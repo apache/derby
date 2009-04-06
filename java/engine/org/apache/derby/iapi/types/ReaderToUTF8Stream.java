@@ -30,6 +30,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.DerbyIOException;
 import org.apache.derby.iapi.services.io.LimitReader;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.reference.MessageId;
 
 /**
  * Converts the characters served by a {@code java.io.Reader} to a stream
@@ -39,6 +40,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
  * Length validation is performed. If required and allowed by the target column
  * type, truncation of blanks will also be performed.
  */
+//@NotThreadSafe
 public final class ReaderToUTF8Stream
 	extends InputStream
 {
@@ -50,13 +52,22 @@ public final class ReaderToUTF8Stream
     /** Constant indicating the first iteration of {@code fillBuffer}. */
     private final static int FIRST_READ = Integer.MIN_VALUE;
     /**
-     * Size of buffer to hold the data read from stream and converted to the
-     * modified UTF-8 format.
+     * Constant indicating that no mark is set in the stream, or that the read
+     * ahead limit of the mark has been exceeded.
      */
-    private final static int BUFSIZE = 32768;
-    private byte[] buffer = new byte[BUFSIZE];
+    private final static int MARK_UNSET_OR_EXCEEDED = -1;
+    /**
+     * Buffer to hold the data read from stream and converted to the modified
+     * UTF-8 format. The initial size is 32 KB, but it may grow if the
+     * {@linkplain #mark(int)} is invoked.
+     */
+    private byte[] buffer = new byte[32*1024];
 	private int boff;
     private int blen = -1;
+    /** Stream mark, set through {@linkplain #mark(int)}. */
+    private int mark = MARK_UNSET_OR_EXCEEDED;
+    /** Read ahead limit for mark, set through {@linkplain #mark(int)}. */
+    private int readAheadLimit;
 	private boolean eof;
     /** Tells if the stream content is/was larger than the buffer size. */
 	private boolean multipleBuffer;
@@ -298,10 +309,41 @@ public final class ReaderToUTF8Stream
             // Make startingOffset point at the first byte after the header.
             startingOffset = headerLength;
         }
-		int off = boff = startingOffset;
+		int off = startingOffset;
+        // In the case of a mark, the offset may be adjusted.
+        // Do not change boff in the encoding loop. Before the encoding loop
+        // starts, it shall point at the next byte the stream will deliver on
+        // the next iteration of read or skip.
+        boff = 0;
 
 		if (off == 0)
 			multipleBuffer = true;
+
+        // If we have a mark set, see if we have to expand the buffer, or if we
+        // are going to read past the read ahead limit and can invalidate the
+        // mark and discard the data currently in the buffer.
+        if (mark >= 0) {
+            // Add 6 bytes reserved for one 3 byte character encoding and the
+            // 3 byte Derby EOF marker (see encoding loop further down).
+            int spaceRequired = readAheadLimit + 6;
+            if (mark + spaceRequired > buffer.length) {
+                if (blen != -1) {
+                    // Calculate the new offset, as we may have to shift bytes
+                    // we have already delivered to the left.
+                    boff = off = blen - mark;
+                }
+                byte[] oldBuf = buffer;
+                if (spaceRequired > buffer.length) {
+                    // We have to allocate a bigger buffer to save the bytes.
+                    buffer = new byte[spaceRequired];
+                }
+                System.arraycopy(oldBuf, mark, buffer, 0, off);
+                mark = 0;
+            } else if (blen != -1) {
+                // Invalidate the mark.
+                mark = MARK_UNSET_OR_EXCEEDED;
+            }
+        }
 
 		// 6! need to leave room for a three byte UTF8 encoding
 		// and 3 bytes for our special end of file marker.
@@ -332,8 +374,6 @@ public final class ReaderToUTF8Stream
 		}
 
 		blen = off;
-		boff = 0;
-
 		if (eof)
 			checkSufficientData();
 	}
@@ -487,6 +527,63 @@ public final class ReaderToUTF8Stream
        // from the reader object 
        // reader.getLimit() returns the remaining bytes available
        // on this stream
-       return (BUFSIZE > remainingBytes ? remainingBytes : BUFSIZE);
+       return (buffer.length > remainingBytes ? remainingBytes : buffer.length);
+    }
+
+    /**
+     * Marks the current position in the stream.
+     * <p>
+     * Note that this stream is not marked at position zero by default (i.e.
+     * in the constructor).
+     *
+     * @param readAheadLimit the maximum limit of bytes that can be read before
+     *      the mark position becomes invalid
+     */
+    public void mark(int readAheadLimit) {
+        if (readAheadLimit > 0) {
+            this.readAheadLimit = readAheadLimit;
+            mark = boff;
+        } else {
+            this.readAheadLimit = mark = MARK_UNSET_OR_EXCEEDED;
+        }
+    }
+
+    /**
+     * Repositions this stream to the position at the time the mark method was
+     * last called on this input stream.
+     *
+     * @throws EOFException if the stream has been closed
+     * @throws IOException if no mark has been set, or the read ahead limit of
+     *      the mark has been exceeded
+     */
+    public void reset()
+            throws IOException {
+        // Throw execption if the stream has been closed implicitly or
+        // explicitly.
+        if (buffer == null) {
+            throw new EOFException(MessageService.getTextMessage
+                    (SQLState.STREAM_EOF));
+        }
+        // Throw exception if the mark hasn't been set, or if we had to refill
+        // the internal buffer after we had read past the read ahead limit.
+        if (mark == MARK_UNSET_OR_EXCEEDED) {
+            throw new IOException(MessageService.getTextMessage(
+                    MessageId.STREAM_MARK_UNSET_OR_EXCEEDED));
+        }
+        // Reset successful, adjust state.
+        boff = mark;
+        readAheadLimit = mark = MARK_UNSET_OR_EXCEEDED;
+    }
+
+    /**
+     * Tests if this stream supports mark/reset.
+     * <p>
+     * The {@code markSupported} method of {@code ByteArrayInputStream} always
+     * returns {@code true}.
+     *
+     * @return {@code true}, mark/reset is always supported.
+     */
+    public boolean markSupported() {
+        return true;
     }
 }
