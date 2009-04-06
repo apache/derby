@@ -411,7 +411,7 @@ public class AlterTableNode extends DDLStatementNode
 			 * the check constraints and generation clauses.
 			 */
 			if  (numGenerationClauses > 0)
-            { tableElementList.bindAndValidateGenerationClauses( schemaDescriptor, fromList, generatedColumns ); }
+            { tableElementList.bindAndValidateGenerationClauses( schemaDescriptor, fromList, generatedColumns, baseTable ); }
 			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
             if ( numReferenceConstraints > 0) { tableElementList.validateForeignKeysOnGenerationClauses( fromList, generatedColumns ); }
 		}

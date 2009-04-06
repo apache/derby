@@ -5101,6 +5101,23 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Test that we don't get a null pointer exception when generation clauses
+     * have forward references to other generated columns.
+     * </p>
+     */
+    public  void    test_029_derby_4145()
+        throws Exception
+    {
+        expectCompilationError
+            (
+             CANT_REFERENCE_GENERATED_COLUMN,
+             "create table t_4145(c1 int, c2 int, c3 generated always as (c1 + c4), c4 generated always as (-c1))"
+             );
+    }
+    
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

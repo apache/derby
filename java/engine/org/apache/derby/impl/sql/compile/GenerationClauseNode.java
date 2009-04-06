@@ -144,6 +144,25 @@ public class GenerationClauseNode extends ValueNode
         return this._generationExpression.isEquivalent( that._generationExpression );
     }
     
+	/**
+	 * Return a vector of columns referenced in the generation expression.
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+    public Vector findReferencedColumns()
+        throws StandardException
+    {
+        CollectNodesVisitor visitor = new CollectNodesVisitor( ColumnReference.class );
+
+        _generationExpression.accept( visitor );
+
+        Vector result = visitor.getList();
+
+        if ( result == null ) { result = new Vector(); }
+
+        return result;
+    }
+
 	/*
 		Stringify.
 	 */

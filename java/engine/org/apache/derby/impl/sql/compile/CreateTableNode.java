@@ -438,7 +438,7 @@ public class CreateTableNode extends DDLStatementNode
 			/* Now that we've finally goobered stuff up, bind and validate
 			 * the check constraints and generation clauses.
 			 */
-			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses( sd, fromList, generatedColumns ); }
+			if  (numGenerationClauses > 0) { tableElementList.bindAndValidateGenerationClauses( sd, fromList, generatedColumns, null ); }
 			if  (numCheckConstraints > 0) { tableElementList.bindAndValidateCheckConstraints(fromList); }
             if ( numReferenceConstraints > 0) { tableElementList.validateForeignKeysOnGenerationClauses( fromList, generatedColumns ); }
 		}

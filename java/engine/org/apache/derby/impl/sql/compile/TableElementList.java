@@ -36,6 +36,7 @@ import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.catalog.types.DefaultInfoImpl;
 
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -57,7 +58,9 @@ import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 
 import org.apache.derby.catalog.UUID;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.Vector;
 
 /**
@@ -741,10 +744,11 @@ public class TableElementList extends QueryTreeNodeVector
 	 * @param sd			Schema where the table lives.
 	 * @param fromList		The FromList in question.
 	 * @param generatedColumns Bitmap of generated columns in the table. Vacuous for CREATE TABLE, but may be non-trivial for ALTER TABLE. This routine may set bits for new generated columns.
+	 * @param baseTable  Table descriptor if this is an ALTER TABLE statement.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	void bindAndValidateGenerationClauses( SchemaDescriptor sd, FromList fromList, FormatableBitSet generatedColumns )
+	void bindAndValidateGenerationClauses( SchemaDescriptor sd, FromList fromList, FormatableBitSet generatedColumns, TableDescriptor baseTable )
 		throws StandardException
 	{
 		CompilerContext cc;
@@ -752,6 +756,9 @@ public class TableElementList extends QueryTreeNodeVector
         ResultColumnList            tableColumns = table.getResultColumns();
         int                                 columnCount = table.getResultColumns().size();
 		int						  size = size();
+
+        // complain if a generation clause references another generated column
+        findIllegalGenerationReferences( fromList, baseTable );
 
         generatedColumns.grow( columnCount + 1 );
         
@@ -892,15 +899,40 @@ public class TableElementList extends QueryTreeNodeVector
 			rcl.clearColumnReferences();
 		}
 
-        //
-        // Now verify that none of the generated columns reference other
-        // generated columns.
-        //
-        ResultColumnList rcl = table.getResultColumns();
+        
+	}
+
+	/**
+	 * Complain if a generation clause references other generated columns. This
+	 * is required by the SQL Standard, part 2, section 4.14.8.
+	 *
+	 * @param fromList		The FromList in question.
+	 * @param baseTable  Table descriptor if this is an ALTER TABLE statement.
+	 * @exception StandardException		Thrown on error
+	 */
+	void findIllegalGenerationReferences( FromList fromList, TableDescriptor baseTable )
+		throws StandardException
+	{
+        ArrayList   generatedColumns = new ArrayList();
+        HashSet     names = new HashSet();
+		int         size = size();
+
+        // add in existing generated columns if this is an ALTER TABLE statement
+        if ( baseTable != null )
+        {
+            ColumnDescriptorList cdl = baseTable.getGeneratedColumns();
+            int                  count = cdl.size();
+            for ( int i = 0; i < count; i++ )
+            {
+                names.add( cdl.elementAt( i ).getColumnName() );
+            }
+        }
+        
+        // find all of the generated columns
 		for (int index = 0; index < size; index++)
 		{
 			ColumnDefinitionNode cdn;
-			TableElementNode element = (TableElementNode) elementAt(index);
+			TableElementNode     element = (TableElementNode) elementAt(index);
 
 			if (! (element instanceof ColumnDefinitionNode)) { continue; }
 
@@ -908,24 +940,35 @@ public class TableElementList extends QueryTreeNodeVector
 
 			if (!cdn.hasGenerationClause()) { continue; }
 
-            String[]   referencedColumnNames = cdn.getDefaultInfo().getReferencedColumnNames();
-            int     count = referencedColumnNames.length;
+            generatedColumns.add( cdn );
+            names.add( cdn.getColumnName() );
+        }
 
-            for ( int i = 0; i < count; i++ )
+        // now look at their generation clauses to see if they reference one
+        // another
+        int    count = generatedColumns.size();
+        for ( int i = 0; i < count; i++ )
+        {
+            ColumnDefinitionNode    cdn = (ColumnDefinitionNode) generatedColumns.get( i );
+            GenerationClauseNode    generationClauseNode = cdn.getGenerationClauseNode();
+            Vector                  referencedColumns = generationClauseNode.findReferencedColumns();
+            int                     refCount = referencedColumns.size();
+            for ( int j = 0; j < refCount; j++ )
             {
-                String      name = referencedColumnNames[ i ];
-                int         referencedColumnID = rcl.getPosition( name, 1 );
+                String  name = ((ColumnReference) referencedColumns.elementAt( j ) ).getColumnName();
 
-                if ( generatedColumns.isSet( referencedColumnID ) )
+                if ( name != null )
                 {
-                    throw StandardException.newException(SQLState.LANG_CANT_REFERENCE_GENERATED_COLUMN, cdn.getColumnName());
+                    if ( names.contains( name ) )
+                    {
+                        throw StandardException.newException(SQLState.LANG_CANT_REFERENCE_GENERATED_COLUMN, cdn.getColumnName());
+                    }
                 }
-           }   // end of loop through referenced columns
+            }
+        }
 
-        }       // end of loop through generated columns
-        
-	}
-
+    }
+    
 	/**
 	 * Prevent foreign keys on generated columns from violating the SQL spec,
 	 * part 2, section 11.8 (<column definition>), syntax rule 12: the
