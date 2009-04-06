@@ -7401,6 +7401,11 @@ Shutting down instance {0}</text>
                 <arg>errorMessage</arg>
             </msg>
 
+            <msg>
+                <name>I027</name>
+                <text>No mark set, or mark read ahead limit exceeded.</text>
+            </msg>
+
         </family>
 
 

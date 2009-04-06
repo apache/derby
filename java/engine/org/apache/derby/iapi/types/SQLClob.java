@@ -32,6 +32,8 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.util.UTF8Util;
 
+import org.apache.derby.shared.common.reference.SQLState;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
@@ -331,6 +333,11 @@ public class SQLClob
                 // Assume new header format, adjust later if necessary.
                 byte[] header = new byte[MAX_STREAM_HEADER_LENGTH];
                 int read = stream.read(header);
+                // Expect at least two header bytes.
+                if (SanityManager.DEBUG) {
+                    SanityManager.ASSERT(read > 1,
+                            "Too few header bytes: " + read);
+                }
                 HeaderInfo hdrInfo = investigateHeader(header, read);
                 if (read > hdrInfo.headerLength()) {
                     // We have read too much. Reset the stream.
@@ -346,6 +353,21 @@ public class SQLClob
                     byteLength(hdrInfo.byteLength()).
                     charLength(hdrInfo.charLength()).build();
             } catch (IOException ioe) {
+                // Check here to see if the root cause is a container closed
+                // exception. If so, this most likely means that the Clob was
+                // accessed after a commit or rollback on the connection.
+                Throwable rootCause = ioe;
+                while (rootCause.getCause() != null) {
+                    rootCause = rootCause.getCause();
+                }
+                if (rootCause instanceof StandardException) {
+                    StandardException se = (StandardException)rootCause;
+                    if (se.getMessageId().equals(
+                            SQLState.DATA_CONTAINER_CLOSED)) {
+                        throw StandardException.newException(
+                                SQLState.BLOB_ACCESSED_AFTER_COMMIT, ioe);
+                    }
+                }
                 throwStreamingIOException(ioe);
             }
         }
@@ -512,11 +534,19 @@ public class SQLClob
             long vcl = vc.length();
             if (vcl < 0L || vcl > Integer.MAX_VALUE)
                 throw this.outOfRange();
-
-            ReaderToUTF8Stream utfIn = new ReaderToUTF8Stream(
-                    vc.getCharacterStream(), (int) vcl, 0, TypeId.CLOB_NAME,
-                    getStreamHeaderGenerator());
-            setValue(utfIn, (int) vcl);
+            // For small values, just materialize the value.
+            // NOTE: Using streams for the empty string ("") isn't supported
+            // down this code path when in soft upgrade mode, because the code
+            // reading the header bytes ends up reading zero bytes (i.e., it
+            // doesn't get the header / EOF marker).
+            if (vcl < 32*1024) {
+                setValue(vc.getSubString(1, (int)vcl));
+            } else {
+                ReaderToUTF8Stream utfIn = new ReaderToUTF8Stream(
+                        vc.getCharacterStream(), (int) vcl, 0, TypeId.CLOB_NAME,
+                        getStreamHeaderGenerator());
+                setValue(utfIn, (int) vcl);
+            }
         } catch (SQLException e) {
             throw dataTypeConversion("DAN-438-tmp");
        }
@@ -658,17 +688,42 @@ public class SQLClob
             // Make sure the stream is correctly positioned.
             rewindStream(hdrLen);
         } else {
+            final boolean markSet = stream.markSupported();
+            if (markSet) {
+                stream.mark(MAX_STREAM_HEADER_LENGTH);
+            }
             byte[] header = new byte[MAX_STREAM_HEADER_LENGTH];
             int read = in.read(header);
+            // Expect at least two header bytes.
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(read > 1, "Too few header bytes: " + read);
+            }
             hdrInfo = investigateHeader(header, read);
             if (read > hdrInfo.headerLength()) {
                 // We read too much data, reset and position on the first byte
                 // of the user data.
-                rewindStream(hdrInfo.headerLength());
+                // First see if we set a mark on the stream and can reset it.
+                // If not, try using the Resetable interface.
+                if (markSet) {
+                    // Stream is not a store Resetable one, use mark/reset
+                    // functionality instead.
+                    stream.reset();
+                    InputStreamUtil.skipFully(stream, hdrInfo.headerLength());
+                } else if (stream instanceof Resetable) {
+                    // We have a store stream.
+                    rewindStream(hdrInfo.headerLength());
+                }
             }
         }
         // The data will be materialized in memory, in a char array.
-        super.readExternal(in, hdrInfo.byteLength(), hdrInfo.charLength());
+        // Subtract the header length from the byte length if there is a byte
+        // encoded in the header, otherwise the decode routine will try to read
+        // too many bytes.
+        int byteLength = 0; // zero is interpreted as unknown / unset
+        if (hdrInfo.byteLength() != 0) {
+            byteLength = hdrInfo.byteLength() - hdrInfo.headerLength();
+        }
+        super.readExternal(in, byteLength, hdrInfo.charLength());
     }
 
     /**
@@ -686,6 +741,10 @@ public class SQLClob
         int prevPos = in.getPosition();
         byte[] header = new byte[MAX_STREAM_HEADER_LENGTH];
         int read = in.read(header);
+        // Expect at least two header bytes.
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(read > 1, "Too few header bytes: " + read);
+        }
         HeaderInfo hdrInfo = investigateHeader(header, read);
         if (read > hdrInfo.headerLength()) {
             // Reset stream. This path will only be taken for Clobs stored

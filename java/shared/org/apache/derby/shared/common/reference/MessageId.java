@@ -184,6 +184,11 @@ public interface MessageId {
 	String CORE_DATABASE_NOT_AVAILABLE	= "I024"; // Database not available
 	String CORE_DRIVER_NOT_AVAILABLE	= "I025"; // JDBC Driver not available
 	String JDBC_DRIVER_REGISTER_ERROR 	= "I026"; // Error while registering driver
+    /**
+     * At the time InputStream.reset was invoked, either no mark was set or the
+     * read ahead limit of the mark was exceeded.
+     */
+    String STREAM_MARK_UNSET_OR_EXCEEDED                    = "I027";
 
     /*
      * Monitor
