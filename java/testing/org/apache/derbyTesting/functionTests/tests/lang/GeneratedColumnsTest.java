@@ -5117,6 +5117,148 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              );
     }
     
+    /**
+     * <p>
+     * Test that a generated column can refer to an identity column.
+     * </p>
+     */
+    public  void    test_030_derby_4146()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+             conn,
+             "create table t_4146 (c1 int generated always as identity, c2 generated always as (c1+100))"
+             );
+        goodStatement
+            (
+             conn,
+             "create table t_4146_2 (c1 int generated always as identity, c2 generated always as (c1+100), c3 int default 1000)"
+             );
+
+        goodStatement
+            (
+             conn,
+             "insert into t_4146 values ( default, default )"
+             );
+        expectCompilationError
+            (
+             CANT_MODIFY_IDENTITY,
+             "insert into t_4146 values ( -1, default )"
+             );
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t_4146 values ( default, -1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_4146 (c1, c2) values ( default, default )"
+             );
+        expectCompilationError
+            (
+             CANT_MODIFY_IDENTITY,
+             "insert into t_4146 (c1, c2) values ( -1, default )"
+             );
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t_4146 (c1, c2) values ( default, -1 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_4146 order by c1",
+             new String[][]
+             {
+                 { "1", "101", },
+                 { "2", "102", },
+             },
+             false
+             );
+
+        goodStatement
+            (
+             conn,
+             "insert into t_4146_2 values ( default, default, default )"
+             );
+        expectCompilationError
+            (
+             CANT_MODIFY_IDENTITY,
+             "insert into t_4146_2 values ( -1, default, default )"
+             );
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t_4146_2 values ( default, -1, default )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_4146_2 (c1, c2) values ( default, default )"
+             );
+        expectCompilationError
+            (
+             CANT_MODIFY_IDENTITY,
+             "insert into t_4146_2 (c1, c2) values ( -1, default )"
+             );
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t_4146_2 (c1, c2) values ( default, -1 )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_4146_2 (c1, c2, c3) values ( default, default, default )"
+             );
+        expectCompilationError
+            (
+             CANT_MODIFY_IDENTITY,
+             "insert into t_4146_2 (c1, c2, c3) values ( -1, default, default )"
+             );
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t_4146_2 (c1, c2, c3) values ( default, -1, default )"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into t_4146_2 (c1, c2, c3) values ( default, default, 2000 )"
+             );
+        expectCompilationError
+            (
+             CANT_MODIFY_IDENTITY,
+             "insert into t_4146_2 (c1, c2, c3) values ( -1, default, 3000 )"
+             );
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t_4146_2 (c1, c2, c3) values ( default, -1, 4000 )"
+             );
+        assertResults
+            (
+             conn,
+             "select * from t_4146_2 order by c1",
+             new String[][]
+             {
+                 { "1", "101", "1000", },
+                 { "2", "102", "1000", },
+                 { "3", "103", "1000", },
+                 { "4", "104", "2000", },
+             },
+             false
+             );
+
+    }
+    
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

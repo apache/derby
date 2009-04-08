@@ -4096,6 +4096,8 @@ public class ResultColumnList extends QueryTreeNodeVector
                 {
                     throw StandardException.newException(SQLState.LANG_CANT_OVERRIDE_GENERATION_CLAUSE, rc.getName());
                 }
+
+                if ( sourceRC != null ) { sourceRC.setColumnDescriptor(cd.getTableDescriptor(), cd); }
             }
 			
 			if ((cd != null) && (cd.isAutoincrement()))
