@@ -98,8 +98,8 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect";
 
   // For testPropertiesAfterConnection and testPropertiesTraceOn
-  permission java.io.FilePermission "${derby.system.home}", "read";
   permission java.io.FilePermission "${derby.system.home}${/}-", "write"; 
+
 };
 
 //
