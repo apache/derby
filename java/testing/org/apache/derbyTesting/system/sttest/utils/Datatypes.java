@@ -609,8 +609,10 @@ public class Datatypes {
 			if (rows < 0)
 				System.out.println("t" + thread_id + " update failed.");
 		}
-		streamReader.close();
-		streamIn.close();
+		if (streamReader != null)
+			streamReader.close();
+		if (streamIn !=null)
+			streamIn.close();
 		if (ps2 != null)
 			try {
 				ps2.close();
