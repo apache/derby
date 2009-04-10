@@ -188,6 +188,8 @@ public class DssTrace
                                     return new  PrintWriter (new java.io.BufferedWriter (new java.io.FileWriter (fileName), 4096));
                                 }
                             }));
+                    // If we successfully made the file. break out here and don't retry
+                    break;
                 } catch (PrivilegedActionException pae) {
                     Exception e = pae.getException();
                     // If we got a FileNotFoundException on the first attempt,
