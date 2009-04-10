@@ -351,9 +351,16 @@ abstract class NoRowsResultSetImpl implements ResultSet
 			** is on, then the run time statistics from the autocommit is the
 			** only one that the user would ever see.  So, we don't overwrite
 			** the run time statistics object for a commit.
+            ** DERBY-2353: Also make an exception when the activation is
+            ** closed. If the activation is closed, the run time statistics
+            ** object is null and there's nothing to print. This may happen
+            ** if a top-level result set closes the activation and close() is
+            ** subsequently called on the child result sets. The information
+            ** about the children is also printed by the parent, so it's safe
+            ** to skip printing it.
 			*/
 			if (lcc.getRunTimeStatisticsMode() &&
-				! doesCommit())
+				!doesCommit() && !activation.isClosed())
 			{
 				endExecutionTime = getCurrentTimeMillis();
 
