@@ -1387,9 +1387,16 @@ public abstract class Connection implements java.sql.Connection,
                 agent_.logWriter_.traceEntry(this, "setTypeMap", map);
             }
             checkForClosedConnection();
-            throw new SqlException(agent_.logWriter_, 
-            		new ClientMessageId (SQLState.NOT_IMPLEMENTED),
-                    "setTypeMap");
+            if (map == null) {
+                throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId (SQLState.INVALID_API_PARAMETER),
+                        map, "map", "setTypeMap");
+            }
+
+            if (!(map.isEmpty())) {
+                throw new SqlException(agent_.logWriter_, new ClientMessageId(
+                        SQLState.NOT_IMPLEMENTED), "setTypeMap");
+            }
         }
         catch ( SqlException se )
         {

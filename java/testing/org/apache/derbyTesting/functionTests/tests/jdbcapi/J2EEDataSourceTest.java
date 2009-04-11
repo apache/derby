@@ -316,6 +316,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         //before shutdown and they all should generate connection error event.
         try {
             conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)");
+            fail("SQLException should be thrown!");
         } catch (SQLException e) {
             //The first call on JDBC Connection object after Network Server
             //shutdown will generate a communication error and that's why we
@@ -332,6 +333,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)", 1);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
             assertSQLState("08003", e);
         }
@@ -342,6 +344,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         	int[] columnIndexes = {1};
             conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)", 
             		columnIndexes);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
             assertSQLState("08003", e);
         }
@@ -352,6 +355,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         	String[] columnNames = {"col1"};
             conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)", 
             		columnNames);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
             assertSQLState("08003", e);
         }
@@ -361,6 +365,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         try {
             conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)",
             		ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
                 assertSQLState("08003", e);
         }
@@ -371,6 +376,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             conn.prepareStatement("CREATE TABLE TAB1(COL1 INT NOT NULL)",
             		ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
             		ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
                 assertSQLState("08003", e);
         }
@@ -379,6 +385,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.createStatement();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
             assertSQLState("08003", e);
         }
@@ -389,6 +396,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
             		ResultSet.CONCUR_READ_ONLY,
             		ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
                 assertSQLState("08003", e);
         }
@@ -397,7 +405,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, 
-            ResultSet.CONCUR_READ_ONLY);
+                    ResultSet.CONCUR_READ_ONLY);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
             assertSQLState("08003", e);
         }
@@ -406,7 +415,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.prepareCall("CREATE TABLE TAB1(COL1 INT NOT NULL)",
-            		ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
                 assertSQLState("08003", e);
         }
@@ -415,6 +425,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.prepareCall("CREATE TABLE TAB1(COL1 INT NOT NULL)");
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
                 assertSQLState("08003", e);
         }
@@ -423,8 +434,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.prepareCall("CREATE TABLE TAB1(COL1 INT NOT NULL)",
-            		ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
-            		ResultSet.CLOSE_CURSORS_AT_COMMIT);
+                    ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY,
+                    ResultSet.CLOSE_CURSORS_AT_COMMIT);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
                 assertSQLState("08003", e);
         }
@@ -433,6 +445,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.nativeSQL("CREATE TABLE TAB1(COL1 INT NOT NULL)");
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
                 assertSQLState("08003", e);
         }
@@ -441,6 +454,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.getAutoCommit();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
                 assertSQLState("08003", e);
         }
@@ -449,38 +463,43 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.setAutoCommit(false);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.getHoldability();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.setHoldability(1);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.commit();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.rollback();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
                 assertSQLState("08003", e);
         }
@@ -489,120 +508,135 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         aes12.resetState();
         try {
             conn.setSavepoint();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.setSavepoint("savept1");
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.rollback((Savepoint)null);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.releaseSavepoint((Savepoint)null);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.getTransactionIsolation();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.getWarnings();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.clearWarnings();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.getMetaData();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.isReadOnly();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.setReadOnly(true);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.setCatalog(null);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.getCatalog();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.getTypeMap();
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
         aes12.resetState();
         try {
             conn.setTypeMap(null);
+            fail("SQLException of 08003 should be thrown!");
         } catch (SQLException e) {
-                assertSQLState("08003", e);
+            assertSQLState("08003", e);
         }
         assertFalse(aes12.didConnectionClosedEventHappen());
         assertTrue(aes12.didConnectionErrorEventHappen());
@@ -1035,24 +1069,16 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         cs.setString(1,"Nested");
         try {
             cs.execute();
+            fail("SQLException of 40XC0 should be thrown!");
         } catch (SQLException sqle) {
             assertSQLState("40XC0", sqle);
         }
         cs.setString(1,"Nested2");
         cs.execute();
         
-        String EmptyMapValue=null;
-        // Note: currently, not supported
-        String NullMapValue=null;
-        String MapMapValue=null;
-        if (usingEmbedded())
-        {
-            EmptyMapValue="OK"; NullMapValue="XJ081"; MapMapValue="0A000";
-        }
-        else if (usingDerbyNetClient())
-        {
-            EmptyMapValue="0A000"; NullMapValue="0A000"; MapMapValue="0A000";
-        }
+        String EmptyMapValue = "OK";
+        String NullMapValue = "XJ081";
+        String MapMapValue = "0A000";
         Object[] expectedValues = {
             new Integer(ResultSet.HOLD_CURSORS_OVER_COMMIT), "XJ010",
             new Integer(2), new Boolean(true), new Boolean(false), 
@@ -1134,6 +1160,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         cs.setString(1,"Nested");
         try {
             cs.execute();
+            fail("SQLException of 40XC0 should be thrown!");
         } catch (SQLException sqle) {
             assertSQLState("40XC0", sqle);
         }
@@ -2617,6 +2644,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     {
         try {
             conn.createStatement().executeQuery("SELECT * FROM APP.NOTTHERE");
+            fail("SQLException of 42X05 should be thrown!");
         }
         catch (SQLException e)
         {
