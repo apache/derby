@@ -286,6 +286,27 @@ public class XATransactionTest extends BaseJDBCTestCase {
         assertTrue(rs.getInt(1) == timeoutStatementsCommitted);
     }
 
+    /**
+     * DERBY-4141 XAExceptions caused by SQLExceptions should have a
+     * non-zero errorCode. SESSION_SEVERITY or greater map to
+     * XAException.XAER_RMFAIL. Lesser exceptions map to XAException.XAER_RMERR 
+     * @throws Exception
+     */
+    public void testXAExceptionErrorCodeOnSQLExceptionDerby4141() throws Exception {
+        XADataSource xaDataSource = J2EEDataSource.getXADataSource();
+        XAConnection xaConn = xaDataSource.getXAConnection();
+        XAResource xaRes = xaConn.getXAResource();        
+        Xid xid = createXid(123, 1);
+        // close the XAConnection so we get an SQLException on
+        // start();
+        xaConn.close();
+        try {
+            xaRes.start(xid, XAResource.TMNOFLAGS);
+            fail("Should have gotten an XAException. xaConn is closed.");
+        } catch (XAException xae) {
+            assertEquals(XAException.XAER_RMFAIL, xae.errorCode);
+        }
+    }
 
     /* ------------------- end helper methods  -------------------------- */
 
