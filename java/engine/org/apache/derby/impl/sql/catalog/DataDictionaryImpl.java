@@ -141,6 +141,7 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -710,15 +711,19 @@ public final class	DataDictionaryImpl
 			if (create) {
 				String userName = IdUtil.getUserNameFromURLProps(startParams);
 				authorizationDatabaseOwner = IdUtil.getUserAuthorizationId(userName);
-			
+
+                HashSet newlyCreatedRoutines = new HashSet();
+                
 				// create any required tables.
 				createDictionaryTables(startParams, bootingTC, ddg);
 				//create procedures for network server metadata
-				create_SYSIBM_procedures(bootingTC);
+				create_SYSIBM_procedures(bootingTC, newlyCreatedRoutines );
 				//create metadata sps statement required for network server
 				createSystemSps(bootingTC);
                 // create the SYSCS_UTIL system procedures)
-                create_SYSCS_procedures(bootingTC);
+                create_SYSCS_procedures(bootingTC, newlyCreatedRoutines );
+                // now grant execute permission on some of these routines
+                grantPublicAccessToSystemRoutines( newlyCreatedRoutines, bootingTC, authorizationDatabaseOwner );
 				// log the current dictionary version
 				dictionaryVersion = softwareVersion;
 
@@ -743,9 +748,7 @@ public final class	DataDictionaryImpl
 			} else {
 				// Get the ids for non-core tables
 				loadDictionaryTables(bootingTC, ddg, startParams);
-				SchemaDescriptor sd = locateSchemaRow(SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME,
-								 bootingTC);
-				authorizationDatabaseOwner = sd.getAuthorizationId();
+
 				String sqlAuth = PropertyUtil.getDatabaseProperty(bootingTC,
 										Property.SQL_AUTHORIZATION_PROPERTY);
 
@@ -6358,6 +6361,9 @@ public final class	DataDictionaryImpl
 		updateSchemaAuth(SchemaDescriptor.STD_SQLJ_SCHEMA_NAME, aid, tc);
 		updateSchemaAuth(SchemaDescriptor.STD_SYSTEM_DIAG_SCHEMA_NAME, aid, tc);
 		updateSchemaAuth(SchemaDescriptor.STD_SYSTEM_UTIL_SCHEMA_NAME, aid, tc);
+
+        // now reset our understanding of who owns the database
+        resetDatabaseOwner( tc );
 	}
 
 	/**
@@ -6899,9 +6905,29 @@ public final class	DataDictionaryImpl
 		dictionaryVersion = (DD_Version)tc.getProperty(
 											DataDictionary.CORE_DATA_DICTIONARY_VERSION);
 
+        resetDatabaseOwner( tc );
+        
 		softwareVersion.upgradeIfNeeded(dictionaryVersion, tc, startParams);
 	}
 
+	/**
+	 *	Reset the database owner according to what is stored in the catalogs.
+     * This can change at upgrade time so we have factored this logic into
+     * a separately callable method.
+	 *
+	 *
+	 *	@param	tc		TransactionController
+     *
+	 *  @exception StandardException		Thrown on error
+	 */
+    public void resetDatabaseOwner( TransactionController tc )
+        throws StandardException
+    {
+        SchemaDescriptor sd = locateSchemaRow
+            (SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME, tc );
+        authorizationDatabaseOwner = sd.getAuthorizationId();
+    }
+    
 	/**
 	 * Initialize indices for an array of catalogs
 	 *
@@ -9390,6 +9416,7 @@ public final class	DataDictionaryImpl
      * @param return_type   null for procedure.  For functions the return type
      *                      of the function.
      *
+     * @param newlyCreatedRoutines evolving set of routines, some of which may need permissions later on
      * @param tc            an instance of the TransactionController
      *
      * @param procClass     the fully qualified name of the class that contains
@@ -9409,6 +9436,7 @@ public final class	DataDictionaryImpl
     short                   routine_sql_control,
     boolean               isDeterministic,
     TypeDescriptor          return_type,
+    HashSet               newlyCreatedRoutines,
     TransactionController   tc,
     String procClass)
         throws StandardException
@@ -9477,6 +9505,8 @@ public final class	DataDictionaryImpl
         addDescriptor(
             ads, null, DataDictionary.SYSALIASES_CATALOG_NUM, false, tc);
 
+        newlyCreatedRoutines.add( routine_name );
+
 		return routine_uuid;
     }
 
@@ -9507,6 +9537,7 @@ public final class	DataDictionaryImpl
      * @param return_type   null for procedure.  For functions the return type
      *                      of the function.
      *
+     * @param newlyCreatedRoutines evolving set of routines, some of which may need permissions later on
      * @param tc            an instance of the TransactionController
      *
      * @return UUID         UUID of system routine that got created.
@@ -9523,13 +9554,14 @@ public final class	DataDictionaryImpl
     short                   routine_sql_control,
     boolean               isDeterministic,
     TypeDescriptor          return_type,
+    HashSet               newlyCreatedRoutines,
     TransactionController   tc)
         throws StandardException
     {
         UUID routine_uuid = createSystemProcedureOrFunction(routine_name,
         schema_uuid, arg_names, arg_types,
         num_out_param, num_result_sets, routine_sql_control, isDeterministic,
-        return_type, tc, "org.apache.derby.catalog.SystemProcedures");
+        return_type, newlyCreatedRoutines, tc, "org.apache.derby.catalog.SystemProcedures");
         return routine_uuid;
     }
 
@@ -9543,16 +9575,18 @@ public final class	DataDictionaryImpl
      *
      * @param tc     transaction controller to use.  Counts on caller to
      *               commit.
+     * @param newlyCreatedRoutines evolving set of routines which may need to be given permissions later on
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
     private final void create_SYSCS_procedures(
-    TransactionController   tc)
+                                               TransactionController   tc, HashSet newlyCreatedRoutines )
         throws StandardException
     {
         // Types used for routine parameters and return types, all nullable.
         TypeDescriptor varchar32672Type = DataTypeDescriptor.getCatalogType(
                 Types.VARCHAR, 32672);
+
         /*
 		** SYSCS_UTIL routines.
 		*/
@@ -9588,6 +9622,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -9615,9 +9650,8 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
-
-			createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
 
         // void SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()
@@ -9632,6 +9666,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -9647,6 +9682,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -9662,6 +9698,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -9686,6 +9723,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -9712,6 +9750,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -9733,6 +9772,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -9754,9 +9794,8 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
-
-			createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
 
         // void SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(smallint)
@@ -9777,9 +9816,8 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
-
-			createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
 
 
@@ -9810,6 +9848,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -9834,6 +9873,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 TypeDescriptor.INTEGER,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -9851,6 +9891,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR, Limits.DB2_VARCHAR_MAXWIDTH),
+                newlyCreatedRoutines,
 
                 /*
                 TODO - mikem, wants to be a CLOB, but don't know how to do 
@@ -9859,8 +9900,6 @@ public final class	DataDictionaryImpl
                     Types.CLOB, Limits.DB2_LOB_MAXWIDTH),
                 */
                 tc);
-
-			createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
 
 
@@ -9893,6 +9932,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -9916,6 +9956,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 	
@@ -9938,6 +9979,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }	
 
@@ -9976,6 +10018,7 @@ public final class	DataDictionaryImpl
 				RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10012,6 +10055,7 @@ public final class	DataDictionaryImpl
 				RoutineAliasInfo.READS_SQL_DATA,
                false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10053,6 +10097,7 @@ public final class	DataDictionaryImpl
 				RoutineAliasInfo.MODIFIES_SQL_DATA,
                false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10097,6 +10142,7 @@ public final class	DataDictionaryImpl
 				RoutineAliasInfo.MODIFIES_SQL_DATA,
                false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10132,17 +10178,18 @@ public final class	DataDictionaryImpl
 				RoutineAliasInfo.MODIFIES_SQL_DATA,
                false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
         // add 10.1 specific system procedures
-        create_10_1_system_procedures(tc, sysUtilUUID);
+        create_10_1_system_procedures(tc, newlyCreatedRoutines, sysUtilUUID);
         // add 10.2 specific system procedures
-        create_10_2_system_procedures(tc, sysUtilUUID);
+        create_10_2_system_procedures(tc, newlyCreatedRoutines, sysUtilUUID);
         // add 10.3 specific system procedures
-        create_10_3_system_procedures(tc);
+        create_10_3_system_procedures(tc, newlyCreatedRoutines );
         // add 10.5 specific system procedures
-        create_10_5_system_procedures(tc);
+        create_10_5_system_procedures(tc, newlyCreatedRoutines );
     }
 
     /**
@@ -10153,13 +10200,14 @@ public final class	DataDictionaryImpl
 	 * calls this method.
      * <p>
      *
+     * @param newlyCreatedRoutines evolving set of routines which we're adding (some may need permissions later on)
      * @param tc     transaction controller to use.  Counts on caller to
      *               commit.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
     protected final void create_SYSIBM_procedures(
-    TransactionController   tc)
+                                                  TransactionController   tc, HashSet newlyCreatedRoutines )
         throws StandardException
     {
         /*
@@ -10223,6 +10271,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10253,6 +10302,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10283,6 +10333,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10313,6 +10364,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10345,6 +10397,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10378,6 +10431,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10410,6 +10464,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10442,6 +10497,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10474,6 +10530,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10511,6 +10568,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10548,6 +10606,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10574,6 +10633,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10609,6 +10669,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10624,6 +10685,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10631,28 +10693,39 @@ public final class	DataDictionaryImpl
     
     /**
      * Grant PUBLIC access to specific system routines. Currently, this is 
-     * done for some routines in SYSCS_UTIL schema. 
+     * done for some routines in SYSCS_UTIL schema. We grant access to routines
+     * which we have just added. Doing it this way lets us declare these
+     * routines in one place and re-use this logic during database creation and
+     * during upgrade.
      * 
      * @param tc	TransactionController to use
      * @param authorizationID	authorization ID of the permission grantor
      * @throws StandardException	Standard exception policy.
      */
-    public void grantPublicAccessToSystemRoutines(TransactionController tc, 
+    public void grantPublicAccessToSystemRoutines(HashSet newlyCreatedRoutines, TransactionController tc, 
     						String authorizationID) throws StandardException {
     	
     	// Get schema ID for SYSCS_UTIL schema
     	String schemaID = getSystemUtilSchemaDescriptor().getUUID().toString();
     	
     	for(int i=0; i < sysUtilProceduresWithPublicAccess.length; i++) {
+
+            String  routineName = sysUtilProceduresWithPublicAccess[i];
+            if ( !newlyCreatedRoutines.contains( routineName ) ) { continue; }
+            
     		grantPublicAccessToSystemRoutine(schemaID, 
-    				sysUtilProceduresWithPublicAccess[i], 
+    				routineName, 
 								AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR, 
 								tc, authorizationID);
     	}
     	
     	for(int i=0; i < sysUtilFunctionsWithPublicAccess.length; i++) {
+            
+            String routineName = sysUtilFunctionsWithPublicAccess[i];
+            if ( !newlyCreatedRoutines.contains( routineName ) ) { continue; }
+            
     		grantPublicAccessToSystemRoutine(schemaID, 
-    				sysUtilFunctionsWithPublicAccess[i], 
+    				routineName, 
 								AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR, 
 								tc, authorizationID);
     	}
@@ -10680,33 +10753,16 @@ public final class	DataDictionaryImpl
     	// For system routines, a valid alias descriptor will be returned.
     	AliasDescriptor ad = getAliasDescriptor(schemaID, routineName, 
     											nameSpace);
-    	
-    	if (SanityManager.DEBUG) {
-			SanityManager.ASSERT((ad != null), "Failed to get AliasDescriptor" 
-											+ " of the routine");
-    	}
+        //
+        // When upgrading from 10.1, it can happen that we haven't yet created
+        // all public procedures. We forgive that possibility here and just return.
+        //
+        if ( ad == null ) { return; }
     	
     	UUID routineUUID = ad.getUUID();
     	createRoutinePermPublicDescriptor(routineUUID, tc, authorizationID);
     }
     
-
-	/**
-	 * Create RoutinePermDescriptor to grant access to PUBLIC for
-	 * this system routine. Currently only SYSUTIL routines need access
-	 * granted to execute them when a database is created/upgraded.
-	 *
-	 * @param routineUUID   uuid of the routine
-	 * @param tc			TransactionController to use
-	 *
-	 * @exception  StandardException  Standard exception policy.
-	 */
-	void createRoutinePermPublicDescriptor(
-	UUID routineUUID,
-	TransactionController tc) throws StandardException
-	{
-		createRoutinePermPublicDescriptor(routineUUID, tc, authorizationDatabaseOwner);
-	}
 
 	/**
 	 * Create RoutinePermDescriptor to grant access to PUBLIC for
@@ -10740,12 +10796,15 @@ public final class	DataDictionaryImpl
      * database, or code doing hard upgrade from previous version.
      * <p>
      *
+     * @param tc                 booting transaction
+     * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
      * @param sysUtilUUID   uuid of the SYSUTIL schema.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
     void create_10_1_system_procedures(
     TransactionController   tc,
+    HashSet               newlyCreatedRoutines,
     UUID                    sysUtilUUID)
 		throws StandardException
     { 
@@ -10786,9 +10845,8 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
-
-			createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
     }
 
@@ -10800,12 +10858,15 @@ public final class	DataDictionaryImpl
      * database, or code doing hard upgrade from previous version.
      * <p>
      *
+     * @param tc booting transaction
+     * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
      * @param sysUtilUUID   uuid of the SYSUTIL schema.
      *
      * @exception  StandardException  Standard exception policy.
      **/
     void create_10_2_system_procedures(
     TransactionController   tc,
+    HashSet               newlyCreatedRoutines,
     UUID                    sysUtilUUID)
 		throws StandardException
     {
@@ -10834,6 +10895,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10864,6 +10926,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10895,6 +10958,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -10928,6 +10992,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
     }
@@ -10939,11 +11004,13 @@ public final class	DataDictionaryImpl
      * database, or code doing hard upgrade from previous version.
      *
      * @param tc            an instance of the TransactionController class.
+     * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
      *
      * @throws StandardException  Standard exception policy.
      **/
     private void create_10_3_system_procedures_SYSIBM(
-        TransactionController   tc)
+        TransactionController   tc,
+        HashSet               newlyCreatedRoutines )
         throws StandardException {
         //create 10.3 functions used by LOB methods.
         UUID schema_uuid = getSysIBMSchemaDescriptor().getUUID();
@@ -10963,6 +11030,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 TypeDescriptor.INTEGER,
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -10982,6 +11050,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 null,
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11008,6 +11077,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11033,6 +11103,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11053,6 +11124,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11079,6 +11151,7 @@ public final class	DataDictionaryImpl
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR,
                     LOBStoredProcedure.MAX_CLOB_RETURN_LEN),
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11105,6 +11178,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 null,
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11128,6 +11202,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 null,
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11149,6 +11224,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 TypeDescriptor.INTEGER,
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11168,6 +11244,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 null,
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11194,6 +11271,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11219,6 +11297,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11241,6 +11320,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.BIGINT),
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11267,6 +11347,7 @@ public final class	DataDictionaryImpl
                 DataTypeDescriptor.getCatalogType(
                     Types.VARBINARY,
                     LOBStoredProcedure.MAX_BLOB_RETURN_LEN),
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11293,6 +11374,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 null,
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11316,6 +11398,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.CONTAINS_SQL,
                 false,
                 null,
+                newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
         }
@@ -11325,9 +11408,10 @@ public final class	DataDictionaryImpl
      * Create the System procedures that are added to 10.5.
      * 
      * @param tc an instance of the TransactionController.
+     * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
      * @throws StandardException Standard exception policy.
      */
-    void create_10_5_system_procedures(TransactionController tc)
+    void create_10_5_system_procedures(TransactionController tc, HashSet newlyCreatedRoutines )
     throws StandardException
     {
         // Create the procedures in the SYSCS_UTIL schema.
@@ -11356,9 +11440,8 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
-
-            createRoutinePermPublicDescriptor(routine_uuid, tc);
         }
     }
 
@@ -11366,14 +11449,15 @@ public final class	DataDictionaryImpl
      * Create the System procedures that are added in 10.3.
      *
      * @param tc an instance of the TransactionController.
+     * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
      * @throws StandardException Standard exception policy. 
      */
-    void create_10_3_system_procedures(TransactionController tc) 
+    void create_10_3_system_procedures(TransactionController tc, HashSet newlyCreatedRoutines ) 
     throws StandardException {
         // Create the procedures in the SYSCS_UTIL schema.
-        create_10_3_system_procedures_SYSCS_UTIL(tc);
+        create_10_3_system_procedures_SYSCS_UTIL(tc, newlyCreatedRoutines );
         //create the procedures in the SYSIBM schema
-        create_10_3_system_procedures_SYSIBM(tc);
+        create_10_3_system_procedures_SYSIBM(tc, newlyCreatedRoutines );
     }
     /**
      * Create system procedures that are part of the
@@ -11384,10 +11468,10 @@ public final class	DataDictionaryImpl
      * <p>
      *
      * @param tc an instance of the Transaction Controller.
+     * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
      * @exception  StandardException  Standard exception policy.
      **/
-    void create_10_3_system_procedures_SYSCS_UTIL(
-    TransactionController   tc)
+    void create_10_3_system_procedures_SYSCS_UTIL( TransactionController   tc, HashSet newlyCreatedRoutines )
         throws StandardException
     {
         UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
@@ -11429,6 +11513,7 @@ public final class	DataDictionaryImpl
 				RoutineAliasInfo.READS_SQL_DATA,
                false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -11470,6 +11555,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -11509,6 +11595,7 @@ public final class	DataDictionaryImpl
                RoutineAliasInfo.MODIFIES_SQL_DATA,
                false,
                (TypeDescriptor) null,
+                newlyCreatedRoutines,
                tc);
         }
 
@@ -11555,6 +11642,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 
@@ -11571,6 +11659,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.NO_SQL,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
         
@@ -11589,6 +11678,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
         
@@ -11606,6 +11696,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.READS_SQL_DATA,
                 false,
                 CATALOG_TYPE_SYSTEM_IDENTIFIER,
+                newlyCreatedRoutines,
                 tc);
         }
         
@@ -11621,6 +11712,7 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.NO_SQL,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
                 tc);
         }
 

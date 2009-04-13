@@ -61,6 +61,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import java.sql.Types;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Properties;
 
 /**
@@ -364,6 +365,8 @@ public	class DD_Version implements	Formatable
 		
 		*/
 
+        HashSet  newlyCreatedRoutines = new HashSet();
+        
 		if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_3)
 		{
 			// Add new system catalogs created for roles
@@ -391,15 +394,9 @@ public	class DD_Version implements	Formatable
             // since 10.0.  Will not work to upgrade any db previous to 10.0,
             // thus only checks for 10.0 rather than <= 10.0.
             bootingDictionary.create_10_1_system_procedures(
-                tc, 
+                tc,
+                newlyCreatedRoutines,
                 bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
-        }
-
-        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_4)
-        {
-            // On ugrade from versions before 10.5, create system procedures
-            // added in 10.5.
-            bootingDictionary.create_10_5_system_procedures(tc);
         }
 
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_1)
@@ -407,7 +404,8 @@ public	class DD_Version implements	Formatable
             // On ugrade from versions before 10.2, create system procedures
             // added in 10.2.
             bootingDictionary.create_10_2_system_procedures(
-                tc, 
+                tc,
+                newlyCreatedRoutines,
                 bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
 
 			if (SanityManager.DEBUG)
@@ -418,17 +416,33 @@ public	class DD_Version implements	Formatable
 
 			// Change system schemas to be owned by aid
 			bootingDictionary.updateSystemSchemaAuthorization(aid, tc);
+
+            // make sure we flag that we need to add permissions to the
+            // following pre-existing routines:
+            newlyCreatedRoutines.add( "SYSCS_INPLACE_COMPRESS_TABLE" );
+            newlyCreatedRoutines.add( "SYSCS_GET_RUNTIMESTATISTICS" );
+            newlyCreatedRoutines.add( "SYSCS_SET_RUNTIMESTATISTICS" );
+            newlyCreatedRoutines.add( "SYSCS_COMPRESS_TABLE" );
+            newlyCreatedRoutines.add( "SYSCS_SET_STATISTICS_TIMING" );
 			
-			// Grant PUBLIC access to some system routines
-			bootingDictionary.grantPublicAccessToSystemRoutines(tc, aid);
         }
 
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_2)
         {
             // On ugrade from versions before 10.3, create system procedures
             // added in 10.3.
-            bootingDictionary.create_10_3_system_procedures(tc);
+            bootingDictionary.create_10_3_system_procedures(tc, newlyCreatedRoutines );
         }
+
+        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_4)
+        {
+            // On upgrade from versions before 10.5, create system procedures
+            // added in 10.5.
+            bootingDictionary.create_10_5_system_procedures(tc, newlyCreatedRoutines);
+        }
+
+        // Grant PUBLIC access to some system routines
+        bootingDictionary.grantPublicAccessToSystemRoutines(newlyCreatedRoutines, tc, aid);
 	}
 
 	/**
