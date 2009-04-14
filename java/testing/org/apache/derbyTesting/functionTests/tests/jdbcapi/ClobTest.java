@@ -387,6 +387,42 @@ public class ClobTest
     }
 
     /**
+     * Truncating a Clob to the empty string.
+     */
+    public void testTruncateZeroOnDisk()
+            throws IOException, SQLException {
+        long size = 33*1024+7;
+        insertDataWithToken("", size, 0, SET_CHARACTER_STREAM);
+        truncateToZero(size);
+    }
+
+    /**
+     * Truncating a Clob to the empty string.
+     */
+    public void testTruncateZeroInMemory()
+            throws IOException, SQLException {
+        long size = 33;
+        insertDataWithToken("", size, 0, SET_STRING);
+        truncateToZero(size);
+    }
+
+    /**
+     * Truncates the default Clob to zero length and checks some basic
+     * operations on the empty Clob.
+     *
+     * @param initSize the expected size of the Clob to truncate
+     */
+    private void truncateToZero(long initSize)
+            throws IOException, SQLException {
+        assertEquals(initSize, this.clob.length());
+        this.clob.truncate(0);
+        assertEquals(0L, this.clob.length());
+        assertEquals("", this.clob.getSubString(1, 0));
+        assertEquals("", this.clob.getSubString(1, 1));
+        assertEquals(-1, this.clob.getCharacterStream().read());
+    }
+
+    /**
      * Truncating a Clob to the current length should work.
      */
     public void testTruncateExactOnDisk()
