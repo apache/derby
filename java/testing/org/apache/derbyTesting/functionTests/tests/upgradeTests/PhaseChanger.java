@@ -79,7 +79,7 @@ final class PhaseChanger extends BaseTestSetup {
         
         if (loader != null) {
             previousLoader = Thread.currentThread().getContextClassLoader();
-            setThreadLoader(loader);
+            UpgradeClassLoader.setThreadLoader(loader);
         }
          
         DataSource ds = JDBCDataSource.getDataSource();
@@ -148,7 +148,7 @@ final class PhaseChanger extends BaseTestSetup {
         
        
         if (loader != null)
-            setThreadLoader(previousLoader);       
+            UpgradeClassLoader.setThreadLoader(previousLoader);       
         loader = null;
         previousLoader = null;
         
@@ -156,26 +156,4 @@ final class PhaseChanger extends BaseTestSetup {
         UpgradeChange.oldVersion.set(null);
     }
     
-    private void setThreadLoader(final ClassLoader which) {
-
-        AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-            
-            public Object run()  { 
-                java.lang.Thread.currentThread().setContextClassLoader(which);
-              return null;
-            }
-        });
-    }
-    
-    private ClassLoader getThreadLoader() {
-
-        return (ClassLoader) AccessController.doPrivileged
-        (new java.security.PrivilegedAction(){
-            
-            public Object run()  { 
-                return Thread.currentThread().getContextClassLoader();
-            }
-        });
-    }
 }
