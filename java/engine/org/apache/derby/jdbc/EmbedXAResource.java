@@ -28,6 +28,7 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 import javax.transaction.xa.XAException;
 
+import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
@@ -792,30 +793,32 @@ class EmbedXAResource implements XAResource {
         // Map interesting exceptions to XAException
         String sqlstate = se.getSQLState();
         String message = se.getMessage();
+        int seErrorCode = se.getErrorCode();      
+        int xaErrorCode;
         
         XAException xae;
         
-        if (sqlstate == null) {
-            // no idea what was wrong, throw non-descript error.
-            if (message != null)
-                xae = new XAException(message);
-            else
-                xae = new XAException(XAException.XAER_RMERR);
-        } else if (sqlstate.equals(StandardException.getSQLStateFromIdentifier(
+        // Determine the XAException.errorCode.  This is known for 
+        // some specific exceptions. For other exceptions, we will
+        // return XAER_RMFAIL for SESSION_SEVERITY or greater and
+        // XAER_RMERR for less severe errors. DERBY-4141.
+        if (sqlstate.equals(StandardException.getSQLStateFromIdentifier(
                             SQLState.STORE_XA_XAER_DUPID)))
-            xae = new XAException(XAException.XAER_DUPID);
+            xaErrorCode = XAException.XAER_DUPID;
         else if (sqlstate.equals(StandardException.getSQLStateFromIdentifier(
                                 SQLState.STORE_XA_PROTOCOL_VIOLATION)))
-            xae = new XAException(XAException.XA_RBPROTO);
+            xaErrorCode = XAException.XA_RBPROTO;
         else if (sqlstate.equals(SQLState.DEADLOCK))
-            xae = new XAException(XAException.XA_RBDEADLOCK);
+            xaErrorCode = XAException.XA_RBDEADLOCK;
         else if (sqlstate.equals(SQLState.LOCK_TIMEOUT))
-            xae = new XAException(XAException.XA_RBTIMEOUT);
-        else if (message != null)
-            xae = new XAException(message);
+            xaErrorCode = XAException.XA_RBTIMEOUT;
+        else if (seErrorCode >=  ExceptionSeverity.SESSION_SEVERITY)
+            xaErrorCode = XAException.XAER_RMFAIL;            
         else
-            xae = new XAException(XAException.XAER_RMERR);
+            xaErrorCode = XAException.XAER_RMERR;
         
+        xae = new XAException(message);
+        xae.errorCode = xaErrorCode;
         if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14)
             xae.initCause(se);
         return xae;
