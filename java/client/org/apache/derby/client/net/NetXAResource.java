@@ -167,7 +167,7 @@ public class NetXAResource implements XAResource {
             }
             netAgent.endReadChain();
         } catch (SqlException sqle) {
-            rc = XAException.XAER_RMERR;
+            rc = getSqlExceptionXAErrorCode(sqle);
             exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
                     (sqle, exceptionsOnXA);
         } finally {
@@ -176,6 +176,25 @@ public class NetXAResource implements XAResource {
         if (rc != XAResource.XA_OK) {
             throwXAException(rc, false);
         }
+    }
+
+    /**
+     * Get XAException.errorCode from SqlException
+     * For disconnect exception, return XAER_RMFAIL
+     * For other exceptions return XAER_RMERR
+     * 
+     * For server side SQLExceptions during 
+     * XA operations the errorCode has already been determined
+     * and wrapped in an XAException for return to the client.
+     * see EmbedXAResource.wrapInXAException
+     * 
+     * @param sqle  SqlException to evaluate.
+     * @return XAException.XAER_RMFAIL for disconnect exception,
+     *         XAException.XAER_RMERR for other exceptions.
+     */
+    private int getSqlExceptionXAErrorCode(SqlException sqle) {      
+       int seErrorCode = sqle.getErrorCode();
+       return (seErrorCode == 40000 ? XAException.XAER_RMFAIL : XAException.XAER_RMERR);
     }
 
     /**
@@ -228,7 +247,7 @@ public class NetXAResource implements XAResource {
             }
             netAgent.endReadChain();
         } catch (SqlException sqle) {
-            rc = XAException.XAER_RMERR;
+            rc = getSqlExceptionXAErrorCode(sqle);
             exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
                     (sqle, exceptionsOnXA);
         } finally {
@@ -290,7 +309,7 @@ public class NetXAResource implements XAResource {
         } catch (SqlException sqle) {
             exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
                     (sqle, exceptionsOnXA);
-            throwXAException(XAException.XAER_RMERR);
+            throwXAException(getSqlExceptionXAErrorCode(sqle));
         } finally {
             conn_.pendingEndXACallinfoOffset_ = -1; // indicate no pending callinfo
         }
@@ -371,7 +390,7 @@ public class NetXAResource implements XAResource {
 
             netAgent.endReadChain();
         } catch (SqlException sqle) {
-            rc = XAException.XAER_RMERR;
+            rc = getSqlExceptionXAErrorCode(sqle);
             exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
                     (sqle, exceptionsOnXA);
         } finally {
@@ -442,7 +461,7 @@ public class NetXAResource implements XAResource {
                 }
             }
         } catch (SqlException sqle) {
-            rc = XAException.XAER_RMERR;
+            rc = getSqlExceptionXAErrorCode(sqle);
             exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
                     (sqle, exceptionsOnXA);
         } finally {
@@ -495,7 +514,7 @@ public class NetXAResource implements XAResource {
                 callInfo.xaRetVal_ = XAResource.XA_OK; // re-initialize XARETVAL
             }
         } catch (SqlException sqle) {
-            rc = XAException.XAER_RMERR;
+            rc = getSqlExceptionXAErrorCode(sqle);
             exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
                     (sqle, exceptionsOnXA);
         } finally {
@@ -569,7 +588,7 @@ public class NetXAResource implements XAResource {
         	if(conn_.autoCommit_)
         		conn_.flowAutoCommit();
         } catch (SqlException sqle) {
-        	rc = XAException.XAER_RMERR;
+        	rc = getSqlExceptionXAErrorCode(sqle);
             exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
                     (sqle, exceptionsOnXA);
         } 
@@ -618,7 +637,7 @@ public class NetXAResource implements XAResource {
             }
 
         } catch (SqlException sqle) {
-            rc = XAException.XAER_RMERR;
+            rc = getSqlExceptionXAErrorCode(sqle);
             exceptionsOnXA = org.apache.derby.client.am.Utils.accumulateSQLException
                     (sqle, exceptionsOnXA);
         } finally {
