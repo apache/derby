@@ -1,10 +1,10 @@
 <html>
-<title>Release Notes for Derby 10.5.1.0</title>
+<title>Release Notes for Derby 10.5.1.1</title>
 <body>
 <h1>
-<a name="Release Notes for Derby 10.5.1.0"></a>Release Notes for Derby 10.5.1.0</h1>
+<a name="Release Notes for Derby 10.5.1.1"></a>Release Notes for Derby 10.5.1.1</h1>
 <blockquote>
-<p>These notes describe the difference between Derby release 10.5.1.0 and the preceding release 10.4.2.0.</p>
+<p>These notes describe the difference between Derby release 10.5.1.1 and the preceding release 10.4.2.0.</p>
 </blockquote>
 <ul>
 <li>
@@ -61,37 +61,46 @@ This is a feature release. The following features were added.
 <ul>
 
 <li>
-SQL Roles. SQL roles (as described in SQL 2003 and errata) are useful for administering privileges for groups of users. Administering roles is generally less error-prone than administering privileges for individual users. SQL Roles are defined in Feature T331 "Basic roles" and Feature T332 "Extended roles". Derby 10.5 implements a subset of T331, plus support for CURRENT_ROLE, which is a part of T332.
+
+<b>SQL Roles</b> - SQL roles (as described in SQL 2003 and errata) are useful for administering privileges for groups of users. Administering roles is generally less error-prone than administering privileges for individual users. SQL Roles are defined in Feature T331 "Basic roles" and Feature T332 "Extended roles". Derby 10.5 implements a subset of T331, plus support for CURRENT_ROLE, which is a part of T332.
 </li>
 
 <li>
-Generated Columns. Generated Columns is a feature which instructs Derby to fill a column with an expression built out of other columns in the row. Derby constructs these column values at INSERT and UPDATE time. The user declares indexes on these columns. This in turn improves SELECT performance since it lets users declare indexes on pre-computed pieces of the WHERE clause. This feature satisfies support for SQL Feature T175.
+
+<b>Generated Columns</b> - Generated Columns is a feature which instructs Derby to fill a column with an expression built out of other columns in the row. Derby constructs these column values at INSERT and UPDATE time. The user declares indexes on these columns. This in turn improves SELECT performance since it lets users declare indexes on pre-computed pieces of the WHERE clause. This feature satisfies support for SQL Feature T175.
 </li>
 
 <li>
-LOB Improvements. There were many performance and usability improvements for BLOBs and CLOBs.  
+
+<b>LOB Improvements</b> - There were many performance and usability improvements for BLOBs and CLOBs.  
 </li>
 
 <li>
-Replication of encrypted databases. With 10.5 it is possible to replicate encrypted databases. 
+
+<b>Replication of encrypted databases</b> - With 10.5 it is possible to replicate encrypted databases. 
 </li>
 
 <li>
-OFFSET/FETCH FIRST. SQL 2008 has added new syntax to support a direct way to limit the 
+
+<b>OFFSET/FETCH FIRST</b> - SQL 2008 has added new syntax to support a direct way to limit the 
 returned set of rows in a result set, through the fetch first and offset clauses. 
 </li>
 
 <li>
-In-memory back end. Initial implementation of a storage engine for Derby where all data is kept in memory. There is no documentation for this feature. This functionality itself is not yet fully implemented, but users are welcome to experiment with it. For details, see: http://wiki.apache.org/db-derby/InMemoryBackEndPrimer
+
+<b>In-memory back end</b> - Initial implementation of a storage engine for Derby where all data is kept in memory. There is no documentation for this feature. This functionality itself is not yet fully implemented, but users are welcome to experiment with it. For details, see the
+<a href="http://wiki.apache.org/db-derby/InMemoryBackEndPrimer">Primer for In-memory Back Ends</a>.
 </li>
 
 <li>
-Allow standard SQL "SET" keyword in ALTER COLUMN syntax, like so:
+
+<b>Standard ALTER COLUMN syntax</b> - Allow standard SQL "SET" keyword in ALTER COLUMN syntax, like so:
  "ALTER TABLE ALTER [COLUMN] columnname SET DEFAULT default-value"
 </li>
 
 <li>
-SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinality statistics (or creates them if they do not exist) for a table's index or for all the indexes on a table, allowing a user to ensure that a query plan based on the most recent state of the table can be created.
+
+<b>SYSCS_UTIL.SYSCS_UPDATE_STATISTICS</b> - New system procedure that updates cardinality statistics (or creates them if they do not exist) for a table's index or for all the indexes on a table, allowing a user to ensure that a query plan based on the most recent state of the table can be created.
 </li>
 
 </ul>
@@ -100,10 +109,52 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <h2>
 <a name="Bug Fixes"></a>Bug Fixes</h2>
 <blockquote>
-<p>The following issues are addressed by Derby release 10.5.1.0. These issues are not addressed in the preceding 10.4.2.0 release.</p>
+<p>The following issues are addressed by Derby release 10.5.1.1. These issues are not addressed in the preceding 10.4.2.0 release.</p>
 <table border="2">
 <tr>
 <td><b>Issue Id</b></td><td><b>Description</b></td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4148">DERBY-4148</a></td><td>NullPointerException in system.sttest run with 10.5.1.0</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4146">DERBY-4146</a></td><td>Cannot insert row when a generated column references an identity column</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4145">DERBY-4145</a></td><td>NullPointerException on CREATE TABLE when generated column depends on another generated column</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4141">DERBY-4141</a></td><td>XAExceptions thrown by Derby can have errorCode 0</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4135">DERBY-4135</a></td><td>Failure in BlobClob4BlobTest due to wrong results being returned</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4128">DERBY-4128</a></td><td>Failure in ServerPropertiesTest due to java.security.AccessControlException on the server side, in 10.4 to 10.5.1. soft upgrade mode</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4127">DERBY-4127</a></td><td>ArrayIndexOutOfBoundsException in DatabaseMetaDataTest when run in Soft Upgrade mode</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4126">DERBY-4126</a></td><td>You can't invoke a table function which is stored in a jar file inside the database</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4125">DERBY-4125</a></td><td>The in-memory storage back end doesn't work on Windows</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4122">DERBY-4122</a></td><td>ClassCastException in SQLClob when running in soft upgrade mode (10.4.2.0 -&gt; 10.5.1.0)</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4121">DERBY-4121</a></td><td>Documentation: more UPDATE_STATISTICS fixes needed for Reference Manual and Tuning Derby</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4119">DERBY-4119</a></td><td>Compress on a large table fails with IllegalArgumentException - Illegal Capacity</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4117">DERBY-4117</a></td><td>dblook script fails when URL contains special characters</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4116">DERBY-4116</a></td><td>SYSCS_UTIL.SYSCS_UPDATE_STATISTICS should update the store estimated row count for the table</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-4104">DERBY-4104</a></td><td>Documentation: update documentation files to 10.5</td>
@@ -113,6 +164,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-4096">DERBY-4096</a></td><td>'testRunTimeStatistics(org.apache.derbyTesting.functionTests.tests.lang.OffsetFetchNextTest)junit.framework.AssertionFailedError' on Windows</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4095">DERBY-4095</a></td><td>Trigger  fails with ERROR 38000: The exception 'java.sql.SQLException: ResultSet not open  during VTIResultSet.getNextRowCore()</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-4094">DERBY-4094</a></td><td>Enforce absolute paths in the in-memory back end internal storage structure</td>
@@ -178,6 +232,15 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-4025">DERBY-4025</a></td><td>CHAR data type documentation fails to describe the maximum allowed length</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4024">DERBY-4024</a></td><td>Replace felix.jar file with the felix sources</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4022">DERBY-4022</a></td><td>Remove dependency of junit targets on deprecated jdk16 variable</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-4017">DERBY-4017</a></td><td>Removed deprecated jdk16 variable from the machinery which builds javadoc</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-4016">DERBY-4016</a></td><td>Document syntax change for ALTER TABLE in Reference Manual</td>
 </tr>
 <tr>
@@ -205,10 +268,28 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3997">DERBY-3997</a></td><td>ORDER BY causes column to be returned</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3996">DERBY-3996</a></td><td>Change eol style to native on jsr169 stubs</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3990">DERBY-3990</a></td><td>ResultSetStreamTest fails on case sensitive file systems, and isn't run as part of any suite</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3989">DERBY-3989</a></td><td>Set the Java 5 compilation path based on the Java 6 compilation path if a Java 5 environment can't be found but a Java 6 environment can be</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3988">DERBY-3988</a></td><td>Set the Java 6 complilation path based on the Java 5 compilation path so that the JDBC4 support is always built</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3985">DERBY-3985</a></td><td>Replace BUILDING.txt with a simlified up-to-date BUILDING.html</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3984">DERBY-3984</a></td><td>Separate out the small number of build targets which really require JDK1.4 features from the bulk of the targets which ought to compile cleanly against small device libraries</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3983">DERBY-3983</a></td><td>User Guide documentation on the limitations of small-device support is stale</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3982">DERBY-3982</a></td><td>Add a facility to override the default set of old versions to be tested in the upgrade tests.</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3981">DERBY-3981</a></td><td>Improve distribution of hash codes in SQLBinary and SQLChar</td>
@@ -229,6 +310,12 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3970">DERBY-3970</a></td><td>PositionedStoreStream doesn't initialize itself properly</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3969">DERBY-3969</a></td><td>NPE if you declare a constraint on a generated column and omit the datatype</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3966">DERBY-3966</a></td><td>Do not require JRE 1.4 libraries at compile time since SUN's JDK 1.4 went out of support and can be used on JRE 1.4 without any problem</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3964">DERBY-3964</a></td><td>NullPointerException when re-evaluating generated column during ON DELETE SET NULL referential action</td>
 </tr>
 <tr>
@@ -239,6 +326,15 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3956">DERBY-3956</a></td><td>Remove method TemplateRow.checkPartialColumnTypes</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3950">DERBY-3950</a></td><td>You should get an error if you try to override a generated column via an INSERT driven by an inner ResultSet</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3948">DERBY-3948</a></td><td>Don't allow references to generated columns in the NEW transition variables of triggered actions of BEFORE triggers</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3945">DERBY-3945</a></td><td>Generation clauses which mention user-coded functions may produce different resuls depending on who performs the triggering INSERT/UPDATE</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3943">DERBY-3943</a></td><td>testReplication_Local_3_p2_StateTests_smallInsert_immediateStopMaster_DISABLED() causes hang in teardown()</td>
@@ -254,6 +350,21 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3934">DERBY-3934</a></td><td>Improve performance of reading modified Clobs</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3932">DERBY-3932</a></td><td>Add tests of generated columns when sql authorization is turned on</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3931">DERBY-3931</a></td><td>GeneratedColumnsTest fails with "'F_MINUS' is not recognized as a function or procedure." on cvm/phoneME</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3930">DERBY-3930</a></td><td>SQL roles: Add VTI for CONTAINED_ROLES</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3923">DERBY-3923</a></td><td>Make the datatype optional when declaring columns with generation clauses</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3922">DERBY-3922</a></td><td>Enable the adding of generated columns via ALTER TABLE</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3917">DERBY-3917</a></td><td>RolesConferredPrivilegesTest  fails with  'java.lang.NoClassDefFoundError: java.sql.DriverManager'  with weme 6.1</td>
@@ -379,6 +490,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3827">DERBY-3827</a></td><td>Add Apache 2.0 license headers to a number of files</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3826">DERBY-3826</a></td><td>Remove the update-with-jdbc4 script, which is dead code now</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3825">DERBY-3825</a></td><td>StoreStreamClob.getReader(charPos) performs poorly</td>
 </tr>
 <tr>
@@ -400,6 +514,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3807">DERBY-3807</a></td><td>traces of removed ij functionality of ij.unicodeEscape should be removed</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3805">DERBY-3805</a></td><td>Create a simple Blob performance regression test</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3803">DERBY-3803</a></td><td>'org.apache.derbyTesting.functionTests.tests.lang.XMLTypeAndOpsTest' failures on JVM 1.5 on trunk, 10.4 and 10.3</td>
 </tr>
 <tr>
@@ -413,6 +530,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3798">DERBY-3798</a></td><td>Remove unnecessary call to Hashtable.get() in TableScanResultSet.getNextRowCore()</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3797">DERBY-3797</a></td><td>Convert jdbcapi/metadataMultiConn to JUnit.</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3796">DERBY-3796</a></td><td>Convert derbynet/OutBufferedStream to JUnit</td>
@@ -487,7 +607,13 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3763">DERBY-3763</a></td><td>Rename BaseJDBCTestCase.usingDerbyNet</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3762">DERBY-3762</a></td><td>Convert "org.apache.derbyTesting.functionTests.tests.lang.arithmetic.sql" to junit.</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3760">DERBY-3760</a></td><td>Convert "org.apache.derbyTesting.functionTests.tests.lang.miscerrors.sql" to junit.</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3759">DERBY-3759</a></td><td>Convert "org.apache.derbyTesting.functionTests.tests.lang.ungroupedAggregatesNegative.sql" to junit.</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3758">DERBY-3758</a></td><td>Convert "org.apache.derbyTesting.functionTests.tests.lang.precedence.sql" to junit</td>
@@ -496,7 +622,13 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3755">DERBY-3755</a></td><td>ij's help text lacks the optional [HOLD | NOHOLD] syntax for GET CURSOR</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3754">DERBY-3754</a></td><td> Convert "org.apache.derbyTesting.functionTests.tests.lang.connect.sql" to junit</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3751">DERBY-3751</a></td><td>Convert case.sql to junit</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3750">DERBY-3750</a></td><td>Convert  "org.apache.derbyTesting.functionTests.tests.lang.constant Expression.sql" to junit</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3745">DERBY-3745</a></td><td>Derby can leak classloaders in an app server environment</td>
@@ -512,6 +644,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3739">DERBY-3739</a></td><td>Skip and read methods in ArrayInputStream may overflow</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3738">DERBY-3738</a></td><td>Add more tests for legal/illegal commands in the different replication states</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3736">DERBY-3736</a></td><td>Revoking a column level privilege from a user, a prepared statement relying on that privilege can still be executed</td>
@@ -574,6 +709,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3704">DERBY-3704</a></td><td>If an IOException is encountered during establishment of the connection, Network Server should print the root exception to the console instead of a generic message</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3703">DERBY-3703</a></td><td>Make it possible to build the JSR169 support with the jdk1.4 libraries</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3702">DERBY-3702</a></td><td>Remove xml-apis.jar because we no longer have to compile against jdk1.3</td>
 </tr>
 <tr>
@@ -587,6 +725,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3695">DERBY-3695</a></td><td>NullPointerException when invoking statement event listeners if one of the listeners is null</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3694">DERBY-3694</a></td><td>'Method resolution for signature java.lang.String.valueOf(int) was ambiguous. (No single maximally specific method.)' in 'testFunctionNullHandling(org.apache.derbyTesting.functionTests.tests.lang.RoutineTest)'  on JavaME</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3693">DERBY-3693</a></td><td>Deadlocks accessing DB metadata</td>
@@ -631,6 +772,12 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3666">DERBY-3666</a></td><td>Make role descriptor a dependency Provider</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3665">DERBY-3665</a></td><td>Master file for derbynet/testProperties.java needs update for 10.3.2.2 to 10.3.3.0 version change.</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3663">DERBY-3663</a></td><td>Convert store/streamingColumn to JUnit</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3661">DERBY-3661</a></td><td>Typo yields redundant test case in GrantRevokeTest</td>
 </tr>
 <tr>
@@ -655,7 +802,16 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3649">DERBY-3649</a></td><td>can't call a stored function with an aggregate argument without getting the following error: ERROR 42Y29</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3642">DERBY-3642</a></td><td>Update and rectify the Derby tutorial</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3640">DERBY-3640</a></td><td>Add an example for table function in Derby Reference Manual</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3638">DERBY-3638</a></td><td>java/testing/Readme.htm location of derbyTesting.jar</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3633">DERBY-3633</a></td><td>tools/derbyrunjartest.java fails with 'No command given.' (expecting 'No arguments given.')</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3631">DERBY-3631</a></td><td>UDF used with aggregate arguments results in error 30000</td>
@@ -677,6 +833,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3618">DERBY-3618</a></td><td>Perform thread dump with ASSERTS with jdk 1.5 or higher</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3615">DERBY-3615</a></td><td>Making the instructions more clear in documentation(BUILDING.txt) regarding setting JRE lib path for a Windows system</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3613">DERBY-3613</a></td><td>SELECT DISTINCT field FROM TABLE_NAME GROUP BY field,  field2</td>
@@ -701,6 +860,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3588">DERBY-3588</a></td><td>suites.All fails to run on Jvm 1.5 when built with JDK 1.5 (Failed to invoke suite(): .jdbc4._Suite)</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3587">DERBY-3587</a></td><td>Convert jdbcapi/testRelative.java to JUnit</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3586">DERBY-3586</a></td><td>Remove am.Connection.reset(LogWriter,ClientBaseDataSource,boolean) and called methods</td>
@@ -730,7 +892,16 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3574">DERBY-3574</a></td><td>With client, attempting to get the lob length after commit  or connection close if there  was a call to length() before commit does not throw an exception</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3572">DERBY-3572</a></td><td>directory error in the file "java/testing/README.htm"</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3571">DERBY-3571</a></td><td>LOB locators are not released if the LOB columns are not accessed by the client</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3570">DERBY-3570</a></td><td>Implement DETERMINISTIC keyword for procedures and functions</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3568">DERBY-3568</a></td><td>Convert jdbcapi/savepointJdbc30_JSR169.java and jdbcapi/savepointJdbc30_XA.java to JUnit</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3567">DERBY-3567</a></td><td>AsynchronousLogShipper#forceFlush should time out</td>
@@ -746,6 +917,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3558">DERBY-3558</a></td><td>regression test failure in testDerbyJarAttributeAlpha - Security Exception</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3556">DERBY-3556</a></td><td>change derby.tests.trace property to print the name of the test before it runs it</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3554">DERBY-3554</a></td><td>Change Collation test to run DatabaseMetaDataTest, BatchUpdateTest,GroupByExpressionTest, and UpdateableResultSetTest for only one locale</td>
@@ -886,6 +1060,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3270">DERBY-3270</a></td><td>Delayed (on-demand) creation of current user schema makes select from view belonging to other schema fail.</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3266">DERBY-3266</a></td><td>Not possible for non-db-owner to create a temporary table. "Get ERROR 42507: User 'USERB' can not perform the operation in schema 'SESSION'."</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3227">DERBY-3227</a></td><td>Remove final from all getConnection() methods in EmbeddedDataSource</td>
 </tr>
 <tr>
@@ -961,6 +1138,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2388">DERBY-2388</a></td><td>DOCS - Reorder JDBC Reference section in Ref Manual</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-2353">DERBY-2353</a></td><td>intermittent NPEs during DELETE ops in a reasonably large transaction</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-2351">DERBY-2351</a></td><td>ORDER BY with expression with distinct in the select list returns incorrect result</td>
 </tr>
 <tr>
@@ -986,6 +1166,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-1726">DERBY-1726</a></td><td>Make i18n/LocalizedDisplay.sql and i18n/LocalizedConnectionAttribute.sql behave equally on different platforms</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-1670">DERBY-1670</a></td><td>Remove optional osgi.jar download by including equivalent jar from the apache incubator felix project in the Derby's svn</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-1458">DERBY-1458</a></td><td>Add MessageBundleTest to build script to verify that there are no orphaned message ids</td>
@@ -1027,6 +1210,9 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <td><a href="http://issues.apache.org/jira/browse/DERBY-503">DERBY-503</a></td><td>Documentation should recommend using .newInstance() to instantiate JDBC driver</td>
 </tr>
 <tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-481">DERBY-481</a></td><td>implement SQL generated columns</td>
+</tr>
+<tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-269">DERBY-269</a></td><td>Provide some way to update index cardinality statistics (e.g. reimplement update statistics)</td>
 </tr>
 <tr>
@@ -1037,7 +1223,7 @@ SYSCS_UTIL.SYSCS_UPDATE_STATISTICS: New system procedure that updates cardinalit
 <h2>
 <a name="Issues"></a>Issues</h2>
 <blockquote>
-<p>Compared with the previous release (10.4.2.0), Derby release 10.5.1.0 introduces the following incompatibilities. These merit your special attention.</p>
+<p>Compared with the previous release (10.4.2.0), Derby release 10.5.1.1 introduces the following incompatibilities. These merit your special attention.</p>
 <ul>
 <li>
 <a href="#Note for DERBY-4073">
@@ -1128,6 +1314,24 @@ intent of the query is ambiguous. Previously, Derby instead produced
 non-distinct results.
 Also, an ORDER BY clause which specifies a table-name-qualified column alias
 is now rejected as invalid, where previously it was accepted.</p>
+</a>
+</li>
+<li>
+<a href="#Note for DERBY-2085">
+<p>Note for DERBY-2085: 
+Derby has improved the error message which is issued when an invalid
+column reference is found in a grouped query. Derby now issues message
+42Y36 instead of 42Y30. Furthermore, the wording of message 42Y36 has
+been expanded to further explain the behavior.
+</p>
+</a>
+</li>
+<li>
+<a href="#Note for DERBY-1062">
+<p>Note for DERBY-1062: 
+Applications will see a different error code and message when they attempt to call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE on a table that does not exist. 
+
+</p>
 </a>
 </li>
 <li>
@@ -2567,6 +2771,184 @@ either simply alias-name, or table-name.column-name.
 </blockquote>
 <hr>
 <h3>
+<a name="Note for DERBY-2085"></a>Note for DERBY-2085</h3>
+<blockquote>
+
+<h4>Summary of Change</h4>
+
+<p>
+Derby has improved the error message which is issued when an invalid
+column reference is found in a grouped query. Derby now issues message
+42Y36 instead of 42Y30. Furthermore, the wording of message 42Y36 has
+been expanded to further explain the behavior.
+</p>
+
+<p>
+Consider the table
+</p>
+
+<blockquote>
+<code>
+CREATE TABLE t (i INT, j INT)
+</code>
+</blockquote>
+
+<p>
+and consider the following query:
+</p>
+
+<blockquote>
+<code>
+SELECT i FROM t GROUP BY i ORDER BY j
+</code>
+</blockquote>
+
+<p>
+In Derby releases 10.2, 10.3, and 10.4,
+this query gives the following error message:
+</p>
+
+<blockquote>
+<code>
+
+ERROR 42Y30: The SELECT list of a grouped query contains at least one invalid expression. If a SELECT list has a GROUP BY, the list may only contain valid grouping expressions and valid aggregate expressions.
+</code>
+</blockquote>
+
+<p>
+This is misleading since there is no invalid expression in the SELECT
+list. It is the ORDER BY clause that is wrong.
+In Derby 10.5, this query will now give the following error message, which is
+a revised version of the message issued by 10.1 (that is, Derby 10.5 behaves
+more like Derby 10.1 in this respect):
+</p>
+
+<blockquote>
+<code>
+ERROR 42Y36: Column reference 'J' is invalid, or is part of an invalid expression.  For a SELECT list with a GROUP BY, the columns and expressions being selected may only contain valid grouping expressions and valid aggregate expressions.
+</code>
+</blockquote>
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+An application which issued a grouped select statement with an invalid
+column reference in the order by clause may now receive a different error
+message than it did in 10.4.
+</p>
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+We feel that message 42Y36 is more helpful to the user in explaining the
+problem with the invalid query.
+</p>
+
+
+</blockquote>
+<hr>
+<h3>
+<a name="Note for DERBY-1062"></a>Note for DERBY-1062</h3>
+<blockquote>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+Applications will see a different error code and message when they attempt to call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE on a table that does not exist. 
+
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+Applications will see a different error code and message when they attempt to call SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE on a table that does not exist. 
+The new error code and message will be 
+ERROR 42Y55: 'ALTER TABLE' cannot be performed on 'MissingTableName' because it does not exist. 
+The old error code and message used to be 
+ERROR 42X05: Table/View 'MissingTableName' does not exist. 
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+The SQL exception code in the previous release was 42X05 and error message was "Table/View 'MissingTableName' does not exist."
+</p>
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+To avoid duplication of code, the error handling is now done by a generic routine in ALTER TABLE rather than a routine specific to SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE. This change to use ALTER TABLE code to implement SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE was made in 10.5 release and that is the reason behind the change in error code behavior.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+If the application is looking for 42X05, it should be changed to look for 42Y55.
+</p>
+
+
+
+</blockquote>
+<hr>
+<h3>
 <a name="Note for DERBY-48"></a>Note for DERBY-48</h3>
 <blockquote>
 
@@ -2704,7 +3086,7 @@ being absent after a rollback.
 <h2>
 <a name="Build Environment"></a>Build Environment</h2>
 <blockquote>
-<p>Derby release 10.5.1.0 was built using the following environment:</p>
+<p>Derby release 10.5.1.1 was built using the following environment:</p>
 <ul>
 <li>
 <b>Branch</b> - Source code came from the 10.5 branch.</li>
