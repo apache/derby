@@ -1123,7 +1123,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * @return a <code>ResultSet</code> listing the fucntions
      * @exception SqlException if a database error occurs
      * @see #getFunctionsX(String, String, String)
-     * @see org.apache.derby.impl.sql.catalog.DataDictionaryImpl#create_10_2_system_procedures(TransactionController,UUID)
+     * @see org.apache.derby.impl.sql.catalog.DataDictionaryImpl#create_10_2_system_procedures(TransactionController,java.util.HashSet,UUID)
      * @see org.apache.derby.impl.jdbc.EmbedDatabaseMetaData#getFunctions(String,String,String)
      */
 
@@ -1199,7 +1199,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * @return a <code>ResultSet</code> listing the fucntions
      * @exception SqlException if a database error occurs
      * @see #getFunctionColumnsX(String, String, String,String)
-     * @see org.apache.derby.impl.sql.catalog.DataDictionaryImpl#create_10_2_system_procedures(TransactionController,UUID)
+     * @see org.apache.derby.impl.sql.catalog.DataDictionaryImpl#create_10_2_system_procedures(TransactionController,java.util.HashSet,UUID)
      * @see org.apache.derby.impl.jdbc.EmbedDatabaseMetaData#getFunctions(String,String,String)
      */
     public java.sql.ResultSet 
