@@ -164,8 +164,15 @@ public class PrivilegeNode extends QueryTreeNode
                     throw StandardException.newException( ( rd.isFunction ? SQLState.LANG_AMBIGUOUS_FUNCTION_NAME
                                                             : SQLState.LANG_AMBIGUOUS_PROCEDURE_NAME),
                                                           rd.name.getFullTableName());
-                if( list.size() != 1)
-                    throw StandardException.newException(SQLState.LANG_NO_SUCH_METHOD_ALIAS, rd.name.getFullTableName());
+                if( list.size() != 1) {
+                    if (rd.isFunction) {
+                        throw StandardException.newException(SQLState.LANG_NO_SUCH_FUNCTION, 
+                                rd.name.getFullTableName());
+                    } else {
+                        throw StandardException.newException(SQLState.LANG_NO_SUCH_PROCEDURE, 
+                                rd.name.getFullTableName());
+                    }
+                }
                 proc = (AliasDescriptor) list.get(0);
             }
             else

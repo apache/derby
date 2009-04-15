@@ -2064,8 +2064,20 @@ Guide.
             </msg>
 
             <msg>
-                <name>42Y03</name>
+                <name>42Y03.S.0</name>
                 <text>'{0}' is not recognized as a function or procedure.</text>
+                <arg>statement</arg>
+            </msg>
+            
+            <msg>
+                <name>42Y03.S.1</name>
+                <text>'{0}' is not recognized as a procedure.</text>
+                <arg>statement</arg>
+            </msg>
+            
+            <msg>
+                <name>42Y03.S.2</name>
+                <text>'{0}' is not recognized as a function.</text>
                 <arg>statement</arg>
             </msg>
 

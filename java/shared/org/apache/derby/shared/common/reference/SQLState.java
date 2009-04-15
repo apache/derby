@@ -911,7 +911,9 @@ public interface SQLState {
 	String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
 	// String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE                = "42Y02";
-	String LANG_NO_SUCH_METHOD_ALIAS                                   = "42Y03";
+	String LANG_NO_SUCH_METHOD_ALIAS                                   = "42Y03.S.0";
+	String LANG_NO_SUCH_PROCEDURE                                      = "42Y03.S.1";
+	String LANG_NO_SUCH_FUNCTION                                       = "42Y03.S.2";
 	String LANG_INVALID_FULL_STATIC_METHOD_NAME                        = "42Y04";
 	String LANG_NO_SUCH_FOREIGN_KEY                                    = "42Y05";
 	//String LANG_METHOD_ALIAS_NOT_FOUND                                 = "42Y06";

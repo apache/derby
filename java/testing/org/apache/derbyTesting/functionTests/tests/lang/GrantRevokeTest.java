@@ -624,6 +624,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             grant("execute", "function s1", "nosuch", users[1]);
     	} catch (SQLException e) {
         	assertSQLState("42Y03", e);
+            assertEquals("'S1.NOSUCH' is not recognized as a function.", e.getMessage());
         }
     }
     
@@ -632,6 +633,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             grant("execute", "function s1", "p1", users[1]);
     	} catch (SQLException e) {
         	assertSQLState("42Y03", e);
+            assertEquals("'S1.P1' is not recognized as a function.", e.getMessage());
         }
     }
     
@@ -648,6 +650,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             grant("execute", "procedure s1", "nosuch", users[1]);
     	} catch (SQLException e) {
         	assertSQLState("42Y03", e);
+            assertEquals("'S1.NOSUCH' is not recognized as a procedure.", e.getMessage());
         }
     }
     
@@ -656,6 +659,7 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
             grant("execute", "procedure s1", "f2", users[1]);
     	} catch (SQLException e) {
         	assertSQLState("42Y03", e);
+            assertEquals("'S1.F2' is not recognized as a procedure.", e.getMessage());
         }
     }
     
