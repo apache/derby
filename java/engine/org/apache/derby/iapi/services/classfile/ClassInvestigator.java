@@ -22,20 +22,15 @@
 package org.apache.derby.iapi.services.classfile;
 
 
-import java.io.InputStream;
-import java.util.Enumeration;
-
 import java.io.IOException;
-import java.util.Vector;
-
-import org.apache.derby.iapi.services.classfile.VMDescriptor;
-import org.apache.derby.iapi.services.classfile.VMDescriptor;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
-
 import java.util.Hashtable;
 import java.util.Vector;
-import java.util.Enumeration;
-import java.util.Collections;
+
+import org.apache.derby.iapi.services.io.DataInputUtil;
 
 
 /** 
@@ -305,13 +300,12 @@ public class ClassInvestigator extends ClassHolder {
 
 		ClassInput ci = new ClassInput(new java.io.ByteArrayInputStream(ae.infoIn));
 
-
-		ci.skipBytes(4); // puts us at code_length
+		DataInputUtil.skipFully(ci, 4);// puts us at code_length
 		int len = ci.getU4();
-		ci.skipBytes(len); // puts us at exception_table_length
+		DataInputUtil.skipFully(ci, len);// puts us at exception_table_length
 		int count = ci.getU2();
 		if (count != 0)
-			ci.skipBytes(8 * count);
+			DataInputUtil.skipFully(ci, 8 * count);
 
 		int nonAttrLength = 4 + 4 + len + 2 + (8 * count);
 
@@ -332,7 +326,7 @@ public class ClassInvestigator extends ClassHolder {
 				System.err.println("ERROR - Unknown code attribute " + name);
 
 			len = ci.getU4();
-			ci.skipBytes(len);
+			DataInputUtil.skipFully(ci, len);
 		}
 
 		if (newCount != 0) {

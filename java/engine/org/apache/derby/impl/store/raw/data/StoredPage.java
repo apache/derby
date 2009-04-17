@@ -36,6 +36,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.ArrayOutputStream;
 import org.apache.derby.iapi.services.io.CompressedNumber;
+import org.apache.derby.iapi.services.io.DataInputUtil;
 import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 import org.apache.derby.iapi.services.io.ErrorObjectInput;
 import org.apache.derby.iapi.services.io.FormatIdInputStream;
@@ -4662,7 +4663,7 @@ public class StoredPage extends CachedPage
                                 inUserCode = null;
                                 int unread = lrdi.clearLimit();
                                 if (unread != 0)
-                                    lrdi.skipBytes(unread);
+                                    DataInputUtil.skipFully(lrdi, unread);
                             }
                             else
                             {
@@ -4711,7 +4712,7 @@ public class StoredPage extends CachedPage
                         inUserCode = null;
                         int unread = lrdi.clearLimit();
                         if (unread != 0)
-                            lrdi.skipBytes(unread);
+                            DataInputUtil.skipFully(lrdi, unread);
                     }
 
                 }
@@ -5258,7 +5259,7 @@ public class StoredPage extends CachedPage
 						inUserCode = null;
 						int unread = dataIn.clearLimit();
 						if (unread != 0)
-							dataIn.skipBytes(unread);
+							DataInputUtil.skipFully(dataIn, unread);
 					}
                     else
                     {
@@ -5315,7 +5316,7 @@ public class StoredPage extends CachedPage
 				inUserCode = null;
 				int unread = dataIn.clearLimit();
 				if (unread != 0)
-					dataIn.skipBytes(unread);
+					DataInputUtil.skipFully(dataIn, unread);
 
 				continue;
 			}
@@ -5561,7 +5562,7 @@ public class StoredPage extends CachedPage
                                     inUserCode = null;
                                     int unread = dataIn.clearLimit();
                                     if (unread != 0)
-                                        dataIn.skipBytes(unread);
+                                        DataInputUtil.skipFully(dataIn, unread);
                                 }
                                 else
                                 {
@@ -5626,7 +5627,7 @@ public class StoredPage extends CachedPage
                             inUserCode = null;
                             int unread = dataIn.clearLimit();
                             if (unread != 0)
-                                dataIn.skipBytes(unread);
+                                DataInputUtil.skipFully(dataIn, unread);
                         }
                     }
                     else
@@ -7711,7 +7712,7 @@ public class StoredPage extends CachedPage
 		int fieldDataLength = StoredFieldHeader.readFieldDataLength(in, fieldStatus, slotFieldSize);
 
 		if (fieldDataLength != 0) {
-			in.skipBytes(fieldDataLength);
+			DataInputUtil.skipFully(in, fieldDataLength);
 		}
 	}
 

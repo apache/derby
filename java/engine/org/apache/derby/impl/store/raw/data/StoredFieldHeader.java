@@ -20,19 +20,17 @@
  */
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.iapi.store.raw.RecordHandle;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import java.io.IOException;
 import java.io.EOFException;
-
+import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.OutputStream;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.services.io.CompressedNumber;
+import org.apache.derby.iapi.services.io.DataInputUtil;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import java.io.InputStream;
 
 /**
     A class to provide static methods to manipulate fields in the field header.
@@ -685,7 +683,7 @@ public final class StoredFieldHeader
                     CompressedNumber.sizeInt(fieldDataLength);
 
                 if (diffLen != 0)
-                    in.skipBytes(diffLen);
+                    DataInputUtil.skipFully(in, diffLen);
             } 
 
             return(fieldDataLength);

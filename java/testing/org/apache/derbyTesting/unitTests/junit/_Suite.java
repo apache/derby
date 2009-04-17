@@ -58,6 +58,7 @@ public class _Suite extends BaseTestCase {
         suite.addTest(PathUtilTest.suite());
         suite.addTest(VirtualFileTest.suite());
         suite.addTest(ReaderToUTF8StreamTest.suite());
+        suite.addTest(DataInputUtilTest.suite());
 
         return suite;
     }
