@@ -21,31 +21,34 @@
 
 package org.apache.derby.impl.store.raw.data;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.zip.CRC32;
+
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.impl.store.raw.data.BasePage;
-
-import org.apache.derby.impl.store.raw.data.LongColumnException;
-import org.apache.derby.impl.store.raw.data.OverflowInputStream;
-import org.apache.derby.impl.store.raw.data.PageVersion;
-import org.apache.derby.impl.store.raw.data.RecordId;
-import org.apache.derby.impl.store.raw.data.RawField;
-import org.apache.derby.impl.store.raw.data.ReclaimSpace;
-import org.apache.derby.impl.store.raw.data.StoredFieldHeader;
-import org.apache.derby.impl.store.raw.data.StoredRecordHeader;
-
-import org.apache.derby.iapi.services.io.FormatIdUtil;
+import org.apache.derby.iapi.services.io.ArrayInputStream;
+import org.apache.derby.iapi.services.io.ArrayOutputStream;
+import org.apache.derby.iapi.services.io.CompressedNumber;
+import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
+import org.apache.derby.iapi.services.io.ErrorObjectInput;
 import org.apache.derby.iapi.services.io.FormatIdInputStream;
 import org.apache.derby.iapi.services.io.FormatIdOutputStream;
+import org.apache.derby.iapi.services.io.FormatIdUtil;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.iapi.services.io.LimitObjectInput;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.StreamStorable;
-import org.apache.derby.iapi.services.io.TypedFormat;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowUtil;
-
+import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
 import org.apache.derby.iapi.store.raw.Page;
@@ -55,40 +58,8 @@ import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.log.LogInstant;
 import org.apache.derby.iapi.store.raw.xact.RawTransaction;
-
-import org.apache.derby.iapi.error.StandardException;
-
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
-import org.apache.derby.iapi.types.Orderable;
-
-import org.apache.derby.iapi.services.io.ArrayInputStream;
-import org.apache.derby.iapi.services.io.ArrayOutputStream;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.util.ByteArray;
-import org.apache.derby.iapi.services.io.CompressedNumber;
-import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
-import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
-import org.apache.derby.iapi.services.io.LimitObjectInput;
-import org.apache.derby.iapi.services.io.ErrorObjectInput;
-
-
-import java.util.Arrays;
-import java.util.zip.CRC32;
-
-import java.io.IOException;
-import java.io.EOFException;
-import java.io.Externalizable;
-import java.io.InvalidClassException;
-
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-import java.io.DataInput;
-import java.io.DataOutput;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 
 
 /**
