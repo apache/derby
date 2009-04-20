@@ -19,7 +19,7 @@
 -- Function to provided an updated C_DATA column for a customer account.
 -- Section 2.5.2.2
 CREATE FUNCTION BAD_CREDIT_DATA(
-    C_DATA VARCHAR(500), W SMALLINT, D SMALLINT,
+    C_DATA VARCHAR(500), W INT, D INT,
     CW SMALLINT, CD SMALLINT, C_ID INTEGER,
     AMOUNT DECIMAL(6, 2))
 RETURNS VARCHAR(500)
