@@ -473,7 +473,11 @@ public class NullableUniqueConstraintTest extends BaseJDBCTestCase {
         // The error happened most frequently in the second iteration, but
         // it didn't always, so we repeat it ten times to increase the
         // likelihood of triggering the bug.
-        for (int i = 0; i < 10; i++) {
+        // DERBY-4097: Increase the number of iterations to increase the
+        // likelihood of exposing another timing-dependent problem with a
+        // WaitError caused by a conflict between the post-commit thread
+        // and the user thread.
+        for (int i = 0; i < 100; i++) {
             for (int j = 0; j < 1000; j++) {
                 insert.setInt(1, j);
                 insert.addBatch();
