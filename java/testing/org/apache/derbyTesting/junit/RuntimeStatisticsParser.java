@@ -329,7 +329,15 @@ public class RuntimeStatisticsParser {
             }    
             return (foundCount >=instances);
                 
-        }
+    }
+
+    /**
+     * Check if sorting node was added for the query.
+     * @return true if sorting node was required
+     */
+    public boolean whatSortingRequired() {
+        return (statistics.indexOf("Sort information: ") != -1 );
+    }
 
     public boolean usedExternalSort() {
         return (statistics.indexOf("Sort type=external") != -1 );
