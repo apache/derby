@@ -4474,7 +4474,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XJ079.S</name>
-                <text>The length specified '{0}' exceeds the size of the BLOB/BLOB.</text>
+                <text>The length specified '{0}' exceeds the size of the BLOB/CLOB.</text>
                 <arg>number</arg>
             </msg>
 
