@@ -379,8 +379,8 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         LeafControlRow originalLeaf = leaf;
         while (leaf != null) {
             if (slot == 0) {
+                LeafControlRow oldLeaf = leaf;
                 try {
-                    LeafControlRow oldLeaf = leaf;
                     //slot is pointing before the first slot
                     //get left sibiling
                     leaf = (LeafControlRow) leaf.getLeftSibling(this);
@@ -398,7 +398,14 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                     // of the loop body to get the slot number rechecked.
                     continue;
                 } catch (WaitError we) {
-                    throw StandardException.plainWrapException(we);
+                    // DERBY-4097: Couldn't latch the left sibling without
+                    // waiting. Release all latches and rescan from top of
+                    // B-tree to prevent deadlock.
+                    if (newLeaf) {
+                        oldLeaf.release();
+                    }
+                    originalLeaf.release();
+                    return RESCAN_REQUIRED;
                 }
             }
             rh = leaf.page.fetchFromSlot(null, slot, rows, null, true);
