@@ -46,6 +46,8 @@ import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derby.iapi.services.info.JVMInfo;
+
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -1000,6 +1002,10 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
      */
     public void testTableFunctionInJar() throws SQLException, MalformedURLException
     {
+        // skip this test if vm is pre Java 5. This is because the jar file was
+        // compiled by a modern compiler and the jar file won't load on
+        // old vms.
+        if ( JVMInfo.J2ME || (JVMInfo.JDK_ID < JVMInfo.J2SE_15 ) ) { return; }
         
         String jarName = "EMC.DUMMY_VTI";
 
