@@ -117,6 +117,26 @@ public class GenericLanguageConnectionContext
 	private boolean runTimeStatisticsSetting ;
 	private boolean statisticsTiming;
 
+	/**
+	 * If xplainOnlyMode is set (via SYSCS_SET_XPLAIN_MODE), then the
+	 * connection does not actually execute statements, but only
+	 * compiles them, and emits the query plan information into the
+	 * XPLAIN tables.
+	 */
+	private boolean xplainOnlyMode = false;
+    
+	/** the current xplain schema. Is usually NULL. Can be set via
+	 * SYSCS_SET_XPLAIN_SCHEMA, in which case it species the schema into
+	 * which XPLAIN information should be stored in user tables.
+	 */
+	private String xplain_schema = null;
+	/**
+	 * For each XPLAIN table, this map stores a SQL INSERT statement which
+	 * can be prepared and used to insert rows into the table during the
+	 * capturing of statistics data into the user XPLAIN tables.
+	 */
+	private Map xplain_statements = new HashMap();
+	
 	//all the temporary tables declared for this connection
 	private ArrayList allDeclaredGlobalTempTables;
 	//The currentSavepointLevel is used to provide the rollback behavior of temporary tables.
@@ -3453,4 +3473,32 @@ public class GenericLanguageConnectionContext
 			getInitialDefaultSchemaDescriptor());
 	}
 
+
+	/** @see LanguageConnectionContext#getXplainOnlyMode() */
+	public boolean getXplainOnlyMode() {
+		return xplainOnlyMode;
+	}
+    
+	/** @see LanguageConnectionContext#setXplainOnlyMode(boolean) */
+	public void setXplainOnlyMode(boolean onOrOff) {
+		xplainOnlyMode = onOrOff;
+	}
+    
+	/** @see LanguageConnectionContext#getXplainSchema() */
+	public String getXplainSchema() {
+		return xplain_schema;
+	}
+    
+	/** @see LanguageConnectionContext#setXplainSchema(String) */
+	public void setXplainSchema(String s) {
+		xplain_schema = s;
+	}
+	public void setXplainStatement(Object key, Object stmt)
+	{
+		xplain_statements.put(key, stmt);
+	}
+	public Object getXplainStatement(Object key)
+	{
+		return xplain_statements.get(key);
+	}
 }

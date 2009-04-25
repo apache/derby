@@ -27,6 +27,11 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableHashtable;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -151,4 +156,54 @@ public class RealScalarAggregateStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_SCALAR_AGG);
   }
+  
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        int noChildren = 0;
+        if(this.childResultSetStatistics!=null) noChildren++;
+        
+        //inform the visitor
+        visitor.setNumberOfChildren(noChildren);
+
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // then my child
+        if(childResultSetStatistics!=null){
+            childResultSetStatistics.accept(visitor);
+		}
+
+    }
+    public String getRSXplainType() { return XPLAINUtil.OP_AGGREGATE; }
+    public Object getResultSetDescriptor(Object rsID, Object parentID,
+            Object scanID, Object sortID, Object stmtID, Object timingID)
+    {
+        return new XPLAINResultSetDescriptor(
+           (UUID)rsID,
+           getRSXplainType(),
+           getRSXplainDetails(),
+           new Integer(this.numOpens),
+           null,                              // the number of index updates 
+           null,                           // lock mode
+           null,                           // lock granularity
+           (UUID)parentID,
+           new Double(this.optimizerEstimatedRowCount),
+           new Double(this.optimizerEstimatedCost),
+           null,                              // the affected rows
+           null,                              // the deferred rows
+           new Integer(this.rowsInput),
+           new Integer(this.rowsSeen),
+           null,                              // the seen rows right
+           new Integer(this.rowsFiltered),
+           new Integer(this.rowsInput - this.rowsFiltered),
+           null,                              // the empty right rows
+           this.indexKeyOptimization?"Y":"N",
+           (UUID)scanID,
+           (UUID)sortID,
+           (UUID)stmtID,
+           (UUID)timingID);
+    }
 }

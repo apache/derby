@@ -21,6 +21,11 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
@@ -48,7 +53,7 @@ abstract class RealNoRowsResultSetStatistics
 	protected String subIndent;
 	protected int sourceDepth;
 	public	ResultSetStatistics	sourceResultSetStatistics;
-	protected long executeTime;
+	public long executeTime;
 
 	// variables to implement the inspectable interface.
 	// Do these have to be public? 
@@ -135,4 +140,57 @@ abstract class RealNoRowsResultSetStatistics
 	{
 		return 0.0;
 	}
+    public String getRSXplainDetails() { return null; }
+    public Object getResultSetDescriptor(Object rsID, Object parentID,
+            Object scanID, Object sortID, Object stmtID, Object timingID)
+    {
+        return new XPLAINResultSetDescriptor(
+           (UUID)rsID,
+           getRSXplainType(),
+           getRSXplainDetails(),
+           null,                              // the number of opens
+           null,                              // the number of index updates 
+           null,                           // lock mode
+           null,                           // lock granularity
+           (UUID)parentID,
+           null,                             // estimated row count
+           null,                             // estimated cost
+           null,                             // affected rows
+           null,                             // deferred rows.
+           null,                              // the input rows
+           null,                              // the seen rows left
+           null,                              // the seen rows right
+           null,                              // the filtered rows
+           null,                              // the returned rows
+           null,                              // the empty right rows
+           null,                           // index key optimization
+           (UUID)scanID,
+           (UUID)sortID,
+           (UUID)stmtID,
+           (UUID)timingID);
+    }
+    public Object getResultSetTimingsDescriptor(Object timingID)
+    {
+        return new XPLAINResultSetTimingsDescriptor(
+           (UUID)timingID,
+           null,                                   // the constructor time
+           null,                                   // the open time
+           null,                                   // the next time
+           null,                                   // the close time
+           new Long(this.executeTime),             // the execute time
+           null,                                   // the avg next time/row
+           null,                                   // the projection time
+           null,                                   // the restriction time
+           null,                                   // the temp_cong_create_time
+           null                                    // the temo_cong_fetch_time
+        );
+    }
+    public Object getSortPropsDescriptor(Object UUID)
+    {
+        return null; // Most statistics classes don't have sort props
+    }
+    public Object getScanPropsDescriptor(Object UUID)
+    {
+        return null; // Most statistics classes don't have sort props
+    }
 }

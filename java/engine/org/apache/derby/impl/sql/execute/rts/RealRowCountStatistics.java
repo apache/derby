@@ -23,6 +23,8 @@ package org.apache.derby.impl.sql.execute.rts;
 
 
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.util.Vector;
@@ -140,4 +142,11 @@ public class RealRowCountStatistics
     public String getNodeName() {
         return MessageService.getTextMessage(SQLState.RTS_RC);
     }
+
+    public void accept(XPLAINVisitor visitor) {
+        visitor.setNumberOfChildren(1);
+        visitor.visit(this);
+        childResultSetStatistics.accept(visitor);
+    }
+    public String getRSXplainType() { return XPLAINUtil.OP_ROW_COUNT; }
 }

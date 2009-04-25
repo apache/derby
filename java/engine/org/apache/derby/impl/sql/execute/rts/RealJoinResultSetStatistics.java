@@ -21,6 +21,11 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -101,4 +106,49 @@ public abstract class RealJoinResultSetStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_JOIN);
   }
+    public Object getResultSetDescriptor(Object rsID, Object parentID,
+            Object scanID, Object sortID, Object stmtID, Object timingID)
+    {
+        return new XPLAINResultSetDescriptor(
+           (UUID)rsID,
+           getRSXplainType(),
+           getRSXplainDetails(),
+           new Integer(this.numOpens),
+           null,                           // index updates
+           null,                           // lock mode
+           null,                           // lock granularity
+           (UUID)parentID,
+           new Double(this.optimizerEstimatedRowCount),
+           new Double(this.optimizerEstimatedCost),
+           null,                              // affected rows
+           null,                              // deferred rows
+           null,                              // the input rows
+           new Integer(this.rowsSeenLeft),
+           new Integer(this.rowsSeenRight),
+           new Integer(this.rowsFiltered),
+           new Integer(this.rowsReturned),
+           null,                              // the empty right rows
+           null,                           // index key optimization
+           (UUID)scanID,
+           (UUID)sortID,
+           (UUID)stmtID,
+           (UUID)timingID);
+    }
+    public Object getResultSetTimingsDescriptor(Object timingID)
+    {
+        return new XPLAINResultSetTimingsDescriptor(
+           (UUID)timingID,
+           new Long(this.constructorTime),
+           new Long(this.openTime),
+           new Long(this.nextTime),
+           new Long(this.closeTime),
+           new Long(this.getNodeTime()),
+           XPLAINUtil.getAVGNextTime(
+               (long)this.nextTime, (this.rowsSeenLeft+this.rowsSeenRight)),
+           null,                          // the projection time
+           null,                          // the restriction time
+           null,                          // the temp_cong_create_time
+           null                           // the temo_cong_fetch_time
+        );
+    }
 }

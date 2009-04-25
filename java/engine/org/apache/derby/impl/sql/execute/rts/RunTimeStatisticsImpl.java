@@ -30,6 +30,8 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableHashtable;
 
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
+
 import java.util.Vector;
 
 import java.io.ObjectOutput;
@@ -379,5 +381,15 @@ public final class RunTimeStatisticsImpl implements RunTimeStatistics
     children.addElement(topResultSetStatistics);
     return children;
   }
+  
+  /**
+   * initiate a visit of an XPLAINVisitor from the top of the RS tree
+   */
+  public void acceptFromTopResultSet(XPLAINVisitor v)
+  {
+      if (topResultSetStatistics != null)
+          topResultSetStatistics.accept(v);
+  }
+  
 
 }

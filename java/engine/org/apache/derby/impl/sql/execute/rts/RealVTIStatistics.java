@@ -27,6 +27,8 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableHashtable;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -149,4 +151,25 @@ public class RealVTIStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_VTI);
   }
+  
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        
+        //inform the visitor
+        visitor.setNumberOfChildren(0);
+        
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // I´m a leaf node, I have no children ...
+        
+	}  
+    public String getRSXplainType() { return XPLAINUtil.OP_VTI_RS; }
+    public String getRSXplainDetails()
+    {
+        return this.javaClassName + ", (" + this.resultSetNumber+")";
+    }
 }

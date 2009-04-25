@@ -21,6 +21,11 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -93,4 +98,42 @@ public class RealHashLeftOuterJoinStatistics
 		resultSetName =
 			MessageService.getTextMessage(SQLState.RTS_HASH_LEFT_OJ_RS);
 	}
+    public String getRSXplainType() { return XPLAINUtil.OP_JOIN_HASH_LO; }
+    public String getRSXplainDetails()
+    {
+        String op_details = "("+this.resultSetNumber + ")" +
+            this.resultSetName       + ", ";
+
+        // check to see if this NL Join is part of an Exist clause
+        if (this.oneRowRightSide) op_details+= ", EXISTS JOIN";
+        return op_details;
+    }
+    public Object getResultSetDescriptor(Object rsID, Object parentID,
+            Object scanID, Object sortID, Object stmtID, Object timingID)
+    {
+        return new XPLAINResultSetDescriptor(
+           (UUID)rsID,
+           getRSXplainType(),
+           getRSXplainDetails(),
+           new Integer(this.numOpens),
+           null,                           // index updates
+           null,                           // lock mode
+           null,                           // lock granularity
+           (UUID)parentID,
+           new Double(this.optimizerEstimatedRowCount),
+           new Double(this.optimizerEstimatedCost),
+           null,                              // affected rows
+           null,                              // deferred rows
+           null,                              // the input rows
+           new Integer(this.rowsSeenLeft),
+           new Integer(this.rowsSeenRight),
+           new Integer(this.rowsFiltered),
+           new Integer(this.rowsReturned),
+           new Integer(this.emptyRightRowsReturned),
+           null,                           // index key optimization
+           (UUID)scanID,
+           (UUID)sortID,
+           (UUID)stmtID,
+           (UUID)timingID);
+    }
 }

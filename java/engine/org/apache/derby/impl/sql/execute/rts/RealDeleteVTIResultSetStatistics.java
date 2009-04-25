@@ -22,6 +22,11 @@
 package org.apache.derby.impl.sql.execute.rts;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
 import org.apache.derby.iapi.reference.SQLState;
 
 /**
@@ -107,4 +112,56 @@ public class RealDeleteVTIResultSetStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_DELETE_VTI);
   }
+  
+  //------------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        int noChildren = 0;
+        if(this.sourceResultSetStatistics!=null) noChildren++;
+        
+        //inform the visitor
+        visitor.setNumberOfChildren(noChildren);
+        
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // then my child
+        if(sourceResultSetStatistics!=null){
+            sourceResultSetStatistics.accept(visitor);
+		}
+
+    }
+    public String getRSXplainType() { return XPLAINUtil.OP_DELETE; }
+    public String getRSXplainDetails() { return XPLAINUtil.OP_VTI; }
+    public Object getResultSetDescriptor(Object rsID, Object parentID,
+            Object scanID, Object sortID, Object stmtID, Object timingID)
+    {
+        return new XPLAINResultSetDescriptor(
+           (UUID)rsID,
+           getRSXplainType(),
+           getRSXplainDetails(),
+           null,                              // the number of opens
+           null,                              // the number of index updates 
+           null,                           // lock mode
+           null,                           // lock granularity
+           (UUID)parentID,
+           null,                             // estimated row count
+           null,                             // estimated cost
+           new Integer(this.rowCount),
+           null,                              // the deferred rows.
+           null,                              // the input rows
+           null,                              // the seen rows left
+           null,                              // the seen rows right
+           null,                              // the filtered rows
+           null,                              // the returned rows
+           null,                              // the empty right rows
+           null,                           // index key optimization
+           (UUID)scanID,
+           (UUID)sortID,
+           (UUID)stmtID,
+           (UUID)timingID);
+    }
+
 }

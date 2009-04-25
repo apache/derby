@@ -26,6 +26,8 @@ import java.io.Serializable;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
+
 /**
 	
   * A RunTimeStatistics object is a representation of the query execution plan and run
@@ -203,4 +205,11 @@ public interface RunTimeStatistics
 	 * query or statement.
 	 */
 	public double getEstimatedRowCount();
+	
+	/**
+	 * Initiate a visit of the ResultSetStatistics tree from the top.
+	 * @param v the visitor that wishes to visit the tree.
+	 */
+	public void acceptFromTopResultSet(XPLAINVisitor v);
+
 }

@@ -154,6 +154,8 @@ public	class DD_Version implements	Formatable
 			return "10.4";
 		case DataDictionary.DD_VERSION_DERBY_10_5:
 			return "10.5";
+		case DataDictionary.DD_VERSION_DERBY_10_6:
+			return "10.6";
 		default:
 			return null;
 		}
@@ -397,6 +399,14 @@ public	class DD_Version implements	Formatable
                 tc,
                 newlyCreatedRoutines,
                 bootingDictionary.getSystemUtilSchemaDescriptor().getUUID());
+        }
+
+        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_5)
+        {
+            // On ugrade from versions before 10.6, create system procedures
+            // added in 10.6.
+            bootingDictionary.create_10_6_system_procedures(tc,
+                    newlyCreatedRoutines);
         }
 
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_1)

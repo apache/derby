@@ -26,6 +26,7 @@ import java.security.PrivilegedAction;
 import java.security.Policy;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -50,10 +51,20 @@ import org.apache.derby.impl.jdbc.EmbedDatabaseMetaData;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.impl.load.Export;
 import org.apache.derby.impl.load.Import;
+import org.apache.derby.impl.sql.catalog.XPLAINTableDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINScanPropsDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINSortPropsDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINStatementDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINStatementTimingsDescriptor;
 import org.apache.derby.impl.sql.execute.JarUtil;
 import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
+import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
@@ -1889,4 +1900,141 @@ public class SystemProcedures  {
        if (statementCache != null)
            statementCache.ageOut();
     }
+  
+	 /**
+     * this procedure switches between the different xplain modes 
+     * @param mode either 0 for explain only, or 1 for explain & execute (default)
+     * @throws SQLException
+     */
+    public static void SYSCS_SET_XPLAIN_MODE(int mode)
+                throws SQLException, StandardException
+            {
+		ConnectionUtil.getCurrentLCC().setXplainOnlyMode(mode != 0 ? true : false);
+            }
+    /**
+     * This procedure returns the current status of the xplain mode.
+     *
+     * If the XPLAIN mode is non-zero, meaning that it is ON, then statements
+     * are being XPLAIN'd only, not executed.
+     *
+     * @return 0 if XPLAIN mode is off, non-zero if on.
+     * @throws SQLException
+     */
+    public static int SYSCS_GET_XPLAIN_MODE()
+                throws SQLException, StandardException
+           {
+                return ConnectionUtil.getCurrentLCC().getXplainOnlyMode()?1:0;
+           }
+    
+    /**
+     * This procedure sets the current xplain schema.
+     * If the schema is not set, runtime statistics are captured as a
+     * textual stream printout. If it is set, statisitcs information is
+     * stored in that schema in user tables.
+     * @param schemaName May be an empty string.
+     * @throws SQLException
+     */
+    public static void SYSCS_SET_XPLAIN_SCHEMA(String schemaName)
+                throws SQLException, StandardException
+    {
+        LanguageConnectionContext lcc       = ConnectionUtil.getCurrentLCC();
+        TransactionController     tc        = lcc.getTransactionExecute();
+
+        if (schemaName == null || schemaName.trim().length() == 0)
+        {
+            lcc.setXplainSchema(null);
+            return;
+        }
+
+        boolean statsSave = lcc.getRunTimeStatisticsMode();
+        lcc.setRunTimeStatisticsMode(false);
+        createXplainSchema(schemaName);
+        createXplainTable(lcc, schemaName,
+                new XPLAINStatementDescriptor());
+        createXplainTable(lcc, schemaName,
+                new XPLAINStatementTimingsDescriptor());
+        createXplainTable(lcc, schemaName,
+                new XPLAINResultSetDescriptor());
+        createXplainTable(lcc, schemaName,
+                new XPLAINResultSetTimingsDescriptor());
+        createXplainTable(lcc, schemaName,
+                new XPLAINScanPropsDescriptor());
+        createXplainTable(lcc, schemaName,
+                new XPLAINSortPropsDescriptor());
+        lcc.setRunTimeStatisticsMode(statsSave);
+        lcc.setXplainSchema(schemaName);
+    }
+    private static boolean hasSchema(Connection conn, String schemaName)
+        throws SQLException
+    {
+        ResultSet rs = conn.getMetaData().getSchemas();
+        boolean schemaFound = false;
+        while (rs.next() && !schemaFound)
+            schemaFound = schemaName.equals(rs.getString("TABLE_SCHEM"));
+        rs.close();
+        return schemaFound;
+    }
+    private static boolean hasTable(Connection conn, String schemaName,
+            String tableName)
+        throws SQLException
+    {
+        ResultSet rs = conn.getMetaData().getTables((String)null,
+                schemaName, tableName,  new String[] {"TABLE"});
+        boolean tableFound = rs.next();
+        rs.close();
+        return tableFound;
+    }
+    private static void createXplainSchema(String schemaName)
+        throws SQLException
+    {
+        String escapedSchema = IdUtil.normalToDelimited(schemaName);
+        Connection conn = getDefaultConn();
+        if (!hasSchema(conn, schemaName))
+        {
+            Statement s = conn.createStatement();
+            s.executeUpdate("CREATE SCHEMA " + escapedSchema);
+            s.close();
+        }
+        conn.close();
+    }
+    // Create the XPLAIN table if it doesn't already exist. Also, make a first
+    // order check that we'll be able to insert rows into the table, by
+    // preparing the INSERT statement for the table. The actual INSERT
+    // statment is saved, as simple string text, in the LCC, to be executed
+    // later when the runtime statistics are being collected.
+    //
+    private static void createXplainTable(
+            LanguageConnectionContext lcc,
+            String schemaName,
+            XPLAINTableDescriptor t)
+        throws SQLException
+    {
+        String []ddl = t.getTableDDL(schemaName);
+        Connection conn = getDefaultConn();
+        if (!hasTable(conn, schemaName, t.getCatalogName()))
+        {
+            Statement s = conn.createStatement();
+            for (int i = 0; i < ddl.length; i++)
+                s.executeUpdate(ddl[i]);
+            s.close();
+        }
+        String ins = t.getTableInsert();
+        conn.prepareStatement(ins).close();
+        conn.close();
+        lcc.setXplainStatement(t.getCatalogName(), ins);
+    }
+    /**
+     * This procedure returns the current set XPLAIN_SCHEMA
+     * @return schema name, may be blank if no schema currently set.
+     * @throws SQLException
+     */
+    public static String SYSCS_GET_XPLAIN_SCHEMA()
+                throws SQLException, StandardException
+    {
+        String sd = ConnectionUtil.getCurrentLCC().getXplainSchema();
+        if (sd == null)
+            return "";
+        return sd;
+    }
+
 }

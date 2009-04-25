@@ -28,6 +28,10 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableHashtable;
 import org.apache.derby.iapi.services.io.FormatableProperties;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINScanPropsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -244,4 +248,89 @@ public class RealHashTableStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_HASH_TABLE);
   }
+  
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        // compute number of children of this node, which get visited
+        int noChildren = 0;
+        if(this.childResultSetStatistics!=null) noChildren++;
+        if(this.subqueryTrackingArray!=null){
+            noChildren += subqueryTrackingArray.length;
+        }
+        // inform the visitor
+        visitor.setNumberOfChildren(noChildren);
+        
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // then my direct child
+        if(childResultSetStatistics!=null){
+            childResultSetStatistics.accept(visitor);
+        }
+        // and now the dependant resultsets, if there are any
+        if (subqueryTrackingArray != null)
+        {
+            boolean foundAttached = false;
+
+            for (int index = 0; index < subqueryTrackingArray.length; index++)
+            {
+                if (subqueryTrackingArray[index] != null)
+                {
+                    // TODO add additional dependant referential action ?
+                    /*
+                    if (! foundAttached)
+                    {
+                        dependentInfo = indent  + "\n" +
+                            MessageService.getTextMessage(
+                                                SQLState.RTS_REFACTION_DEPENDENT) +
+                                ":\n";
+                        foundAttached = true;
+                    }*/
+                    
+                    subqueryTrackingArray[index].accept(visitor);
+                }
+            }
+        }
+    }
+    public String getRSXplainType() { return XPLAINUtil.OP_HASHTABLE; }
+    public String getRSXplainDetails() { return "("+this.resultSetNumber+")"; }
+    public Object getScanPropsDescriptor(Object scanPropsID)
+    {
+        FormatableProperties props = this.scanProperties;
+        
+        String isoLevel = XPLAINUtil.getIsolationLevelCode(this.isolationLevel);
+        
+        String hashkey_columns =
+            XPLAINUtil.getHashKeyColumnNumberString(this.hashKeyColumns);
+        
+        // create new scan info descriptor with some basic information
+        XPLAINScanPropsDescriptor scanRSDescriptor =            
+              new XPLAINScanPropsDescriptor(
+              (UUID)scanPropsID,      // the scan props UUID
+              "Temporary HashTable", // the index/table name
+              null,             // the scan object, either (C)onstraint, (I)ndex or (T)able
+              null,             // the scan type: heap, btree, sort
+              isoLevel,         // the isolation level
+              null,             // the number of visited pages
+              null,             // the number of visited rows
+              null,             // the number of qualified rows
+              null,             // the number of visited deleted rows
+              null,             // the number of fetched columns
+              null,             // the bitset of fetched columns
+              null,             // the btree height
+              null,             // the fetch size
+              null,                          // the start position, internal encoding
+              null,                          // the stop position, internal encoding
+              null,                          // the scan qualifiers
+              this.nextQualifiers,     // the next qualifiers
+              hashkey_columns,               // the hash key column numbers
+              new Integer(this.hashtableSize) // the hash table size
+            );
+        
+        // fill additional information from scan properties
+        return XPLAINUtil.extractScanProps(scanRSDescriptor,props);
+    }
 }

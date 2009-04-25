@@ -27,6 +27,8 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableHashtable;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -154,4 +156,31 @@ public class RealScrollInsensitiveResultSetStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_SCROLL_INSENSITIVE_RS);
   }
+  
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        int noChildren = 0;
+        if(this.childResultSetStatistics!=null) noChildren++;
+        
+        //inform the visitor
+        visitor.setNumberOfChildren(noChildren);
+
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // then my child
+        if(childResultSetStatistics!=null){
+            childResultSetStatistics.accept(visitor);
+        }
+    }
+
+    public String getRSXplainType() { return XPLAINUtil.OP_SCROLL; }
+    public String getRSXplainDetails()
+    {
+        return "("+this.resultSetNumber +"), " +
+                "["+this.numFromHashTable+", "+ this.numToHashTable + "]";
+    }
 }

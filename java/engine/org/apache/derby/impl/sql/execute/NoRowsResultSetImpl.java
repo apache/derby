@@ -43,6 +43,8 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
+import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
@@ -368,21 +370,17 @@ abstract class NoRowsResultSetImpl implements ResultSet
                     lcc.getLanguageConnectionFactory().
                          getExecutionFactory().getResultSetStatisticsFactory();
 
-				lcc.setRunTimeStatisticsObject(
-					rssf.getRunTimeStatistics(activation, this, subqueryTrackingArray));
+                // get the RuntimeStatisticsImpl object which is the wrapper for all 
+                // statistics
+                RunTimeStatistics rsImpl = rssf.getRunTimeStatistics(activation, this, subqueryTrackingArray); 
 
-				HeaderPrintWriter istream = lcc.getLogQueryPlan() ? Monitor.getStream() : null;
-				if (istream != null)
-				{
-					istream.printlnWithHeader(LanguageConnectionContext.xidStr + 
-											  lcc.getTransactionExecute().getTransactionIdString() +
-											  "), " +
-											  LanguageConnectionContext.lccStr +
-											  lcc.getInstanceNumber() +
-											  "), " +
-											  lcc.getRunTimeStatisticsObject().getStatementText() + " ******* " +
-											  lcc.getRunTimeStatisticsObject().getStatementExecutionPlanText());
-				}
+                // save RTS object in lcc
+                lcc.setRunTimeStatisticsObject(rsImpl);
+                
+                // explain gathered statistics
+                XPLAINVisitor visitor =  lcc.getLanguageConnectionFactory().getExecutionFactory().getXPLAINFactory().getXPLAINVisitor();
+                visitor.doXPLAIN(rsImpl,activation);
+
 			}
 			dumpedStats = true;
 		}

@@ -32,6 +32,7 @@ import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.store.access.DynamicCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINFactoryIF;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.store.access.TransactionController;
 import java.util.Properties;
@@ -90,6 +91,20 @@ public interface ExecutionFactory {
         throws StandardException;
 
 	/**
+	 * Get the XPLAINFactory from this ExecutionFactory.
+	 *
+	 * @return  The xplain factory associated with this
+	 *      ExecutionContext
+	 *
+	 * @exception StandardException     Thrown on error
+	 */
+	XPLAINFactoryIF getXPLAINFactory()
+                                throws StandardException;
+	
+	
+  	/**
+  	 * Get the ExecutionFactory from this ExecutionContext.
+  	 *
 		We want an execution context so that we can push it onto
 		the stack.  We could instead require the implementation
 		push it onto the stack for us, but this way we know

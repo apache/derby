@@ -27,6 +27,8 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableHashtable;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -50,7 +52,7 @@ public class RealNestedLoopJoinStatistics
 	 * "Make" this a HashJoin if the right child is a HashScan.
 	 */
 	protected String nodeName ;
-	protected String resultSetName;
+	public String resultSetName;
 
 	// CONSTRUCTORS
 
@@ -217,4 +219,39 @@ public class RealNestedLoopJoinStatistics
 			}
 		}
 	}
+	
+    // -----------------------------------------------------
+    // XPLAINable Implementation
+    // -----------------------------------------------------
+    
+      public void accept(XPLAINVisitor visitor) {
+          int noChildren = 0;
+          if(this.leftResultSetStatistics!=null) noChildren++;
+          if(this.rightResultSetStatistics!=null) noChildren++;
+          
+          //inform the visitor
+          visitor.setNumberOfChildren(noChildren);
+
+          // pre-order, depth-first traversal
+          // me first
+          visitor.visit(this);
+          // then first my left child
+          if(leftResultSetStatistics!=null){
+              leftResultSetStatistics.accept(visitor);
+          }
+          // then first my right child
+          if(rightResultSetStatistics!=null){
+              rightResultSetStatistics.accept(visitor);
+          }
+          
+          
+      }
+    public String getRSXplainType() { return XPLAINUtil.OP_JOIN_NL; }
+    public String getRSXplainDetails()
+    {
+        String op_details = "("+this.resultSetNumber + ")";
+        // check to see if this NL Join is part of an Exist clause
+        if (this.oneRowRightSide) op_details+= ", EXISTS JOIN";
+        return op_details;
+    }
 }

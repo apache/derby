@@ -40,6 +40,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.ResultSetFactory;
 import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINFactoryIF;
 import org.apache.derby.iapi.sql.execute.ScanQualifier;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
@@ -365,4 +366,29 @@ public class GenericExecutionFactory
 	//
 	private ResultSetFactory rsFactory;
     private GenericConstantActionFactory	genericConstantActionFactory;
+
+private XPLAINFactoryIF xplainFactory; 
+ 
+ 
+   /**
+    * Get the XPLAINFactory from this ExecutionContext.
+    *
+    * @return  The XPLAINFactory associated with this
+    *      ExecutionContext
+    *
+    * @exception StandardException     Thrown on error
+    */
+   public XPLAINFactoryIF getXPLAINFactory()
+                   throws StandardException {
+       if (xplainFactory == null) {
+           xplainFactory = (XPLAINFactoryIF)
+               Monitor.bootServiceModule(
+                                   false,
+                                   this,
+                                   XPLAINFactoryIF.MODULE,
+                                   (Properties) null);
+       }
+       return xplainFactory;
+   }
+
 }

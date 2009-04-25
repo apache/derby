@@ -190,6 +190,8 @@ class UpgradeRun extends UpgradeClassLoader
                 	suite.addTest(Changes10_4.suite(phase));
                 if (oldMinor < 5)
                 	suite.addTest(Changes10_5.suite(phase));
+                //if (oldMinor < 6)
+                //	suite.addTest(Changes10_6.suite(phase));
             }
             
             // Add DatabaseMetaData tests. Since metadata

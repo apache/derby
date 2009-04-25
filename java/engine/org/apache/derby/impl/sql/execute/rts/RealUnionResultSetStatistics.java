@@ -31,6 +31,11 @@ import org.apache.derby.iapi.services.io.FormatableHashtable;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 
 /**
   ResultSetStatistics implemenation for UnionResultSet.
@@ -167,4 +172,62 @@ public class RealUnionResultSetStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_UNION);
   }
+  
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        int noChildren = 0;
+        if(this.leftResultSetStatistics!=null) noChildren++;
+        if(this.rightResultSetStatistics!=null) noChildren++;
+        
+        //inform the visitor
+        visitor.setNumberOfChildren(noChildren);
+        
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // then visit first my left child
+        if(leftResultSetStatistics!=null){
+            leftResultSetStatistics.accept(visitor);
+        }
+        // and then my right child
+        if(rightResultSetStatistics!=null){
+            rightResultSetStatistics.accept(visitor);
+        }
+    }  
+    public String getRSXplainType() { return XPLAINUtil.OP_UNION; }
+    public String getRSXplainDetails()
+    {
+        return "("+this.resultSetNumber + ")";
+    }
+    public Object getResultSetDescriptor(Object rsID, Object parentID,
+            Object scanID, Object sortID, Object stmtID, Object timingID)
+    {
+        return new XPLAINResultSetDescriptor(
+           (UUID)rsID,
+           getRSXplainType(),
+           getRSXplainDetails(),
+           new Integer(this.numOpens),
+           null,                           // index updates
+           null,                           // lock mode
+           null,                           // lock granularity
+           (UUID)parentID,
+           new Double(this.optimizerEstimatedRowCount),
+           new Double(this.optimizerEstimatedCost),
+           null,                              // affected rows
+           null,                              // deferred rows
+           null,                              // the input rows
+           new Integer(this.rowsSeenLeft),
+           new Integer(this.rowsSeenRight),
+           new Integer(this.rowsFiltered),
+           new Integer(this.rowsReturned),
+           null,                           // the empty right rows
+           null,                           // index key optimization
+           (UUID)scanID,
+           (UUID)sortID,
+           (UUID)stmtID,
+           (UUID)timingID);
+    }
 }

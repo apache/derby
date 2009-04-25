@@ -27,6 +27,11 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableHashtable;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -159,4 +164,28 @@ public class RealAnyResultSetStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_ANY_RS);
   }
+  
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        // I have only one child
+        visitor.setNumberOfChildren(1);
+        
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // then my child
+        childResultSetStatistics.accept(visitor);
+	}
+  
+    public String getRSXplainType() { return XPLAINUtil.OP_ANY; }
+    public String getRSXplainDetails()
+    {
+        String attachmentString = (this.pointOfAttachment == -1) ? "" :
+                 "ATTACHED:" + this.pointOfAttachment;
+
+        return attachmentString + ";" + this.resultSetNumber;
+    }
 }

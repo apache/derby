@@ -22,6 +22,11 @@
 package org.apache.derby.impl.sql.execute.rts;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.impl.sql.compile.IntersectOrExceptNode;
@@ -204,5 +209,68 @@ public class RealSetOpResultSetStatistics
                 ? (SQLState.RTS_INTERSECT) : (SQLState.RTS_EXCEPT);
 		
         return MessageService.getTextMessage(nodeName);
+    }
+    
+    // -----------------------------------------------------
+    // XPLAINable Implementation
+    // -----------------------------------------------------
+    
+      public void accept(XPLAINVisitor visitor) {
+          int noChildren = 0;
+          if(this.leftResultSetStatistics!=null) noChildren++;
+          if(this.rightResultSetStatistics!=null) noChildren++;
+          
+          //inform the visitor
+          visitor.setNumberOfChildren(noChildren);
+          
+          // pre-order, depth-first traversal
+          // me first
+          visitor.visit(this);
+          // then visit first my left child
+          if(leftResultSetStatistics!=null){
+              leftResultSetStatistics.accept(visitor);
+          }
+          // and then my right child
+          if(rightResultSetStatistics!=null){
+              rightResultSetStatistics.accept(visitor);
+          }
+      }
+    public String getRSXplainType() { return XPLAINUtil.OP_SET; }
+    public String getRSXplainDetails()
+    {
+        String op_details = "("+this.resultSetNumber + ")";
+        // the details are weird, because the semantics are exchanged
+        op_details += (this.opType == IntersectOrExceptNode.INTERSECT_OP)?
+                      ", "+XPLAINUtil.OP_SET_EXCEPT:
+                      ", "+XPLAINUtil.OP_SET_INTERSECT;
+        return op_details;
+    }
+    public Object getResultSetDescriptor(Object rsID, Object parentID,
+            Object scanID, Object sortID, Object stmtID, Object timingID)
+    {
+        return new XPLAINResultSetDescriptor(
+           (UUID)rsID,
+           getRSXplainType(),
+           getRSXplainDetails(),
+           new Integer(this.numOpens),
+           null,                              // the number of index updates 
+           null,                           // lock mode
+           null,                           // lock granularity
+           (UUID)parentID,
+           new Double(this.optimizerEstimatedRowCount),
+           new Double(this.optimizerEstimatedCost),
+           null,                              // the affected rows
+           null,                              // the deferred rows
+           null,                              // the input rows
+           new Integer(this.rowsSeenLeft),        // the seen rows left
+           new Integer(this.rowsSeenRight),       // the seen rows right
+           new Integer(this.rowsFiltered),        // the filtered rows
+           new Integer(this.rowsReturned),        // the returned rows
+           null,                              // the empty right rows
+           null,                           // index key optimization
+           (UUID)scanID,
+           (UUID)sortID,
+           (UUID)stmtID,
+           (UUID)timingID);
     }
 } 

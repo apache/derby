@@ -10190,6 +10190,8 @@ public final class	DataDictionaryImpl
         create_10_3_system_procedures(tc, newlyCreatedRoutines );
         // add 10.5 specific system procedures
         create_10_5_system_procedures(tc, newlyCreatedRoutines );
+        // add 10.6 specific system procedures
+        create_10_6_system_procedures(tc, newlyCreatedRoutines );
     }
 
     /**
@@ -11440,6 +11442,101 @@ public final class	DataDictionaryImpl
                 RoutineAliasInfo.MODIFIES_SQL_DATA,
                 false,
                 (TypeDescriptor) null,
+                newlyCreatedRoutines,
+                tc);
+        }
+    }
+
+    /**
+     * Create the System procedures that are added to 10.6.
+     * 
+     * @param tc an instance of the TransactionController.
+     * @throws StandardException Standard exception policy.
+     */
+    void create_10_6_system_procedures(TransactionController tc,
+            HashSet newlyCreatedRoutines)
+    throws StandardException
+    {
+        // Create the procedures in the SYSCS_UTIL schema.
+        UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
+        // void SYSCS_UTIL.SYSCS_SET_XPLAIN_MODE(smallint mode)
+        {
+            // procedure argument names
+            String[] arg_names = {"ENABLE"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                TypeDescriptor.INTEGER,
+            };
+
+            createSystemProcedureOrFunction(
+                "SYSCS_SET_XPLAIN_MODE",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.CONTAINS_SQL,
+                false,
+                (TypeDescriptor) null,
+                newlyCreatedRoutines,
+                tc);
+        }
+        
+        // SMALLINT SYSCS_UTIL.SYSCS_GET_XPLAIN_MODE()
+        {
+
+            createSystemProcedureOrFunction(
+                "SYSCS_GET_XPLAIN_MODE",
+                sysUtilUUID,
+                null,
+                null,
+                0,
+                0,
+                RoutineAliasInfo.READS_SQL_DATA,
+                false,
+                TypeDescriptor.INTEGER,
+                newlyCreatedRoutines,
+                tc);
+        }
+        
+        
+        // void SYSCS_UTIL.SYSCS_SET_XPLAIN_SCHEMA(String schemaName)
+        {
+            // procedure argument names
+            String[] arg_names = {"SCHEMANAME"};
+
+            // procedure argument types
+            TypeDescriptor[] arg_types = {
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
+            };
+
+            createSystemProcedureOrFunction(
+                "SYSCS_SET_XPLAIN_SCHEMA",
+                sysUtilUUID,
+                arg_names,
+                arg_types,
+                0,
+                0,
+                RoutineAliasInfo.MODIFIES_SQL_DATA,
+                false,
+                (TypeDescriptor) null,
+                newlyCreatedRoutines,
+                tc);
+        }
+
+        // STRING SYSCS_UTIL.SYSCS_GET_XPLAIN_SCHEMA()
+        {
+            createSystemProcedureOrFunction(
+                "SYSCS_GET_XPLAIN_SCHEMA",
+                sysUtilUUID,
+                null,
+                null,
+                0,
+                0,
+                RoutineAliasInfo.READS_SQL_DATA,
+                false,
+                CATALOG_TYPE_SYSTEM_IDENTIFIER,
                 newlyCreatedRoutines,
                 tc);
         }

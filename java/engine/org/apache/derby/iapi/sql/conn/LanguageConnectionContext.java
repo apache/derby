@@ -1200,4 +1200,37 @@ public interface LanguageConnectionContext extends Context {
 	 */
     public  Object    getLastQueryTree();
 
+	
+    /**
+     * sets the XplainOnlyMode.
+     *
+     * If a connection is in XplainOnlyMode, then the statements are not
+     * actually being executed, but are just being compiled and the
+     * runtime statistics collected into the XPLAIN tables. This can be
+     * set on and off by calling SYSCS_SET_XPLAIN_MODE.
+     *
+     * @param onOrOff true if statements are to be XPLAINed only.
+     */
+    public void setXplainOnlyMode(boolean onOrOff);
+
+    /**
+     * gets the current set XplainOnlyMode
+     */
+    public boolean getXplainOnlyMode();
+
+    /**
+     * sets the XplainSchema
+     * @param schema the schema to use for storing XPLAIN'd statements
+     * null means don't store the xplain information
+     * non-null means persistent style, use the indicated schema
+     */
+    public void setXplainSchema(String schema);
+
+    /**
+     * gets the current set XplainSchema
+     * @return the Schema of Xplain, may be null.
+     */
+    public String getXplainSchema();
+    public void setXplainStatement(Object key, Object stmt);
+    public Object getXplainStatement(Object key);
 }

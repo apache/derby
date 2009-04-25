@@ -23,6 +23,8 @@ package org.apache.derby.impl.sql.execute.rts;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
 
 /**
   ResultSetStatistics implemenation for DeleteCascadeResultSet.
@@ -167,6 +169,57 @@ public class RealDeleteCascadeResultSetStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_DELETE_CASCADE);
   }
+  
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        // compute number of children of this node, which get visited
+        int noChildren = 0;
+        if(this.sourceResultSetStatistics!=null) noChildren++;
+        if(this.dependentTrackingArray!=null){
+            noChildren += dependentTrackingArray.length;
+        }
+        // inform the visitor
+        visitor.setNumberOfChildren(noChildren);
+        
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // then my direct child
+        if(sourceResultSetStatistics!=null){
+            sourceResultSetStatistics.accept(visitor);
+        }
+        // and now the dependant resultsets, if there are any
+        if (dependentTrackingArray != null)
+        {
+            boolean foundAttached = false;
+
+            for (int index = 0; index < dependentTrackingArray.length; index++)
+            {
+                if (dependentTrackingArray[index] != null)
+                {
+                    // TODO add additional dependant referential action ?
+                    /*
+                    if (! foundAttached)
+                    {
+                        dependentInfo = indent  + "\n" +
+                            MessageService.getTextMessage(
+                                                SQLState.RTS_REFACTION_DEPENDENT) +
+                                ":\n";
+                        foundAttached = true;
+                    }*/
+                    
+                    dependentTrackingArray[index].accept(visitor);
+                }
+            }
+        }
+        
+        
+    }
+
+    public String getRSXplainDetails() { return XPLAINUtil.OP_CASCADE; }
 }
 
 

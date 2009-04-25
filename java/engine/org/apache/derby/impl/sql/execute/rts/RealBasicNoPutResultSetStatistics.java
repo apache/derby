@@ -21,6 +21,11 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.Formatable;
 
@@ -236,4 +241,59 @@ abstract class RealBasicNoPutResultSetStatistics
 	{
 		return optimizerEstimatedRowCount;
 	}
+
+    public String getRSXplainDetails() { return null; }
+
+    public Object getResultSetDescriptor(Object rsID, Object parentID,
+            Object scanID, Object sortID, Object stmtID, Object timingID)
+    {
+        return new XPLAINResultSetDescriptor(
+           (UUID)rsID,
+           getRSXplainType(),
+           getRSXplainDetails(),
+           new Integer(this.numOpens),
+           null,                              // the number of index updates 
+           null,                           // lock mode
+           null,                           // lock granularity
+           (UUID)parentID,
+           new Double(this.optimizerEstimatedRowCount),
+           new Double(this.optimizerEstimatedCost),
+           null,                              // the affected rows
+           null,                              // the deferred rows
+           null,                              // the input rows
+           new Integer(this.rowsSeen),
+           null,                              // the seen rows right
+           new Integer(this.rowsFiltered),
+           new Integer(this.rowsSeen - this.rowsFiltered),
+           null,                              // the empty right rows
+           null,                           // index key optimization
+           (UUID)scanID,
+           (UUID)sortID,
+           (UUID)stmtID,
+           (UUID)timingID);
+    }
+    public Object getResultSetTimingsDescriptor(Object timingID)
+    {
+        return new XPLAINResultSetTimingsDescriptor(
+           (UUID)timingID,
+           new Long(this.constructorTime),
+           new Long(this.openTime),
+           new Long(this.nextTime),
+           new Long(this.closeTime),
+           new Long(this.getNodeTime()),
+           XPLAINUtil.getAVGNextTime( (long)this.nextTime, this.rowsSeen),
+           null,                          // the projection time
+           null,                          // the restriction time
+           null,                          // the temp_cong_create_time
+           null                           // the temo_cong_fetch_time
+        );
+    }
+    public Object getSortPropsDescriptor(Object UUID)
+    {
+        return null; // Most statistics classes don't have sort props
+    }
+    public Object getScanPropsDescriptor(Object UUID)
+    {
+        return null; // Most statistics classes don't have Scan props
+    }
 }

@@ -33,6 +33,10 @@ import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecutionFactory;
+import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
+import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.TargetResultSet;
 import org.apache.derby.iapi.store.access.Qualifier;
@@ -143,26 +147,28 @@ extends BasicNoPutResultSetImpl
 			** time to dump out the information.
 			*/
 			LanguageConnectionContext lcc = getLanguageConnectionContext();
-			if (lcc.getRunTimeStatisticsMode())
-			{
-				endExecutionTime = getCurrentTimeMillis();
-                
-				lcc.setRunTimeStatisticsObject(
-					lcc.getLanguageConnectionFactory().getExecutionFactory().getResultSetStatisticsFactory().getRunTimeStatistics(activation, this, subqueryTrackingArray));
+			
+                // only if statistics is switched on, collect & derive them
+                if (lcc.getRunTimeStatisticsMode())
+				{   
+                    endExecutionTime = getCurrentTimeMillis();
 
-				HeaderPrintWriter istream = lcc.getLogQueryPlan() ? Monitor.getStream() : null;
-				if (istream != null)
-				{
-					istream.printlnWithHeader(LanguageConnectionContext.xidStr + 
-											  lcc.getTransactionExecute().getTransactionIdString() +
-											  "), " +
-											  LanguageConnectionContext.lccStr +
-											  lcc.getInstanceNumber() +
-											  "), " +
-											  lcc.getRunTimeStatisticsObject().getStatementText() + " ******* " +
-											  lcc.getRunTimeStatisticsObject().getStatementExecutionPlanText());
-				}
-			}
+                    // get the ResultSetStatisticsFactory, which gathers RuntimeStatistics
+                    ExecutionFactory ef = lcc.getLanguageConnectionFactory().getExecutionFactory();
+                    ResultSetStatisticsFactory rssf;
+                    rssf = ef.getResultSetStatisticsFactory();
+  
+                    // get the RuntimeStatisticsImpl object which is the wrapper for all 
+                    // gathered statistics about all the different resultsets
+                    RunTimeStatistics rsImpl = rssf.getRunTimeStatistics(activation, this, subqueryTrackingArray); 
+  
+                    // save the RTW (wrapper)object in the lcc
+                    lcc.setRunTimeStatisticsObject(rsImpl);
+                    
+                    // now explain gathered statistics, using an appropriate visitor
+                    XPLAINVisitor visitor = ef.getXPLAINFactory().getXPLAINVisitor();
+                    visitor.doXPLAIN(rsImpl,activation);
+  				}
 
 			int staLength = (subqueryTrackingArray == null) ? 0 :
 								subqueryTrackingArray.length;

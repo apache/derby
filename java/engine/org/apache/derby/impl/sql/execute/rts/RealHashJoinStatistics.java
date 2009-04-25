@@ -23,6 +23,7 @@ package org.apache.derby.impl.sql.execute.rts;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
 
 /**
   ResultSetStatistics implemenation for HashJoinResultSet.
@@ -105,4 +106,14 @@ public class RealHashJoinStatistics
 											SQLState.RTS_HASH_JOIN_RS);
 		}
 	}
+    public String getRSXplainType() { return XPLAINUtil.OP_JOIN_HASH; }
+    public String getRSXplainDetails()
+    {
+        String op_details = "("+this.resultSetNumber + ")" +
+            this.resultSetName       + ", ";
+
+        // check to see if this NL Join is part of an Exist clause
+        if (this.oneRowRightSide) op_details+= ", EXISTS JOIN";
+        return op_details;
+    }
 }

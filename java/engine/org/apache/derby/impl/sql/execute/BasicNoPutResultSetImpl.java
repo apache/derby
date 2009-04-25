@@ -241,8 +241,12 @@ implements NoPutResultSet
 		attachStatementContext();
 
 		try {
-
-			openCore();
+			LanguageConnectionContext lcc = getLanguageConnectionContext();
+			if(lcc.getRunTimeStatisticsMode() && lcc.getXplainOnlyMode()) {
+				// do nothing
+			} else {
+				openCore();
+			}
 
 		} catch (StandardException se) {
 			activation.checkStatementValidity();
@@ -444,7 +448,14 @@ implements NoPutResultSet
 	 */
 	public final ExecRow	getNextRow() throws StandardException 
 	{
-	    if ( ! isOpen ) {
+		LanguageConnectionContext lcc = getLanguageConnectionContext();
+		if(lcc.getRunTimeStatisticsMode() && lcc.getXplainOnlyMode()){
+			// return null to indicate no results available and 
+			// to bypass the execution
+			return null;
+		}
+		
+		if ( ! isOpen ) {
 			throw StandardException.newException(SQLState.LANG_RESULT_SET_NOT_OPEN, NEXT);
 		}
 

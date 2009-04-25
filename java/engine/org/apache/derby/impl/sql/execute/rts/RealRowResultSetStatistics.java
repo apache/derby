@@ -32,6 +32,12 @@ import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
 
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
+
 /**
   ResultSetStatistics implemenation for RowResultSet.
 
@@ -133,4 +139,49 @@ public class RealRowResultSetStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_ROW_RS);
   }
+  
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        
+        // I have no children, inform my visitor about that
+        visitor.setNumberOfChildren(0);
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // I´m a leaf node, I have no children ...
+        
+    }
+
+    public String getRSXplainType() { return XPLAINUtil.OP_ROW; }
+    public Object getResultSetDescriptor(Object rsID, Object parentID,
+            Object scanID, Object sortID, Object stmtID, Object timingID)
+    {
+        return new XPLAINResultSetDescriptor(
+           (UUID)rsID,
+           getRSXplainType(),
+           getRSXplainDetails(),
+           new Integer(this.numOpens),
+           null,                              // the number of index updates 
+           null,                           // lock mode
+           null,                           // lock granularity
+           (UUID)parentID,
+           new Double(this.optimizerEstimatedRowCount),
+           new Double(this.optimizerEstimatedCost),
+           null,                              // the affected rows
+           null,                              // the deferred rows
+           null,                              // the input rows
+           new Integer(this.rowsSeen),
+           null,                              // the seen rows right
+           new Integer(this.rowsFiltered),
+           new Integer(this.rowsReturned),
+           null,                              // the empty right rows
+           null,                           // index key optimization
+           (UUID)scanID,
+           (UUID)sortID,
+           (UUID)stmtID,
+           (UUID)timingID);
+    }
 }

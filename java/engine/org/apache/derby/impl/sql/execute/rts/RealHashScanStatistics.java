@@ -29,6 +29,12 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableHashtable;
 import org.apache.derby.iapi.services.io.FormatableProperties;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.catalog.XPLAINScanPropsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -279,4 +285,106 @@ public class RealHashScanStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_HASH_SCAN);
   }
+  
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        //inform the visitor about my children
+        visitor.setNumberOfChildren(0);
+        
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // I´m a leaf node, I have no children ...
+        
+    }
+    public String getRSXplainType() { return XPLAINUtil.OP_HASHSCAN; }
+    public String getRSXplainDetails()
+    {
+        if (this.indexName!=null)
+            return (this.isConstraint ? "C: " : "I: ") + this.indexName;
+        else
+            return "T: " + this.tableName;
+    }
+    public Object getScanPropsDescriptor(Object scanPropsID)
+    {
+        String scanObjectType, scanObjectName;
+
+        if(this.indexName!=null){
+            if(this.isConstraint){
+                scanObjectType = "C";  // constraint
+                scanObjectName = this.indexName;
+            } else {
+                scanObjectType = "I";  // index
+                scanObjectName = this.indexName;
+            }
+        } else {
+            scanObjectType = "T";      // table
+            scanObjectName = this.tableName;
+        }
+        
+        String isoLevel = XPLAINUtil.getIsolationLevelCode(this.isolationLevel);
+        String hashkey_columns =
+            XPLAINUtil.getHashKeyColumnNumberString(this.hashKeyColumns);
+        
+        XPLAINScanPropsDescriptor scanRSDescriptor =            
+              new XPLAINScanPropsDescriptor(
+              (UUID)scanPropsID,      // the scan props UUID
+              scanObjectName,
+              scanObjectType,
+              null,             // the scan type: heap, btree, sort
+              isoLevel,         // the isolation level
+              null,             // the number of visited pages
+              null,             // the number of visited rows
+              null,             // the number of qualified rows
+              null,             // the number of visited deleted rows
+              null,             // the number of fetched columns
+              null,             // the bitset of fetched columns
+              null,             // the btree height
+              null,             // the fetch size
+              this.startPosition,
+              this.stopPosition,
+              this.scanQualifiers,
+              this.nextQualifiers,
+              hashkey_columns,
+              new Integer(this.hashtableSize)
+            );
+        
+        FormatableProperties props = this.scanProperties;
+
+        return XPLAINUtil.extractScanProps(scanRSDescriptor,props);
+    }
+    public Object getResultSetDescriptor(Object rsID, Object parentID,
+            Object scanID, Object sortID, Object stmtID, Object timingID)
+    {
+        String lockMode = XPLAINUtil.getLockModeCode(this.lockString);
+        String lockGran = XPLAINUtil.getLockGranularityCode(this.lockString);
+        
+        return new XPLAINResultSetDescriptor(
+           (UUID)rsID,
+           getRSXplainType(),
+           getRSXplainDetails(),
+           new Integer(this.numOpens),            // the number of opens
+           null,                           // the number of index updates 
+           lockMode,                       // lock mode
+           lockGran,                       // lock granularity
+           (UUID)parentID,
+           new Double(this.optimizerEstimatedRowCount),
+           new Double(this.optimizerEstimatedCost),
+           null,                              // the affected rows
+           null,                              // the deferred rows
+           null,                              // the input rows
+           new Integer(this.rowsSeen),            // the seen rows
+           null,                              // the seen rows right
+           new Integer(this.rowsFiltered),        // the filtered rows
+           new Integer(this.rowsSeen-this.rowsFiltered),// the returned rows
+           null,                              // the empty right rows
+           null,                           // index key optimization
+           (UUID)scanID,
+           (UUID)sortID,
+           (UUID)stmtID,
+           (UUID)timingID);
+    }
 }

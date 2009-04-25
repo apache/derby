@@ -33,6 +33,9 @@ import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
 
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
+
 /**
   ResultSetStatistics implemenation for IndexRowToBaseRowResultSet.
 
@@ -182,4 +185,30 @@ public class RealIndexRowToBaseRowStatistics
 	{
 		return childResultSetStatistics;
 	}
+	
+    // -----------------------------------------------------
+    // XPLAINable Implementation
+    // -----------------------------------------------------
+	
+    public void accept(XPLAINVisitor visitor) {
+        int noChildren = 0;
+        if(this.childResultSetStatistics!=null) noChildren++;
+        
+        //inform the visitor
+        visitor.setNumberOfChildren(noChildren);
+        
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // then my child
+        if(childResultSetStatistics!=null){
+            childResultSetStatistics.accept(visitor);
+        }
+    }
+
+    public String getRSXplainType() { return XPLAINUtil.OP_ROWIDSCAN; }
+    public String getRSXplainDetails()
+    {
+        return "("+this.resultSetNumber+")," + this.tableName;
+    }
 }

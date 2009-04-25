@@ -21,12 +21,17 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.FormatableHashtable;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -245,4 +250,82 @@ public class RealProjectRestrictStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_PR);
   }
+  
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        // compute number of children of this node, which get visited
+        int noChildren = 0;
+        if(this.childResultSetStatistics!=null) noChildren++;
+        if(this.subqueryTrackingArray!=null){
+            noChildren += subqueryTrackingArray.length;
+        }
+        // inform the visitor
+        visitor.setNumberOfChildren(noChildren);
+
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // then my direct child
+        if(childResultSetStatistics!=null){
+            childResultSetStatistics.accept(visitor);
+        }
+        // and now the dependant resultsets, if there are any
+        if (subqueryTrackingArray != null)
+        {
+            boolean foundAttached = false;
+
+            for (int index = 0; index < subqueryTrackingArray.length; index++)
+            {
+                if (subqueryTrackingArray[index] != null)
+                {
+                    // TODO add additional dependant referential action ?
+                    /*
+                    if (! foundAttached)
+                    {
+                        dependentInfo = indent  + "\n" +
+                            MessageService.getTextMessage(
+                                                SQLState.RTS_REFACTION_DEPENDENT) +
+                                ":\n";
+                        foundAttached = true;
+                    }*/
+                    
+                    subqueryTrackingArray[index].accept(visitor);
+                }
+            }
+        }
+    }
+    public String getRSXplainType()
+    {
+        
+        if (this.restriction && this.doesProjection)
+            return XPLAINUtil.OP_PROJ_RESTRICT;
+        if (this.doesProjection)
+            return XPLAINUtil.OP_PROJECT;
+        if (this.restriction)
+            return XPLAINUtil.OP_FILTER;
+        return XPLAINUtil.OP_PROJ_RESTRICT;
+    }
+    public String getRSXplainDetails()
+    {
+        return this.resultSetNumber + ";";
+    }
+    public Object getResultSetTimingsDescriptor(Object timingID)
+    {
+        return new XPLAINResultSetTimingsDescriptor(
+           (UUID)timingID,
+           new Long(this.constructorTime),
+           new Long(this.openTime),
+           new Long(this.nextTime),
+           new Long(this.closeTime),
+           new Long(this.getNodeTime()),
+           XPLAINUtil.getAVGNextTime( (long)this.nextTime, this.rowsSeen),
+           new Long(this.projectionTime),
+           new Long(this.restrictionTime),
+           null,                          // the temp_cong_create_time
+           null                           // the temo_cong_fetch_time
+        );
+    }
 }

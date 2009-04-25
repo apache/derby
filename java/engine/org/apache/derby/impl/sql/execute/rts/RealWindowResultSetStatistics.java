@@ -22,6 +22,8 @@
 package org.apache.derby.impl.sql.execute.rts;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 import org.apache.derby.iapi.reference.SQLState;
 
 /**
@@ -153,4 +155,21 @@ public class RealWindowResultSetStatistics
 	{
 		return childResultSetStatistics;
 	}
+
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        // I have only one child
+        visitor.setNumberOfChildren(1);
+        
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // then my child
+        childResultSetStatistics.accept(visitor);
+	}
+
+    public String getRSXplainType() { return XPLAINUtil.OP_WINDOW; }
 }

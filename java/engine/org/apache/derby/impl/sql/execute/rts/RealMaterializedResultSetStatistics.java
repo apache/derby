@@ -21,6 +21,11 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+
+
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
@@ -31,6 +36,8 @@ import org.apache.derby.iapi.services.io.FormatableHashtable;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
+
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 
 /**
   ResultSetStatistics implemenation for MaterializedResultSet.
@@ -152,4 +159,43 @@ public class RealMaterializedResultSetStatistics
   public String getNodeName(){
     return MessageService.getTextMessage(SQLState.RTS_MATERIALIZED_RS);
   }
+  
+  // -----------------------------------------------------
+  // XPLAINable Implementation
+  // -----------------------------------------------------
+  
+    public void accept(XPLAINVisitor visitor) {
+        int noChildren = 0;
+        if(this.childResultSetStatistics!=null) noChildren++;
+        
+        //inform the visitor
+        visitor.setNumberOfChildren(noChildren);
+
+        // pre-order, depth-first traversal
+        // me first
+        visitor.visit(this);
+        // then my child
+        if(childResultSetStatistics!=null){
+            childResultSetStatistics.accept(visitor);
+        }
+    }
+    public String getRSXplainType() { return XPLAINUtil.OP_MATERIALIZE; }
+    public String getRSXplainDetails() { return "("+this.resultSetNumber +")"; }
+  
+    public Object getResultSetTimingsDescriptor(Object timingID)
+    {
+        return new XPLAINResultSetTimingsDescriptor(
+           (UUID)timingID,
+           new Long(this.constructorTime),
+           new Long(this.openTime),
+           new Long(this.nextTime),
+           new Long(this.closeTime),
+           new Long(this.getNodeTime()),
+           XPLAINUtil.getAVGNextTime( (long)this.nextTime, this.rowsSeen),
+           null,                          // the projection time
+           null,                          // the restriction time
+           new Long(this.createTCTime),
+           new Long(this.fetchTCTime)
+        );
+    }
 }

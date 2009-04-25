@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINable;
+
 /**
  * The ResultSetStatistics interface is used to provide run time
  * statistics information on a specific ResultSet.
@@ -29,7 +31,7 @@ package org.apache.derby.impl.sql.execute.rts;
  * this interface can be easily saved to the database.
  *
  */
-public interface ResultSetStatistics 
+public interface ResultSetStatistics extends XPLAINable
 {
 	/**
 	 * Return the statement execution plan as a String.

@@ -24,6 +24,9 @@ package org.apache.derby.impl.sql.execute.rts;
 import org.apache.derby.iapi.util.PropertyUtil;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
+import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.util.Enumeration;
@@ -254,4 +257,19 @@ public class RealDistinctScanStatistics
 	{
 		return MessageService.getTextMessage(SQLState.RTS_DISTINCT_SCAN);
 	}
+	
+    // -----------------------------------------------------
+    // XPLAINable Implementation
+    // -----------------------------------------------------
+    
+      public void accept(XPLAINVisitor visitor) {
+          // I have no children
+          visitor.setNumberOfChildren(0);
+          // pre-order, depth-first traversal
+          // me first
+          visitor.visit(this);
+          // I´m a leaf node, I have no children ...
+      }
+
+    public String getRSXplainType() { return XPLAINUtil.OP_DISTINCTSCAN; }
 }
