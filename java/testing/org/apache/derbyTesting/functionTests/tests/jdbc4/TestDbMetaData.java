@@ -21,7 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -155,9 +154,15 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         { null, "SYSCS_UTIL", "SYSCS_GET_RUNTIMESTATISTICS",
           "org.apache.derby.catalog.SystemProcedures." +
           "SYSCS_GET_RUNTIMESTATISTICS", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
-          { null, "SYSCS_UTIL", "SYSCS_GET_USER_ACCESS",
-              "org.apache.derby.catalog.SystemProcedures." +
-              "SYSCS_GET_USER_ACCESS", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
+        { null, "SYSCS_UTIL", "SYSCS_GET_USER_ACCESS",
+          "org.apache.derby.catalog.SystemProcedures." +
+          "SYSCS_GET_USER_ACCESS", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
+        { null, "SYSCS_UTIL", "SYSCS_GET_XPLAIN_MODE",
+          "org.apache.derby.catalog.SystemProcedures." +
+          "SYSCS_GET_XPLAIN_MODE", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
+        { null, "SYSCS_UTIL", "SYSCS_GET_XPLAIN_SCHEMA",
+          "org.apache.derby.catalog.SystemProcedures." +
+          "SYSCS_GET_XPLAIN_SCHEMA", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSIBM", "BLOBCREATELOCATOR",
           "org.apache.derby.impl.jdbc.LOBStoredProcedure." +
           "BLOBCREATELOCATOR", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
