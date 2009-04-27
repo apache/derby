@@ -146,7 +146,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         
         st.executeUpdate(
         		"INSERT INTO table2 VALUES (2147483649, 'location', "+
-        		"'Boulevard du Souverain, 23')");
+        		"'Bla bla bla bla bla bla 99')");
             
         st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483649, 'SortPlan', "
@@ -191,15 +191,15 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483649, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier001-0001___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier001-0001___________Bla bla bla bla "
+                + "bla bla 99____')");
         
         st.executeUpdate(
         		"INSERT INTO table2 VALUES (2147483649, 'GroupedWith', '')");
             
         st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483649, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
         
         st.executeUpdate(
         		"INSERT INTO table2 VALUES (2147483649, "+
@@ -310,7 +310,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
         st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483650, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
         
         st.executeUpdate(
         		"INSERT INTO table2 VALUES (2147483650, 'SortPlan', 'B-W3-S2')");
@@ -354,14 +354,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         st.executeUpdate(
         		"INSERT INTO table2 VALUES (2147483650, "+
         		"'EnvelopSortingValue', 'BE1180___testOlivier001-0001"+
-        		"___________Boulevard du Souverain, 23____')");
+        		"___________Bla bla bla bla bla bla 99____')");
             
         st.executeUpdate(
         "INSERT INTO table2 VALUES (2147483650, 'GroupedWith', '')");
         
         st.executeUpdate(
         		"INSERT INTO table2 VALUES (2147483650, 'AddressG2', "+
-        		"'Boulevard du Souverain, 23')");
+        		"'Bla bla bla bla bla bla 99')");
             
         st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483650, "
@@ -472,7 +472,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         
         st.executeUpdate(
         		"INSERT INTO table2 VALUES (2147483651, 'location', "+
-        		"'Boulevard du Souverain, 23')");
+        		"'Bla bla bla bla bla bla 99')");
             
         st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483651, 'SortPlan', "
@@ -515,15 +515,15 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483651, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier001-0002___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier001-0002___________Bla bla bla bla "
+                + "bla bla 99____')");
         
         st.executeUpdate(
         		"INSERT INTO table2 VALUES (2147483651, 'GroupedWith', '')");
             
         st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483651, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
         
         st.executeUpdate(
         		"INSERT INTO table2 VALUES (2147483651, 'DiversionReason', '')");
@@ -627,7 +627,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
         st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483652, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
         
         st.executeUpdate(
         		"INSERT INTO table2 VALUES (2147483652, 'SortPlan', 'B-W3-S2')");
@@ -668,13 +668,15 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         "INSERT INTO table2 VALUES (2147483652, 'header', 'true')");
         
         st.executeUpdate(
-        		"INSERT INTO table2 VALUES (2147483652, 'EnvelopSortingValue', 'BE1180___testOlivier001-0002___________Boulevard du Souverain, 23____')");
+        		"INSERT INTO table2 VALUES (2147483652, 'EnvelopSortingValue',"
+        		+ "'BE1180___testOlivier001-0002___________Bla bla bla bla bl,"
+        		+ "a bla 99____')");
             
         st.executeUpdate(
         "INSERT INTO table2 VALUES (2147483652, 'GroupedWith', '')");
         
         st.executeUpdate(
-        		"INSERT INTO table2 VALUES (2147483652, 'AddressG2', 'Boulevard du Souverain, 23')");
+        		"INSERT INTO table2 VALUES (2147483652, 'AddressG2', 'Bla bla bla bla bla bla 99')");
             
         st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483652, "
@@ -785,7 +787,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483653, 'location', "+
-            		"'Boulevard du Souverain, 23')");
+            		"'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483653, 'SortPlan', '')");
@@ -829,15 +831,15 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483653, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier002-0003___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier002-0003___________Bla bla bla bla "
+                + "bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483653, 'GroupedWith', '')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483653, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483653, "+
@@ -947,7 +949,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483654, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483654, 'SortPlan', '')");
@@ -990,14 +992,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483654, "+
             		"'EnvelopSortingValue', "+
-            		"'BE1180___testOlivier002-0003___________Boulevard du Souverain, 23____')");
+            		"'BE1180___testOlivier002-0003___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483654, 'GroupedWith', '')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483654, 'AddressG2', "+
-            		"'Boulevard du Souverain, 23')");
+            		"'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483654, "
@@ -1108,7 +1110,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483655, 'location', "+
-            		"'Boulevard du Souverain, 23')");
+            		"'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483655, 'SortPlan', '')");
@@ -1151,15 +1153,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483655, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier002-0004___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier002-0004___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483655, 'GroupedWith', '')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483655, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483655, 'DiversionReason', '001')");
@@ -1270,7 +1271,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483656, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483656, 'SortPlan', '')");
@@ -2045,7 +2046,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', 'Paper')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483661, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483661, 'location', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483661, 'SortPlan', "
@@ -2088,15 +2089,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483661, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier004-0007___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier004-0007___________Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483661, 'GroupedWith', '')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483661, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483661, 'DiversionReason', '')");
@@ -2197,7 +2197,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483662, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483662, 'SortPlan', 'B-W3-S2')");
@@ -2246,7 +2246,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483662, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483662, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483662, 'AddressG2', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483662, "
@@ -2353,7 +2353,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', 'Paper')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483663, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483663, 'location', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483663, 'SortPlan', "
@@ -2396,15 +2396,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483663, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier004-0008___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier004-0008___________Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483663, 'GroupedWith', '')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483663, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483663, 'DiversionReason', '')");
@@ -2506,7 +2505,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483664, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483664, 'SortPlan', 'B-W3-S2')");
@@ -2547,13 +2546,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483664, 'header', 'true')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483664, 'EnvelopSortingValue', 'BE1180___testOlivier004-0008___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (2147483664, 'EnvelopSortingValue', 'BE1180___testOlivier004-0008___________Bla bla bla bla bla bla 99____')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483664, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483664, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483664, 'AddressG2', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483664, "
@@ -2662,7 +2661,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', '233-621-001')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483665, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483665, 'location', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483665, 'SortPlan', '')");
@@ -2704,15 +2703,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483665, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier005-0009___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier005-0009___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483665, 'GroupedWith', '')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483665, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483665, 'DiversionReason', '001')");
@@ -2817,7 +2815,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483666, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483666, 'SortPlan', '')");
@@ -2866,7 +2864,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483666, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483666, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483666, 'AddressG2', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483666, "
@@ -2975,7 +2973,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', '233-621-001')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483667, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483667, 'location', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483667, 'SortPlan', '')");
@@ -3017,15 +3015,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483667, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier005-0010___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier005-0010___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483667, 'GroupedWith', '')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483667, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483667, 'DiversionReason', '001')");
@@ -3130,7 +3127,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483668, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483668, 'SortPlan', '')");
@@ -3903,7 +3900,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', 'Paper')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483673, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483673, 'location', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483673, 'SortPlan', "
@@ -3946,15 +3943,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483673, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier007-0013___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier007-0013___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483673, 'GroupedWith', '')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483673, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483673, 'DiversionReason', '')");
@@ -4055,7 +4051,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483674, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483674, 'SortPlan', 'B-W3-S2')");
@@ -4104,7 +4100,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483674, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483674, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483674, 'AddressG2', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483674, "
@@ -4211,7 +4207,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', 'Paper')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483675, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483675, 'location', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483675, 'SortPlan', "
@@ -4254,15 +4250,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483675, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier007-0014___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier007-0014___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483675, 'GroupedWith', '')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483675, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483675, 'DiversionReason', '')");
@@ -4363,7 +4358,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483676, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483676, 'SortPlan', 'B-W3-S2')");
@@ -4522,7 +4517,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', '233-621-001')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483677, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483677, 'location', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483677, 'SortPlan', '')");
@@ -4564,15 +4559,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483677, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier008-0015___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier008-0015___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483677, 'GroupedWith', '')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483677, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483677, 'DiversionReason', '001')");
@@ -4673,7 +4667,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483678, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483678, 'SortPlan', '')");
@@ -4714,13 +4708,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483678, 'header', 'true')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483678, 'EnvelopSortingValue', 'BE1180___testOlivier008-0015___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (2147483678, 'EnvelopSortingValue', 'BE1180___testOlivier008-0015___________Bla bla bla bla bla bla 99____')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483678, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483678, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483678, 'AddressG2', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483678, "
@@ -4829,7 +4823,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', '233-621-001')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483679, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483679, 'location', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483679, 'SortPlan', '')");
@@ -4871,15 +4865,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483679, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier008-0016___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier008-0016___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483679, 'GroupedWith', '')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483679, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483679, 'DiversionReason', '001')");
@@ -4982,7 +4975,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483680, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483680, 'SortPlan', '')");
@@ -5031,7 +5024,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483680, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483680, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483680, 'AddressG2', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483680, "
@@ -5752,7 +5745,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', 'Paper')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483685, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483685, 'location', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483685, 'SortPlan', "
@@ -5795,15 +5788,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483685, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier010-0019___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier010-0019___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483685, 'GroupedWith', '')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483685, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483685, 'DiversionReason', '')");
@@ -5904,7 +5896,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483686, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483686, 'SortPlan', 'B-W3-S2')");
@@ -5945,13 +5937,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483686, 'header', 'true')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483686, 'EnvelopSortingValue', 'BE1180___testOlivier010-0019___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (2147483686, 'EnvelopSortingValue', 'BE1180___testOlivier010-0019___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483686, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483686, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483686, 'AddressG2', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483686, "
@@ -6058,7 +6050,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', 'Paper')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483687, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483687, 'location', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483687, 'SortPlan', "
@@ -6101,15 +6093,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483687, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier010-0020___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier010-0020___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483687, 'GroupedWith', '')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483687, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483687, 'DiversionReason', '')");
@@ -6210,7 +6201,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483688, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483688, 'SortPlan', 'B-W3-S2')");
@@ -6251,13 +6242,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483688, 'header', 'true')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483688, 'EnvelopSortingValue', 'BE1180___testOlivier010-0020___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (2147483688, 'EnvelopSortingValue', 'BE1180___testOlivier010-0020___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483688, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483688, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483688, 'AddressG2', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483688, "
@@ -6366,7 +6357,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', '233-621-001')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483689, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483689, 'location', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483689, 'SortPlan', '')");
@@ -6408,15 +6399,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483689, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier011-0021___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier011-0021___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483689, 'GroupedWith', '')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483689, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483689, 'DiversionReason', '001')");
@@ -6517,7 +6507,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483690, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483690, 'SortPlan', '')");
@@ -6558,13 +6548,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483690, 'header', 'true')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483690, 'EnvelopSortingValue', 'BE1180___testOlivier011-0021___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (2147483690, 'EnvelopSortingValue', 'BE1180___testOlivier011-0021___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483690, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483690, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483690, 'AddressG2', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483690, "
@@ -6673,7 +6663,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', '233-621-001')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483691, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483691, 'location', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483691, 'SortPlan', '')");
@@ -6715,15 +6705,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483691, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier011-0022___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier011-0022___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483691, 'GroupedWith', '')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483691, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483691, 'DiversionReason', '001')");
@@ -6824,7 +6813,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483692, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483692, 'SortPlan', '')");
@@ -6865,13 +6854,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483692, 'header', 'true')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483692, 'EnvelopSortingValue', 'BE1180___testOlivier011-0022___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (2147483692, 'EnvelopSortingValue', 'BE1180___testOlivier011-0022___________Bla bla bla bla bla bla 99____')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483692, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483692, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (2147483692, 'AddressG2', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483692, "
@@ -7681,7 +7670,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (4294967297, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (4294967297, 'SortPlan', '')");
@@ -7715,13 +7704,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (4294967297, 'AddressG5', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (4294967297, 'EnvelopSortingValue', 'BE1180___testOlivier002-0003___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (4294967297, 'EnvelopSortingValue', 'BE1180___testOlivier002-0003___________Bla bla bla bla bla bla 99____')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (4294967297, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (4294967297, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (4294967297, 'AddressG2', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (4294967297, "
@@ -7897,7 +7886,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (6442450945, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (6442450945, 'SortPlan', '')");
@@ -7931,13 +7920,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (6442450945, 'AddressG5', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (6442450945, 'EnvelopSortingValue', 'BE1180___testOlivier002-0004___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (6442450945, 'EnvelopSortingValue', 'BE1180___testOlivier002-0004___________Bla bla bla bla bla bla 99____')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (6442450945, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (6442450945, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (6442450945, 'AddressG2', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (6442450945, "
@@ -8135,7 +8124,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', '233-621-001')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (8589934593, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (8589934593, 'location', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (8589934593, 'SortPlan', '')");
@@ -8171,15 +8160,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (8589934593, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier005-0009___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier005-0009___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (8589934593, 'GroupedWith', '')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (8589934593, 'AddressG2', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (8589934593, 'DiversionReason', '001')");
@@ -8446,7 +8434,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (10737418241, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (10737418241, 'SortPlan', '')");
@@ -8480,13 +8468,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (10737418241, 'AddressG5', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (10737418241, 'EnvelopSortingValue', 'BE1180___testOlivier005-0010___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (10737418241, 'EnvelopSortingValue', 'BE1180___testOlivier005-0010___________Bla bla bla bla bla bla 99____')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (10737418241, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (10737418241, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (10737418241, 'AddressG2', 'Bla bla bla bla bla bla 99')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (10737418241, "
@@ -8784,7 +8772,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (12884901889, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (12884901889, 'SortPlan', '')");
@@ -8818,13 +8806,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (12884901889, 'AddressG5', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (12884901889, 'EnvelopSortingValue', 'BE1180___testOlivier008-0015___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (12884901889, 'EnvelopSortingValue', 'BE1180___testOlivier008-0015___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (12884901889, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (12884901889, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (12884901889, 'AddressG2', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (12884901889, "
@@ -9067,7 +9055,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (15032385537, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (15032385537, 'SortPlan', '')");
@@ -9101,13 +9089,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (15032385537, 'AddressG5', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (15032385537, 'EnvelopSortingValue', 'BE1180___testOlivier008-0016___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (15032385537, 'EnvelopSortingValue', 'BE1180___testOlivier008-0016___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (15032385537, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (15032385537, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (15032385537, 'AddressG2', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (15032385537, "
@@ -9359,7 +9347,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (17179869185, 'location', "
-                + "'Boulevard du Souverain, 23')");
+                + "'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (17179869185, 'SortPlan', '')");
@@ -9393,13 +9381,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (17179869185, 'AddressG5', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (17179869185, 'EnvelopSortingValue', 'BE1180___testOlivier011-0021___________Boulevard du Souverain, 23____')");
+            		"INSERT INTO table2 VALUES (17179869185, 'EnvelopSortingValue', 'BE1180___testOlivier011-0021___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (17179869185, 'GroupedWith', '')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (17179869185, 'AddressG2', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (17179869185, 'AddressG2', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (17179869185, "
@@ -9664,7 +9652,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 + "'BatchTypeId', '233-621-001')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (19327352833, 'location', 'Boulevard du Souverain, 23')");
+            		"INSERT INTO table2 VALUES (19327352833, 'location', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (19327352833, 'SortPlan', '')");
@@ -9700,15 +9688,14 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (19327352833, "
                 + "'EnvelopSortingValue', "
-                + "'BE1180___testOlivier011-0022___________Boulevard "
-                + "du Souverain, 23____')");
+                + "'BE1180___testOlivier011-0022___________Bla bla bla bla bla bla 99____')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (19327352833, 'GroupedWith', '')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (19327352833, "
-                + "'AddressG2', 'Boulevard du Souverain, 23')");
+                + "'AddressG2', 'Bla bla bla bla bla bla 99')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (19327352833, 'DiversionReason', '001')");
@@ -10023,6 +10010,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
     /**
      * Test for forcing a order of tables in the FROM list user optimizer
      * overrides. This ordering of table is going to require us to do sorting.
+     * This forced sorting returns the correct result order.
      */
     public void testForceSortWithOptimizerOverrides() throws SQLException {
         Statement s = createStatement();
