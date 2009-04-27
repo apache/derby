@@ -620,15 +620,15 @@ restartScan:
      * len characters
      *
      * @param len the length, in characters, to which the CLOB value should be
-     *      truncated
+     *      truncated, 0 is accepted
      * @exception SQLException if truncating the CLOB value fails
      */
     public void truncate(long len) throws SQLException
     {
         checkValidity();
-        if (len < 1)
+        if (len < 0)
             throw Util.generateCsSQLException(
-                SQLState.BLOB_BAD_POSITION, new Long(len));
+                SQLState.BLOB_NONPOSITIVE_LENGTH, new Long(len));
         try {
             if (!clob.isWritable()) {
                 makeWritableClobClone(len);
