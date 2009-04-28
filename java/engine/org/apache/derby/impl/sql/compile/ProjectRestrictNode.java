@@ -570,7 +570,12 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 								OptimizablePredicateList optimizablePredicates)
 					throws StandardException
 	{
-		if (restrictionList != null)
+        // DERBY-4001: Don't pull predicates if this node is part of a NOT
+        // EXISTS join. For example, in the query below, if we allowed the
+        // predicate 1<>1 (always false) to be pulled, no rows would be
+        // returned, whereas it should return all the rows in table T.
+        // SELECT * FROM T WHERE NOT EXISTS (SELECT * FROM T WHERE 1<>1)
+		if (restrictionList != null && !isNotExists())
 		{
 			// Pull up any predicates that may have been pushed further
 			// down the tree during optimization.

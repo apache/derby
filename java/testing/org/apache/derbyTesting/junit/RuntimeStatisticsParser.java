@@ -298,6 +298,15 @@ public class RuntimeStatisticsParser {
     }
 
     /**
+     * Check if an exists join (or a not exists join) was used.
+     *
+     * @return {@code true} if the query used a (not) exists join
+     */
+    public boolean usedExistsJoin() {
+        return statistics.indexOf("Exists Join ResultSet") != -1;
+    }
+
+    /**
      * Search the RuntimeStatistics for a string.  It must occur
      * at least instances times.
      * @param stringToFind

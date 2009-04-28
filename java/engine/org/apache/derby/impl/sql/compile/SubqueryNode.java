@@ -668,10 +668,7 @@ public class SubqueryNode extends ValueNode
 			 * so we simply return the BinaryComparisonOperatorNode above
 			 * the new join condition.
 			 */
-			ValueNode rightOperand;
-			rightOperand = ((ResultColumn) rrsn.getResultColumns().elementAt(0)).
-								getExpression();
-			return getNewJoinCondition(leftOperand, rightOperand);
+			return getNewJoinCondition(leftOperand, getRightOperand());
 		}
 
 		/* Select subquery is flattenable if:
@@ -758,16 +755,32 @@ public class SubqueryNode extends ValueNode
 				 * is if the predicates do not get pulled up.  If they get pulled
 				 * up then the single next logic for an EXISTS join does not work
 				 * because that row may get disqualified at a higher level.)
+                 * DERBY-4001: Extra conditions to allow flattening to a NOT
+                 * EXISTS join (in a NOT EXISTS join it does matter on which
+                 * side of the join predicates/restrictions are applied):
+                 *  o All the predicates must reference the FBT, otherwise
+                 *    predicates meant for the right side of the join may be
+                 *    applied to the left side of the join.
+                 *  o The right operand (in ALL and NOT IN) must reference the
+                 *    FBT, otherwise the generated join condition may be used
+                 *    to restrict the left side of the join.
 				 */
 				else if ( (isIN() || isANY() || isEXISTS() || flattenableNotExists) &&
 						  ((leftOperand == null) ? true :
 							 leftOperand.categorize(new JBitSet(numTables), false)) &&
-						  select.getWherePredicates().allPushable() &&
-						  singleFromBaseTable(select.getFromList()))
+						  select.getWherePredicates().allPushable())
 				{
-					return flattenToExistsJoin(numTables,
-										   outerFromList, outerSubqueryList,
-										   outerPredicateList, flattenableNotExists);
+                    FromBaseTable fbt =
+                            singleFromBaseTable(select.getFromList());
+
+                    if (fbt != null && (!flattenableNotExists ||
+                         (select.getWherePredicates().allReference(fbt) &&
+                          rightOperandFlattenableToNotExists(numTables, fbt))))
+                    {
+                        return flattenToExistsJoin(numTables,
+                                outerFromList, outerSubqueryList,
+                                outerPredicateList, flattenableNotExists);
+                    }
 				}
 
 				// restore leftOperand to its original value
@@ -830,30 +843,88 @@ public class SubqueryNode extends ValueNode
 	 *
 	 * @param fromList	The from list from the subquery
 	 *
-	 * @return Whether or not the from list from the subquery contains a
-	 *			single entry which is a FBT or a PRN/FBT.
+     * @return the {@code FromBaseTable} if the from list from the subquery
+     * contains a single entry which is a FBT or a PRN/FBT, or {@code null}
+     * if the subquery does not contain a single FBT
 	 */
-	private boolean singleFromBaseTable(FromList fromList)
+	private FromBaseTable singleFromBaseTable(FromList fromList)
 	{
-		boolean retCode = (fromList.size() == 1);
+        FromBaseTable fbt = null;
 
-		if (retCode)
-		{
-			FromTable ft = (FromTable) fromList.elementAt(0);
+        if (fromList.size() == 1) {
+            FromTable ft = (FromTable) fromList.elementAt(0);
+            if (ft instanceof FromBaseTable) {
+                fbt = (FromBaseTable) ft;
+            } else if (ft instanceof ProjectRestrictNode) {
+                ResultSetNode child =
+                        ((ProjectRestrictNode) ft).getChildResult();
+                if (child instanceof FromBaseTable) {
+                    fbt = (FromBaseTable) child;
+                }
+            }
+        }
 
-			if (((ft instanceof ProjectRestrictNode) &&
-				 ((ProjectRestrictNode) ft).getChildResult() instanceof FromBaseTable) ||
-				ft instanceof FromBaseTable)
-			{
-			}
-			else
-			{
-				retCode = false;
-			}
-		}
-
-		return retCode;
+        return fbt;
 	}
+
+    /**
+     * <p>
+     * Check if the right operand is on a form that makes it possible to
+     * flatten this query to a NOT EXISTS join. We don't allow flattening if
+     * the right operand doesn't reference the base table of the subquery.
+     * (Requirement added as part of DERBY-4001.)
+     * </p>
+     *
+     * <p>
+     * The problem with the right operand not referencing the base table of the
+     * subquery, is that the join condition may then be used to filter rows
+     * from the right side (outer) table in the NOT EXISTS join. In a NOT
+     * EXISTS join, the join condition can only safely be applied to the
+     * left side (inner) table of the join. Otherwise, it will filter out all
+     * the interesting rows too early.
+     * </p>
+     *
+     * <p>Take the query below as an example:</p>
+     *
+     * <pre><code>
+     * SELECT * FROM T1 WHERE X NOT IN (SELECT 1 FROM T2)
+     * </code></pre>
+     *
+     * <p>
+     * Here, the right operand is 1, and the join condition is {@code T1.X=1}.
+     * If flattened, the join condition will be used directly on the outer
+     * table, and hide all rows with {@code X<>1}, although those are the only
+     * rows we're interested in. If the join condition had only been used on
+     * the inner table, the NOT EXISTS join logic would do the correct thing.
+     * </p>
+     *
+     * <p>
+     * If the join condition references the inner table, the condition cannot
+     * be used directly on the outer table, so it is safe to flatten the query.
+     * </p>
+     *
+     * @param numTables the number of tables in this statement
+     * @param fbt the only {@code FromBaseTable} in this subquery
+     * @return {@code true} if it is OK to flatten this query to a NOT EXISTS
+     * join, {@code false} otherwise
+     */
+    private boolean rightOperandFlattenableToNotExists(
+            int numTables, FromBaseTable fbt) throws StandardException {
+
+        boolean flattenable = true;
+
+        // If there is no left operand, there is no right operand. If there is
+        // no right operand, it cannot cause any problems for the flattening.
+        if (leftOperand != null) {
+            JBitSet tableSet = new JBitSet(numTables);
+            getRightOperand().categorize(tableSet, false);
+            // The query can be flattened to NOT EXISTS join only if the right
+            // operand references the base table.
+            flattenable = tableSet.get(fbt.getTableNumber());
+        }
+
+        return flattenable;
+    }
 
 	/**
 	 * Can NOT IN, ALL be falttened to NOT EXISTS join?  We can't or the flattening doesn't
@@ -866,10 +937,8 @@ public class SubqueryNode extends ValueNode
 		boolean result = false;
 		if (isNOT_IN() || isALL())
 		{
-			ValueNode rightOperand = ((ResultColumn) resultSet.getResultColumns().elementAt(0)).
-									getExpression();
 			result = (! leftOperand.getTypeServices().isNullable() &&
-						! rightOperand.getTypeServices().isNullable());
+						! getRightOperand().getTypeServices().isNullable());
 		}
 		return result;
 	}
@@ -965,9 +1034,7 @@ public class SubqueryNode extends ValueNode
 		}
 		else
 		{
-			ValueNode rightOperand;
-			rightOperand = ((ResultColumn) select.getResultColumns().elementAt(0)).
-								getExpression();
+			ValueNode rightOperand = getRightOperand();
 			/* If the right operand is a CR, then we need to decrement
 			 * its source level as part of flattening so that
 			 * transitive closure will work correctly.
@@ -1043,6 +1110,18 @@ public class SubqueryNode extends ValueNode
 		return flattenToNormalJoin(numTables, outerFromList,
 								   outerSubqueryList, outerPredicateList);
 	}
+
+    /**
+     * Get the node that will be the right operand in the join condition if
+     * this ALL/ANY/SOME/(NOT) IN subquery is flattened to a join.
+     *
+     * @return the right operand
+     */
+    private ValueNode getRightOperand() {
+        ResultColumn firstRC =
+                (ResultColumn) resultSet.getResultColumns().elementAt(0);
+        return firstRC.getExpression();
+    }
 
 	/**
 	 * Check to see if we have a Variant value below us.
