@@ -1679,6 +1679,26 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		return true;
 	 }
 
+     /**
+      * Check if all the predicates reference a given {@code FromBaseTable}.
+      *
+      * @param fbt the {@code FromBaseTable} to check for
+      * @return {@code true} if the table is referenced by all predicates,
+      * {@code false} otherwise
+      */
+     boolean allReference(FromBaseTable fbt) {
+         int tableNumber = fbt.getTableNumber();
+
+         for (int i = 0; i < size(); i++) {
+             Predicate p = (Predicate) elementAt(i);
+             if (!p.getReferencedSet().get(tableNumber)) {
+                 return false;
+             }
+         }
+
+         return true;
+     }
+
 	/**
 	 * Build a list of pushable predicates, if any,
 	 * that satisfy the referencedTableMap.
