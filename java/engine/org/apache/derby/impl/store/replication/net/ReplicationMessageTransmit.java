@@ -43,7 +43,7 @@ public class ReplicationMessageTransmit {
     
     /** Number of millis to wait for a response message before timing out
      */
-    private final int DEFAULT_MESSAGE_RESPONSE_TIMEOUT = 5000;
+    private final int DEFAULT_MESSAGE_RESPONSE_TIMEOUT = 30000;
 
     /** The thread that listens for messages from the slave */
     private Thread msgReceiver = null;
