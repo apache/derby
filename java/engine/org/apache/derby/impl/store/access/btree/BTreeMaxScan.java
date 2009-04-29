@@ -61,6 +61,25 @@ btree problem.  If the row is the last row in the btree it works very
 efficiently.  This implementation will be removed once backward scan is
 fully functional.
 
+The current implementation only exports to the user the ability to call
+fetchMax() and get back one row, none of the generic scan ablities are
+exported.  
+
+To return the maximum row this implementation does the following:
+1) calls positionAtStartPosition() which returns with the a latch on the
+   rightmost leaf page and a lock on the rightmost leaf row on that page.
+   It will loop until it can get the lock without waiting while holding
+   the latch.  At this point the slot position is just right of the
+   locked row.
+2) in fetchMax() it loops backward on the last leaf page, locking rows
+   as it does so, until it either finds the first non-deleted and locks
+   that row without having to wait and thus did not give up the latch on the 
+   page.  If successful it returns that row.
+3) If it is not successful in this last page search it faults over to 
+   the original implementation of max scan, which is simply a search from 
+   left to right at the leaf level for the last row in the table.
+
+
 **/
 
 public class BTreeMaxScan extends BTreeScan
@@ -73,6 +92,9 @@ public class BTreeMaxScan extends BTreeScan
 
     /**
      * Fetch the maximum non-deleted row from the table.
+     *
+     * Scan from left to right at the leaf level searching for the 
+     * rightmost non deleted row in the index.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
@@ -261,7 +283,8 @@ public class BTreeMaxScan extends BTreeScan
      */
 
     /**
-     * disallow fetchRows on this scan type.
+     * disallow fetchRows on this scan type, caller should only be able
+     * to call fetchMax().
      * <p>
 	 * @exception  StandardException  Standard exception policy.
      **/
@@ -280,12 +303,13 @@ public class BTreeMaxScan extends BTreeScan
 
 
     /**
-     * Position scan at "start" position of the scan.
+     * Position scan at "start" position of the MAX scan.
      * <p>
-     * Positions the scan to the slot just after the first record to be 
-     * returned from the backward scan.  Returns the start page latched, and 
-     * sets "current_slot" to the slot number just right of the first slot
-     * to return.
+     * Positions the scan to the slot just after the last record on the
+     * rightmost leaf of the index.  Returns the rightmost leaf page latched,  
+     * the rightmost row on the page locked and 
+     * sets "current_slot" to the slot number just right of the last row
+     * on the page.
      * <p>
      *
 	 * @exception  StandardException  Standard exception policy.
@@ -299,21 +323,22 @@ public class BTreeMaxScan extends BTreeScan
         // This routine should only be called from first next() call //
         if (SanityManager.DEBUG)
         {
-            SanityManager.ASSERT(this.scan_state          == SCAN_INIT);
+            SanityManager.ASSERT(this.scan_state         == SCAN_INIT);
             SanityManager.ASSERT(pos.current_rh          == null);
-            SanityManager.ASSERT(pos.current_positionKey         == null);
+            SanityManager.ASSERT(pos.current_positionKey == null);
         }
 
-        // Loop until you can lock the row previous to the first row to be
-        // returned by the scan, while holding the page latched, without
-        // waiting.  If you have to wait, drop the latch, wait for the lock -
-        // which makes it likely if you wait for the lock you will loop just
+        // Loop until you can lock the last row, on the rightmost leaf page
+        // of the tree, while holding the page latched, without waiting.
+        //
+        // If you have to wait, drop the latch, and wait for the lock.
+        // This makes it likely that the next search you will loop just
         // once, find the same lock satisfies the search and since you already
         // have the lock it will be granted.
         while (true)
         {
             // Find the starting page and row slot, must start at root and
-            // search either for leftmost leaf, or search for specific key.
+            // search for rightmost leaf.
             ControlRow root = ControlRow.get(this, BTree.ROOTPAGEID); 
 
             // include search of tree in page visited stats.
@@ -334,14 +359,10 @@ public class BTreeMaxScan extends BTreeScan
                         SQLState.BTREE_UNIMPLEMENTED_FEATURE);
             }
 
-            // backward scan initial positioning will request a previous
-            // key lock for initial positioning.  The actual scan will have
-            // to make 2 lock requests per row fetch, one for a previous key
-            // and one for lock on row it is positioned on.  Optimizations
-            // can be made depending on isolation level.
-            // 
-            // Note that this is not a "previous key" lock as the row we are
-            // locking is the max row to return.
+            // lock the last row on the rightmost leaf of the table, as this
+            // is a max scan no previous key locking necessary.  Previous key
+            // locking is used to protect a range of keys, but for max there
+            // is only a single row returned.
 
             pos.current_slot--;
             boolean latch_released = 
@@ -389,8 +410,16 @@ public class BTreeMaxScan extends BTreeScan
 
     /**
      * Fetch the maximum row in the table.
-     * <p>
-     * Utility routine used by both fetchSet() and fetchNextGroup().
+     *
+     * Call positionAtStartPosition() to quickly position on rightmost row
+     * of rightmost leaf of tree.
+     *
+     * Search last page for last non deleted row, and if one is found return
+     * it as max.
+     *
+     * If no row found on last page, or could not find row withou losing latch
+     * then call fetchMaxRowFromBeginning() to search from left to right
+     * for maximum value in index.
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
@@ -411,6 +440,8 @@ public class BTreeMaxScan extends BTreeScan
         if (this.scan_state == BTreeScan.SCAN_INPROGRESS)
         {
             // Get current page of scan, with latch
+
+            // RESOLVE (mikem) - I don't think this code can be called.
             
             // reposition the scan at the row just before the next one to 
             // return.
@@ -445,15 +476,18 @@ public class BTreeMaxScan extends BTreeScan
         // At this point:
         // current_page is latched.  current_slot is the slot on current_page
         // just "right" of the "next" record this routine should process.
+        // In this case teh "next" record is the last row on the rightmost
+        // leaf page.
 
 
         boolean max_found = false;
 
-        // if we can find a non-deleted row on this page then it is easy.
+        // Code is positioned on the rightmost leaf of the index, the rightmost
+        // non-deleted row on this page is the maximum row to return.
 
         if ((pos.current_slot - 1) > 0)
         {
-            // move scan current position forward.
+            // move scan backward in search of last non-deleted row on page.
             pos.current_slot--;
 
             while (pos.current_slot > 0)
@@ -469,6 +503,7 @@ public class BTreeMaxScan extends BTreeScan
                         pos.current_slot, fetch_row, init_fetchDesc,
                         true);
 
+                // lock current row in max scan, no previous key lock necessary.
                 boolean latch_released =
                     !this.getLockingPolicy().lockScanRow(
                         this, this.getConglomerate(), pos, 
@@ -510,9 +545,6 @@ public class BTreeMaxScan extends BTreeScan
                 if (pos.current_rh_qualified)
                 {
                     // return the qualifying max row.
-
-                    // Found qualifying row.  Are we done fetching rows for the
-                    // group?
                     ret_row_count++;
                     stat_numrows_qualified++;
 
@@ -536,7 +568,7 @@ public class BTreeMaxScan extends BTreeScan
             pos.current_leaf = null;
         }
 
-        // Reached last leaf of tree.
+        // Clean up the scan based on searching through rightmost leaf of btree
         positionAtDoneScan(scan_position);
 
         if (!max_found)
