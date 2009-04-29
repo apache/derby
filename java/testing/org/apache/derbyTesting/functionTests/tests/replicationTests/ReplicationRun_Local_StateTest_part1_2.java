@@ -39,11 +39,13 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
 {
     
+    final static String CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE     = "08004";
     final static String LOGIN_FAILED = "08004";
     final static String REPLICATION_DB_NOT_BOOTED = "XRE11";
     final static String REPLICATION_MASTER_ALREADY_BOOTED = "XRE22";
     final static String REPLICATION_NOT_IN_MASTER_MODE = "XRE07";
     final static String REPLICATION_SLAVE_STARTED_OK = "XRE08";
+
     /**
      * Creates a new instance of ReplicationRun_Local_StateTest_part1
      * 
@@ -144,7 +146,7 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
 
 
     private void _testPostStartedMasterAndSlave_StopMaster()
-    throws InterruptedException
+            throws InterruptedException, SQLException
     {
         Connection conn = null;
         String db = null;
@@ -210,24 +212,46 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
                 + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                 + db;
         util.DEBUG("3. testPostStartedMasterAndSlave_StopMaster: " + connectionURL);
-        // Try a sleep:
-        Thread.sleep(15000L);
-        try
-        {
-            conn = DriverManager.getConnection(connectionURL);
-            util.DEBUG("Successfully connected: " + connectionURL);
+
+        // We use a loop below, to allow for intermediate states before success.
+        // If we get here quick enough, we see this error state:
+        //     CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE
+        //
+        SQLException gotEx = null;
+        int tries = 20;
+
+        while (tries-- > 0) {
+            gotEx = null;
+            try {
+                conn = DriverManager.getConnection(connectionURL);
+                util.DEBUG("Successfully connected: " + connectionURL);
+                break;
+            } catch (SQLException se) {
+                gotEx = se;
+                if (se.getSQLState().
+                        equals(CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE)) {
+                    // Try again, shutdown did not complete yet..
+                    util.DEBUG("got CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE, sleep");
+                    Thread.sleep(1000L);
+                    continue;
+
+                } else {
+                    // Something else, so report.
+                    break;
+                }
+            }
         }
-        catch (SQLException se)
-        {
-            int ec = se.getErrorCode();
-            String ss = se.getSQLState();
-            String msg = ec + " " + ss + " " + se.getMessage();
-            util.DEBUG("3. Connect to slave unexpectedly failed : " 
-                    + connectionURL + " " + msg);
-            assertTrue("3. Connect to slave unexpectedly failed : " 
-                    + connectionURL + " " + msg, false);
+
+        if (gotEx != null) {
+            // We did not get what we expected as the final state (connect
+            // success) in reasonable time, or we saw something that is not a
+            // legal intermediate state, so we fail now:
+
+            util.DEBUG("3. failed to connect to ex-slave");
+            throw gotEx;
         }
-        
+
+
         // 4. stopMaster on slave which now is not in replication mode should fail.
         db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
         connectionURL = "jdbc:derby:"  
