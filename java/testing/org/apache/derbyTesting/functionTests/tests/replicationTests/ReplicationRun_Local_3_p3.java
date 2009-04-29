@@ -20,8 +20,10 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
+import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -34,6 +36,10 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
 {
+
+    final static String CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE = "08004";
+    final static String REPLICATION_NOT_IN_MASTER_MODE     = "XRE07";
+    final static int MAX_TRIES = 20;
     
     /**
      * Creates a new instance of ReplicationRun_Local
@@ -150,11 +156,11 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
         
         // 3 separate test
         // stopMaster
-        // failover on slave
+        // shutdown on slave
         assertException(
             _stopMaster(masterServerHost, masterServerPort,
                 masterDatabasePath + FS + masterDbSubPath + FS + replicatedDb),
-            null); // Implies failover. // OK to continue.
+            null); // Implies slave should shut down. // OK to continue.
         /* showCurrentState("Post stopMaster +1s", 1000L,
             masterDatabasePath + FS + masterDbSubPath + FS + replicatedDb, 
             masterServerHost, masterServerPort); */
@@ -167,49 +173,78 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
         showCurrentState("Post stopMaster +5s", 5000L,
             slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
             slaveServerHost, slaveServerPort); */
-        waitForSQLState("08004", 1000L, 20, // 08004.C.7 - CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE
-                slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
-                slaveServerHost, slaveServerPort);
-        /* Got it above... showCurrentState("Post stopMaster +30s", 30000L,
-            slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
-            slaveServerHost, slaveServerPort); // 08004 */
-        /* Got it above... showCurrentState("Post stopMaster +60s", 30000L,
-            masterDatabasePath + FS + masterDbSubPath + FS + replicatedDb, 
-            masterServerHost, masterServerPort); // CONNECTED */
+
+        // Connect to the ex-slave db, to verify that we can boot it and
+        // connect to it.
+        //
+        // DERBY-4186: We use a loop below, to allow for intermediate state on
+        // the slave db after master stopped and before slave reaches the
+        // expected final state.
+        //
+        // If we get here quick enough we see this error state:
+        //     CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE
+        //
+        // The final end state is successful connect (i.e. a reboot) after
+        // stopped slave and db shutdown.
+
+        SQLException gotEx = null;
+        int tries = MAX_TRIES;
+
+        while (tries-- > 0) {
+            gotEx = null;
+            try
+            {
+                String connectionURL =
+                    slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb;
+                ClientDataSource ds = new ClientDataSource();
+                ds.setDatabaseName(connectionURL);
+                ds.setServerName(slaveServerHost);
+                ds.setPortNumber(slaveServerPort);
+                ds.getConnection().close();
+                util.DEBUG("Successfully connected after shutdown: " +
+                           connectionURL);
+                break;
+            }
+            catch (SQLException se)
+            {
+                if (se.getSQLState().
+                        equals(CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE)) {
+                    // Try again, shutdown did not complete yet..
+                    gotEx = se;
+                    util.DEBUG(
+                        "got SLAVE_OPERATION_DENIED_WHILE_CONNECTED, sleep");
+                    Thread.sleep(1000L);
+                    continue;
+
+                } else {
+                    // Something else, so report.
+                    gotEx = se;
+                    break;
+                }
+            }
+        }
+
+        if (gotEx != null) {
+            String reason;
+            if (gotEx.getSQLState().
+                    equals(CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE)) {
+                reason = "Tried " + MAX_TRIES + " times...";
+            } else {
+                reason = "Unexpected SQL state: " + gotEx.getSQLState();
+            }
+
+            util.DEBUG(reason);
+            throw gotEx;
+        }
+
+        // A failover on ex-master db should fail now
         assertException(
             _failOver(masterServerHost, masterServerPort, 
                 masterDatabasePath+FS+masterDbSubPath+FS+replicatedDb),
-            "XRE07");
-        /* _p2: assertException(
-            _failOver(slaveServerHost, slaveServerPort, 
-                slaveDatabasePath+FS+slaveDbSubPath+FS+replicatedDb),
-                "XRE07"); // Hangs!? even after killMaster server. */
-        
-        // 5 separate test
-        // slave: "normal" connect to slave db
-        
-        // 6 separate test
-        // slave: 'internal-stopslave=true'
-        
-        /* failOver(jvmVersion,
-                masterDatabasePath, masterDbSubPath, replicatedDb,
-                masterServerHost,  // Where the master db is run.
-                masterServerPort,
-                testClientHost); //  XRE07 Could not perform operation because the database is not in replication master mode.
-        */
-        
-        waitForSQLState("08004", 1000L, 20, // 08004.C.7 - CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE
-                slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb,
-                slaveServerHost, slaveServerPort); // _failOver above fails...
-        /*
-        connectPing(slaveDatabasePath+FS+slaveDbSubPath+FS+replicatedDb,
-        slaveServerHost,slaveServerPort,
-        testClientHost); // 
-         */
-        
-        // Not relevant as we  can not connect. verifySlave();
-        
-        // We should verify the master as well, at least to see that we still can connect.
+            REPLICATION_NOT_IN_MASTER_MODE);
+
+        // We should verify the master as well, at least to see that we still
+        // can connect.
         verifyMaster();
         
         stopServer(jvmVersion, derbyVersion,
