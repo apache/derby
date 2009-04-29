@@ -119,6 +119,7 @@ public class splitmessages {
         clientMessageIds.add(SQLState.LANG_STRING_TOO_LONG);
         clientMessageIds.add(SQLState.INVALID_COLUMN_ARRAY_LENGTH);
         clientMessageIds.add(SQLState.PROPERTY_INVALID_VALUE);
+        clientMessageIds.add(SQLState.LANG_SUBSTR_START_ADDING_LEN_OUT_OF_RANGE);
     }
 
 	public static void main(String[] args) throws Exception {

@@ -546,9 +546,40 @@ restartScan:
     public int setString(long pos, String str, int offset, int len)
             throws SQLException {
         checkValidity();
-        if (pos < 1)
+        if (pos < 1) {
             throw Util.generateCsSQLException(
                 SQLState.BLOB_BAD_POSITION, new Long(pos));
+        }
+        
+        if (pos > length() + 1) {
+            throw Util.generateCsSQLException(
+        	    SQLState.BLOB_POSITION_TOO_LARGE);
+        }
+        
+        if (str == null) {
+            throw Util.generateCsSQLException(
+        	    SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
+        }
+        
+        if (str.length() == 0) {
+            return 0;
+        }
+        
+        if (offset < 0 || offset >= str.length()) {
+            throw Util.generateCsSQLException(SQLState.BLOB_INVALID_OFFSET);
+        }
+        
+        if (len < 0) {
+            throw Util.generateCsSQLException(
+        	    SQLState.BLOB_NONPOSITIVE_LENGTH);
+        }
+        
+        if (len + offset > str.length()) {
+            throw Util.generateCsSQLException(
+                    SQLState.LANG_SUBSTR_START_ADDING_LEN_OUT_OF_RANGE,
+                    new Integer(offset), new Integer(len), str);
+        }
+        
         try {
             if (!this.clob.isWritable()) {
                 makeWritableClobClone();

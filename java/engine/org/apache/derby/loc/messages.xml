@@ -674,6 +674,14 @@ Guide.
             </msg>
 
             <msg>
+                <name>22011.S.1</name>
+                <text>The range specified for the substring with offset {0} and len {1} is out of range for the String: {2}.</text>
+                <arg>offset</arg>
+                <arg>len</arg>
+                <arg>str</arg>
+            </msg>
+            
+            <msg>
                 <name>22012</name>
                 <text>Attempt to divide by zero.</text>
             </msg>

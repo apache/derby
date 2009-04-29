@@ -21,14 +21,13 @@
 
 package org.apache.derby.client.am;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStream;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.SQLException;
-import org.apache.derby.shared.common.reference.SQLState;
+
 import org.apache.derby.client.net.EncodedInputStream;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class Clob extends Lob implements java.sql.Clob {
     //---------------------navigational members-----------------------------------
@@ -625,7 +624,18 @@ public class Clob extends Lob implements java.sql.Clob {
                 new ClientMessageId(SQLState.BLOB_POSITION_TOO_LARGE),
                 new Long(pos));
         }
-        if ((offset < 0) || offset > str.length() ) {
+        
+        if (str == null) {
+            throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(
+                            SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR));
+        }
+        
+        if (str.length() == 0) {
+            return 0;
+        }
+        
+        if ((offset < 0) || offset >= str.length() ) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.BLOB_INVALID_OFFSET),
                 new Integer(offset));
@@ -635,6 +645,13 @@ public class Clob extends Lob implements java.sql.Clob {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
                 new Integer(len));
+        }
+        
+        if (offset + len > str.length()) {
+            throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(
+                            SQLState.LANG_SUBSTR_START_ADDING_LEN_OUT_OF_RANGE),
+                    new Integer(offset), new Integer(len), str);
         }
 
         if (len == 0) {

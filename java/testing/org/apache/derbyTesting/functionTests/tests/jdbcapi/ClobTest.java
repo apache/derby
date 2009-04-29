@@ -385,6 +385,108 @@ public class ClobTest
         //insertDataWithToken(token, prefix, 2*1024-7, SET_CHARACTER_STREAM);
         executeTestPositionWithStringToken(token, prefix);
     }
+    
+    /**
+     * Test setString() refuses wrong offset. 
+     */
+    public void testSetStringOnWrongOffset() throws SQLException {
+        clob.setString(1, "TEST");
+        long upperLimit = clob.length() + 1;
+        String str = "AGAIN";
+        
+        try {
+            clob.setString(upperLimit, str, -1, 2);
+            fail("setString() refuses negative offset!");
+        } catch (SQLException e) {
+            assertSQLState("XJ078", e);
+        }
+        
+        try {
+            clob.setString(upperLimit, str, str.length() + 1, 1);
+            fail("setString() refuses offset greater than str.length()!");
+        } catch (SQLException e) {
+            assertSQLState("XJ078", e);
+        }
+        
+        //if (offset + len) == str.length(), it's accepted.
+        clob.setString(upperLimit, str, str.length() - 1, 1);
+        
+        try {
+            clob.setString(upperLimit, str, str.length(), 0);
+            fail("offset should be smaller than the length of str");
+        } catch (SQLException e) {
+            assertSQLState("XJ078", e);
+        }
+        
+        try {
+            clob.setString(upperLimit, str, str.length() - 1, 2);
+            fail("setString() refuses offset + len > str.length()!");
+        } catch (SQLException e) {
+            assertSQLState("22011", e);
+        }
+    }
+    
+    /**
+     * Test setString() refuses wrong len. 
+     */
+    public void testSetStringWithWrongLen() throws SQLException {
+        clob.setString(1, "TEST");
+        long upperLimit = clob.length() + 1;
+        String str = "AGAIN";
+        
+        try {
+            clob.setString(upperLimit, str, 0, -1);
+            fail("setString() refuses negative len!");
+        } catch (SQLException e) {
+            assertSQLState("XJ071", e);
+        }
+        
+        try {
+            clob.setString(upperLimit, str, 0, str.length() + 1);
+            fail("setString() refuses wrong len out of range!");
+        } catch (SQLException e) {
+            assertSQLState("22011", e);
+        }
+    }
+    
+    /**
+     * Test setString() refuses pos bigger than clob.length() + 1.
+     */
+    public void testSetStringWithBigPos() throws SQLException {
+        clob.setString(1, "TEST");
+        long upperLimit = clob.length() + 1;
+        
+        try {
+            clob.setString(upperLimit + 1, "AGAIN", 0, 2);
+            fail("pos is out of range!");
+        } catch (SQLException e) {
+            assertSQLState("XJ076", e);
+        }
+    }
+    
+    /**
+     * Test setStrinng() refuses a Null String.
+     */
+    public void testSetStringWithNull() throws SQLException {
+        clob.setString(1, "TEST");
+        long upperLimit = clob.length() + 1;
+        
+        try {
+            clob.setString(upperLimit, null, 0, 2);
+            fail("can not accepted null String!");
+        } catch (SQLException e) {
+            assertSQLState("XJ072", e);
+        }
+    }
+    
+    /**
+     * Test setString() accepts a empty String, and just return 0.
+     */
+    public void testSetStringWithEmptyString() throws SQLException {
+        clob.setString(1, "TEST");
+        long upperLimit = clob.length() + 1;              
+        assertEquals(0, clob.setString(upperLimit, "", 0, 0));           
+    }
 
     /**
      * Truncating a Clob to the empty string.

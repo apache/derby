@@ -699,6 +699,7 @@ public interface SQLState {
 	String LANG_DATE_SYNTAX_EXCEPTION                                  = "22007.S.181";
     String LANG_INVALID_FUNCTION_ARGUMENT                              = "22008.S";
 	String LANG_SUBSTR_START_OR_LEN_OUT_OF_RANGE                        = "22011";
+	String LANG_SUBSTR_START_ADDING_LEN_OUT_OF_RANGE                        = "22011.S.1";
 	String LANG_DIVIDE_BY_ZERO                                         = "22012";
     String LANG_SQRT_OF_NEG_NUMBER                                     = "22013";
     String LANG_INVALID_PARAMETER_FOR_SEARCH_POSITION                  = "22014";
