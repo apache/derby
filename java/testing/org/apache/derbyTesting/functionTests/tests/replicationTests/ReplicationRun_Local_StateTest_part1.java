@@ -25,7 +25,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 
@@ -38,8 +38,16 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
 {
-    
-    /**
+    final static String CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE = "08004";
+    final static String LOGIN_FAILED = "08004";
+    final static String REPLICATION_DB_NOT_BOOTED = "XRE11";
+    final static String REPLICATION_MASTER_ALREADY_BOOTED = "XRE22";
+    final static String REPLICATION_NOT_IN_MASTER_MODE = "XRE07";
+    final static String REPLICATION_SLAVE_STARTED_OK = "XRE08";
+
+
+
+/**
      * Creates a new instance of ReplicationRun_Local_StateTest_part1
      * 
      * @param testcaseName Identifying the test.
@@ -262,8 +270,10 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String msg = ec + " " + ss + " " + se.getMessage();
             // SQLState.REPLICATION_NOT_IN_MASTER_MODE
 
-            assertTrue("stopMaster on master failed: " + msg, 
-                    SQLState.REPLICATION_NOT_IN_MASTER_MODE.equals(ss));
+            BaseJDBCTestCase.assertSQLState(
+                "stopMaster on master failed: " + msg,
+                REPLICATION_NOT_IN_MASTER_MODE,
+                se);
             util.DEBUG("stopMaster on master failed as expected: " + connectionURL + " " + msg);
         }
         
@@ -285,8 +295,10 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             int ec = se.getErrorCode();
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
-            assertTrue("stopSlave on slave failed: " + msg, 
-                    SQLState.REPLICATION_DB_NOT_BOOTED.equals(ss));
+            BaseJDBCTestCase.assertSQLState(
+                "stopSlave on slave failed: " + msg,
+                REPLICATION_DB_NOT_BOOTED,
+                se);
             util.DEBUG("stopSlave on slave failed as expected: " + connectionURL + " " + msg);
         }
     }
@@ -317,8 +329,10 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG(msg);
-            assertTrue("2. Unexpected SQLException: " + msg, 
-                    SQLState.REPLICATION_SLAVE_STARTED_OK.equals(ss));
+            BaseJDBCTestCase.assertSQLState(
+                "2. Unexpected SQLException: " + msg,
+                REPLICATION_SLAVE_STARTED_OK,
+                se);
         }
         
         // Next StartSlave connect should fail:
@@ -334,8 +348,10 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG(msg);
-            assertTrue("2. Unexpected SQLException: " + msg, 
-                    SQLState.LOGIN_FAILED.equals(ss));
+            BaseJDBCTestCase.assertSQLState(
+                "2. Unexpected SQLException: " + msg,
+                LOGIN_FAILED,
+                se);
         }
         
     }
@@ -377,8 +393,10 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG(msg);
             util.DEBUG("1. startMaster: No connection as expected: " + msg);
-            assertTrue("1. Unexpected SQLException: " + msg, 
-                    SQLState.REPLICATION_CONNECTION_EXCEPTION.equals(ss));
+            BaseJDBCTestCase.assertSQLState(
+                "1. Unexpected SQLException: " + msg,
+                REPLICATION_CONNECTION_EXCEPTION,
+                se);
         }
         */
         
@@ -399,8 +417,10 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG("2. startMaster No connection as expected: " + msg);
-            assertTrue("2. Unexpected SQLException: " + msg, 
-                    SQLState.REPLICATION_MASTER_ALREADY_BOOTED.equals(ss));
+            BaseJDBCTestCase.assertSQLState(
+                "2. Unexpected SQLException: " + msg,
+                REPLICATION_MASTER_ALREADY_BOOTED,
+                se);
         }
         }
         
@@ -426,8 +446,10 @@ public class ReplicationRun_Local_StateTest_part1 extends ReplicationRun
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG("3. startSlave No connection as expected: " + msg);
-            assertTrue("3. Unexpected SQLException: " + msg, 
-                   SQLState.CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE.startsWith(ss));
+            BaseJDBCTestCase.assertSQLState(
+                "3. Unexpected SQLException: " + msg,
+                CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE,
+                se);
         }
     }
     

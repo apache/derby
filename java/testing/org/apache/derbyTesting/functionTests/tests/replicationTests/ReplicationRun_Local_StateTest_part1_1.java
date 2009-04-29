@@ -25,8 +25,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 
 /**
@@ -38,7 +38,10 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 
 public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
 {
-    
+    final static String REPLICATION_DB_NOT_BOOTED              = "XRE11";
+    final static String REPLICATION_NOT_IN_SLAVE_MODE          = "XRE40";
+    final static String SLAVE_OPERATION_DENIED_WHILE_CONNECTED = "XRE41";
+
     /**
      * Creates a new instance of ReplicationRun_Local_StateTest_part1
      * 
@@ -162,8 +165,10 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
             int ec = se.getErrorCode();
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
-            assertTrue("connectionURL +  failed: " + msg, 
-                    SQLState.SLAVE_OPERATION_DENIED_WHILE_CONNECTED.equals(ss));
+            BaseJDBCTestCase.assertSQLState(
+                connectionURL + " failed: ",
+                SLAVE_OPERATION_DENIED_WHILE_CONNECTED,
+                se);
             util.DEBUG("1. Failed as expected: " + connectionURL +  " " + msg);
         }
         // Default replication test sequence still OK.
@@ -187,8 +192,10 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
             // SSQLCODE: -1, SQLSTATE: XRE40
-            assertTrue("connectionURL +  failed: " + msg, 
-                    SQLState.REPLICATION_NOT_IN_SLAVE_MODE.equals(ss));
+            BaseJDBCTestCase.assertSQLState(
+                connectionURL + " failed: ",
+                REPLICATION_NOT_IN_SLAVE_MODE,
+                se);
             util.DEBUG("2. Failed as expected: " + connectionURL +  " " + msg);
         }
         // Default replication test sequence still OK.
@@ -222,9 +229,11 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
             util.DEBUG("3. Got "+msg + " Expected: " + 
-                    SQLState.REPLICATION_DB_NOT_BOOTED);
-            assertTrue(connectionURL + " failed: " + msg, 
-                    SQLState.REPLICATION_DB_NOT_BOOTED.equals(ss));
+                       REPLICATION_DB_NOT_BOOTED);
+            BaseJDBCTestCase.assertSQLState(
+                connectionURL + " failed: ",
+                REPLICATION_DB_NOT_BOOTED, 
+                se);
             util.DEBUG("3. Failed as expected: " + connectionURL +  " " + msg);
             stopSlaveCorrect = true;
         }

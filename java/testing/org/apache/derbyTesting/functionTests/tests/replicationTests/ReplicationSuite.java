@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.jdbc4.ReplicationSuite
+   Derby - Class org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationSuite
 
        Licensed to the Apache Software Foundation (ASF) under one
        or more contributor license agreements.  See the NOTICE file
@@ -30,7 +30,7 @@ import junit.framework.TestSuite;
 
 /**
  * Suite to run all JUnit tests in this package:
- * org.apache.derbyTesting.functionTests.tests.jdbc4
+ * org.apache.derbyTesting.functionTests.tests.replicationTests
  *
  */
 public class ReplicationSuite extends BaseTestCase  

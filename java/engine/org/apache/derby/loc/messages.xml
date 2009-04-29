@@ -4901,7 +4901,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
-                <name>XRE04.U.1</name>
+                <name>XRE04.C.1</name>
                 <text>Could not establish a connection to the peer of the replicated database '{0}' on address '{1}:{2}'.</text>
                 <arg>dbname</arg>
                 <arg>hostname</arg>
@@ -4909,13 +4909,13 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
-                <name>XRE04.U.2</name>
+                <name>XRE04.C.2</name>
                 <text>Connection lost for replicated database '{0}'.</text>
                 <arg>dbname</arg>
             </msg>
 
             <msg>
-                <name>XRE05</name>
+                <name>XRE05.C</name>
                 <text>The log files on the master and slave are not in synch for replicated database '{0}'. The master log instant is {1}:{2}, whereas the slave log instant is {3}:{4}. This is FATAL for replication - replication will be stopped.</text>
                 <arg>dbname</arg>
                 <arg>masterfile</arg>
@@ -4942,8 +4942,8 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
-                <name>XRE09</name>
-                <text>Cannot start replication slave mode for database '{0}'. The database has already been booted. </text>
+                <name>XRE09.C</name>
+                <text>Cannot start replication slave mode for database '{0}'. The database has already been booted.</text>
                 <arg>dbname</arg>
             </msg>
 
@@ -4954,7 +4954,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
             
             <msg>
-                <name>XRE11</name>
+                <name>XRE11.C</name>
                 <text>Could not perform operation '{0}' because the database '{1}' has not been booted.</text>
                 <arg>command</arg>
                 <arg>dbname</arg>
@@ -4975,13 +4975,13 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
             
             <msg>
-                <name>XRE21</name>
+                <name>XRE21.C</name>
                 <text>Error occurred while performing failover for database '{0}', Failover attempt was aborted.</text>
                 <arg>dbname</arg>
             </msg>
 
             <msg>
-                <name>XRE22</name>
+                <name>XRE22.C</name>
                 <text>Replication master has already been booted for database '{0}'</text>
                 <arg>dbname</arg>
             </msg>
@@ -4997,12 +4997,12 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
-                <name>XRE41</name>
+                <name>XRE41.C</name>
                 <text>Replication operation 'failover' or 'stopSlave' refused on the slave database because the connection with the master is working. Issue the 'failover' or 'stopMaster' operation on the master database instead.</text>
             </msg>
 
             <msg>
-                <name>XRE42</name>
+                <name>XRE42.C</name>
                 <text>Replicated database '{0}' shutdown.</text>
                 <arg>dbname</arg>
             </msg>

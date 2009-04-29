@@ -28,7 +28,6 @@ import java.util.Properties;
 import java.sql.*;
 import java.io.*;
 import org.apache.derby.jdbc.ClientDataSource;
-import org.apache.derby.shared.common.reference.SQLState;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
@@ -49,6 +48,8 @@ public class ReplicationRun extends BaseTestCase
      */
     final static String REPLICATIONTEST_PROPFILE = "replicationtest.properties";
     
+    final static String REPLICATION_MASTER_TIMED_OUT = "XRE06";
+
     static String testUser = null;
     
     static String userDir = null;
@@ -1004,7 +1005,7 @@ public class ReplicationRun extends BaseTestCase
                     }
                     else
                     {
-                        if (SQLState.REPLICATION_MASTER_TIMED_OUT.equals(sState)) // FIXME! CANNOT_START_MASTER_ALREADY_BOOTED
+                        if (REPLICATION_MASTER_TIMED_OUT.equals(sState)) // FIXME! CANNOT_START_MASTER_ALREADY_BOOTED
                         {
                             util.DEBUG("Master already started?");
                         }

@@ -25,8 +25,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 
 /**
@@ -39,6 +39,11 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
 {
     
+    final static String LOGIN_FAILED = "08004";
+    final static String REPLICATION_DB_NOT_BOOTED = "XRE11";
+    final static String REPLICATION_MASTER_ALREADY_BOOTED = "XRE22";
+    final static String REPLICATION_NOT_IN_MASTER_MODE = "XRE07";
+    final static String REPLICATION_SLAVE_STARTED_OK = "XRE08";
     /**
      * Creates a new instance of ReplicationRun_Local_StateTest_part1
      * 
@@ -166,8 +171,10 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
             //  SQLCODE: -1, SQLSTATE: 08004
-            assertTrue("connectionURL +  failed: " + msg, 
-                    SQLState.LOGIN_FAILED.equals(ss));
+            BaseJDBCTestCase.assertSQLState(
+                "connectionURL +  failed: " + msg,
+                LOGIN_FAILED,
+                se);
             util.DEBUG("stopMaster on slave failed as expected: " 
                     + connectionURL + " " + msg);
         }
@@ -239,9 +246,11 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
             int ec = se.getErrorCode();
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
-            assertTrue("4. stopMaster on slave failed with: " 
-                    + connectionURL + " " + msg, 
-                    SQLState.REPLICATION_NOT_IN_MASTER_MODE.equals(ss));
+            BaseJDBCTestCase.assertSQLState(
+                "4. stopMaster on slave failed with: " 
+                    + connectionURL + " " + msg,
+                REPLICATION_NOT_IN_MASTER_MODE,
+                se);
             util.DEBUG("4. stopMaster on slave failed as expected: " 
                     + connectionURL + " " + msg);
         }
@@ -287,9 +296,11 @@ public class ReplicationRun_Local_StateTest_part1_2 extends ReplicationRun
             int ec = se.getErrorCode();
             String ss = se.getSQLState();
             String msg = ec + " " + ss + " " + se.getMessage();
-            assertTrue("6. stopMaster on server not in master mode failed with: " 
-                    + connectionURL + " " + msg, 
-                    SQLState.REPLICATION_NOT_IN_MASTER_MODE.equals(ss));
+            BaseJDBCTestCase.assertSQLState(
+                "6. stopMaster on server not in master mode failed with: " 
+                    + connectionURL + " " + msg,
+                REPLICATION_NOT_IN_MASTER_MODE,
+                se);
             util.DEBUG("6. stopMaster on server not in master mode failed as expected: " 
                     + connectionURL + " " + msg);
         }
