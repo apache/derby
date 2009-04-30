@@ -288,7 +288,7 @@ class DDMReader
 	 *
 	 * @return true if this is a command; false otherwise
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected boolean isCmd() throws DRDAProtocolException, java.io.UnsupportedEncodingException
 	{
@@ -320,7 +320,7 @@ class DDMReader
 	 *			 - 5 - Request DSS where no reply is expected
 	 *	2 bytes - request correlation id
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected int readDssHeader () throws DRDAProtocolException
 	{
@@ -436,7 +436,7 @@ class DDMReader
 	 * This is used in testing the protocol.  We shouldn't see a reply
 	 * DSS when we are servicing DRDA commands
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected void readReplyDss() throws DRDAProtocolException
 	{
@@ -509,7 +509,7 @@ class DDMReader
      * @param isLayerBStreamingPossible true only when layer B streaming is possible
 	 * @return - returns codepoint
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected int readLengthAndCodePoint( boolean isLayerBStreamingPossible ) 
         throws DRDAProtocolException
@@ -627,7 +627,7 @@ class DDMReader
 	 * 	@return	NO_CODEPOINT if collection stack is empty or remaining length is
 	 *		0; otherwise,  read length and code point
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected int getCodePoint() throws DRDAProtocolException
 	{
@@ -655,7 +655,7 @@ class DDMReader
 	 * @param	codePointCheck	- codePoint to check against
 	 * @return	codePoint
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected int getCodePoint(int codePointCheck) throws DRDAProtocolException
 	{
@@ -675,7 +675,7 @@ class DDMReader
 	 * Read byte value
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected byte readByte () throws DRDAProtocolException
 	{
@@ -697,7 +697,7 @@ class DDMReader
 	 * Read network short value
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected int readNetworkShort () throws DRDAProtocolException
 	{
@@ -710,7 +710,7 @@ class DDMReader
 	 * Read signed network short value
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected int readSignedNetworkShort () throws DRDAProtocolException
 	{
@@ -722,7 +722,7 @@ class DDMReader
 	 * Read platform short value
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected short readShort (int byteOrder) throws DRDAProtocolException
 	{
@@ -738,7 +738,7 @@ class DDMReader
 	 * Read network int value
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected int readNetworkInt () throws DRDAProtocolException
 	{
@@ -753,7 +753,7 @@ class DDMReader
 	 * Read platform int value
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected int readInt (int byteOrder) throws DRDAProtocolException
 	{
@@ -769,7 +769,7 @@ class DDMReader
 	 * Read network long value
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected long readNetworkLong () throws DRDAProtocolException
 	{
@@ -790,7 +790,7 @@ class DDMReader
 	 * Read network six byte value and put it in a long v
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected long readNetworkSixByteLong() throws DRDAProtocolException
 	{
@@ -809,7 +809,7 @@ class DDMReader
 	 * Read platform long value
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected long readLong (int byteOrder) throws DRDAProtocolException
 	{
@@ -825,7 +825,7 @@ class DDMReader
 	 * Read platform float value
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected float readFloat(int byteOrder) throws DRDAProtocolException
 	{
@@ -836,7 +836,7 @@ class DDMReader
 	 * Read platform double value
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected double readDouble(int byteOrder) throws DRDAProtocolException
 	{
@@ -849,7 +849,7 @@ class DDMReader
 	 * @param	scale of the BigDecimal
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected BigDecimal readBigDecimal(int precision, int scale) throws DRDAProtocolException
     {
@@ -1342,7 +1342,7 @@ class DDMReader
 	 * Read boolean value
 	 * @return	value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected boolean readBoolean () throws DRDAProtocolException
 	{
@@ -1359,7 +1359,8 @@ class DDMReader
 	 *                           from source (encryptor)
 	 * @return  decrypted string
 	 *
-	 * @exception DRDProtocolException, SQLException(wrapping any exception in decryption)
+	 * @exception DRDAProtocolException if a protocol error is detected
+     * @exception java.sql.SQLException wrapping any exception in decryption
 	 */
 	protected String readEncryptedString (DecryptionManager decryptM, int securityMechanism,
 										 byte[] initVector, byte[] sourcePublicKey)
@@ -1382,7 +1383,7 @@ class DDMReader
 	 * @param length  - length of string to read
 	 * @return value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected String readString (int length) throws DRDAProtocolException
 	{
@@ -1422,7 +1423,7 @@ class DDMReader
 	 * @param length  - length of string to read
 	 * @return value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected String readString (int length, String encoding) 
 		throws DRDAProtocolException
@@ -1447,7 +1448,7 @@ class DDMReader
 	 * Read string value in DDM data with default encoding
 	 * @return value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected String readStringData()
 		throws DRDAProtocolException
@@ -1460,7 +1461,7 @@ class DDMReader
 	 * @param length  - length of string to read
 	 * @return value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected String readStringData(int length)
 		throws DRDAProtocolException
@@ -1472,7 +1473,7 @@ class DDMReader
 	 * Read length delimited string value in DDM data with default encoding
 	 * @return value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected String readLDStringData(String encoding)
 		throws DRDAProtocolException
@@ -1484,7 +1485,7 @@ class DDMReader
 	/**
 	 * Read string value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected String readString () throws DRDAProtocolException
 	{
@@ -1496,7 +1497,7 @@ class DDMReader
 	 * @param length  - length of string to read
 	 * @return byte array
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected byte[] readBytes (int length) throws DRDAProtocolException
 	{
@@ -1518,7 +1519,7 @@ class DDMReader
 	 * Read byte string value
 	 * @return byte array
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected byte[] readBytes () throws DRDAProtocolException
 	{
@@ -1529,7 +1530,7 @@ class DDMReader
 	 * Skip byte string value
 	 * @param length  - length of string to skip
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected void skipBytes (int length) throws DRDAProtocolException
 	{
@@ -1608,7 +1609,7 @@ class DDMReader
 	 * @param length  - length of string to read
 	 * @return value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected String readCmdString (int length) throws DRDAProtocolException, java.io.UnsupportedEncodingException
 	{
@@ -1625,7 +1626,7 @@ class DDMReader
 	 * Read string value
 	 * @return value
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	protected String readCmdString () throws DRDAProtocolException, java.io.UnsupportedEncodingException
 	{
@@ -1664,7 +1665,7 @@ class DDMReader
 	 * @param desiredDataSize - amount of data we need
 	 * @param adjustLen	- whether to adjust the remaining lengths
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	private void ensureBLayerDataInBuffer (int desiredDataSize, boolean adjustLen) 
 		throws DRDAProtocolException
@@ -1888,7 +1889,7 @@ class DDMReader
 	 * read bytes until it has obtained at least the minimum number.
 	 * @param minimumBytesNeeded - minimum required bytes
 	 *
-	 * @exception DRDProtocolException
+	 * @exception DRDAProtocolException if a protocol error is detected
 	 */
 	private void fill (int minimumBytesNeeded) throws DRDAProtocolException
 	{
