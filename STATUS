@@ -28,7 +28,7 @@ Project info
 
 Releases from trunk:
 
- * 10.5.0.0 : 10.5 branch created on 2009-03-16
+ * 10.5.1.1 : Released 2009-04-28
  * 10.4.2.0 : Released 2008-09-05
  * 10.4.1.3 : Released 2008-04-24
  * 10.3.3.0 : Released 2008-05-12
@@ -53,19 +53,19 @@ None.
 
 RECENT VOTES
 =================================
+Release 10.5.1.1 was voted as release on 2009-04-28.
 
 None.  
 
 OTHER NEWS
 ==========
 
-The 10.5 release will introduce an experimental in-memory database. User feedback is welcome. See http://wiki.apache.org/db-derby/InMemoryBackEndPrimer
+The 10.5 release has introduced an experimental in-memory database. User feedback is welcome. See http://wiki.apache.org/db-derby/InMemoryBackEndPrimer
 
 RELEASE STATUS
 ==============
 
-A 10.5 branch was created on 2009-03-16.
-
+10.5.1.1 was voted as next release on 2009-04-28 and announced 2009-05-01.
 No currently outstanding issues.
 
 
