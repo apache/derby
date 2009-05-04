@@ -89,7 +89,10 @@ public class MogTest extends BaseJDBCTestCase {
           throws SQLException {
 
     // Initialize test objects.
-    final long _seed = System.currentTimeMillis();
+    // NOTE: Due to instability in the test, the seed has been fixed.
+    //       See DERBY-4209 (and DERBY-4085).
+    //final long _seed = System.currentTimeMillis();
+    final long _seed = 1241411544935L;
     java.util.Random rng = new java.util.Random(_seed);
     /** MOG generator being tested */
     GenMog genMog = new GenMog(rng);
