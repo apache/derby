@@ -130,15 +130,12 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     public void testNewKeywordNonReserved()
             throws Exception
     {
-        getConnection().prepareStatement(
-            "select a,b as OFFSET from t1 OFFSET 0 rows");
+        prepareStatement("select a,b as OFFSET from t1 OFFSET 0 rows");
 
         // Column and table correlation name usage
-        getConnection().prepareStatement(
-            "select a,b from t1 AS OFFSET");
+        prepareStatement("select a,b from t1 AS OFFSET");
 
-        getConnection().prepareStatement(
-            "select a,b OFFSET from t1 OFFSET");
+        prepareStatement("select a,b OFFSET from t1 OFFSET");
     }
 
 
@@ -366,7 +363,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         Statement stm = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                         ResultSet.CONCUR_UPDATABLE);
 
-        getConnection().setAutoCommit(false);
+        setAutoCommit(false);
 
         /*
          * offset 0 rows (a no-op), update a row and verify result
@@ -461,7 +458,7 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         Statement stm = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                         ResultSet.CONCUR_UPDATABLE);
 
-        getConnection().setAutoCommit(false);
+        setAutoCommit(false);
 
         /*
          * offset 0 rows (a no-op), update a row and verify result
@@ -616,13 +613,13 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     public void testBigTable() throws SQLException {
         Statement stm = createStatement();
 
-        getConnection().setAutoCommit(false);
+        setAutoCommit(false);
 
         stm.executeUpdate("declare global temporary table session.t (i int) " +
                           "on commit preserve rows not logged");
 
         PreparedStatement ps =
-            getConnection().prepareStatement("insert into session.t values ?");
+            prepareStatement("insert into session.t values ?");
 
         for (int i=1; i <= 100000; i++) {
             ps.setInt(1, i);
