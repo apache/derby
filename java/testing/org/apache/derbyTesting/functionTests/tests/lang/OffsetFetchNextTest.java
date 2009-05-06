@@ -649,10 +649,8 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     /**
      * Test that the values of offset and fetch first are not forgotten if
      * a {@code PreparedStatement} is executed multiple times (DERBY-4212).
-     * <b>NOTE:</b> Disabled until the bug is fixed. Remove x from the method
-     * name to enable it.
      */
-    public void xtestRepeatedExecution() throws SQLException {
+    public void testRepeatedExecution() throws SQLException {
         PreparedStatement ps = prepareStatement(
                 "select * from t1 order by b " +
                 "offset 2 rows fetch next 2 rows only");
