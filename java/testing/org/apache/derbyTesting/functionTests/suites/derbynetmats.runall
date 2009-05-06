@@ -6,4 +6,3 @@ derbynet/testProtocol.java
 lang/holdCursorIJ.sql
 lang/wisconsin.java
 lang/ShutdownDatabase.java
-store/holdCursorJDBC30.sql
