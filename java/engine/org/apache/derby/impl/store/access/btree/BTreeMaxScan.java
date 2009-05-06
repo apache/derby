@@ -366,7 +366,9 @@ public class BTreeMaxScan extends BTreeScan
             if (latch_released)
             {
                 // lost latch on pos.current_leaf, search the tree again.
-                pos.current_leaf = null;
+                // Forget the current position since we'll reposition on the
+                // rightmost key, which is not necessarily the saved position.
+                pos.init();
                 continue;
             }
             else
