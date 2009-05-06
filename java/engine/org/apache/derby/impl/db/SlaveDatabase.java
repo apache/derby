@@ -352,10 +352,7 @@ public class SlaveDatabase extends BasicDatabase {
             }
         }
 
-        if (bootException != null &&
-            SQLState.SHUTDOWN_DATABASE.startsWith(
-                bootException.getSQLState()) &&
-            bootException.getSeverity() == ExceptionSeverity.DATABASE_SEVERITY) {
+        if (bootException != null) {
 
             // DERBY-4186: This is a corner case. Master made us shut down
             // before the initial connect which establishes the slave has
