@@ -65,6 +65,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(DatabaseClassLoadingTest.suite());
         suite.addTest(DynamicLikeOptimizationTest.suite());
         suite.addTest(ExistsWithSubqueriesTest.suite());
+        suite.addTest(FloatTypesTest.suite());
         suite.addTest(GrantRevokeTest.suite());
         suite.addTest(GroupByExpressionTest.suite());
 		suite.addTest(LangScripts.suite());

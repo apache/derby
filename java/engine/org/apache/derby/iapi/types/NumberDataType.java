@@ -493,7 +493,10 @@ public abstract class NumberDataType extends DataType
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.REAL_NAME);
         }
         // Normalize negative floats to be "positive" (can't detect easily without using Float object because -0.0f = 0.0f)
-        if (v == 0.0f) v = 0.0f;
+        // DERBY-2447: It shouldn't matter whether we compare to 0.0f or -0.0f,
+        // both should match negative zero, but comparing to 0.0f triggered
+        // this JVM bug: http://bugs.sun.com/view_bug.do?bug_id=6833879
+        if (v == -0.0f) v = 0.0f;
 
         return v;
 	}
@@ -519,7 +522,10 @@ public abstract class NumberDataType extends DataType
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.REAL_NAME);
         }
         // Normalize negative floats to be "positive" (can't detect easily without using Float object because -0.0f = 0.0f)
-        if (v == 0.0d) v = 0.0d;
+        // DERBY-2447: It shouldn't matter whether we compare to 0.0d or -0.0d,
+        // both should match negative zero, but comparing to 0.0d triggered
+        // this JVM bug: http://bugs.sun.com/view_bug.do?bug_id=6833879
+        if (v == -0.0d) v = 0.0d;
 
         return (float)v;
     }
@@ -539,7 +545,10 @@ public abstract class NumberDataType extends DataType
 			throw StandardException.newException(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE, TypeId.DOUBLE_NAME);
         }
         // Normalize negative doubles to be "positive" (can't detect easily without using Double object because -0.0f = 0.0f)
-        if (v == 0.0d) v = 0.0d;
+        // DERBY-2447: It shouldn't matter whether we compare to 0.0d or -0.0d,
+        // both should match negative zero, but comparing to 0.0d triggered
+        // this JVM bug: http://bugs.sun.com/view_bug.do?bug_id=6833879
+        if (v == -0.0d) v = 0.0d;
 
         return v;
 	}
