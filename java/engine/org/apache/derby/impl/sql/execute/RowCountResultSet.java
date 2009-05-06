@@ -49,8 +49,20 @@ class RowCountResultSet extends NoPutResultSetImpl
     // life of object.
     final NoPutResultSet source;
     final private boolean runTimeStatsOn;
-    private long offset;
-    private long fetchFirst;
+    final private long offset;
+    final private long fetchFirst;
+
+    /**
+     * True if we haven't yet fetched any rows from this result set.
+     * Will be reset on close so the result set is ready to reuse.
+     */
+    private boolean virginal;
+
+    /**
+     * Holds the number of rows returned so far in this round of using the
+     * result set.  Will be reset on close so the result set is ready to reuse.
+     */
+    private long rowsFetched;
 
     /**
      * RowCountResultSet constructor
@@ -87,6 +99,8 @@ class RowCountResultSet extends NoPutResultSetImpl
 
         this.offset = offset;
         this.fetchFirst = fetchFirst;
+        virginal = true;
+        rowsFetched = 0;
 
         /* Remember whether or not RunTimeStatistics is on */
         runTimeStatsOn =
@@ -159,24 +173,26 @@ class RowCountResultSet extends NoPutResultSetImpl
 
         beginTime = getCurrentTimeMillis();
 
-        if (offset > 0) {
+        if (virginal && offset > 0) {
+            // Only skip rows the first time around
+            virginal = false;
+
+            long offsetCtr = offset;
+
             do {
                 result = source.getNextRowCore();
-                offset--;
+                offsetCtr--;
 
-                if (result != null && offset >= 0) {
+                if (result != null && offsetCtr >= 0) {
                     rowsFiltered++;
                 } else {
                     break;
                 }
 
             } while (true);
-
-            // only skip row first time
-            offset = 0;
         } else {
 
-            if (fetchFirst != -1 && rowsSeen >= fetchFirst) {
+            if (fetchFirst != -1 && rowsFetched >= fetchFirst) {
                 result = null;
             } else {
                 result = source.getNextRowCore();
@@ -185,6 +201,7 @@ class RowCountResultSet extends NoPutResultSetImpl
 
 
         if (result != null) {
+            rowsFetched++;
             rowsSeen++;
         }
 
@@ -247,6 +264,10 @@ class RowCountResultSet extends NoPutResultSetImpl
                                     "Close of RowCountResultSet repeated");
             }
         }
+
+        // Reset state for result set reuse, if any
+        virginal = true;
+        rowsFetched = 0;
 
         closeTime += getElapsedMillis(beginTime);
     }
