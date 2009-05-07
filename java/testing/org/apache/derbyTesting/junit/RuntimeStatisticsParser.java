@@ -309,9 +309,9 @@ public class RuntimeStatisticsParser {
     /**
      * Search the RuntimeStatistics for a string.  It must occur
      * at least instances times.
-     * @param stringToFind
-     * @param instances
-     * @return true if stringToFind is found instances times.
+     * @param stringToFind the string to search for
+     * @param instances the minimum number of occurrences of the string
+     * @return true if stringToFind is found at least {@code instances} times
      */
     public boolean findString(String stringToFind, int instances)
     {
@@ -323,12 +323,11 @@ public class RuntimeStatisticsParser {
             if (currentOffset != -1) {
                 foundCount++;
                 stat = stat.substring(currentOffset + stringToFind.length());
-            } else {    
+            } else {
                 break;
-            }   
-            }    
-            return (foundCount >=instances);
-                
+            }
+        }
+        return (foundCount >= instances);
     }
 
     /**
