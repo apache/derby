@@ -62,9 +62,9 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
     }
 
     protected void tearDown() throws Exception {
+        // Rollback all uncommitted operations so that we don't hold any
+        // locks that may block the other threads.
         rollback();
-        setAutoCommit(false); // required by JDBC.dropSchema()
-        JDBC.dropSchema(getConnection().getMetaData(), "APP");
 
         // Go through all the threads and call waitFor() so that we
         // detect errors that happened in another thread.
@@ -73,6 +73,12 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
             thread.waitFor();
         }
         threads = null;
+
+        // All the other threads have finished. Now, remove everything from
+        // the APP schema so that we don't leave anything around for subsequent
+        // tests.
+        setAutoCommit(false); // required by JDBC.dropSchema()
+        JDBC.dropSchema(getConnection().getMetaData(), "APP");
 
         super.tearDown();
     }
