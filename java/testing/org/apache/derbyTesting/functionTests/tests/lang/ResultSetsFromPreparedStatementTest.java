@@ -39,6 +39,8 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
+import org.apache.derbyTesting.junit.SQLUtilities;
 
 // TODO:
 // - Add parameters to all PreparedStatements that support it
@@ -2132,4 +2134,92 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         ps.setMaxRows(2);
         JDBC.assertDrainResults(ps.executeQuery(), 2);
     }
+
+    // Regression tests for DERBY-4204 (regression from DERBY-827)
+    /**
+     * Private helper method that prepares and executes an SQL statement
+     * multiple times and checks that the runtime statistics for the correct
+     * statement is collected.
+     *
+     * @param sql the SQL text to prepare and execute
+     */
+    private void testRuntimeStatistics(String sql) throws SQLException {
+        Statement s = createStatement();
+        s.execute("call syscs_util.syscs_set_runtimestatistics(1)");
+        PreparedStatement ps = prepareStatement(sql);
+        for (int i = 0; i < 5; i++) {
+            ps.execute();
+            while (true) {
+                if (ps.getMoreResults()) {
+                    JDBC.assertDrainResults(ps.getResultSet());
+                } else if (ps.getUpdateCount() == -1) {
+                    // No result set and no update count means no more results
+                    break;
+                }
+            }
+            RuntimeStatisticsParser rtsp =
+                    SQLUtilities.getRuntimeStatisticsParser(s);
+            // Before DERBY-4204 the assert below would fail for some kinds
+            // of statements because the statistics for the previous call to
+            // SYSCS_GET_RUNTIMESTATISTICS() would be returned instead of the
+            // statistics for the previously executed statement.
+            assertTrue("Wrong statement", rtsp.findString(sql, 1));
+        }
+    }
+
+    /**
+     * Test that runtime statistics are collected on re-execution of a
+     * SELECT statement.
+     */
+    public void testRuntimeStatisticsForSelect() throws SQLException {
+        createTestTable("dept", DS, "dept_data");
+        testRuntimeStatistics("select * from dept");
+    }
+
+    /**
+     * Test that runtime statistics are collected on re-execution of an
+     * UPDATE statement.
+     */
+    public void testRuntimeStatisticsForUpdate() throws SQLException {
+        createTestTable("dept", DS, "dept_data");
+        testRuntimeStatistics("update dept set dname = upper(dname)");
+    }
+
+    /**
+     * Test that runtime statistics are collected on re-execution of an
+     * INSERT statement.
+     */
+    public void testRuntimeStatisticsForInsert() throws SQLException {
+        createTestTable("dept", DS, "dept_data");
+        testRuntimeStatistics("insert into dept select * from dept where 1<>1");
+    }
+
+    /**
+     * Test that runtime statistics are collected on re-execution of a
+     * DELETE statement.
+     */
+    public void testRuntimeStatisticsForDelete() throws SQLException {
+        createTestTable("dept", DS, "dept_data");
+        testRuntimeStatistics("delete from dept");
+    }
+
+    /**
+     * Test that runtime statistics are collected on re-execution of a
+     * VALUES statement.
+     */
+    public void testRuntimeStatisticsForValues() throws SQLException {
+        testRuntimeStatistics("values (1, 2, 3, 'this is a test')");
+    }
+
+    /**
+     * Test that runtime statistics are collected on re-execution of a
+     * CALL statement.
+     */
+    public void testRuntimeStatisticsForCall() throws SQLException {
+        createTestTable("dept", DS, "dept_data");
+        testRuntimeStatistics(
+                "call syscs_util.syscs_compress_table(" +
+                "current schema, 'DEPT', 1)");
+    }
+
 }
