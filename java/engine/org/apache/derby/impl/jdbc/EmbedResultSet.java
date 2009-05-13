@@ -3648,7 +3648,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 act.close();
 
                 lcc.popStatementContext(statementContext, null);
-            } catch (StandardException t) {
+            } catch (Throwable t) {
                 throw closeOnTransactionError(t);
             } finally {
                 if (statementContext != null)
@@ -3733,7 +3733,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 movePosition(RELATIVE, 0, "relative");
             }
             lcc.popStatementContext(statementContext, null);
-        } catch (StandardException t) {
+        } catch (Throwable t) {
             throw closeOnTransactionError(t);
         } finally {
             if (statementContext != null)
@@ -3795,7 +3795,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 //the next row.
                 currentRow = null;
                 lcc.popStatementContext(statementContext, null);
-            } catch (StandardException t) {
+            } catch (Throwable t) {
                     throw closeOnTransactionError(t);
             } finally {
                 if (statementContext != null)
