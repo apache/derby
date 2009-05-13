@@ -21,7 +21,6 @@
 
 package org.apache.derby.client.am;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.error.ExceptionUtil;
 
@@ -75,36 +74,4 @@ public class BatchUpdateException extends java.sql.BatchUpdateException {
     {
         this(logWriter, msgid, new Object[] {arg1}, updateCounts);
     }
-    
-    //-----------------old constructors - to be removed when i18n is complete
-    //-----------------------------------------------
-
-    // Temporary constructor until all error keys are defined.
-    public BatchUpdateException(LogWriter logWriter) {
-        this(logWriter, null, null, SqlException.DEFAULT_ERRCODE, null);
-    }
-
-    // Temporary constructor until all error keys are defined.
-    public BatchUpdateException(LogWriter logWriter, int[] updateCounts) {
-        this(logWriter, null, null, SqlException.DEFAULT_ERRCODE, updateCounts);
-    }
-
-    // Temporary constructor until all error keys are defined.
-    public BatchUpdateException(LogWriter logWriter, String reason, int[] updateCounts) {
-        this(logWriter, reason, null, SqlException.DEFAULT_ERRCODE, updateCounts);
-    }
-
-    // Temporary constructor until all error keys are defined.
-    public BatchUpdateException(LogWriter logWriter, String reason, String sqlState, int[] updateCounts) {
-        this(logWriter, reason, sqlState, SqlException.DEFAULT_ERRCODE, updateCounts);
-    }
-
-    // Temporary constructor until all error keys are defined.
-    public BatchUpdateException(LogWriter logWriter, String reason, String sqlState, int errorCode, int[] updateCounts) {
-        super(reason, sqlState, errorCode, updateCounts);
-        if (logWriter != null) {
-            logWriter.traceDiagnosable(this);
-        }
-    }
 }
-
