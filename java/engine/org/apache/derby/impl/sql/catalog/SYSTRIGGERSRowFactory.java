@@ -23,9 +23,12 @@ package org.apache.derby.impl.sql.catalog;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLTimestamp;
 import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.UserType;
 
 import org.apache.derby.iapi.types.TypeId;
 
@@ -203,7 +206,7 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		row.setColumn(3, new SQLChar((suuid == null) ? null : suuid.toString()));
 
 		/* 4th column is CREATIONTIMESTAMP */
-		row.setColumn(4, dvf.getDataValue(createTime));
+		row.setColumn(4, new SQLTimestamp(createTime));
 
 		/* 5th column is EVENT */
 		row.setColumn(5, new SQLChar(event));
@@ -229,16 +232,16 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		/* 12th column is REFERENCEDCOLUMNS 
 		 *  (user type org.apache.derby.catalog.ReferencedColumns)
 		 */
-		row.setColumn(12, dvf.getDataValue(rcd));
+		row.setColumn(12, new UserType(rcd));
 
 		/* 13th column is TRIGGERDEFINITION */
 		row.setColumn(13, dvf.getLongvarcharDataValue(triggerDefinition));
 
 		/* 14th column is REFERENCINGOLD */
-		row.setColumn(14, dvf.getDataValue(referencingOld));
+		row.setColumn(14, new SQLBoolean(referencingOld));
 
 		/* 15th column is REFERENCINGNEW */
-		row.setColumn(15, dvf.getDataValue(referencingNew));
+		row.setColumn(15, new SQLBoolean(referencingNew));
 
 		/* 16th column is OLDREFERENCINGNAME */
 		row.setColumn(16, new SQLVarchar(oldReferencingName));

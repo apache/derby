@@ -171,11 +171,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
          * @see DataValueFactory#getDataValue
          *
          */
-        public NumberDataValue getDataValue(int value)
-        {
-                return new SQLInteger(value);
-        }
-
         public NumberDataValue getDataValue(int value, NumberDataValue previous)
                                                         throws StandardException
         {
@@ -183,14 +178,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                         return new SQLInteger(value);
                 previous.setValue(value);
                 return previous;
-        }
-
-        public NumberDataValue getDataValue(Integer value)
-        {
-                if (value != null)
-                        return new SQLInteger(value.intValue());
-                else
-                        return new SQLInteger();
         }
 
         public NumberDataValue getDataValue(Integer value, NumberDataValue previous)
@@ -223,20 +210,11 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
-        public NumberDataValue getDataValue(Short value)
-        {
-                if (value != null)
-                        return new SQLSmallint(value.shortValue());
-                else
-                        return new SQLSmallint();
-        }
-
         public NumberDataValue getDataValue(Short value, NumberDataValue previous)
                         throws StandardException
         {
                 if (previous == null)
-                        return getDataValue(value);
-
+                        return new SQLSmallint(value);
                 previous.setValue(value);
                 return previous;
         }
@@ -250,27 +228,13 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
-        public NumberDataValue getDataValue(Byte value)
-        {
-                if (value != null)
-                        return new SQLTinyint(value.byteValue());
-                else
-                        return new SQLTinyint();
-        }
-
         public NumberDataValue getDataValue(Byte value, NumberDataValue previous)
                                 throws StandardException
         {
                 if (previous == null)
-                        return getDataValue(value);
-
+                        return new SQLTinyint(value);
                 previous.setValue(value);
                 return previous;
-        }
-
-        public NumberDataValue getDataValue(long value)
-        {
-                return new SQLLongint(value);
         }
 
         public NumberDataValue getDataValue(long value, NumberDataValue previous)
@@ -282,20 +246,12 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
-        public NumberDataValue getDataValue(Long value)
-        {
-                if (value != null)
-                        return new SQLLongint(value.longValue());
-                else
-                        return new SQLLongint();
-        }
 
         public NumberDataValue getDataValue(Long value, NumberDataValue previous)
                         throws StandardException
         {
                 if (previous == null)
-                        return getDataValue(value);
-
+                        return new SQLLongint(value);
                 previous.setValue(value);
                 return previous;
         }
@@ -309,21 +265,11 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
-        public NumberDataValue getDataValue(Float value)
-                throws StandardException
-        {
-                if (value != null)
-                        return new SQLReal(value.floatValue());
-                else
-                        return new SQLReal();
-        }
-
         public NumberDataValue getDataValue(Float value, NumberDataValue previous)
                         throws StandardException
         {
                 if (previous == null)
-                        return getDataValue(value);
-
+                        return new SQLReal(value);
                 previous.setValue(value);
                 return previous;
         }
@@ -337,20 +283,11 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
-        public NumberDataValue getDataValue(Double value) throws StandardException
-        {
-                if (value != null)
-                        return new SQLDouble(value.doubleValue());
-                else
-                        return new SQLDouble();
-        }
-
         public NumberDataValue getDataValue(Double value, NumberDataValue previous)
                         throws StandardException
         {
                 if (previous == null)
-                        return getDataValue(value);
-
+                        return new SQLDouble(value);
                 previous.setValue(value);
                 return previous;
         }
@@ -383,11 +320,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
-        public BooleanDataValue getDataValue(boolean value)
-        {
-                return new SQLBoolean(value);
-        }
-
         public BooleanDataValue getDataValue(boolean value,
                                                                                 BooleanDataValue previous)
                         throws StandardException
@@ -399,31 +331,14 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
-        public BooleanDataValue getDataValue(Boolean value)
-        {
-                if (value != null)
-                        return new SQLBoolean(value.booleanValue());
-                else
-                        return new SQLBoolean();
-        }
-
         public BooleanDataValue getDataValue(Boolean value,
                                                                                         BooleanDataValue previous)
                         throws StandardException
         {
                 if (previous == null)
-                        return getDataValue(value);
-
+                        return new SQLBoolean(value);
                 previous.setValue(value);
                 return previous;
-        }
-
-        public BooleanDataValue getDataValue(BooleanDataValue value)
-        {
-                if (value != null)
-                        return value;
-                else
-                        return new SQLBoolean();
         }
 
         public BitDataValue getBitDataValue(byte[] value) throws StandardException
@@ -620,11 +535,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
             return previous;
         }
 
-        public DateTimeDataValue getDataValue(Date value) throws StandardException
-        {
-                return new SQLDate(value);
-        }
-
         public DateTimeDataValue getDataValue(Date value,
                                                                                         DateTimeDataValue previous)
                         throws StandardException
@@ -635,11 +545,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 return previous;
         }
 
-        public DateTimeDataValue getDataValue(Time value) throws StandardException
-        {
-                return new SQLTime(value);
-        }
-
         public DateTimeDataValue getDataValue(Time value,
                                                                                         DateTimeDataValue previous)
                         throws StandardException
@@ -648,11 +553,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                         return new SQLTime(value);
                 previous.setValue(value);
                 return previous;
-        }
-
-        public DateTimeDataValue getDataValue(Timestamp value) throws StandardException
-        {
-                return new SQLTimestamp(value);
         }
 
         public DateTimeDataValue getDataValue(Timestamp value,
@@ -692,11 +592,6 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         public DateTimeDataValue getTimestamp( DataValueDescriptor date, DataValueDescriptor time) throws StandardException
         {
             return new SQLTimestamp( date, time);
-        }
-
-        public UserDataValue getDataValue(Object value)
-        {
-                return new UserType(value);
         }
 
         public UserDataValue getDataValue(Object value,
@@ -994,7 +889,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         {
                 if (dataValue == null)
                 {
-                        return getDataValue((Object) null);
+                        return new UserType((Object) null);
                 }
                 else
                 {
@@ -1022,7 +917,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 {
                     try
                     {
-                        return getDataValue((Date) null);
+                        return new SQLDate((Date) null);
                     }
                     catch( StandardException se)
                     {
@@ -1046,7 +941,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 {
                     try
                     {
-                        return getDataValue((Time) null);
+                        return new SQLTime((Time) null);
                     }
                     catch( StandardException se)
                     {
@@ -1070,7 +965,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 {
                     try
                     {
-                        return getDataValue((Timestamp) null);
+                        return new SQLTimestamp((Timestamp) null);
                     }
                     catch( StandardException se)
                     {

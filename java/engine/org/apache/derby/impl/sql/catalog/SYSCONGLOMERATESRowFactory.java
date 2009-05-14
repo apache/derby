@@ -23,9 +23,12 @@ package org.apache.derby.impl.sql.catalog;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.UserType;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.catalog.TypeDescriptor;
 
@@ -175,7 +178,7 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 		row.setColumn(2, new SQLChar(tabID));
 
 		/* 3rd column is CONGLOMERATENUMBER (long) */
-		row.setColumn(3, dvf.getDataValue(conglomNumber));
+		row.setColumn(3, new SQLLongint(conglomNumber));
 
 		/* 4th column is CONGLOMERATENAME (varchar(128)) 
 		** If null, use the tableid so we always
@@ -185,13 +188,13 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
                 new SQLVarchar(tabID): new SQLVarchar(conglomName));
 
 		/* 5th  column is ISINDEX (boolean) */
-		row.setColumn(5, dvf.getDataValue(supportsIndex));
+		row.setColumn(5, new SQLBoolean(supportsIndex));
 
 		/* 6th column is DESCRIPTOR
 		*  (user type org.apache.derby.catalog.IndexDescriptor)
 		*/
 		row.setColumn(6,
-			dvf.getDataValue(
+			new UserType(
 						(indexRowGenerator == null ?
 							(IndexDescriptor) null :
 							indexRowGenerator.getIndexDescriptor()
@@ -200,7 +203,7 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 				);
 
 		/* 7th column is ISCONSTRAINT (boolean) */
-		row.setColumn(7, dvf.getDataValue(supportsConstraint));
+		row.setColumn(7, new SQLBoolean(supportsConstraint));
 
 		/* 8th column is CONGLOMERATEID (UUID - char(36)) */
 		row.setColumn(8, new SQLChar(conglomUUIDString));

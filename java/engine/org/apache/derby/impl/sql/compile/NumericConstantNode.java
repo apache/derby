@@ -32,7 +32,12 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.info.JVMInfo;
 
+import org.apache.derby.iapi.types.SQLDouble;
 import org.apache.derby.iapi.types.SQLInteger;
+import org.apache.derby.iapi.types.SQLLongint;
+import org.apache.derby.iapi.types.SQLReal;
+import org.apache.derby.iapi.types.SQLSmallint;
+import org.apache.derby.iapi.types.SQLTinyint;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeUtilities;
 import org.apache.derby.iapi.types.NumberDataValue;
@@ -85,7 +90,7 @@ public final class NumericConstantNode extends ConstantNode
 			{
 				maxwidth = TypeId.SMALLINT_MAXWIDTH;
 				typeid = Types.TINYINT;
-				setValue(getDataValueFactory().getDataValue((Byte) arg1));
+				setValue(new SQLTinyint((Byte) arg1));
 			} 
 			break;
 
@@ -107,7 +112,7 @@ public final class NumericConstantNode extends ConstantNode
 			{
 				maxwidth = TypeId.SMALLINT_MAXWIDTH;
 				typeid = Types.SMALLINT;
-				setValue(getDataValueFactory().getDataValue((Short) arg1));
+				setValue(new SQLSmallint((Short) arg1));
 			}
 			break;
 
@@ -118,7 +123,7 @@ public final class NumericConstantNode extends ConstantNode
 			{
 				maxwidth = TypeId.LONGINT_MAXWIDTH;
 				typeid = Types.BIGINT;
-				setValue(getDataValueFactory().getDataValue((Long) arg1));
+				setValue(new SQLLongint((Long) arg1));
 			}
 			break;
 			
@@ -152,7 +157,7 @@ public final class NumericConstantNode extends ConstantNode
 			{
 				maxwidth = TypeId.DOUBLE_MAXWIDTH;
 				typeid = Types.DOUBLE;
-				setValue(getDataValueFactory().getDataValue((Double) arg1));
+				setValue(new SQLDouble((Double) arg1));
 			}
 			break;
 
@@ -163,8 +168,7 @@ public final class NumericConstantNode extends ConstantNode
 			{
 				maxwidth = TypeId.REAL_MAXWIDTH;
 				typeid = Types.REAL;
-				setValue(
-					getDataValueFactory().getDataValue((Float) arg1));
+				setValue(new SQLReal((Float) arg1));
 			}
 			break;
 			

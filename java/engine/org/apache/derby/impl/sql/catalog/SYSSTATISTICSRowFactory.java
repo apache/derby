@@ -35,6 +35,7 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.UserType;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -164,9 +165,9 @@ public class SYSSTATISTICSRowFactory extends CatalogRowFactory
 		row.setColumn(3, new SQLChar(tableID));
 		row.setColumn(4, new SQLTimestamp(updateTime));
 		row.setColumn(5, new SQLChar(statType));
-  		row.setColumn(6, dvf.getDataValue(validStat));
-		row.setColumn(7, dvf.getDataValue(columnCount));
-		row.setColumn(8, dvf.getDataValue(statisticsObject));
+  		row.setColumn(6, new SQLBoolean(validStat));
+		row.setColumn(7, new SQLInteger(columnCount));
+		row.setColumn(8, new UserType(statisticsObject));
 		return row;
 	}
 	

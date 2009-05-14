@@ -116,6 +116,13 @@ public final class SQLTinyint
 		this.isnull = isnull;
 	}
 
+	public SQLTinyint(Byte obj) {
+		if (isnull = (obj == null))
+			;
+		else
+			value = obj.byteValue();
+	}
+
 	//////////////////////////////////////////////////////////////
 	//
 	// DataValueDescriptor interface

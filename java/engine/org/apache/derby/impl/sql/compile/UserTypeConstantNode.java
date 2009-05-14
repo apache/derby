@@ -156,15 +156,15 @@ public class UserTypeConstantNode extends ConstantNode {
                 setValue( dvd);
 			else if (arg1 instanceof Date)
 			{
-				setValue(getDataValueFactory().getDataValue((Date) arg1));
+				setValue(new SQLDate((Date) arg1));
 			}
 			else if (arg1 instanceof Time)
 			{
-				setValue(getDataValueFactory().getDataValue((Time) arg1));
+				setValue(new SQLTime((Time) arg1));
 			}
 			else if (arg1 instanceof Timestamp)
 			{
-				setValue(getDataValueFactory().getDataValue((Timestamp) arg1));
+				setValue(new SQLTimestamp((Timestamp) arg1));
 			}
 
 			value = arg1;

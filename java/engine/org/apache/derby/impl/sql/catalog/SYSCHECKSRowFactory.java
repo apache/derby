@@ -41,6 +41,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.UserType;
 
 /**
  * Factory for creating a SYSCHECKS row.
@@ -139,7 +140,7 @@ class SYSCHECKSRowFactory extends CatalogRowFactory
 		 *  (user type org.apache.derby.catalog.ReferencedColumns)
 		 */
 		row.setColumn(SYSCHECKS_REFERENCEDCOLUMNS,
-			dvf.getDataValue(rcd));
+			new UserType(rcd));
 
 		return row;
 	}

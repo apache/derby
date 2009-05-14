@@ -40,6 +40,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.UserType;
 
 /**
  * Factory for creating a SYSDEPENDSS row.
@@ -151,14 +152,14 @@ public class SYSDEPENDSRowFactory extends CatalogRowFactory
 
 		/* 2nd column is DEPENDENTFINDER */
 		row.setColumn(SYSDEPENDS_DEPENDENTTYPE,
-				dvf.getDataValue(dependentBloodhound));
+				new UserType(dependentBloodhound));
 
 		/* 3rd column is PROVIDERID (UUID - char(36)) */
 		row.setColumn(SYSDEPENDS_PROVIDERID, new SQLChar(providerID));
 
 		/* 4th column is PROVIDERFINDER */
 		row.setColumn(SYSDEPENDS_PROVIDERTYPE,
-				dvf.getDataValue(providerBloodhound));
+				new UserType(providerBloodhound));
 
 		return row;
 	}

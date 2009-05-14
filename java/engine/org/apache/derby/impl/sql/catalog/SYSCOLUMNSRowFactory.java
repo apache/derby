@@ -49,6 +49,7 @@ import org.apache.derby.iapi.types.SQLInteger;
 import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.UserType;
 import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
 
 /**
@@ -212,11 +213,11 @@ public class SYSCOLUMNSRowFactory extends CatalogRowFactory
 
 		/* 4th column is COLUMNDATATYPE */
 		row.setColumn(SYSCOLUMNS_COLUMNDATATYPE,
-				dvf.getDataValue(typeDesc));
+				new UserType(typeDesc));
 
 		/* 5th column is COLUMNDEFAULT */
 		row.setColumn(SYSCOLUMNS_COLUMNDEFAULT,
-					  dvf.getDataValue(defaultSerializable));
+					  new UserType(defaultSerializable));
 
 		/* 6th column is DEFAULTID (UUID - char(36)) */
 		row.setColumn(SYSCOLUMNS_COLUMNDEFAULTID, new SQLChar(defaultID));

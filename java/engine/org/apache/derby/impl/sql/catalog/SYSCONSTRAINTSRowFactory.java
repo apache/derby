@@ -44,6 +44,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLInteger;
 import org.apache.derby.iapi.types.SQLVarchar;
 
 /**
@@ -205,7 +206,7 @@ public class SYSCONSTRAINTSRowFactory extends CatalogRowFactory
 		row.setColumn(SYSCONSTRAINTS_STATE, new SQLChar(isEnabled ? "E" : "D"));
 
 		/* 7th column is REFERENCED */
-		row.setColumn(SYSCONSTRAINTS_REFERENCECOUNT, dvf.getDataValue(referenceCount));
+		row.setColumn(SYSCONSTRAINTS_REFERENCECOUNT, new SQLInteger(referenceCount));
 
 		return row;
 	}

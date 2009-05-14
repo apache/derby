@@ -34,6 +34,7 @@ import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataValueFactory;
@@ -156,7 +157,7 @@ class SYSFILESRowFactory extends CatalogRowFactory
 		row.setColumn(NAME_COL_NUM, new SQLVarchar(SQLname));
 
 		/* 4th column is GENERATIONID (long) */
-		row.setColumn(GENERATION_ID_COL_NUM, dvf.getDataValue(generationId));
+		row.setColumn(GENERATION_ID_COL_NUM, new SQLLongint(generationId));
 
 		return row;
 	}

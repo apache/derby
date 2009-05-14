@@ -29,6 +29,7 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.iapi.types.BooleanDataValue;
+import org.apache.derby.iapi.types.SQLBoolean;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -78,14 +79,7 @@ public class SQLBooleanConstantNode extends ConstantNode
 			 Boolean.TRUE,
 			 ReuseFactory.getInteger(1));
 
-		if ( val == null )
-		{
-			setValue(getTypeServices().getNull() );
-		}
-		else
-		{
-			setValue(getDataValueFactory().getDataValue(val.booleanValue()));
-		}
+		setValue(new SQLBoolean(val));
 	}
 
 	/**

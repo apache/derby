@@ -37,8 +37,10 @@ import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.SQLChar;
 import org.apache.derby.iapi.types.SQLVarchar;
+import org.apache.derby.iapi.types.UserType;
 
 
 /**
@@ -214,11 +216,11 @@ class SYSALIASESRowFactory extends CatalogRowFactory
 
 		/* 7th column is SYSTEMALIAS (boolean) */
 		row.setColumn
-			(SYSALIASES_SYSTEMALIAS, dvf.getDataValue(systemAlias));
+			(SYSALIASES_SYSTEMALIAS, new SQLBoolean(systemAlias));
 
 		/* 8th column is ALIASINFO (org.apache.derby.catalog.AliasInfo) */
 		row.setColumn(SYSALIASES_ALIASINFO, 
-			dvf.getDataValue(aliasInfo));
+			new UserType(aliasInfo));
 
 		/* 9th column is specific name */
 		row.setColumn

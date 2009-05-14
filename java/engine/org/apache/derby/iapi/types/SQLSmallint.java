@@ -341,6 +341,13 @@ public final class SQLSmallint
 		this.isnull = isnull;
 	}
 
+	public SQLSmallint(Short obj) {
+		if (isnull = (obj == null))
+			;
+		else
+			value = obj.shortValue();
+	}
+
 	/**
 		@exception StandardException thrown if string not accepted
 	 */

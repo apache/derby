@@ -28,6 +28,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.types.BooleanDataValue;
+import org.apache.derby.iapi.types.SQLBoolean;
 
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 
@@ -185,7 +186,7 @@ public class DropDependencyFilter implements TupleFilter
 	{
 		if ( trueValue == null )
 		{
-			trueValue = getDataValueFactory().getDataValue( true );
+			trueValue = new SQLBoolean( true );
 		}
 
 		return	trueValue;
@@ -202,7 +203,7 @@ public class DropDependencyFilter implements TupleFilter
 	{
 		if ( falseValue == null )
 		{
-			falseValue = getDataValueFactory().getDataValue( false );
+			falseValue = new SQLBoolean( false );
 		}
 
 		return	falseValue;

@@ -78,9 +78,12 @@ import org.apache.derby.iapi.sql.execute.ScanQualifier;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.NumberDataValue;
 
+import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.SQLChar;
+import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.types.UserType;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -2754,7 +2757,7 @@ public final class	DataDictionaryImpl
 				columns = modifiedColumns;
 			}
 	        curRow.setColumn(SYSCOLPERMSRowFactory.COLUMNS_COL_NUM,
-					  dvf.getDataValue((Object) columns));
+					  new UserType((Object) columns));
 			ti.updateRow(uuidKey, curRow,
 					SYSCOLPERMSRowFactory.COLPERMSID_INDEX_NUM,
 					 bArray, 
@@ -4251,9 +4254,9 @@ public final class	DataDictionaryImpl
 		/* Set up a couple of row templates for fetching CHARS */
 
 		replaceRow[SYSSTATEMENTSRowFactory.SYSSTATEMENTS_VALID - 1] = 
-            dvf.getDataValue(false);
+            new SQLBoolean(false);
 		replaceRow[SYSSTATEMENTSRowFactory.SYSSTATEMENTS_CONSTANTSTATE - 1] = 
-            dvf.getDataValue((Object) null);
+            new UserType((Object) null);
 
 		/* Scan the entire heap */
 		ScanController sc = 
@@ -6144,7 +6147,7 @@ public final class	DataDictionaryImpl
   		SYSCONGLOMERATESRowFactory  rf = (SYSCONGLOMERATESRowFactory) ti.getCatalogRowFactory();
 
   		conglomNumberOrderable = 
-  				dvf.getDataValue(conglomerateNumber);
+  				new SQLLongint(conglomerateNumber);
 
 		ScanQualifier[][] scanQualifier = exFactory.getScanQualifier(1);
   		scanQualifier[0][0].setQualifier(
@@ -9165,7 +9168,7 @@ public final class	DataDictionaryImpl
 			aiValue += increment.getLong();
 		}
 		row.setColumn(SYSCOLUMNSRowFactory.SYSCOLUMNS_AUTOINCREMENTVALUE,
-					  dvf.getDataValue(aiValue));
+					  new SQLLongint(aiValue));
 
 		ti.updateRow(keyRow, row,
 					 SYSCOLUMNSRowFactory.SYSCOLUMNS_INDEX1_ID,

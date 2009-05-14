@@ -27,6 +27,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.Optimizable;
 
+import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
@@ -68,7 +69,7 @@ public final class BooleanConstantNode extends ConstantNode
 			 ReuseFactory.getInteger(1));
 
 			booleanValue = ((Boolean) arg1).booleanValue();
-			super.setValue(getDataValueFactory().getDataValue(booleanValue));
+			super.setValue(new SQLBoolean(booleanValue));
 		}
 		else
 		{
@@ -198,7 +199,7 @@ public final class BooleanConstantNode extends ConstantNode
 		}
 
 		booleanValue = !booleanValue;
-		super.setValue(getDataValueFactory().getDataValue(booleanValue));
+		super.setValue(new SQLBoolean(booleanValue));
 
 		return this;
 	}

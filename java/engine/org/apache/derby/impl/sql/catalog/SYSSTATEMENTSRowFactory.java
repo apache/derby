@@ -24,8 +24,10 @@ package org.apache.derby.impl.sql.catalog;
 import org.apache.derby.iapi.reference.Property;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.SQLVarchar;
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.UserType;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
@@ -208,7 +210,7 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 		row.setColumn(4, new SQLChar(typeStr));
 
 		/* 5th column is VALID */
-		row.setColumn(5, dvf.getDataValue(valid));
+		row.setColumn(5, new SQLBoolean(valid));
 
 		/* 6th column is TEXT */
 		row.setColumn(6, dvf.getLongvarcharDataValue(text));
@@ -227,10 +229,10 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 		**
 		** CONSTANTSTATE is really a formatable StorablePreparedStatement.
 		*/
-		row.setColumn(10, dvf.getDataValue(preparedStatement));
+		row.setColumn(10, new UserType(preparedStatement));
 
 		/* 11th column is INITIALLY_COMPILABLE */
-		row.setColumn(11, dvf.getDataValue(initiallyCompilable));
+		row.setColumn(11, new SQLBoolean(initiallyCompilable));
 
 		return row;
 	}

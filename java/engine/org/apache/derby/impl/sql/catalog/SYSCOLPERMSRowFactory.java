@@ -37,6 +37,7 @@ import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.SQLChar;
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.UserType;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -136,7 +137,7 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
         row.setColumn( GRANTOR_COL_NUM, grantor);
         row.setColumn( TABLEID_COL_NUM, new SQLChar(tableID));
         row.setColumn( TYPE_COL_NUM, new SQLChar(type));
-        row.setColumn( COLUMNS_COL_NUM, dvf.getDataValue( (Object) columns));
+        row.setColumn( COLUMNS_COL_NUM, new UserType( (Object) columns));
         return row;
     } // end of makeRow
 
