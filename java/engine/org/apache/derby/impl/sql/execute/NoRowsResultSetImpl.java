@@ -60,7 +60,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 abstract class NoRowsResultSetImpl implements ResultSet
 {
 	final Activation    activation;
-	private boolean dumpedStats;
 	NoPutResultSet[]	subqueryTrackingArray;
 
 	private final boolean statisticsTimingOn;
@@ -342,7 +341,6 @@ abstract class NoRowsResultSetImpl implements ResultSet
 		if (!isOpen)
 			return;
 
-		if (! dumpedStats)
 		{
 			/*
 			** If run time statistics tracing is turned on, then now is the
@@ -384,7 +382,6 @@ abstract class NoRowsResultSetImpl implements ResultSet
 											  lcc.getRunTimeStatisticsObject().getStatementExecutionPlanText());
 				}
 			}
-			dumpedStats = true;
 		}
 
 		/* This is the top ResultSet, 
