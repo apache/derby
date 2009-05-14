@@ -2143,9 +2143,14 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      *
      * @param sql the SQL text to prepare and execute
      */
-    private void testRuntimeStatistics(String sql) throws SQLException {
+    private void testRuntimeStatistics(String sql, String schema)
+        throws SQLException
+    {
         Statement s = createStatement();
         s.execute("call syscs_util.syscs_set_runtimestatistics(1)");
+        if (schema != null)
+            s.execute("call syscs_util.syscs_set_xplain_schema('"+
+                schema.toUpperCase()+"')");
         PreparedStatement ps = prepareStatement(sql);
         for (int i = 0; i < 5; i++) {
             ps.execute();
@@ -2165,6 +2170,19 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
             // statistics for the previously executed statement.
             assertTrue("Wrong statement", rtsp.findString(sql, 1));
         }
+        if (schema != null)
+        {
+            // Before DERBY-4204, we would only get a single row for some
+            // kinds of statements, because the statistics weren't re-captured.
+            // So verify that we get 5 distinct rows in SYSXPLAIN_STATEMENTS
+            //
+            s.execute("call syscs_util.syscs_set_xplain_schema('')");
+            PreparedStatement psStatsQ = prepareStatement(
+                "select count(*) from "+schema+".sysxplain_statements" +
+                        " where stmt_text = ?");
+            psStatsQ.setString(1, sql);
+            JDBC.assertSingleValueResultSet(psStatsQ.executeQuery(), "5");
+        }
     }
 
     /**
@@ -2173,7 +2191,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      */
     public void testRuntimeStatisticsForSelect() throws SQLException {
         createTestTable("dept", DS, "dept_data");
-        testRuntimeStatistics("select * from dept");
+        testRuntimeStatistics("select * from dept", "select_stats");
     }
 
     /**
@@ -2182,7 +2200,8 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      */
     public void testRuntimeStatisticsForUpdate() throws SQLException {
         createTestTable("dept", DS, "dept_data");
-        testRuntimeStatistics("update dept set dname = upper(dname)");
+        testRuntimeStatistics("update dept set dname = upper(dname)",
+                "update_stats");
     }
 
     /**
@@ -2191,7 +2210,8 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      */
     public void testRuntimeStatisticsForInsert() throws SQLException {
         createTestTable("dept", DS, "dept_data");
-        testRuntimeStatistics("insert into dept select * from dept where 1<>1");
+        testRuntimeStatistics("insert into dept select * from dept where 1<>1",
+                "insert_stats");
     }
 
     /**
@@ -2200,7 +2220,7 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      */
     public void testRuntimeStatisticsForDelete() throws SQLException {
         createTestTable("dept", DS, "dept_data");
-        testRuntimeStatistics("delete from dept");
+        testRuntimeStatistics("delete from dept", "delete_stats");
     }
 
     /**
@@ -2208,7 +2228,8 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
      * VALUES statement.
      */
     public void testRuntimeStatisticsForValues() throws SQLException {
-        testRuntimeStatistics("values (1, 2, 3, 'this is a test')");
+        testRuntimeStatistics("values (1, 2, 3, 'this is a test')",
+                "values_stats");
     }
 
     /**
@@ -2219,7 +2240,8 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         createTestTable("dept", DS, "dept_data");
         testRuntimeStatistics(
                 "call syscs_util.syscs_compress_table(" +
-                "current schema, 'DEPT', 1)");
+                "current schema, 'DEPT', 1)",
+                null); // XPLAIN doesn't work for CALL statements currently.
     }
 
 }
