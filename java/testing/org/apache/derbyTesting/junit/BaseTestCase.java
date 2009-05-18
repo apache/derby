@@ -35,6 +35,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.SQLException;
 import java.security.AccessController;
@@ -104,13 +105,25 @@ public abstract class BaseTestCase
         try {
             super.runBare();   
         }
-        //To save the derby.log  and database of failed tests.
+        // To log the exception to file, copy the derby.log file and copy
+        // the database of the failed test.
         catch (Throwable running) {
+            PrintWriter stackOut = null;
             try{
                 String failPath = PrivilegedFileOpsForTests.getAbsolutePath(getFailureFolder());
+                // Write the stack trace of the error/failure to file.
+                stackOut = new PrintWriter(
+                        PrivilegedFileOpsForTests.getFileOutputStream(
+                            new File(failPath, "error-stacktrace.out"), true));
+                stackOut.println("[Error/failure logged at " +
+                        new java.util.Date() + "]");
+                running.printStackTrace(stackOut);
+                stackOut.println(); // Add an extra blank line.
+                // Copy the derby.log file.
                 File origLog = new File("system", "derby.log");
                 File newLog = new File(failPath, "derby.log");
                 PrivilegedFileOpsForTests.copy(origLog, newLog);
+                // Copy the database.
                 String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
                 File dbDir = new File("system", dbName );                        
                 File newDbDir = new File(failPath, dbName);
@@ -118,11 +131,19 @@ public abstract class BaseTestCase
            }
             catch (IOException ioe) {
                 // We need to throw the original exception so if there
-                // is an exception saving the db or derby.log we will just
-                // print it.
+                // is an exception saving the db or derby.log we will print it
+                // and additionally try to log it to file.
                 BaseTestCase.printStackTrace(ioe);
+                if (stackOut != null) {
+                    stackOut.println("Copying derby.log or database failed:");
+                    ioe.printStackTrace(stackOut);
+                    stackOut.println();
+                }
             }
             finally {
+                if (stackOut != null) {
+                    stackOut.close();
+                }
                 throw running;
             }
         }

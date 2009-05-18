@@ -259,6 +259,8 @@ public class PrivilegedFileOpsForTests {
 
     /**
      * Returns a file output stream for the specified file.
+     * <p>
+     * If the file already exists and is writable, it will be overwritten.
      *
      * @param file the file to create a stream for
      * @return An output stream.
@@ -268,6 +270,22 @@ public class PrivilegedFileOpsForTests {
      */
     public static FileOutputStream getFileOutputStream(final File file)
             throws FileNotFoundException {
+        return getFileOutputStream(file, false);
+    }
+
+    /**
+     * Returns a file output stream for the specified file.
+     *
+     * @param file the file to create a stream for
+     * @param append whether to append or overwrite an existing file
+     * @return An output stream.
+     * @throws FileNotFoundException if the specified file does not exist
+     * @throws SecurityException if the required permissions to write the file,
+     *      or the path it is in, are missing
+     */
+    public static FileOutputStream getFileOutputStream(final File file,
+                                                       final boolean append)
+            throws FileNotFoundException {
         if (file == null) {
             throw new IllegalArgumentException("file cannot be <null>");
         }
@@ -276,7 +294,7 @@ public class PrivilegedFileOpsForTests {
                     new PrivilegedExceptionAction() {
                         public Object run()
                                 throws FileNotFoundException {
-                            return new FileOutputStream(file);
+                            return new FileOutputStream(file, append);
                         }
                     });
         } catch (PrivilegedActionException pae) {
