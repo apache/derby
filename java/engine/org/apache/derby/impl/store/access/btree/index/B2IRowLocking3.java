@@ -818,14 +818,9 @@ class B2IRowLocking3 implements BTreeLockingPolicy
                 // The previous key is on a previous page, search left 
                 // through the pages to find the key to latch.
 
-                // RESOLVE RLL (mikem) - do I need to do the 
-                // RECORD_ID_PROTECTION_HANDLE lock.
-                // First guarantee that record id's will not move off this
-                // current page while searching for previous key, by getting
-                // the RECORD_ID_PROTECTION_HANDLE lock on the current page.
-                // Since we have a latch on the cur
-
-                // RESOLVE RLL (mikem) - NO RECORD_ID PROTECTION IN EFFECT.
+                // If we need to release the latches while searching left,
+                // a new key may have appeared in the range that we've already
+                // searched, or the tree may have been rearranged, so the
                 // caller must research, get new locks if this routine 
                 // releases latches.
                 ret_status = this.searchLeftAndLockPreviousKey(

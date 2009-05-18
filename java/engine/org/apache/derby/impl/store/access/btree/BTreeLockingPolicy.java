@@ -24,7 +24,6 @@ package org.apache.derby.impl.store.access.btree;
 import org.apache.derby.iapi.error.StandardException; 
 
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
-import org.apache.derby.iapi.store.raw.RecordHandle;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
@@ -44,23 +43,23 @@ pointer where a BTreeLockingPolicy is requested.
 <p>
 There are 2 types of lock interfaces, lockScan*() and lockNonScan*().
 <p>
-The lockScan*() interfaces assume that the caller gets a "scan lock" on the
-page before requesting any row locks on the page.  This is either done by
-makeing a lockScan() call followed by row lock requests, or it can be done
-in one operation by calling lockScanRow() and requesting the scan lock be
-obtained before getting the row lock.  Upon return from these interfaces 
+The lockScan*() interfaces save the key for the current scan position before
+giving up the latch on the page if they have to wait for a row lock. The
+callers can reposition the scan using the saved key by calling
+{@code BTreeScan.reposition()} if such a situation occurs. Then the latches
+are reobtained, possibly on a different page if the current key has been moved
+to another page in the meantime. Upon return from these interfaces
 the row lock requested is guaranteed to have been obtained on the correct
 key for the row requested.  These interfaces handle the special case of 
 unique indexes where the RowLocation can change while waiting on the lock 
 (see implementation for details), basically the lock is retryed after waiting
 if the RowLocation has changed.
 <p>
-The lockNonScan*() interfaces assume that no "scan lock" exists.  If these
+The lockNonScan*() interfaces do not save the current scan position. If these
 routines return that the latch was released while waiting to obtain the
 lock, then the caller must requeue the lock request after taking appropriate
 action.  This action usually involves researching the tree to make sure 
-that the correct key is locked with latches held.  Because no scan lock is
-held the original row could have disappeared from the table.  These interfaces
+that the correct key is locked with latches held. These interfaces
 do not handle the special case of unique indexes where the RowLocation can 
 change while waiting on the lock, as the row may disappear when the latch
 is released to wait on the lock - thus it is necessary that the caller retry
