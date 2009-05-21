@@ -31,6 +31,7 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
  * Run a replication test on localhost
  * by using default values for master and slave hosts,
  * and master and slave ports.
+ * Verify that a second failover is not accepted.
  * 
  */
 
@@ -48,16 +49,6 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
     public ReplicationRun_Local_3_p3(String testcaseName)
     {
         super(testcaseName);
-    }
-    
-    protected void setUp() throws Exception
-    {
-        super.setUp();
-    }
-    
-    protected void tearDown() throws Exception
-    {
-        super.tearDown();
     }
     
     public static Test suite()
@@ -81,6 +72,10 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
     ////
     //////////////////////////////////////////////////////////////
     
+    /**
+     * Verify that a second failover is not accepted.
+     * @throws java.lang.Exception
+     */
     public void testReplication_Local_3_p3_StateNegativeTests()
     throws Exception
     {
@@ -138,7 +133,8 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
                 slaveServerHost, // for slaveReplInterface
                 slaveReplPort);
         
-        runTest(null, // Returns immediatly if replicationTest is null.
+        replicationTest = null; // Used as a flag to verifyMaster and verifySlave!
+        runTest(replicationTest, // Returns immediatly if replicationTest is null.
                 jvmVersion,
                 testClientHost,
                 masterServerHost, masterServerPort,

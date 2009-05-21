@@ -49,16 +49,6 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         super(testcaseName);
     }
     
-    protected void setUp() throws Exception
-    {
-        super.setUp();
-    }
-    
-    protected void tearDown() throws Exception
-    {
-        super.tearDown();
-    }
-    
     public static Test suite()
     {
         TestSuite suite = new TestSuite("ReplicationRun_Local_StateTest_part2 Suite");
@@ -68,6 +58,18 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         return SecurityManagerSetup.noSecurityManager(suite);
     }
         
+    /**
+     * Verify that correct response to replication "commands":
+     * startSlave, startMaster, stopSlave, stopMaster and failOver,
+     * are given when the replicating database is in the following states:
+     * Failover has been performed and 
+     * - slave db has not been shut down,
+     * - slave db has been shut down,
+     * - slave server has been stopped,
+     * - master db has been shut down,
+     * - master server has been stopped.
+     * @throws java.lang.Exception
+     */
     public void testReplication_Local_StateTest_part2()
     throws Exception
     {
@@ -203,47 +205,47 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         
         // Tests against slave:
         assertException(
-                startSlave(slaveServerHost,slaveServerPort,
+                _startSlave(slaveServerHost,slaveServerPort,
                     slaveDatabasePath, replicatedDb,
                     slaveReplPort),
                 "XRE09");
 
         assertException(
-                stopSlave(slaveServerHost,slaveServerPort,
+                _stopSlave(slaveServerHost,slaveServerPort,
                     slaveDatabasePath, replicatedDb,
                     slaveReplPort),
                 "XRE40");
         
         assertException(
-                failOver(slaveServerHost,slaveServerPort,
+                _failOver(slaveServerHost,slaveServerPort,
                     slaveDatabasePath, slaveDbSubPath, replicatedDb),
                 "XRE07");
         
         // Tests against master:
         assertException(
-                startMaster(masterServerHost,masterServerPort,
+                _startMaster(masterServerHost,masterServerPort,
                     masterDatabasePath, replicatedDb,
                     slaveServerHost,slaveReplPort),
                 "XRE04");
         
         assertException(
-                failOver(masterServerHost,masterServerPort,
+                _failOver(masterServerHost,masterServerPort,
                     masterDatabasePath, masterDbSubPath, replicatedDb),
                 "XRE07");
         
         // connect / show tables
         assertException(
-                executeQuery(mConn, "select count(*) from SYS.SYSTABLES"), 
+                _executeQuery(mConn, "select count(*) from SYS.SYSTABLES"), 
                 "08006"); // Thats's just how it is...
          assertException(
-                executeQuery(mConn, "select count(*) from SYS.SYSTABLES"), 
+                _executeQuery(mConn, "select count(*) from SYS.SYSTABLES"), 
                 "08003"); // Thats's just how it is...
         
         // Tests against slave:
         Connection sConn = getConnection(slaveServerHost, slaveServerPort, 
                     slaveDatabasePath, slaveDbSubPath, replicatedDb); // OK
          assertException(
-                executeQuery(sConn, "select count(*) from SYS.SYSTABLES"), 
+                _executeQuery(sConn, "select count(*) from SYS.SYSTABLES"), 
                 null); // null: Should be OK
          sConn.close();
     }
@@ -283,7 +285,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
                 + " No value-adding suggestions here.");
     }
     
-    SQLException startSlave(String slaveServerHost, int slaveServerPort,
+    SQLException _startSlave(String slaveServerHost, int slaveServerPort,
             String slaveDatabasePath, String replicatedDb,
             int slaveReplPort)
     {
@@ -307,7 +309,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         }
     }
 
-    SQLException stopSlave(String slaveServerHost, int slaveServerPort, 
+    SQLException _stopSlave(String slaveServerHost, int slaveServerPort, 
             String slaveDatabasePath, String replicatedDb, 
             int slaveReplPort)
     {
@@ -331,7 +333,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         }
     }
 
-    SQLException failOver(String serverHost, int serverPort, 
+    SQLException _failOver(String serverHost, int serverPort, 
             String databasePath, String dbSubPath, String replicatedDb)
     {
         String db = databasePath +FS+dbSubPath +FS+ replicatedDb;
@@ -352,7 +354,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         }
     }
     
-    SQLException startMaster(String masterServerHost, int masterServerPort,
+    SQLException _startMaster(String masterServerHost, int masterServerPort,
             String databasePath, String replicatedDb,
             String slaveServerHost,
             int slaveReplPort)
@@ -377,18 +379,6 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         }
     }
 
-    Connection getConnection(String serverHost, int serverPort,
-            String databasePath, String dbSubPath, String replicatedDb)
-        throws SQLException
-    {
-        String db = databasePath +FS+dbSubPath +FS+ replicatedDb;
-        String connectionURL = "jdbc:derby:"  
-                + "//" + serverHost + ":" + serverPort + "/"
-                + db;
-        util.DEBUG(connectionURL);
-        return DriverManager.getConnection(connectionURL);
-    }
-    
     SQLException connectTo(String serverHost, int serverPort,
             String databasePath, String dbSubPath, String replicatedDb)
     {
@@ -409,7 +399,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         }
     }
 
-    SQLException executeQuery(Connection conn, String query)
+    SQLException _executeQuery(Connection conn, String query)
     {
         util.DEBUG("executeQuery: " + query);
         try

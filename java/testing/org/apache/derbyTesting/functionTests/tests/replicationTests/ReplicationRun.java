@@ -54,6 +54,10 @@ public class ReplicationRun extends BaseTestCase
     
     static String userDir = null;
     
+    static String dataEncryption = null;
+      // Set to a legal encryption string to
+      // create or connect to an encrypted db.
+    
     static String masterServerHost = "localhost"; 
     static int masterServerPort = 1527; // .. default..
     static String slaveServerHost = "localhost";
@@ -71,6 +75,9 @@ public class ReplicationRun extends BaseTestCase
     static String unFreezeDB = ""; // Preliminary: need to "manually" unfreeze db as part of initialization.
     
     static boolean runUnReplicated = false;
+    
+    static boolean simpleLoad = true;
+    static int simpleLoadTuples = 1000;
     
     static int tuplesToInsertPerf = 10000;
     static int commitFreq = 0; // autocommit
@@ -134,6 +141,8 @@ public class ReplicationRun extends BaseTestCase
     
     /** A Connection to the master database*/
     private Connection masterConn = null;
+    /** A Connection to the slave database*/
+    private Connection slaveConn = null;
     /** The exception thrown as a result of a startSlave connection attempt  */
     private volatile Exception startSlaveException = null;
 
@@ -172,6 +181,16 @@ public class ReplicationRun extends BaseTestCase
         super.tearDown();
     }
     
+    String useEncryption(boolean create)
+    {
+        String encryptionString = "";
+        if ( dataEncryption != null)
+        {
+            if ( create ) encryptionString = ";dataEncryption=true";
+            encryptionString = encryptionString+";"+dataEncryption;
+        }
+        return encryptionString;
+    }
     
     //////////////////////////////////////////////////////////////
     ////
@@ -207,7 +226,8 @@ public class ReplicationRun extends BaseTestCase
         String serverURL = "jdbc:derby:"
                 +"//"+serverHost+":"+serverPort+"/";
         String dbURL = serverURL
-                +fullDbPath;
+                +fullDbPath
+                +useEncryption(false);
         Connection conn = null;
         String lastmsg = null;
         long sleeptime = 200L;
@@ -266,6 +286,7 @@ public class ReplicationRun extends BaseTestCase
             ds.setDatabaseName(fullDbPath);
             ds.setServerName(serverHost);
             ds.setPortNumber(serverPort);
+            ds.setConnectionAttributes(useEncryption(false));
             Connection conn = ds.getConnection();
             conn.close();
         }
@@ -294,6 +315,7 @@ public class ReplicationRun extends BaseTestCase
                 ds.setDatabaseName(fullDbPath);
                 ds.setServerName(serverHost);
                 ds.setPortNumber(serverPort);
+                ds.setConnectionAttributes(useEncryption(false));
                 Connection conn = ds.getConnection();
                 util.DEBUG("Got connection after " 
                         + (count-1) +" * "+ sleepTime + " ms.");
@@ -327,6 +349,7 @@ public class ReplicationRun extends BaseTestCase
                 ds.setDatabaseName(fullDbPath);
                 ds.setServerName(serverHost);
                 ds.setPortNumber(serverPort);
+                ds.setConnectionAttributes(useEncryption(false));
                 Connection conn = ds.getConnection();
                 // Should never get here!
                 conn.close();
@@ -370,7 +393,8 @@ public class ReplicationRun extends BaseTestCase
                 +"//"+serverHost+":"+serverPort+"/";
         String dbURL = serverURL
                 +dbPath
-                +FS+replicatedDb;
+                +FS+replicatedDb
+                +useEncryption(false);
         util.DEBUG("**** DriverManager.getConnection(\"" + dbURL+";shutdown=true\");");
 
         try{
@@ -407,11 +431,20 @@ public class ReplicationRun extends BaseTestCase
                 + ") "
                 );
         
+        if ( replicationTest == null ) 
+        {
+            util.DEBUG("No replicationTest specified. Exitting.");
+            return;
+        } 
         
-        String URL = DB_PROTOCOL
-                +"://"+serverHost
-                +":"+serverPort+"/"
-                +masterDatabasePath+FS+masterDbSubPath+FS+dbName;
+        if ( simpleLoad )
+        {
+            _testInsertUpdateDeleteOnMaster(serverHost, serverPort,
+                dbName, simpleLoadTuples);
+            return;
+        }
+        
+        String URL = masterURL(dbName);
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                 + PS + derbyVersion +FS+ "derbyTesting.jar"
                 + PS + derbyVersion +FS+ "derbytools.jar";
@@ -423,12 +456,6 @@ public class ReplicationRun extends BaseTestCase
         String clientJvm = BaseTestCase.getJavaExecutableName();
         
         String command = null;
-        
-        if ( replicationTest == null ) 
-        {
-            util.DEBUG("No replicationTest specified. Exitting.");
-            return;
-        } 
         
         util.DEBUG("replicationTest: " + replicationTest);
         if ( replicationTest.indexOf(".sql") >= 0 )
@@ -492,10 +519,7 @@ public class ReplicationRun extends BaseTestCase
                 );
         
         
-        String URL = DB_PROTOCOL
-                +"://"+serverHost
-                +":"+serverPort+"/"
-                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName;
+        String URL = slaveURL(dbName);
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                 + PS + derbyVersion +FS+ "derbyTesting.jar"
                 + PS + derbyVersion +FS+ "derbytools.jar";
@@ -588,10 +612,7 @@ public class ReplicationRun extends BaseTestCase
                 );
         
         
-        String URL = DB_PROTOCOL
-                +"://"+masterHost
-                +":"+masterPort+"/"
-                +masterDatabasePath+ /* FS+masterDbSubPath+ */ FS+dbSubPath;
+        String URL = masterLoadURL(dbSubPath);
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                 + PS + derbyVersion +FS+ "derbyTesting.jar"
                 // Needed for 'run resource 'createTestProcedures.subsql';' cases?
@@ -667,10 +688,7 @@ public class ReplicationRun extends BaseTestCase
                 );
         
         
-        String URL = DB_PROTOCOL
-                +"://"+masterHost
-                +":"+masterPort+"/"
-                +masterDatabasePath+ /* FS+masterDbSubPath+ */ FS+dbSubPath;
+        String URL = masterLoadURL(dbSubPath);
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                 + PS + derbyVersion +FS+ "derbyTesting.jar"
                 // Needed for 'run resource 'createTestProcedures.subsql';' cases?
@@ -733,11 +751,9 @@ public class ReplicationRun extends BaseTestCase
     {
         // Should just do a "connect....;create=true" here, instead of copying in initMaster.
         
-        String URL = DB_PROTOCOL
-                +"://"+masterHost
-                +":"+masterServerPort+"/"
-                +masterDatabasePath+FS+masterDbSubPath+FS+dbName
-                +";create=true";
+        String URL = masterURL(dbName)
+                +";create=true"
+                +useEncryption(true);
 
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                 + PS + derbyVersion +FS+ "derbytools.jar";
@@ -747,13 +763,6 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         String clientJvm = BaseTestCase.getJavaExecutableName();
-        
-        String command = clientJvm 
-                + " -Dij.driver=" + DRIVER_CLASS_NAME
-                + " -Dij.connection.createMaster=\"" + URL + "\""
-                + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
-                + " " + "/home/os136789/Replication/testing/exit.sql" // FIXME!!
-                ;
         
         String results = null;
         if ( masterHost.equalsIgnoreCase("localhost") || localEnv )
@@ -770,6 +779,13 @@ public class ReplicationRun extends BaseTestCase
         else
         {
         // Execute the ij command on the testClientHost as testUser
+            String command = clientJvm 
+                + " -Dij.driver=" + DRIVER_CLASS_NAME
+                + " -Dij.connection.createMaster=\"" + URL + "\""
+                + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
+                + " " + "exit.sql" // FIXME!!
+                ;
+        
             results =
                 runUserCommandRemotely(command,
                 testClientHost,
@@ -783,10 +799,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("************************** DERBY-???? Preliminary needs to freeze db before copying to slave and setting replication mode.");
         if ( masterServerHost.equalsIgnoreCase("localhost") || localEnv )
         {
-             URL = DB_PROTOCOL
-                +"://"+masterServerHost
-                +":"+masterServerPort+"/"
-                +masterDatabasePath+FS+masterDbSubPath+FS+dbName;
+             URL = masterURL(dbName);
             Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
             util.DEBUG("bootMasterDatabase getConnection("+URL+")");
             Connection conn = DriverManager.getConnection(URL);
@@ -812,6 +825,7 @@ public class ReplicationRun extends BaseTestCase
                     masterServerHost, masterServerPort,
                     dbSubPath+FS+dbName);
         }
+        util.DEBUG("bootMasterDatabase done.");
     }
 
     /**
@@ -913,10 +927,7 @@ public class ReplicationRun extends BaseTestCase
             masterClassPath = classPath;
         }
                 
-        String URL = DB_PROTOCOL
-                +"://"+masterHost
-                +":"+masterServerPort+"/"
-                +masterDatabasePath+FS+masterDbSubPath+FS+dbName
+        String URL = masterURL(dbName)
                 +";startMaster=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
@@ -952,10 +963,7 @@ public class ReplicationRun extends BaseTestCase
             throws Exception
     {
         
-        String URL = DB_PROTOCOL
-                +"://"+masterHost
-                +":"+masterServerPort+"/"
-                +masterDatabasePath+FS+masterDbSubPath+FS+dbName
+        String URL = masterURL(dbName)
                 +";startMaster=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
                 
@@ -979,7 +987,8 @@ public class ReplicationRun extends BaseTestCase
                     ds.setPortNumber(masterServerPort);
                     ds.setConnectionAttributes("startMaster=true"
                             +";slaveHost="+slaveReplInterface
-                            +";slavePort="+slaveReplPort);
+                            +";slavePort="+slaveReplPort
+                            +useEncryption(false));
                     conn = ds.getConnection();
                     
                     done = true;
@@ -1026,10 +1035,7 @@ public class ReplicationRun extends BaseTestCase
      */
     protected Connection getMasterConnection() {
         if (masterConn == null) {
-            String url = DB_PROTOCOL + "://" + masterServerHost + ":" +
-                         masterServerPort + "/" +
-                         masterDatabasePath + FS + masterDbSubPath + FS +
-                         replicatedDb;
+            String url = masterURL(replicatedDb);
             try {
                 masterConn = DriverManager.getConnection(url);
             } catch (SQLException sqle) {
@@ -1037,6 +1043,22 @@ public class ReplicationRun extends BaseTestCase
             }
         }
         return masterConn;
+    }
+    
+    /**
+     * Get a connection to the slave database.
+     * @return A connection to the slave database
+     */
+    protected Connection getSlaveConnection() {
+        if (slaveConn == null) {
+            String url = slaveURL(replicatedDb);
+            try {
+                slaveConn = DriverManager.getConnection(url);
+            } catch (SQLException sqle) {
+                fail("Could not connect to slave database");
+            }
+        }
+        return slaveConn;
     }
 
 
@@ -1048,6 +1070,18 @@ public class ReplicationRun extends BaseTestCase
      */
     protected void executeOnMaster(String sql) throws SQLException {
          Statement s = getMasterConnection().createStatement();
+         s.execute(sql);
+         s.close();
+    }
+
+    /**
+     * Execute SQL on the slave database through a Statement
+     * @param sql The sql that should be executed on the slave database
+     * @throws java.sql.SQLException thrown if an error occured while
+     * executing the sql
+     */
+    protected void executeOnSlave(String sql) throws SQLException {
+         Statement s = getSlaveConnection().createStatement();
          s.execute(sql);
          s.close();
     }
@@ -1147,10 +1181,7 @@ public class ReplicationRun extends BaseTestCase
         { // Use full classpath when running locally. Can not vary server versions!
             slaveClassPath = classPath;
         }
-        String URL = DB_PROTOCOL
-                +"://"+slaveHost
-                +":"+slaveServerPort+"/"
-                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName
+        String URL = slaveURL(dbName)
                 +";startSlave=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
@@ -1191,10 +1222,7 @@ public class ReplicationRun extends BaseTestCase
             int slaveReplPort)
             throws Exception
     {
-        final String URL = DB_PROTOCOL
-                +"://"+slaveHost
-                +":"+slaveServerPort+"/"
-                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName
+        final String URL = slaveURL(dbName)
                 +";startSlave=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
         
@@ -1205,7 +1233,8 @@ public class ReplicationRun extends BaseTestCase
             final int fSlaveServerPort = slaveServerPort;
             final String fConnAttrs = "startSlave=true"
                                 +";slaveHost="+slaveReplInterface
-                                +";slavePort="+slaveReplPort;
+                                +";slavePort="+slaveReplPort
+                                +useEncryption(false);
             Thread connThread = new Thread(
                     new Runnable()
             {
@@ -1260,10 +1289,7 @@ public class ReplicationRun extends BaseTestCase
         
         String masterClassPath = derbyMasterVersion +FS+ "derbynet.jar";
                 
-        String URL = DB_PROTOCOL
-                +"://"+slaveHost
-                +":"+slaveServerPort+"/"
-                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName
+        String URL = slaveURL(dbName)
                 +";stopSlave=true";
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                 + PS + derbyVersion +FS+ "derbytools.jar";
@@ -1320,10 +1346,7 @@ public class ReplicationRun extends BaseTestCase
         
         String masterClassPath = derbyMasterVersion +FS+ "derbynet.jar";
                 
-        String URL = DB_PROTOCOL
-                +"://"+host
-                +":"+serverPort+"/"
-                +dbPath+FS+dbSubPath+FS+dbName
+        String URL = masterURL(dbName)
                 +";failover=true";
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                 + PS + derbyVersion +FS+ "derbytools.jar";
@@ -1354,10 +1377,7 @@ public class ReplicationRun extends BaseTestCase
             int serverPort)
             throws Exception
     {
-        String URL = DB_PROTOCOL
-                +"://"+host
-                +":"+serverPort+"/"
-                +dbPath+FS+dbSubPath+FS+dbName
+        String URL = masterURL(dbName)
                 +";failover=true";
                
             util.DEBUG("failOver_direct getConnection("+URL+")");
@@ -1403,11 +1423,8 @@ public class ReplicationRun extends BaseTestCase
             masterClassPath = classPath;
         }
                 
-        String URL = DB_PROTOCOL
-                +"://"+masterHost
-                +":"+masterServerPort+"/"
-                +masterDatabasePath+FS+masterDbSubPath+FS+dbName
-                +";stopSlave=true";
+        String URL = masterURL(dbName)
+                +";stopMaster=true"; 
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                 + PS + derbyVersion +FS+ "derbytools.jar";
         if ( masterHost.equals("localhost") )
@@ -1429,7 +1446,7 @@ public class ReplicationRun extends BaseTestCase
                 runUserCommandRemotely(command,
                 testClientHost,
                 testUser,
-                "stopSlave_ij ");
+                "stopMaster_ij ");
         util.DEBUG(results);
     }
     
@@ -1476,7 +1493,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("xFindServerPID: " + pid);
         return pid;
     }
-    private void xStopServer(String serverHost, int serverPID)
+    void xStopServer(String serverHost, int serverPID)
     throws InterruptedException
     {
         if ( serverPID == -1 || serverPID == 0 )
@@ -1493,11 +1510,22 @@ public class ReplicationRun extends BaseTestCase
     {
         util.DEBUG("BEGIN verifySlave "+slaveServerHost+":"
                 +slaveServerPort+"/"+slaveDatabasePath+FS+slaveDbSubPath+FS+replicatedDb);
+        
+        if ( (replicationTest != null) // If 'replicationTest==null' no table was created/filled
+                && simpleLoad )
+        {
+            _verifyDatabase(slaveServerHost, slaveServerPort, 
+                    slaveDatabasePath+FS+slaveDbSubPath+FS+replicatedDb,
+                    simpleLoadTuples);
+            // return;
+        }
+
         ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
         ds.setDatabaseName(slaveDatabasePath + FS + slaveDbSubPath + FS +
                            replicatedDb);
         ds.setServerName(slaveServerHost);
         ds.setPortNumber(slaveServerPort);
+        ds.setConnectionAttributes(useEncryption(false));
         Connection conn = ds.getConnection();
             
         simpleVerify(conn);
@@ -1515,11 +1543,22 @@ public class ReplicationRun extends BaseTestCase
     {
         util.DEBUG("BEGIN verifyMaster " + masterServerHost + ":"
                 +masterServerPort+"/"+masterDatabasePath+FS+masterDbSubPath+FS+replicatedDb);
+        
+        if ( (replicationTest != null)  // If 'replicationTest==null' no table was created/filled
+                && simpleLoad )
+        {
+            _verifyDatabase(masterServerHost, masterServerPort, 
+                    masterDatabasePath+FS+masterDbSubPath+FS+replicatedDb,
+                    simpleLoadTuples);
+            // return;
+        }
+
         ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
         ds.setDatabaseName(masterDatabasePath + FS + masterDbSubPath + FS +
                            replicatedDb);
         ds.setServerName(masterServerHost);
         ds.setPortNumber(masterServerPort);
+        ds.setConnectionAttributes(useEncryption(false));
         Connection conn = ds.getConnection();
             
         simpleVerify(conn);
@@ -1558,10 +1597,7 @@ public class ReplicationRun extends BaseTestCase
                 serverHost,serverPort,
                 dbName);
         /*
-        String URL = DB_PROTOCOL
-                +"://"+serverHost
-                +":"+serverPort+"/"
-                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName;
+        String URL = slaveURL(dbName);
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                 + PS + derbyVersion +FS+ "derbytools.jar";
         
@@ -1608,10 +1644,7 @@ public class ReplicationRun extends BaseTestCase
                 serverHost,serverPort,
                 dbName);
         /*
-        String URL = DB_PROTOCOL
-                +"://"+serverHost
-                +":"+serverPort+"/"
-                +masterDatabasePath+FS+masterDbSubPath+FS+dbName;
+        String URL = masterURL(dbName);
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                 + PS + derbyVersion +FS+ "derbytools.jar";
         
@@ -1664,7 +1697,7 @@ public class ReplicationRun extends BaseTestCase
      */
     
     
-    private String runUserCommand(String command,
+    /* private */ String runUserCommand(String command,
             String testUser)
     {
         util.DEBUG("Execute '"+ command +"'");
@@ -2011,6 +2044,10 @@ public class ReplicationRun extends BaseTestCase
         
         unFreezeDB = null;
         util.DEBUG("unFreezeDB: " + unFreezeDB);
+        
+        simpleLoad = System.getProperty("derby.tests.replSimpleLoad", "true")
+                                                     .equalsIgnoreCase("true");
+        util.DEBUG("simpleLoad: " + simpleLoad);
         
         /* Done in subclasses
         replicationTest = "org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationTestRun";
@@ -2771,11 +2808,8 @@ public class ReplicationRun extends BaseTestCase
         if ( !existingDB )
         {
             // Create it!
-            String URL = DB_PROTOCOL
-                    +"://"+serverHost
-                    +":"+serverPort+"/"
-                    +masterDatabasePath+FS+dbSubPath+FS+database // FIXME! for slave load!
-                    +";create=true"; // Creating!
+            String URL = masterURL(database)
+                    +";create=true"; // Creating! No need for encryption here?
             String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
                     + PS + derbyVersion +FS+ "derbyTesting.jar"
                     + PS + derbyVersion +FS+ "derbytools.jar";
@@ -2810,6 +2844,59 @@ public class ReplicationRun extends BaseTestCase
         
     }
 
+    void makeReadyForReplication()
+        throws Exception
+    {   // Replace the following code in all tests with a call to makeReadyForReplication()!
+        cleanAllTestHosts();
+        
+        initEnvironment();
+        
+        initMaster(masterServerHost,
+                replicatedDb);
+        
+        masterServer = startServer(masterJvmVersion, derbyMasterVersion,
+                masterServerHost,
+                ALL_INTERFACES,
+                masterServerPort,
+                masterDbSubPath);
+        
+        slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
+                slaveServerHost,
+                ALL_INTERFACES,
+                slaveServerPort,
+                slaveDbSubPath);
+        
+        startServerMonitor(slaveServerHost);
+        
+        bootMasterDatabase(jvmVersion,
+                masterDatabasePath +FS+ masterDbSubPath,
+                replicatedDb,
+                masterServerHost,
+                masterServerPort,
+                null // bootLoad, // The "test" to start when booting db.
+                );
+        
+        initSlave(slaveServerHost,
+                jvmVersion,
+                replicatedDb);
+        
+        startSlave(jvmVersion, replicatedDb,
+                slaveServerHost,
+                slaveServerPort,
+                slaveServerHost,
+                slaveReplPort,
+                testClientHost);
+        
+        startMaster(jvmVersion, replicatedDb,
+                masterServerHost,
+                masterServerPort,
+                masterServerHost,
+                slaveServerPort,
+                slaveServerHost,
+                slaveReplPort);
+        
+    }
+    
     ///////////////////////////////////////////////////////////////////////////
     /* Remove any servers or tests still running
      */
@@ -3319,6 +3406,7 @@ test.postStoppedSlaveServer.return=true
         ds.setDatabaseName(dbPath);
         ds.setServerName(serverHost);
         ds.setPortNumber(serverPort);
+        ds.setConnectionAttributes(useEncryption(false));
         Connection conn = ds.getConnection();
         
         PreparedStatement ps = conn.prepareStatement("create table t(i integer primary key, s varchar(64))");
@@ -3349,6 +3437,7 @@ test.postStoppedSlaveServer.return=true
         ds.setDatabaseName(dbPath);
         ds.setServerName(serverHost);
         ds.setPortNumber(serverPort);
+        ds.setConnectionAttributes(useEncryption(false));
         Connection conn = ds.getConnection();
         
         _verify(conn,_noTuplesInserted);
@@ -3372,4 +3461,43 @@ test.postStoppedSlaveServer.return=true
         assertEquals("Expected " +(_noTuplesInserted-1) +" max, got " + max +".",
                      _noTuplesInserted - 1, max);
     }
+    
+    Connection getConnection(String serverHost, int serverPort,
+            String databasePath, String dbSubPath, String replicatedDb)
+        throws SQLException
+    {
+        String db = databasePath +FS+dbSubPath +FS+ replicatedDb;
+        String connectionURL = "jdbc:derby:"  
+                + "//" + serverHost + ":" + serverPort + "/"
+                + db;
+        util.DEBUG(connectionURL);
+        return DriverManager.getConnection(connectionURL);
+    }
+    
+    String masterURL(String dbName)
+    {
+        return DB_PROTOCOL
+                +"://"+masterServerHost
+                +":"+masterServerPort+"/"
+                +masterDatabasePath+FS+masterDbSubPath+FS+dbName
+                +useEncryption(false);
+    }
+    String masterLoadURL(String dbSubPath)
+    {
+        return DB_PROTOCOL
+                +"://"+masterServerHost
+                +":"+masterServerPort+"/"
+                +masterDatabasePath+FS+dbSubPath
+                +useEncryption(false);
+    }
+
+    String slaveURL(String dbName)
+    {
+        return DB_PROTOCOL
+                +"://"+slaveServerHost
+                +":"+slaveServerPort+"/"
+                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName
+                +useEncryption(false);
+    }
+
 }

@@ -26,9 +26,9 @@ import org.apache.derby.jdbc.ClientDataSource;
 
 
 /**
- * Run a replication test on localhost
- * by using default values for master and slave hosts,
- * and master and slave ports.
+ * Defining startSlave, stopmaster, stopSlave and
+ * failOver methods returning SQLException for
+ * negative testing (ReplicationRun_Local_3 set of tests).
  * 
  */
 
@@ -44,16 +44,6 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         super(testcaseName);
     }
     
-    protected void setUp() throws Exception
-    {
-        super.setUp();
-    }
-    
-    protected void tearDown() throws Exception
-    {
-        super.tearDown();
-    }
-        
     //////////////////////////////////////////////////////////////
     ////
     //// The replication test framework (testReplication()):
@@ -73,7 +63,8 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         ds.setDatabaseName(dbPath);
         ds.setServerName(serverHost);
         ds.setPortNumber(serverPort);
-        ds.setConnectionAttributes("failover=true");
+        ds.setConnectionAttributes("failover=true"
+                +useEncryption(false));
         try {
             Connection conn = ds.getConnection(); // 
             conn.close();
@@ -96,7 +87,8 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         ds.setDatabaseName(dbPath);
         ds.setServerName(serverHost);
         ds.setPortNumber(serverPort);
-        ds.setConnectionAttributes("startSlave=true;create=true");
+        ds.setConnectionAttributes("startSlave=true;create=true"
+                +useEncryption(true));
         try {
             Connection conn = ds.getConnection(); // XRE10 - REPLICATION_CONFLICTING_ATTRIBUTES
             conn.close();
@@ -113,7 +105,8 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         ds.setDatabaseName(dbPath);
         ds.setServerName(masterServerHost);
         ds.setPortNumber(masterServerPort);
-        ds.setConnectionAttributes("stopMaster=true");
+        ds.setConnectionAttributes("stopMaster=true"
+                +useEncryption(false));
         try {
             Connection conn = ds.getConnection(); // 
             conn.close();
@@ -133,7 +126,8 @@ public class ReplicationRun_Local_3 extends ReplicationRun
         ds.setDatabaseName(dbPath);
         ds.setServerName(slaveServerHost);
         ds.setPortNumber(slaveServerPort);
-        ds.setConnectionAttributes("stopSlave=true");
+        ds.setConnectionAttributes("stopSlave=true"
+                +useEncryption(false));
         try {
             Connection conn = ds.getConnection();
             conn.close();
