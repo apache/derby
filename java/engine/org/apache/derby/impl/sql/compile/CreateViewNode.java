@@ -220,7 +220,8 @@ public class CreateViewNode extends DDLStatementNode
 		}
 
 		// for each column, stuff system.column
-		colInfos = new ColumnInfo[queryExpression.getResultColumns().size()];
+		// System columns should only include visible columns DERBY-4230
+		colInfos = new ColumnInfo[queryExpression.getResultColumns().visibleSize()];
 		genColumnInfos(colInfos);
 	}
 
@@ -349,7 +350,9 @@ public class CreateViewNode extends DDLStatementNode
 		for (int index = 0; index < rclSize; index++)
 		{
 			ResultColumn rc = (ResultColumn) rcl.elementAt(index);
-
+			// Don't incorporate generated columns DERBY-4230
+			if (rc.isGenerated)
+				continue;
 			//RESOLVEAUTOINCREMENT
 			colInfos[index] = new ColumnInfo(rc.getName(),
 											 rc.getType(),

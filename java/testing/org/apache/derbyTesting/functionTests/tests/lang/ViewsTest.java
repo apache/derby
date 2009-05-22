@@ -1,8 +1,10 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -13,6 +15,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.Utilities;
 
 
 public final class ViewsTest extends BaseJDBCTestCase {
@@ -786,4 +789,39 @@ public final class ViewsTest extends BaseJDBCTestCase {
         conn2.close();
    }
 
+    /**
+     * Make sure DatabaseMetaData.getColumns is correct when we have a view
+     * created when there is an expression in the select list.
+     * Also check the ResultSetMetaData
+     * @throws SQLException
+     */
+    public void testViewMetaDataWithGeneratedColumnsDerby4230() throws SQLException {
+        Statement s = createStatement();
+        s.executeUpdate("create table A (id integer, data varchar(20), data2 integer)");
+        s.executeUpdate("insert into A values (3, 'G', 5), (23, 'G', 4), (5, 'F', 1), (2, 'H', 4), (1, 'F', 5)");
+        //DERBY-4230. Make sure DatabaseMetaData.getColumns does not include generated columns.
+        // You need an expression in the select list.
+        s.executeUpdate("create view V (data, num) as select data, data2 + 2 from A group by data, data2");
+        DatabaseMetaData dmd = getConnection().getMetaData();
+        ResultSet columns = dmd.getColumns(null, null, "V", null);
+        String[][] expectedDBMetaRows = new String[][] {{"","APP","V","DATA","12","VARCHAR","20",null,null,null,"1","",null,null,null
+            ,"40","1","YES",null,null,null,null,"NO"},
+            {"","APP","V","NUM","4","INTEGER","10",null,"0","10","1","",null,null,null,null,"2","YES",null,null,null,null,"NO"}};  
+        JDBC.assertFullResultSet(columns,expectedDBMetaRows);
+        // Make sure ResultSetMetaData is right when selecting from view.
+        // This wasn't a problem with DERBY-4230, but checking for good measure.
+        ResultSet rs = s.executeQuery("SELECT * FROM V");        
+        JDBC.assertColumnNames(rs, new String[] {"DATA","NUM"});
+        JDBC.assertColumnTypes(rs, new int[] {java.sql.Types.VARCHAR, java.sql.Types.INTEGER});
+        JDBC.assertNullability(rs,new boolean[] {true,true});
+        // Finally check the results.
+        String [][] expectedRows = new String[][] {{"F","3"},
+            {"F","7"},
+            {"G","6"},
+            {"G","7"},
+            {"H","6"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+        s.executeUpdate("DROP VIEW V");
+        s.executeUpdate("DROP TABLE A");        
+    }
 }
