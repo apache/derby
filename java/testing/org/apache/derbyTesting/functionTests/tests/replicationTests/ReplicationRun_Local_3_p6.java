@@ -43,11 +43,12 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 public class ReplicationRun_Local_3_p6 extends ReplicationRun_Local_3
 {
     
+    String getDerbyServerPID = null;
+
     /**
      * Creates a new instance of ReplicationRun_Local
      * @param testcaseName Identifying the test.
      */
-    String getDerbyServerPID = null;
     public ReplicationRun_Local_3_p6(String testcaseName)
     {
         super(testcaseName);
