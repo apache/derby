@@ -735,7 +735,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483653, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483653, 'Plex', 'S')");
@@ -898,7 +898,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483654, "+
-            		"'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.')");
+            		"'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483654, 'Plex', 'S')");
@@ -1058,7 +1058,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483655, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483655, 'Plex', 'S')");
@@ -1218,7 +1218,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483656, 'BatchTypeIn"+
             		"structions', 'Ne pas jeter ces documents.  Ils ont "+
-            		"été faits pour quelque chose.')");
+            		"\u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483656, 'Plex', 'S')");
@@ -2611,7 +2611,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483665, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483665, 'Plex', 'S')");
@@ -2766,7 +2766,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483666, 'BatchTypeInstr"+
-            		"uctions', 'Ne pas jeter ces documents.  Ils ont été fait"+
+            		"uctions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 fait"+
             		"s pour quelque chose.')");
 
             st.executeUpdate(
@@ -2923,7 +2923,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483667, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483667, 'Plex', 'S')");
@@ -3077,7 +3077,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483668, 'BatchTypeInstr"+
-            		"uctions', 'Ne pas jeter ces documents.  Ils ont été fa"+
+            		"uctions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 fa"+
             		"its pour quelque chose.')");
 
             st.executeUpdate(
@@ -4467,7 +4467,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483677, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483677, 'Plex', 'S')");
@@ -4619,7 +4619,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483678, 'ItemSeq', '1')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483678, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.')");
+            		"INSERT INTO table2 VALUES (2147483678, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483678, 'Plex', 'S')");
@@ -4773,7 +4773,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483679, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483679, 'Plex', 'S')");
@@ -4926,7 +4926,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483680, 'BatchTypeInstr"+
-            		"uctions', 'Ne pas jeter ces documents.  Ils ont été fai"+
+            		"uctions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 fai"+
             		"ts pour quelque chose.')");
 
             st.executeUpdate(
@@ -6307,7 +6307,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483689, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483689, 'Plex', 'S')");
@@ -6459,7 +6459,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483690, 'ItemSeq', '1')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483690, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.')");
+            		"INSERT INTO table2 VALUES (2147483690, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483690, 'Plex', 'S')");
@@ -6613,7 +6613,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483691, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (2147483691, 'Plex', 'S')");
@@ -6765,7 +6765,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (2147483692, 'ItemSeq', '1')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (2147483692, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.')");
+            		"INSERT INTO table2 VALUES (2147483692, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (2147483692, 'Plex', 'S')");
@@ -7625,7 +7625,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (4294967297, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (4294967297, 'Plex', 'S')");
@@ -7841,7 +7841,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (6442450945, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (6442450945, 'Plex', 'S')");
@@ -8077,7 +8077,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (8589934593, 'ItemSeq', '0')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (8589934593, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.')");
+            		"INSERT INTO table2 VALUES (8589934593, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
 
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (8589934593, 'Plex', 'S')");
@@ -8389,7 +8389,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (10737418241, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (10737418241, 'Plex', 'S')");
@@ -8727,7 +8727,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (12884901889, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (12884901889, 'Plex', 'S')");
@@ -9010,7 +9010,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (15032385537, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (15032385537, 'Plex', 'S')");
@@ -9302,7 +9302,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (17179869185, "
                 + "'BatchTypeInstructions', 'Ne pas jeter ces "
-                + "documents.  Ils ont été faits pour quelque chose.')");
+                + "documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
             		"INSERT INTO table2 VALUES (17179869185, 'Plex', 'S')");
@@ -9605,7 +9605,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "INSERT INTO table2 VALUES (19327352833, 'ItemSeq', '0')");
             
             st.executeUpdate(
-            		"INSERT INTO table2 VALUES (19327352833, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont été faits pour quelque chose.')");
+            		"INSERT INTO table2 VALUES (19327352833, 'BatchTypeInstructions', 'Ne pas jeter ces documents.  Ils ont \u00e9t\u00e9 faits pour quelque chose.')");
             
             st.executeUpdate(
                 "INSERT INTO table2 VALUES (19327352833, 'Plex', 'S')");
