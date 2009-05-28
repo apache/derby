@@ -33,6 +33,7 @@ import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.sql.DatabaseMetaData;
 import java.util.*;
+import org.apache.derby.iapi.jdbc.EngineConnection;
 
 /**
  *	
@@ -85,6 +86,11 @@ class ColumnInfo {
         jdbcColumnTypes = new ArrayList(1);
 		noOfColumns = 0;
 		this.conn = conn;
+
+        if (sName == null) {
+            // Use the current schema if no schema is specified.
+            sName = ((EngineConnection) conn).getCurrentSchemaName();
+        }
 
 		this.schemaName = sName;
 		this.tableName =  tName;

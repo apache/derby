@@ -162,6 +162,25 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	}
 
     /**
+     * Test that import to a table in the default schema works if a table
+     * with the same name exists in a different schema (DERBY-3296).
+     */
+    public void testImportWithSameNameInDifferentSchema() throws Exception {
+        resetTables();
+        doExport(null, "T1", null, null, null);
+        Statement s = createStatement();
+        s.executeUpdate("create table otherschema.t2(x int)");
+        // toSchema must be null to trigger the bug. The bug is not exposed if
+        // the schema is explicit.
+        doImport("T1", null, "T2", null, null, null, 0);
+        // Check that the rows were imported to the correct table (APP.T2)
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select count(*) from app.t2"), "4");
+        setAutoCommit(false); // requirement for dropSchema()
+        JDBC.dropSchema(getConnection().getMetaData(), "OTHERSCHEMA");
+    }
+
+    /**
      * Test that quotes in the arguments to the export and import procedures
      * are handled properly (DERBY-4042).
      */
