@@ -350,6 +350,14 @@ public abstract class BaseJDBCTestCase
         addStatement(cs);
         return cs;
     }
+
+    /**
+     * Utility method to set auto commit behaviour.
+     * @param commit false if autoCommit should be disabled.
+     */
+    public void setAutoCommit(boolean commit) throws SQLException {
+    	getConnection().setAutoCommit(commit);
+    }
     
     /**
      * Utility method to commit using the connection
