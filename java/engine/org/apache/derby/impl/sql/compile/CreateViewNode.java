@@ -220,7 +220,8 @@ public class CreateViewNode extends DDLStatementNode
 		}
 
 		// for each column, stuff system.column
-		colInfos = new ColumnInfo[queryExpression.getResultColumns().size()];
+		// System columns should only include visible columns DERBY-4230
+		colInfos = new ColumnInfo[queryExpression.getResultColumns().visibleSize()];
 		genColumnInfos(colInfos);
 	}
 
@@ -344,12 +345,19 @@ public class CreateViewNode extends DDLStatementNode
 	private void genColumnInfos(ColumnInfo[] colInfos)
 	{
 		ResultColumnList rcl = 	queryExpression.getResultColumns();
-		int			 	 rclSize = rcl.size();
 
-		for (int index = 0; index < rclSize; index++)
+		for (int index = 0; index < colInfos.length; index++)
 		{
 			ResultColumn rc = (ResultColumn) rcl.elementAt(index);
-
+			// The colInfo array has been initialized to be of length 
+			// visibleSize() (DERBY-4230).  This code assumes that all the visible
+			// columns are at the beginning of the rcl. Throw an assertion 
+			// if we hit a generated column in what we think is the visible
+			// range.
+			if (SanityManager.DEBUG) {
+				if (rc.isGenerated)
+					SanityManager.THROWASSERT("Encountered generated column in expected visible range at rcl[" + index +"]");
+			}
 			//RESOLVEAUTOINCREMENT
 			colInfos[index] = new ColumnInfo(rc.getName(),
 											 rc.getType(),
