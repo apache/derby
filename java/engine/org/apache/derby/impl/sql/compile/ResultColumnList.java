@@ -4105,12 +4105,21 @@ public class ResultColumnList extends QueryTreeNodeVector
 	{
 		int numGenerated = 0;
 		int sz = size();
+		boolean inVisibleRange = false;
 		for (int i = sz - 1; i >= 0; i--) 
 		{
 			ResultColumn rc = (ResultColumn) elementAt(i);
 			if (rc.isGenerated()) 
 			{
+				if (SanityManager.DEBUG) {
+					// We expect the generated columns to always be at the end of the list.
+					if (inVisibleRange)
+						SanityManager.THROWASSERT("Encountered generated column in expected visible range at rcl[" + i +"]");
+				}	
 				numGenerated++;
+			} else {
+				// We are counting down, so as soon as we see one visible column, the rest should be th same
+				inVisibleRange = true;
 			}
 		}
 		return numGenerated;
