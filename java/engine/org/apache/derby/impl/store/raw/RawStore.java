@@ -367,6 +367,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 			if (logFactory.checkpoint(this, dataFactory, xactFactory, false))
 			{
+                // checkpoint with "wait" = false.  If set to true shutdown
+                // might loop forever if we are shutting down on a serious 
+                // error where some factory has already shut down and thus
+                // log checkpoint always returns false.
+
 				if (dataFactory != null)
 					dataFactory.removeStubsOK();
 			}
@@ -468,7 +473,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 	public void checkpoint() throws StandardException
 	{
-		logFactory.checkpoint(this, dataFactory, xactFactory, false);
+		logFactory.checkpoint(this, dataFactory, xactFactory, true);
 	}
 
     /**
@@ -1200,7 +1205,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 	public void freezePersistentStore() throws StandardException
 	{
 		// do a checkpoint to get the persistent store up to date.
-		logFactory.checkpoint(this, dataFactory, xactFactory,true);
+		logFactory.checkpoint(this, dataFactory, xactFactory, true);
 		logFactory.freezePersistentStore();
 
 	}
