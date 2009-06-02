@@ -20,11 +20,13 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
+import java.util.Properties;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -68,14 +70,22 @@ public final class NetIjTest extends ScriptTestCase {
      * Return the suite that runs all the derbynet scripts.
      */
     public static Test suite() {
-
         TestSuite suite = new TestSuite("NetScripts");
 
         // Set up the scripts run with the network client
         TestSuite clientTests = new TestSuite("NetScripts:client");
         clientTests.addTest(getSuite(CLIENT_TESTS));
-        Test client = TestConfiguration.clientServerDecorator(clientTests);
 
+        int port = TestConfiguration.getCurrent().getPort();
+
+        Properties prop = new Properties();
+        prop.setProperty("ij.protocol",
+                "jdbc:derby://localhost:"+port+"/");
+
+        Test client = new SystemPropertyTestSetup(
+                TestConfiguration.clientServerDecoratorWithPort(clientTests,port),
+                prop);
+                    
         // add those client tests into the top-level suite.
         suite.addTest(client);
 
@@ -86,7 +96,7 @@ public final class NetIjTest extends ScriptTestCase {
      * A single JUnit test that runs a single derbynet script.
      */
     private NetIjTest(String netTest){
-        super(netTest);
+        super(netTest,true);
     }
 
     /**

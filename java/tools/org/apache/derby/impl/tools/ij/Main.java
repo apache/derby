@@ -200,6 +200,18 @@ public class Main {
 		return new utilMain(numConnections, out);
 	}
 
+    /**
+	 * Get the right utilMain (according to
+	 * the JDBC version. This overload allows the choice of whether
+     * the system properties will be used or not.
+	 *
+	 * @return	The right utilMain (according to the JDBC version).
+	 */
+    public utilMain getutilMain(int numConnections, LocalizedOutput out, boolean loadSystemProperties)
+	{
+		return new utilMain(numConnections, out, loadSystemProperties);
+	}
+
 	/**
 		Give a shortcut to go on the utilInstance so
 		we don't expose utilMain.

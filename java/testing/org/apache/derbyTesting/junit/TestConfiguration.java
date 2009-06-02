@@ -454,6 +454,26 @@ public class TestConfiguration {
             
         return defaultServerDecorator(test);
     }
+
+    /**
+     * Return a decorator for the passed in tests that sets the
+     * configuration for the client to be Derby's JDBC client
+     * and to start the network server at setUp.
+     * <BR>
+     * The database configuration (name etc.) is based upon
+     * the previous configuration.
+     * <BR>
+     * The previous TestConfiguration is restored at tearDown and
+     * the network server is shutdown.
+     * @param suite the suite to decorate
+     */
+    public static Test clientServerDecoratorWithPort(Test suite, int port)
+    {
+        Test test = new NetworkServerTestSetup(suite, false);
+
+        return existingServerDecorator(test,"localhost",port);
+    }
+
     /**
      * Wrapper to use the alternative port number.
      */
@@ -895,7 +915,12 @@ public class TestConfiguration {
         this.userName = DEFAULT_USER_NAME;
         this.userPassword = DEFAULT_USER_PASSWORD;
         this.hostName = null;
-        this.port = -1;
+        String port = BaseTestCase.getSystemProperty("derby.tests.port");
+        if (port == null) {
+        	this.port = DEFAULT_PORT;
+        } else {
+        	this.port = Integer.parseInt(port);
+        }
         this.isVerbose = Boolean.valueOf(
             getSystemProperties().getProperty(KEY_VERBOSE)).
             booleanValue();

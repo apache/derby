@@ -16,8 +16,8 @@ ij> --
 --
 driver 'org.apache.derby.jdbc.ClientDriver';
 ij> --Bug 4632  Make the db italian to make sure string selects  are working
-connect 'jdbc:derby://localhost:1527/testij;create=true;territory=it' USER 'dbadmin' PASSWORD 'dbadmin';
-ij(CONNECTION1)> connect 'jdbc:derby://localhost:1527/testij' USER 'dbadmin' PASSWORD 'dbadbmin';
+connect 'testij;create=true;territory=it' USER 'dbadmin' PASSWORD 'dbadmin';
+ij(CONNECTION1)> connect 'testij' USER 'dbadmin' PASSWORD 'dbadbmin';
 ij(CONNECTION2)> -- this is a comment, a comment in front of a select should not cause an error
 select * from sys.systables where 1=0;
 TABLEID                             |TABLENAME                                                                                                                       |&|SCHEMAID                            |&
@@ -29,39 +29,39 @@ values(1);
 1          
 ij(CONNECTION2)> -- Try some URL attributes
 disconnect all;
-ij> connect 'jdbc:derby://localhost:1527/testij2;create=true' USER 'dbadmin' PASSWORD 'dbadbmin';
+ij> connect 'testij2;create=true' USER 'dbadmin' PASSWORD 'dbadbmin';
 ij> select * from APP.notthere;
 ERROR 42X05: Table/View 'APP.NOTTHERE' does not exist.
 ij> -- examples from the docs
 
-connect 'jdbc:derby://localhost:1527/testij2;create=true;user=judy;password=judy';
-ij(CONNECTION1)> connect 'jdbc:derby://localhost:1527/./testij2;user=judy;password=judy';
-ij(CONNECTION2)> connect 'jdbc:derby://localhost:1527/toursDB';
+connect 'testij2;create=true;user=judy;password=judy';
+ij(CONNECTION1)> connect './testij2;user=judy;password=judy';
+ij(CONNECTION2)> connect 'toursDB';
 ERROR 08004: The connection was refused because the database toursDB was not found.
-ij(CONNECTION2)> connect 'jdbc:derby://localhost:1527/toursDB' USER 'dbadmin' PASSWORD 'dbadbmin';
+ij(CONNECTION2)> connect 'toursDB' USER 'dbadmin' PASSWORD 'dbadbmin';
 ERROR 08004: The connection was refused because the database toursDB was not found.
-ij(CONNECTION2)> connect 'jdbc:derby://localhost:1527/wombat' USER 'APP' PASSWORD 'APP';
-ij(CONNECTION3)> connect  'jdbc:derby://localhost:1527/testij2;create=true;user=usr;password=pwd';
-ij(CONNECTION4)> connect 'jdbc:derby://localhost:1527/testij2;upgrade=true;user=usr;password=pwd';
-ij(CONNECTION5)> connect 'jdbc:derby://localhost:1527/testij2;shutdown=true;user=usr;password=pwd';
+ij(CONNECTION2)> connect 'wombat' USER 'APP' PASSWORD 'APP';
+ij(CONNECTION3)> connect  'testij2;create=true;user=usr;password=pwd';
+ij(CONNECTION4)> connect 'testij2;upgrade=true;user=usr;password=pwd';
+ij(CONNECTION5)> connect 'testij2;shutdown=true;user=usr;password=pwd';
 ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'testij2' shutdown.
-ij(CONNECTION5)> connect 'jdbc:derby://localhost:1527/./testij2;create=true;user=usr;password=pwd';
-ij(CONNECTION6)> connect 'jdbc:derby://localhost:1527/./testij2;create=true;user=usr;password=pwd';
-ij(CONNECTION7)> connect  'jdbc:derby://localhost:1527/testij2;create=true;user=usr;password=pwd';
-ij(CONNECTION8)> connect 'jdbc:derby://localhost:1527/testij2;upgrade=true;user=usr;password=pwd';
-ij(CONNECTION9)> connect 'jdbc:derby://localhost:1527/testij2;shutdown=true;user=usr;password=pwd';
+ij(CONNECTION5)> connect './testij2;create=true;user=usr;password=pwd';
+ij(CONNECTION6)> connect './testij2;create=true;user=usr;password=pwd';
+ij(CONNECTION7)> connect  'testij2;create=true;user=usr;password=pwd';
+ij(CONNECTION8)> connect 'testij2;upgrade=true;user=usr;password=pwd';
+ij(CONNECTION9)> connect 'testij2;shutdown=true;user=usr;password=pwd';
 ERROR 08006: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08006, SQLERRMC: Database 'testij2' shutdown.
 ij(CONNECTION9)> -- retrieveMessageText Testing
-connect 'jdbc:derby://localhost:1527/testij2;create=true;user=usr;password=pwd;retrieveMessageText=false';
+connect 'testij2;create=true;user=usr;password=pwd;retrieveMessageText=false';
 ij(CONNECTION10)> -- Should not get message text
 select * from APP.notthere;
 ERROR 42X05: DERBY SQL error: SQLCODE: -1, SQLSTATE: 42X05, SQLERRMC: APP.NOTTHERE42X05
-ij(CONNECTION10)> connect 'jdbc:derby://localhost:1527/testij2;create=true;user=usr;password=pwd;retrieveMessageText=true';
+ij(CONNECTION10)> connect 'testij2;create=true;user=usr;password=pwd;retrieveMessageText=true';
 ij(CONNECTION11)> -- Should see message text
 select * from APP.notthere;
 ERROR 42X05: Table/View 'APP.NOTTHERE' does not exist.
 ij(CONNECTION11)> -- just user security mechanism
-connect 'jdbc:derby://localhost:1527/testij2;create=true;user=usr;retrieveMessageText=true';
-ij(CONNECTION12)> connect 'jdbc:derby://localhost:1527/wombat' USER 'APP';
+connect 'testij2;create=true;user=usr;retrieveMessageText=true';
+ij(CONNECTION12)> connect 'wombat' USER 'APP';
 ij(CONNECTION13)> disconnect all;
 ij> 

@@ -37,6 +37,20 @@ public abstract class ScriptTestCase extends CanonTestCase {
 
 	private final String inputEncoding;
 	private final String user;
+    private boolean useSystemProperties = false;
+
+    /**
+	 * Create a ScriptTestCase to run a single test
+     * using a connection obtained from getConnection()
+	 * @param script Base name of the .sql script
+     * @param useSystemProperties Whether to use system properties for this test
+	 * excluding the .sql suffix.
+	 */
+	public ScriptTestCase(String script, boolean useSystemProperties)
+	{
+        this(script, null, null, null);
+        this.useSystemProperties = useSystemProperties;
+	}
 
 	/**
 	 * Create a ScriptTestCase to run a single test
@@ -167,13 +181,14 @@ public abstract class ScriptTestCase extends CanonTestCase {
             // encoding to use.
             outputEnc = outputEncoding;
         }
-
+        
 		org.apache.derby.tools.ij.runScript(
 				conn,
 				sqlIn,
 				inputEncoding,
                 getOutputStream(),
-				outputEnc);
+				outputEnc,
+                useSystemProperties);
 		
 		if (!conn.isClosed() && !conn.getAutoCommit())
 		    conn.commit();

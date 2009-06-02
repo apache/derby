@@ -100,6 +100,22 @@ public class utilMain implements java.security.PrivilegedAction {
 		this(numConnections, out, (Hashtable)null);
 	}
 
+    /**
+	 * Set up the test to run with 'numConnections' connections/users.
+     * This overload allows the choice of whether the system properties
+     * will be used or not.
+	 *
+	 * @param numConnections	The number of connections/users to test.
+	 */
+    utilMain(int numConnections, LocalizedOutput out, boolean loadSystemProperties)
+		throws ijFatalException
+	{
+		this(numConnections, out, (Hashtable)null);
+        if (loadSystemProperties) {
+            initFromEnvironment();
+        }
+	}
+
 	/**
 	 * Set up the test to run with 'numConnections' connections/users.
 	 *

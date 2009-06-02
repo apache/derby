@@ -80,23 +80,49 @@ public class ij {
 		  String outputEncoding)
 		  throws UnsupportedEncodingException
   {
-	  LocalizedOutput lo = 
-		  outputEncoding == null ?
-				  LocalizedResource.getInstance().
-		            getNewOutput(sqlOut)
-	             :  
-		          LocalizedResource.getInstance().
+	  return ij.runScript(conn, sqlIn, inputEncoding, sqlOut, outputEncoding,false);
+  }
+
+    /**
+    * Run a SQL script from an InputStream and write
+    * the resulting output to the provided PrintStream.
+    * SQL commands are separated by a semi-colon ';' character.
+    *
+    * @param conn Connection to be used as the script's default connection.
+    * @param sqlIn InputStream for the script.
+    * @param inputEncoding Encoding of the script.
+    * @param sqlOut OutputStream for the script's output
+    * @param outputEncoding Output encoding to use.
+    * @param loadSystemProperties Whether to use the system properties.
+    * @return Number of SQLExceptions thrown during the execution, -1 if not known.
+    * @throws UnsupportedEncodingException
+    */
+    public static int runScript(
+		  Connection conn,
+		  InputStream sqlIn,
+		  String inputEncoding,
+		  OutputStream sqlOut,
+		  String outputEncoding,
+          boolean loadSystemProperties)
+		  throws UnsupportedEncodingException
+    {
+        LocalizedOutput lo =
+          outputEncoding == null ?
+                  LocalizedResource.getInstance().
+                    getNewOutput(sqlOut)
+                 :
+                  LocalizedResource.getInstance().
                     getNewEncodedOutput(sqlOut, outputEncoding);
 
-	  Main ijE = new Main(false);
-	  
-	  LocalizedInput li = LocalizedResource.getInstance().
-	            getNewEncodedInput(sqlIn, inputEncoding);
-	  
-	  utilMain um = ijE.getutilMain(1, lo);
+        Main ijE = new Main(false);
 
-	  return um.goScript(conn, li);
-  }
+        LocalizedInput li = LocalizedResource.getInstance().
+                getNewEncodedInput(sqlIn, inputEncoding);
+
+        utilMain um = ijE.getutilMain(1, lo, loadSystemProperties);
+
+        return um.goScript(conn, li);
+    }
 
   private ij() { // no instances allowed
   }
