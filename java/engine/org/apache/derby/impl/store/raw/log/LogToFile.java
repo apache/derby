@@ -1356,64 +1356,52 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		@exception StandardException - encounter exception while doing 
                                        checkpoint.
+
+        @param rsf          The RawStoreFactory to use to do the checkpoint.
+        @param df           The DataFactory to use to do the checkpoint. 
+        @param tf           The TransactionFactory to use to do the checkpoint.
+        @param wait         If an existing checkpoint is in progress, then if
+                            wait=true then this routine will wait for the 
+                            checkpoint to complete and the do another checkpoint
+                            and wait for it to finish before returning.
 	*/
-	public boolean checkpoint(RawStoreFactory rsf,
-							  DataFactory df,
-							  TransactionFactory tf, 
-							  boolean wait)
+
+	public boolean checkpoint(
+    RawStoreFactory     rsf,
+    DataFactory         df,
+    TransactionFactory  tf, 
+    boolean             wait)
 		 throws StandardException
 	{
 
 		// call checkpoint with no pre-started transaction
-		boolean done = checkpointWithTran(null, rsf, df, tf);
-
-		//above checpoint call will return 'false'  without
-		//performing the checkpoint if some other  thread is doing checkpoint. 
-		//In  cases like backup it is necesary to wait for the 
-		//checkpoint to complete before copying the files. 'wait' flag get passed 
-		//in as 'true' by  such cases.
-		//When wait flag is true, we will wait here until the other thread which
-		//is actually doing the the checkpoint completes.
- 
-		if(!done && wait)
-		{
-			synchronized(this)
-			{
-				//wait until the thread that is doing the checkpoint completes it.
-				while(inCheckpoint)
-				{
-					try
-					{
-						wait();
-					}	
-					catch (InterruptedException ie)
-					{
-						throw StandardException.interrupt(ie);
-					}	
-				}
-				done = true;
-			}
-		}
-
-		return done;
+        return(checkpointWithTran(null, rsf, df, tf, wait));
 	}
-
 
 	/**
 		checkpoint with pre-start transaction
 
+        @param rsf          The RawStoreFactory to use to do the checkpoint.
+        @param df           The DataFactory to use to do the checkpoint. 
+        @param tf           The TransactionFactory to use to do the checkpoint.
+        @param wait         If an existing checkpoint is in progress, then if
+                            wait=true then this routine will wait for the 
+                            checkpoint to complete and the do another checkpoint
+                            and wait for it to finish before returning.
+
 		@exception StandardException Derby Standard Error Policy 
 	*/
-	protected boolean checkpointWithTran(RawTransaction cptran, 
-							   RawStoreFactory rsf,
-							   DataFactory df,
-							   TransactionFactory tf)
+	protected boolean checkpointWithTran(
+    RawTransaction      cptran, 
+    RawStoreFactory     rsf,
+    DataFactory         df,
+    TransactionFactory  tf,
+    boolean             wait)
 		 throws StandardException
 	{
-		boolean proceed = true;
-		LogInstant redoLWM;
+		LogInstant  redoLWM;
 
-		// we may be called to stop the database after a bad error, make sure
+        // we may be called to stop the database after a bad error, make sure
 		// logout is set
 		if (logOut == null)
 		{
@@ -1422,31 +1410,90 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		long approxLogLength;
 
-		synchronized (this)
-		{
-			// has someone else found a problem in the raw store?  
-			if (corrupt != null)
+		boolean     proceed = true;
+        do
+        {
+            synchronized (this)
             {
-				throw StandardException.newException(SQLState.LOG_STORE_CORRUPT, corrupt);
+                if (corrupt != null)
+                {
+                    // someone else found a problem in the raw store.  
+
+                    throw StandardException.newException(
+                            SQLState.LOG_STORE_CORRUPT, corrupt);
+                }
+
+                approxLogLength = endPosition; // current end position
+
+                if (!inCheckpoint)
+                {
+                    // no checkpoint in progress, change status to indicate
+                    // this code is doing the checkpoint.
+                    inCheckpoint = true;
+
+                    // break out of loop and continue to execute checkpoint
+                    // in this routine.
+                    break;
+                }
+                else
+                {
+                    // There is a checkpoint in progress.
+
+                    if (wait)
+                    {
+                        // wait until the thread executing the checkpoint 
+                        // completes.
+
+
+                        // In some cases like backup and compress it is not 
+                        // enough that a checkpoint is in progress, the timing 
+                        // is important.
+                        // In the case of compress it is necessary that the 
+                        // redo low water mark be moved forward past all 
+                        // operations up to the current time, so that a redo of
+                        // the subsequent compress operation is guaranteed
+                        // to not encounter any log record on the container 
+                        // previous to the compress.  In this case the 'wait'
+                        // flag is passed in as 'true'.
+                        //
+                        // When wait is true and another thread is currently
+                        // executing the checkpoint, execution waits here until
+                        // the other thread which is actually doing the the 
+                        // checkpoint completes.  And then the code will loop
+                        // until this thread executes the checkpoint.
+ 
+                        while (inCheckpoint)
+                        {
+                            try
+                            {
+                                wait();
+                            }	
+                            catch (InterruptedException ie)
+                            {
+                                throw StandardException.interrupt(ie);
+                            }	
+                        }
+                    }
+                    else
+                    {
+                        // caller did not want to wait for already executing
+                        // checkpoint to finish.  Routine will return false
+                        // upon exiting the loop.
+                        proceed = false;
+                    }
+                }
+
+                // don't return from inside of a sync block
             }
-
-			// if another checkpoint is in progress, don't do anything
-			if (inCheckpoint == true)
-				proceed = false;
-			else
-				inCheckpoint = true;
-
-			approxLogLength = endPosition; // current end position
-
-			// don't return from inside of a sync block
-		}
+        }
+        while (proceed);
 
 		if (!proceed)
 		{
 			return false;
 		}
 
-		// needCPtran == true if we are not supplied with a pre-started transaction
+		// needCPtran == true if not supplied with a pre-started transaction
 		boolean needCPTran = (cptran == null);
 
 		if (SanityManager.DEBUG)
@@ -1465,18 +1512,21 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			if (approxLogLength > logSwitchInterval)
 			{
 				switchLogFile();
+
 				//log switch is occuring in conjuction with the 
-				//checkpoint, set the amount of log written from last checkpoint to zero.
+				//checkpoint, set the amount of log written from last 
+                //checkpoint to zero.
 				logWrittenFromLastCheckPoint = 0;
-			}else
+			}
+            else
 			{
 				//checkpoint is happening without the log switch,
 				//in the middle of a log file. Amount of log written already for
 				//the current log file should not be included in caluculation 
 				//of when next check point is due. By assigning the negative
-				//value of amount of log writtent for this file. Later it will
-				//be subtracted when we switch the log file or while calculating whether 
-				//we are due a for checkpoint a flush time.
+				//value of amount of log written for this file. Later it will
+				//be subtracted when we switch the log file or while 
+                //calculating whether we are due a for checkpoint at flush time.
 				logWrittenFromLastCheckPoint = -endPosition;
 			}
 

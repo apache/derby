@@ -808,9 +808,11 @@ public interface RawStoreFactory extends Corruptable {
 
 
 	/**
-		Try to checkpoint the database to minimize recovery time.
-		The raw store does not guarentee that a checkpoint will indeed have
-		happened by the time this routine returns.
+        Checkpoint the database.
+
+        The raw store will wait for any current checkpoints to complete.  It
+        will start a new checkpoint and not return until that checkpoint 
+        completes.
 
 		@exception StandardException Standard Derby error policy
 	*/

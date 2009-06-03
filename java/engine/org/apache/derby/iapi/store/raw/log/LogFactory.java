@@ -85,21 +85,28 @@ public interface LogFactory extends Corruptable {
 		properties,
 		RawStore.LOG_SWITCH_INTERVAL and RawStore.CHECKPOINT_INTERVAL.  
 
-		By default, LOG_SWITCH_INTERVAL is every 100K bytes of log record
+		By default, LOG_SWITCH_INTERVAL is every 1M bytes of log record
 		written.  User can change this value by setting the property to some
 		other values during boot time.   The legal range of LOG_SWITCH_INTERVAL
 		is from 100K to 128M.
 
-		By default, CHECKPOINT_INTERVAL equals LOG_SWITCH_INTERVAL, but user
+		By default, CHECKPOINT_INTERVAL equals 10M, but user
 		can set it to less if more frequent checkpoint is desired.  The legal
-		range of CHECKPOINT_INTERVAL is from 100K to LOG_SWITCH_INTERVAL.
+		range of CHECKPOINT_INTERVAL is from 100K to 128M.
 
 		@param rawStoreFactory - the raw store
 		@param dataFactory - the data factory
 		@param transactionFactory - the transaction factory
-		@param wait - if true; waits for the checkpoint to completed even if it is being done my an another thread.
-		@return true if checkpoint is successful
-		@exception StandardException - encounter exception while doing checkpoint.
+		@param wait - if true waits for any existing checkpoint to complete 
+                         and then executes and waits for another checkpoint.
+                      if false if another thead is executing a checkpoint 
+                      routine will return immediately.
+
+		@return true if checkpoint is successful,  Will return false if wait
+                is false and the routine finds another thread executing a 
+                checkpoint.
+
+		@exception StandardException - got exception while doing checkpoint.
 	*/
 	public boolean checkpoint(RawStoreFactory rawStoreFactory,
 							  DataFactory dataFactory,
