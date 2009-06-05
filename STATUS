@@ -53,20 +53,20 @@ None.
 
 RECENT VOTES
 =================================
-Release 10.5.1.1 was voted as release on 2009-04-28.
 
-None.  
+Ole Solberg was elected as a Derby committer on 2009-06-05.
+Release 10.5.1.1 was voted as a release on 2009-04-28 and announced on 2009-05-01.
 
 OTHER NEWS
 ==========
 
-The 10.5 release has introduced an experimental in-memory database. User feedback is welcome. See http://wiki.apache.org/db-derby/InMemoryBackEndPrimer
+The 10.5 release introduced an experimental in-memory database. User feedback is welcome. See http://wiki.apache.org/db-derby/InMemoryBackEndPrimer
 
 RELEASE STATUS
 ==============
 
-10.5.1.1 was voted as next release on 2009-04-28 and announced 2009-05-01.
-No currently outstanding issues.
+The community is working on a 10.5.2 maintenance release, targetted for late July, early August, 2009.
+
 
 
 
@@ -110,3 +110,4 @@ Committers      vnarayanan           V Narayanan (CLA on file)
 Committers      jorgenlo             Jørgen Løland (CLA on file)
 Committers      thomanie             Thomas Nielsen (CLA on file)
 Committers      johnemb              John Embretsen (CLA on file)
+Committers      olesolberg           Ole Solberg (CLA on file)
