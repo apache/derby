@@ -49,6 +49,21 @@ interface InternalClob {
     long getCharLength() throws IOException, SQLException;
 
     /**
+     * Gets the number of characters in the Clob if it is already known.
+     * <p>
+     * This method will not do any work to obtain the length if it isn't
+     * already known. Due to special handling of zero in the code, this method
+     * will return {@code -1} if a length of zero is cached internally.
+     * <p>
+     * If a positive value is returned, it is expected to be equal to the
+     * actual length of the Clob (i.e., no stale values must be returned).
+     *
+     * @return Number of characters in the Clob, or {@code -1} if the length is
+     *      currently unknown (not cached).
+     */
+    long getCharLengthIfKnown();
+
+    /**
      * Returns a stream serving the raw bytes of the Clob.
      * <p>
      * Note that it is up to the caller of this method to handle the issue of

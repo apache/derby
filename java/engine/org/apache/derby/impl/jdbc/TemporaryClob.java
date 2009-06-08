@@ -330,6 +330,17 @@ final class TemporaryClob implements InternalClob {
     }
 
     /**
+     * Returns the cached character count for the Clob, if any.
+     *
+     * @return The number of characters in the Clob, or {@code -1} if unknown.
+     */
+    public synchronized long getCharLengthIfKnown() {
+        checkIfValid();
+        // Treat a cached value of zero as a special case.
+        return (cachedCharLength == 0 ? -1 : cachedCharLength);
+    }
+
+    /**
      * Returns the size of the Clob in bytes.
      *
      * @return Number of bytes in the <code>CLOB</code> value.

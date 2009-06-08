@@ -176,6 +176,17 @@ final class StoreStreamClob
     }
 
     /**
+     * Returns the cached character count for the Clob, if any.
+     *
+     * @return The number of characters in the Clob, or {@code -1} if unknown.
+     */
+    public long getCharLengthIfKnown() {
+        checkIfValid();
+        // Treat a cached value of zero as a special case.
+        return (csd.getCharLength() == 0 ? -1 : csd.getCharLength());
+    }
+
+    /**
      * Returns a stream serving the raw bytes of this Clob.
      * <p>
      * Note that the stream returned is an internal stream, and it should not be
