@@ -207,8 +207,8 @@ public class AsynchronousLogShipper extends Thread implements
     public void run() {
         while (!stopShipping) {
             try {
-                shipALogChunk();
                 synchronized (forceFlushSemaphore) {
+                    shipALogChunk();
                     // Wake up a thread waiting for forceFlush, if any
                     forceFlushSemaphore.notify();
                 }
