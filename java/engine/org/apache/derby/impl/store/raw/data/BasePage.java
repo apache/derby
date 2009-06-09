@@ -877,31 +877,93 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 
 	}
 
-	/**
-	  
-		When we update a column, it turned into a long column.  Need to change
-		the update to effectively insert a new long column chain.
-
-		@exception StandardException Unexpected exception from the implementation
-	 */
-	protected RecordHandle insertLongColumn(BasePage mainChainPage,
-			LongColumnException lce, byte insertFlag)
+    /**
+     * Routine to insert a long column.
+     * <p>
+     * This code inserts a long column as a linked list of rows on overflow
+     * pages.  This list is pointed to by a small pointer in the main page
+     * row column.  The operation does the following:
+     *     allocate new overflow page
+     *     insert single row filling overflow page
+     *     while (more of column exists)
+     *         allocate new overflow page
+     *         insert single row with next piece of row
+     *         update previous piece to point to this new piece of row
+     *
+     * Same code is called both from an initial insert of a long column and
+     * from a subsequent update that results in a long column.
+     *
+     * @return The recordHandle of the first piece of the long column chain.
+     *
+     * @param mainChainPage The parent page with row piece containing column
+     *                      that will eventually point to this long column
+     *                      chain.
+     * @param lce           The LongColumnException thrown when we recognized
+     *                      that the column being inserted was "long", this 
+     *                      structure is used to cache the info that we have
+     *                      read so far about column.  In the case of an insert
+     *                      of the stream it will have a copy of just the first
+     *                      page of the stream that has already been read once.
+     * @param insertFlag    flags for insert operation.    
+     *
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+	protected RecordHandle insertLongColumn(
+    BasePage            mainChainPage,
+    LongColumnException lce, 
+    byte                insertFlag)
 		throws StandardException
 	{
 
-		// Object[] row = new Object[1];
-		// row[0] = (Object) lce.getColumn();
 		Object[] row = new Object[1];
-		row[0] = lce.getColumn();
+		row[0]       = lce.getColumn();
 
 		RecordHandle firstHandle = null;
-		RecordHandle handle = null;
-		RecordHandle prevHandle = null;
-		BasePage curPage = mainChainPage;
-		BasePage prevPage = null;
-		boolean isFirstPage = true;
+		RecordHandle handle      = null;
+		RecordHandle prevHandle  = null;
+		BasePage     curPage     = mainChainPage;
+		BasePage     prevPage    = null;
+		boolean      isFirstPage = true;
+        
+        // undo inserts as purges of all pieces of the overflow column
+        // except for the 1st overflow page pointed at by the main row.  
+        //
+        // Consider a row with one column which is a long column
+        // that takes 2 pages for itself plus an entry in main parent page.
+        // the log records in order for this look something like:
+        //     insert overflow page 1
+        //     insert overflow page 2
+        //     update overflow page 1 record to have pointer to overflow page 2
+        //     insert main row (which has pointer to overflow page 1)
+        //
+        // If this insert gets aborted then something like the following 
+        // happens:
+        //     main row is marked deleted (but ptr to overflow 1 still exists)
+        //     update is aborted so link on page 2 to page 1 is lost
+        //     overflow row on page 2 is marked deleted
+        //     overflow row on page 1 is marked deleted
+        //
+        // There is no way to reclaim page 2 later as the abort of the update
+        // has now lost the link from overflow page 1 to overflow 2, so 
+        // the system has to do it as part of the abort of the insert.  But, 
+        // it can't for page 1 as the main page will attempt to follow
+        // it's link in the deleted row during it's space reclamation and it 
+        // can't tell the difference 
+        // between a row that has been marked deleted as part of an aborted 
+        // insert or as part of a committed delete.  When it follows the link
+        // it could find no page and that could be coded against, but it could 
+        // be that the page is now used by some other overflow row which would 
+        // lead to lots of different kinds of problems.
+        //
+        // So the code leaves the 1st overflow page to be cleaned up with the
+        // main page row is purged, but goes ahead and immediately purges all
+        // the segments that will be lost as part of the links being lost due
+        // to aborted updates.
+        byte after_first_page_insertFlag = 
+            (byte) (insertFlag | Page.INSERT_UNDO_WITH_PURGE);
 
-		// when inserting a long column startCOlumn is just used
+		// when inserting a long column startColumn is just used
 		// as a flag. -1 means the insert is complete, != -1 indicates
 		// more inserts are required.
 		int startColumn = 0;
@@ -935,9 +997,13 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 				firstHandle = handle;
 
 			// step 2: insert column portion
-			startColumn = owner.getActionSet().actionInsert(t, curPage, slot, recordId,
-				row, (FormatableBitSet)null, (LogicalUndo) null, insertFlag,
-				startColumn, true, -1, (DynamicByteArrayOutputStream) null, -1, 100);
+			startColumn = 
+                owner.getActionSet().actionInsert(
+                    t, curPage, slot, recordId, row, (FormatableBitSet)null, 
+                    (LogicalUndo) null, 
+                    (isFirstPage ? insertFlag : after_first_page_insertFlag), 
+                    startColumn, true, -1, (DynamicByteArrayOutputStream) null, 
+                    -1, 100);
 
 			// step 3: if it is not the first page, update previous page,
 			// then release latch on prevPage
@@ -947,8 +1013,9 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 				prevPage.updateFieldOverflowDetails(prevHandle, handle);
 				prevPage.unlatch();
 				prevPage = null;
-			} else
+			} else {
 				isFirstPage = false;
+            }
 
 		} while (startColumn != (-1)) ;
 
@@ -1303,7 +1370,7 @@ public abstract class BasePage implements Page, Lockable, Observer, TypedFormat
 			// Before we purge these rows, we need to make sure they don't have
 			// overflow rows and columns.  Only clean up long rows and long
 			// columns if this is not a temporary container, otherwise, just
-			// loose the space.
+			// lose the space.
 
 			if (owner.isTemporaryContainer() ||	entireRecordOnPage(slot+i))
 				continue;
