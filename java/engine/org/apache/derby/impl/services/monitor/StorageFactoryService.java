@@ -756,6 +756,11 @@ final class StorageFactoryService implements PersistentService
     {
 		String protocolLeadIn = getType() + ":";
         int colon = name.indexOf( ':');
+        // If no subsubprotocol is specified and the storage factory type isn't
+        // the default one, abort.
+        if (colon == -1 && !getType().equals(PersistentService.DIRECTORY)) {
+            return null;
+        }
         if( colon > 1) // Subsubprotocols must be at least 2 characters long
         {
             if( ! name.startsWith( protocolLeadIn))
