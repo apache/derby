@@ -56,8 +56,9 @@
   <property name="relnotes.src.summary" value="${basedir}/releaseSummary.xml" />
   <property name="relnotes.src.buglist" value="${relnotes.src.reports}/fixedBugsList.xml" />
   <property name="relnotes.src.notes" value="${relnotes.src.reports}/releaseNotesList.xml" />
-  <property name="relnotes.out.pamphlet" value="${basedir}/RELEASE-NOTES.html" />
-  <property name="changesfile.out.pamphlet" value="${basedir}/CHANGES.html" />
+  <property name="relnotes.out.filename" value="${basedir}/RELEASE-NOTES.html" />
+  <property name="changesfile.src.buglist" value="${relnotes.src.reports}/changes.xml" />
+  <property name="changesfile.out.filename" value="${basedir}/CHANGES.html" />
 
 <!-- Define the task which generates the release notes -->
   <taskdef
@@ -120,7 +121,7 @@
        summaryFileName="${relnotes.src.summary}"
        bugListFileName="${relnotes.src.buglist}"
        releaseNotesListFileName="${relnotes.src.notes}"
-       pamphletFileName="${relnotes.out.pamphlet}"
+       outputFileName="${relnotes.out.filename}"
      />
 
   </target>
@@ -138,8 +139,8 @@
 
      <generateChangesFile
        summaryFileName="${relnotes.src.summary}"
-       bugListFileName="${relnotes.src.buglist}"
-       pamphletFileName="${changesfile.out.pamphlet}"
+       bugListFileName="${changesfile.src.buglist}"
+       outputFileName="${changesfile.out.filename}"
      />
 
   </target>

@@ -27,25 +27,28 @@ with real information.
 <summary>
 
 <!--
-    Release identifier.
-
-    E.g.: 10.3.0.3
--->
-<releaseID>10.3.0.0</releaseID>
-
-<!--
     Identifier of previous release. The release notes describe the
     delta between releaseID and previousReleaseID.
 
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.2.2.0</previousReleaseID>
+<previousReleaseID>10.5.1.1</previousReleaseID>
+
+<!--
+    Identifier(s) of previously released versions. Any issue that was fixed in
+    any of these versions will be excluded from the fixed bugs list, and the
+    release notes list.
+
+    E.g.: 10.3.1.4 and 10.3.2.1
+    
+-->
+<excludeReleaseID>10.3.3.0</excludeReleaseID>
+<excludeReleaseID>10.4.1.3</excludeReleaseID>
+<excludeReleaseID>10.4.2.0</excludeReleaseID>
+<excludeReleaseID>10.5.1.0</excludeReleaseID>
 
 <buildInfo>
-
-  <!-- Name of the branch. E.g.: 10.3 -->
-  <branch>10.3</branch>
 
   <!-- Machine environment. E.g.:  Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2. -->
   <machine>Cygwin on Microsoft Windows XP Professional Version 2002 Service Pack 2.</machine>
@@ -58,12 +61,6 @@ with real information.
 
   <!-- Output of "java -version" run from your Java 6 installation. E.g.:  Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105). -->
   <java6> Java(TM) 2 Runtime Environment, Standard Edition (build 1.6.0-b105).</java6>
-
-  <!--
-         Say here whether you used osgi.jar to build org.apache.derby.osgi.EmbeddedActivator.
-         E.g.:  The osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.
-  -->
-  <osgi>The osgi.jar was used to build org.apache.derby.osgi.EmbeddedActivator.</osgi>
 
   <!--
          Say which compilers you used.
@@ -113,4 +110,5 @@ This is a minor release. The following new features were added:
 </newFeatures>
 
 </summary>
+
 
