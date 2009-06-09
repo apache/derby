@@ -22,12 +22,7 @@
 package org.apache.derbyBuild;
 
 import java.io.*;
-import java.net.URL;
-import java.util.ArrayList;
 import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
 import org.w3c.dom.*;
 
 /**
@@ -54,8 +49,6 @@ public class ReleaseNoteReader
         "    where\n" +
         "                  RELEASE_NOTE_FILE is the name of the file which holds the release note\n";
 
-    private static  final   String  PARAGRAPH = "p";
-    private static  final   String  BODY = "body";
 
     /////////////////////////////////////////////////////////////////////////
     //
@@ -151,7 +144,7 @@ public class ReleaseNoteReader
         // </p>
         //
         Element     root = releaseNote.getDocumentElement();
-        Element     summaryParagraph = getFirstChild( root, PARAGRAPH );
+        Element     summaryParagraph = GeneratorBase.getFirstChild( root, GeneratorBase.PARAGRAPH );
 
         return summaryParagraph;
     }
@@ -165,51 +158,13 @@ public class ReleaseNoteReader
         throws Exception
     {
         Element     root = releaseNote.getDocumentElement();
-        Element     details = getFirstChild( root, BODY );
+        Element     details = GeneratorBase.getFirstChild( root, GeneratorBase.BODY );
 
         return details;
     }
 
+
     ////////////////////////////////////////////////////////
-    //
-    // XML MINIONS
-    //
-    ////////////////////////////////////////////////////////
-
-    private Element getFirstChild( Element node, String childName )
-        throws Exception
-    {
-        Element retval = getOptionalChild( node, childName );
-
-        if ( retval == null )
-        {
-            throw new Exception( "Could not find child element '" + childName + "' in parent element '" + node.getNodeName() + "'." );
-        }
-
-        return retval;
-    }
-
-    private Element getOptionalChild( Element node, String childName )
-        throws Exception
-    {
-        return (Element) node.getElementsByTagName( childName ).item( 0 );
-    }
-
-    /**
-     * <p>
-     * Squeeze the text out of an Element.
-     * </p>
-     */
-    private String squeezeText( Element node )
-        throws Exception
-    {
-        Node        textChild = node.getFirstChild();
-        String      text = textChild.getNodeValue();
-
-        return text;
-    }
-
-   ////////////////////////////////////////////////////////
     //
     // MISC MINIONS
     //

@@ -56,7 +56,7 @@
   <property name="relnotes.src.summary" value="${basedir}/releaseSummary.xml" />
   <property name="relnotes.src.buglist" value="${relnotes.src.reports}/fixedBugsList.xml" />
   <property name="relnotes.src.notes" value="${relnotes.src.reports}/releaseNotesList.xml" />
-  <property name="relnotes.out.pamphlet" value="${basedir}/RELEASE-NOTES.html" />
+  <property name="relnotes.out.filename" value="${basedir}/RELEASE-NOTES.html" />
 
 <!-- Define the task which generates the release notes -->
   <taskdef
@@ -112,7 +112,7 @@
        summaryFileName="${relnotes.src.summary}"
        bugListFileName="${relnotes.src.buglist}"
        releaseNotesListFileName="${relnotes.src.notes}"
-       pamphletFileName="${relnotes.out.pamphlet}"
+       outputFileName="${relnotes.out.filename}"
      />
 
   </target>
