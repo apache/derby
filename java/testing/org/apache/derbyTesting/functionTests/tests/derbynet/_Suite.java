@@ -59,8 +59,8 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(NetworkServerControlClientCommandTest.suite());
         suite.addTest(ServerPropertiesTest.suite());
         suite.addTest(LOBLocatorReleaseTest.suite());
-        
-        
+        suite.addTest(GetCurrentPropertiesTest.suite());
+
         // Disabled due to "java.sql.SQLSyntaxErrorException: The class
         // 'org.apache.derbyTesting.functionTests.tests.derbynet.checkSecMgr'
         //  does not exist or is inaccessible. This can happen if the class is not public."
