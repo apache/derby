@@ -49,6 +49,13 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         getConnection().setAutoCommit(false);
         Statement st = createStatement();
 
+        st.executeUpdate("create table a(col1 int, col2 int)");
+        st.executeUpdate("insert into a values(1,1),(1,1)");
+        st.executeUpdate("create table b(col1 int, col2 int)");
+        st.executeUpdate("insert into b values(2,2),(2,2)");
+        st.executeUpdate("create table c(col1 int, col2 int)");
+        st.executeUpdate("insert into c values(3,3),(3,3)");
+
         st.executeUpdate(
                 "create TABLE table1 (id BIGINT NOT NULL, PRIMARY KEY(id))");
 
@@ -9993,6 +10000,30 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                 "UPDATE table2 SET value='true' WHERE id=2147483696 "
                 + "AND name='has_address'");
             
+            //Start of tables creation for DERBY-4240 repro
+            st.executeUpdate(
+            		"CREATE TABLE test1 (id BIGINT NOT NULL, name VARCHAR(255), "+
+            		"PRIMARY KEY (id))");
+            st.executeUpdate(
+            		"CREATE TABLE test2 (entity_id BIGINT, rel_id BIGINT)");
+            st.executeUpdate(
+            		"CREATE INDEX idx_test2 ON test2 (entity_id)");
+            st.executeUpdate(
+            		"INSERT INTO test1 (id, name) VALUES (102, 'Tom')");
+            st.executeUpdate(
+            		"INSERT INTO test1 (id, name) VALUES (1, null)");
+            st.executeUpdate(
+            		"INSERT INTO test1 (id, name) VALUES (103, 'Jerry')");
+            st.executeUpdate(
+            		"INSERT INTO test1 (id, name) VALUES (101, 'Pupy')");
+            st.executeUpdate(
+            		"INSERT INTO test2 (entity_id, rel_id) VALUES (1, 102)");
+            st.executeUpdate(
+            		"INSERT INTO test2 (entity_id, rel_id) VALUES (1, 101)");
+            st.executeUpdate(
+            		"INSERT INTO test2 (entity_id, rel_id) VALUES (1, 103)");
+            //End of tables creation for DERBY-4240 repro
+
             getConnection().commit();
             st.close();
     }
@@ -10002,10 +10033,94 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         rollback();
         stmt.executeUpdate("drop table table2");
         stmt.executeUpdate("drop table table1");
+        stmt.executeUpdate("drop table a");
+        stmt.executeUpdate("drop table b");
+        stmt.executeUpdate("drop table c");
+        //drop tables needed for DERBY-4240
+        stmt.executeUpdate("drop table test1");
+        stmt.executeUpdate("drop table test2");
         stmt.close();
         commit();
         super.tearDown();
     }
+
+    /**
+     * Add a test case for DERBY-4240 where the rows were not ordered despite
+     * an order by clause. The fix for DERBY-3926 took care of the bug. 
+     */
+    public void testDerby4240OrderByCase() throws SQLException {
+        String sql1 = 
+        	"SELECT t1.id, t1.name FROM test2 t2 INNER JOIN test1 t1 "+
+        	"ON t2.rel_id = t1.id WHERE t2.entity_id = 1 ORDER BY t1.id ASC";
+        Statement s;
+        ResultSet rs;
+        RuntimeStatisticsParser rtsp;
+        String [][] result;
+
+        s = createStatement();
+        s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+        rs = s.executeQuery(sql1);
+		rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+		assertTrue(rtsp.whatSortingRequired());
+        rs = s.executeQuery(sql1);
+        result = new String[][] {
+                {"101", "Pupy"},{"102", "Tom"}, {"103", "Jerry"}};
+        JDBC.assertFullResultSet(rs, result);
+    }
+
+    /**
+     * Some more tests for order by and sort avoidance logic
+     */
+    public void testAdditionalOrderByCases() throws SQLException {
+        String sql1;
+        Statement s;
+        ResultSet rs;
+        RuntimeStatisticsParser rtsp;
+        String [][] result;
+
+        s = createStatement();
+        s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+        
+        sql1 = "select a.col1, b.col2, c.col2 from a, b, c where c.col1=3 " +
+        "order by a.col1, c.col1";
+        rs = s.executeQuery(sql1);
+		rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+		assertTrue(rtsp.whatSortingRequired());
+        rs = s.executeQuery(sql1);
+        result = new String[][] {
+                {"1", "2", "3"},{"1", "2", "3"}, {"1", "2", "3"},   
+                {"1", "2", "3"},{"1", "2", "3"}, {"1", "2", "3"},   
+                {"1", "2", "3"},{"1", "2", "3"}};
+        JDBC.assertFullResultSet(rs, result);
+        
+        sql1 = "select a.col1, b.col2, c.col2 from a, b, c where a.col1=1 "+
+        "and b.col1 = 2 and c.col1=3 order by a.col1, b.col1, c.col1";
+        rs = s.executeQuery(sql1);
+		rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+		assertFalse(rtsp.whatSortingRequired());
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, result);
+
+        sql1 = "select c.col1, b.col1, a.col1 from a, b, c where a.col1=1 "+
+        "and b.col1 = 2 and c.col1=3 order by c.col1, b.col1, a.col1";
+        result = new String[][] {
+                {"3", "2", "1"},{"3", "2", "1"}, {"3", "2", "1"},   
+                {"3", "2", "1"},{"3", "2", "1"}, {"3", "2", "1"},   
+                {"3", "2", "1"},{"3", "2", "1"}};
+        rs = s.executeQuery(sql1);
+		rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+		assertFalse(rtsp.whatSortingRequired());
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, result);
+
+        sql1 = "select c.col1, b.col1, a.col1 from a, b, c where a.col1=1 "+
+        "and b.col1 = 2 and c.col1=3 order by c.col2, b.col2, a.col2";
+        rs = s.executeQuery(sql1);
+		rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+		assertTrue(rtsp.whatSortingRequired());
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, result);
+}
 
     /**
      * Test for forcing a order of tables in the FROM list user optimizer
@@ -10053,7 +10168,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 		RuntimeStatisticsParser rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
 		assertTrue(rtsp.usedSpecificIndexForIndexScan("TABLE2","KEY3"));
 		assertTrue(rtsp.usedTableScan("TABLE1"));
-		assertFalse(rtsp.whatSortingRequired());
+		assertTrue(rtsp.whatSortingRequired());
   
         rs = s.executeQuery(sql1);
         String[][] result = {
@@ -10085,7 +10200,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 				s);
 		assertTrue(rtsp.usedSpecificIndexForIndexScan("TABLE2","KEY3"));
 		assertTrue(rtsp.usedTableScan("TABLE1"));
-		assertFalse(rtsp.whatSortingRequired());
+		assertTrue(rtsp.whatSortingRequired());
 
 		rs = s.executeQuery(sql1);
         String[][] result = {

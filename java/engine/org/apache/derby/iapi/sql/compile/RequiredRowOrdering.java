@@ -24,6 +24,7 @@ package org.apache.derby.iapi.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.util.JBitSet;
+import org.apache.derby.impl.sql.compile.PredicateList;
 
 /**
  * This interface provides a representation of the required ordering of rows
@@ -43,6 +44,11 @@ public interface RequiredRowOrdering
 	 * given a RowOrdering.
 	 *
 	 * @param rowOrdering	The order of rows in question
+	 * @param optimizableList	The current join order being considered by 
+	 *    the optimizer. We need to look into this to determine if the outer
+	 *    optimizables are single row resultset if the order by column is
+	 *    on an inner optimizable and that inner optimizable is not a one
+	 *    row resultset. DERBY-3926
 	 *
 	 * @return	SORT_REQUIRED if sorting is required,
 	 *			ELIMINATE_DUPS if no sorting is required but duplicates
@@ -52,7 +58,8 @@ public interface RequiredRowOrdering
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	int sortRequired(RowOrdering rowOrdering) throws StandardException;
+	int sortRequired(RowOrdering rowOrdering, OptimizableList optimizableList) 
+	throws StandardException;
 
 	/**
 	 * Tell whether sorting is required for this RequiredRowOrdering,
@@ -63,6 +70,11 @@ public interface RequiredRowOrdering
 	 *
 	 * @param rowOrdering	The order of rows in the partial join order
 	 * @param tableMap		A bit map of the tables in the partial join order
+	 * @param optimizableList	The current join order being considered by 
+	 *    the optimizer. We need to look into this to determine if the outer
+	 *    optimizables are single row resultset if the order by column is
+	 *    on an inner optimizable and that inner optimizable is not a one
+	 *    row resultset. DERBY-3926
 	 *
 	 * @return	SORT_REQUIRED if sorting is required,
 	 *			ELIMINATE_DUPS if no sorting is required by duplicates
@@ -72,7 +84,8 @@ public interface RequiredRowOrdering
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	int sortRequired(RowOrdering rowOrdering, JBitSet tableMap)
+	int sortRequired(RowOrdering rowOrdering, JBitSet tableMap, 
+			OptimizableList optimizableList)
 			throws StandardException;
 
 	/**

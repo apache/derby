@@ -39,7 +39,9 @@ class RowOrderingImpl implements RowOrdering {
 	** This ColumnOrdering represents the columns that can be considered
 	** ordered no matter what.  For example, columns that are compared to
 	** constants with = are always ordered.  Also, all columns in a one-row
-	** result set are ordered.
+	** result set are ordered. Another instance of always ordered is when
+	** the column is involved in an equijoin with an optimizable which is 
+	** always ordered on the column on which the equijoin is happening.
 	*/
 	ColumnOrdering	columnsAlwaysOrdered;
 
@@ -59,6 +61,11 @@ class RowOrderingImpl implements RowOrdering {
 		unorderedOptimizables = new Vector();
 		columnsAlwaysOrdered = new ColumnOrdering(RowOrdering.DONTCARE);
 		alwaysOrderedOptimizables = new Vector();
+	}
+	
+	/** @see RowOrdering#isColumnAlwaysOrdered */
+	public boolean isColumnAlwaysOrdered(int tableNumber, int columnNumber){
+		return (columnsAlwaysOrdered.contains(tableNumber, columnNumber)); 
 	}
 
 	/**

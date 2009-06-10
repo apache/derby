@@ -130,13 +130,27 @@ public interface RowOrdering
 	/**
 	 * Tell this RowOrdering that it is always ordered on the given column
 	 * of the given optimizable.  This is useful when a column in the
-	 * optimizable has an equals comparison with a constant expression.
-	 * This is reset when the optimizable is removed from this RowOrdering.
+	 * optimizable has an equals comparison with a constant expression or
+	 * it is involved in a equijoin with an optimizable which is always 
+	 * ordered on the column on which the equijoin is happening. This is 
+	 * reset when the optimizable is removed from this RowOrdering.
 	 *
 	 * @param optimizable	The table in question
 	 * @param columnNumber	The number of the column in question.
 	 */
 	void columnAlwaysOrdered(Optimizable optimizable, int columnNumber);
+	
+	/**
+	 * Return true if the column is always ordered. That will be true if the
+	 * column has a constant comparison predicate on it or it is involved in
+	 * a equijoin with an optimizable which is always ordered on the column
+	 * on which the equijoin is happening.
+	 *
+	 * @param tableNumber	The table in question
+	 * @param columnNumber	The number of the column in question.
+	 * @return	true means this column is always ordered
+	*/
+	public boolean isColumnAlwaysOrdered(int tableNumber, int columnNumber);
 
 	/**
 	 * Ask whether the given table is always ordered.
