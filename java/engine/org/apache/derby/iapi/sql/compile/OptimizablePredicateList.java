@@ -130,7 +130,9 @@ public interface OptimizablePredicateList
 	 * @param optTable
 	 * @param columnNumber
 	 * @param isNullOkay
-	 * @return
+	 * @return the position of the predicate in the list which corresponds to 
+	 *   the equijoin. If no quijoin predicate found, then the return value 
+	 *   will be -1
 	 * @throws StandardException
 	 */
 	public int hasEqualityPredicateOnOrderedColumn(Optimizable optTable,
