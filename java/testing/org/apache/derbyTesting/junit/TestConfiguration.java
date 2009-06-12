@@ -530,6 +530,12 @@ public class TestConfiguration {
     public static Test existingServerDecorator(Test test, 
             String hostName, int PortNumber)
     {
+    	// Need to have network server and client and not
+        // running in J2ME (JSR169).
+        if (!(Derby.hasClient() && Derby.hasServer())
+                || JDBC.vmSupportsJSR169())
+            return new TestSuite("empty: no network server support");
+
         Test r =
                 new ServerSetup(test, hostName, PortNumber);
         ((ServerSetup)r).setJDBCClient(JDBCClient.DERBYNETCLIENT);
