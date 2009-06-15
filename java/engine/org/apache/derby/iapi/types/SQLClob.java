@@ -236,11 +236,11 @@ public class SQLClob
         long charLength = 0;
         try {
             if (repositionStream) {
-                rewindStream(csd.getDataOffset());
+                rewindStream(stream, csd.getDataOffset());
             }
             charLength = UTF8Util.skipUntilEOF(stream);
             // We just drained the whole stream. Reset it.
-            rewindStream(0);
+            rewindStream(stream, 0);
         } catch (IOException ioe) {
             throwStreamingIOException(ioe);
         }
@@ -342,7 +342,7 @@ public class SQLClob
                 if (read > hdrInfo.headerLength()) {
                     // We have read too much. Reset the stream.
                     read = hdrInfo.headerLength();
-                    rewindStream(read);
+                    rewindStream(stream, read);
                 }
                 csd = new CharacterStreamDescriptor.Builder().stream(stream).
                     bufferable(false).positionAware(false).
@@ -686,11 +686,12 @@ public class SQLClob
                                             : (int)csd.getByteLength();
             hdrInfo = new HeaderInfo(hdrLen, valueLength);
             // Make sure the stream is correctly positioned.
-            rewindStream(hdrLen);
+            rewindStream((InputStream)in, hdrLen);
         } else {
-            final boolean markSet = stream.markSupported();
+            final InputStream srcIn = (InputStream)in;
+            final boolean markSet = srcIn.markSupported();
             if (markSet) {
-                stream.mark(MAX_STREAM_HEADER_LENGTH);
+                srcIn.mark(MAX_STREAM_HEADER_LENGTH);
             }
             byte[] header = new byte[MAX_STREAM_HEADER_LENGTH];
             int read = in.read(header);
@@ -707,11 +708,11 @@ public class SQLClob
                 if (markSet) {
                     // Stream is not a store Resetable one, use mark/reset
                     // functionality instead.
-                    stream.reset();
-                    InputStreamUtil.skipFully(stream, hdrInfo.headerLength());
-                } else if (stream instanceof Resetable) {
+                    srcIn.reset();
+                    InputStreamUtil.skipFully(srcIn, hdrInfo.headerLength());
+                } else if (in instanceof Resetable) {
                     // We have a store stream.
-                    rewindStream(hdrInfo.headerLength());
+                    rewindStream(srcIn, hdrInfo.headerLength());
                 }
             }
         }
@@ -763,14 +764,15 @@ public class SQLClob
      * Rewinds the stream to the beginning and then skips the specified number
      * of bytes.
      *
-     * @param pos number of bytes to skip
+     * @param in input stream to rewind
+     * @param offset number of bytes to skip
      * @throws IOException if resetting or reading from the stream fails
      */
-    private void rewindStream(long pos)
+    private void rewindStream(InputStream in, long offset)
             throws IOException {
         try {
-            ((Resetable)stream).resetStream();
-            InputStreamUtil.skipFully(stream, pos);
+            ((Resetable)in).resetStream();
+            InputStreamUtil.skipFully(in, offset);
         } catch (StandardException se) {
             IOException ioe = new IOException(se.getMessage());
             ioe.initCause(se);
