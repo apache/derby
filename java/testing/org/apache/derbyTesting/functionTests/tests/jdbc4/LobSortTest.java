@@ -158,7 +158,7 @@ public class LobSortTest
         }
         rs.close();
         rs = stmt.executeQuery(sql);
-        // Get the BLOB value length though Blob.length
+        // Get the BLOB value length through Blob.length
         while (rs.next()) {
             assertEquals(rs.getInt(1), (int)rs.getBlob(2).length());
         }
@@ -186,7 +186,7 @@ public class LobSortTest
         }
         rs.close();
         rs = stmt.executeQuery(sql);
-        // Get the CLOB value length though Clob.length
+        // Get the CLOB value length through Clob.length
         while (rs.next()) {
             assertEquals(rs.getInt(1), (int)rs.getClob(2).length());
         }
