@@ -685,7 +685,9 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 * By using anySetBit() and anySetBit(beyondBit), one can quickly go
 	 * thru the entire bit array to return all set bit.
 	 *
-	 * @param beyondBit only look at bit that is greater than this bit number
+	 * @param beyondBit Only look at bit that is greater than this bit number.
+	 *                  Supplying a value of -1 makes the call equivalent to
+	 *                  anySetBit().
 	 * @return the bit number of a bit that is set, or -1 if no bit after
 	 * beyondBit is set
 	 */

@@ -30,6 +30,7 @@ import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
+import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
@@ -403,8 +404,9 @@ class NormalizeResultSet extends NoPutResultSetImpl
 	/**
 	 * @see NoPutResultSet#updateRow
 	 */
-	public void updateRow (ExecRow row) throws StandardException {
-		source.updateRow(row);
+	public void updateRow (ExecRow row, RowChanger rowChanger)
+			throws StandardException {
+		source.updateRow(row, rowChanger);
 	}
 
 	/**

@@ -46,6 +46,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
+import org.apache.derby.iapi.sql.execute.RowChanger;
 
 
 /**
@@ -583,8 +584,9 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 	/**
 	 * @see NoPutResultSet#updateRow
 	 */
-	public void updateRow (ExecRow row) throws StandardException {
-		source.updateRow(row);
+	public void updateRow (ExecRow row, RowChanger rowChanger)
+			throws StandardException {
+		source.updateRow(row, rowChanger);
 	}
 
 	/**

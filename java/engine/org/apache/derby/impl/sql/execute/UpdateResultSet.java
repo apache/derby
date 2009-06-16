@@ -557,7 +557,7 @@ class UpdateResultSet extends DMLWriteResultSet
 					riChecker.doFKCheck(newBaseRow);
 				}
 
-				source.updateRow(newBaseRow);
+				source.updateRow(newBaseRow, rowChanger);
 				rowChanger.updateRow(row,newBaseRow,baseRowLocation);
 
 				//beetle 3865, update cursor use index.
@@ -885,7 +885,6 @@ class UpdateResultSet extends DMLWriteResultSet
 					rowChanger.updateRow(deferredBaseRow,
 										newBaseRow,
 										baseRowLocation);
-					source.updateRow(newBaseRow);
 				}
 			} finally
 			{

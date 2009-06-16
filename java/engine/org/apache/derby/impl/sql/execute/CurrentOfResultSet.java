@@ -39,6 +39,7 @@ import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.execute.RowChanger;
 
 /**
  * Takes a cursor name and returns the current row
@@ -330,8 +331,9 @@ class CurrentOfResultSet extends NoPutResultSetImpl
 	/**
 	 * @see NoPutResultSet#updateRow
 	 */
-	public void updateRow (ExecRow row) throws StandardException {
-		((NoPutResultSet)cursor).updateRow(row);
+	public void updateRow (ExecRow row, RowChanger rowChanger)
+			throws StandardException {
+		((NoPutResultSet)cursor).updateRow(row, rowChanger);
 	}
 	
 	/**

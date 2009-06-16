@@ -24,6 +24,7 @@ package org.apache.derby.iapi.sql.execute;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
 
@@ -181,10 +182,14 @@ public interface NoPutResultSet extends ResultSet, RowLocationRetRowSource
 	 * JDBC's udpateRow method.
 	 *
 	 * @param row new values for the currentRow
+	 * @param rowChanger holds information about row: what columns of it is to
+	 *        be used for updating, and what underlying base table column each
+	 *        such column corresponds to.
 	 *
 	 * @exception StandardException thrown on failure.
 	 */
-	public void updateRow(ExecRow row) throws StandardException;
+	public void updateRow(ExecRow row, RowChanger rowChanger)
+			throws StandardException;
 	
 	/**
 	 * Marks the resultSet's currentRow as deleted after a delete has been 

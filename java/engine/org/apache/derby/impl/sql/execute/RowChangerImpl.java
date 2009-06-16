@@ -593,4 +593,52 @@ class RowChangerImpl	implements	RowChanger
 		java.util.Arrays.sort(output);
 		return output;
 	}
+
+
+	public int findSelectedCol(int selectedCol) {
+		if (selectedCol == -1) {
+			// This is not a base column
+			return -1;
+		}
+
+		int[] changeColArray = (partialChangedColumnIds == null) ?
+			changedColumnIds : partialChangedColumnIds;
+
+		int nextColumnToUpdate = -1;
+		for (int i = 0; i < changeColArray.length; i++) {
+			nextColumnToUpdate =
+				changedColumnBitSet.anySetBit(nextColumnToUpdate);
+
+			if (selectedCol == nextColumnToUpdate + 1) { // bit set is 0 based
+				return changeColArray[i];
+			}
+		}
+
+		return -1;
+	}
+
+
+	public String toString() {
+		if (SanityManager.DEBUG) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("changedColumnBitSet: " + changedColumnBitSet + "\n");
+
+			int[] changedColumnArray = (partialChangedColumnIds == null) ?
+				changedColumnIds : partialChangedColumnIds;
+
+			sb.append("changedColumnArray: [");
+			for (int i = 0; i < changedColumnArray.length; i++) {
+				sb.append(changedColumnArray[i]);
+
+				if (i < changedColumnArray.length-1) {
+					sb.append(",");
+				}
+			}
+			sb.append("]");
+
+			return sb.toString();
+		} else {
+			return super.toString();
+		}
+	}
 }
