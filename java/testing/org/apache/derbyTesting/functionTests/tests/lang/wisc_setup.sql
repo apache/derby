@@ -2702,6 +2702,34 @@ values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
 
 commit;
 
+-- force TENKTUP1 as the outermost join table to make sure 
+-- that no sorting is necessary. DERBY-3926
+get cursor c as
+	'select * from --DERBY-PROPERTIES joinOrder=FIXED
+	 TENKTUP1, TENKTUP2
+	 where TENKTUP1.unique1 = TENKTUP2.unique1
+	 and TENKTUP2.unique1 < 2500
+	 order by TENKTUP1.unique1';
+close c;
+
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+commit;
+
+-- This time, force TENKTUP2 as the outermost join table to make sure 
+-- that still no sorting is necessary. DERBY-3926
+get cursor c as
+	'select * from --DERBY-PROPERTIES joinOrder=FIXED
+	 TENKTUP2, TENKTUP1
+	 where TENKTUP1.unique1 = TENKTUP2.unique1
+	 and TENKTUP2.unique1 < 2500
+	 order by TENKTUP1.unique1';
+close c;
+
+values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
+
+commit;
+
 -- 25% of rows from joining table
 get cursor c as
 	'select * from TENKTUP1, TENKTUP2

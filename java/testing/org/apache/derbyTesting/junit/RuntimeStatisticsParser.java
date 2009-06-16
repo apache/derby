@@ -178,7 +178,28 @@ public class RuntimeStatisticsParser {
     public boolean usedLastKeyIndexScan() {
         return lastKeyIndexScan;
     }
-
+    
+    /**
+     * @param tableName
+     * @return true if a Table Scan ResultSet was used for tableName
+     */    
+    public boolean usedTableScan(String tableName) {
+    	return (statistics.indexOf("Table Scan ResultSet for " +
+    			tableName)!= -1);
+    }
+    
+    /**
+     * @param tableName
+     * @param indexName
+     * @return true if passed indexName was used for Index Scan ResultSet
+     *     for the passed tableName
+     */
+    public boolean usedSpecificIndexForIndexScan(
+               String tableName, String indexName){
+        return (statistics.indexOf("Index Scan ResultSet for " +
+                    tableName + " using index " + indexName)!= -1);
+    }
+    
     /**
      * Return whether or not an index row to base row result set was used in
      * the query.
@@ -229,5 +250,21 @@ public class RuntimeStatisticsParser {
     {
         return (statistics.indexOf("Number of rows qualified=" +
             qualRows + "\n") != -1);
+    }
+
+    /**
+     * Check if sorting node was added for the query.
+     * @return true if sorting node was required
+     */
+    public boolean whatSortingRequired() {
+        return (statistics.indexOf("Sort information: ") != -1 );
+    }
+
+    public boolean usedExternalSort() {
+        return (statistics.indexOf("Sort type=external") != -1 );
+    }
+
+    public String toString() {
+        return statistics;
     }
 }

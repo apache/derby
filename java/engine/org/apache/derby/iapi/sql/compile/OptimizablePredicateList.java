@@ -122,6 +122,23 @@ public interface OptimizablePredicateList
 	 * hash table on a next are qualifiers.
 	 */
 	public void markAllPredicatesQualifiers();
+	
+	/**
+	 * Check into the predicate list if the passed column has an equijoin 
+	 * predicate on it.
+	 * 
+	 * @param optTable
+	 * @param columnNumber
+	 * @param isNullOkay
+	 * @return the position of the predicate in the list which corresponds to 
+	 *   the equijoin. If no quijoin predicate found, then the return value 
+	 *   will be -1
+	 * @throws StandardException
+	 */
+	public int hasEqualityPredicateOnOrderedColumn(Optimizable optTable,
+			  int columnNumber,
+			  boolean isNullOkay)
+	throws StandardException;
 
 	/**
 	 * Is there an optimizable equality predicate on the specified column?
