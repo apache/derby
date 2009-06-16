@@ -41,6 +41,7 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 public class ReplicationRun_Local_3_p5 extends ReplicationRun_Local_3
 {
     
+
     /**
      * Creates a new instance of ReplicationRun_Local
      * @param testcaseName Identifying the test.
@@ -88,18 +89,14 @@ public class ReplicationRun_Local_3_p5 extends ReplicationRun_Local_3
                 replicatedDb);
                 
         _killMasterServer(); // "Crash" master.
-        
-        Thread.sleep(5000L); // Need time to settle down if we had load.
-        // With this sleep we always have REPLICATION_SLAVE_SHUTDOWN_OK
-        String expected = "XRE42"; // REPLICATION_SLAVE_SHUTDOWN_OK
-        // if ( replicationTest != null ) expected = "XRE41"; // SLAVE_OPERATION_DENIED_WHILE_CONNECTED  = "XRE41" if had load and no sleep
-        assertException( 
-            _stopSlave(slaveServerHost, slaveServerPort, 
-                slaveDatabasePath +FS+ slaveDbSubPath +FS+ replicatedDb), // OK when master is gone.
-            expected);
-        
+
+        stopSlave(slaveServerHost,
+                  slaveServerPort,
+                  slaveDatabasePath,
+                  replicatedDb,
+                  false); // master server dead
+
         // Try to re-establish replication mode:
-        // No change. Thread.sleep(5000L); // Need time to settle down if we had load?
         masterServer = startServer(masterJvmVersion, derbyMasterVersion,
                 masterServerHost,
                 ALL_INTERFACES,
@@ -128,14 +125,8 @@ public class ReplicationRun_Local_3_p5 extends ReplicationRun_Local_3
                 jvmVersion,
                 replicatedDb);
 
-        /* Slave server still running, so do not need: 
-        slaveServer = startServer(slaveJvmVersion, derbySlaveVersion,
-                slaveServerHost,
-                ALL_INTERFACES,
-                slaveServerPort,
-                slaveDbSubPath); */
+        /* Slave server still running, so no need to start slave server */
         
-        Thread.sleep(5000L); // Need time to settle down if we had load.
         startSlave(jvmVersion, replicatedDb, // should cause an address-already-in-use exception without the fix for DERBY-3878
                 slaveServerHost,             // Verified that we get 'Address already in use' and then hangs!
                 slaveServerPort,             // without the fix for DERBY-3878
@@ -152,7 +143,7 @@ public class ReplicationRun_Local_3_p5 extends ReplicationRun_Local_3
                 slaveReplPort);
         // Should now be back in "normal" replication mode state.
         
-        assertSqlStateSlaveConn("XRE08"); // REPLICATION_SLAVE_STARTED_OK
+        assertSqlStateSlaveConn(REPLICATION_SLAVE_STARTED_OK);
         
         failOver(jvmVersion,
                 masterDatabasePath, masterDbSubPath, replicatedDb,

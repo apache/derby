@@ -49,7 +49,11 @@ public class ReplicationRun extends BaseTestCase
      */
     final static String REPLICATIONTEST_PROPFILE = "replicationtest.properties";
     
-    final static String REPLICATION_MASTER_TIMED_OUT = "XRE06";
+    final static String REPLICATION_MASTER_TIMED_OUT           = "XRE06";
+    final static String REPLICATION_SLAVE_STARTED_OK           = "XRE08";
+    final static String REPLICATION_DB_NOT_BOOTED              = "XRE11";
+    final static String SLAVE_OPERATION_DENIED_WHILE_CONNECTED = "XRE41";
+    final static String REPLICATION_SLAVE_SHUTDOWN_OK          = "XRE42";
 
     static String testUser = null;
     
@@ -1275,48 +1279,7 @@ public class ReplicationRun extends BaseTestCase
             util.DEBUG("startSlave_direct exit.");
     }
     
-    private void stopSlave(String dbName)
-    {
-        util.DEBUG("Simulating '... stopslave -db "+dbName);
-    }
-    private void stopSlave_ij(String jvmVersion,
-            String dbName,
-            String slaveHost,  // Where the slave db is run.
-            int slaveServerPort,
-            
-            String testClientHost)
-            throws Exception
-    {
-        
-        String masterClassPath = derbyMasterVersion +FS+ "derbynet.jar";
-                
-        String URL = slaveURL(dbName)
-                +";stopSlave=true";
-        String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + PS + derbyVersion +FS+ "derbytools.jar";
-        if ( slaveHost.equals("localhost") )
-        { // Use full classpath when running locally. Can not vary server versions!
-            ijClassPath = classPath;
-        }
-        
-        String clientJvm = BaseTestCase.getJavaExecutableName();
-        
-        String command = clientJvm // "java"
-                + " -Dij.driver=" + DRIVER_CLASS_NAME
-                + " -Dij.connection.stopSlave=\"" + URL + "\""
-                + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
-                + " " + "/home/os136789/Replication/testing/exit.sql"
-                ;
-        
-        // Execute the ij command on the testClientHost as testUser
-        String results =
-                runUserCommandRemotely(command,
-                testClientHost,
-                testUser,
-                "stopSlave_ij ");
-        util.DEBUG(results);
-    }
-    
+
     void failOver(String jvmVersion,
             String dbPath, String dbSubPath, String dbName,
             String host,  // Where the db is run.
@@ -3501,4 +3464,110 @@ test.postStoppedSlaveServer.return=true
                 +useEncryption(false);
     }
 
+
+    SQLException stopSlave(
+        String slaveServerHost,
+        int slaveServerPort,
+        String slaveDatabasePath,
+        String replicatedDb,
+        boolean masterServerAlive)
+        throws Exception
+    {
+        return stopSlave(slaveServerHost,
+                         slaveServerPort,
+                         slaveDatabasePath,
+                         ReplicationRun.slaveDbSubPath,
+                         replicatedDb,
+                         masterServerAlive);
+    }
+
+
+    SQLException stopSlave(
+        String slaveServerHost,
+        int slaveServerPort,
+        String slaveDatabasePath,
+        String subPath,
+        String replicatedDb,
+        boolean masterServerAlive)
+        throws Exception
+    {
+        util.DEBUG("stopSlave");
+        String dbPath = slaveDatabasePath + FS + subPath + FS + replicatedDb;
+
+        String connectionURL = "jdbc:derby:"
+            + "//" + slaveServerHost + ":" + slaveServerPort + "/"
+            + dbPath
+            + ";stopSlave=true"
+            + useEncryption(false);
+
+        if (masterServerAlive) {
+            try {
+                Connection conn = DriverManager.getConnection(connectionURL);
+                conn.close();
+                return null; // If successful.
+            } catch (SQLException se) {
+                return se;
+            }
+        } else {
+            // We use a loop below, to allow for intermediate states before the
+            // expected final state REPLICATION_DB_NOT_BOOTED.
+            //
+            // If we get here quick enough we see these error states (in order):
+            //     a) SLAVE_OPERATION_DENIED_WHILE_CONNECTED
+            //     b) REPLICATION_SLAVE_SHUTDOWN_OK
+            //
+            SQLException gotEx = null;
+            int tries = 20;
+
+            while (tries-- > 0) {
+                gotEx = null;
+
+                try {
+                    DriverManager.getConnection(connectionURL);
+                    fail("Unexpectedly connected");
+                } catch (SQLException se) {
+                    if (se.getSQLState().
+                            equals(SLAVE_OPERATION_DENIED_WHILE_CONNECTED)) {
+                        // Try again, shutdown did not complete yet..
+                        gotEx = se;
+                        util.DEBUG
+                            ("got SLAVE_OPERATION_DENIED_WHILE_CONNECTED, " +
+                             "sleep");
+                        Thread.sleep(1000L);
+                        continue;
+
+                    } else if (se.getSQLState().
+                                   equals(REPLICATION_SLAVE_SHUTDOWN_OK)) {
+                        // Try again, shutdown started but did not complete yet.
+                        gotEx = se;
+                        util.DEBUG("got REPLICATION_SLAVE_SHUTDOWN_OK, " +
+                                   "sleep..");
+                        Thread.sleep(1000L);
+                        continue;
+
+                    } else if (se.getSQLState().
+                                   equals(REPLICATION_DB_NOT_BOOTED)) {
+                        // All is fine, so proceed
+                        util.DEBUG("Got REPLICATION_DB_NOT_BOOTED as expected");
+                        break;
+
+                    } else {
+                        // Something else, so report.
+                        gotEx = se;
+                        break;
+                    }
+                }
+            }
+
+            if (gotEx != null) {
+                // We did not get what we expected as the final state
+                // (REPLICATION_DB_NOT_BOOTED) in reasonable time, or we saw
+                // something that is not a legal intermediate state, so we fail
+                // now:
+                throw gotEx;
+            }
+
+            return null;
+        }
+    }
 }

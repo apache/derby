@@ -191,7 +191,7 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
     }
 
     private void _testPreStoppedSlave(Connection mConn)
-        throws SQLException
+        throws Exception
     {
         util.DEBUG("_testPreStoppedSlave");
         /*  
@@ -211,9 +211,9 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
                 "XRE09");
 
         assertException(
-                _stopSlave(slaveServerHost,slaveServerPort,
-                    slaveDatabasePath, replicatedDb,
-                    slaveReplPort),
+                stopSlave(slaveServerHost,slaveServerPort,
+                          slaveDatabasePath, replicatedDb,
+                          true),
                 "XRE40");
         
         assertException(
@@ -309,29 +309,6 @@ public class ReplicationRun_Local_StateTest_part2 extends ReplicationRun
         }
     }
 
-    SQLException _stopSlave(String slaveServerHost, int slaveServerPort, 
-            String slaveDatabasePath, String replicatedDb, 
-            int slaveReplPort)
-    {
-        String db = slaveDatabasePath +FS+ReplicationRun.slaveDbSubPath +FS+ replicatedDb;
-        String connectionURL = "jdbc:derby:"  
-                + "//" + slaveServerHost + ":" + slaveServerPort + "/"
-                + db
-                + ";stopSlave=true"
-                + ";slaveHost=" + slaveServerHost 
-                + ";slavePort=" + slaveReplPort;
-        util.DEBUG(connectionURL);
-        try
-        {
-            Connection conn = DriverManager.getConnection(connectionURL);
-            util.DEBUG("stopSlave Unexpectedly connected as: " + connectionURL);
-            return new SQLException("stopSlave Unexpectedly connected");
-        }
-        catch (SQLException se)
-        {
-            return se;
-        }
-    }
 
     SQLException _failOver(String serverHost, int serverPort, 
             String databasePath, String dbSubPath, String replicatedDb)

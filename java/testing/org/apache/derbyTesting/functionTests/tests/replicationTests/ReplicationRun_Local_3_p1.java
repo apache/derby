@@ -140,8 +140,11 @@ public class ReplicationRun_Local_3_p1 extends ReplicationRun_Local_3
         // 1. separate test
         // slave: stopSlave
         assertException(
-            _stopSlave(slaveServerHost, slaveServerPort,
-                slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb),
+            stopSlave(slaveServerHost,
+                      slaveServerPort,
+                      slaveDatabasePath,
+                      replicatedDb,
+                      true),
             "XRE41"); // SLAVE_OPERATION_DENIED_WHILE_CONNECTED // OK to continue
        
         // 2. separate test
@@ -149,8 +152,12 @@ public class ReplicationRun_Local_3_p1 extends ReplicationRun_Local_3
         // master: stopMaster
         // slave: stopSlave
         assertException(
-            _stopSlave(masterServerHost, masterServerPort,
-                masterDatabasePath + FS + masterDbSubPath + FS + replicatedDb),
+            stopSlave(masterServerHost,
+                      masterServerPort,
+                      masterDatabasePath,
+                      masterDbSubPath,
+                      replicatedDb,
+                      true),
             "XRE40"); //  REPLICATION_NOT_IN_SLAVE_MODE // OK to continue
         assertException(
             _stopMaster(masterServerHost, masterServerPort,
@@ -166,8 +173,11 @@ public class ReplicationRun_Local_3_p1 extends ReplicationRun_Local_3
                 slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
                 slaveServerHost, slaveServerPort);
         assertException(
-            _stopSlave(slaveServerHost, slaveServerPort,
-                slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb),
+            stopSlave(slaveServerHost,
+                      slaveServerPort,
+                      slaveDatabasePath,
+                      replicatedDb,
+                      true),
             "XRE40"); // REPLICATION_NOT_IN_SLAVE_MODE // OK to continue
         /* showCurrentState("Post stopMaster, stopSlave", 0L,
             slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
