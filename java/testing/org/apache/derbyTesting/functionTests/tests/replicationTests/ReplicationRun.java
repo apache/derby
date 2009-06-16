@@ -21,6 +21,8 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
 
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
+import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derby.drda.NetworkServerControl;
 import java.net.InetAddress;
 import java.util.Properties;
@@ -186,6 +188,74 @@ public class ReplicationRun extends BaseTestCase
         super.tearDown();
     }
     
+    /**
+     * Run the test. Extra logic in addition to BaseTestCase's similar logic,
+     * to save derby.log and database files for replication directories if a
+     * failure happens.
+     */
+    public void runBare() throws Throwable {
+
+        try {
+
+            super.runBare();
+
+        } catch (Throwable running) {
+
+            // Copy the master and slave's derby.log file and databases
+            //
+            PrintWriter stackOut = null;
+
+            try {
+                String failPath = PrivilegedFileOpsForTests.
+                    getAbsolutePath(getFailureFolder());
+
+                stackOut = new PrintWriter(
+                        PrivilegedFileOpsForTests.getFileOutputStream(
+                            new File(failPath, ERRORSTACKTRACEFILE), true));
+
+                String[] replPaths = new String[]{masterDbSubPath,
+                                                  slaveDbSubPath};
+
+                for (int i=0; i < 2; i++) {
+                    // Copy the derby.log file.
+                    //
+                    File origLog = new File(replPaths[i], DERBY_LOG);
+                    File newLog = new File(failPath,
+                                           replPaths[i] + "-" + DERBY_LOG);
+                    PrivilegedFileOpsForTests.copy(origLog, newLog);
+
+                    // Copy the database.
+                    //
+                    String dbName = TestConfiguration.getCurrent().
+                        getDefaultDatabaseName();
+                    File dbDir = new File(replPaths[i], dbName );
+                    File newDbDir = new File(failPath,
+                                             replPaths[i] + "-" + dbName);
+                    PrivilegedFileOpsForTests.copy(dbDir,newDbDir);
+                }
+            } catch (IOException ioe) {
+                // We need to throw the original exception so if there
+                // is an exception saving the db or derby.log we will print it
+                // and additionally try to log it to file.
+                BaseTestCase.printStackTrace(ioe);
+                if (stackOut != null) {
+                    stackOut.println("Copying db_slave/db_master's " +
+                                     DERBY_LOG + " or database failed:");
+                    ioe.printStackTrace(stackOut);
+                    stackOut.println();
+                }
+            } finally {
+                if (stackOut != null) {
+                    stackOut.close();
+                }
+
+                // Let JUnit take over
+                throw running;
+            }
+        }
+    }
+
+
     String useEncryption(boolean create)
     {
         String encryptionString = "";

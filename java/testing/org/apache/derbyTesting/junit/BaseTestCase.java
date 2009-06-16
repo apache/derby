@@ -50,7 +50,10 @@ import java.security.PrivilegedActionException;
  */
 public abstract class BaseTestCase
     extends TestCase {
-    
+
+    protected final static String ERRORSTACKTRACEFILE = "error-stacktrace.out";
+    protected final static String DEFAULT_DB_DIR      = "system";
+    protected final static String DERBY_LOG           = "derby.log";
     /**
      * No argument constructor made private to enforce naming of test cases.
      * According to JUnit documentation, this constructor is provided for
@@ -114,18 +117,18 @@ public abstract class BaseTestCase
                 // Write the stack trace of the error/failure to file.
                 stackOut = new PrintWriter(
                         PrivilegedFileOpsForTests.getFileOutputStream(
-                            new File(failPath, "error-stacktrace.out"), true));
+                            new File(failPath, ERRORSTACKTRACEFILE), true));
                 stackOut.println("[Error/failure logged at " +
                         new java.util.Date() + "]");
                 running.printStackTrace(stackOut);
                 stackOut.println(); // Add an extra blank line.
                 // Copy the derby.log file.
-                File origLog = new File("system", "derby.log");
-                File newLog = new File(failPath, "derby.log");
+                File origLog = new File(DEFAULT_DB_DIR, DERBY_LOG);
+                File newLog = new File(failPath, DERBY_LOG);
                 PrivilegedFileOpsForTests.copy(origLog, newLog);
                 // Copy the database.
                 String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
-                File dbDir = new File("system", dbName );                        
+                File dbDir = new File(DEFAULT_DB_DIR, dbName );
                 File newDbDir = new File(failPath, dbName);
                 PrivilegedFileOpsForTests.copy(dbDir,newDbDir);
            }
