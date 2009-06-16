@@ -35,6 +35,7 @@ import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.execute.TargetResultSet;
+import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.RowLocationRetRowSource;
 import org.apache.derby.iapi.store.access.RowSource;
@@ -506,7 +507,8 @@ extends BasicNoPutResultSetImpl
 	 * This method is result sets used for scroll insensitive updatable 
 	 * result sets for other result set it is a no-op.
 	 */
-	public void updateRow(ExecRow row) throws StandardException {
+	public void updateRow(ExecRow row, RowChanger rowChanger)
+			throws StandardException {
 		// Only ResultSets of type Scroll Insensitive implement
 		// detectability, so for other result sets this method
 		// is a no-op

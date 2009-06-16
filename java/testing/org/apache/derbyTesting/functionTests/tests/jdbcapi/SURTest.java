@@ -1394,6 +1394,165 @@ public class SURTest extends SURBaseTest {
     }
     
     /**
+     * DERBY-4198 "When using the FOR UPDATE OF clause with SUR
+     * (Scroll-insensive updatable result sets), the updateRow() method crashes"
+     *
+     * This bug revealed missing logic to handle the fact the the ExecRow
+     * passed down to ScrollInsensitiveResultSet.updateRow does not always
+     * contain all the rows of the basetable, cf. the logic of RowChangerImpl.
+     * When an explicit list of columns is given as in FOR UPDATE OF
+     * <column-list>, the ExecRow may contains a subset of the the base table
+     * columns and ScrollInsensitiveResultSet was not ready to handle that.
+     *
+     * Test some of the cases which went wrong before the fix.
+     *
+     */
+    public void testForUpdateWithColumnList() throws SQLException {
+        Statement s = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
+                                          ResultSet.CONCUR_UPDATABLE);
+
+        // case a)
+        ResultSet rs = s.executeQuery("select c from t1 for update of c");
+
+        rs.next();
+        rs.updateString(1,"foobar");
+        rs.updateRow();
+        rs.next();
+        rs.previous();
+        assertEquals("foobar", rs.getString(1));
+        rs.close();
+
+        // case b)
+        rs = s.executeQuery("select id from t1 for update of id");
+        rs.next();
+        rs.updateInt(1,20);
+        rs.updateRow();
+        rs.next();
+        rs.previous();
+        assertEquals(20, rs.getInt(1));
+        rs.close();
+
+        // case c)
+        rs = s.executeQuery("select * from t1 for update of id");
+        rs.next();
+        rs.updateInt(1,20);
+        rs.updateRow();
+        rs.next();
+        rs.previous();
+        assertEquals(20, rs.getInt(1));
+        rs.close();
+
+        // case d)
+        rs = s.executeQuery("SELECT * from t1 for update of c");
+        rs.next();
+        int id = rs.getInt(1);
+        int a =  rs.getInt(2);
+        int b =  rs.getInt(3);
+        rs.updateString(4,"foobar");
+        rs.updateRow();
+        rs.next();
+        rs.previous();
+        assertEquals(id, rs.getInt(1));
+        assertEquals(a, rs.getInt(2));
+        assertEquals(b, rs.getInt(3));
+        assertEquals("foobar", rs.getString(4));
+        rs.close();
+
+        // case e)
+        rs = s.executeQuery("SELECT * from t1 for update of id,a,b,c");
+        rs.next();
+        rs.updateInt(1, -20);
+        rs.updateInt(2, 20);
+        rs.updateInt(3, 21);
+        rs.updateString(4,"foobar");
+        rs.updateRow();
+        rs.next();
+        rs.previous();
+        assertEquals(-20, rs.getInt(1));
+        assertEquals(20, rs.getInt(2));
+        assertEquals(21, rs.getInt(3));
+        assertEquals("foobar", rs.getString(4));
+        rs.close();
+
+        // case f)
+        rs = s.executeQuery("SELECT * from t1 for update of id, a,b,c");
+        rs.next();
+        rs.updateInt(1, 20);
+        rs.updateRow();
+        rs.next();
+        rs.previous();
+        assertEquals(20, rs.getInt(1));
+        rs.close();
+
+        // case h)
+        rs = s.executeQuery("SELECT id from t1 for update of id, c");
+           String cursorname = rs.getCursorName();
+        rs.next();
+           Statement s2 = createStatement();
+        s2.executeUpdate("update t1 set c='foobar' where current of " +
+                         cursorname);
+        s2.close();
+        rs.next();
+        rs.previous();
+        rs.getInt(1); // gives error state 22018 before fix
+        rs.close();
+
+        // case i)
+        rs = s.executeQuery("SELECT id from t1 for update");
+        cursorname = rs.getCursorName();
+        rs.next();
+        s2 = createStatement();
+        s2.executeUpdate("update t1 set c='foobar' where current of " +
+                         cursorname);
+        s2.close();
+        rs.next();
+        rs.previous();
+        rs.getInt(1); // ok before fix
+        rs.close();
+
+        // Odd cases: base row mentioned twice in rs, update 1st instance
+        rs = s.executeQuery("SELECT id,a,id from t1");
+        rs.next();
+        rs.updateInt(1, 20);
+        rs.updateRow();
+        rs.next();
+        rs.previous();
+        assertEquals(20, rs.getInt(1));
+        assertEquals(20, rs.getInt(3));
+        rs.close();
+
+        // Odd cases: base row mentioned twice in rs, update 2nd instance
+        // with explicit column list; fails, see DERBY-4226.
+        rs = s.executeQuery("SELECT id,a,id from t1 for update of id");
+        rs.next();
+        try {
+            rs.updateInt(3, 20);
+            fail("should fail");
+        } catch (SQLException e) {
+            String sqlState = usingEmbedded() ? "42X31" : "XJ124";
+            assertSQLState(sqlState, e);
+        }
+        rs.close();
+
+        // Odd cases: base row mentioned twice in rs, update 2nd instance
+        // without explicit column list; works
+        rs = s.executeQuery("SELECT id,a,id from t1 for update");
+        rs.next();
+        rs.updateInt(3, 20);
+        rs.updateRow();
+        assertEquals(20, rs.getInt(1));
+        assertEquals(20, rs.getInt(3));
+        rs.next();
+        rs.previous();
+        assertEquals(20, rs.getInt(1));
+        assertEquals(20, rs.getInt(3));
+        rs.close();
+
+        s.close();
+    }
+
+
+    /**
      * Check that detectability methods throw the correct exception
      * when called in an illegal row state, that is, somehow not
      * positioned on a row. Minion of testDetectabilityExceptions.
@@ -1568,6 +1727,7 @@ public class SURTest extends SURBaseTest {
         rs.close();
         s.close();
     }
+
 
     /**
      * Get a cursor name. We use the same cursor name for all cursors.

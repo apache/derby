@@ -37,6 +37,7 @@ import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 
+import org.apache.derby.iapi.sql.execute.RowChanger;
 import org.apache.derby.iapi.types.SQLBoolean;
 import org.apache.derby.iapi.types.SQLInteger;
 
@@ -1092,15 +1093,15 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		}
 	}
 
+
 	/**
 	 * @see NoPutResultSet#updateRow
 	 *
 	 * Sets the updated column of the hash table to true and updates the row
 	 * in the hash table with the new values for the row.
 	 */
-	public void updateRow(ExecRow row) throws StandardException {
-		ExecRow newRow = row;
-		boolean undoProjection = false;
+	public void updateRow(ExecRow row, RowChanger rowChanger)
+			throws StandardException {
 
 		ProjectRestrictResultSet prRS = null;
 
@@ -1112,41 +1113,72 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 			prRS = ((RowCountResultSet)source).getUnderlyingProjectRestrictRS();
 		}
 
-		if (prRS != null) {
-			newRow = prRS.doBaseRowProjection(row);
-			undoProjection = true;
-		}
-
 		positionInHashTable.setValue(currentPosition);
-		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[]) 
+		DataValueDescriptor[] hashRowArray = (DataValueDescriptor[])
 				ht.get(positionInHashTable);
 		RowLocation rowLoc = (RowLocation) hashRowArray[POS_ROWLOCATION];
+
+		// Maps from each selected column to underlying base table column
+		// number, i.e. as from getBaseProjectMapping if a PRN exists, if not
+		// we construct one, so we always know where in the hash table a
+		// modified column will need to go (we do our own projection).
+		int[] map;
+
+		if (prRS != null) {
+			map = prRS.getBaseProjectMapping();
+		} else {
+			// create a natural projection mapping for all columns in SELECT
+			// list so we can treat the cases of no PRN and PRN the same.
+			int noOfSelectedColumns =
+				hashRowArray.length - (LAST_EXTRA_COLUMN+1);
+
+			map = new int[noOfSelectedColumns];
+
+			// initialize as 1,2,3, .. n which we know is correct since there
+			// is no underlying PRN.
+			for (int i=0; i < noOfSelectedColumns; i++) {
+				map[i] = i+1; // column is 1-based
+			}
+		}
+
+		// Construct a new row based on the old one and the updated columns
+		ExecRow newRow = new ValueRow(map.length);
+
+		for (int i=0; i < map.length; i++) {
+			// What index in ExecRow "row" corresponds to this position in the
+			// hash table, if any?
+			int rowColumn = rowChanger.findSelectedCol(map[i]);
+
+			if (rowColumn > 0) {
+				// OK, a new value has been supplied, use it
+				newRow.setColumn(i+1, row.getColumn(rowColumn));
+			} else {
+				// No new value, so continue using old one
+				newRow.setColumn(i+1, hashRowArray[LAST_EXTRA_COLUMN + 1 + i]);
+			}
+		}
+
 		ht.remove(new SQLInteger(currentPosition));
 		addRowToHashTable(newRow, currentPosition, rowLoc, true);
-		
+
 		// Modify row to refer to data in the BackingStoreHashtable.
 		// This allows reading of data which goes over multiple pages
 		// when doing the actual update (LOBs). Putting columns of
 		// type SQLBinary to disk, has destructive effect on the columns,
 		// and they need to be re-read. That is the reason this is needed.
-		if (undoProjection) {
-			
-			final DataValueDescriptor[] newRowData = newRow.getRowArray();
-			
-			// Array of original position in row
-			final int[] origPos = prRS.getBaseProjectMapping();
-			
-			// We want the row to contain data backed in BackingStoreHashtable
-			final DataValueDescriptor[] backedData = 
-				getRowArrayFromHashTable(currentPosition);
-			
-			for (int i=0; i<origPos.length; i++) {
-				if (origPos[i]>=0) {
-					row.setColumn(origPos[i], backedData[i]);
-				}
+
+		DataValueDescriptor[] backedData =
+			getRowArrayFromHashTable(currentPosition);
+
+		for (int i=0; i < map.length; i++) {
+			// What index in "row" corresponds to this position in the table,
+			// if any?
+			int rowColumn = rowChanger.findSelectedCol(map[i]);
+
+			if (rowColumn > 0) {
+				// OK, put the value in the hash table back to row.
+				row.setColumn(rowColumn, backedData[i]);
 			}
-		} else {
-			row.setRowArray(getRowArrayFromHashTable(currentPosition));
 		}
 	}
 

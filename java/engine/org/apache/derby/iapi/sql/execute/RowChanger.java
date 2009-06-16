@@ -23,6 +23,7 @@ package org.apache.derby.iapi.sql.execute;
 
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -161,4 +162,15 @@ public interface RowChanger
 	  */
 	public void open(int lockMode, boolean wait)
 		 throws StandardException;
+
+	/**
+	 * Return what column no in the input ExecRow (cf nextBaseRow argument to
+	 * #updateRow) would correspond to selected column, if any.
+	 *
+	 * @param selectedCol the column number in the base table of a selected
+	 *                    column or -1 (if selected column is not a base table
+	 *                    column, e.g. i+4).
+	 * @returns column no, or -1 if not found or not a base column
+	 */
+	public int findSelectedCol(int selectedCol);
 }
