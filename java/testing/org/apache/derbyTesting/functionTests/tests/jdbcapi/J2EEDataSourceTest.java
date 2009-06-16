@@ -2286,6 +2286,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // now with ConnectionPoolDataSource
         ClientConnectionPoolDataSource cpds = 
             new ClientConnectionPoolDataSource();
+        cpds.setPortNumber(TestConfiguration.getCurrent().getPort());
+        
         // ConnectionPoolDataSource - EMPTY
         dsConnectionRequests(new String[]  
             {"08001","08001","08001","08001",
@@ -2315,6 +2317,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         // now with XADataSource
         ClientXADataSource xads = new ClientXADataSource();
+        
+        xads.setPortNumber(TestConfiguration.getCurrent().getPort());
+        
         // XADataSource - EMPTY
         dsConnectionRequests(new String[]  
             {"08001","08001","08001","08001",
@@ -2606,6 +2611,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // with ConnectionPoolDataSource
         // ConnectionPoolDataSource - retrieveMessageTextProperty
         ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
+        cpds.setPortNumber(TestConfiguration.getCurrent().getPort());
+        
         cpds.setDatabaseName(dbName);
         cpds.setConnectionAttributes(
                 retrieveMessageTextProperty + "=false");
@@ -2622,6 +2629,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         // now with XADataSource
         ClientXADataSource xads = new ClientXADataSource();
         //XADataSource - retrieveMessageTextProperty
+        xads.setPortNumber(TestConfiguration.getCurrent().getPort());
         xads.setDatabaseName(dbName);
         xads.setConnectionAttributes(
                 retrieveMessageTextProperty + "=false");

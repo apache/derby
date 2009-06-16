@@ -68,7 +68,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
             "derby.drda.sslMode=off\n" + 
             "derby.drda.keepAlive=true\n" + 
             "derby.drda.minThreads=0\n" + 
-            "derby.drda.portNumber=1527\n" + 
+            "derby.drda.portNumber="+TestConfiguration.getCurrent().getPort()+"\n" + 
             "derby.drda.logConnections=false\n" + 
             "derby.drda.timeSlice=0\n" + 
             "derby.drda.startNetworkServer=false\n" + 
@@ -88,7 +88,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
             "derby.drda.sslMode=off\n" + 
             "derby.drda.keepAlive=true\n" + 
             "derby.drda.minThreads=0\n" + 
-            "derby.drda.portNumber=1527\n" + 
+            "derby.drda.portNumber="+TestConfiguration.getCurrent().getPort()+"\n" + 
             "derby.drda.logConnections=false\n" + 
             "derby.drda.timeSlice=0\n" + 
             "derby.drda.startNetworkServer=false\n" + 
@@ -203,7 +203,8 @@ public class SysinfoTest extends BaseJDBCTestCase {
      */	
     public void testSysinfo() throws Exception {
         String[] SysInfoCmd = 
-            new String[] {"org.apache.derby.drda.NetworkServerControl", "sysinfo"};
+            new String[] {"org.apache.derby.drda.NetworkServerControl", "sysinfo",
+            "-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
 
         Process p = execJavaCmd(SysInfoCmd);
         String s = readProcessOutput(p);
@@ -223,7 +224,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
     public void testSysinfoMethod() throws Exception {	
 
         String s = NetworkServerTestSetup.
-        getNetworkServerControlDefault().getSysinfo();
+        getNetworkServerControl(TestConfiguration.getCurrent().getPort()).getSysinfo();
         s = sed(s);
 
         print("testSysinfoMethod", s);
@@ -239,7 +240,8 @@ public class SysinfoTest extends BaseJDBCTestCase {
 
         String[] SysInfoLocaleCmd = 
             new String[] {"-Duser.language=de", "-Duser.country=DE", 
-                "org.apache.derby.drda.NetworkServerControl", "sysinfo"};
+                "org.apache.derby.drda.NetworkServerControl", "sysinfo",
+                "-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         Process p = execJavaCmd(SysInfoLocaleCmd);
         String s = readProcessOutput(p);
         s = sed(s);

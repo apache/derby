@@ -31,6 +31,7 @@ import org.apache.derby.jdbc.ClientDataSource;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Framework to run replication tests.
@@ -59,7 +60,7 @@ public class ReplicationRun extends BaseTestCase
       // create or connect to an encrypted db.
     
     static String masterServerHost = "localhost"; 
-    static int masterServerPort = 1527; // .. default..
+    static int masterServerPort = TestConfiguration.getCurrent().getPort(); // .. get current ports..
     static String slaveServerHost = "localhost";
     static int slaveServerPort = 3527; // .. ..
     static String testClientHost = "localhost";
@@ -2012,7 +2013,7 @@ public class ReplicationRun extends BaseTestCase
         masterServerHost = "localhost";
         util.DEBUG("masterServerHost: " + masterServerHost);
         
-        masterServerPort = 1527;
+        masterServerPort = TestConfiguration.getCurrent().getPort();
         util.DEBUG("masterServerPort: " + masterServerPort);
         
         slaveServerHost = "localhost";

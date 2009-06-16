@@ -50,26 +50,33 @@ public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
     public void testPing() throws Exception {
         String currentHost = TestConfiguration.getCurrent().getHostName();
         String currentPort = Integer.toString(TestConfiguration.getCurrent().getPort());
+        String bogusPort = Integer.toString(TestConfiguration.getCurrent().getPort()-1);
         
         String[] pingCmd1 = new String[] {
                 "org.apache.derby.drda.NetworkServerControl", "ping" };
-        assertSuccessfulPing(pingCmd1);
-      
+        String[] pingCmd3 = new String[] {"org.apache.derby.drda.NetworkServerControl",
+                "ping", "-h", currentHost};
+        
+        /* If the port isn't the default one, we make sure that these two tests pass.
+         * The -p parameter isn't specified here.
+         * Changed to accomodate DERBY-4217
+         */
+        if (TestConfiguration.getCurrent().getPort() == TestConfiguration.DEFAULT_PORT) {
+	        assertSuccessfulPing(pingCmd1);
+            assertSuccessfulPing(pingCmd3);
+        }
+        
         String[] pingCmd2 = new String[] {
                 "org.apache.derby.drda.NetworkServerControl", "ping", "-h",
                 currentHost, "-p", currentPort};
         assertSuccessfulPing(pingCmd2);
-        
-        String[] pingCmd3 = new String[] {"org.apache.derby.drda.NetworkServerControl",
-        "ping", "-h", currentHost};
-        assertSuccessfulPing(pingCmd3);
         
         String[] pingCmd4 = new String[] {
                 "org.apache.derby.drda.NetworkServerControl", "ping", "-h",
                 "nothere" };
         assertFailedPing(pingCmd4,"Unable to find host");
         String[] pingCmd5= new String[] {"org.apache.derby.drda.NetworkServerControl",
-        "ping", "-h", currentHost, "-p", "9393"};
+        "ping", "-h", currentHost, "-p", bogusPort};
         assertFailedPing(pingCmd5,"Could not connect to Derby Network Server");
 
     }

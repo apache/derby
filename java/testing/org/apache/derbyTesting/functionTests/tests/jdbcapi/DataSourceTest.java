@@ -264,7 +264,8 @@ public class DataSourceTest extends BaseJDBCTestCase {
             return;
         
         ClientDataSource ds = new ClientDataSource();
-
+        ds.setPortNumber(TestConfiguration.getCurrent().getPort());
+        
         // DataSource - EMPTY; expect error 08001 in all cases
         // 08001: Required Derby DataSource property databaseName not set.
         dsConnectionRequests(new String[]  
@@ -435,6 +436,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
         // DataSource
         // DataSource - retrieveMessageTextProperty
         ClientDataSource ds = new ClientDataSource();
+        ds.setPortNumber(TestConfiguration.getCurrent().getPort());
         ds.setDatabaseName(dbName);
         ds.setConnectionAttributes(retrieveMessageTextProperty + "=false");
         conn = ds.getConnection();

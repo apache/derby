@@ -114,7 +114,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
         expectedValues.setProperty("derby.drda.sslMode","off");
         expectedValues.setProperty("derby.drda.keepAlive","true");
         expectedValues.setProperty("derby.drda.minThreads","0");
-        expectedValues.setProperty("derby.drda.portNumber","1527");
+        expectedValues.setProperty("derby.drda.portNumber",TestConfiguration.getCurrent().getPort()+"");
         expectedValues.setProperty("derby.drda.logConnections","false");
         expectedValues.setProperty("derby.drda.timeSlice","0");
         expectedValues.setProperty("derby.drda.startNetworkServer","false");
@@ -149,7 +149,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
         expectedValues.setProperty("derby.drda.trace.4","true");
         expectedValues.setProperty("derby.drda.keepAlive","true");
         expectedValues.setProperty("derby.drda.minThreads","0");
-        expectedValues.setProperty("derby.drda.portNumber","1527");
+        expectedValues.setProperty("derby.drda.portNumber",TestConfiguration.getCurrent().getPort()+"");
         expectedValues.setProperty("derby.drda.logConnections","true");
         expectedValues.setProperty("derby.drda.timeSlice","0");
         expectedValues.setProperty("derby.drda.startNetworkServer","false");
@@ -189,7 +189,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
         expectedValues.setProperty("derby.drda.sslMode","off");
         expectedValues.setProperty("derby.drda.keepAlive","true");
         expectedValues.setProperty("derby.drda.minThreads","0");
-        expectedValues.setProperty("derby.drda.portNumber","1527");
+        expectedValues.setProperty("derby.drda.portNumber",TestConfiguration.getCurrent().getPort()+"");
         expectedValues.setProperty("derby.drda.logConnections","true");
         expectedValues.setProperty("derby.drda.timeSlice","0");
         expectedValues.setProperty("derby.drda.startNetworkServer","false");

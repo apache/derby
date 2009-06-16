@@ -39,6 +39,7 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derby.jdbc.ClientConnectionPoolDataSource40;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -989,7 +990,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         // call setSecurityMechanism with secmec.
         JDBCDataSource.setBeanProperty(cpds,
                 "SecurityMechanism", secmec);
-        
+               
         // simulate case when connection will be re-used by getting 
         // a connection, closing it and then the next call to
         // getConnection will re-use the previous connection.  
@@ -1242,7 +1243,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     private HashMap addRequiredAttributes(HashMap attrs)
     {
         String hostName = TestConfiguration.DEFAULT_HOSTNAME;
-        int port = TestConfiguration.DEFAULT_PORT;
+        int port = TestConfiguration.getCurrent().getPort();
         if (usingDB2Client())
         {
             //attrs.put("retrieveMessagesFromServerOnGetMessage","true");
@@ -1276,6 +1277,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             attrs.put("user", user);
         if (password != null)
             attrs.put("password", password);
+
         attrs = addRequiredAttributes(attrs);
         ConnectionPoolDataSource cpds = 
             J2EEDataSource.getConnectionPoolDataSource();

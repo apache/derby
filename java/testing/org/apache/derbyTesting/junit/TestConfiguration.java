@@ -324,11 +324,11 @@ public class TestConfiguration {
         if (cleanDB)
         {
             suite.addTest(new CleanDatabaseTestSetup(
-                    clientExistingServerSuite(testClass, hostName, portNumber)));
+                    clientExistingServerSuite(testClass, hostName, TestConfiguration.getCurrent().getPort())));
         }
         else
         {
-            suite.addTest(clientExistingServerSuite(testClass, hostName, portNumber));
+            suite.addTest(clientExistingServerSuite(testClass, hostName, TestConfiguration.getCurrent().getPort()));
         }
 
         return (suite);
@@ -499,7 +499,7 @@ public class TestConfiguration {
         }
         
         Test r =
-                new ServerSetup(test, DEFAULT_HOSTNAME, DEFAULT_PORT);
+                new ServerSetup(test, DEFAULT_HOSTNAME, TestConfiguration.getCurrent().getPort());
         ((ServerSetup)r).setJDBCClient(JDBCClient.DERBYNETCLIENT); 
         
         return r;
@@ -521,7 +521,7 @@ public class TestConfiguration {
         // which are specific to this test run (perhaps overridden on the
         // command line)?
         //
-        return new ServerSetup(test, DEFAULT_HOSTNAME, DEFAULT_PORT);
+        return new ServerSetup(test, DEFAULT_HOSTNAME, TestConfiguration.getCurrent().getPort());
     }
    /**
     * A variant of defaultServerDecorator allowing 
@@ -1102,18 +1102,12 @@ public class TestConfiguration {
         hostName = props.getProperty(KEY_HOSTNAME, DEFAULT_HOSTNAME);
         isVerbose = Boolean.valueOf(props.getProperty(KEY_VERBOSE)).booleanValue();
         doTrace =  Boolean.valueOf(props.getProperty(KEY_TRACE)).booleanValue();
-        String portStr = props.getProperty(KEY_PORT);
-        if (portStr != null) {
-            try {
-                port = Integer.parseInt(portStr);
-            } catch (NumberFormatException nfe) {
-                // We lose stacktrace here, but it is not important. 
-                throw new NumberFormatException(
-                        "Port number must be an integer. Value: " + portStr); 
-            }
-        } else {
-            port = DEFAULT_PORT;
-        }
+        String port = BaseTestCase.getSystemProperty("derby.tests.port");
+		if (port == null) {
+			this.port = DEFAULT_PORT;
+		} else {
+			this.port = Integer.parseInt(port);
+		}
         String jmxPortStr = props.getProperty(KEY_JMX_PORT);
         if (jmxPortStr != null) {
             try {

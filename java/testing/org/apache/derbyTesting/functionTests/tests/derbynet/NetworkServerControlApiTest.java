@@ -333,9 +333,9 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
 
      // test fixtures from maxthreads
     public void testMaxThreads_0() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         String[] maxthreadsCmd1 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "maxthreads", "0"};
+                "maxthreads", "0","-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         // test maxthreads 0
         assertExecJavaCmdAsExpected(new String[]
                 {"Max threads changed to 0."}, maxthreadsCmd1, 0);
@@ -344,9 +344,9 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     }
 
     public void testMaxThreads_Neg1() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         String[] maxthreadsCmd2 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "maxthreads", "-1", "-h", "localhost", "-p", "1527"};
+                "maxthreads", "-1", "-h", "localhost", "-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         String host = TestUtil.getHostName();
         maxthreadsCmd2[4] = host;
         assertExecJavaCmdAsExpected(new String[]{"Max threads changed to 0."}, maxthreadsCmd2, 0);
@@ -360,9 +360,10 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     public void testMaxThreads_Neg12() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),
+                    TestConfiguration.getCurrent().getPort());
         String[] maxthreadsCmd3 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "maxthreads", "-12"};
+                "maxthreads", "-12","-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         //test maxthreads -12
         assertExecJavaCmdAsExpected(new String[]{
                 "Invalid value, -12, for maxthreads.",
@@ -384,18 +385,18 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     }
 
     public void testMaxThreads_2147483647() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         String[] maxthreadsCmd4 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "maxthreads", "2147483647"};
+                "maxthreads", "2147483647","-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         assertExecJavaCmdAsExpected(new String[]{"Max threads changed to 2147483647."}, maxthreadsCmd4, 0);
         int maxValue = server.getMaxThreads();
         assertEquals("Fail! Max threads value incorrect!", 2147483647, maxValue);
     }
 
     public void testMaxThreads_9000() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         String[] maxthreadsCmd5 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "maxthreads", "9000"};
+                "maxthreads", "9000","-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         assertExecJavaCmdAsExpected(new String[]{"Max threads changed to 9000."}, maxthreadsCmd5, 0);
         int maxValue = server.getMaxThreads();
         assertEquals("Fail! Max threads value incorrect!", 9000, maxValue);
@@ -406,9 +407,9 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     public void testMaxThreads_Invalid() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         String[] maxthreadsCmd5 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "maxthreads", "10000"};
+                "maxthreads", "10000","-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         assertExecJavaCmdAsExpected(new String[]{"Max threads changed to 10000."}, maxthreadsCmd5, 0);
         int maxValue = server.getMaxThreads();
         assertEquals("Fail! Max threads value incorrect!", 10000, maxValue);
@@ -435,14 +436,14 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     }
 
     public void testMaxThreadsCallable_0() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         server.setMaxThreads(0);
         int maxValue = server.getMaxThreads();
         assertEquals("Fail! Max threads value incorrect!", 0, maxValue);
     }
 
     public void testMaxThreadsCallable_Neg1() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         server.setMaxThreads(-1);
         int maxValue = server.getMaxThreads();
         assertEquals("Fail! Max threads value incorrect!", 0, maxValue);
@@ -453,7 +454,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     public void testMaxThreadsCallable_Neg12() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         try {
             server.setMaxThreads(-2);
             fail("Should have thrown an exception with 'DRDA_InvalidValue.U:Invalid value, -2, for maxthreads.'");
@@ -463,14 +464,14 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     }
 
     public void testMaxThreadsCallable_2147483647() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         server.setMaxThreads(2147483647);
         int maxValue = server.getMaxThreads();
         assertEquals("Fail! Max threads value incorrect!", 2147483647, maxValue);
     }
 
     public void testMaxThreadsCallable_9000() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         server.setMaxThreads(9000);
         int maxValue = server.getMaxThreads();
         assertEquals("Fail! Max threads value incorrect!", 9000, maxValue);
@@ -479,9 +480,9 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
       // timeslice test fixtures
     public void testTimeSlice_0() throws Exception {
         int value = 0;
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         String[] timesliceCmd1 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "timeslice", "0"};
+                "timeslice", "0","-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         assertExecJavaCmdAsExpected(new String[]{"Time slice changed to 0."}, timesliceCmd1, 0);
         int timeSliceValue = server.getTimeSlice();
         assertEquals(value, timeSliceValue);
@@ -489,9 +490,9 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
 
     public void testTimeSlice_Neg1() throws Exception {
         int value = 0;
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         String[] timesliceCmd2 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "timeslice", "-1", "-h", "localhost", "-p", "1527"};
+                "timeslice", "-1", "-h", "localhost", "-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         String host = TestUtil.getHostName();
         timesliceCmd2[4] = host;
         assertExecJavaCmdAsExpected(new String[]{"Time slice changed to 0."}, timesliceCmd2, 0);
@@ -501,9 +502,9 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
 
     public void testTimeSlice_Neg12() throws Exception {
         int value = 0;
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         String[] timesliceCmd3 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "timeslice", "-12"};
+                "timeslice", "-12","-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         assertExecJavaCmdAsExpected(new String[]{"Invalid value, -12, for timeslice.",
                 "Usage: NetworkServerControl <commands> ",
                 "Commands:",
@@ -523,9 +524,9 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
 
     public void testTimeSlice_2147483647() throws Exception {
         int value = 2147483647;
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         String[] timesliceCmd4 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "timeslice", "2147483647"};
+                "timeslice", "2147483647","-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         assertExecJavaCmdAsExpected(new String[]{"Time slice changed to 2147483647."}, timesliceCmd4, 0);
         int timeSliceValue = server.getTimeSlice();
         assertEquals(value, timeSliceValue);
@@ -533,9 +534,9 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
 
     public void testTimeSlice_9000() throws Exception {
         int value = 9000;
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         String[] timesliceCmd5 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "timeslice", "9000"};
+                "timeslice", "9000","-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         assertExecJavaCmdAsExpected(new String[]{"Time slice changed to 9000."}, timesliceCmd5, 0);
         int timeSliceValue = server.getTimeSlice();
         assertEquals(value, timeSliceValue);
@@ -543,9 +544,9 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
 
     public void testTimeSlice_a() throws Exception {
         int value = 8000;
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         String[] timesliceCmd5 = new String[]{"org.apache.derby.drda.NetworkServerControl",
-                "timeslice", "8000"};
+                "timeslice", "8000","-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         assertExecJavaCmdAsExpected(new String[]{"Time slice changed to 8000."}, timesliceCmd5, 0);
         int timeSliceValue = server.getTimeSlice();
         assertEquals(value, timeSliceValue);
@@ -569,7 +570,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     }
 
     public void testTimeSliceCallable_0() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         int value = 0;
         server.setTimeSlice(0);
         int timeSliceValue = server.getTimeSlice();
@@ -577,7 +578,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     }
 
     public void testTimeSliceCallable_Neg1() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         int value = 0;
         server.setTimeSlice(-1);
         int timeSliceValue = server.getTimeSlice();
@@ -585,7 +586,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     }
 
     public void testTimeSliceCallable_Neg2() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         int value = 0;
         try {
             server.setTimeSlice(-2);
@@ -597,7 +598,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     }
 
     public void testTimeSliceCallable_2147483647() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         int value = 2147483647;
         server.setTimeSlice(2147483647);
         int timeSliceValue = server.getTimeSlice();
@@ -605,7 +606,7 @@ public class NetworkServerControlApiTest extends BaseJDBCTestCase {
     }
 
     public void testTimeSliceCallable_9000() throws Exception {
-        NetworkServerControl server = new NetworkServerControl();
+        NetworkServerControl server = new NetworkServerControl(InetAddress.getLocalHost(),TestConfiguration.getCurrent().getPort());
         int value = 9000;
         server.setTimeSlice(9000);
         int timeSliceValue = server.getTimeSlice();
