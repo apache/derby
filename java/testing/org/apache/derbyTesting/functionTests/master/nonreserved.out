@@ -472,4 +472,31 @@ ij> select * from t1 where count(i)=i;
 ERROR 42903: Invalid use of an aggregate function.
 ij> drop table t1;
 0 rows inserted/updated/deleted
+ij> -- making SECURITY keyword nonreserved as fix for Derby-4268
+create table SECURITY (security int);
+0 rows inserted/updated/deleted
+ij> insert into security values (1);
+1 row inserted/updated/deleted
+ij> select security from security where security > 0;
+SECURITY   
+-----------
+1          
+ij> select security from security security where security > 0;
+SECURITY   
+-----------
+1          
+ij> select security.security from security where security.security > 0;
+SECURITY   
+-----------
+1          
+ij> prepare security as 'select * from security';
+ij> execute security;
+SECURITY   
+-----------
+1          
+ij> create index security on security(security);
+0 rows inserted/updated/deleted
+ij> drop table SECURITY;
+0 rows inserted/updated/deleted
+ij> remove security;
 ij> 
