@@ -119,7 +119,7 @@ public final class ProductVersionHolder implements java.security.PrivilegedActio
 	private static final String ALPHA = "alpha";
 	private static final String BETA = "beta";
 
-	private final static int	MAINT_ENCODING = 1000000;
+	public final static int	MAINT_ENCODING = 1000000;
 	
 	private String productVendorName;
 	private String productName;
