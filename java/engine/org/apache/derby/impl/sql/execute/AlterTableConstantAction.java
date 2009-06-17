@@ -322,6 +322,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		if (updateStatistics)
 		{
 			updateStatistics(activation);
+            return;
 		}
 		/*
 		** Inform the data dictionary that we are about to write to it.
