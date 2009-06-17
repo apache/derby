@@ -57,7 +57,6 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         Test test = TestConfiguration.embeddedSuite(
                 IndexSplitDeadlockTest.class);
         test = new CleanDatabaseTestSetup(test);
-        test = DatabasePropertyTestSetup.setLockTimeouts(test, 2, 4);
         return test;
     }
 
