@@ -13927,6 +13927,7 @@ nonReservedKeyword()  :
 	|   tok = <RS>
 	|	tok = <SCALE>
 	|	tok = <SAVEPOINT>
+	|	tok = <SECURITY>
 	|	tok = <SEQUENCE>
 	|	tok = <SEQUENTIAL>
 	|	tok = <SERIALIZABLE>
