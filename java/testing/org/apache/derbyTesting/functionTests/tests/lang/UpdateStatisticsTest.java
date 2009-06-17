@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -172,5 +173,30 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         s.executeUpdate("DROP TABLE t2");
         //End of test case for better index selection after statistics
         //availability
+    }
+
+    /**
+     * Test that SYSCS_UPDATE_STATISTICS doesn't obtain exclusive locks on
+     * the table or rows in the table (DERBY-4274).
+     */
+    public void testNoExclusiveLockOnTable() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table t (x char(1))");
+        s.execute("create index ti on t(x)");
+        s.execute("insert into t values 'a','b','c','d'");
+
+        setAutoCommit(false);
+        s.execute("lock table t in share mode");
+
+        Connection c2 = openDefaultConnection();
+        Statement s2 = c2.createStatement();
+        // This call used to time out because SYSCS_UPDATE_STATISTICS tried
+        // to lock T exclusively.
+        s2.execute("call syscs_util.syscs_update_statistics('APP', 'T', null)");
+        s2.close();
+        c2.close();
+
+        s.execute("drop table t");
+        commit();
     }
 }
