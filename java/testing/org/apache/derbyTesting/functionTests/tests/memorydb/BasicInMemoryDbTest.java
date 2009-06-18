@@ -205,6 +205,37 @@ public class BasicInMemoryDbTest
         getConnection();
     }
 
+    /**
+     * Verify that booting two databases with the same name but with different
+     * subsubprotocols doesn't result in two connections to the same database.
+     *
+     * @throws SQLException if something goes wrong
+     */
+    public void testBootSameDbDifferentSubSubProtocol()
+            throws SQLException {
+        final String dbName = "BSDDSSP";
+        // Connect to the in-memory database and create a table.
+        Connection con1 = DriverManager.getConnection(
+                "jdbc:derby:memory:" + dbName + ";create=true");
+        Statement stmt1 = con1.createStatement();
+        stmt1.execute("create table t (text varchar(255))");
+        stmt1.execute("insert into t values ('Inserted into in-memory db')");
+        // Connect to the on-disk database. The table we created in the
+        // in-memory database shouldn't exist in the on-disk database.
+        Connection con2 = DriverManager.getConnection(
+                "jdbc:derby:" + dbName + ";create=true");
+        // Table t should not exist.
+        Statement stmt2 = con2.createStatement();
+        try {
+            stmt2.executeQuery("select * from t");
+            fail("Table 't' should not exist");
+        } catch (SQLException sqle) {
+            assertSQLState("42X05", sqle);
+        }
+        con2.close();
+        con1.close();
+    }
+
     public static Test suite() {
         // Run only in embedded-mode for now.
         return new SupportFilesSetup(new TestSuite(BasicInMemoryDbTest.class));

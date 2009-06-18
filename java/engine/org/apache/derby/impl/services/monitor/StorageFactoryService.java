@@ -756,6 +756,14 @@ final class StorageFactoryService implements PersistentService
     {
 		String protocolLeadIn = getType() + ":";
         int colon = name.indexOf( ':');
+        // If no subsubprotocol is specified and the storage factory type isn't
+        // the default one, abort. We have to deal with Windows drive
+        // specifications here, which contain a colon (i.e. 'C:').
+        // The logic in this method may break in some cases if a colon is used
+        // in the directory or database name.
+        if (colon < 2 && !getType().equals(PersistentService.DIRECTORY)) {
+            return null;
+        }
         if( colon > 1) // Subsubprotocols must be at least 2 characters long
         {
             if( ! name.startsWith( protocolLeadIn))
