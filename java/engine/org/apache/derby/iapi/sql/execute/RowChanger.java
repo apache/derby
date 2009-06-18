@@ -170,7 +170,7 @@ public interface RowChanger
 	 * @param selectedCol the column number in the base table of a selected
 	 *                    column or -1 (if selected column is not a base table
 	 *                    column, e.g. i+4).
-	 * @returns column no, or -1 if not found or not a base column
+	 * @return column no, or -1 if not found or not a base column
 	 */
 	public int findSelectedCol(int selectedCol);
 }
