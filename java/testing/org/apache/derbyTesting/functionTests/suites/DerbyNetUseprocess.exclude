@@ -7,7 +7,6 @@
 #     java.lang.ExceptionInInitializerError 
 #     and access denied (java.lang.RuntimePermission loadLibrary.db2jcct2). (????!)
 # derbynet/DerbyNetAutoStart.java - exits suite...
-# derbynet/getCurrentProperties.java - fails with different sessions
 # derbynet/dblook_test_net.java - fails, test misses properties
 # derbynet/dblook_test_net_territory.java - fails, test misses properties
 # derbynet/runtimeinfo.java - fails with already existing threads (maybe intermittent)
@@ -24,7 +23,6 @@ jdbcapi/maxfieldsize.java
 jdbcapi/HoldabilityTest.junit
 jdbcapi/bestrowidentifier.sql
 derbynet/DerbyNetAutoStart.java
-derbynet/getCurrentProperties.java
 derbynet/dblook_test_net.java
 derbynet/dblook_test_net_territory.java
 derbynet/runtimeinfo.java
