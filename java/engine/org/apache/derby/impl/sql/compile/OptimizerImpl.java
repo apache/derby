@@ -1789,8 +1789,9 @@ public class OptimizerImpl implements Optimizer
 				if (requiredRowOrdering != null &&
 					curOpt.considerSortAvoidancePath())
 				{
-					if (requiredRowOrdering.sortRequired(bestRowOrdering) ==
-									RequiredRowOrdering.NOTHING_REQUIRED)
+					if (requiredRowOrdering.sortRequired(
+							bestRowOrdering, optimizableList) == 
+								RequiredRowOrdering.NOTHING_REQUIRED)
 					{
 						if (optimizerTrace)
 						{
@@ -2246,8 +2247,9 @@ public class OptimizerImpl implements Optimizer
 				** path avoid a sort?
 				*/
 				if (requiredRowOrdering.sortRequired(currentRowOrdering,
-														assignedTableMap)
-										== RequiredRowOrdering.NOTHING_REQUIRED)
+														assignedTableMap,
+														optimizableList)
+										==RequiredRowOrdering.NOTHING_REQUIRED)
 				{
 					ap = optimizable.getBestSortAvoidancePath();
 					bestCostEstimate = ap.getCostEstimate();
@@ -2377,7 +2379,8 @@ public class OptimizerImpl implements Optimizer
 				** path avoid a sort?
 				*/
 				if (requiredRowOrdering.sortRequired(currentRowOrdering,
-														assignedTableMap)
+														assignedTableMap,
+														optimizableList)
 										== RequiredRowOrdering.NOTHING_REQUIRED)
 				{
 					ap = optimizable.getBestSortAvoidancePath();

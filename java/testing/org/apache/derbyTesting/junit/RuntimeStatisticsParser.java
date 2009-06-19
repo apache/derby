@@ -31,6 +31,7 @@ public class RuntimeStatisticsParser {
     private boolean tableScan = false;
     private final boolean indexScan;
     private final boolean indexRowToBaseRow;
+	private final boolean lastKeyIndexScan;
     private String statistics = "";
     private boolean scrollInsensitive = false;
     private final HashSet qualifiers;
@@ -65,6 +66,7 @@ public class RuntimeStatisticsParser {
         indexScan = (rts.indexOf("Index Scan ResultSet") >= 0);
         indexRowToBaseRow =
             (rts.indexOf("Index Row to Base Row ResultSet") >= 0);
+        lastKeyIndexScan = (rts.indexOf("Last Key Index Scan ResultSet") >= 0);
         
         if (rts.indexOf("Eliminate duplicates = true") > 0) {
         	eliminatedDuplicates = true;
@@ -169,6 +171,36 @@ public class RuntimeStatisticsParser {
     }
 
     /**
+     * Return whether or not a last key index scan result set was used
+	 * in the query. A last key index scan is a special optimization for
+	 * MIN and MAX queries against an indexed column (SELECT MAX(ID) FROM T).
+     */
+    public boolean usedLastKeyIndexScan() {
+        return lastKeyIndexScan;
+    }
+    
+    /**
+     * @param tableName
+     * @return true if a Table Scan ResultSet was used for tableName
+     */    
+    public boolean usedTableScan(String tableName) {
+    	return (statistics.indexOf("Table Scan ResultSet for " +
+    			tableName)!= -1);
+    }
+    
+    /**
+     * @param tableName
+     * @param indexName
+     * @return true if passed indexName was used for Index Scan ResultSet
+     *     for the passed tableName
+     */
+    public boolean usedSpecificIndexForIndexScan(
+               String tableName, String indexName){
+        return (statistics.indexOf("Index Scan ResultSet for " +
+                    tableName + " using index " + indexName)!= -1);
+    }
+    
+    /**
      * Return whether or not an index row to base row result set was used in
      * the query.
      */
@@ -218,5 +250,21 @@ public class RuntimeStatisticsParser {
     {
         return (statistics.indexOf("Number of rows qualified=" +
             qualRows + "\n") != -1);
+    }
+
+    /**
+     * Check if sorting node was added for the query.
+     * @return true if sorting node was required
+     */
+    public boolean whatSortingRequired() {
+        return (statistics.indexOf("Sort information: ") != -1 );
+    }
+
+    public boolean usedExternalSort() {
+        return (statistics.indexOf("Sort type=external") != -1 );
+    }
+
+    public String toString() {
+        return statistics;
     }
 }

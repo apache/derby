@@ -132,6 +132,7 @@ public class _Suite extends BaseTestCase  {
 		{
 		}
         suite.addTest(ResultSetsFromPreparedStatementTest.suite());
+        suite.addTest(OrderByAndSortAvoidance.suite());
 
         // tests that do not run with JSR169
         if (JDBC.vmSupportsJDBC3())  
