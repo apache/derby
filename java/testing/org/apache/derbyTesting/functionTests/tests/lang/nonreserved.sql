@@ -223,3 +223,15 @@ select count(*) from t1;
 select count(i) from t1;
 select * from t1 where count(i)=i;
 drop table t1; 
+
+-- making SECURITY keyword nonreserved as fix for Derby-4268
+create table SECURITY (security int);
+insert into security values (1);
+select security from security where security > 0;
+select security from security security where security > 0;
+select security.security from security where security.security > 0;
+prepare security as 'select * from security';
+execute security;
+create index security on security(security);
+drop table SECURITY;
+remove security;
