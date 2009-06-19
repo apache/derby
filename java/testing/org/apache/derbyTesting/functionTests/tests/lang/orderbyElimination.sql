@@ -104,3 +104,27 @@ drop table t1;
 drop table u1;
 drop table u2;
 drop table u3;
+
+-- DERBY-3997: Elimination of ORDER BY clause because all the columns
+-- to order by were known to be constant, made extra columns appear in
+-- the result.
+create table d3997(x int, y int, z int);
+-- These queries used to have two result columns, but should only have one
+select 1 from d3997 where x=1 order by x;
+select y from d3997 where x=1 order by x;
+-- Used to have three columns, should only have two
+select y,z from d3997 where x=1 order by x;
+-- Used to have three columns, should only have one
+select x from d3997 where y=1 and z=1 order by y,z;
+-- Dynamic parameters are also constants (expect one column)
+execute 'select x from d3997 where y=? order by y' using 'values 1';
+-- Order by columns should not be removed from the result here
+select * from d3997 where x=1 order by x;
+select x,y,z from d3997 where x=1 order by x;
+select x,y,z from d3997 where x=1 and y=1 order by x,y;
+-- Order by should not be eliminated here (not constant values). Insert some
+-- data in reverse order to verify that the results are sorted.
+insert into d3997 values (9,8,7),(6,5,4),(3,2,1);
+select * from d3997 where y<>2 order by y;
+select z from d3997 where y>2 order by y;
+drop table d3997;
