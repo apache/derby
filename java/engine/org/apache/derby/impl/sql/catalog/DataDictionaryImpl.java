@@ -2410,6 +2410,77 @@ public final class	DataDictionaryImpl
 					 tc);
 	}
 
+    /**
+     * 10.6 upgrade logic to update the return type of SYSIBM.CLOBGETSUBSTRING. The length of the
+     * return type was changed in 10.5 but old versions of the metadata were not
+     * upgraded at that time. See DERBY-4214.
+     */
+    void upgradeCLOBGETSUBSTRING_10_6( TransactionController tc )
+        throws StandardException
+    {
+		TabInfoImpl          ti = getNonCoreTI(SYSALIASES_CATALOG_NUM);
+		ExecIndexRow         keyRow = exFactory.getIndexableRow(3);
+		DataValueDescriptor  aliasNameOrderable = new SQLVarchar( "CLOBGETSUBSTRING" );;
+		DataValueDescriptor	 nameSpaceOrderable = new SQLChar
+            ( new String( new char[] { AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR } ) );
+        
+		keyRow.setColumn(1, new SQLChar( SchemaDescriptor.SYSIBM_SCHEMA_UUID ));
+		keyRow.setColumn(2, aliasNameOrderable);
+		keyRow.setColumn(3, nameSpaceOrderable);
+
+        AliasDescriptor      oldAD = (AliasDescriptor) getDescriptorViaIndex
+            (
+             SYSALIASESRowFactory.SYSALIASES_INDEX1_ID,
+             keyRow,
+             (ScanQualifier [][]) null,
+             ti,
+             (TupleDescriptor) null,
+             (List) null,
+             true,
+             TransactionController.ISOLATION_REPEATABLE_READ,
+             tc);
+        RoutineAliasInfo   oldRai = (RoutineAliasInfo) oldAD.getAliasInfo();
+        TypeDescriptor     newReturnType = DataTypeDescriptor.getCatalogType( Types.VARCHAR, LOBStoredProcedure.MAX_CLOB_RETURN_LEN );
+        RoutineAliasInfo   newRai = new RoutineAliasInfo
+            (
+             oldRai.getMethodName(),
+             oldRai.getParameterCount(),
+             oldRai.getParameterNames(),
+             oldRai.getParameterTypes(),
+             oldRai.getParameterModes(),
+             oldRai.getMaxDynamicResultSets(),
+             oldRai.getParameterStyle(),
+             oldRai.getSQLAllowed(),
+             oldRai.isDeterministic(),
+             oldRai.calledOnNullInput(),
+             newReturnType
+             );
+        AliasDescriptor      newAD = new AliasDescriptor
+            (
+             this,
+             oldAD.getUUID(),
+             oldAD.getObjectName(),
+             oldAD.getSchemaUUID(),
+             oldAD.getJavaClassName(),
+             oldAD.getAliasType(),
+             oldAD.getNameSpace(),
+             oldAD.getSystemAlias(),
+             newRai,
+             oldAD.getSpecificName()
+             );
+        ExecRow             newRow = ti.getCatalogRowFactory().makeRow( newAD, null );
+
+		ti.updateRow
+            (
+             keyRow,
+             newRow, 
+             SYSALIASESRowFactory.SYSALIASES_INDEX1_ID,
+             new boolean[] { false, false, false },
+             (int[])null,
+             tc
+             );
+    }
+
 	/**
 	 * Drop all table descriptors for a schema.
 	 *

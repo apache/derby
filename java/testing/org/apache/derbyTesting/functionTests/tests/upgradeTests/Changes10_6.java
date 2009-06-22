@@ -23,15 +23,21 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 
 import org.apache.derbyTesting.junit.JDBCDataSource;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.CallableStatement;
+import java.sql.ResultSet;
 
 import javax.sql.DataSource;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.apache.derby.catalog.types.RoutineAliasInfo;
+import org.apache.derby.catalog.TypeDescriptor;
+
 
 /**
  * Upgrade test cases for 10.6.
@@ -109,4 +115,95 @@ public class Changes10_6 extends UpgradeChange {
         }
     }
 
+    /**
+     * Make sure that SYSIBM.CLOBGETSUBSTRING has the correct return value.
+     * See https://issues.apache.org/jira/browse/DERBY-4214
+     */
+    public void testCLOBGETSUBSTRING() throws Exception
+    {
+        Version initialVersion = new Version( getOldMajor(), getOldMinor(), 0, 0 );
+        Version firstVersionHavingThisFunction = new Version( 10, 3, 0, 0 );
+        Version firstVersionHavingCorrectReturnType = new Version( 10, 5, 0, 0 );
+        int     wrongLength = 32672;
+        int     correctLength = 10890;
+        int     actualJdbcType;
+        int     actualLength;
+        
+        Object   returnType;
+
+        boolean hasFunction = initialVersion.compareTo( firstVersionHavingThisFunction ) >= 0;
+        boolean hasCorrectReturnType = initialVersion.compareTo( firstVersionHavingCorrectReturnType ) >= 0;
+        
+    	Statement s = createStatement();
+        ResultSet rs = s.executeQuery
+            (
+             "select a.aliasinfo\n" +
+             "from sys.sysschemas s, sys.sysaliases a\n" +
+             "where s.schemaid = a.schemaid\n" +
+             "and s.schemaname = 'SYSIBM'\n" +
+             "and alias = 'CLOBGETSUBSTRING'\n"
+             );
+        rs.next();
+        
+        switch (getPhase())
+        {
+        case PH_CREATE:
+        case PH_SOFT_UPGRADE:
+        case PH_POST_SOFT_UPGRADE:
+            
+            if ( !hasFunction ) { break; }
+
+            returnType = getTypeDescriptor( rs.getObject( 1 ) );
+            actualJdbcType = getJDBCTypeId( returnType );
+            actualLength = getMaximumWidth( returnType );
+            int              expectedLength = hasCorrectReturnType ? correctLength : wrongLength;
+
+            assertEquals( java.sql.Types.VARCHAR, actualJdbcType );
+            assertEquals( expectedLength, actualLength );
+            
+            break;
+
+        case PH_HARD_UPGRADE:
+
+            RoutineAliasInfo rai = (RoutineAliasInfo) rs.getObject( 1 );
+            TypeDescriptor   td = (TypeDescriptor) rai.getReturnType();
+
+            assertEquals( java.sql.Types.VARCHAR, td.getJDBCTypeId() );
+            assertEquals( correctLength, td.getMaximumWidth() );
+            
+            break;
+        }
+
+        rs.close();
+        s.close();
+    }
+
+    /**
+     * We would like to just cast the alias descriptor to
+     * RoutineAliasDescriptor. However, this doesn't work if we are running on
+     * an old version because the descriptor comes from a different class
+     * loader. We use reflection to get the information we need.
+     */
+    private Object getTypeDescriptor( Object routineAliasDescriptor )
+        throws Exception
+    {
+        Method  meth = routineAliasDescriptor.getClass().getMethod( "getReturnType", null );
+
+        return meth.invoke( routineAliasDescriptor, null );
+    }
+    private int getJDBCTypeId( Object typeDescriptor )
+        throws Exception
+    {
+        Method  meth = typeDescriptor.getClass().getMethod( "getJDBCTypeId", null );
+
+        return ((Integer) meth.invoke( typeDescriptor, null )).intValue();
+    }
+    private int getMaximumWidth( Object typeDescriptor )
+        throws Exception
+    {
+        Method  meth = typeDescriptor.getClass().getMethod( "getMaximumWidth", null );
+
+        return ((Integer) meth.invoke( typeDescriptor, null )).intValue();
+    }
+    
 }

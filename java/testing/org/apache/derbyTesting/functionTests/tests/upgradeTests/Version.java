@@ -70,15 +70,15 @@ public class Version implements Comparable
     /** Construct a version from its legs */
     public Version( int[] legs )
     {
-        constructorMinion( legs, null );
+        constructorMinion( legs );
     }
 
-    /** Construct from a Derby ProductVersionHolder and a classloader */
-    public Version( ProductVersionHolder pvh, ClassLoader classLoader )
+    /** Construct from a Derby ProductVersionHolder  */
+    public Version( ProductVersionHolder pvh )
     {
-        constructorMinion( getLegs( pvh ), classLoader );
+        constructorMinion( getLegs( pvh ) );
     }
-    private void constructorMinion( int[] legs, ClassLoader classLoader )
+    private void constructorMinion( int[] legs )
     {
         if ( legs == null ) { legs = new int[] {}; }
         int count = legs.length;
@@ -90,8 +90,8 @@ public class Version implements Comparable
 
         _legs = new int[ count ];
         for ( int i = 0; i < count; i++ ) { _legs[ i ] = legs[ i ]; }
-        
-        addClassLoader( classLoader );
+
+        makeKey();
     }
     private int[] getLegs( ProductVersionHolder pvh )
     {
@@ -144,6 +144,11 @@ public class Version implements Comparable
      */
     public ClassLoader getClassLoader()
     {
+        ClassLoader retval = (ClassLoader) _classLoaders.get( _key );
+        if ( retval != null ) { return retval; }
+        
+        addClassLoader( );
+        
         return (ClassLoader) _classLoaders.get( _key );
     }
     
@@ -184,19 +189,11 @@ public class Version implements Comparable
      * Add the class loader for this version if it doesn't already exist.
      * </p>
      */
-    private void addClassLoader( ClassLoader classLoader)
+    private void addClassLoader( )
     {
-        makeKey();
+        ClassLoader classLoader = UpgradeClassLoader.makeClassLoader( _legs );
 
-        if ( classLoader == null ) { classLoader = getClassLoader(); }
-        else { _classLoaders.put( _key, classLoader ); }
-
-        if ( classLoader == null )
-        {
-            classLoader = UpgradeClassLoader.makeClassLoader( _legs );
-
-            _classLoaders.put( _key, classLoader );
-        }
+        _classLoaders.put( _key, classLoader );
     }
 
     /**
