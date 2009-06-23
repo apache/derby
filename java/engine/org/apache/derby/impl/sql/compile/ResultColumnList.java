@@ -4078,4 +4078,21 @@ public class ResultColumnList extends QueryTreeNodeVector
 	protected void markInitialSize() {
 		initialListSize = size();
 	}
+	
+	/**
+	 * Remove any columns that may have been added for an order by clause.
+	 * In a query like:
+	 * <pre>select a from t order by b</pre> b is added to the select list
+	 * However in the final projection, after the sort is complete, b will have
+	 * to be removed. 
+	 *
+	 */
+	public void removeOrderByColumns() 
+	{
+		int idx = size() - 1;
+		for (int i = 0; i < orderBySelect; i++, idx--) {
+			removeElementAt(idx);
+		}
+		orderBySelect = 0;
+	}
 }

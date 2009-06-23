@@ -328,6 +328,45 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 	}
 
 	/**
+	 * @see OptimizablePredicateList#hasEqualityPredicateOnOrderedColumn
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public int hasEqualityPredicateOnOrderedColumn(Optimizable optTable,
+													  int columnNumber,
+													  boolean isNullOkay)
+							throws StandardException
+	{
+		ValueNode opNode = null;
+		int size = size();
+		for (int index = 0; index < size; index++)
+		{
+			AndNode			andNode;
+			Predicate		predicate;
+			predicate = (Predicate) elementAt(index);
+			//We are not looking at constant comparison predicate.
+			if (predicate.getReferencedMap().hasSingleBitSet())
+			{
+				continue;
+			}
+
+			andNode = (AndNode) predicate.getAndNode();
+
+			// skip non-equality predicates
+			opNode = andNode.getLeftOperand();
+
+			if (opNode.optimizableEqualityNode(optTable,
+											   columnNumber,
+											   isNullOkay))
+			{
+				return index;
+			}
+		}
+
+		return -1;
+	}
+
+	/**
 	 * @see OptimizablePredicateList#hasOptimizableEqualityPredicate
 	 *
 	 * @exception StandardException		Thrown on error

@@ -21,7 +21,9 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
+import org.apache.derby.iapi.sql.compile.OptimizableList;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
@@ -423,9 +425,10 @@ public class OrderByList extends OrderedColumnList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public int sortRequired(RowOrdering rowOrdering) throws StandardException
+	public int sortRequired(RowOrdering rowOrdering,
+			OptimizableList optimizableList) throws StandardException
 	{
-		return sortRequired(rowOrdering, (JBitSet) null);
+		return sortRequired(rowOrdering, (JBitSet) null, optimizableList);
 	}
 
 	/**
@@ -433,7 +436,9 @@ public class OrderByList extends OrderedColumnList
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public int sortRequired(RowOrdering rowOrdering, JBitSet tableMap)
+	public int sortRequired(RowOrdering rowOrdering, 
+			JBitSet tableMap,
+			OptimizableList optimizableList)
 				throws StandardException
 	{
 		/*
@@ -509,7 +514,92 @@ public class OrderByList extends OrderedColumnList
 					return RequiredRowOrdering.NOTHING_REQUIRED;
 				}
 			}
+			/*
+			 * Does this order by column belong to the outermost optimizable in
+			 * the current join order?
+			 * 
+			 * If yes, then we do not need worry about the ordering of the rows
+			 * feeding into it. Because the order by column is associated with 
+			 * the outermost optimizable, optimizer will not have to deal with 
+			 * the order of any rows coming in from the previous optimizables. 
+			 * 
+			 * But if the current order by column belongs to an inner 
+			 * optimizable in the join order, then go through the following
+			 * if condition logic.
+			 */
 
+			/* If the following boolean is true, then it means that the join 
+			 * order being considered has more than one table 
+			 */
+			boolean moreThanOneTableInJoinOrder = tableMap!=null?
+					(!tableMap.hasSingleBitSet()) : false;
+			if (moreThanOneTableInJoinOrder) 
+			{
+				/*
+				 * First check if the order by column has a constant comparison
+				 * predicate on it or it belongs to an optimizable which is 
+				 * always ordered(that means it is a single row table) or the 
+				 * column is involved in an equijoin with an optimizable which 
+				 * is always ordered on the column on which the equijoin is 
+				 * happening. If yes, then we know that the rows will always be 
+				 * sorted and hence we do not need to worry if (any) prior 
+				 * optimizables in join order are one-row resultsets or not. 
+				 */
+				if ((!rowOrdering.alwaysOrdered(cr.getTableNumber())) &&
+						(!rowOrdering.isColumnAlwaysOrdered(
+								cr.getTableNumber(), cr.getColumnNumber())))
+				{
+					/*
+					 * The current order by column is not always ordered which 
+					 * means that the rows from it will not necessarily be in 
+					 * the sorted order on that column. Because of this, we 
+					 * need to make sure that the outer optimizables (outer to 
+					 * the order by columns's optimizable) in the join order 
+					 * are all one row optimizables, meaning that they can at 
+					 * the most return only one row. If they return more than 
+					 * one row, then it will require multiple scans of the 
+					 * order by column's optimizable and the rows returned 
+					 * from those multiple scans may not be ordered correctly.
+					 */
+					for (int i=0; i < optimizableList.size(); i++)
+					{
+						//Get one outer optimizable at a time from the join
+						//order
+						Optimizable considerOptimizable = 
+							optimizableList.getOptimizable(i);
+						//If we have come across the optimizable for the order 
+						//by column in the join order, then we do not need to 
+						//look at the inner optimizables in the join order. As
+						//long as the outer optimizables are one row resultset,
+						//we are fine to consider sort avoidance.
+						if (considerOptimizable.getTableNumber() == 
+							cr.getTableNumber())
+							break;
+						/*
+						 * The following if condition is checking if the
+						 * outer optimizable to the order by column's 
+						 * optimizable is one row resultset or not. 
+						 * 
+						 * If the outer optimizable is one row resultset, 
+						 * then move on to the next optimizable in the join 
+						 * order and do the same check on that optimizable. 
+						 * Continue this  until we are done checking that all 
+						 * the outer optimizables in the join order are single 
+						 * row resultsets. If we run into an outer optimizable 
+						 * which is not one row resultset, then we can not 
+						 * consider sort avoidance for the query.
+						 */
+						if (rowOrdering.alwaysOrdered(
+								considerOptimizable.getTableNumber()))
+							continue;
+						else
+							//This outer optimizable can return more than 
+							//one row. Because of this, we can't avoid the
+							//sorting for this query.
+							return RequiredRowOrdering.SORT_REQUIRED;
+					}
+				}
+			}
 			if ( ! rowOrdering.alwaysOrdered(cr.getTableNumber()))
 			{
 				/*
