@@ -148,12 +148,16 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     public static Version VERSION_10_0_2_1 = new Version( 10, 0, 2, 1 );
     public static Version VERSION_10_1_3_1 = new Version( 10, 1, 3, 1 );
     public static Version VERSION_10_5_1_1 = new Version( 10, 5, 1, 1 );
+    public static Version VERSION_10_6_0_0 = new Version( 10, 6, 0, 0 );
 
     public static Version.Trajectory TRAJECTORY_10_0_2_1_TO_10_1_3_1 = new Version.Trajectory( new Version[] { VERSION_10_0_2_1, VERSION_10_1_3_1 } );
-    public static Version.Trajectory TRAJECTORY_10_0_2_1_TO_10_5_1_1 = new Version.Trajectory( new Version[] { VERSION_10_0_2_1, VERSION_10_5_1_1 } );
 
     public static String BRANCH_10_0 = "10.0";
     public static String BRANCH_10_1 = "10.1";
+    public static String BRANCH_10_2 = "10.2";
+    public static String BRANCH_10_3 = "10.3";
+    public static String BRANCH_10_4 = "10.4";
+    public static String BRANCH_10_5 = "10.5";
 
     public static final String UPGRADED_DATABASE = "old_database";
     public static final String VIRGIN_DATABASE = "new_database";
@@ -321,6 +325,8 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
         {
             new Version.Trajectory( new Version[] { new Version( 10, 0, 2, 1), new Version( 10, 1, 3, 1 ) } ),
             new Version.Trajectory( new Version[] { new Version( 10, 0, 2, 1), new Version( 10, 3, 3, 0 ) } ),
+            new Version.Trajectory( new Version[] { new Version( 10, 0, 2, 1), new Version( 10, 3, 3, 0 ), new Version( 10, 5, 1, 1 ) } ),
+            new Version.Trajectory( new Version[] { new Version( 10, 0, 2, 1), new Version( 10, 3, 3, 0 ), new Version( 10, 6, 0, 0 ) } ),
             new Version.Trajectory( new Version[] { new Version( 10, 0, 2, 1), new Version( 10, 5, 1, 1 ) } ),
             new Version.Trajectory( new Version[] { new Version( 10, 4, 2, 1), new Version( 10, 5, 1, 1 ) } ),
         };
@@ -1344,7 +1350,12 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
                      SYSROUTINEPERMS.equals( tableName ) &&
                      _trajectory.startsAt( BRANCH_10_0 ) &&
                      ( !_trajectory.contains( BRANCH_10_1 ) ) &&
-                     ( !_trajectory.equals( TRAJECTORY_10_0_2_1_TO_10_5_1_1 ) )
+                     (
+                      _trajectory.contains( BRANCH_10_2 ) ||
+                      _trajectory.contains( BRANCH_10_3 ) ||
+                      _trajectory.contains( BRANCH_10_4 )
+                      ) &&
+                     ( _trajectory.getEndingVersion().compareTo( VERSION_10_6_0_0 )  < 0 )
                  );
     }
     

@@ -451,17 +451,33 @@ public	class DD_Version implements	Formatable
             bootingDictionary.create_10_5_system_procedures(tc, newlyCreatedRoutines);
         }
 
-        // change the return type of SYSIBM.CLOBGETSUBSTRING if necessary. See
+        //
+        // Change the return type of SYSIBM.CLOBGETSUBSTRING if necessary. See
         // DERBY-4214. That function was added in 10.3 and the return type was
         // changed (but not upgraded) in 10.5. We can't distinguish
         // between databases which were originally created by 10.5 and databases
         // which were upgraded to 10.5.
+        //
         if (
             ( fromMajorVersionNumber > DataDictionary.DD_VERSION_DERBY_10_2) &&
             ( fromMajorVersionNumber < DataDictionary.DD_VERSION_DERBY_10_6)
             )
         {
             bootingDictionary.upgradeCLOBGETSUBSTRING_10_6( tc );
+        }
+
+        //
+        // Remove the bad permissions tuple for SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE if necessary.
+        // See DERBY-4215. That procedure will have an extra permissions tuple
+        // with a null GRANTOR field if the database was created by 10.0 and then
+        // hard-upgraded to 10.2 or higher without an intermediate upgrade to 10.1.
+        //
+        if (
+            ( fromMajorVersionNumber > DataDictionary.DD_VERSION_DERBY_10_1) &&
+            ( fromMajorVersionNumber < DataDictionary.DD_VERSION_DERBY_10_6)
+            )
+        {
+            bootingDictionary.upgradeSYSROUTINEPERMS_10_6( tc );
         }
         
         // Grant PUBLIC access to some system routines

@@ -56,7 +56,15 @@ import org.apache.derby.catalog.TypeDescriptor;
 public class Changes10_6 extends UpgradeChange {
 
     private static  final   String  BAD_SYNTAX = "42X01";
+    private static  final   String  TABLE_DOES_NOT_EXIST = "42X05";
 
+    private static  final   String  QUERY_4215 =
+        "select r.grantor\n" +
+        "from sys.sysroutineperms r, sys.sysaliases a\n" +
+        "where r.aliasid = a.aliasid\n" +
+        "and a.alias = 'SYSCS_INPLACE_COMPRESS_TABLE'\n"
+        ;
+    
     public Changes10_6(String name) {
         super(name);
     }
@@ -178,6 +186,67 @@ public class Changes10_6 extends UpgradeChange {
         s.close();
     }
 
+    /**
+     * Make sure that SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE  has the correct
+     * permissons granted to it.
+     * See https://issues.apache.org/jira/browse/DERBY-4215
+     */
+    public void testSYSCS_INPLACE_COMPRESS_TABLE() throws Exception
+    {
+        Version initialVersion = new Version( getOldMajor(), getOldMinor(), 0, 0 );
+        Version firstVersionHavingPermissions = new Version( 10, 2, 0, 0 );
+        boolean beforePermissionsWereAdded = ( initialVersion.compareTo( firstVersionHavingPermissions ) < 0 );
+        
+    	Statement s = createStatement();
+        
+        switch (getPhase())
+        {
+        case PH_CREATE:
+        case PH_SOFT_UPGRADE:
+        case PH_POST_SOFT_UPGRADE:
+            
+            if ( beforePermissionsWereAdded )
+            {
+                assertStatementError( TABLE_DOES_NOT_EXIST, s, QUERY_4215 );
+            }
+            else
+            {
+                vetDERBY_4215( s );
+            }
+
+            break;
+
+        case PH_HARD_UPGRADE:
+
+            vetDERBY_4215( s );
+            
+            break;
+        }
+
+        s.close();
+    }
+
+    /**
+     * Vet the permissions on SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE.
+     * There should be only one permissions tuple for this system procedure and
+     * the grantor should be APP.
+     */
+    private void vetDERBY_4215( Statement s ) throws Exception
+    {
+        String    expectedGrantor = "APP";
+        ResultSet rs = s.executeQuery( QUERY_4215 );
+
+        assertTrue( rs.next() );
+
+        String actualGrantor = rs.getString( 1 );
+        assertEquals( expectedGrantor, actualGrantor );
+
+        assertFalse( rs.next() );
+
+        rs.close();
+    }
+
+    
     /**
      * We would like to just cast the alias descriptor to
      * RoutineAliasDescriptor. However, this doesn't work if we are running on

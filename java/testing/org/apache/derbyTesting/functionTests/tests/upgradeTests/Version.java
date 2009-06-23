@@ -284,6 +284,16 @@ public class Version implements Comparable
 
         /**
          * <p>
+         * Return the ending Version of this Trajectory.
+         * </p>
+         */
+        public Version getEndingVersion()
+        {
+            return getVersion( getVersionCount() -1 );
+        }
+        
+        /**
+         * <p>
          * Return true if this Trajectory starts at the desired Version.
          * </p>
          */

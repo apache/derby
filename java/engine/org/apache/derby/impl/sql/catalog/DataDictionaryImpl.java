@@ -2481,6 +2481,54 @@ public final class	DataDictionaryImpl
              );
     }
 
+    /**
+     * 10.6 upgrade logic to update the permissions granted to SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE.
+     * If a 10.0 database was upgraded to 10.2, 10.3, or 10.4, then there will
+     * be an extra permissions tuple in SYSROUTINEPERMS--that tuple will have a
+     * null grantor field. We must delete this tuple. See DERBY-4215.
+     */
+    void upgradeSYSROUTINEPERMS_10_6( TransactionController tc )
+        throws StandardException
+    {
+        //
+        // Get the aliasID of SYSCS_INPLACE_COMPRESS_TABLE
+        //
+		TabInfoImpl          aliasTI = getNonCoreTI(SYSALIASES_CATALOG_NUM);
+		ExecIndexRow         aliasKeyRow = exFactory.getIndexableRow(3);
+		DataValueDescriptor  aliasNameOrderable = new SQLVarchar( "SYSCS_INPLACE_COMPRESS_TABLE" );;
+		DataValueDescriptor	 nameSpaceOrderable = new SQLChar
+            ( new String( new char[] { AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR } ) );
+        
+		aliasKeyRow.setColumn(1, new SQLChar( SchemaDescriptor.SYSCS_UTIL_SCHEMA_UUID ));
+		aliasKeyRow.setColumn(2, aliasNameOrderable);
+		aliasKeyRow.setColumn(3, nameSpaceOrderable);
+
+        AliasDescriptor      oldAD = (AliasDescriptor) getDescriptorViaIndex
+            (
+             SYSALIASESRowFactory.SYSALIASES_INDEX1_ID,
+             aliasKeyRow,
+             (ScanQualifier [][]) null,
+             aliasTI,
+             (TupleDescriptor) null,
+             (List) null,
+             true,
+             TransactionController.ISOLATION_REPEATABLE_READ,
+             tc);
+        UUID                 aliasID = oldAD.getUUID();
+
+        //
+        // Now delete the permissions tuple which has a null grantor
+        //
+		TabInfoImpl          rpTI = getNonCoreTI(SYSROUTINEPERMS_CATALOG_NUM);
+		ExecIndexRow         rpKeyRow = exFactory.getIndexableRow(3);
+
+		rpKeyRow.setColumn(1, new SQLVarchar( "PUBLIC" ));
+		rpKeyRow.setColumn(2, new SQLChar( aliasID.toString() ));
+		rpKeyRow.setColumn(3, new SQLVarchar( (String) null ) );
+
+		int deleteCount = rpTI.deleteRow(tc, rpKeyRow, SYSROUTINEPERMSRowFactory.GRANTEE_ALIAS_GRANTOR_INDEX_NUM);
+    }
+    
 	/**
 	 * Drop all table descriptors for a schema.
 	 *
