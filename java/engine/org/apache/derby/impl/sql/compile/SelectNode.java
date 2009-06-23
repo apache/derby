@@ -1024,6 +1024,7 @@ public class SelectNode extends ResultSetNode
 				if (orderByList.size() == 0)
 				{
 					orderByList = null;
+                    resultColumns.removeOrderByColumns();
 				}
 			}
 		}
