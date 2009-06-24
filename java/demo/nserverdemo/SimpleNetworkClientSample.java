@@ -36,14 +36,14 @@ import javax.sql.DataSource;
  * and interact with Derby Network Server
  *
  * In particular,this sample program
- * 1)   loads the DB2 Universal JDBC Driver or the Derby Network Client driver
+ * 1)   loads the Derby Network Client driver
    (default is the derby network client driver)
  * 2)	obtains a client connection using the Driver Manager
  * 3)	obtains a client connection using a DataSource
  * 4)	tests the database connections by executing a sample query
  * and then exits the program
  *
- * Before running this program, please make sure that Clouscape Network Server is up
+ * Before running this program, please make sure that Derby Network Server is up
  * and running.
  *  <P>
  *  Usage: java SimpleNetworkClientSample
@@ -63,11 +63,7 @@ public class SimpleNetworkClientSample
 	 */
 	private static int NETWORKSERVER_PORT=1527;
 
-	/**
-	 * DB2 JDBC UNIVERSAL DRIVER class names
-	 */
-	private static final String DB2_JDBC_UNIVERSAL_DRIVER = "com.ibm.db2.jcc.DB2Driver";
-	private static final String DB2_JCC_DS = "com.ibm.db2.jcc.DB2SimpleDataSource";
+
 	/**
 	 * Derby Network Client Driver class names
 	 */
@@ -77,7 +73,6 @@ public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDr
 
 	/**
 	 * This URL is used to connect to Derby Network Server using the DriverManager.
-	 * This URL is for the DB2 JDBC Universal Driver
 	 * Notice that the properties may be established via the URL syntax
 	 */
 	private static final String CS_NS_DBURL= "jdbc:derby:net://localhost:"+NETWORKSERVER_PORT+"/"+DBNAME+";retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";
@@ -106,8 +101,6 @@ public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDr
 		try
 		{
 			System.out.println("Starting Sample client program ");
-                        // Determine which JDBC driver to use
-                        parseArguments(args);
 
 			// load  the appropriate JDBC Driver
 			loadDriver();
@@ -205,15 +198,6 @@ public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDr
 		args = new Object[] {new Integer(1527)};
 		portnumber.invoke(ds, args);
 
-                // The following is only applicable to the DB2 JDBC driver
-                if(jdbcDataSource.equals( DB2_JCC_DS))
-                {
-			// driver type must be 4 to access Derby Network Server
-			Method drivertype = nsDataSource.getMethod("setDriverType", methodParams);
-			args = new Object[] {new Integer(4)};
-			drivertype.invoke(ds, args);
-                }
-
 		return ds;
 
 	}
@@ -243,8 +227,8 @@ public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDr
 		Properties properties = new java.util.Properties();
 
 		// The user and password properties are a must, required by JCC
-		properties.setProperty("user","cloud");
-		properties.setProperty("password","scape");
+		properties.setProperty("user","derbyuser");
+		properties.setProperty("password","pass");
 
 		// Get database connection  via DriverManager api
 		Connection conn = DriverManager.getConnection(url,properties); 
@@ -286,37 +270,6 @@ public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDr
 		  	stmt.close();
  	  }
 	}
-   /**
-     * Determine which jdbc driver to use by parsing the command line args.
-     *  Accepted values:
-     *  jccjdbclient   - The DB2 type 4 universal driver
-     *  derbyclient    - The Derby network driver (default).
-     *  Note: because this is just a sample, we only care about whether
-     *  the above values are specified.  If they are not, then we default
-     *  to the Derby network driver.
-     */
-    private void parseArguments(String[] args)
-    {
-        int length = args.length;
-
-        for (int index = 0; index < length; index++)
-        {
-            if (args[index].equalsIgnoreCase("jccjdbcclient"))
-            {
-
-                jdbcDriver = DB2_JDBC_UNIVERSAL_DRIVER;
-                jdbcDataSource = DB2_JCC_DS;
-                url = CS_NS_DBURL;
-                break;
-            } else if (args[index].equalsIgnoreCase("derbyClient"))
-            {
-                jdbcDriver = DERBY_CLIENT_DRIVER;
-                jdbcDataSource = DERBY_CLIENT_DS;
-                url = DERBY_CLIENT_URL;
-                break;
-            }
-        }
-    }
 
 }
 

@@ -28,7 +28,7 @@ interacts with the Derby Network Server. The program:</P>
 <UL>
   <LI>starts the Derby Network Server 
   <LI>checks if the Derby Network Server is running 
-  <LI>loads the DB2 JDBC Universal Driver or the Derby Client Network JDBC Driver
+  <LI>loads the Derby Client Network JDBC Driver
   <LI>creates the database '<tt>NsSampledb</tt>' if not already created 
   <LI>checks to see if the schema is already created, and if not, 
   creates the schema which includes the <tt>SAMPLETBL</tt> table and corresponding 
@@ -83,7 +83,6 @@ This file contains helper methods to start the Derby Network Server and to shutd
 <UL>
     <LI><tt>NsSample.class</tt></li> 
     <LI><tt>NsSampleClientThread.class</tt></li> 
-    <LI><tt>NsSampleWork.class</tt></li> 
     <LI><tt>NetworkServerUtil.class</tt></li> 
 </UL>
 </li>
@@ -97,20 +96,15 @@ This file contains helper methods to start the Derby Network Server and to shutd
   class=italic>%DERBY_INSTALL%</SPAN><tt>\demo\programs\</tt> directory, where <SPAN 
   class=italic>%DERBY_INSTALL%</SPAN> is the directory where you installed Derby. 
   <LI>Set the CLASSPATH to the current directory (".") and also include the following 
-  jar files in order to use the Derby Network Server and the DB2 JDBC Universal Driver or the Derby Client Network JDBC Driver.
+  jar files in order to use the Derby Network Server and the Derby Client Network JDBC Driver.
 <ul>
 <li><tt>derbynet.jar</tt><br>The Network Server jar file. It must be in your CLASSPATH to use any of the Derby Network 
 Server functions.</li>
 <li><tt>derbyclient.jar</tt><br>This jar file must be in your CLASSPATH to use the Derby Client Network JDBC Driver.</li>
-<li><tt>db2jcc.jar</tt><br>This jar file must be in your CLASSPATH to use the 
-DB2 JDBC Universal Driver.</li>
-<li><tt>db2jcc_license_c.jar</tt><br>This jar file is the license file for the Universal 
-Driver.</li>
 <li><tt>derby.jar</tt><br>The Derby database engine jar file.</li>
 </ul>
 </LI>
-<li>Test the CLASSPATH settings by running the following java command:<pre>java org.apache.derby.tools.sysinfo</pre>This command will show the Derby jar files that are in the CLASSPATH as well as 
-the DB2 JDBC Universal Driver along with their respective versions.</li>
+<li>Test the CLASSPATH settings by running the following java command:<pre>java org.apache.derby.tools.sysinfo</pre>This command will show the Derby jar files that are in the CLASSPATH along with their respective versions.</li>
 <li>Once you have set up your environment correctly, execute the application from the <br> <SPAN 
   class=italic>%DERBY_INSTALL%</SPAN><tt>\demo\programs\</tt> directory:<br>
 <pre>java nserverdemo.NsSample [driverType]</pre>
@@ -118,7 +112,6 @@ the DB2 JDBC Universal Driver along with their respective versions.</li>
 <li>Where the possible values for driverType are:
 <ul>
 <li>derbyClient (default)
-<li>jccjdbcclient
 </ul>
 </ul>
 </li>
