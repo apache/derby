@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.security.*;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -70,8 +69,31 @@ public class TestConfiguration {
     private final static String DEFAULT_FRAMEWORK = "embedded";
     public final static String DEFAULT_HOSTNAME = "localhost";
     public final static String DEFAULT_SSL = "off";
-    public final static int DEFAULT_JMX_PORT = 9999; // 9999 is arbitrary
 
+    /**
+     * Maximum number of ports used by Suites.All 
+     * If this changes, this constant and the Wiki
+     * page at  http://wiki.apache.org/db-derby/DerbyJUnitTesting
+     * need to be updated. 
+     */
+    private final static int MAX_PORTS_USED = 10;
+    
+    /** This is the base port. This does NOT change EVER during the run of a suite.
+     *	It is set using the property derby.tests.basePort and it is set to default when
+     *	a property isn't used. */
+    private final static int basePort;
+    private static int lastAssignedPort;
+    static {
+    	String port = BaseTestCase.getSystemProperty("derby.tests.basePort");
+        if (port == null) {
+        	lastAssignedPort = DEFAULT_PORT;
+        } else {
+        	lastAssignedPort = Integer.parseInt(port);
+        }
+        basePort = lastAssignedPort;
+    }
+    private static int assignedPortCount = 1;
+    
     public  final   static  String  TEST_DBO = "TEST_DBO";
 
     private FileOutputStream serverOutput;
@@ -551,7 +573,7 @@ public class TestConfiguration {
         if (!(Derby.hasClient() && Derby.hasServer())
                 || JDBC.vmSupportsJSR169())
             return new TestSuite("empty: no network server support");
-        int port = getCurrent().getAlternativePort();
+        int port = getCurrent().getNextAvailablePort();
 
         //
         // This looks bogus to me. Shouldn't this get the hostname and port
@@ -921,12 +943,7 @@ public class TestConfiguration {
         this.userName = DEFAULT_USER_NAME;
         this.userPassword = DEFAULT_USER_PASSWORD;
         this.hostName = null;
-        String port = BaseTestCase.getSystemProperty("derby.tests.port");
-        if (port == null) {
-        	this.port = DEFAULT_PORT;
-        } else {
-        	this.port = Integer.parseInt(port);
-        }
+        this.port = basePort;
         this.isVerbose = Boolean.valueOf(
             getSystemProperties().getProperty(KEY_VERBOSE)).
             booleanValue();
@@ -936,7 +953,7 @@ public class TestConfiguration {
         
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
         this.ssl = null;
-        this.jmxPort = DEFAULT_JMX_PORT;
+        this.jmxPort = getNextAvailablePort();
         url = createJDBCUrlWithDatabaseName(defaultDbName);
         initConnector(null);
  
@@ -1102,25 +1119,8 @@ public class TestConfiguration {
         hostName = props.getProperty(KEY_HOSTNAME, DEFAULT_HOSTNAME);
         isVerbose = Boolean.valueOf(props.getProperty(KEY_VERBOSE)).booleanValue();
         doTrace =  Boolean.valueOf(props.getProperty(KEY_TRACE)).booleanValue();
-        String port = BaseTestCase.getSystemProperty("derby.tests.port");
-		if (port == null) {
-			this.port = DEFAULT_PORT;
-		} else {
-			this.port = Integer.parseInt(port);
-		}
-        String jmxPortStr = props.getProperty(KEY_JMX_PORT);
-        if (jmxPortStr != null) {
-            try {
-                jmxPort = Integer.parseInt(jmxPortStr);
-            } catch (NumberFormatException nfe) {
-                // We lose stacktrace here, but it is not important. 
-                throw new NumberFormatException(
-                        "JMX Port number must be an integer. Value: " 
-                        + jmxPortStr); 
-            }
-        } else {
-            jmxPort = DEFAULT_JMX_PORT;
-        }
+        port = basePort;
+        jmxPort = getNextAvailablePort();
 
         ssl = props.getProperty(KEY_SSL);
         
@@ -1292,19 +1292,30 @@ public class TestConfiguration {
     public int getPort() {
         return port;
     }
+    
     /**
-     * Get an alternative port number for network server.
-     *
+     * Get the next available port. This method is multi-purposed.
+     * It can be used for alternative servers and also for JMX and replication.
+     * 
      * @return port number.
      */
-
-    public int getAlternativePort() {
-        int possiblePort = getPort();
-        if (!(possiblePort > 0))
-            possiblePort = 1528;
-        else
-            possiblePort = getPort() + 1;
-        return possiblePort;
+    public int getNextAvailablePort() {
+    	/* We want to crash. If you are reading this, you have to increment
+    	 * the MAX_PORTS_USED constant and to edit the wiki page relative to
+    	 * concurrent test running */
+    	if (assignedPortCount+1 > MAX_PORTS_USED) {
+    		Assert.fail("Port "+(lastAssignedPort+1)+" exceeeds expected maximum. " +
+    					"You may need to update TestConfiguration.MAX_PORTS_USED and "+
+    					"the Wiki page at http://wiki.apache.org/db-derby/DerbyJUnitTesting "+
+    					"if test runs now require more available ports");
+    	}
+    	
+    	int possiblePort = lastAssignedPort + 1;
+		
+		assignedPortCount++;
+		
+		lastAssignedPort = possiblePort;
+		return possiblePort;
     }
     
     /**

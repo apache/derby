@@ -68,9 +68,9 @@ public class ReplicationRun extends BaseTestCase
     static String masterServerHost = "localhost"; 
     static int masterServerPort = TestConfiguration.getCurrent().getPort(); // .. get current ports..
     static String slaveServerHost = "localhost";
-    static int slaveServerPort = 3527; // .. ..
+    static int slaveServerPort = TestConfiguration.getCurrent().getNextAvailablePort();; // .. ..
     static String testClientHost = "localhost";
-    static int slaveReplPort = 6666;
+    static int slaveReplPort = TestConfiguration.getCurrent().getNextAvailablePort();;
     
     static String masterDatabasePath = null;
     static String slaveDatabasePath = null;
@@ -2046,16 +2046,13 @@ public class ReplicationRun extends BaseTestCase
         masterServerHost = "localhost";
         util.DEBUG("masterServerHost: " + masterServerHost);
         
-        masterServerPort = TestConfiguration.getCurrent().getPort();
         util.DEBUG("masterServerPort: " + masterServerPort);
         
         slaveServerHost = "localhost";
         util.DEBUG("slaveServerHost: " + slaveServerHost);
         
-        slaveServerPort = 4527;
         util.DEBUG("slaveServerPort: " + slaveServerPort);
         
-        slaveReplPort = 8888;
         util.DEBUG("slaveReplPort: " + slaveReplPort);
         
         testClientHost = "localhost";

@@ -23,8 +23,6 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.InetAddress;
 import java.security.AccessController;
 import java.sql.SQLException;
 import java.util.Enumeration;
@@ -42,7 +40,6 @@ import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.Utilities;
 
 /** 
  * This test tests the derby.properties, system properties and command line
@@ -246,48 +243,6 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         p = null;
     }
     
-    public int getAlternativePort() throws SQLException {
-
-        Exception failException = null;
-        // start with the default port + 1
-        // there may be a smarter way to get the starting point...
-        
-        int possiblePort = basePort + 1;
-        try {
-            boolean portOK = false;
-            while (!portOK) {
-                // check for first one in use
-                NetworkServerControl networkServer =
-                    new NetworkServerControl(InetAddress.getByName("localhost"), possiblePort);
-                // Ping and wait for the network server to reply
-                boolean started = false;
-
-                try {
-                    networkServer.ping();
-                    // If ping throws no exception the server is running
-                    started = true;
-                } catch(Exception e) {         
-                    failException = e;
-                }
-                // Check if we got a reply on ping
-                if (!started) {
-                    // we'll assume we can use this port. 
-                    // If there was some other problem with the pinging, it'll
-                    // become clear when someone attempts to use the port
-                    portOK = true;
-                }
-                else { // this port's in use.
-                    possiblePort = possiblePort + 1;
-                }
-            }
-        } catch (Exception e) {
-            SQLException se = new SQLException("Error pinging network server");
-            se.initCause(failException);
-            throw se;
-        }        
-        return possiblePort;
-    }
-    
     /**
      *  Ping for the server to be up - or down.
      *  @param port port number to be used in the ping
@@ -422,7 +377,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         checkWhetherNeedToShutdown(new int[] {basePort}, actionResult);
         
         // set derby.drda.portNumber to an alternate number in derby.properties
-        int firstAlternatePort = getAlternativePort();
+        int firstAlternatePort = TestConfiguration.getCurrent().getNextAvailablePort();
         final Properties derbyProperties = new Properties();
         derbyProperties.put("derby.drda.portNumber", 
                 new Integer(firstAlternatePort).toString());
@@ -452,7 +407,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         actionResult = startServer(firstAlternatePort, false);
         checkWhetherNeedToShutdown(new int[] {basePort, firstAlternatePort}, actionResult);
 
-        final int secondAlternatePort = getAlternativePort();
+        final int secondAlternatePort = TestConfiguration.getCurrent().getNextAvailablePort();
         // Now set system properties.
         setSystemProperty("derby.drda.portNumber", 
             new Integer(secondAlternatePort).toString());
@@ -464,13 +419,13 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         // Note that we didn't unset the system property yet, nor did
         // we get rid of derby.properties...
         // command line parameter should take hold
-        int thirdAlternatePort = getAlternativePort();
+        int thirdAlternatePort = TestConfiguration.getCurrent().getNextAvailablePort();
         actionResult = startServer(thirdAlternatePort, true);
         checkWhetherNeedToShutdown(new int[] {basePort, firstAlternatePort, secondAlternatePort,
             thirdAlternatePort}, actionResult);
 
         // now with -p. 
-        int fourthAlternatePort = getAlternativePort();
+        int fourthAlternatePort = TestConfiguration.getCurrent().getNextAvailablePort();
         String[] commandArray = {"-Dderby.system.home=" + derbyHome,
             "org.apache.derby.drda.NetworkServerControl", "-p",
             String.valueOf(fourthAlternatePort).toString(), 
