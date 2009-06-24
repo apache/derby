@@ -72,9 +72,6 @@ public class SimpleApp
      *    <li><code>derbyclient</code> - will use the Derby client driver to
      *        access the Derby Network Server. This driver is included in the
      *        derbyclient.jar file.</li>
-     *    <li><code>jccjdbcclient</code> - will use the DB2 Universal JDBC
-     *        network client driver, also known as JCC, to access the Network
-     *        Server. This driver is not part of the Derby distribution.</li>
      *  </ul>
      * <p>
      * When you are using a client/server framework, the network server must
@@ -101,14 +98,14 @@ public class SimpleApp
      * <p>
      * Starts the actual demo activities. This includes loading the correct
      * JDBC driver, creating a database by making a connection to Derby,
-     * creating a table in the database, and inserting, updating and retreiving
-     * some data. Some of the retreived data is then verified (compared) against
+     * creating a table in the database, and inserting, updating and retrieving
+     * some data. Some of the retrieved data is then verified (compared) against
      * the expected results. Finally, the table is deleted and, if the embedded
      * framework is used, the database is shut down.</p>
      * <p>
      * Generally, when using a client/server framework, other clients may be
      * (or want to be) connected to the database, so you should be careful about
-     * doing shutdown unless you know that noone else needs to access the
+     * doing shutdown unless you know that no one else needs to access the
      * database until it is rebooted. That is why this demo will not shut down
      * the database unless it is running Derby embedded.</p>
      *
@@ -254,7 +251,7 @@ public class SimpleApp
              * comprehend, so we use a different pattern.
              */
 
-            int number; // street number retreived from the database
+            int number; // street number retrieved from the database
             boolean failure = false;
             if (!rs.next())
             {
@@ -329,7 +326,7 @@ public class SimpleApp
                     // the shutdown=true attribute shuts down Derby
                     DriverManager.getConnection("jdbc:derby:;shutdown=true");
 
-                    // To shut down a specific database only, but keeep the
+                    // To shut down a specific database only, but keep the
                     // engine running (for example for connecting to other
                     // databases), specify a database in the connection URL:
                     //DriverManager.getConnection("jdbc:derby:" + dbName + ";shutdown=true");
@@ -472,20 +469,13 @@ public class SimpleApp
      * If the argument is "embedded" or invalid, this method will not change
      * anything, meaning that the default values will be used.</p>
      * <p>
-     * @param args JDBC connection framework, either "embedded", "derbyclient"
-     *        or "jccjdbcclient". Only the first argument will be considered,
-     *        the rest will be ignored.
+     * @param args JDBC connection framework, either "embedded", "derbyclient".
+     * Only the first argument will be considered, the rest will be ignored.
      */
     private void parseArguments(String[] args)
     {
         if (args.length > 0) {
-            if (args[0].equalsIgnoreCase("jccjdbcclient"))
-            {
-                framework = "jccjdbc";
-                driver = "com.ibm.db2.jcc.DB2Driver";
-                protocol = "jdbc:derby:net://localhost:1527/";
-            }
-            else if (args[0].equalsIgnoreCase("derbyclient"))
+            if (args[0].equalsIgnoreCase("derbyclient"))
             {
                 framework = "derbyclient";
                 driver = "org.apache.derby.jdbc.ClientDriver";

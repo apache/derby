@@ -145,7 +145,7 @@ This log file contains Derby progress and error messages.
 <p>This program:</p>
 
 <ul>
- <li>loads the DB2 JDBC Universal Driver or the Derby Network Client JDBC Driver</li>
+ <li>loads the Derby Network Client JDBC Driver</li>
  <li>obtains a client connection using the Driver Manager</li>
  <li>obtains a client connection using a DataSource</li>
  <li>tests the database connections by executing a sample query</li>
@@ -169,8 +169,6 @@ This log file contains Derby progress and error messages.
   <li>the current directory (".")</li>
 <li><tt>derbyclient.jar</tt><br>This jar file must be in your CLASSPATH to use t
 he Derby Client Network JDBC Driver.</li>
-  <li><tt>db2jcc.jar</tt><br>This jar file must be in your CLASSPATH to use the DB2 JDBC Universal Driver.</li>
-  <li><tt>db2jcc_license_c.jar</tt><br>This jar file is the license file for the Universal Driver for Derby.</li>
  </ul></li>
 <li>Once you have set up your environment correctly, execute the
 application from the <br><span class=italic>%DERBY_INSTALL%</span><tt>\demo\programs\nserverdemo\</tt> directory:
@@ -179,7 +177,6 @@ application from the <br><span class=italic>%DERBY_INSTALL%</span><tt>\demo\prog
 <li>Where the possible values for driverType are:
 <ul>
 <li>derbyClient (default)
-<li>jccjdbcclient
 </ul>
 </ul>
 </li>

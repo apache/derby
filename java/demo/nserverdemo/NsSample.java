@@ -41,8 +41,7 @@ import java.io.PrintWriter;
  The program:
 
  1.	starts the Derby Network Server
- 2.	loads the IBM DB2 JDBC Universal driver or derby client JDBC driver
-        (default is the derby client JDBC driver)
+ 2.	loads the derby client JDBC driver
  3. creates the database if not already created
  4. checks to see if the schema is already created, and if not,
  5. creates the schema which includes the table SAMPLETBL and corresponding indexes.
@@ -66,8 +65,7 @@ import java.io.PrintWriter;
 
 public class NsSample {
 
-	public static final String DB2_JDBC_UNIVERSAL_DRIVER = new String("com.ibm.db2.jcc.DB2Driver");
-        public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDriver";
+	public static final String DERBY_CLIENT_DRIVER = "org.apache.derby.jdbc.ClientDriver";
 	public static int NUM_ROWS = 50; /* Number of rows to load initially */
 	public static int ITERATIONS = 10;  //Each client does these many iterations
 	public static int NUM_CLIENT_THREADS = 2;
@@ -82,7 +80,6 @@ public class NsSample {
 	// To connect to Derby Network Server
 	// This URL describes the target database for type 4 connectivity
 	// Notice that the properties may be established via the URL syntax
-	private static final String CS_NS_DBURL= "jdbc:derby:net://localhost:"+NETWORKSERVER_PORT+"/NSSampledb;create=true;retrieveMessagesFromServerOnGetMessage=true;deferPrepares=true;";
         // URL for the Derby client JDBC driver.
 	private static final String DERBY_CLIENT_URL= "jdbc:derby://localhost:"+NETWORKSERVER_PORT+"/NSSampledb;create=true;";
 
@@ -104,9 +101,6 @@ public class NsSample {
       
 
 	  try  {
-
-                // Determine which JDBC driver we are using with Derby
-                parseArguments(args);
 
 		pw = new PrintWriter(System.out,true);	// to print messages
 		pw.println("Using JDBC driver: " + jdbcDriver);
@@ -170,8 +164,8 @@ public class NsSample {
 		Properties properties = new java.util.Properties();
 
 		// The user and password properties are a must, required by JCC
-		properties.setProperty("user","cloud");
-		properties.setProperty("password","scape");
+		properties.setProperty("user","derbyuser");
+		properties.setProperty("password","pass");
 
 		// Get database connection via DriverManager api
 		try	{
@@ -231,33 +225,5 @@ public class NsSample {
       }
 	 }
 
-    /**
-     * Determine which jdbc driver to use by parsing the command line args.
-     *  Accepted values:
-     *  jccjdbclient   - The DB2 type 4 universal driver
-     *  derbyclient    - The Derby network driver (default).
-     *  Note: because this is just a sample, we only care about whether
-     *  the above values are specified.  If they are not, then we default
-     *  to the Derby network driver.
-     */
-    private void parseArguments(String[] args)
-    {
-        int length = args.length;
-
-        for (int index = 0; index < length; index++)
-        {
-            if (args[index].equalsIgnoreCase("jccjdbcclient"))
-            {
-                jdbcDriver = DB2_JDBC_UNIVERSAL_DRIVER;
-                url = CS_NS_DBURL;
-                break;
-            } else if (args[index].equalsIgnoreCase("derbyClient"))
-            {
-                jdbcDriver = DERBY_CLIENT_DRIVER;
-                url = DERBY_CLIENT_URL;
-                break;
-            }
-        }
-    }
 
 }

@@ -36,7 +36,6 @@
   <ul class="SubList">
     <li class="ChapterToc"><a href="#server">Starting the Network Server</a>
     <li class="ChapterToc"><a href="#derbyclient">Using the Derby client driver</a>
-    <li class="ChapterToc"><a href="#jcc">Using the IBM DB2 Universal JDBC driver</a>
   </ul>
 </ul>
 
@@ -71,7 +70,7 @@
   at a time.
 </p>
 <p>In a client/server environment, the application demonstrates the
-use of the Derby network client driver or the IBM DB2 JDBC Universal Driver by
+use of the Derby network client driver by
 connecting to the Network Server and running the demo. Note that the client
 drivers allow multiple instances of the application to run at the same time.
 However, the SQL operations performed by this demo will cause failures when
@@ -349,8 +348,7 @@ SimpleApp finished
 <p>You will need to set up both the client process and the server
 process to run the demo application as a client connecting to the Network server.
 The Network Server needs to be running before you can connect using a client
-driver. This demo includes support for both the Derby client driver and the IBM
-DB2 Universal JDBC driver.
+driver. This demo includes support for the Derby client driver.
 </p>
 <p>You must start the Network Server before trying to run the
 demo application in one of the client modes.
@@ -515,98 +513,6 @@ SimpleApp finished
       <a href="http://db.apache.org/derby/derby_mail.html" target="_new">mailing list</a>.
     </p>
 </ol>
-
-<!-- ##########  HOW TO RUN - DB2 UNIVERSAL (JCC) DRIVER  ########## -->
-<h3><a id="jcc" name="jcc">Using the IBM DB2 JDBC Universal Driver (<var class="command">jccjdbcclient</var>)</a></h3>
-<p>
-  In version 10.0 of Derby, the IBM DB2 JDBC Universal Driver (also known as
-  JCC) was the only client driver that could communicate with the Derby Network
-  Server. This driver is not licensed under the
-  <a href="http://www.apache.org/licenses/">Apache License, Version 2.0</a> used
-  by Apache Derby, but can be downloaded from the IBM developerWorks website
-  (see: <a href="http://www-106.ibm.com/developerworks/db2/downloads/jcc/" target="_new">IBM
-  DB2 JDBC Universal Driver for Apache Derby Network Server</a> for more
-  information).
-</p>
-<table class="listing">
-  <tr>
-    <td class="listItem">Class name:</td>
-    <td class="listItem"><em class="javaObject">com.ibm.db2.jcc.DB2Driver</em></td>
-  </tr>
-  <tr>
-    <td class="listItem">Libraries:</td>
-    <td class="listItem"><em class="fileName">db2jcc.jar</em></td>
-  <tr>
-    <td class="listItem"></td>
-    <td class="listItem"><em class="fileName">db2jcc_license_c.jar</em></td>
-  </tr>
-</table>
-<p>
-  Newer versions of Derby include <a href="#derbyclient">Derby's own network
-  client driver</a>, which is the recommended client driver for most applications.
-  The DB2 Universal Driver is still supported and can be utilized with the
-  SimpleApp demo as follows (these instructions assume you have unzipped the
-  Universal Driver libraries into the <em class="fileName">lib</em> directory of
-  <var class="envVar">DERBY_HOME</var>):
-</p>
-<ol class="decimal">
-  <li class="Normal">Open a command window
-  <li class="Normal">If you haven't set it already on a system-wide basis, set
-  the <var class="envVar">DERBY_HOME</var> environment variable to the location
-  of this Derby installation. This is not strictly required to run the demo, but
-  this environment variable will be used later on this page to refer to the
-  required Derby resources, files, etc. Examples:
-    <p class="BodyRelative">UNIX (ksh/bash):</p>
-    <p class="commandLine">export DERBY_HOME=/home/user/derby/db-derby-10.x.y.z-bin</p>
-    <p class="BodyRelative">Windows:</p>
-    <p class="commandLine">set DERBY_HOME=c:\programs\derby\db-derby-10.x.y.z-bin</p>
-  <li class="Normal">Change directories to the <em class="fileName">$DERBY_HOME/demo/programs/simple</em> directory.
-  <li class="Normal">In the jcc client command window, set the CLASSPATH to include the
-  current directory (the location of <em class="fileName">SimpleApp.class</em>)
-  and the JCC libraries (<em class="fileName">db2jcc.jar</em> and
-  <em class="fileName">db2jcc_license_c.jar</em>).
-  (You may skip this step and provide the classpath as an option to the JVM
-  launch command instead, refer to your JVM's documentation for details).
-    <p class="BodyRelative">This may be done as follows:</p>
-    <p class="BodyRelative">UNIX (ksh/bash):</p>
-    <p class="commandLine">
-      export CLASSPATH=.:${DERBY_HOME}/lib/db2jcc.jar:${DERBY_HOME}/lib/db2jcc_license_c.jar
-    </p>
-    <p class="BodyRelative">WINDOWS:</p>
-    <p class="commandLine">
-      set CLASSPATH=.;%DERBY_HOME%\lib\db2jcc.jar;%DERBY_HOME%\lib\db2jcc_license_c.jar
-    </p>
-    <p class="BodyRelative">
-      It is assumed that you installed the IBM DB2 JDBC Universal Driver jars in
-      the <em class="fileName">lib</em> subdirectory of this Derby installation
-      (<var class="envVar">DERBY_HOME</var>).
-    </p>
-  <li class="Normal">Start the Derby Network Server in a different command
-    window, as described <a href="#server">here</a>
-  <li class="Normal">Start the SimpleApp demo in JCC client mode:
-    <p class="commandLine">
-      java SimpleApp jccjdbcclient
-    </p>
-    <p class="BodyRelative">The <var class="command">jccjdbcclient</var> argument
-      tells the program to use the IBM DB2 JDBC Universal driver (JCC) instead
-      of its default driver (the embedded driver).
-    </p>
-    <p class="BodyRelative">A successful run produces the following output:</p>
-    <pre class="Output">
-SimpleApp starting in jccjdbc mode
-Loaded the appropriate driver
-Connected to and created database derbyDB
-Created table location
-Inserted 1956 Webster
-Inserted 1910 Union
-Updated 1956 Webster to 180 Grand
-Updated 180 Grand to 300 Lakeshore
-Verified the rows
-Dropped table location
-Committed the transaction
-SimpleApp finished
-    </pre>
- </ol>
 
 <!-- ##########  FOOTER (VERSION INFO)  ########## -->
 <hr>
