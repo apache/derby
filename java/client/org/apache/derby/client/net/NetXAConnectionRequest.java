@@ -73,11 +73,15 @@ public class NetXAConnectionRequest extends NetResultSetRequest {
         }
 
         writeXAFlags(CodePoint.XAFLAGS, xaFlags);
+
         // Check whether the timeout value was specified.
         // Value less than 0 means no timeout is specified.
-        if (xaTimeout >= 0) {
+        // DERBY-4232: The DRDA spec says that SYNCCTL should only have a
+        // timeout property if TMNOFLAGS is specified.
+        if (xaTimeout >= 0 && xaFlags == XAResource.TMNOFLAGS) {
             writeXATimeout(CodePoint.TIMEOUT, xaTimeout);
         }
+
         updateLengthBytes();
     }
 
