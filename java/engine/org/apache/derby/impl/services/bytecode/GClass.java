@@ -31,8 +31,12 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.util.ByteArray;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 /**
  * This is a common superclass for the various impls.
@@ -72,20 +76,30 @@ public abstract class GClass implements ClassBuilder {
 
 		filename = filename + ".class";
 
-		File classFile = new File(dir,filename);
+		final File classFile = new File(dir,filename);
 
 		// find the error stream
 		HeaderPrintWriter errorStream = Monitor.getStream();
-
+		FileOutputStream fos = null;
 		try {
-			FileOutputStream fis = new FileOutputStream(classFile);
-			fis.write(bytecode.getArray(),
+			try {
+				fos =  (FileOutputStream)AccessController.doPrivileged(
+						new PrivilegedExceptionAction() {
+							public Object run()
+							throws FileNotFoundException {
+								return new FileOutputStream(classFile);
+							}
+						});
+			} catch (PrivilegedActionException pae) {
+				throw (FileNotFoundException)pae.getException();
+			}
+			fos.write(bytecode.getArray(),
 				bytecode.getOffset(), bytecode.getLength());
-			fis.flush();
+			fos.flush();
 			if (logMessage) {
 				errorStream.printlnWithHeader("Wrote class "+getFullName()+" to file "+classFile.toString()+". Please provide support with the file and the following exception message: "+t);
 			}
-			fis.close();
+			fos.close();
 		} catch (IOException e) {
 			if (SanityManager.DEBUG)
 				SanityManager.THROWASSERT("Unable to write .class file");
