@@ -21,7 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,6 +34,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.Utilities;
 
@@ -463,14 +463,6 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
     public void testBug4810() throws SQLException {
         Connection con = getConnection();
 
-        CallableStatement cs = con
-                .prepareCall("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
-        cs.setString(1, "derby.locks.deadlockTimeout");
-        cs.setString(2, "3");
-        cs.execute();
-        cs.setString(1, "derby.locks.waitTimeout");
-        cs.setString(2, "3");
-        cs.close();
         Statement stmt = con.createStatement();
         stmt.executeUpdate("create table bug4810(i int, b int)");
         stmt
@@ -768,7 +760,11 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite(name);
         suite.addTestSuite(ResultSetMiscTest.class);
 
-        return new CleanDatabaseTestSetup(suite) {
+        // Some test cases expect lock timeouts, so reduce the timeout to
+        // make the test go faster.
+        Test test = DatabasePropertyTestSetup.setLockTimeouts(suite, 1, 3);
+
+        return new CleanDatabaseTestSetup(test) {
             /**
              * Creates the table used in the test cases.
              * 
