@@ -56,6 +56,12 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
     public static Test suite() {
         Test test = TestConfiguration.embeddedSuite(
                 IndexSplitDeadlockTest.class);
+
+        // DERBY-4273: Include the lock table in the error message to help
+        // debugging in case of lock timeouts.
+        test = DatabasePropertyTestSetup.singleProperty(
+                test, "derby.locks.deadlockTrace", "true");
+
         test = new CleanDatabaseTestSetup(test);
         return test;
     }
