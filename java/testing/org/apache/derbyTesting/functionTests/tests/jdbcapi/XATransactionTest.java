@@ -45,6 +45,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.XATestUtil;
 
 /** The test of the properties of the XA transaction interface implementation.
   */
@@ -284,6 +285,75 @@ public class XATransactionTest extends BaseJDBCTestCase {
         // Again, check whether the correct number of transactions
         // was rolled back
         assertTrue(rs.getInt(1) == timeoutStatementsCommitted);
+    }
+
+    /**
+     * DERBY-4232: Test that an XA transaction can be suspended and resumed
+     * when a timeout is in effect.
+     */
+    public void testTransactionTimeoutAndSuspendResume() throws Exception {
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        XAConnection xac = xads.getXAConnection();
+        XAResource xar = xac.getXAResource();
+        Xid xid = XATestUtil.getXid(1, 2, 3);
+
+        // Start work in a new transaction with a timeout
+        xar.setTransactionTimeout(500);
+        xar.start(xid, XAResource.TMNOFLAGS);
+
+        // Suspend the transaction
+        xar.end(xid, XAResource.TMSUSPEND);
+
+        // Resume the transaction (used to fail with a XAER_PROTO on the
+        // network client)
+        xar.start(xid, XAResource.TMRESUME);
+
+        // End the transaction and free up the resources
+        xar.end(xid, XAResource.TMSUCCESS);
+        xar.rollback(xid);
+        xac.close();
+    }
+
+    /**
+     * DERBY-4232: Test that two branches can be joined after the timeout has
+     * been set.
+     */
+    public void testTransactionTimeoutAndJoin() throws Exception {
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        XAConnection xac1 = xads.getXAConnection();
+        XAResource xar1 = xac1.getXAResource();
+        Xid xid1 = XATestUtil.getXid(4, 5, 6);
+
+        // Start/end work in a new transaction
+        xar1.setTransactionTimeout(500);
+        xar1.start(xid1, XAResource.TMNOFLAGS);
+        xar1.end(xid1, XAResource.TMSUCCESS);
+
+        // Create a new branch that can be joined with the existing one
+        XAConnection xac2 = xads.getXAConnection();
+        XAResource xar2 = xac2.getXAResource();
+        xar2.setTransactionTimeout(500);
+
+        // Do some work on the new branch before joining (the bug won't be
+        // reproduced if we join with a fresh branch)
+        Xid xid2 = XATestUtil.getXid(4, 5, 7);
+        xar2.start(xid2, XAResource.TMNOFLAGS);
+        xar2.end(xid2, XAResource.TMSUCCESS);
+        xar2.rollback(xid2);
+
+        assertTrue(
+                "Branches can only be joined if RM is same",
+                xar1.isSameRM(xar2));
+
+        // Join the branches. This used to fail with XAER_PROTO on the
+        // network client.
+        xar2.start(xid1, XAResource.TMJOIN);
+
+        // End the transaction and free up the resources
+        xar2.end(xid1, XAResource.TMSUCCESS);
+        xar2.rollback(xid1);
+        xac1.close();
+        xac2.close();
     }
 
     /**
