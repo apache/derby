@@ -40,6 +40,7 @@ import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import java.lang.reflect.Modifier;
+import java.security.AccessController;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.classfile.VMDescriptor;
@@ -149,7 +150,15 @@ class BCClass extends GClass {
 		if (SanityManager.DEBUG) {
 			if (SanityManager.DEBUG_ON("DumpClassFile")) {
 				/* Dump the file in derby.system.home */
-				String systemHome = System.getProperty(Property.SYSTEM_HOME_PROPERTY,".");
+				String systemHome = (String )AccessController.doPrivileged
+				(new java.security.PrivilegedAction(){
+
+					public Object run(){
+						return System.getProperty(Property.SYSTEM_HOME_PROPERTY,".");
+
+					}
+				}
+				);				
 				writeClassFile(systemHome,false,null);
 			}
 		}
