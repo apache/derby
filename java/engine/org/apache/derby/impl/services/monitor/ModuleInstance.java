@@ -56,6 +56,9 @@ class ModuleInstance {
 	*/
 	protected Object	service;
 
+    /** Flag that tells whether booting of the module has completed. */
+    private boolean booted;
+
 	/*
 	** Constructor
 	*/
@@ -111,4 +114,20 @@ class ModuleInstance {
 	protected Object getInstance() {
 		return instance;
 	}
+
+    /**
+     * Set a flag that indicates that booting of the module has completed.
+     */
+    synchronized void setBooted() {
+        booted = true;
+    }
+
+    /**
+     * Check whether booting of the module has completed.
+     * @return {@code true} if the module has been booted, or {@code false}
+     * otherwise
+     */
+    synchronized boolean isBooted() {
+        return booted;
+    }
 }
