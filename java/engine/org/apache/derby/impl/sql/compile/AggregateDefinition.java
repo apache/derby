@@ -21,8 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.sql.SQLException;
-
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
