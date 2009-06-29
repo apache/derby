@@ -92,7 +92,7 @@ public class SystemProcedures  {
      * <code>SQLERRMC_MESSAGE_DELIMITER</code> When message argument tokes are sent,
      * this value separates the tokens for mulitiple error messages 
      */
-    public  static String SQLERRMC_MESSAGE_DELIMITER = new String(new char[] {(char)20,(char)20,(char)20});
+    public static final String SQLERRMC_MESSAGE_DELIMITER = new String(new char[] {(char)20,(char)20,(char)20});
 
 	/**
 	  Method used by Derby Network Server to get localized message (original call

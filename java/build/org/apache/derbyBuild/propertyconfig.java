@@ -60,12 +60,12 @@ import java.util.Enumeration;
 
 public class propertyconfig {
 
-	public static String header = 
+	public static final String header =
 		"######## This is a generated file, do not edit.\n" +
 		"#\n# This file is generated as by propertyConfig\n" +
 		"#\n";
 
-	public static String footer = 
+	public static final String footer =
 		"\n######## This is a generated file, do not edit.\n";
 
 	public static void main(String[] args) throws IOException

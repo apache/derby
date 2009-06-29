@@ -44,13 +44,13 @@ public final class RowLock {
 	private final int compat;
 
     // Names of locks for virtual lock table print out
-	private static String[] shortnames =  { "S", "S", "U", "U", "X", "X", "X", "X" };
+	private static final String[] shortnames =  { "S", "S", "U", "U", "X", "X", "X", "X" };
 
 	/** Number of row locks. */
 	public static final int R_NUMBER = 8;
 
 	/** Row lock compatibility table. */
-	public static final boolean[][] R_COMPAT = {
+	private static final boolean[][] R_COMPAT = {
         //          Granted
         // Request   RS2     RS3    RU2    RU3    RIP    RI     RX2    RX3
         //

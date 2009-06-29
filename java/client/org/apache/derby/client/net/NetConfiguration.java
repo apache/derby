@@ -185,11 +185,11 @@ public class NetConfiguration {
     static final int USRID_MAXSIZE = 255;
 
     // Product id of the ClientDNC.
-    public static String PRDID;
+    public static final String PRDID;
 
     // The server release level of this product.
     // It will be prefixed with PRDID
-    static String SRVRLSLV;
+    static final String SRVRLSLV;
 
     // Initialize PRDID and SRVRLSLV
     static {

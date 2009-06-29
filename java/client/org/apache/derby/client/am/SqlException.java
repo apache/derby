@@ -87,7 +87,7 @@ public class SqlException extends Exception implements Diagnosable {
     protected SqlException nextException_;
     protected Throwable throwable_;
     
-    public static String CLIENT_MESSAGE_RESOURCE_NAME =
+    public static final String CLIENT_MESSAGE_RESOURCE_NAME =
         "org.apache.derby.loc.clientmessages";
     
     //SQLException factory initialised with default factory
