@@ -102,14 +102,11 @@ final class TopService {
 
 	void setTopModule(Object instance) {
 		synchronized (this) {
-			for (int i = 0; i < moduleInstances.size(); i++) {
-				ModuleInstance module = (ModuleInstance) moduleInstances.elementAt(i);
-				if (module.getInstance() == instance) {
-					topModule = module;
-					notifyAll();
-					break;
-				}
-			}
+            ModuleInstance module = findModuleInstance(instance);
+            if (module != null) {
+                topModule = module;
+                notifyAll();
+            }
 
 			// now add an additional entry into the hashtable
 			// that maps the server name as seen by the user
@@ -222,6 +219,26 @@ final class TopService {
 
 		return null;
 	}
+
+    /**
+     * Find a {@code ModuleInstance} object whose {@code getInstance()} method
+     * returns the object specified by the {@code instance} parameter.
+     *
+     * @param instance the instance to look for
+     * @return a {@code ModuleInstance} object, or {@code null} if no match
+     * was found
+     */
+    private ModuleInstance findModuleInstance(Object instance) {
+        synchronized (moduleInstances) {
+            for (int i = 0; i < moduleInstances.size(); i++) {
+                ModuleInstance module = (ModuleInstance) moduleInstances.get(i);
+                if (module.getInstance() == instance) {
+                    return module;
+                }
+            }
+        }
+        return null;
+    }
 
 	/**
 		Boot a module, performs three steps.
@@ -394,14 +411,7 @@ final class TopService {
 	}
 
 	boolean inService(Object instance) {
-
-		for (int i = 0; i < moduleInstances.size(); i++) {
-
-			ModuleInstance mi = (ModuleInstance) moduleInstances.elementAt(i);
-			if (mi.getInstance() == instance)
-				return true;
-		}
-		return false;
+        return findModuleInstance(instance) != null;
 	}
 
 	public ProtocolKey getKey() {
