@@ -27,7 +27,7 @@ import org.apache.derby.shared.common.reference.MessageId;
 
 
 public abstract class Version {
-    static MessageUtil msgutil = SqlException.getMessageUtil();
+    static final MessageUtil msgutil = SqlException.getMessageUtil();
     
     // Same as java.sql.DatabaseMetaData.getDriverName()
     public static String getDriverName() {
@@ -36,7 +36,7 @@ public abstract class Version {
 
     // for DatabaseMetaData.getDriverVersion()
     public static String getDriverVersion() {
-        return Configuration.dncProductVersionHolder__.getVersionBuildString(true);
+        return Configuration.getProductVersionHolder().getVersionBuildString(true);
     }
 
 
@@ -68,7 +68,7 @@ public abstract class Version {
     // Not an external, just a helper method
     private static String getDriverNameAndVersion() {
         return Configuration.dncDriverName + " " +
-                Configuration.dncProductVersionHolder__.getVersionBuildString(true);
+                Configuration.getProductVersionHolder().getVersionBuildString(true);
     }
 
     // -------------------------- configuration print stream ---------------------

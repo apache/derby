@@ -72,7 +72,7 @@ public final class JSQLType implements Formatable
 		"java.lang.Double"
 	};
 
-	static	public	final	String[]	primitiveNames =
+	static	private	final	String[]	primitiveNames =
 	{
 		"boolean",
 		"char",
@@ -194,6 +194,11 @@ public final class JSQLType implements Formatable
 		}
 
 		return sqlType;
+	}
+
+    // Give read-only access to array of strings
+	public static String getPrimitiveName(byte index){
+	    return primitiveNames[index];
 	}
 
 	///////////////////////////////////////////////////////////////////////

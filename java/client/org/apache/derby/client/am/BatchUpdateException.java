@@ -32,7 +32,7 @@ public class BatchUpdateException extends java.sql.BatchUpdateException {
      *  it knows to look there if the message isn't found in the
      *  shared message bundle.
      */
-    private static MessageUtil msgutil_ = 
+    private static final MessageUtil msgutil_ =
         SqlException.getMessageUtil();
 
     public BatchUpdateException(LogWriter logWriter, ClientMessageId msgid,

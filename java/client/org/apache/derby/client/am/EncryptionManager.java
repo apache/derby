@@ -618,7 +618,7 @@ public class EncryptionManager {
      * package when the capability is put back in (StringUtil.java).     *
      *********************************************************************/
 
-    private static char[] hex_table = {
+    private static final char[] hex_table = {
                 '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
                 'a', 'b', 'c', 'd', 'e', 'f'
             };

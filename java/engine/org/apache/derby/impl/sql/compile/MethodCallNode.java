@@ -1095,7 +1095,7 @@ abstract class MethodCallNode extends JavaValueNode
 
 		        case JSQLType.JAVA_CLASS: return jsqlType.getJavaClassName();
 
-		        case JSQLType.JAVA_PRIMITIVE: return JSQLType.primitiveNames[ jsqlType.getPrimitiveKind() ];
+		        case JSQLType.JAVA_PRIMITIVE: return JSQLType.getPrimitiveName( jsqlType.getPrimitiveKind() );
 
 		        default:
 
@@ -1155,7 +1155,7 @@ abstract class MethodCallNode extends JavaValueNode
 
 		            case JSQLType.JAVA_PRIMITIVE:
 
-						primParmTypeNames[i] = JSQLType.primitiveNames[ jsqlType.getPrimitiveKind() ];
+						primParmTypeNames[i] = JSQLType.getPrimitiveName( jsqlType.getPrimitiveKind() );
 						if ( castToPrimitiveAsNecessary) { methodParms[i].castToPrimitive(true); }
 						break;
 

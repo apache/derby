@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.io.PrintWriter;
 import java.io.File;
 import java.security.AccessController;
-import java.security.PrivilegedActionException;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.NoSuchElementException;
@@ -66,10 +65,11 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
     // this information is needed to decide if security mechanism 
     // can be upgraded to EUSRIDPWD or not
     // See getUpgradedSecurityMechanism()
-    static boolean SUPPORTS_EUSRIDPWD = false;
+    static final boolean SUPPORTS_EUSRIDPWD;
     
     static
     {
+        boolean supports_eusridpwd = false;
         try
         {
             // The EncryptionManager class will instantiate objects of the required 
@@ -78,14 +78,15 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
             // in the JCE implementation in the JVM in which the client
             // is loaded.
             new org.apache.derby.client.am.EncryptionManager(null);
-            SUPPORTS_EUSRIDPWD = true;
+            supports_eusridpwd = true;
         }catch(Exception e)
         {
             // if an exception is thrown, ignore exception.
             // set SUPPORTS_EUSRIDPWD to false indicating that the client 
             // does not support EUSRIDPWD security mechanism
-            SUPPORTS_EUSRIDPWD = false;
+            supports_eusridpwd = false;
         }
+        SUPPORTS_EUSRIDPWD = supports_eusridpwd;
     }
     
     // The loginTimeout jdbc 2 data source property is not supported as a jdbc 1 connection property,

@@ -42,9 +42,9 @@ public class Configuration {
     public static String traceDirectory__ = null;
 
     public static boolean traceFileAppend__ = false;
-    public static String jreLevel = "1.3.0"; // default level if unable to read
-    public static int jreLevelMajor = 1;
-    public static int jreLevelMinor = 3;
+    public static final String jreLevel;// = "1.3.0"; // default level if unable to read
+    public static final int jreLevelMajor;// = 1;
+    public static final int jreLevelMinor;// = 3;
 
     private Configuration() {
     }
@@ -56,7 +56,7 @@ public class Configuration {
 
     // -------------------------- versioning -------------------------------------
 
-    public static ProductVersionHolder dncProductVersionHolder__;
+    private static ProductVersionHolder dncProductVersionHolder__;
 
     public static ProductVersionHolder getProductVersionHolder() {
         return dncProductVersionHolder__;
@@ -73,9 +73,9 @@ public class Configuration {
     public final static byte[] dncPackageConsistencyToken =
             {0x53, 0x59, 0x53, 0x4c, 0x56, 0x4c, 0x30, 0x31};
 
-    // We will not set packagge VERSION in the initial release.
+    // We will not set package VERSION in the initial release.
     // If we have to change the package version in the future then we can.
-    public static String dncPackageVersion = null;
+    public static final String dncPackageVersion = null;
 
     // for Driver.jdbcCompliant()
     public final static boolean jdbcCompliant = true;
@@ -130,7 +130,7 @@ public class Configuration {
 
     // -----------------------Load resource bundles for the driver asap-----------
 
-    private static final String packageNameForDNC = "org.apache.derby.client";
+    private static final String packageNameForDNC = "org.apache.derby.client"; // NOTUSED
 
     public static SqlException exceptionsOnLoadResources = null; // used by ClientDriver to accumulate load exceptions
 
@@ -140,12 +140,17 @@ public class Configuration {
         } catch (SqlException e) {
             exceptionsOnLoadResources = e;
         }
+        String _jreLevel;
         try {
-            jreLevel = System.getProperty("java.version");
+            _jreLevel = System.getProperty("java.version");
         } catch (SecurityException e) {
+            _jreLevel = "1.3.0";
         } // ignore it, assume 1.3.0
+        jreLevel = _jreLevel;
         java.util.StringTokenizer st = new java.util.StringTokenizer(jreLevel, ".");
         int jreState = 0;
+        int _jreLevelMajor = 1;
+        int _jreLevelMinor = 3;
         while (st.hasMoreTokens()) {
             int i;
             try {
@@ -155,15 +160,17 @@ public class Configuration {
             }
             switch (jreState++) {
             case 0:
-                jreLevelMajor = i; // state 0, this is the major version
+                _jreLevelMajor = i; // state 0, this is the major version
                 break;
             case 1:
-                jreLevelMinor = i; // state 1, this is the minor version
+                _jreLevelMinor = i; // state 1, this is the minor version
                 break;
             default:
                 break; // state >1, ignore
             }
         }
+        jreLevelMajor = _jreLevelMajor;
+        jreLevelMinor = _jreLevelMinor;
     }
 
     /**

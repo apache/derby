@@ -95,7 +95,7 @@ abstract class JavaValueNode extends QueryTreeNode
 		{
 		    case JSQLType.JAVA_CLASS: return myType.getJavaClassName();
 
-		    case JSQLType.JAVA_PRIMITIVE: return JSQLType.primitiveNames[ myType.getPrimitiveKind() ];
+		    case JSQLType.JAVA_PRIMITIVE: return JSQLType.getPrimitiveName( myType.getPrimitiveKind() );
 
 		    default:
 
@@ -120,7 +120,7 @@ abstract class JavaValueNode extends QueryTreeNode
 
 		switch( myType.getCategory() )
 		{
-		    case JSQLType.JAVA_PRIMITIVE: return JSQLType.primitiveNames[ myType.getPrimitiveKind() ];
+		    case JSQLType.JAVA_PRIMITIVE: return JSQLType.getPrimitiveName( myType.getPrimitiveKind() );
 
 		    default:
 
