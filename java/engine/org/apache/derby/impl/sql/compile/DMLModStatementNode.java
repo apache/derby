@@ -33,7 +33,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
-import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -1671,12 +1670,10 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		// 	java.lang.Object userExprFun( ) { }
 		MethodBuilder userExprFun = ecb.newUserExprFun();
 
-		/* Declare the field and load it with the current row */
-		LocalField field = ecb.newFieldDeclaration(Modifier.PRIVATE, ClassName.ExecRow);
+        /* Push the the current row onto the stack. */
         userExprFun.pushThis();
         userExprFun.push( rsNumber );
         userExprFun.callMethod(VMOpcode.INVOKEVIRTUAL, ClassName.BaseActivation, "getCurrentRow", ClassName.Row, 1);
-        userExprFun.putField( field );
 
 		// Loop through the result columns, computing generated columns
         // as we go. 
@@ -1698,7 +1695,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
             if ( !rc.hasGenerationClause() ) { continue; }
 
-            userExprFun.getField(field); // instance
+            userExprFun.dup();       // instance (current row)
             userExprFun.push(i + 1); // arg1
 
             rc.generateExpression(ecb, userExprFun);
