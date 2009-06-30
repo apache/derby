@@ -56,7 +56,7 @@ public class AllPackages extends BaseTestCase {
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.store._Suite.suite());
-	 suite.addTest(org.apache.derbyTesting.functionTests.tests.tools._Suite.suite());
+        suite.addTest(org.apache.derbyTesting.functionTests.tests.tools._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.engine._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.demo._Suite.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.memory._Suite.suite());

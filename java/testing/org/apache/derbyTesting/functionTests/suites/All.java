@@ -49,6 +49,7 @@ public class All extends BaseTestCase {
         suite.addTest(AllPackages.suite());
         
         // Encrypted tests
+        // J2ME (JSR169) does not support encryption.
         suite.addTest(EncryptionSuite.suite());
         
         // Replication tests. Implementation require DataSource. 

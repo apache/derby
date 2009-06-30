@@ -20,13 +20,9 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.replicationTests;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 
 
 /**
@@ -200,18 +196,8 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
         util.DEBUG("4. testPostStartedMasterAndSlave_StopSlave: " +
                    connectionURL);
 
-        try {
-            DriverManager.getConnection(connectionURL).close();
-            util.DEBUG("4. Connected as expected: " + connectionURL);
-
-        } catch (SQLException se) {
-            int ec = se.getErrorCode();
-            String ss = se.getSQLState();
-            String msg = ec + " " + ss + " " + se.getMessage();
-            util.DEBUG("4. Unexpectedly failed to connect: " +
-                       connectionURL +  " " + msg);
-            assertTrue("Unexpectedly failed to connect: " +
-                       connectionURL +  " " + msg, false);
-        }
+        waitForConnect(100L, 10, 
+                slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
+                slaveServerHost, slaveServerPort);
     }
 }
