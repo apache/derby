@@ -229,6 +229,9 @@ final class TopService {
      * was found
      */
     private ModuleInstance findModuleInstance(Object instance) {
+        // DERBY-4018: Need to hold the synchronization over the entire loop
+        // to prevent concurrent modifications from causing an
+        // ArrayIndexOutOfBoundsException.
         synchronized (moduleInstances) {
             for (int i = 0; i < moduleInstances.size(); i++) {
                 ModuleInstance module = (ModuleInstance) moduleInstances.get(i);
@@ -269,8 +272,20 @@ final class TopService {
 		// see if a running implementation will handle this protocol
 		synchronized (this) {
 
-			for (int i = 0; i < moduleInstances.size(); i++) {
-				ModuleInstance module = (ModuleInstance) moduleInstances.elementAt(i);
+            for (int i = 0;; i++) {
+                final ModuleInstance module;
+
+                // DERBY-4018: Synchronized block in order to close the window
+                // between size() and elementAt() where the size may change
+                // and result in an ArrayIndexOutOfBoundsException.
+                synchronized (moduleInstances) {
+                    if (i < moduleInstances.size()) {
+                        module = (ModuleInstance) moduleInstances.elementAt(i);
+                    } else {
+                        // No more instances to look at, break out of the loop.
+                        break;
+                    }
+                }
 
                 // DERBY-2074: The module has not been properly booted, so we
                 // cannot yet determine whether or not this is a module we can
