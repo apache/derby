@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 import java.util.Random;
 
 import junit.framework.Test;
@@ -36,6 +37,7 @@ import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
 /**
  * Executes sorting of LOB values based on the length of the LOB or a random
@@ -195,9 +197,13 @@ public class LobSortTest
     }
 
     public static Test suite() {
+        Properties props = new Properties();
+        // Adjust sort buffer size to trigger the bug situation with less data.
+        props.setProperty("derby.storage.sortBufferMax", "4");
         TestSuite suite = new TestSuite(LobSortTest.class,
                                         "LobSortTestEmbedded");
-        return new CleanDatabaseTestSetup(suite) {
+        return new CleanDatabaseTestSetup(
+                new SystemPropertyTestSetup(suite, props, true)) {
             /**
              * Generates a table with Blob and Clobs of mixed size.
              */
@@ -217,7 +223,7 @@ public class LobSortTest
                 ps.setInt(4, 0);
                 ps.setInt(5, rnd.nextInt());
                 ps.executeUpdate();
-                for (int i=0; i < 600; i++) {
+                for (int i=0; i < 100; i++) {
                     CharAlphabet ca = getCharAlphabet(1 + rnd.nextInt(3));
                     int length = (int)(rnd.nextDouble() * 64.0 * 1024.0);
                     if (rnd.nextInt(1000) < 500) {
