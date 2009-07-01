@@ -41,6 +41,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.Arrays;
+
 import junit.framework.Test;
 
 import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
@@ -72,6 +74,11 @@ public class ClobTest
     private static final int SET_ASCII_STREAM = 2;
     /** Constant for Clob.setCharacterStream method. */
     private static final int SET_CHARACTER_STREAM = 4;
+    /**
+     * Next unique id for a Clob. Note that this isn't accessed in a thread-
+     * safe way.
+     */
+    private static int nextUniqueId = 150000;
 
     /** Test data, 18 characters long, containing only Norwegian letters. */
     private static final String NORWEGIAN_LETTERS =
@@ -602,6 +609,81 @@ public class ClobTest
         // Truncate again, same length.
         clob.truncate(truncateTwiceSize);
         assertEquals(truncateTwiceSize, clob.length());
+    }
+
+    /**
+     * Tests that cloning an SQLClob object works when a stream has been set as
+     * the source of the Clob.
+     * <p>
+     * See DERBY-4278
+     *
+     * @throws SQLException if something goes wrong
+     */
+    public void testCloningThroughAddBatchWithStream()
+            throws SQLException {
+        testCloningThroughAddBatch(true, true);
+        testCloningThroughAddBatch(true, false);
+    }
+
+    /**
+     * Tests that cloning an SQLClob object works when a string has been set as
+     * the source of the Clob.
+     *
+     * @throws SQLException if something goes wrong
+     */
+    public void testCloningThroughAddBatchWithString()
+            throws SQLException {
+        testCloningThroughAddBatch(false, true);
+        testCloningThroughAddBatch(false, false);
+    }
+
+    /**
+     * Adds a series of Clobs into the test table using a batch, then deletes
+     * the Clobs inserted.
+     *
+     * @param sourceAsStream whether the source shall be specified as a stream
+     *      or a string
+     * @param autoCommit auto commit mode to run with
+     * @throws SQLException if something goes wrong
+     */
+    private void testCloningThroughAddBatch(final boolean sourceAsStream,
+                                            boolean autoCommit)
+            throws SQLException {
+        final int count = 100;
+        // Adjust auto commit as specified (and reset when done).
+        boolean savedAutoCommitValue = getConnection().getAutoCommit();
+        setAutoCommit(autoCommit);
+        // Expect execution to return an array with ones.
+        int[] expectedResult = new int[count];
+        Arrays.fill(expectedResult, 1);
+        // Insert a series of Clobs using a batch.
+        PreparedStatement insert = prepareStatement(
+                "insert into ClobTestData values (?,?)");
+        int firstId = nextUniqueId;
+        for (int i=0; i < count; i++) {
+            insert.setInt(1, nextUniqueId++);
+            String str = "Clob-" + i;
+            if (sourceAsStream) {
+                insert.setCharacterStream(
+                        2, new StringReader(str), str.length());
+            } else {
+                insert.setString(2, "Clob-" +i);
+            }
+            insert.addBatch();
+        }
+        assertTrue(Arrays.equals(expectedResult, insert.executeBatch()));
+        commit();
+
+        // To avoid keeping the data around, delete it as well.
+        PreparedStatement delete = prepareStatement
+                ("delete from ClobTestData where id = ?");
+        for (int i=0; i < count; i++) {
+            delete.setInt(1, firstId + i);
+            delete.addBatch();
+        }
+        assertTrue(Arrays.equals(expectedResult, delete.executeBatch()));
+        commit();
+        setAutoCommit(savedAutoCommitValue);
     }
 
     /* Test ideas for more tests
