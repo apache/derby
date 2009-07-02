@@ -155,7 +155,11 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(LangHarnessJavaTest.suite());
         		
         suite.addTest(ResultSetsFromPreparedStatementTest.suite());
+        if (!( System.getProperty("java.vm.name").equals("CVM")
+            && System.getProperty("java.vm.version").startsWith("phoneme") ) )
+        { // Disable temporarily until CVM/phoneME is fixed.. See DERBY-4290)
         suite.addTest(OrderByAndSortAvoidance.suite());
+        }
 
         // tests that do not run with JSR169
         if (JDBC.vmSupportsJDBC3())  
