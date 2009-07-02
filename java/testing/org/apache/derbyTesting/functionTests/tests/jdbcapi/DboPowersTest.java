@@ -631,11 +631,22 @@ public class DboPowersTest extends BaseJDBCTestCase
 
         TestSuite suite = new TestSuite("dboPowers:"+framework);
 
+        // A priori, doing a hard upgrade is a no-op here; we are only
+        // interested in checking if we have the powers to do it. However,
+        // sometimes the regression suite is run against a default database
+        // (system/wombat) created by an earlier release to check soft upgrade
+        // modes. To avoid interfering with such usage, we use a
+        // singleUseDatabaseDecorator below, so we avoid accidentally hard
+        // upgrading system/wombat in such runs. The SQLAUTHORIZATION run takes
+        // care of itself since it uses another database anyway.
+
         /* run tests with no authentication enabled */
-        suite.addTest(tests[NOAUTHENTICATION]);
+        suite.addTest(TestConfiguration.singleUseDatabaseDecorator(
+                          tests[NOAUTHENTICATION]));
 
         /* run test for all users with only authentication enabled */
-        suite.addTest(tests[AUTHENTICATION]);
+        suite.addTest(TestConfiguration.singleUseDatabaseDecorator(
+                          tests[AUTHENTICATION]));
 
         /* run test for all users with authentication and
          * sqlAuthorization enabled
