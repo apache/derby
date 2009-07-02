@@ -263,7 +263,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
          * asserting that output is correct.
          */
         String[] sed = {"Version", "version", "Java", "OS", 
-                "[0-9*].[0-9*].[0-9*]","JRE - JDBC","derby.drda.traceDirectory",
+                "[0-9*]\\.[0-9*]\\.[0-9*]","JRE - JDBC","derby.drda.traceDirectory",
                 "Unable to access Protection Domain","listing properties",
                 "Current Locale",           //Remove these because locale info is
                 "Found support for locale:" //not printed when running from jars..
