@@ -102,7 +102,10 @@ public class SQLClob
         //       materializing the value if possible?
 		try
 		{
-			return new SQLClob(getString());
+            SQLClob clone = new SQLClob(getString());
+            // Copy the soft upgrade mode state.
+            clone.inSoftUpgradeMode = inSoftUpgradeMode;
+            return clone;
 		}
 		catch (StandardException se)
 		{
@@ -118,7 +121,10 @@ public class SQLClob
 	 */
 	public DataValueDescriptor getNewNull()
 	{
-		return new SQLClob();
+        SQLClob newClob = new SQLClob();
+        // Copy the soft upgrade mode state.
+        newClob.inSoftUpgradeMode = inSoftUpgradeMode;
+        return newClob;
 	}
 
 	/** @see StringDataValue#getValue(RuleBasedCollator) */

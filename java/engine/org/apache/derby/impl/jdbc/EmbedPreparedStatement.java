@@ -64,6 +64,7 @@ import java.sql.Types;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.types.StringDataValue;
 
 /**
@@ -91,6 +92,13 @@ public abstract class EmbedPreparedStatement
 
 	protected PreparedStatement	preparedStatement;
 	private Activation			activation;
+    /**
+     * Tells if we're accessing a database in soft upgrade mode or not.
+     * <p>
+     * This is lazily set if we need it.
+     * @see #isSoftUpgraded()
+     */
+    private Boolean inSoftUpgradeMode;
         
         private BrokeredConnectionControl bcc=null;
 
@@ -735,6 +743,7 @@ public abstract class EmbedPreparedStatement
             ReaderToUTF8Stream utfIn;
             final StringDataValue dvd = (StringDataValue)
                     getParms().getParameter(parameterIndex -1);
+            dvd.setSoftUpgradeMode(isSoftUpgraded());
             // Need column width to figure out if truncation is needed
             DataTypeDescriptor dtd[] = preparedStatement
                     .getParameterTypes();
@@ -803,6 +812,24 @@ public abstract class EmbedPreparedStatement
 			throw EmbedResultSet.noStateChangeException(t);
 		}
 	}
+
+    /**
+     * Tells if the database being accessed is soft upgraded or not.
+     *
+     * @return {@code true} if database is soft upgraded, {@code false} if not.
+     * @throws StandardException if obtaining the access mode fails
+     */
+    private Boolean isSoftUpgraded()
+            throws StandardException {
+        // Determine if we are accessing a soft upgraded database or not.
+        // This is required to write the correct stream header format for Clobs.
+        if (inSoftUpgradeMode == null) {
+            inSoftUpgradeMode = Boolean.valueOf(
+                lcc.getDataDictionary().checkVersion(
+                    DataDictionary.DD_VERSION_CURRENT, null));
+        }
+        return inSoftUpgradeMode;
+    }
 
     /**
      * Sets the designated parameter to the given input stream.
