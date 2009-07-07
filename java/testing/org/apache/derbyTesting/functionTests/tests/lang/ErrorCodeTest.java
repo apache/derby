@@ -245,9 +245,16 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSTB3","Cannot abort transaction because the log manager is null, probably due to an earlier error.","50000"},
         		{"XSTB5","Creating database with logging disabled encountered unexpected problem.","50000"},
         		{"XSTB6","Cannot substitute a transaction table with another while one is already in use.","50000"},
-        		{"XXXXX","Normal database session close.","40000"}};
-
-        		
+                {"XXXXX","Normal database session close.","40000"},
+                {"XRE04","Could not establish a connection to the peer of the replicated database '{0}' on address '{1}:{2}'.","40000"},
+                {"XRE04","Connection lost for replicated database '{0}'.","40000"},
+                {"XRE05","The log files on the master and slave are not in synch for replicated database '{0}'. The master log instant is {1}:{2}, whereas the slave log instant is {3}:{4}. This is FATAL for replication - replication will be stopped.","40000"},
+                {"XRE09","Cannot start replication slave mode for database '{0}'. The database has already been booted.","40000"},
+                {"XRE11","Could not perform operation '{0}' because the database '{1}' has not been booted.","40000"},
+                {"XRE21","Error occurred while performing failover for database '{0}', Failover attempt was aborted.","40000"},
+                {"XRE22","Replication master has already been booted for database '{0}'","40000"},
+                {"XRE41","Replication operation 'failover' or 'stopSlave' refused on the slave database because the connection with the master is working. Issue the 'failover' or 'stopMaster' operation on the master database instead.","40000"},
+                {"XRE42","Replicated database '{0}' shutdown.","40000"}};
 
         JDBC.assertUnorderedResultSet(rs, expectedRows);
         s.executeUpdate("drop table t");
