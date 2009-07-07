@@ -1,0 +1,345 @@
+/*
+
+   Derby - Class 
+   org.apache.derbyTesting.functionTests.tests.derbynet.RuntimeInfoTest
+
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+ */
+package org.apache.derbyTesting.functionTests.tests.derbynet;
+
+import java.io.File;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Locale;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
+import org.apache.derbyTesting.junit.SecurityManagerSetup;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
+
+/**
+ This tests the runtimeinfo command
+ */
+
+public class RuntimeInfoTest extends BaseJDBCTestCase {
+
+	private static String[] RuntimeinfoCmd = new String[] {
+			"org.apache.derby.drda.NetworkServerControl", "runtimeinfo",
+			"-p", String.valueOf(TestConfiguration.getCurrent().getPort()) };
+	private static String[] RuntimeinfoLocaleCmd = new String[] {
+			"-Duser.language=err", "-Duser.country=DE",
+			"org.apache.derby.drda.NetworkServerControl", "runtimeinfo",
+			"-p", String.valueOf(TestConfiguration.getCurrent().getPort()) };
+	
+	private static String POLICY_FILE_NAME=
+    	"functionTests/tests/derbynet/RuntimeInfoTest.policy";
+    private static String TARGET_POLICY_FILE_NAME="runtimeinfo.policy";
+
+    private static Locale englishLocale = new Locale("en","US");
+	private static Locale germanLocale = new Locale("de","DE");
+	
+	/**
+	 * Constructor
+	 * 
+	 * @param name
+	 */
+	public RuntimeInfoTest(String name) {
+		super(name);
+	}
+
+	/**
+	 * Creates a suite with two testcases, with and without some extra 
+	 * system properties.
+	 * 
+	 * @return
+	 */
+	public static Test suite() {
+		TestSuite suite = new TestSuite("RuntimeInfoTest");
+        
+        suite.addTest(decorateTest(englishLocale));
+        suite.addTest(decorateTest(germanLocale));
+		return suite;
+	}	
+	
+	/**
+	 * This is the wrapper that calls the x_tests in order.
+	 * These fixtures rely on the order of the commands being issued.
+	 */
+	public void testRunTests() throws Exception {
+		x_testRuntimeInfoWithActiveConn();
+		x_testRuntimeInfoLocale();
+		x_testRuntimeInfoAfterConnClose();
+	}
+	
+	/**
+	 * Test runtimeinfo
+	 * 
+	 * @throws Exception
+	 */
+	public void x_testRuntimeInfoWithActiveConn() throws Exception {
+		Process p = execJavaCmd(RuntimeinfoCmd);
+		String output = sed(readProcessOutput(p));
+		
+		printIfVerbose("testRuntimeInfo", output);
+		
+		String expectedOutput = ((HashMap)outputs.get(Locale.getDefault())).get("RuntimeInfoWithActiveConn").toString();
+		assertEquals("Output doesn't match", expectedOutput, output);
+	}
+	
+	/**
+	 * Test runtimeinfo w/ foreign (non-English) locale
+	 */
+	public void x_testRuntimeInfoLocale() throws Exception {      
+		Connection conn1 = getConnection();
+		// Now get a couple of connections with some prepared statements
+		Connection conn2 = openDefaultConnection();
+		PreparedStatement ps = prepareAndExecuteQuery(conn1,
+				"SELECT count(*) from sys.systables");
+		PreparedStatement ps2 = prepareAndExecuteQuery(conn1, "VALUES(1)");
+
+		Connection conn3 = openDefaultConnection();
+		PreparedStatement ps3 = prepareAndExecuteQuery(conn2,
+				"SELECT count(*) from sys.systables");
+		PreparedStatement ps4 = prepareAndExecuteQuery(conn2, "VALUES(2)");
+
+		Process p = execJavaCmd(RuntimeinfoLocaleCmd);
+		String output = sed(readProcessOutput(p));
+		
+		printIfVerbose("testRuntimeInfoLocale", output);
+		
+		int matched = 0;
+		String matchString = "\tSYSLH0001\tSELECT count(*) from sys.systables\n	SYSLH0002\tVALUES(1)\n";
+		String invertedMatchString = "\tSYSLH0002\tVALUES(1)\n\tSYSLH0001\tSELECT count(*) from sys.systables\n";
+		
+		/* The IF clause accomodates for the different order that the result may have */ 
+		matched = output.indexOf(matchString);
+		if (matched == -1) { /* The order was incorrect, try the other one */
+			matched = output.indexOf(invertedMatchString);
+			assertTrue(matched != -1);
+		}
+		
+		matched = 0;
+		matchString = "\tSYSLH0001\tSELECT count(*) from sys.systables\n	SYSLH0002\tVALUES(2)\n";
+		invertedMatchString = "\tSYSLH0002\tVALUES(2)\n\tSYSLH0001\tSELECT count(*) from sys.systables\n";
+		
+		/* Same as above, but with VALUES(2) */ 
+		matched = output.indexOf(matchString);
+		if (matched == -1) { /* The order was incorrect, try the other one */
+			matched = output.indexOf(invertedMatchString);
+			assertTrue(matched != -1);
+		}
+		
+		/* Match the empty session */
+		matched = 0;
+		matchString = ((HashMap)outputs.get(Locale.getDefault())).get("RuntimeInfoLocaleString").toString();
+		
+		assertTrue(output.indexOf(matchString) != -1);
+
+		ps.close();
+		ps2.close();
+		ps3.close();
+		ps4.close();
+		conn1.close();
+		conn2.close();
+		conn3.close();
+
+	}
+
+	/**
+	 * once more after closing the connections 
+	 * - by calling NetworkServerControl.getRuntimeInfo 
+	 * @throws Exception
+	 */
+	public void x_testRuntimeInfoAfterConnClose() throws Exception {
+		// give the network server a second to clean up (DERBY-1455)
+		Thread.sleep(1000);
+
+		String s = NetworkServerTestSetup
+					.getNetworkServerControl(TestConfiguration.getCurrent().getPort())
+					.getRuntimeInfo();
+		s = sed(s);
+		NetworkServerTestSetup.getNetworkServerControl().shutdown();
+		
+		printIfVerbose("testRuntimeInfoMethod", s);
+		
+		String expectedOutput = ((HashMap)outputs.get(Locale.getDefault())).get("RuntimeInfoAfterConnClose").toString();
+		assertEquals("Output doesn't match", expectedOutput, s);
+	}
+
+	public static PreparedStatement prepareAndExecuteQuery(Connection conn,
+			String sql) throws SQLException {
+		PreparedStatement ps = conn.prepareStatement(sql);
+		ResultSet rs = ps.executeQuery();
+		rs.next();
+		return ps;
+	}
+	
+	/**
+     * Replace memory values in the output string
+     * Also trims the string to make it easier to compare.
+     * 
+     * @param s the string to remove lines from
+     * @return the string with the lines removed
+     */
+    private String sed(String s) {
+    	String searchString = ((HashMap)outputs.get(Locale.getDefault())).get("sedMemorySearch").toString();
+    	String replaceString = ((HashMap)outputs.get(Locale.getDefault())).get("sedMemoryReplace").toString();
+		s = s.replaceAll(searchString, replaceString);
+		s = s.trim();
+		return s;
+    }
+    
+    /**
+     * Prints strings to System.out to make it easier to update the tests
+     * when the output changes. BaseTestCase.println() only prints when on VERBOSE
+     * 
+     * @param name just a label to identify the string
+     * @param s the string to be printed
+     */
+    private void printIfVerbose(String name,String s) {
+		println("\n\n>>>" + name + ">>>");
+		println(s);
+		println("<<<" + name + "<<<\n\n");
+    }
+    
+    /**
+     * Construct the name of the server policy file.
+     */
+    private String makePolicyName()
+    {
+        try {
+            String  userDir = getSystemProperty( "user.dir" );
+            String  fileName = userDir + File.separator + SupportFilesSetup.EXTINOUT + File.separator + TARGET_POLICY_FILE_NAME;
+            File      file = new File( fileName );
+            String  urlString = file.toURI().toURL().toExternalForm();
+
+            return urlString;
+        }
+        catch (Exception e)
+        {
+            fail(e.getMessage());
+            return null;
+        }
+    }
+	
+	/**
+	 * Decorate a test with SecurityManagerSetup, clientServersuite, and
+	 * SupportFilesSetup.
+	 * 
+	 * @return the decorated test
+	 */
+	private static Test decorateTest(Locale serverLocale) {
+        String policyName = new RuntimeInfoTest("test").makePolicyName();
+
+        Test test = new TestSuite(RuntimeInfoTest.class);
+        
+        test = TestConfiguration.clientServerDecorator(test);
+        
+        /* A single use database must be used to ensure the consistent output.
+         * The output would change whether the test was being ran for the first
+         * or subsequent times. */
+        test = TestConfiguration.singleUseDatabaseDecorator(test);
+        test = new LocaleTestSetup(test, serverLocale);
+        // Install a security manager using the initial policy file.
+        test = new SecurityManagerSetup(test, policyName);
+
+        // Copy over the policy file we want to use.
+        test = new SupportFilesSetup
+            (
+             test,
+             null,
+             new String[] { POLICY_FILE_NAME },
+             null,
+             new String[] { TARGET_POLICY_FILE_NAME}
+             );
+        
+        return test;
+    }
+	
+	private static final HashMap outputs;
+	static {
+		HashMap englishOutputs = new HashMap();
+		englishOutputs.put("RuntimeInfoWithActiveConn",
+				"--- Derby Network Server Runtime Information ---\n" + 
+				"---------- Session Information ---------------\n" + 
+				"Session # :2\n" + 
+				"\n" + 
+				"\n" + 
+				"-------------------------------------------------------------\n" + 
+				"# Connection Threads : 1\n" + 
+				"# Active Sessions : 1\n" + 
+				"# Waiting  Sessions : 0\n" + 
+				"\n" + 
+				"Total Memory : #####	Free Memory : #####");
+		englishOutputs.put("RuntimeInfoAfterConnClose", 
+				"--- Derby Network Server Runtime Information ---\n" + 
+				"---------- Session Information ---------------\n" + 
+				"Session # :8\n" + 
+				"\n" + 
+				"\n" + 
+				"-------------------------------------------------------------\n" + 
+				"# Connection Threads : 4\n" + 
+				"# Active Sessions : 1\n" + 
+				"# Waiting  Sessions : 0\n" + 
+				"\n" + 
+				"Total Memory : #####	Free Memory : #####");
+		englishOutputs.put("sedMemorySearch", "(?m)Memory : [0-9]*");
+		englishOutputs.put("sedMemoryReplace", "Memory : #####");
+		englishOutputs.put("RuntimeInfoLocaleString", "\tStmt ID\t\tSQLText\n\t-------------\t-----------\n\n\n\nSession");
+		
+		HashMap germanOutputs = new HashMap();
+		germanOutputs.put("RuntimeInfoWithActiveConn",
+				"--- Laufzeitinformationen zu Derby Network Server ---\n" + 
+				"---------- Sitzungsinformationen ---------------\n" + 
+				"Sitzungsnummer:2\n" + 
+				"\n" + 
+				"\n" + 
+				"-------------------------------------------------------------\n" + 
+				"Anzahl der Verbindungs-Threads: 1\n" + 
+				"Anzahl der aktiven Sitzungen: 1\n" + 
+				"Anzahl der wartenden Sitzungen: 0\n" + 
+				"\n" + 
+				"Gesamtspeicher: #####	Freier Speicher: #####");
+		germanOutputs.put("RuntimeInfoAfterConnClose", 
+				"--- Laufzeitinformationen zu Derby Network Server ---\n" + 
+				"---------- Sitzungsinformationen ---------------\n" + 
+				"Sitzungsnummer:8\n" + 
+				"\n" + 
+				"\n" + 
+				"-------------------------------------------------------------\n" + 
+				"Anzahl der Verbindungs-Threads: 4\n" + 
+				"Anzahl der aktiven Sitzungen: 1\n" + 
+				"Anzahl der wartenden Sitzungen: 0\n" + 
+				"\n" + 
+				"Gesamtspeicher: #####	Freier Speicher: #####");
+		germanOutputs.put("sedMemorySearch", "Gesamtspeicher: [0-9]*	Freier Speicher: [0-9]*");
+		germanOutputs.put("sedMemoryReplace", "Gesamtspeicher: #####	Freier Speicher: #####");
+		germanOutputs.put("RuntimeInfoLocaleString", "\tAnwsg-ID\t\tSQL-Text\n\t--------------\t------------\n\n\n\nSitzungsnummer");
+		
+		outputs = new HashMap();
+		outputs.put(englishLocale, englishOutputs);
+		outputs.put(germanLocale, germanOutputs);
+	}
+}

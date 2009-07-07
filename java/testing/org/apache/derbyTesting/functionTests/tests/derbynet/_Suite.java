@@ -55,6 +55,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SecureServerTest.suite());
         suite.addTest(SysinfoTest.suite());
         suite.addTest(SSLTest.suite());
+        suite.addTest(RuntimeInfoTest.suite());
         suite.addTest(NetIjTest.suite());
         suite.addTest(NSinSameJVMTest.suite());
         suite.addTest(NetworkServerControlClientCommandTest.suite());
