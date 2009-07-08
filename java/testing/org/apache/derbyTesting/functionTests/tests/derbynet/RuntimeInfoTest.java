@@ -73,7 +73,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 	 * Creates a suite with two testcases, with and without some extra 
 	 * system properties.
 	 * 
-	 * @return
+	 * @return The test suite with both English and German locales.
 	 */
 	public static Test suite() {
 		TestSuite suite = new TestSuite("RuntimeInfoTest");
