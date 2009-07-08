@@ -57,7 +57,8 @@ public interface Authorizer
 	public static final int DELETE_PRIV = 4;
 	public static final int TRIGGER_PRIV = 5;
 	public static final int EXECUTE_PRIV = 6;
-	public static final int PRIV_TYPE_COUNT = 7;
+	public static final int USAGE_PRIV = 7;
+    public static final int PRIV_TYPE_COUNT = 8;
 
 	/* Used to check who can create schemas or who can modify objects in schema */
 	public static final int CREATE_SCHEMA_PRIV = 16;

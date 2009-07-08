@@ -29,6 +29,7 @@ import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
  * This is an implementation of the DataDescriptorGenerator interface
@@ -514,5 +515,54 @@ public class DataDescriptorGenerator
 									   grantor,
 									   withadminoption,
 									   isDef);
+    }
+
+    /**
+     * Create a new sequence descriptor
+     * @param uuid
+     * @param sequenceName
+     * @return
+     */
+    public SequenceDescriptor newSequenceDescriptor(
+            SchemaDescriptor sd,
+            UUID uuid,
+            String sequenceName,
+            DataTypeDescriptor dataType,
+            long currentValue,
+            long startValue,
+            long minimumValue,
+            long maximumValue,
+            long increment,
+            boolean cycle) {
+        return new SequenceDescriptor(
+                dataDictionary,
+                sd,
+                uuid,
+                sequenceName,
+                dataType,
+                currentValue,
+                startValue,
+                minimumValue,
+                maximumValue,
+                increment,
+                cycle);
+    }
+
+    public PermDescriptor newPermDescriptor(
+            UUID uuid,
+            String objectType,
+            UUID permObjectId,
+            String permission,
+            String grantor,
+            String grantee,
+            boolean grantable) {
+        return new PermDescriptor(dataDictionary,
+                uuid,
+                objectType,
+                permObjectId,
+                permission,
+                grantor,
+                grantee,
+                grantable);
     }
 }

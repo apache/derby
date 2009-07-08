@@ -63,9 +63,11 @@ public interface Dependable
 	public static final String COLUMNS_PERMISSION           = "ColumnsPrivilege";
 	public static final String ROUTINE_PERMISSION           = "RoutinePrivilege";
 	public static final String ROLE_GRANT                   = "RoleGrant";
+    public static final String SEQUENCE                     = "Sequence";
+    public static final String PERM                         = "Perm";
 
 
-	/**
+    /**
 	  *	Get an object which can be written to disk and which,
 	  *	when read from disk, will find or reconstruct this in-memory
 	  * Dependable.

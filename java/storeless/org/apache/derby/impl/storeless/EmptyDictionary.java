@@ -49,6 +49,8 @@ import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoleClosureIterator;
 import org.apache.derby.iapi.sql.dictionary.SubKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -818,4 +820,36 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	public void updateMetadataSPSes(TransactionController tc) throws StandardException {
 		// TODO Auto-generated method stub		
 	}
+
+    public void dropSequenceDescriptor(SequenceDescriptor sequenceDescriptor,
+                                       TransactionController tc) throws StandardException {
+        // TODO Auto-generated method stub
+    }
+
+    public SequenceDescriptor getSequenceDescriptor(UUID uuid) throws StandardException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public SequenceDescriptor getSequenceDescriptor(SchemaDescriptor sd, String sequenceName)
+            throws StandardException {
+        // TODO Auto-generated method stub
+        return null;
+    }   
+
+    public PermDescriptor getPermissions(UUID permUUID) throws StandardException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public PermDescriptor getPermissions(UUID objectID, String granteeAuthId) 
+            throws StandardException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void dropAllPermDescriptors(UUID objectID, TransactionController tc)
+            throws StandardException {
+        // TODO Auto-generated method stub
+    }
 }

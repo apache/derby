@@ -189,8 +189,10 @@ public interface DataDictionary
 	public static final int SYSCOLPERMS_CATALOG_NUM = 17;
 	public static final int SYSROUTINEPERMS_CATALOG_NUM = 18;
     public static final int SYSROLES_CATALOG_NUM = 19;
+    public static final int SYSSEQUENCES_CATALOG_NUM = 20;
+    public static final int SYSPERMS_CATALOG_NUM = 21;
 
-	/* static finals for constraints 
+    /* static finals for constraints
 	 * (Here because they are needed by parser, compilation and execution.)
 	 */
 	public static final int NOTNULL_CONSTRAINT = 1;
@@ -1981,5 +1983,67 @@ public interface DataDictionary
 	 * @throws StandardException
 	 */
 	public void updateMetadataSPSes(TransactionController tc) throws StandardException;
-	
+
+    /**
+     * Drop a sequence descriptor.
+     * @param sequenceDescriptor
+     * @param tc
+     */
+    public void dropSequenceDescriptor(SequenceDescriptor sequenceDescriptor, TransactionController tc) throws StandardException;
+
+    /**
+     * get a descriptor for a Sequence by uuid
+     * @param uuid uuid of the sequence
+     * @return the SequenceDescriptor
+     * @throws StandardException error
+     */
+    public SequenceDescriptor getSequenceDescriptor(UUID uuid) throws StandardException;
+
+    /**
+     * get a descriptor for a Sequence by sequence name
+     * @param sequenceName Name of the sequence
+     * @param sd The scemadescriptor teh sequence belongs to
+     * @return The SequenceDescriptor
+     * @throws StandardException error
+     */
+    public SequenceDescriptor getSequenceDescriptor(SchemaDescriptor sd, String sequenceName)
+            throws StandardException;
+
+    /**
+     * Get permissions granted to one user for an object using the object's Id
+     * and the user's authorization Id.
+     *
+     * @param objectUUID
+     *
+     * @return The descriptor of the permissions for the object
+     *
+     * @exception StandardException
+     */
+    public PermDescriptor getPermissions(UUID objectUUID, String granteeAuthId)
+        throws StandardException;
+
+    /**
+     * Get one user's privileges for an object using the permUUID
+     *
+     * @param permUUID
+     *
+     * @return a PermDescriptor
+     *
+     * @exception StandardException
+     */
+    public PermDescriptor getPermissions(UUID permUUID)
+    throws StandardException;
+
+    /**
+     * Drops all permission descriptors for the given object
+     *
+     * @param objectID The UUID of the object from which to drop
+     *                  all permissions
+     * @param tc        TransactionController for the transaction
+     * @throws StandardException Thrown on error
+     */
+    public void dropAllPermDescriptors(UUID objectID, TransactionController tc)
+            throws StandardException;
+
+
 }

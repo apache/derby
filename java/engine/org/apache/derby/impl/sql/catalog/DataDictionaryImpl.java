@@ -65,6 +65,8 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
+import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
 
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 
@@ -297,8 +299,10 @@ public final class	DataDictionaryImpl
                                     "SYSTABLEPERMS",
                                     "SYSCOLPERMS",
                                     "SYSROUTINEPERMS",
-									"SYSROLES"
-									};
+									"SYSROLES",
+                                    "SYSSEQUENCES",
+                                    "SYSPERMS"
+                                    };
 
 	private	static final int		NUM_NONCORE = nonCoreNames.length;
 
@@ -2234,7 +2238,20 @@ public final class	DataDictionaryImpl
 			return false;
 		}
 
-		return true;
+        // This catalog was added in 10.6. Don't look for this catalog if we
+        // have soft-upgraded from an older release.
+        if( dictionaryVersion.majorVersionNumber >= DataDictionary.DD_VERSION_DERBY_10_6)
+        {
+            if (isSchemaReferenced(tc, getNonCoreTI(SYSSEQUENCES_CATALOG_NUM),
+                                   SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX2_ID,
+                                   2,
+                                   schemaIdOrderable))
+            {
+                return false;
+            }
+        }
+
+        return true;
 	}
 
 	/**
@@ -8926,7 +8943,19 @@ public final class	DataDictionaryImpl
 											 luuidFactory, exFactory, dvf));
 
 				break;
-			}
+
+              case SYSSEQUENCES_CATALOG_NUM:
+				retval = new TabInfoImpl(new SYSSEQUENCESRowFactory(
+											 luuidFactory, exFactory, dvf));
+
+				break;
+
+              case SYSPERMS_CATALOG_NUM:
+				retval = new TabInfoImpl(new SYSPERMSRowFactory(
+											 luuidFactory, exFactory, dvf));
+
+				break;            
+            }
 
 			initSystemIndexVariables(retval);
 
@@ -12644,4 +12673,172 @@ public final class	DataDictionaryImpl
 		createSystemSps(tc);		
 	}
 
+    /**
+     * Drops a sequence descriptor
+     *
+     * @param descriptor The descriptor to drop
+     * @param tc         The TransactionController.
+     * @throws StandardException Thrown on failure
+     */
+    public void dropSequenceDescriptor(SequenceDescriptor descriptor, TransactionController tc)
+            throws StandardException {
+        DataValueDescriptor sequenceIdOrderable;
+        TabInfoImpl ti = getNonCoreTI(SYSSEQUENCES_CATALOG_NUM);
+
+        sequenceIdOrderable = getIDValueAsCHAR(descriptor.getUUID());
+
+        /* Set up the start/stop position for the scan */
+        ExecIndexRow keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
+        keyRow.setColumn(1, sequenceIdOrderable);
+
+        ti.deleteRow(tc, keyRow, SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX1_ID);
+    }
+
+    public SequenceDescriptor getSequenceDescriptor(UUID uuid) throws StandardException {
+        DataValueDescriptor UUIDStringOrderable;
+
+        TabInfoImpl ti = getNonCoreTI(SYSSEQUENCES_CATALOG_NUM);
+
+        /* Use UUIDStringOrderable in both start and stop position for
+           * scan.
+           */
+        UUIDStringOrderable = getIDValueAsCHAR(uuid);
+
+        /* Set up the start/stop position for the scan */
+        ExecIndexRow keyRow = exFactory.getIndexableRow(1);
+        keyRow.setColumn(1, UUIDStringOrderable);
+
+        return (SequenceDescriptor)
+                getDescriptorViaIndex(
+                        SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX1_ID,
+                        keyRow,
+                        (ScanQualifier[][]) null,
+                        ti,
+                        (TupleDescriptor) null,
+                        (List) null,
+                        false);
+    }
+
+    /**
+     * Get the sequence descriptor given a sequence name and a schema Id.
+     *
+     * @param sequenceName The sequence name, guaranteed to be unique only within its schema.
+     * @param sd           The schema descriptor.
+     * @return The SequenceDescriptor for the constraints.
+     * @throws StandardException Thrown on failure
+     */
+    public SequenceDescriptor getSequenceDescriptor(SchemaDescriptor sd, String sequenceName)
+            throws StandardException {
+        DataValueDescriptor schemaIDOrderable;
+        DataValueDescriptor sequenceNameOrderable;
+        TabInfoImpl ti = getNonCoreTI(SYSSEQUENCES_CATALOG_NUM);
+
+        /* Use sequenceNameOrderable and schemaIdOrderable in both start
+           * and stop position for scan.
+           */
+        sequenceNameOrderable = new SQLVarchar(sequenceName);
+        schemaIDOrderable = getIDValueAsCHAR(sd.getUUID());
+
+        /* Set up the start/stop position for the scan */
+        ExecIndexRow keyRow = exFactory.getIndexableRow(2);
+        keyRow.setColumn(1, schemaIDOrderable);
+        keyRow.setColumn(2, sequenceNameOrderable);
+
+        return (SequenceDescriptor)
+                getDescriptorViaIndex(
+                        SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX2_ID,
+                        keyRow,
+                        (ScanQualifier[][]) null,
+                        ti,
+                        (TupleDescriptor) null,
+                        (List) null,
+                        false);
+    }
+
+    /**
+     * Get an object's permission descriptor from the system tables, without going through the cache.
+     * This method is called to fill the permissions cache.
+     *
+     * @return a PermDescriptor that describes the table permissions granted to the grantee on an objcet
+     * , null if no table-level permissions have been granted to him on the table.
+     * @throws StandardException
+     */
+    PermDescriptor getUncachedPermDescriptor(PermDescriptor key)
+            throws StandardException {
+
+        return (PermDescriptor)
+                getUncachedPermissionsDescriptor(SYSPERMS_CATALOG_NUM,
+                        SYSPERMSRowFactory.PERMS_UUID_IDX_NUM, key);
+
+
+    } // end of getUncachedPermDescriptor
+
+    /**
+     * Get permissions granted to one user for an object using the object's Id
+     * and the user's authorization Id.
+     *
+     * @param objectUUID
+     *
+     * @return The descriptor of the permissions for the object
+     *
+     * @exception StandardException
+     */
+    public PermDescriptor getPermissions(UUID objectUUID, String granteeAuthId)
+        throws StandardException {
+        PermDescriptor key = new PermDescriptor(this, null, null, objectUUID, null, null, granteeAuthId, false);
+        return getUncachedPermDescriptor(key);
+    }
+
+    /**
+     * Get one user's privileges for an object using the permUUID.
+     *
+     * @param permUUID
+     * @return The descriptor of the user's permissions for the object.
+     * @throws StandardException
+     */
+    public PermDescriptor getPermissions(UUID permUUID)
+            throws StandardException {
+        PermDescriptor key = new PermDescriptor(this, permUUID);
+        return getUncachedPermDescriptor(key);
+    }
+
+    /**
+     * Drops all permission descriptors for the object whose Id is given.
+     *
+     * @param objectID The UUID of the object from which to drop
+     *                 all the permission descriptors
+     * @param tc       TransactionController for the transaction
+     * @throws StandardException Thrown on error
+     */
+    public void dropAllPermDescriptors(UUID objectID, TransactionController tc)
+            throws StandardException {
+        TabInfoImpl ti = getNonCoreTI(SYSPERMS_CATALOG_NUM);
+        SYSPERMSRowFactory rf = (SYSPERMSRowFactory) ti.getCatalogRowFactory();
+        DataValueDescriptor objIdOrderable;
+        ExecRow curRow;
+        PermissionsDescriptor perm;
+
+        // In Derby authorization mode, permission catalogs may not be present
+        if (!usesSqlAuthorization)
+            return;
+
+        /* Use objIDOrderable in both start and stop position for scan. */
+        objIdOrderable = getIDValueAsCHAR(objectID);
+
+        /* Set up the start/stop position for the scan */
+        ExecIndexRow keyRow = exFactory.getIndexableRow(1);
+        keyRow.setColumn(1, objIdOrderable);
+
+        while ((curRow = ti.getRow(tc, keyRow, rf.PERMS_OBJECTID_IDX_NUM)) != null) {
+            perm = (PermDescriptor) rf.buildDescriptor(curRow, (TupleDescriptor) null, this);
+            removePermEntryInCache(perm);
+
+            // Build new key based on UUID and drop the entry as we want to drop
+            // only this row
+            ExecIndexRow uuidKey;
+            uuidKey = rf.buildIndexKeyRow(rf.PERMS_UUID_IDX_NUM, perm);
+            ti.deleteRow(tc, uuidKey, rf.PERMS_UUID_IDX_NUM);
+        }
+    }
 }
+

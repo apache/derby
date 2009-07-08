@@ -866,7 +866,9 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                     {"SYSTABLEPERMS", "1"},
                     {"SYSCOLPERMS", "1"},
                     {"SYSROUTINEPERMS", "1"},
-                    {"SYSROLES", "1"}
+                    {"SYSROLES", "1"},
+                    {"SYSSEQUENCES", "1"},
+                    {"SYSPERMS", "1"}
                 };
 
         JDBC.assertFullResultSet(rs, expRS, true);

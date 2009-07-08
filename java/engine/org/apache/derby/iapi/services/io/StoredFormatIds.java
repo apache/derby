@@ -610,6 +610,14 @@ public interface StoredFormatIds {
      */
     static public final int COLUMN_DESCRIPTOR_FINDER_V01_ID =
             (MIN_ID_2 + 393);
+
+    /**
+    class org.apache.derby.impl.sql.catalog.SequenceDescriptorFinder
+     */
+    static public final int SEQUENCE_DESCRIPTOR_FINDER_V01_ID =
+            (MIN_ID_2 + 472);
+
+    static public final int PERM_DESCRIPTOR_FINDER_V01_ID = (MIN_ID_2 + 473);
         
     /******************************************************************
     **
@@ -1901,7 +1909,7 @@ public interface StoredFormatIds {
      * Make sure this is updated when a new module is added
      */
     public static final int MAX_ID_2 =
-            (MIN_ID_2 + 471);
+            (MIN_ID_2 + 473);
 
     // DO NOT USE 4 BYTE IDS ANYMORE
     static public final int MAX_ID_4 =

@@ -606,7 +606,7 @@ private void commonTestingForTerritoryBasedDB(Statement s) throws SQLException{
     //The query below will work for the same reason. 
     checkLangBasedQuery(s, "SELECT count(*) FROM SYS.SYSTABLES WHERE CASE " +
     		" WHEN 1=1 THEN TABLENAME ELSE TABLEID END = TABLENAME",
-    		new String[][] {{"23"} });
+    		new String[][] {{"25"} });
 
     //Do some testing using CONCATENATION
     //following will fail because result string of concatenation has 

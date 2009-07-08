@@ -407,6 +407,13 @@ public	class DD_Version implements	Formatable
             // added in 10.6.
             bootingDictionary.create_10_6_system_procedures(tc,
                     newlyCreatedRoutines);
+            
+            // On upgrade from versions before 10.6, create system catalogs
+            // added in 10.6
+            bootingDictionary.upgradeMakeCatalog(
+                    tc, DataDictionary.SYSSEQUENCES_CATALOG_NUM);
+            bootingDictionary.upgradeMakeCatalog(
+                    tc, DataDictionary.SYSPERMS_CATALOG_NUM);
         }
 
         if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_1)
