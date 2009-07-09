@@ -563,8 +563,11 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
 
                 try {
                     Object ov = m.invoke(this, null);
-                    String value = ov == null ? null : ov.toString();
-                    ref.add(new StringRefAddr(propertyName, value));
+                    // Need to check if property value is null, otherwise
+                    // "null" string gets stored.
+                    if (ov != null) {
+                        ref.add(new StringRefAddr(propertyName, ov.toString()));
+                    }
                 } catch (IllegalAccessException iae) {
                 } catch (InvocationTargetException ite) {
                 }

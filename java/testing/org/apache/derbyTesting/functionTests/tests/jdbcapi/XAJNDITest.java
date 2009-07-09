@@ -106,29 +106,30 @@ public class XAJNDITest extends BaseJDBCTestCase {
             ic.rebind("cn=compareDS, o=" + dnString, xads);
             javax.sql.XADataSource ads =
                 (javax.sql.XADataSource)ic.lookup("cn=compareDS, o=" + dnString);
-            // At this point, the directly created xads should be matching the looked up one.
+
+            // Embedded data sources implement equals(), so use it to check
+            // that the two data sources are equal.
             if (usingEmbedded())
             {
                 assertEquals(xads, ads);
             }
-            else
-            {
-                // DERBY-3669; with DerbyNetClient, the original and looked-up
-                // xadatasource are not the same...So, compare piece by piece:
-                // When fixed, rest of else can be replaced by uncommenting 
-                // next line
-                //assertEquals(xads,ads);
-                String[] orgprops = getPropertyBeanList(xads);
-                String[] bindprops = getPropertyBeanList(ads);
-                assertEquals(orgprops.length, bindprops.length);
-                // following is actually checked in DataSourceReferenceTest
-                for (int i=0;i<orgprops.length;i++){
-                    assertEquals(orgprops[i], bindprops[i]);
-                }
-                // We have the same properties, now compare the values
-                assertEqualPropValues(xads,ads, orgprops);
+
+            // Client data sources don't implement equals(), so compare each
+            // property manually. And by the way, we don't trust that equals()
+            // in embedded data sources checks all the properties, so do a
+            // full check for embedded as well.
+            String[] orgprops = getPropertyBeanList(xads);
+            String[] bindprops = getPropertyBeanList(ads);
+            assertEquals(orgprops.length, bindprops.length);
+
+            // Check that all properties are equal.
+            for (int i=0;i<orgprops.length;i++){
+                assertEquals(orgprops[i], bindprops[i]);
+                assertEquals(
+                        JDBCDataSource.getBeanProperty(xads, orgprops[i]),
+                        JDBCDataSource.getBeanProperty(ads, bindprops[i]));
             }
-            
+
             // modify something essential of the original XADataSource
             JDBCDataSource.clearStringBeanProperty(xads, "createDatabase");
             
@@ -136,32 +137,6 @@ public class XAJNDITest extends BaseJDBCTestCase {
             assertFalse(xads.equals(ads));
     }
 
-    public void assertEqualPropValues(
-            XADataSource orgds, XADataSource lookedupds, String[] props)
-    throws Exception {
-        for (int i=0;i<props.length;i++){
-            if (JDBCDataSource.getBeanProperty(orgds, props[i]) != null && 
-                    JDBCDataSource.getBeanProperty(lookedupds, props[i]) != null)
-            {
-                assertEquals(
-                        JDBCDataSource.getBeanProperty(orgds, props[i]),
-                        JDBCDataSource.getBeanProperty(lookedupds, props[i])
-                );
-            }
-            else {
-                if (JDBCDataSource.getBeanProperty(lookedupds,props[i]) != null)
-                {
-                    assertNull(JDBCDataSource.getBeanProperty(orgds,props[i]));
-                }
-                else
-                {
-                    assertNull(JDBCDataSource.getBeanProperty(orgds,props[i]));
-                    assertNull(JDBCDataSource.getBeanProperty(lookedupds,props[i]));
-                }
-            }
-        }
-    }
-    
     /**
      * Obtains a list of bean properties through reflection.
      * 
