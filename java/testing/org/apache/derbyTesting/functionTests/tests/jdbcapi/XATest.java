@@ -560,7 +560,7 @@ public class XATest extends BaseJDBCTestCase {
                 { "2005" }, { "2007" } };
         JDBC.assertFullResultSet(rs, expectedRows);
         rs.close();
-
+        conn.rollback();
         conn.close();
 
         /*
