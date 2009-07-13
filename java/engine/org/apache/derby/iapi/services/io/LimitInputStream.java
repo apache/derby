@@ -144,4 +144,18 @@ public class LimitInputStream extends FilterInputStream implements Limit {
 	public void setInput(InputStream in) {
 		this.in = in;
 	}
+
+    /**
+     * This stream doesn't support mark/reset, independent of whether the
+     * underlying stream does so or not.
+     * <p>
+     * The reason for not supporting mark/reset, is that it is hard to combine
+     * with the limit functionality without always keeping track of the number
+     * of bytes read.
+     *
+     * @return {@code false}
+     */
+    public boolean markSupported() {
+        return false;
+    }
 }

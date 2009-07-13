@@ -26,6 +26,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
+import org.apache.derby.iapi.services.io.FormatIdInputStream;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
@@ -38,6 +39,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.PushbackInputStream;
 import java.sql.Clob;
 import java.sql.Date;
 import java.sql.SQLException;
@@ -242,11 +244,11 @@ public class SQLClob
         long charLength = 0;
         try {
             if (repositionStream) {
-                rewindStream(csd.getDataOffset());
+                rewindStream(stream, csd.getDataOffset());
             }
             charLength = UTF8Util.skipUntilEOF(stream);
             // We just drained the whole stream. Reset it.
-            rewindStream(0);
+            rewindStream(stream, 0);
         } catch (IOException ioe) {
             throwStreamingIOException(ioe);
         }
@@ -348,7 +350,7 @@ public class SQLClob
                 if (read > hdrInfo.headerLength()) {
                     // We have read too much. Reset the stream.
                     read = hdrInfo.headerLength();
-                    rewindStream(read);
+                    rewindStream(stream, read);
                 }
                 csd = new CharacterStreamDescriptor.Builder().stream(stream).
                     bufferable(false).positionAware(false).
@@ -692,11 +694,12 @@ public class SQLClob
                                             : (int)csd.getByteLength();
             hdrInfo = new HeaderInfo(hdrLen, valueLength);
             // Make sure the stream is correctly positioned.
-            rewindStream(hdrLen);
+            rewindStream((InputStream)in, hdrLen);
         } else {
-            final boolean markSet = stream.markSupported();
+            final InputStream srcIn = (InputStream)in;
+            final boolean markSet = srcIn.markSupported();
             if (markSet) {
-                stream.mark(MAX_STREAM_HEADER_LENGTH);
+                srcIn.mark(MAX_STREAM_HEADER_LENGTH);
             }
             byte[] header = new byte[MAX_STREAM_HEADER_LENGTH];
             int read = in.read(header);
@@ -706,18 +709,31 @@ public class SQLClob
             }
             hdrInfo = investigateHeader(header, read);
             if (read > hdrInfo.headerLength()) {
-                // We read too much data, reset and position on the first byte
-                // of the user data.
-                // First see if we set a mark on the stream and can reset it.
-                // If not, try using the Resetable interface.
+                // We read too much data. To "unread" the bytes, the following
+                // mechanisms will be attempted:
+                //  1) See if we set a mark on the stream, if so reset it.
+                //  2) If we have a FormatIdInputStream, use a
+                //     PushBackInputStream and use it as the source.
+                //  3) Try using the Resetable interface.
+                // To avoid silent data truncation / data corruption, we fail
+                // in step three if the stream isn't resetable.
                 if (markSet) {
-                    // Stream is not a store Resetable one, use mark/reset
-                    // functionality instead.
-                    stream.reset();
-                    InputStreamUtil.skipFully(stream, hdrInfo.headerLength());
-                } else if (stream instanceof Resetable) {
-                    // We have a store stream.
-                    rewindStream(hdrInfo.headerLength());
+                    // 1) Reset the stream to the previously set mark.
+                    srcIn.reset();
+                    InputStreamUtil.skipFully(srcIn, hdrInfo.headerLength());
+                } else if (in instanceof FormatIdInputStream) {
+                    // 2) Add a push back stream on top of the underlying
+                    // source, and unread the surplus bytes we read. Set the
+                    // push back stream to be the source of the data input obj.
+                    final int surplus = read - hdrInfo.headerLength();
+                    FormatIdInputStream formatIn = (FormatIdInputStream)in;
+                    PushbackInputStream pushbackIn = new PushbackInputStream(
+                            formatIn.getInputStream(), surplus);
+                    pushbackIn.unread(header, hdrInfo.headerLength(), surplus);
+                    formatIn.setInput(pushbackIn);
+                } else {
+                    // 3) Assume we have a store stream.
+                    rewindStream(srcIn, hdrInfo.headerLength());
                 }
             }
         }
@@ -769,14 +785,15 @@ public class SQLClob
      * Rewinds the stream to the beginning and then skips the specified number
      * of bytes.
      *
-     * @param pos number of bytes to skip
+     * @param in input stream to rewind
+     * @param offset number of bytes to skip
      * @throws IOException if resetting or reading from the stream fails
      */
-    private void rewindStream(long pos)
+    private void rewindStream(InputStream in, long offset)
             throws IOException {
         try {
-            ((Resetable)stream).resetStream();
-            InputStreamUtil.skipFully(stream, pos);
+            ((Resetable)in).resetStream();
+            InputStreamUtil.skipFully(in, offset);
         } catch (StandardException se) {
             IOException ioe = new IOException(se.getMessage());
             ioe.initCause(se);
