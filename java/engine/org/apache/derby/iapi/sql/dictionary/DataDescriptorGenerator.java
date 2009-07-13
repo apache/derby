@@ -521,7 +521,7 @@ public class DataDescriptorGenerator
      * Create a new sequence descriptor
      * @param uuid
      * @param sequenceName
-     * @return
+     * @return SequenceDescriptor
      */
     public SequenceDescriptor newSequenceDescriptor(
             SchemaDescriptor sd,
