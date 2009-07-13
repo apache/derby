@@ -40,6 +40,12 @@ public interface EngineConnection extends Connection {
      */
     public void setDrdaID(String drdaID);
 
+    /**
+     * Is this a global transaction
+     * @return true if this is a global XA transaction
+     */
+    public boolean isInGlobalTransaction();
+    
     /** 
      * Set the transaction isolation level that will be used for the 
      * next prepare.  Used by network server to implement DB2 style 

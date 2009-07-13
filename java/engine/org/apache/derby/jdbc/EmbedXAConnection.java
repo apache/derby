@@ -22,6 +22,7 @@
 package org.apache.derby.jdbc;
 
 import org.apache.derby.impl.jdbc.Util;
+import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.EngineConnection;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 
@@ -52,6 +53,11 @@ class EmbedXAConnection extends EmbedPooledConnection
 		super(ds, u, p, requestPassword);
                 xaRes = new EmbedXAResource (this, ra);
 	}
+
+    /** @see BrokeredConnectionControl#isInGlobalTransaction() */
+    public boolean isInGlobalTransaction() {
+    	return isGlobal();
+    }	
 
     /**
      * Check if this connection is part of a global XA transaction.

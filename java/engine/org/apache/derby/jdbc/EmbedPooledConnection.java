@@ -409,7 +409,11 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 	public void resetIsolationLevelFlag() throws SQLException {
 		realConnection.getLanguageConnection().resetIsolationLevelFlagUsedForSQLandJDBC();
 	}
-	
+
+    /** @see BrokeredConnectionControl#isInGlobalTransaction() */
+    public boolean isInGlobalTransaction() {
+    	return false;
+    }	
 	
 	/**
 		Notify the control class that a SQLException was thrown
