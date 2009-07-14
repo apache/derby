@@ -79,7 +79,7 @@ public class XATestUtil {
         if (expectedRows == null)
             JDBC.assertEmpty(rs);
         else
-            JDBC.assertFullResultSet(rs, expectedRows);
+            JDBC.assertUnorderedResultSet(rs, expectedRows);
         rs.close();
     }
     
