@@ -91,6 +91,12 @@ public interface BrokeredConnectionControl
 	*/
 	public void resetIsolationLevelFlag() throws SQLException;
 
+    /**
+     * Is this a global transaction
+     * @return true if this is a global XA transaction
+     */
+    public boolean isInGlobalTransaction();
+
 	/**
 		Close called on BrokeredConnection. If this call
 		returns true then getRealConnection().close() will be called.

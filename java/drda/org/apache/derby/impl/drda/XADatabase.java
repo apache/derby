@@ -57,7 +57,6 @@ class XADatabase extends Database {
 	XADatabase (String dbName)
 	{
 		super(dbName);
-		forXA = true;
 	}
 
 	/**
