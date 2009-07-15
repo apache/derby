@@ -31,7 +31,7 @@ with real information.
 
     E.g.: 10.3.0.3
 -->
-<releaseID>10.5.1.1</releaseID>
+<releaseID>10.5.2.0</releaseID>
 
 <!--
     Identifier of previous release. The release notes describe the
@@ -40,7 +40,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.4.2.0</previousReleaseID>
+<previousReleaseID>10.5.1.1</previousReleaseID>
 
 <!--
     Identifier(s) of previously released versions. Any issue that was fixed in
@@ -54,6 +54,7 @@ with real information.
 <excludeReleaseID>10.3.3.0</excludeReleaseID>
 <excludeReleaseID>10.4.1.3</excludeReleaseID>
 <excludeReleaseID>10.4.2.0</excludeReleaseID>
+<excludeReleaseID>10.5.1.1</excludeReleaseID>
 
 <!--
     Information on the system used to build the release.
@@ -142,44 +143,15 @@ Derby functionality includes:
     Here describe the new features of this release. E.g.:
 
 <p>
-This is a bug fix release. No new features features were added.
+This is a bug fix release and also provides localization of messages added in 10.5. No new features features were added. 
 </p>
 
 -->
 
 <newFeatures>
 <p>
-This is a feature release. The following features were added.
+This is a bug fix release and also provides localization of new 10.5 messages. No new features were added.
 </p>
-<ul>
-<li>
-<b>SQL Roles</b> - SQL roles (as described in SQL 2003 and errata) are useful for administering privileges for groups of users. Administering roles is generally less error-prone than administering privileges for individual users. SQL Roles are defined in Feature T331 "Basic roles" and Feature T332 "Extended roles". Derby 10.5 implements a subset of T331, plus support for CURRENT_ROLE, which is a part of T332.
-</li>
-<li>
-<b>Generated Columns</b> - Generated Columns is a feature which instructs Derby to fill a column with an expression built out of other columns in the row. Derby constructs these column values at INSERT and UPDATE time. The user declares indexes on these columns. This in turn improves SELECT performance since it lets users declare indexes on pre-computed pieces of the WHERE clause. This feature satisfies support for SQL Feature T175.
-</li>
-<li>
-<b>LOB Improvements</b> - There were many performance and usability improvements for BLOBs and CLOBs.  
-</li>
-<li>
-<b>Replication of encrypted databases</b> - With 10.5 it is possible to replicate encrypted databases. 
-</li>
-<li>
-<b>OFFSET/FETCH FIRST</b> - SQL 2008 has added new syntax to support a direct way to limit the 
-returned set of rows in a result set, through the fetch first and offset clauses. 
-</li>
-<li>
-<b>In-memory back end</b> - Initial implementation of a storage engine for Derby where all data is kept in memory. There is no documentation for this feature. This functionality itself is not yet fully implemented, but users are welcome to experiment with it. For details, see the
-<a href="http://wiki.apache.org/db-derby/InMemoryBackEndPrimer">Primer for In-memory Back Ends</a>.
-</li>
-<li>
-<b>Standard ALTER COLUMN syntax</b> - Allow standard SQL "SET" keyword in ALTER COLUMN syntax, like so:
- "ALTER TABLE ALTER [COLUMN] columnname SET DEFAULT default-value"
-</li>
-<li>
-<b>SYSCS_UTIL.SYSCS_UPDATE_STATISTICS</b> - New system procedure that updates cardinality statistics (or creates them if they do not exist) for a table's index or for all the indexes on a table, allowing a user to ensure that a query plan based on the most recent state of the table can be created.
-</li>
-</ul>
 </newFeatures>
 
 </summary>

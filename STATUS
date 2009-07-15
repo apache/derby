@@ -44,12 +44,12 @@ Releases from trunk:
 PENDING ISSUES
 ==============
 
-None.
+A release candidate for 10.5.2.0 (a bug fix release) will be posted 7/15/2009
 
 RESOLVED ISSUES SINCE LAST STATUS
 =================================
 
-None.
+See RELEASE-NOTES.html
 
 RECENT VOTES
 =================================
@@ -110,3 +110,4 @@ Committers      vnarayanan           V Narayanan (CLA on file)
 Committers      jorgenlo             Jørgen Løland (CLA on file)
 Committers      thomanie             Thomas Nielsen (CLA on file)
 Committers      johnemb              John Embretsen (CLA on file)
+Committers      ole                  Ole Solberg (CLA on file)	
