@@ -336,7 +336,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 				"Gesamtspeicher: #####	Freier Speicher: #####");
 		germanOutputs.put("sedMemorySearch", "Gesamtspeicher: [0-9]*	Freier Speicher: [0-9]*");
 		germanOutputs.put("sedMemoryReplace", "Gesamtspeicher: #####	Freier Speicher: #####");
-		germanOutputs.put("RuntimeInfoLocaleString", "\tAnwsg-ID\t\tSQL-Text\n\t--------------\t------------\n\n\n\nSitzungsnummer");
+		germanOutputs.put("RuntimeInfoLocaleString", "\tAnwsg-ID\t\tSQL-Text\n\t-------------\t-----------\n\n\n\nSitzungsnummer");
 		
 		outputs = new HashMap();
 		outputs.put(englishLocale, englishOutputs);
