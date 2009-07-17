@@ -811,23 +811,6 @@ public abstract class BaseJDBCTestCase
         assertSQLState("Unexpected SQL state.", expected, exception);
     }
     
-    public static void assertErrorCode(String message, int expected, SQLException exception) {
-       while (exception != null)
-       {
-           try {
-               assertEquals(message, expected,exception.getErrorCode());
-           } catch (AssertionFailedError e) {
-               // check and see if our error code is in a chained exception
-               exception = exception.getNextException();               
-           }
-       }
-    }
-    
-    public static void assertErrorCode(int expected, SQLException exception)
-    {
-       assertErrorCode("Unexpected Error Code",expected, exception);
-    }
-    
     /**
      * Assert that the SQL statement does not compile and throws
      * a SQLException with the expected state.
