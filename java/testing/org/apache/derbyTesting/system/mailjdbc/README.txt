@@ -28,7 +28,7 @@ Contents
 
 1. About the Mailjdbc test
 
- This test will mimic how a typical mail client can  use Derby as their database
+ This test will mimic how a typical mail client can use Derby as their database
 
 2. Design
 
@@ -91,6 +91,10 @@ For both conditions the performance of the database should be about the same.
 3. Run java org.apache.derbyTesting.system.mailjdbc.MailJdbc embedded
  or
  java org.apache.derbyTesting.system.mailjdbc.MailJdbc NetworkServer (To run in the NetworkServer mode you should start the n/w server manually)
+4. If you want to use the same database as the previous run, 
+   Run java org.apache.derbyTesting.system.mailjdbc.MailJdbc embedded samedb
+ or
+  java org.apache.derbyTesting.system.mailjdbc.MailJdbc NetworkServer samedb (To run in the NetworkServer mode you should start the n/w server manually)
 
 There are 2 output files. 
 1. Activity.out - which will give all the activities done by the test
