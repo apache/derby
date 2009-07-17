@@ -31,10 +31,13 @@ public class MailJdbc {
 	public static LogFile logAct = new LogFile("Activity.out");
 
 	public static void main(String[] args) throws Exception {
+		boolean useexistingdb = false;
 		String type = args[0];
+		if (args.length > 1 && args[1].equals("samedb"))
+			useexistingdb = true;
 		System.out.println("Test started with " + type + " driver");
 		//Loads the driver
-		DbTasks.jdbcLoad(type);
+		DbTasks.jdbcLoad(type, useexistingdb);
 		//Starts all 4 threads
 		ThreadUtils.startThreads();
 	}

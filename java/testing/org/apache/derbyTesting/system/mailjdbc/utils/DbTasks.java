@@ -57,8 +57,12 @@ public class DbTasks {
 	public static int blob_count = 0;
 
 	public static Random Rn = new Random();
-
-	public static void jdbcLoad(String driverType) {
+	/**
+	 * jdbcLoad - Create url, schema and set driver and database system property that will be use later in the test.
+	 * @param driverType - "embedded" or "NetworkServer" 
+	 * @param useexistingdb - whether to use existing database or not
+	 */
+	public static void jdbcLoad(String driverType, boolean useexistingdb) {
 
 		if (driverType.equalsIgnoreCase("embedded")) {
 			setSystemProperty("driver", "org.apache.derby.jdbc.EmbeddedDriver");
@@ -69,13 +73,22 @@ public class DbTasks {
 					.logMsg("\n\n*****************************************************");
 			// setting the properties like user, password etc for both the
 			// database and the backup database
-			setSystemProperty("database", "jdbc:derby:mailsdb;create=true");
+			if (useexistingdb)
+		        setSystemProperty("database", "jdbc:derby:mailsdb");
+			else
+		        setSystemProperty("database", "jdbc:derby:mailsdb;create=true");			
 			setSystemProperty("ij.user", "REFRESH");
 			setSystemProperty("ij.password", "Refresh");
 		} else {
 			setSystemProperty("driver", "org.apache.derby.jdbc.ClientDriver");
-			setSystemProperty("database",
-					"jdbc:derby://localhost:1527/mailsdb;create=true;user=REFRESH;password=Refresh");
+			if (useexistingdb)
+				setSystemProperty("database",
+					"jdbc:derby://localhost:1527/mailsdb");
+			else
+				setSystemProperty("database",
+					"jdbc:derby://localhost:1527/mailsdb;create=true");
+			setSystemProperty("ij.user", "REFRESH");
+			setSystemProperty("ij.password", "Refresh");
 			MailJdbc.logAct
 					.logMsg(" \n*****************************************************");
 			MailJdbc.logAct
@@ -84,6 +97,12 @@ public class DbTasks {
 					.logMsg("\n\n*****************************************************");
 		}
 		try {
+			if (useexistingdb)
+			{
+				MailJdbc.logAct
+				.logMsg("Useing the existing database...");
+				return;
+			}
 			// Create the schema (tables)
 			long s_schema = System.currentTimeMillis();
 			org.apache.derby.tools.ij
