@@ -37,7 +37,7 @@ public class Backup extends Thread{
 	
 	public Backup(String name)throws Exception{
 		setName(name);
-		conn = DbTasks.getConnection("BACKUP", "Backup");
+		conn = DbTasks.getConnection("REFRESH", "Refresh");
 	}
 
 	public void run() {
