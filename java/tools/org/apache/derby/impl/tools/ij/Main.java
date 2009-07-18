@@ -39,6 +39,8 @@ import java.io.IOException;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -114,12 +116,17 @@ public class Main {
                         out.flush();
     	        } else {
                     try {
-                        in1 = new FileInputStream(file);
+                    	final String inFile1 = file;
+                    	in1 = (FileInputStream) AccessController.doPrivileged(new PrivilegedExceptionAction() {
+            				public Object run() throws FileNotFoundException {
+        						return new FileInputStream(inFile1);
+            				}
+            			});
                         if (in1 != null) {
                             in1 = new BufferedInputStream(in1, utilMain.BUFFEREDFILESIZE);
                             in = langUtil.getNewInput(in1);
                         }
-                    } catch (FileNotFoundException e) {
+                    } catch (PrivilegedActionException e) {
                         if (Boolean.getBoolean("ij.searchClassPath")) {
                             in = langUtil.getNewInput(util.getResourceAsStream(file));
                         }
