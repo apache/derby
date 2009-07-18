@@ -621,7 +621,7 @@ public class DbTasks {
 	// the deletion of some rows
 	{
 		long s_compress = System.currentTimeMillis();
-		long dbsize = databaseSize("mailsdb/seg0");
+		long dbsize = databaseSize(new File("mailsdb"));
 		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 				+ "dbsize before compress : " + dbsize);
 		boolean saveAutoCommit = conn.getAutoCommit();
@@ -652,7 +652,7 @@ public class DbTasks {
 		log.logMsg(LogFile.INFO + thread_name + " : "
 				+ "Time taken to compress the table : " + tabname
 				+ PerfTime.readableTime(e_compress - s_compress));
-		dbsize = databaseSize("mailsdb/seg0");
+		dbsize = databaseSize(new File("mailsdb"));
 		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 				+ "dbsize after compress : " + dbsize);
 	}
@@ -746,16 +746,16 @@ public class DbTasks {
 			conn.setAutoCommit(saveAutoCommit);
 		}
 	}
-	public static long databaseSize(String dbname) {
-		File dir = new File(dbname);
-		File[] files = dir.listFiles();
-		long length = 0;
-		int count = 0;
-		for (int i = 0; i < files.length; i++) {
-			length = length + files[i].length();
-			count++;
-		}
-		return length;
+	public static long databaseSize(File dbname) {
+	    long length = 0;
+	    if (dbname.isDirectory()) {
+	        String[] children = dbname.list();
+	        for (int i=0; i<children.length; i++) 
+	            length = length + databaseSize(new File(dbname, children[i]));
+	        return length;
+	    }
+	    else
+	        return dbname.length();	
 	}
 
 	public static void setSystemProperty(String key, String value) {
