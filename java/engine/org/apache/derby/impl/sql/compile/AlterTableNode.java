@@ -32,6 +32,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
@@ -41,6 +42,7 @@ import org.apache.derby.iapi.types.StringDataValue;
 
 import org.apache.derby.impl.sql.execute.ColumnInfo;
 import org.apache.derby.impl.sql.execute.ConstraintConstantAction;
+import org.apache.derby.impl.sql.execute.CreateConstraintConstantAction;
 
 /**
  * A AlterTableNode represents a DDL statement that alters a table.
@@ -511,6 +513,31 @@ public class AlterTableNode extends DDLStatementNode
 
 			tableElementList.genConstraintActions(false, conActions, getRelativeName(), schemaDescriptor,
 												  getDataDictionary());
+
+			for (int conIndex = 0; conIndex < conActions.length; conIndex++)
+			{
+				ConstraintConstantAction cca = conActions[conIndex];
+
+				if (cca instanceof CreateConstraintConstantAction)
+				{
+					int constraintType = cca.getConstraintType();
+					if (constraintType == DataDictionary.PRIMARYKEY_CONSTRAINT)
+					{
+						DataDictionary dd = getDataDictionary();
+						// Check to see if a constraint of the same type 
+						// already exists
+						ConstraintDescriptorList cdl = 
+                                dd.getConstraintDescriptors(baseTable);
+
+						if (cdl.getPrimaryKey() != null)
+						{
+							throw StandardException.newException(
+                                    SQLState.LANG_ADD_PRIMARY_KEY_FAILED1, 
+                                    baseTable.getQualifiedName());
+						}
+					}
+				}
+			}
 		}
 	}
 	  

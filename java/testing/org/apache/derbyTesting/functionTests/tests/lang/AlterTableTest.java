@@ -113,6 +113,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
     public void testAddColumn() throws Exception {
         Statement st = createStatement();
         createTestObjects(st);
+        conn.commit();
 
         // add column negative tests alter a non-existing table
         assertStatementError("42Y55", st,
@@ -201,18 +202,6 @@ public final class AlterTableTest extends BaseJDBCTestCase {
             JDBC.assertColumnNames(rs, new String[]{"C1"});
             JDBC.assertFullResultSet(rs, new String[][]{{"1"}, {"2"}});
         }
-
-        // DERBY-4244 (START)
-        // Without these lines, this test fails a few lines later when
-        // it makes yet another attempt to add column c2 to table t0. This
-        // bug is logged as DERBY-4244. When that problem is fixed, this
-        // section could be removed.
-        conn.commit();
-        st.executeUpdate("drop table t0");
-        st.executeUpdate(
-                "create table t0(c1 int not null constraint p1 primary key)");
-        conn.commit();
-        // DERBY-4244 (END)
 
         // add non-nullable column to 0 row table and verify
         st.executeUpdate("alter table t0 add column c2 int not null default 0");
