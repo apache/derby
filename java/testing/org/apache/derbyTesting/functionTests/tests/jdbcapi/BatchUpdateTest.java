@@ -1521,4 +1521,49 @@ public class BatchUpdateTest extends BaseJDBCTestCase {
             fail("Could not see 'duplicate key' in printStackTrace()", bue);
         }
     }
+
+    /**
+     * Test the behaviour when one of the statements in a batch fails. The
+     * embedded driver stops executing the batch when that happens, whereas
+     * the client driver continues. The difference between embedded and
+     * client is logged as DERBY-4316.
+     */
+    public void testContinueAfterError() throws SQLException {
+        // Turn off auto-commit so that the tables added by the test can be
+        // rolled back in tearDown().
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create table a(x int)");
+        s.execute("create table b(x int primary key)");
+        s.execute("create table c(x int references b(x))");
+
+        // Drop the three tables in a batch. Since B is referenced by C, it
+        // cannot be dropped before C is dropped. Hence DROP TABLE B will fail.
+        s.addBatch("drop table a");
+        s.addBatch("drop table b");
+        s.addBatch("drop table c");
+
+        // Embedded stops processing the batch on the first failure, and only
+        // the update count from the successful statement is returned. The
+        // client driver continues after the failure, so it'll also drop C.
+        int[] expectedCounts = usingEmbedded() ?
+            new int[]{0} : new int[]{0, Statement.EXECUTE_FAILED, 0};
+
+        assertBatchExecuteError("X0Y25", s, expectedCounts);
+
+        // Table A should not exist after the batch was executed.
+        assertStatementError("42X05", s, "select * from a");
+        // Table B should still exist, since DROP TABLE B failed.
+        assertTableRowCount("B", 0);
+
+        // Embedded driver stops after failure, so expect table C to exist,
+        // whereas the client driver continues after failure, so expect that
+        // it does not exist.
+        if (usingEmbedded()) {
+            assertTableRowCount("C", 0);
+        } else {
+            assertStatementError("42X05", s, "select * from c");
+        }
+    }
 }
