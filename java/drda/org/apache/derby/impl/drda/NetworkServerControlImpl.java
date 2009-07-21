@@ -819,9 +819,9 @@ public final class NetworkServerControlImpl {
                        }
                     });
         } catch (Exception exception) {
-            consoleExceptionPrintTrace(exception);
             consolePropertyMessage("DRDA_UnexpectedException.S",			
                 exception.getMessage());
+            consoleExceptionPrintTrace(exception);
         }
 		
  		// Close out the sessions
@@ -832,9 +832,9 @@ public final class NetworkServerControlImpl {
  				try {
  					session.close();
  				} catch (Exception exception) {
- 					consoleExceptionPrintTrace(exception);
  					consolePropertyMessage("DRDA_UnexpectedException.S",			
  							exception.getMessage());
+ 					consoleExceptionPrintTrace(exception);
  				}
  			}
  		}
@@ -856,9 +856,9 @@ public final class NetworkServerControlImpl {
  									}
  								});
  				} catch (Exception exception) {
- 					consoleExceptionPrintTrace(exception);
  					consolePropertyMessage("DRDA_UnexpectedException.S",			
  							exception.getMessage());
+ 					consoleExceptionPrintTrace(exception);
  				}
  			}
  			threadList.clear();
@@ -870,9 +870,9 @@ public final class NetworkServerControlImpl {
 	    }catch(IOException e){
 			consolePropertyMessage("DRDA_ListenerClose.S", true);
 	    } catch (Exception exception) {
-			consoleExceptionPrintTrace(exception);
 			consolePropertyMessage("DRDA_UnexpectedException.S",			
 					exception.getMessage());
+			consoleExceptionPrintTrace(exception);
 	    }
 
 		// Wake up those waiting on sessions, so
@@ -882,9 +882,9 @@ public final class NetworkServerControlImpl {
 				runQueue.notifyAll();
 			}	
 	    } catch (Exception exception) {
-			consoleExceptionPrintTrace(exception);
 			consolePropertyMessage("DRDA_UnexpectedException.S",			
 					exception.getMessage());
+			consoleExceptionPrintTrace(exception);
 	    }
         
         // And now unregister any MBeans.
@@ -892,9 +892,9 @@ public final class NetworkServerControlImpl {
 	        mgmtService.unregisterMBean(versionMBean);
 	        mgmtService.unregisterMBean(networkServerMBean);
 	    } catch (Exception exception) {
-			consoleExceptionPrintTrace(exception);
 			consolePropertyMessage("DRDA_UnexpectedException.S",			
 					exception.getMessage());
+			consoleExceptionPrintTrace(exception);
 	    }
 
 		if (shutdownDatabasesOnShutdown) {
@@ -925,9 +925,9 @@ public final class NetworkServerControlImpl {
 										   sqle.getMessage());
 				}
 			} catch (Exception exception) {
-				consoleExceptionPrintTrace(exception);
 				consolePropertyMessage("DRDA_UnexpectedException.S",			
 						exception.getMessage());
+				consoleExceptionPrintTrace(exception);
 			}
 		}
 
