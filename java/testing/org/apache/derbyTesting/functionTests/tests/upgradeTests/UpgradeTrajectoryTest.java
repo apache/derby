@@ -1324,7 +1324,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
     private String filterKnownProblems( String tableName, String actual )
     {
         if (
-            _trajectory.endsAt( VERSION_10_5_1_1 ) &&
+            _trajectory.endsAt( BRANCH_10_5 ) &&
             ( contains( actual, DERBY_4214_1 ) || contains( actual, DERBY_4214_2 ) )
            )
         { return ""; }
