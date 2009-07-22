@@ -111,6 +111,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         
         PreparedStatement ps = prepareStatement( sql);
         ps.setBinaryStream( 1, is,data.length);
+        //DERBY-4312 Make sure commit() doesn't interfere here
+        commit();
         ps.executeUpdate();          
         // Make sure things still work ok when we have a parameter that does get consumed.
         // insert a matching row.
@@ -208,6 +210,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         Reader streamReader = new LoopingAlphabetReader(
                 clobLength, CharAlphabet.tamil());
         ps.setCharacterStream(1, streamReader, clobLength);
+        //DERBY-4312 make sure commit() doesn't interfere
+        commit();
         ps.executeUpdate();
         streamReader.close();
         ps.close();
@@ -1301,6 +1305,8 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         InputStream streamIn = new LoopingAlphabetStream(10000);
         ps.setAsciiStream(5, streamIn, 10000);
         ps.setInt(6, 1);
+        // DERBY-4312 make sure commit() doesn't interfere here.
+        commit();
         ps.executeUpdate();
         streamIn.close();
         ps.close();
