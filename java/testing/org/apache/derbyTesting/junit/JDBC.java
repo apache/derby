@@ -392,17 +392,14 @@ public class JDBC {
 		for (int i = 0; i < results.length; i++)
 		{
 			int result = results[i];
-			if (result == -3 /* Statement.EXECUTE_FAILED*/)
+			if (result == Statement.EXECUTE_FAILED)
 				hadError = true;
-			else if (result == -2/*Statement.SUCCESS_NO_INFO*/)
+			else if (result == Statement.SUCCESS_NO_INFO || result >= 0) {
 				didDrop = true;
-			else if (result >= 0)
-				didDrop = true;
+				ddl.set(i, null);
+			}
 			else
 				Assert.fail("Negative executeBatch status");
-            
-            if (didDrop)
-                ddl.set(i, null);
 		}
         s.clearBatch();
         if (didDrop) {
