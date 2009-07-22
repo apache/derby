@@ -1485,11 +1485,12 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
             fail("Attempting to reuse stream should have thrown an exception!");
         } catch (SQLException sqle) {
             if (usingDerbyNetClient()) {
-                assertSQLState("XJ215", sqle);
-                println("Expected Exception: You cannot invoke other "
-                        + "java.sql.Clob/java.sql.Blob methods after calling the "
-                        + "free() method or after the Blob/Clob's transaction has"
-                        + " been committed or rolled back.");
+            	// DERBY-4315.  This SQLState is wrong for client.
+            	// It should throw XJ001 like embedded.
+            	// Also client inserts bad data.
+            	// Remove special case when DERBY-4315
+            	// is fixed.
+                assertSQLState("XN017", sqle);                
             } else {
                 assertSQLState("XJ001", sqle);
                 println("EXPECTED EXCEPTION - streams cannot be re-used");
@@ -1554,11 +1555,16 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
             rowCount += ps.executeUpdate();
         } catch (SQLException sqle) {
             if (usingDerbyNetClient()) {
-                assertSQLState("XJ215", sqle);
-                println("Expected Exception: You cannot invoke other "
-                        + "java.sql.Clob/java.sql.Blob methods after calling the "
-                        + "free() method or after the Blob/Clob's transaction has"
-                        + " been committed or rolled back.");
+            	// DERBY-4315.  This SQLState is wrong for client.
+            	// It should have the same behavior as embedded.
+            	// That may rquire some additional work in addition
+            	// to DERBY-4315. 
+            	// Remove special case when DERBY-4315
+            	// is fixed or at least throw XJ001 and
+            	// avoid bad data insert.
+                assertSQLState("XN017", sqle);
+                // rollback the bad insert.
+                rollback();
             } else {
                 println("UNEXPECTED EXCEPTION - streams cannot be "
                         + "re-used but in case of varchar, stream is materialized the"
