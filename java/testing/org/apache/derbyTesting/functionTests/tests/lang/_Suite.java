@@ -58,7 +58,8 @@ public class _Suite extends BaseTestCase  {
         // different on different vms leading to failures in
         // the nightly runs.
         // suite.addTest(largeCodeGen.suite());
-
+	  
+	  suite.addTest(CheckConstraintTest.suite());
         suite.addTest(AnsiTrimTest.suite());
         suite.addTest(AlterTableTest.suite());
         suite.addTest(CreateTableFromQueryTest.suite());
