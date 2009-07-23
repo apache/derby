@@ -79,6 +79,7 @@ public class TestConfiguration {
     private final static String KEY_HOSTNAME = "hostName";
     private final static String KEY_PORT = "port";
     private final static String KEY_VERBOSE = "derby.tests.debug";    
+    private final static String KEY_TRACE = "derby.tests.trace";
     private final static String KEY_SSL = "ssl";
     
     /**
@@ -679,6 +680,9 @@ public class TestConfiguration {
         this.isVerbose = Boolean.valueOf(
             getSystemProperties().getProperty(KEY_VERBOSE)).
             booleanValue();
+        this.doTrace = Boolean.valueOf(
+            getSystemProperties().getProperty(KEY_TRACE)).
+            booleanValue();
         
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
         this.ssl = null;
@@ -699,6 +703,7 @@ public class TestConfiguration {
         this.userPassword = copy.userPassword;
 
         this.isVerbose = copy.isVerbose;
+        this.doTrace = copy.doTrace;
         this.port = copy.port;
         
         this.jdbcClient = copy.jdbcClient;
@@ -720,6 +725,7 @@ public class TestConfiguration {
         this.userPassword = copy.userPassword;
 
         this.isVerbose = copy.isVerbose;
+        this.doTrace = copy.doTrace;
         this.port = port;
         
         this.jdbcClient = client;
@@ -750,6 +756,7 @@ public class TestConfiguration {
                 copy.passwordToken : passwordToken;
 
         this.isVerbose = copy.isVerbose;
+        this.doTrace = copy.doTrace;
         this.port = copy.port;
         
         this.jdbcClient = copy.jdbcClient;
@@ -807,6 +814,7 @@ public class TestConfiguration {
         this.userPassword = copy.userPassword;
 
         this.isVerbose = copy.isVerbose;
+        this.doTrace = copy.doTrace;
         this.port = copy.port;
         
         this.jdbcClient = copy.jdbcClient;
@@ -834,6 +842,7 @@ public class TestConfiguration {
                                          DEFAULT_USER_PASSWORD);
         hostName = props.getProperty(KEY_HOSTNAME, DEFAULT_HOSTNAME);
         isVerbose = Boolean.valueOf(props.getProperty(KEY_VERBOSE)).booleanValue();
+        doTrace =  Boolean.valueOf(props.getProperty(KEY_TRACE)).booleanValue();
         String portStr = props.getProperty(KEY_PORT);
         if (portStr != null) {
             try {
@@ -1108,6 +1117,10 @@ public class TestConfiguration {
      * Set the verbosity, i.e., whether debug statements print.
      */
     public void	setVerbosity( boolean isChatty )	{ isVerbose = isChatty; }
+    /**
+     * Set JUnit test method tracing.
+     */
+    public void setTrace( boolean isChatty )    { doTrace = isChatty; }
     
     /**
      * Return verbose flag.
@@ -1116,6 +1129,14 @@ public class TestConfiguration {
      */
     public boolean isVerbose() {
         return isVerbose;
+    }
+    /**
+     * Return JUnit test method trace flag.
+     *
+     * @return JUnit test method trace flag.
+     */
+    public boolean doTrace() {
+        return doTrace;
     }
 
 	/**
@@ -1214,6 +1235,7 @@ public class TestConfiguration {
     private final String hostName;
     private final JDBCClient jdbcClient;
     private boolean isVerbose;
+    private boolean doTrace;
     private String ssl;
     
     /**
