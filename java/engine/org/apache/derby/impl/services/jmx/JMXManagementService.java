@@ -283,6 +283,10 @@ public final class JMXManagementService implements ManagementService, ModuleCont
      */
     private synchronized void unregisterMBean(final ObjectName mbeanName)
     {
+        //Has this service been shut down?
+        if (registeredMbeans == null)
+            return;
+
         if (registeredMbeans.remove(mbeanName) == null)
             return;
         
