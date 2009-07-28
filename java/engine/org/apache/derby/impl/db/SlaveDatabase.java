@@ -25,6 +25,7 @@ import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
@@ -134,6 +135,7 @@ public class SlaveDatabase extends BasicDatabase {
         // Check that the database was booted successfully, or throw
         // the exception that caused the boot to fail.
         verifySuccessfulBoot();
+
         inBoot = false;
 
         // This module has now been booted (hence active=true) even
@@ -348,6 +350,18 @@ public class SlaveDatabase extends BasicDatabase {
                     // do nothing
                 }
             }
+        }
+
+        if (bootException != null) {
+
+            // DERBY-4186: This is a corner case. Master made us shut down
+            // before the initial connect which establishes the slave has
+            // finalized it setting up of the slave and returned control to the
+            // application. bootException is set while we (application thread)
+            // are waiting in the sleep in the loop above (by the
+            // SlaveDatabaseBootThread thread in its call to handleShutdown),
+            // and this was previously ignored.
+            throw bootException;
         }
     }
 
