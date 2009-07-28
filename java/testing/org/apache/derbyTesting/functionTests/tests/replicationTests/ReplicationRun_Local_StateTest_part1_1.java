@@ -41,6 +41,7 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
     final static String REPLICATION_DB_NOT_BOOTED              = "XRE11";
     final static String REPLICATION_NOT_IN_SLAVE_MODE          = "XRE40";
     final static String SLAVE_OPERATION_DENIED_WHILE_CONNECTED = "XRE41";
+    final static String REPLICATION_SLAVE_SHUTDOWN_OK          = "XRE42";
 
     /**
      * Creates a new instance of ReplicationRun_Local_StateTest_part1
@@ -141,7 +142,7 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
     }
 
     private void _testPostStartedMasterAndSlave_StopSlave()
-    throws InterruptedException
+            throws InterruptedException, SQLException
     {
         String db = null;
         String connectionURL = null;  
@@ -204,7 +205,6 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
         
         // Take down master - slave connection:
         killMaster(masterServerHost, masterServerPort);
-        Thread.sleep(5000L); // TEMPORARY to see if slave sees that master is gone!
         
         // 3.  stopSlave on slave should now result in an exception stating that
         //     the slave database has been shutdown. A master shutdown results
@@ -217,25 +217,66 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
                 + ";stopSlave=true";
         boolean stopSlaveCorrect = false;
         util.DEBUG("3. testPostStartedMasterAndSlave_StopSlave: " + connectionURL);
-        try
-        {
-            conn = DriverManager.getConnection(connectionURL); // From anywhere against slaveServerHost?
-            util.DEBUG("Unexpectedly connected: " + connectionURL);
-            assertTrue("Unexpectedly connected: " + connectionURL,false);
+
+        // We use a loop below, to allow for intermediate states before the
+        // expected final state.
+        //
+        // If we get here quick enough we see these error states (in order):
+        //     a) SLAVE_OPERATION_DENIED_WHILE_CONNECTED
+        //     b) REPLICATION_SLAVE_SHUTDOWN_OK
+        //
+        // The final end state is expected to be REPLICATION_DB_NOT_BOOTED.
+        //
+        SQLException gotEx = null;
+        int tries = 20;
+
+        while (tries-- > 0) {
+            gotEx = null;
+
+            try {
+                // From anywhere against slaveServerHost?
+                conn = DriverManager.getConnection(connectionURL); 
+                util.DEBUG("Unexpectedly connected: " + connectionURL);
+                assertTrue("Unexpectedly connected: " + connectionURL,false);
+
+            } catch (SQLException se) {
+                if (se.getSQLState().
+                        equals(SLAVE_OPERATION_DENIED_WHILE_CONNECTED)) {
+                    // Try again, shutdown did not complete yet..
+                    gotEx = se;
+                    util.DEBUG
+                        ("got SLAVE_OPERATION_DENIED_WHILE_CONNECTED, sleep");
+                    Thread.sleep(1000L);
+                    continue;
+
+                } else if (se.getSQLState().
+                               equals(REPLICATION_SLAVE_SHUTDOWN_OK)) {
+                    // Try again, shutdown started but did not complete yet.
+                    gotEx = se;
+                    util.DEBUG("got REPLICATION_SLAVE_SHUTDOWN_OK, sleep..");
+                    Thread.sleep(1000L);
+                    continue;
+
+                } else if (se.getSQLState().equals(REPLICATION_DB_NOT_BOOTED)) {
+                    // All is fine, so proceed
+                    util.DEBUG("Got REPLICATION_DB_NOT_BOOTED as expected");
+                    stopSlaveCorrect = true;
+                    break;
+
+                } else {
+                    // Something else, so report.
+                    gotEx = se;
+                    break;
+                }
+            }
         }
-        catch (SQLException se)
-        {
-            int ec = se.getErrorCode();
-            String ss = se.getSQLState();
-            String msg = ec + " " + ss + " " + se.getMessage();
-            util.DEBUG("3. Got "+msg + " Expected: " + 
-                       REPLICATION_DB_NOT_BOOTED);
-            BaseJDBCTestCase.assertSQLState(
-                connectionURL + " failed: ",
-                REPLICATION_DB_NOT_BOOTED, 
-                se);
-            util.DEBUG("3. Failed as expected: " + connectionURL +  " " + msg);
-            stopSlaveCorrect = true;
+
+        if (gotEx != null) {
+            // We did not get what we expected as the final state
+            // (REPLICATION_DB_NOT_BOOTED) in reasonable time, or we saw
+            // something that is not a legal intermediate state, so we fail
+            // now:
+            throw gotEx;
         }
         
         // Default replication test sequence will NOT be OK after this point.
@@ -247,7 +288,7 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
                     + "//" + slaveServerHost + ":" + slaveServerPort + "/"
                     + db;
             util.DEBUG("4. testPostStartedMasterAndSlave_StopSlave: " + connectionURL);
-            Thread.sleep(5000L); // TEMP FIX! To avoid 40000 08004 The connection was refused because the database ..../wombat was not found!
+
             try
             {
                 conn = DriverManager.getConnection(connectionURL);
@@ -260,7 +301,6 @@ public class ReplicationRun_Local_StateTest_part1_1 extends ReplicationRun
                 String msg = ec + " " + ss + " " + se.getMessage();
                 util.DEBUG("4. Unexpectedly failed to connect: " + connectionURL +  " " + msg);
                 assertTrue("Unexpectedly failed to connect: " + connectionURL +  " " + msg, false);
-                // CURRENTLY FAILS W/ 40000 08004 The connection was refused because the database /home/os136789/Replication/testing/db_slave/wombat was not found.
             }
         }
     }

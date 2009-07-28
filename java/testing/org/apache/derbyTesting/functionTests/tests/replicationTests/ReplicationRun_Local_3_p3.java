@@ -167,7 +167,7 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
         showCurrentState("Post stopMaster +5s", 5000L,
             slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
             slaveServerHost, slaveServerPort); */
-        waitForSQLState("08004", 100L, 20, // 08004.C.7 - CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE
+        waitForSQLState("08004", 1000L, 20, // 08004.C.7 - CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE
                 slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb, 
                 slaveServerHost, slaveServerPort);
         /* Got it above... showCurrentState("Post stopMaster +30s", 30000L,
@@ -198,7 +198,7 @@ public class ReplicationRun_Local_3_p3 extends ReplicationRun_Local_3
                 testClientHost); //  XRE07 Could not perform operation because the database is not in replication master mode.
         */
         
-        waitForSQLState("08004", 100L, 20, // 08004.C.7 - CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE
+        waitForSQLState("08004", 1000L, 20, // 08004.C.7 - CANNOT_CONNECT_TO_DB_IN_SLAVE_MODE
                 slaveDatabasePath + FS + slaveDbSubPath + FS + replicatedDb,
                 slaveServerHost, slaveServerPort); // _failOver above fails...
         /*
