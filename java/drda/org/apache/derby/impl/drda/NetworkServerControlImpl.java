@@ -819,8 +819,7 @@ public final class NetworkServerControlImpl {
                        }
                     });
         } catch (Exception exception) {
-            consolePropertyMessage("DRDA_UnexpectedException.S",			
-                exception.getMessage());
+            consolePropertyMessage("DRDA_UnexpectedException.S", true);
             consoleExceptionPrintTrace(exception);
         }
 		
@@ -832,8 +831,7 @@ public final class NetworkServerControlImpl {
  				try {
  					session.close();
  				} catch (Exception exception) {
- 					consolePropertyMessage("DRDA_UnexpectedException.S",			
- 							exception.getMessage());
+ 					consolePropertyMessage("DRDA_UnexpectedException.S", true);
  					consoleExceptionPrintTrace(exception);
  				}
  			}
@@ -856,8 +854,7 @@ public final class NetworkServerControlImpl {
  									}
  								});
  				} catch (Exception exception) {
- 					consolePropertyMessage("DRDA_UnexpectedException.S",			
- 							exception.getMessage());
+ 					consolePropertyMessage("DRDA_UnexpectedException.S", true);
  					consoleExceptionPrintTrace(exception);
  				}
  			}
@@ -870,8 +867,7 @@ public final class NetworkServerControlImpl {
 	    }catch(IOException e){
 			consolePropertyMessage("DRDA_ListenerClose.S", true);
 	    } catch (Exception exception) {
-			consolePropertyMessage("DRDA_UnexpectedException.S",			
-					exception.getMessage());
+			consolePropertyMessage("DRDA_UnexpectedException.S", true);
 			consoleExceptionPrintTrace(exception);
 	    }
 
@@ -882,8 +878,7 @@ public final class NetworkServerControlImpl {
 				runQueue.notifyAll();
 			}	
 	    } catch (Exception exception) {
-			consolePropertyMessage("DRDA_UnexpectedException.S",			
-					exception.getMessage());
+			consolePropertyMessage("DRDA_UnexpectedException.S", true);
 			consoleExceptionPrintTrace(exception);
 	    }
         
@@ -892,8 +887,7 @@ public final class NetworkServerControlImpl {
 	        mgmtService.unregisterMBean(versionMBean);
 	        mgmtService.unregisterMBean(networkServerMBean);
 	    } catch (Exception exception) {
-			consolePropertyMessage("DRDA_UnexpectedException.S",			
-					exception.getMessage());
+			consolePropertyMessage("DRDA_UnexpectedException.S", true);
 			consoleExceptionPrintTrace(exception);
 	    }
 
@@ -925,8 +919,7 @@ public final class NetworkServerControlImpl {
 										   sqle.getMessage());
 				}
 			} catch (Exception exception) {
-				consolePropertyMessage("DRDA_UnexpectedException.S",			
-						exception.getMessage());
+				consolePropertyMessage("DRDA_UnexpectedException.S", true);
 				consoleExceptionPrintTrace(exception);
 			}
 		}
