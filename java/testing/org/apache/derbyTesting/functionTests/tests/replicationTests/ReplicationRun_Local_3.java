@@ -116,25 +116,4 @@ public class ReplicationRun_Local_3 extends ReplicationRun
             return se;
         }       
     }
-
-    SQLException _stopSlave(String slaveServerHost, int slaveServerPort,
-            String dbPath) 
-        throws SQLException
-    {
-        util.DEBUG("_stopSlave");
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
-        ds.setDatabaseName(dbPath);
-        ds.setServerName(slaveServerHost);
-        ds.setPortNumber(slaveServerPort);
-        ds.setConnectionAttributes("stopSlave=true"
-                +useEncryption(false));
-        try {
-            Connection conn = ds.getConnection();
-            conn.close();
-            return null; // If successfull.
-        } catch (SQLException se) {
-            return se;
-        }       
-    }
-    
 }
