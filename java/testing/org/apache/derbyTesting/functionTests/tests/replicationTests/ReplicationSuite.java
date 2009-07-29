@@ -50,6 +50,8 @@ public class ReplicationSuite extends BaseTestCase
         
 		suite.addTest(ReplicationRun_Local_1.suite());
         
+		suite.addTest(ReplicationRun_Local_1Indexing.suite());
+		
 		suite.addTest(ReplicationRun_Local_StateTest_part1.suite());
 		suite.addTest(ReplicationRun_Local_StateTest_part1_1.suite());
 		suite.addTest(ReplicationRun_Local_StateTest_part1_2.suite());
@@ -65,6 +67,12 @@ public class ReplicationSuite extends BaseTestCase
         suite.addTest(ReplicationRun_Local_3_p3.suite());
         suite.addTest(ReplicationRun_Local_3_p4.suite());
         
+		suite.addTest(ReplicationRun_Local_3_p5.suite()); // Test for DERBY-3878
+		
+		suite.addTest(ReplicationRun_Local_Encrypted_1.suite());
+		
+		suite.addTest(ReplicationRun_Local_3_p6.suite());
+		
 		return suite;
 	}
 }

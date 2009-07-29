@@ -46,16 +46,6 @@ public class ReplicationRun_Local extends ReplicationRun
         super(testcaseName);
     }
     
-    protected void setUp() throws Exception
-    {
-        super.setUp();
-    }
-    
-    protected void tearDown() throws Exception
-    {
-        super.tearDown();
-    }
-    
     public static Test suite()
     {
         TestSuite suite = new TestSuite("ReplicationRun_Local Suite");
@@ -77,7 +67,13 @@ public class ReplicationRun_Local extends ReplicationRun
     ////
     //////////////////////////////////////////////////////////////
     
-    public void testReplication_Local_existingTestsAsReplLoad()
+    /**
+     * Test the "normal" replication scenario:
+     * Load on the master db while replicating to slave db,
+     * then verify that slave db is correct after failover.
+     * @throws java.lang.Exception
+     */
+    public void testReplication_Local_TestStraightReplication()
     throws Exception
     {
         cleanAllTestHosts();
