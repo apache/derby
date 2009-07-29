@@ -25,7 +25,7 @@ import java.util.StringTokenizer;
 import java.util.Properties;
 
 /**
-  <p>This class is for IBM's J9 jdk 1.3., foundation class library; v 2.3 (weme6.1)
+  <p>This class is for IBM's J9 jdk 1.3., foundation class library; v 2.4 (weme6.2)
 
  */
 public class j9_foundation11 extends jvm {
@@ -53,7 +53,7 @@ public class j9_foundation11 extends jvm {
 	{
 		String wshome = guessWSHome();
 		// note, may have to use separator instead of hardcoding the slashes...
-		setJavaCmd(wshome+"/weme6.1/bin/j9");
+		setJavaCmd(wshome+"/weme6.2/bin/j9");
 	}
 	else
 		setJavaCmd("j9");
@@ -82,7 +82,7 @@ public class j9_foundation11 extends jvm {
         String srvJvm = sp.getProperty("serverJvm");
         // if we're coming in to be the server jvm for networkserver testing on j9,
         // bootcp is null, so we need to try to setup the bootclasspath from scratch
-        // for now, assume we're only interested in doing this for weme6.1_foundation, worry about
+        // for now, assume we're only interested in doing this for weme6.2_foundation, worry about
         // newer versions, multiple class libraries, or multiple releases later.
         sb.append(" -jcl:foun11");
 
@@ -90,12 +90,12 @@ public class j9_foundation11 extends jvm {
         {
             String pathsep = System.getProperty("path.separator");
             String wshome = guessWSHome();
-            // note, assuming jclFoundation classes sit under weme6.1/lib/jclFoundation11
-            //       and that jdbc.jar sits under weme6.1/lib
+            // note, assuming jclFoundation classes sit under weme6.2/lib/jclFoundation11
+            //       and that jdbc.jar sits under weme6.2/lib
             // note, may have to switch to sep instead of hardcoding the slashes...
-            sb.append(" -Xbootclasspath/a:" + wshome + "/weme6.1/lib/jclFoundation11/classes.zip"
-                + pathsep + wshome + "/weme6.1/lib/jclFoundation11/locale.zip"
-                + pathsep + wshome + "/weme6.1/lib/jdbc.jar");
+            sb.append(" -Xbootclasspath/a:" + wshome + "/weme6.2/lib/jclFoundation11/classes.zip"
+                + pathsep + wshome + "/weme6.2/lib/jclFoundation11/locale.zip"
+                + pathsep + wshome + "/weme6.2/lib/jdbc.jar");
         } 
         else
             sb.append(" -Xbootclasspath/a:" + bootcp);
