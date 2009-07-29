@@ -819,8 +819,7 @@ public final class NetworkServerControlImpl {
                        }
                     });
         } catch (Exception exception) {
-            consolePropertyMessage("DRDA_UnexpectedException.S", true);
-            consoleExceptionPrintTrace(exception);
+        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
         }
 		
  		// Close out the sessions
@@ -831,8 +830,7 @@ public final class NetworkServerControlImpl {
  				try {
  					session.close();
  				} catch (Exception exception) {
- 					consolePropertyMessage("DRDA_UnexpectedException.S", true);
- 					consoleExceptionPrintTrace(exception);
+ 		        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
  				}
  			}
  		}
@@ -854,8 +852,7 @@ public final class NetworkServerControlImpl {
  									}
  								});
  				} catch (Exception exception) {
- 					consolePropertyMessage("DRDA_UnexpectedException.S", true);
- 					consoleExceptionPrintTrace(exception);
+ 		        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
  				}
  			}
  			threadList.clear();
@@ -867,8 +864,7 @@ public final class NetworkServerControlImpl {
 	    }catch(IOException e){
 			consolePropertyMessage("DRDA_ListenerClose.S", true);
 	    } catch (Exception exception) {
-			consolePropertyMessage("DRDA_UnexpectedException.S", true);
-			consoleExceptionPrintTrace(exception);
+        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
 	    }
 
 		// Wake up those waiting on sessions, so
@@ -878,8 +874,7 @@ public final class NetworkServerControlImpl {
 				runQueue.notifyAll();
 			}	
 	    } catch (Exception exception) {
-			consolePropertyMessage("DRDA_UnexpectedException.S", true);
-			consoleExceptionPrintTrace(exception);
+        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
 	    }
         
         // And now unregister any MBeans.
@@ -887,8 +882,7 @@ public final class NetworkServerControlImpl {
 	        mgmtService.unregisterMBean(versionMBean);
 	        mgmtService.unregisterMBean(networkServerMBean);
 	    } catch (Exception exception) {
-			consolePropertyMessage("DRDA_UnexpectedException.S", true);
-			consoleExceptionPrintTrace(exception);
+        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
 	    }
 
 		if (shutdownDatabasesOnShutdown) {
@@ -919,14 +913,24 @@ public final class NetworkServerControlImpl {
 										   sqle.getMessage());
 				}
 			} catch (Exception exception) {
-				consolePropertyMessage("DRDA_UnexpectedException.S", true);
-				consoleExceptionPrintTrace(exception);
+				consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
 			}
 		}
 
 		consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
 						        {att_srvclsnm, versionString});
     }
+	
+	//Print the passed exception on the console and ignore it after that
+	private void consolePrintAndIgnore(String msgProp, 
+			Exception e, boolean printTimeStamp) {
+		// catch the exception consolePropertyMessage will throw since we
+		// just want to print information about it and move on.
+		try {
+			consolePropertyMessage(msgProp, true);
+		} catch (Exception ce) {} 
+		consoleExceptionPrintTrace(e);		
+	}
 	
 	/** 
 	 * Load Derby and save driver for future use.
