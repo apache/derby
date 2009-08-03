@@ -85,6 +85,27 @@ final class XAStatementControl implements BrokeredStatementControl {
                 applicationStatement);
 	}
 
+	/**
+	 * Close the realStatement within this control. 
+	 */
+	public void closeRealStatement() throws SQLException {
+		realStatement.close();
+	}
+	
+	/**
+	 * Close the realCallableStatement within this control. 
+	 */
+	public void closeRealCallableStatement() throws SQLException {
+		realCallableStatement.close();
+	}
+	
+	/**
+	 * Close the realPreparedStatement within this control. 
+	 */
+	public void closeRealPreparedStatement() throws SQLException {
+		realPreparedStatement.close();
+	}
+	
 	public Statement getRealStatement() throws SQLException {
 
 		// 
