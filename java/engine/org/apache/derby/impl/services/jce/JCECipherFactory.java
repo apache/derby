@@ -187,7 +187,7 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 
 		@exception StandardException Standard Derby error policy
 	 */
-	private String encryptKey(byte[] secretKey, byte[] bootPassword)
+	private EncryptedKeyResult encryptKey(byte[] secretKey, byte[] bootPassword)
 		 throws StandardException
 	{
 		// In case of AES, care needs to be taken to allow for 16 bytes muck as well
@@ -215,7 +215,9 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 		// encrypt the secretKey using the key generated of muck from  boot password and the generated IV  
 		tmpCipherProvider.encrypt(secretKey, 0, secretKey.length, result, 0);
 
-		return org.apache.derby.iapi.util.StringUtil.toHexString(result, 0, result.length);
+		String hexOutput = org.apache.derby.iapi.util.StringUtil.toHexString(result, 0, result.length);
+
+        return new EncryptedKeyResult( hexOutput, secretKey );
 
 	}
 	
@@ -749,11 +751,12 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 	}
 
 	private String saveSecretKey(byte[] secretKey, byte[] bootPassword) throws StandardException {
-		String encryptedKey = encryptKey(secretKey, bootPassword);
+		EncryptedKeyResult ekr = encryptKey(secretKey, bootPassword);
+		String encryptedKey = ekr.hexOutput;
 
 		// make a verification key out of the message digest of
 		// the generated key
-		int verifyKey = digest(secretKey);
+		int verifyKey = digest(ekr.paddedInputKey);
 
 		return encryptedKey.concat("-" + verifyKey);
 
@@ -1021,4 +1024,17 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 	    }
 	}
 
+    // tuple for returning results from encryptKey()
+    private static final class EncryptedKeyResult
+    {
+        public String hexOutput;
+        public byte[] paddedInputKey;
+
+        public EncryptedKeyResult( String hexOutput, byte[] paddedInputKey )
+        {
+            this.hexOutput = hexOutput;
+            this.paddedInputKey = paddedInputKey;
+        }
+    }
+    
 }

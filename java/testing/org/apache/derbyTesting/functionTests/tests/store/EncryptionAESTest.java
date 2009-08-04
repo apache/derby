@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class org.apache.derbyTesting.functionTests.tests.store.EncryptionKeyTest
+ * Derby - Class org.apache.derbyTesting.functionTests.tests.store.EncryptionAESTest
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -219,11 +219,7 @@ extends BaseJDBCTestCase {
         validateDBContents(con);
         // Shutdown the database.
         con.close();
-        // bug DERBY-3710 - with encryptionKeyLength=192,
-        // we cannot connect after a shutdown. Works fine with 128 and 256.
-        // the if is to workaround DERBY-3710, can be removed when it's fixed.
-        if (!encryptionKeyLength.equals("192"))
-            shutdown(dbName);
+        shutdown(dbName);
         // Reconnect using correct key length.
         con = getConnection(dbName, encryptionAlgorithm, attributes);
         validateDBContents(con);
@@ -232,10 +228,7 @@ extends BaseJDBCTestCase {
         con = getDriverManagerConnection(dbName, encryptionAlgorithm, attributes);
         validateDBContents(con);
         con.close();
-        // Shutdown the database.
-        // the if is to workaround DERBY-3710
-        if (!encryptionKeyLength.equals("192"))
-            shutdown(dbName);
+        shutdown(dbName);
         String[] keyLengths = {"128", "192", "256", "512"};
         for (int i=0 ; i < keyLengths.length ; i++) {
             if (!encryptionKeyLength.equals(keyLengths[i])){
@@ -247,15 +240,29 @@ extends BaseJDBCTestCase {
                     encryptionKeyLength, attributes);
             }
         }
-        // workaround DERBY-3710; otherwise the db was shutdown
-        // in the method runMismatchKeyLength.
-        if (encryptionKeyLength.equals("192"))
-        {
-            attributes = new String[] 
-               {("encryptionKeyLength=" + encryptionKeyLength),
-                 "bootPassword=Thursday"};
-            shutdown(dbName);
-        }
+
+        // now try re-encrypting with a different boot password
+        attributes = new String[]
+            {
+                ("encryptionKeyLength=" + encryptionKeyLength),
+                "bootPassword=Thursday",
+                "newBootPassword=Saturday"
+            };
+        con = getDriverManagerConnection(dbName, encryptionAlgorithm, attributes);
+        validateDBContents(con);
+        con.close();
+        shutdown(dbName);
+
+        // reconnect to make sure we don't have another variant of DERBY-3710
+        attributes = new String[]
+            {
+                ("encryptionKeyLength=" + encryptionKeyLength),
+                "bootPassword=Saturday"
+            };
+        con = getDriverManagerConnection(dbName, encryptionAlgorithm, attributes);
+        validateDBContents(con);
+        con.close();
+        shutdown(dbName);
     }
 
     /**
@@ -267,14 +274,12 @@ extends BaseJDBCTestCase {
         Connection con = null;
         // try connecting
         // all combinations work - (if unrestricted policy jars are
-        // in place) except with length 192 if we've done a shutdown.
+        // in place)
         try {
             con = getConnection(dbName, encryptionAlgorithm, attributes );
             validateDBContents(con);
             con.close();
-            // workaround DERBY-3710
-            if (!encryptionKeyLength.equals("192"))
-                shutdown(dbName);
+            shutdown(dbName);
         } catch (SQLException e) {
             e.printStackTrace();
             con.close();
