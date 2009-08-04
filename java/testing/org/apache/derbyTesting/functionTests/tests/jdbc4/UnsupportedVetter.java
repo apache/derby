@@ -240,17 +240,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 					// JDBC SPEC. HOWEVER, DERBY DOES NOT IMPLEMENT THEM IN ONE
 					// OR THE OTHER OF OUR CLIENTS.
 					//
-					new FD( "updateBlob", new Class[] { int.class, Blob.class } ),
-					new FD( "updateBlob", new Class[] { String.class, Blob.class } ),
-                                        new FD( "updateBlob", new Class[] { int.class, InputStream.class ,long.class } ),
-                                        new FD( "updateBlob", new Class[] { String.class, InputStream.class ,long.class } ),
-					new FD( "updateClob", new Class[] { int.class, Clob.class } ),
-					new FD( "updateClob", new Class[] { String.class, Clob.class } ),
-                                        new FD( "updateClob", new Class[] { int.class, Reader.class ,long.class } ),
-                                        new FD( "updateClob", new Class[] { String.class, Reader.class ,long.class } ),
                                         new FD( "updateNClob",new Class[] { int.class,Reader.class,long.class}),
                                         new FD( "updateNClob",new Class[] { String.class,Reader.class,long.class}),
-					
 
 					//
 					// According to the JDBC4 spec and javadoc, the following
@@ -301,39 +292,6 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 			// all of its methods.
 			//
 
-			new Exclusions
-			(
-			 //
-			 // THE FOLLOWING METHODS ARE MANDATORY ACCORDING TO THE
-			 // JDBC SPEC. HOWEVER, DERBY DOES NOT IMPLEMENT THEM IN ONE
-			 // OR THE OTHER OF OUR CLIENTS.
-			 //
-			    java.sql.Blob.class,
-				new MD[]
-				{
-					new FD( "getBinaryStream", new Class[] { long.class, long.class } ),
-					new FD( "setBinaryStream", new Class[] { long.class } ),
-					new FD( "setBytes", new Class[] { long.class, byte[].class } ),
-					new FD( "setBytes", new Class[] { long.class, byte[].class, int.class, int.class } ),
-					new FD( "truncate", new Class[] { long.class } )
-				} ),
-			new Exclusions
-			(
-			 //
-			 // THE FOLLOWING METHODS ARE MANDATORY ACCORDING TO THE
-			 // JDBC SPEC. HOWEVER, DERBY DOES NOT IMPLEMENT THEM IN ONE
-			 // OR THE OTHER OF OUR CLIENTS.
-			 //
-			    java.sql.Clob.class,
-				new MD[]
-				{
-					new FD( "getCharacterStream", new Class[] { long.class, long.class } ),
-					new FD( "setAsciiStream", new Class[] { long.class } ),
-					new FD( "setCharacterStream", new Class[] { long.class } ),
-					new FD( "setString", new Class[] { long.class, String.class } ),
-					new FD( "setString", new Class[] { long.class, String.class, int.class, int.class } ),
-					new FD( "truncate", new Class[] { long.class } )
-				} )
 		};
 
 	//
