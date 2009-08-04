@@ -97,9 +97,9 @@ public class AssertFailureTest extends BaseTestCase {
 
         } else {
             String expected = "(Skipping thread dump because it is not " +
-            		"supported on JVM 1.4)\n";
+            		"supported on JVM 1.4)";
 
-            assertEquals("String not correct.", expected, s);
+            assertEquals("String not correct.", expected, s.trim());
         }
     }
 
@@ -125,9 +125,9 @@ public class AssertFailureTest extends BaseTestCase {
 
         } else {
             String expected = "(Skipping thread dump because it is not " +
-                "supported on JVM 1.4)\n";
+                "supported on JVM 1.4)";
 
-            assertEquals("String not correct.", expected, s);
+            assertEquals("String not correct.", expected, s.trim());
         }
     }
 }
