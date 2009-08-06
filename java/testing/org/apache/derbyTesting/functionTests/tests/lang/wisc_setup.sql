@@ -2718,6 +2718,14 @@ commit;
 
 -- This time, force TENKTUP2 as the outermost join table to make sure 
 -- that still no sorting is necessary. DERBY-3926
+-- DERBY-4331 backs out part of DERBY-3926, the expected plan now does not
+-- do sort avoidance.  
+-- When DERBY-4339 is implemented, the following query plan should not have
+-- a sort node.
+-- The plan is forced to use TENKTUP2 as outermost
+-- join.  It knows that query result is sorted on TENKTUP2.unique1, but does not
+-- recognize that because "TENKTUP1.unique1 = TENKTUP2.unique1" that query
+-- is also sorted on TENKTUP1.unique1 and could avoid a sort.
 get cursor c as
 	'select * from --DERBY-PROPERTIES joinOrder=FIXED
 	 TENKTUP2, TENKTUP1
@@ -2890,6 +2898,12 @@ commit;
 -- Sort avoidance with joins and order by on columns in different tables
 --
 -- order on joining columns
+-- DERBY-4339, DERBY-4331
+-- until DERBY-4339 is implemented the following query will not do sort
+-- avoidance.  The current code does not use the knowledge that
+-- TENKTUP1.unique1 = TENKTUP2.unique1 to infer that a plan that is sorted
+-- on TENKTUP1.unique1 or TENKTUP2.unique1 is also sorted correctly for an
+-- order by TENKTUP1.unique1, TENKTUP2.unique1.
 get cursor c as
 	'select * from TENKTUP1, TENKTUP2
 	 where TENKTUP1.unique1 = TENKTUP2.unique1

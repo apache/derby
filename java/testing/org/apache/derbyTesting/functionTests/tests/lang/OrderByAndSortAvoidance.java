@@ -10024,6 +10024,74 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
             		"INSERT INTO test2 (entity_id, rel_id) VALUES (1, 103)");
             //End of tables creation for DERBY-4240 repro
 
+            //Start of tables creation for DERBY-4331 repro
+            st.executeUpdate(
+            		"CREATE TABLE REPOSITORIES ( ID INT CONSTRAINT "+
+            		"REPOSITORIES_PRIMARY_ID PRIMARY KEY GENERATED ALWAYS "+
+            		"AS IDENTITY, "+
+            		"PATH VARCHAR(32672) CONSTRAINT REPOSITORIES_PATH "+
+            		"UNIQUE NOT NULL)");
+            st.executeUpdate(
+            		"CREATE TABLE FILES ( ID INT CONSTRAINT FILES_PRIMARY_ID "+
+            		"PRIMARY KEY GENERATED ALWAYS AS IDENTITY, "+
+            		"PATH VARCHAR(32672) NOT NULL, REPOSITORY INT NOT NULL "+
+            		"REFERENCES REPOSITORIES ON DELETE CASCADE, "+
+            		"CONSTRAINT FILES_REPOSITORY_PATH UNIQUE "+
+            		"(REPOSITORY, PATH))");
+            st.executeUpdate(
+            		"CREATE TABLE AUTHORS ( "+
+            		"ID INT CONSTRAINT AUTHORS_PRIMARY_ID PRIMARY KEY "+
+            		"GENERATED ALWAYS AS IDENTITY, REPOSITORY INT NOT NULL "+
+            		"REFERENCES REPOSITORIES ON DELETE CASCADE, "+
+            		"NAME VARCHAR(32672) NOT NULL, "+
+            		"CONSTRAINT AUTHORS_REPOSITORY_NAME UNIQUE (REPOSITORY, NAME))");
+            st.executeUpdate(
+            		"CREATE TABLE CHANGESETS ( "+
+            		"ID INT CONSTRAINT CHANGESETS_PRIMARY_ID PRIMARY KEY "+
+            		"GENERATED ALWAYS AS IDENTITY, " +
+            		"REPOSITORY INT NOT NULL REFERENCES REPOSITORIES "+
+            		"ON DELETE CASCADE, REVISION VARCHAR(1024) NOT NULL, "+
+            		"AUTHOR INT NOT NULL REFERENCES AUTHORS ON DELETE CASCADE, "+
+            		"TIME TIMESTAMP NOT NULL, MESSAGE VARCHAR(32672) NOT NULL, "+
+            		"CONSTRAINT CHANGESETS_REPOSITORY_REVISION UNIQUE "+
+            		"(REPOSITORY, REVISION))");
+            st.executeUpdate(
+            		"CREATE UNIQUE INDEX IDX_CHANGESETS_ID_DESC ON "+
+            		"CHANGESETS(ID DESC)");
+            st.executeUpdate(
+            		"CREATE TABLE FILECHANGES ( "+
+            		"ID INT CONSTRAINT FILECHANGES_PRIMARY_ID PRIMARY KEY "+
+            		"GENERATED ALWAYS AS IDENTITY, FILE INT NOT NULL "+
+            		"REFERENCES FILES ON DELETE CASCADE, "+
+            		"CHANGESET INT NOT NULL REFERENCES CHANGESETS "+
+            		"ON DELETE CASCADE, " +
+            		"CONSTRAINT FILECHANGES_FILE_CHANGESET "+
+            		"UNIQUE (FILE, CHANGESET))");
+            st.executeUpdate(
+            		"insert into repositories(path) values "+
+            		"'/var/tmp/source5923202038296723704opengrok/mercurial'");
+            st.executeUpdate(
+            		"insert into files(path, repository) values "+
+            		"('/mercurial/Makefile', 1), "+
+            		"('/mercurial/main.c', 1), "+
+            		"('/mercurial/header.h', 1), "+
+            		"('/mercurial/.hgignore', 1)");
+            st.executeUpdate(
+            		"insert into authors(repository, name) values "+
+            		"(1, 'Trond Norbye <trond.norbye@sun.com>')");
+            st.executeUpdate(
+            		"insert into changesets(repository, revision, author, "+
+            		"time, message) values (1,'0:816b6279ae9c',1,"+
+            		"'2008-08-12 22:00:00.0','Add .hgignore file'),"+
+            		"(1,'1:f24a5fd7a85d',1,'2008-08-12 22:03:00.0',"+
+            		"'Created a small dummy program'),"+
+            		"(1,'2:585a1b3f2efb',1,'2008-08-12 22:13:00.0',"+
+            		"'Add lint make target and fix lint warnings')");
+            st.executeUpdate(
+            		"insert into filechanges(file, changeset) values "+
+            		"(4,1),(1,2),(3,2),(2,2),(1,3),(2,3)");
+            //End of tables creation for DERBY-4331 repro
+
             getConnection().commit();
             st.close();
     }
@@ -10039,10 +10107,195 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         //drop tables needed for DERBY-4240
         stmt.executeUpdate("drop table test1");
         stmt.executeUpdate("drop table test2");
+        //drop tables needed for DERBY-4331
+        stmt.executeUpdate("drop table FILECHANGES");
+        stmt.executeUpdate("drop table CHANGESETS");
+        stmt.executeUpdate("drop table AUTHORS");
+        stmt.executeUpdate("drop table FILES");
+        stmt.executeUpdate("drop table REPOSITORIES");
         stmt.close();
         commit();
         super.tearDown();
     }
+
+    /**
+     * Add a test case for DERBY-4331 where the rows were not ordered correctly
+     * for both ascending and descending order by clause.  
+     */
+    public void testDerby4331() throws SQLException {
+        Statement s;
+        ResultSet rs;
+        RuntimeStatisticsParser rtsp;
+        String [][] desc_result = new String[][] {
+        		{"3"},{"3"},{"2"},{"2"},{"2"},{"1"}};
+        String [][] asc_result  = new String[][] {
+        		{"1"},{"2"},{"2"},{"2"},{"3"},{"3"}};
+        
+        String sql1 = 
+        	"SELECT CS.ID FROM CHANGESETS CS, FILECHANGES FC, "+
+        	"REPOSITORIES R, FILES F, AUTHORS A WHERE "+
+        	"R.PATH = '/var/tmp/source5923202038296723704opengrok/mercurial' "+
+        	"AND F.REPOSITORY = R.ID AND A.REPOSITORY = R.ID AND "+
+        	"CS.REPOSITORY = R.ID AND CS.ID = FC.CHANGESET AND F.ID = FC.FILE "+
+        	"AND A.ID = CS.AUTHOR AND EXISTS ( "+
+        	"SELECT 1 FROM FILES F2 WHERE "+
+        	"F2.ID = FC.FILE AND F2.REPOSITORY = R.ID AND "+
+        	"F2.PATH LIKE '/%' ESCAPE '#') "+
+        	"ORDER BY CS.ID DESC";
+        s = createStatement();
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, desc_result);
+        
+        sql1 = 
+        	"SELECT CS.ID FROM --DERBY-PROPERTIES joinOrder=FIXED \n" +
+        	"CHANGESETS CS, FILECHANGES FC, REPOSITORIES R, FILES F, "+
+        	"AUTHORS A WHERE " +
+        	"R.PATH = '/var/tmp/source5923202038296723704opengrok/mercurial' "+
+        	"AND F.REPOSITORY = R.ID AND A.REPOSITORY = R.ID AND "+
+        	"CS.REPOSITORY = R.ID AND CS.ID = FC.CHANGESET AND "+
+        	"F.ID = FC.FILE AND A.ID = CS.AUTHOR AND EXISTS ( "+
+        	"SELECT 1 FROM FILES F2 WHERE "+
+        	"F2.ID = FC.FILE AND F2.REPOSITORY = R.ID AND "+
+        	"F2.PATH LIKE '/%' ESCAPE '#') "+
+        	"ORDER BY CS.ID DESC"; 
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, desc_result);
+
+        sql1 =
+        	"SELECT CS.ID FROM --DERBY-PROPERTIES joinOrder=FIXED  \n" +
+        	"REPOSITORIES R -- DERBY-PROPERTIES constraint=REPOSITORIES_PATH \n"+
+        	",FILES F -- DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	",FILECHANGES FC -- DERBY-PROPERTIES constraint=FILECHANGES_FILE_CHANGESET \n"+
+        	", AUTHORS A -- DERBY-PROPERTIES constraint=AUTHORS_REPOSITORY_NAME \n"+
+        	", CHANGESETS CS -- DERBY-PROPERTIES constraint=CHANGESETS_PRIMARY_ID \n"+
+        	"WHERE "+
+        	"R.PATH = '/var/tmp/source5923202038296723704opengrok/mercurial' "+
+        	"AND F.REPOSITORY = R.ID AND "+
+        	"A.REPOSITORY = R.ID AND "+
+        	"CS.REPOSITORY = R.ID AND "+
+        	"CS.ID = FC.CHANGESET AND "+
+        	"F.ID = FC.FILE AND "+
+        	"A.ID = CS.AUTHOR AND "+
+        	"EXISTS ( SELECT 1 FROM FILES F2 WHERE "+
+        	"F2.ID = FC.FILE AND F2.REPOSITORY = R.ID AND "+
+        	"F2.PATH LIKE '/%' ESCAPE '#') "+
+        	"ORDER BY CS.ID DESC"; 
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, desc_result);
+
+        sql1 =
+        	"SELECT CS.ID FROM " +
+        	" CHANGESETS CS, FILECHANGES FC, REPOSITORIES R, FILES F, "+
+        	"AUTHORS A WHERE "+
+        	"R.PATH = '/var/tmp/source5923202038296723704opengrok/mercurial' "+
+        	"AND F.REPOSITORY = R.ID AND A.REPOSITORY = R.ID AND "+
+        	"CS.REPOSITORY = R.ID AND CS.ID = FC.CHANGESET AND "+
+        	"F.ID = FC.FILE AND A.ID = CS.AUTHOR AND EXISTS ( "+
+        	"SELECT 1 FROM FILES F2 WHERE F2.REPOSITORY = 1) "+
+        	"ORDER BY CS.ID DESC";
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, desc_result);
+        
+        sql1 = 
+        	"SELECT CS.ID FROM --DERBY-PROPERTIES joinOrder=FIXED \n" +
+        	"REPOSITORIES R, FILES F, FILECHANGES FC, AUTHORS A, "+
+        	"CHANGESETS CS WHERE " +
+        	"R.PATH = '/var/tmp/source5923202038296723704opengrok/mercurial' "+
+        	"AND F.REPOSITORY = R.ID AND A.REPOSITORY = R.ID AND "+
+        	"CS.REPOSITORY = R.ID AND CS.ID = FC.CHANGESET AND "+
+        	"F.ID = FC.FILE AND A.ID = CS.AUTHOR AND EXISTS ( "+
+        	"SELECT 1 FROM FILES F2 WHERE "+
+        	"F2.ID = FC.FILE AND F2.REPOSITORY = R.ID AND "+
+        	"F2.PATH LIKE '/%' ESCAPE '#') ORDER BY CS.ID DESC";
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, desc_result);
+        
+        sql1 =
+        	"SELECT CS.ID FROM --DERBY-PROPERTIES joinOrder=FIXED \n"+
+        	"REPOSITORIES R --DERBY-PROPERTIES constraint=REPOSITORIES_PATH \n"+
+        	", FILES F --DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	", FILECHANGES FC --DERBY-PROPERTIES constraint=FILECHANGES_FILE_CHANGESET \n"+
+        	", AUTHORS A --DERBY-PROPERTIES constraint=AUTHORS_REPOSITORY_NAME \n"+
+        	", CHANGESETS CS --DERBY-PROPERTIES constraint=CHANGESETS_PRIMARY_ID \n"+
+        	"WHERE " +
+        	"R.PATH = '/var/tmp/source5923202038296723704opengrok/mercurial' "+
+        	"AND F.REPOSITORY = R.ID AND A.REPOSITORY = R.ID AND "+
+        	"CS.REPOSITORY = R.ID AND CS.ID = FC.CHANGESET AND "+
+        	"F.ID = FC.FILE AND A.ID = CS.AUTHOR AND EXISTS ( SELECT 1 "+
+        	"FROM FILES F2 --DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	"WHERE F2.ID = FC.FILE AND F2.REPOSITORY = R.ID AND "+
+        	"F2.PATH LIKE '/%' ESCAPE '#') ORDER BY CS.ID DESC";
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, desc_result);
+        
+        sql1 = 
+        	"SELECT CS.ID FROM --DERBY-PROPERTIES joinOrder=FIXED \n" +
+        	"REPOSITORIES R --DERBY-PROPERTIES constraint=REPOSITORIES_PATH \n"+
+        	", FILES F --DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	", FILECHANGES FC --DERBY-PROPERTIES constraint=FILECHANGES_FILE_CHANGESET \n"+
+        	", AUTHORS A --DERBY-PROPERTIES constraint=AUTHORS_REPOSITORY_NAME \n"+
+        	", CHANGESETS CS --DERBY-PROPERTIES constraint=CHANGESETS_PRIMARY_ID \n"+
+        	"WHERE "+
+        	"R.PATH = '/var/tmp/source5923202038296723704opengrok/mercurial' "+
+        	"AND F.REPOSITORY = R.ID AND A.REPOSITORY = R.ID AND "+
+        	"CS.REPOSITORY = R.ID AND CS.ID = FC.CHANGESET AND "+
+        	"F.ID = FC.FILE AND A.ID = CS.AUTHOR AND EXISTS ( "+
+        	"SELECT 1 "+
+        	"FROM FILES F2 --DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	"WHERE F2.ID = FC.FILE )ORDER BY CS.ID DESC";
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, desc_result);
+        
+        sql1 = 
+        	"SELECT CS.ID FROM --DERBY-PROPERTIES joinOrder=FIXED \n"+
+        	"REPOSITORIES R --DERBY-PROPERTIES constraint=REPOSITORIES_PATH \n"+
+        	", FILES F --DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	", FILECHANGES FC --DERBY-PROPERTIES constraint=FILECHANGES_FILE_CHANGESET \n"+
+        	", CHANGESETS CS --DERBY-PROPERTIES constraint=CHANGESETS_PRIMARY_ID \n"+
+        	"WHERE "+
+        	"R.PATH = '/var/tmp/source5923202038296723704opengrok/mercurial' "+
+        	"AND F.REPOSITORY = R.ID AND CS.REPOSITORY = R.ID AND "+
+        	"CS.ID = FC.CHANGESET AND F.ID = FC.FILE AND EXISTS ("+
+        	"SELECT 1 " +
+        	"FROM FILES F2 --DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	"WHERE F2.ID = FC.FILE) ORDER BY CS.ID DESC";
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, desc_result);
+        
+        sql1 =
+        	"SELECT CS.ID FROM --DERBY-PROPERTIES joinOrder=FIXED \n"+
+        	"FILES F --DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	", FILECHANGES FC --DERBY-PROPERTIES constraint=FILECHANGES_FILE_CHANGESET \n"+
+        	", CHANGESETS CS --DERBY-PROPERTIES constraint=CHANGESETS_PRIMARY_ID \n"+
+        	"WHERE CS.ID = FC.CHANGESET AND F.ID = FC.FILE AND EXISTS ( "+
+        	"SELECT 1 "+
+        	"FROM FILES F2 --DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	"WHERE F2.ID = FC.FILE) ORDER BY CS.ID DESC";
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, desc_result);
+        
+        sql1 = 
+        	"SELECT CS.ID FROM --DERBY-PROPERTIES joinOrder=FIXED \n"+
+        	"FILES F --DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	", FILECHANGES FC --DERBY-PROPERTIES constraint=FILECHANGES_FILE_CHANGESET \n"+
+        	", CHANGESETS CS --DERBY-PROPERTIES constraint=CHANGESETS_PRIMARY_ID \n"+
+        	"WHERE CS.ID = FC.CHANGESET AND F.ID = FC.FILE AND EXISTS ( "+
+        	"SELECT 1 "+
+        	"FROM FILES F2 --DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	"WHERE F2.ID = FC.FILE) ORDER BY CS.ID";
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, asc_result);
+
+        sql1 = 
+        	"SELECT CS.ID FROM --DERBY-PROPERTIES joinOrder=FIXED \n"+
+        	"FILES F --DERBY-PROPERTIES constraint=FILES_REPOSITORY_PATH \n"+
+        	", FILECHANGES FC --DERBY-PROPERTIES constraint=FILECHANGES_FILE_CHANGESET \n"+
+        	", CHANGESETS CS --DERBY-PROPERTIES constraint=CHANGESETS_PRIMARY_ID \n"+
+        	"WHERE CS.ID = FC.CHANGESET AND F.ID = FC.FILE "+
+        	"ORDER BY CS.ID DESC";
+        rs = s.executeQuery(sql1);
+        JDBC.assertFullResultSet(rs, desc_result);
+   }
 
     /**
      * Add a test case for DERBY-4240 where the rows were not ordered despite
