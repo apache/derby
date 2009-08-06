@@ -62,7 +62,8 @@ public class _Suite extends BaseTestCase  {
 	  suite.addTest(CheckConstraintTest.suite());
         suite.addTest(AnsiTrimTest.suite());
         suite.addTest(AlterTableTest.suite());
-        suite.addTest(CreateTableFromQueryTest.suite());
+        suite.addTest(CreateTableFromQueryTest.suite());     
+        suite.addTest(ColumnDefaultsTest.suite());
         suite.addTest(CompressTableTest.suite());
         suite.addTest(DatabaseClassLoadingTest.suite());
         suite.addTest(DynamicLikeOptimizationTest.suite());
