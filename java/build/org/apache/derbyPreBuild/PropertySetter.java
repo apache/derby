@@ -23,13 +23,18 @@ package org.apache.derbyPreBuild;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.PropertyHelper;
@@ -71,7 +76,15 @@ import org.apache.tools.ant.taskdefs.Property;
  * directory pointed to by the library property.</li>
  * <li>Otherwise we try to set the classpath properties to values
  * specific to the vendor of the running vm.</li>
- * <li>Otherwise, if we don't recognize the vm vendor, we abort the build.</li>
+ * <li>If we don't recognize the vendor of the running vm, print a warning
+ * message and then try to set the classpath properties using the JDK with the
+ * highest implementation version from any vendor matching the required
+ * specification version. If a vendor has chosen to deviate significantly from
+ * the file layout of other JDKs, the detection will most likely fail.
+ * People using JDKs with a more exotic file layout should specify the library
+ * directory explicitly through ant.properties, or resort to setting the compile
+ * classpath manually.
+ * </li>
  * </ul>
  *
  * <p>
@@ -124,6 +137,8 @@ public class PropertySetter extends Task
     /////////////////////////////////////////////////////////////////////////
 
     private Hashtable   _propertiesSnapshot;
+    /** JDK vendor as reported by Java through the property 'java.vendor'. */
+    private String jdkVendor;
     
     /////////////////////////////////////////////////////////////////////////
     //
@@ -165,6 +180,42 @@ public class PropertySetter extends Task
         }
     }
     
+    /**
+     * Simple class holding information about a JDK.
+     * Note that the values will never be {@code null}. If a piece of
+     * information is missing, {@code UNKNOWN} will be used. If the JDK home
+     * variable is {@code null}, a runtime exception will be thrown.
+     */
+    //@Immutable
+    private static final class  JDKInfo {
+        /** Constant used when information is missing. */
+        public static final String UNKNOWN = "unknown";
+        /** The specification version of the JVM (i.e "1.6"). */
+        public final String specificationVersion;
+        /** The implementation version of the JVM (i.e. "1.6.0_14" or "6.0"). */
+        public final String implementationVersion;
+        /** The JDK implementation vendor. */
+        public final String vendor;
+        /** Path to the JDK home directory. */
+        public final String path;
+
+        JDKInfo(String vendor, String spec, String impl, String path) {
+            this.vendor = (vendor == null ? UNKNOWN : vendor);
+            this.specificationVersion = (spec == null ? UNKNOWN : spec);
+            this.implementationVersion = (impl == null ? UNKNOWN : impl);
+            this.path = path;
+            if (path == null) {
+                throw new IllegalArgumentException("JDK home cannot be null");
+            }
+        }
+
+        public String toString() {
+            return ("vendor=" + vendor + ", specVersion=" +
+                    specificationVersion + ", implVersion=" +
+                    implementationVersion + ", path=" + path);
+        }
+    }
+
     /////////////////////////////////////////////////////////////////////////
     //
     //  CONSTRUCTORS
@@ -233,14 +284,27 @@ public class PropertySetter extends Task
             //
             // This is where you plug in vendor-specific logic.
             //
-            String  jdkVendor = getProperty( JDK_VENDOR );
-
-            if ( jdkVendor == null ) { jdkVendor = ""; }
+            jdkVendor = getProperty(JDK_VENDOR, "");
 
             if (  jdkVendor.startsWith( JDK_APPLE ) ) { setForAppleJDKs(); }
             else if ( usingIBMjdk( jdkVendor ) ) { setForIbmJDKs(); }
             else if ( JDK_SUN.equals( jdkVendor ) ) { setForSunJDKs(); }
-            
+            else {
+                // We don't know anything about this vendor. Print a warning
+                // message and try to continue.
+                echo("Unrecognized VM vendor: '" + jdkVendor + "'");
+                echo("An attempt to configure the required JDKs will be made," +
+                        " but the build may fail.");
+                echo("In case of problems:\n" +
+                        "  - consult BUILDING.html and set the required " +
+                        "properties manually\n" +
+                        "  - set the property printCompilerProperties to true " +
+                        "and ask the Derby development community for help\n" +
+                        "    (please provide the debug output from running ant)"
+                        );
+                setForMostJDKsJARInspection("1.4", "1.5", "1.6");
+                setForMostJDKs("1.4", "1.5", "1.6");
+            }
         } catch (Throwable t)
         {
             echoThrowable( t );
@@ -295,6 +359,7 @@ public class PropertySetter extends Task
     private void    setForIbmJDKs()
         throws Exception
     {
+        setForMostJDKsJARInspection("1.4", "5.0", "6.0");
         setForMostJDKs( "142", "50", "60" );
     }
     
@@ -313,7 +378,8 @@ public class PropertySetter extends Task
     private void    setForSunJDKs()
         throws Exception
     {
-        setForMostJDKs( "1.4.", "1.5.", "1.6" );
+        setForMostJDKsJARInspection("1.4", "1.5", "1.6");
+        setForMostJDKs( "1.4", "1.5", "1.6" );
     }
     
     /////////////////////////////////////////////////////////////////////////
@@ -321,6 +387,35 @@ public class PropertySetter extends Task
     //  JDK HEURISTICS
     //
     /////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Sets the properties needed to compile using most JDKs.
+     * <p>
+     * Will search for JDK based on a list of root directories. A JDK is
+     * identified by certain files and the content of JAR file manifests.
+     */
+    private void setForMostJDKsJARInspection(
+            String seed14, String seed15, String seed16)
+        throws Exception {
+        String  default_j14lib = getProperty( J14LIB );
+        String  default_j15lib = getProperty( J15LIB );
+        String  default_j16lib = getProperty( J16LIB );
+
+        // Obtain a list of all JDKs available to us, then specify which one to
+        // use for the different versions we require.
+        List<JDKInfo> jdks = locateJDKs(getJdkSearchPath());
+        if (default_j14lib == null) {
+            default_j14lib = getJreLib(jdks, seed14, jdkVendor);
+        }
+        if (default_j15lib == null) {
+            default_j15lib = getJreLib(jdks, seed15, jdkVendor);
+        }
+        if (default_j16lib == null) {
+            default_j16lib = getJreLib(jdks, seed16, jdkVendor);
+        }
+
+        defaultSetter(default_j14lib, default_j15lib, default_j16lib);
+    }
 
     /**
      * <p>
@@ -467,6 +562,271 @@ public class PropertySetter extends Task
         return javadir.getAbsolutePath() + libStub;
     }
 
+    // JDK heuristics based on inspecting JARs.
+
+    /**
+     * Searches for JDKs in the specified directories.
+     *
+     * @param jdkParentDirectories a list of parent directories to search in
+     * @return A list containing information objects for JDKs found on the
+     *      system. If no JDKs were found, the list will be empty.
+     */
+    private List<JDKInfo> locateJDKs(List<File> jdkParentDirectories) {
+        ArrayList<JDKInfo> jdks = new ArrayList<JDKInfo>();
+        if (jdkParentDirectories == null) {
+            return jdks;
+        }
+
+        File jreLibRel = new File("jre", "lib");
+        String[] jarsRelative = new String[] {
+                // Special cases for IBM JDKs.
+                new File(jreLibRel, "core.jar").getPath(),
+                new File(jreLibRel, "vm.jar").getPath(),
+                // Default JAR file to look for, used be most JDKs.
+                new File(jreLibRel, "rt.jar").getPath(),
+            };
+        for (File jdkParentDirectory : jdkParentDirectories) {
+            // Limit the search to the directories in the parent directory.
+            // Don't descend into sub directories.
+            File[] possibleJdkRoots = jdkParentDirectory.listFiles(
+                    new FileFilter() {
+
+                        /** Accepts only directories. */
+                        public boolean accept(File pathname) {
+                            return pathname.isDirectory();
+                        }
+                    });
+            for (File f : possibleJdkRoots) {
+                File rtArchive = new File(f, jreLibRel.getPath());
+                if (!rtArchive.exists()) {
+                    // Bail out, we only understand JDKs that have a jre/lib dir
+                    continue;
+                }
+                // Look for the various JARs that identify a JDK and see if a
+                // implementation version is specified in the manifest.
+                for (String jar : jarsRelative) {
+                    rtArchive = new File(f, jar);
+                    if (rtArchive.exists()) {
+                        // Jar found.
+                        Manifest mf;
+                        try {
+                            JarFile rtJar = new JarFile(rtArchive);
+                            mf = rtJar.getManifest();
+                        } catch (IOException ioeIgnored) {
+                            // Obtaining the manifest failed for some reason.
+                            // If in debug mode, let the user know.
+                            if (isSet(PROPERTY_SETTER_DEBUG_FLAG)) {
+                                echo("Failed to obtain manifest for " +
+                                        rtArchive.getAbsolutePath() + ": " +
+                                        ioeIgnored.getMessage());
+                            }
+                            continue;
+                        }
+                        JDKInfo jdk = inspectJarManifest(mf, f);
+                        if (jdk != null) {
+                            jdks.add(jdk);
+                            break;
+                        }
+                    }
+                    rtArchive = null; // Reset
+                }
+                if (rtArchive == null) {
+                    // We didn't find any of the jars we were looking for, or
+                    // the manifests didn't contain an implementation version.
+                    // Continue with the next potential JDK root.
+                    continue;
+                }
+            }
+         }
+        return jdks;
+     }
+
+    /**
+     * Inspects the specified manifest to obtain information about the JDK.
+     *
+     * @param mf manifest from a JDK jar file
+     * @param jdkHome the home directory of the JDK
+     * @return An information object for the JDK, or {@code null} if no
+     *      information was found.
+     */
+    private JDKInfo inspectJarManifest(Manifest mf, File jdkHome) {
+        // The manifest may be null, as it is optional.
+        if (mf == null) {
+            return null;
+        }
+        JDKInfo info = new JDKInfo(
+            mf.getMainAttributes().getValue("Implementation-Vendor"),
+            mf.getMainAttributes().getValue("Specification-Version"),
+            mf.getMainAttributes().getValue("Implementation-Version"),
+            jdkHome.getAbsolutePath());
+        if (!info.implementationVersion.equals(JDKInfo.UNKNOWN)) {
+            // Make sure we have javac
+            File jdkBin = new File(jdkHome, "bin");
+            File[] javac = jdkBin.listFiles(new FilenameFilter() {
+
+                public boolean accept(File dir, String name) {
+                    return name.toLowerCase().startsWith("javac");
+                }
+            });
+            if (javac == null || javac.length == 0) {
+                return null;
+            }
+            //javac located, we're good to go.
+            if (isSet(PROPERTY_SETTER_DEBUG_FLAG)) {
+                System.out.println("found JDK: " + info);
+            }
+            return info;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the path to the most suitable JDK found on the system.
+     * <p>
+     * The selection is taken based on the specification version and potentially
+     * the JDK vendor.
+     *
+     * @param jdks the JDKs we can choose from
+     * @param specificationVersion the specification version we want, i.e.
+     *      "1.4" or "1.6". {@code null} allows all valid versions.
+     * @param vendor the vendor to prefer, if any
+     * @return The path to the chosen JDK, or {@code null} if no suitable JDK
+     *      was found.
+     */
+    private String getJreLib(List<JDKInfo> jdks,
+            String specificationVersion, String vendor) {
+        // If we have no candidate JDKs, just return null at once.
+        if (jdks == null || jdks.size() == 0) {
+            return null;
+        }
+        final String jreLib = new File("jre", "lib").getPath();
+        ArrayList<JDKInfo> candidates = new ArrayList<JDKInfo>();
+        ArrayList<String> versions = new ArrayList<String>();
+        // Get the JDKs with the requested specification version.
+        // Because some vendors are unable to correctly specify the meta data,
+        // we have to look at the implementation version only.
+        for (JDKInfo jdk : jdks) {
+            String implVersion = jdk.implementationVersion;
+            if (isValidVersion(implVersion, specificationVersion)) {
+                candidates.add(jdk);
+                if (!versions.contains(implVersion)) {
+                    versions.add(implVersion);
+                }
+            }
+        }
+        // See if we found any suitable JDKs.
+        if (candidates.size() == 0) {
+            if (isSet(PROPERTY_SETTER_DEBUG_FLAG)) {
+                System.out.println("INFO: No valid JDK with specification " +
+                        "version '" + specificationVersion + "' found");
+            }
+            return null;
+        }
+
+        // Sort and reverse the version list (highest first).
+        Collections.sort(versions);
+        Collections.reverse(versions);
+
+        // Try to find a JVM of the same vendor first. If that fails, return
+        // the highest version suitable JDK from any vendor.
+        String[] targetVendors = new String[] {
+                vendor,
+                null // insignificant, ignores vendor and compares version only
+            };
+        for (String targetVendor : targetVendors) {
+            for (String version : versions) {
+                for (JDKInfo jdk : candidates) {
+                    if (jdk.implementationVersion.equals(version) &&
+                            isSameVendor(targetVendor, jdk.vendor)) {
+                        if (isSet(PROPERTY_SETTER_DEBUG_FLAG)) {
+                            System.out.println(
+                                    "Chosen JDK for specification version " +
+                                    specificationVersion + " (vendor " +
+                                    (targetVendor == null ? "ignored"
+                                                          : jdkVendor) +
+                                    "): " + jdk);
+                        }
+                        return new File(jdk.path, jreLib).getAbsolutePath();
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Tells if the specified implementation version is representing a valid JDK
+     * version and if it satisfies the specification version.
+     *
+     * @param implVersion the version string to check
+     * @param specVersion the specification version to satisfy
+     * @return {@code true} if a valid version, {@code false} if not.
+     */
+    private static boolean isValidVersion(String implVersion,
+                                          String specVersion) {
+        // Don't allow null as a version.
+        if (implVersion == null) {
+            return false;
+        }
+        // Don't allow early access versions.
+        // This rule should at least match Sun EA versions.
+        if (implVersion.contains("ea")) {
+            return false;
+        }
+
+        // See if the implementation version matches the specification version.
+        if (specVersion == null) {
+            return true;
+        }
+        // The current way of comparing the versions, is to check if the
+        // specification version can be found as part of the implementation
+        // version. For instance spec=1.6, matches impl=1.6.0_14.
+        return implVersion.contains(specVersion);
+    }
+
+    /**
+     * Tells if the two vendor names are representing the same vendor.
+     *
+     * @param targetVendor target vendor name, or {@code null} or whitespace /
+     *      empty string if insignificant
+     * @param vendor the candidate vendor name to compare with
+     * @return {@code true} if considered the same or {@code targetVendor} is
+     *      {@code null}, {@code false} if not.
+     */
+    private static boolean isSameVendor(String targetVendor, String vendor) {
+        // If there is no target vendor, return true.
+        if (targetVendor == null || targetVendor.trim().equals("")) {
+            return true;
+        }
+        // If we have a target vendor, but no vendor name to compare with,
+        // always return false.
+        if (vendor == null || vendor.trim().equals("")) {
+            return false;
+        }
+        // Normalize both the vendor names and compare.
+        String target = normalizeVendorName(targetVendor);
+        String candidate = normalizeVendorName(vendor);
+        // Implement special cases here, if required.
+        return candidate.equals(target);
+    }
+
+    /**
+     * Normalizes the vendor name for the purpose of vendor name matching.
+     *
+     * @param vendorName the vendor name as reported by the VM or similar
+     * @return A normalized vendor name suitable for vendor name matching.
+     */
+    private static String normalizeVendorName(String vendorName) {
+        // Currently we only replace commas with the empty string. The reason
+        // for doing this is that the vendor name specified in the jar file
+        // manifest differes from the one return by the JVM itself for the Sun
+        // JDKs. For instance:
+        //  - from JAR:        Sun Microsystems, Inc.
+        //  - from running VM: Sun Microsystems Inc.
+        // (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6851869)
+        return vendorName.replaceAll(",", "");
+    }
+
     /////////////////////////////////////////////////////////////////////////
     //
     //  PROPERTY MINIONS
@@ -491,6 +851,9 @@ public class PropertySetter extends Task
         setClasspathFromLib( J14CLASSPATH, j14lib, false );
         setClasspathFromLib( J15CLASSPATH, j15lib, false );
         setClasspathFromLib( J16CLASSPATH, j16lib, false );
+
+        // Refresh the properties snapshot to reflect the latest changes.
+        refreshProperties();
     }
     
     /**
@@ -796,6 +1159,22 @@ public class PropertySetter extends Task
         appendProperty( buffer, J14LIB );
         appendProperty( buffer, J15LIB );
         appendProperty( buffer, J16LIB );
+        // Build a string of the search path, which may contain multiple values.
+        buffer.append("jdkSearchPath = ");
+        try {
+            List<File> paths = getJdkSearchPath();
+            for (File path : paths) {
+                buffer.append(path.getPath()).append(", ");
+            }
+            // Remove the trailing ", ".
+            buffer.deleteCharAt(buffer.length() -1);
+            buffer.deleteCharAt(buffer.length() -1);
+
+        } catch (Exception e) {
+            buffer.append("unknown (reason: ").append(e.getMessage().trim()).
+                   append(")");
+        }
+        buffer.append("\n");
 
         return buffer.toString();
     }
