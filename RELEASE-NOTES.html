@@ -65,7 +65,11 @@ This is a bug fix release and also provides localization of new 10.5 messages. N
 
 
 <p>The following issues are addressed by Derby release 10.5.3.0. These
-issues are not addressed in the preceding, deprecated 10.5.2.0 release.</p>
+issues are not addressed in the preceding, deprecated 10.5.2.0
+release. Most significantly, Derby 10.5.3.0 carries the fix to the
+wrong-results bug which caused the community to abandon 10.5.2.0:
+<a href="http://issues.apache.org/jira/browse/DERBY-4331"><b>DERBY-4331</b></a>
+</p>
 
 
 <table border="2">
@@ -233,6 +237,9 @@ issues are not addressed in the preceding, deprecated 10.5.2.0 release.</p>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3991">DERBY-3991</a></td><td>Clob.truncate(0) throws exception</td>
+</tr>
+<tr>
+<td><a href="http://issues.apache.org/jira/browse/DERBY-3926">DERBY-3926</a></td><td>Incorrect ORDER BY caused by index</td>
 </tr>
 <tr>
 <td><a href="http://issues.apache.org/jira/browse/DERBY-3887">DERBY-3887</a></td><td>Embedded Derby fails under JBoss because of JMX-related conflicts</td>
