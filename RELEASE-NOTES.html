@@ -1,10 +1,10 @@
 <html>
-<title>Release Notes for Derby 10.5.2.0</title>
+<title>Release Notes for Derby 10.5.3.0</title>
 <body>
 <h1>
-<a name="Release Notes for Derby 10.5.2.0"></a>Release Notes for Derby 10.5.2.0</h1>
+<a name="Release Notes for Derby 10.5.3.0"></a>Release Notes for Derby 10.5.3.0</h1>
 <blockquote>
-<p>These notes describe the difference between Derby release 10.5.2.0 and the preceding release 10.5.1.1.</p>
+<p>These notes describe the difference between Derby release 10.5.3.0 and the preceding release 10.5.1.1.</p>
 </blockquote>
 <ul>
 <li>
@@ -62,7 +62,66 @@ This is a bug fix release and also provides localization of new 10.5 messages. N
 <h2>
 <a name="Bug Fixes"></a>Bug Fixes</h2>
 <blockquote>
-<p>The following issues are addressed by Derby release 10.5.2.0. These issues are not addressed in the preceding 10.5.1.1 release.</p>
+
+
+<p>The following issues are addressed by Derby release 10.5.3.0. These
+issues are not addressed in the preceding, deprecated 10.5.2.0 release.</p>
+
+
+<table border="2">
+<tr>
+<td><b>Issue Id</b></td><td><b>Description</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4331"><b>DERBY-4331</b></a></td><td><b> Join returns results in wrong order</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4312"><b>DERBY-4312</b></a></td><td><b> SQLException XJ215 on insert with setCharacterStream() and autocommit off in mailjdbc test</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4306"><b>DERBY-4306</b></a></td><td><b> NullPointerException in JMXManagementService.unregisterMBean when running jdbcapi._Suite</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4305"><b>DERBY-4305</b></a></td><td><b>; Make changes to test harness class j9_foundation11 to support newer version of IBM's JSR169 implementation</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4292"><b>DERBY-4292</b></a></td><td><b> creation of FileInputStream in org.apache.derby.impl.tools.ij.Main not wrapped in privilege  block which can cause problems running under SecurityManager</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4246"><b>DERBY-4246</b></a></td><td><b> '.replicationTests.ReplicationRun_Local_3_p5).testReplication_Local_3_p5_DERBY_3878()' fails w/ "Could not perform operation 'stopSlave' because the database '...' has not been booted".</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4270"><b>DERBY-4270</b></a></td><td><b> Make replication tests save derby.log and database when a failure occurs.</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4203"><b>DERBY-4203</b></a></td><td><b> (partial) Change mailjdbc  system test to be able to restart with the existing database instead of creating a new one so it can be used for upgrade testing</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4186"><b>DERBY-4186</b></a></td><td><b> After master stop, test fails when it succeeds in connecting (rebooting) shut-down ex-slave</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4185"><b>DERBY-4185</b></a></td><td><b> Make timeout settable or increase default for one replication message layer protocol.</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4175"><b>DERBY-4175</b></a></td><td><b> Instability in some replication tests under load, since tests don't wait long enough for final state or anticipate intermediate states</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-4166"><b>DERBY-4166</b></a></td><td><b> (partial) improvements to the mailjdbc test</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-3921"><b>DERBY-3921</b></a></td><td><b> Replication: Test replication of encrypted databases</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-3814"><b>DERBY-3814</b></a></td><td><b> - failure in testAssertFailureThreadDump with weme 6.1 / JSR 169</b></td>
+</tr>
+<tr>
+  <td><a href="http://issues.apache.org/jira/browse/DERBY-3710"><b>DERBY-3710</b></a></td><td><b>: cannot access a database using AES encryption with encryptionKeyLength=192 after it's been shutdown</b></td>
+</tr>
+</table>
+
+<p>The following additional issues are addressed by Derby release 10.5.3.0. These issues are not addressed in the preceding 10.5.1.1 release.</p>
+
+
 <table border="2">
 <tr>
 <td><b>Issue Id</b></td><td><b>Description</b></td>
@@ -222,7 +281,7 @@ This is a bug fix release and also provides localization of new 10.5 messages. N
 <h2>
 <a name="Issues"></a>Issues</h2>
 <blockquote>
-<p>Compared with the previous release (10.5.1.1), Derby release 10.5.2.0 introduces the following new features and incompatibilities. These merit your special attention.</p>
+<p>Compared with the previous release (10.5.1.1), Derby release 10.5.3.0 introduces the following new features and incompatibilities. These merit your special attention.</p>
 <ul>
 <li>
 <a href="#Note for DERBY-4230">
@@ -441,24 +500,26 @@ Look for SQLState XJ071 instead of XJ070 when <tt>Clob.truncate</tt> is called t
 <h2>
 <a name="Build Environment"></a>Build Environment</h2>
 <blockquote>
-<p>Derby release 10.5.2.0 was built using the following environment:</p>
+<p>Derby release 10.5.3.0 was built using the following environment:</p>
 <ul>
 <li>
 <b>Branch</b> - Source code came from the 10.5 branch.</li>
 <li>
-<b>Machine</b> - Microsoft Windows XP Professional Version 2002 Service Pack 2.</li>
+<b>Machine</b> - Mac OS X 10.5.7 on Macbook Pro 3,1.</li>
 <li>
-<b>Ant</b> - Apache Ant version 1.7.0 compiled on December 13 2006.</li>
+<b>Ant</b> - Apache Ant version 1.7.1 compiled on June 27 2008</li>
 <li>
-<b>JDK 1.4</b> - Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2)
-Classic VM (build 1.4.2, J2RE 1.4.2 IBM Windows 32 build cn142-20061124 (SR7)</li>
+<b>J2ME/JSR 169</b> - Sun's phoneME Advanced MR2</li>
 <li>
-<b>Java 6</b> - Java(TM) SE Runtime Environment (build pwi3260sr3-20081106_07(SR3))
-IBM J9 VM (build 2.4, J2RE 1.6.0 IBM J9 2.4 Windows XP x86-32 jvmwi3260-20081105_25433</li>
+<b>JDK 1.4</b> - Apple's Java(TM) 2 Runtime Environment, Standard Edition (build 1.4.2_21-b01-324)</li>
 <li>
-<b>Compiler</b> - The 1.6 compiler was used to compile all classes, but java 1.4.2 classes were used to compile appropriate 1.4.2 support</li>
+<b>Java 5</b> - Apple's Java(TM) 2 Runtime Environment, Standard Edition (build 1.5.0_19-b02-304)</li>
 <li>
-<b>JSR 169</b> - J2ME support was built using IBM's j9 jvm from WEME6.1</li>
+<b>Java 6</b> - Apple's Java(TM) SE Runtime Environment (build 1.6.0_13-b03-211)</li>
+<li>
+<b>Compiler</b> - The Apple Java 5 compiler was used to compile all classes.
+Platform-specific code was compiled against the corresponding platform
+libraries listed above.</li>
 </ul>
 </blockquote>
 </body>
