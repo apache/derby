@@ -27,7 +27,7 @@ Project info
   * The Derby sub-project's modules will be available as distinct and discrete downloads.
 
 Releases from trunk:
-
+ * 10.5.2.0 : Released 2009-07-30 (Deprecated)
  * 10.5.1.1 : Released 2009-04-28
  * 10.4.2.0 : Released 2008-09-05
  * 10.4.1.3 : Released 2008-04-24
@@ -56,6 +56,7 @@ RECENT VOTES
 
 Ole Solberg was elected as a Derby committer on 2009-06-05.
 Release 10.5.1.1 was voted as a release on 2009-04-28 and announced on 2009-05-01.
+Relase 10.5.2.0 was voted as a release on 2009-07-30 and deprecated on 2009-08-07 because of DERBY-4331.  A accelerated 10.5.3 release is being planned.
 
 OTHER NEWS
 ==========
@@ -65,7 +66,7 @@ The 10.5 release introduced an experimental in-memory database. User feedback is
 RELEASE STATUS
 ==============
 
-The community is working on a 10.5.2 maintenance release, targetted for late July, early August, 2009.
+The community is working on a 10.5.3 maintenance release, targetted for late August.
 
 
 
