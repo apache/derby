@@ -37,6 +37,26 @@ public interface BrokeredStatementControl
 	public int checkHoldCursors(int holdability) throws SQLException;
 
 	/**
+	 * Close the real JDBC Statement when this is controlling a Statement.
+	 * @throws SQLException
+	 */
+	public void closeRealStatement() throws SQLException;
+	
+	/**
+	 * Close the real JDBC CallableStatement when this is controlling a
+	 * CallableStatement. 
+	 * @throws SQLException
+	 */
+	public void closeRealCallableStatement() throws SQLException;
+	
+	/**
+	 * Close the real JDBC CallableStatement when this is controlling a
+	 * PreparedStatement. 
+	 * @throws SQLException
+	 */
+	public void closeRealPreparedStatement() throws SQLException;
+	
+	/**
 		Return the real JDBC statement for the brokered statement
 		when this is controlling a Statement.
 	*/

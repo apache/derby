@@ -60,6 +60,10 @@ public abstract class BrokeredCallableStatement extends BrokeredPreparedStatemen
         return getCallableStatement().wasNull();
     }
 
+    public final void close() throws SQLException {
+        control.closeRealCallableStatement();
+    }
+    
     public final String getString(int parameterIndex)
         throws SQLException
     {

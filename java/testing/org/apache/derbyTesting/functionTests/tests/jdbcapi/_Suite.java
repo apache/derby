@@ -88,7 +88,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(RelativeTest.suite());
         suite.addTest(metadataMultiConnTest.suite());
         suite.addTest(ResultSetStreamTest.suite());
-        suite.addTest(InternationalConnectSimpleDSTest.suite());
+        suite.addTest(InternationalConnectSimpleDSTest.suite());       
         
         // Old harness .java tests that run using the HarnessJavaTest
         // adapter and continue to use a single master file.
@@ -117,7 +117,8 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(PoolXADSCreateShutdownDBTest.suite());
             suite.addTest(XADSAuthenticationTest.suite());
             suite.addTest(XATransactionTest.suite());
-
+            suite.addTest(XATest.suite());
+            
             // Test uses JDBC 3.0 datasources, and javax.naming.Reference etc.
             suite.addTest(DataSourceReferenceTest.suite());
             suite.addTest(DataSourceSerializationTest.suite());
