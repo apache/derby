@@ -465,13 +465,6 @@ public class FromBaseTable extends FromTable
 
 				for (int i = 0; i < baseColumnPositions.length; i++)
 				{
-					//Check if the order by column has equijoin on another 
-					//column which is already identified as an ordered column
-					if (doesOrderByColumnHaveEquiJoin(
-							irg, predList, rowOrdering))
-						rowOrdering.columnAlwaysOrdered(this, 
-								baseColumnPositions[i]);
-
 					/*
 					** Don't add the column to the ordering if it's already
 					** an ordered column.  This can happen in the following
@@ -4238,86 +4231,6 @@ public class FromBaseTable extends FromTable
 			}
 		}
 		return true;
-	}
-
-	//Check if the columns in the index have an equijoin on them
-	//with other already ordered columns from the other optimizables. This
-	//is done by going through the columns in the index and checking the
-	//predicate list for equijoins on the index columns. 
-	private boolean doesOrderByColumnHaveEquiJoin(IndexRowGenerator irg,
-			OptimizablePredicateList predList, RowOrdering ro)
-	throws StandardException
-	{
-		if (predList == null)
-		{
-			return false;
-		}
-
-		// is this a unique index. 
-		if (! irg.isUnique())
-		{
-			return false;
-		}
-
-		PredicateList restrictionList = (PredicateList) predList;
-
-		int[] baseColumnPositions = irg.baseColumnPositions();
-
-		for (int index = 0; index < baseColumnPositions.length; index++)
-		{
-			// get the column number at this position
-			int curCol = baseColumnPositions[index];
-
-			//Check if this column from the index has an equi join predicate
-			//on them.
-			int j = restrictionList.hasEqualityPredicateOnOrderedColumn(
-					this, curCol, true);
-			if (j == -1)
-				return false;
-
-			//We have found a predicate which has an equi join involving the
-			//index column. Now ensure that the equi join is with a column
-			//which is already identified as always ordered.
-			Predicate		predicate;
-			predicate = (Predicate) restrictionList.elementAt(j);
-			ValueNode vn = predicate.getAndNode().getLeftOperand();
-			ColumnReference cr;
-  			if (vn instanceof BinaryRelationalOperatorNode)
-  			{
-  				BinaryRelationalOperatorNode bon = 
-  					(BinaryRelationalOperatorNode) vn;
-  				cr = null;
-				if (bon.columnOnOneSide(this) == 
-					BinaryRelationalOperatorNode.LEFT)
-				{
-	  				//If the index column is on left side, then look for the 
-					//operand on the other side to see if it is of type 
-					//ColumnReference. If it is, then check if that column 
-					//is identified as always ordered
-					if (bon.getRightOperand() instanceof ColumnReference)
-						cr = (ColumnReference)bon.getRightOperand();
-				} else
-				{
-	  				//If the index column is on right side, then look for the 
-					//operand on the other side to see if it is of type 
-					//ColumnReference. If it is, then check if that column 
-					//is identified as always ordered
-					if (bon.getLeftOperand() instanceof ColumnReference)
-						cr = (ColumnReference)bon.getLeftOperand();
-				}
-				if (cr!=null)
-				{
-					//We have found that the index column is involved in an
-					//equijoin with another column. Now check if that other
-					//column is always ordered
-					if (ro.orderedOnColumn(1, cr.getTableNumber(), 
-							cr.getColumnNumber()))
-						return true;
-				}
-  			}
-		}
-
-		return false;
 	}
 
 	/**
