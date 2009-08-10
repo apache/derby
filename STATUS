@@ -28,6 +28,7 @@ Project info
 
 Releases from trunk:
 
+ * 10.5.2.0 : Released 2009-07-30 (deprecated)
  * 10.5.1.1 : Released 2009-04-28
  * 10.4.2.0 : Released 2008-09-05
  * 10.4.1.3 : Released 2008-04-24
@@ -44,7 +45,7 @@ Releases from trunk:
 PENDING ISSUES
 ==============
 
-A release candidate for 10.5.2.0 (a bug fix release) will be posted 7/15/2009
+Bug-fix release candidate 10.5.3.0 addresses the regression introduced by 10.5.2.0.
 
 RESOLVED ISSUES SINCE LAST STATUS
 =================================
@@ -53,7 +54,8 @@ See RELEASE-NOTES.html
 
 RECENT VOTES
 =================================
-Release 10.5.1.1 was voted as release on 2009-04-28.
+Ole Solberg was elected as a Derby committer on 2009-06-05.
+Release 10.5.2.0 was voted as an official release on 2009-07-30 and deprecated on 2009-08-07 because of DERBY-4331.
 
 None.  
 
@@ -65,7 +67,9 @@ The 10.5 release has introduced an experimental in-memory database. User feedbac
 RELEASE STATUS
 ==============
 
-10.5.1.1 was voted as next release on 2009-04-28 and announced 2009-05-01.
+Bug-fix release 10.5.2.0 was posted on the website and quickly deprecated because it contains a wrong-results regression, DERBY-4331.
+
+10.5.1.1 was voted as the latest feature release on 2009-04-28 and announced 2009-05-01.
 No currently outstanding issues.
 
 
