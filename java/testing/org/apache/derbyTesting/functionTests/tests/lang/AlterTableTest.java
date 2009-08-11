@@ -19,9 +19,12 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.InputStream;
+import java.sql.Blob;
 import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLWarning;
@@ -32,6 +35,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.functionTests.util.TestInputStream;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -2653,9 +2657,77 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         assertStatementError("42X14", st,
                 " alter table \"d3355_a\" alter column \"c1\" not null");
     }
+    
+    public void testJira4256() throws SQLException{
+        
+        Statement st = createStatement();
+        createTestObjects(st);
+        
+        //increase the maximum size of the clob 
+        
+        Clob clob = null;
+        Blob blob=null;
+        int val = 1;
+        int size = 15 * 1024;
+        InputStream stream;
+               
+        st.executeUpdate("create table clob_tab(c1 int,clob_col clob(10K))");
+        conn.commit();
+        
+        pSt=conn.prepareStatement("INSERT INTO clob_tab values (?,?)");   
+        stream = new TestInputStream(size, val);
+        
+        //this insert fails(size>10K) 
+        pSt.setInt(1, val);
+        pSt.setAsciiStream(2, stream, size);
+        assertStatementError("XJ001", pSt);
+        pSt.close();
+        
+        conn.rollback();
+        
+        st.executeUpdate("ALTER TABLE clob_tab ALTER COLUMN "
+                +"clob_col SET DATA TYPE clob(20K)");
+        
+        pSt=conn.prepareStatement("INSERT INTO clob_tab values (?,?)");
+        stream = new TestInputStream(size, val);
+        
+        //this insert succeed (maximum blob size not increased to 20K)
+        pSt.setInt(1, val);
+        pSt.setAsciiStream(2, stream, size);
+        pSt.executeUpdate();
+        pSt.close(); 
+        
+        
+        //increase the maximum size of the blob        
+        
+        st.executeUpdate("CREATE TABLE blob_tab ( C1 INTEGER," +
+                                "blob_col BLOB(10K) NOT NULL)");
+        
+        conn.commit();
+        
+        pSt=conn.prepareStatement("INSERT INTO blob_tab values (?,?)");
+        stream = new TestInputStream(size, val);
+        
+        //this insert fails(size>10K) 
+        pSt.setInt(1, val);
+        pSt.setBinaryStream(2, stream, size);
+        assertStatementError("22001", pSt);
+        pSt.close();
+        
+        conn.rollback();
+        
+        st.executeUpdate("ALTER TABLE blob_tab ALTER COLUMN "
+                +"blob_col SET DATA TYPE blob(20K)");  
+        
+        pSt=conn.prepareStatement("INSERT INTO blob_tab values (?,?)");
+        stream = new TestInputStream(size, val);
+        
+        //this insert succeed (maximum blob size not increased to 20K)
+        pSt.setInt(1, val);
+        pSt.setBinaryStream(2, stream, size);
+        pSt.executeUpdate();
+        pSt.close();   
+        
+        conn.rollback();
+    }
 }
-
-
-
-
-

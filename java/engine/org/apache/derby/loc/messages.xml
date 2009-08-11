@@ -2491,7 +2491,7 @@ Guide.
 
             <msg>
                 <name>42Z16</name>
-                <text>Only columns of type VARCHAR may have their length altered. </text>
+                <text>Only columns of type VARCHAR, CLOB, and BLOB may have their length altered. </text>
             </msg>
 
             <msg>
