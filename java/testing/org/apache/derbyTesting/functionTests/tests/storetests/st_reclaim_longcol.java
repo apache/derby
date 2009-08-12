@@ -163,26 +163,55 @@ public class st_reclaim_longcol extends BaseTest
 
         int total_expected_page_max = 12 + num_rows;
 
-        if (total_pages > total_expected_page_max)
+        int MAX_WAIT_FOR_BG_THREAD = 100000;
+        int ms_waited              = 20;
+
+        while (total_pages > total_expected_page_max)
         {
-            // for the above test case we expect the following space:
-            //     page 0
-            //     page 1 
-            //     free space from 1 blob - 9 pages per blob
-            //     allocated page per long/short blob insert.  Each long
-            //         inserts onto a new page to try and fit it entirely
-            //         on a page.  Then the short blob goes to last inserted
-            //         page.  This process repeats.  The previous pages are
-            //         marked "half-filled" and can be used in future for
-            //         short rows that don't fit on the last page inserted.
-            
+            if (ms_waited < MAX_WAIT_FOR_BG_THREAD)
+            {
+                // The result is dependent on background activity which may
+                // differ from machine to machine.  Loop, sleeping in this
+                // thread to allow background thread to run.
 
+                try
+                {
+                    ms_waited += 1000;
+                    Thread.sleep(1000);
+                }
+                catch (Exception ex)
+                {
+                    // just ignore interupts of sleep.
+                }
 
-            System.out.println(
-                "Test failed, expected less than " + 
-                total_expected_page_max + " pages - count is:\n" +
-                "free pages     : "   + sp_info[SPACE_INFO_NUM_FREE] +
-                "\nallocated pages: " + sp_info[SPACE_INFO_NUM_ALLOC]);
+                sp_info = getSpaceInfo(conn, "APP", "LONGCOL", true);
+
+                total_pages = 
+                    sp_info[SPACE_INFO_NUM_ALLOC] + 
+                    sp_info[SPACE_INFO_NUM_FREE];
+            }
+            else
+            {
+                // for the above test case we expect the following space:
+                //     page 0
+                //     page 1 
+                //     free space from 1 blob - 9 pages per blob
+                //     allocated page per long/short blob insert.  Each long
+                //         inserts onto a new page to try and fit it entirely
+                //         on a page.  Then the short blob goes to last inserted
+                //         page.  This process repeats.  The previous pages are
+                //         marked "half-filled" and can be used in future for
+                //         short rows that don't fit on the last page inserted.
+
+                System.out.println(
+                    "Test 1 failed, expected less than " + 
+                    total_expected_page_max + " pages - count is:\n" +
+                    "free pages     : "   + sp_info[SPACE_INFO_NUM_FREE] +
+                    "\nallocated pages: " + sp_info[SPACE_INFO_NUM_ALLOC] +
+                    "\nWaited " + ms_waited + "ms. for background work.");
+
+                break;
+            }
         }
 
         if (verbose)
@@ -308,13 +337,45 @@ public class st_reclaim_longcol extends BaseTest
         // bigger than worksize, something like work_size=5 and total_work >100
         int total_expected_page_max = 30 * work_size; 
 
-        if (total_pages > total_expected_page_max)
+        int MAX_WAIT_FOR_BG_THREAD = 100000;
+        int ms_waited              = 20;
+
+        while (total_pages > total_expected_page_max)
         {
-            System.out.println(
-                "Test failed, expected less than " + 
-                total_expected_page_max + " pages - count is:\n" +
-                "free pages     : "   + sp_info[SPACE_INFO_NUM_FREE] +
-                "\nallocated pages: " + sp_info[SPACE_INFO_NUM_ALLOC]);
+            if (ms_waited < MAX_WAIT_FOR_BG_THREAD)
+            {
+                // The result is dependent on background activity which may
+                // differ from machine to machine.  Loop, sleeping in this
+                // thread to allow background thread to run.
+
+                try
+                {
+                    ms_waited += 1000;
+                    Thread.sleep(1000);
+                }
+                catch (Exception ex)
+                {
+                    // just ignore interupts of sleep.
+                }
+
+                sp_info = getSpaceInfo(conn, "APP", "LONGCOL", true);
+
+                total_pages = 
+                    sp_info[SPACE_INFO_NUM_ALLOC] + 
+                    sp_info[SPACE_INFO_NUM_FREE];
+            }
+            else
+            {
+
+                System.out.println(
+                    "Test 2 failed, expected less than " + 
+                    total_expected_page_max + " pages - count is:\n" +
+                    "free pages     : "   + sp_info[SPACE_INFO_NUM_FREE] +
+                    "\nallocated pages: " + sp_info[SPACE_INFO_NUM_ALLOC] +
+                    "\nWaited " + ms_waited + "ms. for background work.");
+
+                break;
+            }
         }
 
         if (verbose)
