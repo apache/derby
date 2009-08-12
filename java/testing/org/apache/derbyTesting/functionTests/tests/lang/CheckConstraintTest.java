@@ -424,88 +424,59 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st.executeUpdate(
             " create index i1 on t1(c1)");
         
-        /* DERBY-4282  after fixing the issue DERBY-4282 this commented
-         * part can be uncomment
-           
-        PreparedStatement ps_c1 = prepareStatement(
-            "select * from t1 where c2 = 2 for update of c1");
+        Statement st1 = conn.createStatement();
+        st1.setCursorName("c1");
+        ResultSet rs1 = st1.executeQuery(
+                "select * from t1 where c2=2 for update of C1");
+        rs1.next();   
+        setAutoCommit(false);
         
-        ResultSet c1 = ps_c1.executeQuery();
+        // this update should succeed
+        assertUpdateCount(st,1,
+                "update t1 set c1 = c1 where current of \"c1\"");
         
-        //c1.next();  
+        // this update should fail
+        assertStatementError("23513", st,
+            "update t1 set c1 = c1 + 1 where current of \"c1\"");
+        st1.close();
+        rs1.close();
         
-        expRS=new String[][]{
-            {"2","2"}
-        };
-        JDBC.assertFullResultSet(c1, expRS);
-
+        Statement st2 = conn.createStatement();
+        st2.setCursorName("c2");
+        ResultSet rs2 = st2.executeQuery(
+                "select * from t1 where c1 = 2 for update of c2");
+        rs2.next();   
         setAutoCommit(false);
         // this update should succeed
-             
-        assertUpdateCount(st, 1,  
-            "update t1 set c1 = c1 where current of c1");
-        //setAutoCommit(true);        
-        // this update should fail
-        
-        assertStatementError("23513", st,
-            "update t1 set c1 = c1 + 1 where current of c1");
-        
-        c1.close();
-        ps_c1.close();
-        
-        PreparedStatement ps_c2 = prepareStatement(
-            "select * from t1 where c1 = 2 for update of c2");
-        
-        ResultSet c2 = ps_c2.executeQuery();
-        
-        c2.next(); 
-        
-        expRS=new String[][]{
-            {"2","2"}
-        };
-        JDBC.assertFullResultSet(c2, expRS);
-
-        
-        // this update should succeed
-        
-        assertUpdateCount(st, 1,
-            "update t1 set c2 = c2 where current of c2");
+        assertUpdateCount(st,1,
+                "update t1 set c2 = c2 where current of \"c2\"");
         
         // this update should fail
-        
         assertStatementError("23513", st,
-            "update t1 set c2 = c2 + 1 where current of c2");
+            "update t1 set c2 = c2 + 1 where current of \"c2\"");
+        st2.close();
+        rs2.close();
         
-        c2.close();
-        ps_c2.close();
-        
-        PreparedStatement ps_c3 = prepareStatement(
-            "select * from t1 where c1 = 2 for update of c1, c2");
-        
-        ResultSet c3 = ps_c3.executeQuery();
-        
-        c3.next(); 
-        
-        expRS=new String[][]{
-            {"2","2"}
-        };
-        JDBC.assertFullResultSet(c3, expRS);
-
+        Statement st3 = conn.createStatement();
+        st3.setCursorName("c3");
+        ResultSet rs3 = st3.executeQuery(
+                "select * from t1 where c1 = 2 for update of c1, c2");
+        rs3.next();   
+        setAutoCommit(false);
         
         // this update should succeed
-        
         assertUpdateCount(st, 1,
-            "update t1 set c2 = c1, c1 = c2 where current of c3");
+            "update t1 set c2 = c1, c1 = c2 where current of \"c3\"");
         
         // this update should fail
-        
         assertStatementError("23513", st,
-            "update t1 set c2 = c2 + 1, c1 = c1 + 3 where current of c3");
+            "update t1 set c2 = c2 + 1, c1 = c1 + 3 where current of \"c3\"");
         
         // this update should succeed
-        
         assertUpdateCount(st, 1,
-            "update t1 set c2 = c1 + 3, c1 = c2 + 3 where current of c3");
+            "update t1 set c2 = c1 + 3, c1 = c2 + 3 where current of \"c3\"");
+        st3.close();
+        rs3.close();
         
         rs = st.executeQuery(
             " select * from t1");
@@ -523,9 +494,6 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
-        c3.close();
-        ps_c3.close();
-*/       
         conn.rollback();
         
         // complex expressions
@@ -890,6 +858,43 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
             " DROP TABLE   \"indicator\"");
              
         getConnection().rollback();
+        st.close();
+    }
+    public void testJira4282() throws SQLException
+    {
+        // This test doesnt work properly in the embedded configuration.
+        // The intent of the test is to expose the DERBY-4282 problem, and
+        // this test case does do that in the client/server configuration, so
+        // we only run the test in that configuration. In the embedded
+        // configuration, the UPDATE statement unexpectedly gets a 
+        // "no current row" exception.
+        //
+        if (usingEmbedded())
+            return;
+
+        st = createStatement();
+
+        st.executeUpdate(
+            "create table t4282(c1 int, c2 int, constraint ck1 "
+            + "check(c1 = c2), constraint ck2 check(c2=c1))");
+
+        st.executeUpdate("insert into t4282 values (1,1),(2,2),(3,3),(4,4)");
+
+        Statement st1 = createStatement();
+        st1.setCursorName("c1");
+        ResultSet rs = st1.executeQuery("select * from t4282 for update");
+        assertTrue("Failed to retrieve row for update", rs.next());
+        // DERBY-4282 causes the next statement to fail with:
+        //
+        // Column 'C2' is either not in any table in the FROM list or
+        // appears within a join specification and is outside the scope
+        // of the join specification or appears in a HAVING clause and
+        // is not in the GROUP BY list. If this is a CREATE or ALTER TABLE
+        // statement then 'C2' is not a column in the target table. 
+        st.executeUpdate("update t4282 set c1 = c1 where current of \"c1\"");
+
+        // If we get here, all is well, and DERBY-4282 did not occur.
+        st1.close();
         st.close();
     }
 }

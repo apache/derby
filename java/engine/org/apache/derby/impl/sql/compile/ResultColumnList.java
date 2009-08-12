@@ -4057,7 +4057,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		ResultColumn	rc = (ResultColumn) nodeFactory.getNode
 			(
 				C_NodeTypes.RESULT_COLUMN,
-				null,
+				columnName,
 				nodeFactory.getNode
 				(
 					C_NodeTypes.COLUMN_REFERENCE,
