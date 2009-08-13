@@ -1803,7 +1803,10 @@ public abstract class EmbedConnection implements EngineConnection
     public void checkForTransactionInProgress() throws SQLException {
         if (!isClosed() && (rootConnection == this) &&
                 !autoCommit && !transactionIsIdle()) {
-            throw newSQLException(SQLState.CANNOT_CLOSE_ACTIVE_CONNECTION);
+            // DERBY-1191 partial fix. Make sure this  exception is logged with
+            // derby.stream.error.logSeverityLevel=0 so users can see changes needed
+            // after the DERBY-3319 fix.
+            Util.logAndThrowSQLException(newSQLException(SQLState.CANNOT_CLOSE_ACTIVE_CONNECTION));
         }
     }
 

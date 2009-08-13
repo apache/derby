@@ -21,15 +21,20 @@
 
 package org.apache.derby.impl.jdbc;
 
+import org.apache.derby.iapi.error.ErrorStringBuilder;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
+import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.error.ExceptionSeverity;
 
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.JDBC40Translation;
@@ -68,6 +73,9 @@ public abstract class Util  {
     private static SQLExceptionFactory exceptionFactory = 
                                     new SQLExceptionFactory ();
 
+
+	private static int logSeverityLevel = PropertyUtil.getSystemInt(Property.LOG_SEVERITY_LEVEL,
+		SanityManager.DEBUG ? 0 : ExceptionSeverity.SESSION_SEVERITY);
 	/*
 	** Methods of Throwable
 	*/
@@ -75,6 +83,53 @@ public abstract class Util  {
 	// class implementation
 
     /**
+     * Log SQLException to the error log if the severity exceeds the 
+     * logSeverityLevel  and then throw it.  This method can be used for 
+     * logging JDBC exceptions to derby.log DERBY-1191.
+     * 
+     * @param se SQLException to log and throw
+     * @throws SQLException
+     */
+    public static void logAndThrowSQLException(SQLException se) throws SQLException {
+    	if (se.getErrorCode() >= logSeverityLevel){
+    	logSQLException(se);
+    	}
+    	throw se;
+    }
+    
+	/**
+	 * Log an SQLException to the error log or to the console if there is no
+	 * error log available.
+	 * This method could perhaps be optimized to have a static shared
+	 * ErrorStringBuilder and synchronize the method, but this works for now.
+	 * 
+	 * @param se SQLException to log
+	 */
+	private static void logSQLException(SQLException se) {
+    	if (se == null)
+    		return;
+    	String message = se.getMessage();
+    	String sqlstate = se.getSQLState();
+    	if ((sqlstate != null) && (sqlstate.equals(SQLState.LOGIN_FAILED)) && 
+    			(message != null) && (message.equals("Connection refused : java.lang.OutOfMemoryError")))				
+    		return;
+
+    	HeaderPrintWriter errorStream = Monitor.getStream();
+    	if (errorStream == null) {
+    		se.printStackTrace();
+    		return;
+    	}
+    	ErrorStringBuilder	errorStringBuilder = new ErrorStringBuilder(errorStream.getHeader());
+    	errorStringBuilder.append("\nERROR " +  se.getSQLState() + ": "  + se.getMessage() + "\n");
+    	errorStringBuilder.stackTrace(se);
+    	errorStream.print(errorStringBuilder.get().toString());
+    	errorStream.flush();
+    	errorStringBuilder.reset();
+
+    }
+
+	
+	/**
      * This looks up the message and sqlstate values and calls
      * the SQLExceptionFactory method to generate
      * the appropriate exception off of them.
