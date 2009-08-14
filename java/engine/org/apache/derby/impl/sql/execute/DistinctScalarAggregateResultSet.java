@@ -138,10 +138,20 @@ class DistinctScalarAggregateResultSet extends ScalarAggregateResultSet
 
         source.openCore();
 
-		/*
-		** Load up the sorter because we have something to sort.
-		*/
-		scanController = loadSorter();
+		try {
+			/*
+			** Load up the sorter because we have something to sort.
+			*/
+			scanController = loadSorter();
+		} catch (StandardException e) {
+			// DERBY-4330 Result set tree must be atomically open or
+			// closed for reuse to work (after DERBY-827).
+
+			isOpen = true; // to make close do its thing:
+			try { close(); } catch (StandardException ee) {}
+			throw e;
+		}
+
 		sorted = true;
 
 	    isOpen = true;
