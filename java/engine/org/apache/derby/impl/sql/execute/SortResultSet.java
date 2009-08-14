@@ -247,26 +247,35 @@ class SortResultSet extends NoPutResultSetImpl
 
         source.openCore();
 
-		/* If this is an in-order distinct then we do not need the sorter.
-		 * (We filter out the duplicate rows ourselves.)
-		 * We save a clone of the first row so that subsequent next()s
-		 * do not overwrite the saved row.
-		 */
-		if (isInSortedOrder && distinct)
-		{
-			currSortedRow = getNextRowFromRS();
-			if (currSortedRow != null)
+		try {
+			/* If this is an in-order distinct then we do not need the sorter.
+			 * (We filter out the duplicate rows ourselves.)  We save a clone
+			 * of the first row so that subsequent next()s do not overwrite the
+			 * saved row.
+			 */
+			if (isInSortedOrder && distinct)
 			{
-				currSortedRow = (ExecRow) currSortedRow.getClone();
+				currSortedRow = getNextRowFromRS();
+
+				if (currSortedRow != null)
+				{
+					currSortedRow = (ExecRow) currSortedRow.getClone();
+				}
 			}
-		}
-		else
-		{
-			/*
-			** Load up the sorter.
-			*/
-			scanController = loadSorter();
-			sorted = true;
+			else
+			{
+				/*
+				** Load up the sorter.
+				*/
+				scanController = loadSorter();
+				sorted = true;
+			}
+		} catch (StandardException e) {
+			// DERBY-4330 Result set tree must be atomically open or
+			// closed for reuse to work (after DERBY-827).
+			isOpen = true; // to make close do its thing:
+			try { close(); } catch (StandardException ee) {}
+			throw e;
 		}
 
 	    isOpen = true;

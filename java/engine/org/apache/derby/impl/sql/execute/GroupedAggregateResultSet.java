@@ -158,26 +158,35 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 
         source.openCore();
 
-		/* If this is an in-order group by then we do not need the sorter.
-		 * (We can do the aggregation ourselves.)
-		 * We save a clone of the first row so that subsequent next()s
-		 * do not overwrite the saved row.
-		 */
-		if (isInSortedOrder)
-		{
-			currSortedRow = getNextRowFromRS();
-			if (currSortedRow != null)
+		try {
+			/* If this is an in-order group by then we do not need the sorter.
+			 * (We can do the aggregation ourselves.)
+			 * We save a clone of the first row so that subsequent next()s
+			 * do not overwrite the saved row.
+			 */
+			if (isInSortedOrder)
 			{
-				currSortedRow = (ExecIndexRow) currSortedRow.getClone();
-				initializeVectorAggregation(currSortedRow);
+				currSortedRow = getNextRowFromRS();
+				if (currSortedRow != null)
+				{
+					currSortedRow = (ExecIndexRow) currSortedRow.getClone();
+					initializeVectorAggregation(currSortedRow);
+				}
 			}
-		}
-		else
-		{
-			/*
-			** Load up the sorter
-			*/
-			scanController = loadSorter();
+			else
+			{
+				/*
+				** Load up the sorter
+				*/
+				scanController = loadSorter();
+			}
+		} catch (StandardException e) {
+			// DERBY-4330 Result set tree must be atomically open or
+			// closed for reuse to work (after DERBY-827).
+
+			isOpen = true; // to make close do its thing:
+			try { close(); } catch (StandardException ee) {}
+			throw e;
 		}
 
 	    isOpen = true;

@@ -105,15 +105,25 @@ class SetOpResultSet extends NoPutResultSetImpl
 		if (SanityManager.DEBUG)
 	    	SanityManager.ASSERT( ! isOpen, "SetOpResultSet already open");
 
-        isOpen = true;
         leftSource.openCore();
-        rightSource.openCore();
-        rightInputRow = rightSource.getNextRowCore();
+
+        try {
+            rightSource.openCore();
+            rightInputRow = rightSource.getNextRowCore();
+        } catch (StandardException e) {
+            // DERBY-4330 Result set tree must be atomically open or
+            // closed for reuse to work (after DERBY-827).
+            isOpen = true; // to make close work:
+            try { close(); } catch (StandardException ee) {}
+            throw e;
+        }
+
         if (rightInputRow != null)
         {
             rowsSeenRight++;
         }
 
+        isOpen = true;
 		numOpens++;
 
 		openTime += getElapsedMillis(beginTime);

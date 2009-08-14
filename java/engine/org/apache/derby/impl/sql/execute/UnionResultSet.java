@@ -108,8 +108,8 @@ class UnionResultSet extends NoPutResultSetImpl
 		if (SanityManager.DEBUG)
 	    	SanityManager.ASSERT( ! isOpen, "UnionResultSet already open");
 
-        isOpen = true;
         source1.openCore();
+        isOpen = true;
 		numOpens++;
 
 		openTime += getElapsedMillis(beginTime);
