@@ -169,6 +169,10 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
     /** Secondary connection. Used if something needs to be executed in a
      * separate transaction. */
     private Connection c2;
+    private Connection c3;
+
+
+    private static final long DERBY_DEFAULT_TIMEOUT = 60;
 
     /**
      * Creates a String containing an insert statement for the
@@ -454,6 +458,31 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         try { s.executeUpdate("drop table emp"); } catch (SQLException e) {}
         try { s.executeUpdate("drop table emp2"); } catch (SQLException e) {}
         try { s.executeUpdate("drop table dept"); } catch (SQLException e) {}
+
+        // DERBY-4330 tables:
+        try {
+            if (c3 != null && !c3.isClosed()) {
+                c3.rollback();
+                c3.close();
+            }
+        } catch (SQLException e) {
+        }
+
+        try { s.executeUpdate(
+                "drop table APP.FILECHANGES"); } catch (SQLException e) {}
+        try { s.executeUpdate(
+                "drop table APP.CHANGESETS"); } catch (SQLException e) {}
+        try { s.executeUpdate(
+                "drop table APP.AUTHORS"); } catch (SQLException e) {}
+        try { s.executeUpdate(
+                "drop table APP.FILES"); } catch (SQLException e) {}
+        try { s.executeUpdate(
+                "drop table APP.REPOSITORIES"); } catch (SQLException e) {}
+        try { s.executeUpdate(
+                "drop table APP.FILECHANGES_2"); } catch (SQLException e) {}
+
+        try { setTimeout(DERBY_DEFAULT_TIMEOUT); } catch (SQLException e) {}
+
         s.close();
         commit();
 
@@ -2244,4 +2273,364 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
                 null); // XPLAIN doesn't work for CALL statements currently.
     }
 
+
+    public void testDerby4330_JoinResultSet()  throws SQLException {
+        setTimeout(1);
+        setSchema("APP");
+        createDerby4330_join_tables();
+
+        PreparedStatement ps = prepareStatement(
+            "SELECT CS.REVISION, A.NAME, CS.TIME, CS.MESSAGE, F.PATH " +
+            "FROM " +
+            "CHANGESETS CS, FILECHANGES FC, " +
+            "           REPOSITORIES R, FILES F, AUTHORS A " +
+            "WHERE " +
+            "F.REPOSITORY = R.ID AND A.REPOSITORY = R.ID AND " +
+            "CS.REPOSITORY = R.ID AND CS.ID = FC.CHANGESET AND " +
+            "F.ID = FC.FILE AND A.ID = CS.AUTHOR AND " +
+            "EXISTS ( " +
+            "SELECT 1 " +
+            "FROM FILES F2 " +
+            "WHERE " +
+            "F2.ID = FC.FILE AND F2.REPOSITORY = R.ID) " +
+            "ORDER BY CS.ID DESC");
+
+        c3 = openDefaultConnection();
+        c3.setAutoCommit(false);
+        Statement stm2 = c3.createStatement();
+        stm2.execute("LOCK TABLE FILECHANGES IN EXCLUSIVE MODE");
+        stm2.close();
+
+        try {
+            ps.executeQuery();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("Expected timeout", "40XL1", e);
+        }
+
+        c3.rollback();
+        c3.close();
+
+        ResultSet rs = ps.executeQuery();
+        assertTrue(rs.next());
+        assertEquals(rs.getString(2), "xyz"); // name
+        assertFalse(rs.next());
+        ps.close();
+
+    }
+
+
+    public void testDerby4330_UnionResultSet()  throws SQLException {
+        setTimeout(1);
+        setSchema("APP");
+        createDerby4330_union_tables();
+
+        PreparedStatement ps = prepareStatement(
+            "SELECT * FROM (" +
+            "SELECT * FROM FILECHANGES_2  UNION " +
+            "SELECT * FROM FILECHANGES) X"); // locked file last
+
+        PreparedStatement ps_inverse = prepareStatement(
+            "SELECT * FROM (" +
+            "SELECT * FROM FILECHANGES  UNION " + // locked file first
+            "SELECT * FROM FILECHANGES_2) X");
+
+        c3 = openDefaultConnection();
+        c3.setAutoCommit(false);
+        Statement stm2 = c3.createStatement();
+        stm2.execute("LOCK TABLE FILECHANGES IN EXCLUSIVE MODE");
+        stm2.close();
+
+        try {
+            ps.executeQuery();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("Expected timeout", "40XL1", e);
+        }
+
+        try {
+            ps_inverse.executeQuery();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("Expected timeout", "40XL1", e);
+        }
+
+        c3.rollback();
+        c3.close();
+
+        ResultSet rs = ps.executeQuery();
+        JDBC.assertFullResultSet(rs, new String[][]{{"1", "1", "1"}});
+
+        rs = ps_inverse.executeQuery();
+        JDBC.assertFullResultSet(rs, new String[][]{{"1", "1", "1"}});
+
+        ps.close();
+        ps_inverse.close();
+
+    }
+
+
+    public void testDerby4330_SetOpResultSet()  throws SQLException {
+        setTimeout(1);
+        setSchema("APP");
+        createDerby4330_union_tables();
+
+        String[] ops = {"EXCEPT", "INTERSECT"};
+        String[][][] opExpectedRs = {null, {{"1", "1", "1"}}};
+
+        for (int i=0; i < 2; i++) {
+            PreparedStatement ps = prepareStatement(
+                "SELECT * FROM (" +
+                "SELECT * FROM FILECHANGES_2 " + ops[i] + " " +
+                // locked file last
+                "SELECT * FROM FILECHANGES) X ORDER BY ID");
+
+            PreparedStatement ps_inverse = prepareStatement(
+                "SELECT * FROM (" +
+                 // locked file first:
+                "SELECT * FROM FILECHANGES " + ops[i] + " " +
+                "SELECT * FROM FILECHANGES_2) X ORDER BY ID");
+
+            c3 = openDefaultConnection();
+            c3.setAutoCommit(false);
+            Statement stm2 = c3.createStatement();
+            stm2.execute("LOCK TABLE FILECHANGES IN EXCLUSIVE MODE");
+            stm2.close();
+
+            try {
+                ps.executeQuery();
+                fail();
+            } catch (SQLException e) {
+                assertSQLState("Expected timeout", "40XL1", e);
+            }
+
+            try {
+                ps_inverse.executeQuery();
+                fail();
+            } catch (SQLException e) {
+                assertSQLState("Expected timeout", "40XL1", e);
+            }
+
+            c3.rollback();
+            c3.close();
+
+            ResultSet rs = ps.executeQuery();
+
+            if (opExpectedRs[i] != null) {
+                JDBC.assertFullResultSet(rs, opExpectedRs[i]);
+            } else {
+                JDBC.assertEmpty(rs);
+            }
+
+            rs = ps_inverse.executeQuery();
+
+            if (opExpectedRs[i] != null) {
+                JDBC.assertFullResultSet(rs, opExpectedRs[i]);
+            } else {
+                JDBC.assertEmpty(rs);
+            }
+
+            ps.close();
+            ps_inverse.close();
+
+        }
+
+    }
+
+
+    public void testDerby4330_GroupedAggregateResultSet()  throws SQLException {
+        setTimeout(1);
+        setSchema("APP");
+        createDerby4330_union_tables();
+
+        PreparedStatement ps = prepareStatement(
+            "SELECT SUM(CHANGESET) from FILECHANGES GROUP BY FILE");
+
+        c3 = openDefaultConnection();
+        c3.setAutoCommit(false);
+        Statement stm2 = c3.createStatement();
+        // Next statement gives an exclusive write lock on a row in FILECHANGES:
+        stm2.execute("INSERT INTO FILECHANGES(FILE,CHANGESET) VALUES (2,2)");
+        stm2.close();
+
+        try {
+            ps.executeQuery();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("Expected timeout", "40XL1", e);
+        }
+
+        c3.rollback();
+        c3.close();
+
+        ResultSet rs = ps.executeQuery();
+        JDBC.assertFullResultSet(rs, new String[][]{{"1"}});
+
+        ps.close();
+    }
+
+
+    public void testDerby4330_DistinctGroupedAggregateResultSet()
+            throws SQLException
+    {
+        setTimeout(1);
+        setSchema("APP");
+        createDerby4330_union_tables();
+
+        PreparedStatement ps = prepareStatement(
+            "SELECT SUM(DISTINCT CHANGESET) from FILECHANGES GROUP BY FILE");
+
+        c3 = openDefaultConnection();
+        c3.setAutoCommit(false);
+        Statement stm2 = c3.createStatement();
+        // Next statement gives an exclusive write lock on a row in FILECHANGES:
+        stm2.execute("INSERT INTO FILECHANGES(FILE,CHANGESET) VALUES (2,2)");
+        stm2.close();
+
+        try {
+            ps.executeQuery();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("Expected timeout", "40XL1", e);
+        }
+
+        c3.rollback();
+        c3.close();
+
+        ResultSet rs = ps.executeQuery();
+        JDBC.assertFullResultSet(rs, new String[][]{{"1"}});
+
+        ps.close();
+    }
+
+
+    public void testDerby4330_DistinctScalarAggregateResultSet()
+            throws SQLException
+    {
+        setTimeout(1);
+        setSchema("APP");
+        createDerby4330_union_tables();
+
+        PreparedStatement ps = prepareStatement(
+            "SELECT SUM(DISTINCT CHANGESET) from FILECHANGES");
+
+        c3 = openDefaultConnection();
+        c3.setAutoCommit(false);
+        Statement stm2 = c3.createStatement();
+        // Next statement gives an exclusive write lock on a row in FILECHANGES:
+        stm2.execute("INSERT INTO FILECHANGES(FILE,CHANGESET) VALUES (2,2)");
+        stm2.close();
+
+        try {
+            ps.executeQuery();
+            fail();
+        } catch (SQLException e) {
+            assertSQLState("Expected timeout", "40XL1", e);
+        }
+
+        c3.rollback();
+        c3.close();
+
+        ResultSet rs = ps.executeQuery();
+        JDBC.assertFullResultSet(rs, new String[][]{{"1"}});
+
+        ps.close();
+    }
+
+
+    private void setTimeout(long t) throws SQLException {
+        Statement stm = createStatement();
+        stm.execute("call syscs_util.syscs_set_database_property(" +
+                    "'derby.locks.waitTimeout', '" + t + "')");
+        stm.close();
+    }
+
+
+    private void createDerby4330_join_tables()  throws SQLException {
+        Statement stm = createStatement();
+        stm.execute(
+            "CREATE TABLE REPOSITORIES (" +
+            "ID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY," +
+            "PATH VARCHAR(32672) UNIQUE NOT NULL)");
+
+        stm.execute(
+            "INSERT INTO REPOSITORIES(PATH) VALUES ('r')");
+
+        stm.execute(
+            "CREATE TABLE FILES (" +
+            "ID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY," +
+            "PATH VARCHAR(32672) NOT NULL," +
+            "REPOSITORY INT NOT NULL REFERENCES REPOSITORIES" +
+            "    ON DELETE CASCADE," +
+            "UNIQUE (REPOSITORY, PATH))");
+
+        stm.execute(
+            "INSERT INTO FILES(PATH, REPOSITORY) VALUES ('/adsf',1)");
+
+        stm.execute(
+            "CREATE TABLE AUTHORS (" +
+            "ID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY," +
+            "REPOSITORY INT NOT NULL REFERENCES REPOSITORIES " +
+            "           ON DELETE CASCADE," +
+            "NAME VARCHAR(32672) NOT NULL," +
+            "UNIQUE (REPOSITORY, NAME))");
+
+        stm.execute(
+            "INSERT INTO AUTHORS(REPOSITORY, NAME) VALUES (1, 'xyz')");
+
+        stm.execute(
+            "CREATE TABLE CHANGESETS (" +
+            "ID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY," +
+            "REPOSITORY INT NOT NULL REFERENCES REPOSITORIES " +
+            "           ON DELETE CASCADE," +
+            "REVISION VARCHAR(1024) NOT NULL," +
+            "AUTHOR INT NOT NULL REFERENCES AUTHORS ON DELETE CASCADE," +
+            "TIME TIMESTAMP NOT NULL," +
+            "MESSAGE VARCHAR(32672) NOT NULL," +
+            "UNIQUE (REPOSITORY, REVISION))");
+
+        stm.execute(
+            "INSERT INTO CHANGESETS(REPOSITORY, REVISION, " +
+            "                       AUTHOR, TIME, MESSAGE)" +
+            " VALUES (1,'',1,CURRENT_TIMESTAMP,'')");
+
+        stm.execute(
+            "CREATE TABLE FILECHANGES (" +
+            "ID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY," +
+            "FILE INT NOT NULL REFERENCES FILES ON DELETE CASCADE," +
+            "CHANGESET INT NOT NULL REFERENCES CHANGESETS ON DELETE CASCADE," +
+            "UNIQUE (FILE, CHANGESET))");
+
+        stm.execute("INSERT INTO FILECHANGES(FILE,CHANGESET) VALUES (1,1)");
+        stm.close();
+        commit();
+    }
+
+
+    private void createDerby4330_union_tables()  throws SQLException {
+        Statement stm = createStatement();
+        stm.execute("CREATE TABLE FILECHANGES (" +
+                    "ID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY," +
+                    "FILE INT NOT NULL," +
+                    "CHANGESET INT NOT NULL," +
+                    "UNIQUE (FILE, CHANGESET))");
+
+        stm.execute("CREATE TABLE FILECHANGES_2 (" +
+                    "ID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY," +
+                    "FILE INT NOT NULL," +
+                    "CHANGESET INT NOT NULL," +
+                    "UNIQUE (FILE, CHANGESET))");
+
+        stm.execute("INSERT INTO FILECHANGES(FILE,CHANGESET) VALUES (1,1)");
+        stm.execute("INSERT INTO FILECHANGES_2(FILE,CHANGESET) VALUES (1,1)");
+        stm.close();
+        commit();
+    }
+
+
+    private void setSchema(String schema) throws SQLException {
+        Statement stm = createStatement();
+        stm.execute("SET SCHEMA " + schema);
+        stm.close();
+    }
 }

@@ -143,14 +143,25 @@ abstract class JoinResultSet extends NoPutResultSetImpl
 		if (SanityManager.DEBUG)
 	    	SanityManager.ASSERT( ! isOpen, "JoinResultSet already open");
 
-	    isOpen = true;
 		leftResultSet.openCore();
-		leftRow = leftResultSet.getNextRowCore();
-		if (leftRow != null)
-		{
-			openRight();
-			rowsSeenLeft++;
+
+		try {
+			leftRow = leftResultSet.getNextRowCore();
+			if (leftRow != null)
+			{
+				openRight();
+				rowsSeenLeft++;
+			}
+		} catch (StandardException e) {
+			// DERBY-4330 Result set tree must be atomically open or
+			// closed for reuse to work (after DERBY-827).
+
+			isOpen = true; // to make close work:
+			try { close(); } catch (StandardException ee) {}
+			throw e;
 		}
+
+	    isOpen = true;
 		numOpens++;
 
 		openTime += getElapsedMillis(beginTime);
