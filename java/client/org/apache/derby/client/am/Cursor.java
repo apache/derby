@@ -1,4 +1,4 @@
-/*
+ /*
 
    Derby - Class org.apache.derby.client.am.Cursor
 
@@ -141,7 +141,6 @@ public abstract class Cursor {
         jdbcTypes_ = new int[numberOfColumns];
     }
 
-    static int ctr = 0;
     /**
      * Makes the next row the current row. Returns true if the current
      * row position is a valid row position.
@@ -154,7 +153,7 @@ public abstract class Cursor {
     protected boolean stepNext(boolean allowServerFetch) throws SqlException {
         // local variable usd to hold the returned value from calculateColumnOffsetsForRow()
         boolean rowPositionIsValid = true;
-        System.err.println("stepNext" + (ctr++));
+
         // reset lob data
         // clears out Cursor.lobs_ calculated for the current row when cursor is moved.
         clearLobData_();

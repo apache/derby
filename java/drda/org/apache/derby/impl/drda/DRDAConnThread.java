@@ -6149,13 +6149,9 @@ class DRDAConnThread extends Thread {
 	 * 
 	 * @exception DRDAProtocolException
 	 */
-
-	static int ctr = 0;
 	private void writeSQLCAXGRP(int updateCount,  long rowCount, String sqlerrmc,
 				SQLException nextException) throws DRDAProtocolException
 	{
-		ctr += rowCount;
-		System.err.println("writeSQLCAXGRP" + ctr);
 		writer.writeByte(0);		// SQLCAXGRP INDICATOR
 		if (sqlamLevel < 7)
 		{
