@@ -14,7 +14,6 @@ lang/dropTable.sql
 lang/emptyStatistics.sql
 lang/fk_nonSPS.sql
 lang/holdCursorIJ.sql
-lang/inbetween.sql
 lang/infostreams.sql
 lang/isolationLevels.sql
 lang/joinDeadlock.sql
