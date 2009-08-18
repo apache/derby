@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.StringDataValue;
@@ -251,6 +252,13 @@ public class JavaToSQLValueNode extends ValueNode
 			throw StandardException.newException(SQLState.LANG_NO_CORRESPONDING_S_Q_L_TYPE, 
 				javaNode.getJavaTypeName());
 		}
+
+        TypeDescriptor catalogType = dts.getCatalogType();
+
+        if ( catalogType.getTypeName().equals( "java.sql.ResultSet" ) )
+        {
+			throw StandardException.newException(SQLState.LANG_TABLE_FUNCTION_NOT_ALLOWED);
+        }
         
         setType(dts);
 		

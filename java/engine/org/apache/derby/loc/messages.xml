@@ -2748,6 +2748,11 @@ Guide.
                 <arg>className</arg>
             </msg>
 
+            <msg>
+                <name>42ZB6</name>
+                <text>A scalar value is expected, not a row set returned by a table function.</text>
+            </msg>
+
         </family>
 
 

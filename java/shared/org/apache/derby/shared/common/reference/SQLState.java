@@ -1089,6 +1089,7 @@ public interface SQLState {
     String LANG_XML_NOT_ALLOWED_DJRS                                = "42ZB3";
     String LANG_NOT_TABLE_FUNCTION                                  = "42ZB4";
     String LANG_NO_COSTING_CONSTRUCTOR                              = "42ZB5";
+    String LANG_TABLE_FUNCTION_NOT_ALLOWED                   = "42ZB6";
 
 	//following 3 matches the DB2 sql states
 	String LANG_DECLARED_GLOBAL_TEMP_TABLE_ONLY_IN_SESSION_SCHEMA = "428EK";

@@ -925,6 +925,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
         subqueryTest();
 
         coercionTest();
+
+        miscBugs();
     }
     
     /**
@@ -1616,6 +1618,51 @@ public class TableFunctionTest extends BaseJDBCTestCase
                  Types.LONGVARCHAR,
                  Types.LONGVARBINARY,
              }
+             );
+    }
+    
+    /**
+     * <p>
+     * Miscellaneous bugs.
+     * </p>
+     */
+    private void  miscBugs()
+        throws Exception
+    {
+        derby_4092();
+    }
+    
+    /**
+     * <p>
+     * Don't allow table functions to appear where scalar functions are expected.
+     * </p>
+     */
+    private void  derby_4092()
+        throws Exception
+    {
+        goodStatement
+            (
+             "create function derby_4092()\n" +
+             "returns TABLE\n" +
+             "  (\n" +
+             "     column0 varchar( 10 ),\n" +
+             "     column1 varchar( 10 )\n" +
+             "  )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name '" + getClass().getName() + ".returnsACoupleRows'\n"
+             );
+
+        expectError
+            (
+             "42ZB6",
+             "values( derby_4092() )"
+             );
+        expectError
+            (
+             "42ZB6",
+             "select derby_4092(), tablename from sys.systables"
              );
     }
     
