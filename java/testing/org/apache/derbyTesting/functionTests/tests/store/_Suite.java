@@ -52,7 +52,7 @@ public class _Suite extends BaseTestCase  {
         TestSuite suite = new TestSuite("store");
         
         suite.addTest(BootAllTest.suite());
-
+        suite.addTest(ClassLoaderBootTest.suite());
         suite.addTest(Derby3625Test.suite());
         suite.addTest(PositionedStoreStreamTest.suite());
         suite.addTest(BackupRestoreTest.suite());
