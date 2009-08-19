@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 
 /**
  * This class implements the StorageFile interface using features of Java 1.4 not available in earlier
@@ -185,7 +186,31 @@ class DirFile4 extends DirFile
 				SanityManager.THROWASSERT("Unable to Acquire Exclusive Lock on "
 										  + getPath());
 			}
-		}
+		} catch (OverlappingFileLockException ofle)
+        {
+            //
+            // Under Java 6 and later, this exception is raised if the database
+            // has been opened by another Derby instance in a different
+            // ClassLoader in this VM. See DERBY-700.
+            //
+            // The OverlappingFileLockException is raised by the
+            // lockFileChannel.tryLock() call above.
+            //
+            try {
+                lockFileChannel.close();
+                lockFileOpen.close();
+            } catch (IOException e)
+            {
+                if (SanityManager.DEBUG)
+                {
+                    SanityManager.THROWASSERT("Error closing file channel "
+                                              + getPath(), e);
+                }
+            }
+            lockFileChannel=null;
+            lockFileOpen = null;
+            status = EXCLUSIVE_FILE_LOCK_NOT_AVAILABLE;
+        }
     
 		return status;
 	} // end of getExclusiveFileLock
