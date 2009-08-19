@@ -386,14 +386,15 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                     //slot is pointing before the first slot
                     //get left sibiling
                     leaf = (LeafControlRow) leaf.getLeftSibling(this);
+                    if (newLeaf) {
+                        oldLeaf.release();
+                    }
+                    newLeaf = true;
                     //no left sibiling
                     if (leaf == null)
                         return NO_MATCH;
                     //set the slot to last slot number
                     slot = leaf.page.recordCount() - 1;
-                    if (newLeaf)
-                        oldLeaf.release();
-                    newLeaf = true;
                     // DERBY-4027: We have moved to the previous page and need
                     // to recheck that the slot number is valid (it won't be
                     // if the page we moved to is empty). Restart from the top
