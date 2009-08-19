@@ -92,13 +92,6 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
         Test test = suite;
         TestSetup setup = 
             new CleanDatabaseTestSetup(test) {
-                protected void decorateSQL(Statement s) throws SQLException {
-                    // table used to test  export.
-                    s.execute("CREATE TABLE BOOKS(id int," +
-                              "name varchar(30)," + 
-                              "content clob, " + 
-                              "pic blob )");
-                }
                  protected void setUp() throws Exception {
                      super.setUp();
                      //shutdown the database. 
@@ -106,11 +99,11 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
                      JDBCDataSource.shutdownDatabase(ds);
                  }
             };
-            Properties p = new Properties();
-            p.setProperty("derby.infolog.append", "true");
+        Properties p = new Properties();
+        p.setProperty("derby.infolog.append", "true");
                                    
-            setup = new SystemPropertyTestSetup(setup,p);
-            return SecurityManagerSetup.noSecurityManager(setup);
+        setup = new SystemPropertyTestSetup(setup,p);
+        return SecurityManagerSetup.noSecurityManager(setup);
     }
 
 
@@ -127,6 +120,16 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
         loader_2 = createDerbyClassLoader(urls);
     }
 
+    protected void    tearDown()
+        throws Exception
+    {
+        if ( mainLoader != null ) { setThreadLoader(mainLoader); }
+
+        loader_1 = null;
+        loader_2 = null;
+        mainLoader = null;
+    }
+
 
     /**
      * Given a loaded class, this
@@ -138,63 +141,18 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
     private DerbyURLClassLoader createDerbyClassLoader(final URL[] urls) 
         throws Exception 
     {
-        try {
-            return (DerbyURLClassLoader)AccessController.doPrivileged(
-            new java.security.PrivilegedExceptionAction(){   
-             public Object run()
-             {
-                 return new DerbyURLClassLoader(urls);
-             }
-         });
-        }catch(PrivilegedActionException pae) {
-            throw pae.getException();
-        }
-    }
-
-
-    /**
-     * Given a loaded class, this
-     * routine asks the class's class loader for information about where the
-     * class was loaded from. Typically, this is a file, which might be
-     * either a class file or a jar file. The routine figures that out, and
-     * returns the name of the file. If it can't figure it out, it returns null
-     */
-    private static URL getFileWhichLoadedClass(final Class cls) throws Exception 
-    {
-        try {
-         return (URL)AccessController.doPrivileged(
-         new java.security.PrivilegedExceptionAction(){   
-             public Object run()
-             {
-                 CodeSource cs = null;
-                 cs = cls.getProtectionDomain().getCodeSource ();
-                 if ( cs == null )
-                     return null;        
-                 return cs.getLocation ();
+        return (DerbyURLClassLoader)AccessController.doPrivileged
+            (
+             new java.security.PrivilegedExceptionAction(){   
+                 public Object run()
+                 {
+                     return new DerbyURLClassLoader(urls);
                  }
-         });
-        }catch(PrivilegedActionException pae) {
-            throw pae.getException();
-        }
+             });
     }
+
+
     
-    private URL getURL(final File file) throws MalformedURLException
-    {
-        try {
-            return (URL) AccessController.doPrivileged
-            (new java.security.PrivilegedExceptionAction(){
-
-                public Object run() throws MalformedURLException{
-                return file.toURL();
-
-                }
-            }
-             );
-        } catch (PrivilegedActionException e) {
-            throw (MalformedURLException) e.getException();
-        } 
-    }
-
     /* 
      * Test booting a database, that was alreadt booted by another class loader.
      */
@@ -214,32 +172,24 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
         
         // first boot the database using one loader and attempt 
         // to boot it using another loader, it should fail to boot.
-        try {
 
-            setThreadLoader(loader_1);
-            DataSource ds_1 = JDBCDataSource.getDataSource();
-            Connection conn1 = ds_1.getConnection();
-            // now attemp to boot using another class loader.
-            setThreadLoader(loader_2);
-            try {
-                DataSource ds_2 = JDBCDataSource.getDataSource();
-                ds_2.getConnection();
-                fail("booted database that was already booted by another CLR");
-            } catch (SQLException e) {
-                SQLException ne = e.getNextException();
-                assertPreventDualBoot(ne);
-            }
-            
-            // shutdown the database.
-            setThreadLoader(loader_1);
-            JDBCDataSource.shutdownDatabase(ds_1);
-            
-        } catch (SQLException se) {
-            dumpSQLException(se);
-        }finally {
-            // set the thread context loader back to the generic one. 
-            setThreadLoader(mainLoader);
+        setThreadLoader(loader_1);
+        DataSource ds_1 = JDBCDataSource.getDataSource();
+        Connection conn1 = ds_1.getConnection();
+        // now attemp to boot using another class loader.
+        setThreadLoader(loader_2);
+        try {
+            DataSource ds_2 = JDBCDataSource.getDataSource();
+            ds_2.getConnection();
+            fail("booted database that was already booted by another CLR");
+        } catch (SQLException e) {
+            SQLException ne = e.getNextException();
+            assertPreventDualBoot(ne);
         }
+        
+        // shutdown the database.
+        setThreadLoader(loader_1);
+        JDBCDataSource.shutdownDatabase(ds_1);
     }
 
     
@@ -251,26 +201,18 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
     {
         // first boot the database using one loader and shutdown and then 
         // attempt to boot it using another loader, it should boot.
-        try {
 
-            setThreadLoader(loader_1);
-            DataSource ds_1 = JDBCDataSource.getDataSource();
-            Connection conn1 = ds_1.getConnection();
-            //shutdown the database.
-            JDBCDataSource.shutdownDatabase(ds_1);
-            // now attemp to boot using another class loader.
-            setThreadLoader(loader_2);
-            DataSource ds_2 = JDBCDataSource.getDataSource();
-            ds_2.getConnection();
-            // shutdown the database.
-            JDBCDataSource.shutdownDatabase(ds_2);
-            
-        } catch (SQLException se) {
-            dumpSQLException(se);
-        }finally {
-            // set the thread context loader back to the generic one. 
-            setThreadLoader(mainLoader);
-        }
+        setThreadLoader(loader_1);
+        DataSource ds_1 = JDBCDataSource.getDataSource();
+        Connection conn1 = ds_1.getConnection();
+        //shutdown the database.
+        JDBCDataSource.shutdownDatabase(ds_1);
+        // now attemp to boot using another class loader.
+        setThreadLoader(loader_2);
+        DataSource ds_2 = JDBCDataSource.getDataSource();
+        ds_2.getConnection();
+        // shutdown the database.
+        JDBCDataSource.shutdownDatabase(ds_2);
     }
 
 
@@ -287,15 +229,6 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
         });
     }
 
-
-    private static void dumpSQLException(SQLException se)
-    {
-		while (se != null)
-		{
-			se.printStackTrace();
-			se = se.getNextException();
-		}		
-	}	
 
 	private static void assertPreventDualBoot(SQLException ne) {
 		assertNotNull(ne);
