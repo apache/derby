@@ -531,6 +531,33 @@ public class NullableUniqueConstraintTest extends BaseJDBCTestCase {
                 "update constraintest set val1 = '2' where val1 = '3'");
     }
 
+    /**
+     * Test that we can insert and delete the same value multiple times in a
+     * nullable unique index. This used to cause a livelock before DERBY-4081
+     * because the duplicate check on insert sometimes didn't release all
+     * latches.
+     */
+    public void testInsertDeleteContinuouslySameValue() throws SQLException {
+        // Must disable auto-commit for reliable reproduction, otherwise the
+        // post-commit worker thread will remove deleted index rows.
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create table d4081(x int unique)");
+
+        // The loop below did not get past the 372nd iteration before
+        // DERBY-4081 was fixed. Try 500 iterations now.
+        PreparedStatement ins = prepareStatement("insert into d4081 values 0");
+        PreparedStatement del = prepareStatement("delete from d4081");
+        for (int i = 0; i < 500; i++) {
+            ins.execute();
+            del.execute();
+        }
+
+        // Verify that the table is empty after the last delete operation.
+        assertTableRowCount("D4081", 0);
+    }
+
     public static void main(String [] args) {
         TestResult tr = new TestResult();
         Test t = suite();
