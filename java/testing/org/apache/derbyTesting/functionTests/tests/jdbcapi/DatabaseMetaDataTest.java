@@ -1,4 +1,4 @@
-/*
+ /*
 
    Derby - Class org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest
 
@@ -242,7 +242,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         TestSuite baseCpSuite = new TestSuite("Base connection pooling suite");
         // Add the tests here.
-        //        baseCpSuite.addTest(new DatabaseMetaDataTest("testConnectionSpecific"));
+        baseCpSuite.addTest(new DatabaseMetaDataTest("testConnectionSpecific"));
 
         // Setup the two configurations; CPDS and XADS.
         TestSuite fullCpSuite = new TestSuite(
@@ -350,7 +350,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws SQLException 
      *
      */
-    public void xtestDetermineFeatureSupport() throws SQLException
+    public void testDetermineFeatureSupport() throws SQLException
     {
         DatabaseMetaData dmd = getDMD();
         
@@ -502,7 +502,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws SQLException 
      *
      */
-    public void xtestDataSourceLimits() throws SQLException
+    public void testDataSourceLimits() throws SQLException
     {
         DatabaseMetaData dmd = getDMD();
         
@@ -532,7 +532,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertEquals(30, dmd.getMaxUserNameLength());
     }
     
-    public void xtestMiscellaneous() throws SQLException
+    public void testMiscellaneous() throws SQLException
     {
         DatabaseMetaData dmd = getDMD();
         
@@ -620,7 +620,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Methods that describe the version of the
      * driver and database.
      */
-    public void xtestVersionInfo() throws SQLException
+    public void testVersionInfo() throws SQLException
     {
         DatabaseMetaData dmd = getDMD();
         int databaseMajor = dmd.getDatabaseMajorVersion();
@@ -690,7 +690,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * is the only JDBC 3 DatabaseMetaData method
      * that is dropped in JSR169.
      */
-    public void xtestGetURL() throws SQLException
+    public void testGetURL() throws SQLException
     {
         DatabaseMetaData dmd = getDMD();
         
@@ -717,7 +717,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * case and quoted ones as mixed case.
      * They are always compared case sensitive.
      */
-    public void xtestIdentifierStorage() throws SQLException
+    public void testIdentifierStorage() throws SQLException
     {
         DatabaseMetaData dmd = getDMD();
         
@@ -733,7 +733,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * methods that return information about handling NULL.
      */
-    public void xtestNullInfo() throws SQLException
+    public void testNullInfo() throws SQLException
     {
         DatabaseMetaData dmd = getDMD();
         
@@ -748,7 +748,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Method getSQLKeywords, returns list of SQL keywords
      * that are not defined by SQL92.
      */
-    public void xtestSQLKeywords() throws SQLException
+    public void testSQLKeywords() throws SQLException
     {
         String keywords = getDMD().getSQLKeywords();
         
@@ -761,7 +761,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Methods that return information specific to
      * the current connection.
      */
-    public void xtestConnectionSpecific() throws SQLException
+    public void testConnectionSpecific() throws SQLException
     {
         DatabaseMetaData dmd = getDMD();
         
@@ -777,7 +777,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * The constants for nullability are the same but let's check to make sure.
      *
      */
-    public void xtestConstants()
+    public void testConstants()
     {
       assertEquals(DatabaseMetaData.columnNoNulls, ResultSetMetaData.columnNoNulls);
       assertEquals(DatabaseMetaData.columnNullable, ResultSetMetaData.columnNullable);
@@ -796,7 +796,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * nullability for the columns in the ResultSet. 
      * 
      */
-    public void xtestUnimplementedSQLObjectAttributes() throws SQLException
+    public void testUnimplementedSQLObjectAttributes() throws SQLException
     {
         DatabaseMetaData dmd = getDMD();
         
@@ -950,7 +950,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void xtestGetSchemasReadOnly() throws SQLException {
+    public void testGetSchemasReadOnly() throws SQLException {
         
         DatabaseMetaData dmd = getDMD();
          
@@ -963,7 +963,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void xtestGetSchemasModify() throws SQLException {
+    public void testGetSchemasModify() throws SQLException {
         createSchemasForTests();
         DatabaseMetaData dmd = getDMD();
         ResultSet rs = dmd.getSchemas();
@@ -1073,7 +1073,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws SQLException
      * @throws IOException 
      */
-    public void xtestGetTablesReadOnly() throws SQLException, IOException {
+    public void testGetTablesReadOnly() throws SQLException, IOException {
         
         DatabaseMetaData dmd = getDMD();
         
@@ -1151,7 +1151,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws SQLException
      * @throws IOException 
      */
-    public void xtestGetTablesModify() throws SQLException, IOException {
+    public void testGetTablesModify() throws SQLException, IOException {
                 
         int totalTables = createTablesForTest(false);
         
@@ -1385,7 +1385,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     {
         ResultSet[] rs = getColumns(null, null, null, null);
         for ( int j =0 ; j<2 ; j++) {
-            System.err.println("testGetColumnsReadOnly: " + j);
             checkColumnsShape(rs[j], j);
             crossCheckGetColumnsAndResultSetMetaData(rs[j], false, j);
         }
@@ -1396,7 +1395,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void xtestGetColumnsModify() throws SQLException {
+    public void testGetColumnsModify() throws SQLException {
            
         // skip XML datatype as our cross check with
         // ResultSetMetaData will fail
@@ -1923,7 +1922,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     /**
      * Test getTableTypes()
      */
-    public void xtestTableTypes() throws SQLException
+    public void testTableTypes() throws SQLException
     {
         DatabaseMetaData dmd = getDMD();
         
@@ -1949,7 +1948,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Test getTypeInfo
      * @throws SQLException 
      */
-    public void xtestGetTypeInfo() throws SQLException
+    public void testGetTypeInfo() throws SQLException
     {
         // Client returns BOOLEAN type from the engine as SMALLINT
         int BOOLEAN = Types.BOOLEAN;      
@@ -2452,7 +2451,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * JDBC escaped numeric functions - JDBC 3.0 C.1
      * @throws SQLException
      */
-    public void xtestNumericFunctions() throws SQLException
+    public void testNumericFunctions() throws SQLException
     {
         escapedFunctions(NUMERIC_FUNCTIONS,
                 getDMD().getNumericFunctions());
@@ -2461,7 +2460,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * JDBC escaped string functions - JDBC 3.0 C.2
      * @throws SQLException
      */
-    public void xtestStringFunctions() throws SQLException
+    public void testStringFunctions() throws SQLException
     {
         escapedFunctions(STRING_FUNCTIONS,
                 getDMD().getStringFunctions());
@@ -2470,7 +2469,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * JDBC escaped date time functions - JDBC 3.0 C.3
      * @throws SQLException
      */
-    public void xtestTimeDataFunctions() throws SQLException
+    public void testTimeDataFunctions() throws SQLException
     {
         escapedFunctions(TIMEDATE_FUNCTIONS,
                 getDMD().getTimeDateFunctions());
@@ -2479,7 +2478,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * JDBC escaped system functions - JDBC 3.0 C.4
      * @throws SQLException
      */
-    public void xtestSystemFunctions() throws SQLException
+    public void testSystemFunctions() throws SQLException
     {
         escapedFunctions(SYSTEM_FUNCTIONS,
                 getDMD().getSystemFunctions());
@@ -2775,7 +2774,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * the JDBC calls return correct results (testing of the JDBC results occurs
      * elsewhere, see fixtures testGetXXportedKeys()
      */
-    public void xtestGetXXportedKeysODBC() throws SQLException, IOException
+    public void testGetXXportedKeysODBC() throws SQLException, IOException
     {
         Statement st = createStatement();
 
@@ -3010,7 +3009,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Test getBestRowIdentifier
      * @throws SQLException 
      */
-    public void xtestGetBestRowIdentifier() throws SQLException
+    public void testGetBestRowIdentifier() throws SQLException
     {
         Statement st = createStatement();
 
@@ -3344,7 +3343,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * For further testing see test lang.grantRevokeTest
      * @throws SQLException 
      */
-    public void xtestGetColumnPrivileges() throws SQLException
+    public void testGetColumnPrivileges() throws SQLException
     {       
         // unlike for instance getTables() and getUDTs trying to call
         // getColumnPrivileges with all nulls gets stopped because 
@@ -3425,7 +3424,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * For further testing see test lang.grantRevokeTest
      * @throws SQLException 
      */
-    public void xtestGetTablePrivileges() throws SQLException
+    public void testGetTablePrivileges() throws SQLException
     {
         ResultSet rs[] = getTablePrivileges(null,null,null);
         JDBC.assertEmpty(rs[0]);
@@ -3493,7 +3492,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Test getIndexInfo; does not modify database
      * @throws SQLException 
      */
-    public void xtestGetIndexInfo() throws SQLException
+    public void testGetIndexInfo() throws SQLException
     {
         
         // unlike for instance getTables() and getUDTs trying to call
@@ -3551,7 +3550,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Test getIndexInfo further; does modify database
      * @throws SQLException 
      */
-    public void xtestMoreGetIndexInfo() throws SQLException
+    public void testMoreGetIndexInfo() throws SQLException
     {
         // test to see that we are correctly returning D for ASC_OR_DESC.
         // As Derby only supports tableIndexHashed Type, and 
@@ -3734,7 +3733,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Test getPrimaryKeys; does modify database
      * @throws SQLException 
      */
-    public void xtestGetPrimaryKeys() throws SQLException
+    public void testGetPrimaryKeys() throws SQLException
     {
         String[][] expRS = new String[][] {
                 {"","APP","KT1","I","2","PRIMKEY"},
@@ -3825,7 +3824,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Test getImportedKeys, getExportedKeys, getCrossReference; modifies db
      * @throws SQLException 
      */
-    public void xtestGetXXportedKeys() throws SQLException
+    public void testGetXXportedKeys() throws SQLException
     {
         // getExportedKeys
 
@@ -4171,7 +4170,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Test referential action values; modifies database
      * @throws SQLException 
      */
-    public void xtestReferentialAction() throws SQLException
+    public void testReferentialAction() throws SQLException
     {
         Statement s = createStatement();
 
@@ -4287,7 +4286,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     // Possible TODO: 
     //   rewrite data portion of this test to compare results from 
     //   metadata with sys.sys* query results (leave shape check in place)
-    public void xtestGetProceduresGetProcColumns() throws SQLException {
+    public void testGetProceduresGetProcColumns() throws SQLException {
         
         Statement s = createStatement();
         getConnection().setAutoCommit(false);
@@ -4591,7 +4590,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         return rss;        
     }
 
-    public void xtestBugFixes() throws SQLException {
+    public void testBugFixes() throws SQLException {
         
         Statement s = createStatement();
         getConnection().setAutoCommit(false);        
@@ -4684,7 +4683,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * Reading of DatabaseMetaData obtained earlier, after a connection
      * is closed.
      */
-    public void xtestDMDconnClosed() throws SQLException {
+    public void testDMDconnClosed() throws SQLException {
         ResultSet rs_ = getConnection().getMetaData().
         getTables("%","%","%",null); // should work
         getConnection().close();
