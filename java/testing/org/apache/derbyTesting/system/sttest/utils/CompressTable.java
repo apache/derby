@@ -21,10 +21,10 @@
 package org.apache.derbyTesting.system.sttest.utils;
 
 import java.io.IOException;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Date;
 
 import org.apache.derby.tools.JDBCDisplayUtil;
@@ -77,37 +77,18 @@ public class CompressTable {
 	
 	static synchronized void compress(Connection conn)
 	throws java.lang.Exception {
-		Statement s = null;
-		int tick = 1;
-		boolean locked = false;
-		while (locked == false) {
-			try {
-				s = conn.createStatement();
-				s.execute("lock table Datatypes in exclusive mode");
-				s.close();
-				locked = true;
-			} catch (SQLException se) {
-				// not now lockable
-				if (se.getSQLState().equals("X0X02")) {
-					Thread.sleep(20000);
-					if (tick++ < 10) {
-						System.out
-						.println("compress: cannot lock table, retrying "
-								+ tick + "\n");
-						continue;
-					} else {
-						System.out.println("compress timed out\n");
-						return;
-					}
-				} else
-					JDBCDisplayUtil.ShowException(System.out, se);
-			}
-		}
 		System.out.println("compressing table");
 		try {
-			s = conn.createStatement();
-			s.execute("alter table Datatypes compress");
-			System.out.println("table compressed");
+			conn.setAutoCommit(true);
+			CallableStatement cs = conn
+				.prepareCall("CALL SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE(?, ?, ?, ?, ?)");
+			cs.setString(1, "APP");
+			cs.setString(2, "DATATYPES");
+			cs.setShort(3, (short) 1);
+			cs.setShort(4, (short) 1);
+			cs.setShort(5, (short) 1);
+			cs.execute();
+			cs.close();
 		} catch (SQLException se) {
 			System.out.println("compress table: FAIL -- unexpected exception:");
 			JDBCDisplayUtil.ShowException(System.out, se);
