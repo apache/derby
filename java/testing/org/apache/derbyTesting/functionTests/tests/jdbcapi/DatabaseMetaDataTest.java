@@ -1,4 +1,4 @@
- /*
+/*
 
    Derby - Class org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest
 
