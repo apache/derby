@@ -228,7 +228,7 @@ public class Datatypes {
 		//pick the rows
 		try {
 			ps = conn
-			.prepareStatement(" select id from  Datatypes where id = ?");
+			.prepareStatement(" select id from  Datatypes where id >= ?");
 		} catch (SQLException se) {
 			if (se.getNextException() == null)
 				throw se;
@@ -245,14 +245,21 @@ public class Datatypes {
 				ps.setInt(1, ind);
 				rs = ps.executeQuery();
 				if (rs.next()) {
-					//keep trying till we get a good one
 					j = rs.getInt(1);
+					//if the id is null, find another row.
 					if (rs.wasNull()) {
 						i--;
 						continue;
 					}
 					list[i] = j;
 
+				}
+				else {
+					// the random number is higher than the
+					// highest id value in the database. 
+					// delete would fail. Pick another.
+					i--;
+					continue;
 				}
 				//don't worry about consistency; if row with this id
 				//gets changed by another thread we will just forge ahead;
