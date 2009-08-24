@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 import java.sql.PreparedStatement;
+import java.sql.ParameterMetaData ;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -40,6 +41,14 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * Test <result offset clause> and <fetch first clause>.
  */
 public class OffsetFetchNextTest extends BaseJDBCTestCase {
+
+    private final static String LANG_FORMAT_EXCEPTION = "22018";
+    private final static String LANG_INTEGER_LITERAL_EXPECTED = "42X20";
+    private final static String LANG_INVALID_ROW_COUNT_FIRST = "2201W";
+    private final static String LANG_INVALID_ROW_COUNT_OFFSET = "2201X";
+    private final static String LANG_MISSING_PARMS = "07000";
+    private final static String LANG_SYNTAX_ERROR = "42X01";
+	private final static String LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL = "2201Z";
 
     public OffsetFetchNextTest(String name) {
         super(name);
@@ -103,21 +112,21 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
 
         // Wrong range in row count argument
 
-        assertStatementError("2201X", st,
+        assertStatementError(LANG_INVALID_ROW_COUNT_OFFSET, st,
                              "select * from t1 offset -1 rows");
 
-        assertStatementError("2201W", st,
+        assertStatementError(LANG_INVALID_ROW_COUNT_FIRST, st,
                              "select * from t1 fetch first 0 rows only");
 
-        assertStatementError("2201W", st,
+        assertStatementError(LANG_INVALID_ROW_COUNT_FIRST, st,
                              "select * from t1 fetch first -1 rows only");
 
         // Wrong type in row count argument
-        assertStatementError("42X20", st,
+        assertStatementError(LANG_INTEGER_LITERAL_EXPECTED, st,
                              "select * from t1 fetch first 3.14 rows only");
 
         // Wrong order of clauses
-        assertStatementError("42X01", st,
+        assertStatementError(LANG_SYNTAX_ERROR, st,
                              "select * from t1 " +
                              "fetch first 0 rows only offset 0 rows");
     }
@@ -658,6 +667,136 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         for (int i = 0; i < 10; i++) {
             JDBC.assertFullResultSet(ps.executeQuery(), expected);
         }
+    }
+
+    /**
+     * Test dynamic arguments
+     */
+    public void testDynamicArgs() throws SQLException {
+        // Check look-ahead also for ? in grammar since offset is not reserved
+        PreparedStatement ps = prepareStatement(
+            "select * from t1 offset ? rows");
+
+        // Check range errors
+        ps = prepareStatement(
+            "select * from t1 order by b " +
+            "offset ? rows fetch next ? rows only");
+
+        ps.setInt(1, 0);
+        assertPreparedStatementError(LANG_MISSING_PARMS, ps);
+
+        ps.setInt(1, -1);
+        ps.setInt(2, 2);
+        assertPreparedStatementError(LANG_INVALID_ROW_COUNT_OFFSET, ps);
+
+        ps.setInt(1, 0);
+        ps.setInt(2, 0);
+        assertPreparedStatementError(LANG_INVALID_ROW_COUNT_FIRST, ps);
+
+        // Check non-integer values
+        try {
+            ps.setString(1, "aaa");
+        } catch (SQLException e) {
+            assertSQLState(LANG_FORMAT_EXCEPTION, e);
+        }
+
+        try {
+            ps.setString(2, "aaa");
+        } catch (SQLException e) {
+            assertSQLState(LANG_FORMAT_EXCEPTION, e);
+        }
+
+
+        // A normal case
+        String[][] expected = {{"1", "3"}, {"1", "4"}};
+        for (int i = 0; i < 2; i++) {
+            ps.setInt(1,2);
+            ps.setInt(2,2);
+            JDBC.assertFullResultSet(ps.executeQuery(), expected);
+        }
+
+        // Now, note that since we now have different values for offset and
+        // fetch first, we also exercise reusing the result set for this
+        // prepared statement (i.e. the values are computed at execution time,
+        // not at result set generation time). Try long value for change.
+        ps.setLong(1, 1L);
+        ps.setInt(2, 3);
+        expected = new String[][]{{"1", "2"}, {"1", "3"}, {"1", "4"}};
+        JDBC.assertFullResultSet(ps.executeQuery(), expected);
+
+
+        //  Try a large number
+        ps.setLong(1, Integer.MAX_VALUE * 2L);
+        ps.setInt(2, 5);
+        JDBC.assertEmpty(ps.executeQuery());
+
+        // Mix of prepared and not
+        ps = prepareStatement(
+            "select * from t1 order by b " +
+             "offset ? rows fetch next 3 rows only");
+        ps.setLong(1, 1L);
+        JDBC.assertFullResultSet(ps.executeQuery(), expected);
+
+        ps = prepareStatement(
+            "select * from t1 order by b " +
+             "offset 4 rows fetch next ? rows only");
+        ps.setLong(1, 1L);
+        JDBC.assertFullResultSet(ps.executeQuery(),
+                                 new String[][]{{"1", "5"}});
+
+        // Mix of other dyn args and ours:
+        ps = prepareStatement(
+            "select * from t1 where a = ? order by b " +
+             "offset ? rows fetch next 3 rows only");
+        ps.setInt(1, 1);
+        ps.setLong(2, 1L);
+        JDBC.assertFullResultSet(ps.executeQuery(), expected);
+
+        ps = prepareStatement(
+            "select * from t1 where a = ? order by b " +
+             "offset 1 rows fetch next ? rows only");
+        ps.setInt(1, 1);
+        ps.setLong(2, 2L);
+        expected = new String[][]{{"1", "2"}, {"1", "3"}};
+        JDBC.assertFullResultSet(ps.executeQuery(), expected);
+
+
+        // NULLs not allowed (Note: parameter metadata says "isNullable" for
+        // all ? args in Derby...)
+        ps = prepareStatement(
+            "select * from t1 order by b " +
+             "offset ? rows fetch next ? rows only");
+        ps.setNull(1, Types.BIGINT);
+        ps.setInt(2, 2);
+        assertPreparedStatementError(LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL, ps);
+
+        ps.setInt(1,1);
+        ps.setNull(2, Types.BIGINT);
+        assertPreparedStatementError(LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL, ps);
+
+        ps.close();
+    }
+
+    /**
+     * Test dynamic arguments
+     */
+    public void testDynamicArgsMetaData() throws SQLException {
+        PreparedStatement ps = prepareStatement(
+            "select * from t1 where a = ? order by b " +
+            "offset ? rows fetch next ? rows only");
+
+        ParameterMetaData pmd = ps.getParameterMetaData();
+        int[] expectedTypes = { Types.INTEGER, Types.BIGINT, Types.BIGINT };
+
+        for (int i = 0; i < 3; i++) {
+            assertEquals("Unexpected parameter type",
+                         expectedTypes[i], pmd.getParameterType(i+1));
+            assertEquals("Derby ? args are nullable",
+                         // Why is that? Cf. logic in ParameterNode.setType
+                         ParameterMetaData.parameterNullable,
+                         pmd.isNullable(i+1));
+        }
+        ps.close();
     }
 
     private void queryAndCheck(

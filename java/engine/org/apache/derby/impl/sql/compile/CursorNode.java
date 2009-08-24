@@ -23,6 +23,7 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
 import java.util.Vector;
+import java.sql.Types;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
@@ -35,6 +36,8 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.impl.sql.CursorInfo;
 import org.apache.derby.impl.sql.CursorTableReference;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 /**
  * A CursorNode represents a result set that can be returned to a client.
@@ -53,8 +56,8 @@ public class CursorNode extends DMLStatementNode
 
 	private String		name;
 	private OrderByList	orderByList;
-	private NumericConstantNode   offset;     // <result offset clause> value
-	private NumericConstantNode   fetchFirst; // <fetch first clause> value
+	private ValueNode   offset;     // <result offset clause> value
+	private ValueNode   fetchFirst; // <fetch first clause> value
 	private String		statementType;
 	private int		updateMode;
 	private boolean		needTarget;
@@ -106,8 +109,8 @@ public class CursorNode extends DMLStatementNode
 		this.name = (String) name;
 		this.statementType = (String) statementType;
 		this.orderByList = (OrderByList) orderByList;
-		this.offset = (NumericConstantNode)offset;
-		this.fetchFirst = (NumericConstantNode)fetchFirst;
+		this.offset = (ValueNode)offset;
+		this.fetchFirst = (ValueNode)fetchFirst;
 
 		this.updateMode = ((Integer) updateMode).intValue();
 		this.updatableColumns = (Vector) updatableColumns;
@@ -362,7 +365,7 @@ public class CursorNode extends DMLStatementNode
 
 	private void bindOffsetFetch() throws StandardException {
 
-		if (offset != null) {
+		if (offset instanceof ConstantNode) {
 			DataValueDescriptor dvd = ((ConstantNode)offset).getValue();
 			long val = dvd.getLong();
 
@@ -371,9 +374,16 @@ public class CursorNode extends DMLStatementNode
 					SQLState.LANG_INVALID_ROW_COUNT_OFFSET,
 					Long.toString(val) );
 			}
+		} else if (offset instanceof ParameterNode) {
+			offset.
+				setType(new DataTypeDescriptor(
+							TypeId.getBuiltInTypeId(Types.BIGINT),
+							false /* ignored tho; ends up nullable,
+									 so we test for NULL at execute time */));
 		}
 
-		if (fetchFirst != null) {
+
+		if (fetchFirst instanceof ConstantNode) {
 			DataValueDescriptor dvd = ((ConstantNode)fetchFirst).getValue();
 			long val = dvd.getLong();
 
@@ -382,6 +392,12 @@ public class CursorNode extends DMLStatementNode
 					SQLState.LANG_INVALID_ROW_COUNT_FIRST,
 					Long.toString(val) );
 			}
+		} else if (fetchFirst instanceof ParameterNode) {
+			fetchFirst.
+				setType(new DataTypeDescriptor(
+							TypeId.getBuiltInTypeId(Types.BIGINT),
+							false /* ignored tho; ends up nullable,
+									 so we test for NULL at execute time*/));
 		}
 	}
 

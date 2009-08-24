@@ -497,7 +497,6 @@ public class SQLParser
 		DataTypeDescriptor[] descriptors = cc.getParameterTypes();
 
 		ParameterNode				newNode;
-		ParameterNode				oldNode;
 		int							paramCount;
 
 		/*
@@ -3115,8 +3114,8 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 	int				  isolationLevel = ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL;
 	CursorNode		  retval;
 	OrderByList orderCols = null;
-	NumericConstantNode offset = null;
-	NumericConstantNode fetchFirst = null;
+	ValueNode offset = null;
+	ValueNode fetchFirst = null;
 }
 {
 	queryExpression = queryExpression(null, NO_SET_OP) 
@@ -8069,18 +8068,22 @@ nullOrdering(OrderByColumn orderCol) :
 /*
  * <A NAME="offsetClause">offsetClause</A>
  */
-NumericConstantNode
+ValueNode
 offsetClause() throws StandardException :
 {
-	NumericConstantNode result;
+	ValueNode result = null;
 }
 {
 	// Since OFFSET is not yet a reserved keyword, cf. disambiguation
 	// look-ahead for it w.r.t. offsetClause in method nonReservedKeyword.
 	// This solves the shift/reduce conflict, and allows us to use OFFSET as an
 	// identifier in all contexts.
-	<OFFSET> result = intLiteral() ( <ROW> | <ROWS> )
-    {
+	<OFFSET>
+    ( result = intLiteral()
+	| result = dynamicParameterSpecification()
+    )
+	( <ROW> | <ROWS> )
+	{
 		return result;
 	}
 }
@@ -8089,16 +8092,18 @@ offsetClause() throws StandardException :
 /*
  * <A NAME="fetchFirstClause">fetchFirstClause</A>
  */
-NumericConstantNode
+ValueNode
 fetchFirstClause() throws StandardException :
 {
 	// The default number of rows to fetch if the literal is omitted is 1:
-	NumericConstantNode result = getNumericNode("1", true);
+	ValueNode result = getNumericNode("1", true);
 }
 {
 	<FETCH> ( <FIRST> | <NEXT> )
-		[ result = intLiteral() ] ( <ROW> | <ROWS> ) <ONLY>
-    {
+		[ result = intLiteral()
+		| result = dynamicParameterSpecification()
+		] ( <ROW> | <ROWS> ) <ONLY>
+	{
 		return result;
 	}
 }
@@ -13893,7 +13898,8 @@ nonReservedKeyword()  :
 			getToken(1).kind == OFFSET &&
 			!(getToken(2).kind == PLUS_SIGN ||
 			  getToken(2).kind == MINUS_SIGN ||
-			  getToken(2).kind == EXACT_NUMERIC)
+			  getToken(2).kind == EXACT_NUMERIC ||
+			  getToken(2).kind == QUESTION_MARK)
 		})
 		tok = <OFFSET>
 	|	tok = <OLD>

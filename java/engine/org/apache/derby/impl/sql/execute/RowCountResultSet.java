@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -28,7 +29,9 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 
 
 
@@ -49,8 +52,10 @@ class RowCountResultSet extends NoPutResultSetImpl
     // life of object.
     final NoPutResultSet source;
     final private boolean runTimeStatsOn;
-    final private long offset;
-    final private long fetchFirst;
+    private long offset;
+    private long fetchFirst;
+    final private GeneratedMethod offsetMethod;
+    final private GeneratedMethod fetchFirstMethod;
 
     /**
      * True if we haven't yet fetched any rows from this result set.
@@ -72,8 +77,8 @@ class RowCountResultSet extends NoPutResultSetImpl
      *                        which provides the context for the row
      *                        allocation operation
      * @param resultSetNumber The resultSetNumber for the ResultSet
-     * @param offset          The offset value (0 by default)
-     * @param fetchFirst      The fetch first value (-1 if not in use)
+     * @param offsetMethod   Generated method
+     * @param fetchFirstMethod Generated method
      * @param optimizerEstimatedRowCount
      *                        Estimated total # of rows by optimizer
      * @param optimizerEstimatedCost
@@ -84,21 +89,22 @@ class RowCountResultSet extends NoPutResultSetImpl
         (NoPutResultSet s,
          Activation a,
          int resultSetNumber,
-         long offset,
-         long fetchFirst,
+         GeneratedMethod offsetMethod,
+         GeneratedMethod fetchFirstMethod,
          double optimizerEstimatedRowCount,
          double optimizerEstimatedCost)
-        throws StandardException
-    {
+            throws StandardException {
+
         super(a,
               resultSetNumber,
               optimizerEstimatedRowCount,
               optimizerEstimatedCost);
 
+        this.offsetMethod = offsetMethod;
+        this.fetchFirstMethod = fetchFirstMethod;
+
         source = s;
 
-        this.offset = offset;
-        this.fetchFirst = fetchFirst;
         virginal = true;
         rowsFetched = 0;
 
@@ -173,26 +179,77 @@ class RowCountResultSet extends NoPutResultSetImpl
 
         beginTime = getCurrentTimeMillis();
 
-        if (virginal && offset > 0) {
-            // Only skip rows the first time around
-            virginal = false;
+        if (virginal) {
+            if (offsetMethod != null) {
+                DataValueDescriptor offVal
+                    = (DataValueDescriptor)offsetMethod.invoke(activation);
 
-            long offsetCtr = offset;
+                if (offVal.isNotNull().getBoolean()) {
+                    offset = offVal.getLong();
 
-            do {
-                result = source.getNextRowCore();
-                offsetCtr--;
-
-                if (result != null && offsetCtr >= 0) {
-                    rowsFiltered++;
+                    if (offset < 0) {
+                        throw StandardException.newException(
+                            SQLState.LANG_INVALID_ROW_COUNT_OFFSET,
+                            Long.toString(offset));
+                    } else {
+                        offset = offVal.getLong();
+                    }
                 } else {
-                    break;
+                    throw StandardException.newException(
+                        SQLState.LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL,
+                        "OFFSET");
                 }
+            } else {
+                // not given
+                offset = 0;
+            }
 
-            } while (true);
+
+            if (fetchFirstMethod != null) {
+                DataValueDescriptor fetchFirstVal
+                    = (DataValueDescriptor)fetchFirstMethod.invoke(activation);
+
+                if (fetchFirstVal.isNotNull().getBoolean()) {
+
+                    fetchFirst = fetchFirstVal.getLong();
+
+                    if (fetchFirst < 1) {
+                        throw StandardException.newException(
+                            SQLState.LANG_INVALID_ROW_COUNT_FIRST,
+                            Long.toString(fetchFirst));
+                    }
+                } else {
+                    throw StandardException.newException(
+                        SQLState.LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL,
+                        "FETCH FIRST/NEXT");
+                }
+            }
+
+            if (offset > 0) {
+                // Only skip rows the first time around
+                virginal = false;
+
+                long offsetCtr = offset;
+
+                do {
+                    result = source.getNextRowCore();
+                    offsetCtr--;
+
+                    if (result != null && offsetCtr >= 0) {
+                        rowsFiltered++;
+                    } else {
+                        break;
+                    }
+                } while (true);
+            } else {
+                if (fetchFirstMethod != null && rowsFetched >= fetchFirst) {
+                    result = null;
+                } else {
+                    result = source.getNextRowCore();
+                }
+            }
         } else {
-
-            if (fetchFirst != -1 && rowsFetched >= fetchFirst) {
+            if (fetchFirstMethod != null && rowsFetched >= fetchFirst) {
                 result = null;
             } else {
                 result = source.getNextRowCore();

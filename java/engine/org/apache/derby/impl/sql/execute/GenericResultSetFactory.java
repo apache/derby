@@ -1273,8 +1273,8 @@ public class GenericResultSetFactory implements ResultSetFactory
 		NoPutResultSet source,
 		Activation activation,
 		int resultSetNumber,
-		long offset,
-		long fetchFirst,
+		GeneratedMethod offsetMethod,
+		GeneratedMethod fetchFirstMethod,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost)
 		throws StandardException
@@ -1282,8 +1282,8 @@ public class GenericResultSetFactory implements ResultSetFactory
 		return new RowCountResultSet(source,
 									 activation,
 									 resultSetNumber,
-									 offset,
-									 fetchFirst,
+									 offsetMethod,
+									 fetchFirstMethod,
 									 optimizerEstimatedRowCount,
 									 optimizerEstimatedCost);
 	}

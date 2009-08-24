@@ -1620,8 +1620,9 @@ public interface ResultSetFactory {
 	 *		                  which provides the context for the row
 	 *                        allocation operation
 	 * @param resultSetNumber The resultSetNumber for the ResultSet
-	 * @param offset          The offset value (0 by default)
-	 * @param fetchFirst      The fetch first value (-1 if not in use)
+	 * @param offsetMethod   The OFFSET parameter was specified
+	 * @param fetchFirstMethod The FETCH FIRST/NEXT parameter was
+	 *                        specified
 	 * @param optimizerEstimatedRowCount
 	 *                        Estimated total # of rows by optimizer
 	 * @param optimizerEstimatedCost
@@ -1633,8 +1634,8 @@ public interface ResultSetFactory {
 		NoPutResultSet source,
 		Activation activation,
 		int resultSetNumber,
-		long offset,
-		long fetchFirst,
+		GeneratedMethod offsetMethod,
+		GeneratedMethod fetchFirstMethod,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost) throws StandardException;
 

@@ -1014,7 +1014,29 @@ public abstract class BaseJDBCTestCase
         }
         
     }
-    
+
+    /**
+     * Assert that the query fails (either in execution, or retrieval of
+     * results--doesn't matter) and throws a SQLException with the expected
+     * state and error code
+     *
+     * Parameters must have been already bound, if any.
+     *
+     * @param sqlState expected sql state.
+     * @param ps PreparedStatement query object to execute.
+     */
+    public static void assertPreparedStatementError(String sqlState,
+                                                    PreparedStatement ps) {
+        try {
+            boolean haveRS = ps.execute();
+            fetchAndDiscardAllResults(ps, haveRS);
+            fail("Expected error '" + sqlState +
+                "' but no error was thrown.");
+        } catch (SQLException se) {
+            assertSQLState(sqlState, se);
+        }
+    }
+
     /**
      * Assert that execution of the received PreparedStatement
      * object fails (either in execution or when retrieving

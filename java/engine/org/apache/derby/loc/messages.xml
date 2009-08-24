@@ -764,6 +764,12 @@ Guide.
                 <text>Invalid row count for FIRST/NEXT, must be >= 1.</text>
             </msg>
 
+            <msg>
+                <name>2201Z</name>
+                <text>NULL value not allowed for {0} argument.</text>
+                <arg>string</arg>
+            </msg>
+
         </family>
 
 

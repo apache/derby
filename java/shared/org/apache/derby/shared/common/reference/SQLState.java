@@ -714,6 +714,7 @@ public interface SQLState {
 	String LANG_ESCAPE_IS_NULL                                  	   = "22501";
 	String LANG_INVALID_ROW_COUNT_OFFSET                               = "2201X";
 	String LANG_INVALID_ROW_COUNT_FIRST                                = "2201W";
+	String LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL                         = "2201Z";
 
 	/*
 	** Integrity violations.
