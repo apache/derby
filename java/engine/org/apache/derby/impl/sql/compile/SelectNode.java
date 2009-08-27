@@ -162,10 +162,6 @@ public class SelectNode extends ResultSetNode
 		if (SanityManager.DEBUG)
 		{
 			return "isDistinct: "+ isDistinct + "\n"+
-		    	"groupByList: " +
-				(groupByList != null ? groupByList.toString() : "null") + "\n" +
-				"orderByList: " + 
-				(orderByList != null ? orderByList.toString() : "null") + "\n" +
 				super.toString();
 		}
 		else
@@ -238,12 +234,22 @@ public class SelectNode extends ResultSetNode
 				whereSubquerys.treePrint(depth + 1);
 			}
 
-			printLabel(depth, "preJoinFL: ");
+			if (groupByList != null) {
+				printLabel(depth, "groupByList:");
+				groupByList.treePrint(depth + 1);
+			}
+
+			if (orderByList != null) {
+				printLabel(depth, "orderByList:");
+				orderByList.treePrint(depth + 1);
+			}
 
 			if (preJoinFL != null)
 			{
+				printLabel(depth, "preJoinFL: ");
 				preJoinFL.treePrint(depth + 1);
 			}
+
 		}
 	}
 

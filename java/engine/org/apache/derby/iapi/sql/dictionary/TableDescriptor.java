@@ -878,7 +878,9 @@ public class TableDescriptor extends TupleDescriptor
 	{
 		if (SanityManager.DEBUG)
 		{
-			String tempString = "SCHEMA:\n" + schema + "\ntableName: " + tableName + "\n" +
+			String tempString =
+				"\n" + "schema: " + schema + "\n" +
+				"tableName: " + tableName + "\n" +
 				"oid: " + oid + " tableType: " + tableType + "\n" +
 				"conglomerateDescriptorList: " + conglomerateDescriptorList + "\n" +
 				"columnDescriptorList: " + columnDescriptorList + "\n" +
@@ -886,10 +888,12 @@ public class TableDescriptor extends TupleDescriptor
 				"heapConglomNumber: " + heapConglomNumber + "\n";
 			if (tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
 			{
-				tempString = tempString + "onCommitDeleteRows: " + "\n" + onCommitDeleteRows + "\n";
-				tempString = tempString + "onRollbackDeleteRows: " + "\n" + onRollbackDeleteRows + "\n";
+				tempString = tempString + "onCommitDeleteRows: " + "\n" +
+					onCommitDeleteRows + "\n";
+				tempString = tempString + "onRollbackDeleteRows: " + "\n" +
+					onRollbackDeleteRows;
 			} else
-				tempString = tempString + "lockGranularity: " + lockGranularity + "\n";
+				tempString = tempString + "lockGranularity: " + lockGranularity;
 			return tempString;
 		}
 		else

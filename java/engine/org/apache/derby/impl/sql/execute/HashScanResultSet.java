@@ -740,15 +740,21 @@ public class HashScanResultSet extends ScanResultSet
 		output += "\t" + MessageService.getTextMessage(
 										SQLState.LANG_ORDERED_NULL_SEMANTICS) +
 										"\n";
+		boolean colSeen = false;
 		for (int position = 0; position < positioner.nColumns(); position++)
 		{
 			if (positioner.areNullsOrdered(position))
 			{
 				output = output + position + " ";
+				colSeen = true;
+			}
+
+			if (colSeen && position == positioner.nColumns() - 1) {
+				output = output +  "\n";
 			}
 		}
 		
-		return output + "\n";
+		return output;
 	}
 
 	public Properties getScanProperties()

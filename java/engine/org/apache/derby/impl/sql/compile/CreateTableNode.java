@@ -195,13 +195,17 @@ public class CreateTableNode extends DDLStatementNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			String tempString = "tableElementList: " + "\n" + tableElementList + "\n";
+			String tempString = "";
 			if (tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE)
 			{
 				tempString = tempString + "onCommitDeleteRows: " + "\n" + onCommitDeleteRows + "\n";
 				tempString = tempString + "onRollbackDeleteRows: " + "\n" + onRollbackDeleteRows + "\n";
 			} else
-				tempString = tempString + "properties: " + "\n" + properties + "\n" + "lockGranularity: " + "\n" + lockGranularity + "\n";
+				tempString = tempString +
+					(properties != null ?
+					 "properties: " + "\n" + properties + "\n" :
+					 "") +
+					"lockGranularity: " + lockGranularity + "\n";
 			return super.toString() +  tempString;
 		}
 		else
@@ -209,6 +213,19 @@ public class CreateTableNode extends DDLStatementNode
 			return "";
 		}
 	}
+
+	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 * @param depth		The depth to indent the sub-nodes
+	 */
+	public void printSubNodes(int depth) {
+		if (SanityManager.DEBUG) {
+			printLabel(depth, "tableElementList: ");
+			tableElementList.treePrint(depth + 1);
+		}
+	}
+
 
 	public String statementToString()
 	{

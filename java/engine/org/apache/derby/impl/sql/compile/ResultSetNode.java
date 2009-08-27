@@ -144,7 +144,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 			if (resultColumns != null)
 			{
 				printLabel(depth, "resultColumns: ");
-				resultColumns.treePrint(depth);
+				resultColumns.treePrint(depth + 1);
 			}
 		}
 	}

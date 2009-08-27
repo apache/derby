@@ -285,7 +285,10 @@ public class GenericStatement
 				{
 					if (SanityManager.DEBUG_ON("DumpParseTree")) 
 					{
+						SanityManager.GET_DEBUG_STREAM().print(
+							"\n\n============PARSE===========\n\n");
 						qt.treePrint();
+						lcc.getPrintedObjectsMap().clear();
 					}
 
 					if (SanityManager.DEBUG_ON("StopAfterParsing")) 
@@ -320,7 +323,10 @@ public class GenericStatement
 					{
 						if (SanityManager.DEBUG_ON("DumpBindTree")) 
 						{
+							SanityManager.GET_DEBUG_STREAM().print(
+								"\n\n============BIND===========\n\n");
 							qt.treePrint();
+							lcc.getPrintedObjectsMap().clear();
 						}
 
 						if (SanityManager.DEBUG_ON("StopAfterBinding")) {
@@ -437,7 +443,10 @@ public class GenericStatement
 					{
 						if (SanityManager.DEBUG_ON("DumpOptimizedTree")) 
 						{
+							SanityManager.GET_DEBUG_STREAM().print(
+								"\n\n============OPT===========\n\n");
 							qt.treePrint();
+							lcc.getPrintedObjectsMap().clear();
 						}
 
 						if (SanityManager.DEBUG_ON("StopAfterOptimizing")) 

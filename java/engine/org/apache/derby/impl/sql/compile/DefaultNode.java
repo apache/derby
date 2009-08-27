@@ -109,8 +109,8 @@ public  class DefaultNode extends ValueNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			return "defaultTree: " + defaultTree + "\n" +
-				   "defaultText: " + defaultText + "\n" +
+			return "columnName: " + columnName + "\n" +
+				"defaultText: " + defaultText + "\n" +
 				super.toString();
 		}
 		else
@@ -118,6 +118,26 @@ public  class DefaultNode extends ValueNode
 			return "";
 		}
 	}
+
+    /**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth		The depth of this node in the tree
+	 */
+	public void printSubNodes(int depth)
+	{
+		if (SanityManager.DEBUG)
+		{
+			super.printSubNodes(depth);
+
+			if (defaultTree != null) {
+				printLabel(depth, "defaultTree:");
+				defaultTree.treePrint(depth + 1);
+			}
+		}
+	}
+
 
 	/**
 	 * Bind this expression.  This means binding the sub-expressions,

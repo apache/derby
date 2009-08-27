@@ -28,6 +28,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
 import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.util.StringUtil;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -194,17 +195,17 @@ public class RealDistinctScanStatistics
 			scanInfo +
 			subIndent + MessageService.getTextMessage(
 												SQLState.RTS_START_POSITION) +
-						":\n" + startPosition + 
+			":\n" + StringUtil.ensureIndent(startPosition, depth + 2) + "\n" +
 			subIndent + MessageService.getTextMessage(
 												SQLState.RTS_STOP_POSITION) +
-						":\n" + stopPosition +
+			":\n" + StringUtil.ensureIndent(stopPosition, depth + 2) + "\n" +
 			subIndent + MessageService.getTextMessage(
 												SQLState.RTS_SCAN_QUALS) +
-						":\n" + scanQualifiers + "\n" +
-			subIndent +
-						MessageService.getTextMessage(
+			":\n" + StringUtil.ensureIndent(scanQualifiers, depth + 2) + "\n" +
+			subIndent + MessageService.getTextMessage(
 												SQLState.RTS_NEXT_QUALS) +
-						":\n" + nextQualifiers + "\n" +
+			":\n" + StringUtil.ensureIndent(nextQualifiers, depth + 2) + "\n" +
+
 			// RESOLVE - estimated row count and cost will eventually 
 			// be displayed for all nodes
 			dumpEstimatedCosts(subIndent);

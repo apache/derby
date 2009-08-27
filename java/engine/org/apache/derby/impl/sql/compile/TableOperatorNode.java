@@ -238,8 +238,6 @@ abstract class TableOperatorNode extends FromTable
 		if (SanityManager.DEBUG)
 		{
 			return "nestedInParens: " + false + "\n" +
-				leftResultSet.toString() + "\n" +
-				rightResultSet.toString() + "\n" + 
 				super.toString();
 		}
 		else
@@ -264,13 +262,13 @@ abstract class TableOperatorNode extends FromTable
 			if (leftResultSet != null)
 			{
 				printLabel(depth, "leftResultSet: ");
-				leftResultSet.printSubNodes(depth + 1);
+				leftResultSet.treePrint(depth + 1);
 			}
 
 			if (rightResultSet != null)
 			{
 				printLabel(depth, "rightResultSet: ");
-				rightResultSet.printSubNodes(depth + 1);
+				rightResultSet.treePrint(depth + 1);
 			}
 		}
 	}

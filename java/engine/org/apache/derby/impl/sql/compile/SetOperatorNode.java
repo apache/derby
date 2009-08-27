@@ -529,8 +529,6 @@ abstract class SetOperatorNode extends TableOperatorNode
 		if (SanityManager.DEBUG)
 		{
 			return 	"all: " + all + "\n" +
-				"orderByList: " + 
-				(orderByList != null ? orderByList.toString() : "null") + "\n" +
 				super.toString();
 		}
 		else
@@ -539,6 +537,26 @@ abstract class SetOperatorNode extends TableOperatorNode
 		}
 	}
 
+	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth		The depth of this node in the tree
+	 */
+
+	public void printSubNodes(int depth)
+	{
+		if (SanityManager.DEBUG)
+		{
+			super.printSubNodes(depth);
+
+			if (orderByList != null) {
+				printLabel(depth, "orderByList:");
+				orderByList.treePrint(depth + 1);
+			}
+
+		}
+	}
 	/**
 	 * Bind the result columns of this ResultSetNode when there is no
 	 * base table to bind them to.  This is useful for SELECT statements,

@@ -1097,29 +1097,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 
 
 	/**
-	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
-	 * how tree printing is supposed to work.
-	 *
-	 * @param depth		The depth of this node in the tree
-	 */
-
-	public void printSubNodes(int depth)
-	{
-		if (SanityManager.DEBUG)
-		{
-			Predicate		predicate;
-
-			super.printSubNodes(depth);
-
-			for (int index = 0; index < size(); index++)
-			{
-				predicate = (Predicate) elementAt(index);
-				predicate.treePrint(depth + 1);
-			}
-		}
-	}
-
-	/**
 	 *  Eliminate predicates of the form:
 	 *							AndNode
 	 *							/	   \

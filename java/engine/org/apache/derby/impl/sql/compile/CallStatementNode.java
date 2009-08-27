@@ -75,25 +75,6 @@ public class CallStatementNode extends DMLStatementNode
 		this.methodCall.getJavaValueNode().markForCallStatement();
 	}
 
-	/**
-	 * Convert this object to a String.  See comments in QueryTreeNode.java
-	 * for how this should be done for tree printing.
-	 *
-	 * @return	This object as a String
-	 */
-
-	public String toString()
-	{
-		if (SanityManager.DEBUG)
-		{
-			return "CALL " + methodCall.toString() + "\n" +
-				super.toString();
-		}
-		else
-		{
-			return "";
-		}
-	}
 
 	public String statementToString()
 	{

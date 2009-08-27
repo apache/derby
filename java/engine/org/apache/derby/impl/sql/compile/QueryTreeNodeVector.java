@@ -106,33 +106,22 @@ abstract class QueryTreeNodeVector extends QueryTreeNode
 		v.insertElementAt(qt, index);
 	}
 
+
 	/**
-	 * Format this list as a string
-	 *
-	 * We can simply iterate through the list.  Note each list member
-	 * is a QueryTreeNode, and so should have its specialization of
-	 * toString defined.
-	 *
-	 * @return	This list formatted as a String
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 * @param depth		The depth to indent the sub-nodes
 	 */
-	public String toString()
-	{
-		if (SanityManager.DEBUG)
-		{
-			StringBuffer	buffer = new StringBuffer("");
-
-			for (int index = 0; index < size(); index++)
-			{
-				buffer.append(elementAt(index).toString()).append("; ");
+	public void printSubNodes(int depth) {
+		if (SanityManager.DEBUG) {
+			for (int index = 0; index < size(); index++) {
+				debugPrint(formatNodeString("[" + index + "]:", depth));
+				QueryTreeNode elt = (QueryTreeNode)elementAt(index);
+				elt.treePrint(depth);
 			}
-
-			return buffer.toString();
-		}
-		else
-		{
-			return "";
 		}
 	}
+
 
 	/**
 	 * Accept a visitor, and call v.visit()

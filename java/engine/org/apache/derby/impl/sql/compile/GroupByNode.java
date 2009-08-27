@@ -866,11 +866,50 @@ public class GroupByNode extends SingleChildResultSetNode
 		if (SanityManager.DEBUG)
 		{
 			return "singleInputRowOptimization: " + singleInputRowOptimization + "\n" +
-				childResult.toString() + "\n" + super.toString();
+				super.toString();
 		}
 		else
 		{
 			return "";
+		}
+	}
+
+	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth		The depth of this node in the tree
+	 */
+	public void printSubNodes(int depth) {
+		if (SanityManager.DEBUG)
+		{
+			super.printSubNodes(depth);
+
+			printLabel(depth, "aggregateVector:\n");
+
+			for (int i=0; i < aggregateVector.size(); i++) {
+					AggregateNode agg =
+						(AggregateNode)aggregateVector.elementAt(i);
+					debugPrint(formatNodeString("[" + i + "]:", depth + 1));
+					agg.treePrint(depth + 1);
+			}
+
+			if (groupingList != null) {
+				printLabel(depth, "groupingList: ");
+				groupingList.treePrint(depth + 1);
+			}
+
+			if (havingClause != null)
+			{
+				printLabel(depth, "havingClause: ");
+				havingClause.treePrint(depth + 1);
+			}
+
+			if (havingSubquerys != null)
+			{
+				printLabel(depth, "havingSubqueries: ");
+				havingSubquerys.treePrint(depth + 1);
+			}
 		}
 	}
 

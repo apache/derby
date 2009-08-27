@@ -448,7 +448,7 @@ public final class ColumnDescriptor extends TupleDescriptor
 				"columnType: " + columnType + "\n" +
 				"columnDefault: " + columnDefault + "\n" +
 				"uuid: " + uuid + "\n" +
-				"defaultUUID: " + defaultUUID + "\n";
+				"defaultUUID: " + defaultUUID ;
 		}
 		else
 		{

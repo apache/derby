@@ -48,6 +48,7 @@ import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.catalog.UUID;
 
 import java.util.Map;
+import java.util.AbstractMap;
 
 /**
  * LanguageConnectionContext keeps the result sets,
@@ -1200,6 +1201,13 @@ public interface LanguageConnectionContext extends Context {
 	 */
     public  Object    getLastQueryTree();
 
+	/**
+	 * Return a map of AST nodes that have already been printed during a
+	 * compiler phase, so as to be able to avoid printing a node more than once.
+	 * @see org.apache.derby.impl.sql.compile.QueryTreeNode#treePrint(int)
+	 * @return the map
+	 */
+    public Map getPrintedObjectsMap();
 	
     /**
      * sets the XplainOnlyMode.

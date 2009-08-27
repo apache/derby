@@ -91,32 +91,6 @@ public class TableElementList extends QueryTreeNodeVector
 	} 
 
 	/**
-	 * Convert this object to a String.  See comments in QueryTreeNode.java
-	 * for how this should be done for tree printing.
-	 *
-	 * @return	This object as a String
-	 */
-
-	public String toString()
-	{
-		if (SanityManager.DEBUG)
-		{
-			StringBuffer	buffer = new StringBuffer("");
-
-			for (int index = 0; index < size(); index++)
-			{
-				buffer.append(elementAt(index).toString()).append("\n");
-			}
-
-			return buffer.toString();
-		}
-		else
-		{
-			return "";
-		}
-	}
-
-	/**
 	 * Use the passed schema descriptor's collation type to set the collation
 	 * of the character string types in create table node
 	 * @param sd

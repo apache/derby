@@ -86,9 +86,10 @@ public class BaseColumnNode extends ValueNode
 		if (SanityManager.DEBUG)
 		{
 			return "columnName: " + columnName + "\n" +
+				"tableName: " +
 				( ( tableName != null) ?
 						tableName.toString() :
-						"tableName: null\n") +
+						"null") + "\n" +
 				super.toString();
 		}
 		else

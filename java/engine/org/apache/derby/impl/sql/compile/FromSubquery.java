@@ -73,25 +73,6 @@ public class FromSubquery extends FromTable
 	}
 
 	/**
-	 * Convert this object to a String.  See comments in QueryTreeNode.java
-	 * for how this should be done for tree printing.
-	 *
-	 * @return	This object as a String
-	 */
-
-	public String toString()
-	{
-		if (SanityManager.DEBUG)
-		{
-			return  super.toString();
-		}
-		else
-		{
-			return "";
-		}
-	}
-
-	/**
 	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
 	 * how tree printing is supposed to work.
 	 *

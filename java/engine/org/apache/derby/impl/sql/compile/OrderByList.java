@@ -112,22 +112,6 @@ public class OrderByList extends OrderedColumnList
 	}
 
 	/**
-		Print the list.
-	
-		@param depth		The depth at which to indent the sub-nodes
-	 */
-	public void printSubNodes(int depth) {
-
-		if (SanityManager.DEBUG) 
-		{
-			for (int index = 0; index < size(); index++)
-			{
-				( (OrderByColumn) (elementAt(index)) ).treePrint(depth);
-			}
-		}
-	}
-
-	/**
 		Bind the update columns by their names to the target resultset
 		of the cursor specification.
 
@@ -867,5 +851,25 @@ public class OrderByList extends OrderedColumnList
 		 * TODO - is this really necessary?
 		 */
 		columnOrdering = getColumnOrdering();		
+	}
+
+
+	public String toString() {
+
+		StringBuffer buff = new StringBuffer();
+
+		if (columnOrdering != null) {
+			for (int i = 0; i < columnOrdering.length; i++) {
+				buff.append("[" + i + "] " + columnOrdering[i] + "\n");
+			}
+		}
+
+		return
+			"allAscending: " + allAscending + "\n" +
+			"alwaysSort:" + allAscending + "\n" +
+			"sortNeeded: " + sortNeeded  + "\n" +
+			"columnOrdering: " + "\n" +
+			buff.toString() + "\n" +
+			super.toString();
 	}
 }

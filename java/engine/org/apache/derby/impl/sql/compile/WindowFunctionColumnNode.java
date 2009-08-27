@@ -167,4 +167,22 @@ abstract class WindowFunctionColumnNode extends ResultColumn
 	{
 		return null;
 	}
+
+	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth		The depth of this node in the tree
+	 */
+
+	public void printSubNodes(int depth)
+	{
+		super.printSubNodes(depth);
+		if (SanityManager.DEBUG)
+		{
+			printLabel(depth, "windownode: ");
+			windowNode.treePrint(depth + 1);
+		}
+	}
+
 }

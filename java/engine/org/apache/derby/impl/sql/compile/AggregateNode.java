@@ -617,8 +617,8 @@ public class AggregateNode extends UnaryOperatorNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			return "Aggregate: "+aggregateName+
-				"\ndistinct: "+distinct+
+			return "aggregateName: " + aggregateName + "\n" +
+				"distinct: " + distinct + "\n" +
 				super.toString();
 		}
 		else

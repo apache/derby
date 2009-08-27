@@ -204,24 +204,6 @@ public class DistinctNode extends SingleChildResultSetNode
 		// return ((Optimizable) childResult).pushOptPredicate(optimizablePredicate);
 	}
 
-	/**
-	 * Convert this object to a String.  See comments in QueryTreeNode.java
-	 * for how this should be done for tree printing.
-	 *
-	 * @return	This object as a String
-	 */
-
-	public String toString()
-	{
-		if (SanityManager.DEBUG)
-		{
-			return childResult.toString() + "\n" + super.toString();
-		}
-		else
-		{
-			return "";
-		}
-	}
 
 	/**
 	 * Optimize this DistinctNode.  

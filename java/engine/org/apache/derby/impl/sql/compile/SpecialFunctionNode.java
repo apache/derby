@@ -257,7 +257,8 @@ public class SpecialFunctionNode extends ValueNode
 	public String toString() {
 		if (SanityManager.DEBUG)
 		{
-			return super.toString()+ sqlName;
+			return "sqlName: " + sqlName + "\n" +
+				super.toString();
 		}
 		else
 		{

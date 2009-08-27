@@ -83,27 +83,28 @@ public class OrderByNode extends SingleChildResultSetNode
 		resultColumns.genVirtualColumnNodes(this, prRCList);
 	}
 
+
 	/**
-	 * Convert this object to a String.  See comments in QueryTreeNode.java
-	 * for how this should be done for tree printing.
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
 	 *
-	 * @return	This object as a String
+	 * @param depth		The depth of this node in the tree
 	 */
 
-	public String toString()
+	public void printSubNodes(int depth)
 	{
 		if (SanityManager.DEBUG)
 		{
-			return childResult.toString() + "\n" + 
-				"orderByList: " + 
-				(orderByList != null ? orderByList.toString() : "null") + "\n" +
-				super.toString();
-		}
-		else
-		{
-			return "";
+			super.printSubNodes(depth);
+
+			if (orderByList != null)
+			{
+				printLabel(depth, "orderByList: ");
+				orderByList.treePrint(depth + 1);
+			}
 		}
 	}
+
 
 	ResultColumnDescriptor[] makeResultDescriptors()
 	{

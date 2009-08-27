@@ -22,6 +22,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.sql.Types;
+import java.util.Map;
 
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.types.SynonymAliasInfo;
@@ -328,7 +329,13 @@ public abstract class QueryTreeNode implements Visitable
 		if (SanityManager.DEBUG)
 		{
 			debugPrint(nodeHeader());
-			debugPrint(formatNodeString(this.toString(), 0));
+			String thisStr = formatNodeString(this.toString(), 0);
+
+			if (containsInfo(thisStr) &&
+					!SanityManager.DEBUG_ON("DumpBrief")) {
+				debugPrint(thisStr);
+			}
+
 			printSubNodes(0);
 			debugFlush();
 		}
@@ -347,10 +354,36 @@ public abstract class QueryTreeNode implements Visitable
 	{
 		if (SanityManager.DEBUG)
 		{
-			debugPrint(formatNodeString(nodeHeader(), depth));
-			debugPrint(formatNodeString(this.toString(), depth));
-			printSubNodes(depth);
+			Map printed =
+				getLanguageConnectionContext().getPrintedObjectsMap();
+
+			if (printed.containsKey(this)) {
+				debugPrint(formatNodeString(nodeHeader(), depth));
+				debugPrint(formatNodeString("***truncated***\n", depth));
+			} else {
+				printed.put(this, null);
+				debugPrint(formatNodeString(nodeHeader(), depth));
+				String thisStr = formatNodeString(this.toString(), depth);
+
+				if (containsInfo(thisStr) &&
+						!SanityManager.DEBUG_ON("DumpBrief")) {
+					debugPrint(thisStr);
+				}
+
+				printSubNodes(depth);
+			}
+
 		}
+	}
+
+
+	private static boolean containsInfo(String str) {
+		for (int i = 0; i < str.length(); i++) {
+			if (str.charAt(i) != '\t' && str.charAt(i) != '\n') {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -419,6 +452,12 @@ public abstract class QueryTreeNode implements Visitable
 	 * the code might look like:
 	 *
 	 * "memberName: " + memberName + "\n" + ...
+	 *
+	 * Vector members containing subclasses of QueryTreeNode should subclass
+	 * QueryTreeNodeVector. Such subclasses form a special case: These classes
+	 * should not implement printSubNodes, since there is generic handling in
+	 * QueryTreeNodeVector.  They should only implement toString if they
+	 * contain additional members.
 	 *
 	 * @return	This node formatted as a String
 	 */

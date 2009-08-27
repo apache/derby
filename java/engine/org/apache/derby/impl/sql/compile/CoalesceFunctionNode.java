@@ -320,7 +320,10 @@ public class CoalesceFunctionNode extends ValueNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			return super.toString()+functionName+"("+argumentsList+")\n";
+			return
+				"functionName: " + functionName + "\n" +
+				"firstNonParameterNodeIdx: " + firstNonParameterNodeIdx + "\n" +
+				super.toString();
 		}
 		else
 		{
@@ -328,6 +331,25 @@ public class CoalesceFunctionNode extends ValueNode
 		}
 	}
         
+	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth		The depth of this node in the tree
+	 */
+
+	public void printSubNodes(int depth)
+	{
+		if (SanityManager.DEBUG)
+		{
+			super.printSubNodes(depth);
+
+			printLabel(depth, "argumentsList: ");
+			argumentsList.treePrint(depth + 1);
+		}
+	}
+
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -405,27 +427,4 @@ public class CoalesceFunctionNode extends ValueNode
 		}
 		return this;
 	}
-
-
-	/**
-	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
-	 * how tree printing is supposed to work.
-	 *
-	 * @param depth					The depth of this node in the tree
-	 */
-
-	public void printSubNodes(int depth)
-	{
-		if (SanityManager.DEBUG)
-		{
-			super.printSubNodes(depth);
-			printLabel(depth, "argumentsList: [firstNonParameterNodeIdx=" +
-					   firstNonParameterNodeIdx + "]" );
-			int argumentsListSize = argumentsList.size();
-			for (int i=0; i < argumentsListSize; i++) {
-			    ((ValueNode)argumentsList.elementAt(i)).treePrint(depth+1);
-			}
-		}
-	}
-        
 }

@@ -82,6 +82,8 @@ import org.apache.derby.iapi.reference.Property;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.AbstractMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -3473,6 +3475,22 @@ public class GenericLanguageConnectionContext
 			getInitialDefaultSchemaDescriptor());
 	}
 
+	/**
+	 * This holds a map of AST nodes that have already been printed during a
+	 * compiler phase, so as to be able to avoid printing a node more than once.
+	 * @see org.apache.derby.impl.sql.compile.QueryTreeNode#treePrint(int)
+	 */
+	Map printedObjectsMap = null;
+
+	/**
+	 * @see org.apache.derby.iapi.sql.conn.LanguageConnectionContext#getPrintedObjectsMap
+	 */
+	public Map getPrintedObjectsMap() {
+		if (printedObjectsMap == null) {
+			printedObjectsMap = new IdentityHashMap();
+		}
+		return printedObjectsMap;
+	}
 
 	/** @see LanguageConnectionContext#getXplainOnlyMode() */
 	public boolean getXplainOnlyMode() {

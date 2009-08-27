@@ -864,4 +864,28 @@ public class ColumnDefinitionNode extends TableElementNode
 
 	}
 
+    /**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth		The depth of this node in the tree
+	 */
+	public void printSubNodes(int depth)
+	{
+		if (SanityManager.DEBUG)
+		{
+			super.printSubNodes(depth);
+
+			if (defaultNode != null) {
+				printLabel(depth, "default: ");
+				defaultNode.treePrint(depth + 1);
+			}
+
+
+			if (generationClauseNode != null) {
+				printLabel(depth, "generationClause: ");
+				generationClauseNode.treePrint(depth + 1);
+			}
+		}
+	}
 }

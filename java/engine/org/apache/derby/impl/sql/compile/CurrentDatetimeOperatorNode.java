@@ -169,7 +169,8 @@ public class CurrentDatetimeOperatorNode extends ValueNode {
 	public String toString() {
 		if (SanityManager.DEBUG)
 		{
-			return super.toString()+"method = "+methodName[whichType]+"\n";
+			return "methodName: " + methodName[whichType] + "\n" +
+				super.toString();
 		}
 		else
 		{

@@ -258,18 +258,18 @@ public class AlterTableNode extends DDLStatementNode
 		if (SanityManager.DEBUG)
 		{
 			return super.toString() +
-				"objectName: " + "\n" + getObjectName() + "\n" +
-				"tableElementList: " + "\n" + tableElementList + "\n" +
-				"lockGranularity: " + "\n" + lockGranularity + "\n" +
-				"compressTable: " + "\n" + compressTable + "\n" +
-				"sequential: " + "\n" + sequential + "\n" +
-				"truncateTable: " + "\n" + truncateTable + "\n" +
-				"purge: " + "\n" + purge + "\n" +
-				"defragment: " + "\n" + defragment + "\n" +
-				"truncateEndOfTable: " + "\n" + truncateEndOfTable + "\n" +
-				"updateStatistics: " + "\n" + updateStatistics + "\n" +
-				"updateStatisticsAll: " + "\n" + updateStatisticsAll + "\n" +
-				"indexNameForUpdateStatistics: " + "\n" + indexNameForUpdateStatistics + "\n";
+				"objectName: " + getObjectName() + "\n" +
+				"lockGranularity: " + lockGranularity + "\n" +
+				"compressTable: " + compressTable + "\n" +
+				"sequential: " + sequential + "\n" +
+				"truncateTable: " + truncateTable + "\n" +
+				"purge: " + purge + "\n" +
+				"defragment: " + defragment + "\n" +
+				"truncateEndOfTable: " + truncateEndOfTable + "\n" +
+				"updateStatistics: " + updateStatistics + "\n" +
+				"updateStatisticsAll: " + updateStatisticsAll + "\n" +
+				"indexNameForUpdateStatistics: " +
+				     indexNameForUpdateStatistics + "\n";
 		}
 		else
 		{
@@ -277,7 +277,19 @@ public class AlterTableNode extends DDLStatementNode
 		}
 	}
 
-	public String statementToString()
+	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 * @param depth		The depth to indent the sub-nodes
+	 */
+	public void printSubNodes(int depth) {
+		if (SanityManager.DEBUG) {
+			printLabel(depth, "tableElementList: ");
+			tableElementList.treePrint(depth + 1);
+		}
+	}
+
+public String statementToString()
 	{
 		if(truncateTable)
 			return "TRUNCATE TABLE";

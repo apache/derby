@@ -23,6 +23,8 @@ package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 
+import org.apache.derby.iapi.services.sanity.SanityManager;
+
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.Formatable;
@@ -172,4 +174,16 @@ public class IndexColumnOrder implements ColumnOrdering, Formatable
 	 *	@return	the formatID of this class
 	 */
 	public	int	getTypeFormatId()	{ return StoredFormatIds.INDEX_COLUMN_ORDER_V01_ID; }
+
+	public String toString() {
+		if (SanityManager.DEBUG) {
+			return
+				"IndexColumnOrder.colNum: " + colNum + "\n" +
+				"IndexColumnOrder.ascending: " + ascending  + "\n" +
+				"IndexColumnOrder.nullsOrderedLow: " + nullsOrderedLow;
+		} else {
+			return super.toString();
+		}
+
+	}
 }

@@ -74,21 +74,6 @@ public class GroupByList extends OrderedColumnList
 		return (GroupByColumn) elementAt(position);
 	}
 
-	/**
-		Print the list.
-
-		@param depth		The depth at which to indent the sub-nodes
-	 */
-	public void printSubNodes(int depth)
-	{
-		if (SanityManager.DEBUG)
-		{
-			for (int index = 0; index < size(); index++)
-			{
-				( (GroupByColumn) elementAt(index) ).treePrint(depth);
-			}
-		}
-	}
 
 	/**
 	 * Get the number of grouping columns that need to be added to the SELECT list.
@@ -300,28 +285,23 @@ public class GroupByList extends OrderedColumnList
 		}
 	}
 
+
 	/**
-	 * Print it out, baby
+	 * Convert this object to a String.  See comments in QueryTreeNode.java
+	 * for how this should be done for tree printing.
+	 *
+	 * @return	This object as a String
 	 */
 	public String toString()
 	{
-		if (SanityManager.DEBUG)
-		{
-			StringBuffer	buf = new StringBuffer();
-
-			for (int index = 0; index < size(); index++)
-			{
-				GroupByColumn	groupingCol = (GroupByColumn) elementAt(index);
-
-				buf.append(groupingCol.toString());
-			}
-			return buf.toString();
-		}
-		else
-		{
+		if (SanityManager.DEBUG) {
+			return "numGroupingColsAdded: " + numGroupingColsAdded + "\n" +
+				super.toString();
+		} else {
 			return "";
 		}
 	}
+
 
 	public void preprocess(
 			int numTables, FromList fromList, SubqueryList whereSubquerys, 

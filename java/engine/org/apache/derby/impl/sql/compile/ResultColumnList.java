@@ -665,24 +665,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 		}
 	}
 
-	/**
-	 * This class needs a treePrint method, even though it is not a
-	 * descendant of QueryTreeNode, because its members contain tree
-	 * nodes, and these have to be printed and indented properly.
-	 *
-	 * @param depth		The depth at which to indent the sub-nodes
-	 */
-
-	public void treePrint(int depth)
-	{
-		if (SanityManager.DEBUG)
-		{
-			for (int index = 0; index < size(); index++)
-			{
-				((ResultColumn) elementAt(index) ).treePrint(depth);
-			}
-		}
-	}
 
 	/**
 	 * Bind the expressions in this ResultColumnList.  This means binding
@@ -4250,4 +4232,21 @@ public class ResultColumnList extends QueryTreeNodeVector
 		resetVirtualColumnIds();
 	}
 
+	/**
+	 * Convert this object to a String.  See comments in QueryTreeNode.java
+	 * for how this should be done for tree printing.
+	 *
+	 * @return	This object as a String
+	 */
+	public String toString()
+	{
+		if (SanityManager.DEBUG) {
+			return "indexRow: " + indexRow + "\n" +
+				(indexRow ? "conglomerateId: " + conglomerateId + "\n"
+				 : "") +
+				super.toString();
+		} else {
+			return "";
+		}
+	}
 }

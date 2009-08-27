@@ -74,9 +74,38 @@ public class OrderByColumn extends OrderedColumn {
 	 */
 	public String toString() {
 		if (SanityManager.DEBUG) {
-			return expression.toString();
+			return
+				"nullsOrderedLow: " + nullsOrderedLow + "\n" +
+				"ascending; " + ascending + "\n" +
+				"addedColumnOffset: " + addedColumnOffset + "\n" +
+				super.toString();
 		} else {
 			return "";
+		}
+	}
+
+
+	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth		The depth of this node in the tree
+	 */
+	public void printSubNodes(int depth)
+	{
+		if (SanityManager.DEBUG)
+		{
+			super.printSubNodes(depth);
+
+			if (expression != null) {
+				printLabel(depth, "expression: ");
+				expression.treePrint(depth + 1);
+			}
+
+			if (resultCol != null) {
+				printLabel(depth, "resultCol: ");
+				resultCol.treePrint(depth + 1);
+			}
 		}
 	}
 

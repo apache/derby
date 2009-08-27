@@ -49,30 +49,6 @@ import java.util.Vector;
 
 public class ValueNodeList extends QueryTreeNodeVector
 {
-
-	/**
-	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
-	 * how tree printing is supposed to work.
-	 *
-	 * @param depth		The depth of this node in the tree
-	 */
-
-	public void printSubNodes(int depth)
-	{
-		if (SanityManager.DEBUG)
-		{
-			super.printSubNodes(depth);
-
-			for (int index = 0; index < size(); index++)
-			{
-				ValueNode		valueNode;
-				valueNode = (ValueNode) elementAt(index);
-				valueNode.treePrint(depth + 1);
-			}
-		}
-	}
-
-
 	/**
 	 * Add a ValueNode to the list.
 	 *

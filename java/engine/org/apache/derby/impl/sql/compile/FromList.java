@@ -853,29 +853,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		}
 	}
 
-	/**
-	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
-	 * how tree printing is supposed to work.
-	 *
-	 * @param depth		The depth of this node in the tree
-	 */
-
-	public void printSubNodes(int depth)
-	{
-		if (SanityManager.DEBUG)
-		{
-			FromTable	fromTable;
-
-			super.printSubNodes(depth);
-
-			int size = size();
-			for (int index = 0; index < size; index++)
-			{
-				fromTable = (FromTable) elementAt(index);
-				fromTable.treePrint(depth + 1);
-			}
-		}
-	}
 
 	/**
 	 * Set the (query block) level (0-based) for the FromTables in this

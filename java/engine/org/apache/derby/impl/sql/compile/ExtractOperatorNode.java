@@ -176,7 +176,8 @@ public class ExtractOperatorNode extends UnaryOperatorNode {
 	public String toString() {
 		if (SanityManager.DEBUG)
 		{
-			return super.toString() + "field is "+fieldName[extractField]+"\n";
+			return "fieldName: " + fieldName[extractField] + "\n" +
+				super.toString();
 		}
 		else
 		{
