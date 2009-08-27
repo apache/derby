@@ -828,4 +828,86 @@ public final class ViewsTest extends BaseJDBCTestCase {
         s.executeUpdate("DROP VIEW V");
         s.executeUpdate("DROP TABLE A");        
     }
+
+
+    /**
+     * DERBY-3478
+     * Make sure column names are correct when we select from a view and also
+     * give a table correation name with derived column list.
+     *
+     * E.g. SELECT * FROM V1 X(A,B)
+     *
+     * @throws SQLException
+     */
+    public void testViewMetaDataWithCorrelationNameAndDerivedColumnList_3478()
+            throws SQLException
+    {
+        Statement s = createStatement();
+        s.executeUpdate("create table t1 (i int, j int)");
+        s.executeUpdate("insert into t1 values (1, 1), (1, -1), " +
+                        "                      (2, 2), (3, -3), (4, 4)");
+
+        s.executeUpdate("create view v1 as select j, i from t1");
+        s.executeUpdate("create view v2 (x,y,z) as select j, i, i+j from t1");
+
+        DatabaseMetaData dmd = getConnection().getMetaData();
+        ResultSet columns = dmd.getColumns(null, null, "V1", null);
+
+        String[][] expectedDBMetaRows = new String[][]
+            {{"","APP","V1","J","4","INTEGER","10",null,"0","10","1","",
+              null,null,null,null,"1","YES",null,null,null,null,"NO"},
+             {"","APP","V1","I","4","INTEGER","10",null,"0","10","1","",
+              null,null,null,null,"2","YES",null,null,null,null,"NO"}};
+
+        JDBC.assertFullResultSet(columns,expectedDBMetaRows);
+
+        expectedDBMetaRows = new String[][]
+            {{"","APP","V2","X","4","INTEGER","10",null,"0","10","1","",
+              null,null,null,null,"1","YES",null,null,null,null,"NO"},
+             {"","APP","V2","Y","4","INTEGER","10",null,"0","10","1","",
+              null,null,null,null,"2","YES",null,null,null,null,"NO"},
+             {"","APP","V2","Z","4","INTEGER","10",null,"0","10","1","",
+              null,null,null,null,"3","YES",null,null,null,null,"NO"}};
+
+        columns = dmd.getColumns(null, null, "V2", null);
+        JDBC.assertFullResultSet(columns,expectedDBMetaRows);
+
+        // Make sure ResultSetMetaData is right when selecting from view. This
+        // exposes DERBY-3478 if not fixed.
+
+        ResultSet rs = s.executeQuery("select * from v1 x(a,b)");
+        JDBC.assertColumnNames(rs, new String[] {"A","B"});
+        JDBC.assertColumnTypes(rs, new int[] {java.sql.Types.INTEGER,
+                                              java.sql.Types.INTEGER});
+        JDBC.assertNullability(rs,new boolean[] {true,true});
+
+        // Check the results.
+        String [][] expectedRows = new String[][]
+            {{"1","1"},
+             {"-1","1"},
+             {"2","2"},
+             {"-3","3"},
+             {"4","4"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+        rs = s.executeQuery("select * from v2 as x(a,b,d)");
+        JDBC.assertColumnNames(rs, new String[] {"A","B","D"});
+        JDBC.assertColumnTypes(rs, new int[] {java.sql.Types.INTEGER,
+                                              java.sql.Types.INTEGER,
+                                              java.sql.Types.INTEGER});
+        JDBC.assertNullability(rs,new boolean[] {true,true, true});
+
+        // Check the results.
+        expectedRows = new String[][]
+            {{"1","1","2"},
+             {"-1","1","0"},
+             {"2","2","4"},
+             {"-3","3","0"},
+             {"4","4","8"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+        s.executeUpdate("drop view v1");
+        s.executeUpdate("drop view v2");
+        s.executeUpdate("drop table t1");
+    }
 }

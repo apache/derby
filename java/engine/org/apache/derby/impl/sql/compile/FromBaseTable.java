@@ -2291,8 +2291,19 @@ public class FromBaseTable extends FromTable
 				// since we reset the compilation schema when we return, we
 				// need to save it for use when we bind expressions:
 				fsq.setOrigCompilationSchema(compSchema);
+				ResultSetNode fsqBound =
+					fsq.bindNonVTITables(dataDictionary, fromListParam);
 
-				return fsq.bindNonVTITables(dataDictionary, fromListParam);
+				/* Do error checking on derived column list and update "exposed"
+				 * column names if valid.
+				 */
+				if (derivedRCL != null) {
+					fsqBound.getResultColumns().propagateDCLInfo(
+						derivedRCL,
+						origTableName.getFullTableName());
+				}
+
+				return fsqBound;
 			}
 			finally
 			{
