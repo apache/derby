@@ -793,110 +793,155 @@ public final class NetworkServerControlImpl {
                             NetworkServerMBean.class,
                             "type=NetworkServer");
                 			
-		// wait until we are told to shutdown or someone sends an InterruptedException
-        synchronized(shutdownSync) {
-            try {
-				shutdownSync.wait();
-            }
-            catch (InterruptedException e)
-            {
-                shutdown = true;
-            }
-        }
-        
-        AccessController.doPrivileged(
-                new PrivilegedAction() {
-                    public Object run()  {
-                    // Need to interrupt the memcheck thread if it is sleeping.
-                        if (mc != null)
-                            mc.interrupt();
+		try {
+			// wait until we are told to shutdown or someone sends an InterruptedException
+	        synchronized(shutdownSync) {
+	            try {
+					shutdownSync.wait();
+	            }
+	            catch (InterruptedException e)
+	            {
+	                shutdown = true;
+	            }
+	        }
+	        
+	        try {
+	            AccessController.doPrivileged(
+	                    new PrivilegedAction() {
+	                        public Object run()  {
+	                        // Need to interrupt the memcheck thread if it is sleeping.
+	                            if (mc != null)
+	                                mc.interrupt();
 
-                        //interrupt client thread
-                        clientThread.interrupt();
+	                            //interrupt client thread
+	                            clientThread.interrupt();
 
-                        return null;
-                    }
-                });
-		
- 		// Close out the sessions
- 		synchronized(sessionTable) {
- 			for (Enumeration e = sessionTable.elements(); e.hasMoreElements(); )
- 			{	
- 				Session session = (Session) e.nextElement();
- 				session.close();
- 			}
- 		}
+	                            return null;
+	                       }
+	                    });
+	        } catch (Exception exception) {
+	        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+	        }
+			
+	 		// Close out the sessions
+	 		synchronized(sessionTable) {
+	 			for (Enumeration e = sessionTable.elements(); e.hasMoreElements(); )
+	 			{	
+	 				Session session = (Session) e.nextElement();
+	 				try {
+	 					session.close();
+	 				} catch (Exception exception) {
+	 		        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+	 				}
+	 			}
+	 		}
 
-		synchronized (threadList)
-		{
- 			//interupt any connection threads still active
- 			for (int i = 0; i < threadList.size(); i++)
- 			{
-				final DRDAConnThread threadi = (DRDAConnThread)threadList.get(i);
-                
- 				threadi.close();
-				AccessController.doPrivileged(
-							new PrivilegedAction() {
-								public Object run() {
-									threadi.interrupt();
-									return null;
-								}
-							});
- 			}
- 			threadList.clear();
-		}
-	   	
-	    // close the listener socket
-	    try{
-	       serverSocket.close();
-	    }catch(IOException e){
-			consolePropertyMessage("DRDA_ListenerClose.S", true);
-	    }
+			synchronized (threadList)
+			{
+	 			//interupt any connection threads still active
+	 			for (int i = 0; i < threadList.size(); i++)
+	 			{
+	 				try {
+	 					final DRDAConnThread threadi = (DRDAConnThread)threadList.get(i);
+	 	                
+	 	 				threadi.close();
+	 					AccessController.doPrivileged(
+	 								new PrivilegedAction() {
+	 									public Object run() {
+	 										threadi.interrupt();
+	 										return null;
+	 									}
+	 								});
+	 				} catch (Exception exception) {
+	 		        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+	 				}
+	 			}
+	 			threadList.clear();
+			}
+		   	
+		    // close the listener socket
+		    try{
+		       serverSocket.close();
+		    }catch(IOException e){
+				consolePropertyMessage("DRDA_ListenerClose.S", true);
+		    } catch (Exception exception) {
+	        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+		    }
 
+			// Wake up those waiting on sessions, so
+			// they can close down
+		    try{
+				synchronized (runQueue) {
+					runQueue.notifyAll();
+				}	
+		    } catch (Exception exception) {
+	        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+		    }
+	        
+	        // And now unregister any MBeans.
+		    try {
+		        mgmtService.unregisterMBean(versionMBean);
+		        mgmtService.unregisterMBean(networkServerMBean);
+		    } catch (Exception exception) {
+	        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+		    }
 
-		// Wake up those waiting on sessions, so
-		// they can close down
-		synchronized (runQueue) {
-			runQueue.notifyAll();
-		}	
-        
-        // And now unregister any MBeans.
-        mgmtService.unregisterMBean(versionMBean);
-        mgmtService.unregisterMBean(networkServerMBean);
+			if (shutdownDatabasesOnShutdown) {
 
-		if (shutdownDatabasesOnShutdown) {
-
-			// Shutdown Derby
-			try {
-				// tell driver to shutdown the engine
-				if (cloudscapeDriver != null) {
-					// DERBY-2109: pass user credentials for driver shutdown
-					final Properties p = new Properties();
-					if (userArg != null) {
-						p.setProperty("user", userArg);
+				// Shutdown Derby
+				try {
+					// tell driver to shutdown the engine
+					if (cloudscapeDriver != null) {
+						// DERBY-2109: pass user credentials for driver shutdown
+						final Properties p = new Properties();
+						if (userArg != null) {
+							p.setProperty("user", userArg);
+						}
+						if (passwordArg != null) {
+							p.setProperty("password", passwordArg);
+						}
+						cloudscapeDriver.connect("jdbc:derby:;shutdown=true", p);
 					}
-					if (passwordArg != null) {
-						p.setProperty("password", passwordArg);
+				} catch (SQLException sqle) {
+					// If we can't shutdown Derby, perhaps, authentication has
+					// failed or System Privileges weren't granted. We will just
+					// print a message to the console and proceed.
+					String expectedState =
+						StandardException.getSQLStateFromIdentifier(
+								SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN);
+					if (!expectedState.equals(sqle.getSQLState())) {
+						consolePropertyMessage("DRDA_ShutdownWarning.I",
+											   sqle.getMessage());
 					}
-					cloudscapeDriver.connect("jdbc:derby:;shutdown=true", p);
-				}
-			} catch (SQLException sqle) {
-				// If we can't shutdown Derby, perhaps, authentication has
-				// failed or System Privileges weren't granted. We will just
-				// print a message to the console and proceed.
-				String expectedState =
-					StandardException.getSQLStateFromIdentifier(
-							SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN);
-				if (!expectedState.equals(sqle.getSQLState())) {
-					consolePropertyMessage("DRDA_ShutdownWarning.I",
-										   sqle.getMessage());
+				} catch (Exception exception) {
+					consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
 				}
 			}
-		}
 
-		consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
-						        {att_srvclsnm, versionString});
+			consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
+							        {att_srvclsnm, versionString});
+			
+		} catch (Exception ex) {
+			try {
+				//If the console printing is not available,  then we have
+				//a simple stack trace print below to atleast print some
+				//exception info
+	        	consolePrintAndIgnore("DRDA_UnexpectedException.S", ex, true);				
+			} catch (Exception e) {}
+			ex.printStackTrace();
+		}
     }
+	
+	//Print the passed exception on the console and ignore it after that
+	private void consolePrintAndIgnore(String msgProp, 
+			Exception e, boolean printTimeStamp) {
+		// catch the exception consolePropertyMessage will throw since we
+		// just want to print information about it and move on.
+		try {
+			consolePropertyMessage(msgProp, true);
+		} catch (Exception ce) {} 
+		consoleExceptionPrintTrace(e);		
+	}
 	
 	/** 
 	 * Load Derby and save driver for future use.
