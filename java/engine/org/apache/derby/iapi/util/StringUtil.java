@@ -24,9 +24,6 @@ package org.apache.derby.iapi.util;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-
 /**
 	A set of public static methods for dealing with Strings
 */
@@ -519,43 +516,4 @@ public class StringUtil
 
         return buffer.toString();
     }
-
-
-	/**
-	 * Utility for formatting which bends a multi-line string into shape for
-	 * outputting it in a context where there is <i>depth</i> tabs. Trailing
-	 * newlines are discarded as well.
-	 * <p>
-	 * Replace     "^[\t]*" with "depth" number of tabs.<br>
-	 * Replace     "\n+$" with "".
-	 * Replace all "\n[\t]*" with "\n" + "depth" number of tabs.<br>
-	 * </p>
-	 * @param formatted string to sanitize
-	 * @param depth the string is to be printed at
-	 */
-	public static String ensureIndent(String formatted, int depth) {
-		StringBuffer buf = new StringBuffer();
-		StringBuffer indent = new StringBuffer();
-
-		while (depth-- > 0) {
-			indent.append("\t");
-		}
-
-
-		Pattern pat_a = Pattern.compile("\\A\\t*");
-		Matcher m_a = pat_a.matcher(formatted);
-
-		formatted = m_a.replaceFirst(indent.toString());
-
-		Pattern pat_b = Pattern.compile("\\n+\\Z");
-		Matcher m_b = pat_b.matcher(formatted);
-		formatted = m_b.replaceFirst("");
-
-		Pattern pat_c = Pattern.compile("\\n\\t*");
-		Matcher m_c = pat_c.matcher(formatted);
-		formatted = m_c.replaceAll("\n" + indent.toString());
-
-
-		return formatted;
-	}
 }
