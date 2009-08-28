@@ -2578,6 +2578,11 @@ public abstract class EmbedConnection implements EngineConnection
 		getLanguageConnection().setDrdaID(drdaID);
 	}
 
+    /** @see EngineConnection#isInGlobalTransaction() */
+    public boolean isInGlobalTransaction() {
+    	return false;
+    }
+
 	/**
 		Reset the connection before it is returned from a PooledConnection
 		to a new application request (wrapped by a BrokeredConnection).

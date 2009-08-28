@@ -473,6 +473,11 @@ public abstract class BrokeredConnection implements EngineConnection
         }
 	}
 
+    /** @see EngineConnection#isInGlobalTransaction() */
+    public boolean isInGlobalTransaction() {
+    	return control.isInGlobalTransaction();
+    }
+
 	/**
 	 *  Set the internal isolation level to use for preparing statements.
 	 *  Subsequent prepares will use this isoalation level
