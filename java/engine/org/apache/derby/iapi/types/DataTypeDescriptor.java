@@ -627,7 +627,9 @@ public final class DataTypeDescriptor implements Formatable
 								"Normalization of " + t2 + " being asked to convert to " + t1);
 					}
 				}
-			}
+            } else {
+                SanityManager.THROWASSERT("cachedDest is null");
+            }
 		}
 
 		if (source.isNull())
@@ -635,14 +637,8 @@ public final class DataTypeDescriptor implements Formatable
 			if (!isNullable())
 				throw StandardException.newException(SQLState.LANG_NULL_INTO_NON_NULL,"");
 
-			if (cachedDest == null)
-				cachedDest = getNull();
-			else
-				cachedDest.setToNull();
+            cachedDest.setToNull();
 		} else {
-
-			if (cachedDest == null)
-				cachedDest = getNull();
 
 			int jdbcId = getJDBCTypeId();
 

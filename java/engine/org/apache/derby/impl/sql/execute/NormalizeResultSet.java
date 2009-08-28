@@ -52,6 +52,12 @@ class NormalizeResultSet extends NoPutResultSetImpl
 	private	int				numCols;
 	private int				startCol;
 
+    /**
+     * This array contains data value descriptors that can be used (and reused)
+     * by normalizeRow() to hold the normalized column values.
+     */
+    private final DataValueDescriptor[] cachedDestinations;
+
 	/* RESOLVE - We need to pass the ResultDescription for this ResultSet
 	 * as a parameter to the constructor and use it instead of the one from
 	 * the activation
@@ -107,6 +113,7 @@ class NormalizeResultSet extends NoPutResultSetImpl
 		
 		startCol = computeStartColumn( forUpdate, resultDescription );
 		normalizedRow = activation.getExecutionFactory().getValueRow(numCols);
+        cachedDestinations = new DataValueDescriptor[numCols];
 		recordConstructorTime();
 	}
 
@@ -350,10 +357,6 @@ class NormalizeResultSet extends NoPutResultSetImpl
 	 */
 	private ExecRow normalizeRow(ExecRow sourceRow) throws StandardException
 	{
-		int					whichCol;
-
-		if (desiredTypes == null) { desiredTypes = fetchResultTypes( resultDescription ); }
-
         int                     count = resultDescription.getColumnCount();
 
 		for (int i = 1; i <= count; i++)
@@ -367,8 +370,9 @@ class NormalizeResultSet extends NoPutResultSetImpl
                 { normalizedCol = sourceCol; }
 				else
                 {
-                    normalizedCol = normalizeColumn
-                        ( desiredTypes[i - 1], sourceRow, i, normalizedRow.getColumn(i), resultDescription );
+                    normalizedCol = normalizeColumn(
+                            getDesiredType(i), sourceRow, i,
+                            getCachedDestination(i), resultDescription);
                 }
 
 				normalizedRow.setColumn(i, normalizedCol);
@@ -379,12 +383,43 @@ class NormalizeResultSet extends NoPutResultSetImpl
 	}
 
     /**
+     * Get a cached data value descriptor that can receive the normalized
+     * value of the specified column.
+     *
+     * @param col the column number (1-based)
+     * @return a data value descriptor of the correct type for the column
+     * @throws StandardException if a new data value descriptor cannot be
+     * created
+     */
+    private DataValueDescriptor getCachedDestination(int col)
+            throws StandardException {
+        int index = col - 1;
+        if (cachedDestinations[index] == null) {
+            cachedDestinations[index] = getDesiredType(col).getNull();
+        }
+        return cachedDestinations[index];
+    }
+
+    /**
+     * Get a data type descriptor that describes the desired type for the
+     * specified column.
+     *
+     * @param col the column number (1-based)
+     * @return a data type descriptor for the column
+     */
+    private DataTypeDescriptor getDesiredType(int col) {
+        if (desiredTypes == null) {
+            desiredTypes = fetchResultTypes(resultDescription);
+        }
+        return desiredTypes[col - 1];
+    }
+
+    /**
      * <p>
      * Fetch the result datatypes out of the activation.
      * </p>
      */
-    private  DataTypeDescriptor[]    fetchResultTypes( ResultDescription desc )
-        throws StandardException
+    private DataTypeDescriptor[] fetchResultTypes(ResultDescription desc)
     {
         int     count = desc.getColumnCount();
 

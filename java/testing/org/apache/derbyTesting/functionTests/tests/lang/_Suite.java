@@ -72,6 +72,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(GrantRevokeTest.suite());
         suite.addTest(GroupByExpressionTest.suite());
         suite.addTest(InbetweenTest.suite());
+        suite.addTest(InsertTest.suite());
 		suite.addTest(LangScripts.suite());
         suite.addTest(MathTrigFunctionsTest.suite());
         suite.addTest(PrepareExecuteDDL.suite());
