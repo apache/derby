@@ -798,26 +798,34 @@ public final class NetworkServerControlImpl {
             }
         }
         
-        AccessController.doPrivileged(
-                new PrivilegedAction() {
-                    public Object run()  {
-                    // Need to interrupt the memcheck thread if it is sleeping.
-                        if (mc != null)
-                            mc.interrupt();
+        try {
+            AccessController.doPrivileged(
+                    new PrivilegedAction() {
+                        public Object run()  {
+                        // Need to interrupt the memcheck thread if it is sleeping.
+                            if (mc != null)
+                                mc.interrupt();
 
-                        //interrupt client thread
-                        clientThread.interrupt();
+                            //interrupt client thread
+                            clientThread.interrupt();
 
-                        return null;
-                    }
-                });
+                            return null;
+                       }
+                    });
+        } catch (Exception exception) {
+        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+        }
 		
  		// Close out the sessions
  		synchronized(sessionTable) {
  			for (Enumeration e = sessionTable.elements(); e.hasMoreElements(); )
  			{	
  				Session session = (Session) e.nextElement();
- 				session.close();
+ 				try {
+ 					session.close();
+ 				} catch (Exception exception) {
+ 		        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+ 				}
  			}
  		}
 
@@ -826,16 +834,20 @@ public final class NetworkServerControlImpl {
  			//interupt any connection threads still active
  			for (int i = 0; i < threadList.size(); i++)
  			{
-				final DRDAConnThread threadi = (DRDAConnThread)threadList.get(i);
-                
- 				threadi.close();
-				AccessController.doPrivileged(
-							new PrivilegedAction() {
-								public Object run() {
-									threadi.interrupt();
-									return null;
-								}
-							});
+ 				try {
+ 					final DRDAConnThread threadi = (DRDAConnThread)threadList.get(i);
+ 	                
+ 	 				threadi.close();
+ 					AccessController.doPrivileged(
+ 								new PrivilegedAction() {
+ 									public Object run() {
+ 										threadi.interrupt();
+ 										return null;
+ 									}
+ 								});
+ 				} catch (Exception exception) {
+ 		        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+ 				}
  			}
  			threadList.clear();
 		}
@@ -845,18 +857,27 @@ public final class NetworkServerControlImpl {
 	       serverSocket.close();
 	    }catch(IOException e){
 			consolePropertyMessage("DRDA_ListenerClose.S");
+	    } catch (Exception exception) {
+        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
 	    }
-
 
 		// Wake up those waiting on sessions, so
 		// they can close down
-		synchronized (runQueue) {
-			runQueue.notifyAll();
-		}	
+	    try{
+			synchronized (runQueue) {
+				runQueue.notifyAll();
+			}	
+	    } catch (Exception exception) {
+        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+	    }
         
         // And now unregister any MBeans.
-        mgmtService.unregisterMBean(versionMBean);
-        mgmtService.unregisterMBean(networkServerMBean);
+	    try {
+	        mgmtService.unregisterMBean(versionMBean);
+	        mgmtService.unregisterMBean(networkServerMBean);
+	    } catch (Exception exception) {
+        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+	    }
 
 		if (shutdownDatabasesOnShutdown) {
 
@@ -885,6 +906,8 @@ public final class NetworkServerControlImpl {
 					consolePropertyMessage("DRDA_ShutdownWarning.I",
 										   sqle.getMessage());
 				}
+			} catch (Exception exception) {
+				consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
 			}
 		}
 
@@ -892,6 +915,17 @@ public final class NetworkServerControlImpl {
 						        {att_srvclsnm, versionString, 
 								getFormattedTimestamp()});
     }
+	
+	//Print the passed exception on the console and ignore it after that
+	private void consolePrintAndIgnore(String msgProp, 
+			Exception e, boolean printTimeStamp) {
+		// catch the exception consolePropertyMessage will throw since we
+		// just want to print information about it and move on.
+		try {
+			consolePropertyMessage(msgProp);
+		} catch (Exception ce) {} 
+		consoleExceptionPrintTrace(e);		
+	}
 	
 	/** 
 	 * Load Derby and save driver for future use.
