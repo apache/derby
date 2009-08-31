@@ -26,6 +26,8 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.Types;
 
 import junit.framework.Assert;
 import junit.framework.Test;
@@ -54,7 +56,7 @@ public final class CommentTest extends BaseJDBCTestCase {
     */
     public static Test suite()
     {
-        return TestConfiguration.embeddedSuite(CommentTest.class);
+        return TestConfiguration.defaultSuite(CommentTest.class);
     }
 
     /**
@@ -66,6 +68,10 @@ public final class CommentTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(
             stmt.executeQuery("/* a comment */ VALUES 1"), 
+            new String [][] {{"1"}});
+
+        JDBC.assertFullResultSet(
+            stmt.executeQuery("-- eof comment\nVALUES 1"),
             new String [][] {{"1"}});
 
         JDBC.assertFullResultSet(
@@ -129,14 +135,94 @@ public final class CommentTest extends BaseJDBCTestCase {
 
         // just comments generates syntax error
         assertCompileError("42X01", "/* this is a comment */");
+        assertCompileError("42X01", "/* this is a comment */ /* /* foo */ */");
+        assertCompileError(
+            "42X01",
+            "\n\r\r\n/* Weird newlines in front of a comment */" +
+                " /* /* foo */ */");
         assertCompileError("42X01", "-- this is a comment \n");
+
+        // sole comment error
+        assertCompileError("42X02", "/* this is not quite a comment");
     }
-    
+
+
+    /**
+     * Test that an initial bracketed comment doesn't affect the checks for
+     * executeQuery(executeUpdate
+     */
+    public void testInitialComment_derby4338() throws Exception
+    {
+        Statement s = createStatement();
+
+        JDBC.assertDrainResults(
+            s.executeQuery("/* comment */ select * from sys.systables"));
+        JDBC.assertDrainResults(
+            s.executeQuery("/* */\nSELECT * from sys.systables"));
+        JDBC.assertDrainResults(
+            s.executeQuery("/* --*/\n\rSELECT * from sys.systables"));
+        JDBC.assertDrainResults(
+            s.executeQuery("--\nselect * from sys.systables"));
+
+        s.executeUpdate("/* /* foo*/ */ create table t (i int)");
+        s.executeUpdate("--\n drop table t");
+
+        PreparedStatement ps = prepareStatement(
+            "{call syscs_util." +
+            "syscs_set_database_property('foo', ?)}");
+        ps.setString(1, "bar");
+        ps.execute();
+
+        if (usingEmbedded()) {
+            Assert.assertTrue(ps.getUpdateCount() == 0);
+        } else {
+            // Change to 0 when DERBY-211 is fixed.
+            Assert.assertTrue(ps.getUpdateCount() == -1);
+        }
+
+        // The escape after the comment below was not handled correctly prior
+        // to DERBY-4338, i.e. the statement was not classified as a "call"
+        // statement.
+        ps = prepareStatement(
+            "--\n{call syscs_util." +
+            "syscs_set_database_property('foo', ?)}");
+        ps.setString(1, "bar");
+        ps.execute();
+
+        // The assert blows up for the client prior to fix of DERBY-4338.
+        if (usingEmbedded()) {
+            Assert.assertEquals(0, ps.getUpdateCount());
+        } else {
+            // Change to 0 when DERBY-211 is fixed.
+            Assert.assertEquals(-1, ps.getUpdateCount());
+        }
+
+        ps.setNull(1, Types.VARCHAR); // clean up setting
+        ps.execute();
+    }
+
+    /**
+     * Test that an statement classifier in client doesn't get confused over
+     * keywords that end in *, ' and ". This is not strictly a comment test,
+     * but was fixed as part of DERBY-4338.
+     */
+    public void testWrongKeywordLexing_derby4338() throws Exception
+    {
+        Statement s = createStatement();
+
+        JDBC.assertDrainResults(
+            s.executeQuery("select* from sys.systables"));
+        JDBC.assertDrainResults(
+            s.executeQuery("select'a' from sys.systables"));
+        JDBC.assertDrainResults(
+            s.executeQuery("select\"TABLEID\" from sys.systables"));
+    }
+
     /**
      * Default connections to auto-commit false.
      */
     protected void initializeConnection(Connection conn) throws SQLException
-    {    
+    {
         conn.setAutoCommit(false);
     }
 }

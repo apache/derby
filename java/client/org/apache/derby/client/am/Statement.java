@@ -2319,59 +2319,21 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     // Should investigate if it can be optimized..  if we can avoid this parsing..
     //
     void parseSqlAndSetSqlModes(String sql) throws SqlException {
-        String delims = "\t\n\r\f=? (";
-        java.util.StringTokenizer tokenizer = null;
-        String firstToken = null;
-
-        // See if the statement starts with a comment; if so, move
-        // past the comment and get the first token of the actual
-        // statement to be executed.  Note: must use "startsWith"
-        // when looking for the comment delimiters instead of
-        // "equals" because there may not be whitespace between the
-        // the delimiter and the comment itself, ex "--my comment".
-        if (sql.trim().startsWith("--")) {
-
-            // Read each line of the statement until we find a
-            // line that is NOT a comment.
-            int lastEndLine = -1;
-            String endline = "\n\r\f";
-            tokenizer = new java.util.StringTokenizer(sql, endline, true);
-            while (tokenizer.hasMoreTokens()) {
-                firstToken = tokenizer.nextToken();
-                if (endline.indexOf(firstToken) != -1)
-                // this is some sort of newline ("\n", "\r", or "\f").
-                    lastEndLine = sql.indexOf(firstToken, lastEndLine+1);
-                else if (!firstToken.trim().startsWith("--"))
-                    break;
-            }
-
-            if (firstToken.startsWith("--")) {
-            // entire statement was just one or more comments; pass it as
-            // a query to the server and let the server deal with it.
-                sqlMode_ = isQuery__;
-                return;
-            }
-            else {
-            // we have a non-comment line; get a tokenizer for the
-            // statement beginning at the start of this line.
-                tokenizer = new java.util.StringTokenizer(
-                    sql.substring(lastEndLine+1), delims);
-            }
-
-        }
-        else {
-        // there aren't any leading comments, so just get the first token
-        // in the SQL statement.
-            tokenizer = new java.util.StringTokenizer(sql, delims);
-        }
-
-        if (!tokenizer.hasMoreTokens()) {
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.NO_TOKENS_IN_SQL_TEXT), sql);
-        }
 
         sqlUpdateMode_ = 0;
-        firstToken = tokenizer.nextToken();
+
+        // See if the statement starts with one or more comments; if so, move
+        // past the comments and get the first token of the actual statement to
+        // be executed.
+        String firstToken = getStatementToken(sql);
+
+        if (firstToken == null) {
+            // entire statement was just one or more comments; pass it as a
+            // query to the server and let the server deal with it.
+            sqlMode_ = isQuery__;
+            return;
+        }
+
 
         if (firstToken.equalsIgnoreCase("select") || // captures <subselect> production
                 firstToken.equalsIgnoreCase("values")) // captures <values-clause> production
@@ -2383,6 +2345,170 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         } else {
             parseUpdateSql(firstToken);
         }
+    }
+
+
+    /**
+     * Minion of getStatementToken. If the input string starts with an
+     * identifier consisting of letters only (like "select", "update"..),return
+     * it, else return supplied string.
+     * @see #getStatementToken
+     * @param sql input string
+     * @return identifier or unmodified string
+     */
+    private String isolateAnyInitialIdentifier (String sql) {
+        int idx = 0;
+        int length = sql.length();
+
+        if (length == 0) {
+            return sql;
+        }
+
+        char next = sql.charAt(idx);
+
+        if (!Character.isLetter(next)) {
+            return sql;
+        }
+
+        while (idx < length) {
+            if (!Character.isLetter(next)) {
+                break;
+            }
+            next = sql.charAt(++idx);
+        }
+
+        return sql.substring(0, idx);
+    }
+
+    /**
+     * State constants used by the FSM inside getStatementToken.
+     * @see #getStatementToken
+     */
+    private final static int OUTSIDE = 0;
+    private final static int INSIDE_SIMPLECOMMENT = 1;
+    private final static int INSIDE_BRACKETED_COMMENT = 2;
+
+    /**
+     * Step past any initial non-significant characters and comments to find
+     * first significant SQL token so we can classify statement.
+     *
+     * @return first significant SQL token
+     * @throws SqlException std exception policy
+     */
+    private String getStatementToken(String sql) throws SqlException {
+        int bracketNesting = 0;
+        int state = OUTSIDE;
+        int idx = 0;
+        String tokenFound = null;
+        char next;
+
+        while (idx < sql.length() && tokenFound == null) {
+            next = sql.charAt(idx);
+
+            switch (state) {
+            case OUTSIDE:
+                switch (next) {
+                case '\n':
+                case '\t':
+                case '\r':
+                case '\f':
+                case ' ':
+                case '(':
+                case '{': // JDBC escape characters
+                case '=': //
+                case '?': //
+                    idx++;
+                    break;
+                case '/':
+                    if (idx == sql.length() - 1) {
+                        // no more characters, so this is the token
+                        tokenFound = "/";
+                    } else if (sql.charAt(idx + 1) == '*') {
+                        state = INSIDE_BRACKETED_COMMENT;
+                        bracketNesting++;
+                        idx++; // step two chars
+                    }
+
+                    idx++;
+                    break;
+                case '-':
+                    if (idx == sql.length() - 1) {
+                        // no more characters, so this is the token
+                        tokenFound = "/";
+                    } else if (sql.charAt(idx + 1) == '-') {
+                        state = INSIDE_SIMPLECOMMENT;
+                        idx = idx++;
+                    }
+
+                    idx++;
+                    break;
+                default:
+                    // a token found
+                    tokenFound = isolateAnyInitialIdentifier(
+                        sql.substring(idx));
+
+                    break;
+                }
+
+                break;
+            case INSIDE_SIMPLECOMMENT:
+                switch (next) {
+                case '\n':
+                case '\r':
+                case '\f':
+
+                    state = OUTSIDE;
+                    idx++;
+
+                    break;
+                default:
+                    // anything else inside a simple comment is ignored
+                    idx++;
+                    break;
+                }
+
+                break;
+            case INSIDE_BRACKETED_COMMENT:
+                switch (next) {
+                case '/':
+                    if (idx != sql.length() - 1 &&
+                            sql.charAt(idx + 1) == '*') {
+
+                        bracketNesting++;
+                        idx++; // step two chars
+                    }
+                    idx++;
+
+                    break;
+                case '*':
+                    if (idx != sql.length() - 1 &&
+                            sql.charAt(idx + 1) == '/') {
+
+                        bracketNesting--;
+
+                        if (bracketNesting == 0) {
+                            state = OUTSIDE;
+                            idx++; // step two chars
+                        }
+                    }
+
+                    idx++;
+                    break;
+                default:
+                    idx++;
+                    break;
+                }
+
+                break;
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.ASSERT(false);
+                }
+                break;
+            }
+        }
+
+        return tokenFound;
     }
 
     private void parseUpdateSql(String firstToken) throws SqlException {
