@@ -70,7 +70,6 @@ class Database
 	protected boolean RDBUPDRM_sent = false;	//We have sent that an update
 											// occurred in this transaction
 	protected boolean sendTRGDFTRT = false; // Send package target default value
-
     /**
      * Connection to the database in the embedded engine.
      */
@@ -79,8 +78,6 @@ class Database
 													   // for execute imm
 	private DRDAStatement currentStatement; // current statement we are working on
 	private Hashtable stmtTable;		// Hash table for storing statements
-
-	boolean forXA = false;
 
 	// constructor
 	/**
@@ -332,7 +329,12 @@ class Database
 			conn.rollback();
 	}
 	/**
-	  * Close the connection and clean up the statement table
+	  * Database close does following cleanup tasks
+	  * 1)Rollback any pending transaction on the Connection object (except 
+	  * for a global-XA Connection obejct) before closing the Connection. 
+	  * Without the rollback, the Connection close will result into an 
+	  * exception if there is a pending transaction on that Connection.
+	  * 2)Clean up the statement table 
 	  * @throws SQLException on conn.close() error to be handled in DRDAConnThread.
 	  */
 	protected void close() throws SQLException
@@ -351,7 +353,8 @@ class Database
 				defaultStatement.close();
 			if ((conn != null) && !conn.isClosed())
 			{
-				if (! forXA)
+				//rollback all the pending transactions except global XA trans
+				if (! conn.isInGlobalTransaction())
 				{
 					conn.rollback();
 				}

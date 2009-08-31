@@ -48,6 +48,55 @@ import org.apache.derbyTesting.junit.TestConfiguration;
   */
 public class XATransactionTest extends BaseJDBCTestCase {
 
+	/**
+	  * This test does following 
+	  * 1)Start the network server
+	  * 2)Start a local xa transaction
+	  * 3)Do not commit the local XA transaction
+	  * 4)Shutdown the network server
+	  * 5)Start the server again
+	  * 
+	  * Before the fix for DERBY-4053 went in, step 4) would not shutdown the
+	  * server properly because of the pending local XA transaction. During the
+	  * server shutdown, we try to close all the open connections but the close 
+	  * on the XA connection results into an exception because there is still a
+	  * pending transaction. That exception is not handled by the server and
+	  * because of that, all the code necessary to shutdown the server is not
+	  * executed. The next time around, step 5), when we try to bring up the
+	  * server again, it ends up hanging
+	  * 2009-07-09 21:21:28.828 GMT : Invalid reply from network server: Insufficient data.
+	  * 2009-07-09 21:21:28.843 GMT : Could not listen on port 1527 on host 127.0.0.1: java.net.BindException: Address already in use: JVM_Bind
+	  * 
+	  * The fix for DERBY-4053 makes sure that before calling close on local XA
+	  * transaction, we first rollback any transaction active on the 
+	  * connection. 
+	 */
+	public void testPendingLocalTranAndServerShutdown() throws Exception {
+        if (usingEmbedded())
+            return;
+        //1)Server must be up already through the Derby junit framework
+        //2)Start a local xa transaction
+        XADataSource xaDataSource = J2EEDataSource.getXADataSource();
+        XAConnection xaconn = xaDataSource.getXAConnection();
+        XAResource xar = xaconn.getXAResource();
+        Connection conn = xaconn.getConnection();
+        Statement s = conn.createStatement();
+        s.executeUpdate("create table tab(i int)");
+        s.executeUpdate("insert into tab values (1),(2),(3),(4)");
+        conn.commit();
+        conn.setAutoCommit(false);
+        ResultSet rs = s.executeQuery("select * from tab");
+        rs.next();
+        //3)Do not commit this pending local XA transaction
+    	
+        //4)Shutdown the network server
+        //bring the server down while the local xa transaction is still active
+        TestConfiguration.getCurrent().stopNetworkServer();
+        
+        //5)Start the server again
+        TestConfiguration.getCurrent().startNetworkServer();
+	}
+
     public void testGlobalXIDinTransactionTable() throws Exception {
         Statement stm = getConnection().createStatement();
         stm.execute("create table XATT2 (i int, text char(10))");
