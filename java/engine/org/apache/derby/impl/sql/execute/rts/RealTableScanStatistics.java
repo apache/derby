@@ -23,6 +23,7 @@ package org.apache.derby.impl.sql.execute.rts;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.util.PropertyUtil;
+import org.apache.derby.iapi.util.StringUtil;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.SQLState;
@@ -192,7 +193,7 @@ public class RealTableScanStatistics
 
 		String scanInfo =
 			indent + MessageService.getTextMessage(SQLState.RTS_SCAN_INFO) +
-						": \n" +
+						":\n" +
 						PropertyUtil.sortProperties(scanProperties, subIndent);
 
 		return
@@ -217,12 +218,13 @@ public class RealTableScanStatistics
 			scanInfo +
 			subIndent + MessageService.getTextMessage(
 												SQLState.RTS_START_POSITION) +
-				": \n" + startPosition + 
+			":\n" + StringUtil.ensureIndent(startPosition, depth + 2) + "\n" +
 			subIndent + MessageService.getTextMessage(
 												SQLState.RTS_STOP_POSITION) +
-				": \n" + stopPosition +
+			":\n" + StringUtil.ensureIndent(stopPosition, depth + 2) + "\n" +
 			subIndent + MessageService.getTextMessage(SQLState.RTS_QUALS) +
-				":\n" + qualifiers + "\n" +
+			":\n" + StringUtil.ensureIndent(qualifiers, depth + 2) + "\n" +
+
 			// RESOLVE - estimated row count and cost will eventually 
 			// be displayed for all nodes
 			dumpEstimatedCosts(subIndent);

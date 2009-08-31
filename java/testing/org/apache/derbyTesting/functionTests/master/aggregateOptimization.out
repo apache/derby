@@ -97,17 +97,19 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of pages visited=1
 				Number of rows qualified=9
 				Number of rows visited=9
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 ij> select min(distinct c1), max(distinct(c1)) from t1 group by c1;
 1          |2          
 -----------------------
@@ -185,17 +187,19 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of pages visited=1
 				Number of rows qualified=9
 				Number of rows visited=9
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 ij> -- min optimization
 create index i1 on t1(c1);
 0 rows inserted/updated/deleted
@@ -268,7 +272,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -277,12 +281,12 @@ Source result set:
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> create index i2 on t1(c2, c1);
 0 rows inserted/updated/deleted
 ij> -- equality predicates on all key columns preceding min column 
@@ -367,7 +371,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0, 1}
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -376,14 +380,14 @@ Source result set:
 					Number of rows visited=1
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 ij> -- equality predicates on all key columns preceding min column, 
 -- not a unique index
 select min(c2) from t1 where c1 = 1;
@@ -463,7 +467,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -472,14 +476,14 @@ Source result set:
 					Number of rows visited=2
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 ij> delete from t1;
 9 rows inserted/updated/deleted
 ij> drop index i1;
@@ -567,7 +571,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -576,14 +580,14 @@ Source result set:
 					Number of rows visited=1
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 ij> -- group by ordered on grouping columns
 create table t2(c1 int, c2 int, c3 int, c4 int);
 0 rows inserted/updated/deleted
@@ -659,7 +663,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -668,12 +672,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> -- 1 row table
 insert into t2 values (1, 1, 1, 1);
 1 row inserted/updated/deleted
@@ -745,7 +749,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -754,12 +758,12 @@ Source result set:
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> -- multiple rows, 1 group
 insert into t2 values (1, 2, 2, 2), (1, -1, -1, -1);
 2 rows inserted/updated/deleted
@@ -831,7 +835,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -840,12 +844,12 @@ Source result set:
 				Number of rows visited=3
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> -- multiple rows, multiple groups
 insert into t2 values (2, 3, 2, 2), (2, 3, -1, -1);
 2 rows inserted/updated/deleted
@@ -918,7 +922,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -927,12 +931,12 @@ Source result set:
 				Number of rows visited=5
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> -- ordered, but in reverse order 
 select c2, c1, sum(c3) from t2 group by c2, c1;
 C2         |C1         |3          
@@ -1009,17 +1013,19 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1, 2}
 				Number of columns fetched=3
 				Number of pages visited=1
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 ij> -- clean up
 drop table t1;
 0 rows inserted/updated/deleted
@@ -1304,7 +1310,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -1313,13 +1319,13 @@ Source result set:
 				Number of rows visited=5
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					None
+				stop position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> select max(x) from x where x = 7;
 1          
 -----------
@@ -1387,7 +1393,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -1396,14 +1402,14 @@ Source result set:
 				Number of rows visited=2
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> select max(x) from x where y = 7;
 1          
 -----------
@@ -1471,7 +1477,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -1480,16 +1486,16 @@ Source result set:
 				Number of rows visited=5
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					Column[0][0] Id: 1
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 ij> select max(x) from x where y = 7;
 1          
 -----------
@@ -1557,7 +1563,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -1566,16 +1572,16 @@ Source result set:
 				Number of rows visited=5
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					Column[0][0] Id: 1
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 ij> select max(y) from x where y = 7;
 1          
 -----------
@@ -1643,7 +1649,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={1}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -1652,16 +1658,16 @@ Source result set:
 				Number of rows visited=5
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					Column[0][0] Id: 1
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 ij> select max(x) from x group by x;
 1          
 -----------
@@ -1734,7 +1740,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -1743,12 +1749,12 @@ Source result set:
 				Number of rows visited=5
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> -- could do max optimization on this, but we don't 
 -- really know much about qualifications
 select max(x) from x where x > 99;
@@ -1820,7 +1826,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -1829,13 +1835,13 @@ Source result set:
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	None
+				start position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> autocommit off;
 ij> prepare p as 'select max(x) from x';
 ij> execute p;
@@ -2135,7 +2141,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -2144,12 +2150,12 @@ Source result set:
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> -- min of b should use max optimization whether b in nullable or not because NULLS are sorted high
 select min(b) from t1;
 1          
@@ -2350,7 +2356,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -2359,12 +2365,12 @@ Source result set:
 				Number of rows visited=10
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> create table t2 (a int not null, b int not null);
 0 rows inserted/updated/deleted
 ij> insert into t2 select a, b from t1 where a is not null and b is not null;

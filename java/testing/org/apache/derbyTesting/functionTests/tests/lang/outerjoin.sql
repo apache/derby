@@ -225,7 +225,7 @@ insert into tt2 values (1, 2, 3), (2, 3, 4), (3, 4, 5);
 insert into tt3 values (1, 2, 3), (2, 3, 4), (3, 4, 5);
 
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
-maximumdisplaywidth 4500;
+maximumdisplaywidth 10000;
 
 -- no xform, predicate on outer table
 select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 where tt1.c1 = 3;

@@ -63,7 +63,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -72,12 +72,12 @@ scan information:
 	Number of rows visited=1
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> -- verify SET ISOLATION commits and changes isolation level
 set isolation RR;
 0 rows inserted/updated/deleted
@@ -119,7 +119,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -128,12 +128,12 @@ scan information:
 	Number of rows visited=1
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> set isolation reset;
 0 rows inserted/updated/deleted
 ij> execute getIsolation;
@@ -180,7 +180,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -189,12 +189,12 @@ scan information:
 	Number of rows visited=1
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> set current isolation = reset;
 0 rows inserted/updated/deleted
 ij> execute getIsolation;
@@ -241,7 +241,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -250,12 +250,12 @@ scan information:
 	Number of rows visited=1
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> set isolation to reset;
 0 rows inserted/updated/deleted
 ij> execute getIsolation;
@@ -302,7 +302,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -311,12 +311,12 @@ scan information:
 	Number of rows visited=1
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> -- test WITH ISOLATION clause
 set isolation serializable;
 0 rows inserted/updated/deleted
@@ -356,7 +356,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -365,12 +365,12 @@ scan information:
 	Number of rows visited=1
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> set isolation cursor stability;
 0 rows inserted/updated/deleted
 ij> execute getIsolation;
@@ -409,7 +409,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -418,12 +418,12 @@ scan information:
 	Number of rows visited=1
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> set isolation serializable;
 0 rows inserted/updated/deleted
 ij> execute getIsolation;
@@ -462,7 +462,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -471,12 +471,12 @@ scan information:
 	Number of rows visited=1
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> set current isolation to read committed;
 0 rows inserted/updated/deleted
 ij> execute getIsolation;
@@ -515,7 +515,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -524,12 +524,12 @@ scan information:
 	Number of rows visited=1
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> -- unknown isolation level
 select * from t1 with rw;
 ERROR 42X01: Syntax error: Encountered "rw" at line 2, column 23.

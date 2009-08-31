@@ -129,21 +129,23 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=3
 				Number of pages visited=1
 				Number of rows qualified=4
 				Number of rows visited=8
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 ij> select c1, c2 from sv1 where c1 = 1  + 1 order by c1, c2;
 C1         |C2         
 -----------------------
@@ -219,21 +221,23 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=3
 				Number of pages visited=1
 				Number of rows qualified=4
 				Number of rows visited=8
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 ij> select x1, x2 from sv2 where x1 = 1 order by x1, x2;
 X1         |X2         
 -----------------------
@@ -309,21 +313,23 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=3
 				Number of pages visited=1
 				Number of rows qualified=4
 				Number of rows visited=8
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 ij> select y1, y2 from sv3 where y1 = 1 order by y1, y2;
 Y1         |Y2         
 -----------------------
@@ -412,21 +418,23 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=3
 					Number of pages visited=1
 					Number of rows qualified=4
 					Number of rows visited=8
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 ij> select z1, z2, z4, z5 from sv4 where z1 = z4 and z2 = z5
 order by z1, z2, z4, z5;
 Z1         |Z2         |Z4         |Z5         
@@ -527,17 +535,19 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=3
 					Number of pages visited=1
 					Number of rows qualified=8
 					Number of rows visited=8
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						None
 			Right result set:
 				Hash Scan ResultSet for T1 at serializable isolation level using share table locking: 
 				Number of opens = 8
@@ -557,21 +567,23 @@ None
 					Number of rows qualified=8
 					Number of rows visited=8
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					scan qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					scan qualifiers:
+						None
 					next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
+						Column[0][1] Id: 1
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 ij> select * from av1 where c1 = 1;
 C1         |C2         
 -----------------------
@@ -643,21 +655,23 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of pages visited=1
 				Number of rows qualified=4
 				Number of rows visited=8
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 ij> select * from av2 where x1 = 2;
 X1         |X2         
 -----------------------
@@ -768,21 +782,23 @@ Source result set:
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 							next time in milliseconds/row = 0
-						scan information: 
+						scan information:
 							Bit set of columns fetched={0, 1}
 							Number of columns fetched=2
 							Number of pages visited=1
 							Number of rows qualified=4
 							Number of rows visited=8
 							Scan type=heap
-							start position: 
-null							stop position: 
-null							qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+							start position:
+								null
+							stop position:
+								null
+							qualifiers:
+								Column[0][0] Id: 0
+								Operator: =
+								Ordered nulls: false
+								Unknown return value: false
+								Negate comparison result: false
 ij> select * from av3;
 Y1         |Y2         |Y3         |Y4         
 -----------------------------------------------
@@ -886,17 +902,19 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0, 1}
 						Number of columns fetched=2
 						Number of pages visited=1
 						Number of rows qualified=8
 						Number of rows visited=8
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						qualifiers:
+							None
 				Right result set:
 					Hash Scan ResultSet for T1 at serializable isolation level using share table locking: 
 					Number of opens = 8
@@ -916,16 +934,18 @@ None
 						Number of rows qualified=8
 						Number of rows visited=8
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						scan qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						scan qualifiers:
+							None
 						next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+							Column[0][0] Id: 0
+							Operator: =
+							Ordered nulls: false
+							Unknown return value: false
+							Negate comparison result: false
 ij> select * from cv1;
 C1         |C2         
 -----------------------
@@ -1015,21 +1035,23 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0, 1}
 					Number of columns fetched=2
 					Number of pages visited=1
 					Number of rows qualified=4
 					Number of rows visited=8
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 ij> create index t1_c1 on t1(c1);
 0 rows inserted/updated/deleted
 ij> select c1, c2 from sv1 where c1 = 1 order by c1, c2;
@@ -1115,7 +1137,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -1124,14 +1146,14 @@ Source result set:
 					Number of rows visited=5
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 ij> select x1, x2 from sv2 where x1 = 1 order by x1, x2;
 X1         |X2         
 -----------------------
@@ -1215,7 +1237,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -1224,14 +1246,14 @@ Source result set:
 					Number of rows visited=5
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 ij> select y1, y2 from sv3 where y1 = 1 order by y1, y2;
 Y1         |Y2         
 -----------------------
@@ -1328,7 +1350,7 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
@@ -1337,14 +1359,14 @@ Source result set:
 						Number of rows visited=5
 						Scan type=btree
 						Tree height=1
-						start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-						stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+						start position:
+							>= on first 1 column(s).
+							Ordered null semantics on the following columns: 
+						stop position:
+							> on first 1 column(s).
+							Ordered null semantics on the following columns: 
 						qualifiers:
-None
+							None
 ij> select z1, z2, z4, z5 from sv4 where z1 = z4 and z2 = z5
 order by z1, z2, z4, z5;
 Z1         |Z2         |Z4         |Z5         
@@ -1445,17 +1467,19 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=3
 					Number of pages visited=1
 					Number of rows qualified=8
 					Number of rows visited=8
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						None
 			Right result set:
 				Hash Scan ResultSet for T1 at serializable isolation level using share table locking: 
 				Number of opens = 8
@@ -1475,21 +1499,23 @@ None
 					Number of rows qualified=8
 					Number of rows visited=8
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					scan qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					scan qualifiers:
+						None
 					next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
+						Column[0][1] Id: 1
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 ij> select * from av1 where c1 = 1;
 C1         |C2         
 -----------------------
@@ -1566,7 +1592,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -1575,14 +1601,14 @@ Source result set:
 					Number of rows visited=5
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 ij> select * from av2 where x1 = 2;
 X1         |X2         
 -----------------------
@@ -1698,7 +1724,7 @@ Source result set:
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
 								next time in milliseconds/row = 0
-							scan information: 
+							scan information:
 								Bit set of columns fetched=All
 								Number of columns fetched=2
 								Number of deleted rows visited=0
@@ -1707,14 +1733,14 @@ Source result set:
 								Number of rows visited=4
 								Scan type=btree
 								Tree height=1
-								start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-								stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+								start position:
+									>= on first 1 column(s).
+									Ordered null semantics on the following columns: 
+								stop position:
+									> on first 1 column(s).
+									Ordered null semantics on the following columns: 
 								qualifiers:
-None
+									None
 ij> select y1, y2, y3, y4 + 0 from av3 where y1 = y2;
 Y1         |Y2         |Y3         |4          
 -----------------------------------------------
@@ -1811,17 +1837,19 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0, 1}
 						Number of columns fetched=2
 						Number of pages visited=1
 						Number of rows qualified=8
 						Number of rows visited=8
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						qualifiers:
+							None
 				Right result set:
 					Hash Scan ResultSet for T1 at serializable isolation level using share table locking: 
 					Number of opens = 8
@@ -1841,16 +1869,18 @@ None
 						Number of rows qualified=8
 						Number of rows visited=8
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						scan qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						scan qualifiers:
+							None
 						next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+							Column[0][0] Id: 0
+							Operator: =
+							Ordered nulls: false
+							Unknown return value: false
+							Negate comparison result: false
 ij> select * from cv1 where c1 = 1;
 C1         |C2         
 -----------------------
@@ -1943,7 +1973,7 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of deleted rows visited=0
@@ -1952,14 +1982,14 @@ Source result set:
 						Number of rows visited=5
 						Scan type=btree
 						Tree height=1
-						start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-						stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+						start position:
+							>= on first 1 column(s).
+							Ordered null semantics on the following columns: 
+						stop position:
+							> on first 1 column(s).
+							Ordered null semantics on the following columns: 
 						qualifiers:
-None
+							None
 ij> -- cleanup
 drop view cv1;
 0 rows inserted/updated/deleted
@@ -2049,7 +2079,7 @@ Source result set:
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -2058,14 +2088,14 @@ Source result set:
 			Number of rows visited=0
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> select a from test.table2 where b=25;
 A          
 -----------
@@ -2117,7 +2147,7 @@ Source result set:
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -2126,14 +2156,14 @@ Source result set:
 			Number of rows visited=0
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- This select from a view based on the tables would use TableScan before DERBY-649
 select a from test.view0 where b=25;
 A          
@@ -2210,7 +2240,7 @@ Source result set:
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -2219,14 +2249,14 @@ Source result set:
 					Number of rows visited=0
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 		Right result set:
 			Index Row to Base Row ResultSet for TABLE2:
 			Number of opens = 1
@@ -2245,7 +2275,7 @@ None
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -2254,14 +2284,14 @@ None
 					Number of rows visited=0
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 ij> -- Can't use index for the following
 select a from test.view0 where b=25+a;
 A          
@@ -2330,17 +2360,19 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of pages visited=1
 				Number of rows qualified=0
 				Number of rows visited=0
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 		Right result set:
 			Table Scan ResultSet for TABLE2 at serializable isolation level using share table locking chosen by the optimizer
 			Number of opens = 1
@@ -2351,17 +2383,19 @@ None
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of pages visited=1
 				Number of rows qualified=0
 				Number of rows visited=0
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 ij> -- Inlist tests
 select * from test.view0 where b in (1, 2, 3);
 A          |B          
@@ -2425,7 +2459,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -2434,14 +2468,14 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 	Right result set:
 		Index Row to Base Row ResultSet for TABLE2:
 		Number of opens = 1
@@ -2460,7 +2494,7 @@ None
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -2469,14 +2503,14 @@ None
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> prepare s as 'select * from test.view0 where b in (?, ?, ?)';
 ij> execute s using 'values (1,2,3)';
 IJ WARNING: Autocommit may close using result set
@@ -2540,7 +2574,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -2549,14 +2583,14 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 	Right result set:
 		Index Row to Base Row ResultSet for TABLE2:
 		Number of opens = 1
@@ -2575,7 +2609,7 @@ None
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -2584,14 +2618,14 @@ None
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- This select should use index for first two selects, table scan for the third
 select a from test.view1 where b=25;
 A          
@@ -2670,17 +2704,19 @@ Source result set:
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0, 1}
 					Number of columns fetched=2
 					Number of pages visited=1
 					Number of rows qualified=0
 					Number of rows visited=0
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						None
 			Right result set:
 				Table Scan ResultSet for TABLE2 at serializable isolation level using share table locking chosen by the optimizer
 				Number of opens = 1
@@ -2691,17 +2727,19 @@ None
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0, 1}
 					Number of columns fetched=2
 					Number of pages visited=1
 					Number of rows qualified=0
 					Number of rows visited=0
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						None
 		Right result set:
 			Project-Restrict ResultSet (6):
 			Number of opens = 1
@@ -2725,7 +2763,7 @@ None
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={}
 					Number of columns fetched=0
 					Number of deleted rows visited=0
@@ -2734,12 +2772,12 @@ None
 					Number of rows visited=0
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 ij> select d from test.view2 where d=25;
 D          
 -----------
@@ -2819,17 +2857,19 @@ Source result set:
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0, 1}
 					Number of columns fetched=2
 					Number of pages visited=1
 					Number of rows qualified=0
 					Number of rows visited=0
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						None
 		Right result set:
 			Table Scan ResultSet for TABLE2 at serializable isolation level using share table locking chosen by the optimizer
 			Number of opens = 1
@@ -2840,17 +2880,19 @@ None
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of pages visited=1
 				Number of rows qualified=0
 				Number of rows visited=0
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 ij> CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
 0 rows inserted/updated/deleted
 ij> -- Beetle 4983, customer case, complex query involving views, wrong column remapping
@@ -6940,17 +6982,19 @@ Source result set:
 													next time (milliseconds) = 0
 													close time (milliseconds) = 0
 													next time in milliseconds/row = 0
-												scan information: 
+												scan information:
 													Bit set of columns fetched={0, 1, 2, 4, 5, 6, 7, 8}
 													Number of columns fetched=8
 													Number of pages visited=2
 													Number of rows qualified=16
 													Number of rows visited=16
 													Scan type=heap
-													start position: 
-null													stop position: 
-null													qualifiers:
-None
+													start position:
+														null
+													stop position:
+														null
+													qualifiers:
+														None
 											Right result set:
 												Project-Restrict ResultSet (13):
 												Number of opens = 16
@@ -6983,25 +7027,27 @@ None
 														Number of rows qualified=16
 														Number of rows visited=16
 														Scan type=heap
-														start position: 
-null														stop position: 
-null														scan qualifiers:
-Column[0][0] Id: 14
-Operator: =
-Ordered nulls: true
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 14
-Operator: =
-Ordered nulls: true
-Unknown return value: false
-Negate comparison result: false
+														start position:
+															null
+														stop position:
+															null
+														scan qualifiers:
+															Column[0][0] Id: 14
+															Operator: =
+															Ordered nulls: true
+															Unknown return value: false
+															Negate comparison result: false
+															Column[0][1] Id: 14
+															Operator: =
+															Ordered nulls: true
+															Unknown return value: false
+															Negate comparison result: false
 														next qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+															Column[0][0] Id: 1
+															Operator: =
+															Ordered nulls: false
+															Unknown return value: false
+															Negate comparison result: false
 										Right result set:
 											Hash Table ResultSet (18):
 											Number of opens = 0
@@ -7053,11 +7099,13 @@ Negate comparison result: false
 															open time (milliseconds) = 0
 															next time (milliseconds) = 0
 															close time (milliseconds) = 0
-														scan information: 
-															start position: 
-null															stop position: 
-null															qualifiers:
-None
+														scan information:
+															start position:
+																null
+															stop position:
+																null
+															qualifiers:
+																None
 													Right result set:
 														Hash Scan ResultSet for REPOSITORYOBJECTRESOURCE using constraint ROR_CURRENTVERSION at serializable isolation level using share table locking: 
 														Number of opens = 0
@@ -7070,18 +7118,18 @@ None
 															next time (milliseconds) = 0
 															close time (milliseconds) = 0
 														scan information: 
-															start position: 
-	None
-															stop position: 
-	None
+															start position:
+																None
+															stop position:
+																None
 															scan qualifiers:
-None
+																None
 															next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+																Column[0][0] Id: 0
+																Operator: =
+																Ordered nulls: false
+																Unknown return value: false
+																Negate comparison result: false
 									Right result set:
 										Hash Scan ResultSet for BUSINESSENTITY at serializable isolation level using share table locking: 
 										Number of opens = 0
@@ -7094,16 +7142,18 @@ Negate comparison result: false
 											next time (milliseconds) = 0
 											close time (milliseconds) = 0
 										scan information: 
-											start position: 
-null											stop position: 
-null											scan qualifiers:
-None
+											start position:
+												null
+											stop position:
+												null
+											scan qualifiers:
+												None
 											next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+												Column[0][0] Id: 0
+												Operator: =
+												Ordered nulls: false
+												Unknown return value: false
+												Negate comparison result: false
 								Right result set:
 									Hash Scan ResultSet for BUSINESSENTITY at serializable isolation level using share table locking: 
 									Number of opens = 0
@@ -7116,16 +7166,18 @@ Negate comparison result: false
 										next time (milliseconds) = 0
 										close time (milliseconds) = 0
 									scan information: 
-										start position: 
-null										stop position: 
-null										scan qualifiers:
-None
+										start position:
+											null
+										stop position:
+											null
+										scan qualifiers:
+											None
 										next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+											Column[0][0] Id: 0
+											Operator: =
+											Ordered nulls: false
+											Unknown return value: false
+											Negate comparison result: false
 							Right result set:
 								Hash Scan ResultSet for REPOSITORYENTRY at serializable isolation level using share table locking: 
 								Number of opens = 0
@@ -7138,16 +7190,18 @@ Negate comparison result: false
 									next time (milliseconds) = 0
 									close time (milliseconds) = 0
 								scan information: 
-									start position: 
-null									stop position: 
-null									scan qualifiers:
-None
+									start position:
+										null
+									stop position:
+										null
+									scan qualifiers:
+										None
 									next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+										Column[0][0] Id: 0
+										Operator: =
+										Ordered nulls: false
+										Unknown return value: false
+										Negate comparison result: false
 						Right result set:
 							Hash Scan ResultSet for REPOSITORYENTRYCONTENT at serializable isolation level using share table locking: 
 							Number of opens = 0
@@ -7160,16 +7214,18 @@ Negate comparison result: false
 								next time (milliseconds) = 0
 								close time (milliseconds) = 0
 							scan information: 
-								start position: 
-null								stop position: 
-null								scan qualifiers:
-None
+								start position:
+									null
+								stop position:
+									null
+								scan qualifiers:
+									None
 								next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+									Column[0][0] Id: 0
+									Operator: =
+									Ordered nulls: false
+									Unknown return value: false
+									Negate comparison result: false
 					Right result set:
 						Hash Table ResultSet (27):
 						Number of opens = 0
@@ -7221,13 +7277,13 @@ Negate comparison result: false
 										open time (milliseconds) = 0
 										next time (milliseconds) = 0
 										close time (milliseconds) = 0
-									scan information: 
-										start position: 
-	None
-										stop position: 
-	None
+									scan information:
+										start position:
+											None
+										stop position:
+											None
 										qualifiers:
-None
+											None
 								Right result set:
 									Hash Scan ResultSet for CLASSIFICATION_VALUES at serializable isolation level using share table locking: 
 									Number of opens = 0
@@ -7240,16 +7296,18 @@ None
 										next time (milliseconds) = 0
 										close time (milliseconds) = 0
 									scan information: 
-										start position: 
-null										stop position: 
-null										scan qualifiers:
-None
+										start position:
+											null
+										stop position:
+											null
+										scan qualifiers:
+											None
 										next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+											Column[0][0] Id: 0
+											Operator: =
+											Ordered nulls: false
+											Unknown return value: false
+											Negate comparison result: false
 				Right result set:
 					Hash Scan ResultSet for OBJECTASSOCIATION at serializable isolation level using share table locking: 
 					Number of opens = 0
@@ -7262,16 +7320,18 @@ Negate comparison result: false
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 					scan information: 
-						start position: 
-null						stop position: 
-null						scan qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						scan qualifiers:
+							None
 						next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+							Column[0][0] Id: 0
+							Operator: =
+							Ordered nulls: false
+							Unknown return value: false
+							Negate comparison result: false
 			Right result set:
 				Hash Scan ResultSet for CLASSIFICATIONSCHEME at serializable isolation level using share table locking: 
 				Number of opens = 0
@@ -7284,16 +7344,18 @@ Negate comparison result: false
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				scan information: 
-					start position: 
-null					stop position: 
-null					scan qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					scan qualifiers:
+						None
 					next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 		Right result set:
 			Project-Restrict ResultSet (31):
 			Number of opens = 0
@@ -7319,16 +7381,18 @@ Negate comparison result: false
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 				scan information: 
-					start position: 
-null					stop position: 
-null					scan qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					scan qualifiers:
+						None
 					next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 ij> rollback;
 ij> autocommit on;
 ij> CREATE TABLE D1 (A INT, B VARCHAR(4) FOR BIT DATA);

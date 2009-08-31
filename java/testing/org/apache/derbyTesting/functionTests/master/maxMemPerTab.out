@@ -45,17 +45,19 @@ Left result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of pages visited=3
 		Number of rows qualified=3
 		Number of rows visited=3
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 Right result set:
 	Table Scan ResultSet for TAB2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 	Number of opens = 3
@@ -67,21 +69,23 @@ Right result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of pages visited=3
 		Number of rows qualified=2
 		Number of rows visited=9
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			Column[0][0] Id: 1
+			Operator: =
+			Ordered nulls: false
+			Unknown return value: false
+			Negate comparison result: false
 #### Executing "select * from tab3, tab4 where tab3.c2 = tab4.c2"
 C1         |C2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -126,17 +130,19 @@ Left result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of pages visited=3
 		Number of rows qualified=3
 		Number of rows visited=3
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 Right result set:
 	Hash Scan ResultSet for TAB4 at read committed isolation level using instantaneous share row locking: 
 	Number of opens = 3
@@ -156,13 +162,15 @@ Right result set:
 		Number of rows qualified=3
 		Number of rows visited=3
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		scan qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		scan qualifiers:
+			None
 		next qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			Column[0][0] Id: 1
+			Operator: =
+			Ordered nulls: false
+			Unknown return value: false
+			Negate comparison result: false

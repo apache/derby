@@ -516,4 +516,131 @@ public class StringUtil
 
         return buffer.toString();
     }
+
+
+	/**
+	 * Utility for formatting which bends a multi-line string into shape for
+	 * outputting it in a context where there is <i>depth</i> tabs. Trailing
+	 * newlines are discarded as well.
+	 * <p>
+	 * Replace     "^[\t]*" with "depth" number of tabs.<br>
+	 * Replace     "\n+$" with "".
+	 * Replace all "\n[\t]*" with "\n" + "depth" number of tabs.<br>
+	 * </p>
+	 * @param formatted string to sanitize
+	 * @param depth indentation level the string is to be printed at (0,1,2..)
+	 */
+	public static String ensureIndent(String formatted, int depth) {
+		StringBuffer buf = new StringBuffer();
+		StringBuffer indent = new StringBuffer();
+
+		while (depth-- > 0) {
+			indent.append("\t");
+		}
+
+		if (formatted == null) {
+			return indent.toString() + "null";
+		}
+
+		/*
+		 * Sadly, we can't use java.util.regexp here since it's not supported
+		 * by Foundation 1.1
+		 */
+
+		formatted = doRegExpA(formatted, indent.toString());
+
+		formatted = doRegExpB(formatted);
+
+		formatted = doRegExpC(formatted, indent.toString());
+
+		return formatted;
+	}
+
+	/**
+	 * Reg.exp substitute:<br/>
+	 * <p/>
+	 * Pattern pat_a = Pattern.compile("\\A\\t*");<br/>
+	 * Matcher m_a = pat_a.matcher(src);<br/>
+	 * src = m_a.replaceFirst(indent.toString());<br/>
+	 *
+	 * @param src source string in which to substitute indent
+	 * @param indent indentation to lead source
+	 * @return new version of src after substitution
+	 *
+	 */
+	private static String doRegExpA(String src, String indent) {
+		StringBuffer result = new StringBuffer();
+		int idx = 0;
+
+		while (idx < src.length() && src.charAt(idx) == '\t') {
+			idx++;
+		}
+
+		result.append(indent);
+		result.append(src.substring(idx));
+		return result.toString();
+	}
+
+	/**
+	 * Reg.exp substitute:<br/>
+	 * <p/>
+	 * Pattern pat_b = Pattern.compile("\\n+\\Z");<br/>
+	 * Matcher m_b = pat_b.matcher(formatted);<br/>
+	 * formatted = m_b.replaceFirst("");<br/>
+	 *
+	 * @param src source string in which to substitute
+	 * @return new version of src after substitution
+	 *
+	 */
+	private static String doRegExpB(String src) {
+		StringBuffer result = new StringBuffer();
+		int idx = src.length() - 1;
+
+		while (idx >= 0 && src.charAt(idx) == '\n') {
+			idx--;
+		}
+
+		result.append(src.substring(0, idx + 1));
+		return result.toString();
+	}
+
+
+	/**
+	 * Reg.exp substitute:<br/>
+	 * <p/>
+	 * Pattern pat_c = Pattern.compile("\\n\\t*");<br/>
+	 * Matcher m_c = pat_c.matcher(formatted);<br/>
+	 * formatted = m_c.replaceAll("\n" + indent.toString());<br/>
+	 *
+	 * @param src source string in which to substitute indent
+	 * @param indent indentation to lead source
+	 * @return new version of src after substitution
+	 *
+	 */
+	private static String doRegExpC(String src, String indent) {
+
+		StringBuffer result = new StringBuffer();
+		int idx = 0;
+
+		while (idx < src.length()) {
+			char c = src.charAt(idx);
+
+			if (c == '\n') {
+				result.append(c);
+				int tabidx = idx + 1;
+
+				while (tabidx < src.length() && src.charAt(tabidx) == '\t') {
+					tabidx++;
+				}
+
+				result.append(indent);
+				idx = tabidx;
+			} else {
+				result.append(c);
+				idx++;
+			}
+		}
+		return result.toString();
+	}
 }
+

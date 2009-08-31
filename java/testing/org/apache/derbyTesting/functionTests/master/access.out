@@ -236,17 +236,19 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=5
 	Number of pages visited=1
 	Number of rows qualified=2
 	Number of rows visited=2
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> -- just last column - should be 5 and 50
 select e from foo;
 E          
@@ -282,17 +284,19 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={4}
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=2
 	Number of rows visited=2
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> -- as subset of columns - should be 5,3,1 and 50,30,10
 select e, c, a from foo;
 E          |C          |A          
@@ -341,17 +345,19 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={0, 2, 4}
 		Number of columns fetched=3
 		Number of pages visited=1
 		Number of rows qualified=2
 		Number of rows visited=2
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 ij> -- as subset of columns, with qualifier in list - should be 5,3,1 and 50,30,10
 select e, c, a from foo where foo.e = 5;
 E          |C          |A          
@@ -399,21 +405,23 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={0, 2, 4}
 		Number of columns fetched=3
 		Number of pages visited=1
 		Number of rows qualified=1
 		Number of rows visited=2
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-Column[0][0] Id: 4
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			Column[0][0] Id: 4
+			Operator: =
+			Ordered nulls: false
+			Unknown return value: false
+			Negate comparison result: false
 ij> -- as subset of columns, with qualifier not in list 
 --   - should be 5,3,1 and 50,30,10
 select e, c, a from foo where foo.b = 20;
@@ -463,21 +471,23 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={0, 1, 2, 4}
 		Number of columns fetched=4
 		Number of pages visited=1
 		Number of rows qualified=1
 		Number of rows visited=2
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			Column[0][0] Id: 1
+			Operator: =
+			Ordered nulls: false
+			Unknown return value: false
+			Negate comparison result: false
 ij> -- as subset of columns - should be 1,2 and 10,20
 select a, b from foo;
 A          |B          
@@ -513,17 +523,19 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0, 1}
 	Number of columns fetched=2
 	Number of pages visited=1
 	Number of rows qualified=2
 	Number of rows visited=2
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> -- now check index scans - force the index just to 
 -- make sure it does an index scan.
 create index foo_cover on foo (e, d, c, b, a);
@@ -576,7 +588,7 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={0, 1, 2, 3, 4}
 		Number of columns fetched=5
 		Number of deleted rows visited=0
@@ -585,12 +597,12 @@ Source result set:
 		Number of rows visited=2
 		Scan type=btree
 		Tree height=1
-		start position: 
-	None
-		stop position: 
-	None
+		start position:
+			None
+		stop position:
+			None
 		qualifiers:
-None
+			None
 ij> -- just last column - should be 5 and 50
 select e from foo;
 E          
@@ -626,7 +638,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -635,12 +647,12 @@ scan information:
 	Number of rows visited=2
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> -- as subset of columns - should be 5,3,1 and 50,30,10
 select e, c, a from foo;
 E          |C          |A          
@@ -702,7 +714,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 2, 4}
 			Number of columns fetched=3
 			Number of deleted rows visited=0
@@ -711,12 +723,12 @@ Source result set:
 			Number of rows visited=2
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-None
+				None
 ij> -- as subset of columns, with qualifier in list - should be 5,3,1 and 50, 30, 10
 select e, c, a from foo where foo.e = 5;
 E          |C          |A          
@@ -777,7 +789,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 2, 4}
 			Number of columns fetched=3
 			Number of deleted rows visited=0
@@ -786,14 +798,14 @@ Source result set:
 			Number of rows visited=2
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- as subset of columns, with qualifier not in list - should be 5,3,1 
 -- and 50, 30, 10
 select e, c, a from foo where foo.b = 20;
@@ -856,7 +868,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 2, 3, 4}
 			Number of columns fetched=4
 			Number of deleted rows visited=0
@@ -865,16 +877,16 @@ Source result set:
 			Number of rows visited=2
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-Column[0][0] Id: 3
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 3
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- as subset of columns - should be 1,2 and 10, 20
 select a, b from foo;
 A          |B          
@@ -923,7 +935,7 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={3, 4}
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -932,12 +944,12 @@ Source result set:
 		Number of rows visited=2
 		Scan type=btree
 		Tree height=1
-		start position: 
-	None
-		stop position: 
-	None
+		start position:
+			None
+		stop position:
+			None
 		qualifiers:
-None
+			None
 ij> -- check deleted row feature
 insert into foo values (100, 2, 3, 4, 5);
 1 row inserted/updated/deleted
@@ -997,7 +1009,7 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={0, 1, 2, 3, 4}
 		Number of columns fetched=5
 		Number of deleted rows visited=2
@@ -1006,12 +1018,12 @@ Source result set:
 		Number of rows visited=4
 		Scan type=btree
 		Tree height=1
-		start position: 
-	None
-		stop position: 
-	None
+		start position:
+			None
+		stop position:
+			None
 		qualifiers:
-None
+			None
 ij> -- just last column - should be 5 and 50
 select e from foo;
 E          
@@ -1047,7 +1059,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=2
@@ -1056,12 +1068,12 @@ scan information:
 	Number of rows visited=4
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> -- as subset of columns - should be 5,3,1 and 50,30,10
 select e, c, a from foo;
 E          |C          |A          
@@ -1123,7 +1135,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 2, 4}
 			Number of columns fetched=3
 			Number of deleted rows visited=2
@@ -1132,12 +1144,12 @@ Source result set:
 			Number of rows visited=4
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-None
+				None
 ij> -- as subset of columns, with qualifier in list - should be 5,3,1 and 50,30,10
 select e, c, a from foo where foo.e = 5;
 E          |C          |A          
@@ -1198,7 +1210,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 2, 4}
 			Number of columns fetched=3
 			Number of deleted rows visited=2
@@ -1207,14 +1219,14 @@ Source result set:
 			Number of rows visited=4
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- as subset of columns, with qualifier not in list 
 --   - should be 5,3,1 and 50,30,10
 select e, c, a from foo where foo.b = 20;
@@ -1277,7 +1289,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 2, 3, 4}
 			Number of columns fetched=4
 			Number of deleted rows visited=2
@@ -1286,16 +1298,16 @@ Source result set:
 			Number of rows visited=4
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-Column[0][0] Id: 3
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 3
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- as subset of columns - should be 1,2 and 10,20
 select a, b from foo;
 A          |B          
@@ -1344,7 +1356,7 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={3, 4}
 		Number of columns fetched=2
 		Number of deleted rows visited=2
@@ -1353,12 +1365,12 @@ Source result set:
 		Number of rows visited=4
 		Scan type=btree
 		Tree height=1
-		start position: 
-	None
-		stop position: 
-	None
+		start position:
+			None
+		stop position:
+			None
 		qualifiers:
-None
+			None
 ij> -- now check index scans - force the index just to 
 -- make sure it does an index scan.
 create index foo_cover on foo (e, d, c, b, a);
@@ -1412,7 +1424,7 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={0, 1, 2, 3, 4}
 		Number of columns fetched=5
 		Number of deleted rows visited=2
@@ -1421,12 +1433,12 @@ Source result set:
 		Number of rows visited=4
 		Scan type=btree
 		Tree height=1
-		start position: 
-	None
-		stop position: 
-	None
+		start position:
+			None
+		stop position:
+			None
 		qualifiers:
-None
+			None
 ij> -- just last column - should be 5 and 50
 select e from foo;
 E          
@@ -1462,7 +1474,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=2
@@ -1471,12 +1483,12 @@ scan information:
 	Number of rows visited=4
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> -- as subset of columns - should be 5,3,1 and 50,30,10
 select e, c, a from foo;
 E          |C          |A          
@@ -1538,7 +1550,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 2, 4}
 			Number of columns fetched=3
 			Number of deleted rows visited=2
@@ -1547,12 +1559,12 @@ Source result set:
 			Number of rows visited=4
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-None
+				None
 ij> -- as subset of columns, with qualifier in list - should be 5,3,1 and 50, 30, 10
 select e, c, a from foo where foo.e = 5;
 E          |C          |A          
@@ -1613,7 +1625,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 2, 4}
 			Number of columns fetched=3
 			Number of deleted rows visited=2
@@ -1622,14 +1634,14 @@ Source result set:
 			Number of rows visited=4
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- as subset of columns, with qualifier not in list - should be 5,3,1 
 -- and 50, 30, 10
 select e, c, a from foo where foo.b = 20;
@@ -1692,7 +1704,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 2, 3, 4}
 			Number of columns fetched=4
 			Number of deleted rows visited=2
@@ -1701,16 +1713,16 @@ Source result set:
 			Number of rows visited=4
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-Column[0][0] Id: 3
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 3
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- as subset of columns - should be 1,2 and 10, 20
 select a, b from foo;
 A          |B          
@@ -1759,7 +1771,7 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={3, 4}
 		Number of columns fetched=2
 		Number of deleted rows visited=2
@@ -1768,12 +1780,12 @@ Source result set:
 		Number of rows visited=4
 		Scan type=btree
 		Tree height=1
-		start position: 
-	None
-		stop position: 
-	None
+		start position:
+			None
+		stop position:
+			None
 		qualifiers:
-None
+			None
 ij> -- ----------------------------------------------------------------------------
 -- test case for costing - make sure optimizer picks obvious covered query.
 -- ----------------------------------------------------------------------------
@@ -1847,7 +1859,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -1856,12 +1868,12 @@ scan information:
 	Number of rows visited=10
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> -- ----------------------------------------------------------------------------
 -- test for key too big error message.
 -- ----------------------------------------------------------------------------
@@ -2251,17 +2263,19 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0, 3}
 	Number of columns fetched=2
 	Number of pages visited=6
 	Number of rows qualified=5
 	Number of rows visited=5
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> autocommit on;
 ij> -- test case for track 2241
 --    The problem was that when the level of btree grew, sometimes a long
@@ -2823,7 +2837,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -2832,14 +2846,14 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- update against table with 0 rows.
 update foo set b = 1 where a = 2;
 0 rows inserted/updated/deleted
@@ -2897,7 +2911,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -2906,14 +2920,14 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- select against table with 0 rows.
 select * from foo where a = 2;
 A          |B          
@@ -2954,7 +2968,7 @@ Columns accessed from heap = {1}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -2963,14 +2977,14 @@ Columns accessed from heap = {1}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
 		qualifiers:
-None
+			None
 ij> -- select against table with 0 rows.
 select a from foo where a = 2;
 A          
@@ -3003,7 +3017,7 @@ Fetch Size = 1
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -3012,14 +3026,14 @@ scan information:
 	Number of rows visited=0
 	Scan type=btree
 	Tree height=1
-	start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-	stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+	start position:
+		>= on first 1 column(s).
+		Ordered null semantics on the following columns: 
+	stop position:
+		> on first 1 column(s).
+		Ordered null semantics on the following columns: 
 	qualifiers:
-None
+		None
 ij> -- select against table with 0 rows.
 select a from foo where a = 2;
 A          
@@ -3052,7 +3066,7 @@ Fetch Size = 1
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -3061,14 +3075,14 @@ scan information:
 	Number of rows visited=0
 	Scan type=btree
 	Tree height=1
-	start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-	stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+	start position:
+		>= on first 1 column(s).
+		Ordered null semantics on the following columns: 
+	stop position:
+		> on first 1 column(s).
+		Ordered null semantics on the following columns: 
 	qualifiers:
-None
+		None
 ij> -- now insert one row and make sure still same plan.  Previous to 4595 
 -- 0 row plan was a table scan and it would not change when 1 row was inserted.
 insert into foo values (1, 1);
@@ -3131,7 +3145,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -3140,14 +3154,14 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- delete against table with 1 row.
 delete from foo where a = 1;
 1 row inserted/updated/deleted
@@ -3211,7 +3225,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -3220,14 +3234,14 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- try delete/update statement compiled against table with 1 row.
 drop table foo;
 0 rows inserted/updated/deleted
@@ -3295,7 +3309,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -3304,14 +3318,14 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- delete against table with 1 row.
 delete from foo where a = 1;
 1 row inserted/updated/deleted
@@ -3375,7 +3389,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -3384,14 +3398,14 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- repeat set of 4595 tests against table with primary key, vs. unique index - 
 -- there should be no difference in plan shape.
 -- try delete/update statement compiled against table with 0 rows
@@ -3461,7 +3475,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -3470,16 +3484,16 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
 				qualifiers:
-None
+					None
 ij> -- update against table with 0 rows.
 update foo set b = 1 where a = 2;
 0 rows inserted/updated/deleted
@@ -3537,7 +3551,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -3546,16 +3560,16 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
 				qualifiers:
-None
+					None
 ij> -- select against table with 0 rows.
 select * from foo where a = 2;
 A          |B          
@@ -3596,7 +3610,7 @@ Columns accessed from heap = {1}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -3605,16 +3619,16 @@ Columns accessed from heap = {1}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
 		qualifiers:
-None
+			None
 ij> -- select against table with 0 rows.
 select a from foo where a = 2;
 A          
@@ -3647,7 +3661,7 @@ Fetch Size = 1
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -3656,16 +3670,16 @@ scan information:
 	Number of rows visited=0
 	Scan type=btree
 	Tree height=1
-	start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-	stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+	start position:
+		>= on first 1 column(s).
+		Ordered null semantics on the following columns: 
+		0 
+	stop position:
+		> on first 1 column(s).
+		Ordered null semantics on the following columns: 
+		0 
 	qualifiers:
-None
+		None
 ij> -- select against table with 0 rows.
 select a from foo where a = 2;
 A          
@@ -3698,7 +3712,7 @@ Fetch Size = 1
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -3707,16 +3721,16 @@ scan information:
 	Number of rows visited=0
 	Scan type=btree
 	Tree height=1
-	start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-	stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+	start position:
+		>= on first 1 column(s).
+		Ordered null semantics on the following columns: 
+		0 
+	stop position:
+		> on first 1 column(s).
+		Ordered null semantics on the following columns: 
+		0 
 	qualifiers:
-None
+		None
 ij> -- now insert one row and make sure still same plan.  Previous to 4595 
 -- 0 row plan was a table scan and it would not change when 1 row was inserted.
 insert into foo values (1, 1);
@@ -3779,7 +3793,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -3788,16 +3802,16 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
 				qualifiers:
-None
+					None
 ij> -- delete against table with 1 row.
 delete from foo where a = 1;
 1 row inserted/updated/deleted
@@ -3861,7 +3875,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -3870,16 +3884,16 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
 				qualifiers:
-None
+					None
 ij> -- try delete/update statement compiled against table with 1 row.
 drop table foo;
 0 rows inserted/updated/deleted
@@ -3945,7 +3959,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -3954,16 +3968,16 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
 				qualifiers:
-None
+					None
 ij> -- delete against table with 1 row.
 delete from foo where a = 1;
 1 row inserted/updated/deleted
@@ -4027,7 +4041,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -4036,16 +4050,16 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
 				qualifiers:
-None
+					None
 ij> -- select against table with 1 row.
 select * from foo where a = 2;
 A          |B          
@@ -4086,7 +4100,7 @@ Columns accessed from heap = {1}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -4095,16 +4109,16 @@ Columns accessed from heap = {1}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
 		qualifiers:
-None
+			None
 ij> -- select against table with 1 row.
 select a from foo where a = 2;
 A          
@@ -4137,7 +4151,7 @@ Fetch Size = 1
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -4146,16 +4160,16 @@ scan information:
 	Number of rows visited=0
 	Scan type=btree
 	Tree height=1
-	start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-	stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+	start position:
+		>= on first 1 column(s).
+		Ordered null semantics on the following columns: 
+		0 
+	stop position:
+		> on first 1 column(s).
+		Ordered null semantics on the following columns: 
+		0 
 	qualifiers:
-None
+		None
 ij> -- select against table with 1 row.
 select a from foo where a = 2;
 A          
@@ -4188,7 +4202,7 @@ Fetch Size = 1
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -4197,16 +4211,16 @@ scan information:
 	Number of rows visited=0
 	Scan type=btree
 	Tree height=1
-	start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-	stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+	start position:
+		>= on first 1 column(s).
+		Ordered null semantics on the following columns: 
+		0 
+	stop position:
+		> on first 1 column(s).
+		Ordered null semantics on the following columns: 
+		0 
 	qualifiers:
-None
+		None
 ij> -- repeat set of 4595 tests against table with non-unique index with no
 -- statistics.
 -- there should be no difference in plan shape.
@@ -4279,7 +4293,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -4288,14 +4302,14 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- update against table with 0 rows.
 update foo set b = 1 where a = 2;
 0 rows inserted/updated/deleted
@@ -4353,7 +4367,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -4362,14 +4376,14 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- select against table with 0 rows.
 select * from foo where a = 2;
 A          |B          
@@ -4410,7 +4424,7 @@ Columns accessed from heap = {0, 1}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -4419,14 +4433,14 @@ Columns accessed from heap = {0, 1}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
 		qualifiers:
-None
+			None
 ij> -- select against table with 0 rows.
 select a from foo where a = 2;
 A          
@@ -4459,7 +4473,7 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -4468,14 +4482,14 @@ scan information:
 	Number of rows visited=0
 	Scan type=btree
 	Tree height=1
-	start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-	stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+	start position:
+		>= on first 1 column(s).
+		Ordered null semantics on the following columns: 
+	stop position:
+		> on first 1 column(s).
+		Ordered null semantics on the following columns: 
 	qualifiers:
-None
+		None
 ij> -- select against table with 0 rows.
 select a from foo where a = 2;
 A          
@@ -4508,7 +4522,7 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -4517,14 +4531,14 @@ scan information:
 	Number of rows visited=0
 	Scan type=btree
 	Tree height=1
-	start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-	stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+	start position:
+		>= on first 1 column(s).
+		Ordered null semantics on the following columns: 
+	stop position:
+		> on first 1 column(s).
+		Ordered null semantics on the following columns: 
 	qualifiers:
-None
+		None
 ij> -- now insert one row and make sure still same plan.  Previous to 4595 
 -- 0 row plan was a table scan and it would not change when 1 row was inserted.
 insert into foo values (1, 1);
@@ -4587,7 +4601,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -4596,14 +4610,14 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- delete against table with 1 row.
 delete from foo where a = 1;
 1 row inserted/updated/deleted
@@ -4667,7 +4681,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -4676,14 +4690,14 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- try delete/update statement compiled against table with 1 row.
 drop table foo;
 0 rows inserted/updated/deleted
@@ -4751,7 +4765,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -4760,14 +4774,14 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- delete against table with 1 row.
 delete from foo where a = 1;
 1 row inserted/updated/deleted
@@ -4831,7 +4845,7 @@ Execute Time = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -4840,14 +4854,14 @@ Execute Time = 0
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- select against table with 1 row.
 select * from foo where a = 2;
 A          |B          
@@ -4888,7 +4902,7 @@ Columns accessed from heap = {0, 1}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -4897,14 +4911,14 @@ Columns accessed from heap = {0, 1}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
 		qualifiers:
-None
+			None
 ij> -- select against table with 1 row.
 select a from foo where a = 2;
 A          
@@ -4937,7 +4951,7 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -4946,14 +4960,14 @@ scan information:
 	Number of rows visited=0
 	Scan type=btree
 	Tree height=1
-	start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-	stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+	start position:
+		>= on first 1 column(s).
+		Ordered null semantics on the following columns: 
+	stop position:
+		> on first 1 column(s).
+		Ordered null semantics on the following columns: 
 	qualifiers:
-None
+		None
 ij> -- select against table with 1 row.
 select a from foo where a = 2;
 A          
@@ -4986,7 +5000,7 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -4995,14 +5009,14 @@ scan information:
 	Number of rows visited=0
 	Scan type=btree
 	Tree height=1
-	start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-	stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+	start position:
+		>= on first 1 column(s).
+		Ordered null semantics on the following columns: 
+	stop position:
+		> on first 1 column(s).
+		Ordered null semantics on the following columns: 
 	qualifiers:
-None
+		None
 ij> ------------------------------------------------------------------------
 -- simple regression test for qualifier work.
 ------------------------------------------------------------------------

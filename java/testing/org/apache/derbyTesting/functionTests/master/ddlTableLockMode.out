@@ -91,17 +91,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from row1;
 C1         
 -----------
@@ -132,17 +134,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from table1;
 C1         
 -----------
@@ -173,17 +177,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> -- scans for all updates should be row locked except for table1
 update default1 set c1 = 1;
 0 rows inserted/updated/deleted
@@ -233,17 +239,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update default1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -291,21 +299,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> update row1 set c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -353,17 +363,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update row1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -411,21 +423,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> update table1 set c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -473,17 +487,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update table1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -531,21 +547,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- all inserts should be row locked except for table1
 insert into default1 values 1;
 1 row inserted/updated/deleted
@@ -697,17 +715,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from default1 where c1 = 1;
@@ -757,21 +777,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from row1;
@@ -822,17 +844,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from row1 where c1 = 1;
@@ -882,21 +906,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from table1;
@@ -947,17 +973,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from table1 where c1 = 1;
@@ -1007,21 +1035,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> -- REPEATABLE READ tests
@@ -1077,17 +1107,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from row1;
 C1         
 -----------
@@ -1118,17 +1150,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from table1;
 C1         
 -----------
@@ -1159,17 +1193,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> -- scans for all updates should be row locked except for table1
 update default1 set c1 = 1;
 0 rows inserted/updated/deleted
@@ -1219,17 +1255,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update default1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -1277,21 +1315,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> update row1 set c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -1339,17 +1379,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update row1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -1397,21 +1439,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> update table1 set c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -1459,17 +1503,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update table1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -1517,21 +1563,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- all inserts should be row locked except for table1
 insert into default1 values 1;
 1 row inserted/updated/deleted
@@ -1683,17 +1731,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from default1 where c1 = 1;
@@ -1743,21 +1793,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from row1;
@@ -1808,17 +1860,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from row1 where c1 = 1;
@@ -1868,21 +1922,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from table1;
@@ -1933,17 +1989,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from table1 where c1 = 1;
@@ -1993,21 +2051,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> -- alter table
@@ -2093,17 +2153,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from row1;
 C1         
 -----------
@@ -2134,17 +2196,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from table1;
 C1         
 -----------
@@ -2175,17 +2239,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> -- scans for all updates should be row locked except for table1
 update default1 set c1 = 1;
 0 rows inserted/updated/deleted
@@ -2235,17 +2301,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update default1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -2293,21 +2361,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> update row1 set c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -2355,17 +2425,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update row1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -2413,21 +2485,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> update table1 set c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -2475,17 +2549,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update table1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -2533,21 +2609,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- all inserts should be row locked except for table1
 insert into default1 values 1;
 1 row inserted/updated/deleted
@@ -2699,17 +2777,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from default1 where c1 = 1;
@@ -2759,21 +2839,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from row1;
@@ -2824,17 +2906,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from row1 where c1 = 1;
@@ -2884,21 +2968,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from table1;
@@ -2949,17 +3035,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from table1 where c1 = 1;
@@ -3009,21 +3097,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> -- alter table
@@ -3109,17 +3199,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from row1;
 C1         
 -----------
@@ -3150,17 +3242,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from table1;
 C1         
 -----------
@@ -3191,17 +3285,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> -- scans for all updates should be table locked
 -- (No indexes, so will always do table scan)
 update default1 set c1 = 1;
@@ -3253,17 +3349,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update default1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -3311,21 +3409,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> update row1 set c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -3373,17 +3473,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update row1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -3431,21 +3533,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> update table1 set c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -3493,17 +3597,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update table1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -3551,21 +3657,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- all inserts should be row locked except for table1
 insert into default1 values 1;
 1 row inserted/updated/deleted
@@ -3719,17 +3827,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from default1 where c1 = 1;
@@ -3779,21 +3889,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from row1;
@@ -3844,17 +3956,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from row1 where c1 = 1;
@@ -3904,21 +4018,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from table1;
@@ -3969,17 +4085,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from table1 where c1 = 1;
@@ -4029,21 +4147,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> -- alter table
@@ -4111,17 +4231,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from row1;
 C1         
 -----------
@@ -4152,17 +4274,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from table1;
 C1         
 -----------
@@ -4193,17 +4317,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> -- verify lock granularity changed for updates
 update default1 set c1 = 1;
 0 rows inserted/updated/deleted
@@ -4253,17 +4379,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update default1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -4311,21 +4439,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> update row1 set c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -4373,17 +4503,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update row1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -4431,21 +4563,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> update table1 set c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -4493,17 +4627,19 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> update table1 set c1 = 1 where c1 = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -4551,21 +4687,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- verify lock granularity changed for inserts
 insert into default1 values 1;
 1 row inserted/updated/deleted
@@ -4717,17 +4855,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from default1 where c1 = 1;
@@ -4777,21 +4917,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from row1;
@@ -4842,17 +4984,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from row1 where c1 = 1;
@@ -4902,21 +5046,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from table1;
@@ -4967,17 +5113,19 @@ Execute Time = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={}
 			Number of columns fetched=0
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=1
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> delete from table1 where c1 = 1;
@@ -5027,21 +5175,23 @@ Execute Time = 0
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=0
 			Number of rows visited=0
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> CALL WAIT_FOR_POST_COMMIT();
 0 rows inserted/updated/deleted
 ij> -- bug 3819; delete from table would first

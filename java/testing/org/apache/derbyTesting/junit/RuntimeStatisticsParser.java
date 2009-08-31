@@ -121,19 +121,31 @@ public class RuntimeStatisticsParser {
             // start search after "qualifiers:\n"
             String searchString = statistics.substring(startPos + 12);
             StringTokenizer t = new StringTokenizer(searchString, "\n");
+
             while (t.hasMoreTokens()) {
                 String s = t.nextToken();
-                if (s.startsWith("Operator: ")) {
-                    String operator = s.substring(10);
+                StringTokenizer t2 = new StringTokenizer(s, "\t ");
+
+                if (t2.nextToken().equals("Operator:")) {
+                    String operator = t2.nextToken();
+
                     t.nextToken();  // skip "Ordered nulls: ..."
                     t.nextToken();  // skip "Unknown return value: ..."
                     s = t.nextToken();
-                    if (!s.startsWith("Negate comparison result: ")) {
+
+                    t2 = new StringTokenizer(s, "\t ");
+                    String neg = t2.nextToken();
+
+                    if (!neg.equals("Negate")) {
                         throw new AssertionError(
-                            "Expected to find \"Negate comparison result\"");
+                            "Expected to find \"Negate comparison result\", " +
+                            "found: " + neg);
                     }
+                    t2.nextToken(); // skip "comparison"
+                    t2.nextToken(); // skip "result:"
+
                     boolean negated =
-                        Boolean.valueOf(s.substring(26)).booleanValue();
+                        Boolean.valueOf(t2.nextToken()).booleanValue();
                     set.add(new Qualifier(operator, negated));
                 }
             }

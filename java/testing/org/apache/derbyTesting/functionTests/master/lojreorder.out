@@ -884,17 +884,19 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=3
 					Number of pages visited=1
 					Number of rows qualified=6
 					Number of rows visited=6
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						None
 			Right result set:
 				Hash Scan ResultSet for TNL1_1 at read committed isolation level using instantaneous share row locking: 
 				Number of opens = 6
@@ -914,16 +916,18 @@ None
 					Number of rows qualified=6
 					Number of rows visited=6
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					scan qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					scan qualifiers:
+						None
 					next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 		Right result set:
 			Hash Scan ResultSet for TNL1_1_1 at read committed isolation level using instantaneous share row locking: 
 			Number of opens = 6
@@ -942,16 +946,18 @@ Negate comparison result: false
 				Number of rows qualified=6
 				Number of rows visited=6
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				scan qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				scan qualifiers:
+					None
 				next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 	Right result set:
 		Hash Scan ResultSet for TNL1_2 at read committed isolation level using instantaneous share row locking: 
 		Number of opens = 6
@@ -971,16 +977,18 @@ Negate comparison result: false
 			Number of rows qualified=6
 			Number of rows visited=6
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			scan qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			scan qualifiers:
+				None
 			next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> SELECT * FROM TNL1 A LEFT OUTER JOIN (TNL1_1 B LEFT OUTER JOIN TNL1_1_1 C ON B.ID2=C.ID) ON A.ID=B.ID LEFT OUTER JOIN TNL1_2 D ON A.ID=D.ID ORDER BY 1;
 ID         |COL_CHAR            |COL_DECIMAL   |ID         |COL_CHAR            |COL_DECIMAL   |ID2        |ID         |COL_CHAR            |COL_DECIMAL   |ID         |COL_CHAR            |COL_DECIMAL   
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1068,17 +1076,19 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=3
 					Number of pages visited=1
 					Number of rows qualified=6
 					Number of rows visited=6
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						None
 			Right result set:
 				Hash Scan ResultSet for TNL1_1 at read committed isolation level using instantaneous share row locking: 
 				Number of opens = 6
@@ -1098,16 +1108,18 @@ None
 					Number of rows qualified=6
 					Number of rows visited=6
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					scan qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					scan qualifiers:
+						None
 					next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 		Right result set:
 			Hash Scan ResultSet for TNL1_1_1 at read committed isolation level using instantaneous share row locking: 
 			Number of opens = 6
@@ -1126,16 +1138,18 @@ Negate comparison result: false
 				Number of rows qualified=6
 				Number of rows visited=6
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				scan qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				scan qualifiers:
+					None
 				next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 	Right result set:
 		Hash Scan ResultSet for TNL1_2 at read committed isolation level using instantaneous share row locking: 
 		Number of opens = 6
@@ -1155,16 +1169,18 @@ Negate comparison result: false
 			Number of rows qualified=6
 			Number of rows visited=6
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			scan qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			scan qualifiers:
+				None
 			next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
 0 rows inserted/updated/deleted
 ij> DROP TABLE TNL1;

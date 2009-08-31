@@ -674,7 +674,7 @@ ij> insert into tt3 values (1, 2, 3), (2, 3, 4), (3, 4, 5);
 3 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1);
 0 rows inserted/updated/deleted
-ij> maximumdisplaywidth 4500;
+ij> maximumdisplaywidth 10000;
 ij> -- no xform, predicate on outer table
 select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 where tt1.c1 = 3;
 C1         |C2         |C3         |C1         |C2         |C3         
@@ -725,21 +725,23 @@ Left result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=3
 		Number of pages visited=1
 		Number of rows qualified=1
 		Number of rows visited=8
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			Column[0][0] Id: 0
+			Operator: =
+			Ordered nulls: false
+			Unknown return value: false
+			Negate comparison result: false
 Right result set:
 	Table Scan ResultSet for TT2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 	Number of opens = 1
@@ -751,21 +753,23 @@ Right result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=3
 		Number of pages visited=1
 		Number of rows qualified=1
 		Number of rows visited=8
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			Column[0][0] Id: 1
+			Operator: =
+			Ordered nulls: false
+			Unknown return value: false
+			Negate comparison result: false
 ij> select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 where tt2.c1 + 1= tt2.c2;
 C1         |C2         |C3         |C1         |C2         |C3         
 -----------------------------------------------------------------------
@@ -836,17 +840,19 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=3
 				Number of pages visited=1
 				Number of rows qualified=3
 				Number of rows visited=8
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 	Right result set:
 		Table Scan ResultSet for TT1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 		Number of opens = 3
@@ -858,21 +864,23 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=24
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 where tt2.c1 + 1= 3;
 C1         |C2         |C3         |C1         |C2         |C3         
 -----------------------------------------------------------------------
@@ -942,17 +950,19 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=3
 				Number of pages visited=1
 				Number of rows qualified=3
 				Number of rows visited=8
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 	Right result set:
 		Table Scan ResultSet for TT1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 		Number of opens = 1
@@ -964,21 +974,23 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=8
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> select * from tt2 right outer join tt1 on tt1.c1 = tt2.c2 where tt2.c1 + 1= 3;
 C1         |C2         |C3         |C1         |C2         |C3         
 -----------------------------------------------------------------------
@@ -1035,17 +1047,19 @@ Left result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=3
 			Number of rows visited=8
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 Right result set:
 	Table Scan ResultSet for TT1 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 	Number of opens = 1
@@ -1057,21 +1071,23 @@ Right result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=3
 		Number of pages visited=1
 		Number of rows qualified=1
 		Number of rows visited=8
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			Column[0][0] Id: 0
+			Operator: =
+			Ordered nulls: false
+			Unknown return value: false
+			Negate comparison result: false
 ij> select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 left outer join tt3 on tt2.c2 = tt3.c3 where tt3.c3 = 3;
 C1         |C2         |C3         |C1         |C2         |C3         |C1         |C2         |C3         
 -----------------------------------------------------------------------------------------------------------
@@ -1128,21 +1144,23 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=8
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 2
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 2
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 	Right result set:
 		Project-Restrict ResultSet (6):
 		Number of opens = 1
@@ -1179,17 +1197,19 @@ Negate comparison result: false
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=3
 					Number of pages visited=1
 					Number of rows qualified=3
 					Number of rows visited=8
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						None
 			Right result set:
 				Hash Scan ResultSet for TT2 at read committed isolation level using instantaneous share row locking: 
 				Number of opens = 3
@@ -1209,10 +1229,18 @@ None
 					Number of rows qualified=3
 					Number of rows visited=8
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					scan qualifiers:
-Non&
+					start position:
+						null
+					stop position:
+						null
+					scan qualifiers:
+						None
+					next qualifiers:
+						Column[0][0] Id: 1
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 ij> select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 left outer join tt3 on tt2.c2 = tt3.c3 where tt2.c2 = 3;
 C1         |C2         |C3         |C1         |C2         |C3         |C1         |C2         |C3         
 -----------------------------------------------------------------------------------------------------------
@@ -1268,17 +1296,19 @@ Left result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=3
 			Number of rows visited=8
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Hash Scan ResultSet for TT2 at read committed isolation level using instantaneous share row locking: 
 		Number of opens = 3
@@ -1298,20 +1328,22 @@ None
 			Number of rows qualified=1
 			Number of rows visited=8
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			scan qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			scan qualifiers:
+				Column[0][0] Id: 1
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 			next qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 1
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 Right result set:
 	Table Scan ResultSet for TT3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 	Number of opens = 1
@@ -1323,21 +1355,23 @@ Right result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=3
 		Number of pages visited=1
 		Number of rows qualified=1
 		Number of rows visited=8
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-Column[0][0] Id: 2
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			Column[0][0] Id: 2
+			Operator: =
+			Ordered nulls: false
+			Unknown return value: false
+			Negate comparison result: false
 ij> -- make sure predicates are null tolerant 
 select * from tt1 left outer join tt2 on tt1.c1 = tt2.c2 
 where char(tt2.c2) is null;
@@ -1400,17 +1434,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=3
 			Number of rows visited=8
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Hash Scan ResultSet for TT2 at read committed isolation level using instantaneous share row locking: 
 		Number of opens = 3
@@ -1430,16 +1466,18 @@ None
 			Number of rows qualified=3
 			Number of rows visited=8
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			scan qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			scan qualifiers:
+				None
 			next qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 1
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> commit;
 ij> -- bug 2924, cross join under an outer join
 CREATE TABLE inventory(itemno INT NOT NULL PRIMARY KEY, capacity INT);
@@ -1772,17 +1810,19 @@ Left result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Project-Restrict ResultSet (5):
 		Number of opens = 5
@@ -1815,16 +1855,18 @@ None
 				Number of rows qualified=5
 				Number of rows visited=5
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				scan qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				scan qualifiers:
+					None
 				next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 Right result set:
 	Table Scan ResultSet for T3 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 	Number of opens = 3
@@ -1836,21 +1878,23 @@ Right result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=1
 		Number of pages visited=1
 		Number of rows qualified=2
 		Number of rows visited=15
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			Column[0][0] Id: 0
+			Operator: =
+			Ordered nulls: false
+			Unknown return value: false
+			Negate comparison result: false
 ij> -- Test fix for bug 5659
 create table xxx (a int not null);
 0 rows inserted/updated/deleted

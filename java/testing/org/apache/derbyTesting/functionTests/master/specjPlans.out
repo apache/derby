@@ -109,7 +109,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -118,14 +118,14 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- In the following statement, optimizer thinks we have a non-covering index (referenced columns are
 -- c1 and c2), make sure we are still using unique index (I12), not table scan, not I11.
 update t1 set c2 = 1 where c1 = 1;
@@ -185,7 +185,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -194,14 +194,14 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- The following select should use TABLE SCAN, no predicate at all, and index not covering, no reason
 -- to use index!!!
 select * from t1;
@@ -236,17 +236,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=2
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> -- This one should use index, since it is covered, really doesn't matter which one, since no predicate,
 -- It will choose the first one -- I11.
 select c1 from t1;
@@ -281,7 +283,7 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0}
 	Number of columns fetched=1
 	Number of deleted rows visited=0
@@ -290,12 +292,12 @@ scan information:
 	Number of rows visited=0
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> drop table t1;
 0 rows inserted/updated/deleted
 ij> -- end of something light...
@@ -704,7 +706,7 @@ Source result set:
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -713,14 +715,14 @@ Source result set:
 			Number of rows visited=0
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- MAKE SURE THE FOLLOWING USE TABLE SCAN, NO REASON TO USE INDEX AT ALL, NOT USEFUL PREDICATES!!! 
  SELECT COUNT (*) FROM O_orders WHERE o_entry_date >= '01/10/2003' AND o_entry_date <= '01/09/2003' ;
 1          
@@ -789,26 +791,28 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={6}
 				Number of columns fetched=1
 				Number of pages visited=1
 				Number of rows qualified=0
 				Number of rows visited=0
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-Column[0][0] Id: 6
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
-Column[0][1] Id: 6
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					Column[0][0] Id: 6
+					Operator: <
+					Ordered nulls: false
+					Unknown return value: true
+					Negate comparison result: true
+					Column[0][1] Id: 6
+					Operator: <=
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 ij> SELECT T1.WO_NUMBER, T1.WO_O_ID, T1.WO_OL_ID, T1.WO_STATUS, T1.WO_ORIG_QTY, T1.WO_COMP_QTY, T1.WO_ASSEMBLY_ID, 
  T1.WO_DUE_DATE, T1.WO_START_DATE FROM M_WORKORDER  T1 WHERE T1.WO_NUMBER = 1 FOR UPDATE;
 WO_NUMBER  |WO_O_ID    |WO_OL_ID   |WO_STATUS  |WO_ORIG_QTY|WO_COMP_QTY|WO_ASSEMBLY_ID |WO_DUE_DA&|WO_START_DATE             
@@ -862,7 +866,7 @@ Source result set:
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -871,16 +875,16 @@ Source result set:
 			Number of rows visited=0
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
 			qualifiers:
-None
+				None
 ij> -- MAKE SURE THE FOLLOWING USE TABLE SCAN, NO REASON TO USE INDEX AT ALL, NOT USEFUL PREDICATES!!! 
  SELECT T1.LO_ID, T1.LO_O_ID, T1.LO_OL_ID, T1.LO_ASSEMBLY_ID, T1.LO_QTY, T1.LO_DUE_DATE FROM M_LARGEORDER  T1 WHERE 1=1;
 LO_ID      |LO_O_ID    |LO_OL_ID   |LO_ASSEMBLY_ID |LO_QTY     |LO_DUE_DA&
@@ -926,17 +930,19 @@ Source result set:
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=6
 		Number of pages visited=1
 		Number of rows qualified=0
 		Number of rows visited=0
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 ij> UPDATE M_INVENTORY  SET IN_QTY = 1, IN_LOCATION = 'sanfrancisco', IN_ACC_CODE = 1, IN_ACT_DATE = '01/01/2003', IN_ORDERED = 1 WHERE IN_P_ID = 'abcdefghijklm';
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -1000,7 +1006,7 @@ Execute Time = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -1009,16 +1015,16 @@ Execute Time = 0
 					Number of rows visited=0
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+						0 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
+						0 
 					qualifiers:
-None
+						None
 ij> SELECT COUNT (*) FROM S_component;
 1          
 -----------
@@ -1085,7 +1091,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -1094,12 +1100,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT T1.R_ID, T1.R_TEXT FROM C_RULE  T1 WHERE T1.R_ID = 'abcdefghijlkmijklmnopqrstuvwxyz';
 R_ID                |R_TEXT                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1138,7 +1144,7 @@ Columns accessed from heap = {1}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -1147,16 +1153,16 @@ Columns accessed from heap = {1}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
 		qualifiers:
-None
+			None
 ij> SELECT COUNT (*) FROM C_site;
 1          
 -----------
@@ -1223,7 +1229,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -1232,12 +1238,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT T1.IN_P_ID, T1.IN_QTY, T1.IN_LOCATION, T1.IN_ACC_CODE, T1.IN_ACT_DATE, T1.IN_ORDERED FROM M_INVENTORY  T1 WHERE T1.IN_P_ID = 'abcdefghijkl' FOR UPDATE;
 IN_P_ID        |IN_QTY     |IN_LOCATION         |IN_ACC_CODE|IN_ACT_DA&|IN_ORDERED 
 -----------------------------------------------------------------------------------
@@ -1289,7 +1295,7 @@ Source result set:
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -1298,16 +1304,16 @@ Source result set:
 			Number of rows visited=0
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
 			qualifiers:
-None
+				None
 ij> SELECT T1.OL_SHIP_DATE, T1.OL_QTY, T1.OL_I_ID, T1.OL_O_ID, T1.OL_ID FROM O_ORDERLINE  T1 WHERE ol_o_id = 1 FOR UPDATE ;
 OL_SHIP_D&|OL_QTY     |OL_I_ID        |OL_O_ID    |OL_ID      
 --------------------------------------------------------------
@@ -1372,7 +1378,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=3
 				Number of deleted rows visited=0
@@ -1381,16 +1387,16 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
 				qualifiers:
-None
+					None
 ij> DELETE FROM M_LARGEORDER  WHERE LO_ID = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -1446,7 +1452,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -1455,16 +1461,16 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
 				qualifiers:
-None
+					None
 ij> -- MAKE SURE THE FOLLOWING USE TABLE SCAN, NO REASON TO USE INDEX AT ALL, NOT USEFUL PREDICATES!!! 
  SELECT COUNT (*) FROM M_workorder WHERE wo_start_date >= '01/10/2003' AND wo_start_date <= '01/10/2003';
 1          
@@ -1533,26 +1539,28 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={8}
 				Number of columns fetched=1
 				Number of pages visited=1
 				Number of rows qualified=0
 				Number of rows visited=0
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-Column[0][0] Id: 8
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 8
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					Column[0][0] Id: 8
+					Operator: <=
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
+					Column[0][1] Id: 8
+					Operator: <
+					Ordered nulls: false
+					Unknown return value: true
+					Negate comparison result: true
 ij> SELECT T1.I_DISCOUNT, T1.I_DESC, T1.I_NAME, T1.I_PRICE, T1.I_ID FROM O_ITEM  T1 WHERE T1.I_ID = 'abcdefghijk';
 I_DISCO&|I_DESC                                                                                              |I_NAME              |I_PRICE    |I_ID           
 --------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1604,7 +1612,7 @@ Source result set:
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -1613,16 +1621,16 @@ Source result set:
 			Number of rows visited=0
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
 			qualifiers:
-None
+				None
 ij> SELECT T1.P_ID, T1.P_NAME, T1.P_DESC, T1.P_REV, T1.P_PLANNER, T1.P_TYPE, T1.P_IND, T1.P_LOMARK, T1.P_HIMARK FROM M_PARTS  T1 WHERE T1.P_ID = 'abcdefghijl';
 P_ID           |P_NAME    |P_DESC                                                                                              |P_REV |P_PLANNER  |P_TYPE     |P_IND      |P_LOMARK   |P_HIMARK   
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1661,7 +1669,7 @@ Columns accessed from heap = {1, 2, 3, 4, 5, 6, 7, 8}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -1670,16 +1678,16 @@ Columns accessed from heap = {1, 2, 3, 4, 5, 6, 7, 8}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
 		qualifiers:
-None
+			None
 ij> SELECT COUNT (*) FROM S_purchase_orderline;
 1          
 -----------
@@ -1746,7 +1754,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -1755,12 +1763,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT T1.S_ID, T1.S_NEXTNUM, T1.S_BLOCKSIZE FROM U_SEQUENCES  T1 WHERE T1.S_ID = 'abcdefghijklmnopqrstuvwxyz' FOR UPDATE;
 S_ID                                              |S_NEXTNUM  |S_BLOCKSIZE
 --------------------------------------------------------------------------
@@ -1799,7 +1807,7 @@ Columns accessed from heap = {0, 1, 2}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -1808,16 +1816,16 @@ Columns accessed from heap = {0, 1, 2}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
 		qualifiers:
-None
+			None
 ij> SELECT T1.SC_P_ID, T1.SC_SUPP_ID, T1.SC_PRICE, T1.SC_QTY, T1.SC_DISCOUNT, T1.SC_DEL_DATE FROM S_SUPP_COMPONENT  T1 WHERE T1.SC_P_ID = 'abcdefgjikl' AND T1.SC_SUPP_ID = 1;
 SC_P_ID        |SC_SUPP_ID |SC_PRICE   |SC_QTY     |SC_DISC&|SC_DEL_DATE
 ------------------------------------------------------------------------
@@ -1856,7 +1864,7 @@ Columns accessed from heap = {2, 3, 4, 5}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=3
 		Number of deleted rows visited=0
@@ -1865,16 +1873,16 @@ Columns accessed from heap = {2, 3, 4, 5}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 2 column(s).
-	Ordered null semantics on the following columns: 
-0 1 
-		stop position: 
-	> on first 2 column(s).
-	Ordered null semantics on the following columns: 
-0 1 
+		start position:
+			>= on first 2 column(s).
+			Ordered null semantics on the following columns: 
+			0 1 
+		stop position:
+			> on first 2 column(s).
+			Ordered null semantics on the following columns: 
+			0 1 
 		qualifiers:
-None
+			None
 ij> SELECT T1.O_STATUS, T1.O_SHIP_DATE, T1.O_ENTRY_DATE, T1.O_TOTAL, T1.O_DISCOUNT, T1.O_OL_CNT, T1.O_C_ID, T1.O_ID FROM O_ORDERS  T1 WHERE T1.O_ID = 1 FOR UPDATE;
 O_STATUS   |O_SHIP_DA&|O_ENTRY_DATE              |O_TOTAL    |O_DIS&|O_OL_CNT   |O_C_ID     |O_ID       
 --------------------------------------------------------------------------------------------------------
@@ -1926,7 +1934,7 @@ Source result set:
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -1935,16 +1943,16 @@ Source result set:
 			Number of rows visited=0
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
 			qualifiers:
-None
+				None
 ij> SELECT COUNT (*) FROM M_workorder;
 1          
 -----------
@@ -2011,7 +2019,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -2020,12 +2028,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT COUNT (*) FROM S_purchase_order;
 1          
 -----------
@@ -2092,7 +2100,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -2101,12 +2109,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT COUNT (*) FROM M_bom;
 1          
 -----------
@@ -2173,7 +2181,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -2182,12 +2190,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT T1.PO_NUMBER, T1.PO_SUPP_ID, T1.PO_SITE_ID FROM S_PURCHASE_ORDER  T1 WHERE T1.PO_NUMBER = 1;
 PO_NUMBER  |PO_SUPP_ID |PO_SITE_ID 
 -----------------------------------
@@ -2226,7 +2234,7 @@ Columns accessed from heap = {1, 2}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -2235,16 +2243,16 @@ Columns accessed from heap = {1, 2}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
 		qualifiers:
-None
+			None
 ij> SELECT COUNT (*) FROM O_orderline;
 1          
 -----------
@@ -2311,7 +2319,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -2320,12 +2328,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT T1.D_ID, T1.D_PERCENT FROM C_DISCOUNT  T1 WHERE T1.D_ID = 'abcdefghijklmnopqrstuvwz';
 D_ID                                                            |D_PERCENT  
 ----------------------------------------------------------------------------
@@ -2364,7 +2372,7 @@ Columns accessed from heap = {1}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -2373,16 +2381,16 @@ Columns accessed from heap = {1}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
 		qualifiers:
-None
+			None
 ij> UPDATE O_ORDERLINE  SET OL_SHIP_DATE = '2/28/2000', OL_QTY = 10, OL_I_ID = 'abcdefghijkl' WHERE OL_O_ID = 1 AND OL_ID = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -2446,7 +2454,7 @@ Execute Time = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=3
 					Number of deleted rows visited=0
@@ -2455,16 +2463,16 @@ Execute Time = 0
 					Number of rows visited=0
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 2 column(s).
-	Ordered null semantics on the following columns: 
-0 1 
-					stop position: 
-	> on first 2 column(s).
-	Ordered null semantics on the following columns: 
-0 1 
+					start position:
+						>= on first 2 column(s).
+						Ordered null semantics on the following columns: 
+						0 1 
+					stop position:
+						> on first 2 column(s).
+						Ordered null semantics on the following columns: 
+						0 1 
 					qualifiers:
-None
+						None
 ij> SELECT T1.COMP_ID, T1.COMP_NAME, T1.COMP_DESC, T1.COMP_UNIT, T1.COMP_COST, T1.QTY_ON_ORDER, T1.QTY_DEMANDED, T1.LEAD_TIME, T1.CONTAINER_SIZE FROM S_COMPONENT  T1 WHERE T1.COMP_ID = 'abcdefghijk' FOR UPDATE;
 COMP_ID        |COMP_NAME |COMP_DESC                                                                                           |COMP_UNIT |COMP_COST  |QTY_ON_ORD&|QTY_DEMAND&|LEAD_TIME  |CONTAINER_&
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -2503,7 +2511,7 @@ Columns accessed from heap = {0, 1, 2, 3, 4, 5, 6, 7, 8}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -2512,16 +2520,16 @@ Columns accessed from heap = {0, 1, 2, 3, 4, 5, 6, 7, 8}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
 		qualifiers:
-None
+			None
 ij> SELECT COUNT (*) FROM O_customer;
 1          
 -----------
@@ -2588,7 +2596,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -2597,12 +2605,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT T1.LO_ID, T1.LO_O_ID, T1.LO_OL_ID, T1.LO_ASSEMBLY_ID, T1.LO_QTY, T1.LO_DUE_DATE FROM M_LARGEORDER  T1 WHERE lo_o_id = 1 AND lo_ol_id = 1;
 LO_ID      |LO_O_ID    |LO_OL_ID   |LO_ASSEMBLY_ID |LO_QTY     |LO_DUE_DA&
 --------------------------------------------------------------------------
@@ -2641,7 +2649,7 @@ Columns accessed from heap = {0, 3, 4, 5}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=3
 		Number of deleted rows visited=0
@@ -2650,14 +2658,14 @@ Columns accessed from heap = {0, 3, 4, 5}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 2 column(s).
-	Ordered null semantics on the following columns: 
-		stop position: 
-	> on first 2 column(s).
-	Ordered null semantics on the following columns: 
+		start position:
+			>= on first 2 column(s).
+			Ordered null semantics on the following columns: 
+		stop position:
+			> on first 2 column(s).
+			Ordered null semantics on the following columns: 
 		qualifiers:
-None
+			None
 ij> UPDATE O_ORDERS  SET O_STATUS = 1, O_SHIP_DATE = '01/01/9004', O_ENTRY_DATE = NULL, O_TOTAL = 1000, O_DISCOUNT =100, O_OL_CNT = 1, O_C_ID = 1 WHERE O_ID = 2;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -2721,7 +2729,7 @@ Execute Time = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -2730,16 +2738,16 @@ Execute Time = 0
 					Number of rows visited=0
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+						0 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
+						0 
 					qualifiers:
-None
+						None
 ij> SELECT COUNT (*) FROM C_customer;
 1          
 -----------
@@ -2806,7 +2814,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -2815,12 +2823,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT COUNT (*) FROM M_inventory;
 1          
 -----------
@@ -2887,7 +2895,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -2896,12 +2904,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> -- MAKE SURE THE FOLLOWING USE TABLE SCAN, NO REASON TO USE INDEX AT ALL, NOT USEFUL PREDICATES!!! 
  SELECT T1.SUPP_ID, T1.SUPP_NAME, T1.SUPP_STREET1, T1.SUPP_STREET2, T1.SUPP_CITY, T1.SUPP_STATE, T1.SUPP_COUNTRY, T1.SUPP_ZIP, T1.SUPP_PHONE, T1.SUPP_CONTACT FROM S_SUPPLIER  T1 WHERE 1=1;
 SUPP_ID    |SUPP_NAME       |SUPP_STREET1        |SUPP_STREET2        |SUPP_CITY           |SUP&|SUPP_COUN&|SUPP_ZIP |SUPP_PHONE      |SUPP_CONTACT             
@@ -2947,17 +2955,19 @@ Source result set:
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=10
 		Number of pages visited=1
 		Number of rows qualified=0
 		Number of rows visited=0
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 ij> UPDATE U_SEQUENCES  SET S_NEXTNUM = 1	, S_BLOCKSIZE = 1000 WHERE S_ID = 'abcdefghijklmnopqrstuvwxyz';
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -3013,7 +3023,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -3022,16 +3032,16 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
 				qualifiers:
-None
+					None
 ij> SELECT COUNT (*) FROM M_parts ;
 1          
 -----------
@@ -3098,7 +3108,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -3107,12 +3117,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT COUNT (*) FROM O_item;
 1          
 -----------
@@ -3179,7 +3189,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -3188,12 +3198,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> UPDATE M_WORKORDER  SET WO_O_ID = 11, WO_OL_ID = 11, WO_STATUS = 11, WO_ORIG_QTY = 11, WO_COMP_QTY = 11, WO_ASSEMBLY_ID = 'abcdefghijk', WO_DUE_DATE = '01/01/2000', WO_START_DATE = '01/01/00' WHERE WO_NUMBER = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -3257,7 +3267,7 @@ Execute Time = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -3266,16 +3276,16 @@ Execute Time = 0
 					Number of rows visited=0
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+						0 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
+						0 
 					qualifiers:
-None
+						None
 ij> SELECT T1.POL_NUMBER, T1.POL_PO_ID, T1.POL_P_ID, T1.POL_QTY, T1.POL_BALANCE, T1.POL_DELDATE, T1.POL_MESSAGE FROM S_PURCHASE_ORDERLINE  T1 WHERE T1.POL_NUMBER = 100 AND T1.POL_PO_ID = 200 FOR UPDATE;
 POL_NUMBER |POL_PO_ID  |POL_P_ID       |POL_QTY    |POL_BALANCE|POL_DELDA&|POL_MESSAGE                                                                                         
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -3314,7 +3324,7 @@ Columns accessed from heap = {0, 1, 2, 3, 4, 5, 6}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=3
 		Number of deleted rows visited=0
@@ -3323,16 +3333,16 @@ Columns accessed from heap = {0, 1, 2, 3, 4, 5, 6}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 2 column(s).
-	Ordered null semantics on the following columns: 
-0 1 
-		stop position: 
-	> on first 2 column(s).
-	Ordered null semantics on the following columns: 
-0 1 
+		start position:
+			>= on first 2 column(s).
+			Ordered null semantics on the following columns: 
+			0 1 
+		stop position:
+			> on first 2 column(s).
+			Ordered null semantics on the following columns: 
+			0 1 
 		qualifiers:
-None
+			None
 ij> SELECT T1.OL_SHIP_DATE, T1.OL_QTY, T1.OL_I_ID, T1.OL_O_ID, T1.OL_ID FROM O_ORDERLINE  T1 WHERE ol_o_id = 100 AND ol_i_id = 'abcdefgh'  FOR UPDATE;
 OL_SHIP_D&|OL_QTY     |OL_I_ID        |OL_O_ID    |OL_ID      
 --------------------------------------------------------------
@@ -3397,7 +3407,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=3
 				Number of deleted rows visited=0
@@ -3406,16 +3416,16 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
 				qualifiers:
-None
+					None
 ij> SELECT T1.POL_NUMBER, T1.POL_PO_ID, T1.POL_P_ID, T1.POL_QTY, T1.POL_BALANCE, T1.POL_DELDATE, T1.POL_MESSAGE FROM S_PURCHASE_ORDERLINE  T1 WHERE pol_po_id = 11 FOR UPDATE;
 POL_NUMBER |POL_PO_ID  |POL_P_ID       |POL_QTY    |POL_BALANCE|POL_DELDA&|POL_MESSAGE                                                                                         
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -3454,7 +3464,7 @@ Columns accessed from heap = {0, 1, 2, 3, 4, 5, 6}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=3
 		Number of deleted rows visited=0
@@ -3463,16 +3473,16 @@ Columns accessed from heap = {0, 1, 2, 3, 4, 5, 6}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
 		qualifiers:
-None
+			None
 ij> DELETE FROM O_ORDERS  WHERE O_ID = 1;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -3528,7 +3538,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -3537,16 +3547,16 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
+					0 
 				qualifiers:
-None
+					None
 ij> SELECT COUNT (*) FROM O_orders;
 1          
 -----------
@@ -3613,7 +3623,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -3622,12 +3632,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT COUNT (*) FROM S_supplier;
 1          
 -----------
@@ -3694,7 +3704,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -3703,12 +3713,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT T1.C_ID, T1.C_SINCE, T1.C_BALANCE, T1.C_CREDIT, T1.C_CREDIT_LIMIT, T1.C_YTD_PAYMENT FROM C_CUSTOMER  T1 WHERE T1.C_ID = 1111 FOR UPDATE;
 C_ID       |C_SINCE   |C_BALANCE  |C_C&|C_CREDIT_L&|C_YTD_PAYM&
 ---------------------------------------------------------------
@@ -3760,7 +3770,7 @@ Source result set:
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -3769,16 +3779,16 @@ Source result set:
 			Number of rows visited=0
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
 			qualifiers:
-None
+				None
 ij> -- MAKE SURE THE FOLLOWING DELETE STATEMENT USES UNIQUE INDEX "O_ORDL_IDX", NOT NON-UNIQUE INDEX "O_ORDL_IDX2",
 -- EVEN THOUGH WE ARE COMPILING WITH EMPTY TABLE!!! beetle 5006.
  DELETE FROM O_ORDERLINE  WHERE OL_O_ID = 11111 AND OL_ID = 111111;
@@ -3838,7 +3848,7 @@ Execute Time = 0
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=3
 				Number of deleted rows visited=0
@@ -3847,16 +3857,16 @@ Execute Time = 0
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 2 column(s).
-	Ordered null semantics on the following columns: 
-0 1 
-				stop position: 
-	> on first 2 column(s).
-	Ordered null semantics on the following columns: 
-0 1 
+				start position:
+					>= on first 2 column(s).
+					Ordered null semantics on the following columns: 
+					0 1 
+				stop position:
+					> on first 2 column(s).
+					Ordered null semantics on the following columns: 
+					0 1 
 				qualifiers:
-None
+					None
 ij> SELECT COUNT (*) FROM C_supplier;
 1          
 -----------
@@ -3923,7 +3933,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -3932,12 +3942,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT T1.B_ASSEMBLY_ID, T1.B_COMP_ID, T1.B_LINE_NO, T1.B_QTY, T1.B_ENG_CHANGE, T1.B_OPS, T1.B_OPS_DESC FROM M_BOM  T1 WHERE b_assembly_id = 'specjstuff';
 B_ASSEMBLY_ID  |B_COMP_ID      |B_LINE_NO  |B_QTY      |B_ENG_CHA&|B_OPS      |B_OPS_DESC                                                                                          
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -3989,7 +3999,7 @@ Source result set:
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 3}
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -3998,16 +4008,16 @@ Source result set:
 			Number of rows visited=0
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
 			qualifiers:
-None
+				None
 ij> UPDATE S_COMPONENT  SET COMP_NAME = 'abc', COMP_DESC = 'book', COMP_UNIT = '100', COMP_COST = 1000, QTY_ON_ORDER = 1000, QTY_DEMANDED = 111, LEAD_TIME = 11, CONTAINER_SIZE = 11 WHERE COMP_ID = 'rudyardkipling';
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -4071,7 +4081,7 @@ Execute Time = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -4080,16 +4090,16 @@ Execute Time = 0
 					Number of rows visited=0
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+						0 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
+						0 
 					qualifiers:
-None
+						None
 ij> SELECT T1.PO_NUMBER, T1.PO_SUPP_ID, T1.PO_SITE_ID FROM S_PURCHASE_ORDER  T1 WHERE T1.PO_NUMBER = 100 FOR UPDATE;
 PO_NUMBER  |PO_SUPP_ID |PO_SITE_ID 
 -----------------------------------
@@ -4128,7 +4138,7 @@ Columns accessed from heap = {0, 1, 2}
 		open time (milliseconds) = 0
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -4137,16 +4147,16 @@ Columns accessed from heap = {0, 1, 2}
 		Number of rows visited=0
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
+			0 
 		qualifiers:
-None
+			None
 ij> UPDATE S_PURCHASE_ORDERLINE  SET POL_P_ID = 'teacup', POL_QTY = 2, POL_BALANCE = 2, POL_DELDATE = '01/01/2000', POL_MESSAGE = 'tintin shooting star' WHERE POL_NUMBER = 1 AND POL_PO_ID = 1111;
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -4210,7 +4220,7 @@ Execute Time = 0
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=3
 					Number of deleted rows visited=0
@@ -4219,16 +4229,16 @@ Execute Time = 0
 					Number of rows visited=0
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 2 column(s).
-	Ordered null semantics on the following columns: 
-0 1 
-					stop position: 
-	> on first 2 column(s).
-	Ordered null semantics on the following columns: 
-0 1 
+					start position:
+						>= on first 2 column(s).
+						Ordered null semantics on the following columns: 
+						0 1 
+					stop position:
+						> on first 2 column(s).
+						Ordered null semantics on the following columns: 
+						0 1 
 					qualifiers:
-None
+						None
 ij> SELECT COUNT (*) FROM S_site ;
 1          
 -----------
@@ -4295,7 +4305,7 @@ Source result set:
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={}
 				Number of columns fetched=0
 				Number of deleted rows visited=0
@@ -4304,12 +4314,12 @@ Source result set:
 				Number of rows visited=0
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> SELECT T1.C_SINCE, T1.C_STREET1, T1.C_STREET2, T1.C_CITY, T1.C_STATE, T1.C_COUNTRY, T1.C_ZIP, T1.C_PHONE, T1.C_CONTACT, T1.C_LAST, T1.C_FIRST, T1.C_ID FROM O_CUSTOMER  T1 WHERE T1.C_ID = 23456;
 C_SINCE   |C_STREET1           |C_STREET2           |C_CITY              |C_S&|C_COUNTRY |C_ZIP    |C_PHONE         |C_CONTACT                |C_LAST          |C_FIRST         |C_ID       
 --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -4361,7 +4371,7 @@ Source result set:
 			open time (milliseconds) = 0
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -4370,16 +4380,16 @@ Source result set:
 			Number of rows visited=0
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
+				0 
 			qualifiers:
-None
+				None
 ij> SELECT COUNT (*) FROM C_parts;
 1          
 -----------

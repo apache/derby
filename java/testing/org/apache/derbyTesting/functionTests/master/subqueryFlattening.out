@@ -152,17 +152,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
 		Number of opens = 2
@@ -174,7 +176,7 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -183,14 +185,14 @@ None
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- simple EXISTS
 select * from outer1 o where exists (select * from idx1 i where o.c1 = i.c1);
 C1         |C2         |C3         
@@ -249,17 +251,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
 		Number of opens = 2
@@ -271,7 +275,7 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -280,14 +284,14 @@ None
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- simple ANY
 select * from outer1 o where o.c1 = ANY (select c1 from idx1);
 C1         |C2         |C3         
@@ -346,17 +350,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
 		Number of opens = 2
@@ -368,7 +374,7 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -377,14 +383,14 @@ None
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- another simple ANY
 select * from outer1 o where o.c2 > ANY (select c1 from idx1 i where o.c1 = i.c1);
 C1         |C2         |C3         
@@ -443,17 +449,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
 		Number of opens = 2
@@ -465,7 +473,7 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -474,18 +482,18 @@ None
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-Column[0][0] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 0
+				Operator: <
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- comparisons with parameters
 prepare p1 as 'select * from outer1 o where exists (select * from idx1 i where i.c1 = ?)';
 ij> execute p1 using 'values 1';
@@ -546,7 +554,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -555,14 +563,14 @@ Source result set:
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 	Right result set:
 		Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
 		Number of opens = 1
@@ -574,17 +582,19 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> prepare p2 as 'select * from outer1 o where ? = ANY (select c1 from idx1)';
 ij> execute p2 using 'values 1';
 IJ WARNING: Autocommit may close using result set
@@ -644,7 +654,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -653,14 +663,14 @@ Source result set:
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 	Right result set:
 		Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
 		Number of opens = 1
@@ -672,17 +682,19 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> -- mix constants with correlation columns
 select * from outer1 o where exists (select * from idx2 i where o.c1 = i.c1 and i.c2 = 2);
 C1         |C2         |C3         
@@ -741,7 +753,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 1}
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -750,16 +762,16 @@ Source result set:
 			Number of rows visited=2
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 1
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 	Right result set:
 		Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
 		Number of opens = 1
@@ -771,21 +783,23 @@ Negate comparison result: false
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- multiple tables in subquery
 select * from outer1 o where exists (select * from idx2 i, idx1 where o.c1 = i.c1 and i.c2 = idx1.c1 and i.c2 = 1);
 C1         |C2         |C3         
@@ -855,7 +869,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -864,16 +878,16 @@ Source result set:
 				Number of rows visited=2
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					Column[0][0] Id: 1
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 		Right result set:
 			Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
 			Number of opens = 1
@@ -885,21 +899,23 @@ Negate comparison result: false
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=3
 				Number of pages visited=1
 				Number of rows qualified=1
 				Number of rows visited=2
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 	Right result set:
 		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
 		Number of opens = 1
@@ -911,7 +927,7 @@ Negate comparison result: false
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -920,14 +936,14 @@ Negate comparison result: false
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- comparisons with non-join expressions
 select * from outer1 o where exists (select * from idx1 where idx1.c1 = 1 + 0);
 C1         |C2         |C3         
@@ -987,7 +1003,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -996,14 +1012,14 @@ Source result set:
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 	Right result set:
 		Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
 		Number of opens = 1
@@ -1015,17 +1031,19 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> select * from outer1 o where exists (select * from idx2 i, idx1 where o.c1 + 0 = i.c1 and i.c2 + 0 = idx1.c1 and i.c2 = 1 + 0);
 C1         |C2         |C3         
 -----------------------------------
@@ -1093,7 +1111,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -1102,16 +1120,16 @@ Source result set:
 				Number of rows visited=2
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					Column[0][0] Id: 1
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 		Right result set:
 			Project-Restrict ResultSet (5):
 			Number of opens = 1
@@ -1136,17 +1154,19 @@ Negate comparison result: false
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=3
 					Number of pages visited=1
 					Number of rows qualified=2
 					Number of rows visited=2
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						None
 	Right result set:
 		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
 		Number of opens = 1
@@ -1158,7 +1178,7 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -1167,14 +1187,14 @@ None
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- multilevel subqueries
 -- only flatten bottom of where exists, any, or in with 
 -- exists, any, or in in its own where clause. DERBY-3301.
@@ -1253,7 +1273,7 @@ Attached subqueries:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0, 1}
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -1262,14 +1282,14 @@ Attached subqueries:
 					Number of rows visited=1
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 2 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 2 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 2 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 2 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 			Right result set:
 				Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
 				Number of opens = 1
@@ -1281,7 +1301,7 @@ None
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -1290,14 +1310,14 @@ None
 					Number of rows visited=1
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 	End Subquery Number 0
 Project-Restrict ResultSet (2):
 Number of opens = 1
@@ -1322,17 +1342,19 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=3
 		Number of pages visited=1
 		Number of rows qualified=2
 		Number of rows visited=2
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 ij> -- only flatten bottom
 select * from outer1 o where exists
     (select * from idx2 i where exists
@@ -1417,18 +1439,18 @@ Attached subqueries:
 					Number of rows visited=2
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					scan qualifiers:
-None
+						None
 					next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 			Right result set:
 				Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
 				Number of opens = 1
@@ -1440,7 +1462,7 @@ Negate comparison result: false
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -1449,14 +1471,14 @@ Negate comparison result: false
 					Number of rows visited=1
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 	End Subquery Number 0
 Project-Restrict ResultSet (2):
 Number of opens = 1
@@ -1481,17 +1503,19 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=3
 		Number of pages visited=1
 		Number of rows qualified=2
 		Number of rows visited=2
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 ij> -- flatten innermost into exists join, but dont flatten middle into outer as it
 -- is a where exists, any, or in with exists, any, or in in its own where clause. 
 -- DERBY-3301.
@@ -1570,7 +1594,7 @@ Attached subqueries:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0, 1}
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -1579,14 +1603,14 @@ Attached subqueries:
 					Number of rows visited=1
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 2 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 2 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 2 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 2 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 			Right result set:
 				Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share table locking chosen by the optimizer
 				Number of opens = 1
@@ -1598,7 +1622,7 @@ None
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={}
 					Number of columns fetched=0
 					Number of deleted rows visited=0
@@ -1607,12 +1631,12 @@ None
 					Number of rows visited=1
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 	End Subquery Number 0
 Project-Restrict ResultSet (2):
 Number of opens = 1
@@ -1637,17 +1661,19 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=3
 		Number of pages visited=1
 		Number of rows qualified=2
 		Number of rows visited=2
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 ij> -- flatten a subquery that has a subquery in its select list
 -- verify that subquery gets copied up to outer block
 select * from outer1 o where c1 in
@@ -1698,7 +1724,7 @@ Attached subqueries:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -1707,14 +1733,14 @@ Attached subqueries:
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 	End Subquery Number 1
 Project-Restrict ResultSet (4):
 Number of opens = 1
@@ -1750,7 +1776,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 1}
 			Number of columns fetched=2
 			Number of deleted rows visited=0
@@ -1759,16 +1785,16 @@ Source result set:
 			Number of rows visited=2
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 1
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 	Right result set:
 		Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
 		Number of opens = 1
@@ -1780,21 +1806,23 @@ Negate comparison result: false
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- expression subqueries
 -- simple =
 select * from outer1 o where o.c1 = (select c1 from idx1 i where o.c1 = i.c1);
@@ -1855,17 +1883,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
 		Number of opens = 2
@@ -1877,7 +1907,7 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -1886,18 +1916,18 @@ None
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> select * from outer1 o where o.c1 <= (select c1 from idx1 i where o.c1 = i.c1);
 C1         |C2         |C3         
 -----------------------------------
@@ -1954,17 +1984,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
 		Number of opens = 2
@@ -1976,7 +2008,7 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -1985,18 +2017,18 @@ None
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-Column[0][0] Id: 0
-Operator: <
-Ordered nulls: false
-Unknown return value: true
-Negate comparison result: true
+				Column[0][0] Id: 0
+				Operator: <
+				Ordered nulls: false
+				Unknown return value: true
+				Negate comparison result: true
 ij> -- multiple tables in subquery
 select * from outer1 o where c1 =  (select i.c1 from idx2 i, idx1 where o.c1 = i.c1 and i.c2 = idx1.c1 and i.c2 = 1);
 C1         |C2         |C3         
@@ -2066,7 +2098,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -2075,16 +2107,16 @@ Source result set:
 				Number of rows visited=2
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					Column[0][0] Id: 1
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 		Right result set:
 			Table Scan ResultSet for OUTER1 at serializable isolation level using share table locking chosen by the optimizer
 			Number of opens = 1
@@ -2096,26 +2128,28 @@ Negate comparison result: false
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=3
 				Number of pages visited=1
 				Number of rows qualified=1
 				Number of rows visited=2
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
+					Column[0][1] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 	Right result set:
 		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share row locking chosen by the optimizer
 		Number of opens = 1
@@ -2127,7 +2161,7 @@ Negate comparison result: false
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -2136,14 +2170,14 @@ Negate comparison result: false
 			Number of rows visited=1
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- flattening to an exists join
 -- no index on subquery table
 select * from outer1 where c1 in (select c1 from noidx);
@@ -2204,17 +2238,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Hash Scan ResultSet for NOIDX at serializable isolation level using share table locking: 
 		Number of opens = 2
@@ -2234,16 +2270,18 @@ None
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			scan qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			scan qualifiers:
+				None
 			next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- no unique index on subquery table
 select * from outer1 where c1 in (select c1 from nonunique_idx1);
 C1         |C2         |C3         
@@ -2302,17 +2340,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Hash Scan ResultSet for NONUNIQUE_IDX1 using index NONUNIQUE_IDX1_1 at serializable isolation level using share table locking: 
 		Number of opens = 2
@@ -2334,18 +2374,18 @@ None
 			Number of rows visited=2
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			scan qualifiers:
-None
+				None
 			next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- columns in subquery are not superset of unique index
 select * from outer1 where c1 in (select c1 from idx2);
 C1         |C2         |C3         
@@ -2404,17 +2444,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Hash Scan ResultSet for IDX2 using index IDX2_1 at serializable isolation level using share table locking: 
 		Number of opens = 2
@@ -2436,18 +2478,18 @@ None
 			Number of rows visited=2
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			scan qualifiers:
-None
+				None
 			next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- single table subquery, self join on unique column
 select * from outer1 where exists (select * from idx1 where c1 = c1);
 C1         |C2         |C3         
@@ -2507,17 +2549,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Project-Restrict ResultSet (4):
 		Number of opens = 2
@@ -2542,7 +2586,7 @@ None
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -2551,12 +2595,12 @@ None
 				Number of rows visited=2
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> -- flattening values subqueries
 -- flatten unless contains a subquery
 select * from outer1 where c1 in (values 1);
@@ -2593,21 +2637,23 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=3
 	Number of pages visited=1
 	Number of rows qualified=1
 	Number of rows visited=2
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		Column[0][0] Id: 0
+		Operator: =
+		Ordered nulls: false
+		Unknown return value: false
+		Negate comparison result: false
 ij> select * from outer1 where c1 in (values (select max(c1) from outer1));
 C1         |C2         |C3         
 -----------------------------------
@@ -2685,17 +2731,19 @@ Materialized subqueries:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of pages visited=1
 						Number of rows qualified=2
 						Number of rows visited=2
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						qualifiers:
+							None
 	End Subquery Number 1
 Project-Restrict ResultSet (14):
 Number of opens = 1
@@ -2731,21 +2779,23 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=3
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 	Right result set:
 		Row ResultSet:
 		Number of opens = 1
@@ -2828,17 +2878,19 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of pages visited=1
 				Number of rows qualified=2
 				Number of rows visited=2
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 		Right result set:
 			Hash Scan ResultSet for OUTER2 at serializable isolation level using share table locking: 
 			Number of opens = 2
@@ -2858,16 +2910,18 @@ None
 				Number of rows qualified=2
 				Number of rows visited=2
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				scan qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				scan qualifiers:
+					None
 				next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 	Right result set:
 		Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share table locking chosen by the optimizer
 		Number of opens = 2
@@ -2879,7 +2933,7 @@ Negate comparison result: false
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -2888,12 +2942,12 @@ Negate comparison result: false
 			Number of rows visited=2
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-None
+				None
 ij> -- in predicate (will be flattened to exists)
 select o.c1 from outer1 o join outer2 o2 on (o.c1 = o2.c1) 
 where o.c1 in (select c1 from idx1);
@@ -2965,7 +3019,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -2974,12 +3028,12 @@ Source result set:
 				Number of rows visited=2
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 		Right result set:
 			Hash Scan ResultSet for OUTER1 at serializable isolation level using share table locking: 
 			Number of opens = 2
@@ -2999,16 +3053,18 @@ None
 				Number of rows qualified=2
 				Number of rows visited=2
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				scan qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				scan qualifiers:
+					None
 				next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 	Right result set:
 		Table Scan ResultSet for OUTER2 at serializable isolation level using share table locking chosen by the optimizer
 		Number of opens = 1
@@ -3020,21 +3076,23 @@ Negate comparison result: false
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=1
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- flattened exists join in nested subquery
 select c1 from (select t.c1 from (select o.c1 from outer1 o join outer2 o2 on (o.c1 = o2.c1) where exists (select c1 from idx1)) t, outer2 where t.c1 = outer2.c1) t2;
 C1         
@@ -3129,17 +3187,19 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of pages visited=1
 						Number of rows qualified=2
 						Number of rows visited=2
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						qualifiers:
+							None
 				Right result set:
 					Hash Scan ResultSet for OUTER2 at serializable isolation level using share table locking: 
 					Number of opens = 2
@@ -3159,16 +3219,18 @@ None
 						Number of rows qualified=2
 						Number of rows visited=2
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						scan qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						scan qualifiers:
+							None
 						next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+							Column[0][0] Id: 0
+							Operator: =
+							Ordered nulls: false
+							Unknown return value: false
+							Negate comparison result: false
 			Right result set:
 				Index Scan ResultSet for IDX1 using index IDX1_1 at serializable isolation level using share table locking chosen by the optimizer
 				Number of opens = 2
@@ -3180,7 +3242,7 @@ Negate comparison result: false
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -3189,12 +3251,12 @@ Negate comparison result: false
 					Number of rows visited=2
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 	Right result set:
 		Table Scan ResultSet for OUTER2 at serializable isolation level using share table locking chosen by the optimizer
 		Number of opens = 2
@@ -3206,21 +3268,23 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=4
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- original reported bug
 create table business(businesskey int, name varchar(50), changedate int);
 0 rows inserted/updated/deleted
@@ -3324,26 +3388,28 @@ Source result set:
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=3
 					Number of pages visited=1
 					Number of rows qualified=0
 					Number of rows visited=0
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-Column[0][0] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 2
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						Column[0][0] Id: 1
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
+						Column[0][1] Id: 2
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 			Right result set:
 				Table Scan ResultSet for BUSINESS at serializable isolation level using share table locking chosen by the optimizer
 				Number of opens = 0
@@ -3354,15 +3420,17 @@ Negate comparison result: false
 					open time (milliseconds) = 0
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
-				scan information: 
-					start position: 
-null					stop position: 
-null					qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				scan information:
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 		Right result set:
 			Table Scan ResultSet for CATEGORYBAG at serializable isolation level using share table locking chosen by the optimizer
 			Number of opens = 0
@@ -3373,30 +3441,32 @@ Negate comparison result: false
 				open time (milliseconds) = 0
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
-			scan information: 
-				start position: 
-null				stop position: 
-null				qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][1] Id: 3
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][2] Id: 2
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
-Column[0][3] Id: 1
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			scan information:
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					Column[0][0] Id: 0
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
+					Column[0][1] Id: 3
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
+					Column[0][2] Id: 2
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
+					Column[0][3] Id: 1
+					Operator: =
+					Ordered nulls: false
+					Unknown return value: false
+					Negate comparison result: false
 ij> -- clean up
 drop table outer1;
 0 rows inserted/updated/deleted
@@ -3553,7 +3623,7 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of deleted rows visited=0
@@ -3562,12 +3632,12 @@ Source result set:
 						Number of rows visited=6
 						Scan type=btree
 						Tree height=1
-						start position: 
-	None
-						stop position: 
-	None
+						start position:
+							None
+						stop position:
+							None
 						qualifiers:
-None
+							None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 6
@@ -3592,7 +3662,7 @@ None
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 							next time in milliseconds/row = 0
-						scan information: 
+						scan information:
 							Bit set of columns fetched={0, 1}
 							Number of columns fetched=2
 							Number of deleted rows visited=0
@@ -3601,16 +3671,16 @@ None
 							Number of rows visited=6
 							Scan type=btree
 							Tree height=1
-							start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-							stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+							start position:
+								>= on first 1 column(s).
+								Ordered null semantics on the following columns: 
+								0 
+							stop position:
+								> on first 1 column(s).
+								Ordered null semantics on the following columns: 
+								0 
 							qualifiers:
-None
+								None
 ij> -- NOT EXISTS is flattened
 SELECT COUNT(*) FROM
 ( SELECT ID FROM DOCS WHERE
@@ -3712,7 +3782,7 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of deleted rows visited=0
@@ -3721,12 +3791,12 @@ Source result set:
 						Number of rows visited=6
 						Scan type=btree
 						Tree height=1
-						start position: 
-	None
-						stop position: 
-	None
+						start position:
+							None
+						stop position:
+							None
 						qualifiers:
-None
+							None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 6
@@ -3751,7 +3821,7 @@ None
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 							next time in milliseconds/row = 0
-						scan information: 
+						scan information:
 							Bit set of columns fetched={0, 1}
 							Number of columns fetched=2
 							Number of deleted rows visited=0
@@ -3760,16 +3830,16 @@ None
 							Number of rows visited=6
 							Scan type=btree
 							Tree height=1
-							start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-							stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+							start position:
+								>= on first 1 column(s).
+								Ordered null semantics on the following columns: 
+								0 
+							stop position:
+								> on first 1 column(s).
+								Ordered null semantics on the following columns: 
+								0 
 							qualifiers:
-None
+								None
 ij> -- EXISTS is flattened
 SELECT COUNT(*) FROM
 ( SELECT ID FROM DOCS WHERE
@@ -3871,7 +3941,7 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of deleted rows visited=0
@@ -3880,12 +3950,12 @@ Source result set:
 						Number of rows visited=6
 						Scan type=btree
 						Tree height=1
-						start position: 
-	None
-						stop position: 
-	None
+						start position:
+							None
+						stop position:
+							None
 						qualifiers:
-None
+							None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 6
@@ -3910,7 +3980,7 @@ None
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 							next time in milliseconds/row = 0
-						scan information: 
+						scan information:
 							Bit set of columns fetched={0, 1}
 							Number of columns fetched=2
 							Number of deleted rows visited=0
@@ -3919,16 +3989,16 @@ None
 							Number of rows visited=6
 							Scan type=btree
 							Tree height=1
-							start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-							stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+							start position:
+								>= on first 1 column(s).
+								Ordered null semantics on the following columns: 
+								0 
+							stop position:
+								> on first 1 column(s).
+								Ordered null semantics on the following columns: 
+								0 
 							qualifiers:
-None
+								None
 ij> -- IN is flattened
 SELECT count(ID) FROM DOCS WHERE ID IN (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4009,7 +4079,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -4018,12 +4088,12 @@ Source result set:
 					Number of rows visited=6
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 6
@@ -4048,7 +4118,7 @@ None
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0, 1}
 						Number of columns fetched=2
 						Number of deleted rows visited=0
@@ -4057,16 +4127,16 @@ None
 						Number of rows visited=6
 						Scan type=btree
 						Tree height=1
-						start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-						stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+						start position:
+							>= on first 1 column(s).
+							Ordered null semantics on the following columns: 
+							0 
+						stop position:
+							> on first 1 column(s).
+							Ordered null semantics on the following columns: 
+							0 
 						qualifiers:
-None
+							None
 ij> -- ANY is flattened
 SELECT count(ID) FROM DOCS WHERE ID > ANY (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4147,7 +4217,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -4156,12 +4226,12 @@ Source result set:
 					Number of rows visited=6
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 6
@@ -4186,7 +4256,7 @@ None
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0, 1}
 						Number of columns fetched=2
 						Number of deleted rows visited=0
@@ -4195,14 +4265,14 @@ None
 						Number of rows visited=17
 						Scan type=btree
 						Tree height=1
-						start position: 
-	None
-						stop position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+						start position:
+							None
+						stop position:
+							>= on first 1 column(s).
+							Ordered null semantics on the following columns: 
+							0 
 						qualifiers:
-None
+							None
 ij> -- ANY is flattened
 SELECT count(ID) FROM DOCS WHERE ID <> ANY (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4283,7 +4353,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -4292,12 +4362,12 @@ Source result set:
 					Number of rows visited=6
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 			Right result set:
 				Project-Restrict ResultSet (6):
 				Number of opens = 6
@@ -4330,7 +4400,7 @@ None
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 							next time in milliseconds/row = 0
-						scan information: 
+						scan information:
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
@@ -4339,14 +4409,14 @@ None
 							Number of rows visited=6
 							Scan type=btree
 							Tree height=1
-							start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-							stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+							start position:
+								>= on first 1 column(s).
+								Ordered null semantics on the following columns: 
+							stop position:
+								> on first 1 column(s).
+								Ordered null semantics on the following columns: 
 							qualifiers:
-None
+								None
 ij> -- ALL is flattened, what's not?
 SELECT count(ID) FROM DOCS WHERE ID = ALL (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4427,7 +4497,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -4436,12 +4506,12 @@ Source result set:
 					Number of rows visited=6
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 			Right result set:
 				Project-Restrict ResultSet (6):
 				Number of opens = 6
@@ -4474,7 +4544,7 @@ None
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 							next time in milliseconds/row = 0
-						scan information: 
+						scan information:
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
@@ -4483,14 +4553,14 @@ None
 							Number of rows visited=6
 							Scan type=btree
 							Tree height=1
-							start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-							stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+							start position:
+								>= on first 1 column(s).
+								Ordered null semantics on the following columns: 
+							stop position:
+								> on first 1 column(s).
+								Ordered null semantics on the following columns: 
 							qualifiers:
-None
+								None
 ij> -- ALL is flattened, what's not?
 SELECT count(ID) FROM DOCS WHERE ID < ALL (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4571,7 +4641,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -4580,12 +4650,12 @@ Source result set:
 					Number of rows visited=6
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 6
@@ -4610,7 +4680,7 @@ None
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0, 1}
 						Number of columns fetched=2
 						Number of deleted rows visited=0
@@ -4619,14 +4689,14 @@ None
 						Number of rows visited=18
 						Scan type=btree
 						Tree height=1
-						start position: 
-	None
-						stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+						start position:
+							None
+						stop position:
+							> on first 1 column(s).
+							Ordered null semantics on the following columns: 
+							0 
 						qualifiers:
-None
+							None
 ij> -- ALL is flattened, what's not?
 SELECT count(ID) FROM DOCS WHERE ID <> ALL (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -4707,7 +4777,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -4716,12 +4786,12 @@ Source result set:
 					Number of rows visited=6
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 6
@@ -4746,7 +4816,7 @@ None
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0, 1}
 						Number of columns fetched=2
 						Number of deleted rows visited=0
@@ -4755,16 +4825,16 @@ None
 						Number of rows visited=6
 						Scan type=btree
 						Tree height=1
-						start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
-						stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-0 
+						start position:
+							>= on first 1 column(s).
+							Ordered null semantics on the following columns: 
+							0 
+						stop position:
+							> on first 1 column(s).
+							Ordered null semantics on the following columns: 
+							0 
 						qualifiers:
-None
+							None
 ij> -- Now test nullable correlated columns
 drop table colls;
 0 rows inserted/updated/deleted
@@ -4894,7 +4964,7 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of deleted rows visited=0
@@ -4903,12 +4973,12 @@ Source result set:
 						Number of rows visited=6
 						Scan type=btree
 						Tree height=1
-						start position: 
-	None
-						stop position: 
-	None
+						start position:
+							None
+						stop position:
+							None
 						qualifiers:
-None
+							None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 6
@@ -4941,16 +5011,18 @@ None
 							Number of rows qualified=9
 							Number of rows visited=9
 							Scan type=heap
-							start position: 
-null							stop position: 
-null							scan qualifiers:
-None
+							start position:
+								null
+							stop position:
+								null
+							scan qualifiers:
+								None
 							next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+								Column[0][0] Id: 0
+								Operator: =
+								Ordered nulls: false
+								Unknown return value: false
+								Negate comparison result: false
 ij> -- EXISTS should be flattened
 SELECT COUNT(*) FROM
 ( SELECT ID FROM DOCS WHERE
@@ -5052,7 +5124,7 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of deleted rows visited=0
@@ -5061,12 +5133,12 @@ Source result set:
 						Number of rows visited=6
 						Scan type=btree
 						Tree height=1
-						start position: 
-	None
-						stop position: 
-	None
+						start position:
+							None
+						stop position:
+							None
 						qualifiers:
-None
+							None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 6
@@ -5099,16 +5171,18 @@ None
 							Number of rows qualified=9
 							Number of rows visited=9
 							Scan type=heap
-							start position: 
-null							stop position: 
-null							scan qualifiers:
-None
+							start position:
+								null
+							stop position:
+								null
+							scan qualifiers:
+								None
 							next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+								Column[0][0] Id: 0
+								Operator: =
+								Ordered nulls: false
+								Unknown return value: false
+								Negate comparison result: false
 ij> -- IN should be flattened
 SELECT count(ID) FROM DOCS WHERE ID IN (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -5189,7 +5263,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -5198,12 +5272,12 @@ Source result set:
 					Number of rows visited=6
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 6
@@ -5236,16 +5310,18 @@ None
 						Number of rows qualified=9
 						Number of rows visited=9
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						scan qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						scan qualifiers:
+							None
 						next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+							Column[0][0] Id: 0
+							Operator: =
+							Ordered nulls: false
+							Unknown return value: false
+							Negate comparison result: false
 ij> -- ANY should be flattened
 SELECT count(ID) FROM DOCS WHERE ID > ANY (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -5326,7 +5402,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -5335,12 +5411,12 @@ Source result set:
 					Number of rows visited=6
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 			Right result set:
 				Project-Restrict ResultSet (6):
 				Number of opens = 6
@@ -5373,7 +5449,7 @@ None
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 							next time in milliseconds/row = 0
-						scan information: 
+						scan information:
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
@@ -5382,14 +5458,14 @@ None
 							Number of rows visited=21
 							Scan type=btree
 							Tree height=1
-							start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-							stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+							start position:
+								>= on first 1 column(s).
+								Ordered null semantics on the following columns: 
+							stop position:
+								> on first 1 column(s).
+								Ordered null semantics on the following columns: 
 							qualifiers:
-None
+								None
 ij> -- ALL should NOT be flattened, but subquery should be materialized
 SELECT count(ID) FROM DOCS WHERE ID <> ALL (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -5562,7 +5638,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -5571,12 +5647,12 @@ Source result set:
 				Number of rows visited=6
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> -- Now we make the other correlated column also nullable
 drop table docs;
 0 rows inserted/updated/deleted
@@ -5689,7 +5765,7 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of deleted rows visited=0
@@ -5698,12 +5774,12 @@ Source result set:
 						Number of rows visited=7
 						Scan type=btree
 						Tree height=1
-						start position: 
-	None
-						stop position: 
-	None
+						start position:
+							None
+						stop position:
+							None
 						qualifiers:
-None
+							None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 7
@@ -5736,16 +5812,18 @@ None
 							Number of rows qualified=9
 							Number of rows visited=9
 							Scan type=heap
-							start position: 
-null							stop position: 
-null							scan qualifiers:
-None
+							start position:
+								null
+							stop position:
+								null
+							scan qualifiers:
+								None
 							next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+								Column[0][0] Id: 0
+								Operator: =
+								Ordered nulls: false
+								Unknown return value: false
+								Negate comparison result: false
 ij> -- EXISTS should be flattened
 SELECT COUNT(*) FROM
 ( SELECT ID FROM DOCS WHERE
@@ -5847,7 +5925,7 @@ Source result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of deleted rows visited=0
@@ -5856,12 +5934,12 @@ Source result set:
 						Number of rows visited=7
 						Scan type=btree
 						Tree height=1
-						start position: 
-	None
-						stop position: 
-	None
+						start position:
+							None
+						stop position:
+							None
 						qualifiers:
-None
+							None
 				Right result set:
 					Project-Restrict ResultSet (5):
 					Number of opens = 7
@@ -5894,16 +5972,18 @@ None
 							Number of rows qualified=9
 							Number of rows visited=9
 							Scan type=heap
-							start position: 
-null							stop position: 
-null							scan qualifiers:
-None
+							start position:
+								null
+							stop position:
+								null
+							scan qualifiers:
+								None
 							next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+								Column[0][0] Id: 0
+								Operator: =
+								Ordered nulls: false
+								Unknown return value: false
+								Negate comparison result: false
 ij> -- IN should be flattened
 SELECT count(ID) FROM DOCS WHERE ID IN (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -5984,7 +6064,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -5993,12 +6073,12 @@ Source result set:
 					Number of rows visited=7
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 			Right result set:
 				Project-Restrict ResultSet (5):
 				Number of opens = 7
@@ -6031,16 +6111,18 @@ None
 						Number of rows qualified=9
 						Number of rows visited=9
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						scan qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						scan qualifiers:
+							None
 						next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+							Column[0][0] Id: 0
+							Operator: =
+							Ordered nulls: false
+							Unknown return value: false
+							Negate comparison result: false
 ij> -- ANY should be flattened
 SELECT count(ID) FROM DOCS WHERE ID > ANY (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -6121,7 +6203,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0}
 					Number of columns fetched=1
 					Number of deleted rows visited=0
@@ -6130,12 +6212,12 @@ Source result set:
 					Number of rows visited=7
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 			Right result set:
 				Project-Restrict ResultSet (6):
 				Number of opens = 7
@@ -6168,7 +6250,7 @@ None
 							next time (milliseconds) = 0
 							close time (milliseconds) = 0
 							next time in milliseconds/row = 0
-						scan information: 
+						scan information:
 							Bit set of columns fetched=All
 							Number of columns fetched=2
 							Number of deleted rows visited=0
@@ -6177,14 +6259,14 @@ None
 							Number of rows visited=28
 							Scan type=btree
 							Tree height=1
-							start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-							stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+							start position:
+								>= on first 1 column(s).
+								Ordered null semantics on the following columns: 
+							stop position:
+								> on first 1 column(s).
+								Ordered null semantics on the following columns: 
 							qualifiers:
-None
+								None
 ij> -- ALL should NOT be flattened, but subquery should be materialized, watch out results
 SELECT count(ID) FROM DOCS WHERE ID <> ALL (SELECT ID FROM COLLS WHERE COLLID IN (-2,1) );
 1          
@@ -6357,7 +6439,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -6366,12 +6448,12 @@ Source result set:
 				Number of rows visited=7
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> drop table t1;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
 ij> drop table t2;
@@ -6457,17 +6539,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=7
 			Number of rows visited=7
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Hash Scan ResultSet for T2 at serializable isolation level using share table locking: 
 		Number of opens = 7
@@ -6487,16 +6571,18 @@ None
 			Number of rows qualified=7
 			Number of rows visited=7
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			scan qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			scan qualifiers:
+				None
 			next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 0
+				Operator: =
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> select * from t1 where not exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not in (select t3.c1 from t3, t4));
 C1         
 -----------

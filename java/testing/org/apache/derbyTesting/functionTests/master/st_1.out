@@ -103,17 +103,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=2
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> call SYSCS_SET_RUNTIMESTATISTICS(0);
 0 rows inserted/updated/deleted
 ij> call SYSCS_SET_STATISTICS_TIMING(0);
@@ -225,17 +227,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=2
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
 0 rows inserted/updated/deleted
 ij> call SYSCS_UTIL.SYSCS_SET_STATISTICS_TIMING(0);

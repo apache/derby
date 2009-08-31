@@ -90,17 +90,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=3
 			Number of rows visited=3
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 	Right result set:
 		Intersect ResultSet:
 		Number of opens = 1
@@ -136,17 +138,19 @@ None
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=1
 					Number of pages visited=1
 					Number of rows qualified=4
 					Number of rows visited=4
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						None
 		Right result set:
 			Sort ResultSet:
 			Number of opens = 1
@@ -172,17 +176,19 @@ None
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=1
 					Number of pages visited=1
 					Number of rows qualified=5
 					Number of rows visited=5
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						None
 ij> SELECT i FROM t1 UNION SELECT j FROM t2 EXCEPT SELECT k FROM t3;
 1          
 -----------
@@ -248,17 +254,19 @@ Left result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=1
 				Number of pages visited=1
 				Number of rows qualified=3
 				Number of rows visited=3
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 		Right result set:
 			Table Scan ResultSet for T2 at read committed isolation level using instantaneous share row locking chosen by the optimizer
 			Number of opens = 1
@@ -270,17 +278,19 @@ None
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=1
 				Number of pages visited=1
 				Number of rows qualified=4
 				Number of rows visited=4
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 Right result set:
 	Sort ResultSet:
 	Number of opens = 1
@@ -306,17 +316,19 @@ Right result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> SELECT i FROM t1 INTERSECT SELECT j FROM t2 EXCEPT SELECT k FROM t3;
 1          
 -----------
@@ -382,17 +394,19 @@ Left result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=1
 				Number of pages visited=1
 				Number of rows qualified=3
 				Number of rows visited=3
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 	Right result set:
 		Sort ResultSet:
 		Number of opens = 1
@@ -418,17 +432,19 @@ None
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched=All
 				Number of columns fetched=1
 				Number of pages visited=1
 				Number of rows qualified=4
 				Number of rows visited=4
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 Right result set:
 	Sort ResultSet:
 	Number of opens = 1
@@ -454,17 +470,19 @@ Right result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=5
 			Number of rows visited=5
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
 0 rows inserted/updated/deleted
 ij> 

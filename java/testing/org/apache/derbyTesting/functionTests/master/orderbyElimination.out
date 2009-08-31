@@ -103,17 +103,19 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=4
 		Number of pages visited=1
 		Number of rows qualified=10
 		Number of rows visited=10
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 ij> select distinct c1, c2, c3, c4 from t1 order by c1, c2, c3, c4;
 C1         |C2         |C3         |C4         
 -----------------------------------------------
@@ -169,17 +171,19 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched=All
 		Number of columns fetched=4
 		Number of pages visited=1
 		Number of rows qualified=10
 		Number of rows visited=10
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 ij> -- in order prefix
 select distinct c3, c4 from t1 order by 1, 2;
 C3         |C4         
@@ -236,17 +240,19 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={2, 3}
 		Number of columns fetched=2
 		Number of pages visited=1
 		Number of rows qualified=10
 		Number of rows visited=10
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 ij> select distinct c3, c4 from t1 order by c3, c4;
 C3         |C4         
 -----------------------
@@ -301,17 +307,19 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={2, 3}
 		Number of columns fetched=2
 		Number of pages visited=1
 		Number of rows qualified=10
 		Number of rows visited=10
 		Scan type=heap
-		start position: 
-null		stop position: 
-null		qualifiers:
-None
+		start position:
+			null
+		stop position:
+			null
+		qualifiers:
+			None
 ij> -- no prefix
 select distinct c3, c4 from t1 order by 2;
 C3         |C4         
@@ -394,17 +402,19 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={2, 3}
 				Number of columns fetched=2
 				Number of pages visited=1
 				Number of rows qualified=10
 				Number of rows visited=10
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 ij> select distinct c3, c4 from t1 order by c4;
 C3         |C4         
 -----------------------
@@ -485,17 +495,19 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={2, 3}
 				Number of columns fetched=2
 				Number of pages visited=1
 				Number of rows qualified=10
 				Number of rows visited=10
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 ij> -- expression
 select distinct c3, 1 from t1 order by 1;
 C3         |2          
@@ -561,17 +573,19 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={2}
 			Number of columns fetched=1
 			Number of pages visited=1
 			Number of rows qualified=10
 			Number of rows visited=10
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> select distinct c3, 1 from t1 order by 2;
 C3         |2          
 -----------------------
@@ -648,17 +662,19 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={2}
 				Number of columns fetched=1
 				Number of pages visited=1
 				Number of rows qualified=10
 				Number of rows visited=10
 				Scan type=heap
-				start position: 
-null				stop position: 
-null				qualifiers:
-None
+				start position:
+					null
+				stop position:
+					null
+				qualifiers:
+					None
 ij> -- verify that a sort is still done when a unique index 
 -- exists
 create unique index i1 on t1(c1, c2, c3, c4);
@@ -723,7 +739,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 1, 2, 3}
 			Number of columns fetched=4
 			Number of deleted rows visited=0
@@ -732,14 +748,14 @@ Source result set:
 			Number of rows visited=3
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 2 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 2 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 2 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 2 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> select distinct c3, c4 from t1 where c1 = 1 and c2 = 2 order by c4;
 C3         |C4         
 -----------------------
@@ -800,7 +816,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 1, 2, 3}
 			Number of columns fetched=4
 			Number of deleted rows visited=0
@@ -809,14 +825,14 @@ Source result set:
 			Number of rows visited=3
 			Scan type=btree
 			Tree height=1
-			start position: 
-	>= on first 2 column(s).
-	Ordered null semantics on the following columns: 
-			stop position: 
-	> on first 2 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				>= on first 2 column(s).
+				Ordered null semantics on the following columns: 
+			stop position:
+				> on first 2 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-None
+				None
 ij> -- order by and union
 select c1 from t1 union select c2 from t1 order by 1;
 1          
@@ -881,7 +897,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -890,12 +906,12 @@ Source result set:
 			Number of rows visited=10
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-None
+				None
 	Right result set:
 		Index Scan ResultSet for T1 using index I1 at serializable isolation level using share table locking chosen by the optimizer
 		Number of opens = 1
@@ -907,7 +923,7 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={1}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -916,12 +932,12 @@ None
 			Number of rows visited=10
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-None
+				None
 ij> select c1 from t1 union select c2 as c1 from t1 order by c1;
 C1         
 -----------
@@ -984,7 +1000,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -993,12 +1009,12 @@ Source result set:
 			Number of rows visited=10
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-None
+				None
 	Right result set:
 		Index Scan ResultSet for T1 using index I1 at serializable isolation level using share table locking chosen by the optimizer
 		Number of opens = 1
@@ -1010,7 +1026,7 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={1}
 			Number of columns fetched=1
 			Number of deleted rows visited=0
@@ -1019,12 +1035,12 @@ None
 			Number of rows visited=10
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	None
+			start position:
+				None
+			stop position:
+				None
 			qualifiers:
-None
+				None
 ij> -- RESOLVE: next 2 will do 2 sorts (bug 58)
 select c3, c4 from t1 union select c2, c1 from t1 order by 2;
 1          |2          
@@ -1111,7 +1127,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={2, 3}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -1120,12 +1136,12 @@ Source result set:
 				Number of rows visited=10
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 		Right result set:
 			Project-Restrict ResultSet (5):
 			Number of opens = 1
@@ -1150,7 +1166,7 @@ None
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0, 1}
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -1159,12 +1175,12 @@ None
 					Number of rows visited=10
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 ij> select c3, c4 from t1 union select c2, c1 as c4 from t1 order by c4;
 1          |C4         
 -----------------------
@@ -1249,7 +1265,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={2, 3}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -1258,12 +1274,12 @@ Source result set:
 				Number of rows visited=10
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 		Right result set:
 			Project-Restrict ResultSet (5):
 			Number of opens = 1
@@ -1288,7 +1304,7 @@ None
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched={0, 1}
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -1297,12 +1313,12 @@ None
 					Number of rows visited=10
 					Scan type=btree
 					Tree height=1
-					start position: 
-	None
-					stop position: 
-	None
+					start position:
+						None
+					stop position:
+						None
 					qualifiers:
-None
+						None
 ij> -- DERBY-2887: investigate affect of NULLS FIRST/LAST on sorting
 insert into t1 values (1, null, 14, null);
 1 row inserted/updated/deleted
@@ -1346,7 +1362,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0, 1, 2}
 	Number of columns fetched=3
 	Number of deleted rows visited=0
@@ -1355,14 +1371,14 @@ scan information:
 	Number of rows visited=8
 	Scan type=btree
 	Tree height=-1
-	start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-	stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+	start position:
+		>= on first 1 column(s).
+		Ordered null semantics on the following columns: 
+	stop position:
+		> on first 1 column(s).
+		Ordered null semantics on the following columns: 
 	qualifiers:
-None
+		None
 ij> -- Needs to do a sort to get the NULLS FIRST:
 select c1,c2,c3 from t1 where c1 = 1 order by c1,c2 nulls first;
 C1         |C2         |C3         
@@ -1417,7 +1433,7 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={0, 1, 2}
 		Number of columns fetched=3
 		Number of deleted rows visited=0
@@ -1426,14 +1442,14 @@ Source result set:
 		Number of rows visited=8
 		Scan type=btree
 		Tree height=1
-		start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-		stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+		start position:
+			>= on first 1 column(s).
+			Ordered null semantics on the following columns: 
+		stop position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
 		qualifiers:
-None
+			None
 ij> -- test recognition of single row tables
 -- even when scanning heap
 create table u1(c1 int, c2 int);
@@ -1541,7 +1557,7 @@ Source result set:
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -1550,14 +1566,14 @@ Source result set:
 					Number of rows visited=1
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 		Right result set:
 			Index Row to Base Row ResultSet for U2:
 			Number of opens = 1
@@ -1577,7 +1593,7 @@ None
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of deleted rows visited=0
@@ -1586,14 +1602,14 @@ None
 					Number of rows visited=1
 					Scan type=btree
 					Tree height=1
-					start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-					stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+					start position:
+						>= on first 1 column(s).
+						Ordered null semantics on the following columns: 
+					stop position:
+						> on first 1 column(s).
+						Ordered null semantics on the following columns: 
 					qualifiers:
-None
+						None
 	Right result set:
 		Table Scan ResultSet for U3 at serializable isolation level using share table locking chosen by the optimizer
 		Number of opens = 1
@@ -1605,17 +1621,19 @@ None
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched=All
 			Number of columns fetched=2
 			Number of pages visited=1
 			Number of rows qualified=2
 			Number of rows visited=2
 			Scan type=heap
-			start position: 
-null			stop position: 
-null			qualifiers:
-None
+			start position:
+				null
+			stop position:
+				null
+			qualifiers:
+				None
 ij> -- clean up
 drop table t1;
 0 rows inserted/updated/deleted

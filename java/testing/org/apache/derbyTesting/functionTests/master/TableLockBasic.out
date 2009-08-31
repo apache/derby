@@ -369,17 +369,19 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=1
 	Number of rows visited=1
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> drop table rts;
 0 rows inserted/updated/deleted
 ij> commit;
@@ -426,17 +428,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from default_granularity with rr;
 C1         
 -----------
@@ -467,17 +471,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from row_granularity with cs;
 C1         
 -----------
@@ -508,17 +514,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from row_granularity with rr;
 C1         
 -----------
@@ -549,17 +557,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from table_granularity with cs;
 C1         
 -----------
@@ -590,17 +600,19 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> select * from table_granularity with rr;
 C1         
 -----------
@@ -631,16 +643,18 @@ Fetch Size = 16
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-scan information: 
+scan information:
 	Bit set of columns fetched=All
 	Number of columns fetched=1
 	Number of pages visited=1
 	Number of rows qualified=0
 	Number of rows visited=0
 	Scan type=heap
-	start position: 
-null	stop position: 
-null	qualifiers:
-None
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> rollback;
 ij> 

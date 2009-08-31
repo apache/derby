@@ -117,7 +117,7 @@ Source result set:
 			next time (milliseconds) = 0
 			close time (milliseconds) = 0
 			next time in milliseconds/row = 0
-		scan information: 
+		scan information:
 			Bit set of columns fetched={0, 1, 2}
 			Number of columns fetched=3
 			Number of deleted rows visited=0
@@ -126,17 +126,17 @@ Source result set:
 			Number of rows visited=7
 			Scan type=btree
 			Tree height=1
-			start position: 
-	None
-			stop position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
+			start position:
+				None
+			stop position:
+				>= on first 1 column(s).
+				Ordered null semantics on the following columns: 
 			qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+				Column[0][0] Id: 1
+				Operator: <=
+				Ordered nulls: false
+				Unknown return value: false
+				Negate comparison result: false
 ij> -- should use index i5
 select c2, c1 from tab1 where c2 <= 44 and c1 > 55;
 C2    |C1         
@@ -186,7 +186,7 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={0, 1}
 		Number of columns fetched=2
 		Number of deleted rows visited=0
@@ -195,17 +195,17 @@ Source result set:
 		Number of rows visited=3
 		Scan type=btree
 		Tree height=1
-		start position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
-		stop position: 
-	None
+		start position:
+			> on first 1 column(s).
+			Ordered null semantics on the following columns: 
+		stop position:
+			None
 		qualifiers:
-Column[0][0] Id: 1
-Operator: <=
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+			Column[0][0] Id: 1
+			Operator: <=
+			Ordered nulls: false
+			Unknown return value: false
+			Negate comparison result: false
 ij> -- should use i1
 select c1, c3, c4 from tab1 order by c1, c3;
 C1         |C3                    |C4                            
@@ -249,7 +249,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0, 1, 2}
 	Number of columns fetched=3
 	Number of deleted rows visited=0
@@ -258,12 +258,12 @@ scan information:
 	Number of rows visited=10
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> -- should use i2
 select c1, c3, c4 from tab1 order by c1 desc, c3 desc, c4 desc;
 C1         |C3                    |C4                            
@@ -307,7 +307,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0, 1, 2}
 	Number of columns fetched=3
 	Number of deleted rows visited=0
@@ -316,12 +316,12 @@ scan information:
 	Number of rows visited=10
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> -- should use i3
 select c1, c3, c4 from tab1 order by c1 desc, c3 asc, c4 desc;
 C1         |C3                    |C4                            
@@ -365,7 +365,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0, 1, 2}
 	Number of columns fetched=3
 	Number of deleted rows visited=0
@@ -374,12 +374,12 @@ scan information:
 	Number of rows visited=10
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> -- should use i4
 select c1, c2, c3 from tab1 order by c2 desc, c3 asc;
 C1         |C2    |C3                    
@@ -436,7 +436,7 @@ Source result set:
 		next time (milliseconds) = 0
 		close time (milliseconds) = 0
 		next time in milliseconds/row = 0
-	scan information: 
+	scan information:
 		Bit set of columns fetched={0, 1, 2}
 		Number of columns fetched=3
 		Number of deleted rows visited=0
@@ -445,12 +445,12 @@ Source result set:
 		Number of rows visited=10
 		Scan type=btree
 		Tree height=1
-		start position: 
-	None
-		stop position: 
-	None
+		start position:
+			None
+		stop position:
+			None
 		qualifiers:
-None
+			None
 ij> -- should use i5
 select c1, c2 from tab1 order by c1, c2 desc;
 C1         |C2    
@@ -494,7 +494,7 @@ Fetch Size = 16
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
 	next time in milliseconds/row = 0
-scan information: 
+scan information:
 	Bit set of columns fetched={0, 1}
 	Number of columns fetched=2
 	Number of deleted rows visited=0
@@ -503,12 +503,12 @@ scan information:
 	Number of rows visited=10
 	Scan type=btree
 	Tree height=1
-	start position: 
-	None
-	stop position: 
-	None
+	start position:
+		None
+	stop position:
+		None
 	qualifiers:
-None
+		None
 ij> -- should use i4
 select max(c2) from tab1;
 1     
@@ -578,7 +578,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0}
 				Number of columns fetched=1
 				Number of deleted rows visited=0
@@ -587,12 +587,12 @@ Source result set:
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	None
-				stop position: 
-	None
+				start position:
+					None
+				stop position:
+					None
 				qualifiers:
-None
+					None
 ij> -- should use i4
 select min(c2) from tab1;
 1     
@@ -729,7 +729,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -738,14 +738,14 @@ Source result set:
 				Number of rows visited=4
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- should use i5
 select max(c2) from tab1 where c1 = 34;
 1     
@@ -815,7 +815,7 @@ Source result set:
 				next time (milliseconds) = 0
 				close time (milliseconds) = 0
 				next time in milliseconds/row = 0
-			scan information: 
+			scan information:
 				Bit set of columns fetched={0, 1}
 				Number of columns fetched=2
 				Number of deleted rows visited=0
@@ -824,14 +824,14 @@ Source result set:
 				Number of rows visited=1
 				Scan type=btree
 				Tree height=1
-				start position: 
-	>= on first 1 column(s).
-	Ordered null semantics on the following columns: 
-				stop position: 
-	> on first 1 column(s).
-	Ordered null semantics on the following columns: 
+				start position:
+					>= on first 1 column(s).
+					Ordered null semantics on the following columns: 
+				stop position:
+					> on first 1 column(s).
+					Ordered null semantics on the following columns: 
 				qualifiers:
-None
+					None
 ij> -- test if bulk insert rebuilds desc index right
 call SYSCS_UTIL.SYSCS_COMPRESS_TABLE('APP', 'TAB1', 0);
 0 rows inserted/updated/deleted

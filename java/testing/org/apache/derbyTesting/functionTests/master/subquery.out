@@ -1019,11 +1019,13 @@ Source result set:
 				Number of rows visited=5
 				Scan type=heap
 				start position:
-null				stop position:
-null				scan qualifiers:
-None
+					null
+				stop position:
+					null
+				scan qualifiers:
+					None
 				next qualifiers:
-None
+					None
 		Right result set:
 			Hash Table ResultSet (4):
 			Number of opens = 5
@@ -1062,11 +1064,13 @@ Negate comparison result: false
 					Number of rows visited=9
 					Scan type=heap
 					start position:
-null					stop position:
-null					scan qualifiers:
-None
+						null
+					stop position:
+						null
+					scan qualifiers:
+						None
 					next qualifiers:
-None
+						None
 ij> -- clean up.
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
 0 rows inserted/updated/deleted
@@ -1218,17 +1222,19 @@ Left result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of pages visited=1
 						Number of rows qualified=5
 						Number of rows visited=5
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						qualifiers:
+							None
 			Right result set:
 				Table Scan ResultSet for T2 at read committed isolation level using share row locking chosen by the optimizer
 				Number of opens = 5
@@ -1240,21 +1246,23 @@ None
 					next time (milliseconds) = 0
 					close time (milliseconds) = 0
 					next time in milliseconds/row = 0
-				scan information: 
+				scan information:
 					Bit set of columns fetched=All
 					Number of columns fetched=2
 					Number of pages visited=1
 					Number of rows qualified=5
 					Number of rows visited=25
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+					start position:
+						null
+					stop position:
+						null
+					qualifiers:
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 Right result set:
 	Hash Table ResultSet (13):
 	Number of opens = 5
@@ -1322,17 +1330,19 @@ Negate comparison result: false
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of pages visited=1
 						Number of rows qualified=3
 						Number of rows visited=3
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						qualifiers:
+							None
 				Right result set:
 					Hash Scan ResultSet for T4 at read committed isolation level using instantaneous share row locking: 
 					Number of opens = 3
@@ -1352,16 +1362,18 @@ None
 						Number of rows qualified=3
 						Number of rows visited=3
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						scan qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						scan qualifiers:
+							None
 						next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+							Column[0][0] Id: 0
+							Operator: =
+							Ordered nulls: false
+							Unknown return value: false
+							Negate comparison result: false
 ij> -- Now add more data to the tables.
 insert into t1 select * from t2;
 5 rows inserted/updated/deleted
@@ -1518,17 +1530,19 @@ Left result set:
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched={0}
 						Number of columns fetched=1
 						Number of pages visited=6
 						Number of rows qualified=655
 						Number of rows visited=655
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						qualifiers:
+							None
 			Right result set:
 				Hash Scan ResultSet for T2 at read committed isolation level using instantaneous share row locking: 
 				Number of opens = 655
@@ -1548,16 +1562,18 @@ None
 					Number of rows qualified=405
 					Number of rows visited=405
 					Scan type=heap
-					start position: 
-null					stop position: 
-null					scan qualifiers:
-None
+					start position:
+						null
+					stop position:
+						null
+					scan qualifiers:
+						None
 					next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+						Column[0][0] Id: 0
+						Operator: =
+						Ordered nulls: false
+						Unknown return value: false
+						Negate comparison result: false
 Right result set:
 	Hash Table ResultSet (13):
 	Number of opens = 5
@@ -1625,17 +1641,19 @@ Negate comparison result: false
 						next time (milliseconds) = 0
 						close time (milliseconds) = 0
 						next time in milliseconds/row = 0
-					scan information: 
+					scan information:
 						Bit set of columns fetched=All
 						Number of columns fetched=2
 						Number of pages visited=4
 						Number of rows qualified=432
 						Number of rows visited=432
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						qualifiers:
+							None
 				Right result set:
 					Hash Scan ResultSet for T3 at read committed isolation level using instantaneous share row locking: 
 					Number of opens = 432
@@ -1655,16 +1673,18 @@ None
 						Number of rows qualified=699
 						Number of rows visited=699
 						Scan type=heap
-						start position: 
-null						stop position: 
-null						scan qualifiers:
-None
+						start position:
+							null
+						stop position:
+							null
+						scan qualifiers:
+							None
 						next qualifiers:
-Column[0][0] Id: 0
-Operator: =
-Ordered nulls: false
-Unknown return value: false
-Negate comparison result: false
+							Column[0][0] Id: 0
+							Operator: =
+							Ordered nulls: false
+							Unknown return value: false
+							Negate comparison result: false
 ij> -- clean up.
 call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0);
 0 rows inserted/updated/deleted
