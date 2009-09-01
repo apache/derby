@@ -232,8 +232,18 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory {
         suuid = getUUIDFactory().recreateUUID(schemaIdString);
 
         // fourth column is the data type of this sequene generator
-        DataTypeDescriptor dataType = (DataTypeDescriptor) row.getColumn(SYSSEQUENCES_SEQUENCEDATATYPE).
+        /*
+          ** What is stored in the column is a TypeDescriptorImpl, which
+          ** points to a BaseTypeIdImpl.  These are simple types that are
+          ** intended to be movable to the client, so they don't have
+          ** the entire implementation.  We need to wrap them in DataTypeServices
+          ** and TypeId objects that contain the full implementations for
+          ** language processing.
+          */
+        TypeDescriptor catalogType = (TypeDescriptor) row.getColumn(SYSSEQUENCES_SEQUENCEDATATYPE).
                 getObject();
+        DataTypeDescriptor dataTypeServices =
+                DataTypeDescriptor.getType(catalogType);
 
         col = row.getColumn(SYSSEQUENCES_CURRENT_VALUE);
         currentValue = col.getLong();
@@ -257,7 +267,7 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory {
                 (dd.getSchemaDescriptor(suuid, null),
                         ouuid,
                         sequenceName,
-                        dataType,
+                        dataTypeServices,
                         currentValue,
                         startValue,
                         minimumValue,

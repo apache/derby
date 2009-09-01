@@ -626,7 +626,13 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
           case C_NodeTypes.ROW_COUNT_NODE:
             return C_NodeNames.ROW_COUNT_NODE_NAME;
 
-		  // WARNING: WHEN ADDING NODE TYPES HERE, YOU MUST ALSO ADD
+          case C_NodeTypes.CREATE_SEQUENCE_NODE:
+            return C_NodeNames.CREATE_SEQUENCE_NODE_NAME;
+
+          case C_NodeTypes.DROP_SEQUENCE_NODE:
+            return C_NodeNames.DROP_SEQUENCE_NODE_NAME;
+
+          // WARNING: WHEN ADDING NODE TYPES HERE, YOU MUST ALSO ADD
 		  // THEM TO tools/jar/DBMSnodes.properties
 
 		  default:

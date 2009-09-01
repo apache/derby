@@ -236,8 +236,12 @@ public interface C_NodeTypes
 	// OFFSET, FETCH FIRST node
 	static final int ROW_COUNT_NODE = 223;
 
+    // sequences
+    static final int CREATE_SEQUENCE_NODE = 224;
+    static final int DROP_SEQUENCE_NODE = 225;
+
     // Final value in set, keep up to date!
-    static final int FINAL_VALUE = ROW_COUNT_NODE;
+    static final int FINAL_VALUE = DROP_SEQUENCE_NODE;
 
     /**
      * Extensions to this interface can use nodetypes > MAX_NODE_TYPE with out fear of collision

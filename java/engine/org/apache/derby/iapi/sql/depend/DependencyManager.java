@@ -35,7 +35,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 	The dependency manager tracks needs that dependents have of providers. This
 	is a general purpose interface which is associated with a
 	DataDictinary object; infact the dependencymanager is really the
-	datadictionary keeping track of dependcies between objects that it handles
+	datadictionary keeping track of dependencies between objects that it handles
 	(descriptors) as well as prepared statements.
 	<p>
 	The primary example of this is a prepared statement's needs of 
@@ -335,7 +335,9 @@ public interface DependencyManager {
 	// current role for privileges by recreating the activation.
 	public static final int RECHECK_PRIVILEGES = 48;
 
-	/**
+    public static final int DROP_SEQUENCE = 49;
+
+    /**
      * Extensions to this interface may use action codes > MAX_ACTION_CODE without fear of
      * clashing with action codes in this base interface.
      */

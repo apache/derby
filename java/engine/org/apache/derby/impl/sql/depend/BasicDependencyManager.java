@@ -886,7 +886,10 @@ public class BasicDependencyManager implements DependencyManager {
 		    case RECHECK_PRIVILEGES:
 				return "RECHECK PRIVILEGES";
 
-			default:
+            case DROP_SEQUENCE:
+				return "DROP SEQUENCE";
+
+            default:
 				if (SanityManager.DEBUG)
 				{
 					SanityManager.THROWASSERT("getActionString() passed an invalid value (" + action + ")");

@@ -2822,7 +2822,8 @@ createStatements() throws StandardException :
             statementNode = viewDefinition(beginToken) |
             statementNode = triggerDefinition() |
             statementNode = synonymDefinition() |
-            statementNode = roleDefinition()
+            statementNode = roleDefinition() |
+            statementNode = sequenceDefinition()
         )
         {
         }
@@ -2859,7 +2860,8 @@ dropStatements() throws StandardException :
             statementNode = dropAliasStatement() |
             statementNode = dropViewStatement() |
             statementNode = dropTriggerStatement() |
-            statementNode = dropRoleStatement()
+            statementNode = dropRoleStatement() |
+            statementNode = dropSequenceStatement()
         )
 	{
 		return statementNode;
@@ -9807,6 +9809,47 @@ roleDefinition() throws StandardException :
 	}
 }
 
+/*
+ * <A NAME="sequenceDefinition">sequenceDefinition</A>
+ */
+StatementNode
+sequenceDefinition() throws StandardException :
+{
+	TableName qualifiedSequenceName = null;
+}
+{
+	<SEQUENCE> qualifiedSequenceName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+	{
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_6, "SEQUENCES");
+		return (StatementNode) nodeFactory.getNode(
+			C_NodeTypes.CREATE_SEQUENCE_NODE,
+			qualifiedSequenceName,
+			getContextManager());
+	}
+}
+
+/*
+ * <A NAME="dropSequenceStatement">dropSequenceStatement</A>
+ */
+StatementNode
+dropSequenceStatement() throws StandardException :
+{
+	TableName sequenceName;
+}
+{
+	/*
+	 * DROP SEQUENCE <sequencename>
+	 */
+	<SEQUENCE> sequenceName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+	{
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_6, "SEQUENCES");
+
+		return (StatementNode) nodeFactory.getNode(
+			C_NodeTypes.DROP_SEQUENCE_NODE,
+			sequenceName,
+			getContextManager());
+	}
+}
 
 /*
  * <A NAME="tableDefinition">tableDefinition</A>

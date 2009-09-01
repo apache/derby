@@ -52,6 +52,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.AliasInfo;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
+import org.apache.derby.impl.sql.compile.TableName;
 
 import java.util.List;
 import java.util.Properties;
@@ -318,8 +319,17 @@ public class GenericConstantActionFactory
 		return new SetRoleConstantAction(roleName, type);
 	}
 
+    /**
+	 * Make the ConstantAction for a CREATE SEQUENCE statement.
+	 *
+	 * @param sequenceName	Name of sequence.
+	 */
+	public	ConstantAction	getCreateSequenceConstantAction(TableName sequenceName)
+	{
+        return new CreateSequenceConstantAction(sequenceName.getSchemaName(), sequenceName.getTableName());
+	}
 
-	/**
+    /**
 	 *	Make the ConstantAction for a CREATE TABLE statement.
 	 *
 	 *  @param schemaName	name for the schema that table lives in.
@@ -570,8 +580,20 @@ public class GenericConstantActionFactory
 		return new DropRoleConstantAction(roleName);
 	}
 
+    /**
+	 *	Make the ConstantAction for a DROP SEQUENCE statement.
+	 *
+     *  @param sd the schema the sequence object belongs to
+	 *	@param	seqName	name of sequence to be dropped
+	 *
+	 */
+	public ConstantAction getDropSequenceConstantAction(SchemaDescriptor sd, String seqName)
+	{
+		return new DropSequenceConstantAction(sd, seqName);
+	}
 
-	/**
+
+    /**
 	 *	Make the ConstantAction for a DROP SCHEMA statement.
 	 *
 	 *	@param	schemaName			Table name.

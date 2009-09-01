@@ -91,7 +91,9 @@ public interface C_NodeNames
 
 	static final String CREATE_SCHEMA_NODE_NAME = "org.apache.derby.impl.sql.compile.CreateSchemaNode";
 
-	static final String CREATE_TABLE_NODE_NAME = "org.apache.derby.impl.sql.compile.CreateTableNode";
+    static final String CREATE_SEQUENCE_NODE_NAME = "org.apache.derby.impl.sql.compile.CreateSequenceNode";
+
+    static final String CREATE_TABLE_NODE_NAME = "org.apache.derby.impl.sql.compile.CreateTableNode";
 
 	static final String CREATE_TRIGGER_NODE_NAME = "org.apache.derby.impl.sql.compile.CreateTriggerNode";
 
@@ -126,7 +128,9 @@ public interface C_NodeNames
 
 	static final String DROP_SCHEMA_NODE_NAME = "org.apache.derby.impl.sql.compile.DropSchemaNode";
 
-	static final String DROP_TABLE_NODE_NAME = "org.apache.derby.impl.sql.compile.DropTableNode";
+    static final String DROP_SEQUENCE_NODE_NAME = "org.apache.derby.impl.sql.compile.DropSequenceNode";
+
+    static final String DROP_TABLE_NODE_NAME = "org.apache.derby.impl.sql.compile.DropTableNode";
 
 	static final String DROP_TRIGGER_NODE_NAME = "org.apache.derby.impl.sql.compile.DropTriggerNode";
 
