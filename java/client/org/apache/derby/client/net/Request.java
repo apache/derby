@@ -21,10 +21,8 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.DisconnectException;
-import org.apache.derby.client.am.EncryptionManager;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.io.BufferedInputStream;
@@ -294,9 +292,9 @@ public class Request {
 		int bytesToRead;
 
 		if (writeNullByte) {
-			bytesToRead = Utils.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - 1 - extendedLengthByteCount);
+			bytesToRead = Math.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - 1 - extendedLengthByteCount);
 		} else {
-			bytesToRead = Utils.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - extendedLengthByteCount);
+			bytesToRead = Math.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - extendedLengthByteCount);
 		}
 			
 		byte[] lengthAndCodepoint;
@@ -455,9 +453,9 @@ public class Request {
 		int bytesToRead;
 				
 		if (writeNullByte) {
-			bytesToRead = Utils.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - 1 - extendedLengthByteCount);
+			bytesToRead = Math.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - 1 - extendedLengthByteCount);
 		} else {
-			bytesToRead = Utils.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - extendedLengthByteCount);
+			bytesToRead = Math.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - extendedLengthByteCount);
 		}
 				
 		buildLengthAndCodePointForLob(codePoint,
@@ -742,7 +740,7 @@ public class Request {
         // either at end of data, end of dss segment, or both.
         if (leftToRead != 0) {
             // 32k segment filled and not at end of data.
-            if ((Utils.min(2 + leftToRead, 32767)) > (bytes_.length - offset_)) {
+            if ((Math.min(2 + leftToRead, 32767)) > (bytes_.length - offset_)) {
                 try {
                     sendBytes(netAgent_.getOutputStream());
                 } catch (java.io.IOException ioe) {
@@ -752,7 +750,7 @@ public class Request {
             dssLengthLocation_ = offset_;
             bytes_[offset_++] = (byte) (0xff);
             bytes_[offset_++] = (byte) (0xff);
-            newBytesToRead = Utils.min(leftToRead, 32765);
+            newBytesToRead = Math.min(leftToRead, 32765);
         }
 
         return newBytesToRead;

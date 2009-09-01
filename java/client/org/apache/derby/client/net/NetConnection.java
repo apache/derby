@@ -32,7 +32,6 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.MessageId;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.client.am.Statement;
-import org.apache.derby.client.am.Utils;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientDriver;
@@ -1325,7 +1324,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 prddtaLen,
                 netAgent_);
 
-        int extnamTruncateLength = Utils.min(extnam_.length(), NetConfiguration.PRDDTA_APPL_ID_FIXED_LEN);
+        int extnamTruncateLength = Math.min(extnam_.length(), NetConfiguration.PRDDTA_APPL_ID_FIXED_LEN);
         netAgent_.sourceCcsidManager_.convertFromUCS2(extnam_.substring(0, extnamTruncateLength),
                 prddta_,
                 prddtaLen,
@@ -1333,7 +1332,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         prddtaLen += NetConfiguration.PRDDTA_APPL_ID_FIXED_LEN;
 
         if (user_ != null) {
-            int userTruncateLength = Utils.min(user_.length(), NetConfiguration.PRDDTA_USER_ID_FIXED_LEN);
+            int userTruncateLength = Math.min(user_.length(), NetConfiguration.PRDDTA_USER_ID_FIXED_LEN);
             netAgent_.sourceCcsidManager_.convertFromUCS2(user_.substring(0, userTruncateLength),
                     prddta_,
                     prddtaLen,

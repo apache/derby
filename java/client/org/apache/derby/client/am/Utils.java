@@ -22,8 +22,6 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLException;
-import org.apache.derby.iapi.types.SQLBit;
-import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.MessageId;
 
 // Self-contained utilities.
@@ -235,14 +233,6 @@ public final class Utils {
         } else {
             return sqlca.getUpdateCount();
         }
-    }
-
-    public static int min(int i, int j) {
-        return (i < j) ? i : j;
-    }
-
-    public static int max(int i, int j) {
-        return (i < j) ? j : i;
     }
 
     // latestException is assumed to be non-null, accumulatedExceptions can be null

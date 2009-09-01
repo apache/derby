@@ -26,7 +26,6 @@ import javax.transaction.xa.Xid;
 
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
-import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class NetConnectionRequest extends Request implements ConnectionRequestInterface {
@@ -431,7 +430,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
     // The External Name is the name of the job, task, or process on a
     // system for which a DDM server is active.
     private void buildEXTNAM(String extnam) throws SqlException {
-        int extnamTruncateLength = Utils.min(extnam.length(),
+        int extnamTruncateLength = Math.min(extnam.length(),
                 NetConfiguration.EXTNAM_MAXSIZE);
 
         writeScalarString(CodePoint.EXTNAM,
@@ -440,7 +439,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
 
     // Server Name is the name of the DDM server.
     private void buildSRVNAM(String srvnam) throws SqlException {
-        int srvnamTruncateLength = Utils.min(srvnam.length(),
+        int srvnamTruncateLength = Math.min(srvnam.length(),
                 NetConfiguration.SRVNAM_MAXSIZE);
         writeScalarString(CodePoint.SRVNAM,
                 srvnam.substring(0, srvnamTruncateLength));
