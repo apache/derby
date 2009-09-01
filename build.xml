@@ -2311,4 +2311,77 @@ you should not have to do this.
         </emma>
     </target>
 
+    <!-- do most of the ant calls to prepare a release -->
+    <target name="prepareforrelease" depends="checkstateremoved,checksanenotset,checkforpackagingfile,cleanalljars,cleandocs,cleansnapshot,clobber,cleanreleasefiles">
+	<!-- check that tools/ant/properties/packaging.properties exists -->
+        <fail unless="packaging.present" message="Need to know what md5 and pgp tools you want to use and their settings, please create tools/ant/properties/packaging.properties from tools/ant/properties/packaging.tmpl"/>
+        <!-- other possible checks? maybe no checked out files? -->
+        <!-- maybe try to force a doc build? call to ant release will check for docs out -->
+        <!-- assume svn update has been done to the desired level -->
+        <!-- we should already be squeeky clean, depends removed jars, javadoc, snapshot, classes, and old release artifacts -->
+        <echo level="info" message="  Sane = ${sane}"/>
+        <antcall target="clobber"/>
+        <antcall target="sane"/>
+        <antcall target="all">
+           <param name="deprecation" value="off"/>
+        </antcall>
+        <antcall target="buildjars"/>
+        <antcall target="clobber"/>
+        <antcall target="insane"/>
+        <antcall target="snapshot">
+            <param name="deprecation" value="off"/>
+            <param name="sane" value="false"/>
+        </antcall>
+        <antcall target="publishedapi">
+            <param name="deprecation" value="off"/>
+        </antcall>
+        <!-- finish by removing the state.properties file, so we can do it again -->
+        <antcall target="cleanstate"/>
+    </target>
+
+    <target name="checkstateremoved" depends="state.exists">
+        <fail message="Cannot build a release; please remove java/engine/state.properties by running ant cleanstate (or run ant clobber)">
+            <condition>
+                <isset property="state.prepare.available"/>             
+            </condition>
+        </fail>     
+    </target>
+
+    <target name="state.exists">
+        <!-- check if state.properties file does *not* exist without generating it  -->
+        <!-- if it exists, the sane property is already loaded, messing up the prepare process -->
+        <available file="${derby.engine.src.dir}/state.properties" property="state.prepare.available"/>
+    </target>
+
+    <target name="checksanenotset">
+        <!-- check that sane is *not* set elsewhere, e.g. $HOME/ant.properties -->
+        <echo level="info" message="sane : ${sane}"/>
+        <fail message="Cannot build a release; please do not set sane to either true or false">
+            <condition>
+                <isset property="sane"/>             
+            </condition>
+        </fail>     
+    </target>
+
+    <target name="checkforpackagingfile">
+        <available file="${basedir}/tools/ant/properties/packaging.properties" property="packaging.present"/>
+    </target>
+
+    <target name="cleansnapshot">
+    	<delete dir="${basedir}/snapshot"/>
+    </target>
+
+    <target name="cleanreleasefiles">
+    	<delete dir="${basedir}/tools/release/crlf"/>
+    	<delete dir="${basedir}/tools/release/lf"/>
+    	<delete file="${basedir}/tools/release/*.md5"/>
+    	<delete file="${basedir}/tools/release/*.asc"/>
+    	<delete file="${basedir}/tools/release/*.zip"/>
+    	<delete file="${basedir}/tools/release/*.tar.gz"/>
+    	<delete file="${basedir}/tools/release/maintversion.properties"/>
+    </target>
+
+    <target name="cleanalljars">
+        <delete dir="${basedir}/jars"/>
+    </target>
 </project>
