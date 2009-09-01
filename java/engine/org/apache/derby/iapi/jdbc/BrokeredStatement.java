@@ -125,9 +125,9 @@ public class BrokeredStatement implements EngineStatement
      * ResultSet, if one exists, is also closed.
 	 * @exception SQLException thrown on failure.
      */
-	public final void close() throws SQLException
+	public void close() throws SQLException
     {
-		getStatement().close();
+		control.closeRealStatement();
     }
 
     public final Connection getConnection()
