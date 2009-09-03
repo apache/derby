@@ -717,104 +717,241 @@ public final class NetworkServerControlImpl {
 							);
 		clientThread.start();
 			
-		// wait until we are told to shutdown or someone sends an InterruptedException
-        synchronized(shutdownSync) {
-            try {
-				shutdownSync.wait();
-            }
-            catch (InterruptedException e)
-            {
-                shutdown = true;
-            }
-        }
+		try {
+			// wait until we are told to shutdown or someone sends an InterruptedException
+	        synchronized(shutdownSync) {
+	            try {
+					shutdownSync.wait();
+	            }
+	            catch (InterruptedException e)
+	            {
+	                shutdown = true;
+	            }
+	        }
+	        
+	        try {
+	            AccessController.doPrivileged(
+	                    new PrivilegedAction() {
+	                        public Object run()  {
+	                        // Need to interrupt the memcheck thread if it is sleeping.
+	                            if (mc != null)
+	                                mc.interrupt();
 
-        
-        AccessController.doPrivileged(
-                new PrivilegedAction() {
-                    public Object run()  {
-                    // Need to interrupt the memcheck thread if it is sleeping.
-                        if (mc != null)
-                            mc.interrupt();
+		                            //interrupt client thread
+		                            clientThread.interrupt();
 
-                        //interrupt client thread
-                        clientThread.interrupt();
+		                            return null;
+		                       }
+		                    });
+		        } catch (Exception exception) {
+		        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+		        }
+				
+		 		// Close out the sessions
+		 		synchronized(sessionTable) {
+		 			for (Enumeration e = sessionTable.elements(); e.hasMoreElements(); )
+		 			{	
+		 				Session session = (Session) e.nextElement();
+		 				try {
+		 					session.close();
+		 				} catch (Exception exception) {
+		 		        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+		 				}
+		 			}
+		 		}
 
-                        return null;
-                    }
-                });
+			synchronized (threadList)
+			{
+	 			//interupt any connection threads still active
+	 			for (int i = 0; i < threadList.size(); i++)
+	 			{
+	 				try {
+	 					final DRDAConnThread threadi = (DRDAConnThread)threadList.get(i);
+	 	                
+	 	 				threadi.close();
+	 					AccessController.doPrivileged(
+	 								new PrivilegedAction() {
+	 									public Object run() {
+	 										threadi.interrupt();
+	 										return null;
+	 									}
+	 								});
+	 				} catch (Exception exception) {
+	 		        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+	 				}
+	 			}
+	 			threadList.clear();
+			}
 		
- 		// Close out the sessions
- 		synchronized(sessionTable) {
- 			for (Enumeration e = sessionTable.elements(); e.hasMoreElements(); )
- 			{	
- 				Session session = (Session) e.nextElement();
- 				session.close();
- 			}
- 		}
+		    // close the listener socket
+		    try{
+		       serverSocket.close();
+		    }catch(IOException e){
+				consolePropertyMessage("DRDA_ListenerClose.S");
+		    } catch (Exception exception) {
+	        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+		    }
 
-		synchronized (threadList)
-		{
- 			//interupt any connection threads still active
- 			for (int i = 0; i < threadList.size(); i++)
- 			{
-				final DRDAConnThread threadi = (DRDAConnThread)threadList.get(i);
-                
- 				threadi.close();
-				AccessController.doPrivileged(
-							new PrivilegedAction() {
-								public Object run() {
-									threadi.interrupt();
-									return null;
-								}
-							});
- 			}
- 			threadList.clear();
-		}
-	   
- 
+			// Wake up those waiting on sessions, so
+			// they can close down
+		    try{
+				synchronized (runQueue) {
+					runQueue.notifyAll();
+				}	
+		    } catch (Exception exception) {
+	        	consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
+		    }
 
-	
-	    // close the listener socket
-	    try{
-	       serverSocket.close();
-	    }catch(IOException e){
-			consolePropertyMessage("DRDA_ListenerClose.S");
-	    }
+			if (shutdownDatabasesOnShutdown) {
 
-
-		// Wake up those waiting on sessions, so
-		// they can close down
-		synchronized (runQueue) {
-			runQueue.notifyAll();
-		}						
-
-		if (shutdownDatabasesOnShutdown) {
-
-			// Shutdown Derby
-			try {
-				if (cloudscapeDriver != null)
-					cloudscapeDriver.connect("jdbc:derby:;shutdown=true",
-											 (Properties) null);
-			} catch (SQLException sqle) {
-				// If we can't shutdown Derby. Perhaps authentication is
-				// set to true or some other reason. We will just print a
-				// message to the console and proceed.
-				String expectedState =
-					StandardException.getSQLStateFromIdentifier(
-							SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN);
-				if (!expectedState.equals(sqle.getSQLState())) {
-					consolePropertyMessage("DRDA_ShutdownWarning.I",
-										   sqle.getMessage());
+				// Shutdown Derby
+				try {
+					if (cloudscapeDriver != null)
+						cloudscapeDriver.connect("jdbc:derby:;shutdown=true",
+												 (Properties) null);
+				} catch (SQLException sqle) {
+					// If we can't shutdown Derby. Perhaps authentication is
+					// set to true or some other reason. We will just print a
+					// message to the console and proceed.
+					String expectedState =
+						StandardException.getSQLStateFromIdentifier(
+								SQLState.CLOUDSCAPE_SYSTEM_SHUTDOWN);
+					if (!expectedState.equals(sqle.getSQLState())) {
+						consolePropertyMessage("DRDA_ShutdownWarning.I",
+											   sqle.getMessage());
+					}
+				} catch (Exception exception) {
+					consolePrintAndIgnore("DRDA_UnexpectedException.S", exception, true);
 				}
+				}
+
+				consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
+								        {att_srvclsnm, versionString});
+				
+		} catch (Exception ex) {
+			try {
+				//If the console printing is not available,  then we have
+				//a simple stack trace print below to atleast print some
+				//exception info
+	        	consolePrintAndIgnore("DRDA_UnexpectedException.S", ex, true);				
+			} catch (Exception e) {}
+			ex.printStackTrace();
+		}		
+    }
+	
+	//Print the passed exception on the console and ignore it after that
+	private void consolePrintAndIgnore(String msgProp, 
+			Exception e, boolean printTimeStamp) {
+		// catch the exception consolePropertyMessage will throw since we
+		// just want to print information about it and move on.
+		try {
+			consolePropertyMessage(msgProp, true);
+		} catch (Exception ce) {} 
+		consoleExceptionPrintTrace(e);		
+	}
+	/**
+	 * Put property message on console
+	 *
+	 * @param msgProp		message property key
+	 * @param printTimeStamp whether to prepend a timestamp to the message
+     *
+     * @throws Exception if an error occurs
+	 */
+	protected void consolePropertyMessage(String msgProp, boolean printTimeStamp)
+		throws Exception
+	{
+		consolePropertyMessageWork(msgProp, null, printTimeStamp);
+	}
+
+	/**
+	 * Handle console error message
+	 * 	- display on console and if it is a user error, display usage
+	 *  - if user error or severe error, throw exception with message key and message
+	 *
+	 * @param messageKey	message key
+	 * @param args			arguments to message
+	 * @param printTimeStamp whether to prepend a timestamp to the message
+     *
+     * @throws Exception if an error occurs
+	 */
+	private void consolePropertyMessageWork(String messageKey, String [] args, boolean printTimeStamp)
+		throws Exception
+	{
+		String locMsg = null;
+
+		int type = getMessageType(messageKey);
+
+		if (type == ERRTYPE_UNKNOWN)
+			locMsg = messageKey;
+		else
+			locMsg = localizeMessage(messageKey, langUtil, args);
+
+		//display on the console
+		consoleMessage(locMsg, printTimeStamp);
+
+		//if it is a user error display usage
+		if (type == ERRTYPE_USER)
+			usage();
+
+		//we may want to use a different locale for throwing the exception
+		//since this can be sent to a browser with a different locale
+		if (currentSession != null && 
+				currentSession.langUtil != null &&
+				type != ERRTYPE_UNKNOWN)
+			locMsg = localizeMessage(messageKey, currentSession.langUtil, args);
+
+		// throw an exception for severe and user errors
+		if (type == ERRTYPE_SEVERE || type == ERRTYPE_USER)
+		{
+			if (messageKey.equals("DRDA_SQLException.S"))
+				throwSQLException(args[0]);
+			else if (messageKey.equals("DRDA_SQLWarning.I"))
+				throwSQLWarning(args[0]);
+			else 
+				throw new Exception(messageKey+":"+locMsg);
+		}
+
+		// throw an exception with just the message if the error type is
+		// unknown
+		if (type == ERRTYPE_UNKNOWN)
+			throw new Exception(locMsg);
+
+		return;
+
+	}
+
+	/**
+	 * Write a message to console output stream
+	 *
+	 * @param msg	message
+     * @param printTimeStamp Whether to prepend a timestamp to the message or not
+	 */
+	public void consoleMessage(String msg, boolean printTimeStamp)
+	{
+		// print to console if we have one
+		PrintWriter lw = logWriter;
+		if (lw != null)
+		{
+			synchronized(lw) {
+                if (printTimeStamp) {
+                    lw.println(getFormattedTimestamp() + " : " + msg);
+                } else {
+                    lw.println(msg);                    
+                }
 			}
 		}
-
-		consolePropertyMessage("DRDA_ShutdownSuccess.I", new String [] 
-						        {att_srvclsnm, versionString, 
-								getFormattedTimestamp()});
-		
-
-    }
+		// always print to derby.log
+		lw = cloudscapeLogWriter;
+		if (lw != null)
+			synchronized(lw)
+			{
+				if (printTimeStamp) {
+                    Monitor.logMessage(getFormattedTimestamp() + " : " + msg);
+                } else {
+                    Monitor.logMessage(msg);
+                }
+			}
+	}
 	
 	/** 
 	 * Load Derby and save driver for future use.
