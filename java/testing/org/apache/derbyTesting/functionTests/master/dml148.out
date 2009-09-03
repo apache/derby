@@ -162,13 +162,13 @@ ij> -- PASS:0844 If 6 rows selected with ordered rows and column values ?
     FROM SEVEN_TYPES right outer JOIN HU.STAFF
        ON GRADE IN (10, 11, 13) AND EMPNUM = T_CHAR
    ORDER BY EMPNAME, T_INT;
-T_INT      |T_CHAR    |EMPNAME             |EMP&|GRADE
-------------------------------------------------------
-NULL       |NULL      |Alice               |E1  |12   
-2          |E2        |Betty               |E2  |10   
-NULL       |NULL      |Carmen              |E3  |13   
-NULL       |NULL      |Don                 |E4  |12   
-NULL       |NULL      |Ed                  |E5  |13   
+T_INT      |T_CHAR    |EMPNAME             |EM&|GRADE
+-----------------------------------------------------
+NULL       |NULL      |Alice               |E1 |12   
+2          |E2        |Betty               |E2 |10   
+NULL       |NULL      |Carmen              |E3 |13   
+NULL       |NULL      |Don                 |E4 |12   
+NULL       |NULL      |Ed                  |E5 |13   
 ij> -- PASS:0844 If 5 rows selected with ordered rows and column values ?
 -- PASS:0844    NULL NULL Alice  E1 12  ?
 -- PASS:0844       2 E2   Betty  E2 10  ?

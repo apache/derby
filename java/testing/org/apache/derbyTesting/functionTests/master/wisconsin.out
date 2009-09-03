@@ -29214,11 +29214,9 @@ Left result set:
 					start position:
 						>= on first 1 column(s).
 						Ordered null semantics on the following columns: 
-						0 
 					stop position:
 						> on first 1 column(s).
 						Ordered null semantics on the following columns: 
-						0 
 					qualifiers:
 						None
 	Right result set:

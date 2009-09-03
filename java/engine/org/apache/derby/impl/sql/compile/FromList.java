@@ -385,27 +385,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	}
 
 	/**
-	 * Returns true if any Outer joins present. Used to set Nullability
-	 *
-	 * @return	True if has any outer joins. False otherwise.
-	 */
-	public boolean hasOuterJoins()
-				throws StandardException
-	{
-		FromTable	fromTable;
-
-		int size = size();
-		for (int index = 0; index < size; index++)
-		{
-			fromTable = (FromTable) elementAt(index);
-			if (fromTable instanceof HalfOuterJoinNode)
-				return true;
-		}
-
-		return false;
-	}
-
-	/**
 	 * Expand a "*" into the appropriate ResultColumnList. If the "*"
 	 * is unqualified it will expand into a list of all columns in all
 	 * of the base tables in the from list at the current nesting level;

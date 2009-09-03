@@ -136,13 +136,13 @@ NULL
 NULL       
 NULL       
 ij> select a.* from ((values ('a', 'b')) a inner join (values ('c', 'd')) b on 1=1) left outer join (values ('e', 'f')) c on 1=1;
-1   |2   
----------
-a   |b   
+1|2
+---
+a|b
 ij> select b.* from ((values ('a', 'b')) a inner join (values ('c', 'd')) b on 1=1) left outer join (values ('e', 'f')) c on 1=1;
-1   |2   
----------
-c   |d   
+1|2
+---
+c|d
 ij> select c.* from ((values ('a', 'b')) a inner join (values ('c', 'd')) b on 1=1) left outer join (values ('e', 'f')) c on 1=1;
 1   |2   
 ---------

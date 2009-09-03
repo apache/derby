@@ -45,21 +45,21 @@ ij> -- PASS:0863 If COUNT = 3?
 
    SELECT * FROM HU.STAFF LEFT OUTER JOIN HU.WORKS
       ON (HU.STAFF.EMPNUM=HU.WORKS.EMPNUM);
-EMP&|EMPNAME             |GRADE|CITY           |EMP&|PNUM|HOURS 
-----------------------------------------------------------------
-E1  |Alice               |12   |Deale          |E1  |P1  |40    
-E1  |Alice               |12   |Deale          |E1  |P2  |20    
-E1  |Alice               |12   |Deale          |E1  |P3  |80    
-E1  |Alice               |12   |Deale          |E1  |P4  |20    
-E1  |Alice               |12   |Deale          |E1  |P5  |12    
-E1  |Alice               |12   |Deale          |E1  |P6  |12    
-E2  |Betty               |10   |Vienna         |E2  |P1  |40    
-E2  |Betty               |10   |Vienna         |E2  |P2  |80    
-E3  |Carmen              |13   |Vienna         |E3  |P2  |20    
-E4  |Don                 |12   |Deale          |E4  |P2  |20    
-E4  |Don                 |12   |Deale          |E4  |P4  |40    
-E4  |Don                 |12   |Deale          |E4  |P5  |80    
-E5  |Ed                  |13   |Akron          |NULL|NULL|NULL  
+EM&|EMPNAME             |GRADE|CITY           |EMP&|PNUM|HOURS 
+---------------------------------------------------------------
+E1 |Alice               |12   |Deale          |E1  |P1  |40    
+E1 |Alice               |12   |Deale          |E1  |P2  |20    
+E1 |Alice               |12   |Deale          |E1  |P3  |80    
+E1 |Alice               |12   |Deale          |E1  |P4  |20    
+E1 |Alice               |12   |Deale          |E1  |P5  |12    
+E1 |Alice               |12   |Deale          |E1  |P6  |12    
+E2 |Betty               |10   |Vienna         |E2  |P1  |40    
+E2 |Betty               |10   |Vienna         |E2  |P2  |80    
+E3 |Carmen              |13   |Vienna         |E3  |P2  |20    
+E4 |Don                 |12   |Deale          |E4  |P2  |20    
+E4 |Don                 |12   |Deale          |E4  |P4  |40    
+E4 |Don                 |12   |Deale          |E4  |P5  |80    
+E5 |Ed                  |13   |Akron          |NULL|NULL|NULL  
 ij> -- PASS:0863 If 13 rows are returned?
 
    COMMIT WORK;

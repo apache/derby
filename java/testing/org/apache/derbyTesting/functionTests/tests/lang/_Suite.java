@@ -73,6 +73,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(GroupByExpressionTest.suite());
         suite.addTest(InbetweenTest.suite());
         suite.addTest(InsertTest.suite());
+        suite.addTest(JoinTest.suite());
 		suite.addTest(LangScripts.suite());
         suite.addTest(MathTrigFunctionsTest.suite());
         suite.addTest(PrepareExecuteDDL.suite());
