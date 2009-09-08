@@ -572,6 +572,17 @@ public class JoinNode extends TableOperatorNode
 				throw StandardException.newException(SQLState.LANG_AMBIGUOUS_COLUMN_NAME, 
 						 columnReference.getSQLColumnName());
 			}
+
+            // All columns on the logical right side of a "half" outer join
+            // can contain nulls. The correct nullability is set by
+            // bindResultColumns()/buildRCL(). However, if bindResultColumns()
+            // has not been called yet, the caller of this method will see
+            // the wrong nullability. This problem is logged as DERBY-2916.
+            // Until that's fixed, set the nullability here too.
+            if (this instanceof HalfOuterJoinNode) {
+                rightRC.setNullability(true);
+            }
+
 			resultColumn = rightRC;
 		}
 

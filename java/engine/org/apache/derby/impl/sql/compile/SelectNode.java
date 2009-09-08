@@ -635,10 +635,6 @@ public class SelectNode extends ResultSetNode
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_ELEMENTS);
 		}
-
-		/* Fix nullability in case of any outer joins in the fromList */
-		if (fromList.hasOuterJoins())
-			resultColumns.setNullability(true);
 	}
 
 	/**
