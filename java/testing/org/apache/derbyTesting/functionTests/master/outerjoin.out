@@ -62,15 +62,9 @@ Any unrecognized commands are treated as potential SQL commands and executed dir
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- no join clause
 select * from t1 left outer join t2;
-ERROR 42X01: Syntax error: Encountered "<EOF>" at line 2, column 35.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ERROR 42Y11: A join specification is required with the 'LEFT OUTER JOIN' clause.
 ij> select * from t1 right outer join t2;
-ERROR 42X01: Syntax error: Encountered "<EOF>" at line 1, column 36.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ERROR 42Y11: A join specification is required with the 'RIGHT OUTER JOIN' clause.
 ij> -- positive tests
 select t1.c1 from t1 left outer join t2 on t1.c1 = t2.c1;
 C1         
