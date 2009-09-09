@@ -9202,12 +9202,19 @@ qualifiedJoin(ResultSetNode leftRSN, boolean nestedInParens) throws StandardExce
 	TableOperatorNode	ton = null;
 	Object[]			onOrUsingClause = null;
 	ResultColumnList	usingClause = null;
-	ValueNode			onClause = null;
+	ValueNode			onClause;
 }
 {
+	/* RESOLVE - If we ever support NATURAL JOIN then we will need to break up
+	 * this rule.  Right now the joinSpecification() is non-optional.  This
+	 * allows us to build the Join tree from left to right. With NATURAL JOINS
+	 * there is no joinSpecification() and we would want to build the tree from
+	 * right to left.
+	 */
+	//[ <NATURAL> ] 
 		[ joinType = joinType() ] <JOIN>
 		rightRSN = tableReferenceTypes(nestedInParens) 
-		[ onOrUsingClause = joinSpecification(leftRSN, rightRSN) ]
+		onOrUsingClause = joinSpecification(leftRSN, rightRSN)
 	{
 		/* If NATURAL OR UNION is specified, then no joinSpecification()
 		 * is required, otherwise it is required.
@@ -9219,11 +9226,8 @@ qualifiedJoin(ResultSetNode leftRSN, boolean nestedInParens) throws StandardExce
 		 */
 
 		/* Figure out whether an ON or USING clause was used */
-		if (onOrUsingClause != null)
-		{
-			onClause = (ValueNode) onOrUsingClause[ON_CLAUSE];
-			usingClause = (ResultColumnList) onOrUsingClause[USING_CLAUSE];
-		}
+		onClause = (ValueNode) onOrUsingClause[ON_CLAUSE];
+		usingClause = (ResultColumnList) onOrUsingClause[USING_CLAUSE];
 
 		if (onClause == null && usingClause == null)
 		{
