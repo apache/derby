@@ -606,10 +606,6 @@ CREATE TABLE t2(col1 int, col2 int);
 INSERT INTO t1 VALUES(3,4);
 INSERT INTO t2 VALUES(3,4);
 
--- CROSS JOIN not supported in both Cloudscape and DB2 mode and that is why rather than getting feature not implemented, we will get syntax error
--- (1) CROSS JOIN should be disabled in FROM clause of SELECT statement
-SELECT * FROM t1 CROSS JOIN t2;
-
 -- (2) USING should be disabled in INNER JOIN of SELECT statement
 SELECT * FROM t1 INNER JOIN t2 USING (col1);
 

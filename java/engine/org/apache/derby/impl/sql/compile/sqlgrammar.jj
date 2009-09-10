@@ -1369,6 +1369,7 @@ public class SQLParser
 	 *
 	 *	JOIN
 	 *	INNER JOIN
+	 *	CROSS JOIN
 	 *	LEFT OUTER JOIN
 	 *	RIGHT OUTER JOIN
 	 *
@@ -1387,6 +1388,10 @@ public class SQLParser
 			retval = true;
 		}
 		else if (tokKind1 == INNER && tokKind2 == JOIN)
+		{
+			retval = true;
+		}
+		else if (tokKind1 == CROSS && tokKind2 == JOIN)
 		{
 			retval = true;
 		}
@@ -1988,6 +1993,7 @@ TOKEN [IGNORE_CASE] :
 |	<CORRESPONDING: "corresponding">
 |	<COUNT: "count">
 |	<CREATE: "create">
+|	<CROSS: "cross">
 |	<CURRENT: "current">
 |	<CURRENT_DATE: "current_date">
 |	<CURRENT_TIME: "current_time">
@@ -8904,12 +8910,27 @@ optionalTableProperties() throws StandardException :
 FromTable
 tableReference(boolean nestedInParens) throws StandardException :
 {
+    FromTable fromTable;
+    TableOperatorNode joinTable = null;
+}
+{
+    fromTable = tableFactor()
+        (LOOKAHEAD({joinedTableExpressionFollows()})
+            joinTable = joinedTableExpression(
+                (joinTable == null) ? fromTable : joinTable,
+                nestedInParens)) *
+    {
+        return joinTable == null ? fromTable : joinTable;
+    }
+}
+
+FromTable tableFactor() throws StandardException :
+{
 	JavaToSQLValueNode	javaToSQLNode = null;
 	TableName			tableName;
 	String				correlationName = null;
 	ResultColumnList	derivedRCL = null;
 	FromTable			fromTable;
-	TableOperatorNode	joinTable = null;
 	FromTable			tableReference;
 	Object[]			optionalTableClauses = new Object[OPTIONAL_TABLE_CLAUSES_SIZE];
 	Properties			tableProperties = null;
@@ -8926,25 +8947,8 @@ tableReference(boolean nestedInParens) throws StandardException :
 		[ <AS> ] correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 		[ <LEFT_PAREN> derivedRCL = derivedColumnList() <RIGHT_PAREN> ]
 		[ optionalTableClauses = optionalTableProperties() ]
-		(LOOKAHEAD( { joinedTableExpressionFollows() } )
-		 joinTable = joinedTableExpression(
-									(joinTable != null) ?
-										joinTable :
-										(FromTable) nodeFactory.getNode(
-											C_NodeTypes.FROM_VTI,
-											javaToSQLNode.getJavaValueNode(), 
-											correlationName,
-											derivedRCL, 
-											((optionalTableClauses != null) ? 
-												(Properties) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES] :
-												(Properties) null),
-											getContextManager()),
-									nestedInParens)) *
 	{
-		/* Build a derived table if not a join expression */
-		if (joinTable == null)
-		{
-			fromTable = (FromTable) nodeFactory.getNode(
+		fromTable = (FromTable) nodeFactory.getNode(
 								C_NodeTypes.FROM_VTI,
 								javaToSQLNode.getJavaValueNode(), 
 								correlationName,
@@ -8953,46 +8957,20 @@ tableReference(boolean nestedInParens) throws StandardException :
 									(Properties) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES] :
 									(Properties) null),
 								getContextManager()); 
-		}
-		else
-		{
-			fromTable = joinTable;
-		}
-
 		return fromTable;
 	}
 |
 	/* identifier() used to be correlationName() */
 	tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 		optionalTableClauses = optionalTableClauses()
-		(LOOKAHEAD( { joinedTableExpressionFollows() } )
-		 joinTable = joinedTableExpression(
-									(joinTable != null) ?
-										joinTable :
-										(FromTable) nodeFactory.getNode(
-												C_NodeTypes.FROM_BASE_TABLE,
-												tableName,
-												(String) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_CORRELATION_NAME],
-												(ResultColumnList) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_DERIVED_RCL],
-												(Properties) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES],
-												getContextManager()), 
-									nestedInParens)) *
 	{
-		/* Build a from table if not a join expression */
-		if (joinTable == null)
-		{
-			fromTable = (FromTable) nodeFactory.getNode(
+		fromTable = (FromTable) nodeFactory.getNode(
 											C_NodeTypes.FROM_BASE_TABLE,
 											tableName,
 												(String) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_CORRELATION_NAME],
 												(ResultColumnList) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_DERIVED_RCL],
 												(Properties) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES],
 											getContextManager());
-		}
-		else
-		{		   
-			fromTable = joinTable;
-		}
 		return fromTable;
 	}
 |
@@ -9022,25 +9000,8 @@ tableReference(boolean nestedInParens) throws StandardException :
 	derivedTable = derivedTable() [ <AS> ] correlationName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 		[ <LEFT_PAREN> derivedRCL = derivedColumnList() <RIGHT_PAREN> ]
 		[ optionalTableClauses = optionalTableProperties() ]
-		( LOOKAHEAD( { joinedTableExpressionFollows() } )
-		  joinTable = joinedTableExpression(
-									(joinTable != null) ?
-										joinTable :
-										(FromTable) nodeFactory.getNode(
-													C_NodeTypes.FROM_SUBQUERY,
-													derivedTable, 
-													correlationName,
-													derivedRCL,
-													((optionalTableClauses != null) ?
-														(Properties) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES] :
-														(Properties) null),
-													getContextManager()),
-									nestedInParens)) *
 	{
-		/* Build a derived table if not a join expression */
-		if (joinTable == null)
-		{
-			fromTable = (FromTable) nodeFactory.getNode(
+		fromTable = (FromTable) nodeFactory.getNode(
 											C_NodeTypes.FROM_SUBQUERY,
 											derivedTable, 
 											correlationName,
@@ -9049,31 +9010,13 @@ tableReference(boolean nestedInParens) throws StandardException :
 												(Properties) optionalTableClauses[OPTIONAL_TABLE_CLAUSES_TABLE_PROPERTIES] :
 												(Properties) null),
 											getContextManager()); 
-		}
-		else
-		{
-			fromTable = joinTable;
-		}
 
 		return fromTable;
 	}
 |
 	<LEFT_PAREN> tableReference = tableReferenceTypes(true) <RIGHT_PAREN>
-		( LOOKAHEAD( { joinedTableExpressionFollows() } )
-		  joinTable = joinedTableExpression(
-									(joinTable != null) ?
-										joinTable :
-										tableReference,
-									nestedInParens)) *
 	{
-		if (joinTable == null)
-		{
-			fromTable = tableReference; 
-		}
-		else
-		{
-			fromTable = joinTable;
-		}
+		fromTable = tableReference;
 
 		return fromTable;
 	}
@@ -9188,10 +9131,39 @@ joinedTableExpression(ResultSetNode leftRSN, boolean nestedInParens) throws Stan
 	TableOperatorNode joinNode;
 }
 {
+	joinNode = crossJoin(leftRSN, nestedInParens)
+	{
+		return joinNode;
+	}
+|
 	joinNode = qualifiedJoin(leftRSN, nestedInParens) 
 	{
 		return joinNode;
 	}
+}
+
+TableOperatorNode
+crossJoin(ResultSetNode leftRSN, boolean nestedInParens)
+throws StandardException :
+{
+    ResultSetNode rightRSN;
+}
+{
+    <CROSS> <JOIN> rightRSN = tableFactor()
+    {
+        TableOperatorNode ton = (TableOperatorNode) nodeFactory.getNode(
+                C_NodeTypes.JOIN_NODE,
+                leftRSN,
+                rightRSN,
+                null, // no ON clause in CROSS JOIN
+                null, // no USING clause in CROSS JOIN
+                null,
+                null,
+                null,
+                getContextManager());
+        ton.setNestedInParens(nestedInParens);
+        return ton;
+    }
 }
 
 TableOperatorNode
@@ -9205,24 +9177,14 @@ qualifiedJoin(ResultSetNode leftRSN, boolean nestedInParens) throws StandardExce
 	ValueNode			onClause;
 }
 {
-	/* RESOLVE - If we ever support NATURAL JOIN then we will need to break up
-	 * this rule.  Right now the joinSpecification() is non-optional.  This
-	 * allows us to build the Join tree from left to right. With NATURAL JOINS
-	 * there is no joinSpecification() and we would want to build the tree from
-	 * right to left.
-	 */
-	//[ <NATURAL> ] 
 		[ joinType = joinType() ] <JOIN>
 		rightRSN = tableReferenceTypes(nestedInParens) 
 		onOrUsingClause = joinSpecification(leftRSN, rightRSN)
 	{
-		/* If NATURAL OR UNION is specified, then no joinSpecification()
-		 * is required, otherwise it is required.
-		 */
-
-		/* RESOLVE - Since we don't support NATURAL or UNION joins yet,
-		 * onOrUsingClause must be non-null.  (Change error message if and
-		 * when grammar changes.)
+		/* If NATURAL or CROSS is specified, then no joinSpecification()
+		 * is required, otherwise it is required. NATURAL and CROSS should
+		 * be handled by other rules, so this rule should always see a
+		 * joinSpecification().
 		 */
 
 		/* Figure out whether an ON or USING clause was used */
@@ -13655,6 +13617,7 @@ reservedKeyword() :
 |	tok = <CONVERT>
 |	tok = <CORRESPONDING>
 |	tok = <CREATE>
+|	tok = <CROSS>
 |	tok = <CURRENT>
 |	tok = <CURRENT_DATE>
 |	tok = <CURRENT_TIME>

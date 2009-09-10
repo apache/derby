@@ -1189,13 +1189,6 @@ ij> INSERT INTO t1 VALUES(3,4);
 1 row inserted/updated/deleted
 ij> INSERT INTO t2 VALUES(3,4);
 1 row inserted/updated/deleted
-ij> -- CROSS JOIN not supported in both Cloudscape and DB2 mode and that is why rather than getting feature not implemented, we will get syntax error
--- (1) CROSS JOIN should be disabled in FROM clause of SELECT statement
-SELECT * FROM t1 CROSS JOIN t2;
-ERROR 42X01: Syntax error: Encountered "<EOF>" at line 3, column 30.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- (2) USING should be disabled in INNER JOIN of SELECT statement
 SELECT * FROM t1 INNER JOIN t2 USING (col1);
 ERROR 42X01: Syntax error: Encountered "USING" at line 2, column 32.
