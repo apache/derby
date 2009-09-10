@@ -1,6 +1,6 @@
 /*
 
- Derby - Class org.apache.derbyTesting.functionTests.tests.lang.DeclareGlobalTempTableJava
+ Derby - Class org.apache.derbyTesting.functionTests.tests.lang.DeclareGlobalTempTableJavaTest
 
  Licensed to the Apache Software Foundation (ASF) under one or more
  contributor license agreements.  See the NOTICE file distributed with
@@ -54,7 +54,7 @@ public class DeclareGlobalTempTableJavaTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-	return TestConfiguration.embeddedSuite(DeclareGlobalTempTableJavaTest.class);
+	return TestConfiguration.defaultSuite(DeclareGlobalTempTableJavaTest.class);
     }
     protected void setUp() throws Exception {
         super.setUp();
@@ -753,6 +753,74 @@ public class DeclareGlobalTempTableJavaTest extends BaseJDBCTestCase {
             assertSQLState("23502", e);
         }
     }
+    /**
+     *  Temporary table create and drop Rollback behaviour
+     *  Tests the basic function of temporary table with holdability
+     *
+     *  @throws SQLException 
+     */
+    public void testTempTableDDLRollbackbehaviour1() throws SQLException {
+        Statement s = createStatement();
+        s.executeUpdate("declare global temporary table SESSION.t1(c11 int, c12 int) on commit preserve rows  not logged");
+        JDBC.assertSingleValueResultSet(s.executeQuery("select count(*) from SESSION.t1") , "0");
+        s.executeUpdate("drop table SESSION.t1");
+        // we've removed the table, so select should fail
+        assertStatementError("42X05" , s , "select * from SESSION.t1");
+        rollback();
+        // should still fail after rollback; we don't have savepoints and
+        // we rolled back entire transaction, incl. creation of temp table
+        assertStatementError("42X05" , s , "select * from SESSION.t1");
+    }
+
+    /**
+     *  Temporary table create and drop Rollback behaviour
+     *  Tests drop of temp table and rollback - select should still work
+     *
+     *  @throws SQLException 
+     */
+    public void testTempTableDDLRollbackbehaviour2() throws SQLException {
+        Statement s = createStatement();
+        s.executeUpdate("declare global temporary table SESSION.t1(c11 int, c12 int) on commit preserve rows  not logged");
+        commit();
+        // drop table and rollback - select should still work
+        s.executeUpdate("drop table SESSION.t1");
+        assertStatementError("42X05" , s , "select * from SESSION.t1");
+        rollback();
+        // select should work again
+        JDBC.assertSingleValueResultSet(s.executeQuery("select count(*) from SESSION.t1") , "0");
+    }
+
+    /**
+     *  Temporary table create and drop Rollback behaviour
+     *  Tests drop of temp table and commit - select should no longer work
+     *
+     *  @throws SQLException 
+     */
+    public void testTempTableDDLRollbackbehaviour3() throws SQLException {
+        Statement s = createStatement();
+        s.executeUpdate("declare global temporary table SESSION.t1(c11 int, c12 int) on commit preserve rows  not logged");
+        JDBC.assertSingleValueResultSet(s.executeQuery("select count(*) from SESSION.t1") , "0");
+        commit();
+        // drop table and commit - select should no longer work
+        s.executeUpdate("drop table SESSION.t1");
+        commit();
+        assertStatementError("42X05" , s , "select * from SESSION.t1");
+    }
+
+    /**
+     *  Temporary table create and drop Rollback behaviour
+     *  Tests create of temp table and rollback - select should fail
+     *
+     *  @throws SQLException 
+     */
+    public void testTempTableDDLRollbackbehaviour4() throws SQLException {
+        Statement s = createStatement();
+        s.executeUpdate("declare global temporary table SESSION.t1(c11 int, c12 int) on commit preserve rows  not logged");
+        JDBC.assertSingleValueResultSet(s.executeQuery("select count(*) from SESSION.t1") , "0");
+        rollback();
+        assertStatementError("42X05" , s , "select * from SESSION.t1");
+    }
+    
     /**
      * Rollback behavior - declare temp table, rollback, select should fail.
      * 

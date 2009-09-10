@@ -182,6 +182,9 @@ public class _Suite extends BaseTestCase  {
             // Test uses DriverManager to connect to database in jar.
             suite.addTest(DBInJarTest.suite());
             suite.addTest(ConnectTest.suite());
+            
+            // test uses PooledConnections and Savepoints
+            suite.addTest(DeclareGlobalTempTableJavaJDBC30Test.suite());
         }
         
         suite.addTest(BigDataTest.suite());

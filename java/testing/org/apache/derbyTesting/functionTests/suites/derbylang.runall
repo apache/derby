@@ -8,7 +8,6 @@ lang/currentSchema.sql
 lang/cursorerrors.sql
 lang/db2Compatibility.sql
 lang/ddlTableLockMode.sql
-lang/declareGlobalTempTableJavaJDBC30.java
 lang/desc_index.sql
 lang/dropTable.sql
 lang/emptyStatistics.sql
