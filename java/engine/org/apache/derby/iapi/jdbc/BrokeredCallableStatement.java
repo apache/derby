@@ -59,6 +59,10 @@ public class BrokeredCallableStatement extends BrokeredPreparedStatement
         return getCallableStatement().wasNull();
     }
 
+    public final void close() throws SQLException {
+        control.closeRealCallableStatement();
+    }
+    
     public final String getString(int parameterIndex)
         throws SQLException
     {

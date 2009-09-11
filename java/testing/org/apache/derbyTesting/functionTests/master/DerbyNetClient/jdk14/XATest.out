@@ -202,4 +202,6 @@ Global xact Statement psdh_d Statement holdable HOLD_CURSORS_OVER_COMMIT 1
 Global xact Statement pshh_d Statement holdable HOLD_CURSORS_OVER_COMMIT 1
 Global xact Statement psch_d Statement holdable CLOSE_CURSORS_AT_COMMIT 2
 derby966 complete
+derby4310PreparedStatement
+derby4310CallableStatement
 XATest complete

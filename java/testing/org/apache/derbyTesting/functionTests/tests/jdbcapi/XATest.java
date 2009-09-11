@@ -21,6 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.Connection;
+import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -76,6 +77,11 @@ public class XATest {
         
         // DERBY-966 holdability testing
         derby966(dsx);
+        
+        // DERBY-4310 closing of statement with an embedded XAConnection
+        // should not cause recompile of statement
+        derby4310PreparedStatement(dsx);
+        derby4310CallableStatement(dsx);
 
         System.out.println("XATest complete");
     }
@@ -775,6 +781,125 @@ public class XATest {
 
     }
     
+    /** 
+     * Dummy method for derby4310CallableStatement
+     */
+    public static void zeroArg() {  }
+    
+    /**
+     * This test checks the fix on DERBY-4310, for not repreparing 
+     * CallableStatements upon calling close() on them.
+     */
+    public static void derby4310CallableStatement(XADataSource xads) 
+    throws Exception 
+    {
+        System.out.println("derby4310CallableStatement");
+        try {
+            XAConnection xac = xads.getXAConnection();
+            XAResource xar = xac.getXAResource();
+
+            Xid xid = XATestUtil.getXid(4310, 9, 49);
+
+            /* Create the procedure based on XATest.zeroArg() */
+            Connection conn = xac.getConnection();
+            Statement s = conn.createStatement();
+            s.executeUpdate("CREATE PROCEDURE ZA() LANGUAGE JAVA "+
+                            "EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.jdbcapi.XATest.zeroArg' "+
+                            "PARAMETER STYLE JAVA");
+            conn.commit();
+            
+            /* Prepare and execute CallableStatement based on the procedure above */
+            CallableStatement cs = conn.prepareCall("CALL ZA()");
+            cs.execute();
+
+            /* Start and end a transaction on the XAResource object */
+            xar.start(xid, XAResource.TMNOFLAGS);
+            xar.end(xid, XAResource.TMSUCCESS);
+
+            /* Drop the procedure on a parallel, regular connection */
+            Connection conn2 = ij.startJBMS();
+            Statement s2 = conn2.createStatement();
+            s2.execute("DROP PROCEDURE ZA");
+            conn2.commit();
+            conn2.close();
+            
+            try {
+                /* Try to close the prepared statement. This would throw an exception
+                 * before the fix, claiming that the table was not found. */
+                cs.close();
+            } finally {
+                /* Rollback the transaction and close the connections */
+                xar.rollback(xid);
+                conn.close();
+                xac.close();
+            }
+        } catch (SQLException e) {
+            TestUtil.dumpSQLExceptions(e);
+            e.printStackTrace(System.out);
+        } catch (XAException e) {
+            XATestUtil.dumpXAException("derby4310CallableStatement", e);
+        }
+    }
+    
+    /**
+     * This test checks the fix on DERBY-4310, for not repreparing 
+     * PreparedStatements upon calling close() on them.
+     * @param xads
+     */
+    private static void derby4310PreparedStatement(XADataSource xads)
+    throws Exception
+    {
+        System.out.println("derby4310PreparedStatement");
+        try {
+            XAConnection xac = xads.getXAConnection();
+            XAResource xar = xac.getXAResource();
+
+            Xid xid = XATestUtil.getXid(4310, 9, 48);
+            
+            Connection conn = xac.getConnection();
+            
+            /* Create the table and insert some records into it. */
+            Statement s = conn.createStatement();
+            s.executeUpdate("CREATE TABLE foo4310_PS (I INT)");
+            conn.createStatement().executeUpdate("insert into APP.foo4310_PS values (0)");
+            conn.createStatement().executeUpdate("insert into APP.foo4310_PS values (1)");
+            conn.createStatement().executeUpdate("insert into APP.foo4310_PS values (2)");
+            conn.commit();
+            
+            /* Prepare and execute the statement to be tested */
+            PreparedStatement ps = conn.prepareStatement("SELECT * FROM APP.foo4310_PS");
+            ps.executeQuery().close();
+
+            /* Start and end a transaction on the XAResource object */
+            xar.start(xid, XAResource.TMNOFLAGS);
+            xar.end(xid, XAResource.TMSUCCESS);
+
+            /* Drop the table on a parallel, regular connection */
+            Connection conn2 = ij.startJBMS();
+            Statement s2 = conn2.createStatement();
+            s2.execute("DROP TABLE foo4310_PS");
+            conn2.commit();
+            conn2.close();
+
+            
+            try {
+                /* Try to close the prepared statement. This would throw an exception
+                 * before the fix, claiming that the table was not found. */
+                ps.close();
+            } finally {
+                /* Rollback the transaction and close the connections */
+                xar.rollback(xid);
+                conn.close();
+                xac.close();
+            }
+        } catch (SQLException e) {
+            TestUtil.dumpSQLExceptions(e);
+            e.printStackTrace(System.out);
+        } catch (XAException e) {
+            XATestUtil.dumpXAException("derby4310PreparedStatement", e);
+        }
+    }
+
     /**
      * Derby-966 holdability and global/location transactions.
      * (work in progress)
