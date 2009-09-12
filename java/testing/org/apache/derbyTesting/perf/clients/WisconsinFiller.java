@@ -34,6 +34,16 @@ import org.apache.derbyTesting.functionTests.tests.lang.wisconsin;
  */
 public class WisconsinFiller implements DBFiller {
 
+    int numRows;
+    public WisconsinFiller(int nRows)
+    {
+        super();
+        numRows = nRows;
+    }
+    public WisconsinFiller()
+    {
+        this(10000);
+    }
     public void fill(Connection c) throws SQLException {
         c.setAutoCommit(false);
 
@@ -42,7 +52,7 @@ public class WisconsinFiller implements DBFiller {
         dropTable(c, "ONEKTUP");
         dropTable(c, "BPRIME");
 
-        wisconsin.createTables(c, false);
+        wisconsin.createTables(c, false, numRows);
 
         c.commit();
     }

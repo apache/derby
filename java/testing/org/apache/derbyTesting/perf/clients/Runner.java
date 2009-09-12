@@ -200,7 +200,7 @@ public class Runner {
      * @return the value of the option
      * @throws NumberFormatException if the value is not an {@code int}
      */
-    private static int getLoadOpt(String option, int defaultValue) {
+    static int getLoadOpt(String option, int defaultValue) {
         String val = (String) loadOpts.get(option);
         return val == null ? defaultValue : Integer.parseInt(val);
     }
@@ -235,6 +235,7 @@ public class Runner {
 "      * sr_update_multi - single-record update on a random table\n" +
 "                    (32 tables with a single row each)\n" +
 "      * index_join - join of two tables (using indexed columns)\n" +
+"      * group_by - GROUP BY queries against TENKTUP1\n" +
 "      * bank_tx - emulate simple bank transactions, similar to TPC-B. The\n" +
 "                  following load-specific options are accepted:\n" +
 "            - branches=NN: specifies the number of branches in the db\n" +
@@ -303,6 +304,8 @@ public class Runner {
             return new SingleRecordFiller(1, 32);
         } else if (load.equals("index_join")) {
             return new WisconsinFiller();
+        } else if (load.equals("group_by")) {
+            return new WisconsinFiller(getLoadOpt("numRows", 10000));
         } else if (load.equals("bank_tx")) {
             return new BankAccountFiller(
                 getLoadOpt("branches", 1),
@@ -337,6 +340,8 @@ public class Runner {
             return new SingleRecordUpdateClient(1, 32);
         } else if (load.equals("index_join")) {
             return new IndexJoinClient();
+        } else if (load.equals("group_by")) {
+            return new GroupByClient();
         } else if (load.equals("bank_tx")) {
             return new BankTransactionClient(
                 getLoadOpt("branches", 1),

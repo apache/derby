@@ -64,6 +64,10 @@ public class wisconsin {
 	
 	public static void createTables(Connection conn, boolean compress)
 			throws SQLException {
+                createTables(conn, compress, 10000);
+        }
+	public static void createTables(Connection conn, boolean compress, int numRows)
+			throws SQLException {
 
 		Statement stmt = conn.createStatement();
 		
@@ -83,9 +87,9 @@ public class wisconsin {
 											 "stringu1 char(52) not null, " +
 											 "stringu2 char(52) not null, " +
 											 "string4 char(52) )");
-		//--insert 10000 rows into TENKTUP1
+		//--insert numRows rows into TENKTUP1
 		WISCInsert wi = new WISCInsert();
-		wi.doWISCInsert(10000, "TENKTUP1", conn);
+		wi.doWISCInsert(numRows, "TENKTUP1", conn);
 		
 		stmt.execute("create unique index TK1UNIQUE1 on TENKTUP1(unique1)");
 		stmt.execute("create unique index TK1UNIQUE2 on TENKTUP1(unique2)");
@@ -117,9 +121,9 @@ public class wisconsin {
 											"stringu1 char(52), " +
 											"stringu2 char(52), " +
 											"string4 char(52) )");
-		//-- insert 10000 rows into TENKTUP2
+		//-- insert numRows rows into TENKTUP2
 		wi = new WISCInsert();
-		wi.doWISCInsert(10000, "TENKTUP2", conn);
+		wi.doWISCInsert(numRows, "TENKTUP2", conn);
 		
 		stmt.execute("create unique index TK2UNIQUE1 on TENKTUP2(unique1)");
 		stmt.execute("create unique index TK2UNIQUE2 on TENKTUP2(unique2)");
