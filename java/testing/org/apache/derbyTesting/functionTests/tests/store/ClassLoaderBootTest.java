@@ -221,18 +221,19 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
             Connection conn1 = ds_1.getConnection();
             // now attemp to boot using another class loader.
             setThreadLoader(loader_2);
+            DataSource ds_2 = JDBCDataSource.getDataSource();
             try {
-                DataSource ds_2 = JDBCDataSource.getDataSource();
                 ds_2.getConnection();
                 fail("booted database that was already booted by another CLR");
             } catch (SQLException e) {
                 SQLException ne = e.getNextException();
                 assertPreventDualBoot(ne);
+                JDBCDataSource.shutEngine(ds_2);
             }
             
-            // shutdown the database.
+            // shutdown the engine.
             setThreadLoader(loader_1);
-            JDBCDataSource.shutdownDatabase(ds_1);
+            JDBCDataSource.shutEngine(ds_1);
             
         } catch (SQLException se) {
             dumpSQLException(se);
@@ -262,9 +263,9 @@ public class ClassLoaderBootTest extends BaseJDBCTestCase {
             setThreadLoader(loader_2);
             DataSource ds_2 = JDBCDataSource.getDataSource();
             ds_2.getConnection();
-            // shutdown the database.
-            JDBCDataSource.shutdownDatabase(ds_2);
-            
+            // shutdown the engine for both the class loaders.
+            JDBCDataSource.shutEngine(ds_2);            
+            JDBCDataSource.shutEngine(ds_1);
         } catch (SQLException se) {
             dumpSQLException(se);
         }finally {
