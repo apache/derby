@@ -25,6 +25,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import javax.sql.DataSource;
+
 import junit.framework.Assert;
 
 /**
@@ -263,4 +265,22 @@ public class JDBCDataSource {
             clearStringBeanProperty(ds, "shutdownDatabase");
         }
     }
+
+    /**
+     * Shutdown the engine described by this data source.
+     * The shutdownDatabase property is cleared by this method.
+     */
+    public static void shutEngine(javax.sql.DataSource ds) throws SQLException {
+        setBeanProperty(ds, "shutdownDatabase", "shutdown");
+        JDBCDataSource.setBeanProperty(ds, "databaseName", "");
+        try {
+            ds.getConnection();
+            Assert.fail("Engine failed to shut down");
+        } catch (SQLException e) {
+             BaseJDBCTestCase.assertSQLState("Engine shutdown", "XJ015", e);
+        } finally {
+            clearStringBeanProperty(ds, "shutdownDatabase");
+        }
+    }
+
 }
