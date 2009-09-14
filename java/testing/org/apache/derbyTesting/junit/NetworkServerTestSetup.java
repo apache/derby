@@ -41,13 +41,17 @@ import org.apache.derby.drda.NetworkServerControl;
  */
 final public class NetworkServerTestSetup extends BaseTestSetup {
 
-    /** Setting maximum wait time to 40 seconds.   On some platforms
+    /** Setting maximum wait time to 40 seconds by default.  On some platforms
      * it may take this long to start the server.  Increasing the wait
      *  time should not adversely affect those
      *  systems with fast port turnaround as the actual code loops for 
      *  SLEEP_TIME intervals, so should never see WAIT_TIME.
+     *  For even slower systems (or for faster systems) the default value can
+     *  be overwritten using the property derby.tests.networkServerStartTimeout
+     *  (which is in seconds, rather than milliseconds)
      */
-    private static final long WAIT_TIME = 40000;
+    private static final long DEFAULT_WAIT_TIME = 40000;
+    private static final long WAIT_TIME = getWaitTime();
     
     /** Sleep for 500 ms before pinging the network server (again) */
     private static final int SLEEP_TIME = 100;
@@ -629,4 +633,32 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     {
         return pingForServerUp(control, null, true);
     }
+    
+    /*
+     * set the period before network server times out on start up based on the
+     * value passed in with property derby.tests.networkServerStartTimeout
+     * in seconds, or use the default
+     * for example: with DEFAULT_WAIT_TIME set to 40000, i.e. 40 seconds,
+     * setting the property like so: 
+     *          -Dderby.tests.networkServerStartTimeout=60
+     * would extend the timeout to 1 minute.
+     * If an invalid value is passed in (eg. 'abc') the calling test will fail
+     */
+    public static long getWaitTime() {
+        long waitTime = DEFAULT_WAIT_TIME;
+        String waitString = BaseTestCase.getSystemProperty(
+                "derby.tests.networkServerStartTimeout");
+        if (waitString != null && waitString.length() != 0)
+        {
+            try {
+                waitTime = (Long.parseLong(waitString)*1000);
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail("trouble setting WAIT_TIME from passed in property " +
+                        "derby.tests.networkServerStartTimeout");
+            }
+        }
+        return waitTime;
+    }
+
 }
