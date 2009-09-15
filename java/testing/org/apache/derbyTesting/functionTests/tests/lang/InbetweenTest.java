@@ -193,9 +193,9 @@ public final class InbetweenTest extends BaseJDBCTestCase {
             + "'15:47:28', null, null)");
         
         st.executeUpdate(
-            " insert into bt2 values (28, 82, null, '15:47:28', "
-            + "'"+Timestamp.valueOf("0000-00-00 15:47:28.0")+"', null)");
-        
+                " insert into bt2 values (28, 82, null, '15:47:28', "
+                + "'"+Timestamp.valueOf("2007-02-23 15:47:27.544")+"', null)");
+            
         //create indexes
         
         st.executeUpdate(" create index ix_big_i on big (i)");       
