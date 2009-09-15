@@ -31,7 +31,7 @@ public final class JDBCClient {
     /**
      * The embedded JDBC client.
      */
-    static final JDBCClient EMBEDDED_30= new JDBCClient(
+    public static final JDBCClient EMBEDDED_30= new JDBCClient(
             "Embedded_30", 
             "org.apache.derby.jdbc.EmbeddedDriver", 
             "org.apache.derby.jdbc.EmbeddedDataSource", 

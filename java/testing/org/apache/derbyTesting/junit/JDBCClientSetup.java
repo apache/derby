@@ -27,7 +27,7 @@ import junit.framework.Test;
  * is restored at tearDown time.
  *
  */
-final class JDBCClientSetup extends ChangeConfigurationSetup {
+public final class JDBCClientSetup extends ChangeConfigurationSetup {
 
     private final JDBCClient client;
      

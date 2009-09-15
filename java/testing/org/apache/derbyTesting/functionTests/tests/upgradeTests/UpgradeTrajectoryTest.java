@@ -41,6 +41,8 @@ import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.EmbeddedDataSource;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBCClient;
+import org.apache.derbyTesting.junit.JDBCClientSetup;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
@@ -147,6 +149,7 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
 
     public static Version VERSION_10_0_2_1 = new Version( 10, 0, 2, 1 );
     public static Version VERSION_10_1_3_1 = new Version( 10, 1, 3, 1 );
+    public static Version VERSION_10_2_2_0 = new Version( 10, 2, 2, 0 );
     public static Version VERSION_10_5_1_1 = new Version( 10, 5, 1, 1 );
     public static Version VERSION_10_6_0_0 = new Version( 10, 6, 0, 0 );
 
@@ -433,6 +436,17 @@ public class UpgradeTrajectoryTest extends BaseJDBCTestCase
         preReleaseUpgrade.setProperty( "derby.database.allowPreReleaseUpgrade", "true");
         
         setup = new SystemPropertyTestSetup(setup, preReleaseUpgrade );
+
+        // If the first release in the trajectory pre-dates the release which
+        // introduced JDBC4, force the client to be the JDBC3 client. This
+        // prevents us from falling through and picking up the JDBC4 data source from
+        // the system classpath rather than picking up a datasource from
+        // the version-specific classloader.
+        if ( trajectory.getVersion( 0 ).compareTo( VERSION_10_2_2_0 ) < 0 )
+        {
+            setup = new JDBCClientSetup( setup, JDBCClient.EMBEDDED_30 );
+        }
+        
         suite.addTest( setup );
     }
 
