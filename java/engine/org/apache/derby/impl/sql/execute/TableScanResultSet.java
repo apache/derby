@@ -82,7 +82,7 @@ class TableScanResultSet extends ScanResultSet
     protected int[] indexCols;		//index keys base column position array
 	public int rowsPerRead;
 	public boolean forUpdate;
-	private boolean sameStartStopPosition;
+	final boolean sameStartStopPosition;
 	private boolean nextDone;
 	private RowLocation rlTemplate;
 
@@ -244,19 +244,7 @@ class TableScanResultSet extends ScanResultSet
 		if (dcoci == null)
 			dcoci = tc.getDynamicCompiledConglomInfo(conglomId);
 
-
-		if (startKeyGetter != null)
-		{
-			startPosition = (ExecIndexRow) startKeyGetter.invoke(activation);
-			if (sameStartStopPosition)
-			{
-				stopPosition = startPosition;
-			}
-		}
-		if (stopKeyGetter != null)
-		{
-			stopPosition = (ExecIndexRow) stopKeyGetter.invoke(activation);
-		}
+        initStartAndStopKey();
 
 		/* NOTE: We always open the ScanController on the 1st open
 		 * to do the keyed conglomerate check.
@@ -327,6 +315,22 @@ class TableScanResultSet extends ScanResultSet
 		openTime += getElapsedMillis(beginTime);
 	}
 
+    /**
+     * Initialize the {@code startPosition} and {@code stopPosition} fields
+     * which are used to limit the rows returned by the scan.
+     */
+    void initStartAndStopKey() throws StandardException {
+        if (startKeyGetter != null) {
+            startPosition = (ExecIndexRow) startKeyGetter.invoke(activation);
+            if (sameStartStopPosition) {
+                stopPosition = startPosition;
+            }
+        }
+        if (stopKeyGetter != null) {
+            stopPosition = (ExecIndexRow) stopKeyGetter.invoke(activation);
+        }
+    }
+
 	/*
 	** Open the scan controller
 	**
@@ -335,74 +339,10 @@ class TableScanResultSet extends ScanResultSet
 	protected void openScanController(TransactionController tc)
 		throws StandardException
 	{
-		openScanController(tc, (DataValueDescriptor)null);
-	}
-
-	/*
-	** Does the work of openScanController.
-	**
-	** @param tc transaction controller; will open one if null.
-	** @param probeValue If non-null then we will open the scan controller
-	**  and position it using the received probeValue as the start key.
-	**  Otherwise we'll use whatever value is in startPosition (if non-
-	**  null) as the start key.
-	*/
-	protected void openScanController(TransactionController tc,
-		DataValueDescriptor probeValue) throws StandardException
-	{
 		DataValueDescriptor[] startPositionRow = 
             startPosition == null ? null : startPosition.getRowArray();
 		DataValueDescriptor[] stopPositionRow = 
             stopPosition == null ? null : stopPosition.getRowArray();
-
-		/* If we have a probe value then we do the "probe" by positioning
-		 * the scan at the first row matching the value.  The way to do
-		 * that is to use the value as a start key, which is what will
-		 * happen if we plug it into first column of "startPositionRow".
-		 * So in this case startPositionRow[0] functions as a "place-holder"
-		 * for the probe value.  The same goes for stopPositionRow[0].
-		 *
-		 * Note that it *is* possible for a start/stop key to contain more
-		 * than one column (ex. if we're scanning a multi-column index). In
-		 * that case we plug probeValue into the first column of the start
-		 * and/or stop key and leave the rest of the key as it is.  As an 
-		 * example, assume we have the following predicates:
-		 *
-		 *    ... where d in (1, 20000) and b > 200 and b <= 500
-		 *
-		 * And assume further that we have an index defined on (d, b).
-		 * In this case it's possible that we have TWO start predicates
-		 * and TWO stop predicates: the IN list will give us "d = probeVal",
-		 * which is a start predicate and a stop predicate; then "b > 200"
-		 * may give us a second start predicate, while "b <= 500" may give
-		 * us a second stop predicate.  So in this situation we want our
-		 * start key to be:
-		 *
-		 *    (probeValue, 200)
-		 *
-		 * and our stop key to be:
-		 *
-		 *    (probeValue, 500).
-		 *
-		 * This will effectively limit the scan so that it only returns
-		 * rows whose "D" column equals probeValue and whose "B" column
-		 * falls in the range of 200 thru 500.
-		 *
-		 * Note: Derby currently only allows a single start/stop predicate
-		 * per column. See PredicateList.orderUsefulPredicates().
-		 */
-		if (probeValue != null)
-		{
-			startPositionRow[0] = probeValue;
-
-		 	/* If the start key and stop key are the same, we've already set
-			 * stopPosition equal to startPosition as part of openCore().
-			 * So by putting the probe value into startPositionRow[0], we
-			 * also put it into stopPositionRow[0].
-			 */
-			if (!sameStartStopPosition)
-				stopPositionRow[0] = probeValue;
-		}
 
 		// Clear the Qualifiers's Orderable cache 
 		if (qualifiers != null)
@@ -461,44 +401,12 @@ class TableScanResultSet extends ScanResultSet
 	*/
 	protected void reopenScanController() throws StandardException
 	{
-		reopenScanController((DataValueDescriptor)null);
-	}
-
-	/*
-	** Does the work of reopenScanController.
-	**
-	** @param probeValue If non-null then we will open the scan controller
-	**  and position it using the received probeValue as the start key.
-	**  Otherwise we'll use whatever value is in startPosition (if non-
-	**  null) as the start key.
-	*/
-	protected void reopenScanController(DataValueDescriptor probeValue)
-		throws StandardException
-	{
 		DataValueDescriptor[] startPositionRow = 
             startPosition == null ? null : startPosition.getRowArray();
 		DataValueDescriptor[] stopPositionRow = 
             stopPosition == null ? null : stopPosition.getRowArray();
 
-		/* If we have a probe value then we do the "probe" by using the
-		 * value as a start and stop key.  See openScanController() for
-		 * details.  Note that in this case we do *not* want to reset
-		 * the rowsThisScan variable because we are going to be doing
-		 * multiple "probes" for a single scan.  Logic to detect when
-		 * when we've actually started a new scan (as opposed to just
-		 * repositioning an existing scan based on a probe value) is
-		 * in MultiProbeTableScanResultSet.reopenScanController(),
-		 * and that method will then take care of resetting the variable
-		 * (if needed) for probing scans.
-		 */
-		if (probeValue != null)
-		{
-			startPositionRow[0] = probeValue;
-			if (!sameStartStopPosition)
-				stopPositionRow[0] = probeValue;
-		}
-		else
-			rowsThisScan = 0;
+        rowsThisScan = 0;
 
 		// Clear the Qualifiers's Orderable cache 
 		if (qualifiers != null)
@@ -531,18 +439,7 @@ class TableScanResultSet extends ScanResultSet
 		if (SanityManager.DEBUG)
 		    SanityManager.ASSERT(isOpen, "TableScanResultSet not open, cannot reopen");
 
-		if (startKeyGetter != null)
-		{
-			startPosition = (ExecIndexRow) startKeyGetter.invoke(activation);
-			if (sameStartStopPosition)
-			{
-				stopPosition = startPosition;
-			}
-		}
-		if (stopKeyGetter != null)
-		{
-			stopPosition = (ExecIndexRow) stopKeyGetter.invoke(activation);
-		}
+        initStartAndStopKey();
 
 		// Check whether there are any comparisons with unordered nulls
 		// on either the start or stop position.  If there are, we can

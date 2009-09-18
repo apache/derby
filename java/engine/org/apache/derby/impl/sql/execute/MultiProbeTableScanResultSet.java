@@ -28,11 +28,11 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
-import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
+import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -87,6 +87,14 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
      * for cases where all necessary sorting occurred at compilation time).
      */
     private int sortRequired;
+
+    /**
+     * Tells whether or not we should skip the next attempt to (re)open the
+     * scan controller. If it is {@code true} it means that the previous call
+     * to {@link #initStartAndStopKey()} did not find a new probe value, which
+     * means that the probe list is exhausted and we shouldn't perform a scan.
+     */
+    private boolean skipNextScan;
 
     /**
      * Constructor.  Just save off the relevant probing state and pass
@@ -215,29 +223,6 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
     }
 
     /**
-     * Open the scan controller
-     *
-     * @param tc transaction controller; will open one if null.
-     * @exception StandardException thrown on failure to open
-     */
-    protected void openScanController(TransactionController tc)
-        throws StandardException
-    {
-        /* If we're opening the scan controller for the first time then
-         * we want to use the first value in the (now sorted) list as
-         * the start/stop key.  That's what we pass in here.
-         */
-        openScanController(tc, probeValues[0]);
-
-        /* probeValIndex should be the index of the *next* value to
-         * use.  Since we just positioned ourselves at the 0th probe
-         * value with the above call, the next value we want is the
-         * one at index "1".
-         */
-        probeValIndex = 1;
-    }
-
-    /**
      * @see NoPutResultSet#reopenCore
      */
     public void reopenCore() throws StandardException
@@ -298,6 +283,33 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
      */
     protected void reopenScanController() throws StandardException
     {
+        // TableScanResultSet.reopenScanController() will reset rowsThisScan
+        // because it thinks this is a completely new scan. However, we want
+        // it to reflect the total number of rows seen in the multi-probe
+        // scan, so we keep the original value and restore it after reopening
+        // the controller. Instead, we reset rowsThisScan to 0 each time
+        // initStartAndStopKey() is called on the first probe value.
+        long rows = rowsThisScan;
+        super.reopenScanController();
+        rowsThisScan = rows;
+    }
+
+    /**
+     * Initialize the start key and the stop key used in the scan. Both keys
+     * will be set to the probe value. If no new probe value was found (the
+     * probe list was exhausted), the flag skipNextScan will be {@code true}
+     * when the method returns to prevent a new scan from being reopened with
+     * a missing or incorrect probe value.
+     */
+    void initStartAndStopKey() throws StandardException {
+
+        // Make sure the fields are initialized with a placeholder.
+        // startPosition and stopPosition will always be non-null in a
+        // MultiProbeTableScanResultSet, and they will always be initialized
+        // to the first value in the probe list. They will be changed to
+        // the actual probe value later in this method.
+        super.initStartAndStopKey();
+
         /* If we're looking for the first value in the probe list, then
          * reset the row scan count.  Otherwise leave it unchanged since
          * we're just continuing an already-opened scan.  Note that we
@@ -307,21 +319,76 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
         if (probeValIndex == 0)
             rowsThisScan = 0;
 
-        DataValueDescriptor pv = null;
-        if (moreInListVals())
-        {
-            pv = getNextProbeValue();
-            if (pv == null)
-            {
-                /* We'll get here when we've exhausted the probe list. In
-                 * that case leave the scan as it is, which effectively
-                 * means we are done.
-                 */
-                return;
+        DataValueDescriptor[] startPositionRow = startPosition.getRowArray();
+        DataValueDescriptor[] stopPositionRow = stopPosition.getRowArray();
+
+        DataValueDescriptor probeValue = getNextProbeValue();
+
+		/* If we have a probe value then we do the "probe" by positioning
+		 * the scan at the first row matching the value.  The way to do
+		 * that is to use the value as a start key, which is what will
+		 * happen if we plug it into first column of "startPositionRow".
+		 * So in this case startPositionRow[0] functions as a "place-holder"
+		 * for the probe value.  The same goes for stopPositionRow[0].
+		 *
+		 * Note that it *is* possible for a start/stop key to contain more
+		 * than one column (ex. if we're scanning a multi-column index). In
+		 * that case we plug probeValue into the first column of the start
+		 * and/or stop key and leave the rest of the key as it is.  As an
+		 * example, assume we have the following predicates:
+		 *
+		 *    ... where d in (1, 20000) and b > 200 and b <= 500
+		 *
+		 * And assume further that we have an index defined on (d, b).
+		 * In this case it's possible that we have TWO start predicates
+		 * and TWO stop predicates: the IN list will give us "d = probeVal",
+		 * which is a start predicate and a stop predicate; then "b > 200"
+		 * may give us a second start predicate, while "b <= 500" may give
+		 * us a second stop predicate.  So in this situation we want our
+		 * start key to be:
+		 *
+		 *    (probeValue, 200)
+		 *
+		 * and our stop key to be:
+		 *
+		 *    (probeValue, 500).
+		 *
+		 * This will effectively limit the scan so that it only returns
+		 * rows whose "D" column equals probeValue and whose "B" column
+		 * falls in the range of 200 thru 500.
+		 *
+		 * Note: Derby currently only allows a single start/stop predicate
+		 * per column. See PredicateList.orderUsefulPredicates().
+		 */
+        if (probeValue != null) {
+            startPositionRow[0] = probeValue;
+            if (!sameStartStopPosition) {
+                stopPositionRow[0] = startPositionRow[0];
             }
         }
 
-        reopenScanController(pv);
+        // If we didn't find a new probe value, the probe list is exhausted,
+        // and we shouldn't open a new scan. skipScan() will detect this and
+        // prevent (re)openScanController() from being called.
+        skipNextScan = (probeValue == null);
+    }
+
+    /**
+     * Check if the scan should be skipped. It should be skipped if (1)
+     * {@link #initStartAndStopKey()} exhausted the probe list, or (2) the scan
+     * should return no results because of nulls in the start key or stop key.
+     * See {@link NoPutResultSetImpl#skipScan(ExecIndexRow,ExecIndexRow)} for
+     * details about (2).
+     *
+     * @param startPosition the key on which to start the scan
+     * @param stopPosition the key on which to stop the scan
+     * @return {@code true} if scan should be skipped, {@code false} otherwise
+     */
+    protected boolean skipScan(
+            ExecIndexRow startPosition, ExecIndexRow stopPosition)
+		throws StandardException
+    {
+        return skipNextScan || super.skipScan(startPosition, stopPosition);
     }
 
     /**
