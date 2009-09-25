@@ -781,6 +781,11 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
      * Test dynamic arguments
      */
     public void testDynamicArgsMetaData() throws SQLException {
+
+    	//since there is no getParameterMetaData() call available in JSR169 
+    	//implementations, do not run this test if we are running JSR169
+    	if (JDBC.vmSupportsJSR169()) return;
+
         PreparedStatement ps = prepareStatement(
             "select * from t1 where a = ? order by b " +
             "offset ? rows fetch next ? rows only");
