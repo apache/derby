@@ -46,12 +46,20 @@ public abstract class BaseExpressionActivation
 
 
 	/**
+	 * <p>
 	 * Get the minimum value of 4 input values.  If less than 4 values, input
-	 * NULL.  If more than 4 input values, call this multiple times to
+	 * {@code null} for the unused parameters and place them at the end.
+	 * If more than 4 input values, call this multiple times to
 	 * accumulate results.  Also have judge's type as parameter to have a base
 	 * upon which the comparison is based.  An example use is for code 
 	 * generation in bug 3858.
+	 * </p>
 	 * 
+	 * <p>
+	 * If all the input values are SQL NULL, return SQL NULL. Otherwise, return
+	 * the minimum value of the non-NULL inputs.
+	 * </p>
+	 *
 	 * @param v1		1st value
 	 * @param v2		2nd value
 	 * @param v3		3rd value
@@ -77,23 +85,34 @@ public abstract class BaseExpressionActivation
 			judge = (DataValueDescriptor) new TypeId(judgeTypeFormatId, new UserDefinedTypeIdImpl()).getNull();
 			
 		DataValueDescriptor minVal = v1;
-		if (v2 != null && judge.lessThan(v2, minVal).equals(true))
+		if (v2 != null &&
+				(minVal.isNull() || judge.lessThan(v2, minVal).equals(true)))
 			minVal = v2;
-		if (v3 != null && judge.lessThan(v3, minVal).equals(true))
+		if (v3 != null &&
+				(minVal.isNull() || judge.lessThan(v3, minVal).equals(true)))
 			minVal = v3;
-		if (v4 != null && judge.lessThan(v4, minVal).equals(true))
+		if (v4 != null &&
+				(minVal.isNull() || judge.lessThan(v4, minVal).equals(true)))
 			minVal = v4;
 		return minVal;
 	}
 
 
 	/**
+	 * <p>
 	 * Get the maximum value of 4 input values.  If less than 4 values, input
-	 * NULL.  If more than 4 input values, call this multiple times to
+	 * {@code null} for the unused parameters and place them at the end.
+	 * If more than 4 input values, call this multiple times to
 	 * accumulate results.  Also have judge's type as parameter to have a base
 	 * upon which the comparison is based.  An example use is for code 
 	 * generation in bug 3858.
+	 * </p>
 	 * 
+	 * <p>
+	 * If all the input values are SQL NULL, return SQL NULL. Otherwise, return
+	 * the maximum value of the non-NULL inputs.
+	 * </p>
+	 *
 	 * @param v1		1st value
 	 * @param v2		2nd value
 	 * @param v3		3rd value
@@ -119,11 +138,14 @@ public abstract class BaseExpressionActivation
 			judge =  new TypeId(judgeTypeFormatId, new UserDefinedTypeIdImpl()).getNull();
 
 		DataValueDescriptor maxVal = v1;
-		if (v2 != null && judge.greaterThan(v2, maxVal).equals(true))
+		if (v2 != null &&
+				(maxVal.isNull() || judge.greaterThan(v2, maxVal).equals(true)))
 			maxVal = v2;
-		if (v3 != null && judge.greaterThan(v3, maxVal).equals(true))
+		if (v3 != null &&
+				(maxVal.isNull() || judge.greaterThan(v3, maxVal).equals(true)))
 			maxVal = v3;
-		if (v4 != null && judge.greaterThan(v4, maxVal).equals(true))
+		if (v4 != null &&
+				(maxVal.isNull() || judge.greaterThan(v4, maxVal).equals(true)))
 			maxVal = v4;
 		return maxVal;
 	}

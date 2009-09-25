@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -120,5 +121,42 @@ public class JoinTest extends BaseJDBCTestCase {
                 "(t t3 left join t t4 on 1=1) on 1=1");
         JDBC.assertNullability(rs, new boolean[]{true, false, true, true});
         JDBC.assertEmpty(rs);
+    }
+
+    /**
+     * DERBY-4372: Some joins used to miss some rows after an index was
+     * created, because the start and stop keys passed to the index scan were
+     * wrong if the IN list in the JOIN condition contained a NULL.
+     */
+    public void testDerby4372() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table d4372_1 (a int, b int)");
+        s.execute("create table d4372_2 (c int)");
+        s.execute("insert into d4372_1 values (1,1),(null,1),(1,null)," +
+                "(2,2),(2,null),(null,2),(3,3),(null,3),(3,null),(null,null)");
+        s.execute("insert into d4372_2 values (1), (3)");
+
+        String[][] expectedJoinResult = {
+            {"1", "1", "1"},
+            {null, "1", "1"},
+            {"1", null, "1"},
+            {"3", "3", "3"},
+            {null, "3", "3"},
+            {"3", null, "3"}
+        };
+
+        // Try a problematic join, but without an index.
+        PreparedStatement ps = prepareStatement(
+                "select * from d4372_1 join d4372_2 on c in (a, b)");
+
+        JDBC.assertUnorderedResultSet(ps.executeQuery(), expectedJoinResult);
+
+        // Now create an index on C and retry the join. Should still return the
+        // same rows, but didn't before DERBY-4372 was fixed.
+        s.execute("create index d4372_idx on d4372_2(c)");
+        JDBC.assertUnorderedResultSet(ps.executeQuery(), expectedJoinResult);
+
+        s.execute("drop table d4372_1");
+        s.execute("drop table d4372_2");
     }
 }
