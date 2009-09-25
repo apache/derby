@@ -206,7 +206,7 @@ public class RealLastIndexKeyScanStatistics
         // pre-order, depth-first traversal
         // me first
         visitor.visit(this);
-        // I´m a leaf node and I have no children ...
+        // I'm a leaf node and I have no children ...
         
     }
     public String getRSXplainType() { return XPLAINUtil.OP_LASTINDEXKEYSCAN; }

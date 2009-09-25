@@ -299,7 +299,7 @@ public class RealHashScanStatistics
         // pre-order, depth-first traversal
         // me first
         visitor.visit(this);
-        // I´m a leaf node, I have no children ...
+        // I'm a leaf node, I have no children ...
         
     }
     public String getRSXplainType() { return XPLAINUtil.OP_HASHSCAN; }
