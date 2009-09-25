@@ -876,6 +876,8 @@ public class GenericLanguageConnectionContext
 		int size = acts.size();
 		if (size > 0)
 		{
+            int cursorHash = cursorName.hashCode();
+
 			for (int i = 0; i < size; i++) {
 				 Activation a = (Activation) acts.get(i);
 
@@ -887,6 +889,22 @@ public class GenericLanguageConnectionContext
 
 
 				String executingCursorName = a.getCursorName();
+
+                // If the executing cursor has no name, or if the hash code of
+                // its name is different from the one we're looking for, it
+                // can't possibly match. Since java.lang.String caches the
+                // hash code (at least in the most common implementations),
+                // checking the hash code is cheaper than comparing the names
+                // with java.lang.String.equals(), especially if there are many
+                // open statements associated with the connection. See
+                // DERBY-3882. Note that we can only use the hash codes to
+                // determine that the names don't match. Even if the hash codes
+                // are equal, we still need to call equals() to verify that the
+                // two names actually are equal.
+                if (executingCursorName == null ||
+                        executingCursorName.hashCode() != cursorHash) {
+                    continue;
+                }
 
 				 if (cursorName.equals(executingCursorName)) {
 
