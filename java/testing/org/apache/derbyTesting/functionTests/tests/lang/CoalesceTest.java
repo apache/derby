@@ -30,10 +30,10 @@ import java.sql.SQLException;
 import java.io.UnsupportedEncodingException;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 
 
 /**
@@ -1170,6 +1170,19 @@ public class CoalesceTest extends BaseJDBCTestCase
                expectedValues[index++]);
     }
 
+    /**
+     * Regression test for DERBY-4342. A self-join with COALESCE in the WHERE
+     * clause used to fail with a NullPointerException because
+     * CoalesceFunctionNode didn't remap column references correctly.
+     */
+    public void testColumnRemappingDerby4342() throws SQLException {
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+                "select t1.smallintcol from " +
+                "AllDataTypesTable t1 join AllDataTypesTable t2 " +
+                "on t1.smallintcol=t2.smallintcol where " +
+                "coalesce(t1.smallintcol, t1.integercol) = 1"),
+                "1");
+    }
 
     /**************supporting methods *******************/
     private void dumpRS(ResultSet rs, String expectedValue) throws SQLException

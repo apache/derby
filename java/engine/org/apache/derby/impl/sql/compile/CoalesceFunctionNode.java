@@ -428,4 +428,20 @@ public class CoalesceFunctionNode extends ValueNode
 		}
 	}
         
+    /**
+     * Remap all the {@code ColumnReference}s in this tree to be clones of
+     * the underlying expression.
+     *
+     * @return the remapped tree
+     * @throws StandardException if an error occurs
+     */
+    public ValueNode remapColumnReferencesToExpressions()
+            throws StandardException
+    {
+        for (int i = 0; i < argumentsList.size(); i++) {
+            ValueNode vn = (ValueNode) argumentsList.elementAt(i);
+            vn.remapColumnReferencesToExpressions();
+        }
+        return this;
+    }
 }
