@@ -226,10 +226,6 @@ public interface C_NodeTypes
     static final int GRANT_ROLE_NODE = 215;
     static final int REVOKE_ROLE_NODE = 216;
 
-    // OLAP Window functions
-    static final int WINDOW_NODE = 220;
-    static final int ROW_NUMBER_COLUMN_NODE = 221;
-
     // generated columns
     static final int GENERATION_CLAUSE_NODE = 222;
 

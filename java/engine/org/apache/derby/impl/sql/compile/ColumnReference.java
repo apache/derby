@@ -611,7 +611,6 @@ public class ColumnReference extends ValueNode
 		referencedTabs.set(tableNumber);
 
 		return ( ! replacesAggregate ) &&
-			   ( ! source.isWindowFunction() ) && 
 			   ( (source.getExpression() instanceof ColumnReference) ||
 			     (source.getExpression() instanceof VirtualColumnNode) ||
 				 (source.getExpression() instanceof ConstantNode));
@@ -1003,7 +1002,7 @@ public class ColumnReference extends ValueNode
 	{ 
 		return (source.getExpression() instanceof ColumnReference);
 	}
-	
+
 	/**
 	 * The type of a ColumnReference is the type of its
      * source unless the source is null then it is

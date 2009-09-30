@@ -139,7 +139,6 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(NestedWhereSubqueryTest.suite());
         suite.addTest(ConglomerateSharingTest.suite());
         suite.addTest(NullableUniqueConstraintTest.suite());
-        suite.addTest(OLAPTest.suite());
         suite.addTest(UniqueConstraintSetNullTest.suite());
         suite.addTest(ViewsTest.suite());
         suite.addTest(DeadlockModeTest.suite());

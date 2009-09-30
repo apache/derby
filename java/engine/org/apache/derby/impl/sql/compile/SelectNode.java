@@ -33,6 +33,8 @@ import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
@@ -1254,29 +1256,11 @@ public class SelectNode extends ResultSetNode
 				throws StandardException
 	{
 		boolean				eliminateSort = false;
+		PredicateList		restrictionList;
+		ResultColumnList	prRCList;
 		ResultSetNode		prnRSN;
-		boolean				hasWindowFunction = false;
-		ResultColumnList	originalRCL = this.resultColumns.copyListAndObjects();		
 
-		/*
-		 * Even if we have a window function, we must do all projection and
-		 * restriction at this stage. Restricting on a window function, i.e
-		 *    SELECT ... <WINDOWFUNCTION> AS W ... WHERE W ...
-		 * is not allowed. Restrictions need to be evaluated in an outer SELECT
-		 * to achieve this.
-		 */
-		hasWindowFunction = resultColumns.containsWindowFunctionResultColumn();		
-		if (hasWindowFunction) {				
-			/*
-			 * Remove any window function columns now, and reinsert them from
-			 * the copy made above once grouping and ordering has been performed.
-			 */						
-			resultColumns.removeWindowFunctionColumns();			
-			if (orderByList != null) {
-				orderByList.adjustForWindowFunctionColumns();				
-			}
-		}
-		
+
 		prnRSN = (ResultSetNode) getNodeFactory().getNode(
 								C_NodeTypes.PROJECT_RESTRICT_NODE,
 								fromList.elementAt(0),	/* Child ResultSet */
@@ -1324,12 +1308,8 @@ public class SelectNode extends ResultSetNode
 			eliminateSort = eliminateSort || gbn.getIsInSortedOrder();
 		}
 
-		/* 
-		 * If it is distinct, that must also be taken care of. But, if there is 
-		 * a window function in the RCL we must delay duplicate elimination
-		 * until after the window function has been evaluated.
-		 */
-		if (isDistinct && !hasWindowFunction)
+		// if it is distinct, that must also be taken care of.
+		if (isDistinct)
 		{
 			// We first verify that a distinct is valid on the
 			// RCL.
@@ -1433,10 +1413,6 @@ public class SelectNode extends ResultSetNode
 								null,
 								null,
 								getContextManager());
-				/*
-				 * Remove added ordering columns from the saved original RCL
-				*/								
-				originalRCL.removeOrderByColumns();				
 			}
 		}
 
@@ -1485,93 +1461,6 @@ public class SelectNode extends ResultSetNode
 		/* Set the cost of this node in the generated node */
 		prnRSN.costEstimate = costEstimate.cloneMe();
 
-		/*
-		 * Now that grouping and ordering has been performed, we can reinsert 
-		 * the window function column(s), and pull the WindowNode(s) up from 
-		 * under the window function ResultColumn(s).
-		 */
-		if (hasWindowFunction) {		
-			/*
-			 * Pull all WindowNodes up from under their window function column,
-			 * and place the WindowNode on top.
-			 */			
-			int size = originalRCL.size();						
-			int windowFunctionLevel = 0;		
-			ResultColumnList windowFunctionRCL = originalRCL.copyListAndObjects();										
-			for (int index = 0; index < size; index++) {
-				ResultColumn rc = (ResultColumn) originalRCL.elementAt(index);				
-				/*
-				 * NOTE: We only care about window function columns that appear 
-				 * here, and not about references into subquerys or similar.
-				 */
-				if (rc.expressionIsWindowFunction()) {					
-			
-					WindowFunctionColumnNode wfcn = (WindowFunctionColumnNode) rc.getExpression();
-					WindowNode windowNode = wfcn.getWindowNode();
-
-					windowFunctionLevel++;
-					
-					windowNode.setResultColumns(windowFunctionRCL);
-					windowNode.setChildResult((ResultSetNode) prnRSN);
-					windowNode.setWindowFunctionLevel(windowFunctionLevel);
-					
-					/* Set the cost of this node in the generated node */
-					windowNode.costEstimate = costEstimate.cloneMe();
-					/* Set the new top */
-					prnRSN = windowNode;
-				}
-			}
-
-			/* 
-			 * After evaluation of the window function, we can do duplicate 
-			 * elimination for distinct queries.
-			 */
-			if (isDistinct)
-			{
-				/* Verify that a distinct is valid on the RCL. */
-				prnRSN.getResultColumns().verifyAllOrderable();
-
-				/*
-				 * We cannot push duplicate elimination into store via a hash 
-				 * scan when there is a window function in the RCL, but it may 
-				 * be possible to filter out duplicates without a sorter.
-				 */
-				boolean inSortedOrder = isOrderedResult(prnRSN.getResultColumns(), 
-														prnRSN, 
-														!(orderByAndDistinctMerged));
-				prnRSN = (ResultSetNode) getNodeFactory().getNode(
-											C_NodeTypes.DISTINCT_NODE,
-											prnRSN,
-											new Boolean(inSortedOrder),
-											null,
-											getContextManager());
-				prnRSN.costEstimate = costEstimate.cloneMe();
-			}
-			
-			/*
-			 * Top off with a PRN as this is the intent of this method. Even 
-			 * though this PRN is a noop and will never be generated, we should 
-			 * leave it here as other parts of the code expects to find 
-			 * PRN -> WN, or PRN -> DN -> WN.
-			 */
-			ResultColumnList newRCL = prnRSN.getResultColumns().copyListAndObjects(); 
-			newRCL.genVirtualColumnNodes(prnRSN, prnRSN.getResultColumns());
-						
-			prnRSN = (ResultSetNode) getNodeFactory().getNode(
-				C_NodeTypes.PROJECT_RESTRICT_NODE,
-				prnRSN, /* Child ResultSet */
-				newRCL, /* Projection */ 
-				null, /* Restriction */
-				null, /* Restriction as PredicateList */
-				null, /* Subquerys in Projection */
-				null, /* Subquerys in Restriction */
-				null,
-				getContextManager());
-		
-			/* Set the cost of this node in the generated node */
-			prnRSN.costEstimate = costEstimate.cloneMe();						
-		}
-	
 		return prnRSN;
 	}
 

@@ -2281,9 +2281,7 @@ TOKEN [IGNORE_CASE] :
 |	<LONG: "long">
 |	<LTRIM: "ltrim">
 |	<NONE: "none">
-|	<OVER: "over">
 |	<ROLE: "role">
-|	<ROW_NUMBER: "row_number">
 |	<RTRIM: "rtrim">
 |	<SUBSTR:	"substr">
 |	<XML:	"xml">
@@ -4973,8 +4971,6 @@ selectSublist(ResultColumnList resultColumns) throws StandardException :
 	ResultColumn	resultColumn;
 	ResultColumn	allResultColumn;
 	TableName	tableName;
-    String          columnName = null;
-
 }
 {
 	// This LOOKAHEAD is required because both a qualifiedName() and a
@@ -5001,50 +4997,6 @@ selectSublist(ResultColumnList resultColumns) throws StandardException :
 		/* Add the new AllResultColumn to the end of the list */
 		resultColumns.addResultColumn(allResultColumn);
 	}
-|
-		/*
-		 *  Lookahead to find window functions in unnamed windows
-		 *  TODO: Use a method rather than the explicit function names?
-		 *        Probably belongs in derivedColum()
-		 */
-		LOOKAHEAD(
-		{
-			getToken(1).kind == ROW_NUMBER &&
-			getToken(2).kind == LEFT_PAREN &&
-			getToken(3).kind == RIGHT_PAREN
-		}
-		)
-		<ROW_NUMBER> <LEFT_PAREN> <RIGHT_PAREN>        
-
-		/* 
-		 * TODO: <windowspecification> is ignored for now, but OVER is required
-		 */
-		<OVER> <LEFT_PAREN> <RIGHT_PAREN>
-
-		[ columnName = asClause() ]
-		{
-			/*
-			 * If there is no AS clause, use the windowfunction name as the result column name.
-			 */
-			WindowNode windowNode = (WindowNode) nodeFactory.getNode(
-											C_NodeTypes.WINDOW_NODE,
-											null,  // name
-											null,  // partition definition list
-											null,  // order by list
-											null,  // frame definition
-											getContextManager());
-			ValueNode expression = (ValueNode) nodeFactory.getNode(
-											C_NodeTypes.ROW_NUMBER_COLUMN_NODE,
-											windowNode,
-											getContextManager());
-			resultColumn = (ResultColumn) nodeFactory.getNode(
-											C_NodeTypes.RESULT_COLUMN,
-											columnName,
-											expression,
-											getContextManager());
-			/* Add the new ResultColumn to the end of the list */
-			resultColumns.addResultColumn(resultColumn);
-		}
 |
 	resultColumn = derivedColumn(resultColumns)
 	{
@@ -13911,7 +13863,6 @@ nonReservedKeyword()  :
 	|	tok = <OLD>
 	|	tok = <OLD_TABLE>
 	|	tok = <OJ>
-	|	tok = <OVER>
 	|	tok = <PASCAL>
 	|	tok = <PASSING>
 	|	tok = <PLI>
@@ -13934,7 +13885,6 @@ nonReservedKeyword()  :
 	|	tok = <ROLE>
 	|	tok = <ROW>
 //	|	tok = <ROW_COUNT>
-	|	tok = <ROW_NUMBER>
 	|   tok = <RR>
 	|   tok = <RS>
 	|	tok = <SCALE>
