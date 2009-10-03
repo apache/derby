@@ -27,6 +27,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -922,6 +923,22 @@ public class InListMultiProbeTest extends BaseJDBCTestCase {
                     {"1","1"},
                     {"3","1"}
                     });
+    }
+
+    /**
+     * Statements with {@code X IN (?,?)} used to go into an infinite loop if
+     * the first parameter was NULL and there was an index on X (DERBY-4376).
+     */
+    public void testDerby4376() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table d4376(x int primary key)");
+        s.execute("insert into d4376 values (1), (2), (3)");
+        PreparedStatement ps = prepareStatement(
+                "select * from d4376 where x in (?, ?)");
+        ps.setNull(1, Types.INTEGER);
+        ps.setInt(2, 1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+        s.execute("drop table d4376");
     }
 
     /**
