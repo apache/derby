@@ -833,6 +833,13 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         
         JDBC.assertFullResultSet(rs, expRS, true);
         
+        // Cleanup:
+        st.executeUpdate("drop table t4");
+        st.executeUpdate("drop table t3");
+        st.executeUpdate("drop table t2");
+        st.executeUpdate("drop table t1");
+        conn.commit();
+        
         // DERBY-2989
     }
     public void testJira2989() throws SQLException{
