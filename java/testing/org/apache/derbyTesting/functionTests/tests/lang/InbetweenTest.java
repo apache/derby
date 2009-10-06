@@ -4501,4 +4501,27 @@ public final class InbetweenTest extends BaseJDBCTestCase {
         conn.rollback();
         st.close();
     }
+
+    /**
+     * Regression test cases for DERBY-4388, where the not elimination in
+     * BetweenOperatorNode could make column references point to the wrong
+     * result sets after optimization, causing NullPointerExceptions.
+     */
+    public void testDerby4388NotElimination() throws SQLException {
+        setAutoCommit(false); // for easy cleanup with rollback() in tearDown()
+        Statement s = createStatement();
+        s.execute("create table d4388_t1(a int)");
+        s.execute("create table d4388_t2(b int)");
+        s.execute("insert into d4388_t1 values 0,1,2,3,4,5,6");
+        s.execute("insert into d4388_t2 values 0,1,2,3");
+        // The queries below used to cause NullPointerException.
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from d4388_t1 left join d4388_t2 " +
+                               "on a=b where b not between 1 and 5"),
+                new String[][]{{"0", "0"}});
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from d4388_t2 right join d4388_t1 " +
+                               "on a=b where b not between 1 and 5"),
+                new String[][]{{"0", "0"}});
+    }
 }
