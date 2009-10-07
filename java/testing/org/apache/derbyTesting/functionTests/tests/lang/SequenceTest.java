@@ -79,13 +79,16 @@ public class SequenceTest extends BaseJDBCTestCase {
         s.executeUpdate("DROP SEQUENCE mySeq1");
     }
 
-    public void testDuplicateCreationFailure() {
+    public void testDuplicateCreationFailure() throws SQLException {
+        Statement s = null;
         try {
-            Statement s = createStatement();
+            s = createStatement();
             s.executeUpdate("CREATE SEQUENCE mySeq1");
             s.executeUpdate("CREATE SEQUENCE mySeq1");
         } catch (SQLException sqle) {
             assertSQLState("X0Y68", sqle);
+        }finally{
+            s.executeUpdate("DROP SEQUENCE mySeq1"); // Drop the one created.
         }
     }
 
@@ -154,6 +157,9 @@ public class SequenceTest extends BaseJDBCTestCase {
         // should implicitly create schema ALPHA
         assertStatementError("42507", stmtBeta, "DROP SEQUENCE alpha.alpha_seq");
 
+        // Cleanup:
+        stmtAlpha.executeUpdate("DROP SEQUENCE alpha_seq");
+        
         stmtAlpha.close();
         stmtBeta.close();
         alphaCon.close();
@@ -170,6 +176,7 @@ public class SequenceTest extends BaseJDBCTestCase {
 
         Connection alphaCon = openUserConnection(ALPHA);
         Statement stmtAlpha = alphaCon.createStatement();
+        stmtAlpha.executeUpdate("CREATE SEQUENCE alpha_seq");
 
         Connection betaCon = openUserConnection(BETA);
         Statement stmtBeta = betaCon.createStatement();
@@ -177,6 +184,9 @@ public class SequenceTest extends BaseJDBCTestCase {
         // should implicitly create schema ALPHA
         assertStatementError("42507", stmtBeta, "CREATE SEQUENCE alpha.alpha_seq3");
 
+        // Cleanup:
+        stmtAlpha.executeUpdate("DROP SEQUENCE alpha_seq");
+        
         stmtAlpha.close();
         stmtBeta.close();
         alphaCon.close();
