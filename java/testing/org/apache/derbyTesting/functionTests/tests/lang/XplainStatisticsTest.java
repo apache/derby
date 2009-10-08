@@ -1085,6 +1085,8 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         throws SQLException
     {
         Statement s = createStatement();
+        // Make sure we don't have the tuple to be inserted already:
+        s.executeUpdate("delete from AIRLINES"); 
         enableXplainStyle(s);
         String insertStatement = 
             "insert into AIRLINES values " +
@@ -1641,6 +1643,9 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             if (e.getMessage().indexOf("RS_ID") < 0)
                 fail("Expected message about missing column RS_ID, not " +
                         e.getMessage());
+        } finally {
+            // Drop the created table if this testcase is not run as the last.
+            s.executeUpdate("drop table xpltest.sysxplain_resultsets");
         }
     }
 
