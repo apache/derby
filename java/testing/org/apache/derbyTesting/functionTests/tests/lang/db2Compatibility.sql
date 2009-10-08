@@ -606,15 +606,6 @@ CREATE TABLE t2(col1 int, col2 int);
 INSERT INTO t1 VALUES(3,4);
 INSERT INTO t2 VALUES(3,4);
 
--- (2) USING should be disabled in INNER JOIN of SELECT statement
-SELECT * FROM t1 INNER JOIN t2 USING (col1);
-
--- (3) USING should be disabled in INNER JOIN of SELECT statement
-SELECT * FROM t1 LEFT OUTER JOIN t2 USING (col1);
-
--- (4) USING should be disabled in INNER JOIN of SELECT statement
-SELECT * FROM t1 RIGHT OUTER JOIN t2 USING (col1);
-
 -- (5) TRUE and FALSE constants should be disabled in WHERE clause of SELECT statement
 SELECT * FROM t1 INNER JOIN t2 ON t1.col1 = t2.col1 WHERE true;
 SELECT * FROM t1 INNER JOIN t2 ON t1.col1 = t2.col1 WHERE false;

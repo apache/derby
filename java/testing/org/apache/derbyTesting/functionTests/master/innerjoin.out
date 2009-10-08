@@ -51,7 +51,7 @@ Any unrecognized commands are treated as potential SQL commands and executed dir
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- empty column list
 select * from t1 join t2 using ();
-ERROR 42X01: Syntax error: Encountered "using" at line 2, column 26.
+ERROR 42X01: Syntax error: Encountered ")" at line 2, column 33.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.

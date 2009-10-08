@@ -3724,6 +3724,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * @return A list of the join columns from this list
 	 */
 	ResultColumnList getJoinColumns(ResultColumnList joinColumns)
+            throws StandardException
 	{
 		ResultColumnList	newRCL = new ResultColumnList();
 
@@ -3744,6 +3745,11 @@ public class ResultColumnList extends QueryTreeNodeVector
 			}
 
 			ResultColumn xferRC = getResultColumn(columnName);
+
+            if (xferRC == null) {
+                throw StandardException.newException(
+                        SQLState.LANG_COLUMN_NOT_FOUND, columnName);
+            }
 
 			// Add the RC to the new list.
 			newRCL.addElement(xferRC);

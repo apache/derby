@@ -36,6 +36,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class JoinTest extends BaseJDBCTestCase {
     private static final String SYNTAX_ERROR = "42X01";
     private static final String AMBIGUOUS_COLNAME = "42X03";
+    private static final String COLUMN_NOT_IN_SCOPE = "42X04";
+    private static final String NON_COMPARABLE = "42818";
 
     public JoinTest(String name) {
         super(name);
@@ -400,5 +402,244 @@ public class JoinTest extends BaseJDBCTestCase {
             result[i] = rows[rows.length - 1 - i];
         }
         return result;
+    }
+
+    /**
+     * Tests for the USING clause added in DERBY-4370.
+     */
+    public void testUsingClause() throws SQLException {
+        // No auto-commit to make it easier to clean up the test tables.
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+
+        s.execute("create table t1(a int, b int, c int)");
+        s.execute("create table t2(b int, c int, d int)");
+        s.execute("create table t3(d int, e varchar(5), f int)");
+
+        s.execute("insert into t1 values (1,2,3),(2,3,4),(4,4,4)");
+        s.execute("insert into t2 values (1,2,3),(2,3,4),(5,5,5)");
+        s.execute("insert into t3 values " +
+                "(2,'abc',3),(4,'def',5),(null,null,null)");
+
+        // Simple one-column USING clauses for the different joins. Expected
+        // column order: First, the columns from the USING clause. Then,
+        // non-join columns from left side followed by non-join columns from
+        // right side.
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 join t2 using (b)"),
+            new String[][]{{"2", "1", "3", "3", "4"}});
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 inner join t2 using (b)"),
+            new String[][]{{"2", "1", "3", "3", "4"}});
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 left join t2 using (b)"),
+            new String[][]{
+                {"2", "1", "3", "3", "4"},
+                {"3", "2", "4", null, null},
+                {"4", "4", "4", null, null}});
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 left outer join t2 using (b)"),
+            new String[][]{
+                {"2", "1", "3", "3", "4"},
+                {"3", "2", "4", null, null},
+                {"4", "4", "4", null, null}});
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 right join t2 using (b)"),
+            new String[][]{
+                {"2", "1", "3", "3", "4"},
+                {"1", null, null, "2", "3"},
+                {"5", null, null, "5", "5"}});
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 right outer join t2 using (b)"),
+            new String[][]{
+                {"2", "1", "3", "3", "4"},
+                {"1", null, null, "2", "3"},
+                {"5", null, null, "5", "5"}});
+
+        // Two-column clauses
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 join t2 using (b, c)"),
+            new String[][]{{"2", "3", "1", "4"}});
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 join t2 using (c, b)"),
+            new String[][]{{"3", "2", "1", "4"}});
+
+        // Qualified asterisks should expand to all non-join columns
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select t1.* from t1 join t2 using (b, c)"),
+            "1");
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select t2.* from t1 join t2 using (b, c)"),
+            "4");
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select t1.*, t2.* from t1 join t2 using (b, c)"),
+            new String[][]{{"1", "4"}});
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select t1.* from t1 left join t2 using (b, c)"),
+            new String[][]{{"1"}, {"2"}, {"4"}});
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select t1.* from t1 right join t2 using (b, c)"),
+            new String[][]{{"1"}, {null}, {null}});
+
+        // USING clause can be in between joins or at the end
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery(
+                "select t3.e from t1 join t2 using (b) join t3 using (d)"),
+            "def");
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery(
+                "select t3.e from t1 join t2 join t3 using (d) using (b)"),
+            "def");
+
+        // USING can be placed in between or after outer joins as well, but
+        // then the results are different (different nesting of the joins).
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 left join t2 using (b) " +
+                           "right join t3 using (d)"),
+            new String[][] {
+                    {"2", null, null, null, null, "abc", "3"},
+                    {"4", "2", "1", "3", "3", "def", "5"},
+                    {null, null, null, null, null, null, null}});
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 left join t2 " +
+                           "right join t3 using (d) using (b)"),
+            new String[][] {
+                    {"2", "1", "3", "4", "3", "def", "5"},
+                    {"3", "2", "4", null, null, null, null},
+                    {"4", "4", "4", null, null, null, null}});
+
+        // Should be able to reference a non-join column without qualifier if
+        // it's unambiguous.
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select a from t1 join t2 using (b, c)"),
+            "1");
+
+        // USING clause should accept quoted identifiers.
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 join t2 using (\"B\")"),
+            new String[][]{{"2", "1", "3", "3", "4"}});
+
+        // When referencing a join column X without a table qualifier in an
+        // outer join, the value should be coalesce(t1.x, t2.x). That is, the
+        // value should be non-null if one of the qualified columns is non-null.
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select b from t1 left join t2 using (b)"),
+                new String[][]{{"2"}, {"3"}, {"4"}});
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select b from t1 right join t2 using (b)"),
+                new String[][]{{"1"}, {"2"}, {"5"}});
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+                "select d, t2.d, t3.d from t2 left join t3 using (d)"),
+            new String[][] {
+                {"3", "3", null},
+                {"4", "4", "4"},
+                {"5", "5", null}});
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+                "select d, t2.d, t3.d from t2 right join t3 using (d)"),
+            new String[][] {
+                {"2", null, "2"},
+                {"4", "4", "4"},
+                {null, null, null}});
+        JDBC.assertEmpty(s.executeQuery(
+            "select * from t2 left join t3 using (d) where d is null"));
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+            "select * from t2 right join t3 using (d) where d is null"),
+            new String[][]{{null, null, null, null, null}});
+
+        // Verify that ORDER BY picks up the correct column.
+        JDBC.assertFullResultSet(
+            s.executeQuery("select c from t1 left join t2 using (b, c) " +
+                           "order by c desc nulls last"),
+            new String[][]{{"4"}, {"4"}, {"3"}});
+        JDBC.assertFullResultSet(
+            s.executeQuery("select c from t1 left join t2 using (b, c) " +
+                           "order by t1.c desc nulls last"),
+            new String[][]{{"4"}, {"4"}, {"3"}});
+        JDBC.assertFullResultSet(
+            s.executeQuery("select c from t1 left join t2 using (b, c) " +
+                           "order by t2.c desc nulls last"),
+            new String[][]{{"3"}, {"4"}, {"4"}});
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select c from t1 right join t2 using (b, c) " +
+                           "order by c desc nulls last fetch next row only"),
+            "5");
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select c from t1 right join t2 using (b, c) " +
+                           "order by t1.c desc nulls last fetch next row only"),
+            "3");
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select c from t1 right join t2 using (b, c) " +
+                           "order by t2.c desc nulls last fetch next row only"),
+            "5");
+
+        // Aggregate + GROUP BY
+        JDBC.assertFullResultSet(
+            s.executeQuery("select b, count(t2.b) from t1 left join t2 " +
+                           "using (b) group by b order by b"),
+            new String[][]{{"2", "1"}, {"3", "0"}, {"4", "0"}});
+
+        // Using aliases to construct common column names.
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 table_a(col1, col2, col3) " +
+                           "inner join t3 table_b(col1, col2, col3) " +
+                           "using (col1)"),
+            new String[][] {
+                {"2", "3", "4", "abc", "3"},
+                {"4", "4", "4", "def", "5"}});
+
+        // ***** Negative tests *****
+
+        // Use of unqualified non-join columns should result in errors if
+        // columns with that name exist in both tables.
+        assertStatementError(AMBIGUOUS_COLNAME, s,
+                "select b from t1 join t2 using (b) join t3 using(c)");
+        assertStatementError(AMBIGUOUS_COLNAME, s,
+                "select b from t1 join t2 using (c)");
+        assertStatementError(AMBIGUOUS_COLNAME, s,
+                "select * from t1 join t2 using (b) order by c");
+
+        // Column names in USING should not be qualified.
+        assertStatementError(SYNTAX_ERROR, s,
+                "select * from t1 join t2 using (t1.b)");
+
+        // USING needs parens even if only one column is specified.
+        assertStatementError(SYNTAX_ERROR, s,
+                "select * from t1 join t2 using b");
+
+        // Empty column list is not allowed.
+        assertStatementError(SYNTAX_ERROR, s,
+                "select * from t1 join t2 using ()");
+
+        // Join columns with non-comparable data types should fail (trying to
+        // compare INT and VARCHAR).
+        assertStatementError(NON_COMPARABLE, s,
+                "select * from t2 a(x,y,z) join t3 b(x,y,z) using(y)");
+
+        // The two using clauses come in the wrong order, so expect that
+        // column B is not found.
+        assertStatementError(COLUMN_NOT_IN_SCOPE, s,
+                "select t3.e from t1 join t2 join t3 using (b) using (d)");
+
+        // References to non-common or non-existent columns in the using clause
+        // should result in an error.
+        assertStatementError(COLUMN_NOT_IN_SCOPE, s,
+                "select * from t1 join t2 using (a)");
+        assertStatementError(COLUMN_NOT_IN_SCOPE, s,
+                "select * from t1 join t2 using (d)");
+        assertStatementError(COLUMN_NOT_IN_SCOPE, s,
+                "select * from t1 join t2 using (a,d)");
+        assertStatementError(COLUMN_NOT_IN_SCOPE, s,
+                "select * from t1 join t2 using (a,b,c)");
+        assertStatementError(COLUMN_NOT_IN_SCOPE, s,
+                "select * from t1 join t2 using (x)");
+        assertStatementError(COLUMN_NOT_IN_SCOPE, s,
+                "select * from t1 join t2 using (b,c,x)");
+
+        // If two columns in the left table are named B, we should get an
+        // error when specifying B as a join column, since we don't know which
+        // of the columns to use.
+        assertStatementError(AMBIGUOUS_COLNAME, s,
+                "select * from (t1 cross join t2) join t2 tt2 using(b)");
     }
 }

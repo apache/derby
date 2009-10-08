@@ -9250,6 +9250,13 @@ joinSpecification(ResultSetNode leftRSN, ResultSetNode rightRSN)
 		onOrUsingClause[USING_CLAUSE] = usingClause;
 		return onOrUsingClause;
 	}
+|
+    usingClause = namedColumnsJoin()
+    {
+        onOrUsingClause[ON_CLAUSE] = joinClause;
+        onOrUsingClause[USING_CLAUSE] = usingClause;
+        return onOrUsingClause;
+    }
 }
 
 ValueNode
@@ -9263,6 +9270,19 @@ joinCondition() throws StandardException :
 	{
 		return joinClause;
 	}
+}
+
+ResultColumnList
+namedColumnsJoin() throws StandardException :
+{
+    ResultColumnList usingClause = (ResultColumnList) nodeFactory.getNode(
+            C_NodeTypes.RESULT_COLUMN_LIST, getContextManager());
+}
+{
+    <USING> <LEFT_PAREN> columnNameList(usingClause) <RIGHT_PAREN>
+    {
+        return usingClause;
+    }
 }
 
 /*
