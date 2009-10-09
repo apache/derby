@@ -24,6 +24,8 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 
+import java.text.Collator;
+import java.util.Locale;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ParameterMetaData;
@@ -108,8 +110,20 @@ public class Changes10_4 extends UpgradeChange {
         case PH_CREATE:
             // create the database if it was not already created. Note the
         	// JDBC url attributes.
+            String locale = "en";
+            Locale[] availableLocales = Collator.getAvailableLocales();
+            for (int i = 0; i < availableLocales.length; i++) {
+                if ("no".equals(availableLocales[i].getLanguage())) {
+                    locale="no"; // Use something different than 'en' 
+                    // if the JVM supports it.
+                    break;
+                }
+            }
+
             JDBCDataSource.setBeanProperty(
-                    ds, "ConnectionAttributes", "create=true;territory=no;collation=TERRITORY_BASED");
+                    ds, "ConnectionAttributes", 
+                    "create=true;territory="+locale+";"
+                        +"collation=TERRITORY_BASED");
             ds.getConnection().close();
             break;
             
