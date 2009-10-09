@@ -921,8 +921,14 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
      */
     public void xtestRollbackWillReleaseLaterSavepoints() throws SQLException {
         Connection con = getConnection();
-        Savepoint savepoint1 = con.setSavepoint();
+        
         Statement s = createStatement();
+
+        // Make sure T1 is empty (testcase running order might have left content!):
+        s.execute("DELETE FROM T1");
+        
+        Savepoint savepoint1 = con.setSavepoint();
+
         s.executeUpdate("INSERT INTO T1 VALUES(1,1)");
 
         Savepoint savepoint2 = con.setSavepoint("s1");
