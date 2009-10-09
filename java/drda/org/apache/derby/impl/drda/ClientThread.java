@@ -92,13 +92,19 @@ final class ClientThread extends Thread {
                     } // end inner try/catch block
                     
                 } catch (InterruptedException ie) {
-                    // This is a shutdown and we'll just exit the
-                    // thread. NOTE: This is according to the logic
-                    // before this rewrite. I am not convinced that it
-                    // is allways the case, but will not alter the
-                    // behaviour since it is not within the scope of
-                    // this change (DERBY-2108).
-                    return;
+                    if (parent.getShutdown()) {
+                        // This is a shutdown and we'll just exit the
+                        // thread. NOTE: This is according to the logic
+                        // before this rewrite. I am not convinced that it
+                        // is allways the case, but will not alter the
+                        // behaviour since it is not within the scope of
+                        // this change (DERBY-2108).
+                    	clientSocket.close();
+            	        return;
+                    }
+                    parent.consoleExceptionPrintTrace(ie);
+                    if (clientSocket != null)
+                        clientSocket.close();
 
                 } catch (javax.net.ssl.SSLException ssle) {
                     // SSLException is a subclass of
@@ -115,17 +121,17 @@ final class ClientThread extends Thread {
                     return; // Exit the thread
                     
                 } catch (IOException ioe) {
+                    if (clientSocket != null)
+                        clientSocket.close();
                     // IOException causes this thread to stop.  No
                     // console error message if this was caused by a
                     // shutdown
                     synchronized (parent.getShutdownSync()) {
-                        if (!parent.getShutdown()) {
-                            parent.consoleExceptionPrintTrace(ioe);
-                            if (clientSocket != null)
-                                clientSocket.close();
-                        }
+                        if (parent.getShutdown()) {
+                            return; // Exit the thread
+                        } 
                     }
-                    return; // Exit the thread
+                    parent.consoleExceptionPrintTrace(ioe);
                 }
             } catch (Exception e) {
                 // Catch and log all other exceptions
