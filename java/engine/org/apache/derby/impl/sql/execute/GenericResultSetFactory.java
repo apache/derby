@@ -346,13 +346,14 @@ public class GenericResultSetFactory implements ResultSetFactory
 		int maxRowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost) 
+		double optimizerEstimatedCost,
+		boolean isRollup) 
 			throws StandardException
 	{
 		return new GroupedAggregateResultSet(
 						source, isInSortedOrder, aggregateItem, orderItem, source.getActivation(),
 						rowAllocator, maxRowSize, resultSetNumber, optimizerEstimatedRowCount,
-						optimizerEstimatedCost);
+						optimizerEstimatedCost, isRollup);
 	}
 
 	/**
@@ -367,13 +368,14 @@ public class GenericResultSetFactory implements ResultSetFactory
 		int maxRowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost) 
+		double optimizerEstimatedCost,
+		boolean isRollup) 
 			throws StandardException
 	{
 		return new DistinctGroupedAggregateResultSet(
 						source, isInSortedOrder, aggregateItem, orderItem, source.getActivation(),
 						rowAllocator, maxRowSize, resultSetNumber, optimizerEstimatedRowCount,
-						optimizerEstimatedCost);
+						optimizerEstimatedCost, isRollup);
 	}
 											
 

@@ -487,6 +487,7 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
+		@param isRollup true if this is a GROUP BY ROLLUP()
 		@return the scalar aggregation operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -499,7 +500,8 @@ public interface ResultSetFactory {
 		int rowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost) 
+		double optimizerEstimatedCost,
+		boolean isRollup) 
 			throws StandardException;
 
 	/**
@@ -521,6 +523,7 @@ public interface ResultSetFactory {
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
+		@param isRollup true if this is a GROUP BY ROLLUP()
 		@return the scalar aggregation operation as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -533,7 +536,8 @@ public interface ResultSetFactory {
 		int rowSize,
 		int resultSetNumber, 
 		double optimizerEstimatedRowCount,
-		double optimizerEstimatedCost) 
+		double optimizerEstimatedCost,
+		boolean isRollup) 
 			throws StandardException;
 
 	/**

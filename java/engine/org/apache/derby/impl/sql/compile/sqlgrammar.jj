@@ -2225,6 +2225,7 @@ TOKEN [IGNORE_CASE] :
 |	<REPEATABLE: "repeatable">
 |	<RESTART: "restart">
 |	<RETURNS: "returns">
+|	<ROLLUP: "rollup">
 |	<ROW: "row">
 |	<SAVEPOINT: "savepoint">
 |	<SCALE: "scale">
@@ -9605,10 +9606,21 @@ groupByClause() throws StandardException :
 	GroupByList groupingCols;
 }
 {
-	<GROUP> <BY> groupingCols = groupingColumnReferenceList()
+	<GROUP> <BY> 
+        (
+	LOOKAHEAD ( { getToken(1).kind == ROLLUP &&
+			getToken(2).kind == LEFT_PAREN } )
+        <ROLLUP> <LEFT_PAREN> groupingCols = groupingColumnReferenceList() <RIGHT_PAREN>
+	{
+		groupingCols.setRollup();
+		return groupingCols;
+	}
+|
+	groupingCols = groupingColumnReferenceList()
 	{
 		return groupingCols;
 	}
+        )
 }
 
 GroupByList
@@ -13903,6 +13915,7 @@ nonReservedKeyword()  :
 	|	tok = <RETURNING>
 	|	tok = <RETURNS>
 	|	tok = <ROLE>
+ 	|	tok = <ROLLUP>
 	|	tok = <ROW>
 //	|	tok = <ROW_COUNT>
 	|   tok = <RR>

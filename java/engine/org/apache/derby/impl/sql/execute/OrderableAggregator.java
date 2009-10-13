@@ -76,6 +76,16 @@ abstract class OrderableAggregator extends SystemAggregator
 	{
 		return value;
 	}
+        public String toString()
+        {
+            try {
+            return "OrderableAggregator: " + value.getString();
+            }
+            catch (StandardException e)
+            {
+                return super.toString() + ":" + e.getMessage();
+            }
+        }
 
 	/////////////////////////////////////////////////////////////
 	// 

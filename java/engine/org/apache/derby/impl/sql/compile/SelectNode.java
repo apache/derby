@@ -564,7 +564,7 @@ public class SelectNode extends ResultSetNode
 		** in the select list.
 		*/
 		numDistinctAggs = numDistinctAggregates(selectAggregates);
-		if (numDistinctAggs > 1)
+		if (groupByList == null && numDistinctAggs > 1)
 		{
 			throw StandardException.newException(SQLState.LANG_USER_AGGREGATE_MULTIPLE_DISTINCTS);
 		}

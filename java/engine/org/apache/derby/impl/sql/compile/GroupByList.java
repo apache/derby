@@ -47,6 +47,7 @@ import java.util.Vector;
 public class GroupByList extends OrderedColumnList
 {
 	int		numGroupingColsAdded = 0;
+	boolean         rollup = false;
 
 	/**
 		Add a column to the list
@@ -74,6 +75,16 @@ public class GroupByList extends OrderedColumnList
 		return (GroupByColumn) elementAt(position);
 	}
 
+
+	public void setRollup()
+	{
+		rollup = true;
+	}
+	public boolean isRollup()
+	{
+		return rollup;
+	}
+                        
 
 	/**
 	 * Get the number of grouping columns that need to be added to the SELECT list.

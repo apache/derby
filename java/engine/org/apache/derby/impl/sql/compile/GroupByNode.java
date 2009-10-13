@@ -183,6 +183,11 @@ public class GroupByNode extends SingleChildResultSetNode
 		*/
 		addAggregates();
 
+		if (this.groupingList != null && this.groupingList.isRollup())
+                {
+			resultColumns.setNullability(true);
+			parent.getResultColumns().setNullability(true);
+                }
 		/* We say that the source is never in sorted order if there is a distinct aggregate.
 		 * (Not sure what happens if it is, so just skip it for now.)
 		 * Otherwise, we check to see if the source is in sorted order on any permutation
@@ -252,7 +257,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		{
 			if (SanityManager.DEBUG)
 			{
-				SanityManager.ASSERT(numDistinct == 1,
+				SanityManager.ASSERT(groupingList != null || numDistinct == 1,
 					"Should not have more than 1 distinct aggregate per Group By node");
 			}
 			
@@ -1141,14 +1146,16 @@ public class GroupByNode extends SingleChildResultSetNode
 		 *			from the sort
 		 *  arg7: row size
 		 *  arg8: resultSetNumber
+		 *  arg9: isRollup
 		 */
 		String resultSet = (addDistinctAggregate) ? "getDistinctGroupedAggregateResultSet" : "getGroupedAggregateResultSet";
     
 		mb.push(costEstimate.rowCount());
 		mb.push(costEstimate.getEstimatedCost());
+		mb.push(groupingList.isRollup());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, resultSet,
-                ClassName.NoPutResultSet, 9);
+                ClassName.NoPutResultSet, 10);
 
 	}
 

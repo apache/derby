@@ -1045,7 +1045,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     "on srt.sort_rs_id = rs.sort_rs_id " +
                     "where rs.op_identifier='GROUPBY'"),
                 new String[][] {
-                    {"IN","10","7",null, null, null,"N","Y"} } );
+                    {"IN","10","10",null, null, null,"N","Y"} } );
         verifySensibleStatementTimings(s);
         verifySensibleResultSetTimings(s);
     }

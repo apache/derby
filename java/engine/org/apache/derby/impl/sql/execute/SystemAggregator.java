@@ -73,4 +73,15 @@ abstract class SystemAggregator implements ExecAggregator
 	{
 		eliminatedNulls = in.readBoolean();
 	}
+        public String toString()
+        {
+            try
+            {
+            return super.toString() + "[" + getResult().getString() + "]";
+            }
+            catch (Exception e)
+            {
+                return e.getMessage();
+            }
+        }
 }

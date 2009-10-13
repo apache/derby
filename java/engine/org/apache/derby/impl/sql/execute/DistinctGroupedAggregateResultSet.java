@@ -67,11 +67,12 @@ class DistinctGroupedAggregateResultSet extends GroupedAggregateResultSet
 					GeneratedMethod ra,
 					int maxRowSize,
 					int resultSetNumber,
-				    double optimizerEstimatedRowCount,
-				    double optimizerEstimatedCost) throws StandardException 
+					double optimizerEstimatedRowCount,
+					double optimizerEstimatedCost,
+					boolean isRollup) throws StandardException 
 	{
 		super(s, isInSortedOrder, aggregateItem, orderingItem,
-			  a, ra, maxRowSize, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
+			  a, ra, maxRowSize, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost, isRollup);
     }
 
 

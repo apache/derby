@@ -21,7 +21,10 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.HashSet;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableArrayHolder;
@@ -29,6 +32,7 @@ import org.apache.derby.iapi.services.loader.GeneratedMethod;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
+import org.apache.derby.iapi.sql.execute.ExecAggregator;
 import org.apache.derby.iapi.sql.execute.ExecIndexRow;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
@@ -45,6 +49,30 @@ import org.apache.derby.iapi.types.RowLocation;
  * It will scan the entire source result set and calculate
  * the grouped aggregates when scanning the source during the 
  * first call to next().
+ *
+ * The implementation is capable of computing multiple levels of grouping
+ * in a single result set (this is requested using GROUP BY ROLLUP).
+ *
+ * This implementation has 3 variations, which it chooses according to
+ * the following rules:
+ * - If the data are guaranteed to arrive already in sorted order, we make
+ *   a single pass over the data, computing the aggregates in-line as the
+ *   data are read.
+ * - If the statement requests either multiple ROLLUP levels, or a DISTINCT
+ *   grouping, then the data are first sorted, then we make a single
+ *   pass over the data as above.
+ * - Otherwise, the data are sorted, and a SortObserver is used to compute
+ *   the aggregations inside the sort, and the results are read back directly
+ *   from the sorter.
+ *
+ * Note that, as of the introduction of the ROLLUP support, we no longer
+ * ALWAYS compute the aggregates using a SortObserver, which is an
+ * arrangement by which the sorter calls back into the aggregates during
+ * the sort process each time it consolidates two rows with the same
+ * sort key. Using aggregate sort observers is an efficient technique, but
+ * it was complex to extend it to the ROLLUP case, so to simplify the code
+ * we just have one path for both already-sorted and un-sorted data sources
+ * in the ROLLUP case.
  *
  */
 class GroupedAggregateResultSet extends GenericAggregateResultSet
@@ -70,15 +98,35 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 
 	private ExecIndexRow sortResultRow;
 
-	// In order group bys
-	private ExecIndexRow currSortedRow;
-	private boolean nextCalled;
+	// - resultRows: This is the current accumulating grouped result that
+	//   we are computing, at each level of aggregation. If we are not
+	//   doing a ROLLUP, then there is only one entry in resultRows, and
+	//   it contains the currently-accumulating aggregated result. If we
+	//   are doing a ROLLUP, then there are N+1 entries in resultRows,
+	//   as follows (imagine we're doing ROLLUP(a,b,c,d):
+	//   [0]: GROUP BY ()
+	//   [1]: GROUP BY (A)
+	//   [2]: GROUP BY (A,B)
+	//   [3]: GROUP BY (A,B,C)
+	//   [4]: GROUP BY (A,B,C,D)
+	// - finishedResults: this list is used only when a ROLLUP is computing
+	//   multiple levels of aggregation at once, and the results for
+	//   several groupings have been completed, but not yet returned to
+	//   our caller.
+	// - distinctValues: used only if DISTINCT aggregates are present,
+	//   this is a HashSet for each aggregate for each level of grouping,
+	//   and the HashSet instances contain the values this aggregate
+	//   has seen during this group instance, to eliminate duplicates.
+	//
+	private boolean resultsComplete;
+	private List finishedResults;
+	private ExecIndexRow[]			resultRows;
+	private HashSet [][]			distinctValues;
 
-	// used to track and close sorts
-	private long distinctAggSortId;
-	private boolean dropDistinctAggSort;
+	private boolean rollup;
+	private boolean usingAggregateObserver = false;
+
 	private long genericSortId;
-	private boolean dropGenericSort;
 	private TransactionController tc;
 
 	// RTS
@@ -112,10 +160,13 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 					int maxRowSize,
 					int resultSetNumber,
 				    double optimizerEstimatedRowCount,
-				    double optimizerEstimatedCost) throws StandardException 
+					double optimizerEstimatedCost,
+					boolean isRollup) throws StandardException 
 	{
 		super(s, aggregateItem, a, ra, resultSetNumber, optimizerEstimatedRowCount, optimizerEstimatedCost);
 		this.isInSortedOrder = isInSortedOrder;
+		rollup = isRollup;
+		finishedResults = new ArrayList();
 		sortTemplateRow = getExecutionFactory().getIndexableRow((ExecRow) rowAllocator.invoke(activation));
 		order = (ColumnOrdering[])
 					((FormatableArrayHolder)
@@ -127,6 +178,14 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			SanityManager.DEBUG("AggregateTrace","execution time: "+ 
 					a.getPreparedStatement().getSavedObject(aggregateItem));
 		}
+		hasDistinctAggregate = aggInfoList.hasDistinct();
+		// If there is no ROLLUP, and no DISTINCT, and the data are
+		// not in sorted order, then we can use AggregateSortObserver
+		// to compute the aggregation in the sorter:
+		usingAggregateObserver =
+			!isInSortedOrder &&
+			!rollup &&
+			!hasDistinctAggregate;
 
 		recordConstructorTime();
     }
@@ -159,27 +218,40 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
         source.openCore();
 
 		try {
-			/* If this is an in-order group by then we do not need the sorter.
-			 * (We can do the aggregation ourselves.)
-			 * We save a clone of the first row so that subsequent next()s
-			 * do not overwrite the saved row.
-			 */
-			if (isInSortedOrder)
-			{
-				currSortedRow = getNextRowFromRS();
-				if (currSortedRow != null)
-				{
-					currSortedRow = (ExecIndexRow) currSortedRow.getClone();
-					initializeVectorAggregation(currSortedRow);
-				}
-			}
+		/* If this is an in-order group by then we do not need the sorter.
+		 * (We can do the aggregation ourselves.)
+		 * We save a clone of the first row so that subsequent next()s
+		 * do not overwrite the saved row.
+		 */
+		if (!isInSortedOrder)
+			scanController = loadSorter();
+
+		ExecIndexRow currSortedRow = getNextRowFromRS();
+		resultsComplete = (currSortedRow == null);
+		if (usingAggregateObserver)
+		{
+			if (currSortedRow != null)
+				finishedResults.add(
+					finishAggregation(currSortedRow).getClone());
+		}
+		else if (!resultsComplete)
+		{
+			if (rollup)
+				resultRows = new ExecIndexRow[order.length+1];
 			else
+				resultRows = new ExecIndexRow[1];
+			if (aggInfoList.hasDistinct())
+			    distinctValues = new HashSet[resultRows.length][aggregates.length];
+			for (int r = 0; r < resultRows.length; r++)
 			{
-				/*
-				** Load up the sorter
-				*/
-				scanController = loadSorter();
+				resultRows[r] =
+					(ExecIndexRow) currSortedRow.getClone();
+				initializeVectorAggregation(resultRows[r]);
+				if (aggInfoList.hasDistinct())
+					distinctValues[r] = new HashSet[aggregates.length];
+				initializeDistinctMaps(r, true);
 			}
+		}
 		} catch (StandardException e) {
 			// DERBY-4330 Result set tree must be atomically open or
 			// closed for reuse to work (after DERBY-827).
@@ -197,8 +269,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 
 	/**
 	 * Load up the sorter.  Feed it every row from the
-	 * source scan.  If we have a vector aggregate, initialize
-	 * the aggregator for each source row.  When done, close
+	 * source scan.  When done, close
 	 * the source scan and open the sort.  Return the sort
 	 * scan controller.
 	 *
@@ -210,106 +281,29 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		throws StandardException
 	{
 		SortController 			sorter;
-		long 					sortId;
 		ExecRow 				sourceRow;
 		ExecRow 				inputRow;
 		int						inputRowCountEstimate = (int) optimizerEstimatedRowCount;
-		boolean					inOrder = isInSortedOrder;
 
 		tc = getTransactionController();
 
-		ColumnOrdering[] currentOrdering = order;
+		SortObserver observer;
+		if (usingAggregateObserver)
+			observer = new AggregateSortObserver(true, aggregates,
+				aggregates, sortTemplateRow);
+		else
+			observer = new BasicSortObserver(true, false,
+				sortTemplateRow, true);
 
-		/*
-		** Do we have any distinct aggregates?  If so, we'll need
-		** a separate sort.  We use all of the sorting columns and
-		** drop the aggregation on the distinct column.  Then
-		** we'll feed this into the sorter again w/o the distinct
-		** column in the ordering list.
-		*/
-		if (aggInfoList.hasDistinct())
-		{
-			hasDistinctAggregate = true;
-			
-			GenericAggregator[] aggsNoDistinct = getSortAggregators(aggInfoList, true,
-						activation.getLanguageConnectionContext(), source);
-			SortObserver sortObserver = new AggregateSortObserver(true, aggsNoDistinct, aggregates,
-																  sortTemplateRow);
-
-			sortId = tc.createSort((Properties)null, 
-					sortTemplateRow.getRowArray(),
-					order,
-					sortObserver,
-					false,			// not in order
-					inputRowCountEstimate,				// est rows, -1 means no idea	
-					maxRowSize		// est rowsize
-					);
-			sorter = tc.openSort(sortId);
-			distinctAggSortId = sortId;
-			dropDistinctAggSort = true;
-				
-			while ((sourceRow = source.getNextRowCore())!=null) 
-			{
-				sorter.insert(sourceRow.getRowArray());
-				rowsInput++;
-			}
-
-			/*
-			** End the sort and open up the result set
-			*/
-			source.close();
-			sortProperties = sorter.getSortInfo().getAllSortInfo(sortProperties);
-			sorter.completedInserts();
-
-			scanController = 
-                tc.openSortScan(sortId, activation.getResultSetHoldability());
-			
-			/*
-			** Aggs are initialized and input rows
-			** are in order.  All we have to do is
-			** another sort to remove (merge) the 
-			** duplicates in the distinct column
-			*/	
-			inOrder = true;
-			inputRowCountEstimate = rowsInput;
-	
-			/*
-			** Drop the last column from the ordering.  The
-			** last column is the distinct column.  Don't
-			** pay any attention to the fact that the ordering
-			** object's name happens to correspond to a techo
-			** band from the 80's.
-			**
-			** If there aren't any ordering columns other
-			** than the distinct (i.e. for scalar distincts)
-			** just skip the 2nd sort altogether -- we'll
-			** do the aggregate merge ourselves rather than
-			** force a 2nd sort.
-			*/
-			if (order.length == 1)
-			{
-				return scanController;
-			}
-
-			ColumnOrdering[] newOrder = new ColumnOrdering[order.length - 1];
-			System.arraycopy(order, 0, newOrder, 0, order.length - 1);
-			currentOrdering = newOrder;
-		}
-
-		SortObserver sortObserver = new AggregateSortObserver(true, aggregates, aggregates,
-															  sortTemplateRow);
-
-		sortId = tc.createSort((Properties)null, 
-						sortTemplateRow.getRowArray(),
-						currentOrdering,
-						sortObserver,
-						inOrder,
-						inputRowCountEstimate, // est rows
-					 	maxRowSize			// est rowsize 
-						);
-		sorter = tc.openSort(sortId);
-		genericSortId = sortId;
-		dropGenericSort = true;
+		genericSortId = tc.createSort((Properties)null, 
+				sortTemplateRow.getRowArray(),
+				order,
+				observer,
+				false,
+				inputRowCountEstimate, // est rows
+				maxRowSize			// est rowsize 
+		);
+		sorter = tc.openSort(genericSortId);
 	
 		/* The sorter is responsible for doing the cloning */
 		while ((inputRow = getNextRowFromRS()) != null) 
@@ -317,10 +311,44 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			sorter.insert(inputRow.getRowArray());
 		}
 		source.close();
-		sortProperties = sorter.getSortInfo().getAllSortInfo(sortProperties);
 		sorter.completedInserts();
-
-		return tc.openSortScan(sortId, activation.getResultSetHoldability());
+		sortProperties = sorter.getSortInfo().
+			getAllSortInfo(sortProperties);
+		if (aggInfoList.hasDistinct())
+		{
+			/*
+			** If there was a distinct aggregate, then that column
+			** was automatically included as the last column in
+			** the sort ordering. But we don't want it to be part
+			** of the ordering anymore, because we aren't grouping
+			** by that column, we just sorted it so that distinct
+			** aggregation would see the values in order.
+			*/
+			int numDistinctAggs = 0;
+			for (int i = 0; i < aggregates.length; i++)
+			{
+				AggregatorInfo aInfo = (AggregatorInfo)
+					aggInfoList.elementAt(i);
+				if (aInfo.isDistinct())
+					numDistinctAggs++;
+			}
+			// Although it seems like N aggs could have been
+			// added at the end, in fact only one has been
+			// FIXME -- need to get GroupByNode to handle this
+			// correctly, but that requires understanding
+			// scalar distinct aggregates.
+			numDistinctAggs = 1;
+			if (order.length > numDistinctAggs)
+			{
+				ColumnOrdering[] newOrder = new ColumnOrdering[
+					order.length - numDistinctAggs];
+				System.arraycopy(order, 0, newOrder, 0,
+					order.length-numDistinctAggs);
+				order = newOrder;
+			}
+		}
+		return tc.openSortScan(genericSortId,
+			activation.getResultSetHoldability());
 	}
 
 
@@ -341,82 +369,105 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 
 		beginTime = getCurrentTimeMillis();
 
-		// In order group by
-		if (isInSortedOrder)
+		if (finishedResults.size() > 0)
+			return makeCurrent(finishedResults.remove(0));
+		else if (resultsComplete)
+			return null;
+
+		ExecIndexRow nextRow = getNextRowFromRS();
+		// No rows, no work to do
+		if (nextRow == null)
+			return finalizeResults();
+
+		// If the aggregation was performed using the SortObserver, the
+		// result row from the sorter is complete and ready to return:
+		if (usingAggregateObserver)
+			return finishAggregation(nextRow);
+
+		/* Drain and merge rows until we find new distinct values for the grouping columns. */
+		while (nextRow != null)
 		{
-			// No rows, no work to do
-			if (currSortedRow == null)
-			{
-				nextTime += getElapsedMillis(beginTime);
-				return null;
-			}
+			/* We found a new set of values for the grouping columns.  
+			 * Update the current row and return this group. 
+			 *
+			 * Note that in the case of GROUP BY ROLLUP,
+			 * there may be more than one level of grouped
+			 * aggregates which is now complete. We can
+			 * only return 1, and the other completed
+			 * groups are held in finishedResults until
+			 * our caller calls getNextRowCore() again to
+			 * get the next level of results.
+			 */
+			ExecIndexRow currSortedRow =
+				    resultRows[resultRows.length-1];
+                        ExecRow origRow = (ExecRow)nextRow.getClone();;
+                        initializeVectorAggregation(nextRow);
+			int distinguisherCol = 
+				    sameGroupingValues(currSortedRow, nextRow);
 
-		    ExecIndexRow nextRow = getNextRowFromRS();
-
-			/* Drain and merge rows until we find new distinct values for the grouping columns. */
-			while (nextRow != null)
+			for (int r = 0; r < resultRows.length; r++)
 			{
-				/* We found a new set of values for the grouping columns.  
-				 * Update the current row and return this group. 
-				 */
-				if (! sameGroupingValues(currSortedRow, nextRow))
+				boolean sameGroup = (rollup ?
+				    r <= distinguisherCol :
+				    distinguisherCol == order.length);
+				if (sameGroup)
 				{
-					ExecIndexRow result = currSortedRow;
-
-					/* Save a clone of the new row so that it doesn't get overwritten */
-					currSortedRow = (ExecIndexRow) nextRow.getClone();
-					initializeVectorAggregation(currSortedRow);
-
-					nextTime += getElapsedMillis(beginTime);
-					rowsReturned++;
-					return finishAggregation(result);
+					/* Same group - initialize the new
+					   row and then merge the aggregates */
+					//initializeVectorAggregation(nextRow);
+					mergeVectorAggregates(nextRow, resultRows[r], r);
 				}
 				else
 				{
-					/* Same group - initialize the new row and then merge the aggregates */
-					initializeVectorAggregation(nextRow);
-					mergeVectorAggregates(nextRow, currSortedRow);
+					setRollupColumnsToNull(resultRows[r],r);
+					finishedResults.add(finishAggregation(resultRows[r]));
+					/* Save a clone of the new row so
+					   that it doesn't get overwritten */
+					resultRows[r] = (ExecIndexRow)
+						    origRow.getClone();
+					initializeVectorAggregation(resultRows[r]);
+					initializeDistinctMaps(r, false);
 				}
-
-				// Get the next row
-				nextRow = getNextRowFromRS();
 			}
-
-			// We've drained the source, so no more rows to return
-			ExecIndexRow result = currSortedRow;
-			currSortedRow = null;
-			nextTime += getElapsedMillis(beginTime);
-			return finishAggregation(result);
-		}
-		else
-		{
-		    ExecIndexRow sortResult = null;
-
-	        if ((sortResult = getNextRowFromRS()) != null)
+			if (finishedResults.size() > 0)
 			{
-				setCurrentRow(sortResult);
-			}
-
-			/*
-			** Only finish the aggregation
-			** if we have a return row.  We don't generate
-			** a row on a vector aggregate unless there was
-			** a group.
-			*/
-			if (sortResult != null)
-			{
-				sortResult = finishAggregation(sortResult);
-				currentRow = sortResult;
-			}
-
-			if (sortResult != null)
-			{
+				nextTime += getElapsedMillis(beginTime);
 				rowsReturned++;
+                                return makeCurrent(finishedResults.remove(0));
 			}
 
-			nextTime += getElapsedMillis(beginTime);
-		    return sortResult;
+			// Get the next row
+			nextRow = getNextRowFromRS();
 		}
+
+		return finalizeResults();
+	}
+	// Return the passed row, after ensuring that we call setCurrentRow
+	private ExecRow makeCurrent(Object row)
+		throws StandardException
+	{
+		ExecRow resultRow = (ExecRow)row;
+		setCurrentRow(resultRow);
+		return resultRow;
+	}
+	private ExecRow finalizeResults()
+		throws StandardException
+	{
+		// We've drained the source, so no more rows to return
+		resultsComplete = true;
+		if (! usingAggregateObserver )
+		{
+			for (int r = 0; r < resultRows.length; r++)
+			{
+				setRollupColumnsToNull(resultRows[r],r);
+				finishedResults.add(finishAggregation(resultRows[r]));
+			}
+		}
+		nextTime += getElapsedMillis(beginTime);
+		if (finishedResults.size() > 0)
+			return makeCurrent(finishedResults.remove(0));
+		else
+			return null;
 	}
 
 	/**
@@ -427,12 +478,12 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	 * @param currRow	The current row.
 	 * @param newRow	The new row.
 	 *
-	 * @return	Whether or not to filter out the new row has the same values for the 
-	 *			grouping columns as the current row.
+	 * @return	The order index number which first distinguished
+	 *			these rows, or order.length if the rows match.
 	 *
 	 * @exception StandardException thrown on failure to get row location
 	 */
-	private boolean sameGroupingValues(ExecRow currRow, ExecRow newRow)
+	private int sameGroupingValues(ExecRow currRow, ExecRow newRow)
 		throws StandardException
 	{
 		for (int index = 0; index < order.length; index++)
@@ -441,10 +492,10 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			DataValueDescriptor newOrderable = newRow.getColumn(order[index].getColumnId() + 1);
 			if (! (currOrderable.compare(DataValueDescriptor.ORDER_OP_EQUALS, newOrderable, true, true)))
 			{
-				return false;
+				return index;
 			}
 		}
-		return true;
+		return order.length;
 	}
 
 	/**
@@ -468,16 +519,9 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			sourceExecIndexRow = null;
 			closeSource();
 
-			if (dropDistinctAggSort)
-			{
-				tc.dropSort(distinctAggSortId);
-				dropDistinctAggSort = false;
-			}
-
-			if (dropGenericSort)
+			if (!isInSortedOrder)
 			{
 				tc.dropSort(genericSortId);
-				dropGenericSort = false;
 			}
 			super.close();
 		}
@@ -597,6 +641,22 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	}
 
 
+	// We are performing a ROLLUP aggregation and
+	// we need to set the N rolled-up columns in this
+	// row to NULL.
+	private void setRollupColumnsToNull(ExecRow row, int resultNum)
+		throws StandardException
+	{
+		int numRolledUpCols = resultRows.length - resultNum - 1;
+		for (int i = 0; i < numRolledUpCols; i++)
+		{
+			int rolledUpColIdx = order.length - 1 - i;
+			DataValueDescriptor rolledUpColumn =
+				row.getColumn(order[rolledUpColIdx].getColumnId() + 1);
+			rolledUpColumn.setToNull();
+		}
+	}
+
 	/**
 	 * Get a row from the sorter.  Side effects:
 	 * sets currentRow.
@@ -616,6 +676,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			inputRow = getExecutionFactory().getIndexableRow(currentRow);
 
 			scanController.fetch(inputRow.getRowArray());
+
 		}
 		return inputRow;
 	}
@@ -691,16 +752,80 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	 *
 	 * @exception	standard Derby exception
 	 */
-	private void mergeVectorAggregates(ExecRow newRow, ExecRow currRow)
+	private void mergeVectorAggregates(ExecRow newRow, ExecRow currRow,
+		int level)
 		throws StandardException
 	{
 		for (int i = 0; i < aggregates.length; i++)
 		{
 			GenericAggregator currAggregate = aggregates[i];
+			AggregatorInfo aInfo = (AggregatorInfo)
+					aggInfoList.elementAt(i);
+			if (aInfo.isDistinct())
+			{
+				DataValueDescriptor newValue = currAggregate.getInputColumnValue(newRow);
+				// A NULL value is always distinct, so we only
+				// have to check for duplicate values for
+				// non-NULL values.
+				if (newValue.getString() != null)
+				{
+					if (distinctValues[level][i].contains(
+						    newValue.getString()))
+						continue;
+					distinctValues[level][i].add(
+						newValue.getString());
+				}
+			}
 
 			// merge the aggregator
 			currAggregate.merge(newRow, currRow);
 		}
 	}
 
+	private void initializeDistinctMaps(int r, boolean allocate)
+	    throws StandardException
+	{
+		for (int a = 0; a < aggregates.length; a++)
+		{
+			AggregatorInfo aInfo = (AggregatorInfo)
+						aggInfoList.elementAt(a);
+			if (aInfo.isDistinct())
+			{
+				if (allocate)
+					distinctValues[r][a] = new HashSet();
+				else
+					distinctValues[r][a].clear();
+				DataValueDescriptor newValue =
+					aggregates[a].getInputColumnValue(resultRows[r]);
+				distinctValues[r][a].add(newValue.getString());
+			}
+		}
+	}
+
+        private void dumpAllRows(int cR)
+            throws StandardException
+        {
+            System.out.println("dumpAllRows("+cR+"/"+resultRows.length+"):");
+            for (int r = 0; r < resultRows.length; r++)
+                System.out.println(dumpRow(resultRows[r]));
+        }
+	private String dumpRow(ExecRow r)
+		throws StandardException
+	{
+            if (r == null)
+                return "<NULL ROW>";
+	    StringBuffer buf = new StringBuffer();
+	    int nCols = r.nColumns();
+	    for (int d = 0; d < nCols; d++)
+	    {
+		if (d > 0) buf.append(",");
+                DataValueDescriptor o = r.getColumn(d+1);
+                buf.append(o.getString());
+                if (o instanceof ExecAggregator)
+                    buf.append("[").
+                        append(((ExecAggregator)o).getResult().getString()).
+                        append("]");
+	    }
+	    return buf.toString();
+	}
 }

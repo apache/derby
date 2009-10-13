@@ -336,6 +336,11 @@ class GenericAggregator
 		return aggregatorColumnId;
 	}
 
+	DataValueDescriptor getInputColumnValue(ExecRow row)
+	    throws StandardException
+	{
+	    return row.getColumn(inputColumnId + 1);
+	}
 
 	/**
 	 * Merge two partial aggregations.  This is how the
