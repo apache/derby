@@ -1638,7 +1638,16 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		for (Enumeration e = colRefs.elements(); e.hasMoreElements(); )
 		{
 			ColumnReference ref = (ColumnReference)e.nextElement();
-			ref.getSource().markAllRCsInChainReferenced();
+			ResultColumn source = ref.getSource();
+
+            // DERBY-4391: Don't try to call markAllRCsInChainReferenced() if
+            // source is null. This can happen if the ColumnReference is
+            // pointing to a column that is not from a base table. For instance
+            // if we have a VALUES clause like (VALUES (1, 2), (3, 4)) V1(I, J)
+            // then a column reference to V1.I won't have a source.
+			if (source != null) {
+				source.markAllRCsInChainReferenced();
+			}
 		}
 	}
 
