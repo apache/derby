@@ -89,6 +89,27 @@ public interface ExecPreparedStatement
 	 */
 	GeneratedClass getActivationClass() throws StandardException;
 
+    /**
+     * <p>
+     * Checks whether this PreparedStatement is up to date and its activation
+     * class is identical to the supplied generated class. A call to {@code
+     * upToDate(gc)} is supposed to perform the same work as the following code
+     * in one atomic operation:
+     * </p>
+     *
+     * <pre>
+     * getActivationClass() == gc && upToDate()
+     * </pre>
+     *
+     * @param gc a generated class that must be identical to {@code
+     * getActivationClass()} for this method to return {@code true}
+     * @return {@code true} if this statement is up to date and its activation
+     * class is identical to {@code gc}, {@code false} otherwise
+     * @see PreparedStatement#upToDate()
+     * @see #getActivationClass()
+     */
+    boolean upToDate(GeneratedClass gc) throws StandardException;
+
 	/**
 	 *  Mark the statement as unusable, i.e. the system is
 	 * finished with it and no one should be able to use it.

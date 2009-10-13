@@ -200,8 +200,28 @@ public class GenericPreparedStatement
 	public synchronized boolean	upToDate()
 		throws StandardException
 	{
-		return  isValid && (activationClass != null) && !compilingStatement;
+		return isUpToDate();
 	}
+
+    /**
+     * Check whether this statement is up to date and its generated class is
+     * identical to the supplied class object.
+     * @see ExecPreparedStatement#upToDate(GeneratedClass)
+     */
+    public synchronized boolean upToDate(GeneratedClass gc) {
+        return (activationClass == gc) && isUpToDate();
+    }
+
+    /**
+     * Unsynchronized helper method for {@link #upToDate()} and {@link
+     * #upToDate(GeneratedClass)}. Checks whether this statement is up to date.
+     *
+     * @return {@code true} if this statement is up to date, {@code false}
+     * otherwise
+     */
+    private boolean isUpToDate() {
+        return isValid && (activationClass != null) && !compilingStatement;
+    }
 
 	public void rePrepare(LanguageConnectionContext lcc) 
 		throws StandardException {

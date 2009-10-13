@@ -267,14 +267,8 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 
 	public final void checkStatementValidity() throws StandardException {
 
-		if (preStmt == null)
+		if (preStmt == null || preStmt.upToDate(gc))
 			return;
-
-		synchronized (preStmt) {
-
-			if ((gc == preStmt.getActivationClass()) && preStmt.upToDate())
-				return;
-		}
 
 		StandardException se = StandardException.newException(SQLState.LANG_STATEMENT_NEEDS_RECOMPILE);
 		se.setReport(StandardException.REPORT_NEVER);
