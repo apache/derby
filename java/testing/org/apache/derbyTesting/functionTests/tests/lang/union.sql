@@ -489,3 +489,16 @@ select * from
 -- cleanup.
 drop table t1;
 drop table t2;
+
+-- Regression test for DERBY-4391. These UNION queries used to throw a
+-- NullPointerException during compilation. Now all of them should compile
+-- successfully, but some of them fail during execution if their subqueries
+-- return more than one row.
+create table d4391(a int not null primary key, b int);
+insert into d4391 values (0, 4), (1, 3), (2, 2), (3, 1), (4, 0);
+select * from d4391 where a < (values 2 union values 2);
+select * from d4391 where a < (select 4 from d4391 union select b from d4391);
+select * from d4391 where a < (select a+b from d4391 union select 4 from d4391);
+select * from d4391 where a < (select a+b from d4391 union select a from d4391);
+select * from d4391 where a < (select sum(a) from d4391 union select sum(b) from d4391);
+drop table d4391;
