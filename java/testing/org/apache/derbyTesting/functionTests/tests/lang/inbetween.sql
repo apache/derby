@@ -935,3 +935,13 @@ select c1 from v1 where c1 NOT IN (1, 2);
 drop view v1;
 drop table t1;
 drop table t2;
+
+create table t1(a int);
+create table t2(b int);
+insert into t1 values 0,1,2,3,4,5,6;
+insert into t2 values 0,1,2,3;
+--the next two statements failed with NPE before DERBY-4388
+select * from t1 left join t2 on a=b where b not between 1 and 5;
+select * from t2 right join t1 on a=b where b not between 1 and 5;
+drop table t1;
+drop table t2;

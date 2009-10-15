@@ -127,11 +127,17 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 		/* Set type info for the operator node */
 		leftBCO.bindComparisonOperator();
 
+        // DERBY-4388: If leftOperand is a ColumnReference, it may be remapped
+        // during optimization, and that requires the less-than node and the
+        // greater-than node to have separate objects.
+        ValueNode leftClone = (leftOperand instanceof ColumnReference) ?
+            leftOperand.getClone() : leftOperand;
+
 		/* leftO > rightOList.elementAt(1) */
 		rightBCO = (BinaryComparisonOperatorNode) 
 					nodeFactory.getNode(
 								C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE,
-								leftOperand, 
+								leftClone,
 								rightOperandList.elementAt(1),
 								cm);
 		/* Set type info for the operator node */
