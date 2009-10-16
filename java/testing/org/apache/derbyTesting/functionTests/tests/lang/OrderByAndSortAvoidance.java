@@ -10116,7 +10116,7 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
                     //End of tables creation for DERBY-4331 repro
 
                     getConnection().commit();
-                    System.exit(1);
+                    st.close();
                 }
             };
     }
