@@ -20,7 +20,7 @@
 if [ -z "$DERBY_HOME" ] ; then
   echo "Error: DERBY_HOME is not set. Please set the DERBY_HOME environment variable"
   echo "to the location of your Derby installation."
-  exit 1
+  return 1
 fi
 
 export CLASSPATH="${DERBY_HOME}/lib/derby.jar:${DERBY_HOME}/lib/derbytools.jar:${CLASSPATH}"
