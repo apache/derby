@@ -38,6 +38,7 @@ public class JoinTest extends BaseJDBCTestCase {
     private static final String AMBIGUOUS_COLNAME = "42X03";
     private static final String COLUMN_NOT_IN_SCOPE = "42X04";
     private static final String NON_COMPARABLE = "42818";
+    private static final String NO_COLUMNS = "42X81";
 
     public JoinTest(String name) {
         super(name);
@@ -641,5 +642,15 @@ public class JoinTest extends BaseJDBCTestCase {
         // of the columns to use.
         assertStatementError(AMBIGUOUS_COLNAME, s,
                 "select * from (t1 cross join t2) join t2 tt2 using(b)");
+
+        // DERBY-4407: If all the columns of table X are in the USING clause,
+        // X.* will expand to no columns. A result should always have at least
+        // one column.
+        assertStatementError(NO_COLUMNS, s,
+                "select x.* from t1 x inner join t1 y using (a,b,c)");
+        assertStatementError(NO_COLUMNS, s,
+                "select x.* from t1 x left join t1 y using (a,b,c)");
+        assertStatementError(NO_COLUMNS, s,
+                "select x.* from t1 x right join t1 y using (a,b,c)");
     }
 }

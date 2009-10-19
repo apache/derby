@@ -1895,6 +1895,11 @@ Guide.
             </msg>
 
             <msg>
+                <name>42X81</name>
+                <text>A query expression must return at least one column.</text>
+            </msg>
+
+            <msg>
                 <name>42X82</name>
                 <text>The USING clause returned more than one row. Only single-row ResultSets are permissible.</text>
             </msg>

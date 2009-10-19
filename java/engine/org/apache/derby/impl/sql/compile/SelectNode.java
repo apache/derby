@@ -643,6 +643,13 @@ public class SelectNode extends ResultSetNode
 		{
 			throw StandardException.newException(SQLState.LANG_TOO_MANY_ELEMENTS);
 		}
+
+        // DERBY-4407: A derived table must have at least one column.
+        if (resultColumns.size() == 0)
+        {
+            throw StandardException.newException(
+                    SQLState.LANG_EMPTY_COLUMN_LIST);
+        }
 	}
 
 	/**
