@@ -33,8 +33,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 
 import java.util.Vector;
@@ -334,19 +332,9 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	BinaryOperatorNode getNegation(ValueNode leftOperand,
+	abstract BinaryOperatorNode getNegation(ValueNode leftOperand,
 										  ValueNode rightOperand)
-				throws StandardException
-	{
-		/* Keep the compiler happy - this method should never be called.
-		 * We should always be calling the method in a sub-class.
-		 */
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(false,
-					"expected to call getNegation() for subclass " +
-					getClass().toString());
-		return this;
-	}
+				throws StandardException;
 
 	/**
 	 * Finish putting an expression into conjunctive normal

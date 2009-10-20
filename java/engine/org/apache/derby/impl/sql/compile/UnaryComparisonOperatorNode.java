@@ -53,7 +53,7 @@ import java.util.Vector;
  *
  */
 
-public class UnaryComparisonOperatorNode extends UnaryOperatorNode
+public abstract class UnaryComparisonOperatorNode extends UnaryOperatorNode
 {
 	/**
 	 * Bind this comparison operator.  All that has to be done for binding
@@ -138,18 +138,8 @@ public class UnaryComparisonOperatorNode extends UnaryOperatorNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	UnaryOperatorNode getNegation(ValueNode operand)
-				throws StandardException
-	{
-		/* Keep the compiler happy - this method should never be called.
-		 * We should always be calling the method in a sub-class.
-		 */
-		if (SanityManager.DEBUG)
-		SanityManager.ASSERT(false,
-					"expected to call getNegation() for subclass " +
-					getClass().toString());
-		return this;
-	}
+	abstract UnaryOperatorNode getNegation(ValueNode operand)
+				throws StandardException;
 
 	/* RelationalOperator interface */
 
