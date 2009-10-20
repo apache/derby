@@ -140,6 +140,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ConglomerateSharingTest.suite());
         suite.addTest(NullableUniqueConstraintTest.suite());
         suite.addTest(UniqueConstraintSetNullTest.suite());
+        suite.addTest(UniqueConstraintMultiThreadedTest.suite());
         suite.addTest(ViewsTest.suite());
         suite.addTest(DeadlockModeTest.suite());
         suite.addTest(AnsiSignaturesTest.suite());
