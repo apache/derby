@@ -52,16 +52,7 @@ public class BooleanTypeCompiler extends BaseTypeCompiler
 	 */
 	public boolean convertible(TypeId otherType, boolean forDataTypeFunction)
 	{
-		int otherJDBCTypeId = otherType.getJDBCTypeId();
-
-		if ((otherJDBCTypeId == Types.DATE) ||
-			(otherJDBCTypeId == Types.TIME) ||
-			(otherJDBCTypeId == Types.TIMESTAMP))
-		{
-			return false;
-		}
-
-		return true;
+        return (otherType.isStringTypeId() || otherType.isBooleanTypeId());
 	}
 
         /**

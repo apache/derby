@@ -1311,11 +1311,9 @@ public final class DataTypeDescriptor implements Formatable
 				(compareWithTypeID.isUserDefinedTypeId()))
 			return compareWithDTD.comparable(this, forEquals, cf);
 
-    	//Numeric types are comparable to numeric types, boolean types and to 
-		//comparable user types
+    	//Numeric types are comparable to numeric types
 		if (typeId.isNumericTypeId())
-    		return (compareWithTypeID.isNumericTypeId() || 
-            		compareWithTypeID.isBooleanTypeId());
+    		return (compareWithTypeID.isNumericTypeId());
 
 		//CHAR, VARCHAR and LONGVARCHAR are comparable to strings, boolean, 
 		//DATE/TIME/TIMESTAMP and to comparable user types
@@ -1335,12 +1333,15 @@ public final class DataTypeDescriptor implements Formatable
 		if (typeId.isBitTypeId()) 
         	return (compareWithTypeID.isBitTypeId()); 
 		
-		//Booleans are comparable to Boolean, string, numeric and to 
-		//comparable user types 
+		//Booleans are comparable to Boolean, string, and to 
+		//comparable user types. As part of the work on DERYB-887,
+        //I removed the comparability of booleans to numerics; I don't
+		//understand the previous statement about comparable user types.
+        //I suspect that is wrong and should be addressed when we
+        //re-enable UDTs (see DERBY-651).
 		if (typeId.isBooleanTypeId())
     		return (compareWithTypeID.getSQLTypeName().equals(typeId.getSQLTypeName()) ||
-    				compareWithTypeID.isStringTypeId() ||
-    				compareWithTypeID.isNumericTypeId()); 
+    				compareWithTypeID.isStringTypeId()); 
 
 		//Dates are comparable to dates, strings and to comparable
 		//user types.

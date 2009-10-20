@@ -52,10 +52,10 @@ public final class CharTypeCompiler extends BaseTypeCompiler
         public boolean convertible(TypeId otherType, boolean forDataTypeFunction)
         {
 			// LONGVARCHAR can only be converted from  character types
-			// or CLOB.
+			// or CLOB or boolean.
 			if (getTypeId().isLongVarcharTypeId())
 			{
-				return (otherType.isStringTypeId());
+				return (otherType.isStringTypeId() || otherType.isBooleanTypeId());
 			}
 
 			// The double function can convert CHAR and VARCHAR

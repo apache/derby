@@ -52,7 +52,7 @@ public class CLOBTypeCompiler extends BaseTypeCompiler
 								   boolean forDataTypeFunction)
         {
             // allow casting to any string
-            return (otherType.isStringTypeId()) ;
+            return (otherType.isStringTypeId() || otherType.isBooleanTypeId()) ;
 
         }
 
@@ -75,10 +75,10 @@ public class CLOBTypeCompiler extends BaseTypeCompiler
 
         public boolean storable(TypeId otherType, ClassFactory cf)
         {
-            // no automatic conversions at store time--but string
+            // no automatic conversions at store time--but booleans and string
 			// literals (or values of type CHAR/VARCHAR) are STORABLE
             // as clobs, even if the two types can't be COMPARED.
-            return (otherType.isStringTypeId()) ;
+            return (otherType.isStringTypeId() || otherType.isBooleanTypeId()) ;
         }
 
         /** @see TypeCompiler#interfaceName */
