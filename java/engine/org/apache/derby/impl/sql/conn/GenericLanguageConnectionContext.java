@@ -41,6 +41,7 @@ import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
+import org.apache.derby.iapi.sql.compile.ASTVisitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -290,6 +291,9 @@ public class GenericLanguageConnectionContext
 	// cache of ai being handled in memory (bulk insert + alter table).
 	private HashMap autoincrementCacheHashtable;
 
+    // User-written inspector to print out query tree
+    private ASTVisitor astWalker;
+    
 	/*
 	   constructor
 	*/
@@ -3537,4 +3541,14 @@ public class GenericLanguageConnectionContext
 	{
 		return xplain_statements.get(key);
 	}
+    
+    public void setASTVisitor( ASTVisitor visitor )
+    {
+        astWalker = visitor;
+    }
+    public ASTVisitor getASTVisitor( )
+    {
+        return astWalker;
+    }
+
 }

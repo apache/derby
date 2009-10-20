@@ -32,6 +32,7 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.types.DataValueFactory;
 
+import org.apache.derby.iapi.sql.compile.ASTVisitor;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorActivation;
@@ -1241,4 +1242,20 @@ public interface LanguageConnectionContext extends Context {
     public String getXplainSchema();
     public void setXplainStatement(Object key, Object stmt);
     public Object getXplainStatement(Object key);
+
+    /**
+     * Set a Visitor which walks the AST at various stages. This is useful
+     * for poking user-written inspectors into the parse, bind, and optimize phases.
+     *
+     * @param visitor The Visitor which should walk the tree. Could be null.
+     */
+    public void setASTVisitor( ASTVisitor visitor );
+
+    /**
+     * Get the Visitor which should walk the AST.
+     *
+     * @return The Visitor for that phase. Could be null.
+     */
+    public ASTVisitor getASTVisitor( );
+    
 }

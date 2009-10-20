@@ -33,6 +33,8 @@ import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.Statement;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Parser;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.compile.ASTVisitor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -281,6 +283,9 @@ public class GenericStatement
 
 				parseTime = getCurrentTimeMillis(lcc);
 
+                // Call user-written tree-printer if it exists
+                walkAST( lcc, qt, ASTVisitor.AFTER_PARSE);
+
 				if (SanityManager.DEBUG) 
 				{
 					if (SanityManager.DEBUG_ON("DumpParseTree")) 
@@ -318,6 +323,9 @@ public class GenericStatement
 
 					qt.bindStatement();
 					bindTime = getCurrentTimeMillis(lcc);
+
+                    // Call user-written tree-printer if it exists
+                    walkAST( lcc, qt, ASTVisitor.AFTER_BIND);
 
 					if (SanityManager.DEBUG) 
 					{
@@ -373,6 +381,9 @@ public class GenericStatement
 					qt.optimizeStatement();
 
 					optimizeTime = getCurrentTimeMillis(lcc);
+
+                    // Call user-written tree-printer if it exists
+                    walkAST( lcc, qt, ASTVisitor.AFTER_OPTIMIZE);
 
 					// Statement logging if lcc.getLogStatementText() is true
 					if (istream != null)
@@ -542,6 +553,18 @@ public class GenericStatement
 
 		return preparedStmt;
 	}
+
+    /** Walk the AST, using a (user-supplied) Visitor */
+    private void walkAST( LanguageConnectionContext lcc, Visitable queryTree, int phase ) throws StandardException
+    {
+        ASTVisitor visitor = lcc.getASTVisitor();
+        if ( visitor != null )
+        {
+            visitor.begin( statementText, phase );
+            queryTree.accept( visitor );
+            visitor.end( phase );
+        }
+    }
 
 	/**
 	 * Generates an execution plan given a set of named parameters.
