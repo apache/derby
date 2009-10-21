@@ -35,7 +35,6 @@ class DBOperations implements Runnable {
      * Instantiates DBOperation object.
      * @param con Connection to be used within this object.
      * @param keyValue key value while executing dmls.
-     * @return 
      */
     DBOperations(Connection con, int keyValue) throws SQLException {
         this.con = con;
