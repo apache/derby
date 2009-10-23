@@ -32,6 +32,8 @@ import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.util.ReuseFactory;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.compile.Visitor;
 
 /**
  * An OrderByColumn is a column in the ORDER BY clause.  An OrderByColumn
@@ -83,7 +85,6 @@ public class OrderByColumn extends OrderedColumn {
 			return "";
 		}
 	}
-
 
 	/**
 	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
@@ -497,4 +498,31 @@ public class OrderByColumn extends OrderedColumn {
 		if (addedColumnOffset > gap)
 			addedColumnOffset--;
 	}
+
+
+	/**
+	 * Accept a visitor, and call v.visit()
+	 * on child nodes as necessary.
+	 *
+	 * @param v the visitor
+	 *
+	 * @exception StandardException on error
+	 */
+	public Visitable accept(Visitor v)
+		throws StandardException
+	{
+		Visitable returnNode = v.visit(this);
+
+		if (v.skipChildren(this))
+		{
+			return returnNode;
+		}
+
+		if (expression != null && !v.stopTraversal())
+		{
+			expression = (ValueNode)expression.accept(v);
+		}
+		return returnNode;
+	}
+
 }

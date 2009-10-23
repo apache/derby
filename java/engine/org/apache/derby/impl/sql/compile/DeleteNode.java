@@ -787,7 +787,8 @@ public class DeleteNode extends DMLModStatementNode
                                                      whereClause, /* WHERE clause */
                                                      null, /* GROUP BY list */
                                                      null, /* having clause */
-                                                     getContextManager());
+													 null, /* windows */
+													 getContextManager());
 
         return (StatementNode) nodeFactory.getNode(
                                                     C_NodeTypes.DELETE_NODE,
@@ -836,7 +837,8 @@ public class DeleteNode extends DMLModStatementNode
                                                      fromList, /* FROM list */
                                                      whereClause, /* WHERE clause */
                                                      null, /* GROUP BY list */
-						     null, /* having clause */
+													 null, /* having clause */
+													 null, /* windows */
                                                      getContextManager());
 
         return (StatementNode) nodeFactory.getNode(

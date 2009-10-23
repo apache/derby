@@ -778,6 +778,7 @@ public class SQLParser
 					  					whereClause, /* WHERE clause */
 										null, /* GROUP BY list */
 										null, /* having clause */
+										null, /* window list */
 										getContextManager());
 
 		StatementNode retval =
@@ -818,6 +819,7 @@ public class SQLParser
 					  					whereClause, /* WHERE clause */
 										null, /* GROUP BY list */
 										null, /* having clause */
+										null, /* window list */
 										getContextManager());
 
 		StatementNode retval =
@@ -1083,6 +1085,37 @@ public class SQLParser
 			// identifier, and see whether it is followed by " ( DISTINCT "
 		  	if (getToken(2).kind == LEFT_PAREN && getToken(3).kind == DISTINCT)
 				retval = true;
+			break;
+		}
+
+		return retval;
+	}
+
+
+	/**
+	 * Determine whether the next sequence of tokens can be the beginning of a
+	 * window or aggregate function.
+	 * @return	TRUE iff the next set of tokens is the beginning of a
+	 *			window or aggregate function
+	 */
+	private boolean windowOrAggregateFunctionFollows()
+	{
+		boolean retval = false;
+
+		switch (getToken(1).kind) {
+
+		case ROWNUMBER:
+
+		// case RANK:
+		// case DENSE_RANK:
+		// case PERCENT_RANK:
+		// case CUME_DIST:
+
+			retval = true;
+			break;
+
+		default:
+			retval = aggregateFollows();
 			break;
 		}
 
@@ -2152,6 +2185,7 @@ TOKEN [IGNORE_CASE] :
 |	<VIEW: "view">
 |	<WHENEVER: "whenever">
 |	<WHERE: "where">
+|   <WINDOW: "window">
 |	<WITH: "with">
 |	<WORK: "work">
 |	<WRITE: "write">
@@ -2282,7 +2316,9 @@ TOKEN [IGNORE_CASE] :
 |	<LONG: "long">
 |	<LTRIM: "ltrim">
 |	<NONE: "none">
+|	<OVER: "over">
 |	<ROLE: "role">
+|	<ROWNUMBER: "row_number">
 |	<RTRIM: "rtrim">
 |	<SUBSTR:	"substr">
 |	<XML:	"xml">
@@ -6524,10 +6560,12 @@ valueExpressionPrimary(boolean inSelectClause) throws StandardException :
 		return value;
 	}
 |
-	// This LOOKAHEAD is required to distinguish an aggregateNode from
+        // This LOOKAHEAD is required to distinguish an
+        // window/aggregate function from
 	// miscBuiltins(). Both can start with an identifier.
-	LOOKAHEAD( { aggregateFollows() } )
-	value = aggregateNode()
+
+	LOOKAHEAD( { windowOrAggregateFunctionFollows() } )
+	value = windowOrAggregateFunctionNode()
 	{
 		return value;
 	}
@@ -8681,12 +8719,14 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 	GroupByList	groupByList = null;
 	ValueNode	havingClause = null;
 	Token		whereToken;
+	WindowList  windows = null;
 }
 {
 	fromList = fromClause()
 	[ whereToken = <WHERE> whereClause = whereClause(whereToken) ]
 	[ groupByList = groupByClause() ]
 	[ havingClause = havingClause() ]
+	[ windows = windowClause() ]
 	{
  
 		// fix for HAVING without GROUP BY, makes sure we get one
@@ -8711,6 +8751,7 @@ tableExpression(ResultColumnList selectList) throws StandardException :
 							whereClause,
 							groupByList,
 							havingClause,
+							windows,
 							getContextManager());
 
 		return selectNode;
@@ -9393,15 +9434,16 @@ datetimeValueFunction() throws StandardException :
 ** aggregate nodes.
 */
 ValueNode
-aggregateNode() throws StandardException :
+windowOrAggregateFunctionNode() throws StandardException :
 {
-	ValueNode agg;
+	ValueNode winOrAgg;
+	QueryTreeNode window = null;
 }
 {
 	<COUNT> <LEFT_PAREN>
 	( <ASTERISK>
 	{
-			agg = (ValueNode) nodeFactory.getNode(
+			winOrAgg = (ValueNode) nodeFactory.getNode(
 								C_NodeTypes.AGGREGATE_NODE,
 								null,
 								CountAggregateDefinition.class, 
@@ -9410,19 +9452,75 @@ aggregateNode() throws StandardException :
 								getContextManager());
 	}
 	|
-		agg = aggregateExpression("COUNT", CountAggregateDefinition.class)
+		winOrAgg = aggregateExpression("COUNT", CountAggregateDefinition.class)
 	)
-	<RIGHT_PAREN>
+		<RIGHT_PAREN> [ window = overClause() ]
 	{
-		return agg;
+		if (window != null) {
+			winOrAgg =  (ValueNode) nodeFactory.getNode(
+				C_NodeTypes.AGGREGATE_WINDOW_FUNCTION_NODE,
+				window,
+				winOrAgg,
+				getContextManager());
+		}
+
+		return winOrAgg;
 	}
 |
-	agg = generalAggregate()
+	winOrAgg = generalAggregate() [ window = overClause() ]
 	{
-		return agg;
+		if (window != null) {
+			winOrAgg =  (ValueNode) nodeFactory.getNode(
+				C_NodeTypes.AGGREGATE_WINDOW_FUNCTION_NODE,
+				window,
+				winOrAgg,
+				getContextManager());
+		}
+
+		return winOrAgg;
+	}
+|
+	<ROWNUMBER> <LEFT_PAREN> <RIGHT_PAREN> window = overClause()
+	{
+		winOrAgg = (ValueNode) nodeFactory.getNode(
+			C_NodeTypes.ROW_NUMBER_FUNCTION_NODE,
+			null,
+			window,
+			getContextManager());
+		return winOrAgg;
 	}
 }
 
+
+QueryTreeNode
+overClause() throws StandardException :
+{
+	String windowRef;
+	OrderByList orderCols = null;
+}
+{
+  LOOKAHEAD({ getToken(2).kind == LEFT_PAREN ||
+			  getToken(2).kind == IDENTIFIER })
+	<OVER>
+  ( <LEFT_PAREN> [ orderCols = orderByClause() ] <RIGHT_PAREN>
+	{
+		return (QueryTreeNode) nodeFactory.getNode(
+			C_NodeTypes.WINDOW_DEFINITION_NODE,
+			null,
+			orderCols,
+			getContextManager());
+	}
+ |
+   windowRef = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+   {
+	   return (QueryTreeNode) nodeFactory.getNode(
+			C_NodeTypes.WINDOW_REFERENCE_NODE,
+			windowRef,
+			getContextManager());
+   }
+ )
+
+}
 
 
 ValueNode
@@ -9674,6 +9772,44 @@ havingClause() throws StandardException :
 	<HAVING> value = valueExpression(false)
 	{
 		return value;
+	}
+}
+
+
+WindowList
+windowClause() throws StandardException :
+{
+	WindowList windows = new WindowList();
+	windows.setContextManager(getContextManager());
+}
+{
+	<WINDOW> windows = windowDefinition(windows)
+	( <COMMA> windows = windowDefinition(windows) )*
+	{
+		return windows;
+	}
+}
+
+
+WindowList
+windowDefinition(WindowList wl) throws StandardException :
+{
+	String windowName;
+	OrderByList orderCols = null;
+}
+{
+	windowName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
+	<AS>
+	<LEFT_PAREN> [ orderCols = orderByClause() ] <RIGHT_PAREN>
+	{
+		wl.addWindow(
+			(WindowDefinitionNode)nodeFactory.getNode(
+				C_NodeTypes.WINDOW_DEFINITION_NODE,
+				windowName,
+				orderCols,
+				getContextManager()));
+
+		return wl;
 	}
 }
 
@@ -13895,6 +14031,7 @@ nonReservedKeyword()  :
 	|	tok = <OLD>
 	|	tok = <OLD_TABLE>
 	|	tok = <OJ>
+	|	tok = <OVER>
 	|	tok = <PASCAL>
 	|	tok = <PASSING>
 	|	tok = <PLI>
@@ -13918,6 +14055,7 @@ nonReservedKeyword()  :
  	|	tok = <ROLLUP>
 	|	tok = <ROW>
 //	|	tok = <ROW_COUNT>
+	|	tok = <ROWNUMBER>
 	|   tok = <RR>
 	|   tok = <RS>
 	|	tok = <SCALE>

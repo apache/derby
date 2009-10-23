@@ -296,6 +296,10 @@ public class AggregateNode extends UnaryOperatorNode
 						aggregateName);
 			}
 
+			// Also forbid any window function inside an aggregate unless in
+			// subquery, cf. SQL 2003, section 10.9, SR 7 a).
+			SelectNode.checkNoWindowFunctions(operand, aggregateName);
+
 			/*
 			** Check the type of the operand.  Make sure that the user
 			** defined aggregate can handle the operand datatype.

@@ -2784,6 +2784,23 @@ Guide.
                 <text>A scalar value is expected, not a row set returned by a table function.</text>
             </msg>
 
+            <msg>
+                <name>42ZC0</name>
+                <text>Window '{0}' is not defined.</text>
+                <arg>windowName</arg>
+            </msg>
+
+            <msg>
+                <name>42ZC1</name>
+                <text>Only one window is supported.</text>
+            </msg>
+
+            <msg>
+                <name>42ZC2</name>
+                <text>Window function is illegal in this context: '{0}' clause</text>
+                <arg>clauseName</arg>
+            </msg>
+
         </family>
 
 
@@ -6732,6 +6749,11 @@ MessageId.java.
             <msg>
                 <name>43X9B.U</name>
                 <text>Row Count</text>
+            </msg>
+
+            <msg>
+                <name>43X9C.U</name>
+                <text>Window ResultSet: </text>
             </msg>
 
             <msg>

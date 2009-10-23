@@ -25,12 +25,16 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.ResultSetMetaData;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
+import junit.framework.Assert;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 /**
  * OLAP functionality test.
@@ -39,9 +43,55 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */ 
 public class OLAPTest extends BaseJDBCTestCase {
 
+	private final static String LANG_WINDOW_FUNCTION_CONTEXT_ERROR = "42ZC2";
+	private final static String NOT_IMPLEMENTED = "0A000";
+	private final static String LANG_SYNTAX_ERROR = "42X01";
+	private final static String LANG_COLUMN_NOT_FOUND =	"42X04";
+
 	public OLAPTest(String name) {
 		super(name);    
 	}
+
+	public static Test makeSuite() {
+        Test clean = new CleanDatabaseTestSetup(
+            new TestSuite(OLAPTest.class)) {
+                protected void decorateSQL(Statement s)
+                        throws SQLException
+                {
+                    getConnection().setAutoCommit(false);
+                    s.executeUpdate("create table t1 (a int, b int)");
+                    s.executeUpdate("create table t2 (x int)");
+                    s.executeUpdate("create table t3 (y int)");
+                    s.executeUpdate("create table t4 (a int, b int)");
+                    s.executeUpdate("create table t5 (a int, b int)");
+
+                    s.executeUpdate(
+                        "insert into t1 values (10,100),(20,200)," +
+                        "                      (30,300),(40,400)," +
+                        "                      (50,500)");
+                    s.executeUpdate(
+                        "insert into t2 values (1),(2),(3),(4),(5)");
+                    s.executeUpdate(
+                        "insert into t3 values (4),(5),(6),(7),(8)");
+                    s.executeUpdate(
+                        "insert into t4 values (10,100),(20,200)");
+                    s.executeUpdate(
+                        "insert into t5 values (1,1),(2,4),(3,4),(4,4),(5,9)");
+                    getConnection().commit();
+                }
+            };
+		return clean;
+	}
+
+
+	public static Test suite()
+    {
+		TestSuite suite = new TestSuite("OLAPTest");
+		suite.addTest(makeSuite());
+		suite.addTest(TestConfiguration.clientServerDecorator(makeSuite()));
+		return suite;
+    }
+
 
 	/**
 	 * Main test body
@@ -52,19 +102,13 @@ public class OLAPTest extends BaseJDBCTestCase {
 		throws SQLException {
 		Statement s = createStatement();
 
-		s.executeUpdate("create table t1 (a int, b int)");
-		s.executeUpdate("create table t2 (x int)");
-		s.executeUpdate("create table t3 (y int)");
-		s.executeUpdate("create table t4 (a int, b int)");
-
-		s.executeUpdate("insert into t1 values (10,100),(20,200),(30,300),(40,400),(50,500)");
-		s.executeUpdate("insert into t2 values (1),(2),(3),(4),(5)");
-		s.executeUpdate("insert into t3 values (4),(5),(6),(7),(8)");		
-		s.executeUpdate("insert into t4 values (10,100),(20,200)");
-
 		/*
 		 * Positive testing of Statements
-		 *
+		 */
+
+
+
+		/*
 		 * Simple queries
 		 */		
 		ResultSet rs = s.executeQuery("select row_number() over (), t1.* from t1");
@@ -98,25 +142,45 @@ public class OLAPTest extends BaseJDBCTestCase {
 		expectedRows = new String[][]{{"1", "4"}, {"2", "5"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
 
+		// DERBY-4069: ORDER BY should be applied at the cursor level, that is
+		// *after* a windowing clause in the. So, with the original ordering
+		// here, the ROW_NUMBER should come backwards:
+
 		/* Ordering */
 		rs = s.executeQuery("select row_number() over () as r, t1.* from t1 order by b desc");
-		expectedRows = new String[][]{{"1", "50", "500"}, {"2", "40", "400"}, {"3", "30", "300"}, {"4", "20", "200"}, {"5", "10", "100"}};
+
+		expectedRows = new String[][]{{"5", "50", "500"},
+									  {"4", "40", "400"},
+									  {"3", "30", "300"},
+									  {"2", "20", "200"},
+									  {"1", "10", "100"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
+
+        // DERBY-4069: ORDER BY should be applied at the cursor level, that is
+        // *after* a windowing clause in the. So, with the original ordering
+        // here, the ROW_NUMBER should come backwards:
 
 		/* Ordering on a column dropped in projection */
 		rs = s.executeQuery("select row_number() over () as r, t1.a from t1 order by b desc");
-		expectedRows = new String[][]{{"1", "50"}, {"2", "40"}, {"3", "30"}, {"4", "20"}, {"5", "10"}};
+
+		expectedRows = new String[][]{{"5", "50"},
+									  {"4", "40"},
+									  {"3", "30"},
+									  {"2", "20"},
+									  {"1", "10"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
 
 		/* Only expressions in RCL */
 		rs = s.executeQuery("select row_number() over (), row_number() over (), 2*t1.a from t1");
 		expectedRows = new String[][]{{"1", "1", "20"}, {"2", "2","40"}, {"3", "3","60"}, {"4", "4", "80"}, {"5", "5", "100"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
-		
+
+
+
 		/*
-		 * Subquerys 
-		 */ 
-			
+		 * Subqueries
+		 */
+
 		/* This query returned no rows at one time */
 		rs = s.executeQuery("select * from (select row_number() over () as r,x from t2,t3 where x=y) s(r,x) where r < 3");
 		expectedRows = new String[][]{{"1", "4"}, {"2", "5"}};
@@ -232,7 +296,19 @@ public class OLAPTest extends BaseJDBCTestCase {
 		expectedRows = new String[][]{{"100", "20", "200"}, {"200", "40", "400"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
 
-		/* Group by and having */
+		// Check that flattening does not happen when a window is used in a
+		// subquery
+
+		rs = s.executeQuery("select * from t5 o where o.a in " +
+							"(select x + row_number() over () from t2)");
+		expectedRows = new String[][]{{"2", "4"},
+									  {"4", "4"}};
+		JDBC.assertFullResultSet(rs, expectedRows);
+
+
+		/*
+		 * Group by and having
+		 */
 		rs = s.executeQuery("select r from (select a, row_number() over() as r, b from t1) x group by r");
 		expectedRows = new String[][]{{"1"}, {"2"}, {"3"}, {"4"}, {"5"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
@@ -301,36 +377,221 @@ public class OLAPTest extends BaseJDBCTestCase {
 										{"5", "ABC"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
 		
-		rs = s.executeQuery("select * from (select distinct row_number() over (), 'ABC' from t1) tmp");
+		rs = s.executeQuery(
+			"select * from (select distinct row_number() over (), " +
+			"                               'ABC' from t1) tmp");
 		expectedRows = new String[][]{{"1", "ABC"},
 										{"2", "ABC"},
 										{"3", "ABC"},
 										{"4", "ABC"},
 										{"5", "ABC"}};
 		JDBC.assertFullResultSet(rs, expectedRows);
-		
-		/*
-		 * Negative testing of Statements
-		 */
 
-		// Missing required OVER () 
-		assertStatementError("42X01", s, "select row_number() as r, * from t1 where t1.a > 2");
+        // Test explicitly declared window
+        rs = s.executeQuery(
+            "select * from (select distinct row_number() over w, 'ABC' " +
+                            "from t1 window w as ()) tmp");
+        JDBC.assertFullResultSet(rs, expectedRows);
 
-		// Illegal where clause, r not a named column of t1.        
-		assertStatementError("42X04", s, "select row_number() over () as r, a from t1 where r < 3");
+        // DERBY-3634 Cannot use row_number() in ORDER BY clause
+        rs = s.executeQuery(
+            "select row_number() over () r, a from t1 order by r desc");
+        expectedRows = new String[][]{{"5", "50"},
+                                      {"4", "40"},
+                                      {"3", "30"},
+                                      {"2", "20"},
+                                      {"1", "10"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
 
-		// Illegal use of asterix with another column identifier.        
-		assertStatementError("42X01", s, "select row_number() over () as r, * from t1 where t1.a > 2");
+        rs = s.executeQuery(
+            "select a from t1 order by row_number() over () desc");
+        expectedRows = new String[][]{{"50"},
+                                      {"40"},
+                                      {"30"},
+                                      {"20"},
+                                      {"10"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
 
-		/*
-		 * Clean up the tables used.
-		 */
-		s.executeUpdate("drop table t1");
-		s.executeUpdate("drop table t2");
-		s.executeUpdate("drop table t3");
+        // Another case mentioned in DERBY-3634
+        rs = s.executeQuery("select a, row_number() over () from t1 except " +
+                            "select a, row_number() over () from t1");
+        JDBC.assertEmpty(rs);
 
-		s.close();
-	}
+        // And yet another case mentioned in DERBY-3634 This actually also
+        // tests that ROW_NUMBER in an ORDER BY does not get optimized away if
+        // there is a restriction, see SelectNode's call to
+        // orderByList.removeConstantColumns(wherePredicates).
+        rs = s.executeQuery("select abs(a), row_number() over () c " +
+                            "from t1 where a > 30 and a <= 50 " +
+                            "order by c desc");
+        expectedRows = new String[][]{{"50", "2"},
+                                      {"40", "1"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+
+        // DERBY-3635 Cannot build SELECT LIST expressions involving
+        // ROW_NUMBER()
+        rs = s.executeQuery("select row_number() over () + 10, a from t1 " +
+                            "order by row_number() over () desc");
+        expectedRows = new String[][]{{"15", "50"},
+                                      {"14", "40"},
+                                      {"13", "30"},
+                                      {"12", "20"},
+                                      {"11", "10"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+
+        // Check that a non-used window doesn't cause problems
+        rs = s.executeQuery("select a from t1 window r as () order by a desc");
+        expectedRows = new String[][]{{"50"},
+                                      {"40"},
+                                      {"30"},
+                                      {"20"},
+                                      {"10"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+        // Check that a row_number combined with group by works. Good to test
+        // this since windowing uses a similar rewrite mechanism to group by
+        // and could interfere (seen during development).
+        rs = s.executeQuery("select row_number() over r, b, sum(a) from t5 " +
+                            "group by b window r as ()");
+        expectedRows = new String[][]{{"1", "1", "1"},
+                                      {"2", "4", "9"},
+                                      {"3", "9", "5"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+        // Check that a row_number combined with group by works. Good to test
+        // this since windowing uses a similar rewrite mechanism to group by
+        // and could interfere (seen during development).
+        rs = s.executeQuery("select row_number() over r, b, sum(a) from t5 " +
+                            "group by b window r as ()");
+        expectedRows = new String[][]{{"1", "1", "1"},
+                                      {"2", "4", "9"},
+                                      {"3", "9", "5"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+        rs = s.executeQuery("select b, sum(a) from t5 " +
+                            "group by b window r as ()");
+        expectedRows = new String[][]{{"1", "1"},
+                                      {"4", "9"},
+                                      {"9", "5"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+        // Check that row_number inside EXISTS works.
+        rs = s.executeQuery("SELECT * FROM t2 WHERE EXISTS " +
+                            "(SELECT ROW_NUMBER() OVER () FROM t5)");
+        expectedRows = new String[][]{{"1"},{"2"},{"3"},{"4"},{"5"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+        /*
+         * Negative testing of Statements
+         */
+
+        // Missing required OVER ()
+        assertStatementError(
+            LANG_SYNTAX_ERROR, s,
+			"select row_number() as r, * from t1 where t1.a > 2");
+
+        // Illegal where clause, r not a named column of t1.
+        assertStatementError(
+            LANG_COLUMN_NOT_FOUND, s,
+            "select row_number() over () as r, a from t1 where r < 3");
+
+        // Illegal use of asterisk with another column identifier.
+        assertStatementError(
+            LANG_SYNTAX_ERROR, s,
+            "select row_number() over () as r, * from t1 where t1.a > 2");
+
+        // Order by in window specification
+        assertStatementError(
+            NOT_IMPLEMENTED,
+            s,
+            "select row_number() over (order by i) as r from t1");
+
+        // Other window function than row_number:
+        assertStatementError(NOT_IMPLEMENTED,
+                             s,
+                             "select max(i) over () from t1");
+
+        // Illegal context: WHERE, cf. SQL 2003, section 7.8 SR 2
+        assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+                             s,
+                             "select * from t4 where row_number() over () > 3");
+
+        // But nested inside a subquery it should work:
+        rs = s.executeQuery("select * from t2 where x in " +
+                            "     (select row_number() over () from t4)");
+        expectedRows = new String[][]{{"1"},{"2"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+        // Illegal context: GROUP BY
+        assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+                             s,
+                             "select * from t4 group by row_number() over ()");
+
+        // But nested inside a subquery it should work.
+        // Fails: DERBY-4403, enable this test when that issue is fixed.
+        // rs = s.executeQuery("select * from t4 group by a + " +
+        //             "(select row_number() over () from t4 where a=10)");
+        // JDBC.assertEmpty(rs);
+
+
+        // Illegal context: HAVING, cf. SQL 2003, section 7.10 SR 4
+        assertStatementError(
+			LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+			s,
+			"select * from t4 group by a having b = row_number() over ()");
+
+        // But nested inside a subquery it should work:
+        rs = s.executeQuery(
+            "select sum(a) from t5 group by b " +
+            "   having b = (select row_number() over () + 3 " +
+            "                   from t5 where a=1)");
+        expectedRows = new String[][]{{"9"}};
+
+
+        // Illegal context: VALUES
+        assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+                             s,
+                             "values row_number() over ()");
+
+        // But nested inside a subquery it should work:
+        rs = s.executeQuery("values 3 + " +
+                            "(select row_number() over () from t2 where x=1)");
+        expectedRows = new String[][]{{"4"}};
+        JDBC.assertFullResultSet(rs, expectedRows);
+
+        // Illegal context: Aggregate function, cf. SQL 2003, section 10.9 SR 7
+        // a)
+        assertStatementError(LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+                             s,
+                             "select sum(row_number() over ()) from t4");
+
+        // Illegal context: JOIN ON clause, cf. SQL 2003, section 7.7 SR 5
+        assertStatementError(
+            LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+            s,
+            "select * from t4 t_1 join t4 t_2 on " +
+            "                     t_1.a = row_number() over () + t_2.a");
+    }
+
+
+    public void testMetaData()
+        throws SQLException {
+
+        if (JDBC.vmSupportsJSR169()) {
+            // does not support metadata
+            return;
+        }
+
+        Statement s = createStatement();
+        ResultSet rs = s.executeQuery(
+            "select row_number() over () from sys.systables");
+        ResultSetMetaData rsmd = rs.getMetaData();
+
+        assertEquals(ResultSetMetaData.columnNoNulls, rsmd.isNullable(1));
+    }
+
 
     private String makeString(int len)
     {
@@ -679,7 +940,7 @@ public class OLAPTest extends BaseJDBCTestCase {
                 {"DEF","2","350","1","20"},
                 {null,"8","1075","4","215"},
             });
-        // Show a usage of disinct shipping aggregate, similar to the
+        // Show a usage of distinct shipping aggregate, similar to the
         // distinct count aggregate:
         JDBC.assertUnorderedResultSet( s.executeQuery(
             "select o.Customer, count(*) as items_per_customer, " +
@@ -883,8 +1144,4 @@ public class OLAPTest extends BaseJDBCTestCase {
 
         s.close();
     }
-
-	public static Test suite() {
-		return TestConfiguration.defaultSuite(OLAPTest.class);
-	}
 }

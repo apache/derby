@@ -101,8 +101,12 @@ public class SQLStateConstants
         = "22006";
     public static final String DATA_EXCEPTION_INVALID_PARAMETER_VALUE 
         = "22023";
-    public static final String DATA_EXCEPTION_INVALID_PRECEDING_OR_FOLLOWING_SIZE_IN_WINDOW_FUNCTION 
-        = "22013";
+
+
+    // Derby uses 22013 for something else, cf. SQLState.LANG_SQRT_OF_NEG_NUMBER
+    // public static final String DATA_EXCEPTION_INVALID_PRECEDING_OR_FOLLOWING_SIZE_IN_WINDOW_FUNCTION
+    //    = "22013";
+
     public static final String DATA_EXCEPTION_INVALID_REGULAR_EXPRESSION 
         = "2201B";
     public static final String DATA_EXCEPTION_INVALID_REPEAT_ARGUMENT_IN_A_SAMPLE_CLAUSE 

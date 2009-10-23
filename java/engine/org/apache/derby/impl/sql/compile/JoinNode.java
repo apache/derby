@@ -826,6 +826,10 @@ public class JoinNode extends TableOperatorNode
 				throw se;
 			}
 
+			// SQL 2003, section 7.7 SR 5
+			SelectNode.checkNoWindowFunctions(joinClause, "ON");
+
+
 			/* DB2 doesn't allow subquerries in the ON clause */
 			if (subqueryList.size() > 0)
 				throw StandardException.newException(SQLState.LANG_DB2_ON_CLAUSE_INVALID); 

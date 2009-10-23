@@ -75,6 +75,7 @@ public class ColumnReference extends ValueNode
 	//Expression genResult;
 
 	private boolean		replacesAggregate;
+	private boolean		replacesWindowFunctionCall;
 
 	private int			nestingLevel = -1;
 	private int			sourceLevel = -1;
@@ -146,7 +147,11 @@ public class ColumnReference extends ValueNode
 				"tableNumber: " + tableNumber + "\n" +
 				"columnNumber: " + columnNumber + "\n" +
 				"replacesAggregate: " + replacesAggregate + "\n" +
-				"tableName: " + ( ( tableName != null) ? tableName.toString() : "null") + "\n" +
+				"replacesWindowFunctionCall: " +
+				    replacesWindowFunctionCall + "\n" +
+				"tableName: " + ( ( tableName != null) ?
+								  tableName.toString() :
+								  "null") + "\n" +
 				"nestingLevel: " + nestingLevel + "\n" +
 				"sourceLevel: " + sourceLevel + "\n" +
 				super.toString();
@@ -258,6 +263,15 @@ public class ColumnReference extends ValueNode
 		replacesAggregate = true;
 	}
 
+
+	/**
+	 * Mark this node as being generated to replace a window function call.
+	 */
+	public void markGeneratedToReplaceWindowFunctionCall()
+	{
+		replacesWindowFunctionCall = true;
+	}
+
 	/**
 	 * Determine whether or not this node was generated to
 	 * replace an aggregate in the user's SELECT.
@@ -268,6 +282,19 @@ public class ColumnReference extends ValueNode
 	public boolean getGeneratedToReplaceAggregate()
 	{
 		return replacesAggregate;
+	}
+
+
+	/**
+	 * Determine whether or not this node was generated to
+	 * replace a window function call in the user's SELECT.
+	 *
+	 * @return boolean	Whether or not this node was generated to replace
+	 *					a window function call in the user's SELECT.
+	 */
+	public boolean getGeneratedToReplaceWindowFunctionCall()
+	{
+		return replacesWindowFunctionCall;
 	}
 
 	/**
@@ -309,6 +336,8 @@ public class ColumnReference extends ValueNode
 		nestingLevel = oldCR.getNestingLevel();
 		sourceLevel = oldCR.getSourceLevel();
 		replacesAggregate = oldCR.getGeneratedToReplaceAggregate();
+		replacesWindowFunctionCall =
+			oldCR.getGeneratedToReplaceWindowFunctionCall();
 		scoped = oldCR.isScoped();
 	}
 
@@ -592,6 +621,8 @@ public class ColumnReference extends ValueNode
 	 * pushing the predicate into the SelectNode that evaluates the aggregate,
 	 * which doesn't make sense, since the having clause is supposed to be
 	 * applied to the result of the SelectNode.
+	 * This also goes for column references that replaces a window function.
+	 *
 	 *
 	 * RESOLVE - revisit this issue once we have views.
 	 *
@@ -611,6 +642,7 @@ public class ColumnReference extends ValueNode
 		referencedTabs.set(tableNumber);
 
 		return ( ! replacesAggregate ) &&
+			   ( ! replacesWindowFunctionCall ) &&
 			   ( (source.getExpression() instanceof ColumnReference) ||
 			     (source.getExpression() instanceof VirtualColumnNode) ||
 				 (source.getExpression() instanceof ConstantNode));

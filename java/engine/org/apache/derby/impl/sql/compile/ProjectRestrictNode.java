@@ -1099,10 +1099,26 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		 * if we can push any of the predicates which just got pushed
 		 * down to our level into the SelectNode.
 		 */
-		if (pushPList != null && (childResult instanceof SelectNode))
+		if (pushPList != null &&
+				(childResult instanceof SelectNode))
 		{
-			pushPList.pushExpressionsIntoSelect((SelectNode) childResult, false);
+			SelectNode childSelect = (SelectNode)childResult;
+
+			if ( (childSelect.hasWindows()  &&
+				  childSelect.orderByList != null) ) {
+				// We can't push down if there is an ORDER BY and a window
+				// function because that would make ROW_NUMBER give wrong
+				// result:
+				// E.g.
+				//     SELECT * from (SELECT ROW_NUMBER() OVER (), j FROM T
+				//                    ORDER BY j) WHERE j=5
+				//
+			} else {
+				pushPList.pushExpressionsIntoSelect((SelectNode) childResult,
+													false);
+			}
 		}
+
 
 		/* DERBY-649: Push simple predicates into Unions. It would be up to UnionNode
 		 * to decide if these predicates can be pushed further into underlying SelectNodes

@@ -1096,6 +1096,10 @@ public interface SQLState {
     String LANG_NO_COSTING_CONSTRUCTOR                              = "42ZB5";
     String LANG_TABLE_FUNCTION_NOT_ALLOWED                   = "42ZB6";
 
+	String LANG_NO_SUCH_WINDOW                                         = "42ZC0";
+	String LANG_WINDOW_LIMIT_EXCEEDED                                  = "42ZC1";
+	String LANG_WINDOW_FUNCTION_CONTEXT_ERROR                          = "42ZC2";
+
 	//following 3 matches the DB2 sql states
 	String LANG_DECLARED_GLOBAL_TEMP_TABLE_ONLY_IN_SESSION_SCHEMA = "428EK";
 	String LANG_NOT_ALLOWED_FOR_DECLARED_GLOBAL_TEMP_TABLE = "42995";
@@ -1213,6 +1217,7 @@ public interface SQLState {
 	String RTS_ROW_RS												   = "43X99.U";
 	String RTS_RC                                                      = "43X9A.U";
 	String RTS_RC_RS                                                   = "43X9B.U";
+	String RTS_WINDOW_RS                                               = "43X9C.U";
 
 	String RTS_SCALAR_AGG_RS										   = "43Y00.U";
 	String RTS_INDEX_KEY_OPT										   = "43Y01.U";

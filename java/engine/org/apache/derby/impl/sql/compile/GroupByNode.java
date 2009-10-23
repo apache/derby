@@ -580,13 +580,15 @@ public class GroupByNode extends SingleChildResultSetNode
 			CollectNodesVisitor collectNodesVisitor = 
 				new CollectNodesVisitor(ColumnReference.class, AggregateNode.class);
 			havingClause.accept(collectNodesVisitor);
+
 			for (Iterator it = collectNodesVisitor.getList().iterator();
 			     it.hasNext(); ) 
 			{
 				ColumnReference cr = (ColumnReference)it.next();
-				
-				if (!cr.getGeneratedToReplaceAggregate() && 
-						cr.getSourceLevel() == level) {
+
+				if ( ! (cr.getGeneratedToReplaceAggregate() ||
+						cr.getGeneratedToReplaceWindowFunctionCall()) &&
+					 cr.getSourceLevel() == level) {
 					throw StandardException.newException(
 							SQLState.LANG_INVALID_COL_HAVING_CLAUSE, 
 							cr.getSQLColumnName());						

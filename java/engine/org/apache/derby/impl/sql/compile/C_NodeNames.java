@@ -43,7 +43,6 @@ public interface C_NodeNames
     // THEM TO tools/jar/DBMSnodes.properties
 
 	static final String AGGREGATE_NODE_NAME = "org.apache.derby.impl.sql.compile.AggregateNode";
-
 	static final String ALL_RESULT_COLUMN_NAME = "org.apache.derby.impl.sql.compile.AllResultColumn";
 
 	static final String ALTER_TABLE_NODE_NAME = "org.apache.derby.impl.sql.compile.AlterTableNode";
@@ -301,6 +300,11 @@ public interface C_NodeNames
 	static final String SAVEPOINT_NODE_NAME = "org.apache.derby.impl.sql.compile.SavepointNode";
 
 	static final String XML_CONSTANT_NODE_NAME = "org.apache.derby.impl.sql.compile.XMLConstantNode";
+	static final String AGGREGATE_WINDOW_FUNCTION_NAME = "org.apache.derby.impl.sql.compile.AggregateWindowFunctionNode";
+	static final String ROW_NUMBER_FUNCTION_NAME = "org.apache.derby.impl.sql.compile.RowNumberFunctionNode";
+	static final String WINDOW_DEFINITION_NAME = "org.apache.derby.impl.sql.compile.WindowDefinitionNode";
+	static final String WINDOW_REFERENCE_NAME = "org.apache.derby.impl.sql.compile.WindowReferenceNode";
+	static final String WINDOW_RESULTSET_NODE_NAME = "org.apache.derby.impl.sql.compile.WindowResultSetNode";
 
 	static final String ROW_COUNT_NODE_NAME = "org.apache.derby.impl.sql.compile.RowCountNode";
 

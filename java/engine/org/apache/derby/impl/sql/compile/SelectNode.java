@@ -88,6 +88,16 @@ public class SelectNode extends ResultSetNode
 	 */
 	GroupByList	groupByList;
 
+	/**
+	 * List of windows.
+	 */
+	WindowList windows;
+
+	/**
+	 * List of window function calls (e.g. ROW_NUMBER, AVG(i), DENSE_RANK).
+	 */
+	Vector windowFuncCalls;
+
 	/** User specified a group by without aggregates and we turned 
 	 * it into a select distinct 
 	 */
@@ -125,7 +135,8 @@ public class SelectNode extends ResultSetNode
 			  Object fromList,
 			  Object whereClause,
 			  Object groupByList,
-			  Object havingClause)
+			  Object havingClause,
+			  Object windowDefinitionList)
 			throws StandardException
 	{
 		/* RESOLVE - remove aggregateList from constructor.
@@ -139,6 +150,15 @@ public class SelectNode extends ResultSetNode
 		this.originalWhereClause = (ValueNode) whereClause;
 		this.groupByList = (GroupByList) groupByList;
 		this.havingClause = (ValueNode)havingClause;
+
+		// This initially represents an explicit <window definition list>, as
+		// opposed to <in-line window specifications>, see 2003, 6.10 and 6.11.
+		// <in-line window specifications> are added later, see right below for
+		// in-line window specifications used in window functions in the SELECT
+		// column list and in genProjectRestrict for such window specifications
+		// used in window functions in ORDER BY.
+		this.windows = (WindowList)windowDefinitionList;
+
 		bindTargetListOnly = false;
 		
 		this.originalWhereClauseHadSubqueries = false;
@@ -150,6 +170,65 @@ public class SelectNode extends ResultSetNode
 				this.originalWhereClauseHadSubqueries = true;
 			}
 		}
+
+		if (resultColumns != null) {
+
+			// Collect window functions used in result columns, and check them
+			// for any <in-line window specification>s.
+
+			CollectNodesVisitor cnvw =
+				new CollectNodesVisitor(WindowFunctionNode.class);
+			resultColumns.accept(cnvw);
+			windowFuncCalls = cnvw.getList();
+
+			for (int i=0; i < windowFuncCalls.size(); i++) {
+				WindowFunctionNode wfn =
+					(WindowFunctionNode)windowFuncCalls.elementAt(i);
+
+				// Some window function, e.g. ROW_NUMBER() contains an inline
+				// window specification, so we add it to our list of window
+				// definitions.
+
+				if (wfn.getWindow() instanceof WindowDefinitionNode) {
+					// Window function call contains an inline definition, add
+					// it to our list of windows.
+					windows = addInlinedWindowDefinition(windows, wfn);
+				} else {
+					// a window reference, bind it later.
+
+					if (SanityManager.DEBUG) {
+						SanityManager.ASSERT(
+							wfn.getWindow() instanceof WindowReferenceNode);
+					}
+				}
+			}
+		}
+	}
+
+	private WindowList addInlinedWindowDefinition (WindowList wl,
+												   WindowFunctionNode wfn) {
+		WindowDefinitionNode wdn = (WindowDefinitionNode)wfn.getWindow();
+
+		if (wl == null) {
+			// This is the first window we see, so initialize list.
+			wl = new WindowList();
+			wl.setContextManager(getContextManager());
+		}
+
+		WindowDefinitionNode equiv = wdn.findEquivalentWindow(wl);
+
+		if (equiv != null) {
+			// If the window is equivalent an existing one, optimize
+			// it away.
+
+			wfn.setWindow(equiv);
+		} else {
+			// remember this window for posterity
+
+			wl.addWindow((WindowDefinitionNode)wfn.getWindow());
+		}
+
+		return wl;
 	}
 
 	/**
@@ -241,6 +320,11 @@ public class SelectNode extends ResultSetNode
 				groupByList.treePrint(depth + 1);
 			}
 
+			if (havingClause != null) {
+				printLabel(depth, "havingClause:");
+				havingClause.treePrint(depth + 1);
+			}
+
 			if (orderByList != null) {
 				printLabel(depth, "orderByList:");
 				orderByList.treePrint(depth + 1);
@@ -252,6 +336,11 @@ public class SelectNode extends ResultSetNode
 				preJoinFL.treePrint(depth + 1);
 			}
 
+			if (windows != null)
+			{
+				printLabel(depth, "windows: ");
+				windows.treePrint(depth + 1);
+			}
 		}
 	}
 
@@ -448,6 +537,18 @@ public class SelectNode extends ResultSetNode
 			fromListParam.insertElementAt(fromList.elementAt(index), index);
 		}
 
+		// In preparation for resolving window references in expressions, we
+		// make the FromList carry the set of explicit window definitions.
+		//
+		// E.g. "select row_number () from r, .. from t window r as ()"
+		//
+		// Here the expression "row_number () from r" needs to be bound to r's
+		// definition. Window functions can also in-line window specifications,
+		// no resolution is necessary. See also
+		// WindowFunctionNode.bindExpression.
+
+		fromListParam.setWindows(windows);
+
 		resultColumns.bindExpressions(fromListParam, 
 									  selectSubquerys,
 									  selectAggregates);
@@ -496,6 +597,8 @@ public class SelectNode extends ResultSetNode
 			
 			whereClause = whereClause.checkIsBoolean();
 			getCompilerContext().popCurrentPrivType();
+
+			checkNoWindowFunctions(whereClause, "WHERE");
 		}
 
 		if (havingClause != null) {
@@ -506,6 +609,7 @@ public class SelectNode extends ResultSetNode
 			havingClause.bindExpression(
 					fromListParam, havingSubquerys, havingAggregates);
 			havingClause = havingClause.checkIsBoolean();
+			checkNoWindowFunctions(havingClause, "HAVING");
 		}
 		
 		/* Restore fromList */
@@ -541,6 +645,8 @@ public class SelectNode extends ResultSetNode
 				SanityManager.ASSERT(gbAggregateVector.size() == 0,
 						"Unexpected Aggregate vector generated by Group By clause");
 			}
+
+			checkNoWindowFunctions(groupByList, "GROUP BY");
 		}
 		/* If ungrouped query with aggregates in SELECT list, verify
 		 * that all result columns are valid aggregate expressions -
@@ -637,7 +743,6 @@ public class SelectNode extends ResultSetNode
 		 */
 		fromList.bindResultColumns(fromListParam);
 		super.bindResultColumns(fromListParam);
-
 		/* Only 1012 elements allowed in select list */
 		if (resultColumns.size() > Limits.DB2_MAX_ELEMENTS_IN_SELECT_LIST)
 		{
@@ -969,7 +1074,6 @@ public class SelectNode extends ResultSetNode
 				// columns are ones that have equality comparisons with
 				// constant expressions (e.g. x = 3)
 				orderByList.removeConstantColumns(wherePredicates);
-
 				/*
 				** It's possible for the order by list to shrink to nothing
 				** as a result of removing constant columns.  If this happens,
@@ -1099,6 +1203,42 @@ public class SelectNode extends ResultSetNode
 		{
 			newTop.setReferencedTableMap((JBitSet) referencedTableMap.clone());
 		}
+
+
+		if (orderByList != null) {
+
+			// Collect window function calls and in-lined window definitions
+			// contained in them from the orderByList.
+
+			CollectNodesVisitor cnvw =
+				new CollectNodesVisitor(WindowFunctionNode.class);
+			orderByList.accept(cnvw);
+			Vector wfcInOrderBy = cnvw.getList();
+
+			for (int i=0; i < wfcInOrderBy.size(); i++) {
+				WindowFunctionNode wfn =
+					(WindowFunctionNode)wfcInOrderBy.elementAt(i);
+				windowFuncCalls.add(wfn);
+
+
+				if (wfn.getWindow() instanceof WindowDefinitionNode) {
+					// Window function call contains an inline definition, add
+					// it to our list of windows.
+					windows = addInlinedWindowDefinition(windows, wfn);
+
+				} else {
+					// a window reference, should be bound already.
+
+					if (SanityManager.DEBUG) {
+						SanityManager.ASSERT(
+							false,
+							"a window reference, should be bound already");
+					}
+				}
+			}
+		}
+
+
 		return newTop;
 	}
 
@@ -1267,7 +1407,6 @@ public class SelectNode extends ResultSetNode
 		ResultColumnList	prRCList;
 		ResultSetNode		prnRSN;
 
-
 		prnRSN = (ResultSetNode) getNodeFactory().getNode(
 								C_NodeTypes.PROJECT_RESTRICT_NODE,
 								fromList.elementAt(0),	/* Child ResultSet */
@@ -1314,6 +1453,33 @@ public class SelectNode extends ResultSetNode
 			// Remember whether or not we can eliminate the sort.
 			eliminateSort = eliminateSort || gbn.getIsInSortedOrder();
 		}
+
+
+		if (windows != null) {
+
+			// Now we add a window result set wrapped in a PRN on top of what
+			// we currently have.
+
+			if (windows.size() > 1) {
+				throw StandardException.newException(
+					SQLState.LANG_WINDOW_LIMIT_EXCEEDED);
+			}
+
+			WindowNode wn = (WindowNode)windows.elementAt(0);
+
+			WindowResultSetNode wrsn =
+				(WindowResultSetNode)getNodeFactory().getNode(
+					C_NodeTypes.WINDOW_RESULTSET_NODE,
+					prnRSN,
+					wn,
+					windowFuncCalls,
+					new Integer(nestingLevel),
+					getContextManager());
+
+			prnRSN = wrsn.getParent();
+			wrsn.assignCostEstimate(optimizer.getOptimizedCost());
+		}
+
 
 		// if it is distinct, that must also be taken care of.
 		if (isDistinct)
@@ -1386,6 +1552,7 @@ public class SelectNode extends ResultSetNode
 		/* Generate the OrderByNode if a sort is still required for
 		 * the order by.
 		 */
+
 		if (orderByList != null)
 		{
 			if (orderByList.getSortNeeded())
@@ -1423,8 +1590,12 @@ public class SelectNode extends ResultSetNode
 			}
 		}
 
-		
-		if (wasGroupBy && resultColumns.numGeneratedColumnsForGroupBy() > 0) {
+
+		if (wasGroupBy &&
+			resultColumns.numGeneratedColumnsForGroupBy() > 0 &&
+			windows == null) // windows handling already added a PRN which
+							 // obviates this.
+		{
 			// This case takes care of columns generated for group by's which 
 			// will need to be removed from the final projection. Note that the
 			// GroupByNode does remove generated columns but in certain cases
@@ -2223,5 +2394,36 @@ public class SelectNode extends ResultSetNode
 	public boolean hasAggregatesInSelectList() 
 	{
 		return !selectAggregates.isEmpty();
+	}
+
+	/**
+	 * Used by SubqueryNode to avoid flattening of a subquery if a window is
+	 * defined on it. Note that any inline window definitions should have been
+	 * collected from both the selectList and orderByList at the time this
+	 * method is called, so the windows list is complete. This is true after
+	 * preprocess is completed.
+	 *
+	 * @return true if this select node has any windows on it
+	 */
+	public boolean hasWindows()
+	{
+		return windows != null;
+	}
+
+
+	public static void checkNoWindowFunctions(QueryTreeNode clause,
+											   String clauseName)
+			throws StandardException {
+
+		// Clause cannot contain window functions except inside subqueries
+		HasNodeVisitor visitor = new HasNodeVisitor(WindowFunctionNode.class,
+													SubqueryNode.class);
+		clause.accept(visitor);
+
+		if (visitor.hasNode()) {
+			throw StandardException.newException(
+				SQLState.LANG_WINDOW_FUNCTION_CONTEXT_ERROR,
+				clauseName);
+		}
 	}
 }

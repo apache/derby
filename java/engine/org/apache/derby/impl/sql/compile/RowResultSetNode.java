@@ -244,6 +244,8 @@ public class RowResultSetNode extends FromTable
 		{
 			throw StandardException.newException(SQLState.LANG_NO_AGGREGATES_IN_WHERE_CLAUSE);
 		}
+
+		SelectNode.checkNoWindowFunctions(resultColumns, "VALUES");
 	}
 
 	/**

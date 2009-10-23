@@ -24,6 +24,8 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.compile.Visitor;
+import org.apache.derby.iapi.sql.compile.Visitable;
 
 import org.apache.derby.iapi.types.TypeId;
 
@@ -135,5 +137,29 @@ public class GroupByColumn extends OrderedColumn
 	{
 		this.columnExpression = cexpr;
 		
+	}
+
+	/**
+	 * Accept a visitor, and call v.visit()
+	 * on child nodes as necessary.
+	 *
+	 * @param v the visitor
+	 *
+	 * @exception StandardException on error
+	 */
+	public Visitable accept(Visitor v)
+		throws StandardException {
+
+		Visitable returnNode = v.visit(this);
+
+		if (v.skipChildren(this)) {
+			return returnNode;
+		}
+
+		if (columnExpression != null) {
+			columnExpression = (ValueNode)columnExpression.accept(v);
+		}
+
+		return returnNode;
 	}
 }

@@ -829,6 +829,33 @@ public class GenericResultSetFactory implements ResultSetFactory
 	}
 
 	/**
+		@see ResultSetFactory#getWindowResultSet
+		@exception StandardException	Thrown on error
+	 */
+	public NoPutResultSet getWindowResultSet(
+								Activation activation,
+								NoPutResultSet source,
+								GeneratedMethod rowAllocator,
+								int resultSetNumber,
+								int erdNumber,
+								GeneratedMethod restriction,
+								double optimizerEstimatedRowCount,
+								double optimizerEstimatedCost)
+		throws StandardException
+	{
+		return new WindowResultSet(
+								activation,
+								source,
+								rowAllocator,
+								resultSetNumber,
+								erdNumber,
+								restriction,
+								optimizerEstimatedRowCount,
+								optimizerEstimatedCost);
+	}
+
+
+	/**
 		@see ResultSetFactory#getNestedLoopJoinResultSet
 		@exception StandardException thrown on error
 	 */

@@ -1103,6 +1103,41 @@ public interface ResultSetFactory {
 								double optimizerEstimatedCost)
 			throws StandardException;
 
+
+
+	/**
+	   A OLAP window on top of a regular result set. It is used to realize
+	   window functions.
+	   <p>
+	   @param activation   Activation
+	   @param source       The result set input to this result set.
+	   @param rowAllocator A reference to a method in the activation
+			               that generates rows of the right size and
+						   shape for the source.
+	   @param resultSetNumber The resultSetNumber for the ResultSet
+	   @param erdNumber    Int for ResultDescription
+	                       (so it can be turned back into an object)
+	   @param restriction  The restriction, if any, to be applied to the
+	                       base row
+	   @param optimizerEstimatedRowCount
+                           Estimated total # of rows by optimizer
+	   @param optimizerEstimatedCost
+                           Estimated total cost by optimizer
+	   @throws StandardException
+	 */
+	public NoPutResultSet getWindowResultSet(
+								Activation activation,
+								NoPutResultSet source,
+								GeneratedMethod rowAllocator,
+								int resultSetNumber,
+								int erdNumber,
+								GeneratedMethod restriction,
+								double optimizerEstimatedRowCount,
+								double optimizerEstimatedCost)
+			throws StandardException;
+
+
+
 	/**
 		A nested loop left outer join result set forms a result set on top of
 		2 other result sets.

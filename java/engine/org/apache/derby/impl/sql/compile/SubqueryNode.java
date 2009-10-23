@@ -627,6 +627,7 @@ public class SubqueryNode extends ValueNode
 					  underTopAndNode && !havingSubquery &&
 					  !isWhereExistsAnyInWithWhereSubquery() &&
 					  parentComparisonOperator instanceof BinaryComparisonOperatorNode;
+
 		if (flattenable)
 		{
 			/* If we got this far and we are an expression subquery
@@ -680,6 +681,7 @@ public class SubqueryNode extends ValueNode
 		 *	  that the flattening of the subquery will not
 		 *	  introduce duplicates into the result set.
          *  o The subquery is not part of a having clause (DERBY-3257)
+		 *  o There are no windows defined on it
 		 *
 		 *	OR,
 		 *  o The subquery is NOT EXISTS, NOT IN, ALL (beetle 5173).
@@ -691,6 +693,7 @@ public class SubqueryNode extends ValueNode
 		boolean flattenableNotExists = (isNOT_EXISTS() || canAllBeFlattened());
 
 		flattenable = (resultSet instanceof SelectNode) &&
+ 			          !((SelectNode)resultSet).hasWindows() &&
 					  underTopAndNode && !havingSubquery &&
 					  !isWhereExistsAnyInWithWhereSubquery() &&
 					  (isIN() || isANY() || isEXISTS() || flattenableNotExists ||
@@ -728,6 +731,7 @@ public class SubqueryNode extends ValueNode
 				}
 				/* Never flatten to normal join for NOT EXISTS.
 				 */
+
 				if ((! flattenableNotExists) && select.uniqueSubquery(additionalEQ))
 				{
 					// Flatten the subquery

@@ -73,6 +73,13 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 */
 	private boolean isTransparent;
 
+	/**
+	 * Window definitions used for resolving window functions not containing
+	 * in-line window specifications, but referring window definitions
+	 */
+	private WindowList windows;
+
+
 	/** Initializer for a FromList */
 
 	public void init(Object optimizeJoinOrder)
@@ -1614,5 +1621,22 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		}
 
 		return this;
+	}
+
+
+	/**
+	 * Set windows field to the supplied value.
+	 * @param windows list of window definitions associated with a SELECT.
+	 */
+	public void setWindows(WindowList windows) {
+		this.windows = windows;
+	}
+
+
+	/**
+	 * @return list of window definitions associated with a SELECT.
+	 */
+	public WindowList getWindows() {
+		return windows;
 	}
 }

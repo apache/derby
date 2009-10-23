@@ -70,6 +70,7 @@ import org.apache.derby.impl.sql.execute.UnionResultSet;
 import org.apache.derby.impl.sql.execute.UpdateResultSet;
 import org.apache.derby.impl.sql.execute.VTIResultSet;
 import org.apache.derby.impl.sql.execute.DependentResultSet;
+import org.apache.derby.impl.sql.execute.WindowResultSet;
 
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealAnyResultSetStatistics;
@@ -107,6 +108,7 @@ import org.apache.derby.impl.sql.execute.rts.RealVTIStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealRowCountStatistics;
 import org.apache.derby.impl.sql.execute.rts.ResultSetStatistics;
 import org.apache.derby.impl.sql.execute.rts.RunTimeStatisticsImpl;
+import org.apache.derby.impl.sql.execute.rts.RealWindowResultSetStatistics;
 
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -835,6 +837,24 @@ public class RealResultSetStatisticsFactory
 											rrs.rowsReturned,
 											rrs.optimizerEstimatedRowCount,
 											rrs.optimizerEstimatedCost);
+		}
+		else if (rs instanceof WindowResultSet)
+		{
+			WindowResultSet wrs = (WindowResultSet) rs;
+
+			return new RealWindowResultSetStatistics(
+											wrs.numOpens,
+											wrs.rowsSeen,
+											wrs.rowsFiltered,
+											wrs.constructorTime,
+											wrs.openTime,
+											wrs.nextTime,
+											wrs.closeTime,
+											wrs.resultSetNumber,
+											wrs.optimizerEstimatedRowCount,
+											wrs.optimizerEstimatedCost,
+											getResultSetStatistics(wrs.source)
+											);
 		}
 		else if (rs instanceof SetOpResultSet)
 		{
