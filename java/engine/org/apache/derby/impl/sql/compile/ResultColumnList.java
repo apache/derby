@@ -1609,6 +1609,16 @@ public class ResultColumnList extends QueryTreeNodeVector
 					insertElementAt(allExpansion.elementAt(inner), index + inner);
 				}
 
+				// Move the index position to account for the removals and the
+				// insertions. Should be positioned on the last column in the
+				// expansion to prevent double processing of the columns.
+				// DERBY-4410: If the expansion is empty, this will move the
+				// position one step back because the * was removed and nothing
+				// was inserted, so all columns to the right of the current
+				// position have been moved one position to the left. If we
+				// don't adjust the position, we end up skipping columns.
+				index += (allExpansion.size() - 1);
+
 				// If the rc was a "*", we need to set the initial list size
 				// to the number of columns that are actually returned to
 				// the user.

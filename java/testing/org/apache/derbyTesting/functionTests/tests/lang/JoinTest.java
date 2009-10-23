@@ -652,5 +652,11 @@ public class JoinTest extends BaseJDBCTestCase {
                 "select x.* from t1 x left join t1 y using (a,b,c)");
         assertStatementError(NO_COLUMNS, s,
                 "select x.* from t1 x right join t1 y using (a,b,c)");
+
+        // DERBY-4410: If X.* expanded to no columns, the result column that
+        // immediately followed it (Y.*) would not be expanded, which eventually
+        // resulted in a NullPointerException.
+        assertStatementError(NO_COLUMNS, s,
+                "select x.*, y.* from t1 x inner join t1 y using (a, b, c)");
     }
 }
