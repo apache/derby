@@ -484,7 +484,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @param allTableName		The qualifier on the "*"
 	 *
-	 * @return ResultColumnList The expanded list
+	 * @return ResultColumnList The expanded list, or {@code null} if
+	 * {@code allTableName} is non-null and doesn't match a table name in
+	 * this result set
 	 *
 	 * @exception StandardException		Thrown on error
 	 */

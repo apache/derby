@@ -39,6 +39,7 @@ public class JoinTest extends BaseJDBCTestCase {
     private static final String COLUMN_NOT_IN_SCOPE = "42X04";
     private static final String NON_COMPARABLE = "42818";
     private static final String NO_COLUMNS = "42X81";
+    private static final String TABLE_NAME_NOT_IN_SCOPE = "42X10";
 
     public JoinTest(String name) {
         super(name);
@@ -658,5 +659,11 @@ public class JoinTest extends BaseJDBCTestCase {
         // resulted in a NullPointerException.
         assertStatementError(NO_COLUMNS, s,
                 "select x.*, y.* from t1 x inner join t1 y using (a, b, c)");
+
+        // DERBY-4414: If the table name in an asterisked identifier chain does
+        // not match the table names of either side in the join, the query
+        // should fail gracefully and not throw a NullPointerException.
+        assertStatementError(TABLE_NAME_NOT_IN_SCOPE, s,
+                "select xyz.* from t1 join t2 using (b)");
     }
 }

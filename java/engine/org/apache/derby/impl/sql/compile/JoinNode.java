@@ -428,11 +428,20 @@ public class JoinNode extends TableOperatorNode
 		 */
 		if (leftRCL == null)
 		{
+			if (rightRCL == null)
+			{
+				// Both sides are null. This only happens if allTableName is
+				// non-null and doesn't match the table name of any of the
+				// join tables (DERBY-4414).
+				return null;
+			}
 			rightRCL.resetVirtualColumnIds();
 			return rightRCL;
 		}
 		else if (rightRCL == null)
 		{
+			// leftRCL is non-null, otherwise the previous leg of the if
+			// statement would have been chosen.
 			leftRCL.resetVirtualColumnIds();
 			return leftRCL;
 		}
