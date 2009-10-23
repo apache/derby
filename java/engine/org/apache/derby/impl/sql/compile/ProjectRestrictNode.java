@@ -1586,7 +1586,7 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		** This ProjectRestrictNode is not a No-Op if it does any
 		** restriction.
 		*/
-		if ( (restriction != null) ||
+		if ( (restriction != null) || (constantRestriction != null) ||
 			 (restrictionList != null && restrictionList.size() > 0) )
 		{
 			return false;
