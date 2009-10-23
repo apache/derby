@@ -66,6 +66,13 @@ ij> CREATE PROCEDURE APP.PROCTEST(IN A INTEGER, OUT B DECIMAL(10,2))
 PARAMETER STYLE JAVA READS SQL DATA LANGUAGE JAVA 
 EXTERNAL NAME 'a.b.c.d.e';
 0 rows inserted/updated/deleted
+ij> CREATE FUNCTION APP.FUNCTTEST(A INTEGER)
+RETURNS INTEGER
+PARAMETER STYLE JAVA
+LANGUAGE JAVA
+NO SQL
+EXTERNAL NAME 'a.b.c.d.e.f';
+0 rows inserted/updated/deleted
 ij> -- first display all tables, then display tables in one schema
 SHOW TABLES;
 TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
@@ -136,6 +143,30 @@ ij> SHOW PROCEDURES IN APP;
 PROCEDURE_SCHEM     |PROCEDURE_NAME                |REMARKS             
 ------------------------------------------------------------------------
 APP                 |PROCTEST                      |a.b.c.d.e           
+ij> SHOW FUNCTIONS IN APP;
+FUNCTION_SCHEM|FUNCTION_NAME               |REMARKS                            
+-------------------------------------------------------------------------------
+APP           |FUNCTTEST                   |a.b.c.d.e.f                        
+ij> SHOW FUNCTIONS;
+FUNCTION_SCHEM|FUNCTION_NAME               |REMARKS                            
+-------------------------------------------------------------------------------
+APP           |FUNCTTEST                   |a.b.c.d.e.f                        
+SYSCS_UTIL    |SYSCS_CHECK_TABLE           |org.apache.derby.catalog.SystemPro&
+SYSCS_UTIL    |SYSCS_GET_DATABASE_PROPERTY |org.apache.derby.catalog.SystemPro&
+SYSCS_UTIL    |SYSCS_GET_RUNTIMESTATISTICS |org.apache.derby.catalog.SystemPro&
+SYSCS_UTIL    |SYSCS_GET_USER_ACCESS       |org.apache.derby.catalog.SystemPro&
+SYSCS_UTIL    |SYSCS_GET_XPLAIN_MODE       |org.apache.derby.catalog.SystemPro&
+SYSCS_UTIL    |SYSCS_GET_XPLAIN_SCHEMA     |org.apache.derby.catalog.SystemPro&
+SYSIBM        |BLOBCREATELOCATOR           |org.apache.derby.impl.jdbc.LOBStor&
+SYSIBM        |BLOBGETBYTES                |org.apache.derby.impl.jdbc.LOBStor&
+SYSIBM        |BLOBGETLENGTH               |org.apache.derby.impl.jdbc.LOBStor&
+SYSIBM        |BLOBGETPOSITIONFROMBYTES    |org.apache.derby.impl.jdbc.LOBStor&
+SYSIBM        |BLOBGETPOSITIONFROMLOCATOR  |org.apache.derby.impl.jdbc.LOBStor&
+SYSIBM        |CLOBCREATELOCATOR           |org.apache.derby.impl.jdbc.LOBStor&
+SYSIBM        |CLOBGETLENGTH               |org.apache.derby.impl.jdbc.LOBStor&
+SYSIBM        |CLOBGETPOSITIONFROMLOCATOR  |org.apache.derby.impl.jdbc.LOBStor&
+SYSIBM        |CLOBGETPOSITIONFROMSTRING   |org.apache.derby.impl.jdbc.LOBStor&
+SYSIBM        |CLOBGETSUBSTRING            |org.apache.derby.impl.jdbc.LOBStor&
 ij> SHOW SYNONYMS IN USER1;
 TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
 ------------------------------------------------------------------------

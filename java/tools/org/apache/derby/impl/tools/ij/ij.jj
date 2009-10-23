@@ -799,6 +799,55 @@ class ij {
 		}
 	}
 
+    /**
+       Return a resultset of functions from database metadata.
+
+       JDBC4.0 has a method in DatabaseMetaData called getFunctions().
+       Since this method is implemented in Derby's JDBC3.0 driver
+       we can use it. But only through Java reflection.
+     */
+    public ijResult showFunctions(String schema) throws SQLException {
+        ResultSet rs = null;
+
+        try {
+            haveConnection();
+
+            DatabaseMetaData dbmd = theConnection.getMetaData();
+            Method getFunctions;
+            try {
+                getFunctions = dbmd.getClass().getMethod("getFunctions",
+                                                    new Class[] { String.class,
+                                                               String.class,
+                                                               String.class});
+                rs = (ResultSet)getFunctions.invoke(dbmd, new Object[] { null, schema, null});
+            } catch(NoSuchMethodException nsme) {
+                throw ijException.notAvailableForDriver(dbmd.getDriverName());
+            } catch(IllegalAccessException iae) {
+                throw ijException.notAvailableForDriver(dbmd.getDriverName());
+            } catch(InvocationTargetException ite) {
+                // getFunctions throws only SQLException
+                throw (SQLException)ite.getCause();
+            }
+
+            int[] displayColumns = new int[] {
+                    rs.findColumn("FUNCTION_SCHEM"),
+                    rs.findColumn("FUNCTION_NAME"),
+                    rs.findColumn("REMARKS")
+            };
+            int[] columnWidths = new int[] {
+                    14,
+                    28,
+                    35
+            };
+
+            return new ijResultSetResult(rs, displayColumns, columnWidths);
+        } catch (SQLException e) {
+            if(rs!=null)
+                rs.close();
+            throw e;
+        }
+    }
+
 	/**
 	   Return a resultset of schemas from database metadata
 	 */
@@ -1108,6 +1157,7 @@ TOKEN [IGNORE_CASE] :
 |	<FIRST: "first">
 |	<FOR: "for">
 |	<FROM: "from">
+|	<FUNCTIONS: "functions">
 |	<GET: "get">
 |	<GETCURRENTROWNUMBER: "getcurrentrownumber">
 |	<HOLD: "hold">
@@ -1929,6 +1979,11 @@ throws SQLException
 		[ <IN> schema=identifier() ]
 	{
 		return showProcedures(schema);
+	}
+|	<SHOW> <FUNCTIONS>
+		[ <IN> schema=identifier() ]
+	{
+		return showFunctions(schema);
 	}
 |	<SHOW> <SCHEMAS>
 	{
