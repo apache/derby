@@ -239,7 +239,9 @@ public final class GenericColumnDescriptor
 			return "GenericColumnDescriptor\n\tname: "+name+
 				"\n\tTable: "+schemaName+"."+tableName+
 				"\n\tcolumnPos: "+columnPos+
-				"\n\tType: "+type;
+				"\n\tType: "+type+
+				"\n\tisAutoincrement: " + isAutoincrement +
+				"\n\thasGenerationClause: " + hasGenerationClause;
 		}
 		else
 		{
