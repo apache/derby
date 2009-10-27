@@ -80,4 +80,9 @@ class SubstituteExpressionVisitor implements Visitor
 				false:
 				skipOverClass.isInstance(node);
 	}
+
+	public boolean visitChildrenFirst(Visitable node)
+	{
+		return false;
+	}
 }

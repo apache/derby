@@ -409,22 +409,16 @@ public class HashTableNode extends SingleChildResultSetNode
 	}
 
 	/**
-	 * Accept a visitor, and call v.visit()
-	 * on child nodes as necessary.  
+	 * Accept the visitor for all visitable children of this node.
 	 * 
 	 * @param v the visitor
 	 *
 	 * @exception StandardException on error
 	 */
-	public Visitable accept(Visitor v) 
+	void acceptChildren(Visitor v)
 		throws StandardException
 	{
-		if (v.skipChildren(this))
-		{
-			return v.visit(this);
-		}
-
-		Visitable returnNode = super.accept(v);
+		super.acceptChildren(v);
 
 		if (searchPredicateList != null && !v.stopTraversal())
 		{
@@ -435,7 +429,5 @@ public class HashTableNode extends SingleChildResultSetNode
 		{
 			joinPredicateList = (PredicateList)joinPredicateList.accept(v);
 		}
-
-		return returnNode;
 	}
 }

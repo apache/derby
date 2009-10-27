@@ -65,6 +65,19 @@ public interface Visitor
 		throws StandardException;
 
 	/**
+	 * Method that is called to see if {@code visit()} should be called on
+	 * the children of {@code node} before it is called on {@code node} itself.
+	 * If this method always returns {@code true}, the visitor will walk the
+	 * tree bottom-up. If it always returns {@code false}, the tree is visited
+	 * top-down.
+	 *
+	 * @param node the top node of a sub-tree about to be visited
+	 * @return {@code true} if {@code node}'s children should be visited
+	 * before {@code node}, {@code false} otherwise
+	 */
+	boolean visitChildrenFirst(Visitable node);
+
+	/**
 	 * Method that is called to see
 	 * if query tree traversal should be
 	 * stopped before visiting all nodes.

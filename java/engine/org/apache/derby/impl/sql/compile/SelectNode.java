@@ -2344,27 +2344,16 @@ public class SelectNode extends ResultSetNode
 	}
 
 	/**
-	 * Accept a visitor, and call v.visit()
-	 * on child nodes as necessary.  
+	 * Accept the visitor for all visitable children of this node.
 	 * 
 	 * @param v the visitor
 	 *
 	 * @exception StandardException on error
 	 */
-	public Visitable accept(Visitor v)
+	void acceptChildren(Visitor v)
 		throws StandardException
 	{
-		Visitable returnNode = v.visit(this);
-
-		if (v.skipChildren(this))
-		{
-			return returnNode;
-		}
-
-		if (!v.stopTraversal())
-		{
-			super.accept(v);
-		}
+		super.acceptChildren(v);
 
 		if (fromList != null && !v.stopTraversal())
 		{
@@ -2384,8 +2373,6 @@ public class SelectNode extends ResultSetNode
 		if (havingClause != null && !v.stopTraversal()) {
 			havingClause = (ValueNode)havingClause.accept(v);
 		}
-		
-		return returnNode;
 	}
 
 	/**

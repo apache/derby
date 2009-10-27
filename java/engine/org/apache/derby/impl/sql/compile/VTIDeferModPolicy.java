@@ -204,4 +204,9 @@ class VTIDeferModPolicy implements Visitor
     {
         return false;
     } // end of skipChildren
+
+    public boolean visitChildrenFirst(Visitable node)
+    {
+        return false;
+    }
 } // end of class VTIDeferModPolicy

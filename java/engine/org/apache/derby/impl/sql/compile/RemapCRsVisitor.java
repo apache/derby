@@ -93,6 +93,11 @@ public class RemapCRsVisitor implements Visitor
 		return (node instanceof SubqueryNode);
 	}
 
+	public boolean visitChildrenFirst(Visitable node)
+	{
+		return false;
+	}
+
 	public boolean stopTraversal()
 	{
 		return false;

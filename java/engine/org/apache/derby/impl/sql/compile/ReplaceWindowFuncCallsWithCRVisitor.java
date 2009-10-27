@@ -97,6 +97,16 @@ public class ReplaceWindowFuncCallsWithCRVisitor implements Visitor
 	/**
 	 * Vistor override.
 	 * @return false
+	 * @see Visitor#visitChildrenFirst
+	 */
+	public boolean visitChildrenFirst(Visitable node)
+	{
+		return false;
+	}
+
+	/**
+	 * Vistor override.
+	 * @return false
 	 * @see Visitor#skipChildren
 	 */
 	public boolean stopTraversal()

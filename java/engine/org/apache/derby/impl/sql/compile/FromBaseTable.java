@@ -4587,26 +4587,17 @@ public class FromBaseTable extends FromTable
 	}
 
 	/**
-	 * Accept a visitor, and call v.visit()
-	 * on child nodes as necessary.  
+	 * Accept the visitor for all visitable children of this node.
 	 * 
 	 * @param v the visitor
 	 *
 	 * @exception StandardException on error
 	 */
-	public Visitable accept(Visitor v) 
+	void acceptChildren(Visitor v)
 	
 		throws StandardException
 	{
-
-	        Visitable returnNode = super.accept(v);
-
-		if (v.skipChildren(this))
-		{
-			return returnNode;
-		}
-
-
+		super.acceptChildren(v);
 
 		if (nonStoreRestrictionList != null && !v.stopTraversal()) {
 			nonStoreRestrictionList.accept(v);
@@ -4623,8 +4614,6 @@ public class FromBaseTable extends FromTable
 		if (requalificationRestrictionList != null && !v.stopTraversal()) {
 			requalificationRestrictionList.accept(v);
 		}
-		
-		return returnNode;
 	}
 
 }

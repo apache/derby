@@ -338,29 +338,21 @@ public class JavaToSQLValueNode extends ValueNode
 	}
 
 	/**
-	 * Accept a visitor, and call v.visit()
-	 * on child nodes as necessary.  
+	 * Accept the visitor for all visitable children of this node.
 	 * 
 	 * @param v the visitor
 	 *
 	 * @exception StandardException on error
 	 */
-	public Visitable accept(Visitor v) 
+	void acceptChildren(Visitor v)
 		throws StandardException
 	{
-		Visitable returnNode = v.visit(this);
-	
-		if (v.skipChildren(this))
-		{
-			return returnNode;
-		}
+		super.acceptChildren(v);
 
 		if (javaNode != null && !v.stopTraversal())
 		{
 			javaNode = (JavaValueNode)javaNode.accept(v);
 		}
-		
-		return returnNode;
 	}
         
 	/**

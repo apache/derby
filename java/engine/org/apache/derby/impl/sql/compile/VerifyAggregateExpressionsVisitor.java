@@ -145,4 +145,9 @@ public class VerifyAggregateExpressionsVisitor implements Visitor
 	{
 		return false;
 	}
+
+	public boolean visitChildrenFirst(Visitable node)
+	{
+		return false;
+	}
 }	

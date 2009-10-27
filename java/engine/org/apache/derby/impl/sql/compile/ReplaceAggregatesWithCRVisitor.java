@@ -116,6 +116,11 @@ public class ReplaceAggregatesWithCRVisitor implements Visitor
 				skipOverClass.isInstance(node);
 	}
 	
+	public boolean visitChildrenFirst(Visitable node)
+	{
+		return false;
+	}
+
 	public boolean stopTraversal()
 	{
 		return false;

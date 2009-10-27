@@ -379,23 +379,25 @@ public class CoalesceFunctionNode extends ValueNode
 		}
 		return true;
 	}
-	public Visitable accept(Visitor v) throws StandardException 
+
+	/**
+	 * Accept the visitor for all visitable children of this node.
+	 *
+	 * @param v the visitor
+	 * @throws StandardException on error in the visitor
+	 */
+	void acceptChildren(Visitor v) throws StandardException
 	{
-		Visitable returnNode = v.visit(this);
-		
-		if (v.skipChildren(this) || v.stopTraversal())
-		{
-			return returnNode;
-		}
-		
+		super.acceptChildren(v);
+
 		int size = argumentsList.size();
 		for (int index = 0; index < size; index++)
 		{
 			argumentsList.setElementAt(
 					(QueryTreeNode)(argumentsList.elementAt(index)).accept(v), index);
 		}
-		return returnNode;
 	}
+
 	/**
 	 * Preprocess an expression tree.  We do a number of transformations
 	 * here (including subqueries, IN lists, LIKE and BETWEEN) plus

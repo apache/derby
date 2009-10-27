@@ -111,6 +111,14 @@ public class HasNodeVisitor implements Visitor
 				skipOverClass.isInstance(node);
 	}
 
+	/**
+	 * Visit parent before children.
+	 */
+	public boolean visitChildrenFirst(Visitable node)
+	{
+		return false;
+	}
+
 	////////////////////////////////////////////////
 	//
 	// CLASS INTERFACE

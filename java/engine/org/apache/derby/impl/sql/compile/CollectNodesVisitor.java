@@ -69,6 +69,11 @@ public class CollectNodesVisitor implements Visitor
 		this.skipOverClass = skipOverClass;
 	}
 
+	public boolean visitChildrenFirst(Visitable node)
+	{
+		return false;
+	}
+
 	public boolean stopTraversal()
 	{
 		return false;

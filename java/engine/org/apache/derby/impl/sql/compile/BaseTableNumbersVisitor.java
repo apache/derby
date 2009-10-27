@@ -223,4 +223,12 @@ public class BaseTableNumbersVisitor implements Visitor
 		return false;
 	}
 
+	/**
+	 * @see org.apache.derby.iapi.sql.compile.Visitor#visitChildrenFirst
+	 */
+	public boolean visitChildrenFirst(Visitable node)
+	{
+		return false;
+	}
+
 }	

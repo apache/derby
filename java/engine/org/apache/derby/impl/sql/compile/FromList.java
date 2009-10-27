@@ -1602,27 +1602,6 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 		isTransparent = true;
 	}
 
-	/**
-	 * Accept a visitor, and call v.visit()
-	 * on child nodes as necessary.  
-	 * 
-	 * @param v the visitor
-	 *
-	 * @exception StandardException on error
-	 */
-	public Visitable accept(Visitor v) 
-		throws StandardException
-	{
-		int size = size();
-		for (int index = 0; index < size; index++)
-		{
-			FromTable fromTable = (FromTable) elementAt(index);
-			setElementAt((QueryTreeNode) fromTable.accept(v), index);
-		}
-
-		return this;
-	}
-
 
 	/**
 	 * Set windows field to the supplied value.

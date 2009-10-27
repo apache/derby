@@ -688,17 +688,45 @@ public abstract class QueryTreeNode implements Visitable
 	}
 
 	/**
-	 * Accept a visitor, and call v.visit()
-	 * on child nodes as necessary.  
+	 * Accept a visitor, and call {@code v.visit()} on child nodes as
+	 * necessary. Sub-classes should not override this method, but instead
+	 * override the {@link #acceptChildren(Visitor)} method.
 	 * 
 	 * @param v the visitor
 	 *
 	 * @exception StandardException on error
 	 */
-	public Visitable accept(Visitor v) 
+	public final Visitable accept(Visitor v)
 		throws StandardException
 	{
-		return v.visit(this);
+		final boolean childrenFirst = v.visitChildrenFirst(this);
+		final boolean skipChildren = v.skipChildren(this);
+
+		if (childrenFirst && !skipChildren && !v.stopTraversal()) {
+			acceptChildren(v);
+		}
+
+		final Visitable ret = v.stopTraversal() ? this : v.visit(this);
+
+		if (!childrenFirst && !skipChildren && !v.stopTraversal()) {
+			acceptChildren(v);
+		}
+
+		return ret;
+	}
+
+	/**
+	 * Accept a visitor on all child nodes. All sub-classes that add fields
+	 * that should be visited, should override this method and call
+	 * {@code accept(v)} on all visitable fields, as well as
+	 * {@code super.acceptChildren(v)} to make sure all visitable fields
+	 * defined by the super-class are accepted too.
+	 *
+	 * @param v the visitor
+	 * @throws StandardException on errors raised by the visitor
+	 */
+	void acceptChildren(Visitor v) throws StandardException {
+		// no children
 	}
 
 	/**

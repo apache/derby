@@ -106,6 +106,11 @@ public class HasCorrelatedCRsVisitor implements Visitor
 		return false;
 	}
 
+	public boolean visitChildrenFirst(Visitable v)
+	{
+		return false;
+	}
+
 	////////////////////////////////////////////////
 	//
 	// CLASS INTERFACE

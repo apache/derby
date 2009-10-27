@@ -91,6 +91,11 @@ public class ReferencedTablesVisitor implements Visitor
 			    node instanceof ResultSetNode);
 	}
 
+	public boolean visitChildrenFirst(Visitable node)
+	{
+		return false;
+	}
+
 	public boolean stopTraversal()
 	{
 		return false;

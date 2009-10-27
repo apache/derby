@@ -2194,29 +2194,23 @@ public class SubqueryNode extends ValueNode
 	}
 
 	/**
-	 * Accept a visitor, and call v.visit()
-	 * on child nodes as necessary.  
+	 * Accept the visitor for all visitable children of this node.
 	 * 
 	 * @param v the visitor
 	 *
 	 * @exception StandardException on error
 	 */
-	public Visitable accept(Visitor v)
+	void acceptChildren(Visitor v)
 		throws StandardException
 	{
-		Visitable returnNode = v.visit(this);
+		super.acceptChildren(v);
 
 		/* shortcut if we've already done it
 		 */
 		if ((v instanceof HasCorrelatedCRsVisitor) && doneCorrelationCheck) 
 		{
 			((HasCorrelatedCRsVisitor) v).setHasCorrelatedCRs(foundCorrelation);
-			return returnNode;
-		}
-	
-		if (v.skipChildren(this))
-		{
-			return returnNode;
+			return;
 		}
 
 		if (resultSet != null && !v.stopTraversal())
@@ -2228,7 +2222,6 @@ public class SubqueryNode extends ValueNode
 		{
 			leftOperand = (ValueNode)leftOperand.accept(v);
 		}
-		return returnNode;
 	}
 
 	private boolean isIN()

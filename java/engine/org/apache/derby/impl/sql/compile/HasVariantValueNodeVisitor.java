@@ -131,6 +131,11 @@ public class HasVariantValueNodeVisitor implements Visitor
 		return false;
 	}
 
+	public boolean visitChildrenFirst(Visitable node)
+	{
+		return false;
+	}
+
 	/**
 	 * Stop traversal if we found the target node
 	 *
