@@ -1550,6 +1550,14 @@
       <param name="manifest.file" value="${derby.jar.dir}/lists/smfclient.mf"/>
     </antcall>
 
+    <!-- add extra osgi bits to manifest -->
+
+    <manifest file="${derby.jar.dir}/lists/smfclient.mf"  mode="update">
+      <attribute name="Bundle-SymbolicName" value="derbyclient"/>
+      <attribute name="DynamicImport-Package" value="*"/>
+      <attribute name="Export-Package" value="org.apache.derby.jdbc"/> 
+    </manifest> 
+
     <!-- declare the client driver for autoloading by the JDBC 4 DriverManager -->
     <antcall target="declare-autoloadable-driver">
       <param name="driver.name" value="org.apache.derby.jdbc.ClientDriver"/>
