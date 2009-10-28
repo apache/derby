@@ -502,3 +502,11 @@ select * from d4391 where a < (select a+b from d4391 union select 4 from d4391);
 select * from d4391 where a < (select a+b from d4391 union select a from d4391);
 select * from d4391 where a < (select sum(a) from d4391 union select sum(b) from d4391);
 drop table d4391;
+
+-- Regression test for DERBY-4411. The predicate 1=0 used to be lost when the
+-- SELECT statement was compiled, and the statement would fail with a message
+-- saying that a scalar sub-query should return exactly one row.
+create table d4411(a int primary key, b int);
+insert into d4411 values (0, 4), (1, 3), (2, 2), (3, 1), (4, 0);
+select * from d4411 where a < (values 2 union select b from d4411 where 1=0);
+drop table d4411;

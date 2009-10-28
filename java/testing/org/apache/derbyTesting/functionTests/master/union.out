@@ -1251,4 +1251,18 @@ A          |B
 4          |0          
 ij> drop table d4391;
 0 rows inserted/updated/deleted
+ij> -- Regression test for DERBY-4411. The predicate 1=0 used to be lost when the
+-- SELECT statement was compiled, and the statement would fail with a message
+-- saying that a scalar sub-query should return exactly one row.
+create table d4411(a int primary key, b int);
+0 rows inserted/updated/deleted
+ij> insert into d4411 values (0, 4), (1, 3), (2, 2), (3, 1), (4, 0);
+5 rows inserted/updated/deleted
+ij> select * from d4411 where a < (values 2 union select b from d4411 where 1=0);
+A          |B          
+-----------------------
+0          |4          
+1          |3          
+ij> drop table d4411;
+0 rows inserted/updated/deleted
 ij> 
