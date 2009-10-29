@@ -38,6 +38,7 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultDescription;
+import org.apache.derby.iapi.sql.ParameterValueSet; 
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -59,6 +60,8 @@ import org.apache.derby.iapi.services.io.FormatableHashtable;
 import org.apache.derby.vti.DeferModification;
 import org.apache.derby.vti.IFastPath;
 import org.apache.derby.vti.VTIEnvironment;
+import org.apache.derby.vti.RestrictedVTI;
+import org.apache.derby.vti.Restriction;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -102,6 +105,9 @@ class VTIResultSet extends NoPutResultSetImpl
 
     private DataTypeDescriptor[]    returnColumnTypes;
 
+    private String[] vtiProjection;
+    private Restriction vtiRestriction;
+
 	/**
 		Specified isolation level of SELECT (scan). If not set or
 		not application, it will be set to ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL
@@ -123,7 +129,9 @@ class VTIResultSet extends NoPutResultSetImpl
 			     double optimizerEstimatedRowCount,
 				 double optimizerEstimatedCost,
 				 boolean isDerbyStyleTableFunction,
-                 int returnTypeNumber
+                 int returnTypeNumber,
+                 int vtiProjectionNumber,
+                 int vtiRestrictionNumber
                  ) 
 		throws StandardException
 	{
@@ -142,6 +150,14 @@ class VTIResultSet extends NoPutResultSetImpl
         this.returnType = returnTypeNumber == -1 ? null :
             (TypeDescriptor)
             activation.getPreparedStatement().getSavedObject(returnTypeNumber);
+
+        this.vtiProjection = vtiProjectionNumber == -1 ? null :
+            (String[])
+            activation.getPreparedStatement().getSavedObject(vtiProjectionNumber);
+
+        this.vtiRestriction = vtiRestrictionNumber == -1 ? null :
+            (Restriction)
+            activation.getPreparedStatement().getSavedObject(vtiRestrictionNumber);
 
 		if (erdNumber != -1)
 		{
@@ -222,6 +238,13 @@ class VTIResultSet extends NoPutResultSetImpl
 			else
 			{
 				userVTI = (ResultSet) constructor.invoke(activation);
+
+                if ( userVTI instanceof RestrictedVTI )
+                {
+                    RestrictedVTI restrictedVTI = (RestrictedVTI) userVTI;
+
+                    restrictedVTI.initScan( vtiProjection, cloneRestriction( activation ) );
+                }
 			}
 
 			// Set up the nullablity of the runtime columns, may be delayed
@@ -235,6 +258,67 @@ class VTIResultSet extends NoPutResultSetImpl
 
 		openTime += getElapsedMillis(beginTime);
 	}
+
+    /**
+     * Clone the restriction for a Restricted VTI, filling in parameter values
+     * as necessary.
+     */
+    private Restriction cloneRestriction( Activation activation ) throws StandardException
+    {
+        if ( vtiRestriction == null ) { return null; }
+        else { return cloneRestriction( activation, vtiRestriction ); }
+    }
+    private Restriction cloneRestriction( Activation activation, Restriction original )
+        throws StandardException
+    {
+        if ( original instanceof Restriction.AND)
+        {
+            Restriction.AND and = (Restriction.AND) original;
+            
+            return new Restriction.AND
+                (
+                 cloneRestriction( activation, and.getLeftChild() ),
+                 cloneRestriction( activation, and.getRightChild() )
+                 );
+        }
+        else if ( original instanceof Restriction.OR)
+        {
+            Restriction.OR or = (Restriction.OR) original;
+            
+            return new Restriction.OR
+                (
+                 cloneRestriction( activation, or.getLeftChild() ),
+                 cloneRestriction( activation, or.getRightChild() )
+                 );
+        }
+        else if ( original instanceof Restriction.ColumnQualifier)
+        {
+            Restriction.ColumnQualifier cq = (Restriction.ColumnQualifier) original;
+            Object originalConstant = cq.getConstantOperand();
+            Object newConstant;
+
+            if ( originalConstant ==  null ) { newConstant = null; }
+            else if ( originalConstant instanceof int[] )
+            {
+                int parameterNumber = ((int[]) originalConstant)[ 0 ];
+                ParameterValueSet pvs = activation.getParameterValueSet();
+
+                newConstant = pvs.getParameter( parameterNumber ).getObject();
+            }
+            else { newConstant = originalConstant; }
+           
+            return new Restriction.ColumnQualifier
+                (
+                 cq.getColumnName(),
+                 cq.getComparisonOperator(),
+                 newConstant
+                 );
+        }
+        else
+        {
+            throw StandardException.newException( SQLState.NOT_IMPLEMENTED, original.getClass().getName() );
+        }
+    }
 
 	private boolean[] setNullableColumnList() throws SQLException, StandardException {
 

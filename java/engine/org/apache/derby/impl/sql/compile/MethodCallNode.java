@@ -58,6 +58,7 @@ import org.apache.derby.catalog.types.RoutineAliasInfo;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Member;
 
+import java.sql.ResultSet;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -138,6 +139,14 @@ abstract class MethodCallNode extends JavaValueNode
     public String getJavaClassName()
     {
         return javaClassName;
+    }
+
+    /**
+     * @return get the Java method or constructor determined during the bind() phase.
+     */
+    public Member getResolvedMethod()
+    {
+        return method;
     }
 
     /**
@@ -767,7 +776,7 @@ abstract class MethodCallNode extends JavaValueNode
 				    ( routineInfo.getParameterStyle() == RoutineAliasInfo.PS_DERBY_JDBC_RESULT_SET )
 				)
 				{
-				    requiredType = "java.sql.ResultSet";
+				    requiredType = ResultSet.class.getName();
 				}
 				else
 				{
@@ -792,7 +801,20 @@ abstract class MethodCallNode extends JavaValueNode
 				}
 			}
 
-			if (!requiredType.equals(typeName))
+            boolean foundCorrectType;
+            if ( ResultSet.class.getName().equals( requiredType )  )
+            {
+                // allow subtypes of ResultSet too
+                try {
+                    Class actualType = classInspector.getClass( typeName );
+
+                    foundCorrectType = ResultSet.class.isAssignableFrom( actualType );
+                }
+                catch (ClassNotFoundException cnfe) { foundCorrectType = false; }
+            }
+            else{ foundCorrectType = requiredType.equals(typeName); }
+
+			if (!foundCorrectType)
 			{
 				throwNoMethodFound(requiredType + " " + javaClassName, parmTypeNames, primParmTypeNames);
 			}

@@ -63,6 +63,8 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 import org.apache.derby.vti.DeferModification;
+import org.apache.derby.vti.RestrictedVTI;
+import org.apache.derby.vti.Restriction;
 import org.apache.derby.vti.VTICosting;
 import org.apache.derby.vti.VTIEnvironment;
 
@@ -76,6 +78,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionContext;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import java.sql.PreparedStatement;
@@ -85,6 +88,8 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Properties; 
 import java.util.Vector;
 import org.apache.derby.iapi.services.io.FormatableHashtable;
@@ -108,6 +113,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	boolean				materializable;
 	boolean				isTarget;
 	boolean				isDerbyStyleTableFunction;
+	boolean				isRestrictedTableFunction;
 	ResultSet			rs;
 
 	private	FormatableHashtable	compileTimeConstants;
@@ -149,6 +155,9 @@ public class FromVTI extends FromTable implements VTIEnvironment
     private boolean controlsDeferral;
     private boolean isInsensitive;
     private int resultSetType = ResultSet.TYPE_FORWARD_ONLY;
+
+    private String[] projectedColumnNames; // for RestrictedVTIs
+    private Restriction vtiRestriction; // for RestrictedVTIs
 
     /**
 	 * @param invocation		The constructor or static method for the VTI
@@ -480,6 +489,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		version2 = true;
 	}
 
+
 	/**
 	 * Bind the non VTI tables in this ResultSetNode.  This includes getting their
 	 * descriptors from the data dictionary and numbering them.
@@ -554,7 +564,14 @@ public class FromVTI extends FromTable implements VTIEnvironment
             )			{
             isDerbyStyleTableFunction = true;
         }
-        
+
+        if ( isDerbyStyleTableFunction )
+        {
+            Method boundMethod = (Method) methodCall.getResolvedMethod();
+
+            isRestrictedTableFunction = RestrictedVTI.class.isAssignableFrom( boundMethod.getReturnType() );
+        }
+
 		/* If we have a valid constructor, does class implement the correct interface? 
 		 * If version2 is true, then it must implement PreparedStatement, otherwise
 		 * it can implement either PreparedStatement or ResultSet.  (We check for
@@ -1199,6 +1216,279 @@ public class FromVTI extends FromTable implements VTIEnvironment
 				);
 	}
 
+    /**
+     * Compute the projection and restriction to be pushed to the external
+     * table function if it is a RestrictedVTI. This method is called by the
+     * parent ProjectRestrictNode at code generation time. See DERBY-4357.
+     *
+     * @param parentProjection The column list which the parent ProjectRestrictNode expects to return.
+     * @param parentPredicates The full list of predicates to be applied by the parent ProjectRestrictNode
+     */
+    void computeProjectionAndRestriction( ResultColumnList parentProjection, PredicateList parentPredicates )
+        throws StandardException
+    {
+        // nothing to do if this is a not a restricted table function
+        if ( !isRestrictedTableFunction ) { return; }
+
+        computeRestriction( parentPredicates, computeProjection( parentProjection ) );
+    }
+    /**
+     * Fills in the array of projected column names suitable for handing to
+     * RestrictedVTI.initScan(). Returns a mapping of the exposed column names
+     * to the actual names of columns in the table function. This is useful
+     * because the predicate refers to the exposed column names.
+     *
+     * @param parentProjection The column list which the parent ProjectRestrictNode expects to return.
+     */
+    private HashMap computeProjection( ResultColumnList parentProjection ) throws StandardException
+    {
+        HashSet  projectedColumns = new HashSet();
+        HashMap  nameMap = new HashMap();
+        String[] exposedNames = parentProjection.getColumnNames();
+        int      projectedCount = exposedNames.length;
+
+        for ( int i = 0; i < projectedCount; i++ ) { projectedColumns.add( exposedNames[ i ] ); }
+
+        ResultColumnList allVTIColumns = getResultColumns();
+        int              totalColumnCount = allVTIColumns.size();
+
+        projectedColumnNames = new String[ totalColumnCount ];
+
+        for ( int i = 0; i < totalColumnCount; i++ )
+        {
+            ResultColumn column = allVTIColumns.getResultColumn( i + 1 );
+            String       exposedName = column.getName();
+
+            if ( projectedColumns.contains( exposedName ) )
+            {
+                String       baseName = column.getBaseColumnNode().getColumnName();
+                
+                projectedColumnNames[ i ] = baseName;
+
+                nameMap.put( exposedName, baseName );
+            }
+        }
+
+        return nameMap;
+    }
+    /**
+     * Fills in the restriction to be handed to a RestrictedVTI at run-time.
+     *
+     * @param parentPredicates The full list of predicates to be applied by the parent ProjectRestrictNode
+     * @param columnNameMap Mapping between the exposed column names used in the predicates and the actual column names declared for the table function at CREATE FUNCTION time.
+     */
+    private void computeRestriction( PredicateList parentPredicates, HashMap columnNameMap )
+        throws StandardException
+    {
+        if ( parentPredicates == null )  { return; }
+
+        int predicateCount = parentPredicates.size();
+
+        // walk the list, looking for qualifiers, that is, WHERE clause
+        // fragments (conjuncts)  which can be pushed into the table function
+        for ( int i = 0; i < predicateCount; i++ )
+        {
+            Predicate predicate = (Predicate) parentPredicates.elementAt( i );
+
+            if ( predicate.isQualifier() )
+            {
+                // A Predicate has a top level AND node
+                Restriction newRestriction = makeRestriction( predicate.getAndNode(), columnNameMap );
+
+                // If newRestriction is null, then we are confused. Don't push
+                // the restriction into the table function
+                if ( newRestriction == null )
+                {
+                    vtiRestriction = null;
+                    return;
+                }
+
+                // If we get here, then we still understand the restriction
+                // we're compiling.
+
+                if ( vtiRestriction == null ) { vtiRestriction = newRestriction; }
+                else { vtiRestriction = new Restriction.AND( vtiRestriction, newRestriction ); }
+            }
+        }
+    }
+    /**
+     * Turn a compile-time WHERE clause fragment into a run-time
+     * Restriction. Returns null if the clause could not be understood.
+     *
+     * @param clause The clause which should be turned into a Restriction.
+     * @param columnNameMap Mapping between the exposed column names used in the predicates and the actual column names declared for the table function at CREATE FUNCTION time.
+     */
+    private Restriction makeRestriction( ValueNode clause, HashMap columnNameMap )
+        throws StandardException
+    {
+        if ( clause instanceof AndNode )
+        {
+            AndNode andOperator = (AndNode) clause;
+
+            // strip off trailing vacuous constant if present
+            if ( andOperator.getRightOperand() instanceof BooleanConstantNode )
+            { return makeRestriction( andOperator.getLeftOperand(), columnNameMap ); }
+            
+            Restriction leftRestriction = makeRestriction( andOperator.getLeftOperand(), columnNameMap );
+            Restriction rightRestriction = makeRestriction( andOperator.getRightOperand(), columnNameMap );
+
+            if ( (leftRestriction == null) || (rightRestriction == null) ) { return null; }
+
+            return new Restriction.AND( leftRestriction, rightRestriction );
+        }
+        else if ( clause instanceof OrNode )
+        {
+            OrNode orOperator = (OrNode) clause;
+            
+            // strip off trailing vacuous constant if present
+            if ( orOperator.getRightOperand() instanceof BooleanConstantNode )
+            { return makeRestriction( orOperator.getLeftOperand(), columnNameMap ); }
+            
+            Restriction leftRestriction = makeRestriction( orOperator.getLeftOperand(), columnNameMap );
+            Restriction rightRestriction = makeRestriction( orOperator.getRightOperand(), columnNameMap );
+
+            if ( (leftRestriction == null) || (rightRestriction == null) ) { return null; }
+
+            return new Restriction.OR( leftRestriction, rightRestriction );
+        }
+        else if ( clause instanceof BinaryRelationalOperatorNode )
+        { return makeLeafRestriction( (BinaryRelationalOperatorNode) clause, columnNameMap ); }
+        else if ( clause instanceof IsNullNode )
+        { return makeIsNullRestriction( (IsNullNode) clause, columnNameMap ); }
+        else { return iAmConfused( clause ); }
+    }
+    /**
+     * Makes a Restriction out of a comparison between a constant and a column
+     * in the VTI.
+     *
+     * @param clause The clause which should be turned into a Restriction.
+     * @param columnNameMap Mapping between the exposed column names used in the predicates and the actual column names declared for the table function at CREATE FUNCTION time.
+     */
+    private Restriction makeLeafRestriction( BinaryRelationalOperatorNode clause, HashMap columnNameMap )
+        throws StandardException
+    {
+        int rawOperator = clause.getOperator();
+        ColumnReference rawColumn;
+        ValueNode rawValue;
+
+        if ( clause.getLeftOperand() instanceof ColumnReference )
+        {
+            rawColumn = (ColumnReference) clause.getLeftOperand();
+            rawValue = clause.getRightOperand();
+        }
+        else if ( clause.getRightOperand() instanceof ColumnReference )
+        {
+            rawColumn = (ColumnReference) clause.getRightOperand();
+            rawValue = clause.getLeftOperand();
+            rawOperator = flipOperator( rawOperator );
+        }
+        else { return iAmConfused( clause ); }
+
+        int comparisonOperator = mapOperator( rawOperator );
+        if ( comparisonOperator < 0 ) { return iAmConfused( clause ); }
+
+        String columnName = (String) columnNameMap.get( rawColumn.getColumnName() );
+        Object constantOperand = squeezeConstantValue( rawValue );
+        if ( (columnName == null) || (constantOperand == null) ) { return iAmConfused( clause ); }
+
+        return new Restriction.ColumnQualifier( columnName, comparisonOperator, constantOperand );
+    }
+    /**
+     * Makes an IS NULL comparison of a column
+     * in the VTI.
+     *
+     * @param clause The IS NULL (or IS NOT NULL) node
+     * @param columnNameMap Mapping between the exposed column names used in the predicates and the actual column names declared for the table function at CREATE FUNCTION time.
+     */
+    private Restriction makeIsNullRestriction( IsNullNode clause, HashMap columnNameMap )
+        throws StandardException
+    {
+        ColumnReference rawColumn = (ColumnReference) clause.getOperand();
+
+        int comparisonOperator = mapOperator( clause.getOperator() );
+        if ( comparisonOperator < 0 ) { return iAmConfused( clause ); }
+        if (
+            (comparisonOperator != Restriction.ColumnQualifier.ORDER_OP_ISNULL) &&
+            (comparisonOperator != Restriction.ColumnQualifier.ORDER_OP_ISNOTNULL)
+            ) { return iAmConfused( clause ); }
+
+        String columnName = (String) columnNameMap.get( rawColumn.getColumnName() );
+        if ( columnName == null ) { return iAmConfused( clause ); }
+
+        return new Restriction.ColumnQualifier( columnName, comparisonOperator, null );
+    }
+    /** This is a handy place to put instrumentation for tracing trees which we don't understand */
+    private Restriction iAmConfused( ValueNode clause ) throws StandardException
+    {
+        return null;
+    }
+    /** Flip the sense of a comparison */
+    private int flipOperator( int rawOperator ) throws StandardException
+    {
+        switch( rawOperator )
+        {
+        case RelationalOperator.EQUALS_RELOP:         return RelationalOperator.EQUALS_RELOP;
+        case RelationalOperator.GREATER_EQUALS_RELOP: return RelationalOperator.LESS_EQUALS_RELOP;
+        case RelationalOperator.GREATER_THAN_RELOP:   return RelationalOperator.LESS_THAN_RELOP;
+        case RelationalOperator.LESS_EQUALS_RELOP:    return RelationalOperator.GREATER_EQUALS_RELOP;
+        case RelationalOperator.LESS_THAN_RELOP:      return RelationalOperator.GREATER_THAN_RELOP;
+        case RelationalOperator.NOT_EQUALS_RELOP:     return RelationalOperator.NOT_EQUALS_RELOP;
+
+        case RelationalOperator.IS_NOT_NULL_RELOP:
+        case RelationalOperator.IS_NULL_RELOP:
+        default:
+            if ( SanityManager.DEBUG )
+            {
+                SanityManager.THROWASSERT( "Unrecognized relational operator: " + rawOperator );
+            }
+        }
+
+        return -1;
+    }
+    /** Map internal operator constants to user-visible ones */
+    private int mapOperator( int rawOperator ) throws StandardException
+    {
+        switch( rawOperator )
+        {
+        case RelationalOperator.EQUALS_RELOP:         return Restriction.ColumnQualifier.ORDER_OP_EQUALS;
+        case RelationalOperator.GREATER_EQUALS_RELOP: return Restriction.ColumnQualifier.ORDER_OP_GREATEROREQUALS;
+        case RelationalOperator.GREATER_THAN_RELOP:   return Restriction.ColumnQualifier.ORDER_OP_GREATERTHAN;
+        case RelationalOperator.LESS_EQUALS_RELOP:    return Restriction.ColumnQualifier.ORDER_OP_LESSOREQUALS;
+        case RelationalOperator.LESS_THAN_RELOP:      return Restriction.ColumnQualifier.ORDER_OP_LESSTHAN;
+        case RelationalOperator.IS_NULL_RELOP:        return Restriction.ColumnQualifier.ORDER_OP_ISNULL;
+        case RelationalOperator.IS_NOT_NULL_RELOP:    return Restriction.ColumnQualifier.ORDER_OP_ISNOTNULL;
+
+        case RelationalOperator.NOT_EQUALS_RELOP:
+        default:
+            if ( SanityManager.DEBUG )
+            {
+                SanityManager.THROWASSERT( "Unrecognized relational operator: " + rawOperator );
+            }
+        }
+
+        return -1;
+    }
+    /**
+     * Get the constant or parameter reference out of a comparand. Return null
+     * if we are confused. A parameter reference is wrapped in an integer array
+     * to distinguish it from a constant integer.
+     */
+    private Object squeezeConstantValue( ValueNode valueNode ) throws StandardException
+    {
+        if ( valueNode instanceof ParameterNode )
+        {
+            return new int[] { ((ParameterNode) valueNode).getParameterNumber() };
+        }
+        else if ( valueNode instanceof ConstantNode )
+        {
+            return ((ConstantNode) valueNode).getValue().getObject();
+        }
+        else
+        {
+            return iAmConfused( valueNode );
+        }
+    }
+    
 	/**
 	 * Generation on a FromVTI creates a wrapper around
 	 * the user's java.sql.ResultSet
@@ -1325,14 +1615,26 @@ public class FromVTI extends FromTable implements VTIEnvironment
 
 		// Push the return type
         int rtNum = -1;
-        if ( isDerbyStyleTableFunction )
+        if ( isDerbyStyleTableFunction  )
         {
             rtNum = acb.addItem(methodCall.getRoutineInfo().getReturnType());
         }
         mb.push(rtNum);
 
-		return 16;
+        // push the projection and restriction for RestrictedVTIs
+        mb.push( storeObjectInPS( acb, projectedColumnNames ) );
+        mb.push( storeObjectInPS( acb, vtiRestriction ) );        
+
+		return 18;
 	}
+    /** Store an object in the prepared statement.  Returns -1 if the object is
+     * null. Otherwise returns the object's retrieval handle.
+     */
+    private int storeObjectInPS( ActivationClassBuilder acb, Object obj ) throws StandardException
+    {
+        if ( obj == null ) { return -1; }
+        else { return acb.addItem( obj ); }
+    }
 
 	private void generateConstructor(ActivationClassBuilder acb,
 										   MethodBuilder mb, boolean reuseablePs)

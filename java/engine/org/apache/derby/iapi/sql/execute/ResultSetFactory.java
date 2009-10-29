@@ -644,16 +644,15 @@ public interface ResultSetFactory {
 		@param resultSetNumber	The resultSetNumber for the ResultSet
 		@param constructor		The GeneratedMethod for the user's constructor
 		@param javaClassName	The java class name for the VTI
-		@param erdNumber		int for referenced column BitSet 
-								(so it can be turned back into an object)
+		@param erdNumber		int for referenced column BitSet (so it can be turned back into an object)
 		@param version2			Whether or not VTI is a version 2 VTI.
 		@param isTarget			Whether or not VTI is a target VTI.
-		@param optimizerEstimatedRowCount	Estimated total # of rows by
-											optimizer
+		@param optimizerEstimatedRowCount	Estimated total # of rows by optimizer
 		@param optimizerEstimatedCost		Estimated total cost by optimizer
 		@param isDerbyStyleTableFunction    True if this is a Derby-style table function
-		@param returnTypeNumber	Which saved object contains the return type
-								(a multi-set) serialized as a byte array
+		@param returnTypeNumber	Which saved object contains the return type (a multi-set) serialized as a byte array
+		@param vtiProjectionNumber	Which saved object contains the projection for a RestrictedVTI
+		@param vtiRestrictionNumber	Which saved object contains the restriction for a RestrictedVTI
 		@return the row as a result set.
 		@exception StandardException thrown when unable to create the
 			result set
@@ -671,7 +670,9 @@ public interface ResultSetFactory {
 									 double optimizerEstimatedRowCount,
 									 double optimizerEstimatedCost,
                                      boolean isDerbyStyleTableFunction,
-                                     int returnTypeNumber
+                                     int returnTypeNumber,
+                                     int vtiProjectionNumber,
+                                     int vtiRestrictionNumber
                                           )
 		 throws StandardException;
 

@@ -20,6 +20,7 @@
  */
 package org.apache.derby.vti;
 
+import java.io.Serializable;
 import java.sql.SQLException;
 
 /**
@@ -32,11 +33,25 @@ import java.sql.SQLException;
  * the Table Function.
  * </p>
  */
-public abstract class Restriction
+public abstract class Restriction implements Serializable
 {
+    /**
+     * Turn this Restriction into a string suitable for use in a WHERE clause.
+     */
+    public abstract String toSQL();
+
+    /** Utility method to double quote a string */
+    protected String doubleQuote( String raw ) { return "\"" + raw + "\""; }
+
+    /** Utility method to parenthesize an expression */
+    protected String parenthesize( String raw ) { return "( " + raw + " )"; }
+    
     /** An AND of two Restrictions */
     public static class AND extends Restriction
     {
+        /** Derby serializes these objects in PreparedStatements */
+        public static final long serialVersionUID = -8205388794606605844L;
+        
         private Restriction _leftChild;
         private Restriction _rightChild;
 
@@ -52,11 +67,19 @@ public abstract class Restriction
 
         /** Get the right Restriction */
         public Restriction getRightChild() { return _rightChild; }
+        
+        public String toSQL()
+        {
+            return parenthesize( _leftChild.toSQL() ) + " AND " + parenthesize( _rightChild.toSQL() );
+        }
     }
 
     /** An OR of two Restrictions */
     public static class OR extends Restriction
     {
+        /** Derby serializes these objects in PreparedStatements */
+        public static final long serialVersionUID = -8205388794606605844L;
+        
         private Restriction _leftChild;
         private Restriction _rightChild;
 
@@ -72,6 +95,11 @@ public abstract class Restriction
 
         /** Get the right Restriction */
         public Restriction getRightChild() { return _rightChild; }
+
+        public String toSQL()
+        {
+            return parenthesize( _leftChild.toSQL() ) + " OR " + parenthesize( _rightChild.toSQL() );
+        }
     }
 
     /**
@@ -89,7 +117,7 @@ public abstract class Restriction
        * </p>
        *
        * <blockquote><pre>
-       *  <     =     <=     >      >=
+       *  <     =     <=     >      >=    IS NULL    IS NOT NULL
        * </pre></blockquote>
        */
     public static class ColumnQualifier extends Restriction
@@ -99,21 +127,33 @@ public abstract class Restriction
         // CONSTANTS
         //
         ////////////////////////////////////////////////////////////////////////////////////////
+
+        /** Derby serializes these objects in PreparedStatements */
+        public static final long serialVersionUID = -8205388794606605844L;
         
         /**	 Ordering operation constant representing '<' **/
-        public static final int ORDER_OP_LESSTHAN = 1;
+        public static final int ORDER_OP_LESSTHAN = 0;
 
         /**	 Ordering operation constant representing '=' **/
-        public static final int ORDER_OP_EQUALS = 2;
+        public static final int ORDER_OP_EQUALS = 1;
 
         /**	 Ordering operation constant representing '<=' **/
-        public static final int ORDER_OP_LESSOREQUALS = 3;
+        public static final int ORDER_OP_LESSOREQUALS = 2;
 
         /**	 Ordering operation constant representing '>' **/
-        public static final int ORDER_OP_GREATERTHAN = 4;
+        public static final int ORDER_OP_GREATERTHAN = 3;
 
         /**	 Ordering operation constant representing '>=' **/
-        public static final int ORDER_OP_GREATEROREQUALS = 5;
+        public static final int ORDER_OP_GREATEROREQUALS = 4;
+
+        /**	 Ordering operation constant representing 'IS NULL' **/
+        public static final int ORDER_OP_ISNULL = 5;
+
+        /**	 Ordering operation constant representing 'IS NOT NULL' **/
+        public static final int ORDER_OP_ISNOTNULL = 6;
+
+        // Visible forms of the constants above
+        private String[] OPERATOR_SYMBOLS = new String[] {  "<", "=", "<=", ">", ">=", "IS NULL", "IS NOT NULL" };
 
         ////////////////////////////////////////////////////////////////////////////////////////
         //
@@ -126,9 +166,6 @@ public abstract class Restriction
 
         /** comparison operator, one of the ORDER_OP constants */
         private int     _comparisonOperator;
-
-        /** null handling */
-        private boolean _nullEqualsNull;
 
         /** value to compare the column to */
         private Object _constantOperand;
@@ -146,20 +183,17 @@ public abstract class Restriction
          *
          * @param columnName Name of column as declared in the CREATE FUNCTION statement.
          * @param comparisonOperator One of the ORDER_OP constants.
-         * @param nullEqualsNull True if NULLS should be treated like ordinary values which sort before all other values. Used to encode IS NULL comparisons.
          * @param constantOperand Constant value to which the column should be compared.
          */
         public ColumnQualifier
             (
              String columnName,
              int comparisonOperator,
-             boolean nullEqualsNull,
              Object constantOperand
              )
         {
             _columnName = columnName;
             _comparisonOperator = comparisonOperator;
-            _nullEqualsNull = nullEqualsNull;
             _constantOperand = constantOperand;
         }
         
@@ -186,27 +220,28 @@ public abstract class Restriction
 
         /**
          * <p>
-         * Specifies how nulls behave in comparisons. If true, then nulls are
-         * treated as values which sort before all other values; and the = comparison
-         * between two nulls evaluates to TRUE. If this method returns false, then
-         * any comparison involving a null evaluates to UNKNOWN. This is useful
-         * for encoding IS NULL comparisons.
-         * </p>
-         */
-        public boolean nullEqualsNull() { return _nullEqualsNull; }
-
-        /**
-         * <p>
          * Get the constant value to which the column should be compared. The
          * constant value must be an Object of the Java type which corresponds to
          * the SQL type of the column. The column's SQL type was declared in the CREATE FUNCTION statement.
          * The mapping of SQL types to Java types is defined in table 4 of chapter 14
          * of the original JDBC 1 specification (dated 1996). Bascially, these are the Java
          * wrapper values you would expect. For instance, SQL INT maps to java.lang.Integer, SQL CHAR
-         * maps to java.lang.String, etc..
+         * maps to java.lang.String, etc.. This object will be null if the
+         * comparison operator is ORDER_OP_ISNULL or ORDER_OP_ISNOTNULL.
          * </p>
          */
         public Object getConstantOperand() { return _constantOperand; }
+        
+        public String toSQL()
+        {
+            StringBuffer buffer = new StringBuffer();
+
+            buffer.append( doubleQuote( _columnName ) );
+            buffer.append( " " + OPERATOR_SYMBOLS[ _comparisonOperator ] + " " );
+            if ( _constantOperand != null ) { buffer.append( _constantOperand ); }
+
+            return buffer.toString();
+        }
     }
     
 }
