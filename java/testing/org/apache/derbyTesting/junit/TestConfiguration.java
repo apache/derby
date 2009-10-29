@@ -346,11 +346,11 @@ public class TestConfiguration {
         if (cleanDB)
         {
             suite.addTest(new CleanDatabaseTestSetup(
-                    clientExistingServerSuite(testClass, hostName, TestConfiguration.getCurrent().getPort())));
+                    clientExistingServerSuite(testClass, hostName, portNumber)));
         }
         else
         {
-            suite.addTest(clientExistingServerSuite(testClass, hostName, TestConfiguration.getCurrent().getPort()));
+            suite.addTest(clientExistingServerSuite(testClass, hostName, portNumber));
         }
 
         return (suite);
