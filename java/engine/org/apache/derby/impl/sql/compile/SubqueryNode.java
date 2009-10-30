@@ -2213,12 +2213,12 @@ public class SubqueryNode extends ValueNode
 			return;
 		}
 
-		if (resultSet != null && !v.stopTraversal())
+		if (resultSet != null)
 		{
 			resultSet = (ResultSetNode)resultSet.accept(v);
 		}
 
-		if (leftOperand != null && !v.stopTraversal())
+		if (leftOperand != null)
 		{
 			leftOperand = (ValueNode)leftOperand.accept(v);
 		}

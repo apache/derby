@@ -754,7 +754,7 @@ public class UnaryOperatorNode extends ValueNode
 	{
 		super.acceptChildren(v);
 
-		if (operand != null && !v.stopTraversal())
+		if (operand != null)
 		{
 			operand = (ValueNode)operand.accept(v);
 		}

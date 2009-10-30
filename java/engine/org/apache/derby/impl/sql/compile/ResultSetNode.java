@@ -1612,7 +1612,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	{
 		super.acceptChildren(v);
 
-		if (resultColumns != null && !v.stopTraversal())
+		if (resultColumns != null)
 		{
 			resultColumns = (ResultColumnList)resultColumns.accept(v);
 		}

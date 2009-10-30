@@ -4599,19 +4599,19 @@ public class FromBaseTable extends FromTable
 	{
 		super.acceptChildren(v);
 
-		if (nonStoreRestrictionList != null && !v.stopTraversal()) {
+		if (nonStoreRestrictionList != null) {
 			nonStoreRestrictionList.accept(v);
 		}
 		
-		if (restrictionList != null & !v.stopTraversal()) {
+		if (restrictionList != null) {
 			restrictionList.accept(v);
 		}
 
-		if (nonBaseTableRestrictionList != null && !v.stopTraversal()) {
+		if (nonBaseTableRestrictionList != null) {
 			nonBaseTableRestrictionList.accept(v);
 		}
 
-		if (requalificationRestrictionList != null && !v.stopTraversal()) {
+		if (requalificationRestrictionList != null) {
 			requalificationRestrictionList.accept(v);
 		}
 	}

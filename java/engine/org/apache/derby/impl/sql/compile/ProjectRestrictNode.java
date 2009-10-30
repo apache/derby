@@ -1833,12 +1833,12 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 	{
 		super.acceptChildren(v);
 
-		if (restriction != null && !v.stopTraversal())
+		if (restriction != null)
 		{
 			restriction = (ValueNode)restriction.accept(v);
 		}
 
-		if (restrictionList != null && !v.stopTraversal())
+		if (restrictionList != null)
 		{
 			restrictionList = (PredicateList)restrictionList.accept(v);
 		}

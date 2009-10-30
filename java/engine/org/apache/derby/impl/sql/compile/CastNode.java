@@ -986,7 +986,7 @@ public class CastNode extends ValueNode
 	{
 		super.acceptChildren(v);
 
-		if (castOperand != null && !v.stopTraversal())
+		if (castOperand != null)
 		{
 			castOperand = (ValueNode)castOperand.accept(v);
 		}

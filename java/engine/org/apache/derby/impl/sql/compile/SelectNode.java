@@ -2355,22 +2355,22 @@ public class SelectNode extends ResultSetNode
 	{
 		super.acceptChildren(v);
 
-		if (fromList != null && !v.stopTraversal())
+		if (fromList != null)
 		{
 			fromList = (FromList)fromList.accept(v);
 		}
 
-		if (whereClause != null && !v.stopTraversal())
+		if (whereClause != null)
 		{
 			whereClause = (ValueNode)whereClause.accept(v);
 		}		
 
-		if (wherePredicates != null && !v.stopTraversal())
+		if (wherePredicates != null)
 		{
 			wherePredicates = (PredicateList)wherePredicates.accept(v);
 		}		
 
-		if (havingClause != null && !v.stopTraversal()) {
+		if (havingClause != null) {
 			havingClause = (ValueNode)havingClause.accept(v);
 		}
 	}

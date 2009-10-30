@@ -386,12 +386,12 @@ public abstract class BinaryListOperatorNode extends ValueNode
 	{
 		super.acceptChildren(v);
 
-		if (leftOperand != null && !v.stopTraversal())
+		if (leftOperand != null)
 		{
 			leftOperand = (ValueNode)leftOperand.accept(v);
 		}
 			
-		if (rightOperandList != null && !v.stopTraversal())
+		if (rightOperandList != null)
 		{
 			rightOperandList = (ValueNodeList)rightOperandList.accept(v);
 		}

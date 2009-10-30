@@ -957,11 +957,11 @@ abstract class TableOperatorNode extends FromTable
 	{
 		super.acceptChildren(v);
 
-		if (leftResultSet != null && !v.stopTraversal())
+		if (leftResultSet != null)
 		{
 			leftResultSet = (ResultSetNode)leftResultSet.accept(v);
 		}
-		if (rightResultSet != null && !v.stopTraversal())
+		if (rightResultSet != null)
 		{
 			rightResultSet = (ResultSetNode)rightResultSet.accept(v);
 		}

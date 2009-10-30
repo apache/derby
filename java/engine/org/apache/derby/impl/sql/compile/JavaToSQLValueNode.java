@@ -349,7 +349,7 @@ public class JavaToSQLValueNode extends ValueNode
 	{
 		super.acceptChildren(v);
 
-		if (javaNode != null && !v.stopTraversal())
+		if (javaNode != null)
 		{
 			javaNode = (JavaValueNode)javaNode.accept(v);
 		}

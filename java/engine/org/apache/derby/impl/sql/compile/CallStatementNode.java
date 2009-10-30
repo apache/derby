@@ -250,7 +250,7 @@ public class CallStatementNode extends DMLStatementNode
 	{
 		super.acceptChildren(v);
 
-		if (!v.stopTraversal())
+		if (methodCall != null)
 		{
 			methodCall = (JavaToSQLValueNode) methodCall.accept(v);
 		}

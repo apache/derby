@@ -729,12 +729,12 @@ public class ConditionalNode extends ValueNode
 	{
 		super.acceptChildren(v);
 
-		if (testCondition != null && !v.stopTraversal())
+		if (testCondition != null)
 		{
 			testCondition = (ValueNode)testCondition.accept(v);
 		}
 
-		if (thenElseList != null && !v.stopTraversal())
+		if (thenElseList != null)
 		{
 			thenElseList = (ValueNodeList)thenElseList.accept(v);
 		}

@@ -821,7 +821,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 	{
 		super.acceptChildren(v);
 
-		if (andNode != null && !v.stopTraversal())
+		if (andNode != null)
 		{
 			andNode = (AndNode)andNode.accept(v);
 		}

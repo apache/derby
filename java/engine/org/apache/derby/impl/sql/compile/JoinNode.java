@@ -1943,17 +1943,17 @@ public class JoinNode extends TableOperatorNode
 	{
 		super.acceptChildren(v);
 
-		if (resultColumns != null && !v.stopTraversal())
+		if (resultColumns != null)
 		{
 			resultColumns = (ResultColumnList)resultColumns.accept(v);
 		}
 
-		if (joinClause != null && !v.stopTraversal())
+		if (joinClause != null)
 		{
 			joinClause = (ValueNode)joinClause.accept(v);
 		}
 
-		if (usingClause != null && !v.stopTraversal())
+		if (usingClause != null)
 		{
 			usingClause = (ResultColumnList)usingClause.accept(v);
 		}

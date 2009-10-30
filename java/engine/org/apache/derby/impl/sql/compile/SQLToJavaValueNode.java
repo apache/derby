@@ -507,7 +507,7 @@ public class SQLToJavaValueNode extends JavaValueNode
 	{
 		super.acceptChildren(v);
 
-		if (value != null && !v.stopTraversal())
+		if (value != null)
 		{
 			value = (ValueNode)value.accept(v);
 		}

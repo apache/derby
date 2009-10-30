@@ -420,12 +420,12 @@ public class HashTableNode extends SingleChildResultSetNode
 	{
 		super.acceptChildren(v);
 
-		if (searchPredicateList != null && !v.stopTraversal())
+		if (searchPredicateList != null)
 		{
 			searchPredicateList = (PredicateList)searchPredicateList.accept(v);
 		}
 
-		if (joinPredicateList != null && !v.stopTraversal())
+		if (joinPredicateList != null)
 		{
 			joinPredicateList = (PredicateList)joinPredicateList.accept(v);
 		}

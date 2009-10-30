@@ -423,7 +423,7 @@ public class IndexToBaseRowNode extends FromTable
 	{
 		super.acceptChildren(v);
 
-		if (source != null && !v.stopTraversal())
+		if (source != null)
 		{
 			source = (FromBaseTable)source.accept(v);
 		}

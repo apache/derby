@@ -512,7 +512,7 @@ public class OrderByColumn extends OrderedColumn {
 	{
 		super.acceptChildren(v);
 
-		if (expression != null && !v.stopTraversal())
+		if (expression != null)
 		{
 			expression = (ValueNode)expression.accept(v);
 		}

@@ -1744,7 +1744,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
 	{
 		super.acceptChildren(v);
 
-		if (!v.stopTraversal())
+		if (methodCall != null)
 		{
 			methodCall = (MethodCallNode) methodCall.accept(v);
 		}

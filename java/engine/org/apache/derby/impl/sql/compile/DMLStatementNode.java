@@ -495,7 +495,7 @@ abstract class DMLStatementNode extends StatementNode
 	{
 		super.acceptChildren(v);
 
-		if (resultSet != null && !v.stopTraversal())
+		if (resultSet != null)
 		{
 			resultSet = (ResultSetNode)resultSet.accept(v);
 		}

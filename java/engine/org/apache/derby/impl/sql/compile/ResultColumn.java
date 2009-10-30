@@ -1545,7 +1545,7 @@ public class ResultColumn extends ValueNode
 	{
 		super.acceptChildren(v);
 	
-		if (expression != null && !v.stopTraversal())
+		if (expression != null)
 		{
 			setExpression( (ValueNode)expression.accept(v) );
 		}

@@ -477,7 +477,7 @@ public class NonStaticMethodCallNode extends MethodCallNode
 	{
 		super.acceptChildren(v);
 
-		if (receiver != null && !v.stopTraversal())
+		if (receiver != null)
 		{
 			receiver = (JavaValueNode)receiver.accept(v);
 		}

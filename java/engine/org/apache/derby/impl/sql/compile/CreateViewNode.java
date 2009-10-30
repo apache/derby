@@ -402,7 +402,7 @@ public class CreateViewNode extends DDLStatementNode
 	{
 		super.acceptChildren(v);
 
-		if (queryExpression != null && !v.stopTraversal())
+		if (queryExpression != null)
 		{
 			queryExpression = (ResultSetNode)queryExpression.accept(v);
 		}

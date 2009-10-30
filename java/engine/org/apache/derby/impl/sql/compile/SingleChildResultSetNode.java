@@ -620,7 +620,7 @@ abstract class SingleChildResultSetNode extends FromTable
 	{
 		super.acceptChildren(v);
 
-		if (childResult != null && !v.stopTraversal())
+		if (childResult != null)
 		{
 			childResult = (ResultSetNode)childResult.accept(v);
 		}
