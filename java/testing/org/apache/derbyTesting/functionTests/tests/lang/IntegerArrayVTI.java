@@ -120,7 +120,7 @@ public class IntegerArrayVTI extends StringArrayVTI implements RestrictedVTI
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    public static String getLastProjection() { return Arrays.asList( _lastProjection ).toString(); }
+    public static String getLastProjection() { return ( (_lastProjection == null) ? null : Arrays.asList( _lastProjection ).toString() ); }
     public static String getLastRestriction() { return ( ( _lastRestriction == null ) ? null : _lastRestriction.toSQL() ); }
     
 }

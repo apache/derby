@@ -177,6 +177,17 @@ public class HashTableNode extends SingleChildResultSetNode
 		if (SanityManager.DEBUG)
         SanityManager.ASSERT(resultColumns != null, "Tree structure bad");
 
+        //
+        // If we are projecting and restricting the stream from a table
+        // function, then give the table function all of the information that
+        // it needs in order to push the projection and qualifiers into
+        // the table function. See DERBY-4357.
+        //
+        if ( childResult instanceof FromVTI )
+        {
+            ((FromVTI) childResult).computeProjectionAndRestriction( searchPredicateList );
+        }
+
 		generateMinion( acb, mb, false);
 	}
 

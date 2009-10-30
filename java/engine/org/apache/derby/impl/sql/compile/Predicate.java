@@ -731,7 +731,7 @@ public final class Predicate extends QueryTreeNode implements OptimizablePredica
 		{
 			return binaryRelOpColRefsToString() + "\nreferencedSet: " +
 				referencedSet  + "\n" + "pushable: " + pushable + "\n" +
-				referencedSet  + "\n" + "isQualifier: " + isQualifier + "\n" +
+				"isQualifier: " + isQualifier + "\n" +
 				super.toString();
 		}
 		else

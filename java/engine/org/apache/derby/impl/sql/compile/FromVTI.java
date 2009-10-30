@@ -1221,33 +1221,27 @@ public class FromVTI extends FromTable implements VTIEnvironment
      * table function if it is a RestrictedVTI. This method is called by the
      * parent ProjectRestrictNode at code generation time. See DERBY-4357.
      *
-     * @param parentProjection The column list which the parent ProjectRestrictNode expects to return.
      * @param parentPredicates The full list of predicates to be applied by the parent ProjectRestrictNode
      */
-    void computeProjectionAndRestriction( ResultColumnList parentProjection, PredicateList parentPredicates )
+    void computeProjectionAndRestriction( PredicateList parentPredicates )
         throws StandardException
     {
         // nothing to do if this is a not a restricted table function
         if ( !isRestrictedTableFunction ) { return; }
 
-        computeRestriction( parentPredicates, computeProjection( parentProjection ) );
+        computeRestriction( parentPredicates, computeProjection( ) );
     }
     /**
      * Fills in the array of projected column names suitable for handing to
-     * RestrictedVTI.initScan(). Returns a mapping of the exposed column names
+     * RestrictedVTI.initScan(). Returns a map of the exposed column names
      * to the actual names of columns in the table function. This is useful
      * because the predicate refers to the exposed column names.
      *
      * @param parentProjection The column list which the parent ProjectRestrictNode expects to return.
      */
-    private HashMap computeProjection( ResultColumnList parentProjection ) throws StandardException
+    private HashMap computeProjection( ) throws StandardException
     {
-        HashSet  projectedColumns = new HashSet();
         HashMap  nameMap = new HashMap();
-        String[] exposedNames = parentProjection.getColumnNames();
-        int      projectedCount = exposedNames.length;
-
-        for ( int i = 0; i < projectedCount; i++ ) { projectedColumns.add( exposedNames[ i ] ); }
 
         ResultColumnList allVTIColumns = getResultColumns();
         int              totalColumnCount = allVTIColumns.size();
@@ -1259,7 +1253,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
             ResultColumn column = allVTIColumns.getResultColumn( i + 1 );
             String       exposedName = column.getName();
 
-            if ( projectedColumns.contains( exposedName ) )
+            if ( column.isReferenced() )
             {
                 String       baseName = column.getBaseColumnNode().getColumnName();
                 
@@ -1290,7 +1284,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
         {
             Predicate predicate = (Predicate) parentPredicates.elementAt( i );
 
-            if ( predicate.isQualifier() )
+            if ( canBePushedDown( predicate ) )
             {
                 // A Predicate has a top level AND node
                 Restriction newRestriction = makeRestriction( predicate.getAndNode(), columnNameMap );
@@ -1310,6 +1304,20 @@ public class FromVTI extends FromTable implements VTIEnvironment
                 else { vtiRestriction = new Restriction.AND( vtiRestriction, newRestriction ); }
             }
         }
+    }
+    /** Return true if the predicate can be pushed into a RestrictedVTI */
+    private boolean canBePushedDown( Predicate predicate ) throws StandardException
+    {
+        JBitSet referencedSet = predicate.getReferencedSet();
+
+        // we want this to be a qualifier on only this FROM table */
+        return
+            (
+             predicate.isQualifier() &&
+             (referencedSet != null) &&
+             (referencedSet.hasSingleBitSet() ) &&
+             (referencedSet.get( getTableNumber() ) )
+             );
     }
     /**
      * Turn a compile-time WHERE clause fragment into a run-time
@@ -1502,6 +1510,10 @@ public class FromVTI extends FromTable implements VTIEnvironment
 								MethodBuilder mb)
 							throws StandardException
 	{
+        // If necessary, compute the projection to be pushed into the table
+        // function
+        if ( isRestrictedTableFunction && ( projectedColumnNames == null) ) { computeProjection(); }
+        
 		/* NOTE: We need to remap any CRs within the parameters
 		 * so that we get their values from the right source
 		 * row.  For example, if a CR is a join column, we need

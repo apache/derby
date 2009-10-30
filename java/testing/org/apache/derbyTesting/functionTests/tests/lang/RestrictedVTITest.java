@@ -142,6 +142,19 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
                  "external name 'org.apache.derbyTesting.functionTests.tests.lang.RestrictedVTITest.nullableIntegerList'\n"
                  );
         }
+        if ( !tableExists( conn, "T_4357_1" ) )
+        {
+            goodStatement
+                (
+                 conn,
+                 "create table t_4357_1( a int )\n"
+                 );
+            goodStatement
+                (
+                 conn,
+                 "insert into t_4357_1( a ) values cast( null as int), ( 1 ), ( 100 ), ( 1000 ), ( 10000)\n"
+                 );
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -171,6 +184,33 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
              },
              "[S_R, S_NR, NS_R, null]",
              "( \"NS_R\" < 3000 ) AND ( \"S_R\" > 1 )"
+             );
+        assertPR
+            (
+             conn,
+             "select s_r, s_nr from table( integerList() ) s where s_r > 1 and ns_r < 3000 order by s_r\n",
+             new String[][]
+             {
+                 { "100" ,         "200"  },
+             },
+             "[S_R, S_NR, NS_R, null]",
+             "( \"NS_R\" < 3000 ) AND ( \"S_R\" > 1 )"
+             );
+
+        // order by with no restriction
+        assertPR
+            (
+             conn,
+             "select s_r, s_nr from table( integerList() ) s order by s_r\n",
+             new String[][]
+             {
+                 { "1" ,         "2"  },
+                 { "100" ,         "200"  },
+                 { "1000" ,         "2000"  },
+                 { "10000" ,         "20000"  },
+             },
+             "[S_R, S_NR, null, null]",
+             null
              );
 
         // similar test except with a ? parameter
@@ -391,6 +431,162 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
 
     }
 
+    /**
+     * <p>
+     * Test joins to RestrictedVTIs.
+     * </p>
+     */
+    public void test_05_joins() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // hashjoin with no restriction
+        assertPR
+            (
+             conn,
+             "select a, w, y from t_4357_1, table( nullableIntegerList() ) as s( w, x, y, z ) where a = w\n",
+             new String[][]
+             {
+                 { "100" ,    "100",    "300"  },
+                 { "1000" ,    "1000",    null  },
+                 { "10000" ,    "10000",    "30000"  },
+             },
+             "[S_R, null, NS_R, null]",
+             null
+             );
+        assertPR
+            (
+             conn,
+             "select a, w, y from t_4357_1, table( nullableIntegerList() ) as s( w, x, y, z ) where a = w order by y\n",
+             new String[][]
+             {
+                 { "100" ,    "100",    "300"  },
+                 { "10000" ,    "10000",    "30000"  },
+                 { "1000" ,    "1000",    null  },
+             },
+             "[S_R, null, NS_R, null]",
+             null
+             );
+
+        // hashjoin with a restriction on the table function
+        assertPR
+            (
+             conn,
+             "select a, w, x from t_4357_1, table( nullableIntegerList() ) as s( w, x, y, z ) where a = w and y is not null\n",
+             new String[][]
+             {
+                 { "100" ,    "100",    null  },
+                 { "10000" ,    "10000",    "20000"  },
+             },
+             "[S_R, S_NR, NS_R, null]",
+             "\"NS_R\" IS NOT NULL "
+             );
+        assertPR
+            (
+             conn,
+             "select a, w, x from t_4357_1, table( nullableIntegerList() ) as s( w, x, y, z ) where a = w and y is not null order by w\n",
+             new String[][]
+             {
+                 { "100" ,    "100",    null  },
+                 { "10000" ,    "10000",    "20000"  },
+             },
+             "[S_R, S_NR, NS_R, null]",
+             "\"NS_R\" IS NOT NULL "
+             );
+
+        // hashjoin with a restriction on the base table which transitive closure
+        // turns into a restriction on the table function
+        assertPR
+            (
+             conn,
+             "select a, w, x from t_4357_1, table( nullableIntegerList() ) as s( w, x, y, z ) where a = w and a > 100\n",
+             new String[][]
+             {
+                 { "1000" ,    "1000",    "2000" },
+                 { "10000" ,    "10000",    "20000"  },
+             },
+             "[S_R, S_NR, null, null]",
+             "\"S_R\" > 100"
+             );
+        assertPR
+            (
+             conn,
+             "select a, w, x from t_4357_1, table( nullableIntegerList() ) as s( w, x, y, z ) where a = w and a > 100 order by x\n",
+             new String[][]
+             {
+                 { "1000" ,    "1000",    "2000" },
+                 { "10000" ,    "10000",    "20000"  },
+             },
+             "[S_R, S_NR, null, null]",
+             "\"S_R\" > 100"
+             );
+
+        // hashjoin with a restriction that can't be pushed into the table function
+        assertPR
+            (
+             conn,
+             "select a, w, x from t_4357_1, table( nullableIntegerList() ) as s( w, x, y, z ) where a = w and a + x > 100\n",
+             new String[][]
+             {
+                 { "1000" ,    "1000",    "2000" },
+                 { "10000" ,    "10000",    "20000"  },
+             },
+             "[S_R, S_NR, null, null]",
+             null
+             );
+        assertPR
+            (
+             conn,
+             "select a, w, x from t_4357_1, table( nullableIntegerList() ) as s( w, x, y, z ) where a = w and x + y > 100\n",
+             new String[][]
+             {
+                 { "10000" ,    "10000",    "20000"  },
+             },
+             "[S_R, S_NR, NS_R, null]",
+             null
+             );
+
+    }
+
+    /**
+     * <p>
+     * Test DISTINCT.
+     * </p>
+     */
+    public void test_06_distinct() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // distinct with restriction
+        assertPR
+            (
+             conn,
+             "select distinct s_r, s_nr from table( integerList() ) s where s_r > 1 and ns_r < 3000\n",
+             new String[][]
+             {
+                 { "100" ,         "200"  },
+             },
+             "[S_R, S_NR, NS_R, null]",
+             "( \"NS_R\" < 3000 ) AND ( \"S_R\" > 1 )"
+             );
+
+        // distinct without restriction
+        assertPR
+            (
+             conn,
+             "select distinct s_r, s_nr from table( integerList() ) s\n",
+             new String[][]
+             {
+                 { "1" ,         "2"  },
+                 { "100" ,         "200"  },
+                 { "1000" ,         "2000"  },
+                 { "10000" ,         "20000"  },
+             },
+             "[S_R, S_NR, null, null]",
+             null
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
@@ -447,6 +643,23 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
     {
         PreparedStatement ps = chattyPrepare( conn, "select count (*) from sys.sysaliases where alias = ?" );
         ps.setString( 1, functionName );
+
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+
+        boolean retval = rs.getInt( 1 ) > 0 ? true : false;
+
+        rs.close();
+        ps.close();
+
+        return retval;
+    }
+
+    /** Return true if the table exists */
+    private boolean tableExists( Connection conn, String tableName ) throws Exception
+    {
+        PreparedStatement ps = chattyPrepare( conn, "select count (*) from sys.systables where tablename = ?" );
+        ps.setString( 1, tableName );
 
         ResultSet rs = ps.executeQuery();
         rs.next();

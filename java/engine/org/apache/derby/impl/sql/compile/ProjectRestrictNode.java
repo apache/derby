@@ -1320,6 +1320,17 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		if (SanityManager.DEBUG)
         SanityManager.ASSERT(resultColumns != null, "Tree structure bad");
 
+        //
+        // If we are projecting and restricting the stream from a table
+        // function, then give the table function all of the information that
+        // it needs in order to push the projection and qualifiers into
+        // the table function. See DERBY-4357.
+        //
+        if ( childResult instanceof FromVTI )
+        {
+            ((FromVTI) childResult).computeProjectionAndRestriction( restrictionList );
+        }
+
 		generateMinion( acb, mb, false);
 	}
 
@@ -1353,17 +1364,6 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 									 MethodBuilder mb, boolean genChildResultSet)
 									throws StandardException
 	{
-        //
-        // If we are projecting and restricting the stream from a table
-        // function, then give the table function all of the information that
-        // it needs in order to push the projection and qualifiers into
-        // the table function. See DERBY-4357.
-        //
-        if ( childResult instanceof FromVTI )
-        {
-            ((FromVTI) childResult).computeProjectionAndRestriction( resultColumns, restrictionList );
-        }
-
 		/* If this ProjectRestrict doesn't do anything, bypass its generation.
 		 * (Remove any true and true predicates first, as they could be left
 		 * by the like transformation.)
