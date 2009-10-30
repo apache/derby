@@ -1688,7 +1688,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 			ResultColumn resultColumn = (ResultColumn) elementAt(index);
 
 			/* Skip over generated columns */
-			if (resultColumn.isGenerated())
+			if (resultColumn.isGenerated() || resultColumn.isGeneratedForUnmatchedColumnInInsert())
 			{
 				continue;
 			}

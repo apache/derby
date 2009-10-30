@@ -1119,3 +1119,11 @@ alter table d4006_a alter column z default 99; -- should fail DERBY-4011
 alter table d4006_a alter column z default null; -- should fail DERBY-4011
 drop table d4006_a;
 
+-- DERBY-4419 is a variant on DERBY-1644:
+create table d4419_t1(x int);
+insert into d4419_t1 values 1,2;
+create table d4419_t2(x int);
+insert into d4419_t2 values 2,3;
+create table d4419_t3(x int, y int generated always as identity);
+insert into d4419_t3(x) select * from d4419_t1 union select * from d4419_t2;
+
