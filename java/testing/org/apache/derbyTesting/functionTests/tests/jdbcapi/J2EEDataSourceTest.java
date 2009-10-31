@@ -776,6 +776,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         Connection c = pc.getConnection();
         c.setAutoCommit(false);
         testCloseActiveConnection(c, false, false);
+        pc.close();
     }
 
     /**
@@ -790,6 +791,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         Connection c = xa.getConnection();
         c.setAutoCommit(false);
         testCloseActiveConnection(c, false, false);
+        xa.close();
     }
 
     /**
@@ -812,6 +814,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         c.setAutoCommit(false);
         testCloseActiveConnection(c, false, true);
         xar.end(xid, XAResource.TMSUCCESS);
+        xa.close();
     }
 
     /**
