@@ -8149,30 +8149,48 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st_user3.executeUpdate(
             "insert into rt3 values (3)");
         
+        // test multiple FKs
+        st_user3.executeUpdate("drop table user3.rt3");
+        st_user2.executeUpdate("drop table user2.rt2");
+        st_user1.executeUpdate("drop table user1.rt1");
         // set connection user1
-        //ij(USER3)> -- test multiple FKs DERBY-1589?set 
-        // connection user1drop table user3.rt3drop table 
-        // user2.rt2drop table user1.rt1create table rt1 (c1 int 
-        // primary key not null, c2 int)insert into rt1 values 
-        // (1,1), (2,2)grant references on rt1 to PUBLIC, user2, 
-        // user3set connection user2 XJ001 occurred at create table 
-        // rt2...create table rt2 (c1 int primary key not null, 
-        // constraint rt2fk foreign key(c1) references 
-        // user1.rt1)insert into rt2 values (1), (2)grant 
-        // references on rt2 to PUBLIC, user3set connection 
-        // user3create table rt3 (c1 int primary key not null, 
-        // constraint rt3fk1 foreign key(c1) references 
-        // user1.rt1,	constraint rt3fk2 foreign key(c1) references 
-        // user1.rt2)insert into rt3 values (1), (2)set connection 
-        // user1 rt3fk1 should get dropped.revoke references on rt1 
-        // from PUBLICrevoke references on rt1 from user3set 
-        // connection user2revoke references on rt2 from PUBLIC 
-        // expect errorinsert into rt2 values (3)set connection 
-        // user3 expect error, use user3 references privilege, 
-        // rt3fk2 still in effectinsert into rt3 values (3)set 
-        // connection user2revoke references on rt2 from user3set 
-        // connection user3 ok, rt3fk2 should be dropped.insert 
-        // into rt3 values (3) 
+        st_user1.executeUpdate(
+            "create table rt1 (c1 int primary key not null, c2 int)");
+        st_user1.executeUpdate("insert into rt1 values (1,1), (2,2)");
+        st_user1.executeUpdate(
+            "grant references on rt1 to PUBLIC, user2, user3");
+        // set connection user2
+        // XJ001 occurred at create table rt2..
+        st_user2.executeUpdate(
+            "create table rt2 (c1 int primary key not null," +
+            " constraint rt2fk foreign key(c1) references user1.rt1)");
+        st_user2.executeUpdate("insert into rt2 values (1), (2)");
+        st_user2.executeUpdate("grant references on rt2 to PUBLIC, user3");
+        // set connection user3
+        st_user3.executeUpdate(
+            "create table rt3 (c1 int primary key not null," +
+            " constraint rt3fk1 foreign key(c1) references user1.rt1," +
+            " constraint rt3fk2 foreign key(c1) references user2.rt2)");
+        st_user3.executeUpdate("insert into rt3 values (1), (2)");
+        // set connection user1 
+        // rt3fk1 should get dropped.
+        st_user1.executeUpdate("revoke references on rt1 from PUBLIC");
+        st_user1.executeUpdate("revoke references on rt1 from user3");
+        // set connection user2
+        st_user2.executeUpdate("revoke references on rt2 from PUBLIC");
+        // expect error:
+        // ERROR 23503: INSERT on table 'RT2' caused a violation of foreign
+        // key constraint 'RT2FK' for key (3).
+        assertStatementError("23503", st_user2, "insert into rt2 values (3)");
+        // set connection user3
+        // expect error, user3 references privilege, rt3fk2 still in effect
+        assertStatementError("23503", st_user3, "insert into rt3 values (3)");
+        // set connection user2
+        st_user2.executeUpdate("revoke references on rt2 from user3");
+        // set connection user3
+        // ok, rt3fk2 should be dropped.
+        st_user3.executeUpdate("insert into rt3 values (3) ");
+
         // ---------------------------------------------------------
         // ---------- routines and standard builtins 
         // ---------------------------------------------------------
