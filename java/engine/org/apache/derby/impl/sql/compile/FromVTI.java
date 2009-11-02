@@ -1236,8 +1236,6 @@ public class FromVTI extends FromTable implements VTIEnvironment
      * RestrictedVTI.initScan(). Returns a map of the exposed column names
      * to the actual names of columns in the table function. This is useful
      * because the predicate refers to the exposed column names.
-     *
-     * @param parentProjection The column list which the parent ProjectRestrictNode expects to return.
      */
     private HashMap computeProjection( ) throws StandardException
     {
