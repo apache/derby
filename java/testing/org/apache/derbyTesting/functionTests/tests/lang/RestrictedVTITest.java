@@ -587,6 +587,47 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Test subqueries.
+     * </p>
+     */
+    public void test_07_subqueries() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // table function in subquery
+        assertPR
+            (
+             conn,
+             "select * from t_4357_1 where exists ( select x from table( nullableIntegerList() ) as s( w, x, y, z ) where a = w )\n",
+             new String[][]
+             {
+                 { "100"  },
+                 { "1000"  },
+                 { "10000"  },
+             },
+             "[S_R, S_NR, null, null]",
+             null
+             );
+
+        // table function in inner and outer query blocks
+        assertPR
+            (
+             conn,
+             "select * from table( nullableIntegerList() ) as t( a, b, c, d ) where exists ( select x from table( nullableIntegerList() ) as s( w, x, y, z ) where a = w )\n",
+             new String[][]
+             {
+                 { "100", null, "300", "400"  },
+                 { "1000", "2000", null, "4000"  },
+                 { "10000", "20000", "30000", null  },
+             },
+             "[S_R, S_NR, null, null]",
+             null
+             );
+
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
