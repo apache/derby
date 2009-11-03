@@ -79,6 +79,8 @@ public class StressMultiTest extends BaseJDBCTestCase {
      */
     private static int MINUTES = 10;
     
+    private static final String THREADSMINUTES = "derby.tests.ThreadsMinutes";
+    
     /**
      * Force verbosity, used for debugging. Will print alot of information
      * to the screen. 
@@ -252,6 +254,24 @@ public class StressMultiTest extends BaseJDBCTestCase {
     public void setUp() throws Exception{
         super.setUp();
         this.getTestConfiguration().setVerbosity(DEBUG);
+        
+        // Let -Dderby.tests.ThreadsMinutes=TTxMM override.
+        String optThreadsMinutes = getSystemProperty(THREADSMINUTES);
+        if ( optThreadsMinutes != null )
+        { // Syntax: '99x22' meaning 99 threads 22 minutes.
+            int xPos = optThreadsMinutes.indexOf("x");
+            try{
+                // Assuming xPos >= 1 : substring or parseInt will catch it.
+                THREADS = Integer.parseInt(optThreadsMinutes.substring(0, xPos));
+                MINUTES = Integer.parseInt(optThreadsMinutes.substring(xPos+1, optThreadsMinutes.length()));
+            }
+            catch ( Exception e) {
+                alarm("Illegal value for '"+THREADSMINUTES+"': '"
+                        +optThreadsMinutes+"' - " +e.getMessage()
+                        +". Threads: " + THREADS +", minutes: " + MINUTES);
+            }
+            traceit("Threads: " + THREADS +", minutes: " + MINUTES);
+        }
     }
 
     /*
