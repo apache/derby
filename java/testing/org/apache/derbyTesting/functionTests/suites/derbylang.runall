@@ -9,7 +9,6 @@ lang/cursorerrors.sql
 lang/db2Compatibility.sql
 lang/ddlTableLockMode.sql
 lang/desc_index.sql
-lang/dropTable.sql
 lang/emptyStatistics.sql
 lang/fk_nonSPS.sql
 lang/holdCursorIJ.sql
