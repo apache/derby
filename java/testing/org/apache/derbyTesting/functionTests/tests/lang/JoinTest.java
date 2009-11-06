@@ -40,6 +40,7 @@ public class JoinTest extends BaseJDBCTestCase {
     private static final String NON_COMPARABLE = "42818";
     private static final String NO_COLUMNS = "42X81";
     private static final String TABLE_NAME_NOT_IN_SCOPE = "42X10";
+    private static final String VALUES_WITH_NULL = "42X07";
 
     public JoinTest(String name) {
         super(name);
@@ -47,6 +48,36 @@ public class JoinTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         return TestConfiguration.defaultSuite(JoinTest.class);
+    }
+
+    /**
+     * DERBY-4365 Test that the NULL values are caught in VALUES clause when it
+     * is part of a non-INSERT statement. Throw exception 42X07 for such a 
+     * case.
+     * 
+     */
+    public void testNullabilityInValues() throws SQLException {
+        Statement s = createStatement();
+        assertStatementError(
+        		VALUES_WITH_NULL, s, 
+        		"select a.* from (values (null)) a left outer join "+
+        		"(values ('a')) b on 1=1");
+        assertStatementError(
+        		VALUES_WITH_NULL, s, 
+        		"select a.* from (values (null)) a");
+
+        String[][] expectedResult = {
+            {"a"},
+            {"a"},
+            {"b"},
+            {"b"},
+            {null},
+            {null}
+        };
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+        		"select a.* from (values ('a'),('b'),(cast(null as char(1)))) "
+        		+ "a left outer join (values ('c'),('d')) b on 1=1"), 
+        		expectedResult);
     }
 
     /**
