@@ -258,6 +258,9 @@ public final class DropTableTest extends BaseJDBCTestCase {
         assertStatementError("42X01", st, " drop view vt1 restrict");
         assertStatementError("42X01", st, " drop view vt1 cascade");
         
+        st.executeUpdate( "drop view vvt1"); // Clean up.
+        st.executeUpdate( "drop view  vt1"); // Clean up.
+        st.executeUpdate( "drop table  t1"); // Clean up.
         st.close();
     }
     public void testDropTableIndexesDropped() throws SQLException{
@@ -327,6 +330,7 @@ public final class DropTableTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, expRS);
         
         st1.close();
+        st.executeUpdate("drop table T1"); // Clean up
         st.close();
         //pretend all of the above didn't happen
         getConnection().setAutoCommit(true);
