@@ -490,25 +490,22 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 	{
 		String url = jdbcurl;
 
-		if (driver == null || !driver.acceptsURL(url))
+		synchronized(this)
 		{
-			synchronized(this)
+			// The driver has either never been booted, or it has been
+			// shutdown by a 'jdbc:derby:;shutdown=true'
+			if (driver == null || !driver.acceptsURL(url))
 			{
-				// The driver has either never been booted, or it has been
-				// shutdown by a 'jdbc:derby:;shutdown=true'
-				if (driver == null || !driver.acceptsURL(url))
-				{
 
-					new org.apache.derby.jdbc.EmbeddedDriver();
+				new org.apache.derby.jdbc.EmbeddedDriver();
 
-					// If we know the driver, we loaded it.   Otherwise only
-					// work if DriverManager has already loaded it.
+				// If we know the driver, we loaded it.   Otherwise only
+				// work if DriverManager has already loaded it.
 
-					AutoloadedDriver	autoloadedDriver =
-						(AutoloadedDriver) DriverManager.getDriver(url);
-					driver = (InternalDriver) autoloadedDriver.getDriverModule();
-					// DriverManager will throw an exception if it cannot find the driver
-				}
+				AutoloadedDriver	autoloadedDriver =
+					(AutoloadedDriver) DriverManager.getDriver(url);
+				driver = (InternalDriver) autoloadedDriver.getDriverModule();
+				// DriverManager will throw an exception if it cannot find the driver
 			}
 		}
 		return driver;
