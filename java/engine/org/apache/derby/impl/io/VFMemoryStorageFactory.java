@@ -47,6 +47,13 @@ public class VFMemoryStorageFactory
     private static final Map DATABASES = new HashMap();
 
     /**
+     * Dummy store used to carry out frequent operations that don't
+     * require a "proper store", for instance getting the canonical name
+     * of the data store.
+     */
+    private static final DataStore DUMMY_STORE = new DataStore("::DUMMY::");
+
+    /**
      * Deletes the database if it exists.
      *
      * @param dbName the database name
@@ -114,10 +121,16 @@ public class VFMemoryStorageFactory
                 if (DATABASES.containsKey(canonicalName)) {
                     // Fetch the existing data store.
                     this.dbData = (DataStore)DATABASES.get(canonicalName);
-                } else {
+                } else if (uniqueName != null) {
                     // Create a new data store.
                     this.dbData = new DataStore(canonicalName);
                     DATABASES.put(canonicalName, dbData);
+                } else {
+                    // We have a database name, but no unique name.
+                    // Assume that the client only wants to do some
+                    // "book-keeping" operations, like getting the
+                    // canonical name.
+                    this.dbData = DUMMY_STORE;
                 }
             }
             // Specify the data directory and the temp directory.
@@ -128,17 +141,13 @@ public class VFMemoryStorageFactory
         // Handle cases where the database name is null, but a system home
         // directory has been specified.
         } else if (home != null) {
-            // Return the "system home directory" and create a temporary
-            // directory for it.
+            // Return the "system home directory" and specify a temporary
+            // directory for it (may never by used).
+            // As databases are created, the dummy will contain the
+            // directory names of the database locations, but the
+            // databases themselves will be stored in separate stores.
             final String absHome = new File(home).getCanonicalPath();
-            synchronized (DATABASES) {
-                dbData = (DataStore)DATABASES.get(absHome);
-                if (dbData == null) {
-                    // Create a new data store for the specified home.
-                    dbData = new DataStore(absHome);
-                    DATABASES.put(absHome, dbData);
-                }
-            }
+            dbData = DUMMY_STORE;
             dataDirectory = new VirtualFile(absHome, dbData);
             tempDir = new VirtualFile(getSeparator() + "tmp", dbData);
         }
