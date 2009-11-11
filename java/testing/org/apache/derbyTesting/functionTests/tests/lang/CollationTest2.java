@@ -737,6 +737,10 @@ public class CollationTest2 extends BaseJDBCTestCase
             ps.executeUpdate();
         }
 
+        s.execute(
+        		"CREATE TABLE EMPTY_TABLE (NAME VARCHAR(40))");
+        s.execute(
+        		"CREATE INDEX EMPTY_TABLE_IDX ON EMPTY_TABLE(NAME)");
         commit();
     }
 
@@ -1128,6 +1132,7 @@ public class CollationTest2 extends BaseJDBCTestCase
     private void dropTable() throws SQLException 
     {
         dropTable("CUSTOMER");
+        dropTable("EMPTY_TABLE");
     }
 
     private void runQueries(
@@ -1473,6 +1478,21 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         setUpTable();
 
+        //DERBY-4435
+        String emptyFileName =
+            (SupportFilesSetup.getReadWrite("empty_file.dat")).getPath();
+        s.execute("DELETE FROM EMPTY_TABLE");
+        //there is no data in EMPTY_TABLE so empty_file.dat will be empty 
+        //after export
+        doExportTable("APP", "EMPTY_TABLE", emptyFileName, null, null, "UTF-16");
+        commit();
+        // bulk insert with replace to empty table/one index from an empty file 
+        // import empty_file.dat into EMPTY_TABLE 
+        doImportTable(
+                "APP", "EMPTY_TABLE", emptyFileName, "|", "``", null, 1);
+
+        commit();
+
         // export CUSTOMER date to names.dat
         String fileName =
             (SupportFilesSetup.getReadWrite("names.dat")).getPath();
@@ -1480,7 +1500,6 @@ public class CollationTest2 extends BaseJDBCTestCase
         doExportTable("APP", "CUSTOMER", fileName, null, null, "UTF-16");
 
         commit();
-
 
         // bulk insert to empty table, no indexes without replace 
         // (last arg 0 = no replace).
