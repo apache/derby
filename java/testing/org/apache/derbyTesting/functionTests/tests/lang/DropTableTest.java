@@ -19,16 +19,12 @@ limitations under the License.
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLWarning;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -43,28 +39,17 @@ public final class DropTableTest extends BaseJDBCTestCase {
         super(name);
     }
     
-    ResultSet rs = null;
-    ResultSetMetaData rsmd;
-    SQLWarning sqlWarn = null;
-    PreparedStatement pSt;
-    CallableStatement cSt;
-    String [][] expRS;
-    String [] expColNames;
-    Statement st;
-
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("dropTable Test");
-        suite.addTest(TestConfiguration.defaultSuite(DropTableTest.class));
-        return suite;
+        return TestConfiguration.defaultSuite(DropTableTest.class);
     }
 
     public void testDropTableWithConstraints() throws Exception
     {
         //test table with different constraints
         
-        st = createStatement();
-        getConnection().setAutoCommit(false);
+        Statement st = createStatement();
+        setAutoCommit(false);
         
         // test simple table - all should work
         
@@ -139,14 +124,13 @@ public final class DropTableTest extends BaseJDBCTestCase {
         
         st.executeUpdate( "insert into t2 values(1)");
         st.executeUpdate( " drop table t2");
-        
-        st.close();
     }
+
     public void testDropTableWithView() throws SQLException{
         // test table with view
         
-        st = createStatement();
-        getConnection().setAutoCommit(false);
+        Statement st = createStatement();
+        setAutoCommit(false);
         
         st.executeUpdate( "create table t1(a int, b int)");
         st.executeUpdate( " create table t2(c int, d int)");
@@ -180,31 +164,28 @@ public final class DropTableTest extends BaseJDBCTestCase {
         assertStatementError("42X05", st, " select * from vvt1a");
         assertStatementError("42X05", st, " select * from vvvt1a");
         st.executeUpdate( " drop table t2");
-        
-        st.close();
     }
     public void testDropTableWithPreparedStatement() throws SQLException{
         // test table with prepared statement
         
-        st = createStatement();
-        getConnection().setAutoCommit(false);
+        Statement st = createStatement();
+        setAutoCommit(false);
         
         st.executeUpdate( "create table t1(a int)");
-        pSt = prepareStatement( "select * from t1");
+        PreparedStatement pSt = prepareStatement( "select * from t1");
         
         // this should work, statement will be invalidated and 
         // will fail when recompiled
         
         st.executeUpdate( "drop table t1");
         assertStatementError("42X05", pSt);
- 
-        st.close();
     }
+
     public void testDropTableWithTriggers() throws SQLException{
         // test table with triggers
         
-        st = createStatement();
-        getConnection().setAutoCommit(false);
+        Statement st = createStatement();
+        setAutoCommit(false);
         
         st.executeUpdate( "create table t1(a int)");
         st.executeUpdate( " create table t2(a int)");
@@ -238,15 +219,13 @@ public final class DropTableTest extends BaseJDBCTestCase {
         
         assertStatementError("42X05", st, "insert into t2 values(1)");
         st.executeUpdate( " drop table t2");
-        
-        st.close();
     }
     
     public void testDropTableDropView() throws SQLException{
         // test drop view
         
-        st = createStatement();
-        getConnection().setAutoCommit(false);
+        Statement st = createStatement();
+        setAutoCommit(false);
         
         st.executeUpdate( "create table t1(a int)");
         st.executeUpdate( " create view vt1 as select * from t1");
@@ -261,13 +240,13 @@ public final class DropTableTest extends BaseJDBCTestCase {
         st.executeUpdate( "drop view vvt1"); // Clean up.
         st.executeUpdate( "drop view  vt1"); // Clean up.
         st.executeUpdate( "drop table  t1"); // Clean up.
-        st.close();
     }
+
     public void testDropTableIndexesDropped() throws SQLException{
         // make sure that indexes are dropped for drop table
         
-        st = createStatement();
-        getConnection().setAutoCommit(false);
+        Statement st = createStatement();
+        setAutoCommit(false);
         
         st.executeUpdate( "create table t2(a int not null primary key)");
         st.executeUpdate(
@@ -296,8 +275,8 @@ public final class DropTableTest extends BaseJDBCTestCase {
             + "from (sys.sysconglomerates c), (sys.systables t) "
             + "where t.tableid = c.tableid and "
             + "t.tablename = 'REFT2'"), "1");
-        
-         getConnection().rollback();
+
+        rollback();
         
         // unsuccessful drop table should not affect open cursor 
         // beetle 4393
@@ -307,11 +286,12 @@ public final class DropTableTest extends BaseJDBCTestCase {
         st.executeUpdate( " insert into T1(i) values(1)");
         st.executeUpdate( " insert into T1(i) values(2)");
         
-        Statement st1 = getConnection().createStatement();
+        Statement st1 = createStatement();
         st1.setCursorName("X1");
         
         ResultSet rs1 = st1.executeQuery( "select i from t1 for update of c"); 
-        pSt = prepareStatement("update t1 set c = CHAR(i) where current of X1");
+        PreparedStatement pSt =
+            prepareStatement("update t1 set c = CHAR(i) where current of X1");
         
         assertStatementError("X0X95",st,"drop table T1");
         
@@ -319,11 +299,11 @@ public final class DropTableTest extends BaseJDBCTestCase {
         
         pSt.executeUpdate();
         
-        rs=st.executeQuery("select * from T1");
-        expColNames=new String[]{"I","C","D"};
+        ResultSet rs = st.executeQuery("select * from T1");
+        String[] expColNames = new String[]{"I","C","D"};
         JDBC.assertColumnNames(rs, expColNames);
         
-        expRS=new String[][]{
+        String[][] expRS = new String[][]{
             {"1","1",null},
             {"2",null,null}
         };
@@ -331,8 +311,8 @@ public final class DropTableTest extends BaseJDBCTestCase {
         
         st1.close();
         st.executeUpdate("drop table T1"); // Clean up
-        st.close();
+
         //pretend all of the above didn't happen
-        getConnection().setAutoCommit(true);
+        setAutoCommit(true);
     }
 }
