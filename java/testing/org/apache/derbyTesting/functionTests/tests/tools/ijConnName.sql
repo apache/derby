@@ -14,11 +14,12 @@
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
--- assumes the connections connOne, connTwo are set up already
+-- assumes the connection connOne is set up already
 -- and that connThree, connFour failed to be setup correctly (bad URLs)
 
 -- expect connOne to be active
 show connections;
+connect 'jdbc:derby:lemming;create=true' as connTwo;
 set connection connOne;
 values 1;
 set connection connTwo;

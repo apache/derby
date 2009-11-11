@@ -1,7 +1,6 @@
 CONNONE* - 	jdbc:derby:wombat
-CONNTWO - 	jdbc:derby:lemming
 * = current connection
-ij(CONNONE)> --
+ij> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -17,7 +16,7 @@ ij(CONNONE)> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
--- assumes the connections connOne, connTwo are set up already
+-- assumes the connection connOne is set up already
 -- 1)at the startup time, it will list all the connections
 -- 2)select will now display number of rows selected
 select count(*) from sys.systables where 1=0;
@@ -25,4 +24,4 @@ select count(*) from sys.systables where 1=0;
 -----------
 0          
 1 row selected
-ij(CONNONE)> 
+ij> 
