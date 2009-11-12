@@ -47,8 +47,27 @@ import org.apache.derbyTesting.junit.SupportFilesSetup;
 public class BasicInMemoryDbTest
         extends BaseJDBCTestCase {
 
+    /**
+     * Helper for dealing with memory databases. For now we use a single
+     * instance for all test classes / cases, as the tests are run single
+     * threaded.
+     */
+    private static final MemoryDbManager dbm =
+            MemoryDbManager.getSharedInstance();
+
     public BasicInMemoryDbTest(String name) {
         super(name);
+    }
+
+    /**
+     * Closes all opened statements and connections that are known, and also
+     * deletes all known in-memory databases.
+     *
+     * @throws Exception if something goes wrong
+     */
+    public void tearDown()
+            throws Exception {
+        dbm.cleanUp();
     }
 
     /**
@@ -57,8 +76,7 @@ public class BasicInMemoryDbTest
      */
     public void testFunctionalityPresent() {
         try {
-            getConnection(); // Make sure the driver is loaded (slight hack).
-            DriverManager.getConnection("jdbc:derby:memory:nonExistingDb");
+            dbm.getConnection("nonExistingDb");
         } catch (SQLException e) {
             // Expect a database not found exception.
             assertSQLState("XJ004", e);
@@ -84,15 +102,14 @@ public class BasicInMemoryDbTest
     public void testCreateBackupBootRestore()
             throws IOException, SQLException {
         // 1. Create the database with the in-memory protocol.
-        Connection memCon = DriverManager.getConnection(
-                "jdbc:derby:memory:newMemDb;create=true");
+        Connection memCon = dbm.createDatabase("newMemDb");
         // Make sure the database is newly created.
         assertNull(memCon.getWarnings());
-        Statement stmt = memCon.createStatement();
+        Statement stmt = dbm.createStatement(memCon);
         stmt.executeUpdate("create table toverify(" +
                 "id int, val1 varchar(10), val2 clob, primary key(id))");
-        PreparedStatement ps = memCon.prepareStatement("insert into toverify " +
-                "values (?,?,?)");
+        PreparedStatement ps = dbm.prepareStatement(memCon,
+                "insert into toverify values (?,?,?)");
         // The content to insert into the table.
         String[][] firstContent = new String[][] {
             {"1", "one", getString(1000, CharAlphabet.modernLatinLowercase())},
@@ -145,24 +162,21 @@ public class BasicInMemoryDbTest
         }
 
         // 5. Restore modified backup into memory.
-        memCon = DriverManager.getConnection("jdbc:derby:memory:newMemDb2" +
-                ";createFrom=" + dbPathBackedUp);
+        memCon = dbm.getConnection("newMemDb2;createFrom=" + dbPathBackedUp);
 
         // 6. Verify the new content, where the original in-memory database was
         //    backed up and the directory protocol was used to add one more row
         //    to the backed up database. Now we have restored the on-disk
         //    modified backup, again representing it as an in-memory database.
-        stmt = memCon.createStatement();
+        stmt = dbm.createStatement(memCon);
         rs = stmt.executeQuery("select * from toverify");
         String[][] secondContent = new String[4][3];
         System.arraycopy(firstContent, 0, secondContent, 0, 3);
         System.arraycopy(rowToAdd, 0, secondContent[3], 0, 3);
         JDBC.assertFullResultSet(rs, secondContent);
-        stmt.close();
-        memCon.close();
 
-        // The data will probably hang around in memory at this point.
-        // How to fix that?
+        // Delete the second in memory database.
+        dbm.dropDatabase("newMemDb2");
     }
 
     /**
@@ -172,7 +186,7 @@ public class BasicInMemoryDbTest
      */
     public void testShutdown()
             throws SQLException {
-        DriverManager.getConnection("jdbc:derby:memory:/tmp/myDB;create=true");
+        dbm.createDatabase("/tmp/myDB");
         try {
             DriverManager.getConnection(
                     "jdbc:derby:memory:/tmp/myDB;shutdown=true");
@@ -215,9 +229,8 @@ public class BasicInMemoryDbTest
             throws SQLException {
         final String dbName = "BSDDSSP";
         // Connect to the in-memory database and create a table.
-        Connection con1 = DriverManager.getConnection(
-                "jdbc:derby:memory:" + dbName + ";create=true");
-        Statement stmt1 = con1.createStatement();
+        Connection con1 = dbm.createDatabase(dbName);
+        Statement stmt1 = dbm.createStatement(con1);
         stmt1.execute("create table t (text varchar(255))");
         stmt1.execute("insert into t values ('Inserted into in-memory db')");
         // Connect to the on-disk database. The table we created in the
@@ -233,7 +246,126 @@ public class BasicInMemoryDbTest
             assertSQLState("42X05", sqle);
         }
         con2.close();
-        con1.close();
+    }
+
+    /**
+     * Test deletion of an in-memory database:
+     *  - create database
+     *  - delete database
+     *  - try to connection to database, should fail
+     *  - recreate and delete again
+     *
+     * @throws SQLException if something else goes wrong
+     */
+    // DISABLED because the feature isn't implemented yet (see DERBY-4428)
+    public void DISABLED_testDelete()
+            throws SQLException {
+            Connection conCreate = DriverManager.getConnection(
+                    "jdbc:derby:memory:deleteDbSimple;create=true");
+            Statement stmt = dbm.createStatement(conCreate);
+            JDBC.assertDrainResults(stmt.executeQuery(
+                    "select * from sys.systables"));
+            // Delete the database.
+            try {
+                DriverManager.getConnection(
+                    "jdbc:derby:memory:deleteDbSimple;drop=true");
+                fail("Dropping database should have raised exception.");
+            } catch (SQLException sqle) {
+                assertSQLState("08006", sqle);
+            }
+            // Try to connect to the database again, without creation.
+            try {
+                DriverManager.getConnection(
+                    "jdbc:derby:memory:deleteDbSimple;create=false");
+                fail("Database should not exist after deletion.");
+            } catch (SQLException sqle) {
+                assertSQLState("XJ004", sqle);
+            }
+
+            // Recreate and delete again.
+            conCreate = DriverManager.getConnection(
+                    "jdbc:derby:memory:deleteDbSimple;create=true");
+            stmt = dbm.createStatement(conCreate);
+            JDBC.assertDrainResults(stmt.executeQuery(
+                    "select * from sys.systables"));
+            // Delete the database.
+            try {
+                DriverManager.getConnection(
+                    "jdbc:derby:memory:deleteDbSimple;delete=true");
+                fail("Dropping database should have raised exception.");
+            } catch (SQLException sqle) {
+                assertSQLState("08006", sqle);
+            }
+    }
+
+    /**
+     * Deletes the database when in use by a different connection.
+     * <p>
+     * The expected outcome is that the first connection will be closed when
+     * the second one deletes the database.
+     *
+     * @throws IOException if something goes wrong
+     * @throws SQLException if something goes wrong
+     */
+    // DISABLED because the feature isn't implemented yet (see DERBY-4428)
+    public void DISABLED_testDeleteWhenInUse()
+            throws IOException, SQLException {
+        Connection con = DriverManager.getConnection(
+                "jdbc:derby:memory:deleteDb;create=true");
+        PreparedStatement ps = dbm.prepareStatement(con,
+                "select * from sys.systables");
+        JDBC.assertDrainResults(ps.executeQuery());
+        // Delete the database.
+        try {
+            DriverManager.getConnection(
+                "jdbc:derby:memory:deleteDb;drop=true");
+            fail("Dropping database should have raised exception.");
+        } catch (SQLException sqle) {
+            assertSQLState("08006", sqle);
+        }
+        // Execute query from first connection again.
+        assertTrue(con.isClosed());
+        try {
+            JDBC.assertDrainResults(ps.executeQuery());
+            fail("Database has been dropped, query shouldn't work.");
+        } catch (SQLException sqle) {
+            // Expect no current connection.
+            assertSQLState("08003", sqle);
+        }
+    }
+
+    /**
+     * Shuts down the database when in use by a different connection.
+     * <p>
+     * The expected outcome is that the first connection will be closed when
+     * the second one shuts down the database.
+     *
+     * @throws IOException if something goes wrong
+     * @throws SQLException if something goes wrong
+     */
+    public void testShutdownWhenInUse()
+            throws IOException, SQLException {
+        Connection con = dbm.createDatabase("deleteDb");
+        PreparedStatement ps = dbm.prepareStatement(con,
+                "select * from sys.systables");
+        JDBC.assertDrainResults(ps.executeQuery());
+        // Delete the database.
+        try {
+            DriverManager.getConnection(
+                "jdbc:derby:memory:deleteDb;shutdown=true");
+            fail("Database shutdown should have raised exception.");
+        } catch (SQLException sqle) {
+            assertSQLState("08006", sqle);
+        }
+        // Execute query from first connection again.
+        assertTrue(con.isClosed());
+        try {
+            JDBC.assertDrainResults(ps.executeQuery());
+            fail("Database has been shut down, query shouldn't work.");
+        } catch (SQLException sqle) {
+            // Expect no current connection.
+            assertSQLState("08003", sqle);
+        }
     }
 
     public static Test suite() {

@@ -77,6 +77,8 @@ public class MogTest extends BaseJDBCTestCase {
           } catch (SQLException sqle) {
               // Ignore exceptions during close.
           }
+          // DISABLED because the feature isn't implemented yet (see DERBY-4428)
+          //dropInMemoryDb();
       }
       println("duration-in-memory: " + (System.currentTimeMillis() - start));
   }
@@ -183,20 +185,46 @@ public class MogTest extends BaseJDBCTestCase {
         sqle.initCause(e);
         throw sqle;
     }
-    StringBuffer sb = new StringBuffer("jdbc:derby:");
-    if (usingEmbedded()) {
-        sb.append("memory:");
-    } else {
-        // This is a hack. Change this when proper support for the in-memory
-        // back end has been implemented.
-        sb.append("//");
-        sb.append(TestConfiguration.getCurrent().getHostName());
-        sb.append(':');
-        sb.append(TestConfiguration.getCurrent().getPort());
-        sb.append('/');
-        sb.append("memory:");
-    }
-    sb.append("MogTestDb;create=true");
+    StringBuffer sb = constructUrl().append(";create=true");
     return DriverManager.getConnection(sb.toString());
   }
+
+  /**
+   * Drops the database used by the test.
+   *
+   * @throws SQLException if dropping the database fails
+   */
+    private void dropInMemoryDb()
+            throws SQLException {
+        StringBuffer sb = constructUrl().append(";drop=true");
+        try {
+            DriverManager.getConnection(sb.toString());
+            fail("Dropping database should have raised exception.");
+        } catch (SQLException sqle) {
+            assertSQLState("08006", sqle);
+        }
+    }
+
+    /**
+     * Constructs the default URL for the in-memory test database.
+     *
+     * @return A database URL (without any connection attributes).
+     */
+    private StringBuffer constructUrl() {
+        StringBuffer sb = new StringBuffer("jdbc:derby:");
+        if (usingEmbedded()) {
+            sb.append("memory:");
+        } else {
+            // This is a hack. Change this when proper support for the in-memory
+            // back end has been implemented.
+            sb.append("//");
+            sb.append(TestConfiguration.getCurrent().getHostName());
+            sb.append(':');
+            sb.append(TestConfiguration.getCurrent().getPort());
+            sb.append('/');
+            sb.append("memory:");
+        }
+        sb.append("MogTestDb");
+        return sb;
+    }
 }
