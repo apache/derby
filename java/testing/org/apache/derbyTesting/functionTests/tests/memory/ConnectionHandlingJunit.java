@@ -20,6 +20,7 @@
  */
 package org.apache.derbyTesting.functionTests.tests.memory;
 
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -36,7 +37,29 @@ import org.apache.derbyTesting.junit.JDBC;
  *  see for example DERBY-2480.
  */
 public class ConnectionHandlingJunit extends BaseJDBCTestCase {
-    
+
+    /**
+     * Returns a log writer that discards all the data written to it.
+     *
+     * @return Writer discarding the log.
+     */
+    public static Writer getLogDiscarder() {
+        // Writer discarding all data written to it.
+        return new Writer() {
+            public void write(char[] cbuf, int off, int len) {
+                // Do nothing.
+            }
+
+            public void flush() {
+                // Do nothing.
+            }
+
+            public void close() {
+                // Do nothing.
+            }
+        };
+    }
+
     /** Creates a new instance of this test class 
      *  @param name The name of this test instance; may determine which test
      *         fixture to run.
@@ -71,6 +94,8 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
 
             TestCase nonExistentDbTest = new ConnectionHandlingJunit(
                     "driverMgrTestConnectionsToNonexistentDb");
+            TestCase nonExistentDbTestInMem = new ConnectionHandlingJunit(
+                    "driverMgrTestConnectionsToNonexistentDbInMemory");
             
             /* run "driverMgrTestConnectionsToNonexistentDb" in embedded mode only
              * by default, since it is not very useful to continue running in
@@ -78,6 +103,7 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
              * resources are <i>almost</i> exhausted from the embedded test.
              */
             suite.addTest(nonExistentDbTest);
+            suite.addTest(nonExistentDbTestInMem);
             // to run the test in client/server mode, comment the above line,
             // uncomment the next and recompile.
             //suite.addTest(TestConfiguration.clientServerDecorator(nonExistentDbTest));
@@ -116,10 +142,18 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
      *         examined using assertions.
      */
     public void driverMgrTestConnectionsToNonexistentDb() throws SQLException {
-
-        Connection myInvalidConn = null;
-        
         String url = getTestConfiguration().getJDBCUrl("nonexistentDatabase");
+        driverMgrConnectionInitiator(url, false);
+    }
+
+    public void driverMgrTestConnectionsToNonexistentDbInMemory()
+            throws SQLException {
+        driverMgrConnectionInitiator("jdbc:derby:memory:noDbHere", true);
+    }
+
+    private void driverMgrConnectionInitiator(String url, boolean appendId)
+            throws SQLException {
+        Connection myInvalidConn = null;
         // Not using the regular helper methods in super class because
         // we don't want to actually create a database, or connect to an
         // existing one (current helper classes add ";create=true" if the DB
@@ -142,7 +176,8 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
                 try {
                     // We are expecting an exception here because we are trying to 
                     // connect to a DB that does not exist.
-                    myInvalidConn = DriverManager.getConnection(url);
+                    myInvalidConn = DriverManager.getConnection(
+                            appendId ? url + count : url);
                     // The following may happen because of changes to helper methods
                     // such as TestConfiguration.getJDBCUrl(dbName).
                     fail("Got connection to a DB that should not exist");
@@ -211,6 +246,13 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
      * @throws SQLException if an unexpected exception is thrown
      */
     private void loadDriver(String url) throws SQLException {
+        // Attempt to make Derby discard the log, as a log message will be
+        // written for every failed connection attempt.
+        // To take effect, the property must be set before the driver is
+        // loaded, which means this test should be run separately.
+        setSystemProperty("derby.stream.error.method",
+                "org.apache.derbyTesting.functionTests.tests.memory." +
+                "ConnectionHandlingJunit.getLogDiscarder");
         try {
             DriverManager.getDriver(url);
         } catch (SQLException e) {
