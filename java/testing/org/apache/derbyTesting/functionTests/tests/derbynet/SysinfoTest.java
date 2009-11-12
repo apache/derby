@@ -45,7 +45,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class SysinfoTest extends BaseJDBCTestCase {
 
     private static String TARGET_POLICY_FILE_NAME="sysinfo.policy";
-    private String OUTPUT;
+    private String [] OUTPUT;
 
     /**
      * Set to true before adding a test to the suite to add some extra properties.
@@ -62,41 +62,41 @@ public class SysinfoTest extends BaseJDBCTestCase {
         /**
          * Output from sysinfo without the extra properties. 
          */
-        String OUTPUT1 = 
-            "--------- Derby Network Server Information --------\n" + 
-            "derby.drda.maxThreads=0\n" + 
-            "derby.drda.sslMode=off\n" + 
-            "derby.drda.keepAlive=true\n" + 
-            "derby.drda.minThreads=0\n" + 
-            "derby.drda.portNumber=1527\n" + 
-            "derby.drda.logConnections=false\n" + 
-            "derby.drda.timeSlice=0\n" + 
-            "derby.drda.startNetworkServer=false\n" + 
-            "derby.drda.traceAll=false\n" + 
-            "--------- Derby Information --------\n" + 
-            "------------------------------------------------------\n" + 
-            "----------------- Locale Information -----------------\n" + 
-            "------------------------------------------------------";
+        String [] OUTPUT1 = {
+            "--------- Derby Network Server Information --------" , 
+            "derby.drda.maxThreads=0" ,
+            "derby.drda.sslMode=off" , 
+            "derby.drda.keepAlive=true" , 
+            "derby.drda.minThreads=0" , 
+            "derby.drda.portNumber=1527" , 
+            "derby.drda.logConnections=false" ,
+            "derby.drda.timeSlice=0" , 
+            "derby.drda.startNetworkServer=false" , 
+            "derby.drda.traceAll=false" ,
+            "--------- Derby Information --------" , 
+            "------------------------------------------------------" , 
+            "----------------- Locale Information -----------------" , 
+            "------------------------------------------------------"};
 
         /**
          * Output by sysinfo with the extra properties.
          */
-        String OUTPUT2 = 
-            "--------- Derby Network Server Information --------\n" + 
-            "derby.drda.securityMechanism=USER_ONLY_SECURITY\n" + 
-            "derby.drda.maxThreads=0\n" + 
-            "derby.drda.sslMode=off\n" + 
-            "derby.drda.keepAlive=true\n" + 
-            "derby.drda.minThreads=0\n" + 
-            "derby.drda.portNumber=1527\n" + 
-            "derby.drda.logConnections=false\n" + 
-            "derby.drda.timeSlice=0\n" + 
-            "derby.drda.startNetworkServer=false\n" + 
-            "derby.drda.traceAll=false\n" + 
-            "--------- Derby Information --------\n" + 
-            "------------------------------------------------------\n" + 
-            "----------------- Locale Information -----------------\n" + 
-            "------------------------------------------------------";
+        String [] OUTPUT2 = {
+            "--------- Derby Network Server Information --------" , 
+            "derby.drda.securityMechanism=USER_ONLY_SECURITY" , 
+            "derby.drda.maxThreads=0" ,
+            "derby.drda.sslMode=off" ,
+            "derby.drda.keepAlive=true" , 
+            "derby.drda.minThreads=0" , 
+            "derby.drda.portNumber=1527" , 
+            "derby.drda.logConnections=false" ,
+            "derby.drda.timeSlice=0" ,
+            "derby.drda.startNetworkServer=false" , 
+            "derby.drda.traceAll=false" ,
+            "--------- Derby Information --------" , 
+            "------------------------------------------------------" , 
+            "----------------- Locale Information -----------------" , 
+            "------------------------------------------------------"};
 
         if (useProperties)
             OUTPUT = OUTPUT2;
@@ -203,7 +203,8 @@ public class SysinfoTest extends BaseJDBCTestCase {
      */	
     public void testSysinfo() throws Exception {
         String[] SysInfoCmd = 
-            new String[] {"org.apache.derby.drda.NetworkServerControl", "sysinfo"};
+            new String[] {"org.apache.derby.drda.NetworkServerControl", "sysinfo",
+            "-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
 
         Process p = execJavaCmd(SysInfoCmd);
         String s = readProcessOutput(p);
@@ -211,8 +212,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
         s = sed(s);
 
         print("testSysinfo", s);
-        assertEquals(OUTPUT,s);
-
+        assertMatchingStringExists(s);
     }
 
     /**
@@ -223,11 +223,11 @@ public class SysinfoTest extends BaseJDBCTestCase {
     public void testSysinfoMethod() throws Exception {	
 
         String s = NetworkServerTestSetup.
-        getNetworkServerControlDefault().getSysinfo();
+        getNetworkServerControl(TestConfiguration.getCurrent().getPort()).getSysinfo();
         s = sed(s);
 
         print("testSysinfoMethod", s);
-        assertEquals(OUTPUT, s);
+        assertMatchingStringExists(s);
     }		
 
     /**
@@ -239,13 +239,14 @@ public class SysinfoTest extends BaseJDBCTestCase {
 
         String[] SysInfoLocaleCmd = 
             new String[] {"-Duser.language=de", "-Duser.country=DE", 
-                "org.apache.derby.drda.NetworkServerControl", "sysinfo"};
+                "org.apache.derby.drda.NetworkServerControl", "sysinfo",
+                "-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         Process p = execJavaCmd(SysInfoLocaleCmd);
         String s = readProcessOutput(p);
         s = sed(s);
 
         print("testSysinfoLocale", s);
-        assertEquals(OUTPUT, s);
+        assertMatchingStringExists(s);
     }
 
     /**
@@ -261,7 +262,7 @@ public class SysinfoTest extends BaseJDBCTestCase {
          * asserting that output is correct.
          */
         String[] sed = {"Version", "version", "Java", "OS", 
-                "[0-9*].[0-9*].[0-9*]","JRE - JDBC","derby.drda.traceDirectory",
+                "[0-9*]\\.[0-9*]\\.[0-9*]","JRE - JDBC","derby.drda.traceDirectory",
                 "Unable to access Protection Domain","listing properties",
                 "Current Locale",           //Remove these because locale info is
                 "Found support for locale:" //not printed when running from jars..
@@ -312,5 +313,34 @@ public class SysinfoTest extends BaseJDBCTestCase {
             // class, it ok to ignore this.
         }
         return url.getPath();
+    }
+    
+    private void assertMatchingStringExists(String actualOutput) {
+        String delimiter = "\n";
+        String [] actualOutputArray = actualOutput.split(delimiter);
+        int lineCount = actualOutputArray.length;
+        assertEquals(OUTPUT.length, lineCount);
+        for (int i=0 ; i<lineCount ; i++)
+        {
+            String fullExpOutput="";
+            for (int j=0 ; j < OUTPUT.length; j++) {
+                fullExpOutput=fullExpOutput + OUTPUT[j] + "\n";
+            }
+            String ns = actualOutputArray[i];
+            assertTrue("Output string: " + ns + 
+                "\ndoesn't match any of the expected strings: \n" + 
+                fullExpOutput,
+                searchMatchingString(ns));
+        }
+    }
+        
+    private boolean searchMatchingString(String substring){
+        for (int i=0; i<OUTPUT.length;i++)
+        {
+            if (!substring.equals(OUTPUT[i]))
+                continue;
+            else return true;
+        }
+        return false;
     }
 }
