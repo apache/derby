@@ -949,4 +949,22 @@ public final class InsertNode extends DMLModStatementNode
 		}
 	}
 	
+	/**
+	 * Accept the visitor for all visitable children of this node.
+	 * 
+	 * @param v the visitor
+	 *
+	 * @exception StandardException on error
+	 */
+	void acceptChildren(Visitor v)
+		throws StandardException
+	{
+		super.acceptChildren(v);
+
+		if (targetColumnList != null)
+		{
+			targetColumnList.accept(v);
+		}
+	}
+
 } // end of class InsertNode

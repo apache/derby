@@ -42,6 +42,8 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.Dependent;
@@ -1992,6 +1994,25 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			}
 		}
 	}
+
+	/**
+	 * Accept the visitor for all visitable children of this node.
+	 * 
+	 * @param v the visitor
+	 *
+	 * @exception StandardException on error
+	 */
+	void acceptChildren(Visitor v)
+		throws StandardException
+	{
+		super.acceptChildren(v);
+
+		if (targetTableName != null)
+		{
+			targetTableName.accept(v);
+		}
+	}
+
 }
 
 
