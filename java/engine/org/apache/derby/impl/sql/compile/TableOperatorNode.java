@@ -87,6 +87,23 @@ abstract class TableOperatorNode extends FromTable
 	}
 
 	/**
+	 * DERBY-4365
+	 * Bind untyped nulls to the types in the given ResultColumnList.
+	 * This is used for binding the nulls in row constructors and
+	 * table constructors.  
+	 *
+	 * @param rcl	The ResultColumnList with the types to bind nulls to
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void bindUntypedNullsToResultColumns(ResultColumnList rcl)
+	throws StandardException
+	{
+		leftResultSet.bindUntypedNullsToResultColumns(rcl);
+		rightResultSet.bindUntypedNullsToResultColumns(rcl);
+	}
+
+	/**
 	 * @see Optimizable#modifyAccessPath
 	 *
 	 * @exception StandardException		Thrown on error

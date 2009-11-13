@@ -34,12 +34,44 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  * Test cases for JOINs.
  */
 public class JoinTest extends BaseJDBCTestCase {
+    private static final String VALUES_WITH_NULL = "42X07";
+
     public JoinTest(String name) {
         super(name);
     }
 
     public static Test suite() {
         return TestConfiguration.defaultSuite(JoinTest.class);
+    }
+
+    /**
+     * DERBY-4365 Test that the NULL values are caught in VALUES clause when it
+     * is part of a non-INSERT statement. Throw exception 42X07 for such a 
+     * case.
+     * 
+     */
+    public void testNullabilityInValues() throws SQLException {
+        Statement s = createStatement();
+        assertStatementError(
+        		VALUES_WITH_NULL, s, 
+        		"select a.* from (values (null)) a left outer join "+
+        		"(values ('a')) b on 1=1");
+        assertStatementError(
+        		VALUES_WITH_NULL, s, 
+        		"select a.* from (values (null)) a");
+
+        String[][] expectedResult = {
+            {"a"},
+            {"a"},
+            {"b"},
+            {"b"},
+            {null},
+            {null}
+        };
+        JDBC.assertUnorderedResultSet(s.executeQuery(
+        		"select a.* from (values ('a'),('b'),(cast(null as char(1)))) "
+        		+ "a left outer join (values ('c'),('d')) b on 1=1"), 
+        		expectedResult);
     }
 
     /**
