@@ -14,10 +14,8 @@ ij> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
-
 -- This test will cover SHOW TABLES, SHOW SCHEMAS, etc.
 -- and the DESCRIBE command.
-
 -- first, set schema to sys and demonstrate that we can see the system tables.
 SET SCHEMA SYS;
 0 rows inserted/updated/deleted
@@ -105,10 +103,20 @@ ij> SHOW TABLES IN APP;
 TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
 ------------------------------------------------------------------------
 APP                 |T1                            |                    
+ij> SHOW TABLES IN app;
+TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
+------------------------------------------------------------------------
+APP                 |T1                            |                    
 ij> -- 'describe t1' will give error, as not in current schema
 DESCRIBE t1;
 IJ ERROR: No table exists with the name T1
 ij> DESCRIBE APP.t1;
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+I                   |INTEGER  |0   |10  |10    |AUTOINCRE&|NULL      |NO      
+D                   |DECIMAL  |2   |10  |5     |NULL      |NULL      |YES     
+TEST                |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
+ij> DESCRIBE app.t1;
 COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
 ------------------------------------------------------------------------------
 I                   |INTEGER  |0   |10  |10    |AUTOINCRE&|NULL      |NO      

@@ -14,10 +14,8 @@
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
-
 -- This test will cover SHOW TABLES, SHOW SCHEMAS, etc.
 -- and the DESCRIBE command.
-
 -- first, set schema to sys and demonstrate that we can see the system tables.
 SET SCHEMA SYS;
 SHOW TABLES;
@@ -46,10 +44,12 @@ EXTERNAL NAME 'a.b.c.d.e.f';
 -- first display all tables, then display tables in one schema
 SHOW TABLES;
 SHOW TABLES IN APP;
+SHOW TABLES IN app;
 
 -- 'describe t1' will give error, as not in current schema
 DESCRIBE t1;
 DESCRIBE APP.t1;
+DESCRIBE app.t1;
 DESCRIBE v1;
 
 SHOW SCHEMAS;

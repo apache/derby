@@ -1809,8 +1809,8 @@ throws SQLException
 }
 {
 	<DESCRIBE>
-	( ( i=identifier() <PERIOD> i2=identifier() )
-	| i2=identifier()
+	( ( i=caIdentifier() <PERIOD> i2=caIdentifier() )
+	| i2=caIdentifier()
 	| s=<STRING>
 	)
 	{
@@ -1947,7 +1947,7 @@ throws SQLException
 		return showConnectionsMethod(false);
 	}
 |   <SHOW> (t=<TABLES> | v=<VIEWS> | <SYNONYMS> | <ALIASES>)
-		[ <IN> schema=identifier() ]
+		[ <IN> schema=caIdentifier() ]
 	{
 		if(t!=null) {
 		    types = new String[] { "TABLE", "SYSTEM TABLE" };
@@ -1959,8 +1959,8 @@ throws SQLException
 		return showTables(schema, types);
 	}
 |	<SHOW> <INDEXES> 
-		[ (<IN> schema=identifier()) |
-		  (<FROM> tblname=identifier() [ <PERIOD> str=identifier() ] ) ]
+		[ (<IN> schema=caIdentifier()) |
+		  (<FROM> tblname=caIdentifier() [ <PERIOD> str=caIdentifier() ] ) ]
 	{
 		if(str != null) {
 			// if absolute table reference given
@@ -1976,12 +1976,12 @@ throws SQLException
 		return showIndexes(schema,tblname);
 	}
 |	<SHOW> <PROCEDURES>
-		[ <IN> schema=identifier() ]
+		[ <IN> schema=caIdentifier() ]
 	{
 		return showProcedures(schema);
 	}
 |	<SHOW> <FUNCTIONS>
-		[ <IN> schema=identifier() ]
+		[ <IN> schema=caIdentifier() ]
 	{
 		return showFunctions(schema);
 	}
@@ -3072,6 +3072,33 @@ identifier() :
 		// ij doesn't recognize any use of delimited identifiers in its syntax.
 		return (t.image.toUpperCase(Locale.ENGLISH));
 	}
+}
+
+/**
+    A case/connection respectful identifier.
+
+    Like an ordinary identifier(), but require a connection in order
+    to extract the case policy from database meta data.
+*/
+String
+caIdentifier() throws SQLException :
+{
+    Token t;
+}
+{
+    t=<IDENTIFIER>
+    {
+        haveConnection();
+        DatabaseMetaData dbmd = theConnection.getMetaData();
+
+        String identifier = t.image;
+        if (dbmd.storesLowerCaseIdentifiers())
+            identifier = identifier.toLowerCase(Locale.ENGLISH);
+        else if (dbmd.storesUpperCaseIdentifiers())
+            identifier = identifier.toUpperCase(Locale.ENGLISH);
+
+        return identifier;
+    }
 }
 
 int
