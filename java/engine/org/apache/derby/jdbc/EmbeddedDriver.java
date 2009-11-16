@@ -96,8 +96,6 @@ public class EmbeddedDriver  implements Driver {
 		EmbeddedDriver.boot();
 	}
 
-	private	AutoloadedDriver	_autoloadedDriver;
-	
 	// Boot from the constructor as well to ensure that
 	// Class.forName(...).newInstance() reboots Derby 
 	// after a shutdown inside the same JVM.
