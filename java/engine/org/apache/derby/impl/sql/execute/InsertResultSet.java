@@ -2162,6 +2162,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		ExecRow				baseRows = null;
 		ColumnOrdering[][]	ordering = new ColumnOrdering[numIndexes][];
 		int					numColumns = td.getNumberOfColumns();
+        collation       = new int[numIndexes][];
 
 		// Create the BitSet for mapping the partial row to the full row
 		FormatableBitSet bitSet = new FormatableBitSet(numColumns + 1);
@@ -2341,6 +2342,10 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			properties.put("nKeyFields", Integer.toString(indexRowLength));
 
 			indexCC.close();
+			
+            collation[index] = 
+                constants.irgs[index].getColumnCollationIds(
+                    td.getColumnDescriptorList());
 
 			// We can finally drain the sorter and rebuild the index
 			// Populate the index.
