@@ -176,7 +176,7 @@ public class DropWhileConnectingTest
          *
          * @param id worker thread id, must be in the range [0, threadCount>
          * @param accessCount number of successful accesses made to the db
-         * @param SQL
+         * @param error error to report
          */
         public synchronized void reportError(int id, int accessCount,
                                              Throwable error) {
