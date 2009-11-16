@@ -986,8 +986,8 @@ public class BinaryRelationalOperatorNode
      * See if the node always evaluates to true or false, and return a Boolean
      * constant node if it does.
      *
-     * @return a Boolean constant if the result of the operator is known, or
-     * the operator node otherwise
+     * @return a node representing a Boolean constant if the result of the
+     * operator is known; otherwise, this operator node
      */
     ValueNode evaluateConstantExpressions() throws StandardException {
         if (leftOperand instanceof ConstantNode &&
