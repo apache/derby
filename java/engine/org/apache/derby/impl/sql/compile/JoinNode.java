@@ -1957,6 +1957,11 @@ public class JoinNode extends TableOperatorNode
 		{
 			usingClause = (ResultColumnList)usingClause.accept(v);
 		}
+
+		if (joinPredicates != null)
+		{
+			joinPredicates = (PredicateList) joinPredicates.accept(v);
+		}
 	}
 
 	// This method returns the table references in Join node, and this may be

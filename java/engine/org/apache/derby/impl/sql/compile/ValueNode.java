@@ -461,6 +461,22 @@ public abstract class ValueNode extends QueryTreeNode
 		return this;
 	}
 
+    /**
+     * If this node is known to always evaluate to the same value, return a
+     * node that represents that known value as a constant. Typically used to
+     * transform operators with constant operands into constants.
+     *
+     * @return a constant representing the value to which this node is
+     * guaranteed to evaluate, or {@code this} if the value is not known
+     * @throws StandardException if an error occurs during evaluation
+     * @see ConstantExpressionVisitor
+     */
+    ValueNode evaluateConstantExpressions() throws StandardException {
+        // We normally don't know what the node evaluates to up front, so
+        // don't do anything in the default implementation.
+        return this;
+    }
+
 	/**
 	 * Eliminate NotNodes in the current query block.  We traverse the tree, 
 	 * inverting ANDs and ORs and eliminating NOTs as we go.  We stop at 

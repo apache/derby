@@ -252,7 +252,8 @@ X
 1          
 ij> -- ... and false and ... should get resolved to false
 select x from s where 2147483647 + 10 = 2 and (1=2);
-ERROR 22003: The resulting value is outside the range for the data type INTEGER.
+X          
+-----------
 ij> select x from s where (1=2) and 2147483647 + 10 = 2;
 X          
 -----------

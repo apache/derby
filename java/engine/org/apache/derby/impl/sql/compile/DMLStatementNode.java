@@ -318,6 +318,16 @@ abstract class DMLStatementNode extends StatementNode
 		resultSet = resultSet.preprocess(getCompilerContext().getNumTables(),
 										 null,
 										 (FromList) null);
+
+		// Evaluate expressions with constant operands here to simplify the
+		// query tree and to reduce the runtime cost. Do it before optimize()
+		// since the simpler tree may have more accurate information for
+		// the optimizer. (Example: The selectivity for 1=1 is estimated to
+		// 0.1, whereas the actual selectivity is 1.0. In this step, 1=1 will
+		// be rewritten to TRUE, which is known by the optimizer to have
+		// selectivity 1.0.)
+		accept(new ConstantExpressionVisitor());
+
 		resultSet = resultSet.optimize(getDataDictionary(), null, 1.0d);
 
 		resultSet = resultSet.modifyAccessPaths();

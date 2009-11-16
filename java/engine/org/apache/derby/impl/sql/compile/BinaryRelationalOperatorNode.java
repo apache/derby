@@ -981,6 +981,56 @@ public class BinaryRelationalOperatorNode
 	public String getReceiverInterfaceName() {
 	    return ClassName.DataValueDescriptor;
 	}
+
+    /**
+     * See if the node always evaluates to true or false, and return a Boolean
+     * constant node if it does.
+     *
+     * @return a Boolean constant if the result of the operator is known, or
+     * the operator node otherwise
+     */
+    ValueNode evaluateConstantExpressions() throws StandardException {
+        if (leftOperand instanceof ConstantNode &&
+                rightOperand instanceof ConstantNode) {
+            ConstantNode leftOp = (ConstantNode) leftOperand;
+            ConstantNode rightOp = (ConstantNode) rightOperand;
+            DataValueDescriptor leftVal = leftOp.getValue();
+            DataValueDescriptor rightVal = rightOp.getValue();
+
+            if (!leftVal.isNull() && !rightVal.isNull()) {
+                int comp = leftVal.compare(rightVal);
+                switch (operatorType) {
+                    case EQUALS_RELOP:
+                        return newBool(comp == 0);
+                    case NOT_EQUALS_RELOP:
+                        return newBool(comp != 0);
+                    case GREATER_THAN_RELOP:
+                        return newBool(comp > 0);
+                    case GREATER_EQUALS_RELOP:
+                        return newBool(comp >= 0);
+                    case LESS_THAN_RELOP:
+                        return newBool(comp < 0);
+                    case LESS_EQUALS_RELOP:
+                        return newBool(comp <= 0);
+                }
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     * Create a Boolean constant node with a specified value.
+     *
+     * @param b the value of the constant
+     * @return a node representing a Boolean constant
+     */
+    private ValueNode newBool(boolean b) throws StandardException {
+        return (ValueNode) getNodeFactory().getNode(
+                C_NodeTypes.BOOLEAN_CONSTANT_NODE,
+                Boolean.valueOf(b),
+                getContextManager());
+    }
 	
 	/**
 	 * Returns the negation of this operator; negation of Equals is NotEquals.

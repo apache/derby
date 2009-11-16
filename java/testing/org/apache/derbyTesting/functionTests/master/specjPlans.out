@@ -908,41 +908,28 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (2):
+Table Scan ResultSet for M_LARGEORDER at read committed isolation level using instantaneous share row locking chosen by the optimizer
 Number of opens = 1
 Rows seen = 0
 Rows filtered = 0
-restriction = false
-projection = false
+Fetch Size = 16
 	constructor time (milliseconds) = 0
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-	restriction time (milliseconds) = 0
-	projection time (milliseconds) = 0
-Source result set:
-	Table Scan ResultSet for M_LARGEORDER at read committed isolation level using instantaneous share row locking chosen by the optimizer
-	Number of opens = 1
-	Rows seen = 0
-	Rows filtered = 0
-	Fetch Size = 16
-		constructor time (milliseconds) = 0
-		open time (milliseconds) = 0
-		next time (milliseconds) = 0
-		close time (milliseconds) = 0
-	scan information:
-		Bit set of columns fetched=All
-		Number of columns fetched=6
-		Number of pages visited=1
-		Number of rows qualified=0
-		Number of rows visited=0
-		Scan type=heap
-		start position:
-			null
-		stop position:
-			null
-		qualifiers:
-			None
+scan information:
+	Bit set of columns fetched=All
+	Number of columns fetched=6
+	Number of pages visited=1
+	Number of rows qualified=0
+	Number of rows visited=0
+	Scan type=heap
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> UPDATE M_INVENTORY  SET IN_QTY = 1, IN_LOCATION = 'sanfrancisco', IN_ACC_CODE = 1, IN_ACT_DATE = '01/01/2003', IN_ORDERED = 1 WHERE IN_P_ID = 'abcdefghijklm';
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
@@ -2933,41 +2920,28 @@ End Compilation Timestamp : null
 Begin Execution Timestamp : null
 End Execution Timestamp : null
 Statement Execution Plan Text: 
-Project-Restrict ResultSet (2):
+Table Scan ResultSet for S_SUPPLIER at read committed isolation level using instantaneous share row locking chosen by the optimizer
 Number of opens = 1
 Rows seen = 0
 Rows filtered = 0
-restriction = false
-projection = false
+Fetch Size = 16
 	constructor time (milliseconds) = 0
 	open time (milliseconds) = 0
 	next time (milliseconds) = 0
 	close time (milliseconds) = 0
-	restriction time (milliseconds) = 0
-	projection time (milliseconds) = 0
-Source result set:
-	Table Scan ResultSet for S_SUPPLIER at read committed isolation level using instantaneous share row locking chosen by the optimizer
-	Number of opens = 1
-	Rows seen = 0
-	Rows filtered = 0
-	Fetch Size = 16
-		constructor time (milliseconds) = 0
-		open time (milliseconds) = 0
-		next time (milliseconds) = 0
-		close time (milliseconds) = 0
-	scan information:
-		Bit set of columns fetched=All
-		Number of columns fetched=10
-		Number of pages visited=1
-		Number of rows qualified=0
-		Number of rows visited=0
-		Scan type=heap
-		start position:
-			null
-		stop position:
-			null
-		qualifiers:
-			None
+scan information:
+	Bit set of columns fetched=All
+	Number of columns fetched=10
+	Number of pages visited=1
+	Number of rows qualified=0
+	Number of rows visited=0
+	Scan type=heap
+	start position:
+		null
+	stop position:
+		null
+	qualifiers:
+		None
 ij> UPDATE U_SEQUENCES  SET S_NEXTNUM = 1	, S_BLOCKSIZE = 1000 WHERE S_ID = 'abcdefghijklmnopqrstuvwxyz';
 0 rows inserted/updated/deleted
 ij> values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS();
