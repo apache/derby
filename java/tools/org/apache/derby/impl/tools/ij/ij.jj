@@ -824,9 +824,22 @@ class ij {
                 throw ijException.notAvailableForDriver(dbmd.getDriverName());
             } catch(IllegalAccessException iae) {
                 throw ijException.notAvailableForDriver(dbmd.getDriverName());
+            } catch(AbstractMethodError ame) {
+                // According to http://bugs.sun.com/view_bug.do?bug_id=6531596
+                // invoke() may throw AbstractMethodError instead of
+                // InvocationTargetException on some JREs
+                throw ijException.notAvailableForDriver(dbmd.getDriverName());
             } catch(InvocationTargetException ite) {
-                // getFunctions throws only SQLException
-                throw (SQLException)ite.getCause();
+                Throwable cause = ite.getCause();
+                // 'cause' *must* be an SQLException if the method is
+                // *actually* called. But may be AbstractMethodError in some
+                // cases, if the driver implements an older version of the
+                // JDBC spec (pre-JDBC 4.0). See issue DERBY-3809.
+                if (cause instanceof SQLException)
+                    throw (SQLException)cause;
+
+                // else
+                throw ijException.notAvailableForDriver(dbmd.getDriverName());
             }
 
             int[] displayColumns = new int[] {
