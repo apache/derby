@@ -123,6 +123,18 @@ public class GroupByExpressionTest extends BaseJDBCTestCase
     }
     
     /**
+     * DERBY-4202 Aggregates not allowed in group by
+     * @throws Exception
+     */
+    public void testDerby4402AggregateInGroupBy() throws Exception
+    {
+    	assertCompileError(
+                "42Y26", "select c1 from test group by sum(c3)");
+    	assertCompileError(
+                "42Y26", "select c1 from test group by (c1+sum(c3))");
+    }
+    
+    /**
      * queries which combine compound expressions and simple column refs.
      */
     public void testDerby3094Expressions() throws Exception
