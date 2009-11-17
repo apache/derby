@@ -9749,8 +9749,7 @@ groupingColumnReference(GroupByList groupingCols) throws StandardException :
 		columnExpression.accept(visitor);
 		if (visitor.hasNode())
 		{
-			{if (true) throw StandardException.newException(
-				SQLState.LANG_AGGREGATE_IN_GROUPBY_LIST);}
+			throw StandardException.newException(SQLState.LANG_AGGREGATE_IN_GROUPBY_LIST);
 		}
 		if (columnExpression.isParameterNode()) 
 	    	{
