@@ -192,9 +192,22 @@ ij> -- bug 5658
 -- In DB2 UDB, any column referenced in an expression of the 
 -- join-condition must be a column of one of the operand tables of 
 -- the associated join (in the scope of the same joined-table clause).
--- this query should fail
+-- DERBY-4380: This query used to fail because column B was seen as ambiguous
+-- (could belong to both T1 and T2). However, the scope of the ON clause
+-- makes it unabiguous; the first occurrence of B must be T1.B, and the second
+-- one must be T2.B.
 select t1.*, s2.* from t t1 left outer join s on (b = e), t t2 left outer join s s2 on (b = e);
-ERROR 42X03: Column name 'B' is in more than one table in the FROM list.
+A          |B           |C    |D          |E           |F    
+-------------------------------------------------------------
+1          |1.000       |1    |NULL       |NULL        |NULL 
+1          |1.000       |1    |2          |2.000       |2    
+1          |1.000       |1    |3          |3.000       |3    
+2          |2.000       |2    |NULL       |NULL        |NULL 
+2          |2.000       |2    |2          |2.000       |2    
+2          |2.000       |2    |3          |3.000       |3    
+3          |3.000       |3    |NULL       |NULL        |NULL 
+3          |3.000       |3    |2          |2.000       |2    
+3          |3.000       |3    |3          |3.000       |3    
 ij> -- a view of a regular join
 create view jv (fv, ev, dv, cv, bv, av) as (select f, e, d, c, b, a from t, s where b = e);
 0 rows inserted/updated/deleted
@@ -1947,9 +1960,8 @@ PART      |NUM   |PRODUCT        |NUM   |PRICE
 --------------------------------------------------
 ij> -- ---------------------------------------------------------------------;
 -- test unit 3. subquery in OUTER JOIN ON clause;
--- Not allowed in DB2 compatibility mode
 -- ---------------------------------------------------------------------;
--- 301 - '='/like/in in RIGHT JOIN ON condition with correlated IN subquery; Error.
+-- 301 - '='/like/in in RIGHT JOIN ON condition with correlated IN subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p right join k55admin.products pt
 on (pt.product in ('Bolt','Nuts') or
@@ -1961,8 +1973,17 @@ and pt.price IN
         on 1=0
         where a.num>=pt.num)
 order by 1,2,3,4;
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
-ij> -- 302 - '='/like/in in LEFT JOIN ON condition with uncorrelated IN subquery; Error.
+PART      |NUM   |PRODUCT        |NUM   |PRICE    
+--------------------------------------------------
+NULL      |NULL  |Generator      |10    |45.75    
+NULL      |NULL  |Hammer         |50    |5.75     
+NULL      |NULL  |Relay          |30    |7.55     
+NULL      |NULL  |Ruler          |30    |8.75     
+NULL      |NULL  |Sander         |20    |35.75    
+NULL      |NULL  |Saw            |205   |18.90    
+NULL      |NULL  |Screwdriver    |505   |3.70     
+NULL      |NULL  |NULL           |20    |NULL     
+ij> -- 302 - '='/like/in in LEFT JOIN ON condition with uncorrelated IN subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p left join k55admin.products pt
 on (pt.product in ('Bolt','Nuts') or
@@ -1973,8 +1994,17 @@ and pt.price IN
         from k55admin.parts b left join k55admin.products a
         on 1=0)
 order by 1,2,3,4;
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
-ij> -- 303 - '=' and inlist in RIGHT JOIN ON condition with correlated exists subquery; Error.
+PART      |NUM   |PRODUCT        |NUM   |PRICE    
+--------------------------------------------------
+Blades    |205   |NULL           |NULL  |NULL     
+Magnets   |10    |NULL           |NULL  |NULL     
+Oil       |160   |NULL           |NULL  |NULL     
+Paper     |20    |NULL           |NULL  |NULL     
+Plastic   |30    |NULL           |NULL  |NULL     
+Steel     |30    |NULL           |NULL  |NULL     
+Wire      |10    |NULL           |NULL  |NULL     
+NULL      |30    |NULL           |NULL  |NULL     
+ij> -- 303 - '=' and inlist in RIGHT JOIN ON condition with correlated exists subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p right join k55admin.products pt
 on pt.product in ('Bolt','Nuts') and p.num = pt.num
@@ -1984,8 +2014,17 @@ and exists
         on 1=0
         where a.num>=pt.num)
 order by 1,2,3,4;
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
-ij> -- 304 - '=' and inlist in LEFT JOIN ON condition with uncorrelated exists subquery; Error.
+PART      |NUM   |PRODUCT        |NUM   |PRICE    
+--------------------------------------------------
+NULL      |NULL  |Generator      |10    |45.75    
+NULL      |NULL  |Hammer         |50    |5.75     
+NULL      |NULL  |Relay          |30    |7.55     
+NULL      |NULL  |Ruler          |30    |8.75     
+NULL      |NULL  |Sander         |20    |35.75    
+NULL      |NULL  |Saw            |205   |18.90    
+NULL      |NULL  |Screwdriver    |505   |3.70     
+NULL      |NULL  |NULL           |20    |NULL     
+ij> -- 304 - '=' and inlist in LEFT JOIN ON condition with uncorrelated exists subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p left join k55admin.products pt
 on pt.product in ('Bolt','Nuts') and p.num = pt.num
@@ -1994,8 +2033,17 @@ and exists
         from k55admin.parts b left join k55admin.products a
         on 1=0)
 order by 1,2,3,4;
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
-ij> -- 305 - '='/like/in in RIGHT JOIN ON condition with correlated '>=ALL' subquery; Error.
+PART      |NUM   |PRODUCT        |NUM   |PRICE    
+--------------------------------------------------
+Blades    |205   |NULL           |NULL  |NULL     
+Magnets   |10    |NULL           |NULL  |NULL     
+Oil       |160   |NULL           |NULL  |NULL     
+Paper     |20    |NULL           |NULL  |NULL     
+Plastic   |30    |NULL           |NULL  |NULL     
+Steel     |30    |NULL           |NULL  |NULL     
+Wire      |10    |NULL           |NULL  |NULL     
+NULL      |30    |NULL           |NULL  |NULL     
+ij> -- 305 - '='/like/in in RIGHT JOIN ON condition with correlated '>=ALL' subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p right join k55admin.products pt
 on (pt.product in ('Bolt','Nuts') or
@@ -2007,8 +2055,22 @@ and pt.price >=ALL
         on 1=0
         where a.num>=pt.num)
 order by 1,2,3,4;
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
-ij> -- 306 - '='/like/in in LEFT JOIN ON condition with uncorrelated scalar subquery; Error.
+PART      |NUM   |PRODUCT        |NUM   |PRICE    
+--------------------------------------------------
+Blades    |205   |Saw            |205   |18.90    
+Magnets   |10    |Generator      |10    |45.75    
+Paper     |20    |Sander         |20    |35.75    
+Paper     |20    |NULL           |20    |NULL     
+Plastic   |30    |Relay          |30    |7.55     
+Plastic   |30    |Ruler          |30    |8.75     
+Steel     |30    |Relay          |30    |7.55     
+Steel     |30    |Ruler          |30    |8.75     
+Wire      |10    |Generator      |10    |45.75    
+NULL      |30    |Relay          |30    |7.55     
+NULL      |30    |Ruler          |30    |8.75     
+NULL      |NULL  |Hammer         |50    |5.75     
+NULL      |NULL  |Screwdriver    |505   |3.70     
+ij> -- 306 - '='/like/in in LEFT JOIN ON condition with uncorrelated scalar subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p left join k55admin.products pt
 on (pt.product in ('Bolt','Nuts') or
@@ -2019,7 +2081,16 @@ and pt.price =
         from k55admin.parts b left join k55admin.products a
         on 1=0)
 order by 1,2,3,4;
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+PART      |NUM   |PRODUCT        |NUM   |PRICE    
+--------------------------------------------------
+Blades    |205   |NULL           |NULL  |NULL     
+Magnets   |10    |NULL           |NULL  |NULL     
+Oil       |160   |NULL           |NULL  |NULL     
+Paper     |20    |NULL           |NULL  |NULL     
+Plastic   |30    |NULL           |NULL  |NULL     
+Steel     |30    |NULL           |NULL  |NULL     
+Wire      |10    |NULL           |NULL  |NULL     
+NULL      |30    |NULL           |NULL  |NULL     
 ij> -- coj202.clp
 ---------------------------------------------------------------------
 --      inner join (105)

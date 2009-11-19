@@ -697,4 +697,46 @@ public class JoinTest extends BaseJDBCTestCase {
         assertStatementError(TABLE_NAME_NOT_IN_SCOPE, s,
                 "select xyz.* from t1 join t2 using (b)");
     }
+
+    /**
+     * Test that ON clauses can contain subqueries (DERBY-4380).
+     */
+    public void testSubqueryInON() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create table t1(a int)");
+        s.execute("insert into t1 values 1,2,3");
+        s.execute("create table t2(b int)");
+        s.execute("insert into t2 values 1,2");
+        s.execute("create table t3(c int)");
+        s.execute("insert into t3 values 2,3");
+
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery(
+                "select * from t1 join t2 on a = some (select c from t3)"),
+            new String[][]{{"2", "1"}, {"2", "2"}, {"3", "1"}, {"3", "2"}});
+
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t1 left join t2 " +
+                           "on a = b and b not in (select c from t3)"),
+            new String[][]{{"1", "1"}, {"2", null}, {"3", null}});
+
+        JDBC.assertUnorderedResultSet(
+            s.executeQuery("select * from t3 join t2 on exists " +
+                           "(select * from t2 join t1 on exists " +
+                           "(select * from t3 where c = a))"),
+            new String[][]{{"2", "1"}, {"2", "2"}, {"3", "1"}, {"3", "2"}});
+
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery("select a from t1 join t2 " +
+                           "on a = (select count(*) from t3) and a = b"),
+            "2");
+
+        // This query used to cause NullPointerException with early versions
+        // of the DERBY-4380 patch.
+        JDBC.assertEmpty(s.executeQuery(
+            "select * from t1 join t2 on exists " +
+            "(select * from t3 x left join t3 y on 1=0 where y.c=1)"));
+    }
 }

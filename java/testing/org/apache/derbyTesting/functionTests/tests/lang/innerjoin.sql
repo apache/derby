@@ -86,7 +86,7 @@ remove asdf;
 select * from t1 join t2 on t1.c1 = t2.c1 where t1.c1 = 1;
 select * from t1 join t2 on t1.c1 = 1 where t2.c1 = t1.c1;
 
--- subquery in join clause, not allowed in DB2 compatibility mode
+-- subquery in join clause
 select * from t1 a join t2 b 
 on a.c1 = b.c1 and a.c1 = (select c1 from t1 where a.c1 = t1.c1);
 select * from t1 a join t2 b 

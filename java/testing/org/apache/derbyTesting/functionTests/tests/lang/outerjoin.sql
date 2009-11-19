@@ -100,7 +100,7 @@ select * from {oj t1 left outer join t2 on t1.c1 = t2.c1} where t1.c1 = 1;
 select * from t1 right outer join t2 on t1.c1 = 1 where t2.c1 = t1.c1;
 select * from {oj t1 right outer join t2 on t1.c1 = 1} where t2.c1 = t1.c1;
 
--- subquery in join clause. Not allowed in the DB2 compatibility mode. ERROR.
+-- subquery in join clause.
 -- egs of using {oj --} syntax
 select * from t1 a left outer join t2 b 
 on a.c1 = b.c1 and a.c1 = (select c1 from t1 where a.c1 = t1.c1 and a.c1 = 1);
@@ -463,8 +463,10 @@ insert into ttab1 values (1,1),(2,2);
 create table ttab2 (c int, d int);
 insert into ttab2 values (1,1),(2,2);
 
--- this statement should raise an error because 
--- more than one object table includes column "b"
+-- DERBY-4380: These statements used to raise an error because
+-- more than one object table includes column "b". But the scope of the
+-- ON clauses makes it clear which table they belong to in each case, so
+-- they should not fail.
 select cor1.*, cor2.* from ttab1 cor1 left outer join ttab2 on (b = d),
 		ttab1 left outer join ttab2 cor2 on (b = d);
 select cor1.*, cor2.* from ttab1 cor1 left outer join ttab2 on (b = d),

@@ -797,7 +797,6 @@ public interface SQLState {
 	String LANG_TABLE_REQUIRES_COLUMN_NAMES                            = "42909";
 	String LANG_DELETE_RULE_VIOLATION		   					       = "42915";
 	String LANG_SYNONYM_CIRCULAR   		   					           = "42916";
-	String LANG_DB2_ON_CLAUSE_INVALID		   					       = "42972";
 	String LANG_SYNTAX_ERROR                                           = "42X01";
 	String LANG_LEXICAL_ERROR                                          = "42X02";
 	String LANG_AMBIGUOUS_COLUMN_NAME                                  = "42X03";

@@ -799,40 +799,13 @@ public class JoinNode extends TableOperatorNode
 			fromList.addElement((FromTable) leftResultSet);
 			fromList.addElement((FromTable) rightResultSet);
 
-			/* First bind with all tables in the from clause, to detect ambiguous
-			 * references. Push the left and right children to the front of the
-			 * fromListParam before binding the join clause.  (We will
-			 * remove it before returning.)  Valid column references in
-			 * the join clause are limited to columns from the 2 tables being
-			 * joined
-			 */
-			fromListParam.insertElementAt(rightResultSet, 0);
-			fromListParam.insertElementAt(leftResultSet, 0);
 			joinClause = joinClause.bindExpression(
-									  fromListParam, subqueryList,
-									  aggregateVector);
-
-			/* Now bind with two tables being joined. If this raises column not found exception,
-			 * then we have a reference to other tables in the from clause. Raise invalid
-			 * ON clause error to match DB2.
-			 */
-			try {
-				joinClause = joinClause.bindExpression(
 									  fromList, subqueryList,
 									  aggregateVector);
-			} catch (StandardException se) {
-				if (se.getSQLState().equals(SQLState.LANG_COLUMN_NOT_FOUND))
-					throw StandardException.newException(SQLState.LANG_DB2_ON_CLAUSE_INVALID); 
-				throw se;
-			}
 
 			// SQL 2003, section 7.7 SR 5
 			SelectNode.checkNoWindowFunctions(joinClause, "ON");
 
-
-			/* DB2 doesn't allow subquerries in the ON clause */
-			if (subqueryList.size() > 0)
-				throw StandardException.newException(SQLState.LANG_DB2_ON_CLAUSE_INVALID); 
 			/*
 			** We cannot have aggregates in the ON clause.
 			** In the future, if we relax this, we'll need
@@ -843,9 +816,6 @@ public class JoinNode extends TableOperatorNode
 			{
 				throw StandardException.newException(SQLState.LANG_NO_AGGREGATES_IN_ON_CLAUSE);
 			}
-
-			fromListParam.removeElementAt(0);
-			fromListParam.removeElementAt(0);
 		}
 		/* USING clause */
 		else if (usingClause != null)

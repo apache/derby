@@ -1422,11 +1422,6 @@ Guide.
             </msg>
 
             <msg>
-                <name>42972</name>
-                <text>An ON clause associated with a JOIN operator is not valid.</text>
-            </msg>
-
-            <msg>
                 <name>42995</name>
                 <text>The requested function does not apply to global temporary tables.</text>
             </msg>

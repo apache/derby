@@ -71,14 +71,14 @@ ERROR 42X03: Column name 'T1.C1' is in more than one table in the FROM list.
 ij> -- join clause only allowed to contain column references from tables being
 -- joined. DB2 doesn't allow references to correlated columns
 select * from t1, t2 join t3 on t1.c1 = t2.c1;
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ERROR 42X04: Column 'T1.C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T1.C1' is not a column in the target table.
 ij> -- should match db2's behavior by raising an error
 select * from t2 b inner join t3 c on a.c1 = b.c1 and b.c1 = c.c1;
 ERROR 42X04: Column 'A.C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'A.C1' is not a column in the target table.
 ij> select * from t3 b where exists (select * from t1 a inner join t2 on b.c1 = t2.c1);
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ERROR 42X04: Column 'B.C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'B.C1' is not a column in the target table.
 ij> select * from t3 where exists (select * from t1 inner join t2 on t3.c1 = t2.c1);
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ERROR 42X04: Column 'T3.C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'T3.C1' is not a column in the target table.
 ij> -- positive tests
 
 select a.c1 from t1 a join t2 b on a.c1 = b.c1;
@@ -123,17 +123,23 @@ ij> select * from t1 join t2 on t1.c1 = 1 where t2.c1 = t1.c1;
 C1         |C1         
 -----------------------
 1          |1          
-ij> -- subquery in join clause, not allowed in DB2 compatibility mode
+ij> -- subquery in join clause
 select * from t1 a join t2 b 
 on a.c1 = b.c1 and a.c1 = (select c1 from t1 where a.c1 = t1.c1);
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+C1         |C1         
+-----------------------
+1          |1          
+3          |3          
 ij> select * from t1 a join t2 b 
 on a.c1 = b.c1 and a.c1 in (select c1 from t1 where a.c1 = t1.c1);
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+C1         |C1         
+-----------------------
+1          |1          
+3          |3          
 ij> -- correlated columns
 select * from t1 a
 where exists (select * from t1 inner join t2 on a.c1 = t2.c1);
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ERROR 42X04: Column 'A.C1' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'A.C1' is not a column in the target table.
 ij> -- nested joins
 select * from t1 join t2 on t1.c1 = t2.c1 inner join t3 on t1.c1 = t3.c1;
 C1         |C1         |C1         

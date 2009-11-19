@@ -247,23 +247,55 @@ ij> select * from {oj t1 right outer join t2 on t1.c1 = 1} where t2.c1 = t1.c1;
 C1         |C1         
 -----------------------
 1          |1          
-ij> -- subquery in join clause. Not allowed in the DB2 compatibility mode. ERROR.
+ij> -- subquery in join clause.
 -- egs of using {oj --} syntax
 select * from t1 a left outer join t2 b 
 on a.c1 = b.c1 and a.c1 = (select c1 from t1 where a.c1 = t1.c1 and a.c1 = 1);
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+C1         |C1         
+-----------------------
+1          |1          
+2          |NULL       
+2          |NULL       
+3          |NULL       
+4          |NULL       
 ij> select * from {oj t1 a left outer join t2 b 
 on a.c1 = b.c1 and a.c1 = (select c1 from t1 where a.c1 = t1.c1 and a.c1 = 1)};
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+C1         |C1         
+-----------------------
+1          |1          
+2          |NULL       
+2          |NULL       
+3          |NULL       
+4          |NULL       
 ij> select * from t1 a left outer join t2 b 
 on a.c1 = b.c1 and a.c1 = (select c1 from t1 where a.c1 = t1.c1 and a.c1 <> 2);
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+C1         |C1         
+-----------------------
+1          |1          
+2          |NULL       
+2          |NULL       
+3          |3          
+3          |3          
+4          |NULL       
 ij> select * from {oj t1 a left outer join t2 b 
 on a.c1 = b.c1 and a.c1 = (select c1 from t1 where a.c1 = t1.c1 and a.c1 <> 2)};
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+C1         |C1         
+-----------------------
+1          |1          
+2          |NULL       
+2          |NULL       
+3          |3          
+3          |3          
+4          |NULL       
 ij> select * from t1 a right outer join t2 b 
 on a.c1 = b.c1 and a.c1 in (select c1 from t1 where a.c1 = t1.c1);
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+C1         |C1         
+-----------------------
+1          |1          
+3          |3          
+3          |3          
+NULL       |5          
+NULL       |6          
 ij> -- outer join in subquery
 -- egs of using {oj --} syntax
 select * from t1 a
@@ -1915,14 +1947,26 @@ ij> create table ttab2 (c int, d int);
 0 rows inserted/updated/deleted
 ij> insert into ttab2 values (1,1),(2,2);
 2 rows inserted/updated/deleted
-ij> -- this statement should raise an error because 
--- more than one object table includes column "b"
+ij> -- DERBY-4380: These statements used to raise an error because
+-- more than one object table includes column "b". But the scope of the
+-- ON clauses makes it clear which table they belong to in each case, so
+-- they should not fail.
 select cor1.*, cor2.* from ttab1 cor1 left outer join ttab2 on (b = d),
 		ttab1 left outer join ttab2 cor2 on (b = d);
-ERROR 42X03: Column name 'B' is in more than one table in the FROM list.
+A          |B          |C          |D          
+-----------------------------------------------
+1          |1          |1          |1          
+1          |1          |2          |2          
+2          |2          |1          |1          
+2          |2          |2          |2          
 ij> select cor1.*, cor2.* from ttab1 cor1 left outer join ttab2 on (b = d),
 		ttab1 left outer join ttab2 cor2 on (b = cor2.d);
-ERROR 42X03: Column name 'B' is in more than one table in the FROM list.
+A          |B          |C          |D          
+-----------------------------------------------
+1          |1          |1          |1          
+1          |1          |2          |2          
+2          |2          |1          |1          
+2          |2          |2          |2          
 ij> -- This should pass
 select cor1.*, cor2.* from ttab1 left outer join ttab2 on (b = d), 
 		ttab1 cor1 left outer join ttab2 cor2 on (cor1.b = cor2.d);
@@ -1936,7 +1980,7 @@ ij> -- These should fail too
 select * from ttab1, ttab1 left outer join ttab2 on (a=c);
 ERROR 42X03: Column name 'TTAB1.A' is in more than one table in the FROM list.
 ij> select * from ttab1 cor1, ttab1 left outer join ttab2 on (cor1.a=c);
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ERROR 42X04: Column 'COR1.A' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'COR1.A' is not a column in the target table.
 ij> -- This should pass
 select * from ttab1, ttab1 cor1 left outer join ttab2 on (cor1.a=c);
 A          |B          |A          |B          |C          |D          

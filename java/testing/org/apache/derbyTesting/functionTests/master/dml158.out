@@ -25,7 +25,7 @@ ij> -- date_time print
       ON PROJ.CITY <> STAFF.CITY
       AND EMPNUM = WORKS.EMPNUM
       AND PNUM = WORKS.PNUM);
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ERROR 42X04: Column 'WORKS.EMPNUM' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'WORKS.EMPNUM' is not a column in the target table.
 ij> -- PASS:0857 If ERROR OR SQLSTATE = 42X04
 
    SELECT EMPNUM, PNUM FROM WORKS

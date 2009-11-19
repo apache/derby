@@ -79,7 +79,10 @@ select * from t left outer join s on (b = e), r where a = g;
 -- In DB2 UDB, any column referenced in an expression of the 
 -- join-condition must be a column of one of the operand tables of 
 -- the associated join (in the scope of the same joined-table clause).
--- this query should fail
+-- DERBY-4380: This query used to fail because column B was seen as ambiguous
+-- (could belong to both T1 and T2). However, the scope of the ON clause
+-- makes it unabiguous; the first occurrence of B must be T1.B, and the second
+-- one must be T2.B.
 select t1.*, s2.* from t t1 left outer join s on (b = e), t t2 left outer join s s2 on (b = e);
 
 -- a view of a regular join
@@ -789,10 +792,9 @@ order by 1,2,3,4;
 
 -- ---------------------------------------------------------------------;
 -- test unit 3. subquery in OUTER JOIN ON clause;
--- Not allowed in DB2 compatibility mode
 -- ---------------------------------------------------------------------;
 
--- 301 - '='/like/in in RIGHT JOIN ON condition with correlated IN subquery; Error.
+-- 301 - '='/like/in in RIGHT JOIN ON condition with correlated IN subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p right join k55admin.products pt
 on (pt.product in ('Bolt','Nuts') or
@@ -805,7 +807,7 @@ and pt.price IN
         where a.num>=pt.num)
 order by 1,2,3,4;
 
--- 302 - '='/like/in in LEFT JOIN ON condition with uncorrelated IN subquery; Error.
+-- 302 - '='/like/in in LEFT JOIN ON condition with uncorrelated IN subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p left join k55admin.products pt
 on (pt.product in ('Bolt','Nuts') or
@@ -817,7 +819,7 @@ and pt.price IN
         on 1=0)
 order by 1,2,3,4;
 
--- 303 - '=' and inlist in RIGHT JOIN ON condition with correlated exists subquery; Error.
+-- 303 - '=' and inlist in RIGHT JOIN ON condition with correlated exists subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p right join k55admin.products pt
 on pt.product in ('Bolt','Nuts') and p.num = pt.num
@@ -828,7 +830,7 @@ and exists
         where a.num>=pt.num)
 order by 1,2,3,4;
 
--- 304 - '=' and inlist in LEFT JOIN ON condition with uncorrelated exists subquery; Error.
+-- 304 - '=' and inlist in LEFT JOIN ON condition with uncorrelated exists subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p left join k55admin.products pt
 on pt.product in ('Bolt','Nuts') and p.num = pt.num
@@ -838,7 +840,7 @@ and exists
         on 1=0)
 order by 1,2,3,4;
 
--- 305 - '='/like/in in RIGHT JOIN ON condition with correlated '>=ALL' subquery; Error.
+-- 305 - '='/like/in in RIGHT JOIN ON condition with correlated '>=ALL' subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p right join k55admin.products pt
 on (pt.product in ('Bolt','Nuts') or
@@ -851,7 +853,7 @@ and pt.price >=ALL
         where a.num>=pt.num)
 order by 1,2,3,4;
 
--- 306 - '='/like/in in LEFT JOIN ON condition with uncorrelated scalar subquery; Error.
+-- 306 - '='/like/in in LEFT JOIN ON condition with uncorrelated scalar subquery
 select part, p.num, product, pt.NUM, price
 from k55admin.parts p left join k55admin.products pt
 on (pt.product in ('Bolt','Nuts') or

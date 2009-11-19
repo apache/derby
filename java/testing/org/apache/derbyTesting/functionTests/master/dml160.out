@@ -24,7 +24,7 @@ ij> -- date_time print
      AND BUDGET > AVG (OSTAFF.GRADE) * 1000
      WHERE HU.WORKS.EMPNUM = OSTAFF.EMPNUM) FROM HU.STAFF AS OSTAFF
      ORDER BY 2, 1;
-ERROR 42972: An ON clause associated with a JOIN operator is not valid.
+ERROR 42X04: Column 'OSTAFF.GRADE' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'OSTAFF.GRADE' is not a column in the target table.
 ij> -- PASS:0859 If 5 rows are returned in the following order?
 --               empnum   count
 --               ======   =====
