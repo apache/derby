@@ -255,6 +255,16 @@ final class TopService {
 			for (int i = 0; i < moduleInstances.size(); i++) {
 				ModuleInstance module = (ModuleInstance) moduleInstances.elementAt(i);
 
+                // DERBY-2074: The module has not been properly booted, so we
+                // cannot yet determine whether or not this is a module we can
+                // use. Assume that we cannot use it and continue looking. We
+                // may end up booting the module twice if the assumption
+                // doesn't hold, but we'll detect and resolve that later when
+                // we call addToProtocol().
+                if (!module.isBooted()) {
+                    continue;
+                }
+
 				if (!module.isTypeAndName((PersistentService) null, key.getFactoryInterface(), key.getIdentifier()))
 					continue;
 
@@ -293,6 +303,8 @@ final class TopService {
 			moduleInstances.removeElement(module);
 			throw se;
 		}
+
+        module.setBooted();
 
 		synchronized (this) {
 
