@@ -1604,14 +1604,24 @@ public class SelectNode extends ResultSetNode
 			// select c1 from t group by c1, c2
 			// we would have added c2 to the projection list which will have to be 
 			// projected out.
-			
-			ResultColumnList newSelectList = prnRSN.getResultColumns().copyListAndObjects(); 
-			newSelectList.removeGeneratedGroupingColumns();
-			newSelectList.genVirtualColumnNodes(prnRSN, prnRSN.getResultColumns());
+			//
+
+			// Keep the same RCL on top, since there may be
+			// references to its result columns above us, e.g. in this query:
+			//
+			// select sum(j),i from t group by i having i
+			//             in (select i from t group by i,j )
+			//
+			ResultColumnList topList = prnRSN.getResultColumns();
+			ResultColumnList newSelectList = topList.copyListAndObjects();
+			prnRSN.setResultColumns(newSelectList);
+
+			topList.removeGeneratedGroupingColumns();
+			topList.genVirtualColumnNodes(prnRSN, newSelectList);
 			prnRSN = (ResultSetNode) getNodeFactory().getNode(
 						C_NodeTypes.PROJECT_RESTRICT_NODE,
 						prnRSN,
-						newSelectList,
+						topList,
 						null,
 						null,
 						null,
