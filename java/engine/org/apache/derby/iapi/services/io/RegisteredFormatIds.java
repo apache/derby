@@ -533,5 +533,8 @@ String[] TwoByte = {
         /* 469 */   "org.apache.derby.catalog.types.RowMultiSetImpl",
         /* 470 */   "org.apache.derby.impl.store.access.btree.index.B2I",
         /* 471 */   "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
+        /* 472 */       "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
+        /* 473 */       "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
+        /* 474 */       "org.apache.derby.catalog.types.UDTAliasInfo",
 };
 }

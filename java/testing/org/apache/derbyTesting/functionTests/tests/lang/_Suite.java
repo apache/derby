@@ -200,6 +200,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(GeneratedColumnsTest.suite());
         suite.addTest(GeneratedColumnsPermsTest.suite());
         suite.addTest(RestrictedVTITest.suite());
+        suite.addTest(UDTTest.suite());
         suite.addTest(AlterColumnTest.suite());
         suite.addTest(UserLobTest.suite());
         suite.addTest(OffsetFetchNextTest.suite());

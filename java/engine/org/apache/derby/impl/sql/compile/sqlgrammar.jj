@@ -2873,6 +2873,7 @@ createStatements() throws StandardException :
         }
 |		statementNode = procedureDefinition()
 |		statementNode = functionDefinition()
+|		statementNode = udtDefinition()
 |
 		statementNode = indexDefinition()
         {
@@ -10548,6 +10549,31 @@ throws StandardException :
 	}
 }
 
+/**
+	CREATE TYPE
+*/
+
+StatementNode
+udtDefinition() throws StandardException :
+{
+	TableName udtName;
+	String externalName;
+}
+{
+		<TYPE> udtName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+		<EXTERNAL> <NAME> externalName = string()
+		<LANGUAGE>  <JAVA>
+		{
+			checkVersion(DataDictionary.DD_VERSION_DERBY_10_6, "CREATE TYPE");
+			return getCreateAliasNode(
+							udtName,
+							externalName,
+							null,
+							AliasInfo.ALIAS_TYPE_UDT_AS_CHAR,
+							Boolean.FALSE);
+		}
+}
+
 StatementNode
 viewDefinition(Token beginToken) throws StandardException :
 {
@@ -13100,6 +13126,12 @@ dropAliasStatement() throws StandardException :
 		checkVersion(DataDictionary.DD_VERSION_DERBY_10_1, "DROP SYNONYM");
 
 		return dropAliasNode(aliasName, AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR);
+	}
+|	<TYPE> aliasName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <RESTRICT>
+	{
+		checkVersion(DataDictionary.DD_VERSION_DERBY_10_6, "DROP TYPE");
+
+		return dropAliasNode(aliasName, AliasInfo.ALIAS_TYPE_UDT_AS_CHAR);
 	}
 }
 

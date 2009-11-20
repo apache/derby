@@ -57,6 +57,7 @@ public class Changes10_6 extends UpgradeChange {
 
     private static  final   String  BAD_SYNTAX = "42X01";
     private static  final   String  TABLE_DOES_NOT_EXIST = "42X05";
+    private static  final   String  UPGRADE_REQUIRED = "XCL47";
 
     private static  final   String  QUERY_4215 =
         "select r.grantor\n" +
@@ -64,6 +65,9 @@ public class Changes10_6 extends UpgradeChange {
         "where r.aliasid = a.aliasid\n" +
         "and a.alias = 'SYSCS_INPLACE_COMPRESS_TABLE'\n"
         ;
+
+    private static final   String CREATE_TYPE_DDL = "create type fooType external name 'mypackage.foo' language java\n";
+    private static final   String DROP_TYPE_DDL = "drop type fooType restrict\n";
     
     public Changes10_6(String name) {
         super(name);
@@ -225,7 +229,6 @@ public class Changes10_6 extends UpgradeChange {
 
         s.close();
     }
-
     /**
      * Vet the permissions on SYSCS_UTIL.SYSCS_INPLACE_COMPRESS_TABLE.
      * There should be only one permissions tuple for this system procedure and
@@ -244,6 +247,46 @@ public class Changes10_6 extends UpgradeChange {
         assertFalse( rs.next() );
 
         rs.close();
+    }
+
+    /**
+     * Make sure that you can only create UDTs in a hard-upgraded database.
+     * See https://issues.apache.org/jira/browse/DERBY-651
+     */
+    public void testUDTs() throws Exception
+    {        
+    	Statement s = createStatement();
+
+        int phase = getPhase();
+
+        //println( "Phase = " + phase );
+        
+        switch ( phase )
+        {
+        case PH_CREATE:
+        case PH_POST_SOFT_UPGRADE:
+            
+            assertStatementError( BAD_SYNTAX, s, CREATE_TYPE_DDL );
+            assertStatementError( BAD_SYNTAX, s, DROP_TYPE_DDL );
+            
+            break;
+
+        case PH_SOFT_UPGRADE:
+
+            assertStatementError( UPGRADE_REQUIRED, s, CREATE_TYPE_DDL );
+            assertStatementError( UPGRADE_REQUIRED, s, DROP_TYPE_DDL );
+            
+            break;
+
+        case PH_HARD_UPGRADE:
+
+            s.execute( CREATE_TYPE_DDL );
+            s.execute( DROP_TYPE_DDL );
+            
+            break;
+        }
+
+        s.close();
     }
 
     

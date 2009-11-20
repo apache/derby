@@ -42,6 +42,7 @@ import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.catalog.types.SynonymAliasInfo;
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
+import org.apache.derby.catalog.types.UDTAliasInfo;
 
 import java.util.Vector;
 
@@ -102,6 +103,13 @@ public class CreateAliasNode extends DDLStatementNode
 
 		switch (this.aliasType)
 		{
+			case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
+				this.javaClassName = (String) targetObject;
+				aliasInfo = new UDTAliasInfo();
+
+				implicitCreateSchema = true;
+                break;
+                
 			case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 			case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
 			{
@@ -228,6 +236,8 @@ public class CreateAliasNode extends DDLStatementNode
 	{
 		switch (this.aliasType)
 		{
+		case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
+			return "CREATE TYPE";
 		case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 			return "CREATE PROCEDURE";
 		case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
@@ -310,6 +320,13 @@ public class CreateAliasNode extends DDLStatementNode
 		if (aliasType != AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)
 			return;
 
+        // validity checking for UDTs
+        if ( aliasType == AliasInfo.ALIAS_TYPE_UDT_AS_CHAR )
+        {
+            // nothing to do yet
+            return;
+        }
+
 		// Don't allow creating synonyms in SESSION schema. Causes confusion if
 		// a temporary table is created later with same name.
 		if (isSessionSchema(getSchemaDescriptor().getSchemaName()))
@@ -335,18 +352,7 @@ public class CreateAliasNode extends DDLStatementNode
 	 */
 	public ConstantAction	makeConstantAction() throws StandardException
 	{
-		String schemaName;
-		switch (aliasType) {
-		case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
-		case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
-			schemaName = getSchemaDescriptor().getSchemaName();
-			break;
-		case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
-			schemaName = getSchemaDescriptor().getSchemaName();
-			break;
-		default:
-			schemaName = null;
-		}
+		String schemaName = getSchemaDescriptor().getSchemaName();
 
 		return	getGenericConstantActionFactory().getCreateAliasConstantAction(
 											  getRelativeName(),

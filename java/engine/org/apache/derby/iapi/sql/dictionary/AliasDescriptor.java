@@ -304,6 +304,8 @@ public final class AliasDescriptor
 				return "FUNCTION";
 			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 				return "SYNONYM";
+			case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
+				return "TYPE";
 		}
 		return  null;
 	}

@@ -92,6 +92,10 @@ class CreateAliasConstantAction extends DDLConstantAction
 				nameSpace = AliasInfo.ALIAS_NAME_SPACE_SYNONYM_AS_CHAR;
 				break;
 
+			case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
+				nameSpace = AliasInfo.ALIAS_NAME_SPACE_UDT_AS_CHAR;
+				break;
+
 			default:
 				if (SanityManager.DEBUG)
 				{
@@ -125,6 +129,10 @@ class CreateAliasConstantAction extends DDLConstantAction
 				type = "CREATE SYNONYM ";
 				break;
 
+			case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
+				type = "CREATE TYPE ";
+				break;
+
 			default:
 				if (SanityManager.DEBUG)
 				{
@@ -141,9 +149,9 @@ class CreateAliasConstantAction extends DDLConstantAction
 
 	/**
 	 *	This is the guts of the Execution-time logic for
-     *  CREATE FUNCTION, PROCEDURE or SYNONYM.
+     *  CREATE FUNCTION, PROCEDURE, SYNONYM, and TYPE.
      *  <P>
-     *  A routine (function or procedure) is represented as:
+     *  A function, procedure, or udt is represented as:
      *  <UL>
      *  <LI> AliasDescriptor
      *  </UL>
@@ -202,7 +210,7 @@ class CreateAliasConstantAction extends DDLConstantAction
             DDLConstantAction.getSchemaDescriptorForCreate(dd, activation, schemaName);
 
 		//
-		// Create a new method alias descriptor with aliasID filled in.
+		// Create a new alias descriptor with aliasID filled in.
 		// 
 		UUID aliasID = dd.getUUIDFactory().createUUID();
 
@@ -217,6 +225,12 @@ class CreateAliasConstantAction extends DDLConstantAction
 
 		// perform duplicate rule checking
 		switch (aliasType) {
+		case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
+
+            AliasDescriptor duplicateUDT = dd.getAliasDescriptor( sd.getUUID().toString(), aliasName, nameSpace );
+            if ( duplicateUDT != null ) { throw StandardException.newException( SQLState.LANG_OBJECT_ALREADY_EXISTS, ads.getDescriptorType(), aliasName ); }
+            break;
+            
 		case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
 		case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
 		{

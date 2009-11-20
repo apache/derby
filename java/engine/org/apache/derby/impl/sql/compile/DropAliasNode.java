@@ -79,6 +79,10 @@ public class DropAliasNode extends DDLStatementNode
 				nameSpace = AliasInfo.ALIAS_NAME_SPACE_SYNONYM_AS_CHAR;
 				break;
 
+			case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
+				nameSpace = AliasInfo.ALIAS_NAME_SPACE_UDT_AS_CHAR;
+				break;
+
 			default:
 				if (SanityManager.DEBUG)
 				{
@@ -155,6 +159,9 @@ public class DropAliasNode extends DDLStatementNode
 				break;
 			case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
 				typeName = "SYNONYM";
+				break;
+			case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
+				typeName = "TYPE";
 				break;
 		}
 		return typeName;

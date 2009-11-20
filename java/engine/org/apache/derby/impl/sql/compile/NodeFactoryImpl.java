@@ -685,7 +685,10 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 
 		nodeType = C_NodeTypes.CREATE_ALIAS_NODE;
 
-		if (aliasType != AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)
+		if (
+            (aliasType != AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR) &&
+            (aliasType != AliasInfo.ALIAS_TYPE_UDT_AS_CHAR)
+            )
 		{
         	int lastPeriod;
         	String fullStaticMethodName = (String) targetName;

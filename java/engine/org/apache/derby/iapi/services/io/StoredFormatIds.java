@@ -1457,6 +1457,7 @@ public interface StoredFormatIds {
 
     public static final int ROUTINE_INFO_V01_ID = (MIN_ID_2 + 451);
     public static final int SYNONYM_INFO_V01_ID = (MIN_ID_2 + 455);
+    public static final int UDT_INFO_V01_ID = (MIN_ID_2 + 474);
 
     /******************************************************************
     **
@@ -1909,7 +1910,7 @@ public interface StoredFormatIds {
      * Make sure this is updated when a new module is added
      */
     public static final int MAX_ID_2 =
-            (MIN_ID_2 + 473);
+            (MIN_ID_2 + 474);
 
     // DO NOT USE 4 BYTE IDS ANYMORE
     static public final int MAX_ID_4 =
