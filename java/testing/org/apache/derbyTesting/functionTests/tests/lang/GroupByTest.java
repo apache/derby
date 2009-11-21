@@ -2035,4 +2035,32 @@ public class GroupByTest extends BaseJDBCTestCase {
          
          JDBC.assertFullResultSet(rs, new String[][] {{"4","2"},{"5","2"}});
     }
+
+    /**
+     * GROUP BY in an IN-subquery inside HAVING clause whose select list is
+     * subset of group by columns.
+     *
+     * @throws SQLException
+     */
+    public void testDerby4450() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        ResultSet rs;
+
+        s.executeUpdate(
+            "create table tt(i int not null," +
+            "               j int, k int)");
+        s.executeUpdate(
+            "insert into tt values " +
+            "    (1,10,1), (1,40,1),(3,45,1),(4,46,1),(5,90,1)");
+
+        rs = s.executeQuery(
+            "select sum(j) from tt group by i having i " +
+            "                     in (select i from tt group by i,j )");
+
+        JDBC.assertFullResultSet(rs, new String[][] {
+                {"50"},{"45"},{"46"},{"90"}});
+        rollback();
+    }
 }
+
