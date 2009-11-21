@@ -79,7 +79,7 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
         suite.addTestSuite(UpdateXXXTest.class);
         
         // requires java.math.BigDecimal
-        if (JDBC.vmSupportsJDBC2())
+        if (JDBC.vmSupportsJDBC3())
             suite.addTest(new UpdateXXXTest("jdbc2testUpdateBigDecimal"));
                       
         return suite;

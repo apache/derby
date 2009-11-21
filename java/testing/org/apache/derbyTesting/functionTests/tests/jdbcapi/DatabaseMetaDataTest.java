@@ -700,12 +700,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         } catch (NoSuchMethodError e) {
             // JSR 169 - method must not be there!
             assertTrue("getURL not supported", JDBC.vmSupportsJSR169());
-            assertFalse("getURL not supported", JDBC.vmSupportsJDBC2());
+            assertFalse("getURL not supported", JDBC.vmSupportsJDBC3());
             return;
         }
         
         assertFalse("getURL is supported!", JDBC.vmSupportsJSR169());
-        assertTrue("getURL is supported!", JDBC.vmSupportsJDBC2());
+        assertTrue("getURL is supported!", JDBC.vmSupportsJDBC3());
         
         assertEquals("getURL match",
                 getTestConfiguration().getJDBCUrl(),

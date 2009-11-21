@@ -367,7 +367,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     public void testDerby2073() throws Exception
     {
         // Cannot use setBigDecimal with J2ME
-        if (!JDBC.vmSupportsJDBC2())
+        if (!JDBC.vmSupportsJDBC3())
             return;
         
         
@@ -1238,7 +1238,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 worked = false;
             }
             rs.close();
-            if (JDBC.vmSupportsJDBC2())
+            if (JDBC.vmSupportsJDBC3())
                 judge_getXXX(worked, sqleResult, 18, type);
         }
 
@@ -2752,7 +2752,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     // JSR169
                 }
 
-                if (JDBC.vmSupportsJDBC2()) {
+                if (JDBC.vmSupportsJDBC3()) {
                     psi.executeUpdate();
                     getValidValue(psq, jdbcTypes[type], "setUnicodeStream");
                 }
@@ -2762,7 +2762,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 sqleResult = sqle;
                 worked = false;
             }
-            if (JDBC.vmSupportsJDBC2())
+            if (JDBC.vmSupportsJDBC3())
                 judge_setXXX(worked, sqleResult, 14, type);
         }
 
@@ -3717,7 +3717,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     public static Test suite() {
         
         // Don't run for JSR169 until DERBY-2403 is resolved.
-        if (JDBC.vmSupportsJDBC2())
+        if (JDBC.vmSupportsJDBC3())
             return TestConfiguration.defaultSuite(ParameterMappingTest.class);
         else
             return  new TestSuite("ParameterMapping");

@@ -41,7 +41,7 @@ import org.apache.derbyTesting.junit.JDBC;
      {
          TestSuite suite = new TestSuite("VTITest");
          // requires DriverManager support
-         if (JDBC.vmSupportsJDBC2()) {
+         if (JDBC.vmSupportsJDBC3()) {
             suite.addTest(new VTITest("bulkInsertVtiTest", "WAREHOUSE"));
             // Run the same test again, but now insert into a table whose name
             // contains single and double quote characters (DERBY-3682)

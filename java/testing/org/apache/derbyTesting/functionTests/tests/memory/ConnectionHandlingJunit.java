@@ -80,7 +80,7 @@ public class ConnectionHandlingJunit extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite("ConnectionHandlingJUnit");
         
         // Only support for java.sql.DriverManager has been implemented.
-        if (JDBC.vmSupportsJDBC2()) {
+        if (JDBC.vmSupportsJDBC3()) {
             /* driverMgrTestConnectionsToNonexistentDb:
              * Only support for DriverManager (JDBC2 and above) for now, for
              * simplicity (connecting to DB and possibly also loading the driver

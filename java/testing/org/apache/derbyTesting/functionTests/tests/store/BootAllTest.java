@@ -59,7 +59,7 @@ public class BootAllTest  extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite("BootAllTest");
         
         // Test uses driver manager so JDBC 2 required.
-        if (JDBC.vmSupportsJDBC2())
+        if (JDBC.vmSupportsJDBC3())
         {           
             // Suite to create the third (inner) database and
             // perform the actual test (will be run last)

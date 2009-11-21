@@ -68,7 +68,7 @@ public final class JDBCClient {
     {
         if (JDBC.vmSupportsJDBC4())
             return EMBEDDED_40;
-        if (JDBC.vmSupportsJDBC2())
+        if (JDBC.vmSupportsJDBC3())
             return EMBEDDED_30;
         if (JDBC.vmSupportsJSR169())
             return EMBEDDED_169;

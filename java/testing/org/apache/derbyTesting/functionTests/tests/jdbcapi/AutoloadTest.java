@@ -56,7 +56,7 @@ public class AutoloadTest extends BaseJDBCTestCase
      * See class desciption for details.
      */
     public static Test suite() {
-        if (!JDBC.vmSupportsJDBC2())
+        if (!JDBC.vmSupportsJDBC3())
             return new TestSuite("empty: no java.sql.DriverManager");
 
         boolean embeddedAutoLoad = false;

@@ -1159,7 +1159,7 @@ public class TestConfiguration {
      * @return JDBC connection url, without attributes.
      */
     private String createJDBCUrlWithDatabaseName(String name) {
-        if (JDBC.vmSupportsJDBC2())
+        if (JDBC.vmSupportsJDBC3())
         {
             String url;
            if (jdbcClient.isEmbedded()) {
@@ -1194,7 +1194,7 @@ public class TestConfiguration {
                 Assert.fail(e.getMessage());
             }            
         }
-        else if (JDBC.vmSupportsJDBC2())
+        else if (JDBC.vmSupportsJDBC3())
         {
             try {
                 connector = (Connector) Class.forName(

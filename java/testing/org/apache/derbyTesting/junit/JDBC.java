@@ -162,17 +162,6 @@ public class JDBC {
 	}
 
 	/**
- 	 * <p>
-	 * Return true if the virtual machine environment
-	 * supports JDBC2 or later.
-	 * </p>
-	 */
-	public static boolean vmSupportsJDBC2()
-	{
-		return HAVE_DRIVER;
-	}
-
-	/**
 	 * Return true if the virtual machine environment
 	 * supports JSR169. JSR169 is a subset of JDBC 3
      * and hence a subset of JDBC 4 as well.
