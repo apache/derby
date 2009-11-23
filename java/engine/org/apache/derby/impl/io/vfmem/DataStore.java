@@ -56,27 +56,45 @@ public final class DataStore {
      */
     private final Map files = new HashMap(80);
 
-    /** The name of the database this store serves. */
+    /**
+     * The name of the database this store serves, expected to be the absolute
+     * path of the service root (i.e. /tmp/myDB if the database myDB is created
+     * in /tmp).
+     */
     private final String databaseName;
     /** Counter used to generate unique temporary file names. */
     private long tmpFileCounter = 0;
+    /** Tells if this store is scheduled for deletion. */
+    private boolean deleteMe;
 
     /**
      * Creates a new data store.
      *
-     * @param databaseName the name of the assoicated database
+     * @param databaseName the name of the assoicated database, expected to be
+     *      the absolute path of the service root.
      */
     public DataStore(String databaseName) {
         this.databaseName = databaseName;
     }
 
     /**
-     * Returns the database name.
+     * Returns the database name, which is expected to equal the path of the
+     * service root.
      *
      * @return The database name.
      */
     public String getDatabaseName() {
         return this.databaseName;
+    }
+
+    /**
+     * Tells if this data store is scheduled for deletion.
+     *
+     * @return {@code true} if the store is awaiting deletion,
+     *      {@code false} otherwise.
+     */
+    public boolean scheduledForDeletion() {
+        return this.deleteMe;
     }
 
     /**
@@ -161,6 +179,13 @@ public final class DataStore {
                         files.put(nPath, entry);
                         return false;
                     }
+                    // Check if we just deleted the service root. Normally the
+                    // service would be deleted using deleteAll.
+                    if (nPath.equals(databaseName) &&
+                            files.get(databaseName) == null) {
+                        // Service root deleted, mark this store for removal.
+                        deleteMe = true;
+                    }
                 }
                 entry.release();
             }
@@ -198,7 +223,13 @@ public final class DataStore {
                 return false;
             } else if (entry.isDirectory()) {
                 // Delete root is a directory.
-                return _deleteAll(nPath);
+                boolean deleted = _deleteAll(nPath);
+                if (files.get(databaseName) == null) {
+                    // The service root has been deleted, which means that all
+                    // the data has been deleted. Mark this store for removal.
+                    deleteMe = true;
+                }
+                return deleted;
             } else {
                 // Delete root is a file.
                 entry.release();

@@ -38,6 +38,16 @@ import org.apache.derby.io.WritableStorageFactory;
 /**
  * A storage factory for virtual files, where the contents of the files are
  * stored in main memory.
+ * <p>
+ * Note that data store deletion may happen inside one of two different methods;
+ * either in {@code shutdown} or in {@code init}. This is due to the current
+ * implementation and the fact that dropping a database is done through the
+ * file IO interface by deleting the service root. As the deletion then becomes
+ * a two step process, someone else may boot the database again before the
+ * reference to the store has been removed. To avoid this, the
+ * {@code init}-method will never initialize with a store scheduled for
+ * deletion. I have only seen this issue in heavily loaded multithreaded
+ * environments (2 CPUs/cores should be enough to reproduce).
  */
 public class VFMemoryStorageFactory
         implements StorageFactory, WritableStorageFactory {
@@ -54,6 +64,7 @@ public class VFMemoryStorageFactory
     private static final DataStore DUMMY_STORE = new DataStore("::DUMMY::");
 
     /**
+     * TODO: Remove this method once the new mechanism has been added.
      * Deletes the database if it exists.
      *
      * @param dbName the database name
@@ -118,19 +129,26 @@ public class VFMemoryStorageFactory
                 canonicalName = new File(databaseName).getCanonicalPath();
             }
             synchronized (DATABASES) {
-                if (DATABASES.containsKey(canonicalName)) {
-                    // Fetch the existing data store.
-                    this.dbData = (DataStore)DATABASES.get(canonicalName);
-                } else if (uniqueName != null) {
-                    // Create a new data store.
-                    this.dbData = new DataStore(canonicalName);
-                    DATABASES.put(canonicalName, dbData);
-                } else {
-                    // We have a database name, but no unique name.
-                    // Assume that the client only wants to do some
-                    // "book-keeping" operations, like getting the
-                    // canonical name.
-                    this.dbData = DUMMY_STORE;
+                this.dbData = (DataStore)DATABASES.get(canonicalName);
+                // If the store has been scheduled for deletion, purge it.
+                if (dbData != null && dbData.scheduledForDeletion()) {
+                    DATABASES.remove(canonicalName);
+                    dbData.purge();
+                    dbDropCleanupInDummy(canonicalName);
+                    dbData = null;
+                }
+                if (dbData == null) {
+                    if (uniqueName != null) {
+                        // Create a new data store.
+                        this.dbData = new DataStore(canonicalName);
+                        DATABASES.put(canonicalName, dbData);
+                    } else {
+                        // We have a database name, but no unique name.
+                        // Assume that the client only wants to do some
+                        // "book-keeping" operations, like getting the
+                        // canonical name.
+                        this.dbData = DUMMY_STORE;
+                    }
                 }
             }
             // Specify the data directory and the temp directory.
@@ -161,11 +179,29 @@ public class VFMemoryStorageFactory
         }
     }
 
+    /**
+     * Normally does nothing, but if the database is in a state such that it
+     * should be deleted this will happen here.
+     */
     public void shutdown() {
-        // For now, do nothing.
-        // TODO: Deleting stuff doesn't seem to play nice when running the
-        // regression tests, as CleanDatabaseTestSetup fails then. The cause
-        // is unknown and should be investigated.
+        // If the data store has been scheduled for deletion, which happens
+        // when the store detects that the service root has been deleted, then
+        // delete the whole store to release the memory.
+        if (dbData.scheduledForDeletion()) {
+            DataStore store;
+            synchronized (DATABASES) {
+                store = (DataStore)DATABASES.remove(canonicalName);
+                // Must clean up the dummy while holding monitor.
+                if (store != null && store == dbData) {
+                    dbDropCleanupInDummy(canonicalName);
+                }
+            }
+            // If this is the correct store, purge it now.
+            if (store != null && store == dbData) {
+                dbData.purge(); // Idempotent.
+                dbData = null;
+            }
+        }
     }
 
     public String getCanonicalName() {
@@ -334,6 +370,18 @@ public class VFMemoryStorageFactory
             return path;
         } else {
             return new File(dataDirectory.getPath(), path).getPath();
+        }
+    }
+
+    /**
+     * Cleans up the internal dummy data store after a database has been
+     * dropped.
+     *
+     * @param dbPath absolute path of the dropped database
+     */
+    private void dbDropCleanupInDummy(String dbPath) {
+        while (dbPath != null && DUMMY_STORE.deleteEntry(dbPath)) {
+            dbPath = new File(dbPath).getParent();
         }
     }
 }
