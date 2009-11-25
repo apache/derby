@@ -639,15 +639,7 @@ final class StorageFactoryService implements PersistentService
 		Throwable t = null;
         try
         {
-			String protocolLeadIn = "";
-			//prepend the subsub protocol name to the storage factoty canonical
-			//name to form the service name except in case of the the 
-			//default subsubprototcol(PersistentService.DIRECTORY)
-
-			if (!(getType().equals( PersistentService.DIRECTORY))) 
-				protocolLeadIn = getType() + ":";
-
-            return protocolLeadIn + (String) AccessController.doPrivileged(
+            return getProtocolLeadIn() + (String) AccessController.doPrivileged(
                 new PrivilegedExceptionAction()
                 {
                     public Object run()
@@ -733,12 +725,23 @@ final class StorageFactoryService implements PersistentService
                         {
                             if (SanityManager.DEBUG)
                             {
+                                // Run this through getCanonicalServiceName as
+                                // an extra sanity check. Prepending the
+                                // protocol lead in to the canonical name from
+                                // the storage factory should be enough.
+                                String tmpCanonical = getCanonicalServiceName(
+                                        getProtocolLeadIn() +
+                                        storageFactory.getCanonicalName());
+                                // These should give the same result.
                                 SanityManager.ASSERT(
-                                    serviceName.equals(
-                                        storageFactory.getCanonicalName()), 
+                                        tmpCanonical.equals(getProtocolLeadIn()
+                                        + storageFactory.getCanonicalName()));
+                                SanityManager.ASSERT(
+                                    serviceName.equals(tmpCanonical),
                                     "serviceName = " + serviceName +
-                                    ";storageFactory.getCanonicalName() = " + 
-                                    storageFactory.getCanonicalName());
+                                    " ; protocolLeadIn + " +
+                                    "storageFactory.getCanoicalName = " +
+                                    tmpCanonical);
                             }
                             StorageFile serviceDirectory = storageFactory.newStorageFile( null);
                             return serviceDirectory.deleteAll() ? this : null;
@@ -754,7 +757,6 @@ final class StorageFactoryService implements PersistentService
 	public String getCanonicalServiceName(String name)
 		throws StandardException
     {
-		String protocolLeadIn = getType() + ":";
         int colon = name.indexOf( ':');
         // If no subsubprotocol is specified and the storage factory type isn't
         // the default one, abort. We have to deal with Windows drive
@@ -766,17 +768,15 @@ final class StorageFactoryService implements PersistentService
         }
         if( colon > 1) // Subsubprotocols must be at least 2 characters long
         {
-            if( ! name.startsWith( protocolLeadIn))
+            if( ! name.startsWith(getType() + ":"))
                 return null; // It is not our database
             name = name.substring( colon + 1);
         }
-        if( getType().equals( PersistentService.DIRECTORY)) // The default subsubprototcol
-            protocolLeadIn = "";
         final String nm = name;
 
         try
         {
-            return protocolLeadIn + (String) AccessController.doPrivileged(
+            return getProtocolLeadIn() + (String) AccessController.doPrivileged(
                 new PrivilegedExceptionAction()
                 {
                     public Object run()
@@ -853,6 +853,24 @@ final class StorageFactoryService implements PersistentService
     public Class getStorageFactoryClass()
     {
         return storageFactoryClass;
+    }
+
+    /**
+     * Returns the protocol lead in for this service.
+     *
+     * @return An empty string if the protocol is the default one
+     *      (PersistentService.DIRECTORY), the subsub protocol name followed by
+     *      colon otherwise.
+     */
+    private String getProtocolLeadIn() {
+        // We prepend the subsub protocol name to the storage factory canonical
+        // name to form the service name, except in case of the default
+        // subsub prototcol (which is PersistentService.DIRECTORY).
+        if (getType().equals(PersistentService.DIRECTORY)) {
+            return "";
+        } else {
+            return getType() + ":";
+        }
     }
     
     final class DirectoryList implements Enumeration, PrivilegedAction
