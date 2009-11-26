@@ -86,4 +86,52 @@ public class InsertTest extends BaseJDBCTestCase {
                     "select * from t2 order by int(cast (a as varchar(10)))"),
                 data);
     }
+
+    /**
+     * INSERT used to fail with a NullPointerException if the source was an
+     * EXCEPT operation or an INTERSECT operation. DERBY-4420.
+     */
+    public void testInsertFromExceptOrIntersect() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        // Create tables to fetch data from
+        s.execute("create table t1(x int)");
+        s.execute("insert into t1 values 1,2,3");
+        s.execute("create table t2(x int)");
+        s.execute("insert into t2 values 2,3,4");
+
+        // Create table to insert into
+        s.execute("create table t3(x int)");
+
+        // INTERSECT (used to cause NullPointerException)
+        s.execute("insert into t3 select * from t1 intersect select * from t2");
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from t3 order by x"),
+                new String[][]{{"2"}, {"3"}});
+        s.execute("delete from t3");
+
+        // INTERSECT ALL (used to cause NullPointerException)
+        s.execute("insert into t3 select * from t1 " +
+                  "intersect all select * from t2");
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from t3 order by x"),
+                new String[][]{{"2"}, {"3"}});
+        s.execute("delete from t3");
+
+        // EXCEPT (used to cause NullPointerException)
+        s.execute("insert into t3 select * from t1 except select * from t2");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from t3 order by x"),
+                "1");
+        s.execute("delete from t3");
+
+        // EXCEPT ALL (used to cause NullPointerException)
+        s.execute("insert into t3 select * from t1 " +
+                  "except all select * from t2");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from t3 order by x"),
+                "1");
+        s.execute("delete from t3");
+    }
 }

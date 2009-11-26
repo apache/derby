@@ -304,7 +304,12 @@ public abstract class ResultSetNode extends QueryTreeNode
 	}
 
 	/**
-	 * Set the type of each parameter in the result column list for this table constructor.
+	 * Set the type of each parameter in the result column list if this node
+	 * represents a table constructor (aka VALUES clause). Table constructors
+	 * are represented either by a {@code RowResultSetNode} or by a
+	 * {@code UnionNode} with multiple {@code RowResultSetNode} children and
+	 * whose {@code tableConstructor()} method returns {@code true}. For all
+	 * other nodes, this method should be a no-op.
 	 *
 	 * @param typeColumns	The ResultColumnList containing the desired result
 	 *						types.
@@ -314,143 +319,9 @@ public abstract class ResultSetNode extends QueryTreeNode
 	void setTableConstructorTypes(ResultColumnList typeColumns)
 			throws StandardException
 	{
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(resultColumns.visibleSize() <= typeColumns.size(),
-				"More columns in ResultColumnList than in base table");
-
-		/* Look for ? parameters in the result column list */
-		int rclSize = resultColumns.size();
-		for (int index = 0; index < rclSize; index++)
-		{
-			ResultColumn	rc = (ResultColumn) resultColumns.elementAt(index);
-
-			ValueNode re = rc.getExpression();
-
-			if (re.requiresTypeFromContext())
-			{
-				ResultColumn	typeCol =
-					(ResultColumn) typeColumns.elementAt(index);
-
-				/*
-				** We found a ? - set its type to the type of the
-				** corresponding column of the target table.
-				*/
-				re.setType(typeCol.getTypeServices());
-			}
-			else if (re instanceof CharConstantNode)
-			{
-				// Character constants are of type CHAR (fixed length string).
-				// This causes a problem (beetle 5160) when multiple row values are provided
-				// as constants for insertion into a variable length string column.
-				//
-				// This issue is the query expression
-				// VALUES 'abc', 'defghi'
-				// has type of CHAR(6), ie. the length of largest row value for that column.
-				// This is from the UNION defined behaviour.
-				// This causes strings with less than the maximum length to be blank padded
-				// to that length (CHAR semantics). Thus if this VALUES clause is used to
-				// insert into a variable length string column, then these blank padded values
-				// are inserted, which is not what is required ...
-				// 
-				// BECAUSE, when the VALUES is used as a table constructor SQL standard says the
-				// types of the table constructor's columns are set by the table's column types.
-				// Thus, in this case, each of those string constants should be of type VARCHAR
-				// (or the matching string type for the table).
-				//
-				//
-				// This is only an issue for fixed length character (CHAR, BIT) string or
-				// binary consraints being inserted into variable length types.
-				// This is because any other type's fundemental literal value is not affected
-				// by its data type. E.g. Numeric types such as INT, REAL, BIGINT, DECIMAL etc.
-				// do not have their value modifed by the union since even if the type is promoted
-				// to a higher type, its fundemental value remains unchanged. 
-				// values (1.2, 34.4567, 234.47) will be promoted to
-				// values (1.2000, 34.4567, 234.4700)
-				// but their numeric value remains the same.
-				//
-				//
-				//
-				// The fix is to change the base type of the table constructor's value to
-				// match the column type. Its length can be left as-is, because there is
-				// still a normailzation step when the value is inserted into the table.
-				// That will set the correct length and perform truncation checks etc.
-
-				ResultColumn	typeCol =
-					(ResultColumn) typeColumns.elementAt(index);
-
-				TypeId colTypeId = typeCol.getTypeId();
-
-				if (colTypeId.isStringTypeId()) {
-
-					if (colTypeId.getJDBCTypeId() != java.sql.Types.CHAR) {
-
-						int maxWidth = re.getTypeServices().getMaximumWidth();
-
-						re.setType(new DataTypeDescriptor(colTypeId, true, maxWidth));
-					}
-				}
-				else if (colTypeId.isBitTypeId()) {
-					if (colTypeId.getJDBCTypeId() == java.sql.Types.VARBINARY) {
-					// then we're trying to cast a char literal into a
-					// variable bit column.  We can't change the base
-					// type of the table constructor's value from char
-					// to bit, so instead, we just change the base type
-					// of that value from char to varchar--that way,
-					// no padding will be added when we convert to
-					// bits later on (Beetle 5306).
-						TypeId tId = TypeId.getBuiltInTypeId(java.sql.Types.VARCHAR);
-						re.setType(new DataTypeDescriptor(tId, true));
-						typeColumns.setElementAt(typeCol, index);
-					}
-					else if (colTypeId.getJDBCTypeId() == java.sql.Types.LONGVARBINARY) {
-						TypeId tId = TypeId.getBuiltInTypeId(java.sql.Types.LONGVARCHAR);
-						re.setType(new DataTypeDescriptor(tId, true));
-						typeColumns.setElementAt(typeCol, index);
-					}
-				}
-
-			}
-			else if (re instanceof BitConstantNode)
-			{
-				ResultColumn	typeCol =
-					(ResultColumn) typeColumns.elementAt(index);
-
-				TypeId colTypeId = typeCol.getTypeId();
-
-				if (colTypeId.isBitTypeId()) {
-
-					// NOTE: Don't bother doing this if the column type is BLOB,
-					// as we don't allow bit literals to be inserted into BLOB
-					// columns (they have to be explicitly casted first); beetle 5266.
-					if ((colTypeId.getJDBCTypeId() != java.sql.Types.BINARY) &&
-						(colTypeId.getJDBCTypeId() != java.sql.Types.BLOB)) {
-
-						int maxWidth = re.getTypeServices().getMaximumWidth();
-
-						re.setType(new DataTypeDescriptor(colTypeId, true, maxWidth));
-					}
-				}
-				else if (colTypeId.isStringTypeId()) {
-					if (colTypeId.getJDBCTypeId() == java.sql.Types.VARCHAR) {
-					// then we're trying to cast a bit literal into a
-					// variable char column.  We can't change the base
-					// type of the table constructor's value from bit
-					// to char, so instead, we just change the base
-					// type of that value from bit to varbit--that way,
-					// no padding will be added when we convert to
-					// char later on.
-						TypeId tId = TypeId.getBuiltInTypeId(java.sql.Types.VARBINARY);
-						re.setType(new DataTypeDescriptor(tId, true));
-						typeColumns.setElementAt(typeCol, index);
-					}
-					else if (colTypeId.getJDBCTypeId() == java.sql.Types.LONGVARCHAR) {
-						TypeId tId = TypeId.getBuiltInTypeId(java.sql.Types.LONGVARBINARY);
-						re.setType(new DataTypeDescriptor(tId, true));
-						typeColumns.setElementAt(typeCol, index);
-					}
-				}
-			}
-		}
+		// Nothing to be done unless this node represents a VALUES clause, in
+		// which case the overrides in RowResultSetNode or UnionNode will do
+		// the necessary work.
 	}
 
 	/**
