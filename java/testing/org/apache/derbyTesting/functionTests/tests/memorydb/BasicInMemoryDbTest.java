@@ -257,8 +257,7 @@ public class BasicInMemoryDbTest
      *
      * @throws SQLException if something else goes wrong
      */
-    // DISABLED because the feature isn't implemented yet (see DERBY-4428)
-    public void DISABLED_testDelete()
+    public void testDelete()
             throws SQLException {
             Connection conCreate = DriverManager.getConnection(
                     "jdbc:derby:memory:deleteDbSimple;create=true");
@@ -291,7 +290,7 @@ public class BasicInMemoryDbTest
             // Delete the database.
             try {
                 DriverManager.getConnection(
-                    "jdbc:derby:memory:deleteDbSimple;delete=true");
+                    "jdbc:derby:memory:deleteDbSimple;drop=true");
                 fail("Dropping database should have raised exception.");
             } catch (SQLException sqle) {
                 assertSQLState("08006", sqle);
@@ -307,8 +306,7 @@ public class BasicInMemoryDbTest
      * @throws IOException if something goes wrong
      * @throws SQLException if something goes wrong
      */
-    // DISABLED because the feature isn't implemented yet (see DERBY-4428)
-    public void DISABLED_testDeleteWhenInUse()
+    public void testDeleteWhenInUse()
             throws IOException, SQLException {
         Connection con = DriverManager.getConnection(
                 "jdbc:derby:memory:deleteDb;create=true");

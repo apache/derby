@@ -1613,6 +1613,7 @@ public interface SQLState {
     String MALFORMED_URL = "XJ028.C";
     String BOOT_DATABASE_FAILED = "XJ040.C";
     String CREATE_DATABASE_FAILED = "XJ041.C";
+    String CONFLICTING_BOOT_ATTRIBUTES = "XJ048.C";
     String CONFLICTING_CREATE_ATTRIBUTES = "XJ049.C";
 	String CONFLICTING_RESTORE_ATTRIBUTES = "XJ081.C";
     String INVALID_ATTRIBUTE = "XJ05B.C";
@@ -1685,8 +1686,9 @@ public interface SQLState {
     String NET_PASSWORD_TOO_LONG                                = "08001.C.12";
 
         
-    // system severity
+    // database severity
     String SHUTDOWN_DATABASE = "08006.D";  
+    String DROP_DATABASE = "08006.D.1";
         
     //the following 2 exceptions are internal and never get seen by the user.
     String CLOSE_REQUEST = "close.C.1"; // no message in messages.properties as it is never printed

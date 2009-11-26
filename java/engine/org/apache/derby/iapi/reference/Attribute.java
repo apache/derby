@@ -163,6 +163,11 @@ public interface Attribute {
 	*/
 	String CREATE_ATTR = "create";
 
+    /**
+        The attribute that is used to request a drop database.
+    */
+    String DROP_ATTR = "drop";
+
 	/**
 		The attribute that is used to set the user name.
 	*/

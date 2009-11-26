@@ -458,6 +458,12 @@ Guide.
                 <arg>databaseName</arg>
             </msg>
 
+            <msg>
+                <name>08006.D.1</name>
+                <text>Database '{0}' dropped.</text>
+                <arg>databaseName</arg>
+            </msg>
+
         </family>
 
 
@@ -4362,6 +4368,12 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XJ045.S</name>
                 <text>Invalid or (currently) unsupported isolation level, '{0}', passed to Connection.setTransactionIsolation(). The currently supported values are java.sql.Connection.TRANSACTION_SERIALIZABLE, java.sql.Connection.TRANSACTION_REPEATABLE_READ, java.sql.Connection.TRANSACTION_READ_COMMITTED, and java.sql.Connection.TRANSACTION_READ_UNCOMMITTED.</text>
                 <arg>levelName</arg>
+            </msg>
+
+            <msg>
+                <name>XJ048.C</name>
+                <text>Conflicting boot attributes specified: {0}</text>
+                <arg>attributes</arg>
             </msg>
 
             <msg>

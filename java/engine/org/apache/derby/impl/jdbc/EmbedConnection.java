@@ -270,6 +270,14 @@ public abstract class EmbedConnection implements EngineConnection
 
             boolean isFailoverMasterBoot = false;
             boolean isFailoverSlaveBoot = false;
+            final boolean dropDatabase = isDropDatabase(info);
+
+            // Don't allow both the shutdown and the drop attribute.
+            if (shutdown && dropDatabase) {
+                throw newSQLException(
+                        SQLState.CONFLICTING_BOOT_ATTRIBUTES,
+                        Attribute.SHUTDOWN_ATTR + ", " + Attribute.DROP_ATTR);
+            }
 
             // check that a replication operation is not combined with
             // other operations
@@ -277,6 +285,7 @@ public abstract class EmbedConnection implements EngineConnection
             if (replicationOp!= null) {
                 if (createBoot ||
                     shutdown ||
+                    dropDatabase ||
                     isTwoPhaseEncryptionBoot ||
                     isTwoPhaseUpgradeBoot) {
                     throw StandardException.
@@ -379,7 +388,7 @@ public abstract class EmbedConnection implements EngineConnection
 				}
 			}
 
-			if (createBoot && !shutdown)
+           if (createBoot && !shutdown && !dropDatabase)
 			{
 				// if we are shutting down don't attempt to boot or create the
 				// database
@@ -555,6 +564,39 @@ public abstract class EmbedConnection implements EngineConnection
 				throw tr.shutdownDatabaseException();
 			}
 
+            // Drop the database at this point, if that is requested.
+            if (dropDatabase) {
+                if (!usingNoneAuth &&
+                        getLanguageConnection().usesSqlAuthorization()) {
+                    // Only the database owner is allowed to drop the database.
+                    // NOTE: Reusing the message for shutdown, as drop database
+                    //       includes a shutdown. May want to change this later
+                    //       if/when we add system privileges.
+                    checkIsDBOwner(OP_SHUTDOWN);
+                }
+
+                // TODO: If system privileges is turned on, we need to check
+                // that the user has the shutdown/drop privilege. Waiting for
+                // Derby-2109
+
+                String dbName = tr.getDBName(); // Save before shutdown
+                // TODO: Should block database access and sleep for a while here
+                // Shut down the database.
+                handleException(tr.shutdownDatabaseException());
+                // Give running threads a chance to detect the shutdown.
+                // Removing the service, or rather its conglomerates, too early
+                // may cause a number of errors to be thrown. Try to make the
+                // shutdown/drop as clean as possible.
+                sleep(500L);
+                Monitor.removePersistentService(dbName);
+                // Generate the drop database exception here, as this is the
+                // only place it will be thrown.
+                StandardException se = StandardException.newException(
+                    SQLState.DROP_DATABASE, dbName);
+                se.setReport(StandardException.REPORT_NEVER);
+                throw se;
+            }
+
 			// Raise a warning in sqlAuthorization mode if authentication is not ON
 			if (usingNoneAuth && getLanguageConnection().usesSqlAuthorization())
 				addWarning(SQLWarningFactory.newSQLWarning(SQLState.SQL_AUTHORIZATION_WITH_NO_AUTHENTICATION));
@@ -664,6 +706,16 @@ public abstract class EmbedConnection implements EngineConnection
 		//
 		if (createCount > 1) throw newSQLException(SQLState.CONFLICTING_CREATE_ATTRIBUTES);
 		
+        // Don't allow combinations of create/restore and drop.
+        if (createCount == 1 && isDropDatabase(p)) {
+            // See whether we have conflicting create or restore attributes.
+            String sqlState = SQLState.CONFLICTING_CREATE_ATTRIBUTES;
+            if (restoreCount > 0) {
+                sqlState = SQLState.CONFLICTING_RESTORE_ATTRIBUTES;
+            }
+            throw newSQLException(sqlState);
+        }
+
 		//retuns true only for the  create flag not for restore flags
 		return (createCount - restoreCount) == 1;
 	}
@@ -674,6 +726,19 @@ public abstract class EmbedConnection implements EngineConnection
         // as part of the finally clause of the object creator. 
         this.setInactive();
         throw newSQLException(SQLState.DATABASE_NOT_FOUND, dbname);
+    }
+
+    /**
+     * Examines the boot properties and determines if the given attributes
+     * would entail dropping the database.
+     *
+     * @param p the attribute set
+     * @return {@code true} if the drop database operation is requested,
+     *      {@code false} if not.
+     */
+    private boolean isDropDatabase(Properties p) {
+        return (Boolean.valueOf(
+                    p.getProperty(Attribute.DROP_ATTR)).booleanValue());
     }
 
 	/**
@@ -2521,6 +2586,25 @@ public abstract class EmbedConnection implements EngineConnection
             throw Util.generateCsSQLException(
                     SQLState.AUTH_DATABASE_CREATE_EXCEPTION,
                     dbname, (Object)e); // overloaded method
+        }
+    }
+
+    /**
+     * Puts the current thread to sleep and sets the interrupt flag of the
+     * thread if an {@code InterruptedException} is thrown while sleeping.
+     * <p>
+     * <em>NOTE</em>: This method does not guarantee that the thread sleeps at
+     * least {@code millis} milliseconds.
+     *
+     * @param millis milliseconds to sleep
+     */
+    private static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException ie) {
+            // Set the interrupt flag of the thread to allow code higher up the
+            // stack to detect the interruption.
+            Thread.currentThread().interrupt();
         }
     }
 

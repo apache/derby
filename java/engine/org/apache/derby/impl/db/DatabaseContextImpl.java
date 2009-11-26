@@ -57,6 +57,8 @@ final class DatabaseContextImpl extends ContextImpl implements DatabaseContext
         
         if (se.getSeverity() == ExceptionSeverity.DATABASE_SEVERITY) {
 		    ContextService.getFactory().notifyAllActiveThreads(this);
+            // This may be called multiple times, but is short-circuited
+            // in the monitor.
 		    Monitor.getMonitor().shutdown(db);
         }
 	}

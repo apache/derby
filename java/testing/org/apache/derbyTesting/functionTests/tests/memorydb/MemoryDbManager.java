@@ -148,10 +148,6 @@ public class MemoryDbManager {
      */
     public void dropDatabase(String dbNameAndAttributes)
             throws SQLException {
-        // DISABLED because the feature isn't implemented yet (see DERBY-4428)
-        if (true) {
-            return;
-        }
         String url = JDBC_PREFIX + dbNameAndAttributes + ";drop=true";
         try {
             DriverManager.getConnection(url);

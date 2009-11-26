@@ -77,8 +77,7 @@ public class MogTest extends BaseJDBCTestCase {
           } catch (SQLException sqle) {
               // Ignore exceptions during close.
           }
-          // DISABLED because the feature isn't implemented yet (see DERBY-4428)
-          //dropInMemoryDb();
+          dropInMemoryDb();
       }
       println("duration-in-memory: " + (System.currentTimeMillis() - start));
   }
