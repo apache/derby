@@ -284,9 +284,6 @@ public final class InsertNode extends DMLModStatementNode
 														this);
 			}
 			getCompilerContext().popCurrentPrivType();
-
-            // don't allow overriding of generation clauses
-            forbidGenerationOverrides( targetColumnList, false, null );
 		}
 
 		/* Verify that all underlying ResultSets reclaimed their FromList */

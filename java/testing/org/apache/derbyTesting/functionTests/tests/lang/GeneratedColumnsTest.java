@@ -122,6 +122,118 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
     ///////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * Test for DERBY-4448 and DERBY-4451: removal of explicitly given values
+     * for generated column failed if there is more than one row in the VALUES
+     * clause.
+     */
+    public void testDerby_4448_4451() throws SQLException {
+
+        //  DERBY-4451
+
+        Statement s = createStatement();
+        ResultSet rs = null;
+        setAutoCommit(false);
+
+        s.execute("create table t(a int, b generated always as (-a))");
+        s.execute("insert into t(b,a) values (default,1)");
+
+
+        // Trying to override a generation clause
+
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(b,a) select a,b from t union select a,b from t"
+             );
+
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(a,b) select * from t union select * from t"
+             );
+
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(b,a) select * from t union select * from t"
+             );
+
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(b,a) select * from t intersect select * from t"
+             );
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(b,a) select * from t except select * from t"
+             );
+
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(b,a) select a,b from t"
+             );
+
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(a,b) values (1,1)"
+             );
+
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(b,a) values (default,1), (2, 2)"
+             );
+
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(b,a) values (default,1), (default, 2),(3,3)"
+             );
+
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(b,a) values (1,1), (default, 2),(default,3)"
+             );
+
+        // Originally repro: failed prior to fix with array out of bounds
+        // (insane), or ASSERT (sane):
+        s.execute("insert into t(b,a) values (default,1), (default, 2)");
+
+        rs = s.executeQuery("select * from t");
+        JDBC.assertFullResultSet(rs, new String[][]{
+                {"1", "-1"},
+                {"1", "-1"},
+                {"2", "-2"}});
+
+        // DERBY-4448:
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(b) values (2)"
+            );
+
+        // Originally repro for DERBY-4448: failed with array out of bounds
+        // prior to fix:
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(b) values (default), (2)"
+            );
+
+        expectCompilationError
+            (
+             CANT_OVERRIDE_GENERATION_CLAUSE,
+             "insert into t(b) values (default), (default), (2)"
+            );
+
+        rollback();
+    }
+
+    /**
      * <p>
      * Test that the stored system procedures and functions are non-deterministic. If you want
      * a particular procedure/function to be deterministic, add some logic here.
@@ -5259,6 +5371,8 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     }
     
+
+
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

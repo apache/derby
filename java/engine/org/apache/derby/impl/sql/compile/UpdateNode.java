@@ -374,7 +374,8 @@ public final class UpdateNode extends DMLModStatementNode
 		getCompilerContext().popCurrentPrivType();
 
         // don't allow overriding of generation clauses
-        forbidGenerationOverrides( resultSet.getResultColumns(), true, addedGeneratedColumns );
+        forbidGenerationOverrides( resultSet.getResultColumns(),
+								   addedGeneratedColumns );
         
 		LanguageConnectionContext lcc = getLanguageConnectionContext();
 		if (lcc.getAutoincrementUpdate() == false)
@@ -1293,4 +1294,75 @@ public final class UpdateNode extends DMLModStatementNode
 		super.normalizeSynonymColumns(rcl, tableNameNode);
 	}
     
+    /**
+     * Do not allow generation clauses to be overriden. Throws an exception if
+     * the user attempts to override the value of a generated column.  The only
+     * value allowed in a generated column is DEFAULT. We will use
+     * addedGeneratedColumns list to pass through the generated columns which
+     * have already been added to the update list.
+     *
+     * @param targetRCL  the row in the table being UPDATEd
+     * @param addedGeneratedColumns generated columns which the compiler added
+     *        earlier on
+     * @throws StandardException on error
+     */
+    private void forbidGenerationOverrides(
+        ResultColumnList targetRCL,
+        ColumnDescriptorList addedGeneratedColumns)
+            throws StandardException
+    {
+        int  count = targetRCL.size();
+
+        ResultColumnList    resultRCL = resultSet.getResultColumns();
+
+        for ( int i = 0; i < count; i++ )
+        {
+            ResultColumn    rc = (ResultColumn) targetRCL.elementAt( i );
+
+            if ( rc.hasGenerationClause() )
+            {
+                ValueNode   resultExpression =
+                    ((ResultColumn) resultRCL.elementAt( i )).getExpression();
+
+                if ( !( resultExpression instanceof DefaultNode) )
+                {
+                    //
+                    // We may have added the generation clause
+                    // ourselves. Here we forgive ourselves for this
+                    // pro-active behavior.
+                    //
+                    boolean allIsForgiven = false;
+
+                    String columnName =
+                        rc.getTableColumnDescriptor().getColumnName();
+
+                    int addedCount = addedGeneratedColumns.size();
+
+                    for ( int j = 0; j < addedCount; j++ )
+                    {
+                        String addedColumnName = addedGeneratedColumns.
+                            elementAt(j).getColumnName();
+
+                        if ( columnName.equals( addedColumnName ) )
+                        {
+                            allIsForgiven = true;
+                            break;
+                        }
+                    }
+                    if ( allIsForgiven ) { continue; }
+
+                    throw StandardException.newException
+                        (SQLState.LANG_CANT_OVERRIDE_GENERATION_CLAUSE,
+                         rc.getName() );
+                }
+                else
+                {
+                    // Skip this step if we're working on an update
+                    // statement. For updates, the target list has already
+                    // been enhanced.
+                    continue;
+                }
+            }
+        }
+    }
 } // end of UpdateNode
