@@ -21,9 +21,11 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -139,6 +141,84 @@ public class UDTTest  extends GeneratedColumnsHelper
         goodStatement( conn, "create type adt_schema.fooType external name 'mypackage.foo' language java\n" );
         goodStatement( conn, "create type \"smallint\" external name 'mypackage.foo' language java\n" );
         goodStatement( conn, "create type \"SMALLINT\" external name 'mypackage.foo' language java\n" );
+    }
+
+    /**
+     * <p>
+     * Basic column, return value, and parameter support.
+     * </p>
+     */
+    public void test_02_basicColumnRetvalParam() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create type Price external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement( conn, "create table orders( orderID int generated always as identity, customerID int, totalPrice price )\n" );
+        goodStatement
+            ( conn,
+              "create function makePrice( currencyCode char( 3 ), amount decimal( 31, 5 ), timeInstant Timestamp )\n" +
+              "returns Price language java parameter style java no sql\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.makePrice'\n");
+        goodStatement
+            ( conn,
+              "create function getCurrencyCode( price Price ) returns char( 3 ) language java parameter style java no sql\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.getCurrencyCode'\n" );
+        goodStatement
+            ( conn,
+              "create function getAmount( price Price ) returns decimal( 31, 5 ) language java parameter style java no sql\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.getAmount'\n" );
+        goodStatement
+            ( conn,
+              "create function getTimeInstant( price Price ) returns timestamp language java parameter style java no sql\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.getTimeInstant'\n" );
+        goodStatement
+            ( conn,
+              "create procedure savePrice( in a Price ) language java parameter style java no sql\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.savePrice'\n" );
+        goodStatement
+            ( conn,
+              "create function getSavedPrice() returns Price language java parameter style java no sql\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.getSavedPrice'\n" );
+        goodStatement
+            ( conn,
+              "insert into orders( customerID, totalPrice ) values\n" +
+              "( 12345, makePrice( 'USD', cast( 9.99 as decimal( 31, 5 ) ), timestamp('2009-10-16 14:24:43') ) )\n" );
+
+        assertResults
+            (
+             conn,
+             "select getCurrencyCode( totalPrice ), getAmount( totalPrice ), getTimeInstant( totalPrice ) from orders",
+             new String[][]
+             {
+                 { "USD" ,         "9.99000" ,        "1969-12-31 16:00:00.0" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select totalPrice from orders",
+             new String[][]
+             {
+                 { "Price( USD, 9.99000, 1969-12-31 16:00:00.0 )" },
+             },
+             false
+             );
+
+        goodStatement
+            ( conn,
+              "call savePrice\n" +
+              "( makePrice( 'EUR', cast( 1.23 as decimal( 31, 5 ) ), timestamp('1969-12-31 16:00:00') ) )\n" );
+        assertResults
+            (
+             conn,
+             "values( getSavedPrice() )",
+             new String[][]
+             {
+                 { "Price( EUR, 1.23000, 1969-12-31 16:00:00.0 )" },
+             },
+             false
+             );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////

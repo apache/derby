@@ -54,7 +54,8 @@ public class UserDefinedTypeIdImpl extends BaseTypeIdImpl
 
 	/**
 	 * Constructor for a UserDefinedTypeIdImpl. The SQLTypeName of a UserDefinedType
-	 * is assumed to be its className.
+	 * is assumed to be its className for Derby-only UserDefinedTypes. For
+	 * actual user created UDTs, the SQLTypeName is a schema qualified name.
 	 *
 	 * @param className	The SQL name of the type
 	 */
@@ -62,6 +63,21 @@ public class UserDefinedTypeIdImpl extends BaseTypeIdImpl
 	public UserDefinedTypeIdImpl(String className)
 	{
 		super(className);
+		this.className = className;
+		JDBCTypeId = java.sql.Types.JAVA_OBJECT;
+	}
+
+	/**
+	 * Constructor for a UDT.
+	 *
+	 * @param schemaName	Schema that the UDT lives in.
+	 * @param unqualifiedName	The name of the type inside that schema.
+	 * @param className	The Java class  bound to the SQL type.
+	 */
+
+	public UserDefinedTypeIdImpl(String schemaName, String unqualifiedName, String className)
+	{
+		super( schemaName, unqualifiedName );
 		this.className = className;
 		JDBCTypeId = java.sql.Types.JAVA_OBJECT;
 	}
@@ -78,6 +94,10 @@ public class UserDefinedTypeIdImpl extends BaseTypeIdImpl
 	{
 		return true;
 	}
+    
+	/** Has this user type been bound? */
+	public boolean isBound() { return !(className == null); }
+
 	// Formatable interface.
 
 	/**
@@ -107,6 +127,13 @@ public class UserDefinedTypeIdImpl extends BaseTypeIdImpl
 		 throws IOException
 	{
 		super.writeExternal( out );
+
+        // If the class name is null, then an internal error has occurred. We
+        // are trying to persist a UDT descriptor which has not been bound yet
+        if ( className == null )
+        {
+            throw new IOException( "Internal error: class name for user defined type has not been determined yet." );
+        }
 		out.writeUTF( className );
 	}
 	/**

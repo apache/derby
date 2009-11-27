@@ -271,7 +271,7 @@ public class StaticMethodCallNode extends MethodCallNode
 				optimizeDomainValueConversion();
 			
 			TypeDescriptor returnType = routineInfo.getReturnType();
-			if (returnType != null && !returnType.isRowMultiSet())
+			if ( returnType != null && !returnType.isRowMultiSet() && !returnType.isUserDefinedType() )
 			{
 				TypeId returnTypeId = TypeId.getBuiltInTypeId(returnType.getJDBCTypeId());
 
@@ -424,7 +424,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
 				TypeDescriptor td = parameterTypes[p];
 
-				TypeId typeId = TypeId.getBuiltInTypeId(td.getJDBCTypeId());
+				TypeId typeId = TypeId.getTypeId(td);
 
 				TypeId parameterTypeId = typeId;
 

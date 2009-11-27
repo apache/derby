@@ -80,7 +80,7 @@ public class DecimalTypeIdImpl extends BaseTypeIdImpl
 
 	private void setNumericType()
 	{
-		SQLTypeName = "NUMERIC";
+		unqualifiedName = "NUMERIC";
 		JDBCTypeId = Types.NUMERIC;
 	}
 }

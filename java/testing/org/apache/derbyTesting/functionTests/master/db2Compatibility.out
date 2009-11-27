@@ -178,22 +178,19 @@ Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> create table NOTYPE(i int, b TINYINT);
-ERROR 42X01: Syntax error: Encountered "TINYINT" at line 1, column 30.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ERROR 42X94: TYPE 'TINYINT' does not exist.
 ij> create table NOTYPE(i int, b java.lang.String);
-ERROR 42X01: Syntax error: Encountered "java" at line 1, column 30.
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 39.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> create table NOTYPE(i int, b com.acme.Address);
-ERROR 42X01: Syntax error: Encountered "com" at line 1, column 30.
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 38.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> create table NOTYPE(i int, b org.apache.derby.vti.VTIEnvironment);
-ERROR 42X01: Syntax error: Encountered "org" at line 1, column 30.
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 40.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
@@ -587,12 +584,12 @@ Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> create table mm (x org.apache.derbyTesting.functionTests.util.ManyMethods);
-ERROR 42X01: Syntax error: Encountered "org" at line 1, column 20.
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 30.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> create table sc (x org.apache.derbyTesting.functionTests.util.SubClass);
-ERROR 42X01: Syntax error: Encountered "org" at line 1, column 20.
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 30.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
@@ -717,10 +714,7 @@ ij> create table testtype9(col1 NVARCHAR(10));
 ERROR 0A000: Feature not implemented: NATIONAL CHAR VARYING.
 ij> -- tinyint datatype already disabled
 create table testtype10(col1 TINYINT);
-ERROR 42X01: Syntax error: Encountered "TINYINT" at line 2, column 30.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ERROR 42X94: TYPE 'TINYINT' does not exist.
 ij> create table testtype11 (a national character large object (1000));
 ERROR 0A000: Feature not implemented: NCLOB.
 ij> -- beetle5426
@@ -735,10 +729,7 @@ Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> create table testtype13 (a Tour);
-ERROR 42X01: Syntax error: Encountered "Tour" at line 1, column 28.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ERROR 42X94: TYPE 'TOUR' does not exist.
 ij> -- clean up
 drop table testtype1;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE1' because it does not exist.

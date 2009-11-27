@@ -26,6 +26,7 @@ import java.util.Map;
 
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.types.SynonymAliasInfo;
+import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.ClassName;
@@ -1310,6 +1311,7 @@ public abstract class QueryTreeNode implements Visitable
                 this.getLanguageConnectionContext().getTransactionCompile());
 		if (td == null || td.isSynonymDescriptor())
 			return null;
+
 		return td;
 	}
 
@@ -1595,6 +1597,42 @@ public abstract class QueryTreeNode implements Visitable
             throwReliabilityException( fragmentTypeTxt, fragmentBitMask );
 		}
 	}
+
+    /**
+     * Bind a UDT. This involves looking it up in the DataDictionary and filling
+     * in its class name.
+     */
+    public DataTypeDescriptor bindUserType( DataTypeDescriptor originalDTD ) throws StandardException
+    {
+        // nothing to do if this is not a user defined type
+        if ( !originalDTD.getTypeId().userType() ) { return originalDTD; }
+
+        UserDefinedTypeIdImpl userTypeID = (UserDefinedTypeIdImpl) originalDTD.getTypeId().getBaseTypeId();
+
+        // also nothing to do if the type has already been resolved
+        if ( userTypeID.isBound() ) { return originalDTD; }
+
+        // ok, we have an unbound UDT. lookup this type in the data dictionary
+
+        DataDictionary dd = getDataDictionary();
+        SchemaDescriptor typeSchema = getSchemaDescriptor( userTypeID.getSchemaName() );
+        char  udtNameSpace = AliasInfo.ALIAS_NAME_SPACE_UDT_AS_CHAR;
+        String unqualifiedTypeName = userTypeID.getUnqualifiedName();
+        AliasDescriptor ad = dd.getAliasDescriptor( typeSchema.getUUID().toString(), unqualifiedTypeName, udtNameSpace );
+
+		if (ad == null)
+		{
+			throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, ad.getAliasType(udtNameSpace),  unqualifiedTypeName);
+		}
+
+        DataTypeDescriptor result = new DataTypeDescriptor
+            (
+             TypeId.getUserDefinedTypeId( typeSchema.getSchemaName(), unqualifiedTypeName, ad.getJavaClassName() ),
+             originalDTD.isNullable()
+             );
+
+        return result;
+    }
 
     /**
      * Common code for the 2 checkReliability functions.  Always throws StandardException.

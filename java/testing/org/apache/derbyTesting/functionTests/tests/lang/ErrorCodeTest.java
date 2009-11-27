@@ -70,7 +70,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         
         //-- parser error
         //-- bug 5701        
-        assertStatementError("42X01",30000,s,"create table t(i nt, s smallint)");
+        assertStatementError("42X94",30000,s,"create table t(i nt, s smallint)");
         
         //-- non-boolean where clause
         assertStatementError("42X19", 30000, s, "select * from t where i");

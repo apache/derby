@@ -235,6 +235,11 @@ public class UserType extends DataType
 		return super.getTimestamp(cal);
 	}
 
+	void setObject(Object theValue)
+    {
+        setValue( theValue );
+    }
+    
 	public Object getObject()
 	{
 		return value;

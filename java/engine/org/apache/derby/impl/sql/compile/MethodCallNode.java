@@ -45,6 +45,9 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.catalog.TypeDescriptor;
 
+import org.apache.derby.catalog.types.TypeDescriptorImpl;
+import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
+
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
@@ -760,7 +763,7 @@ abstract class MethodCallNode extends JavaValueNode
 		else
 		{
 			String promoteName = null;
-			TypeDescriptor returnType = routineInfo.getReturnType();
+			TypeDescriptorImpl returnType = (TypeDescriptorImpl) routineInfo.getReturnType();
 			String requiredType;
 			if (returnType == null)
 			{
@@ -778,6 +781,10 @@ abstract class MethodCallNode extends JavaValueNode
 				{
 				    requiredType = ResultSet.class.getName();
 				}
+                else if ( returnType.getTypeId().userType() )
+                {
+                    requiredType = ((UserDefinedTypeIdImpl) returnType.getTypeId()).getClassName();
+                }
 				else
 				{
 			 		requiredType = returnTypeId.getCorrespondingJavaTypeName();

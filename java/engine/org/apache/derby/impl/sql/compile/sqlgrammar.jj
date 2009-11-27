@@ -288,13 +288,13 @@ public class SQLParser
 				);
 	}
 
-	private DataTypeDescriptor getJavaClassDataTypeDescriptor(String javaClassName) 
+	private DataTypeDescriptor getJavaClassDataTypeDescriptor(TableName typeName) 
 	{
-		return new DataTypeDescriptor(
-					TypeId.getUserDefinedTypeId(
-								javaClassName, 
-								lastTokenDelimitedIdentifier.booleanValue()),
-					true);
+		return new DataTypeDescriptor
+            (
+                TypeId.getUserDefinedTypeId( typeName.getSchemaName(), typeName.getTableName(), null ),
+                true
+            );
 	}
 	private LanguageConnectionContext getLanguageConnectionContext()
 	{
@@ -666,6 +666,30 @@ public class SQLParser
 	{
 	    return commonDatatypeName(1, checkFollowingToken);
 	}
+
+	/**
+	 * Determine whether the next sequence of tokens represents 
+	 * a datatype (could be a common datatype or a schema qualified UDT name).
+	 *
+	 * @return	TRUE iff the next set of tokens names a datatype
+	 */
+	boolean dataTypeCheck(int start)
+	{
+        if ( commonDatatypeName( start, false ) ) { return true; }
+
+        boolean retval = true;
+
+		switch (getToken(start).kind)
+		{
+		  case COMMA:
+		  case LEFT_PAREN:
+		  case RIGHT_PAREN:
+			retval = false;
+            break;
+        }
+
+        return retval;
+    }
 
 	/**
 	 * Determine whether a sequence of tokens represents one of
@@ -3790,6 +3814,12 @@ dataTypeDDL() throws StandardException :
 	{
 		return typeDescriptor;
 	}
+|
+    LOOKAHEAD ( { getToken(1).kind != GENERATED } )
+	typeDescriptor = javaType()
+	{
+		return typeDescriptor;
+	}
 }
 
 /**
@@ -4336,12 +4366,12 @@ xmlDocOrContent() throws StandardException :
 DataTypeDescriptor
 javaType() throws StandardException :
 {
-	String	javaClassName;
+	TableName	typeName;
 }
 {
-	javaClassName = javaClassName() 
+	typeName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
 	{
-		return getJavaClassDataTypeDescriptor(javaClassName);
+		return getJavaClassDataTypeDescriptor(typeName);
 	}
 }
 
@@ -10358,7 +10388,7 @@ procedureParameterDefinition(Vector[] list) throws StandardException :
 	inout = inoutParameter()
 	
 	// Lookahead needed because token could satisfy identifier and dataTypeDDL
-	[   LOOKAHEAD( { commonDatatypeName(2, false) })
+	[   LOOKAHEAD( { dataTypeCheck(2) })
 	    parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	]
 	typeDescriptor = dataTypeDDL()
@@ -10453,7 +10483,7 @@ functionParameterDefinition(Vector[] list) throws StandardException :
 }
 {
 	// Lookahead needed because token could satisfy identifier and dataTypeDDL
-	[   LOOKAHEAD( { commonDatatypeName(2, false) })
+	[   LOOKAHEAD( { dataTypeCheck(2) })
 	    parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	]
 	typeDescriptor = dataTypeDDL() 

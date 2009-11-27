@@ -395,6 +395,15 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		return typeId instanceof RowMultiSetImpl;
 	}
 
+	/**
+	* @see TypeDescriptor#isUserDefinedType
+	 */
+    public	boolean isUserDefinedType()
+    {
+        return typeId.userType();
+    }
+
+
 	/** @see TypeDescriptor#getCollationType() */
 	public int	getCollationType()
 	{

@@ -72,7 +72,12 @@ public class BaseTypeIdImpl implements Formatable
     
     private int   formatId;
 
-    String        SQLTypeName;
+    // schema where the type lives. only for UDTs
+    private String schemaName;
+
+    // unqualified type name
+    String unqualifiedName;
+
     /**
      * JDBC type - derived from the format identifier.
      */
@@ -99,25 +104,49 @@ public class BaseTypeIdImpl implements Formatable
     /**
      * Constructor for an BaseTypeIdImpl
      *
-     * @param SQLTypeName   The SQL name of the type
+     * @param SQLTypeName   The unqualified SQL name of the type
      */
 
     BaseTypeIdImpl(String SQLTypeName)
     {
-        this.SQLTypeName = SQLTypeName;
+        this.schemaName = null;
+        this.unqualifiedName = SQLTypeName;
     }
 
     /**
-     * Returns the SQL name of the datatype. If it is a user-defined type,
+     * Constructor for an BaseTypeIdImpl which describes a UDT
+     *
+     * @param schemaName The schema that the UDT lives in
+     * @param qualifiedName The qualified name of the UDT in that schema
+     */
+
+    BaseTypeIdImpl(String schemaName, String unqualifiedName )
+    {
+        this.schemaName = schemaName;
+        this.unqualifiedName = unqualifiedName;
+    }
+
+    /**
+     * Returns the SQL name of the datatype. If it is a Derby user-defined type,
      * it returns the full Java path name for the datatype, meaning the
-     * dot-separated path including the package names.
+     * dot-separated path including the package names. If it is a UDT, returns
+     * "schemaName"."unqualifiedName".
      *
      * @return      A String containing the SQL name of this type.
      */
     public String   getSQLTypeName()
     {
-        return SQLTypeName;
+        if ( schemaName == null ) { return unqualifiedName; }
+        else { return doubleQuote( schemaName ) + '.' + doubleQuote( unqualifiedName ); }
     }
+
+    /** Get the schema name of this type. Non-null only for UDTs */
+    public String getSchemaName() { return schemaName; }
+
+    /** Get the unqualified name of this type. Except for UDTs, this is the same
+     * value as getSQLTypeName()
+     */
+    public String getUnqualifiedName() { return unqualifiedName; }
 
     /**
      * Get the jdbc type id for this type.  JDBC type can be
@@ -237,7 +266,19 @@ public class BaseTypeIdImpl implements Formatable
     public void readExternal( ObjectInput in )
              throws IOException, ClassNotFoundException
     {
-        SQLTypeName = in.readUTF();
+        unqualifiedName = in.readUTF();
+
+        //
+        // If the name begins with a quote, then it is just the first part
+        // of the type name, viz., the schema that the type lives in.
+        // Strip the quotes from around the name and then read the
+        // following  unqualified name.
+        //
+        if ( unqualifiedName.charAt( 0 ) == '"' )
+        {
+            schemaName = stripQuotes( unqualifiedName );
+            unqualifiedName = in.readUTF();
+        }
     }
 
     /**
@@ -250,7 +291,18 @@ public class BaseTypeIdImpl implements Formatable
     public void writeExternal( ObjectOutput out )
              throws IOException
     {
-        out.writeUTF( SQLTypeName );
+        if ( schemaName == null ) { out.writeUTF( unqualifiedName ); }
+        else
+        {
+            //
+            // Wrap the schema name in quotes. quotes are illegal characters in
+            // basic SQL type names and in Java class names, so this will flag
+            // readExternal() that this type has a 2-part name
+            // (schemaName.unqualifiedName).
+            //
+            out.writeUTF( doubleQuote( schemaName ) );
+            out.writeUTF( unqualifiedName );
+        }
     }
 
     private void setTypeIdSpecificInstanceVariables()
@@ -258,109 +310,130 @@ public class BaseTypeIdImpl implements Formatable
         switch (formatId)
         {
           case StoredFormatIds.BOOLEAN_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.BOOLEAN_NAME;
-                JDBCTypeId = JVMInfo.JAVA_SQL_TYPES_BOOLEAN;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.BOOLEAN_NAME;
+              JDBCTypeId = JVMInfo.JAVA_SQL_TYPES_BOOLEAN;
+              break;
 
           case StoredFormatIds.INT_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.INTEGER_NAME;
-                JDBCTypeId = Types.INTEGER;
-                 break;
+              schemaName = null;
+              unqualifiedName = TypeId.INTEGER_NAME;
+              JDBCTypeId = Types.INTEGER;
+              break;
 
           case StoredFormatIds.SMALLINT_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.SMALLINT_NAME;
-                JDBCTypeId = Types.SMALLINT;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.SMALLINT_NAME;
+              JDBCTypeId = Types.SMALLINT;
+              break;
 
           case StoredFormatIds.TINYINT_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.TINYINT_NAME;
-                JDBCTypeId = Types.TINYINT;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.TINYINT_NAME;
+              JDBCTypeId = Types.TINYINT;
+              break;
 
           case StoredFormatIds.LONGINT_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.LONGINT_NAME;
-                JDBCTypeId = Types.BIGINT;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.LONGINT_NAME;
+              JDBCTypeId = Types.BIGINT;
+              break;
 
           case StoredFormatIds.DECIMAL_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.DECIMAL_NAME;
-                JDBCTypeId = Types.DECIMAL;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.DECIMAL_NAME;
+              JDBCTypeId = Types.DECIMAL;
+              break;
 
           case StoredFormatIds.DOUBLE_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.DOUBLE_NAME;
-                JDBCTypeId = Types.DOUBLE;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.DOUBLE_NAME;
+              JDBCTypeId = Types.DOUBLE;
+              break;
 
           case StoredFormatIds.REAL_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.REAL_NAME;
-                JDBCTypeId = Types.REAL;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.REAL_NAME;
+              JDBCTypeId = Types.REAL;
+              break;
                 
           case StoredFormatIds.REF_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.REF_NAME;
-                JDBCTypeId = Types.OTHER;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.REF_NAME;
+              JDBCTypeId = Types.OTHER;
+              break;
 
           case StoredFormatIds.CHAR_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.CHAR_NAME;
-                JDBCTypeId = Types.CHAR;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.CHAR_NAME;
+              JDBCTypeId = Types.CHAR;
+              break;
 
           case StoredFormatIds.VARCHAR_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.VARCHAR_NAME;
-                JDBCTypeId = Types.VARCHAR;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.VARCHAR_NAME;
+              JDBCTypeId = Types.VARCHAR;
+              break;
 
           case StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.LONGVARCHAR_NAME;
-                JDBCTypeId = Types.LONGVARCHAR;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.LONGVARCHAR_NAME;
+              JDBCTypeId = Types.LONGVARCHAR;
+              break;
 
           case StoredFormatIds.CLOB_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.CLOB_NAME;
-                JDBCTypeId = Types.CLOB;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.CLOB_NAME;
+              JDBCTypeId = Types.CLOB;
+              break;
 
           case StoredFormatIds.BIT_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.BIT_NAME;
-                JDBCTypeId = Types.BINARY;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.BIT_NAME;
+              JDBCTypeId = Types.BINARY;
+              break;
 
           case StoredFormatIds.VARBIT_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.VARBIT_NAME;
-                JDBCTypeId = Types.VARBINARY;
-               break;
+              schemaName = null;
+              unqualifiedName = TypeId.VARBIT_NAME;
+              JDBCTypeId = Types.VARBINARY;
+              break;
 
           case StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.LONGVARBIT_NAME;
-                JDBCTypeId = Types.LONGVARBINARY;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.LONGVARBIT_NAME;
+              JDBCTypeId = Types.LONGVARBINARY;
+              break;
 
           case StoredFormatIds.BLOB_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.BLOB_NAME;
-                JDBCTypeId = Types.BLOB;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.BLOB_NAME;
+              JDBCTypeId = Types.BLOB;
+              break;
 
           case StoredFormatIds.DATE_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.DATE_NAME;
-                JDBCTypeId = Types.DATE;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.DATE_NAME;
+              JDBCTypeId = Types.DATE;
+              break;
 
           case StoredFormatIds.TIME_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.TIME_NAME;
-                JDBCTypeId = Types.TIME;
-                 break;
+              schemaName = null;
+              unqualifiedName = TypeId.TIME_NAME;
+              JDBCTypeId = Types.TIME;
+              break;
 
           case StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.TIMESTAMP_NAME;
-                JDBCTypeId = Types.TIMESTAMP;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.TIMESTAMP_NAME;
+              JDBCTypeId = Types.TIMESTAMP;
+              break;
 
           case StoredFormatIds.XML_TYPE_ID_IMPL:
-                SQLTypeName = TypeId.XML_NAME;
-                JDBCTypeId = JDBC40Translation.SQLXML;
-                break;
+              schemaName = null;
+              unqualifiedName = TypeId.XML_NAME;
+              JDBCTypeId = JDBC40Translation.SQLXML;
+              break;
 
           default:
                 if (SanityManager.DEBUG)
@@ -370,4 +443,11 @@ public class BaseTypeIdImpl implements Formatable
                 break;
         }
     }
+
+    // wrap a string in quotes
+    private String doubleQuote( String raw ) { return '"' + raw + '"'; }
+
+    // strip the bracketing quotes from a string
+    private String stripQuotes( String quoted ) { return quoted.substring( 1, quoted.length() - 1 ); }
+    
 }

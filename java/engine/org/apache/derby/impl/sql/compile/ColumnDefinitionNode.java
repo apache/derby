@@ -399,13 +399,13 @@ public class ColumnDefinitionNode extends TableElementNode
 		if (!getType().getTypeId().userType())
 			return;
 
+        // bind the UDT if necessary
+        setType( bindUserType( getType() ) );
+
 		ClassInspector classInspector = getClassFactory().getClassInspector();
 
 		columnTypeName =
 			getType().getTypeId().getCorrespondingJavaTypeName();
-
-
-
 
 		/* User type - We first check for the columnTypeName as a java class.
 		 * If that fails, then we treat it as a class alias.

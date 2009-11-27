@@ -168,7 +168,7 @@ public class CreateAliasNode extends DDLStatementNode
 					for (int i = 0; i < paramCount; i++) {
 						modes[i] = ((Integer) (((Vector) parameters[2]).elementAt(i))).intValue();
 
-						if (TypeId.getBuiltInTypeId(types[i].getJDBCTypeId()).isLongConcatableTypeId())
+						if ( (!types[ i ].isUserDefinedType()) && TypeId.getBuiltInTypeId(types[i].getJDBCTypeId()).isLongConcatableTypeId())
 							throw StandardException.newException(SQLState.LANG_LONG_DATA_TYPE_NOT_ALLOWED, names[i]);
 
 					}
@@ -205,9 +205,22 @@ public class CreateAliasNode extends DDLStatementNode
 				else
 					calledOnNullInput = calledOnNullInputO.booleanValue();
 
+                // bind the return type if it is a user defined type. this fills
+                // in the class name.
+                TypeDescriptor returnType = (TypeDescriptor) routineElements[RETURN_TYPE];
+                if ( returnType != null )
+                {
+                    DataTypeDescriptor dtd = DataTypeDescriptor.getType( returnType );
+                    if ( dtd.getTypeId().isUserDefinedTypeId() )
+                    {
+                        dtd = bindUserType( dtd );
+                        returnType = dtd.getCatalogType();
+                    }
+                }
+
 				aliasInfo = new RoutineAliasInfo(this.methodName, paramCount, names, types, modes, drs,
 						((Short) routineElements[PARAMETER_STYLE]).shortValue(),	// parameter style
-                        sqlAllowed, isDeterministic, calledOnNullInput, (TypeDescriptor) routineElements[RETURN_TYPE]);
+                        sqlAllowed, isDeterministic, calledOnNullInput, returnType );
 
 				implicitCreateSchema = true;
 				}
@@ -314,6 +327,7 @@ public class CreateAliasNode extends DDLStatementNode
             ((RoutineAliasInfo)aliasInfo).setCollationTypeForAllStringTypes(
                     getSchemaDescriptor().getCollationType());
 
+            bindParameterTypes( (RoutineAliasInfo)aliasInfo );
 		}
 		// Procedures and functions do not check class or method validity until
 		// runtime execution. Synonyms do need some validity checks.
@@ -344,6 +358,29 @@ public class CreateAliasNode extends DDLStatementNode
 			throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
 
 	}
+
+    /** Bind the class names for UDTs */
+    private void bindParameterTypes( RoutineAliasInfo aliasInfo ) throws StandardException
+    {
+        TypeDescriptor[] parameterTypes = aliasInfo.getParameterTypes();
+
+        if ( parameterTypes == null ) { return; }
+
+        int count = parameterTypes.length;
+        for ( int i = 0; i < count; i++ )
+        {
+            TypeDescriptor td = parameterTypes[ i ];
+
+            // if this is a user defined type, resolve the Java class name
+            if ( td.isUserDefinedType() )
+            {
+                DataTypeDescriptor dtd = DataTypeDescriptor.getType( td );
+
+                dtd = bindUserType( dtd );
+                parameterTypes[ i ] = dtd.getCatalogType();
+            }
+        }
+    }
 
 	/**
 	 * Create the Constant information that will drive the guts of Execution.

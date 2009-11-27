@@ -186,6 +186,11 @@ public interface TypeDescriptor
 	  */
 	public	boolean isRowMultiSet();
     
+	/**
+	 * Return true if this is a user defined type
+	  */
+	public	boolean isUserDefinedType();
+    
     /**
      * If this catalog type is a row multi-set type
      * then return its array of catalog types.

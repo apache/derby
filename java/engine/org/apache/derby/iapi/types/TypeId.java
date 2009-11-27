@@ -26,6 +26,7 @@ import java.sql.Types;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.DecimalTypeIdImpl;
+import org.apache.derby.catalog.types.TypeDescriptorImpl;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.Limits;
@@ -378,6 +379,19 @@ public final class TypeId
                                         );
         }
 
+    /**
+     * This factory  method is used for UDTs. If the className argument is null,
+     * then this TypeId will have to be bound.
+     */
+    public static TypeId getUserDefinedTypeId(String schemaName, String unqualifiedName, String className )
+    {
+        return new TypeId
+            (
+             StoredFormatIds.USERDEFINED_TYPE_ID_V3,
+             new UserDefinedTypeIdImpl(schemaName, unqualifiedName, className )
+             );
+    }
+
         /**
          * Get a TypeId for the class that corresponds to the given Java type
          * name.
@@ -570,15 +584,21 @@ public final class TypeId
      * @param catalogType
      * @return TypeId that represents the base type, null if not applicable.
      */
-    static TypeId getTypeId(TypeDescriptor catalogType)
+    public static TypeId getTypeId(TypeDescriptor catalogType)
     {
+        TypeDescriptorImpl tdi = (TypeDescriptorImpl) catalogType;
         final int jdbcType = catalogType.getJDBCTypeId();
         TypeId typeId = TypeId.getBuiltInTypeId(jdbcType);
         if (typeId != null)
             return typeId;
         
         if (jdbcType == Types.JAVA_OBJECT) {
-            return TypeId.getUserDefinedTypeId(catalogType.getTypeName(), false);
+            return new TypeId( StoredFormatIds.USERDEFINED_TYPE_ID_V3, tdi.getTypeId() );
+        }
+
+        if ( tdi.isRowMultiSet() )
+        {
+            return new TypeId( StoredFormatIds.ROW_MULTISET_TYPE_ID_IMPL, tdi.getTypeId() );
         }
         
         return null;
