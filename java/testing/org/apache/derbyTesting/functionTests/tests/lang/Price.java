@@ -82,7 +82,7 @@ public class Price implements Externalizable
     public void writeExternal(ObjectOutput out) throws IOException
     {
         // first write the version id
-        out.writeInt( FIRST_VERSION );
+        out.writeInt( TIMESTAMPED_VERSION );
 
         // now write the state
         out.writeObject( currencyCode );

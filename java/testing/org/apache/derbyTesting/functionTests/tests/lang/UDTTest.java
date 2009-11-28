@@ -190,7 +190,7 @@ public class UDTTest  extends GeneratedColumnsHelper
              "select getCurrencyCode( totalPrice ), getAmount( totalPrice ), getTimeInstant( totalPrice ) from orders",
              new String[][]
              {
-                 { "USD" ,         "9.99000" ,        "1969-12-31 16:00:00.0" },
+                 { "USD" ,         "9.99000" ,        "2009-10-16 14:24:43.0" },
              },
              false
              );
@@ -200,7 +200,7 @@ public class UDTTest  extends GeneratedColumnsHelper
              "select totalPrice from orders",
              new String[][]
              {
-                 { "Price( USD, 9.99000, 1969-12-31 16:00:00.0 )" },
+                 { "Price( USD, 9.99000, 2009-10-16 14:24:43.0 )" },
              },
              false
              );
@@ -208,14 +208,14 @@ public class UDTTest  extends GeneratedColumnsHelper
         goodStatement
             ( conn,
               "call savePrice\n" +
-              "( makePrice( 'EUR', cast( 1.23 as decimal( 31, 5 ) ), timestamp('1969-12-31 16:00:00') ) )\n" );
+              "( makePrice( 'EUR', cast( 1.23 as decimal( 31, 5 ) ), timestamp('2008-10-16 14:24:43') ) )\n" );
         assertResults
             (
              conn,
              "values( getSavedPrice() )",
              new String[][]
              {
-                 { "Price( EUR, 1.23000, 1969-12-31 16:00:00.0 )" },
+                 { "Price( EUR, 1.23000, 2008-10-16 14:24:43.0 )" },
              },
              false
              );
