@@ -1601,6 +1601,10 @@ public abstract class QueryTreeNode implements Visitable
     /**
      * Bind a UDT. This involves looking it up in the DataDictionary and filling
      * in its class name.
+     *
+     * @param originalDTD A datatype: might be an unbound UDT and might not be
+     *
+     * @return The bound UDT if originalDTD was an unbound UDT; otherwise returns originalDTD.
      */
     public DataTypeDescriptor bindUserType( DataTypeDescriptor originalDTD ) throws StandardException
     {

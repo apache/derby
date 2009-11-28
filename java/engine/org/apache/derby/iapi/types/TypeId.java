@@ -380,8 +380,14 @@ public final class TypeId
         }
 
     /**
-     * This factory  method is used for UDTs. If the className argument is null,
+     * This factory  method is used for ANSI UDTs. If the className argument is null,
      * then this TypeId will have to be bound.
+     *
+     * @param schemaName Schema that the type definition lives in.
+     * @param unqualifiedName The second part of the ANSI dot-separated name for the type.
+     * @param className The Java class which is bound to the schema-qualified name by the CREATE TYPE statement.
+     *
+     * @return A bound type TypeId describing this ANSI UDT.
      */
     public static TypeId getUserDefinedTypeId(String schemaName, String unqualifiedName, String className )
     {

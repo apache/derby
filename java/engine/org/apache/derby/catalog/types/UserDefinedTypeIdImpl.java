@@ -28,6 +28,25 @@ import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
 
+/**
+ * <p>
+ * This type id describes a user defined type. There are 2 kinds of user defined
+ * types in Derby:
+ * </p>
+ *
+ * <ul>
+ * <li><b>Old-fashioned</b> - In the original Cloudscape code, it was possible
+ * to declare a column's type to be the name of a Java class. Unlike ANSI
+ * UDTs, these user defined types were not schema objects themselves and they
+ * didn't have schema-qualified names. Some of the system tables have columns
+ * whose datatypes are old-fashioned user defined types. E.g., SYS.SYSALIASES.ALIASINFO.</li>
+ * <li><b>ANSI</b> - As part of the work on
+ * <a href="https://issues.apache.org/jira/browse/DERBY-651">DERBY-651</a>,
+ * we added ANSI UDTs. These are user defined types which are declared via the
+ * CREATE TYPE statement. These have schema-qualified names. The CREATE TYPE
+ * statement basically binds a schema-qualified name to the name of a Java class.</li>
+ * </ul>
+ */
 public class UserDefinedTypeIdImpl extends BaseTypeIdImpl
 {
 	/********************************************************

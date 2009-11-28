@@ -117,7 +117,7 @@ public class BaseTypeIdImpl implements Formatable
      * Constructor for an BaseTypeIdImpl which describes a UDT
      *
      * @param schemaName The schema that the UDT lives in
-     * @param qualifiedName The qualified name of the UDT in that schema
+     * @param unqualifiedName The qualified name of the UDT in that schema
      */
 
     BaseTypeIdImpl(String schemaName, String unqualifiedName )
