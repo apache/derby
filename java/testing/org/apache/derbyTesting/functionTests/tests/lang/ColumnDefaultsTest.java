@@ -144,7 +144,19 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         
         assertStatementError("42802", st,
             " insert into neg values (default, 1)");
-        
+
+
+        // DERBY-4426
+        assertStatementError("42Y85", st,
+            " insert into neg values (default) union values (default)");
+
+        assertStatementError("42Y85", st,
+            " insert into neg values (default) except values (default)");
+
+        // Make sure sub-queries are inspected for illegal DEFAULT also.
+        assertStatementError("42Y85", st,
+            " insert into neg select * from (values default) t");
+
         st.executeUpdate( " drop table neg");
         
         st.executeUpdate( "drop function asdf");
@@ -402,7 +414,21 @@ public final class ColumnDefaultsTest extends BaseJDBCTestCase {
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);
-        
+
+        // DERBY-4426: make sure we don't forbid inside a multi-value table
+        // constructor since this is represented as a UnionNode
+        st.executeUpdate( "delete from t7");
+        st.executeUpdate( "insert into t7 values 1, default");
+        rs = st.executeQuery( " select * from t7");
+
+        expRS = new String [][]
+        {
+            {"1"},
+            {"10"}
+        };
+
+        JDBC.assertFullResultSet(rs, expRS, true);
+
         st.executeUpdate( " drop table t1");
         
         st.executeUpdate( " drop table t7");

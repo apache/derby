@@ -853,17 +853,14 @@ public class RowResultSetNode extends FromTable
 	}
 
 	/**
-	 * Replace any DEFAULTs with the associated tree for the default.
-	 *
-	 * @param ttd	The TableDescriptor for the target table.
-	 * @param tcl	The RCL for the target table.
-	 *
-	 * @exception StandardException		Thrown on error
+     * {@inheritDoc}
 	 */
-	void replaceDefaults(TableDescriptor ttd, ResultColumnList tcl) 
+	void replaceOrForbidDefaults(TableDescriptor ttd,
+                                 ResultColumnList tcl,
+                                 boolean allowDefaults)
 		throws StandardException
 	{
-		resultColumns.replaceDefaults(ttd, tcl);
+		resultColumns.replaceOrForbidDefaults(ttd, tcl, allowDefaults);
 	}
 
 	/**

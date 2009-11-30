@@ -295,8 +295,18 @@ public final class InsertNode extends DMLModStatementNode
 				" on return from RS.bindExpressions()");
 		}
 
-		/* Replace any DEFAULTs with the associated tree */
-		resultSet.replaceDefaults(targetTableDescriptor, targetColumnList);
+        /* Replace any DEFAULTs with the associated tree, or flag DEFAULTs if
+         * not allowed (inside top level set operator nodes). Subqueries are
+         * checked for illegal DEFAULTs elsewhere.
+         */
+        boolean isTableConstructor =
+            (resultSet instanceof UnionNode &&
+             ((UnionNode)resultSet).tableConstructor()) ||
+            resultSet instanceof RowResultSetNode;
+
+        resultSet.replaceOrForbidDefaults(targetTableDescriptor,
+                                          targetColumnList,
+                                          isTableConstructor);
 
 		/* Bind the expressions now that the result columns are bound 
 		 * NOTE: This will be the 2nd time for those underlying ResultSets

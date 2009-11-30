@@ -3864,14 +3864,18 @@ public class ResultColumnList extends QueryTreeNodeVector
 	}
 
 	/**
-	 * Replace any DEFAULTs with the associated tree for the default.
+	 * Replace any DEFAULTs with the associated tree for the default if
+	 * allowed, or flag.
 	 *
 	 * @param ttd	The TableDescriptor for the target table.
 	 * @param tcl	The RCL for the target table.
+     * @param allowDefaults true if allowed
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	void replaceDefaults(TableDescriptor ttd, ResultColumnList tcl) 
+	void replaceOrForbidDefaults(TableDescriptor ttd,
+                                 ResultColumnList tcl,
+                                 boolean allowDefaults)
 		throws StandardException
 	{
 		int size = size();
@@ -3882,6 +3886,11 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 			if (rc.isDefaultColumn())
 			{
+                if (!allowDefaults) {
+                    throw StandardException.newException(
+                        SQLState.LANG_INVALID_USE_OF_DEFAULT);
+                }
+
 				//				DefaultNode defaultNode = (DefaultNode) rc.getExpression();
 				// Get ColumnDescriptor by name or by position?
 				ColumnDescriptor cd;

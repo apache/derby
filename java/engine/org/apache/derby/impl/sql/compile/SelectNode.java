@@ -2423,4 +2423,16 @@ public class SelectNode extends ResultSetNode
 				clauseName);
 		}
 	}
+
+    /**
+     * {@inheritDoc}
+     *
+     * A no-op for SelectNode.
+     */
+    void replaceOrForbidDefaults(TableDescriptor ttd,
+                                 ResultColumnList tcl,
+                                 boolean allowDefaults)
+        throws StandardException
+    {
+    }
 }

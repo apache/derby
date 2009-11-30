@@ -233,6 +233,43 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         rollback();
     }
 
+
+    /**
+     * Test for DERBY-4426
+     */
+    public void testDerby_4426() throws SQLException {
+
+        Statement s = createStatement();
+        ResultSet rs = null;
+        setAutoCommit(false);
+
+        s.execute("create table t(a int, b generated always as (-a))");
+        s.execute("insert into t(b,a) values (default,1)");
+
+        // Wrong use of default
+        expectCompilationError
+            (
+             LANG_INVALID_USE_OF_DEFAULT,
+             "insert into t(b,a) values (default,3) intersect " +
+             "                   values (default,3)"
+             );
+
+        expectCompilationError
+            (
+             LANG_INVALID_USE_OF_DEFAULT,
+             "insert into t(a,b) values (3,default) except values (3,default)"
+             );
+
+        expectCompilationError
+            (
+             LANG_INVALID_USE_OF_DEFAULT,
+             "insert into t values (3,default) union values (3,default)"
+             );
+
+
+        rollback();
+    }
+
     /**
      * <p>
      * Test that the stored system procedures and functions are non-deterministic. If you want

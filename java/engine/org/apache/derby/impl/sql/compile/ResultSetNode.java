@@ -1763,19 +1763,28 @@ public abstract class ResultSetNode extends QueryTreeNode
 		return false;
 	}
 
-	/**
-	 * Replace any DEFAULTs with the associated tree for the default.
-	 *
-	 * @param ttd	The TableDescriptor for the target table.
-	 * @param tcl	The RCL for the target table.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	void replaceDefaults(TableDescriptor ttd, ResultColumnList tcl) 
-		throws StandardException
-	{
-		// Only subclasses with something to do override this.
-	}
+    /**
+     * Replace any DEFAULTs with the associated tree for the default if
+     * allowed, or flag (when inside top level set operator nodes). Subqueries
+     * are checked for illegal DEFAULTs elsewhere.
+     *
+     * @param ttd   The TableDescriptor for the target table.
+     * @param tcl   The RCL for the target table.
+     * @param allowDefaults true if allowed
+     *
+     * @exception StandardException         Thrown on error
+     */
+    void replaceOrForbidDefaults(TableDescriptor ttd,
+                                 ResultColumnList tcl,
+                                 boolean allowDefaults)
+        throws StandardException
+    {
+        if (SanityManager.DEBUG) {
+            SanityManager.THROWASSERT(
+                "replaceOrForbidDefaults() not expected to be called for " +
+                this.getClass().getName());
+        }
+    }
 
 	/**
 	 * Is it possible to do a distinct scan on this ResultSet tree.

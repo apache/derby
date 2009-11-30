@@ -87,7 +87,8 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  CASCADED_COLUMN_DROP_WARNING = "01009";
     protected static  final   String  CONSTRAINT_DROPPED_WARNING = "01500";
     protected static  final   String  TRIGGER_DROPPED_WARNING = "01502";
-    
+    protected static  final   String  LANG_INVALID_USE_OF_DEFAULT = "42Y85";
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE

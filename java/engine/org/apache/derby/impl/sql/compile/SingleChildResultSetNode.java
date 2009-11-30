@@ -555,20 +555,6 @@ abstract class SingleChildResultSetNode extends FromTable
 	}
 
 	/**
-	 * Replace any DEFAULTs with the associated tree for the default.
-	 *
-	 * @param ttd	The TableDescriptor for the target table.
-	 * @param tcl	The RCL for the target table.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	void replaceDefaults(TableDescriptor ttd, ResultColumnList tcl) 
-		throws StandardException
-	{
-		childResult.replaceDefaults(ttd, tcl);
-	}
-
-	/**
 	 * @see ResultSetNode#adjustForSortElimination
 	 */
 	void adjustForSortElimination()

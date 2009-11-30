@@ -686,7 +686,20 @@ abstract class SetOperatorNode extends TableOperatorNode
 		}			
 	}
 
-	/**
+    /**
+     * {@inheritDoc}
+     */
+    void replaceOrForbidDefaults(TableDescriptor ttd,
+                                 ResultColumnList tcl,
+                                 boolean allowDefaults)
+        throws StandardException
+    {
+        leftResultSet.replaceOrForbidDefaults(ttd, tcl, allowDefaults);
+        rightResultSet.replaceOrForbidDefaults(ttd, tcl, allowDefaults);
+    }
+
+
+    /**
 	 * Get the parameter types from the given RowResultSetNode into the
 	 * given array of types.  If an array position is already filled in,
 	 * don't clobber it.
