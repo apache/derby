@@ -33,6 +33,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * <p>
@@ -150,6 +151,10 @@ public class UDTTest  extends GeneratedColumnsHelper
      */
     public void test_02_basicColumnRetvalParam() throws Exception
     {
+        //
+        // DECIMAL datatype used here and the JSR169 support for it is less complete.
+        //
+        if ( JDBC.vmSupportsJSR169() ) { return; }
         Connection conn = getConnection();
 
         goodStatement( conn, "create type Price external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
