@@ -916,24 +916,42 @@ public abstract class ResultSetNode extends QueryTreeNode
 	/**
 	 * This ResultSet is the source for an Insert.  The target RCL
 	 * is in a different order and/or a superset of this RCL.  In most cases
-	 * we will reorder and/or add defaults to the current RCL so that is
+	 * we will add a ProjectRestrictNode on top of the source with an RCL that
 	 * matches the target RCL.
 	 * NOTE - The new or enhanced RCL will be fully bound.
 	 *
-	 * @param numTargetColumns	# of columns in target RCL
+	 * @param target            the target node for the insert
+	 * @param inOrder           are source cols in same order as target cols?
 	 * @param colMap			int array representation of correspondence between
 	 *							RCLs - colmap[i] = -1 -> missing in current RCL
 	 *								   colmap[i] = j -> targetRCL(i) <-> thisRCL(j+1)
-	 * @param dataDictionary	DataDictionary to use
-	 * @param targetTD			TableDescriptor for target if the target is not a VTI, null if a VTI
-     * @param targetVTI         Target description if it is a VTI, null if not a VTI
+	 * @return a node that replaces this node and whose RCL matches the target
+	 * RCL. May return this node if no changes to the RCL are needed, or if the
+	 * RCL is modified in-place.
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void enhanceRCLForInsert(int numTargetColumns, int[] colMap, 
-											 DataDictionary dataDictionary,
-											 TableDescriptor targetTD,
-                                             FromVTI targetVTI)
+	ResultSetNode enhanceRCLForInsert(
+			InsertNode target, boolean inOrder, int[] colMap)
+		throws StandardException
+	{
+		if (!inOrder || resultColumns.size() < target.resultColumnList.size()) {
+			return generateProjectRestrictForInsert(target, colMap);
+		}
+		return this;
+	}
+
+	/**
+	 * Generate an RCL that can replace the original RCL of this node to
+	 * match the RCL of the target for the insert.
+	 *
+	 * @param target the target node for the insert
+	 * @param colMap int array representation of correspondence between
+	 *        RCLs - colmap[i] = -1 -&gt; missing in current RCL
+	 *               colmap[i] = j -&gt; targetRCL(i) &lt;-&gt; thisRCL(j+1)
+	 * @return an RCL that matches the target RCL
+	 */
+	ResultColumnList getRCLForInsert(InsertNode target, int[] colMap)
 			throws StandardException
 	{
 		// our newResultCols are put into the bound form straight away.
@@ -946,10 +964,10 @@ public abstract class ResultSetNode extends QueryTreeNode
 		 * (Much simpler to build new list and then assign to source,
 		 * rather than massage the source list in place.)
 		 */
+		int numTargetColumns = target.resultColumnList.size();
 		for (int index = 0; index < numTargetColumns; index++)
 		{
 			ResultColumn	newResultColumn = null;
-			ColumnReference newColumnReference;
 
 			if (colMap[index] != -1)
 			{
@@ -958,14 +976,17 @@ public abstract class ResultSetNode extends QueryTreeNode
 			}
 			else
 			{
-				newResultColumn = genNewRCForInsert(targetTD, targetVTI, index + 1, dataDictionary);
+				newResultColumn = genNewRCForInsert(
+						target.targetTableDescriptor,
+						target.targetVTI,
+						index + 1,
+						target.getDataDictionary());
 			}
 
 			newResultCols.addResultColumn(newResultColumn);
 		}
 
-		/* Set the source RCL to the massaged version */
-		resultColumns = newResultCols;
+		return newResultCols;
 	}
 
 	/**
@@ -1069,6 +1090,103 @@ public abstract class ResultSetNode extends QueryTreeNode
 		newResultColumn.markGeneratedForUnmatchedColumnInInsert();
 
 		return newResultColumn;
+	}
+
+	/**
+	 * Generate a ProjectRestrictNode to put on top of this node if it's the
+	 * source for an insert, and the RCL needs reordering and/or addition of
+	 * columns in order to match the target RCL.
+	 *
+	 * @param target the target node for the insert
+	 * @param colMap int array representation of correspondence between
+	 *        RCLs - colmap[i] = -1 -&gt; missing in current RCL
+	 *               colmap[i] = j -&gt; targetRCL(i) &lt;-&gt; thisRCL(j+1)
+	 * @return a ProjectRestrictNode whos RCL matches the target RCL
+	 */
+	private ResultSetNode generateProjectRestrictForInsert(
+			InsertNode target, int[] colMap)
+		throws StandardException
+	{
+		// our newResultCols are put into the bound form straight away.
+		ResultColumnList newResultCols =
+								(ResultColumnList) getNodeFactory().getNode(
+												C_NodeTypes.RESULT_COLUMN_LIST,
+												getContextManager());
+
+		int numTargetColumns = target.resultColumnList.size();
+
+		/* Create a massaged version of the source RCL.
+		 * (Much simpler to build new list and then assign to source,
+		 * rather than massage the source list in place.)
+		 */
+		for (int index = 0; index < numTargetColumns; index++)
+		{
+			ResultColumn	newResultColumn;
+			ResultColumn	oldResultColumn;
+			ColumnReference newColumnReference;
+
+			if (colMap[index] != -1)
+			{
+				// getResultColumn uses 1-based positioning, so offset the
+				// colMap entry appropriately
+				oldResultColumn =
+						resultColumns.getResultColumn(colMap[index] + 1);
+
+				newColumnReference = (ColumnReference) getNodeFactory().getNode(
+												C_NodeTypes.COLUMN_REFERENCE,
+												oldResultColumn.getName(),
+												null,
+												getContextManager());
+				/* The ColumnReference points to the source of the value */
+				newColumnReference.setSource(oldResultColumn);
+				// colMap entry is 0-based, columnId is 1-based.
+				newColumnReference.setType(oldResultColumn.getType());
+
+				// Source of an insert, so nesting levels must be 0
+				newColumnReference.setNestingLevel(0);
+				newColumnReference.setSourceLevel(0);
+
+				// because the insert already copied the target table's
+				// column descriptors into the result, we grab it from there.
+				// alternatively, we could do what the else clause does,
+				// and look it up in the DD again.
+				newResultColumn = (ResultColumn) getNodeFactory().getNode(
+						C_NodeTypes.RESULT_COLUMN,
+						oldResultColumn.getType(),
+						newColumnReference,
+						getContextManager());
+			}
+			else
+			{
+				newResultColumn = genNewRCForInsert(
+						target.targetTableDescriptor,
+						target.targetVTI,
+						index + 1,
+						target.getDataDictionary());
+			}
+
+			newResultCols.addResultColumn(newResultColumn);
+		}
+
+		/* The generated ProjectRestrictNode now has the ResultColumnList
+		 * in the order that the InsertNode expects.
+		 * NOTE: This code here is an exception to several "rules":
+		 *		o  This is the only ProjectRestrictNode that is currently
+		 *		   generated outside of preprocess().
+		 *	    o  The UnionNode is the only node which is not at the
+		 *		   top of the query tree which has ColumnReferences under
+		 *		   its ResultColumnList prior to expression push down.
+		 */
+		return (ResultSetNode) getNodeFactory().getNode(
+									C_NodeTypes.PROJECT_RESTRICT_NODE,
+									this,
+									newResultCols,
+									null,
+									null,
+									null,
+									null,
+									null,
+									getContextManager());
 	}
 
 	/**

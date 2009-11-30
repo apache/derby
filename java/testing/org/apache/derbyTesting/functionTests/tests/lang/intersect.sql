@@ -176,3 +176,14 @@ select * from view_ex_all order by 1 DESC,2,3;
 -- intersect joins
 select t1.id,t1.i1,t2.i1 from t1 join t2 on t1.id = t2.id
 intersect select t1.id,t1.i2,t2.i2 from t1 join t2 on t1.id = t2.id;
+
+-- DERBY-4433: Insert from INTERSECT/EXCEPT into subset of columns
+create table d4433_t1(x int);
+insert into d4433_t1 values 1,2,3,4;
+create table d4433_t2(x int);
+insert into d4433_t2 values 3,4,5,6;
+create table d4433_t3(x int, y int);
+insert into d4433_t3(x) select x from d4433_t1 intersect select x from d4433_t2;
+select * from d4433_t3 order by x, y;
+insert into d4433_t3(x) select x from d4433_t1 except select x from d4433_t2;
+select * from d4433_t3 order by x, y;

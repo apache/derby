@@ -123,6 +123,18 @@ public class RowResultSetNode extends FromTable
 		}
 	}
 
+	/**
+	 * Modify the RCL of this node to match the target of the insert.
+	 */
+	ResultSetNode enhanceRCLForInsert(
+			InsertNode target, boolean inOrder, int[] colMap)
+		throws StandardException
+	{
+		if (!inOrder || resultColumns.size() < target.resultColumnList.size()) {
+			resultColumns = getRCLForInsert(target, colMap);
+		}
+		return this;
+	}
 
 	/*
 	 *  Optimizable interface
