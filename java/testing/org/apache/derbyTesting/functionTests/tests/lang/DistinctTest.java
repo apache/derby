@@ -457,14 +457,20 @@ public class DistinctTest extends BaseJDBCTestCase {
 		assertEquals(2, s.executeUpdate("insert into destWithAI(c12) select distinct(c31) from source"));
 		
 		// we should not see gaps in the autoincrement column
-		String [][] expected = { {"1", "1"}, 
-				                 {"2", "2"} };
-		JDBC.assertFullResultSet(s.executeQuery("select * from destWithAI"), expected);
+		String [][] expected = { {"1"}, {"2"} };
+		JDBC.assertFullResultSet(
+				s.executeQuery("select c11 from destWithAI order by c11"),
+				expected);
+		JDBC.assertFullResultSet(
+				s.executeQuery("select c12 from destWithAI order by c12"),
+				expected);
 		
 		assertEquals(2, s.executeUpdate("insert into destWithNoAI(c22) select distinct(c31) from source"));
 		expected = new String [][] { {null, "1"}, 
 				                     {null, "2"} };
-		JDBC.assertFullResultSet(s.executeQuery("select * from destWithNoAI"), expected);
+		JDBC.assertFullResultSet(
+				s.executeQuery("select * from destWithNoAI order by c22"),
+				expected);
 		
 		s.execute("drop table source");
 		s.execute("drop table destWithNoAI");
