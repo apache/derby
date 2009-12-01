@@ -168,12 +168,7 @@ public class BasicSortObserver implements SortObserver
 		{
 			// the only difference between getClone and cloneObject is cloneObject does
 			// not objectify a stream.  We use getClone here.  Beetle 4896.
-
-			// DERBY-4413 shows that the value for a generated column will be
-			// null as the result set is computed as part of an INSERT INTO, so
-			// accept a null also.
-			newArray[i] =
-				(origArray[i] != null ? origArray[i].getClone() : null);
+			newArray[i] = origArray[i].getClone();
 		}
 
 		return newArray;
