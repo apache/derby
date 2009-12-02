@@ -347,8 +347,21 @@ public class StaticMethodCallNode extends MethodCallNode
 	 * This can't be done for parameters which are wrappers over SQL function
 	 * defined with RETURN NULL ON NULL INPUT because such functions need
 	 * access to both sql domain value and java domain value. - Derby479
+     * This optimization is not available if the outer function is
+	 * RETURN NULL ON NULL INPUT. That is because the SQLToJavaNode is
+	 * responsible for compiling the byte code which skips the method call if
+     * the parameter is null--if we remove the SQLToJavaNode, then we don't
+     * compile that check and we get bug DERBY-1030.
 	 */
 	private void optimizeDomainValueConversion() throws StandardException {
+
+        //
+        // This optimization is not possible if we are compiling a call to
+        // a NULL ON NULL INPUT method. See DERBY-1030 and the header
+        // comment above.
+        //
+        if ( !routineInfo.calledOnNullInput() ) { return; }
+        
 		int		count = methodParms.length;
 		for (int parm = 0; parm < count; parm++)
 		{

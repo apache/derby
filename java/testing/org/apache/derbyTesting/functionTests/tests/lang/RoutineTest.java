@@ -572,7 +572,7 @@ public class RoutineTest extends BaseJDBCTestCase {
         // noon->NULL by inner function
         // NULL->NULL by outer due to RETURN NULL ON NULL INPUT
         ps.setTime(1, noon); // noon->NULL->NULL
-        JDBC.assertSingleValueResultSet(ps.executeQuery(), "11:00:00");        
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);        
         ps.setTime(1, null); // NULL->11:00:00->11:30:00
         JDBC.assertSingleValueResultSet(ps.executeQuery(), "11:30:00");
 
