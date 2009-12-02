@@ -904,4 +904,56 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         st1.close();
         st.close();
     }
+    // This test verifies that if the PRIMARY KEY constraint mentions a
+    // column which is potentially large, then Derby will automatically
+    // choose a large pagesize for the index's conglomerate (DERBY-3947)
+    //
+    public void testPrimaryKeyPageSizeDerby3947()
+        throws SQLException
+    {
+        st = createStatement();
+        st.executeUpdate("create table d3947 (x varchar(1000) primary key)");
+        char[] chars = new char[994];
+        PreparedStatement ps = prepareStatement("insert into d3947 values (?)");
+        ps.setString(1, new String(chars));
+        ps.executeUpdate();
+        ps.close();
+        checkLargePageSize(st, "D3947");
+        st.executeUpdate("drop table d3947");
+
+        // A second variation is to add the PK constraint using ALTER TABLE;
+        // A third variation is to add a FK constraint
+        st.executeUpdate("create table d3947 (x varchar(1000) not null, " +
+                " y varchar(1000))");
+        st.executeUpdate("alter table d3947 add constraint " +
+                "constraint1 primary key (x)");
+        st.executeUpdate("alter table d3947 add constraint " +
+                "constraint2 foreign key (y) references d3947(x)");
+        checkLargePageSize(st, "D3947");
+        // Ensure we still get the right error message when col doesn't exist:
+        assertStatementError("42X14", st,
+                "alter table d3947 add constraint " +
+                "constraint3 foreign key (z) references d3947(x)");
+        st.executeUpdate("drop table d3947");
+
+        st.close();
+    }
+    private void checkLargePageSize(Statement st, String tblName)
+        throws SQLException
+    {
+        ResultSet rs = st.executeQuery(
+            "select * from TABLE(SYSCS_DIAG.SPACE_TABLE('"+tblName+"')) T");
+        while (rs.next())
+        {
+            if ("1".equals(rs.getString("isindex")))
+                assertEquals(32768, rs.getInt("pagesize"));
+            else
+                assertEquals(4096, rs.getInt("pagesize"));
+
+            //System.out.println(rs.getString("conglomeratename") +
+            //        ","+rs.getString("isindex")+
+            //        ","+rs.getString("pagesize"));
+        }
+        rs.close();
+    }
 }

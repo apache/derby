@@ -25,6 +25,8 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -61,6 +63,7 @@ import org.apache.derby.catalog.UUID;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.HashSet;
+import java.util.Properties;
 import java.util.Vector;
 
 /**
@@ -1298,9 +1301,64 @@ public class TableElementList extends QueryTreeNodeVector
                     isAscending,
                     isConstraint,
                     cdn.getBackingIndexUUID(),
-                    cdn.getProperties());
+                    checkIndexPageSizeProperty(cdn));
 		}
 	}
+    /**
+     * Checks if the index should use a larger page size.
+     *
+     * If the columns in the index are large, and if the user hasn't already
+     * specified a page size to use, then we may need to default to the
+     * large page size in order to get an index with sufficiently large pages.
+     * For example, this DDL should use a larger page size for the index
+     * that backs the PRIMARY KEY constraint:
+     *
+     * create table t (x varchar(1000) primary key)
+     *
+     * @param cdn Constraint node
+     *
+     * @return properties to use for creating the index
+     */
+    private Properties checkIndexPageSizeProperty(ConstraintDefinitionNode cdn) 
+        throws StandardException
+    {
+        Properties result = cdn.getProperties();
+        if (result == null)
+            result = new Properties();
+        if ( result.get(Property.PAGE_SIZE_PARAMETER) != null ||
+             PropertyUtil.getServiceProperty(
+                 getLanguageConnectionContext().getTransactionCompile(),
+                 Property.PAGE_SIZE_PARAMETER) != null)
+        {
+            // do not override the user's choice of page size, whether it
+            // is set for the whole database or just set on this statement.
+            return result;
+        }
+        ResultColumnList rcl = cdn.getColumnList();
+        int approxLength = 0;
+        for (int index = 0; index < rcl.size(); index++)
+        {
+            String colName = ((ResultColumn) rcl.elementAt(index)).getName();
+            DataTypeDescriptor dtd;
+            if (td == null)
+                dtd = getColumnDataTypeDescriptor(colName);
+            else
+                dtd = getColumnDataTypeDescriptor(colName, td);
+            // There may be no DTD if the column does not exist. That syntax
+            // error is not caught til later in processing, so here we just
+            // skip the length checking if the column doesn't exist.
+            if (dtd != null)
+                approxLength+=dtd.getTypeId().getApproximateLengthInBytes(dtd);
+        }
+        if (approxLength > Property.IDX_PAGE_SIZE_BUMP_THRESHOLD)
+        {
+            result.put(
+                    Property.PAGE_SIZE_PARAMETER,
+                    Property.PAGE_SIZE_DEFAULT_LONG);
+        }
+        return result;
+    }
+
 
 	/**
 	 * Check to make sure that there are no duplicate column names
