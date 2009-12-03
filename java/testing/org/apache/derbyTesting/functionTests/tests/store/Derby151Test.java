@@ -23,6 +23,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.JDBC;
 
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -36,6 +37,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.DriverManager;
 
 /**
  *   Test to reproduce and verify fix for DERBY-151.
@@ -53,11 +55,33 @@ public class Derby151Test extends BaseJDBCTestCase
     protected static Test baseSuite(String name)
     {
         TestSuite suite = new TestSuite(name);
-        suite.addTestSuite(Derby151Test.class);
-        return new CleanDatabaseTestSetup(
-            new TestSuite(Derby151Test.class, name));
+
+        if (!JDBC.vmSupportsJSR169()) {
+            // JSR169 cannot run with tests with stored procedures
+            // that do database access - for they require a
+            // DriverManager connection to jdbc:default:connection;
+            // DriverManager is not supported with JSR169.
+            suite.addTestSuite(Derby151Test.class);
+            return new CleanDatabaseTestSetup(
+                new TestSuite(Derby151Test.class, name));
+        } else {
+            return suite;
+        }
     }
 
+    public static Test suite()
+    {
+        TestSuite suite = new TestSuite("Derby151Test");
+
+        suite.addTest(
+            baseSuite("Derby151Test:embedded"));
+
+        suite.addTest(
+            TestConfiguration.clientServerDecorator(
+                baseSuite("Derby151Test:c/s")));
+
+        return suite;
+    }
 
     protected void setUp()
             throws java.lang.Exception {
@@ -67,6 +91,7 @@ public class Derby151Test extends BaseJDBCTestCase
         stmt.executeUpdate("CREATE TABLE d151(x int primary key)");
         stmt.close();
     }
+
     /**
      * Clean up the connection maintained by this test.
      */
@@ -80,52 +105,51 @@ public class Derby151Test extends BaseJDBCTestCase
         super.tearDown();
     }
 
+    // We do the actual test inside a stored procedure so we can test this for
+    // client/server as well, otherwise we would just interrupt the client
+    // thread.
+    public static void d151() throws SQLException {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
 
-    public void testD151 () throws SQLException {
-        PreparedStatement insert =
-            prepareStatement("insert into d151 values (?)");
+        PreparedStatement insert = null;
         try {
+            insert = c.prepareStatement("insert into d151 values (?)");
+
             for (int i = 0; i < 10000; i++) {
                 insert.setInt(1, i);
                 insert.executeUpdate();
                 Thread.currentThread().interrupt();
             }
+        } finally {
+            if (insert != null) {
+                try {
+                    insert.close(); // already closed by error
+                } catch (SQLException e) {
+                }
+            }
+
+            c.close();
+        }
+    }
+
+    public void testD151 () throws SQLException {
+        Statement s = createStatement();
+        s.executeUpdate(
+            "create procedure D151 () MODIFIES SQL DATA " +
+            "external name 'org.apache.derbyTesting.functionTests" +
+            ".tests.store.Derby151Test.d151' " +
+            "language java parameter style java");
+
+        try {
+            s.executeUpdate("call D151()");
 
             // We were not able to prokove any error, but that should not fail
-            // the test; the results here may depend on VMs possibly.  So just,
+            // the test; the results here may depend on VMs possibly.  So just
             // report this fact in verbose mode:
 
             println("Not able to test fix for DERBY-151: No interrupt seen");
-
         } catch (SQLException e) {
             assertSQLState("XSDG9", e);
         }
-        insert.close(); // already closed by error
-    }
-
-    public static Test suite()
-    {
-        TestSuite suite = new TestSuite("Derby151Test");
-        suite.addTest(
-            baseSuite("Derby151Test:embedded"));
-
-        // Note: We are not adding a client/Server version since the explicit
-        // interrupt may (will) upset the communication socket to the client.
-        // I see 08006 SQL state on OpenSolaris/JDK1.6.
-        //
-        //    :
-        // org.apache.derby.client.am.DisconnectException:
-        //                    A communications error has been detected: null.
-        //    :
-        // java.io.InterruptedIOException
-        //    at java.net.SocketOutputStream.socketWrite0(Native Method)
-        //    at java.net.SocketOutputStream.socketWrite(
-        //                                         SocketOutputStream.java:92)
-        //    at java.net.SocketOutputStream.write(SocketOutputStream.java:136)
-        //
-        // which happened before any error in RAFContainer4.
-
-
-        return suite;
     }
 }
