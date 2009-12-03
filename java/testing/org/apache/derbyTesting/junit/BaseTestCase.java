@@ -470,7 +470,7 @@ public abstract class BaseTestCase
 	 * @throws InterruptedException
 	 * @throws IOException
 	 */
-	public void assertExecJavaCmdAsExpected(String[] expectedString,
+	public static void assertExecJavaCmdAsExpected(String[] expectedString,
 	        String[] cmd, int expectedExitValue) throws InterruptedException,
 	        IOException {
 
@@ -499,7 +499,7 @@ public abstract class BaseTestCase
 	 * @return the process that was started
 	 * @throws IOException
 	 */
-	public Process execJavaCmd(String[] cmd) throws IOException {
+	public static Process execJavaCmd(String[] cmd) throws IOException {
 	    int totalSize = 3 + cmd.length;
 	    String[] tcmd = new String[totalSize];
 	    tcmd[0] = getJavaExecutableName();
@@ -521,11 +521,7 @@ public abstract class BaseTestCase
 	            }
 	        });
 	    } catch (PrivilegedActionException pe) {
-	        Exception e = pe.getException();
-	        if (e instanceof IOException)
-	            throw (IOException) e;
-	        else
-	            throw (SecurityException) e;
+            throw (IOException) pe.getException();
 	    }
 	    return pr;
 	}
@@ -552,7 +548,7 @@ public abstract class BaseTestCase
     * @return output of the process
     * @throws InterruptedException
     */
-   public String readProcessOutput(Process pr) throws InterruptedException {
+   public static String readProcessOutput(Process pr) throws InterruptedException {
 		InputStream is = pr.getInputStream();
 		if (is == null) {
 			fail("Unexpectedly receiving no text from the process");
