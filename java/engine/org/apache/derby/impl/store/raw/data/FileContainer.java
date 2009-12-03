@@ -903,9 +903,10 @@ abstract class FileContainer
      * @param bytes the bytes to write
      * @param offset the offset to start writing at
      * @throws IOException if an I/O error occurs while writing
+	 * @exception StandardException  Derby Standard error policy
      */
     void writeAtOffset(StorageRandomAccessFile file, byte[] bytes, long offset)
-            throws IOException
+            throws IOException, StandardException
     {
         file.seek(offset);
         file.write(bytes);
@@ -919,8 +920,10 @@ abstract class FileContainer
 		positioned at the beginning of the first allocation page.
 
 		@exception IOException error in read the embryonic page from file
+		@exception StandardException  Derby Standard error policy
 	*/
-	protected byte[] getEmbryonicPage(DataInput fileData) throws IOException
+	protected byte[] getEmbryonicPage(DataInput fileData) throws
+		IOException, StandardException
 	{
 		byte[] epage = new byte[AllocPage.MAX_BORROWED_SPACE];
 
@@ -941,9 +944,10 @@ abstract class FileContainer
      * {@code FileContainer.FIRST_ALLOC_PAGE_OFFSET})
      * @return a byte array containing the embryonic page
      * @throws IOException if an I/O error occurs while reading
+	 * @throws StandardException  Derby Standard error policy
      */
     byte[] getEmbryonicPage(StorageRandomAccessFile file, long offset)
-            throws IOException
+            throws IOException, StandardException
     {
         file.seek(offset);
         return getEmbryonicPage(file);

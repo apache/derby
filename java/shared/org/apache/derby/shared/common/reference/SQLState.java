@@ -531,6 +531,7 @@ public interface SQLState {
 	String DATA_DIRECTORY_NOT_FOUND_IN_BACKUP                   = "XSDG6.D";
 	String UNABLE_TO_REMOVE_DATA_DIRECTORY                      = "XSDG7.D";
 	String UNABLE_TO_COPY_DATA_DIRECTORY                        = "XSDG8.D";
+	String FILE_IO_INTERRUPTED                                  = "XSDG9.D";
 
 
 

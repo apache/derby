@@ -23,6 +23,7 @@ package org.apache.derby.impl.store.raw.data;
 
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.store.raw.ContainerKey;
@@ -33,6 +34,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.ClosedByInterruptException;
 import org.apache.derby.io.StorageRandomAccessFile;
 
 /**
@@ -422,7 +424,7 @@ class RAFContainer4 extends RAFContainer {
      * @throws IOException if an I/O error occurs while writing
      */
     void writeAtOffset(StorageRandomAccessFile file, byte[] bytes, long offset)
-            throws IOException
+            throws IOException, StandardException
     {
         FileChannel ioChannel = getChannel(file);
         if (ioChannel != null) {
@@ -442,9 +444,10 @@ class RAFContainer4 extends RAFContainer {
      * {@code FileContainer.FIRST_ALLOC_PAGE_OFFSET})
      * @return a byte array containing the embryonic page
      * @throws IOException if an I/O error occurs while reading
+     * @throws StandardException if thread is interrupted.
      */
     byte[] getEmbryonicPage(StorageRandomAccessFile file, long offset)
-            throws IOException
+            throws IOException, StandardException
     {
         FileChannel ioChannel = getChannel(file);
         if (ioChannel != null) {
@@ -459,21 +462,32 @@ class RAFContainer4 extends RAFContainer {
 
     /**
      * Attempts to fill buf completely from start until it's full.
-     * <p>
+     * <p/>
      * FileChannel has no readFull() method, so we roll our own.
+     * <p/>
+     * @param dstBuffer buffer to read into
+     * @param srcChannel channel to read from
+     * @param position file position from where to read
+     *
+     * @throws IOException if an I/O error occurs while reading
+     * @throws StandardException If thread is interrupted.
      */
     private final void readFull(ByteBuffer dstBuffer,
                                 FileChannel srcChannel,
                                 long position)
-        throws IOException
+            throws IOException, StandardException
     {
         while(dstBuffer.remaining() > 0) {
-            if( srcChannel.read(dstBuffer, position + dstBuffer.position())
-                    == -1)
-            {
-                throw new EOFException(
-                        "Reached end of file while attempting to read a "
-                        + "whole page.");
+            try {
+                if (srcChannel.read(dstBuffer,
+                                    position + dstBuffer.position()) == -1) {
+                        throw new EOFException(
+                            "Reached end of file while attempting to read a "
+                            + "whole page.");
+                }
+            } catch (ClosedByInterruptException e) {
+                throw StandardException.newException(
+                    SQLState.FILE_IO_INTERRUPTED, e);
             }
         }
     }
@@ -481,16 +495,28 @@ class RAFContainer4 extends RAFContainer {
     /**
      * Attempts to write buf completely from start until end, at the given
      * position in the destination fileChannel.
-     * <p>
+     * <p/>
      * FileChannel has no writeFull() method, so we roll our own.
+     * <p/>
+     * @param srcBuffer buffer to write
+     * @param dstChannel channel to write to
+     * @param position file position to start writing at
+     *
+     * @throws IOException if an I/O error occurs while writing
+     * @throws StandardException If thread is interrupted.
      */
     private final void writeFull(ByteBuffer srcBuffer,
                                  FileChannel dstChannel,
                                  long position)
-        throws IOException
+            throws IOException, StandardException
     {
         while(srcBuffer.remaining() > 0) {
-            dstChannel.write(srcBuffer, position + srcBuffer.position());
+            try {
+                dstChannel.write(srcBuffer, position + srcBuffer.position());
+            } catch (ClosedByInterruptException e) {
+                throw StandardException.newException(
+                    SQLState.FILE_IO_INTERRUPTED, e);
+            }
         }
     }
 }

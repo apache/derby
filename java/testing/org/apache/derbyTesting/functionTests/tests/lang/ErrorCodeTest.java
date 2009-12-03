@@ -214,6 +214,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSDG6","Data segment directory not found in {0} backup during restore. Please make sure that backup copy is the right one and it is not corrupted.","45000"},
         		{"XSDG7","Directory {0} could not be removed during restore. Please make sure that permissions are correct.","45000"},
         		{"XSDG8","Unable to copy directory '{0}' to '{1}' during restore. Please make sure that there is enough space and permissions are correct. ","45000"},
+        		{"XSDG9","Derby thread received an interrupt during a disk I/O operation, please check your application for the source of the interrupt.","45000"},
         		{"XSLA0","Cannot flush the log file to disk {0}.","45000"},
         		{"XSLA1","Log Record has been sent to the stream, but it cannot be applied to the store (Object {0}).  This may cause recovery problems also.","45000"},
         		{"XSLA2","System will shutdown, got I/O Exception while accessing log file.","45000"},

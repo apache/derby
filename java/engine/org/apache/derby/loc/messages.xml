@@ -5635,6 +5635,11 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <arg>value</arg>
             </msg>
 
+            <msg>
+                <name>XSDG9.D</name>
+                <text>Derby thread received an interrupt during a disk I/O operation, please check your application for the source of the interrupt.</text>
+            </msg>
+
         </family>
 
 
