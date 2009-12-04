@@ -1083,7 +1083,54 @@ public class BinaryRelationalOperatorNode
 
 		return -1;
 	}	
-	
+
+    /**
+     * Return an equivalent node with the operands swapped, and possibly with
+     * the operator type changed in order to preserve the meaning of the
+     * expression.
+     */
+    BinaryOperatorNode getSwappedEquivalent() throws StandardException {
+        BinaryOperatorNode newNode = (BinaryOperatorNode) getNodeFactory().getNode(getNodeTypeForSwap(),
+                rightOperand, leftOperand,
+                getContextManager());
+        newNode.setType(getTypeServices());
+        return newNode;
+    }
+
+    /**
+     * Return the node type that must be used in order to construct an
+     * equivalent expression if the operands are swapped. For symmetric
+     * operators ({@code =} and {@code <>}), the same node type is returned.
+     * Otherwise, the direction of the operator is switched in order to
+     * preserve the meaning (for instance, a node representing less-than will
+     * return the node type for greater-than).
+     *
+     * @return a node type that preserves the meaning of the expression if
+     * the operands are swapped
+     */
+    private int getNodeTypeForSwap() {
+        switch (getNodeType()) {
+            case C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE:
+                return C_NodeTypes.BINARY_EQUALS_OPERATOR_NODE;
+            case C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE:
+                return C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE;
+            case C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE:
+                return C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE;
+            case C_NodeTypes.BINARY_LESS_THAN_OPERATOR_NODE:
+                return C_NodeTypes.BINARY_GREATER_THAN_OPERATOR_NODE;
+            case C_NodeTypes.BINARY_LESS_EQUALS_OPERATOR_NODE:
+                return C_NodeTypes.BINARY_GREATER_EQUALS_OPERATOR_NODE;
+            case C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE:
+                return C_NodeTypes.BINARY_NOT_EQUALS_OPERATOR_NODE;
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT(
+                            "Invalid nodeType: " + getNodeType());
+                }
+                return -1;
+        }
+    }
+
 	/**
 	 * is this is useful start key? for example a predicate of the from
 	 * <em>column Lessthan 5</em> is not a useful start key but is a useful stop

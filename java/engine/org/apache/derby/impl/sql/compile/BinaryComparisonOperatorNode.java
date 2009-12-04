@@ -336,6 +336,25 @@ public abstract class BinaryComparisonOperatorNode extends BinaryOperatorNode
 										  ValueNode rightOperand)
 				throws StandardException;
 
+    /**
+     * <p>
+     * Return a node equivalent to this node, but with the left and right
+     * operands swapped. The node type may also be changed if the operator
+     * is not symmetric.
+     * </p>
+     *
+     * <p>
+     * This method may for instance be used to normalize a predicate by
+     * moving constants to the right-hand side of the comparison. Example:
+     * {@code 1 = A} will be transformed to {@code A = 1}, and {@code 10 < B}
+     * will be transformed to {@code B > 10}.
+     * </p>
+     *
+     * @return an equivalent expression with the operands swapped
+     * @throws StandardException if an error occurs
+     */
+    abstract BinaryOperatorNode getSwappedEquivalent() throws StandardException;
+
 	/**
 	 * Finish putting an expression into conjunctive normal
 	 * form.  An expression tree in conjunctive normal form meets

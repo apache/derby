@@ -839,20 +839,6 @@ public class BinaryOperatorNode extends ValueNode
 	}
 
 	/**
-	 * Swap the left and right sides.
-	 */
-	void swapOperands()
-	{
-		String	  tmpInterfaceType = leftInterfaceType;
-		ValueNode tmpVN = leftOperand;
-
-		leftOperand = rightOperand;
-		rightOperand = tmpVN;
-		leftInterfaceType = rightInterfaceType;
-		rightInterfaceType = tmpInterfaceType;
-	}
-
-	/**
 	 * Accept the visitor for all visitable children of this node.
 	 * 
 	 * @param v the visitor

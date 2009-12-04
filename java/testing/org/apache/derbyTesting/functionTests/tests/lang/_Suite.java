@@ -77,6 +77,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(JoinTest.suite());
 		suite.addTest(LangScripts.suite());
         suite.addTest(MathTrigFunctionsTest.suite());
+        suite.addTest(PredicateTest.suite());
         suite.addTest(PrepareExecuteDDL.suite());
         suite.addTest(ReferentialActionsTest.suite());
         suite.addTest(RolesTest.suite());

@@ -2271,10 +2271,10 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				{
 					searchClauses.addElement(predicate);
 				}
-				else if (right instanceof ConstantNode && left instanceof ColumnReference)
+				else if (left instanceof ConstantNode && right instanceof ColumnReference)
 				{
 					// put the ColumnReference on the left to simplify things
-					bcon.swapOperands();
+					andNode.setLeftOperand(bcon.getSwappedEquivalent());
 					searchClauses.addElement(predicate);
 				}
 				continue;
