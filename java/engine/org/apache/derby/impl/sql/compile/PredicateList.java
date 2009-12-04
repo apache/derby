@@ -2179,7 +2179,14 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 					{
 						outerJCL.addElement(newPred);
 					}
-					innerJCL.addElement(newPred);
+
+                    if (outerJCL != innerJCL) {
+                        innerJCL.addElement(newPred);
+                    } else {
+                        // DERBY-4387: Avoid adding <t1>.a = <t1>.b twice to
+                        // the same predicate list, so do nothing since we
+                        // already added predicate to outerJCL above.
+                    }
 				}
 			}
 		}
