@@ -191,4 +191,50 @@ public class JoinTest extends BaseJDBCTestCase {
         s.execute("drop table d4372_1");
         s.execute("drop table d4372_2");
     }
+
+
+    /**
+     * Test that computation of transitive closure of equi-join does not give
+     * rise to eternal loop in a case where a predicate of type T1.x = T1.y is
+     * added to the closure.
+     * @throws SQLException
+     */
+    public void testDerby4387() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        ResultSet rs;
+
+
+        s.executeUpdate("create table c (a int, b int, c int)");
+        s.executeUpdate("create table cc (aa int)");
+
+        // Compiling this query gave an infinite loop (would eventually run out
+        // of memory though) before the fix:
+        rs = s.executeQuery("select * from cc t1, c t2, cc t3 " +
+                            "    where t3.aa = t2.a and " +
+                            "          t3.aa = t2.b and " +
+                            "          t3.aa = t2.c");
+
+        // After the fix the correct joinClauses table should look like this
+        // when done (see PredicateList#joinClauseTransitiveClosure variable
+        // joinClauses), where EC is equivalence class assigned, and a *
+        // denotes a predicate added by the closure computation.
+        //
+        // [0]: (t1)
+        // [1]: (t2)
+        //    [0]: 2.1 = 1.1 EC: 0     i.e.  t3.aa == t2.a
+        //    [1]: 1.1 = 1.3 EC: 0           t2.a  == t2.c *
+        //    [2]: 1.1 = 1.2 EC: 0           t2.a  == t2.b *
+        //    [3]: 2.1 = 1.2 EC: 0           t3.aa == t2.b
+        //    [4]: 2.1 = 1.3 EC: 0           t3.aa == t2.c
+        // [2]: (t3)
+        //    [0]: 2.1 = 1.1 EC: 0           t3.aa == t2.a
+        //    [1]: 2.1 = 1.2 EC: 0           t3.aa == t2.b
+        //    [2]: 2.1 = 1.3 EC: 0           t3.aa == t2.c
+        //
+        // Before the fix, the derived predicates (e.g. t2.a == t2.b) were
+        // added twice and caused an infinite loop.
+
+        rollback();
+    }
 }
