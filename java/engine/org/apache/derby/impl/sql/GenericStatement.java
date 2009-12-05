@@ -521,7 +521,7 @@ public class GenericStatement
 						bindTime - parseTime, //bind time
 						optimizeTime - bindTime, //optimize time
 						generateTime - optimizeTime, //generate time
-						getElapsedTimeMillis(beginTime),
+						generateTime - beginTime, //total compile time
 						beginTimestamp,
 						endTimestamp);
 				}
