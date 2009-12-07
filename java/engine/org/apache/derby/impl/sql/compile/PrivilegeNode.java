@@ -47,8 +47,9 @@ public class PrivilegeNode extends QueryTreeNode
     public static final int ROUTINE_PRIVILEGES = 1;
 
     private int objectType;
-    private Object objectOfPrivilege;
-    private TablePrivilegesNode specificPrivileges; // Null for routines
+    private TableName objectName;
+    private TablePrivilegesNode specificPrivileges; // Null for routine and usage privs
+    private RoutineDesignator routineDesignator; // null for table and usage privs
 
     /**
      * initialize a PrivilegesNode
@@ -60,8 +61,6 @@ public class PrivilegeNode extends QueryTreeNode
     public void init( Object objectType, Object objectOfPrivilege, Object specificPrivileges)
     {
         this.objectType = ((Integer) objectType).intValue();
-        this.objectOfPrivilege = objectOfPrivilege;
-        this.specificPrivileges = (TablePrivilegesNode) specificPrivileges;
         if( SanityManager.DEBUG)
         {
             SanityManager.ASSERT( objectOfPrivilege != null,
@@ -69,19 +68,17 @@ public class PrivilegeNode extends QueryTreeNode
             switch( this.objectType)
             {
             case TABLE_PRIVILEGES:
-                SanityManager.ASSERT( objectOfPrivilege instanceof TableName,
-                                      "incorrect name type, " + objectOfPrivilege.getClass().getName()
-                                      + ", used with table privilege");
                 SanityManager.ASSERT( specificPrivileges != null,
                                       "null specific privileges used with table privilege");
+                objectName = (TableName) objectOfPrivilege;
+                this.specificPrivileges = (TablePrivilegesNode) specificPrivileges;
                 break;
 
             case ROUTINE_PRIVILEGES:
-                SanityManager.ASSERT( objectOfPrivilege instanceof RoutineDesignator,
-                                      "incorrect name type, " + objectOfPrivilege.getClass().getName()
-                                      + ", used with table privilege");
                 SanityManager.ASSERT( specificPrivileges == null,
                                       "non-null specific privileges used with execute privilege");
+                routineDesignator = (RoutineDesignator) objectOfPrivilege;
+                objectName = routineDesignator.name;
                 break;
 
             default:
@@ -106,71 +103,78 @@ public class PrivilegeNode extends QueryTreeNode
 	public QueryTreeNode bind( HashMap dependencies, List grantees, boolean isGrant ) throws StandardException
 	{
         Provider dependencyProvider = null;
-        SchemaDescriptor sd = null;
-		
+        SchemaDescriptor sd = getSchemaDescriptor( objectName.getSchemaName(), true);
+        objectName.setSchemaName( sd.getSchemaName() );
+        
+        // Can not grant/revoke permissions from self
+        if (grantees.contains(sd.getAuthorizationId()))
+        {
+            throw StandardException.newException
+                (SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, objectName.getFullTableName());
+        }
+
         switch( objectType)
         {
         case TABLE_PRIVILEGES:
-            TableName tableName = (TableName) objectOfPrivilege;
-            sd = getSchemaDescriptor( tableName.getSchemaName(), true);
+
+            // can't grant/revoke privileges on system tables
             if (sd.isSystemSchema())
-                throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, tableName.getFullTableName());
-				
-            TableDescriptor td = getTableDescriptor( tableName.getTableName(), sd);
+            {
+                throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, objectName.getFullTableName());
+            }
+            
+            TableDescriptor td = getTableDescriptor( objectName.getTableName(), sd);
             if( td == null)
-                throw StandardException.newException( SQLState.LANG_TABLE_NOT_FOUND, tableName);
+            {
+                throw StandardException.newException( SQLState.LANG_TABLE_NOT_FOUND, objectName);
+            }
 
             // Don't allow authorization on SESSION schema tables. Causes confusion if
             // a temporary table is created later with same name.
             if (isSessionSchema(sd.getSchemaName()))
+            {
                 throw StandardException.newException(SQLState.LANG_OPERATION_NOT_ALLOWED_ON_SESSION_SCHEMA_TABLES);
+            }
 
             if (td.getTableType() != TableDescriptor.BASE_TABLE_TYPE &&
             		td.getTableType() != TableDescriptor.VIEW_TYPE)
-                throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, tableName.getFullTableName());
-
-			// Can not grant/revoke permissions from self
-			if (grantees.contains(sd.getAuthorizationId()))
-				throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED,
-						 td.getQualifiedName());
+            {
+                throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, objectName.getFullTableName());
+            }
 
             specificPrivileges.bind( td, isGrant);
             dependencyProvider = td;
             break;
 
         case ROUTINE_PRIVILEGES:
-            RoutineDesignator rd = (RoutineDesignator) objectOfPrivilege;
-            sd = getSchemaDescriptor( rd.name.getSchemaName(), true);
-
             if (!sd.isSchemaWithGrantableRoutines())
-                throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, rd.name.getFullTableName());
+            {
+                throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED, objectName.getFullTableName());
+            }
 				
             AliasDescriptor proc = null;
             RoutineAliasInfo routineInfo = null;
             java.util.List list = getDataDictionary().getRoutineList(
-                sd.getUUID().toString(), rd.name.getTableName(),
-                rd.isFunction ? AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR : AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR
+                sd.getUUID().toString(), objectName.getTableName(),
+                routineDesignator.isFunction ? AliasInfo.ALIAS_NAME_SPACE_FUNCTION_AS_CHAR : AliasInfo.ALIAS_NAME_SPACE_PROCEDURE_AS_CHAR
                 );
 
-			// Can not grant/revoke permissions from self
-			if (grantees.contains(sd.getAuthorizationId()))
-				throw StandardException.newException(SQLState.AUTH_GRANT_REVOKE_NOT_ALLOWED,
-						 rd.name.getFullTableName());
-
-            if( rd.paramTypeList == null)
+            if( routineDesignator.paramTypeList == null)
             {
                 // No signature was specified. Make sure that there is exactly one routine with that name.
                 if( list.size() > 1)
-                    throw StandardException.newException( ( rd.isFunction ? SQLState.LANG_AMBIGUOUS_FUNCTION_NAME
+                {
+                    throw StandardException.newException( ( routineDesignator.isFunction ? SQLState.LANG_AMBIGUOUS_FUNCTION_NAME
                                                             : SQLState.LANG_AMBIGUOUS_PROCEDURE_NAME),
-                                                          rd.name.getFullTableName());
+                                                          objectName.getFullTableName());
+                }
                 if( list.size() != 1) {
-                    if (rd.isFunction) {
+                    if (routineDesignator.isFunction) {
                         throw StandardException.newException(SQLState.LANG_NO_SUCH_FUNCTION, 
-                                rd.name.getFullTableName());
+                                objectName.getFullTableName());
                     } else {
                         throw StandardException.newException(SQLState.LANG_NO_SUCH_PROCEDURE, 
-                                rd.name.getFullTableName());
+                                objectName.getFullTableName());
                     }
                 }
                 proc = (AliasDescriptor) list.get(0);
@@ -185,13 +189,13 @@ public class PrivilegeNode extends QueryTreeNode
 
                     routineInfo = (RoutineAliasInfo) proc.getAliasInfo();
                     int parameterCount = routineInfo.getParameterCount();
-                    if (parameterCount != rd.paramTypeList.size())
+                    if (parameterCount != routineDesignator.paramTypeList.size())
                         continue;
                     TypeDescriptor[] parameterTypes = routineInfo.getParameterTypes();
                     found = true;
                     for( int parmIdx = 0; parmIdx < parameterCount; parmIdx++)
                     {
-                        if( ! parameterTypes[parmIdx].equals( rd.paramTypeList.get( parmIdx)))
+                        if( ! parameterTypes[parmIdx].equals( routineDesignator.paramTypeList.get( parmIdx)))
                         {
                             found = false;
                             break;
@@ -201,20 +205,23 @@ public class PrivilegeNode extends QueryTreeNode
                 if( ! found)
                 {
                     // reconstruct the signature for the error message
-                    StringBuffer sb = new StringBuffer( rd.name.getFullTableName());
+                    StringBuffer sb = new StringBuffer( objectName.getFullTableName());
                     sb.append( "(");
-                    for( int i = 0; i < rd.paramTypeList.size(); i++)
+                    for( int i = 0; i < routineDesignator.paramTypeList.size(); i++)
                     {
                         if( i > 0)
                             sb.append(",");
-                        sb.append( rd.paramTypeList.get(i).toString());
+                        sb.append( routineDesignator.paramTypeList.get(i).toString());
                     }
                     throw StandardException.newException(SQLState.LANG_NO_SUCH_METHOD_ALIAS, sb.toString());
                 }
             }
-            rd.setAliasDescriptor( proc);
+            routineDesignator.setAliasDescriptor( proc);
             dependencyProvider = proc;
             break;
+
+        default:
+                SanityManager.THROWASSERT( "Invalid privilege objectType: " + this.objectType);
         }
 
         if( dependencyProvider != null)
@@ -239,7 +246,7 @@ public class PrivilegeNode extends QueryTreeNode
             return specificPrivileges.makePrivilegeInfo();
 
         case ROUTINE_PRIVILEGES:
-            return ((RoutineDesignator) objectOfPrivilege).makePrivilegeInfo();
+            return routineDesignator.makePrivilegeInfo();
         }
         return null;
     }
