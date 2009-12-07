@@ -65,27 +65,36 @@ public class PrivilegeNode extends QueryTreeNode
         {
             SanityManager.ASSERT( objectOfPrivilege != null,
                                   "null privilge object");
-            switch( this.objectType)
+        }
+        switch( this.objectType)
+        {
+        case TABLE_PRIVILEGES:
+            if( SanityManager.DEBUG)
             {
-            case TABLE_PRIVILEGES:
                 SanityManager.ASSERT( specificPrivileges != null,
                                       "null specific privileges used with table privilege");
-                objectName = (TableName) objectOfPrivilege;
-                this.specificPrivileges = (TablePrivilegesNode) specificPrivileges;
-                break;
-
-            case ROUTINE_PRIVILEGES:
+            }
+            objectName = (TableName) objectOfPrivilege;
+            this.specificPrivileges = (TablePrivilegesNode) specificPrivileges;
+            break;
+            
+        case ROUTINE_PRIVILEGES:
+            if( SanityManager.DEBUG)
+            {
                 SanityManager.ASSERT( specificPrivileges == null,
                                       "non-null specific privileges used with execute privilege");
-                routineDesignator = (RoutineDesignator) objectOfPrivilege;
-                objectName = routineDesignator.name;
-                break;
-
-            default:
+            }
+            routineDesignator = (RoutineDesignator) objectOfPrivilege;
+            objectName = routineDesignator.name;
+            break;
+            
+        default:
+            if( SanityManager.DEBUG)
+            {
                 SanityManager.THROWASSERT( "Invalid privilege objectType: " + this.objectType);
             }
         }
-    } // end of init
+    }
 
     /**
      * Bind this GrantNode. Resolve all table, column, and routine references. Register
