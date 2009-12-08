@@ -230,7 +230,10 @@ public class PrivilegeNode extends QueryTreeNode
             break;
 
         default:
+            if( SanityManager.DEBUG)
+            {
                 SanityManager.THROWASSERT( "Invalid privilege objectType: " + this.objectType);
+            }
         }
 
         if( dependencyProvider != null)
