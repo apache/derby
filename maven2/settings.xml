@@ -7,21 +7,39 @@
     <server>
       <id>apache.releases</id>
       <!-- RELEASE_DATA: User credentials required for site deployment.
-           Replace the user name and password with your Apache credentials.
+           Fill in your Apache user name, and uncomment the line to specify
+           a private key passphrase if required.
            It is highly recommended to only do this when actually deploying
            a release, and then revert the changes immediately afterwards to
            avoid unintended deployments!
+
+           Note that all required information can be specified as properties on
+           the command line instead of in this file. For instance:
+           mvn -Dusername=asf_user -Dpassphrase=asf_users_passphrase deploy
+
+           If you get the credentials wrong and try to deploy to the Apache
+           site, your IP may be blacklisted. Contact the Apache infrastructure
+           team to get the ban lifted.
       -->
       <username>my_login</username>
+      <!--
+           Password authentication doesn't work (unknown reason).
+           Use a private key (see below).
       <password>my_password</password>
-      <!-- Make sure only one of password and privateKey is used.
-           If both are present, privateKey will be ignored.
+      -->
+      <!-- Make sure only one of 'password' and 'privateKey' is specified.
+           If both are present, 'privateKey' will be ignored.
+      -->
       <privateKey>${user.home}/.ssh/id_dsa</privateKey>
+      <!-- Specify the key passphrase if you have one (uncomment the line).
       <passphrase>some_passphrase</passphrase>
       -->
+
+      <!-- These settings don't work, but maybe they will one day? -->
       <filePermissions>664</filePermissions>
       <directoryPermissions>775</directoryPermissions>
       <configuration></configuration>
+
     </server>
   </servers>
 </settings>

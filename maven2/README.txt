@@ -1,8 +1,8 @@
 GENERATING MAVEN 2 ARTIFACTS FOR APACHE DERBY
 =============================================
 
-The POMs in the maven2 directory are able to generate Maven 2 artifacts for
-Apache Derby. The following software is required for deploying a release:
+The POMs in the maven2 directory enable you to generate Maven 2 artifacts
+for Apache Derby. The following software is required for deploying a release:
  1. Maven 2
  2. GnuPG (for signing the artifacts)
  3. ssh/scp (for site deployment)
@@ -11,20 +11,38 @@ Note that Maven 2 will pull down quite a few required plugins the first time
 you run it. They will be cached locally, so they are not downloaded again the
 next time.
 
+All commands below are to be executed from the directory 'maven2' within the
+Derby source code repository.
+
+WARNING: The Maven repository is write-once. This means that you have only one
+         chance to deploy artifacts with a given version string. Once they are
+         deployed, you cannot overwrite them. The only way to deprecate a set
+         of deployed artifacts is to deploy a new set of artifacts with a
+         different version string.
+
+
 Short description of the required steps:
+
  a) Generate the Derby jar files.
-    For releases, generate the insane jars. You can specify which jars to use
+    For releases, generate the insane jars. You can override which jars to use
     with the property 'sanity' in the top-level POM.
     The jars are expected to be found in 'jars/[in]sane' relative to the
     checked out code repository.
 
- b) Specify required information for one or all of the following steps.
-    To generate and deploy release artifacts, these pieces of information must
-    be specified:
+ b) Specify required information for one or all of the following sub-steps.
+    To successfully generate and deploy release artifacts, all of these
+    must be specified:
       - The Derby release version, which must be specified in all POMs.
-        One way to do this, is to use search and replace (i.e. Perl or sed).
-      - Passphrase for your GPG signing key, see top level POM and step (d).
-      - User credentials for deployment, see 'settings.xml'.
+        Compile and execute the Java program SetDerbyVersion, i.e.:
+        javac SetDerbyVersion && java -cp . SetDerbyVersion
+        Alternatively, use search and replace (i.e. Perl or sed) - make sure
+        you don't replace version tags that aren't supposed to modified.
+        Make sure you diff the POMs to verify the changes.
+        Note that the Java program performs some extra sanity checks.
+      - Passphrase for your GPG signing key. Required for step (c) and (d).
+        See the top level POM for details, brief instructions in (c).
+      - User credentials for deployment. Required for step (d).
+        See 'settings.xml' for details.
 
  c) 'mvn clean install'
     Generates the artifacts, signatures for the artifacts using GnuPG and
@@ -32,12 +50,17 @@ Short description of the required steps:
     You are required to provide your private key and the passphrase to GnuPG.
     Using a passphrase agent is recommended, but you can also specify it on
     the command line when invoking maven with -Dgpg.passphrase=PASSPHRASE.
-    There are other ways to achieve this too, but please do not specify you
-    passphrase in the POM that is deployed on the Maven repositories!
+
+    WARNING: Do not specify your passphrase in the POM that is deployed on
+             the Maven repositories!
+
     The local repository is typically found in '~/.m2/repository/', and the
-    Derby artifacts are located under "org/apache/derby/".
+    Derby artifacts are located under 'org/apache/derby/'.
     The clean target is included to avoid unintentionally installing/deploying
     artifacts not supposed to be deployed.
+    If you just want to build the artifacts, use 'mvn package' or 'mvn verify'.
+    The former will generate the artifact jar, the latter will additionally
+    generate/include the POM to be deployed and the signatures.
 
     NOTE: Do not run 'mvn package|verify install', that is to combine either
           package or verify with install, as this causes the
@@ -45,17 +68,42 @@ Short description of the required steps:
           './engine/target/derby-trunk-alpha.jar.asc.asc'.
 
  d) 'mvn deploy' or 'mvn clean deploy'
-   NOTE: This step has been reported not to work. Deploy manually until fixed.
-   Deploys the artifacts, including signatures and checksum files, to the
-   Apache Maven 2 repository. The files will then be distributed to mirrors.
+    Deploys the artifacts, including signatures and checksum files, to the
+    Apache Maven 2 repository. The files will then be distributed to mirrors.
 
-Basically, for each project, the following files should be found in the
-various 'maven2/[project]/target' directories:
+    NOTE: This step has been reported to not work when using username and
+    password authentication. Unless you prefer to deploy manually, use a
+    public key to log into the remote host (people.apache.org).
+
+For each project, the following files should be found in the
+various 'maven2/[project]/target' directories after 'verify' or 'install':
     - ARTIFACT-VERSION.jar
     - ARTIFACT-VERSION.jar.asc
     - ARTIFACT-VERSION.pom
     - ARTIFACT-VERSION.pom.asc
 
-When these are deployed or installed locally, there will be a md5 and a sha1
-file for each artifact. The 'derbywar' project will have a war file instead
-of a jar file.
+When these are deployed, or installed locally, checksum files (a md5 and a sha1
+file for each artifact) will be generated by Maven. Check your local
+repository to confirm this (i.e. '~/.m2/repository').
+The 'derbywar' project will have a war file instead of a jar file.
+
+Some time after you have deployed the artifacts to the Apache staging
+repository (happens when you run 'mvn deploy'), they should appear in the
+central Maven repository.
+Try one of these to confirm that your artifacts are available:
+http://repo1.maven.org/maven2/org/apache/derby/
+http://mvnrepository.com/artifact/org.apache.derby
+
+
+Release history for Maven 2 artifacts
+=====================================
+
+The list below shows the Apache Derby artifacts published by the Apache Derby
+community.
+The dates are when the artifacts were written to the central Maven repository
+(repo1.maven.org/maven2 or repo2.maven.org/maven2).
+
+2009-10-07 10.5.3.0_1   OK
+2009-08-26 10.5.3.0     BROKEN
+    An error in all the POMs made these artifacts unusable (DERBY-4390).
+    Use version 10.5.3.0_1 instead.
