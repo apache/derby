@@ -98,6 +98,13 @@ public class Derby151Test extends BaseJDBCTestCase
     protected void tearDown()
             throws java.lang.Exception {
 
+        // Clearing the interrupt flag; makes sense for embedded part of
+        // the test. When running c/s, it would be the server thread which
+        // receives the interrupt, and since db is shut down, that should
+        // be ok for later tests. We need to clear the flag here since, for
+        // embedded, the app thread is affected.
+        Thread.currentThread().interrupted();
+
         Statement stmt = createStatement();
         stmt.executeUpdate("DROP TABLE d151");
         stmt.close();
@@ -150,12 +157,6 @@ public class Derby151Test extends BaseJDBCTestCase
             println("Not able to test fix for DERBY-151: No interrupt seen");
         } catch (SQLException e) {
             assertSQLState("XSDG9", e);
-            // Clearing the interrupt flag; makes sense for embedded part of
-            // the test. When running c/s, it would be the server thread which
-            // receives the interrupt, and since db is shut down, that should
-            // be ok for later tests. We need to clear the flag here since, for
-            // embedded, the app thread is affected.
-            Thread.currentThread().interrupted();
         }
     }
 }
