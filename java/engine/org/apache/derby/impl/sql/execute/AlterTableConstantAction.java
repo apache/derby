@@ -510,6 +510,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			}
 		}
 
+        // adjust dependencies on user defined types
+        adjustUDTDependencies( lcc, dd, td, columnInfo );
+
 		/* Create/Drop any constraints */
 		if (constraintActions != null)
 		{

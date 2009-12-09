@@ -21,9 +21,12 @@
 
 package org.apache.derby.impl.sql.execute;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
@@ -37,9 +40,12 @@ import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.depend.ProviderInfo;
+import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
+import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
@@ -56,6 +62,7 @@ import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
  * Abstract class that has actions that are across
@@ -805,6 +812,122 @@ abstract class DDLConstantAction implements ConstantAction
         }
     }
 
+    /**
+     * Adjust dependencies of a table on ANSI UDTs. We only add one dependency
+     * between a table and a UDT. If the table already depends on the UDT, we don't add
+     * a redundant dependency.
+     */
+    protected   void    adjustUDTDependencies
+        (
+         LanguageConnectionContext  lcc,
+         DataDictionary     dd,
+         TableDescriptor    td,
+         ColumnInfo[]        columnInfos
+         )
+        throws StandardException
+    {
+        if ( columnInfos == null ) { return; }
+
+		TransactionController tc = lcc.getTransactionExecute();
+
+        int changedColumnCount = columnInfos.length;
+        HashMap addUdtMap = new HashMap();
+        HashMap dropUdtMap = new HashMap();
+        HashSet addColumnNames = new HashSet();
+        HashSet dropColumnNames = new HashSet();
+
+        // first find all of the new ansi udts which the table must depend on
+        // and the old ones which are candidates for removal
+        for ( int i = 0; i < changedColumnCount; i++ )
+        {
+            ColumnInfo ci = columnInfos[ i ];
+
+            // skip this column if it is not a UDT
+            AliasDescriptor ad = dd.getAliasDescriptorForUDT( tc, columnInfos[ i ].dataType );
+            if ( ad == null ) { continue; }
+
+            String key = ad.getObjectID().toString();
+
+            if ( ci.action == ColumnInfo.CREATE )
+            {
+                addColumnNames.add( ci.name);
+
+                // no need to add the descriptor if it is already on the list
+                if ( addUdtMap.get( key ) != null ) { continue; }
+
+                addUdtMap.put( key, ad );
+            }
+            else if ( ci.action == ColumnInfo.DROP )
+            {
+                dropColumnNames.add( ci.name );
+                dropUdtMap.put( key, ad );
+            }
+        }
+
+        // nothing to do if there are no columns of udt type
+        if ( (addUdtMap.size() == 0) && (dropUdtMap.size() == 0) ) { return; }
+
+        //
+        // Now prune from the add list all udt descriptors for which we already have dependencies.
+        // These are the udts for old columns. This supports the ALTER TABLE ADD COLUMN
+        // case.
+        //
+        // Also prune from the drop list add udt descriptors which will still be
+        // referenced by the remaining columns.
+        //
+        ColumnDescriptorList cdl = td.getColumnDescriptorList();
+        int totalColumnCount = cdl.size();
+
+        for ( int i = 0; i < totalColumnCount; i++ )
+        {
+            ColumnDescriptor cd = cdl.elementAt( i );
+
+            // skip columns that are being added and dropped. we only want the untouched columns
+            if (
+                addColumnNames.contains( cd.getColumnName() ) ||
+                dropColumnNames.contains( cd.getColumnName() )
+                ) { continue; }
+
+            // nothing to do if the old column isn't a UDT
+            AliasDescriptor ad = dd.getAliasDescriptorForUDT( tc, cd.getType() );
+            if ( ad == null ) { continue; }
+
+            String key = ad.getObjectID().toString();
+
+            // ha, it is a UDT. remove the UDT from the list of dependencies to
+            // add and drop
+            if ( addUdtMap.get( key ) != null ) { addUdtMap.remove( key ); }
+            if ( dropUdtMap.get( key ) != null ) { dropUdtMap.remove( key ); }
+        }
+
+        // again, nothing to do if there are no columns of udt type
+        if ( (addUdtMap.size() == 0) && (dropUdtMap.size() == 0) ) { return; }
+
+        DependencyManager   dm = dd.getDependencyManager();
+        ContextManager      cm = lcc.getContextManager();
+
+        // add new dependencies
+        Iterator            addIterator = addUdtMap.values().iterator();
+        while( addIterator.hasNext() )
+        {
+            AliasDescriptor ad = (AliasDescriptor) addIterator.next();
+
+            dm.addDependency( td, ad, cm );
+        }
+
+        // drop dependencies that are orphaned
+        Iterator            dropIterator = dropUdtMap.values().iterator();
+        while( dropIterator.hasNext() )
+        {
+            AliasDescriptor ad = (AliasDescriptor) dropIterator.next();
+
+            DependencyDescriptor dependency = new DependencyDescriptor( td, ad );
+
+            dd.dropStoredDependency( dependency, tc );
+        }
+    }
+
+    
 	/**
 	 * Mutable Boolean wrapper, initially false
 	 */

@@ -264,6 +264,7 @@ public class BasicDependencyManager implements DependencyManager {
 		throws StandardException
 	{
 		List list = getDependents(p);
+
 		if (list == null)
 		{
 			return;
@@ -888,6 +889,9 @@ public class BasicDependencyManager implements DependencyManager {
 
             case DROP_SEQUENCE:
 				return "DROP SEQUENCE";
+
+            case DROP_UDT:
+				return "DROP TYPE";
 
             default:
 				if (SanityManager.DEBUG)

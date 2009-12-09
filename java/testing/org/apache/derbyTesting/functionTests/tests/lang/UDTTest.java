@@ -51,6 +51,7 @@ public class UDTTest  extends GeneratedColumnsHelper
     public static final String OBJECT_EXISTS = "X0Y68";
     public static final String NONEXISTENT_OBJECT = "42Y55";
     public static final String SYNTAX_ERROR = "42X01";
+    public static final String TABLE_DEPENDS_ON_TYPE = "X0Y29";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -226,10 +227,159 @@ public class UDTTest  extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Adding and dropping udt columns.
+     * </p>
+     */
+    public void test_03_addDropColumn() throws Exception
+    {
+        Connection conn = getConnection();
+        String tableName1 = "UDTCOLUMNS";
+        String tableName2 = "UDTCOLUMNS2";
+
+        goodStatement
+            ( conn,
+              "create type price_03 external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+
+        // even though there are 2 price_03 columns, we only create 1 dependency
+        goodStatement
+            ( conn,
+              "create table " + tableName1 + "\n" +
+              "(\n" +
+              "    a int, b int,\n" +
+              "    price1 price_03,\n" +
+              "    price2 price_03\n" +
+              ")\n"
+              );
+        assertEquals( 1, countTableDependencies( conn, tableName1 ) );
+
+        // verify that we can't drop the type while the table depends on it
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03 restrict\n" );
+
+        // add another price_03 column. should not add another dependency
+        goodStatement
+            ( conn,
+              "alter table udtColumns add column price3 price_03\n" );
+        assertEquals( 1, countTableDependencies( conn, tableName1 ) );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03 restrict\n" );
+
+        // drop one of the price_03 column. there should still be a dependency
+        goodStatement
+            ( conn,
+              "alter table udtColumns drop column price3\n" );
+        assertEquals( 1, countTableDependencies( conn, tableName1 ) );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03 restrict\n" );
+
+        // drop another column. same story.
+        goodStatement
+            ( conn,
+              "alter table udtColumns drop column price2\n" );
+        assertEquals( 1, countTableDependencies( conn, tableName1 ) );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03 restrict\n" );
+
+        // drop the last udt column. dependency should disappear
+        goodStatement
+            ( conn,
+              "alter table udtColumns drop column price1\n" );
+        assertEquals( 0, countTableDependencies( conn, tableName1 ) );
+        goodStatement
+            ( conn,
+              "drop type Price_03 restrict\n" );
+
+        // similar experiments with more types
+        goodStatement
+            ( conn,
+              "create type price_03_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            ( conn,
+              "create type price_03_b external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            ( conn,
+              "create type price_03_c external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+
+        goodStatement
+            ( conn,
+              "create table udtColumns2\n" +
+              "(\n" +
+              "    a int, b int,\n" +
+              "    price1 price_03_a,\n" +
+              "    price2 price_03_b\n" +
+              ")\n"
+              );
+        assertEquals( 2, countTableDependencies( conn, tableName2 ) );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03_a restrict\n" );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03_b restrict\n" );
+        
+        goodStatement
+            ( conn,
+              "alter table udtColumns2 add column price3 price_03_c\n" );
+        assertEquals( 3, countTableDependencies( conn, tableName2 ) );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03_a restrict\n" );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03_b restrict\n" );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03_c restrict\n" );
+
+        goodStatement
+            ( conn,
+              "alter table udtColumns2 drop column b\n" );
+        assertEquals( 3, countTableDependencies( conn, tableName2 ) );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03_a restrict\n" );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03_b restrict\n" );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type Price_03_c restrict\n" );
+
+        goodStatement
+            ( conn,
+              "alter table udtColumns2 drop column price3\n" );
+        assertEquals( 2, countTableDependencies( conn, tableName2 ) );
+        goodStatement
+            ( conn,
+              "drop type Price_03_c restrict\n" );
+
+        goodStatement
+            ( conn,
+              "alter table udtColumns2 drop column price2\n" );
+        assertEquals( 1, countTableDependencies( conn, tableName2 ) );
+        goodStatement
+            ( conn,
+              "drop type Price_03_b restrict\n" );
+
+        goodStatement
+            ( conn,
+              "alter table udtColumns2 drop column price1\n" );
+        assertEquals( 0, countTableDependencies( conn, tableName2 ) );
+        goodStatement
+            ( conn,
+              "drop type Price_03_a restrict\n" );
+
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    /** Get the number of dependencies that a table has */
+    private int countTableDependencies( Connection conn, String tableName ) throws Exception
+    {
+        PreparedStatement ps = chattyPrepare
+            ( conn, "select count(*) from sys.sysdepends d, sys.systables t where d.dependentid = t.tableid and t.tablename = ?" );
+        ps.setString( 1, tableName );
+
+        return getScalarInteger( ps );
+    }
+
+    /** Get a scalar integer result from a query */
+    private int getScalarInteger( PreparedStatement ps ) throws Exception
+    {
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        int retval = rs.getInt( 1 );
+
+        rs.close();
+        ps.close();
+
+        return retval;
+    }
 
 }

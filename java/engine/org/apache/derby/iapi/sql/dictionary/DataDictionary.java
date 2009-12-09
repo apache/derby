@@ -1475,6 +1475,16 @@ public interface DataDictionary
 	 */
 	UUIDFactory getUUIDFactory();
 
+    /**
+     * Get the alias descriptor for an ANSI UDT.
+     *
+     * @param tc The transaction to use: if null, use the compilation transaction
+     * @param dtd The UDT's type descriptor
+     *
+     * @return The UDT's alias descriptor if it is an ANSI UDT; null otherwise.
+     */
+    public AliasDescriptor getAliasDescriptorForUDT( TransactionController tc, DataTypeDescriptor dtd ) throws StandardException;
+    
 	/**
 	 * Get an AliasDescriptor given its UUID.
 	 *

@@ -380,6 +380,10 @@ public final class AliasDescriptor
         case AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR:
             invalidationType = DependencyManager.DROP_SYNONYM;
             break;
+            
+        case AliasInfo.ALIAS_TYPE_UDT_AS_CHAR:
+            invalidationType = DependencyManager.DROP_UDT;
+            break;
         }
         
         dm.invalidateFor(this, invalidationType, lcc);

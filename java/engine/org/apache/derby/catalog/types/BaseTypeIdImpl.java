@@ -148,6 +148,9 @@ public class BaseTypeIdImpl implements Formatable
      */
     public String getUnqualifiedName() { return unqualifiedName; }
 
+    /** Return true if this is this type id describes an ANSI UDT */
+    public boolean isAnsiUDT() { return (schemaName != null); }
+    
     /**
      * Get the jdbc type id for this type.  JDBC type can be
      * found in java.sql.Types. 

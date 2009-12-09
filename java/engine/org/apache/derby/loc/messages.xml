@@ -3136,6 +3136,14 @@ Guide.
             </msg>
 
             <msg>
+                <name>X0Y29.S</name>
+                <text>Operation '{0}' cannot be performed on object '{1}' because TABLE '{2}' is dependent on that object.</text>
+                <arg>operationName</arg>
+                <arg>objectName</arg>
+                <arg>viewName</arg>
+            </msg>
+
+            <msg>
                 <name>X0Y32.S</name>
                 <text>{0} '{1}' already exists in {2} '{3}'.</text>
                 <arg>value</arg>

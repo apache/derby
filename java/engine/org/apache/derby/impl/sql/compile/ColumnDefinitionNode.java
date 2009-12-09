@@ -199,7 +199,7 @@ public class ColumnDefinitionNode extends TableElementNode
 	{
 		if (SanityManager.DEBUG)
 		{
-			return "type: " + getType().toString() + "\n" +
+			return "type: " + getType() + "\n" +
 				"defaultValue: " + defaultValue + "\n" +
 				super.toString();
 		}

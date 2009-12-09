@@ -30,10 +30,14 @@ import org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -83,7 +87,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 	*/
 
 public class TableDescriptor extends TupleDescriptor
-	implements UniqueSQLObjectDescriptor, Provider
+	implements UniqueSQLObjectDescriptor, Provider, Dependent
 {
 	public static final int BASE_TABLE_TYPE = 0;
 	public static final int SYSTEM_TABLE_TYPE = 1;
@@ -1383,4 +1387,79 @@ public class TableDescriptor extends TupleDescriptor
 	{
 		return (tableType == TableDescriptor.SYNONYM_TYPE) ? "Synonym" : "Table/View";
 	}
+
+	//////////////////////////////////////////////////////
+	//
+	// DEPENDENT INTERFACE
+	//
+	//////////////////////////////////////////////////////
+	/**
+	 * Check that all of the dependent's dependencies are valid.
+	 *
+	 * @return true if the dependent is currently valid
+	 */
+	public synchronized boolean isValid()
+	{
+		return true;
+	}
+
+	/**
+	 * Prepare to mark the dependent as invalid (due to at least one of
+	 * its dependencies being invalid).
+	 *
+	 * @param action	The action causing the invalidation
+	 * @param p		the provider
+	 *
+	 * @exception StandardException thrown if unable to make it invalid
+	 */
+	public void prepareToInvalidate(Provider p, int action,
+					LanguageConnectionContext lcc) 
+		throws StandardException
+	{
+		DependencyManager dm = getDataDictionary().getDependencyManager();
+
+		switch (action)
+		{
+			/*
+			** Currently, the only thing we are dependent
+			** on is an alias descriptor for an ANSI UDT.
+			*/
+		    default:
+
+				throw StandardException.newException(SQLState.LANG_PROVIDER_HAS_DEPENDENT_TABLE, 
+									dm.getActionString(action), 
+									p.getObjectName(),
+									getQualifiedName());
+		}
+	}
+
+	/**
+	 * Mark the dependent as invalid (due to at least one of
+	 * its dependencies being invalid).  Always an error
+	 * for a table -- should never have gotten here.
+	 *
+	 * @param	action	The action causing the invalidation
+	 *
+	 * @exception StandardException thrown if called in sanity mode
+	 */
+	public void makeInvalid(int action, LanguageConnectionContext lcc) 
+		throws StandardException
+	{
+		/* 
+		** We should never get here, we should have barfed on 
+		** prepareToInvalidate().
+		*/
+		if (SanityManager.DEBUG)
+		{
+			DependencyManager dm;
+	
+			dm = getDataDictionary().getDependencyManager();
+
+			SanityManager.THROWASSERT("makeInvalid("+
+				dm.getActionString(action)+
+				") not expected to get called");
+		}
+	}
+    
 }
+

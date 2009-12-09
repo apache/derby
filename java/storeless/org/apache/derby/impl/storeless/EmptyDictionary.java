@@ -614,6 +614,12 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return null;
 	}
 
+    public AliasDescriptor getAliasDescriptorForUDT( TransactionController tc, DataTypeDescriptor dtd )
+        throws StandardException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	public AliasDescriptor getAliasDescriptor(UUID uuid)
 			throws StandardException {
 		// TODO Auto-generated method stub

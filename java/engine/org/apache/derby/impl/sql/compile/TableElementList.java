@@ -224,8 +224,9 @@ public class TableElementList extends QueryTreeNodeVector
 					ModifyColumnNode mcdn = (ModifyColumnNode)cdn;
 					mcdn.checkExistingConstraints(td);
 					mcdn.useExistingCollation(td);
+
 				} else if (cdn.isAutoincrementColumn())
-					numAutoCols ++;
+                { numAutoCols ++; }
 			}
 			else if (tableElement.getElementType() == TableElementNode.AT_DROP_COLUMN)
 			{
@@ -483,9 +484,12 @@ public class TableElementList extends QueryTreeNodeVector
 		{
 			if (((TableElementNode) elementAt(index)).getElementType() == TableElementNode.AT_DROP_COLUMN)
 			{
+                String columnName = ((TableElementNode) elementAt(index)).getName();
+
 				colInfos[index] = new ColumnInfo(
-								((TableElementNode) elementAt(index)).getName(),
-								null, null, null, null, null, null,
+								columnName,
+								td.getColumnDescriptor( columnName ).getType(),
+                                null, null, null, null, null,
 								ColumnInfo.DROP, 0, 0, 0);
 				break;
 			}
@@ -521,7 +525,7 @@ public class TableElementList extends QueryTreeNodeVector
                 DependencyManager dm = getDataDictionary().getDependencyManager();
                 providerInfos = dm.getPersistentProviderInfos(apl);
             }
-            
+
 			colInfos[index - numConstraints] = 
 				new ColumnInfo(coldef.getColumnName(),
 							   coldef.getType(),

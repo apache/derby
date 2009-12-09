@@ -30,6 +30,8 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.Visitable;
+import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
@@ -565,6 +567,24 @@ public String statementToString()
 	    numConstraints = tableElementList.genColumnInfos(colInfos);
 	}
 
+
+	/**
+	 * Accept the visitor for all visitable children of this node.
+	 * 
+	 * @param v the visitor
+	 *
+	 * @exception StandardException on error
+	 */
+	void acceptChildren(Visitor v)
+		throws StandardException
+	{
+		super.acceptChildren(v);
+
+		if (tableElementList != null)
+		{
+			tableElementList.accept(v);
+		}
+	}
 
 	/*
 	 * class interface

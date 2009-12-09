@@ -134,6 +134,7 @@ import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -6675,8 +6676,6 @@ public final class	DataDictionaryImpl
 			ddlList,
 			false);
 
-
-
 		return ddlList;
 	}
 
@@ -6827,6 +6826,30 @@ public final class	DataDictionaryImpl
 		return uuidFactory;
 	}
 
+    /**
+     * Get the alias descriptor for an ANSI UDT.
+     *
+     * @param tc The transaction to use: if null, use the compilation transaction
+     * @param dtd The UDT's type descriptor
+     *
+     * @return The UDT's alias descriptor if it is an ANSI UDT; null otherwise.
+     */
+    public AliasDescriptor getAliasDescriptorForUDT( TransactionController tc, DataTypeDescriptor dtd ) throws StandardException
+    {
+        if ( tc == null ) { tc = getTransactionCompile(); }
+
+        if ( dtd == null ) { return null; }
+
+        BaseTypeIdImpl btii = dtd.getTypeId().getBaseTypeId();
+        if ( !btii.isAnsiUDT() ) { return null; }
+
+        SchemaDescriptor sd = getSchemaDescriptor( btii.getSchemaName(), tc, true );
+        AliasDescriptor ad = getAliasDescriptor
+            ( sd.getUUID().toString(), btii.getUnqualifiedName(), AliasInfo.ALIAS_NAME_SPACE_UDT_AS_CHAR );
+
+        return ad;
+    }
+    
 	/**
 	 * Get a AliasDescriptor given its UUID.
 	 *
@@ -8310,7 +8333,7 @@ public final class	DataDictionaryImpl
 		else
 		{
 			if (SanityManager.DEBUG)
-			{
+ 			{
 				SanityManager.ASSERT(! booting, "booting is expected to be false");
 			}
 			{

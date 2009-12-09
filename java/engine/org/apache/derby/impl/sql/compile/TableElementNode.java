@@ -22,6 +22,7 @@
 package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 /**
  * A TableElementNode is an item in a TableElementList, and represents
@@ -101,6 +102,7 @@ public class TableElementNode extends QueryTreeNode
 		if (SanityManager.DEBUG)
 		{
 			return "name: " + name + "\n" +
+                "elementType: " + getElementType() + "\n" +
 				super.toString();
 		}
 		else
@@ -181,7 +183,11 @@ public class TableElementNode extends QueryTreeNode
 		else if ( hasUniqueKeyConstraint() ) { return AT_ADD_UNIQUE_CONSTRAINT; }
 		else if ( hasCheckConstraint() ) { return AT_ADD_CHECK_CONSTRAINT; }
 		else if ( this instanceof ConstraintDefinitionNode ) { return AT_DROP_CONSTRAINT; }
-		else if ( this instanceof ModifyColumnNode ) { return AT_MODIFY_COLUMN; }
+		else if ( this instanceof ModifyColumnNode )
+        {
+            if ( getNodeType() == C_NodeTypes.DROP_COLUMN_NODE ) { return AT_DROP_COLUMN; }
+            else { return AT_MODIFY_COLUMN; }
+        }
 		else { return elementType; }
 	}
 
