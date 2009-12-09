@@ -709,7 +709,7 @@ public class SQLChar
                     throw StandardException.newException(
                             SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION, 
                             ioe, 
-                            "java.sql.String");
+                            String.class.getName());
                 }
             }
         }
