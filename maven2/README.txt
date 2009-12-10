@@ -20,6 +20,14 @@ WARNING: The Maven repository is write-once. This means that you have only one
          of deployed artifacts is to deploy a new set of artifacts with a
          different version string.
 
+WARNING: The Apache server has been configured to ban IP addresses if too many
+         unsuccessful login attempts are made within a short time period. For
+         this reason it is important that you test the SSH configuration before
+         you run the Maven deploy step. The current Maven setup requires that
+         issuing "ssh people.apache.org" logs you into the server without
+         prompting for a password. See instructions below.
+         If your IP gets banned, send a message to infrastructure at apache dot
+         org. Include your IP address in the mail.
 
 Short description of the required steps:
 
@@ -40,9 +48,25 @@ Short description of the required steps:
         Make sure you diff the POMs to verify the changes.
         Note that the Java program performs some extra sanity checks.
       - Passphrase for your GPG signing key. Required for step (c) and (d).
-        See the top level POM for details, brief instructions in (c).
+        See the top-level POM for details, brief instructions in (c).
       - User credentials for deployment. Required for step (d).
-        See 'settings.xml' for details.
+        Several options for how to configure Maven seem to exist, but only
+        one of them has been reported to work for most scenarios. If your
+        system doesn't have executables called 'ssh' and 'scp', then please
+        figure out how to successfully specify alternative executables...
+
+        The local username will be used when accessing the Apache server using
+        the external SSH commands. If your local username isn't the same as
+        your Apache username, you must configure SSH to use the correct
+        username. On Unix systems, this is done by adding the following to
+        '~/.ssh/config' (the host name pattern must match the host specified
+        under the repository tag in the top-level POM):
+
+        Host people.apache.org
+            User your_apache_username
+
+        Again, configuring Maven to use a different username should be
+        possible, but attempts to do so have failed so far.
 
  c) 'mvn clean install'
     Generates the artifacts, signatures for the artifacts using GnuPG and
@@ -74,6 +98,18 @@ Short description of the required steps:
     NOTE: This step has been reported to not work when using username and
     password authentication. Unless you prefer to deploy manually, use a
     public key to log into the remote host (people.apache.org).
+
+    If your umask is set to something else than 0002 (the default is 0022),
+    you should log into the Apache server and grant write permission to the
+    group owner (which should be 'apcvs'). Alternatively, use this SSH command:
+
+    ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ -user \$USER -exec chmod g+w {} \;"
+
+    To verify the group ownership and permissions, run the two following SSH
+    commands. If everything is set correctly, the should return no file names.
+
+    ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ \! -group apcvs"
+    ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ \! -perm -g+w"
 
 For each project, the following files should be found in the
 various 'maven2/[project]/target' directories after 'verify' or 'install':
