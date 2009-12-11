@@ -370,7 +370,7 @@ class CreateTableConstantAction extends DDLConstantAction
         //
         // The table itself can depend on the user defined types of its columns.
         //
-        adjustUDTDependencies( lcc, dd, td, columnInfo );
+        adjustUDTDependencies( lcc, dd, td, columnInfo, false );
         
 		if ( tableType == TableDescriptor.GLOBAL_TEMPORARY_TABLE_TYPE )
 		{

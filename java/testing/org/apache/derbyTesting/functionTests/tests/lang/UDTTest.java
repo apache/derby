@@ -350,9 +350,68 @@ public class UDTTest  extends GeneratedColumnsHelper
         goodStatement
             ( conn,
               "drop type Price_03_a restrict\n" );
-
     }
 
+    /**
+     * <p>
+     * Dropping a whole table which has udt columns.
+     * </p>
+     */
+    public void test_04_dropTable() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            ( conn,
+              "create type price_orphan external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            ( conn,
+              "create type price_orphan2 external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            ( conn,
+              "create type price_orphan3 external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            ( conn,
+              "create type price_orphan4 external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            ( conn,
+              "create table t_orphan( a price_orphan )\n" );
+        goodStatement
+            ( conn,
+              "create table t_orphan2( a price_orphan2, b int, c price_orphan2 )\n" );
+        goodStatement
+            ( conn,
+              "create table t_orphan3( a price_orphan3, b int, c price_orphan4 )\n" );
+        
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type price_orphan restrict\n" );
+        goodStatement
+            ( conn,
+              "drop table t_orphan\n" );
+        goodStatement
+            ( conn,
+              "drop type price_orphan restrict\n" );
+        
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type price_orphan2 restrict\n" );
+        goodStatement
+            ( conn,
+              "drop table t_orphan2\n" );
+        goodStatement
+            ( conn,
+              "drop type price_orphan2 restrict\n" );
+        
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type price_orphan3 restrict\n" );
+        expectExecutionError( conn, TABLE_DEPENDS_ON_TYPE, "drop type price_orphan4 restrict\n" );
+        goodStatement
+            ( conn,
+              "drop table t_orphan3\n" );
+        goodStatement
+            ( conn,
+              "drop type price_orphan3 restrict\n" );
+        goodStatement
+            ( conn,
+              "drop type price_orphan4 restrict\n" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

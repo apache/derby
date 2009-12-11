@@ -266,6 +266,12 @@ class DropTableConstantAction extends DDLSingleTableConstantAction
 
 		dm.invalidateFor(td, DependencyManager.DROP_TABLE, lcc);
 
+        //
+        // The table itself can depend on the user defined types of its columns.
+        // Drop all of those dependencies now.
+        //
+        adjustUDTDependencies( lcc, dd, td, null, true );
+
 		/* Drop the table */
 		dd.dropTableDescriptor(td, sd, tc);
 

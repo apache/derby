@@ -820,17 +820,18 @@ abstract class DDLConstantAction implements ConstantAction
     protected   void    adjustUDTDependencies
         (
          LanguageConnectionContext  lcc,
-         DataDictionary     dd,
-         TableDescriptor    td,
-         ColumnInfo[]        columnInfos
+         DataDictionary             dd,
+         TableDescriptor            td,
+         ColumnInfo[]               columnInfos,
+         boolean                    dropWholeTable
          )
         throws StandardException
     {
-        if ( columnInfos == null ) { return; }
+        if ( (!dropWholeTable) && (columnInfos == null) ) { return; }
 
 		TransactionController tc = lcc.getTransactionExecute();
 
-        int changedColumnCount = columnInfos.length;
+        int changedColumnCount = columnInfos == null ? 0 : columnInfos.length;
         HashMap addUdtMap = new HashMap();
         HashMap dropUdtMap = new HashMap();
         HashSet addColumnNames = new HashSet();
@@ -864,8 +865,9 @@ abstract class DDLConstantAction implements ConstantAction
             }
         }
 
-        // nothing to do if there are no columns of udt type
-        if ( (addUdtMap.size() == 0) && (dropUdtMap.size() == 0) ) { return; }
+        // nothing to do if there are no changed columns of udt type
+        // and this is not a DROP TABLE command
+        if ( (!dropWholeTable) && (addUdtMap.size() == 0) && (dropUdtMap.size() == 0) ) { return; }
 
         //
         // Now prune from the add list all udt descriptors for which we already have dependencies.
@@ -894,10 +896,13 @@ abstract class DDLConstantAction implements ConstantAction
 
             String key = ad.getObjectID().toString();
 
-            // ha, it is a UDT. remove the UDT from the list of dependencies to
-            // add and drop
-            if ( addUdtMap.get( key ) != null ) { addUdtMap.remove( key ); }
-            if ( dropUdtMap.get( key ) != null ) { dropUdtMap.remove( key ); }
+            // ha, it is a UDT.
+            if ( dropWholeTable ) { dropUdtMap.put( key, ad ); }
+            else
+            {
+                if ( addUdtMap.get( key ) != null ) { addUdtMap.remove( key ); }
+                if ( dropUdtMap.get( key ) != null ) { dropUdtMap.remove( key ); }
+            }
         }
 
         // again, nothing to do if there are no columns of udt type
