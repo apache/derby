@@ -1685,62 +1685,62 @@ ij> drop table roTable;
 0 rows inserted/updated/deleted
 ij> -- No support for Java types in CAST statements;
 values CAST (NULL AS CLASS java.lang.Integer);
-ERROR 42X01: Syntax error: Encountered "" at line 3, column 22.
+ERROR 42X01: Syntax error: Encountered "java" at line 3, column 28.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CAST (NULL AS CLASS com.acme.SomeClass);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 22.
+ERROR 42X01: Syntax error: Encountered "com" at line 1, column 28.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CAST (NULL AS CLASS java.sql.Date);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 22.
+ERROR 42X01: Syntax error: Encountered "java" at line 1, column 28.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CAST (NULL AS java.lang.Integer);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 22.
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 31.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CAST (NULL AS com.acme.SomeClass);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 22.
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 30.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CAST (NULL AS java.sql.Date);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 22.
+ERROR 42X01: Syntax error: Encountered "sql" at line 1, column 27.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CAST (? AS CLASS java.lang.Integer);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ERROR 42X01: Syntax error: Encountered "java" at line 1, column 25.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CAST (? AS CLASS com.acme.SomeClass);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ERROR 42X01: Syntax error: Encountered "com" at line 1, column 25.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CAST (? AS CLASS java.sql.Date);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ERROR 42X01: Syntax error: Encountered "java" at line 1, column 25.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CAST (? AS java.lang.Integer);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 28.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CAST (? AS com.acme.SomeClass);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ERROR 42X01: Syntax error: Encountered "." at line 1, column 27.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> values CAST (? AS java.sql.Date);
-ERROR 42X01: Syntax error: Encountered "" at line 1, column 19.
+ERROR 42X01: Syntax error: Encountered "sql" at line 1, column 24.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.

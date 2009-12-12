@@ -381,13 +381,11 @@ public class CastNode extends ValueNode
 		*/
 		if (getTypeId().userType())
 		{
+            setType( bindUserType( getTypeServices() ) );
+            
 			String className = getTypeId().getCorrespondingJavaTypeName();
 
 			verifyClassExist(className);
-
-			setType(new DataTypeDescriptor(TypeId.getUserDefinedTypeId(className, false),
-														true /* assume nullable for now, change it if not nullable */
-													));
 		}
 
         // Obviously the type of a parameter that

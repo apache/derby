@@ -3855,6 +3855,11 @@ dataTypeCast() throws StandardException :
 	{
 		return typeDescriptor;
 	}
+|
+	typeDescriptor = javaType()
+	{
+		return typeDescriptor;
+	}
 }
 
 /*
@@ -3897,7 +3902,7 @@ dataTypeCommon() throws StandardException :
 	typeDescriptor = LOBType()
 |
 	typeDescriptor = XMLType()
-	)
+)
 	{
 		return typeDescriptor;
 	}

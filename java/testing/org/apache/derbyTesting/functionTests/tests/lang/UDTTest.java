@@ -429,15 +429,8 @@ public class UDTTest  extends GeneratedColumnsHelper
         goodStatement
             (
              conn,
-             "create function makePrice_05( )\n" +
-             "returns price_05_a language java parameter style java no sql\n" +
-             "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.makePrice'\n"
-              );
-        goodStatement
-            (
-             conn,
              "create view udtView( a, b, c ) as\n" +
-             "select tabletype, makePrice_05( ), makePrice_05( )\n" +
+             "select tabletype, cast (null as price_05_a), cast( null as price_05_a)\n" +
              "from sys.systables\n"
               );
         expectExecutionError( conn, VIEW_DEPENDS_ON_TYPE, "drop type price_05_a restrict\n" );
@@ -455,15 +448,8 @@ public class UDTTest  extends GeneratedColumnsHelper
         goodStatement
             (
              conn,
-             "create function makePrice_05_b( )\n" +
-             "returns price_05_b language java parameter style java no sql\n" +
-             "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.makePrice'\n"
-              );
-        goodStatement
-            (
-             conn,
              "create view udtView_b( a ) as\n" +
-             "select tabletype from sys.systables where makePrice_05_b() is not null\n"
+             "select tabletype from sys.systables where ( cast (null as price_05_b) ) is not null\n"
               );
         expectExecutionError( conn, VIEW_DEPENDS_ON_TYPE, "drop type price_05_b restrict\n" );
         goodStatement
@@ -473,6 +459,42 @@ public class UDTTest  extends GeneratedColumnsHelper
             ( conn,
               "drop type price_05_b restrict\n" );
 
+    }
+
+    /**
+     * <p>
+     * Casting to UDTs.
+     * </p>
+     */
+    public void test_06_casts() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // cast a NULL as a UDT
+        goodStatement
+            ( conn,
+              "create type price_06_b external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        assertResults
+            (
+             conn,
+             "values ( cast ( null as price_06_b ) )\n",
+             new String[][]
+             {
+                 { null },
+             },
+             false
+             );
+
+        // casting an untyped parameter to a UDT
+        PreparedStatement ps = chattyPrepare
+            ( conn, "values ( cast ( ? as price_06_b ) )" );
+        ps.setObject( 1, Price.makePrice() );
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        Price result = (Price) rs.getObject( 1 );
+        rs.close();
+        ps.close();
+        assertTrue( Price.makePrice().equals( result ) );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
