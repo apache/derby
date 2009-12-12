@@ -271,6 +271,10 @@ public class StaticMethodCallNode extends MethodCallNode
 				optimizeDomainValueConversion();
 			
 			TypeDescriptor returnType = routineInfo.getReturnType();
+
+            // create type dependency if return type is an ANSI UDT
+            if ( returnType != null ) { createTypeDependency( DataTypeDescriptor.getType( returnType ) ); }
+
 			if ( returnType != null && !returnType.isRowMultiSet() && !returnType.isUserDefinedType() )
 			{
 				TypeId returnTypeId = TypeId.getBuiltInTypeId(returnType.getJDBCTypeId());

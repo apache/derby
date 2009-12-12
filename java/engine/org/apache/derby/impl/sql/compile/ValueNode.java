@@ -287,6 +287,9 @@ public abstract class ValueNode extends QueryTreeNode
 	public void setType(DataTypeDescriptor dataTypeServices) throws StandardException
 	{
 		this.dataTypeServices = dataTypeServices;
+
+        // create a dependency on this type if it is an ANSI UDT
+        if ( dataTypeServices != null ) { createTypeDependency( dataTypeServices ); }
 	}
 	
 	/**

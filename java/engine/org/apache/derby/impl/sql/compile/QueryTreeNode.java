@@ -1639,6 +1639,21 @@ public abstract class QueryTreeNode implements Visitable
     }
 
     /**
+     * Declare a dependency on a type. This is only used if the type is an ANSI UDT.
+     *
+     * @param dtd Type which may have a dependency declared on it.
+     */
+    public void createTypeDependency( DataTypeDescriptor dtd ) throws StandardException
+    {
+        AliasDescriptor ad = getDataDictionary().getAliasDescriptorForUDT( null, dtd );
+
+        if ( ad != null )
+        {
+            getCompilerContext().createDependency( ad );
+        }
+    }
+    
+    /**
      * Common code for the 2 checkReliability functions.  Always throws StandardException.
      *
      * @param fragmentType Type of fragment as a string, for inclusion in error messages.

@@ -52,6 +52,7 @@ public class UDTTest  extends GeneratedColumnsHelper
     public static final String NONEXISTENT_OBJECT = "42Y55";
     public static final String SYNTAX_ERROR = "42X01";
     public static final String TABLE_DEPENDS_ON_TYPE = "X0Y29";
+    public static final String VIEW_DEPENDS_ON_TYPE = "X0Y23";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -412,6 +413,68 @@ public class UDTTest  extends GeneratedColumnsHelper
               "drop type price_orphan4 restrict\n" );
     }
     
+    /**
+     * <p>
+     * Dependencies of views on UDTs.
+     * </p>
+     */
+    public void test_05_viewDependencies() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // view with UDT in select list
+        goodStatement
+            ( conn,
+              "create type price_05_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            (
+             conn,
+             "create function makePrice_05( )\n" +
+             "returns price_05_a language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.makePrice'\n"
+              );
+        goodStatement
+            (
+             conn,
+             "create view udtView( a, b, c ) as\n" +
+             "select tabletype, makePrice_05( ), makePrice_05( )\n" +
+             "from sys.systables\n"
+              );
+        expectExecutionError( conn, VIEW_DEPENDS_ON_TYPE, "drop type price_05_a restrict\n" );
+        goodStatement
+            ( conn,
+              "drop view udtView\n" );
+        goodStatement
+            ( conn,
+              "drop type price_05_a restrict\n" );
+
+        // view with UDT in where clause
+        goodStatement
+            ( conn,
+              "create type price_05_b external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            (
+             conn,
+             "create function makePrice_05_b( )\n" +
+             "returns price_05_b language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.makePrice'\n"
+              );
+        goodStatement
+            (
+             conn,
+             "create view udtView_b( a ) as\n" +
+             "select tabletype from sys.systables where makePrice_05_b() is not null\n"
+              );
+        expectExecutionError( conn, VIEW_DEPENDS_ON_TYPE, "drop type price_05_b restrict\n" );
+        goodStatement
+            ( conn,
+              "drop view udtView_b\n" );
+        goodStatement
+            ( conn,
+              "drop type price_05_b restrict\n" );
+
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
