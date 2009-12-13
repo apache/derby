@@ -3140,7 +3140,15 @@ Guide.
                 <text>Operation '{0}' cannot be performed on object '{1}' because TABLE '{2}' is dependent on that object.</text>
                 <arg>operationName</arg>
                 <arg>objectName</arg>
-                <arg>viewName</arg>
+                <arg>tableName</arg>
+            </msg>
+
+            <msg>
+                <name>X0Y30.S</name>
+                <text>Operation '{0}' cannot be performed on object '{1}' because ROUTINE '{2}' is dependent on that object.</text>
+                <arg>operationName</arg>
+                <arg>objectName</arg>
+                <arg>routineName</arg>
             </msg>
 
             <msg>

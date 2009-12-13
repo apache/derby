@@ -29,6 +29,8 @@ import java.util.List;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -905,11 +907,33 @@ abstract class DDLConstantAction implements ConstantAction
             }
         }
 
+        adjustUDTDependencies( lcc, dd, td, addUdtMap, dropUdtMap );
+    }
+    /**
+     * Add and drop dependencies of an object on UDTs.
+     *
+     * @param lcc Interpreter's state variable for this session.
+     * @param dd Metadata
+     * @param dependent Object which depends on UDT
+     * @param addUdtMap Map of UDTs for which dependencies should be added
+     * @param dropUdtMap Map of UDT for which dependencies should be dropped
+     */
+    private   void    adjustUDTDependencies
+        (
+         LanguageConnectionContext  lcc,
+         DataDictionary             dd,
+         Dependent                  dependent,
+         HashMap                    addUdtMap,
+         HashMap                    dropUdtMap
+         )
+        throws StandardException
+    {
         // again, nothing to do if there are no columns of udt type
         if ( (addUdtMap.size() == 0) && (dropUdtMap.size() == 0) ) { return; }
 
-        DependencyManager   dm = dd.getDependencyManager();
-        ContextManager      cm = lcc.getContextManager();
+		TransactionController tc = lcc.getTransactionExecute();
+        DependencyManager     dm = dd.getDependencyManager();
+        ContextManager        cm = lcc.getContextManager();
 
         // add new dependencies
         Iterator            addIterator = addUdtMap.values().iterator();
@@ -917,7 +941,7 @@ abstract class DDLConstantAction implements ConstantAction
         {
             AliasDescriptor ad = (AliasDescriptor) addIterator.next();
 
-            dm.addDependency( td, ad, cm );
+            dm.addDependency( dependent, ad, cm );
         }
 
         // drop dependencies that are orphaned
@@ -926,12 +950,69 @@ abstract class DDLConstantAction implements ConstantAction
         {
             AliasDescriptor ad = (AliasDescriptor) dropIterator.next();
 
-            DependencyDescriptor dependency = new DependencyDescriptor( td, ad );
+            DependencyDescriptor dependency = new DependencyDescriptor( dependent, ad );
 
             dd.dropStoredDependency( dependency, tc );
         }
     }
 
+    /**
+     * Add and drop dependencies of a routine on UDTs.
+     *
+     * @param lcc Interpreter's state variable for this session.
+     * @param dd Metadata
+     * @param ad Alias descriptor for the routine
+     * @param adding True if we are adding dependencies, false if we're dropping them
+     */
+    protected   void    adjustUDTDependencies
+        (
+         LanguageConnectionContext  lcc,
+         DataDictionary             dd,
+         AliasDescriptor            ad,
+         boolean                    adding
+         )
+        throws StandardException
+    {
+        // nothing to do if this is not a routine
+        switch ( ad.getAliasType() )
+        {
+		case AliasInfo.ALIAS_TYPE_PROCEDURE_AS_CHAR:
+		case AliasInfo.ALIAS_TYPE_FUNCTION_AS_CHAR:
+            break;
+
+        default: return;
+        }
+        
+		TransactionController tc = lcc.getTransactionExecute();
+        RoutineAliasInfo      aliasInfo = (RoutineAliasInfo) ad.getAliasInfo();
+        HashMap               addUdtMap = new HashMap();
+        HashMap               dropUdtMap = new HashMap();
+        HashMap               udtMap = adding ? addUdtMap : dropUdtMap;
+        TypeDescriptor        rawReturnType = aliasInfo.getReturnType();
+
+        if ( rawReturnType != null )
+        {
+            AliasDescriptor       returnTypeAD = dd.getAliasDescriptorForUDT
+                ( tc, DataTypeDescriptor.getType( rawReturnType ) );
+
+            if ( returnTypeAD != null ) { udtMap.put( returnTypeAD.getObjectID().toString(), returnTypeAD ); }
+        }
+
+        TypeDescriptor[]      paramTypes = aliasInfo.getParameterTypes();
+        if ( paramTypes != null )
+        {
+            int paramCount = paramTypes.length;
+            for ( int i = 0; i < paramCount; i++ )
+            {
+                AliasDescriptor       paramType = dd.getAliasDescriptorForUDT
+                    ( tc, DataTypeDescriptor.getType( paramTypes[ i ] ) );
+
+                if ( paramType != null ) { udtMap.put( paramType.getObjectID().toString(), paramType ); }
+            }
+        }
+
+        adjustUDTDependencies( lcc, dd, ad, addUdtMap, dropUdtMap );
+    }
     
 	/**
 	 * Mutable Boolean wrapper, initially false

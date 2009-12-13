@@ -91,6 +91,40 @@ public class TupleDescriptor
 	}
 
 
+	/**
+	 * If the name has double quotes in it, put two double quotes for every single
+	 * double quote.
+	 * Finally put double quotes around string to protect against
+	 * names with blanks, reserved words being used as identifiers etc.
+	 * For eg, if table name is m"n, return it as "m""n". For now, this is used
+	 * by DMLModStatementNode.parseCheckConstraint().
+	 *
+	 * Possible improvement: We could possibly analyze string to
+	 * avoid double quotes in normal cases.
+	 *
+	 * @param name	The String with or without double quotes
+	 *
+	 * @return	The quoted String
+	 */
+
+	public String quoteProtectName(String name)
+	{
+		String quotedString = name;
+		int quotePos = name.indexOf("\"");
+
+		if (quotePos == -1)
+			return "\"" + name + "\"";
+
+		//string does have quotes in it.
+		while(quotePos != -1) {
+			quotedString = quotedString.substring(0,quotePos) + "\"" +
+				quotedString.substring(quotePos);
+			quotePos = quotedString.indexOf("\"",quotePos+2);
+		}
+		return "\"" + quotedString + "\"";
+
+	}
+
 	//////////////////////////////////////////////////////////////////
 	//
 	//	BEHAVIOR. These are only used by Replication!!

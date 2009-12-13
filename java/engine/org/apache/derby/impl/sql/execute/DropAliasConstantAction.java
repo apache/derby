@@ -108,6 +108,8 @@ class DropAliasConstantAction extends DDLConstantAction
 		{
 			throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, ad.getAliasType(nameSpace),  aliasName);
 		}
+
+        adjustUDTDependencies( lcc, dd, ad, false );
         
         ad.drop(lcc);
 

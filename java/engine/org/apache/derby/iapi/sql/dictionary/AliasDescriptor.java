@@ -23,9 +23,11 @@ package org.apache.derby.iapi.sql.dictionary;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import	org.apache.derby.catalog.AliasInfo;
@@ -56,7 +58,7 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 public final class AliasDescriptor 
 	extends TupleDescriptor
-	implements UniqueTupleDescriptor, Provider
+	implements UniqueTupleDescriptor, Provider, Dependent
 {
 	private final UUID		aliasID;
 	private final String		aliasName;
@@ -122,6 +124,28 @@ public final class AliasDescriptor
 	public UUID getSchemaUUID()
 	{
 		return schemaID;
+	}
+
+	/**
+	 * Gets the name of the schema that the alias lives in.
+	 *
+	 * @return	A String containing the name of the schema that the alias
+	 *		lives in.
+	 */
+	public String	getSchemaName() throws StandardException
+	{
+		return getDataDictionary().getSchemaDescriptor( schemaID, null ).getSchemaName();
+	}
+
+	/**
+	 * Gets the full, qualified name of the alias.
+	 *
+	 * @return	A String containing the name of the table.
+	 */
+	public String	getQualifiedName() throws StandardException
+	{
+		return quoteProtectName(getSchemaName()) + "." +
+			quoteProtectName( aliasName );
 	}
 
 	/**
@@ -404,4 +428,78 @@ public final class AliasDescriptor
         /* Drop the alias */
         dd.dropAliasDescriptor(this, tc);
     }
+
+	//////////////////////////////////////////////////////
+	//
+	// DEPENDENT INTERFACE
+	//
+	//////////////////////////////////////////////////////
+	/**
+	 * Check that all of the dependent's dependencies are valid.
+	 *
+	 * @return true if the dependent is currently valid
+	 */
+	public synchronized boolean isValid()
+	{
+		return true;
+	}
+
+	/**
+	 * Prepare to mark the dependent as invalid (due to at least one of
+	 * its dependencies being invalid).
+	 *
+	 * @param action	The action causing the invalidation
+	 * @param p		the provider
+	 *
+	 * @exception StandardException thrown if unable to make it invalid
+	 */
+	public void prepareToInvalidate(Provider p, int action,
+					LanguageConnectionContext lcc) 
+		throws StandardException
+	{
+		DependencyManager dm = getDataDictionary().getDependencyManager();
+
+		switch (action)
+		{
+			/*
+			** Currently, the only thing we are dependent
+			** on is an alias descriptor for an ANSI UDT.
+			*/
+		    default:
+
+				throw StandardException.newException(SQLState.LANG_PROVIDER_HAS_DEPENDENT_ALIAS, 
+									dm.getActionString(action), 
+									p.getObjectName(),
+									getQualifiedName());
+		}
+	}
+
+	/**
+	 * Mark the dependent as invalid (due to at least one of
+	 * its dependencies being invalid).  Always an error
+	 * for an alias -- should never have gotten here.
+	 *
+	 * @param	action	The action causing the invalidation
+	 *
+	 * @exception StandardException thrown if called in sanity mode
+	 */
+	public void makeInvalid(int action, LanguageConnectionContext lcc) 
+		throws StandardException
+	{
+		/* 
+		** We should never get here, we should have barfed on 
+		** prepareToInvalidate().
+		*/
+		if (SanityManager.DEBUG)
+		{
+			DependencyManager dm;
+	
+			dm = getDataDictionary().getDependencyManager();
+
+			SanityManager.THROWASSERT("makeInvalid("+
+				dm.getActionString(action)+
+				") not expected to get called");
+		}
+	}
+    
 }

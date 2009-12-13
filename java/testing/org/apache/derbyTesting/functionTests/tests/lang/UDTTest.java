@@ -53,6 +53,7 @@ public class UDTTest  extends GeneratedColumnsHelper
     public static final String SYNTAX_ERROR = "42X01";
     public static final String TABLE_DEPENDS_ON_TYPE = "X0Y29";
     public static final String VIEW_DEPENDS_ON_TYPE = "X0Y23";
+    public static final String ROUTINE_DEPENDS_ON_TYPE = "X0Y30";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -496,6 +497,108 @@ public class UDTTest  extends GeneratedColumnsHelper
         ps.close();
         assertTrue( Price.makePrice().equals( result ) );
     }
+
+    /**
+     * <p>
+     * Dependencies of routines on UDTs.
+     * </p>
+     */
+    public void test_07_routineDependencies() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // function that returns a udt
+        goodStatement
+            ( conn,
+              "create type price_07_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            ( conn,
+              "create function makePrice_07_a( )\n" +
+              "returns price_07_a\n" +
+              "language java\n" +
+              "parameter style java\n" +
+              "no sql\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.makePrice'\n"
+              );
+        expectExecutionError( conn, ROUTINE_DEPENDS_ON_TYPE, "drop type price_07_a restrict\n" );
+        goodStatement
+            ( conn,
+              "drop function makePrice_07_a\n" );
+        goodStatement
+            ( conn,
+              "drop type price_07_a restrict\n" );
+
+        // function with a udt arg
+        goodStatement
+            ( conn,
+              "create type price_07_b external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            ( conn,
+              "create function getCurrencyCode_07_b(  priceArg1 price_07_b  )\n" +
+              "returns char( 3 )\n" +
+              "language java\n" +
+              "parameter style java\n" +
+              "no sql\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.getCurrencyCode'\n"
+              );
+        expectExecutionError( conn, ROUTINE_DEPENDS_ON_TYPE, "drop type price_07_b restrict\n" );
+        goodStatement
+            ( conn,
+              "drop function getCurrencyCode_07_b\n" );
+        goodStatement
+            ( conn,
+              "drop type price_07_b restrict\n" );
+
+        // procedure with a udt arg
+        goodStatement
+            ( conn,
+              "create type price_07_c external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            ( conn,
+              "create procedure oneArgPriceProc_07( price1 price_07_c )\n" +
+              "language java\n" +
+              "parameter style java\n" +
+              "no sql\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.oneArgPriceProc_07'\n"
+              );
+        expectExecutionError( conn, ROUTINE_DEPENDS_ON_TYPE, "drop type price_07_c restrict\n" );
+        goodStatement
+            ( conn,
+              "drop procedure oneArgPriceProc_07\n" );
+        goodStatement
+            ( conn,
+              "drop type price_07_c restrict\n" );
+
+        // procedure with two udt args
+        goodStatement
+            ( conn,
+              "create type price_07_d external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement
+            ( conn,
+              "create procedure twoArgPriceProc_07( price1 price_07_d, price2 price_07_d )\n" +
+              "language java\n" +
+              "parameter style java\n" +
+              "no sql\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.twoArgPriceProc_07'\n"
+              );
+        expectExecutionError( conn, ROUTINE_DEPENDS_ON_TYPE, "drop type price_07_d restrict\n" );
+        goodStatement
+            ( conn,
+              "drop procedure twoArgPriceProc_07\n" );
+        goodStatement
+            ( conn,
+              "drop type price_07_d restrict\n" );
+
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // PROCEDURES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public static void oneArgPriceProc( Price price1 ) {}
+    public static void twoArgPriceProc( Price price1, Price price2 ) {}
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

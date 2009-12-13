@@ -313,5 +313,7 @@ class CreateAliasConstantAction extends DDLConstantAction
 
 		dd.addDescriptor(ads, null, DataDictionary.SYSALIASES_CATALOG_NUM,
 						 false, tc);
+
+        adjustUDTDependencies( lcc, dd, ads, true );
 	}
 }
