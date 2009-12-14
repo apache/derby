@@ -79,6 +79,7 @@ import java.util.Calendar;
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.iapi.util.IdUtil;
 
 /**
  * A EmbedResultSet for results from the EmbedStatement family. 
@@ -3604,7 +3605,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                     }
                     // using quotes around the column name 
                     // to preserve case sensitivity
-                    insertSQL.append(quoteSqlIdentifier(
+                    insertSQL.append(IdUtil.normalToDelimited(
                             resultDescription.getColumnDescriptor(i).getName()));
                     if (columnGotUpdated[i-1]) { 
                         valuesSQL.append("?");
@@ -3696,14 +3697,14 @@ public abstract class EmbedResultSet extends ConnectionChild
                     if (foundOneColumnAlready)
                         updateWhereCurrentOfSQL.append(",");
                     //using quotes around the column name to preserve case sensitivity
-                    updateWhereCurrentOfSQL.append(quoteSqlIdentifier(
+                    updateWhereCurrentOfSQL.append(IdUtil.normalToDelimited(
                             resultDescription.getColumnDescriptor(i).getName()) + "=?");
                     foundOneColumnAlready = true;
                 }
             }
             //using quotes around the cursor name to preserve case sensitivity
             updateWhereCurrentOfSQL.append(" WHERE CURRENT OF " + 
-                    quoteSqlIdentifier(getCursorName()));
+                    IdUtil.normalToDelimited(getCursorName()));
 
             // Context used for preparing, don't set any timeout (use 0)
             statementContext = lcc.pushStatementContext(isAtomic, false, updateWhereCurrentOfSQL.toString(), null, false, 0L);
@@ -3772,7 +3773,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 deleteWhereCurrentOfSQL.append(getFullBaseTableName(activation.getPreparedStatement().getTargetTable()));//get the underlying (schema.)table name
                 //using quotes around the cursor name to preserve case sensitivity
                 deleteWhereCurrentOfSQL.append(" WHERE CURRENT OF " + 
-                        quoteSqlIdentifier(getCursorName()));
+                        IdUtil.normalToDelimited(getCursorName()));
                 
                 // Context used for preparing, don't set any timeout (use 0)
                 statementContext = lcc.pushStatementContext(isAtomic, false, deleteWhereCurrentOfSQL.toString(), null, false, 0L);
@@ -3808,24 +3809,10 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 	private String getFullBaseTableName(ExecCursorTableReference targetTable) {
 		//using quotes to preserve case sensitivity
-		if (targetTable.getSchemaName() != null)
-			return quoteSqlIdentifier(targetTable.getSchemaName()) + "." + 
-					quoteSqlIdentifier(targetTable.getBaseName());
-		else
-			return quoteSqlIdentifier(targetTable.getBaseName());
+        return IdUtil.mkQualifiedName(targetTable.getSchemaName(),
+                                      targetTable.getBaseName());
 	}
 
-    private String quoteSqlIdentifier(String orgValue) {
-        int i = 0, start = 0;
-        String retValue = "";
-        while ((i = orgValue.indexOf("\"", start) + 1) > 0) {
-            retValue += orgValue.substring(start, i) + "\"";
-            start = i;
-        }
-        retValue += orgValue.substring(start, orgValue.length());
-        return "\"" + retValue + "\"";
-    }
-    
 	/**
 	 * JDBC 2.0
 	 * 
