@@ -680,8 +680,6 @@ public class SqlXmlUtil implements Formatable
      */
     private void loadSerializer() throws java.io.IOException
     {
-        java.io.StringWriter sWriter = new java.io.StringWriter();
-
         // Set serialization properties.
         Properties props = OutputProperties.getDefaultMethodProperties("xml");
 

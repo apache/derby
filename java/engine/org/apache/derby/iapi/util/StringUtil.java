@@ -531,7 +531,6 @@ public class StringUtil
 	 * @param depth indentation level the string is to be printed at (0,1,2..)
 	 */
 	public static String ensureIndent(String formatted, int depth) {
-		StringBuffer buf = new StringBuffer();
 		StringBuffer indent = new StringBuffer();
 
 		while (depth-- > 0) {
