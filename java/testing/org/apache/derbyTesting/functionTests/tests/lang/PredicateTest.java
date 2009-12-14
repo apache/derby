@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -97,6 +98,29 @@ public class PredicateTest extends BaseJDBCTestCase {
                 "23");
 
         // Verify that we now have all the expected qualifiers.
+        assertEquals(expectedOperators, extractOperators(getStatistics()));
+
+        // Now check that we get the same plan with parameters instead of
+        // constants on the right-hand side.
+
+        PreparedStatement paramRight = prepareStatement(
+                "select i from t1, t2 where " +
+                "t1.i = t2.j and t1.i >= ? and t2.j <= ?");
+        paramRight.setInt(1, 23);
+        paramRight.setInt(2, 30);
+
+        JDBC.assertSingleValueResultSet(paramRight.executeQuery(), "23");
+        assertEquals(expectedOperators, extractOperators(getStatistics()));
+
+        // Same plan expected with parameters on the left-hand side.
+
+        PreparedStatement paramLeft = prepareStatement(
+                "select i from t1, t2 where " +
+                "t1.i = t2.j and ? <= t1.i and ? >= t2.j");
+        paramLeft.setInt(1, 23);
+        paramLeft.setInt(2, 30);
+
+        JDBC.assertSingleValueResultSet(paramLeft.executeQuery(), "23");
         assertEquals(expectedOperators, extractOperators(getStatistics()));
     }
 

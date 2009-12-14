@@ -1440,6 +1440,17 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		}
 	}
 
+    /**
+     * Check if a node is representing a constant or a parameter.
+     *
+     * @param node the node to check
+     * @return {@code true} if the node is a constant or a parameter, {@code
+     * false} otherwise
+     */
+    private static boolean isConstantOrParameterNode(ValueNode node) {
+        return node instanceof ConstantNode || node instanceof ParameterNode;
+    }
+
 	/**
 	 * Push all predicates, which can be pushed, into the underlying select.
 	 * A predicate can be pushed into an underlying select if the source of 
@@ -1510,8 +1521,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 					opNode = (BinaryRelationalOperatorNode) andNode.getLeftOperand();
 					// Investigate using invariant interface to check rightOperand
 					if (! (opNode.getLeftOperand() instanceof ColumnReference) ||
-					    ! (opNode.getRightOperand() instanceof ConstantNode ||
-							 opNode.getRightOperand() instanceof ParameterNode))
+						! isConstantOrParameterNode(opNode.getRightOperand()))
 						continue;
 
 					crNode = (ColumnReference) opNode.getLeftOperand();
@@ -2273,12 +2283,13 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 
 				// RESOLVE: Consider using variant type of the expression, instead of
 				// ConstantNode or ParameterNode in the future.
-				if (left instanceof ColumnReference && 
-					  (right instanceof ConstantNode || right instanceof ParameterNode))
+				if (left instanceof ColumnReference &&
+						isConstantOrParameterNode(right))
 				{
 					searchClauses.addElement(predicate);
 				}
-				else if (left instanceof ConstantNode && right instanceof ColumnReference)
+				else if (isConstantOrParameterNode(left) &&
+						right instanceof ColumnReference)
 				{
 					// put the ColumnReference on the left to simplify things
 					andNode.setLeftOperand(bcon.getSwappedEquivalent());
