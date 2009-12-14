@@ -615,18 +615,6 @@ public class GenericStatement
 		}
 	}
 
-	private static long getElapsedTimeMillis(long beginTime)
-	{
-		if (beginTime != 0)
-		{
-			return System.currentTimeMillis() - beginTime;
-		}
-		else
-		{
-			return 0;
-		}
-	}
-
     /**
      * Return the {@link PreparedStatement} currently associated with this
      * statement.
