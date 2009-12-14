@@ -41,6 +41,7 @@ import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.util.IdUtil;
 
 /**
  * This class represents a table descriptor. The external interface to this
@@ -268,9 +269,7 @@ public class TableDescriptor extends TupleDescriptor
 	 */
 	public String	getQualifiedName()
 	{
-		//quoteProtectName is for bug 3476. 
-		return quoteProtectName(getSchemaName()) + "." +
-			quoteProtectName(getName());
+        return IdUtil.mkQualifiedName(getSchemaName(), getName());
 	}
 
 	/**

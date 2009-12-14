@@ -40,6 +40,7 @@ import	org.apache.derby.catalog.DependableFinder;
 import	org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.util.IdUtil;
 
 /**
  * This class represents an Alias Descriptor. 
@@ -144,8 +145,7 @@ public final class AliasDescriptor
 	 */
 	public String	getQualifiedName() throws StandardException
 	{
-		return quoteProtectName(getSchemaName()) + "." +
-			quoteProtectName( aliasName );
+        return IdUtil.mkQualifiedName(getSchemaName(), aliasName);
 	}
 
 	/**
