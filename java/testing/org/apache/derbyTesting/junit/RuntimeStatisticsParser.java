@@ -310,6 +310,14 @@ public class RuntimeStatisticsParser {
     }
 
     /**
+     * @return true if a nested loop left outer join was used
+     */
+    public boolean usedNLLeftOuterJoin()
+    {
+        return (statistics.indexOf("Nested Loop Left Outer Join") != -1);
+    }
+
+    /**
      * Check if an exists join (or a not exists join) was used.
      *
      * @return {@code true} if the query used a (not) exists join

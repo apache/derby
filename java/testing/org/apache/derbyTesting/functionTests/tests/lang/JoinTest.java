@@ -29,6 +29,8 @@ import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
+import org.apache.derbyTesting.junit.SQLUtilities;
 
 /**
  * Test cases for JOINs.
@@ -52,18 +54,18 @@ public class JoinTest extends BaseJDBCTestCase {
 
     /**
      * DERBY-4365 Test that the NULL values are caught in VALUES clause when it
-     * is part of a non-INSERT statement. Throw exception 42X07 for such a 
+     * is part of a non-INSERT statement. Throw exception 42X07 for such a
      * case.
-     * 
+     *
      */
     public void testNullabilityInValues() throws SQLException {
         Statement s = createStatement();
         assertStatementError(
-        		VALUES_WITH_NULL, s, 
+        		VALUES_WITH_NULL, s,
         		"select a.* from (values (null)) a left outer join "+
         		"(values ('a')) b on 1=1");
         assertStatementError(
-        		VALUES_WITH_NULL, s, 
+        		VALUES_WITH_NULL, s,
         		"select a.* from (values (null)) a");
 
         String[][] expectedResult = {
@@ -76,7 +78,7 @@ public class JoinTest extends BaseJDBCTestCase {
         };
         JDBC.assertUnorderedResultSet(s.executeQuery(
         		"select a.* from (values ('a'),('b'),(cast(null as char(1)))) "
-        		+ "a left outer join (values ('c'),('d')) b on 1=1"), 
+        		+ "a left outer join (values ('c'),('d')) b on 1=1"),
         		expectedResult);
     }
 
@@ -784,5 +786,819 @@ public class JoinTest extends BaseJDBCTestCase {
         // added twice and caused an infinite loop.
 
         rollback();
+    }
+
+
+    /**
+     * Derby-4405 improve rewrite of OUTER JOIN to INNER JOIN in presence of
+     * null intolerant predicate. It uses a slimmed down toursdb dataset.
+     */
+    public void testDerby_4405() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.execute("CREATE TABLE COUNTRIES(" +
+                  "COUNTRY VARCHAR(26) UNIQUE NOT NULL," +
+                  "COUNTRY_ISO_CODE CHAR(2) PRIMARY KEY NOT NULL)");
+
+
+        s.execute("CREATE TABLE CITIES(" +
+                  "CITY_ID INTEGER primary key NOT NULL ," +
+                  "COUNTRY VARCHAR(26) NOT NULL," +
+                  "AIRPORT VARCHAR(3))");
+
+
+        s.execute("CREATE TABLE FLIGHTS(" +
+                  "FLIGHT_ID CHAR(6) NOT NULL ," +
+                  "ORIG_AIRPORT CHAR(3)," +
+                  "PRIMARY KEY (FLIGHT_ID))");
+
+        s.execute("CREATE INDEX ORIGINDEX ON FLIGHTS (ORIG_AIRPORT)");
+
+        PreparedStatement ps = getConnection().prepareStatement(
+            "insert into COUNTRIES values ( ?,? )");
+
+        insertTourRow(ps, "Afghanistan", "AF");
+        insertTourRow(ps, "Albania", "AL");
+        insertTourRow(ps, "Algeria", "DZ");
+        insertTourRow(ps, "American Samoa", "AS");
+        insertTourRow(ps, "Angola", "AO");
+        insertTourRow(ps, "Argentina", "AR");
+        insertTourRow(ps, "Armenia", "AM");
+        insertTourRow(ps, "Australia", "AU");
+        insertTourRow(ps, "Austria", "AT");
+        insertTourRow(ps, "Azerbaijan", "AZ");
+        insertTourRow(ps, "Bahamas", "BS");
+        insertTourRow(ps, "Bangladesh", "BD");
+        insertTourRow(ps, "Barbados", "BB");
+        insertTourRow(ps, "Belgium", "BE");
+        insertTourRow(ps, "Belize", "BZ");
+        insertTourRow(ps, "Bermuda", "BM");
+        insertTourRow(ps, "Bolivia", "BO");
+        insertTourRow(ps, "Botswana", "BW");
+        insertTourRow(ps, "Brazil", "BR");
+        insertTourRow(ps, "Bulgaria", "BG");
+        insertTourRow(ps, "Cambodia", "KH");
+        insertTourRow(ps, "Cameroon", "CM");
+        insertTourRow(ps, "Canada", "CA");
+        insertTourRow(ps, "Cape Verde", "CV");
+        insertTourRow(ps, "Chile", "CL");
+        insertTourRow(ps, "China", "CN");
+        insertTourRow(ps, "Colombia", "CO");
+        insertTourRow(ps, "Congo", "CG");
+        insertTourRow(ps, "Costa Rica", "CR");
+        insertTourRow(ps, "Cote d'Ivoire", "CI");
+        insertTourRow(ps, "Cuba", "CU");
+        insertTourRow(ps, "Czech Republic", "CZ");
+        insertTourRow(ps, "Denmark", "DK");
+        insertTourRow(ps, "Dominical Republic", "DO");
+        insertTourRow(ps, "Ecuador", "EC");
+        insertTourRow(ps, "Egypt", "EG");
+        insertTourRow(ps, "El Salvador", "SV");
+        insertTourRow(ps, "Ethiopia", "ET");
+        insertTourRow(ps, "Falkland Islands", "FK");
+        insertTourRow(ps, "Fiji", "FJ");
+        insertTourRow(ps, "Finland", "FI");
+        insertTourRow(ps, "France", "FR");
+        insertTourRow(ps, "Georgia", "GE");
+        insertTourRow(ps, "Germany", "DE");
+        insertTourRow(ps, "Ghana", "GH");
+        insertTourRow(ps, "Greece", "GR");
+        insertTourRow(ps, "Guadeloupe", "GP");
+        insertTourRow(ps, "Guatemala", "GT");
+        insertTourRow(ps, "Honduras", "HN");
+        insertTourRow(ps, "Hungary", "HU");
+        insertTourRow(ps, "Iceland", "IS");
+        insertTourRow(ps, "India", "IN");
+        insertTourRow(ps, "Indonesia", "ID");
+        insertTourRow(ps, "Iran", "IR");
+        insertTourRow(ps, "Iraq", "IQ");
+        insertTourRow(ps, "Ireland", "IE");
+        insertTourRow(ps, "Israel", "IL");
+        insertTourRow(ps, "Italy", "IT");
+        insertTourRow(ps, "Jamaica", "JM");
+        insertTourRow(ps, "Japan", "JP");
+        insertTourRow(ps, "Jordan", "JO");
+        insertTourRow(ps, "Kenya", "KE");
+        insertTourRow(ps, "Lebanon", "LB");
+        insertTourRow(ps, "Lithuania", "LT");
+        insertTourRow(ps, "Madagascar", "MG");
+        insertTourRow(ps, "Malaysia", "MY");
+        insertTourRow(ps, "Mali", "ML");
+        insertTourRow(ps, "Mexico", "MX");
+        insertTourRow(ps, "Morocco", "MA");
+        insertTourRow(ps, "Mozambique", "MZ");
+        insertTourRow(ps, "Nepal", "NP");
+        insertTourRow(ps, "Netherlands", "NL");
+        insertTourRow(ps, "New Zealand", "NZ");
+        insertTourRow(ps, "Nicaragua", "NI");
+        insertTourRow(ps, "Nigeria", "NG");
+        insertTourRow(ps, "Norway", "NO");
+        insertTourRow(ps, "Pakistan", "PK");
+        insertTourRow(ps, "Paraguay", "PY");
+        insertTourRow(ps, "Peru", "PE");
+        insertTourRow(ps, "Philippines", "PH");
+        insertTourRow(ps, "Poland", "PL");
+        insertTourRow(ps, "Portugal", "PT");
+        insertTourRow(ps, "Russia", "RU");
+        insertTourRow(ps, "Samoa", "WS");
+        insertTourRow(ps, "Senegal", "SN");
+        insertTourRow(ps, "Sierra Leone", "SL");
+        insertTourRow(ps, "Singapore", "SG");
+        insertTourRow(ps, "Slovakia", "SK");
+        insertTourRow(ps, "South Africa", "ZA");
+        insertTourRow(ps, "Spain", "ES");
+        insertTourRow(ps, "Sri Lanka", "LK");
+        insertTourRow(ps, "Sudan", "SD");
+        insertTourRow(ps, "Sweden", "SE");
+        insertTourRow(ps, "Switzerland", "CH");
+        insertTourRow(ps, "Syrian Arab Republic", "SY");
+        insertTourRow(ps, "Tajikistan", "TJ");
+        insertTourRow(ps, "Tanzania", "TZ");
+        insertTourRow(ps, "Thailand", "TH");
+        insertTourRow(ps, "Trinidad and Tobago", "TT");
+        insertTourRow(ps, "Tunisia", "TN");
+        insertTourRow(ps, "Turkey", "TR");
+        insertTourRow(ps, "Ukraine", "UA");
+        insertTourRow(ps, "United Kingdom", "GB");
+        insertTourRow(ps, "United States", "US");
+        insertTourRow(ps, "Uruguay", "UY");
+        insertTourRow(ps, "Uzbekistan", "UZ");
+        insertTourRow(ps, "Venezuela", "VE");
+        insertTourRow(ps, "Viet Nam", "VN");
+        insertTourRow(ps, "Virgin Islands (British)", "VG");
+        insertTourRow(ps, "Virgin Islands (U.S.)", "VI");
+        insertTourRow(ps, "Yugoslavia", "YU");
+        insertTourRow(ps, "Zaire", "ZR");
+        insertTourRow(ps, "Zimbabwe", "ZW");
+
+        ps = getConnection().prepareStatement(
+            "insert into CITIES VALUES (?,?,?)");
+
+        insertTourRow(ps, 1, "Netherlands", "AMS");
+        insertTourRow(ps, 2, "Greece", "ATH");
+        insertTourRow(ps, 3, "New Zealand", "AKL");
+        insertTourRow(ps, 4, "Lebanon", "BEY");
+        insertTourRow(ps, 5, "Colombia", "BOG");
+        insertTourRow(ps, 6, "India", "BOM");
+        insertTourRow(ps, 7, "Hungary", "BUD");
+        insertTourRow(ps, 8, "Argentina", "BUE");
+        insertTourRow(ps, 9, "Egypt", "CAI");
+        insertTourRow(ps, 10, "India", "CCU");
+        insertTourRow(ps, 11, "South Africa", "CPT");
+        insertTourRow(ps, 12, "Venezuela", "CCS");
+        insertTourRow(ps, 13, "Morocco", "CAS");
+        insertTourRow(ps, 14, "Denmark", "CPH");
+        insertTourRow(ps, 15, "Ireland", "DUB");
+        insertTourRow(ps, 16, "Switzerland", "GVA");
+        insertTourRow(ps, 17, "China", "HKG");
+        insertTourRow(ps, 18, "Turkey", "IST");
+        insertTourRow(ps, 19, "Indonesia", "JKT");
+        insertTourRow(ps, 20, "Afghanistan", "KBL");
+        insertTourRow(ps, 21, "Pakistan", "KHI");
+        insertTourRow(ps, 22, "Nigeria", "LOS");
+        insertTourRow(ps, 23, "Peru", "LIM");
+        insertTourRow(ps, 24, "Portugal", "LIS");
+        insertTourRow(ps, 25, "United Kingdom", "LHR");
+        insertTourRow(ps, 26, "Spain", "MAD");
+        insertTourRow(ps, 27, "Philippines", "MNL");
+        insertTourRow(ps, 28, "Australia", "MEL");
+        insertTourRow(ps, 29, "Mexico", "MEX");
+        insertTourRow(ps, 30, "Canada", "YUL");
+        insertTourRow(ps, 31, "Russia", "SVO");
+        insertTourRow(ps, 32, "Kenya", "NBO");
+        insertTourRow(ps, 33, "Japan", "OSA");
+        insertTourRow(ps, 34, "Norway", "OSL");
+        insertTourRow(ps, 35, "France", "CDG");
+        insertTourRow(ps, 36, "Czech Republic", "PRG");
+        insertTourRow(ps, 37, "Iceland", "REY");
+        insertTourRow(ps, 38, "Brazil", "GIG");
+        insertTourRow(ps, 39, "Italy", "FCO");
+        insertTourRow(ps, 40, "Chile", "SCL");
+        insertTourRow(ps, 41, "Brazil", "GRU");
+        insertTourRow(ps, 43, "China", "SHA");
+        insertTourRow(ps, 44, "Singapore", "SIN");
+        insertTourRow(ps, 45, "Sweden", "ARN");
+        insertTourRow(ps, 46, "Australia", "SYD");
+        insertTourRow(ps, 47, "United States", "SJC");
+        insertTourRow(ps, 48, "Iran", "THR");
+        insertTourRow(ps, 49, "Japan", "NRT");
+        insertTourRow(ps, 50, "Canada", "YYZ");
+        insertTourRow(ps, 51, "Poland", "WAW");
+        insertTourRow(ps, 52, "United States", "ALB");
+        insertTourRow(ps, 53, "United States", "ABQ");
+        insertTourRow(ps, 54, "United States", "ATL");
+        insertTourRow(ps, 55, "United States", "BOI");
+        insertTourRow(ps, 56, "United States", "BOS");
+        insertTourRow(ps, 57, "United States", "CHS");
+        insertTourRow(ps, 58, "United States", "MDW");
+        insertTourRow(ps, 59, "United States", "CLE");
+        insertTourRow(ps, 60, "United States", "DFW");
+        insertTourRow(ps, 61, "United States", "DEN");
+        insertTourRow(ps, 62, "United States", "DSM");
+        insertTourRow(ps, 63, "United States", "FAI");
+        insertTourRow(ps, 64, "United States", "HLN");
+        insertTourRow(ps, 65, "United States", "HNL");
+        insertTourRow(ps, 66, "United States", "HOU");
+        insertTourRow(ps, 67, "United States", "JNU");
+        insertTourRow(ps, 68, "United States", "MCI");
+        insertTourRow(ps, 69, "United States", "LAX");
+        insertTourRow(ps, 70, "United States", "MEM");
+        insertTourRow(ps, 71, "United States", "MIA");
+        insertTourRow(ps, 72, "United States", "MKE");
+        insertTourRow(ps, 73, "United States", "MSP");
+        insertTourRow(ps, 74, "United States", "BNA");
+        insertTourRow(ps, 75, "United States", "MSY");
+        insertTourRow(ps, 76, "United States", "JFK");
+        insertTourRow(ps, 77, "United States", "OKC");
+        insertTourRow(ps, 78, "United States", "PHL");
+        insertTourRow(ps, 79, "United States", "PHX");
+        insertTourRow(ps, 80, "United States", "STL");
+        insertTourRow(ps, 81, "United States", "SLC");
+        insertTourRow(ps, 82, "United States", "SAT");
+        insertTourRow(ps, 83, "United States", "SAN");
+        insertTourRow(ps, 84, "United States", "SFO");
+        insertTourRow(ps, 85, "United States", "SJU");
+        insertTourRow(ps, 86, "United States", "SEA");
+        insertTourRow(ps, 87, "United States", "IAD");
+
+        ps = getConnection().prepareStatement(
+            "insert into FLIGHTS values (?,?)");
+
+        insertTourRow(ps, "AA1111", "ABQ");
+        insertTourRow(ps, "AA1112", "LAX");
+        insertTourRow(ps, "AA1113", "ABQ");
+        insertTourRow(ps, "AA1114", "PHX");
+        insertTourRow(ps, "AA1115", "ABQ");
+        insertTourRow(ps, "AA1116", "OKC");
+        insertTourRow(ps, "AA1117", "AKL");
+        insertTourRow(ps, "AA1118", "HNL");
+        insertTourRow(ps, "AA1119", "AKL");
+        insertTourRow(ps, "AA1120", "NRT");
+        insertTourRow(ps, "AA1121", "AKL");
+        insertTourRow(ps, "AA1122", "SYD");
+        insertTourRow(ps, "AA1123", "ALB");
+        insertTourRow(ps, "AA1124", "JFK");
+        insertTourRow(ps, "AA1125", "ALB");
+        insertTourRow(ps, "AA1126", "BOS");
+        insertTourRow(ps, "AA1127", "ALB");
+        insertTourRow(ps, "AA1128", "IAD");
+        insertTourRow(ps, "US1517", "AMS");
+        insertTourRow(ps, "US1516", "JFK");
+        insertTourRow(ps, "AA1131", "AMS");
+        insertTourRow(ps, "AA1132", "ATH");
+        insertTourRow(ps, "AA1133", "AMS");
+        insertTourRow(ps, "AA1134", "CDG");
+        insertTourRow(ps, "AA1135", "ARN");
+        insertTourRow(ps, "AA1136", "BOS");
+        insertTourRow(ps, "AA1137", "ARN");
+        insertTourRow(ps, "AA1138", "SVO");
+        insertTourRow(ps, "AA1139", "ARN");
+        insertTourRow(ps, "AA1140", "CPH");
+        insertTourRow(ps, "AA1141", "ATH");
+        insertTourRow(ps, "AA1142", "LHR");
+        insertTourRow(ps, "AA1143", "ATH");
+        insertTourRow(ps, "AA1144", "CAI");
+        insertTourRow(ps, "AA1145", "ATH");
+        insertTourRow(ps, "AA1146", "CDG");
+        insertTourRow(ps, "AA1147", "ATL");
+        insertTourRow(ps, "AA1148", "LAX");
+        insertTourRow(ps, "AA1149", "ATL");
+        insertTourRow(ps, "AA1150", "DFW");
+        insertTourRow(ps, "AA1151", "ATL");
+        insertTourRow(ps, "AA1152", "SEA");
+        insertTourRow(ps, "AA1153", "BEY");
+        insertTourRow(ps, "AA1154", "CAI");
+        insertTourRow(ps, "AA1270", "BEY");
+        insertTourRow(ps, "AA1269", "MAD");
+        insertTourRow(ps, "AA1157", "BEY");
+        insertTourRow(ps, "AA1158", "BOM");
+        insertTourRow(ps, "AA1159", "BNA");
+        insertTourRow(ps, "AA1160", "MIA");
+        insertTourRow(ps, "AA1161", "BNA");
+        insertTourRow(ps, "AA1162", "JFK");
+        insertTourRow(ps, "AA1163", "BNA");
+        insertTourRow(ps, "AA1164", "GIG");
+        insertTourRow(ps, "US1591", "BOG");
+        insertTourRow(ps, "AA1190", "MIA");
+        insertTourRow(ps, "AA1167", "BOG");
+        insertTourRow(ps, "AA1168", "LIM");
+        insertTourRow(ps, "AA1169", "BOG");
+        insertTourRow(ps, "AA1170", "GIG");
+        insertTourRow(ps, "AA1171", "BOI");
+        insertTourRow(ps, "AA1172", "SEA");
+        insertTourRow(ps, "AA1173", "BOI");
+        insertTourRow(ps, "AA1174", "DSM");
+        insertTourRow(ps, "AA1175", "BOI");
+        insertTourRow(ps, "AA1176", "HLN");
+        insertTourRow(ps, "AA1177", "BOM");
+        insertTourRow(ps, "AA1178", "CCU");
+        insertTourRow(ps, "AA1179", "BOM");
+        insertTourRow(ps, "AA1180", "KHI");
+        insertTourRow(ps, "AA1181", "BOM");
+        insertTourRow(ps, "AA1182", "HKG");
+        insertTourRow(ps, "AA1183", "BOS");
+        insertTourRow(ps, "AA1184", "SFO");
+        insertTourRow(ps, "AA1185", "BOS");
+        insertTourRow(ps, "AA1186", "MIA");
+        insertTourRow(ps, "AA1187", "BOS");
+        insertTourRow(ps, "AA1188", "IAD");
+        insertTourRow(ps, "AA1189", "BUD");
+        insertTourRow(ps, "AA1191", "BUD");
+        insertTourRow(ps, "AA1192", "SVO");
+        insertTourRow(ps, "AA1193", "BUD");
+        insertTourRow(ps, "AA1194", "FCO");
+        insertTourRow(ps, "AA1195", "CAI");
+        insertTourRow(ps, "AA1196", "MIA");
+        insertTourRow(ps, "AA1197", "CAI");
+        insertTourRow(ps, "AA1198", "IST");
+        insertTourRow(ps, "AA1199", "CAI");
+        insertTourRow(ps, "AA1200", "GIG");
+        insertTourRow(ps, "AA1201", "CAS");
+        insertTourRow(ps, "AA1202", "KHI");
+        insertTourRow(ps, "AA1203", "CAS");
+        insertTourRow(ps, "AA1204", "LOS");
+        insertTourRow(ps, "AA1205", "CAS");
+        insertTourRow(ps, "AA1206", "MAD");
+        insertTourRow(ps, "AA1207", "CCS");
+        insertTourRow(ps, "AA1208", "SCL");
+        insertTourRow(ps, "AA1209", "CCS");
+        insertTourRow(ps, "AA1210", "MEX");
+        insertTourRow(ps, "AA1211", "CCS");
+        insertTourRow(ps, "AA1212", "BUE");
+        insertTourRow(ps, "AA1213", "CCU");
+        insertTourRow(ps, "AA1214", "HKG");
+        insertTourRow(ps, "AA1215", "CCU");
+        insertTourRow(ps, "AA1216", "NRT");
+        insertTourRow(ps, "AA1217", "CCU");
+        insertTourRow(ps, "AA1218", "SIN");
+        insertTourRow(ps, "AA1219", "CDG");
+        insertTourRow(ps, "AA1220", "LHR");
+        insertTourRow(ps, "AA1221", "CDG");
+        insertTourRow(ps, "AA1222", "JFK");
+        insertTourRow(ps, "AA1223", "CDG");
+        insertTourRow(ps, "AA1224", "SVO");
+        insertTourRow(ps, "AA1225", "CHS");
+        insertTourRow(ps, "AA1226", "ATL");
+        insertTourRow(ps, "AA1227", "CHS");
+        insertTourRow(ps, "AA1228", "MCI");
+        insertTourRow(ps, "AA1229", "CHS");
+        insertTourRow(ps, "AA1230", "MSY");
+        insertTourRow(ps, "AA1231", "CLE");
+        insertTourRow(ps, "AA1232", "LAX");
+        insertTourRow(ps, "AA1233", "CLE");
+        insertTourRow(ps, "AA1234", "DFW");
+        insertTourRow(ps, "AA1235", "CLE");
+        insertTourRow(ps, "AA1236", "MDW");
+        insertTourRow(ps, "AA1237", "CPH");
+        insertTourRow(ps, "AA1238", "FCO");
+        insertTourRow(ps, "AA1239", "CPH");
+        insertTourRow(ps, "AA1240", "REY");
+        insertTourRow(ps, "AA1241", "CPH");
+        insertTourRow(ps, "AA1242", "CDG");
+        insertTourRow(ps, "AA1243", "CPT");
+        insertTourRow(ps, "AA1244", "LOS");
+        insertTourRow(ps, "AA1245", "CPT");
+        insertTourRow(ps, "AA1246", "NBO");
+        insertTourRow(ps, "AA1247", "CPT");
+        insertTourRow(ps, "AA1248", "LHR");
+        insertTourRow(ps, "AA1249", "DEN");
+        insertTourRow(ps, "AA1250", "SEA");
+        insertTourRow(ps, "AA1251", "DEN");
+        insertTourRow(ps, "AA1252", "BOI");
+        insertTourRow(ps, "AA1253", "DEN");
+        insertTourRow(ps, "AA1254", "JFK");
+        insertTourRow(ps, "AA1255", "DFW");
+        insertTourRow(ps, "AA1256", "SAT");
+        insertTourRow(ps, "AA1257", "DFW");
+        insertTourRow(ps, "AA1258", "ATL");
+        insertTourRow(ps, "AA1259", "DFW");
+        insertTourRow(ps, "AA1260", "MIA");
+        insertTourRow(ps, "AA1261", "DSM");
+        insertTourRow(ps, "AA1262", "MDW");
+        insertTourRow(ps, "AA1263", "DSM");
+        insertTourRow(ps, "AA1264", "SLC");
+        insertTourRow(ps, "AA1265", "DSM");
+        insertTourRow(ps, "AA1266", "OKC");
+        insertTourRow(ps, "AA1267", "DUB");
+        insertTourRow(ps, "AA1268", "LHR");
+        insertTourRow(ps, "AA1272", "CDG");
+        insertTourRow(ps, "AA1273", "BUE");
+        insertTourRow(ps, "AA1274", "SCL");
+        insertTourRow(ps, "AA1275", "BUE");
+        insertTourRow(ps, "AA1276", "GRU");
+        insertTourRow(ps, "US1509", "BUE");
+        insertTourRow(ps, "US1508", "MIA");
+        insertTourRow(ps, "AA1279", "FAI");
+        insertTourRow(ps, "AA1280", "JNU");
+        insertTourRow(ps, "AA1281", "FAI");
+        insertTourRow(ps, "AA1282", "SEA");
+        insertTourRow(ps, "US1443", "FAI");
+        insertTourRow(ps, "US1444", "NRT");
+        insertTourRow(ps, "AA1285", "FCO");
+        insertTourRow(ps, "AA1286", "CDG");
+        insertTourRow(ps, "AA1287", "FCO");
+        insertTourRow(ps, "AA1288", "CAI");
+        insertTourRow(ps, "AA1289", "FCO");
+        insertTourRow(ps, "AA1290", "JFK");
+        insertTourRow(ps, "AA1291", "GIG");
+        insertTourRow(ps, "AA1292", "MIA");
+        insertTourRow(ps, "AA1293", "GIG");
+        insertTourRow(ps, "AA1294", "LIM");
+        insertTourRow(ps, "AA1295", "GIG");
+        insertTourRow(ps, "AA1296", "BUE");
+        insertTourRow(ps, "US1249", "GRU");
+        insertTourRow(ps, "US1250", "CCS");
+        insertTourRow(ps, "US1251", "GRU");
+        insertTourRow(ps, "US1252", "JFK");
+        insertTourRow(ps, "US1253", "GRU");
+        insertTourRow(ps, "US1254", "LAX");
+        insertTourRow(ps, "AA1053", "GRU");
+        insertTourRow(ps, "AA1054", "LIM");
+        insertTourRow(ps, "US1255", "GVA");
+        insertTourRow(ps, "US1256", "CPH");
+        insertTourRow(ps, "US1257", "GVA");
+        insertTourRow(ps, "US1258", "LIS");
+        insertTourRow(ps, "US1259", "GVA");
+        insertTourRow(ps, "US1260", "OSL");
+        insertTourRow(ps, "US1266", "HKG");
+        insertTourRow(ps, "US1264", "SIN");
+        insertTourRow(ps, "US1267", "HLN");
+        insertTourRow(ps, "US1268", "SEA");
+        insertTourRow(ps, "US1269", "HLN");
+        insertTourRow(ps, "US1270", "BOI");
+        insertTourRow(ps, "US1271", "HLN");
+        insertTourRow(ps, "US1272", "DEN");
+        insertTourRow(ps, "US1276", "HNL");
+        insertTourRow(ps, "US1274", "NRT");
+        insertTourRow(ps, "US1277", "HNL");
+        insertTourRow(ps, "US1278", "SYD");
+        insertTourRow(ps, "US1281", "HOU");
+        insertTourRow(ps, "US1282", "SAT");
+        insertTourRow(ps, "US1283", "HOU");
+        insertTourRow(ps, "US1284", "IAD");
+        insertTourRow(ps, "US1285", "IAD");
+        insertTourRow(ps, "US1286", "BOS");
+        insertTourRow(ps, "US1287", "IAD");
+        insertTourRow(ps, "US1288", "MSP");
+        insertTourRow(ps, "US1289", "IAD");
+        insertTourRow(ps, "US1290", "MIA");
+        insertTourRow(ps, "US1291", "IST");
+        insertTourRow(ps, "US1292", "THR");
+        insertTourRow(ps, "US1293", "IST");
+        insertTourRow(ps, "US1294", "FCO");
+        insertTourRow(ps, "US1295", "IST");
+        insertTourRow(ps, "US1296", "ATH");
+        insertTourRow(ps, "US1381", "JFK");
+        insertTourRow(ps, "US1382", "CDG");
+        insertTourRow(ps, "US1349", "JFK");
+        insertTourRow(ps, "US1300", "LAX");
+        insertTourRow(ps, "US1301", "JFK");
+        insertTourRow(ps, "US1302", "GRU");
+        insertTourRow(ps, "US1303", "JKT");
+        insertTourRow(ps, "US1304", "HKG");
+        insertTourRow(ps, "US1308", "JKT");
+        insertTourRow(ps, "US1307", "SYD");
+        insertTourRow(ps, "US1309", "JNU");
+        insertTourRow(ps, "US1310", "SEA");
+        insertTourRow(ps, "US1311", "JNU");
+        insertTourRow(ps, "US1312", "SFO");
+        insertTourRow(ps, "US1313", "JNU");
+        insertTourRow(ps, "US1314", "HNL");
+        insertTourRow(ps, "US1315", "KBL");
+        insertTourRow(ps, "US1316", "KHI");
+        insertTourRow(ps, "US1317", "KBL");
+        insertTourRow(ps, "US1318", "IST");
+        insertTourRow(ps, "US1321", "KHI");
+        insertTourRow(ps, "US1322", "IST");
+        insertTourRow(ps, "US1323", "KHI");
+        insertTourRow(ps, "US1324", "IST");
+        insertTourRow(ps, "US1325", "KHI");
+        insertTourRow(ps, "US1326", "THR");
+        insertTourRow(ps, "US1327", "LAX");
+        insertTourRow(ps, "US1328", "HNL");
+        insertTourRow(ps, "US1329", "LAX");
+        insertTourRow(ps, "US1330", "GRU");
+        insertTourRow(ps, "US1331", "LAX");
+        insertTourRow(ps, "US1332", "NRT");
+        insertTourRow(ps, "US1333", "LHR");
+        insertTourRow(ps, "US1334", "WAW");
+        insertTourRow(ps, "US1335", "LHR");
+        insertTourRow(ps, "US1336", "YYZ");
+        insertTourRow(ps, "US1337", "LHR");
+        insertTourRow(ps, "US1338", "NBO");
+        insertTourRow(ps, "US1501", "LIM");
+        insertTourRow(ps, "US1340", "MIA");
+        insertTourRow(ps, "US1344", "LIM");
+        insertTourRow(ps, "US1342", "BUE");
+        insertTourRow(ps, "US1345", "LIS");
+        insertTourRow(ps, "US1346", "CDG");
+        insertTourRow(ps, "US1347", "LIS");
+        insertTourRow(ps, "US1348", "CAS");
+        insertTourRow(ps, "US1353", "LOS");
+        insertTourRow(ps, "US1354", "MAD");
+        insertTourRow(ps, "US1355", "LOS");
+        insertTourRow(ps, "US1356", "ATH");
+        insertTourRow(ps, "US1357", "MAD");
+        insertTourRow(ps, "US1358", "CDG");
+        insertTourRow(ps, "US1361", "MAD");
+        insertTourRow(ps, "US1362", "JFK");
+        insertTourRow(ps, "US1363", "MCI");
+        insertTourRow(ps, "US1364", "LAX");
+        insertTourRow(ps, "US1365", "MCI");
+        insertTourRow(ps, "US1366", "DFW");
+        insertTourRow(ps, "US1367", "MCI");
+        insertTourRow(ps, "US1368", "JFK");
+        insertTourRow(ps, "US1379", "MDW");
+        insertTourRow(ps, "US1380", "LAX");
+        insertTourRow(ps, "US1473", "MDW");
+        insertTourRow(ps, "US1474", "JFK");
+        insertTourRow(ps, "US1383", "MDW");
+        insertTourRow(ps, "US1384", "ATL");
+        insertTourRow(ps, "US1385", "MEL");
+        insertTourRow(ps, "US1386", "SYD");
+        insertTourRow(ps, "US1387", "MEL");
+        insertTourRow(ps, "US1388", "SIN");
+        insertTourRow(ps, "US1389", "MEL");
+        insertTourRow(ps, "US1390", "HNL");
+        insertTourRow(ps, "US1391", "MEM");
+        insertTourRow(ps, "US1392", "MIA");
+        insertTourRow(ps, "US1393", "MEM");
+        insertTourRow(ps, "US1394", "JFK");
+        insertTourRow(ps, "US1395", "MEM");
+        insertTourRow(ps, "US1396", "LAX");
+        insertTourRow(ps, "US1397", "MEX");
+        insertTourRow(ps, "US1398", "SFO");
+        insertTourRow(ps, "US1399", "MEX");
+        insertTourRow(ps, "US1400", "LAX");
+        insertTourRow(ps, "US1401", "MEX");
+        insertTourRow(ps, "US1402", "BOG");
+        insertTourRow(ps, "US1403", "MIA");
+        insertTourRow(ps, "US1404", "GRU");
+        insertTourRow(ps, "US1405", "MIA");
+        insertTourRow(ps, "US1406", "LAX");
+        insertTourRow(ps, "US1407", "MIA");
+        insertTourRow(ps, "US1408", "JFK");
+        insertTourRow(ps, "US1409", "MKE");
+        insertTourRow(ps, "US1410", "JFK");
+        insertTourRow(ps, "US1411", "MKE");
+        insertTourRow(ps, "US1412", "MDW");
+        insertTourRow(ps, "US1413", "MKE");
+        insertTourRow(ps, "US1414", "JFK");
+        insertTourRow(ps, "US1415", "MNL");
+        insertTourRow(ps, "US1416", "SYD");
+        insertTourRow(ps, "US1417", "MNL");
+        insertTourRow(ps, "US1418", "TPE");
+        insertTourRow(ps, "US1419", "MNL");
+        insertTourRow(ps, "US1420", "SIN");
+        insertTourRow(ps, "AA1419", "MNL");
+        insertTourRow(ps, "AA1420", "HKG");
+        insertTourRow(ps, "AA1421", "MNL");
+        insertTourRow(ps, "US1422", "HNL");
+        insertTourRow(ps, "US1423", "MSP");
+        insertTourRow(ps, "US1424", "MDW");
+        insertTourRow(ps, "AA1423", "MDW");
+        insertTourRow(ps, "AA1424", "MIA");
+        insertTourRow(ps, "US1427", "MSY");
+        insertTourRow(ps, "US1428", "SFO");
+        insertTourRow(ps, "US1429", "MSY");
+        insertTourRow(ps, "US1430", "ATL");
+        insertTourRow(ps, "US1431", "MSY");
+        insertTourRow(ps, "US1432", "JFK");
+        insertTourRow(ps, "US1433", "NBO");
+        insertTourRow(ps, "US1434", "FCO");
+        insertTourRow(ps, "US1435", "NBO");
+        insertTourRow(ps, "US1436", "MAD");
+        insertTourRow(ps, "US1437", "NBO");
+        insertTourRow(ps, "US1438", "CAS");
+        insertTourRow(ps, "US1439", "NRT");
+        insertTourRow(ps, "US1440", "SYD");
+        insertTourRow(ps, "US1441", "NRT");
+        insertTourRow(ps, "US1442", "LAX");
+        insertTourRow(ps, "US1445", "OKC");
+        insertTourRow(ps, "US1446", "SLC");
+        insertTourRow(ps, "US1447", "OKC");
+        insertTourRow(ps, "US1448", "JFK");
+        insertTourRow(ps, "US1449", "OKC");
+        insertTourRow(ps, "US1450", "LAX");
+        insertTourRow(ps, "US1451", "OSA");
+        insertTourRow(ps, "US1452", "NRT");
+        insertTourRow(ps, "US1453", "OSA");
+        insertTourRow(ps, "US1454", "TPE");
+        insertTourRow(ps, "US1455", "OSA");
+        insertTourRow(ps, "US1456", "SVO");
+        insertTourRow(ps, "US1457", "OSL");
+        insertTourRow(ps, "US1458", "PRG");
+        insertTourRow(ps, "US1459", "OSL");
+        insertTourRow(ps, "US1460", "ARN");
+        insertTourRow(ps, "US1461", "OSL");
+        insertTourRow(ps, "US1462", "WAW");
+        insertTourRow(ps, "AA1462", "OSL");
+        insertTourRow(ps, "AA1463", "CDG");
+        insertTourRow(ps, "US1463", "PHL");
+        insertTourRow(ps, "US1464", "IAD");
+        insertTourRow(ps, "US1465", "PHL");
+        insertTourRow(ps, "US1466", "MIA");
+        insertTourRow(ps, "US1469", "PHX");
+        insertTourRow(ps, "US1470", "LAX");
+        insertTourRow(ps, "US1471", "PHX");
+        insertTourRow(ps, "US1472", "SEA");
+        insertTourRow(ps, "US1475", "PRG");
+        insertTourRow(ps, "US1476", "CDG");
+        insertTourRow(ps, "US1477", "PRG");
+        insertTourRow(ps, "US1478", "FCO");
+        insertTourRow(ps, "US1479", "PRG");
+        insertTourRow(ps, "US1480", "REY");
+        insertTourRow(ps, "US1481", "REY");
+        insertTourRow(ps, "US1482", "SVO");
+        insertTourRow(ps, "US1483", "REY");
+        insertTourRow(ps, "US1484", "CDG");
+        insertTourRow(ps, "US1485", "REY");
+        insertTourRow(ps, "US1486", "DUB");
+        insertTourRow(ps, "US1487", "SAN");
+        insertTourRow(ps, "US1488", "SFO");
+        insertTourRow(ps, "US1489", "SAN");
+        insertTourRow(ps, "US1490", "DFW");
+        insertTourRow(ps, "US1491", "SAN");
+        insertTourRow(ps, "US1492", "MEX");
+        insertTourRow(ps, "US1493", "SAT");
+        insertTourRow(ps, "US1494", "ATL");
+        insertTourRow(ps, "US1495", "SAT");
+        insertTourRow(ps, "US1496", "LAX");
+        insertTourRow(ps, "US1497", "SAT");
+        insertTourRow(ps, "US1498", "MIA");
+        insertTourRow(ps, "US1499", "SCL");
+        insertTourRow(ps, "US1500", "GRU");
+        insertTourRow(ps, "US1503", "SCL");
+        insertTourRow(ps, "US1504", "BUE");
+        insertTourRow(ps, "US1505", "SEA");
+        insertTourRow(ps, "AA1505", "SFO");
+        insertTourRow(ps, "US1506", "SEA");
+        insertTourRow(ps, "US1507", "JFK");
+        insertTourRow(ps, "US1510", "SEL");
+        insertTourRow(ps, "US1511", "NRT");
+        insertTourRow(ps, "US1514", "SEL");
+        insertTourRow(ps, "US1515", "SHA");
+        insertTourRow(ps, "US1518", "SFO");
+        insertTourRow(ps, "US1519", "SCL");
+        insertTourRow(ps, "US1529", "SFO");
+        insertTourRow(ps, "US1521", "HNL");
+        insertTourRow(ps, "US1522", "SHA");
+        insertTourRow(ps, "US1523", "SIN");
+        insertTourRow(ps, "US1524", "SHA");
+        insertTourRow(ps, "US1525", "HKG");
+        insertTourRow(ps, "US1526", "SHA");
+        insertTourRow(ps, "US1527", "SVO");
+        insertTourRow(ps, "AA1528", "SIN");
+        insertTourRow(ps, "AA1529", "SYD");
+        insertTourRow(ps, "AA1532", "SIN");
+        insertTourRow(ps, "AA1533", "HKG");
+        insertTourRow(ps, "US1536", "SJU");
+        insertTourRow(ps, "US1537", "CCS");
+        insertTourRow(ps, "US1538", "SJU");
+        insertTourRow(ps, "US1539", "MEL");
+        insertTourRow(ps, "US1540", "SLC");
+        insertTourRow(ps, "US1541", "DEN");
+        insertTourRow(ps, "US1542", "SLC");
+        insertTourRow(ps, "US1543", "SFO");
+        insertTourRow(ps, "US1544", "SLC");
+        insertTourRow(ps, "US1545", "MDW");
+        insertTourRow(ps, "US1546", "STL");
+        insertTourRow(ps, "US1547", "MDW");
+        insertTourRow(ps, "US1548", "STL");
+        insertTourRow(ps, "US1549", "JFK");
+        insertTourRow(ps, "US1550", "STL");
+        insertTourRow(ps, "US1551", "LAX");
+        insertTourRow(ps, "US1552", "SVO");
+        insertTourRow(ps, "US1553", "CDG");
+        insertTourRow(ps, "US1554", "SVO");
+        insertTourRow(ps, "US1555", "NRT");
+        insertTourRow(ps, "US1558", "SYD");
+        insertTourRow(ps, "US1559", "AKL");
+        insertTourRow(ps, "US1560", "SYD");
+        insertTourRow(ps, "US1561", "HNL");
+        insertTourRow(ps, "US1562", "SYD");
+        insertTourRow(ps, "US1563", "HKG");
+        insertTourRow(ps, "US1564", "THR");
+        insertTourRow(ps, "US1565", "KBL");
+        insertTourRow(ps, "US1566", "THR");
+        insertTourRow(ps, "US1567", "KHI");
+        insertTourRow(ps, "US1568", "THR");
+        insertTourRow(ps, "US1569", "CAI");
+        insertTourRow(ps, "US1572", "TPE");
+        insertTourRow(ps, "US1573", "SYD");
+        insertTourRow(ps, "US1574", "TPE");
+        insertTourRow(ps, "US1575", "OSA");
+        insertTourRow(ps, "US1576", "WAW");
+        insertTourRow(ps, "US1577", "PRG");
+        insertTourRow(ps, "US1578", "WAW");
+        insertTourRow(ps, "US1579", "SVO");
+        insertTourRow(ps, "US1580", "WAW");
+        insertTourRow(ps, "US1581", "ARN");
+        insertTourRow(ps, "US1584", "YUL");
+        insertTourRow(ps, "US1585", "JFK");
+        insertTourRow(ps, "US1586", "YUL");
+        insertTourRow(ps, "US1587", "SFO");
+        insertTourRow(ps, "US1588", "YYZ");
+        insertTourRow(ps, "US1589", "SEA");
+        insertTourRow(ps, "US1590", "YYZ");
+        insertTourRow(ps, "US1592", "YYZ");
+        insertTourRow(ps, "US1593", "LHR");
+        insertTourRow(ps, "AA1600", "SFO");
+        insertTourRow(ps, "AA1601", "LAX");
+        insertTourRow(ps, "AA1602", "SFO");
+        insertTourRow(ps, "AA1603", "LAX");
+        insertTourRow(ps, "US1600", "YYZ");
+        insertTourRow(ps, "US1601", "SCL");
+
+
+        s.execute("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+
+        ResultSet rs;
+        RuntimeStatisticsParser rtsp;
+
+        // 0. Only the variant with the subquery did the re-write of outer to
+        // inner join prior to this fix. When the re-write is performed, the
+        // optimizer chooses a hash join on CITIES, which substantially speeds
+        // up the query.
+
+        rs = s.executeQuery("SELECT * FROM CITIES LEFT OUTER JOIN " +
+                            "    (SELECT * FROM FLIGHTS, COUNTRIES) S " +
+                            "  ON CITIES.AIRPORT = S.ORIG_AIRPORT " +
+                            "  WHERE S.COUNTRY_ISO_CODE = 'US'");
+
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+        assertTrue(rtsp.usedHashJoin());
+
+        // 1. Equivalent variant failed to rewrite prior to patch and was slow.
+        rs = s.executeQuery("SELECT * FROM CITIES LEFT OUTER JOIN FLIGHTS " +
+                            "    INNER JOIN COUNTRIES ON 1=1 " +
+                            "    ON CITIES.AIRPORT = FLIGHTS.ORIG_AIRPORT " +
+                            "  WHERE COUNTRIES.COUNTRY_ISO_CODE = 'US'");
+
+
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+
+        // Check that outer join has been rewritten
+        assertFalse(rtsp.usedNLLeftOuterJoin());
+        assertTrue(rtsp.usedHashJoin());
+
+
+        // 1b. Equivalent variant of 1, just use ROJ instead.
+        rs = s.executeQuery("SELECT * FROM FLIGHTS " +
+                            "    INNER JOIN COUNTRIES ON 1=1 " +
+                            "    RIGHT OUTER JOIN CITIES " +
+                            "    ON CITIES.AIRPORT = FLIGHTS.ORIG_AIRPORT " +
+                            "  WHERE COUNTRIES.COUNTRY_ISO_CODE = 'US'");
+
+
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+
+        // Check that outer join has been rewritten
+        assertFalse(rtsp.usedNLLeftOuterJoin()); // ROJ is made LOJ in case
+                                                 // still used
+        assertTrue(rtsp.usedHashJoin());
+
+
+        // 2. Equivalent variant failed to rewrite prior to patch and was slow.
+        rs = s.executeQuery("SELECT * FROM CITIES LEFT OUTER JOIN " +
+                            "   (FLIGHTS CROSS JOIN COUNTRIES) " +
+                            "  ON CITIES.AIRPORT = FLIGHTS.ORIG_AIRPORT " +
+                            "  WHERE COUNTRIES.COUNTRY_ISO_CODE = 'US'");
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+
+        // Check that outer join has been rewritten
+        assertFalse(rtsp.usedNLLeftOuterJoin());
+        assertTrue(rtsp.usedHashJoin());
+
+        // 2b. Equivalent variant of 2, just use ROJ instead.
+        rs = s.executeQuery(
+            "SELECT * FROM " +
+            "   (FLIGHTS CROSS JOIN COUNTRIES) RIGHT OUTER JOIN " +
+            "    CITIES ON CITIES.AIRPORT = FLIGHTS.ORIG_AIRPORT " +
+            "  WHERE COUNTRIES.COUNTRY_ISO_CODE = 'US'");
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+
+        // Check that outer join has been rewritten
+        assertFalse(rtsp.usedNLLeftOuterJoin()); // ROJ is made LOJ in case
+                                                 // still used
+        assertTrue(rtsp.usedHashJoin());
+
+    }
+
+
+    static void insertTourRow(PreparedStatement ps, String a, String b)
+            throws SQLException {
+        ps.setString(1, a);
+        ps.setString(2, b);
+        ps.execute();
+    }
+
+    static void insertTourRow(PreparedStatement ps, int a, String b, String c)
+            throws SQLException {
+        ps.setInt(1,a);
+        ps.setString(2, b);
+        ps.setString(3, c);
+        ps.execute();
     }
 }

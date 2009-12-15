@@ -566,7 +566,6 @@ public class HalfOuterJoinNode extends JoinNode
 
 		super.transformOuterJoins(predicateTree, numTables);
 
-		JBitSet innerMap = new JBitSet(numTables);
 		if (rightOuterJoin)
 		{
 			if (SanityManager.DEBUG)
@@ -581,7 +580,11 @@ public class HalfOuterJoinNode extends JoinNode
 			innerRS = rightResultSet;
 		}
 
-		innerRS.fillInReferencedTableMap(innerMap);
+        // We a relooking for a null intolerant predicate on an inner table.
+        // Collect base table numbers, also if they are located inside a join
+        // (inner or outer), that is, the inner operand is itself a join,
+        // recursively.
+        JBitSet innerMap = innerRS.LOJgetReferencedTables(numTables);
 
 		/* Walk predicates looking for 
 		 * a null intolerant predicate on the inner table.
