@@ -84,7 +84,7 @@ public class JarStorageFactory extends BaseStorageFactory
             return;
         // Parse the dataDirectory name. It should be of the form "(jar-file)directory" or "jar-file"
         int offset = 0;
-        while( offset < dataDirectory.length() & Character.isSpaceChar( dataDirectory.charAt( offset)))
+        while( offset < dataDirectory.length() && Character.isSpaceChar( dataDirectory.charAt( offset)))
             offset ++;
         int leftParen = -1;
         int rightParen = -1;
@@ -99,7 +99,7 @@ public class JarStorageFactory extends BaseStorageFactory
         {
             jarFile = getJarFile( dataDirectory.substring( leftParen + 1, rightParen));
             offset = rightParen + 1;
-            while( offset < dataDirectory.length() & Character.isSpaceChar( dataDirectory.charAt( offset)))
+            while( offset < dataDirectory.length() && Character.isSpaceChar( dataDirectory.charAt( offset)))
                 offset ++;
             dataDirectory = dataDirectory.substring( offset, dataDirectory.length());
         }
