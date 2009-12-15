@@ -21,14 +21,8 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-import org.apache.derby.iapi.services.stream.InfoStreams;
-
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
@@ -37,7 +31,6 @@ import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
