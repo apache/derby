@@ -746,7 +746,7 @@ public abstract class IdUtil
 	 */
 	public static String parseRoleId(String roleName) throws StandardException
 	{
-		roleName.trim();
+		roleName = roleName.trim();
 		// NONE is a special case and is not allowed with its special
 		// meaning in SET ROLE <value specification>. Even if there is
 		// a role with case normal form "NONE", we require it to be
