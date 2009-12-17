@@ -742,22 +742,31 @@ V
 ----------------------------------------
 ij> -- rollback should release the prepared statements
 rollback ;
-ij> -- . order by only allowed on cursor spec, not subquerys (error) 
-select v from obt where i in (select i from obt2 order by i);
-ERROR 42X01: Syntax error: Encountered "order" at line 2, column 50.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
-ij> select v from obt where i = (select i from obt2 order by i);
-ERROR 42X01: Syntax error: Encountered "order" at line 1, column 49.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
-ij> select v from (select i,v from obt2 order by i);
-ERROR 42X01: Syntax error: Encountered "order" at line 1, column 37.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ij> select v from obt where i in (select i from obt2 order by i);
+V                                       
+----------------------------------------
+hello                                   
+planet                                  
+world                                   
+hello                                   
+ij> select v from obt where i in (select i2 from obt2 order by i2);
+V                                       
+----------------------------------------
+hello                                   
+world                                   
+hello                                   
+ij> -- more than one row in subquery: error
+select v from obt where i = (select i from obt2 order by i);
+V                                       
+----------------------------------------
+ERROR 21000: Scalar subquery is only allowed to return a single row.
+ij> select v from (select i2,v from obt2 order by i2)s;
+V                                       
+----------------------------------------
+shoe                                    
+planet                                  
+hello                                   
+planet                                  
 ij> -- rollback should release the prepared statements
 rollback ;
 ij> -- order by allowed on datatypes, 

@@ -286,8 +286,11 @@ public class AlterTableNode extends DDLStatementNode
 	 */
 	public void printSubNodes(int depth) {
 		if (SanityManager.DEBUG) {
-			printLabel(depth, "tableElementList: ");
-			tableElementList.treePrint(depth + 1);
+			if (tableElementList != null) {
+				printLabel(depth, "tableElementList: ");
+				tableElementList.treePrint(depth + 1);
+			}
+
 		}
 	}
 

@@ -677,7 +677,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	void	bindRowScopedExpression
+	static void	bindRowScopedExpression
 	(
 		NodeFactory			nodeFactory,
         ContextManager    contextManager,
@@ -1915,6 +1915,30 @@ abstract class DMLModStatementNode extends DMLStatementNode
 	}
 
 	/**
+	 * Prints the sub-nodes of this object.  See QueryTreeNode.java for
+	 * how tree printing is supposed to work.
+	 *
+	 * @param depth		The depth of this node in the tree
+	 */
+
+	public void printSubNodes(int depth)
+	{
+		if (SanityManager.DEBUG)
+		{
+			super.printSubNodes(depth);
+
+			printLabel(depth, "targetTableName: ");
+			targetTableName.treePrint(depth + 1);
+
+			if (resultColumnList != null)
+			{
+				printLabel(depth, "resultColumnList: ");
+				resultColumnList.treePrint(depth + 1);
+			}
+		}
+	}
+
+	/**
 	 * Accept the visitor for all visitable children of this node.
 	 * 
 	 * @param v the visitor
@@ -1931,7 +1955,6 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			targetTableName.accept(v);
 		}
 	}
-
 }
 
 

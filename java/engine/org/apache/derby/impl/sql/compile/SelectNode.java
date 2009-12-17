@@ -1342,6 +1342,7 @@ public class SelectNode extends ResultSetNode
 	 *		o  It does not contain a group by or having clause
 	 *		o  It does not contain aggregates.
 	 *		o  It is not a DISTINCT.
+	 *      o  It does not have an ORDER BY clause (pushed from FromSubquery).
 	 *
 	 * @param fromList	The outer from list
 	 *
@@ -1381,6 +1382,13 @@ public class SelectNode extends ResultSetNode
 		/* Don't flatten if selectNode contains an aggregate */
 		if ((selectAggregates != null) && 
 			 (selectAggregates.size() > 0))
+		{
+			return false;
+		}
+
+		/* Don't flatten if selectNode now has an order by */
+		if ((orderByList != null) &&
+			 (orderByList.size() > 0))
 		{
 			return false;
 		}
@@ -1573,14 +1581,22 @@ public class SelectNode extends ResultSetNode
 			int orderBySelect = this.getResultColumns().getOrderBySelect();
 			if (orderBySelect > 0)
 			{
-				ResultColumnList selectRCs = prnRSN.getResultColumns().copyListAndObjects();
-				
-				selectRCs.removeOrderByColumns();
-				selectRCs.genVirtualColumnNodes(prnRSN, prnRSN.getResultColumns());				
+				// Keep the same RCL on top, since there may be references to
+				// its result columns above us, i.e. in this query:
+                //
+				// select sum(j),i from t group by i having i
+				//             in (select i from t order by j)
+				//
+				ResultColumnList topList = prnRSN.getResultColumns();
+				ResultColumnList newSelectList = topList.copyListAndObjects();
+				prnRSN.setResultColumns(newSelectList);
+
+				topList.removeOrderByColumns();
+				topList.genVirtualColumnNodes(prnRSN, newSelectList);
 				prnRSN = (ResultSetNode) getNodeFactory().getNode(
 								C_NodeTypes.PROJECT_RESTRICT_NODE,
 								prnRSN,
-								selectRCs,
+								topList,
 								null,
 								null,
 								null,

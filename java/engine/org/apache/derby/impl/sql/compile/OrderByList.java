@@ -76,6 +76,7 @@ public class OrderByList extends OrderedColumnList
 	private ColumnOrdering[] columnOrdering;
 	private int estimatedRowSize;
 	private boolean sortNeeded = true;
+	private int resultSetNumber = -1;
 
 	/**
 		Add a column to the list
@@ -112,12 +113,11 @@ public class OrderByList extends OrderedColumnList
 	}
 
 	/**
-		Bind the update columns by their names to the target resultset
-		of the cursor specification.
-
-		@param target	The underlying result set
-	
-		@exception StandardException		Thrown on error
+	 *	Bind the update columns by their names to the target resultset of the
+	 * cursor specification. This variant is used by InsertNode.
+	 *
+	 * 	@param target	The underlying result set
+	 *	@exception StandardException		Thrown on error
 	 */
 	public void bindOrderByColumns(ResultSetNode target)
 					throws StandardException {
@@ -149,7 +149,7 @@ public class OrderByList extends OrderedColumnList
 			}
 		}
 	}
-	
+
 	/**
 	 * Adjust addedColumnOffset values due to removal of a duplicate column
 	 *
@@ -387,7 +387,7 @@ public class OrderByList extends OrderedColumnList
 
 		child.generate(acb, mb);
 
-		int resultSetNumber = cc.getNextResultSetNumber();
+		resultSetNumber = cc.getNextResultSetNumber();
 
 		// is a distinct query
 		mb.push(false);
@@ -841,5 +841,9 @@ public class OrderByList extends OrderedColumnList
 			"columnOrdering: " + "\n" +
 			buff.toString() + "\n" +
 			super.toString();
+	}
+
+	public int getResultSetNumber() {
+		return resultSetNumber;
 	}
 }

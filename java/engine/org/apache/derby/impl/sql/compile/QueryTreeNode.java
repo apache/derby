@@ -343,6 +343,25 @@ public abstract class QueryTreeNode implements Visitable
 	}
 
 	/**
+	 * Print call stack for debug purposes
+	 */
+
+	public void stackPrint()
+	{
+		if (SanityManager.DEBUG)
+		{
+			debugPrint("Stacktrace:\n");
+			Exception e = new Exception("dummy");
+            StackTraceElement[] st= e.getStackTrace();
+            for (int i=0; i<st.length; i++) {
+                debugPrint(st[i] + "\n");
+            }
+
+			debugFlush();
+		}
+	}
+
+	/**
 	 * Print this tree for debugging purposes.  This recurses through
 	 * all the sub-nodes and prints them indented by their depth in
 	 * the tree, starting with the given indentation.
@@ -369,6 +388,10 @@ public abstract class QueryTreeNode implements Visitable
 				if (containsInfo(thisStr) &&
 						!SanityManager.DEBUG_ON("DumpBrief")) {
 					debugPrint(thisStr);
+				}
+
+				if (thisStr.charAt(thisStr.length()-1) != '\n') {
+					debugPrint("\n");
 				}
 
 				printSubNodes(depth);

@@ -1746,6 +1746,15 @@ public class SQLParser
 			autoIncrementInfo,
 			getContextManager());
 	}
+
+	private boolean
+		isTableValueConstructor(ResultSetNode expression)
+			throws StandardException {
+
+		return expression instanceof RowResultSetNode ||
+			(expression instanceof UnionNode &&
+			 ((UnionNode)expression).tableConstructor());
+	}
 }
 
 PARSER_END(SQLParser)
@@ -4903,6 +4912,7 @@ ResultSetNode
 nonJoinQueryPrimary() throws StandardException :
 {
 	ResultSetNode	primary;
+	OrderByList orderCols = null;
 }
 {
 	primary = simpleTable()
@@ -4910,8 +4920,14 @@ nonJoinQueryPrimary() throws StandardException :
 		return primary;
 	}
 |
-	<LEFT_PAREN> primary = queryExpression(null, NO_SET_OP) <RIGHT_PAREN>
+	<LEFT_PAREN> primary = queryExpression(null, NO_SET_OP)
+                 [ orderCols = orderByClause() ]
+	<RIGHT_PAREN>
 	{
+		if (orderCols != null) {
+			primary.setOrderBy(orderCols);
+		}
+
 		return primary;
 	}
 }
@@ -8295,6 +8311,7 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 	Properties			targetProperties = null;
 	ResultSetNode	queryExpression;
 	ResultColumnList	columnList = null;
+	OrderByList orderCols = null;
 }
 {
 	[
@@ -8308,13 +8325,25 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 	]
 	[ targetProperties = propertyList(false) <CHECK_PROPERTIES>]
 	queryExpression = queryExpression(null, NO_SET_OP)
+	[ orderCols = orderByClause() ]
 	{
+		if (orderCols != null && isTableValueConstructor(queryExpression)) {
+			// Not allowed by the standard since this is a <contextually typed
+			// table value constructor> according SQL 2008, vol2, section 14.11
+			// "<insert statement>, SR 17. (I.e. it is not a <subquery> and
+			// can't have an ORDER BY).
+
+			throw StandardException.newException(
+				SQLState.LANG_SYNTAX_ERROR, "ORDER BY");
+		}
+
 		return (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.INSERT_NODE,
 							targetTable,
 							columnList,
 							queryExpression,
 							targetProperties,
+							orderCols,
 							getContextManager());
 	}
 	/* RESOLVE: Ignoring default values for now
@@ -8552,15 +8581,18 @@ subquery(int subqueryType, ValueNode leftOperand) throws StandardException :
 {
 	ResultSetNode	queryExpression;
 	SubqueryNode	subqueryNode;
+	OrderByList orderCols = null;
 }
 {
 	queryExpression = queryExpression(null, NO_SET_OP)
+	[ orderCols = orderByClause() ]
 	{
 		subqueryNode = (SubqueryNode) nodeFactory.getNode(
 										C_NodeTypes.SUBQUERY_NODE,
 										queryExpression, 
 										ReuseFactory.getInteger(subqueryType),
 										leftOperand,
+										orderCols,
 										getContextManager());
 		return subqueryNode;
 	}
@@ -8964,7 +8996,7 @@ FromTable tableFactor() throws StandardException :
 	FromTable			tableReference;
 	Object[]			optionalTableClauses = new Object[OPTIONAL_TABLE_CLAUSES_SIZE];
 	Properties			tableProperties = null;
-	ResultSetNode		derivedTable;
+	SubqueryNode		derivedTable;
 }
 {
 	/* NOTE: this rule has to come first in order to avoid making NEW
@@ -9033,7 +9065,8 @@ FromTable tableFactor() throws StandardException :
 	{
 		fromTable = (FromTable) nodeFactory.getNode(
 											C_NodeTypes.FROM_SUBQUERY,
-											derivedTable, 
+											derivedTable.getResultSet(),
+											derivedTable.getOrderByList(),
 											correlationName,
 											derivedRCL,
 											((optionalTableClauses != null) ?
@@ -9141,7 +9174,7 @@ indexColumnItem(Vector columnList) throws StandardException :
 /*
  * <A NAME="derivedTable">derivedTable</A>
  */
-ResultSetNode
+SubqueryNode
 derivedTable() throws StandardException :
 {
 	SubqueryNode tableSubquery;
@@ -9151,7 +9184,7 @@ derivedTable() throws StandardException :
 	tableSubquery = tableSubquery(SubqueryNode.FROM_SUBQUERY, null)
 	<RIGHT_PAREN>
 	{
-		return tableSubquery.getResultSet();
+		return tableSubquery;
 	}
 }
 
@@ -10618,11 +10651,13 @@ viewDefinition(Token beginToken) throws StandardException :
 	TableName			tableName;
 	Token				checkTok = null;
 	Token				endToken;
+	OrderByList         orderCols = null;
 }
 {
 	<VIEW> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 		[ <LEFT_PAREN> resultColumns = viewColumnList() <RIGHT_PAREN> ]
 		<AS> queryExpression = queryExpression(null, NO_SET_OP)
+		[ orderCols = orderByClause() ]
 	{
 		checkOptionType = ViewDescriptor.NO_CHECK_OPTION;
 		endToken = getToken(0);
@@ -10643,6 +10678,7 @@ viewDefinition(Token beginToken) throws StandardException :
 								StringUtil.slice(statementSQLText,
 												beginToken.beginOffset,
 												endToken.endOffset,false),
+								orderCols,
 								getContextManager());
 	}
 }

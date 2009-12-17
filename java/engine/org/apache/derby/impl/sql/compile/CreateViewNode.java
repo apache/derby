@@ -68,7 +68,7 @@ public class CreateViewNode extends DDLStatementNode
 	int					checkOption;
 	ProviderInfo[]		providerInfos;
 	ColumnInfo[]		colInfos;
-
+	private OrderByList orderByList;
 
 	/**
 	 * Initializer for a CreateViewNode
@@ -80,6 +80,7 @@ public class CreateViewNode extends DDLStatementNode
 	 * @param checkOption		The type of WITH CHECK OPTION that was specified
 	 *							(NONE for now)
 	 * @param qeText			The text for the queryExpression
+	 * @param orderCols         ORDER BY list
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -88,7 +89,8 @@ public class CreateViewNode extends DDLStatementNode
 				   Object resultColumns,
 				   Object	 queryExpression,
 				   Object checkOption,
-				   Object qeText)
+				   Object qeText,
+				   Object orderCols)
 		throws StandardException
 	{
 		initAndCheck(newObjectName);
@@ -96,6 +98,7 @@ public class CreateViewNode extends DDLStatementNode
 		this.queryExpression = (ResultSetNode) queryExpression;
 		this.checkOption = ((Integer) checkOption).intValue();
 		this.qeText = ((String) qeText).trim();
+		this.orderByList = (OrderByList)orderCols;
 
 		implicitCreateSchema = true;
 	}
@@ -408,4 +411,7 @@ public class CreateViewNode extends DDLStatementNode
 		}
 	}
 
+	public OrderByList getOrderByList() {
+		return orderByList;
+	}
 }

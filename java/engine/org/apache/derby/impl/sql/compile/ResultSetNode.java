@@ -935,7 +935,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 			InsertNode target, boolean inOrder, int[] colMap)
 		throws StandardException
 	{
-		if (!inOrder || resultColumns.size() < target.resultColumnList.size()) {
+		if (!inOrder ||
+                resultColumns.visibleSize() < target.resultColumnList.size()) {
 			return generateProjectRestrictForInsert(target, colMap);
 		}
 		return this;
@@ -1001,7 +1002,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	ResultColumn genNewRCForInsert(TableDescriptor targetTD,
+	private ResultColumn genNewRCForInsert(TableDescriptor targetTD,
                                    FromVTI targetVTI,
                                    int columnNumber,
 								   DataDictionary dataDictionary)
@@ -1901,4 +1902,15 @@ public abstract class ResultSetNode extends QueryTreeNode
 		return null;
 	}
 	
+	/**
+	 * Override this for nodes that can take an ORDER BY
+	 */
+	public void setOrderBy(OrderByList orderCols) throws StandardException {
+		if (SanityManager.DEBUG)
+		{
+			SanityManager.THROWASSERT(
+				"ORDER BY attempted set for wrong node type:" +
+				getClass().getName());
+		}
+	}
 }

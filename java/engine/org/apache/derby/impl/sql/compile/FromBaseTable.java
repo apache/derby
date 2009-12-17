@@ -2237,12 +2237,14 @@ public class FromBaseTable extends FromTable
 					SanityManager.ASSERT(vd != null,
 						"vd not expected to be null for " + tableName);
 				}
-	
+
 				cvn = (CreateViewNode)
 				          parseStatement(vd.getViewText(), false);
 
 				rsn = cvn.getParsedQueryExpression();
-	
+
+				OrderByList orderByList = cvn.getOrderByList();
+
 				/* If the view contains a '*' then we mark the views derived column list
 				 * so that the view will still work, and return the expected results,
 				 * if any of the tables referenced in the view have columns added to
@@ -2271,7 +2273,8 @@ public class FromBaseTable extends FromTable
 
 				fsq = (FromSubquery) getNodeFactory().getNode(
 					C_NodeTypes.FROM_SUBQUERY,
-					rsn, 
+					rsn,
+					orderByList,
 					(correlationName != null) ? 
                         correlationName : getOrigTableName().getTableName(), 
 					resultColumns,

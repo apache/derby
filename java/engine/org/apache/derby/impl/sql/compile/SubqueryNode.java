@@ -166,6 +166,8 @@ public class SubqueryNode extends ValueNode
 	private boolean foundVariant;
 	private boolean doneInvariantCheck;
 
+	private OrderByList orderByList;
+
 	/* Subquery types.
 	 * NOTE: FROM_SUBQUERY only exists for a brief second in the parser.  It
 	 * should never appear in a query tree.
@@ -201,15 +203,18 @@ public class SubqueryNode extends ValueNode
 	 * @param resultSet		The ResultSetNode for the subquery
 	 * @param subqueryType	The type of the subquery
 	 * @param leftOperand	The left operand, if any, of the subquery
+	 * @param orderCols     ORDER BY list
 	 */
 
 	public void init(
 							Object resultSet,
 							Object subqueryType,
-							Object leftOperand)
+							Object leftOperand,
+					        Object orderCols)
 	{
 		this.resultSet = (ResultSetNode) resultSet;
 		this.subqueryType = ((Integer) subqueryType).intValue();
+		this.orderByList = (OrderByList)orderCols;
 
 		/* Subqueries are presumed not to be under a top level AndNode by
 		 * default.  This is because expression normalization only recurses
@@ -268,6 +273,12 @@ public class SubqueryNode extends ValueNode
 			{
 				printLabel(depth, "leftOperand: ");
 				leftOperand.treePrint(depth + 1);
+			}
+
+			if (orderByList != null)
+			{
+				printLabel(depth, "orderByList: ");
+				orderByList.treePrint(depth + 1);
 			}
 		}
 	}
@@ -504,10 +515,18 @@ public class SubqueryNode extends ValueNode
 									   aggregateVector);
 		}
 
+		if (orderByList != null) {
+			orderByList.pullUpOrderByColumns(resultSet);
+		}
+
 		/* bind the expressions in the underlying subquery */
 		resultSet.bindExpressions(fromList);
 
 		resultSet.bindResultColumns(fromList);
+
+		if (orderByList != null) {
+			orderByList.bindOrderByColumns(resultSet);
+		}
 
 		/* reject any untyped nulls in the subquery */
 		resultSet.bindUntypedNullsToResultColumns(null);
@@ -625,6 +644,7 @@ public class SubqueryNode extends ValueNode
 		 */
 		flattenable = (resultSet instanceof RowResultSetNode) &&
 					  underTopAndNode && !havingSubquery &&
+			          orderByList == null &&
 					  !isWhereExistsAnyInWithWhereSubquery() &&
 					  parentComparisonOperator instanceof BinaryComparisonOperatorNode;
 
@@ -694,6 +714,7 @@ public class SubqueryNode extends ValueNode
 
 		flattenable = (resultSet instanceof SelectNode) &&
  			          !((SelectNode)resultSet).hasWindows() &&
+			          orderByList == null &&
 					  underTopAndNode && !havingSubquery &&
 					  !isWhereExistsAnyInWithWhereSubquery() &&
 					  (isIN() || isANY() || isEXISTS() || flattenableNotExists ||
@@ -787,6 +808,20 @@ public class SubqueryNode extends ValueNode
 				leftOperand = origLeftOperand;
 			}
 		}
+
+		// Push the order by list down to the ResultSet
+		if (orderByList != null) {
+			// If we have more than 1 ORDERBY columns, we may be able to
+			// remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
+			if (orderByList.size() > 1)
+			{
+				orderByList.removeDupColumns();
+			}
+
+			resultSet.pushOrderByList(orderByList);
+			orderByList = null;
+		}
+
 
 		/* We transform the leftOperand and the select list for quantified 
 		 * predicates that have a leftOperand into a new predicate and push it
@@ -2462,5 +2497,15 @@ public class SubqueryNode extends ValueNode
 			 */
 			return false;
 		}
+	}
+
+	/**
+	 * Get ORDER BY list (used to construct FROM_SUBQUERY only), cf.
+	 * FromSubquery, for which this node is transient.
+	 *
+	 * @return order by list if specified, else null.
+	 */
+	public OrderByList getOrderByList() {
+		return orderByList;
 	}
 }

@@ -300,12 +300,13 @@ select v from obt where v='newval';
 -- rollback should release the prepared statements
 rollback ;
 
--- . order by only allowed on cursor spec, not subquerys (error) 
 select v from obt where i in (select i from obt2 order by i);
+select v from obt where i in (select i2 from obt2 order by i2);
 
+-- more than one row in subquery: error
 select v from obt where i = (select i from obt2 order by i);
 
-select v from (select i,v from obt2 order by i);
+select v from (select i2,v from obt2 order by i2)s;
 
 -- rollback should release the prepared statements
 rollback ;

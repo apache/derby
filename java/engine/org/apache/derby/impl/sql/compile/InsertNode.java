@@ -110,6 +110,7 @@ public final class InsertNode extends DMLModStatementNode
 	public		FKInfo				fkInfo;
 	protected	boolean				bulkInsert;
 	private 	boolean				bulkInsertReplace;
+	private     OrderByList         orderByList;
 	
 	protected   RowLocation[] 		autoincRowLocation;
 	/**
@@ -124,13 +125,16 @@ public final class InsertNode extends DMLModStatementNode
 	 * @param queryExpression	The query expression that will generate
 	 *				the rows to insert into the given table
 	 * @param targetProperties	The properties specified on the target table
+     * @param orderByList The order by list for the source result set, null if
+	 *			no order by list
 	 */
 
 	public void init(
 			Object targetName,
 			Object insertColumns,
 			Object queryExpression,
-			Object targetProperties)
+			Object targetProperties,
+            Object orderByList)
 	{
 		/* statementType gets set in super() before we've validated
 		 * any properties, so we've kludged the code to get the
@@ -144,6 +148,7 @@ public final class InsertNode extends DMLModStatementNode
 		setTarget((QueryTreeNode) targetName);
 		targetColumnList = (ResultColumnList) insertColumns;
 		this.targetProperties = (Properties) targetProperties;
+		this.orderByList = (OrderByList) orderByList;
 
 		/* Remember that the query expression is the source to an INSERT */
 		getResultSetNode().setInsertSource();
@@ -204,6 +209,11 @@ public final class InsertNode extends DMLModStatementNode
 			{
 				printLabel(depth, "targetColumnList: ");
 				targetColumnList.treePrint(depth + 1);
+			}
+
+			if (orderByList != null) {
+				printLabel(depth, "orderByList: ");
+				orderByList.treePrint(depth + 1);
 			}
 
 			/* RESOLVE - need to print out targetTableDescriptor */
@@ -419,6 +429,18 @@ public final class InsertNode extends DMLModStatementNode
 			{
 				colMap[position] = position;
 			}
+		}
+
+		// Bind the ORDER BY columns
+		if (orderByList != null)
+		{
+			orderByList.pullUpOrderByColumns(resultSet);
+
+			// The select list may have new columns now, make sure to bind
+			// those.
+			super.bindExpressions();
+
+			orderByList.bindOrderByColumns(resultSet);
 		}
 
 		resultSet = enhanceAndCheckForAutoincrement(resultSet, inOrder, colMap);
@@ -793,6 +815,32 @@ public final class InsertNode extends DMLModStatementNode
 		}
 
 		return indexedCols;
+	}
+
+	/**
+     * {@inheritDoc}
+     * <p>
+     * Remove any duplicate ORDER BY columns and push an ORDER BY if present
+     * down to the source result set, before calling super.optimizeStatement.
+     * </p>
+	 */
+
+	public void optimizeStatement() throws StandardException
+	{
+		// Push the order by list down to the ResultSet
+		if (orderByList != null)
+		{
+			// If we have more than 1 ORDERBY columns, we may be able to
+			// remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
+			if (orderByList.size() > 1)
+			{
+				orderByList.removeDupColumns();
+			}
+
+			resultSet.pushOrderByList(orderByList);
+			orderByList = null;
+		}
+		super.optimizeStatement();
 	}
 
 	/**

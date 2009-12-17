@@ -46,6 +46,7 @@ import org.apache.derby.iapi.util.JBitSet;
 public class FromSubquery extends FromTable
 {
 	ResultSetNode	subquery;
+	private OrderByList orderByList;
 
 	/**
 	 * DERBY-3270: If this subquery represents an expanded view, this holds the
@@ -57,18 +58,21 @@ public class FromSubquery extends FromTable
 	 * Intializer for a table in a FROM list.
 	 *
 	 * @param subquery		The subquery
+	 * @param orderByList   ORDER BY list if any, or null
 	 * @param correlationName	The correlation name
 	 * @param derivedRCL		The derived column list
 	 * @param tableProperties	Properties list associated with the table
 	 */
 	public void init(
 					Object subquery,
+					Object orderByList,
 					Object correlationName,
 				 	Object derivedRCL,
 					Object tableProperties)
 	{
 		super.init(correlationName, tableProperties);
 		this.subquery = (ResultSetNode) subquery;
+		this.orderByList = (OrderByList)orderByList;
 		resultColumns = (ResultColumnList) derivedRCL;
 	}
 
@@ -88,6 +92,12 @@ public class FromSubquery extends FromTable
 			{
 				printLabel(depth, "subquery: ");
 				subquery.treePrint(depth + 1);
+			}
+
+			if (orderByList != null)
+			{
+				printLabel(depth, "orderByList: ");
+				orderByList.treePrint(depth + 1);
 			}
 		}
 	}
@@ -200,7 +210,10 @@ public class FromSubquery extends FromTable
 		/* From subqueries cannot be correlated, so we pass an empty FromList
 		 * to subquery.bindExpressions() and .bindResultColumns()
 		 */
-		
+		if (orderByList != null) {
+			orderByList.pullUpOrderByColumns(subquery);
+		}
+
 		nestedFromList = emptyFromList;
 
 		CompilerContext compilerContext = getCompilerContext();
@@ -217,6 +230,10 @@ public class FromSubquery extends FromTable
 			if (origCompilationSchema != null) {
 				compilerContext.popCompilationSchema();
 			}
+		}
+
+		if (orderByList != null) {
+			orderByList.bindOrderByColumns(subquery);
 		}
 
 		/* Now that we've bound the expressions in the subquery, we 
@@ -325,13 +342,27 @@ public class FromSubquery extends FromTable
 									FromList fromList)
 								throws StandardException
 	{
+		// Push the order by list down to the ResultSet
+		if (orderByList != null)
+		{
+			// If we have more than 1 ORDERBY columns, we may be able to
+			// remove duplicate columns, e.g., "ORDER BY 1, 1, 2".
+			if (orderByList.size() > 1)
+			{
+				orderByList.removeDupColumns();
+			}
+
+			subquery.pushOrderByList(orderByList);
+			orderByList = null;
+		}
+
 		/* We want to chop out the FromSubquery from the tree and replace it 
 		 * with a ProjectRestrictNode.  One complication is that there may be 
 		 * ColumnReferences above us which point to the FromSubquery's RCL.
 		 * What we want to return is a tree with a PRN with the
 		 * FromSubquery's RCL on top.  (In addition, we don't want to be
 		 * introducing any redundant ProjectRestrictNodes.)
-		 * Another complication is that we want to be able to only only push
+		 * Another complication is that we want to be able to only push
 		 * projections and restrictions down to this ProjectRestrict, but
 		 * we want to be able to push them through as well.
 		 * So, we:
@@ -541,7 +572,11 @@ public class FromSubquery extends FromTable
 		 * NOTE: This method will capture any column renaming due to 
 		 * a derived column list.
 		 */
-		int rclSize = resultColumns.size();
+
+		// Use visibleSize, because we don't want to propagate any order by
+		// columns not selected.
+		int rclSize = resultColumns.visibleSize();
+
 		for (int index = 0; index < rclSize; index++)
 		{
 			ResultColumn resultColumn = (ResultColumn) resultColumns.elementAt(index);

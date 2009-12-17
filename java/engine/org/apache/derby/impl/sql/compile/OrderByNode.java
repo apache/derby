@@ -128,5 +128,19 @@ public class OrderByNode extends SingleChildResultSetNode
 		}
 
 	    orderByList.generate(acb, mb, childResult);
+
+		// We need to take note of result set number if ORDER BY is used in a
+		// subquery for the case where a PRN is inserted in top of the select's
+		// PRN to project away a sort column that is not part of the select
+		// list, e.g.
+		//
+		//     select * from (select i from t order by j desc) s
+		//
+		// If the resultSetNumber is not correctly set in our resultColumns,
+		// code generation for the PRN above us will fail when calling
+		// resultColumns.generateCore -> VCN.generateExpression, cf. the Sanity
+		// assert in VCN.generateExpression on sourceResultSetNumber >= 0.
+		resultSetNumber = orderByList.getResultSetNumber();
+		resultColumns.setResultSetNumber(resultSetNumber);
 	}
 }

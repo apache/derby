@@ -646,15 +646,16 @@ public class ResultColumnList extends QueryTreeNodeVector
 		 */
 		if (SanityManager.DEBUG)
 		{
-			 if ((! countMismatchAllowed) && size() != nameList.size())
+			 if ((! countMismatchAllowed) && visibleSize() != nameList.size())
 			 {
 				SanityManager.THROWASSERT(
-					"The size of the 2 lists is expected to be the same. size() = " +
-					size() + ", nameList.size() = " + nameList.size());
+					"The size of the 2 lists is expected to be the same. " +
+					"visibleSize() = " + visibleSize() +
+					", nameList.size() = " + nameList.size());
 			 }
 		 }
 
-		int size = (countMismatchAllowed) ? nameList.size() : size();
+		int size = (countMismatchAllowed) ? nameList.size() : visibleSize();
 		for (int index = 0; index < size; index++)
 		{
 			ResultColumn thisResultColumn = (ResultColumn) elementAt(index);
@@ -4227,6 +4228,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 	{
 		if (SanityManager.DEBUG) {
 			return "indexRow: " + indexRow + "\n" +
+				 "orderBySelect: " + orderBySelect + "\n" +
 				(indexRow ? "conglomerateId: " + conglomerateId + "\n"
 				 : "") +
 				super.toString();
