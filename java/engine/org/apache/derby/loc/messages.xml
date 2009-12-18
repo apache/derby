@@ -1089,8 +1089,9 @@ Guide.
 
             <msg>
                 <name>42504</name>
-                <text>User '{0}' does not have execute permission on {1} '{2}'.'{3}'.</text>
+                <text>User '{0}' does not have {1} permission on {2} '{3}'.'{4}'.</text>
                 <arg>authorizationID</arg>
+                <arg>permissionType</arg>
                 <arg>objectName</arg>
                 <arg>schemaName</arg>
                 <arg>tableName</arg>
@@ -1098,8 +1099,9 @@ Guide.
 
             <msg>
                 <name>42505</name>
-                <text>User '{0}' does not have execute permission on {1} '{2}'.'{3}' for grant.</text>
+                <text>User '{0}' does not have {1} permission on {2} '{3}'.'{4}' for grant.</text>
                 <arg>authorizationID</arg>
+                <arg>permissionType</arg>
                 <arg>objectName</arg>
                 <arg>schemaName</arg>
                 <arg>tableName</arg>

@@ -32,6 +32,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import	org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
+import	org.apache.derby.catalog.types.UDTAliasInfo;
 
 import org.apache.derby.catalog.UUID;
 
@@ -59,7 +60,7 @@ import org.apache.derby.iapi.util.IdUtil;
 
 public final class AliasDescriptor 
 	extends TupleDescriptor
-	implements UniqueTupleDescriptor, Provider, Dependent
+	implements PrivilegedSQLObject, Provider, Dependent
 {
 	private final UUID		aliasID;
 	private final String		aliasName;
@@ -70,6 +71,7 @@ public final class AliasDescriptor
 	private final boolean		systemAlias;
 	private final AliasInfo	aliasInfo;
 	private final String		specificName;
+    private final SchemaDescriptor schemaDescriptor;
 
 	/**
 	 * Constructor for a AliasDescriptor
@@ -89,12 +91,14 @@ public final class AliasDescriptor
 							  String aliasName, UUID schemaID, String javaClassName,
 							  char aliasType, char nameSpace, boolean systemAlias,
 							  AliasInfo aliasInfo, String specificName)
+        throws StandardException
 	{
 		super( dataDictionary );
 
 		this.aliasID = aliasID;
 		this.aliasName = aliasName;
 		this.schemaID = schemaID;
+		this.schemaDescriptor = dataDictionary.getSchemaDescriptor(schemaID, null);
 		this.javaClassName = javaClassName;
 		this.aliasType = aliasType;
 		this.nameSpace = nameSpace;
@@ -117,6 +121,26 @@ public final class AliasDescriptor
 		return aliasID;
 	}
 
+   /**
+	 * @see PrivilegedSQLObject#getObjectTypeName
+	 */
+	public String getObjectTypeName()
+	{
+        if ( aliasInfo instanceof UDTAliasInfo )
+        {
+            return PermDescriptor.UDT_TYPE;
+        }
+        else
+        {
+            if( SanityManager.DEBUG)
+            {
+                SanityManager.THROWASSERT( "Unsupported alias type: " + aliasInfo.getClass().getName() );
+            }
+
+            return null;  // should never get here
+        }
+	}
+
 	/**
 	 * Gets the UUID  of the schema for this method alias.
 	 *
@@ -128,6 +152,26 @@ public final class AliasDescriptor
 	}
 
 	/**
+	 * Gets the SchemaDescriptor for this alias.
+	 *
+	 * @return SchemaDescriptor	The SchemaDescriptor.
+	 */
+	public final SchemaDescriptor getSchemaDescriptor()
+	{
+		return schemaDescriptor;
+	}
+
+	/**
+	 * Gets the name of the alias.
+	 *
+	 * @return	A String containing the name of the statement.
+	 */
+	public final String	getName()
+	{
+		return aliasName;
+	}
+
+	/**
 	 * Gets the name of the schema that the alias lives in.
 	 *
 	 * @return	A String containing the name of the schema that the alias
@@ -135,7 +179,7 @@ public final class AliasDescriptor
 	 */
 	public String	getSchemaName() throws StandardException
 	{
-		return getDataDictionary().getSchemaDescriptor( schemaID, null ).getSchemaName();
+		return schemaDescriptor.getSchemaName();
 	}
 
 	/**

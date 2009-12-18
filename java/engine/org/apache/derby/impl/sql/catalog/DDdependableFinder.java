@@ -178,6 +178,12 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 			case StoredFormatIds.ROLE_GRANT_FINDER_V01_ID:
 				return Dependable.ROLE_GRANT;
 
+			case StoredFormatIds.SEQUENCE_DESCRIPTOR_FINDER_V01_ID:
+				return Dependable.SEQUENCE;
+
+			case StoredFormatIds.PERM_DESCRIPTOR_FINDER_V01_ID:
+				return Dependable.PERM;
+
 			default:
 				if (SanityManager.DEBUG)
 				{
@@ -260,6 +266,12 @@ public class DDdependableFinder implements	DependableFinder, Formatable
 
 		    case StoredFormatIds.ROLE_GRANT_FINDER_V01_ID:
 				return dd.getRoleGrantDescriptor(dependableObjectID);
+
+			case StoredFormatIds.SEQUENCE_DESCRIPTOR_FINDER_V01_ID:
+                return dd.getSequenceDescriptor(dependableObjectID);
+
+			case StoredFormatIds.PERM_DESCRIPTOR_FINDER_V01_ID:
+                return dd.getGenericPermissions(dependableObjectID);
 
 		default:
 				if (SanityManager.DEBUG)

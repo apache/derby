@@ -61,22 +61,23 @@ public class SYSPERMSRowFactory extends PermissionsCatalogRowFactory {
     private static final int[][] indexColumnPositions =
             {
                     {SYSPERMS_PERMISSIONID},
-                    {SYSPERMS_OBJECTID}
+                    {SYSPERMS_OBJECTID},
+                    {SYSPERMS_GRANTEE, SYSPERMS_OBJECTID, SYSPERMS_GRANTOR},
             };
 
-    // UUID
-    static final int PERMS_UUID_IDX_NUM = 0;
-
-    // object Id
+    // index numbers
+    public static final int PERMS_UUID_IDX_NUM = 0;
     public static final int PERMS_OBJECTID_IDX_NUM = 1;
+    public static final int GRANTEE_OBJECTID_GRANTOR_INDEX_NUM = 2;
 
-    private static final boolean[] uniqueness = { true, false };
+    private static final boolean[] uniqueness = { true, false, true };
 
     private static final String[] uuids = {
             "9810800c-0121-c5e1-a2f5-00000043e718", // catalog UUID
             "6ea6ffac-0121-c5e3-f286-00000043e718", // heap UUID
-            "5cc556fc-0121-c5e6-4e43-00000043e718",  // uuid index
-            "7a92cf84-0122-51e6-2c5e-00000047b548"   // object id index
+            "5cc556fc-0121-c5e6-4e43-00000043e718",  // PERMS_UUID_IDX_NUM
+            "7a92cf84-0122-51e6-2c5e-00000047b548",   // PERMS_OBJECTID_IDX_NUM
+            "9810800c-0125-8de5-3aa0-0000001999e8",   // GRANTEE_OBJECTID_GRANTOR_INDEX_NUM
     };
 
 
@@ -105,7 +106,18 @@ public class SYSPERMSRowFactory extends PermissionsCatalogRowFactory {
         ExecIndexRow row = null;
 
         switch (indexNumber) {
-            case PERMS_UUID_IDX_NUM:
+        case GRANTEE_OBJECTID_GRANTOR_INDEX_NUM:
+            // RESOLVE We do not support the FOR GRANT OPTION, so generic permission rows are unique on the
+            // grantee and object UUID columns. The grantor column will always have the name of the owner of the
+            // object. So the index key, used for searching the index, only has grantee and object UUID columns.
+            // It does not have a grantor column.
+            row = getExecutionFactory().getIndexableRow( 2 );
+            row.setColumn(1, getAuthorizationID( perm.getGrantee()));
+            String protectedObjectsIDStr = ((PermDescriptor) perm).getPermObjectId().toString();
+            row.setColumn(2, new SQLChar(protectedObjectsIDStr));
+            break;
+
+        case PERMS_UUID_IDX_NUM:
                 row = getExecutionFactory().getIndexableRow(1);
                 String permUUIDStr = ((PermDescriptor) perm).getUUID().toString();
                 row.setColumn(1, new SQLChar(permUUIDStr));
@@ -113,6 +125,11 @@ public class SYSPERMSRowFactory extends PermissionsCatalogRowFactory {
         }
         return row;
     } // end of buildIndexKeyRow
+
+    public int getPrimaryKeyIndexNumber()
+    {
+        return GRANTEE_OBJECTID_GRANTOR_INDEX_NUM;
+    }
 
     /**
      * Or a set of permissions in with a row from this catalog table
@@ -141,11 +158,16 @@ public class SYSPERMSRowFactory extends PermissionsCatalogRowFactory {
      */
     public int removePermissions(ExecRow row, PermissionsDescriptor perm, boolean[] colsChanged)
             throws StandardException {
-        return -1; // There is only one kind of routine privilege so delete the whole row.
+        return -1; // There is only one kind of privilege per row so delete the whole row.
     } // end of removePermissions
 
-    void setUUIDOfThePassedDescriptor(ExecRow row, PermissionsDescriptor perm) throws StandardException {
-        //To change body of implemented methods use File | Settings | File Templates.
+	/** 
+	 * @see PermissionsCatalogRowFactory#setUUIDOfThePassedDescriptor
+	 */
+    void setUUIDOfThePassedDescriptor(ExecRow row, PermissionsDescriptor perm) throws StandardException
+    {
+        DataValueDescriptor existingPermDVD = row.getColumn(SYSPERMS_PERMISSIONID);
+        perm.setUUID(getUUIDFactory().recreateUUID(existingPermDVD.getString()));
     }
 
     /**
@@ -172,6 +194,11 @@ public class SYSPERMSRowFactory extends PermissionsCatalogRowFactory {
         if (td != null) {
             PermDescriptor sd = (PermDescriptor) td;
             UUID pid = sd.getUUID();
+            if ( pid == null )
+            {
+				pid = getUUIDFactory().createUUID();
+				sd.setUUID(pid);
+            }
             permIdString = pid.toString();
 
             objectType = sd.getObjectType();

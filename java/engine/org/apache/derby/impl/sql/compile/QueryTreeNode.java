@@ -1652,6 +1652,8 @@ public abstract class QueryTreeNode implements Visitable
 			throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, ad.getAliasType(udtNameSpace),  unqualifiedTypeName);
 		}
 
+        createTypeDependency( ad );
+
         DataTypeDescriptor result = new DataTypeDescriptor
             (
              TypeId.getUserDefinedTypeId( typeSchema.getSchemaName(), unqualifiedTypeName, ad.getJavaClassName() ),
@@ -1662,7 +1664,8 @@ public abstract class QueryTreeNode implements Visitable
     }
 
     /**
-     * Declare a dependency on a type. This is only used if the type is an ANSI UDT.
+     * Declare a dependency on a type and check that you have privilege to use
+     * it. This is only used if the type is an ANSI UDT.
      *
      * @param dtd Type which may have a dependency declared on it.
      */
@@ -1670,9 +1673,19 @@ public abstract class QueryTreeNode implements Visitable
     {
         AliasDescriptor ad = getDataDictionary().getAliasDescriptorForUDT( null, dtd );
 
-        if ( ad != null )
+        if ( ad != null ) { createTypeDependency( ad ); }
+    }
+    /**
+     * Declare a dependency on an ANSI UDT, identified by its AliasDescriptor,
+     * and check that you have privilege to use it.
+     */
+    private void createTypeDependency( AliasDescriptor ad ) throws StandardException
+    {
+        getCompilerContext().createDependency( ad );
+
+        if ( isPrivilegeCollectionRequired() )
         {
-            getCompilerContext().createDependency( ad );
+            getCompilerContext().addRequiredUsagePriv( ad );
         }
     }
     

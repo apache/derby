@@ -372,6 +372,7 @@ public class SystemCatalogTest extends BaseJDBCTestCase {
 				{"SYSKEYS", "SYSKEYS_HEAP", "false"},
 				{"SYSKEYS", "SYSKEYS_INDEX1", "true"},
                 {"SYSPERMS", "SYSPERMS_HEAP", "false"},
+                {"SYSPERMS", "SYSPERMS_INDEX3", "true"},
                 {"SYSPERMS", "SYSPERMS_INDEX2", "true"},
                 {"SYSPERMS", "SYSPERMS_INDEX1", "true"},
                 {"SYSROLES", "SYSROLES_HEAP", "false"},

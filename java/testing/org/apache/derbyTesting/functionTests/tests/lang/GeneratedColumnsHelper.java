@@ -81,6 +81,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  LACK_TABLE_PRIV = "42500";
     protected static  final   String  LACK_COLUMN_PRIV = "42502";
     protected static  final   String  LACK_EXECUTE_PRIV = "42504";
+    protected static  final   String  LACK_USAGE_PRIV = "42504";
     protected static  final   String  CANT_ADD_IDENTITY = "42601";
     protected static  final   String  CANT_MODIFY_IDENTITY = "42Z23";
     
@@ -88,6 +89,10 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  CONSTRAINT_DROPPED_WARNING = "01500";
     protected static  final   String  TRIGGER_DROPPED_WARNING = "01502";
     protected static  final   String  LANG_INVALID_USE_OF_DEFAULT = "42Y85";
+    protected static  final   String  GRANT_REVOKE_NOT_ALLOWED = "42509";
+    protected static  final   String  ROUTINE_DEPENDS_ON_TYPE = "X0Y30";
+    protected static  final   String  TABLE_DEPENDS_ON_TYPE = "X0Y29";
+    protected static  final   String  VIEW_DEPENDS_ON_PRIVILEGE = "X0Y23";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -156,6 +161,27 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
         println( "\nExpecting " + sqlState + " when preparing:\n\t" + query );
 
         assertCompileError( sqlState, query );
+    }
+
+    /**
+     * Assert that the statement text, when compiled, raises an exception
+     */
+    protected void    expectCompilationError( Connection conn, String sqlState, String query )
+    {
+        println( "\nExpecting " + sqlState + " when preparing:\n\t" + query );
+
+        PreparedStatement ps = null;
+
+        try {
+            ps = conn.prepareStatement( query );
+        } catch (SQLException se )
+        {
+            assertSQLState( sqlState, se );
+
+            return;
+        }
+
+        fail( "Expected SQL state: " + sqlState );
     }
 
     /**
@@ -348,6 +374,54 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
         }
 
         assertFalse( rs.next() );
+    }
+
+    /**
+     * Test that a privilege can't be revoked if an object depends on it.
+     */
+    protected void verifyRevokePrivilege
+        (
+         Connection grantorConnection,
+         Connection granteeConnection,
+         String grantStatement,
+         String revokeStatement,
+         String createStatement,
+         String dropStatement,
+         String badRevokeSQLState
+         ) throws Exception
+    {
+        expectExecutionError
+            (
+             granteeConnection,
+             LACK_USAGE_PRIV,
+             createStatement
+             );
+        goodStatement
+            (
+             grantorConnection,
+             grantStatement
+             );
+        goodStatement
+            (
+             granteeConnection,
+             createStatement
+             );
+        expectExecutionError
+            (
+             grantorConnection,
+             badRevokeSQLState,
+             revokeStatement
+             );
+        goodStatement
+            (
+             granteeConnection,
+             dropStatement
+             );
+        goodStatement
+            (
+             grantorConnection,
+             revokeStatement
+             );
     }
 
     /**

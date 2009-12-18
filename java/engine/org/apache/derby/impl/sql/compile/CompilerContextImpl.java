@@ -38,6 +38,9 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
+import org.apache.derby.iapi.sql.dictionary.StatementGenericPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementTablePermission;
 import org.apache.derby.iapi.sql.dictionary.StatementSchemaPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementColumnPermission;
@@ -705,6 +708,7 @@ public class CompilerContextImpl extends ContextImpl
 		requiredTablePrivileges = null;
 		requiredSchemaPrivileges = null;
 		requiredRoutinePrivileges = null;
+		requiredUsagePrivileges = null;
 		requiredRolePrivileges = null;
 		LanguageConnectionContext lcc = (LanguageConnectionContext)
 		getContextManager().getContext(LanguageConnectionContext.CONTEXT_ID);
@@ -714,6 +718,7 @@ public class CompilerContextImpl extends ContextImpl
 			requiredTablePrivileges = new HashMap();
 			requiredSchemaPrivileges = new HashMap();
 			requiredRoutinePrivileges = new HashMap();
+			requiredUsagePrivileges = new HashMap();
 			requiredRolePrivileges = new HashMap();
 		}
 	} // end of initRequiredPriv
@@ -828,6 +833,20 @@ public class CompilerContextImpl extends ContextImpl
 	}
 
 	/**
+	 * @see CompilerContext#addRequiredUsagePriv
+	 */
+	public void addRequiredUsagePriv( PrivilegedSQLObject usableObject )
+    {
+		if( requiredUsagePrivileges == null || usableObject == null) { return; }
+
+        UUID objectID = usableObject.getUUID();
+        String objectType = usableObject.getObjectTypeName();
+
+ 		if (requiredUsagePrivileges.get( objectID ) == null)
+        { requiredUsagePrivileges.put( objectID, objectType ); }
+    }
+    
+	/**
 	 * Add a required schema privilege to the list privileges.
 	 *
 	 * @see CompilerContext#addRequiredSchemaPriv
@@ -868,15 +887,17 @@ public class CompilerContextImpl extends ContextImpl
 	{
 		int size = 0;
 		if( requiredRoutinePrivileges != null)
-			size += requiredRoutinePrivileges.size();
+        { size += requiredRoutinePrivileges.size(); }
+		if( requiredUsagePrivileges != null)
+        { size += requiredUsagePrivileges.size(); }
 		if( requiredTablePrivileges != null)
-			size += requiredTablePrivileges.size();
+        { size += requiredTablePrivileges.size(); }
 		if( requiredSchemaPrivileges != null)
-			size += requiredSchemaPrivileges.size();
+        { size += requiredSchemaPrivileges.size(); }
 		if( requiredColumnPrivileges != null)
-			size += requiredColumnPrivileges.size();
+        { size += requiredColumnPrivileges.size(); }
 		if( requiredRolePrivileges != null)
-			size += requiredRolePrivileges.size();
+        { size += requiredRolePrivileges.size(); }
 		
 		ArrayList list = new ArrayList( size);
 		if( requiredRoutinePrivileges != null)
@@ -886,6 +907,15 @@ public class CompilerContextImpl extends ContextImpl
 				UUID routineUUID = (UUID) itr.next();
 				
 				list.add( new StatementRoutinePermission( routineUUID));
+			}
+		}
+		if( requiredUsagePrivileges != null)
+		{
+			for( Iterator itr = requiredUsagePrivileges.keySet().iterator(); itr.hasNext();)
+			{
+				UUID objectID = (UUID) itr.next();
+				
+				list.add( new StatementGenericPermission( objectID, (String) requiredUsagePrivileges.get( objectID ), PermDescriptor.USAGE_PRIV ) );
 			}
 		}
 		if( requiredTablePrivileges != null)
@@ -973,5 +1003,6 @@ public class CompilerContextImpl extends ContextImpl
 	private HashMap requiredTablePrivileges;
 	private HashMap requiredSchemaPrivileges;
 	private HashMap requiredRoutinePrivileges;
+	private HashMap requiredUsagePrivileges;
 	private HashMap requiredRolePrivileges;
 } // end of class CompilerContextImpl

@@ -2023,13 +2023,16 @@ public interface DataDictionary
      * Get permissions granted to one user for an object using the object's Id
      * and the user's authorization Id.
      *
-     * @param objectUUID
+     * @param objectUUID ID of the object being protected
+     * @param objectType Type of the object (e.g., PermDescriptor.SEQUENCE_TYPE)
+     * @param privilege The kind of privilege needed (e.g., PermDescriptor.USAGE_PRIV)
+     * @param granteeAuthid The user who needs the permission
      *
      * @return The descriptor of the permissions for the object
      *
      * @exception StandardException
      */
-    public PermDescriptor getPermissions(UUID objectUUID, String granteeAuthId)
+    public PermDescriptor getGenericPermissions(UUID objectUUID, String objectType, String privilege, String granteeAuthId)
         throws StandardException;
 
     /**
@@ -2041,7 +2044,7 @@ public interface DataDictionary
      *
      * @exception StandardException
      */
-    public PermDescriptor getPermissions(UUID permUUID)
+    public PermDescriptor getGenericPermissions(UUID permUUID)
     throws StandardException;
 
     /**

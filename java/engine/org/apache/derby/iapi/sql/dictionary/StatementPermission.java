@@ -21,9 +21,15 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
+import org.apache.derby.iapi.sql.depend.DependencyManager;
+import org.apache.derby.iapi.services.context.ContextManager;
 
 /**
  * This class describes a permission require by a statement.
@@ -55,7 +61,7 @@ public abstract class StatementPermission
 
 	/**
 	 * 
-	 * Get the PermissionDescriptor for the passed authorization id for this
+	 * Get the PermissionsDescriptor for the passed authorization id for this
 	 * object. This method gets called during the execution phase of create 
 	 * view/constraint/trigger. The return value of this method is saved in
 	 * dependency system to keep track of views/constraints/triggers 
@@ -68,11 +74,150 @@ public abstract class StatementPermission
 	 * @param authid	AuthorizationId
 	 * @param dd	DataDictionary
 	 * 
-	 * @return PermissionsDescriptor	The PermissionDescriptor for the passed
+	 * @return PermissionsDescriptor	The PermissionsDescriptor for the passed
 	 *  authorization id on this object
 	 * 
 	 * @exception StandardException
 	 */
 	public abstract PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
 	throws StandardException;
+
+    /**
+     * Return true if the passed in permission matches the one required by this
+     * StatementPermission.
+     */
+    public boolean isCorrectPermission( PermissionsDescriptor pd ) throws StandardException
+    { return false; }
+
+    /**
+     * Get the privileged object associated with this permission.
+     */
+    public PrivilegedSQLObject getPrivilegedObject( DataDictionary dd ) throws StandardException
+    { return null; }
+
+    /**
+     * Get the type of the privileged object.
+     */
+    public String getObjectType()
+    { return null; }
+
+    /**
+     * Generic logic called by check() for USAGE and EXECUTE privileges. Throws
+     * an exception if the correct permission cannot be found.
+     */
+	public void genericCheck
+        (
+         LanguageConnectionContext lcc,
+         String authorizationId,
+         boolean forGrant,
+         Activation activation,
+         String privilegeType )
+        throws StandardException
+	{
+		DataDictionary dd = lcc.getDataDictionary();
+		TransactionController tc = lcc.getTransactionExecute();
+		ExecPreparedStatement ps = activation.getPreparedStatement();
+		
+		PermissionsDescriptor perm = getPermissionDescriptor( authorizationId, dd );
+		if( !isCorrectPermission( perm ) ) { perm = getPermissionDescriptor(Authorizer.PUBLIC_AUTHORIZATION_ID, dd ); }
+
+        // if the user has the correct permission, we're done
+		if ( isCorrectPermission( perm ) ) { return; }
+
+		boolean resolved = false;
+
+		// Since no permission exists for the current user or PUBLIC,
+		// check if a permission exists for the current role (if set).
+		String role = lcc.getCurrentRoleId(activation);
+
+		if (role != null) {
+
+			// Check that role is still granted to current user or
+			// to PUBLIC: A revoked role which is current for this
+			// session, is lazily set to none when it is attemped
+			// used.
+			String dbo = dd.getAuthorizationDatabaseOwner();
+			RoleGrantDescriptor rd = dd.getRoleGrantDescriptor
+				(role, authorizationId, dbo);
+
+			if (rd == null) {
+				rd = dd.getRoleGrantDescriptor(
+					role,
+					Authorizer.PUBLIC_AUTHORIZATION_ID,
+					dbo);
+			}
+
+			if (rd == null) {
+				// We have lost the right to set this role, so we can't
+				// make use of any permission granted to it or its
+				// ancestors.
+				lcc.setCurrentRole(activation, null);
+			} else {
+				// The current role is OK, so we can make use of
+				// any permission granted to it.
+				//
+				// Look at the current role and, if necessary, the
+				// transitive closure of roles granted to current role to
+				// see if permission has been granted to any of the
+				// applicable roles.
+
+				RoleClosureIterator rci =
+					dd.createRoleClosureIterator
+					(activation.getTransactionController(),
+					 role, true );
+
+				String r;
+				while (!resolved && (r = rci.next()) != null)
+                {
+					perm = getPermissionDescriptor( r, dd );
+
+					if ( isCorrectPermission( perm ) ) { resolved = true; }
+				}
+			}
+
+			if (resolved ) {
+				// Also add a dependency on the role (qua provider), so that if
+				// role is no longer available to the current user (e.g. grant
+				// is revoked, role is dropped, another role has been set), we
+				// are able to invalidate the ps or activation (the latter is
+				// used if the current role changes).
+				DependencyManager dm = dd.getDependencyManager();
+				RoleGrantDescriptor rgd = dd.getRoleDefinitionDescriptor(role);
+				ContextManager cm = lcc.getContextManager();
+				dm.addDependency(ps, rgd, cm);
+				dm.addDependency(activation, rgd, cm);
+			}
+		}
+
+		if (!resolved)
+        {
+            PrivilegedSQLObject pso = getPrivilegedObject( dd );
+
+			if( pso == null )
+            {
+				throw StandardException.newException
+                    ( SQLState.AUTH_INTERNAL_BAD_UUID, getObjectType() );
+            }
+
+			SchemaDescriptor sd = pso.getSchemaDescriptor();
+
+			if( sd == null)
+            {
+				throw StandardException.newException(
+					SQLState.AUTH_INTERNAL_BAD_UUID, "SCHEMA");
+            }
+
+			throw StandardException.newException(
+				(forGrant
+				 ? SQLState.AUTH_NO_GENERIC_PERMISSION_FOR_GRANT
+				 : SQLState.AUTH_NO_GENERIC_PERMISSION),
+				authorizationId,
+                privilegeType,
+				getObjectType(),
+				sd.getSchemaName(),
+				pso.getName());
+		}
+
+	} // end of genericCheck
+
 }

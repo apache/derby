@@ -39,7 +39,8 @@ import org.apache.derby.impl.sql.catalog.DDdependableFinder;
  * This class is used by rows in the SYS.SYSSEQUENCES system table.
  */
 public class SequenceDescriptor extends TupleDescriptor
-        implements Provider, Dependent, UniqueSQLObjectDescriptor {
+        implements Provider, Dependent, PrivilegedSQLObject
+{
 
     private UUID sequenceUUID;
     private String sequenceName;
@@ -91,6 +92,14 @@ public class SequenceDescriptor extends TupleDescriptor
 	public UUID	getUUID()
 	{
 		return sequenceUUID;
+	}
+
+   /**
+	 * @see PrivilegedSQLObject#getObjectTypeName
+	 */
+	public String getObjectTypeName()
+	{
+		return PermDescriptor.SEQUENCE_TYPE;
 	}
 
     public String toString() {
@@ -265,10 +274,6 @@ public class SequenceDescriptor extends TupleDescriptor
     /*Accessor methods*/
     public String getSequenceName() {
         return sequenceName;
-    }
-
-    public UUID getSequenceUUID() {
-        return sequenceUUID;
     }
 
     public UUID getSchemaId() {

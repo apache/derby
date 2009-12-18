@@ -107,6 +107,7 @@ import org.apache.derby.impl.sql.compile.SQLParserConstants;
 import org.apache.derby.impl.sql.compile.CharStream;
 import org.apache.derby.impl.sql.execute.TablePrivilegeInfo;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
@@ -1713,6 +1714,7 @@ public class SQLParser
 				tokenKind == UPDATE ||
 				tokenKind == REFERENCES ||
 				tokenKind == EXECUTE ||
+				tokenKind == USAGE ||
 				tokenKind == ALL);
 	}
 
@@ -13290,7 +13292,11 @@ grantStatement() throws StandardException :
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "GRANT");
 		checkSqlStandardAccess( "GRANT");
 	}
-	( node = tableGrantStatement() | node = routineGrantStatement() )
+	(
+        node = tableGrantStatement() |
+        node = routineGrantStatement() |
+        node = usageGrantStatement()
+    )
 	{
 		return node;
 	}
@@ -13388,6 +13394,61 @@ routineGrantStatement() throws StandardException :
         return (StatementNode) nodeFactory.getNode( C_NodeTypes.GRANT_NODE,
                                     routinePrivilege, grantees,
                                     getContextManager());
+    }
+}// end of routineGrantStatement
+
+/*
+ * <A NAME="usageGrantStatement">usageGrantStatement</A>
+ */
+StatementNode
+usageGrantStatement() throws StandardException :
+{
+    List grantees;
+    TableName name;
+    Integer objectType;
+}
+{
+    <USAGE> <ON>
+    objectType = usableObjects()
+    name = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+    <TO> grantees = granteeList()
+    {
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_6, "GRANT USAGE");
+        PrivilegeNode privilegeNode = (PrivilegeNode) nodeFactory.getNode
+            (
+                C_NodeTypes.PRIVILEGE_NODE,
+                objectType,
+                name,
+                PermDescriptor.USAGE_PRIV,
+                Boolean.FALSE,
+                getContextManager()
+            );
+        return (StatementNode) nodeFactory.getNode
+            (
+                C_NodeTypes.GRANT_NODE,
+                privilegeNode,
+                grantees,
+                getContextManager()
+            );
+    }
+}// end of usageGrantStatement
+
+/*
+ * <A NAME="usableObjects">usableObjects</A>
+ */
+Integer
+usableObjects() throws StandardException :
+{
+}
+{
+    <SEQUENCE>
+    {
+        return ReuseFactory.getInteger( PrivilegeNode.SEQUENCE_PRIVILEGES);
+    }
+|
+    <TYPE>
+    {
+        return ReuseFactory.getInteger( PrivilegeNode.UDT_PRIVILEGES);
     }
 }// end of routineGrantStatement
 
@@ -13617,7 +13678,11 @@ revokeStatement() throws StandardException :
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_2, "REVOKE");
 		checkSqlStandardAccess( "REVOKE");
 	}
-	( node = tableRevokeStatement() | node = routineRevokeStatement() )
+	(
+        node = tableRevokeStatement() |
+        node = routineRevokeStatement() |
+        node = usageRevokeStatement()
+    )
 	{
 		return node;
 	}
@@ -13681,6 +13746,42 @@ routineRevokeStatement() throws StandardException :
                                     getContextManager());
     }
 }// end of routineRevokeStatement
+
+/*
+ * <A NAME="usageRevokeStatement">usageRevokeStatement</A>
+ */
+StatementNode
+usageRevokeStatement() throws StandardException :
+{
+    List grantees;
+    TableName name;
+    Integer objectType;
+}
+{
+    <USAGE> <ON>
+    objectType = usableObjects()
+    name = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+    <FROM> grantees = granteeList() <RESTRICT>
+    {
+		checkVersion( DataDictionary.DD_VERSION_DERBY_10_6, "REVOKE USAGE");
+        PrivilegeNode privilegeNode = (PrivilegeNode) nodeFactory.getNode
+            (
+                C_NodeTypes.PRIVILEGE_NODE,
+                objectType,
+                name,
+                PermDescriptor.USAGE_PRIV,
+                Boolean.TRUE,
+                getContextManager()
+            );
+        return (StatementNode) nodeFactory.getNode
+            (
+                C_NodeTypes.REVOKE_NODE,
+                privilegeNode,
+                grantees,
+                getContextManager()
+            );
+    }
+}// end of usageRevokeStatement
 
 
 /*

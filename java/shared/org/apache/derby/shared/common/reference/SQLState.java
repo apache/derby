@@ -753,8 +753,8 @@ public interface SQLState {
 	String AUTH_NO_TABLE_PERMISSION_FOR_GRANT                          = "42501";
 	String AUTH_NO_COLUMN_PERMISSION                                   = "42502";
 	String AUTH_NO_COLUMN_PERMISSION_FOR_GRANT                         = "42503";
-	String AUTH_NO_EXECUTE_PERMISSION                                  = "42504";
-	String AUTH_NO_EXECUTE_PERMISSION_FOR_GRANT                        = "42505";
+	String AUTH_NO_GENERIC_PERMISSION                                  = "42504";
+	String AUTH_NO_GENERIC_PERMISSION_FOR_GRANT                        = "42505";
 	String AUTH_NOT_OWNER                                              = "42506";
 	String AUTH_NO_ACCESS_NOT_OWNER                                    = "42507";
 	String AUTH_NOT_DATABASE_OWNER                                     = "42508";

@@ -843,12 +843,12 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
         return null;
     }   
 
-    public PermDescriptor getPermissions(UUID permUUID) throws StandardException {
+    public PermDescriptor getGenericPermissions(UUID permUUID) throws StandardException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public PermDescriptor getPermissions(UUID objectID, String granteeAuthId) 
+    public PermDescriptor getGenericPermissions(UUID objectID, String objectType, String privilege, String granteeAuthId) 
             throws StandardException {
         // TODO Auto-generated method stub
         return null;

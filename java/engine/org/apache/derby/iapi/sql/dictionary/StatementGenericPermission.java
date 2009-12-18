@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission
+   Derby - Class org.apache.derby.iapi.sql.dictionary.StatementGenericPermission
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -26,35 +26,39 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.services.context.ContextManager;
+
 /**
- * This class describes a routine execute permission
+ * This class describes a generic permission (such as USAGE)
  * required by a statement.
  */
 
-public final class StatementRoutinePermission extends StatementPermission
+public final class StatementGenericPermission extends StatementPermission
 {
-	private UUID routineUUID;
+	private UUID _objectID;
+    private String _objectType; // e.g., PermDescriptor.SEQUENCE_TYPE
+    private String _privilege; // e.g., PermDescriptor.USAGE_PRIV
 
-	public StatementRoutinePermission( UUID routineUUID)
+	public StatementGenericPermission( UUID objectID, String objectType, String privilege )
 	{
-		this.routineUUID = routineUUID;
+		_objectID = objectID;
+        _objectType = objectType;
+        _privilege = privilege;
 	}
-									 
+
+    // accessors
+	public UUID getObjectID() { return _objectID; }
+    public String getPrivilege() { return _privilege; }
+
 	/**
-	 * Return routine UUID for this access descriptor
-	 *
-	 * @return	Routine UUID
+	 * @see StatementPermission#getObjectType
 	 */
-	public UUID getRoutineUUID()
-	{
-		return routineUUID;
-	}
+    public String getObjectType() { return _objectType; }
 
 	/**
 	 * @see StatementPermission#check
@@ -64,26 +68,38 @@ public final class StatementRoutinePermission extends StatementPermission
 					   boolean forGrant,
 					   Activation activation) throws StandardException
 	{
-        genericCheck( lcc, authorizationId, forGrant, activation, "EXECUTE" );
+        genericCheck( lcc, authorizationId, forGrant, activation, _privilege );
 	}
+
 
 	/**
 	 * @see StatementPermission#isCorrectPermission
 	 */
     public boolean isCorrectPermission( PermissionsDescriptor raw )
     {
-        if ( (raw == null) || !( raw instanceof RoutinePermsDescriptor) ) { return false; }
+        if ( (raw == null) || !( raw instanceof PermDescriptor) ) { return false; }
 
-        RoutinePermsDescriptor pd = (RoutinePermsDescriptor) raw;
+        PermDescriptor pd = (PermDescriptor) raw;
         
-        return pd.getHasExecutePermission();
+        return
+            pd.getPermObjectId().equals( _objectID ) &&
+            pd.getObjectType().equals( _objectType ) &&
+            pd.getPermission().equals( _privilege )
+            ;
     }
 
 	/**
 	 * @see StatementPermission#getPrivilegedObject
 	 */
     public PrivilegedSQLObject getPrivilegedObject( DataDictionary dd ) throws StandardException
-    { return dd.getAliasDescriptor( routineUUID); }
+    {
+        if ( PermDescriptor.UDT_TYPE.equals( _objectType ) ) { return dd.getAliasDescriptor( _objectID ); }
+        else if ( PermDescriptor.SEQUENCE_TYPE.equals( _objectType ) ) { return dd.getSequenceDescriptor( _objectID ); }
+        else
+        {
+            throw StandardException.newException( SQLState.BTREE_UNIMPLEMENTED_FEATURE );
+        }
+    }
 
 	/**
 	 * @see StatementPermission#getPermissionDescriptor
@@ -91,16 +107,12 @@ public final class StatementRoutinePermission extends StatementPermission
 	public PermissionsDescriptor getPermissionDescriptor(String authid, DataDictionary dd)
 	throws StandardException
 	{
-		return dd.getRoutinePermissions(routineUUID,authid);
+		return dd.getGenericPermissions( _objectID, _objectType, _privilege, authid );
 	}
 
-	/**
-	 * @see StatementPermission#getObjectType
-	 */
-    public String getObjectType() { return "ROUTINE"; }
 
 	public String toString()
 	{
-		return "StatementRoutinePermission: " + routineUUID;
+		return "StatementGenericPermission( " + _objectID + ", " + _objectType + ", " + _privilege + " )";
 	}
 }

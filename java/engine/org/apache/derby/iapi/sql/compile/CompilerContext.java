@@ -34,6 +34,7 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.sql.depend.Dependent;
@@ -563,6 +564,13 @@ public interface CompilerContext extends Context
 	 * @param routine
 	 */
 	public void addRequiredRoutinePriv( AliasDescriptor routine);
+
+	/**
+	 * Add a usage privilege to the list of required privileges.
+	 *
+	 * @param usableObject
+	 */
+	public void addRequiredUsagePriv( PrivilegedSQLObject usableObject );
 
 	/**
 	 * Add a required role privilege to the list of privileges.

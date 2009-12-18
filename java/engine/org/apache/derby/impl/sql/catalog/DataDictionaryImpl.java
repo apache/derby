@@ -12230,20 +12230,27 @@ public final class	DataDictionaryImpl
         if( existingRow == null)
         {
             if( ! add)
+            {
             	//we didn't find an entry in system catalog and this is revoke
             	//so that means there is nothing to revoke. Simply return.
             	//No need to reset permission descriptor's uuid because
             	//no row was ever found in system catalog for the given
             	//permission and hence uuid can't be non-null
                 return false;
-            //We didn't find an entry in system catalog and this is grant so 
-            //so that means we have to enter a new row in system catalog for
-            //this grant.
-            ExecRow row = ti.getCatalogRowFactory().makeRow( perm, (TupleDescriptor) null);
-            int insertRetCode = ti.insertRow(row, tc);
-            if( SanityManager.DEBUG)
-                SanityManager.ASSERT( insertRetCode == TabInfoImpl.ROWNOTDUPLICATE,
-                                      "Race condition in inserting table privilege.");
+            }
+            else
+            {
+                //We didn't find an entry in system catalog and this is grant so 
+                //so that means we have to enter a new row in system catalog for
+                //this grant.
+                ExecRow row = ti.getCatalogRowFactory().makeRow( perm, (TupleDescriptor) null);
+                int insertRetCode = ti.insertRow(row, tc);
+                if( SanityManager.DEBUG)
+                {
+                    SanityManager.ASSERT( insertRetCode == TabInfoImpl.ROWNOTDUPLICATE,
+                                          "Race condition in inserting table privilege.");
+                }
+            }
         }
         else
         {
@@ -12252,9 +12259,14 @@ public final class	DataDictionaryImpl
             boolean[] indicesToUpdate = new boolean[ rf.getNumIndexes()];
             int changedColCount = 0;
             if( add)
+            {
                 changedColCount = rf.orPermissions( existingRow, perm, colsChanged);
+            }
             else
+            {
                 changedColCount = rf.removePermissions( existingRow, perm, colsChanged);
+            }
+            
             if( changedColCount == 0)
             {
             	//grant/revoke privilege didn't change anything and hence 
@@ -12285,10 +12297,12 @@ public final class	DataDictionaryImpl
                         colsToUpdate[ changedColCount++] = i + 1;
                 }
                 if( SanityManager.DEBUG)
+                {
                     SanityManager.ASSERT(
                         changedColCount == colsToUpdate.length,
                         "return value of " + rf.getClass().getName() +
                         ".orPermissions does not match the number of booleans it set in colsChanged.");
+                }
                 ti.updateRow(key, existingRow, primaryIndexNumber,
                              indicesToUpdate, colsToUpdate, tc);
             }
@@ -12301,8 +12315,13 @@ public final class	DataDictionaryImpl
         //If we are dealing with grant, then the caller does not need to send 
         //any invalidation actions to anyone and hence return false
         if (add)
+        {
         	return false;
-        return true;
+        }
+        else
+        {
+            return true;
+        }
     } // end of addPermissionsDescriptor
 
     /**
@@ -12786,30 +12805,47 @@ public final class	DataDictionaryImpl
      * , null if no table-level permissions have been granted to him on the table.
      * @throws StandardException
      */
-    PermDescriptor getUncachedPermDescriptor(PermDescriptor key)
-            throws StandardException {
-
-        return (PermDescriptor)
+    PermDescriptor getUncachedGenericPermDescriptor(PermDescriptor key)
+            throws StandardException
+    {
+    	if (key.getObjectID() == null)
+    	{
+    		//the PERMISSSIONID for SYSRPERMS is not known, so use the id of the
+    		//protected object plus the
+    		//grantor and granteee to find a PermDescriptor
+            return (PermDescriptor)
                 getUncachedPermissionsDescriptor(SYSPERMS_CATALOG_NUM,
-                        SYSPERMSRowFactory.PERMS_UUID_IDX_NUM, key);
+                        SYSPERMSRowFactory.GRANTEE_OBJECTID_GRANTOR_INDEX_NUM, key);
+    	} else
+    	{
+    		//we know the PERMISSIONID for SYSPERMS, so use that to
+    		//find a PermDescriptor from the sytem table
+    		return (PermDescriptor)
+			getUncachedPermissionsDescriptor(SYSPERMS_CATALOG_NUM,
+					SYSPERMSRowFactory.PERMS_UUID_IDX_NUM,key);
+    	}
 
-
-    } // end of getUncachedPermDescriptor
+    } // end of getUncachedGenericPermDescriptor
 
     /**
      * Get permissions granted to one user for an object using the object's Id
      * and the user's authorization Id.
      *
-     * @param objectUUID
+     * @param objectUUID The id of the protected object
+     * @param objectType Type of the object (e.g., SEQUENCE)
+     * @param privilege The kind of privilege needed (e.g., PermDescriptor.USAGE_PRIV)
+     * @param granteeAuthid The user or role who wants to have permission on this object
      *
      * @return The descriptor of the permissions for the object
      *
      * @exception StandardException
      */
-    public PermDescriptor getPermissions(UUID objectUUID, String granteeAuthId)
-        throws StandardException {
-        PermDescriptor key = new PermDescriptor(this, null, null, objectUUID, null, null, granteeAuthId, false);
-        return getUncachedPermDescriptor(key);
+    public PermDescriptor getGenericPermissions(UUID objectUUID, String objectType, String privilege, String granteeAuthId)
+        throws StandardException
+    {
+        PermDescriptor key = new PermDescriptor( this, null, objectType, objectUUID, privilege, null, granteeAuthId, false );
+        
+        return (PermDescriptor) getPermissions( key);
     }
 
     /**
@@ -12819,10 +12855,10 @@ public final class	DataDictionaryImpl
      * @return The descriptor of the user's permissions for the object.
      * @throws StandardException
      */
-    public PermDescriptor getPermissions(UUID permUUID)
+    public PermDescriptor getGenericPermissions(UUID permUUID)
             throws StandardException {
         PermDescriptor key = new PermDescriptor(this, permUUID);
-        return getUncachedPermDescriptor(key);
+        return getUncachedGenericPermDescriptor(key);
     }
 
     /**

@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.sql.dictionary.SequenceDescriptor
+   Derby - Class org.apache.derby.iapi.sql.dictionary.PermDescriptor
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -25,17 +25,29 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.impl.sql.catalog.DDdependableFinder;
+import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
 
 /**
  * This class describes rows in the SYS.SYSPERMS system table, which keeps track of the
  * permissions that have been granted but not revoked.
  */
 public class PermDescriptor extends PermissionsDescriptor
-        implements Provider {
+        implements Provider
+{
+    // object types
+    public static final String SEQUENCE_TYPE = "SEQUENCE";
+    public static final String UDT_TYPE = "TYPE";
+
+    // permissions
+    public static final String USAGE_PRIV = "USAGE";
+
+    // state
+    
     private String objectType;
     private UUID permObjectId;
     private String permission;
@@ -45,8 +57,13 @@ public class PermDescriptor extends PermissionsDescriptor
      * Constructor
      *
      * @param dataDictionary data dictionary
-     * @param permUUID       unique identification in time and space of this perm
-     *                       descriptor
+     * @param permUUID       unique identification in time and space of this perm descriptor
+     * @param objectType     E.g., SEQUENCE_TYPE
+     * @param permObjectId   Unique id of the object being protected
+     * @param permission     E.g., USAGE_PRIV
+     * @param grantor        Authorization id which confers the privilege
+     * @param grantee        Authorization id which receives the privilege
+     * @param isGrantable    True if the privilege can be granted onwards
      */
 
     public PermDescriptor(DataDictionary dataDictionary, UUID permUUID, String objectType,
@@ -110,26 +127,50 @@ public class PermDescriptor extends PermissionsDescriptor
             return false;
         PermDescriptor otherPerm = (PermDescriptor) other;
         return super.keyEquals(otherPerm) &&
-                oid.equals(otherPerm.oid);
+                permObjectId.equals(otherPerm.permObjectId);
     }
 
     /**
      * @return the hashCode for the key part of this permissions descriptor
      */
     public int hashCode() {
-        return super.keyHashCode() + oid.hashCode();
+        return super.keyHashCode() + permObjectId.hashCode();
     }
 
     /**
      * @see PermissionsDescriptor#checkOwner
      */
-    public boolean checkOwner(String authorizationId) throws StandardException {
-        UUID sd = getDataDictionary().getAliasDescriptor(oid).getSchemaUUID();
-        if (getDataDictionary().getSchemaDescriptor(sd, null).getAuthorizationId()
-                .equals(authorizationId)) {
-            return true;
-        } else {
-            return false;
+    public boolean checkOwner( String authorizationId ) throws StandardException
+    {
+        DataDictionary dd = getDataDictionary();
+        PrivilegedSQLObject pso = getProtectedObject( dd, permObjectId, objectType );
+        
+        return pso.getSchemaDescriptor().getAuthorizationId().equals(authorizationId);
+    }
+
+    /**
+     * Get the protected object.
+     *
+     * @param dd Metadata
+     * @param objectID Unique handle on the protected object
+     * @param objectType Type of the object
+     */
+    public static PrivilegedSQLObject getProtectedObject
+        ( DataDictionary dd, UUID objectID, String objectType ) throws StandardException
+    {
+        if ( PermDescriptor.SEQUENCE_TYPE.equals( objectType ) )
+        {
+            return dd.getSequenceDescriptor( objectID );
+        }
+        else if ( PermDescriptor.UDT_TYPE.equals( objectType ) )
+        {
+            return dd.getAliasDescriptor( objectID );
+        }
+        else
+        {
+            // oops, still need to implement support for this kind
+            // of privileged object
+            throw StandardException.newException( SQLState.BTREE_UNIMPLEMENTED_FEATURE );
         }
     }
 
@@ -144,8 +185,14 @@ public class PermDescriptor extends PermissionsDescriptor
      *
      * @return String   The name of this provider.
      */
-    public String getObjectName() {
-        return permission + "privilege on " + objectType;
+    public String getObjectName()
+    {
+        try {
+            DataDictionary dd = getDataDictionary();
+            PrivilegedSQLObject pso = getProtectedObject( dd, permObjectId, objectType );
+        
+            return pso.getName();
+        } catch (StandardException se) { return objectType; }
     }
 
     /**

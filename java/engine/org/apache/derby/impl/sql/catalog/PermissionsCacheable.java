@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.sql.catalog;
 
+import org.apache.derby.catalog.UUID;
+
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.cache.Cacheable;
@@ -29,13 +31,14 @@ import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
-
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColPermsDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -138,14 +141,44 @@ class PermissionsCacheable implements Cacheable
 				}
 			}
 		}
+		else if( key instanceof PermDescriptor)
+		{
+			PermDescriptor permKey = (PermDescriptor) key;
+			permissions = dd.getUncachedGenericPermDescriptor( permKey);
+			if( permissions == null)
+			{
+				// The owner has all privileges unless they have been revoked.
+                String objectType = permKey.getObjectType();
+                String privilege = permKey.getPermission();
+                UUID protectedObjectsID = permKey.getPermObjectId();
+                
+                
+                PrivilegedSQLObject pso = PermDescriptor.getProtectedObject( dd, protectedObjectsID, objectType );
+                SchemaDescriptor sd = pso.getSchemaDescriptor();
+                if( permKey.getGrantee().equals( sd.getAuthorizationId()))
+                {
+                    permissions = new PermDescriptor
+                        (
+                         dd,
+                         null,
+                         objectType,
+                         pso.getUUID(),
+                         privilege,
+                         Authorizer.SYSTEM_AUTHORIZATION_ID,
+                         permKey.getGrantee(),
+                         true
+                         );
+                }
+			}
+		}
 		else
 		{
 			if( SanityManager.DEBUG)
 				SanityManager.NOTREACHED();
 			return null;
 		}
-		if( permissions != null)
-			return this;
+		if( permissions != null) { return this; }
+    
 		return null;
 	} // end of setIdentity
 

@@ -28,9 +28,11 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
+import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.impl.sql.execute.GenericPrivilegeInfo;
 import org.apache.derby.impl.sql.execute.PrivilegeInfo;
 import org.apache.derby.catalog.TypeDescriptor;
 
@@ -45,20 +47,34 @@ public class PrivilegeNode extends QueryTreeNode
     // Privilege object type
     public static final int TABLE_PRIVILEGES = 0;
     public static final int ROUTINE_PRIVILEGES = 1;
+    public static final int SEQUENCE_PRIVILEGES = 2;
+    public static final int UDT_PRIVILEGES = 3;
 
+    //
+    // State initialized when the node is instantiated
+    //
     private int objectType;
     private TableName objectName;
     private TablePrivilegesNode specificPrivileges; // Null for routine and usage privs
     private RoutineDesignator routineDesignator; // null for table and usage privs
 
+    private String privilege;  // E.g., PermDescriptor.USAGE_PRIV
+    private boolean restrict;
+
+    //
+    // State which is filled in by the bind() logic.
+    //
+    private Provider dependencyProvider;
+    
     /**
-     * initialize a PrivilegesNode
+     * Initialize a PrivilegeNode for use against SYS.SYSTABLEPERMS and SYS.SYSROUTINEPERMS.
      *
      * @param objectType (an Integer)
      * @param objectOfPrivilege (a TableName or RoutineDesignator)
-     * @param specificPrivileges null for routines
+     * @param specificPrivileges null for routines and usage
      */
     public void init( Object objectType, Object objectOfPrivilege, Object specificPrivileges)
+        throws StandardException
     {
         this.objectType = ((Integer) objectType).intValue();
         if( SanityManager.DEBUG)
@@ -89,13 +105,26 @@ public class PrivilegeNode extends QueryTreeNode
             break;
             
         default:
-            if( SanityManager.DEBUG)
-            {
-                SanityManager.THROWASSERT( "Invalid privilege objectType: " + this.objectType);
-            }
+            throw unimplementedFeature();
         }
     }
 
+    /**
+     * Initialize a PrivilegeNode for use against SYS.SYSPERMS.
+     *
+     * @param objectType E.g., SEQUENCE
+     * @param objectName A possibles schema-qualified name
+     * @param privilege A PermDescriptor privilege, e.g. PermDescriptor.USAGE_PRIV
+     * @param restrict True if this is a REVOKE...RESTRICT action
+     */
+    public void init( Object objectType, Object objectName, Object privilege, Object restrict )
+    {
+        this.objectType = ((Integer) objectType).intValue();
+        this.objectName = (TableName) objectName;
+        this.privilege = (String) privilege;
+        this.restrict = ((Boolean) restrict).booleanValue();
+    }
+    
     /**
      * Bind this GrantNode. Resolve all table, column, and routine references. Register
      * a dependency on the object of the privilege if it has not already been done
@@ -111,7 +140,6 @@ public class PrivilegeNode extends QueryTreeNode
      */
 	public QueryTreeNode bind( HashMap dependencies, List grantees, boolean isGrant ) throws StandardException
 	{
-        Provider dependencyProvider = null;
         SchemaDescriptor sd = getSchemaDescriptor( objectName.getSchemaName(), true);
         objectName.setSchemaName( sd.getSchemaName() );
         
@@ -229,11 +257,27 @@ public class PrivilegeNode extends QueryTreeNode
             dependencyProvider = proc;
             break;
 
-        default:
-            if( SanityManager.DEBUG)
+        case SEQUENCE_PRIVILEGES:
+            
+            dependencyProvider = getDataDictionary().getSequenceDescriptor( sd, objectName.getTableName() );
+            if ( dependencyProvider == null )
             {
-                SanityManager.THROWASSERT( "Invalid privilege objectType: " + this.objectType);
+                throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, "SEQUENCE", objectName.getFullTableName());
             }
+            break;
+            
+        case UDT_PRIVILEGES:
+            
+            dependencyProvider = getDataDictionary().getAliasDescriptor
+                ( sd.getUUID().toString(), objectName.getTableName(), AliasInfo.ALIAS_NAME_SPACE_UDT_AS_CHAR  );
+            if ( dependencyProvider == null )
+            {
+                throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, "TYPE", objectName.getFullTableName());
+            }
+            break;
+            
+        default:
+            throw unimplementedFeature();
         }
 
         if( dependencyProvider != null)
@@ -247,10 +291,11 @@ public class PrivilegeNode extends QueryTreeNode
         return this;
     } // end of bind
 
+
     /**
      * @return PrivilegeInfo for this node
      */
-    PrivilegeInfo makePrivilegeInfo()
+    PrivilegeInfo makePrivilegeInfo() throws StandardException
     {
         switch( objectType)
         {
@@ -259,7 +304,19 @@ public class PrivilegeNode extends QueryTreeNode
 
         case ROUTINE_PRIVILEGES:
             return routineDesignator.makePrivilegeInfo();
+
+        case SEQUENCE_PRIVILEGES:
+        case UDT_PRIVILEGES:
+            return new GenericPrivilegeInfo( (PrivilegedSQLObject) dependencyProvider, privilege, restrict );
+
+        default:
+            throw unimplementedFeature();
         }
-        return null;
+    }
+
+    /** Report an unimplemented feature */
+    private StandardException unimplementedFeature()
+    {
+        return StandardException.newException( SQLState.BTREE_UNIMPLEMENTED_FEATURE );
     }
 }
