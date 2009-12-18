@@ -214,7 +214,7 @@ public class UDTPermsTest extends GeneratedColumnsHelper
              "select * from ruth.t_ruth_01",
              new String[][]
              {
-                 { "Price( USD, 1, 1969-12-31 16:00:00.0 )" },
+                 { "Price( USD, 1, XXX )" },
              },
              false
              );
@@ -224,7 +224,7 @@ public class UDTPermsTest extends GeneratedColumnsHelper
              "values( ruth.makePrice_ruth_01() )\n",
              new String[][]
              {
-                 { "Price( USD, 1, 1969-12-31 16:00:00.0 )" },
+                 { "Price( USD, 1, XXX )" },
              },
              false
              );
@@ -244,7 +244,7 @@ public class UDTPermsTest extends GeneratedColumnsHelper
              "select * from t_dbo_01\n",
              new String[][]
              {
-                 { "Price( USD, 1, 1969-12-31 16:00:00.0 )" },
+                 { "Price( USD, 1, XXX )" },
              },
              false
              );
@@ -270,7 +270,7 @@ public class UDTPermsTest extends GeneratedColumnsHelper
              "select * from ruth.t_ruth_01",
              new String[][]
              {
-                 { "Price( USD, 1, 1969-12-31 16:00:00.0 )" },
+                 { "Price( USD, 1, XXX )" },
              },
              false
              );
@@ -290,7 +290,7 @@ public class UDTPermsTest extends GeneratedColumnsHelper
              "select * from t_alice_01\n",
              new String[][]
              {
-                 { "Price( USD, 1, 1969-12-31 16:00:00.0 )" },
+                 { "Price( USD, 1, XXX )" },
              },
              false
              );

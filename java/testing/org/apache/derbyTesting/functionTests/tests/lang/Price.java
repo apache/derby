@@ -66,7 +66,14 @@ public class Price implements Externalizable
 
     public String toString()
     {
-        return "Price( " + currencyCode + ", " + amount + ", " + timeInstant + " )";
+        StringBuffer buffer = new StringBuffer();
+
+        buffer.append( "Price( " + currencyCode + ", " + amount + ", "  );
+        if ( DEFAULT_TIMESTAMP.equals( timeInstant ) ) { buffer.append( "XXX" ); }
+        else { buffer.append( timeInstant ); }
+        buffer.append( " )" );
+
+        return buffer.toString();
     }
 
     public boolean equals( Object other )
