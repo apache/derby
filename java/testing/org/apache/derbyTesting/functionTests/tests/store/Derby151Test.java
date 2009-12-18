@@ -61,9 +61,20 @@ public class Derby151Test extends BaseJDBCTestCase
             // that do database access - for they require a
             // DriverManager connection to jdbc:default:connection;
             // DriverManager is not supported with JSR169.
-            suite.addTestSuite(Derby151Test.class);
-            return new CleanDatabaseTestSetup(
-                new TestSuite(Derby151Test.class, name));
+
+            if ("Sun Microsystems Inc.".equals(
+                        System.getProperty("java.vendor"))) {
+
+                suite.addTestSuite(Derby151Test.class);
+                return new CleanDatabaseTestSetup(
+                    new TestSuite(Derby151Test.class, name));
+
+            } else {
+                // DERBY-4463 test fails on IBM VMs. Remove this
+                // exception when that issue is solved.
+                println("Test skipped for this VM, cf. DERBY-4463");
+                return suite;
+            }
         } else {
             return suite;
         }
