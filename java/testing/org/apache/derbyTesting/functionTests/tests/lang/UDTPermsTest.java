@@ -384,6 +384,25 @@ public class UDTPermsTest extends GeneratedColumnsHelper
              dropStatement,
              badRevokeSQLState
              );
+
+        // can't revoke USAGE if a trigger depends on it
+        goodStatement( aliceConnection, "create table t_03_a( a int )\n" );
+        goodStatement( aliceConnection, "create table t_03_b( a int )\n" );
+        createStatement =
+            "create trigger trig_03_a after insert on t_03_a\n" +
+            "  insert into t_03_b( a ) select a from t_03_a where ( cast( null as ruth.price_ruth_02_a ) ) is not null\n";
+        dropStatement = "drop trigger trig_03_a\n";
+        badRevokeSQLState = OPERATION_FORBIDDEN;
+        verifyRevokePrivilege
+            (
+             ruthConnection,
+             aliceConnection,
+             grantUsage,
+             revokeUsage,
+             createStatement,
+             dropStatement,
+             badRevokeSQLState
+             );
     }
     
 }

@@ -52,6 +52,7 @@ public class UDTTest  extends GeneratedColumnsHelper
     public static final String NONEXISTENT_OBJECT = "42Y55";
     public static final String SYNTAX_ERROR = "42X01";
     public static final String VIEW_DEPENDS_ON_TYPE = "X0Y23";
+    public static final String TRIGGER_DEPENDS_ON_TYPE = "X0Y24";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -421,42 +422,48 @@ public class UDTTest  extends GeneratedColumnsHelper
     {
         Connection conn = getConnection();
 
+        String createTypeStatement;
+        String dropTypeStatement;
+        String createObjectStatement;
+        String dropObjectStatement;
+        String badDropSQLState;
+        
         // view with UDT in select list
-        goodStatement
-            ( conn,
-              "create type price_05_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
-        goodStatement
-            (
-             conn,
+        createTypeStatement = "create type price_05_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n";
+        dropTypeStatement = "drop type price_05_a restrict\n";
+        createObjectStatement = 
              "create view udtView( a, b, c ) as\n" +
              "select tabletype, cast (null as price_05_a), cast( null as price_05_a)\n" +
-             "from sys.systables\n"
-              );
-        expectExecutionError( conn, VIEW_DEPENDS_ON_TYPE, "drop type price_05_a restrict\n" );
-        goodStatement
-            ( conn,
-              "drop view udtView\n" );
-        goodStatement
-            ( conn,
-              "drop type price_05_a restrict\n" );
-
-        // view with UDT in where clause
-        goodStatement
-            ( conn,
-              "create type price_05_b external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
-        goodStatement
+            "from sys.systables\n";
+        dropObjectStatement = "drop view udtView\n";
+        badDropSQLState = VIEW_DEPENDS_ON_TYPE;
+        verifyDropRestrictions
             (
              conn,
+             createTypeStatement,
+             dropTypeStatement,
+             createObjectStatement,
+             dropObjectStatement,
+             badDropSQLState
+             );
+
+        // view with UDT in where clause
+        createTypeStatement = "create type price_05_b external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n";
+        dropTypeStatement = "drop type price_05_b restrict\n";
+        createObjectStatement = 
              "create view udtView_b( a ) as\n" +
-             "select tabletype from sys.systables where ( cast (null as price_05_b) ) is not null\n"
-              );
-        expectExecutionError( conn, VIEW_DEPENDS_ON_TYPE, "drop type price_05_b restrict\n" );
-        goodStatement
-            ( conn,
-              "drop view udtView_b\n" );
-        goodStatement
-            ( conn,
-              "drop type price_05_b restrict\n" );
+            "select tabletype from sys.systables where ( cast (null as price_05_b) ) is not null\n";
+        dropObjectStatement = "drop view udtView_b\n";
+        badDropSQLState = VIEW_DEPENDS_ON_TYPE;
+        verifyDropRestrictions
+            (
+             conn,
+             createTypeStatement,
+             dropTypeStatement,
+             createObjectStatement,
+             dropObjectStatement,
+             badDropSQLState
+             );
 
     }
 
@@ -505,90 +512,138 @@ public class UDTTest  extends GeneratedColumnsHelper
     {
         Connection conn = getConnection();
 
+        String createTypeStatement;
+        String dropTypeStatement;
+        String createObjectStatement;
+        String dropObjectStatement;
+        String badDropSQLState;
+        
         // function that returns a udt
-        goodStatement
-            ( conn,
-              "create type price_07_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
-        goodStatement
-            ( conn,
-              "create function makePrice_07_a( )\n" +
-              "returns price_07_a\n" +
-              "language java\n" +
-              "parameter style java\n" +
-              "no sql\n" +
-              "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.makePrice'\n"
-              );
-        expectExecutionError( conn, ROUTINE_DEPENDS_ON_TYPE, "drop type price_07_a restrict\n" );
-        goodStatement
-            ( conn,
-              "drop function makePrice_07_a\n" );
-        goodStatement
-            ( conn,
-              "drop type price_07_a restrict\n" );
+        createTypeStatement = "create type price_07_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n";
+        dropTypeStatement = "drop type price_07_a restrict\n";
+        createObjectStatement = 
+            "create function makePrice_07_a( )\n" +
+            "returns price_07_a\n" +
+            "language java\n" +
+            "parameter style java\n" +
+            "no sql\n" +
+            "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.makePrice'\n";
+        dropObjectStatement = "drop function makePrice_07_a\n";
+        badDropSQLState = ROUTINE_DEPENDS_ON_TYPE;
+        verifyDropRestrictions
+            (
+             conn,
+             createTypeStatement,
+             dropTypeStatement,
+             createObjectStatement,
+             dropObjectStatement,
+             badDropSQLState
+             );
 
         // function with a udt arg
-        goodStatement
-            ( conn,
-              "create type price_07_b external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
-        goodStatement
-            ( conn,
-              "create function getCurrencyCode_07_b(  priceArg1 price_07_b  )\n" +
-              "returns char( 3 )\n" +
-              "language java\n" +
-              "parameter style java\n" +
-              "no sql\n" +
-              "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.getCurrencyCode'\n"
-              );
-        expectExecutionError( conn, ROUTINE_DEPENDS_ON_TYPE, "drop type price_07_b restrict\n" );
-        goodStatement
-            ( conn,
-              "drop function getCurrencyCode_07_b\n" );
-        goodStatement
-            ( conn,
-              "drop type price_07_b restrict\n" );
+        createTypeStatement = "create type price_07_b external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n";
+        dropTypeStatement = "drop type price_07_b restrict\n";
+        createObjectStatement = 
+            "create function getCurrencyCode_07_b(  priceArg1 price_07_b  )\n" +
+            "returns char( 3 )\n" +
+            "language java\n" +
+            "parameter style java\n" +
+            "no sql\n" +
+            "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.getCurrencyCode'\n";
+        dropObjectStatement = "drop function getCurrencyCode_07_b\n";
+        badDropSQLState = ROUTINE_DEPENDS_ON_TYPE;
+        verifyDropRestrictions
+            (
+             conn,
+             createTypeStatement,
+             dropTypeStatement,
+             createObjectStatement,
+             dropObjectStatement,
+             badDropSQLState
+             );
 
         // procedure with a udt arg
-        goodStatement
-            ( conn,
-              "create type price_07_c external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
-        goodStatement
-            ( conn,
-              "create procedure oneArgPriceProc_07( price1 price_07_c )\n" +
-              "language java\n" +
-              "parameter style java\n" +
-              "no sql\n" +
-              "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.oneArgPriceProc_07'\n"
-              );
-        expectExecutionError( conn, ROUTINE_DEPENDS_ON_TYPE, "drop type price_07_c restrict\n" );
-        goodStatement
-            ( conn,
-              "drop procedure oneArgPriceProc_07\n" );
-        goodStatement
-            ( conn,
-              "drop type price_07_c restrict\n" );
+        createTypeStatement = "create type price_07_c external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n";
+        dropTypeStatement = "drop type price_07_c restrict\n";
+        createObjectStatement = 
+            "create procedure oneArgPriceProc_07( price1 price_07_c )\n" +
+            "language java\n" +
+            "parameter style java\n" +
+            "no sql\n" +
+            "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.oneArgPriceProc_07'\n";
+        dropObjectStatement = "drop procedure oneArgPriceProc_07\n";
+        badDropSQLState = ROUTINE_DEPENDS_ON_TYPE;
+        verifyDropRestrictions
+            (
+             conn,
+             createTypeStatement,
+             dropTypeStatement,
+             createObjectStatement,
+             dropObjectStatement,
+             badDropSQLState
+             );
 
         // procedure with two udt args
-        goodStatement
-            ( conn,
-              "create type price_07_d external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
-        goodStatement
-            ( conn,
-              "create procedure twoArgPriceProc_07( price1 price_07_d, price2 price_07_d )\n" +
-              "language java\n" +
-              "parameter style java\n" +
-              "no sql\n" +
-              "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.twoArgPriceProc_07'\n"
-              );
-        expectExecutionError( conn, ROUTINE_DEPENDS_ON_TYPE, "drop type price_07_d restrict\n" );
-        goodStatement
-            ( conn,
-              "drop procedure twoArgPriceProc_07\n" );
-        goodStatement
-            ( conn,
-              "drop type price_07_d restrict\n" );
+        createTypeStatement = "create type price_07_d external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n";
+        dropTypeStatement = "drop type price_07_d restrict\n";
+        createObjectStatement = 
+            "create procedure twoArgPriceProc_07( price1 price_07_d, price2 price_07_d )\n" +
+            "language java\n" +
+            "parameter style java\n" +
+            "no sql\n" +
+            "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.twoArgPriceProc_07'\n";
+        dropObjectStatement = "drop procedure twoArgPriceProc_07\n";
+        badDropSQLState = ROUTINE_DEPENDS_ON_TYPE;
+        verifyDropRestrictions
+            (
+             conn,
+             createTypeStatement,
+             dropTypeStatement,
+             createObjectStatement,
+             dropObjectStatement,
+             badDropSQLState
+             );
 
     }
 
+    /**
+     * <p>
+     * Dependencies of triggers on UDTs.
+     * </p>
+     */
+    public void test_08_triggerDependencies() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create table t_08_a( a int )" );
+        goodStatement( conn, "create table t_08_b( a int )" );
+
+        String createTypeStatement;
+        String dropTypeStatement;
+        String createObjectStatement;
+        String dropObjectStatement;
+        String badDropSQLState;
+        
+        // trigger that mentions a udt
+        createTypeStatement = "create type price_08_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n";
+        dropTypeStatement = "drop type price_08_a restrict\n";
+        createObjectStatement = 
+            "create trigger trig_08_a after insert on t_08_a\n" +
+            "  insert into t_08_b( a ) select ( a ) from t_08_a where ( cast( null as price_08_a ) ) is not null\n";
+        dropObjectStatement = "drop trigger trig_08_a";
+        badDropSQLState = TRIGGER_DEPENDS_ON_TYPE;
+        verifyDropRestrictions
+            (
+             conn,
+             createTypeStatement,
+             dropTypeStatement,
+             createObjectStatement,
+             dropObjectStatement,
+             badDropSQLState
+             );
+
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // PROCEDURES
@@ -603,6 +658,27 @@ public class UDTTest  extends GeneratedColumnsHelper
     // MINIONS
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Verify that a type can't be dropped if it is used by a schema object.
+     */
+    private void verifyDropRestrictions
+        (
+         Connection conn,
+         String createTypeStatement,
+         String dropTypeStatement,
+         String createObjectStatement,
+         String dropObjectStatement,
+         String badDropSQLState
+         )
+        throws Exception
+    {
+        goodStatement( conn, createTypeStatement );
+        goodStatement( conn, createObjectStatement );
+        expectExecutionError( conn, badDropSQLState, dropTypeStatement );
+        goodStatement( conn, dropObjectStatement );
+        goodStatement( conn, dropTypeStatement );
+    }
 
     /** Get the number of dependencies that a table has */
     private int countTableDependencies( Connection conn, String tableName ) throws Exception
