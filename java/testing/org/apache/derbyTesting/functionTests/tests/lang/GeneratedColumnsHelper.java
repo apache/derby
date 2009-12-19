@@ -93,6 +93,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  ROUTINE_DEPENDS_ON_TYPE = "X0Y30";
     protected static  final   String  TABLE_DEPENDS_ON_TYPE = "X0Y29";
     protected static  final   String  VIEW_DEPENDS_ON_PRIVILEGE = "X0Y23";
+    protected static  final   String  NON_EMPTY_SCHEMA = "X0Y54";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

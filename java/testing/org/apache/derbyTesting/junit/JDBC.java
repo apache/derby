@@ -238,13 +238,13 @@ public class JDBC {
         PreparedStatement psf = conn.prepareStatement(
                 "SELECT ALIAS FROM SYS.SYSALIASES A, SYS.SYSSCHEMAS S" +
                 " WHERE A.SCHEMAID = S.SCHEMAID " +
-                " AND CHAR(A.ALIASTYPE) = 'F' " +
+                " AND CHAR(A.ALIASTYPE) = ? " +
                 " AND S.SCHEMANAME = ?");
-        psf.setString(1, schema);
+        psf.setString(1, "F" );
+        psf.setString(2, schema);
         ResultSet rs = psf.executeQuery();
         dropUsingDMD(s, rs, schema, "ALIAS", "FUNCTION");        
-        psf.close();
-  
+
 		// Procedures
 		rs = dmd.getProcedures((String) null,
 				schema, (String) null);
@@ -300,6 +300,13 @@ public class JDBC {
                 GET_TABLES_TABLE);        
         dropUsingDMD(s, rs, schema, "TABLE_NAME", "TABLE");
 
+        // drop UDTs
+        psf.setString(1, "A" );
+        psf.setString(2, schema);
+        rs = psf.executeQuery();
+        dropUsingDMD(s, rs, schema, "ALIAS", "TYPE");        
+        psf.close();
+  
         // Synonyms - need work around for DERBY-1790 where
         // passing a table type of SYNONYM fails.
         rs = dmd.getTables((String) null, schema, (String) null,
@@ -342,7 +349,9 @@ public class JDBC {
 		while (rs.next())
 		{
             String objectName = rs.getString(mdColumn);
-            ddl.add(dropLeadIn + JDBC.escape(schema, objectName));
+            String raw = dropLeadIn + JDBC.escape(schema, objectName);
+            if ( "TYPE".equals( dropType ) ) { raw = raw + " restrict "; }
+            ddl.add( raw );
 		}
 		rs.close();
         if (ddl.isEmpty())

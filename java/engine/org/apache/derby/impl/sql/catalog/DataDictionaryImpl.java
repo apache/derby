@@ -2239,7 +2239,16 @@ public final class	DataDictionaryImpl
 			return false;
 		}
 
-        // This catalog was added in 10.6. Don't look for this catalog if we
+        // don't orphan routines or UDTs
+		if (isSchemaReferenced(tc, getNonCoreTI(SYSALIASES_CATALOG_NUM),
+					SYSALIASESRowFactory.SYSALIASES_INDEX1_ID,
+					1,
+					schemaIdOrderable))
+		{
+			return false;
+		}
+
+        // These catalogs were added in 10.6. Don't look for these catalogs if we
         // have soft-upgraded from an older release.
         if( dictionaryVersion.majorVersionNumber >= DataDictionary.DD_VERSION_DERBY_10_6)
         {

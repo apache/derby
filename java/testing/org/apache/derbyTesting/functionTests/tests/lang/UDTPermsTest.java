@@ -59,7 +59,8 @@ public class UDTPermsTest extends GeneratedColumnsHelper
     private static  final   String      TEST_DBO = "TEST_DBO";
     private static  final   String      RUTH = "RUTH";
     private static  final   String      ALICE = "ALICE";
-    private static  final   String[]    LEGAL_USERS = { TEST_DBO, ALICE, RUTH  };
+    private static  final   String      FRANK = "FRANK";
+    private static  final   String[]    LEGAL_USERS = { TEST_DBO, ALICE, RUTH, FRANK  };
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -403,6 +404,33 @@ public class UDTPermsTest extends GeneratedColumnsHelper
              dropStatement,
              badRevokeSQLState
              );
+    }
+    
+  /**
+     * <p>
+     * Test that you can't drop a schema if it contains a UDT or routine.
+     * </p>
+     */
+    public  void    test_003_dropSchema()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  frankConnection = openUserConnection( FRANK );
+
+        goodStatement
+            ( frankConnection, "create function f_frank_03( a int ) returns int language java parameter style java no sql external name 'foo.bar.Wibble'\n" );
+        expectExecutionError( dboConnection, NON_EMPTY_SCHEMA, "drop schema frank restrict\n" );
+
+        goodStatement
+            (frankConnection, "drop function f_frank_03\n" );
+        goodStatement
+            ( frankConnection, "create type price_frank_03_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        expectExecutionError( dboConnection, NON_EMPTY_SCHEMA, "drop schema frank restrict\n" );
+
+        goodStatement
+            ( frankConnection, "drop type price_frank_03_a restrict\n" );
+        goodStatement
+            ( dboConnection, "drop schema frank restrict\n" );
     }
     
 }
