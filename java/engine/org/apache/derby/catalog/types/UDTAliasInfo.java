@@ -110,8 +110,12 @@ public class UDTAliasInfo implements AliasInfo, Formatable
 	 */
 	public	int	getTypeFormatId()	{ return StoredFormatIds.UDT_INFO_V01_ID; }
 
+    /**
+     * This is used by dblook to reconstruct the UDT-specific parts of the ddl
+     * needed to recreate this alias.
+     */
 	public String toString() {
-		return "";
+		return "LANGUAGE JAVA";
 	}
 
 	public String getMethodName()

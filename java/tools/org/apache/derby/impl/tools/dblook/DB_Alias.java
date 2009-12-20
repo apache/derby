@@ -31,43 +31,74 @@ import java.sql.DatabaseMetaData;
 import java.util.HashMap;
 import org.apache.derby.tools.dblook;
 
-public class DB_Alias {
+public class DB_Alias
+{
+    private static final char UDT_TYPE = 'A';
+    private static final char PROCEDURE_TYPE = 'P';
+    private static final char FUNCTION_TYPE = 'F';
 
 	// Prepared statements use throughout the DDL
 	// generation process.
 
 	/* ************************************************
-	 * Generate the DDL for all stored procedures and
-	 * functions in a given database and write it to
+	 * Generate the DDL for all stored procedures,
+	 * functions, and UDTs in a given database and write it to
 	 * output via Logs.java.
 	 * @param conn Connection to the source database.
 	 ****/
 
-	public static void doProceduresAndFunctions(Connection conn)
+	public static void doProceduresFunctionsAndUDTs(Connection conn)
 		throws SQLException {
 
 		// First do stored procedures.
-		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT ALIAS, ALIASINFO, " +
-			"ALIASID, SCHEMAID, JAVACLASSNAME, SYSTEMALIAS FROM SYS.SYSALIASES " +
-			"WHERE ALIASTYPE='P'");
-		generateDDL(rs, 'P');	// 'P' => for PROCEDURES
+		PreparedStatement ps = conn.prepareStatement
+            (
+             "SELECT ALIAS, ALIASINFO, " +
+             "ALIASID, SCHEMAID, JAVACLASSNAME, SYSTEMALIAS FROM SYS.SYSALIASES " +
+             "WHERE ALIASTYPE=?");
 
-		// Now do functions.
-		rs = stmt.executeQuery("SELECT ALIAS, ALIASINFO, " +
-			"ALIASID, SCHEMAID, JAVACLASSNAME, SYSTEMALIAS FROM SYS.SYSALIASES " +
-			"WHERE ALIASTYPE='F'");
-		generateDDL(rs, 'F');	// 'F' => for FUNCTIONS
+        //
+        // UDTs come before procedures and functions right now because
+        // procedures and functions can have args and return values which
+        // have UDT types. If we add functions to the signatures of UDTs,
+        // then we will have to do some trickier dependency analysis in order
+        // to interleave routine and UDT ddl.
+        //
 
-		rs.close();
-		stmt.close();
+        generateDDL( ps, UDT_TYPE ); // UDT_TYPE => for UDTs
+        generateDDL( ps, PROCEDURE_TYPE );	// PROCEDURE_TYPE => for PROCEDURES
+		generateDDL( ps, FUNCTION_TYPE );	// FUNCTION_TYPE => for FUNCTIONS
+
+        ps.close();
+
 		return;
-
 	}
 
+    /* ************************************************
+	 * Generate the DDL for the stored procedures,
+	 * functions, or UDTs in a given database, depending on the
+	 * the received aliasType.
+	 * @param rs Result set holding either stored procedures
+	 *  or functions.
+	 * @param aliasType Indication of whether we're generating
+	 *  stored procedures or functions.
+	 ****/
+	private static void generateDDL(PreparedStatement ps, char aliasType)
+		throws SQLException
+	{
+        ps.setString( 1, new String( new char[] { aliasType } ) );
+
+        ResultSet rs = ps.executeQuery();
+
+        generateDDL( rs, aliasType );
+
+        rs.close();
+    }
+
+
 	/* ************************************************
-	 * Generate the DDL for either stored procedures or
-	 * functions in a given database, depending on the
+	 * Generate the DDL for the stored procedures,
+	 * functions, or UDTs in a given database, depending on the
 	 * the received aliasType.
 	 * @param rs Result set holding either stored procedures
 	 *  or functions.
@@ -91,9 +122,12 @@ public class DB_Alias {
 
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
-				Logs.reportMessage((aliasType == 'P')
-					? "DBLOOK_StoredProcHeader"
-					: "DBLOOK_FunctionHeader");
+                switch( aliasType )
+                {
+                case UDT_TYPE: Logs.reportMessage( "DBLOOK_UDTHeader" ); break;
+                case PROCEDURE_TYPE: Logs.reportMessage( "DBLOOK_StoredProcHeader" ); break;
+                case FUNCTION_TYPE: Logs.reportMessage( "DBLOOK_FunctionHeader" ); break;
+                }
 				Logs.reportString("----------------------------------------------\n");
 			}
 
@@ -102,7 +136,7 @@ public class DB_Alias {
 				dblook.expandDoubleQuotes(aliasName));
 			fullName = procSchema + "." + fullName;
 
-			String creationString = createProcOrFuncString(
+			String creationString = createProcFuncOrUDTString(
 				fullName, rs, aliasType);
 			Logs.writeToNewDDL(creationString);
 			Logs.writeStmtEndToNewDDL();
@@ -124,31 +158,46 @@ public class DB_Alias {
 	 *   returned, as a String.
 	 ****/
 
-	private static String createProcOrFuncString(String aliasName,
+	private static String createProcFuncOrUDTString(String aliasName,
 		ResultSet aliasInfo, char aliasType) throws SQLException
 	{
 
 		StringBuffer alias = new StringBuffer("CREATE ");
-		if (aliasType == 'P')
-			alias.append("PROCEDURE ");
-		else if (aliasType == 'F')
-			alias.append("FUNCTION ");
+
+        switch( aliasType )
+        {
+        case UDT_TYPE: alias.append( "TYPE " ); break;
+        case PROCEDURE_TYPE: alias.append("PROCEDURE "); break;
+        case FUNCTION_TYPE: alias.append("FUNCTION "); break;
+        }
 		alias.append(aliasName);
 		alias.append(" ");
 
 		String params = aliasInfo.getString(2);
 
-		// Just grab the parameter part; we'll get the method name later.
-		alias.append(params.substring(params.indexOf("("), params.length()));
-		alias.append(" ");
+        if ( aliasType != UDT_TYPE )
+        {
+            // Just grab the parameter part; we'll get the method name later.
+            alias.append(params.substring(params.indexOf("("), params.length()));
+            alias.append(" ");
+        }
 
 		// Now add the external name.
 		alias.append("EXTERNAL NAME '");
 		alias.append(aliasInfo.getString(5));
-		alias.append(".");
-		// Get method name from parameter string fetched above.
-		alias.append(params.substring(0, params.indexOf("(")));
-		alias.append("' ");
+
+        if ( aliasType == UDT_TYPE )
+        {
+            alias.append("' ");
+            alias.append( params );
+        }
+        else
+        {
+            alias.append(".");
+            // Get method name from parameter string fetched above.
+            alias.append(params.substring(0, params.indexOf("(")));
+            alias.append("' ");
+        }
 
 		return alias.toString();
 

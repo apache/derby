@@ -28,6 +28,7 @@ package org.apache.derby.catalog;
  * In a Derby system, an alias can be one of the following:
  * <ul>
  * <li>method alias
+ * <li>UDT alias
  * <li>class alias
  * <li>synonym
  * <li>user-defined aggregate

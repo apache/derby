@@ -526,7 +526,7 @@ public final class dblook {
 			if (tableList == null) {
 			// Don't do these if user just wants table-related objects.
 				DB_Jar.doJars(sourceDBName, this.conn);
-				DB_Alias.doProceduresAndFunctions(this.conn);
+				DB_Alias.doProceduresFunctionsAndUDTs(this.conn);
 			}
 
 			DB_Table.doTables(this.conn, tableIdToNameMap);

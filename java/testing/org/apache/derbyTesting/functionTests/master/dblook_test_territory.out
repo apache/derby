@@ -5799,6 +5799,10 @@ CREATE SCHEMA "BAR"
 -- ----------------------------------------------
 CALL SQLJ.INSTALL_JAR(<maskedOutJarDesc>)
 -- ----------------------------------------------
+-- DDL Statements for user defined types
+-- ----------------------------------------------
+CREATE TYPE "APP"."PRICE" EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.Price' LANGUAGE JAVA
+-- ----------------------------------------------
 -- DDL Statements for stored procedures
 -- ----------------------------------------------
 CREATE PROCEDURE "APP"."PROC1" (INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL DYNAMIC RESULT SETS 4 EXTERNAL NAME 'org.apache.derbyTesting.functionTests.util.ProcedureTest.inoutparams3' 
@@ -5929,6 +5933,10 @@ CREATE SCHEMA "BAR" #
 -- loaded.
 -- ----------------------------------------------
 CALL SQLJ.INSTALL_JAR(<maskedOutJarDesc>)
+-- ----------------------------------------------
+-- DDL Statements for user defined types
+-- ----------------------------------------------
+CREATE TYPE "APP"."PRICE" EXTERNAL NAME 'org.apache.derbyTesting.functionTests.tests.lang.Price' LANGUAGE JAVA #
 -- ----------------------------------------------
 -- DDL Statements for stored procedures
 -- ----------------------------------------------

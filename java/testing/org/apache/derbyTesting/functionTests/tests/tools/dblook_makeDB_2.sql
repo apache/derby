@@ -87,3 +87,10 @@ create synonym syn1 for bar.t1;
 -- ----------------------------------------------
 
 create trigger trigOne after insert on bar.t1 for each row update bar.t1 set i = 4 where i = 2;
+
+-- ----------------------------------------------
+-- UDTs
+-- ----------------------------------------------
+
+create type price external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java;
+

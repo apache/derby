@@ -54,6 +54,12 @@ public class DB_GrantRevoke {
 			"S.SCHEMAID AND T.TABLEID = P.TABLEID");
 		generateColumnPrivs(rs, conn);
 
+		// Generate udt privilege statements
+		rs = stmt.executeQuery("SELECT P.GRANTEE, S.SCHEMANAME, A.ALIAS, P.PERMISSION, P.OBJECTTYPE FROM " +
+			"SYS.SYSPERMS P, SYS.SYSALIASES A, SYS.SYSSCHEMAS S WHERE A.SCHEMAID = " +
+			"S.SCHEMAID AND P.OBJECTID = A.ALIASID AND A.ALIASTYPE='A'");
+		generateUDTPrivs(rs);
+
 		// Generate routine privilege statements
 		rs = stmt.executeQuery("SELECT GRANTEE, SCHEMANAME, ALIAS, ALIASTYPE FROM " +
 			"SYS.SYSROUTINEPERMS P, SYS.SYSALIASES A, SYS.SYSSCHEMAS S WHERE A.SCHEMAID = " +
@@ -269,6 +275,53 @@ public class DB_GrantRevoke {
 		grantStmt.append("(");
 		grantStmt.append(mapColumnsToNames(columns, rsCols));
 		grantStmt.append(")");
+		grantStmt.append(" TO ");
+		grantStmt.append(authName);
+
+		return grantStmt.toString();
+	}
+
+	/** ************************************************
+	 * Generate udt privilege statements
+	 *
+	 * @param rs ResultSet holding required information
+	 ****/
+	public static void generateUDTPrivs(ResultSet rs) throws SQLException
+	{
+		boolean firstTime = true;
+		while (rs.next()) {
+			String authName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(1)));
+			String schemaName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(2)));
+			String aliasName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(3)));
+			String fullName = schemaName + "." + aliasName;
+			String permission = rs.getString(4);
+			String objectType = rs.getString(5);
+
+			if (dblook.isIgnorableSchema(schemaName))
+				continue;
+
+			if (firstTime) {
+				Logs.reportString("----------------------------------------------");
+				Logs.reportMessage("DBLOOK_UDTPrivHeader");
+				Logs.reportString("----------------------------------------------\n");
+			}
+
+			Logs.writeToNewDDL(genericPrivStatement(fullName, authName, permission, objectType ));
+			Logs.writeStmtEndToNewDDL();
+			Logs.writeNewlineToNewDDL();
+			firstTime = false;
+		}
+	}
+	private static String genericPrivStatement(String fullName, String authName, String permission, String objectType )
+		throws SQLException
+	{
+		boolean addSeparator = false;
+		StringBuffer grantStmt = new StringBuffer("GRANT " + permission + " ON " + objectType + " " );
+
+		grantStmt.append(fullName);
 		grantStmt.append(" TO ");
 		grantStmt.append(authName);
 
