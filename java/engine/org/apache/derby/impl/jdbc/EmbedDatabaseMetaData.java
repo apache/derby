@@ -88,6 +88,8 @@ import java.io.InputStream;
 public class EmbedDatabaseMetaData extends ConnectionChild 
 	implements DatabaseMetaData, java.security.PrivilegedAction {
 
+    private static final int ILLEGAL_UDT_TYPE = 0;
+    
 	/*
 	** Property and values related to using
 	** stored prepared statements for metatdata.
@@ -3048,24 +3050,28 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      */
     public ResultSet getUDTs(String catalog, String schemaPattern, 
 		      String typeNamePattern, int[] types)
-      throws SQLException {
+      throws SQLException
+    {
         //we don't have support for catalog names
-        //we don't have java class types per schema, instead it's per database and hence
-        //we ignore schemapattern.
         //the only type of user-named types we support are JAVA_OBJECT
-        int getClassTypes = 0;
-          if (types != null  &&  types.length >= 1) {
-            for (int i=0; i<types.length; i++){
-              if (types[i] == java.sql.Types.JAVA_OBJECT)
-                getClassTypes = 1;
+
+        int getClassTypes = ILLEGAL_UDT_TYPE;
+
+        // null argument, means all supported UDT types
+        if ( types == null ) { getClassTypes = java.sql.Types.JAVA_OBJECT; }
+        else if ( types.length > 0 )
+        {
+            for ( int i=0; i< types.length; i++ )
+            {
+                if ( types[i] == java.sql.Types.JAVA_OBJECT )
+                { getClassTypes = java.sql.Types.JAVA_OBJECT; }
             }
-          } else
-            getClassTypes = 1;
+        }
 
   		PreparedStatement s = getPreparedQuery("getUDTs");
-  		s.setInt(1, java.sql.Types.JAVA_OBJECT);
-  		s.setString(2, catalog);
-  		s.setString(3, schemaPattern);
+  		s.setInt(1, java.sql.Types.JAVA_OBJECT); // thrown away. preserved for backward compatibility with pre-10.6 clients
+  		s.setString(2, swapNull(catalog));
+  		s.setString(3, swapNull(schemaPattern));
   		s.setString(4, swapNull(typeNamePattern));
   		s.setInt(5, getClassTypes);
         return s.executeQuery();

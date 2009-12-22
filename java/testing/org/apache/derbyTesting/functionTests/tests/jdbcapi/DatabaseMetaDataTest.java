@@ -57,6 +57,7 @@ import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 //import org.apache.derby.shared.common.reference.JDBC40Translation;
+import org.apache.derbyTesting.functionTests.tests.upgradeTests.Version;
 
 /**
  * Test the DatabaseMetaData api.
@@ -789,6 +790,108 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     */
     
     /**
+     * Test UDT-related metadata methods.
+     * 
+     */
+    public void testUDTs() throws Exception
+    {
+        //
+        // We only run this test if the database version is at least 10.6.
+        // Otherwise we can't create a UDT.
+        //
+        Version dataVersion = getDataVersion( getConnection() );
+        if ( dataVersion.compareTo( new Version( 10, 6, 0, 0 ) ) < 0 ) { return; }
+        
+        DatabaseMetaData dmd = getDMD();
+
+        createObjectsForUDTTests();
+
+        ResultSet rs = dmd.getUDTs(null,null,null,null);
+        String[] columnNames = new String[] {
+                "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "CLASS_NAME",
+                "DATA_TYPE", "REMARKS", "BASE_TYPE"};
+        int[] columnTypes = new int[] {
+            Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.LONGVARCHAR,
+            Types.INTEGER, Types.VARCHAR, Types.SMALLINT
+        };
+        boolean[] nullability = new boolean[] {
+            true, true, false, false,
+            false, true, true
+        };
+        assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
+
+        String[][] expectedRows = new String[][]
+        {
+            {  null, "APP", "PRICE", "org.apache.derbyTesting.functionTests.tests.lang.Price", "2000", null, null },
+        };
+        JDBC.assertFullResultSet( rs, expectedRows );
+
+        // now try the test, specifying a specific type of UDT
+        rs = dmd.getUDTs( null, null, null, new int[] { Types.JAVA_OBJECT } );
+        JDBC.assertFullResultSet( rs, expectedRows );
+
+        rs = dmd.getUDTs( null, null, null, new int[] { Types.DISTINCT, Types.JAVA_OBJECT } );
+        JDBC.assertFullResultSet( rs, expectedRows );
+
+        // no UDTs of these types
+        rs = dmd.getUDTs( null, null, null, new int[] { Types.DISTINCT, Types.STRUCT } );
+        JDBC.assertEmpty(rs);
+
+        // try explicit schema and type name
+        rs = dmd.getUDTs( null, "APP", "PRICE", new int[] { Types.DISTINCT, Types.JAVA_OBJECT } );
+        JDBC.assertFullResultSet( rs, expectedRows );
+
+        rs = dmd.getUDTs( null, "AP%", "PRI%", new int[] { Types.DISTINCT, Types.JAVA_OBJECT } );
+        JDBC.assertFullResultSet( rs, expectedRows );
+        
+        rs = dmd.getUDTs( null, "FOO", "PRICE", new int[] { Types.DISTINCT, Types.JAVA_OBJECT } );
+        JDBC.assertEmpty(rs);
+
+        // now make sure that getColumns() returns the right data
+        rs = dmd.getColumns( null, "APP", "ORDERS", null );
+        expectedRows = new String[][]
+        {
+            {
+                "", "APP", "ORDERS", "TOTALPRICE",
+                "2000", "\"APP\".\"PRICE\"", "-1", null,
+                null, null, "1", "",
+                null, null, null, null,
+                "1", "YES", null, null,
+                null, null, "NO"
+            },
+        };
+        JDBC.assertFullResultSet( rs, expectedRows );
+        rs = dmd.getColumns( null, "APP", "ORDERS", null );
+        crossCheckGetColumnsAndResultSetMetaData( rs, false, 0 );
+
+        dropObjectsForUDTTests();
+    }
+    /** Create objects needed to test the UDT-related metadata calls */
+    private void createObjectsForUDTTests() throws SQLException
+    {
+        getConnection().setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.execute( "create type price external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java" );
+        s.execute( "create table orders( totalPrice price )" );
+
+        commit();
+        getConnection().setAutoCommit(true);
+    }
+    /** Drop the objects needed for testing the UDT-related metadata methods */
+    private void dropObjectsForUDTTests() throws SQLException
+    {
+        getConnection().setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.execute( "drop table orders" );
+        s.execute( "drop type price restrict" );
+
+        commit();
+        getConnection().setAutoCommit(true);
+    }
+    
+    /**
      * Test methods that describe attributes of SQL Objects
      * that are not supported by derby. In each case the
      * metadata should return an empty ResultSet of the
@@ -859,17 +962,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertMetaDataResultSet(rs, columnNames, columnTypes, nullability);
         JDBC.assertEmpty(rs);
 
-        rs = dmd.getUDTs(null,null,null,null);
-        columnNames = new String[] {
-                "TYPE_CAT", "TYPE_SCHEM", "TYPE_NAME", "CLASS_NAME",
-                "DATA_TYPE", "REMARKS", "BASE_TYPE"};
-        columnTypes = new int[] {
-                Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-        nullability = new boolean[] {
-                true, true, true, true};
-        assertMetaDataResultSet(rs, null, null, null);
-        JDBC.assertEmpty(rs);
-        
         ResultSet rss[] = getVersionColumns(null,null, "No_such_table");
         checkVersionColumnsShape(rss);
         JDBC.assertEmpty(rss[0]);
@@ -2011,7 +2103,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
           Types.INTEGER, Types.LONGVARBINARY, Types.LONGVARCHAR,
           Types.NUMERIC, Types.REAL, Types.SMALLINT,
           Types.TIME, Types.TIMESTAMP,  Types.VARBINARY,
-          Types.VARCHAR, JDBC.SQLXML
+          Types.VARCHAR, JDBC.SQLXML, Types.JAVA_OBJECT
         };
         
         // Rows are returned from getTypeInfo in order of
@@ -2098,6 +2190,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             case Types.VARCHAR:
                 precision = 32672;
                 break;
+	    case Types.JAVA_OBJECT:
 	    case JDBC.SQLXML:
 		precision = 0;
 		break;
@@ -2106,12 +2199,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                     precision, rs.getInt("PRECISION"));
 
             /*
-              Precision value is null for XML data type
+              Precision value is null for XML and OBJECT data type
             */
-            if (typeName.equals("XML" ))
-                assertTrue(rs.wasNull());
+            if ( (typeName.equals("XML" )) || (typeName.equals("OBJECT" )) )
+            { assertTrue(rs.wasNull()); }
             else
-                assertFalse(rs.wasNull());
+            { assertFalse(rs.wasNull()); }
 
             
             // LITERAL_PREFIX (column 4)
@@ -2588,6 +2681,11 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         while (rs.next())
         {
             String typeName = rs.getString("TYPE_NAME");
+
+            // skip the OBJECT type because this does not correspond to an
+            // actual data type but merely flags the fact that the database
+            // supports the creation of user defined types
+            if ( "OBJECT".equals( typeName ) ) { continue; }
             
             String createParams = rs.getString("CREATE_PARAMS");
             
@@ -4695,4 +4793,41 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             assertSQLState("XCL16", sqle);
         }
     }
+
+    /**
+     * <p>
+     * Get the version of the data in the database.
+     * </p>
+     */
+    private Version getDataVersion( Connection conn )
+        throws Exception
+    {
+        PreparedStatement ps = null;
+        ResultSet               rs = null;
+
+        try {
+            ps = conn.prepareStatement( "values syscs_util.syscs_get_database_property('DataDictionaryVersion')" );
+            rs = ps.executeQuery();
+
+            rs.next();
+
+            String retval = rs.getString( 1 );
+            int  dotIdx = retval.indexOf( '.' );
+            int major = Integer.parseInt( retval.substring( 0, dotIdx ) );
+            int minor = Integer.parseInt( retval.substring( dotIdx + 1, retval.length() ) );
+
+            return new Version( major, minor, 0, 0 );
+        }
+        catch (Exception se)
+        {
+            printStackTrace( se );
+            return null;
+        }
+        finally
+        {
+            if ( rs != null ) { rs.close(); }
+            if ( ps != null ) { ps.close(); }
+        }
+    }
+
 }

@@ -766,10 +766,14 @@ public static String[][]SQLData =
         ResultSet rs = dbmd.getTypeInfo();
         int count = 0;
 
+        int expectedDataTypeCount = LEGAL_BOOLEAN_CASTS.length + ILLEGAL_BOOLEAN_CASTS.length;
+        // getTypeInfo() also returns a row for the generic OBJECT data type
+        expectedDataTypeCount++;
+
         while ( rs.next() ) { count++; }
 
         assertEquals( "You must add your new data type to LEGAL_BOOLEAN_CASTS or ILLEGAL_BOOLEAN_CASTS",
-                      LEGAL_BOOLEAN_CASTS.length + ILLEGAL_BOOLEAN_CASTS.length,
+                      expectedDataTypeCount,
                       count );
         
         rs.close();
