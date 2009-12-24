@@ -2026,7 +2026,7 @@ public interface DataDictionary
      * @param objectUUID ID of the object being protected
      * @param objectType Type of the object (e.g., PermDescriptor.SEQUENCE_TYPE)
      * @param privilege The kind of privilege needed (e.g., PermDescriptor.USAGE_PRIV)
-     * @param granteeAuthid The user who needs the permission
+     * @param granteeAuthId The user who needs the permission
      *
      * @return The descriptor of the permissions for the object
      *

@@ -12843,7 +12843,7 @@ public final class	DataDictionaryImpl
      * @param objectUUID The id of the protected object
      * @param objectType Type of the object (e.g., SEQUENCE)
      * @param privilege The kind of privilege needed (e.g., PermDescriptor.USAGE_PRIV)
-     * @param granteeAuthid The user or role who wants to have permission on this object
+     * @param granteeAuthId The user or role who wants to have permission on this object
      *
      * @return The descriptor of the permissions for the object
      *
