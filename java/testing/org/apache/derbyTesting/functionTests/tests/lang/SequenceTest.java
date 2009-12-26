@@ -194,4 +194,14 @@ public class SequenceTest extends BaseJDBCTestCase {
         adminCon.close();
     }
 
+    /**
+     * initial test for next value
+     * @throws SQLException on error
+     */
+    public void testNextValue() throws SQLException {
+        Statement s = createStatement();
+        s.executeUpdate("CREATE SEQUENCE mySeq1");
+        s.execute("SELECT NEXT VALUE FOR mySeq1 from sys.systables");
+    }
+
 }

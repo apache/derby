@@ -6669,6 +6669,11 @@ valueExpressionPrimary(boolean inSelectClause) throws StandardException :
 	{
 		return value;
 	}
+|
+    value = nextValueExpression()
+	{
+		return value;
+	}
 }
 
 /*
@@ -9693,6 +9698,27 @@ castSpecification() throws StandardException :
 		return treeTop;
 	}
 		
+}
+
+/**
+ * Next value from a sequence object
+ */
+ValueNode
+nextValueExpression() throws StandardException :
+{
+	ValueNode		 nextValue;
+	TableName sequenceName;
+}
+{
+       <NEXT> <VALUE> <FOR> sequenceName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+       {
+        checkVersion(DataDictionary.DD_VERSION_DERBY_10_6, "NEXT VALUE");
+		nextValue = (ValueNode) nodeFactory.getNode(
+									C_NodeTypes.NEXT_SEQUENCE_NODE,
+									sequenceName,
+									getContextManager());
+
+		return nextValue;}	
 }
 
 /*

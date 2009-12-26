@@ -196,7 +196,9 @@ public interface C_NodeNames
 
 	static final String NEW_INVOCATION_NODE_NAME = "org.apache.derby.impl.sql.compile.NewInvocationNode";
 
-	static final String NON_STATIC_METHOD_CALL_NODE_NAME = "org.apache.derby.impl.sql.compile.NonStaticMethodCallNode";
+    static final String NEXT_SEQUENCE_NODE_NAME = "org.apache.derby.impl.sql.compile.NextSequenceNode";
+
+    static final String NON_STATIC_METHOD_CALL_NODE_NAME = "org.apache.derby.impl.sql.compile.NonStaticMethodCallNode";
 
 	static final String NORMALIZE_RESULT_SET_NODE_NAME = "org.apache.derby.impl.sql.compile.NormalizeResultSetNode";
 
