@@ -60,6 +60,7 @@ public class ReplicationRun extends BaseTestCase
     static String testUser = null;
     
     static String userDir = null;
+    static String userHome = null; // Used when running distributed.
     
     static String dataEncryption = null;
       // Set to a legal encryption string to
@@ -81,6 +82,8 @@ public class ReplicationRun extends BaseTestCase
     static String freezeDB = ""; // Preliminary: need to "manually" freeze db as part of initialization.
     static String unFreezeDB = ""; // Preliminary: need to "manually" unfreeze db as part of initialization.
     
+    static boolean junitTest = true; // Set to false in replicationtest.properties
+                                     // when running distributed using plain class w/main()
     static boolean runUnReplicated = false;
     
     static boolean simpleLoad = true;
@@ -98,6 +101,9 @@ public class ReplicationRun extends BaseTestCase
     static String replicationTest = "";
     static String replicationVerify = "";
     
+    static int THREADS = 0; // Number of threads and 
+    static int MINUTES = 0; // minutes a StressMultiTest load should run.
+                            // When ReplicationTestRunStress used as load...
     static String sqlLoadInit = "";
     
     final static String networkServerControl = "org.apache.derby.drda.NetworkServerControl";
@@ -115,7 +121,6 @@ public class ReplicationRun extends BaseTestCase
     
     final static String FS = File.separator;
     final static String PS = File.pathSeparator;
-    final static String JVMloc = BaseTestCase.getJavaExecutableName();
     
     static boolean showSysinfo = false;
     static long PINGSERVER_SLEEP_TIME_MILLIS = 500L;
@@ -315,7 +320,7 @@ public class ReplicationRun extends BaseTestCase
                 Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                 conn = DriverManager.getConnection(dbURL);
                 done = true;
-                util.DEBUG("Got connection after " 
+                util.DEBUG("Ping Got connection after " 
                         + count +" * "+ sleeptime + " ms.");
                 conn.close();
             }
@@ -392,7 +397,7 @@ public class ReplicationRun extends BaseTestCase
                 ds.setPortNumber(serverPort);
                 ds.setConnectionAttributes(useEncryption(false));
                 Connection conn = ds.getConnection();
-                util.DEBUG("Got connection after " 
+                util.DEBUG("Wait Got connection after " 
                         + (count-1) +" * "+ sleepTime + " ms.");
                 conn.close();
                 return;
@@ -528,7 +533,7 @@ public class ReplicationRun extends BaseTestCase
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
                 + PS + test_jars;
         
-        String clientJvm = BaseTestCase.getJavaExecutableName();
+        String clientJvm = ReplicationRun.getClientJavaExecutableName();
         
         String command = null;
         
@@ -543,11 +548,18 @@ public class ReplicationRun extends BaseTestCase
                     ;
         }
         else
-        { // JUnit
+        { // JUnit or plain class w/main().
             if ( testClientHost.equals("localhost") )
             {
                 testingClassPath = classPath; // Using the complete classpath
             }
+            String StressMultiTestOption = "";
+            if ( THREADS != 0 && MINUTES != 0 )
+            {
+                StressMultiTestOption = "-Dderby.tests.ThreadsMinutes="+THREADS+"x"+MINUTES;
+            }
+            String testRunner = " junit.textui.TestRunner";
+            if ( ! junitTest ) testRunner = ""; // plain class w/main()
             command = clientJvm
                     + " -Dderby.tests.trace=true"
                     // + " -Djava.security.policy=\"<NONE>\"" // Now using noSecurityManager decorator
@@ -555,21 +567,24 @@ public class ReplicationRun extends BaseTestCase
                     + " -Dtest.serverPort=" + serverPort  // and port to connect to.
                     + " -Dtest.inserts=" + tuplesToInsertPerf // for SimplePerfTest
                     + " -Dtest.commitFreq=" +  commitFreq // for SimplePerfTest
+                    + " " + StressMultiTestOption // For StressMultiTestForReplLoad as load.
+                    + " -Dtest.dbPath=" + masterDbPath(dbName) // OK?
                     + " -classpath " + testingClassPath
-                    + " junit.textui.TestRunner"
+                    + testRunner // NB Empty if a plain class w/main()!
                     + " " + replicationTest
                     ;
         }
         
         long startTime = System.currentTimeMillis();
         String results = null;
+        String workingDir = userHome; // Remember this is run on client against master..
         if ( testClientHost.equalsIgnoreCase("localhost") )
         {
-            runUserCommandLocally(command, userDir+FS+masterDbSubPath, "runTest ");
+            runUserCommandLocally(command, workingDir, "runTest ");
         }
         else
         {
-            command = "cd "+ userDir +";" // Must be positioned where the properties file is located.
+            command = "cd "+ workingDir +";" // NOT Correct: ...Must be positioned where the properties file is located.
                     + command;
             results = runUserCommandRemotely(command, testClientHost, testUser,
                     "runTest ");
@@ -603,7 +618,7 @@ public class ReplicationRun extends BaseTestCase
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
                 + PS + test_jars;
         
-        String clientJvm = BaseTestCase.getJavaExecutableName();
+        String clientJvm = ReplicationRun.getSlaveJavaExecutableName();
         
         String command = null;
         
@@ -641,6 +656,7 @@ public class ReplicationRun extends BaseTestCase
                     + " -Dtest.serverPort=" + serverPort  // and port to connect to.
                     + " -Dtest.inserts=" + tuplesToInsertPerf // for SimplePerfTest
                     + " -Dtest.commitFreq=" +  commitFreq // for SimplePerfTest
+                    + " -Dtest.dbPath=" + slaveDbPath(dbName) // OK?
                     + " -classpath " + testingClassPath
                     + " junit.textui.TestRunner"
                     + " " + replicationTest
@@ -698,7 +714,7 @@ public class ReplicationRun extends BaseTestCase
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
                 + PS + test_jars;
         
-        String clientJvm = BaseTestCase.getJavaExecutableName();
+        String clientJvm = ReplicationRun.getClientJavaExecutableName();
         
         String command = null;
         
@@ -710,7 +726,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("load: " + load);
         if ( load.indexOf(".sql") >= 0 )
         {
-            command = clientJvm // "java"
+            command = clientJvm
                     + " -Dij.driver=" + DRIVER_CLASS_NAME
                     + " -Dij.connection.startTestClient=" + URL
                     + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
@@ -720,18 +736,16 @@ public class ReplicationRun extends BaseTestCase
         else
         {
             /* BEGIN For junit: */
-            command = clientJvm // "java"
+            command = clientJvm
                     + " -Dderby.tests.trace=true"
                     // + " -Djava.security.policy=\"<NONE>\""  // Now using noSecurityManager decorator
                     + " -classpath " + testingClassPath
                     + " junit.textui.TestRunner"
-                    + " " + load //
-                    // + " org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationTestRun"
+                    + " " + load
                     ;
             /* END */
         }
         
-        /* String results = */
         if ( testClientHost.equalsIgnoreCase("localhost") )
         {
             runUserCommandInThread(command,  testUser, dbSubPath,
@@ -774,7 +788,7 @@ public class ReplicationRun extends BaseTestCase
                 // See TestConfiguration: startNetworkServer and stopNetworkServer
                 + PS + test_jars;
         
-        String clientJvm = BaseTestCase.getJavaExecutableName();
+        String clientJvm = ReplicationRun.getClientJavaExecutableName();
         
         String command = null;
         
@@ -837,42 +851,20 @@ public class ReplicationRun extends BaseTestCase
         { // Use full classpath when running locally. Can not vary server versions!
             ijClassPath = classPath;
         }
-        String clientJvm = BaseTestCase.getJavaExecutableName();
+        String hostJvm = ReplicationRun.getMasterJavaExecutableName();
         
         String results = null;
-        if ( masterHost.equalsIgnoreCase("localhost") || localEnv )
+
         {
-            /* results = 
-                runUserCommand(command,
-                testUser,
-                "bootMasterDatabase "); */
             util.DEBUG("bootMasterDatabase getConnection("+URL+")");
             Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
             Connection conn = DriverManager.getConnection(URL);
             conn.close();
         }
-        else
-        {
-        // Execute the ij command on the testClientHost as testUser
-            String command = clientJvm 
-                + " -Dij.driver=" + DRIVER_CLASS_NAME
-                + " -Dij.connection.createMaster=\"" + URL + "\""
-                + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
-                + " " + "exit.sql" // FIXME!!
-                ;
-        
-            results =
-                runUserCommandRemotely(command,
-                testClientHost,
-                testUser,
-                "bootMasterDatabase ");
-        }
-        util.DEBUG(results);
-        
         
         // NB! should be done by startMaster. Preliminary needs to freeze db before copying to slave and setting replication mode.
         util.DEBUG("************************** DERBY-???? Preliminary needs to freeze db before copying to slave and setting replication mode.");
-        if ( masterServerHost.equalsIgnoreCase("localhost") || localEnv )
+        
         {
              URL = masterURL(dbName);
             Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
@@ -881,15 +873,6 @@ public class ReplicationRun extends BaseTestCase
             Statement s = conn.createStatement();
             s.execute("call syscs_util.syscs_freeze_database()");
             conn.close();
-        }
-        else
-        {
-        runTest(freezeDB,
-                clientVM,
-                testClientHost,
-                masterServerHost, masterServerPort,
-                dbName
-                );
         }
         
         if ( load != null )
@@ -925,18 +908,10 @@ public class ReplicationRun extends BaseTestCase
         else
         {
             startMaster_ij(dbName,
-                    masterHost,
-                    masterServerPort, slaveReplInterface,
-                    slaveReplPort, testClientHost);
+                    masterHost, masterServerPort, 
+                    slaveReplInterface, slaveReplPort, 
+                    testClientHost);
         }
-        /* else if ...
-        {
-            startMaster_CLI(clientVM,
-                    dbName,
-                    masterHost,masterServerPort,
-                    slaveClientInterface,slaveServerPort,
-                    slaveReplInterface,slaveReplPort);
-        } */
     }
     /* CLI not available for 10.4 */
     private void startMaster_CLI(String clientVM,
@@ -952,7 +927,7 @@ public class ReplicationRun extends BaseTestCase
         
         String masterClassPath = derbyMasterVersion +FS+ "derbynet.jar";
         
-        String clientJvm = BaseTestCase.getJavaExecutableName();
+        String clientJvm = ReplicationRun.getMasterJavaExecutableName();
         
         if ( masterHost.equals("localhost") )
         { // Use full classpath when running locally. Can not vary server versions!
@@ -996,12 +971,6 @@ public class ReplicationRun extends BaseTestCase
             throws Exception
     {
         
-        String masterClassPath = derbyMasterVersion +FS+ "derbynet.jar";
-        if ( masterHost.equals("localhost") )
-        { // Use full classpath when running locally. Can not vary server versions!
-            masterClassPath = classPath;
-        }
-                
         String URL = masterURL(dbName)
                 +";startMaster=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
@@ -1012,19 +981,18 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
-        String clientJvm = BaseTestCase.getJavaExecutableName();
+        String clientJvm = ReplicationRun.getMasterJavaExecutableName();
         
-        String command = clientJvm // "java"
+        String command = clientJvm
                 + " -Dij.driver=" + DRIVER_CLASS_NAME
                 + " -Dij.connection.startMaster=\"" + URL + "\""
                 + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
-                + " " + "/home/os136789/Replication/testing/exit.sql"
+                + " " + userHome + FS + "ij_dummy_script.sql"
                 ;
         
-        // Execute the ij command on the testClientHost as testUser
         String results =
                 runUserCommandRemotely(command,
-                testClientHost,
+                masterHost, // Must be run on the master!
                 testUser,
                 "startMaster_ij ");
         util.DEBUG(results);
@@ -1212,14 +1180,8 @@ public class ReplicationRun extends BaseTestCase
             slaveClassPath = classPath;
         }
         
-        String clientJvm = BaseTestCase.getJavaExecutableName();
+        String clientJvm = ReplicationRun.getSlaveJavaExecutableName();
         
-        /*
-         * java -classpath ${SLAVE_LIB}/derbynet.jar org.apache.derby.drda.NetworkServerControl \
-         *       startslave test -slavehost ${SLAVEREPLINTERFACE}  -slaveport ${SLAVEREPLPORT} \
-         *       -h ${SLAVECLIENTINTERFACE} -p ${SLAVESERVERPORT}??  \
-         *       -noSecurityManager
-         */
         String command = clientJvm
                 + " -classpath " + slaveClassPath
                 + " " + networkServerControl
@@ -1251,11 +1213,6 @@ public class ReplicationRun extends BaseTestCase
             throws Exception
     {
         
-        String slaveClassPath = derbySlaveVersion +FS+ "derbynet.jar";
-        if ( slaveHost.equals("localhost") )
-        { // Use full classpath when running locally. Can not vary server versions!
-            slaveClassPath = classPath;
-        }
         String URL = slaveURL(dbName)
                 +";startSlave=true;slaveHost="+slaveReplInterface
                 +";slavePort="+slaveReplPort;
@@ -1266,27 +1223,19 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
-        String clientJvm = BaseTestCase.getJavaExecutableName();
+        String clientJvm = ReplicationRun.getSlaveJavaExecutableName();
         
-        String command = clientJvm // "java"
+        String command = clientJvm
                 + " -Dij.driver=" + DRIVER_CLASS_NAME
                 + " -Dij.connection.startSlave=\"" + URL + "\""
                 + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
-                + " " + "/home/os136789/Replication/testing/exit.sql"
+                + " " + userHome + FS + "ij_dummy_script.sql"
                 ;
         
-        // Execute the ij command on the testClientHost as testUser
-        /* String results =
-                runUserCommandRemotely(command,
-                testClientHost,
-                testUser,
-                "startSlave_ij ");
-        util.DEBUG(results); */
-        // 618220 + failover_impl_3205_v3.diff + derby-3361-1a.diff :
         runUserCommandInThreadRemotely(command,
-                testClientHost,
+                slaveHost, // Run on the slave.
                 testUser,
-                slaveDbSubPath+FS+dbName,
+                /* slaveDbSubPath+FS+ */ dbName,
                 "startSlave_ij ");
         
     }
@@ -1378,8 +1327,6 @@ public class ReplicationRun extends BaseTestCase
             throws Exception
     {
         
-        String masterClassPath = derbyMasterVersion +FS+ "derbynet.jar";
-                
         String URL = masterURL(dbName)
                 +";failover=true";
         String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
@@ -1389,13 +1336,13 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
-        String clientJvm = BaseTestCase.getJavaExecutableName();
+        String clientJvm = ReplicationRun.getClientJavaExecutableName();
         
-        String command = clientJvm // "java"
+        String command = clientJvm
                 + " -Dij.driver=" + DRIVER_CLASS_NAME
                 + " -Dij.connection.failover=\"" + URL + "\""
                 + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
-                + " " + "/home/os136789/Replication/testing/exit.sql"
+                + " " + userHome + FS + "ij_dummy_script.sql"
                 ;
         
         // Execute the ij command on the testClientHost as testUser
@@ -1466,13 +1413,13 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
         
-        String clientJvm = BaseTestCase.getJavaExecutableName();
+        String clientJvm = ReplicationRun.getMasterJavaExecutableName();
         
-        String command = clientJvm // "java"
+        String command = clientJvm
                 + " -Dij.driver=" + DRIVER_CLASS_NAME
                 + " -Dij.connection.stopMaster=\"" + URL + "\""
                 + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
-                + " " + "/home/os136789/Replication/testing/exit.sql"
+                + " " + userHome + FS + "ij_dummy_script.sql"
                 ;
         
         // Execute the ij command on the testClientHost as testUser
@@ -1497,20 +1444,14 @@ public class ReplicationRun extends BaseTestCase
             return 0;
         }
         int pid = -1;
-        /* String command = "ps auxwww "
-                + " | grep " + serverPort
-                + " | grep '.NetworkServerControl start -h '"
-                // + " | grep '/trunk_slave/jars/'" or trunk_master...
-                + " | grep -v grep"
-                + " | grep -v ssh"
-                + " | gawk '{ print $2 }'"; */
+
         String p1 = "ps auxwww"; // "/bin/ps auxwww";
         String p2 = " | grep " + serverPort; // /bin/grep
         String p3 = " | grep '.NetworkServerControl start -h '"; // /bin/grep
         String p4 = ""; // | /bin/grep '/trunk_slave/jars/'"; // Also used for master...
         String p5 = " | grep -v grep"; // /bin/grep
         String p6 = " | grep -v ssh"; // /bin/grep
-        String p7 = " | grep -v tcsh";  // /bin/grep// Assuming always doing remote command (ssh)
+        String p7 = " | grep -v bash";  // /bin/grep// Assuming always doing remote command (ssh)
         String p8 = " | gawk '{ print $2 }'"; // /bin/gawk
         String p9 = " | head -1"; // For cases where we also get some error...
         
@@ -1564,12 +1505,13 @@ public class ReplicationRun extends BaseTestCase
             
         simpleVerify(conn);
         conn.close();
-        /*
+        /* BEGIN Distributed repl. tests only */
+        if ( !slaveServerHost.equalsIgnoreCase("localhost") ){
         runSlaveVerificationCLient(jvmVersion,
                 testClientHost,
                 replicatedDb,
-                slaveServerHost, slaveServerPort);
-        */
+                slaveServerHost, slaveServerPort);}
+        /* END Distributed repl. tests only */
         util.DEBUG("END   verifySlave");
     }
     void verifyMaster()
@@ -1597,12 +1539,13 @@ public class ReplicationRun extends BaseTestCase
             
         simpleVerify(conn);
         conn.close();
-        /*
+        /* BEGIN Distributed repl. tests only */
+        if ( !masterServerHost.equalsIgnoreCase("localhost") ){
         runMasterVerificationCLient(jvmVersion,
                 testClientHost,
                 replicatedDb,
-                masterServerHost, masterServerPort);
-        */
+                masterServerHost, masterServerPort);}
+        /* END Distributed repl. tests only */
         util.DEBUG("END   verifyMaster");
     }
     private void simpleVerify(Connection conn) // Verification code..
@@ -1624,43 +1567,13 @@ public class ReplicationRun extends BaseTestCase
             throws Exception
     {
         util.DEBUG("runSlaveVerificationCLient");
-        
+        if ( replicationVerify != null){
         runTestOnSlave(replicationVerify,
                 jvmVersion,
                 testClientHost,
                 serverHost,serverPort,
                 dbName);
-        /*
-        String URL = slaveURL(dbName);
-        String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + PS + derbyVersion +FS+ "derbytools.jar";
-        
-        String clientJvm = jvmVersion+JVMloc;
-        
-        String command = clientJvm // "java"
-                + " -Dij.driver=" + DRIVER_CLASS_NAME
-                + " -Dij.connection.slave=" + URL
-                + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
-                + " " + replicationVerify // FIXME! handle junit verificationclients too!
-                ;
-        
-        String results = null;
-        if ( serverHost.equalsIgnoreCase("localhost") )
-        {
-            runUserCommandLocally(command,
-                    userDir,
-                    "runSlaveVerificationCLient ");
         }
-        else
-        {
-            results = runUserCommandRemotely(command,
-                    testClientHost,
-                    testUser,
-                    // dbName,
-                    "runSlaveVerificationCLient ");
-        }
-        util.DEBUG(results);
-       */
     }
     
     private void runMasterVerificationCLient(String jvmVersion,
@@ -1671,67 +1584,18 @@ public class ReplicationRun extends BaseTestCase
             throws Exception
     {
         util.DEBUG("runMasterVerificationCLient");
-        
+        if ( replicationVerify != null ){
         runTest(replicationVerify,
                 jvmVersion,
                 testClientHost,
                 serverHost,serverPort,
                 dbName);
-        /*
-        String URL = masterURL(dbName);
-        String ijClassPath = derbyVersion +FS+ "derbyclient.jar"
-                + PS + derbyVersion +FS+ "derbytools.jar";
-        
-        String clientJvm = jvmVersion+JVMloc;
-        
-        String command = clientJvm // "java"
-                + " -Dij.driver=" + DRIVER_CLASS_NAME
-                + " -Dij.connection.master=" + URL
-                + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
-                + " " + replicationVerify // FIXME! handle junit verificationclients too!
-                ;
-        
-        String results = null;
-        if ( serverHost.equalsIgnoreCase("localhost") )
-        {
-            runUserCommandLocally(command,
-                    userDir,
-                    "runMasterVerificationCLient ");            
         }
-        else
-        {
-            results =
-                    runUserCommandRemotely(command,
-                    testClientHost,
-                    testUser,
-                    // dbName,
-                    "runMasterVerificationCLient ");
-        }
-        util.DEBUG(results);
-       */
     }
     
-    /* UNUSED!
-    private static Connection getConnection(String driverClassName,String url,String dbUid,String dbPasswd)
-    {
-        DEBUG("getConnection: '"+driverClassName+"' '"+url+"' '"+dbUid+"' '"+dbPasswd+"'");
-        Connection con = null;
-        try
-        {
-            Class.forName(driverClassName).newInstance();
-            con = DriverManager.getConnection(url); //,dbUid,dbPasswd);
-        }
-        catch (Exception e)
-        {
-            util.DEBUG("Failed to create connection: " + url + ", " + e.getMessage());
-            e.printStackTrace();
-        }
-        return con;
-    }
-     */
     
     
-    /* private */ String runUserCommand(String command,
+    String runUserCommand(String command,
             String testUser)
     {
         util.DEBUG("Execute '"+ command +"'");
@@ -1781,7 +1645,7 @@ public class ReplicationRun extends BaseTestCase
         return output;
     }
     private void runUserCommandLocally(String command, String user_dir, String ID)
-    { // Running on localhost.
+    { // Running on localhost. Param user_dir is not used! FIXME: remove user_dir param!
         util.DEBUG("");
         final String debugId = "runUserCommandLocally " + ID + " ";
         util.DEBUG("+++ runUserCommandLocally " + command + " / " + user_dir);
@@ -1926,7 +1790,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("");
     }
     
-    
+    // FIXME: NB NB Currently only invoked from startSlave_ij (others unused!)
     private void runUserCommandInThreadRemotely(String command,
             String host,
             String testUser,
@@ -1950,11 +1814,11 @@ public class ReplicationRun extends BaseTestCase
                 , " '" + command + "'"
                 }; */
         final String[] envElements = {"CLASS_PATH="+""
-                , "PATH="+FS+"home"+FS+testUser+FS+"bin:$PATH" // "/../bin"
+                , "PATH="+FS+"home"+FS+testUser+FS+"bin:$PATH" // "/../bin" FIXME!!! All such!
                 };
         
-        String workingDirName = System.getProperty("user.dir");
-        util.DEBUG(ID+"user.dir: " + workingDirName);
+        String workingDirName = System.getProperty("user.home");
+        util.DEBUG(ID+"user.home: " + workingDirName);
         String tmp ="";
         /* for ( int i=0;i<commandElements.length;i++)
         {tmp = tmp + commandElements[i];} */
@@ -1964,22 +1828,22 @@ public class ReplicationRun extends BaseTestCase
         for ( int i=0;i<envElements.length;i++)
         {tmp = tmp + envElements[i] + " ";}
         util.DEBUG(ID+"envElements: " + tmp);
-        final File workingDir = new File(workingDirName + FS + dbDir);
-        util.DEBUG(ID+"workingDir: " + workingDirName + FS + dbDir);
+        final File workingDir = new File(workingDirName);
+        util.DEBUG(ID+"workingDir: " + workingDirName);
         
         {
             util.DEBUG(ID+"Running command on non-local host "+ host);
             
-            String[] shEnvElements = {"setenv CLASS_PATH "+""
-                    , "setenv PATH "+FS+"home"+FS+testUser+FS+"bin:${PATH}"
+            String[] shEnvElements = {"CLASS_PATH="+""
+                    , "PATH="+FS+"home"+FS+testUser+FS+"bin:${PATH}"
             };
             String shellEnv = "";
             for ( int i=0;i<shEnvElements.length;i++)
             {shellEnv = shellEnv + shEnvElements[i] + ";";}
             util.DEBUG(ID+"shellEnv: " + shellEnv);
             
-            String shellCmd = "cd " + workingDirName + FS + dbDir + ";pwd;"
-                    + shellEnv + ";"
+            String shellCmd = "cd " + workingDirName + ";pwd;" // user.home aka workingDirName must be accessible from master, slave and client.
+                    + shellEnv // + ";"
                     + fullCmd;
             
             util.DEBUG(ID+"shellCmd: " + shellCmd);
@@ -2006,7 +1870,9 @@ public class ReplicationRun extends BaseTestCase
                     }
                     catch (Exception ex)
                     {
+                        util.DEBUG(ID+"++++++++++++++ Exception " + ex.getMessage());
                         ex.printStackTrace();
+                        util.DEBUG(ID+"-------------- Exception");
                     }
                     
                 }
@@ -2109,15 +1975,6 @@ public class ReplicationRun extends BaseTestCase
         
         classPath = System.getProperty("java.class.path"); util.DEBUG("classPath: " + classPath);
         
-        /* Assuming running off jars. Instead allow using full classpath. */
-        if (false ) // FIXME! Need a property to tell we assume jars in the distributed case!
-        {
-        int sep = classPath.indexOf("derby.jar"+PS); util.DEBUG("sep: " + sep);
-        String tclassPath = classPath.substring(0,sep); util.DEBUG("classPath: " + classPath);
-        sep = tclassPath.lastIndexOf(FS); util.DEBUG("sep: " + sep);
-        derbyVersion = tclassPath.substring(0,sep);
-        }
-        /* */
         util.DEBUG("derbyVersion: " + derbyVersion);
         
         derbyMasterVersion = null;
@@ -2200,24 +2057,17 @@ public class ReplicationRun extends BaseTestCase
             // util.writeToFile(derbyProperties, dir+FS+"derby.properties");
         }
         else
-        {
-            String command = "cd "+masterDatabasePath+FS+masterDbSubPath+";"
-                + " rm -rf " + dbName + " derby.log ij_master;"
-                + " rm Server*.trace;"
-                /* bootMasterDataBase now does "connect ...;create=true": */
-               // + " cp -r " + masterDatabasePath + "/origdb/" + dbName +"/ .;"
-                + " ls -al;"
-                // Also cleanup on slave as part of this.
-                + " cd "+slaveDatabasePath+FS+slaveDbSubPath+";"
-                + " rm -rf " + dbName + " derby.log ij_slave;"
-                + " rm Server*.trace;"
+        {            
+            String command = "mkdir -p "+masterDatabasePath+FS+masterDbSubPath+";"
+                + " cd "+masterDatabasePath+FS+masterDbSubPath+";"
+                + " rm -rf " + dbName + " derby.log;"
+                + " rm -f Server*.trace;"
                 + " ls -al;"
                 ;
             results = 
                 runUserCommandRemotely(command,
                 host,
                 testUser,
-                // dbName, // unneccessary?
                 "initMaster ");
         }
         util.DEBUG(results);
@@ -2250,28 +2100,14 @@ public class ReplicationRun extends BaseTestCase
     void initSlave(String host, String clientVM, String dbName)
     throws Exception
     {
-        /*
-         * PoC:
-         * cd /home/user/Replication/testing/db_slave
-         * rm -rf test derby.log ij_slave
-         * cp -r ../db_master/test/ .
-         */
         
         util.DEBUG("initSlave");
-        
-        String command = "cd " + slaveDatabasePath+FS+slaveDbSubPath+";"
-                + " rm -rf " + dbName + " ij_slave;" // derby.log
-                // + " rm Server*.trace;"
-                + " cp -r " +masterDatabasePath+FS+masterDbSubPath+FS+dbName +"/ .;"
-                + " ls -al" // DEBUG
-                ;
         
         String results = null;
         if ( host.equalsIgnoreCase("localhost") || localEnv )
         {
-            String slaveDir = slaveDatabasePath+FS+slaveDbSubPath;
             String slaveDb = slaveDatabasePath+FS+slaveDbSubPath+FS+dbName;
-            // The slaveDb dir is cleaned by initMaster!
+            // The slaveDb dir is cleaned by initMaster! NB NB SHOULD THIS BE SO?
             // util.cleanDir(slaveDb, true); // true: do delete the db directory itself.
                                           // derby.log etc will be kept.
             String masterDb = masterDatabasePath+FS
@@ -2284,11 +2120,18 @@ public class ReplicationRun extends BaseTestCase
         }
         else
         {
+            String command = "mkdir -p "+slaveDatabasePath+FS+slaveDbSubPath+";"
+                + " cd " + slaveDatabasePath+FS+slaveDbSubPath+";"
+                + " rm -rf " + dbName + " derby.log;"
+                + " rm -f Server*.trace;"
+                + " scp -r " + masterServerHost + ":" +masterDatabasePath+FS+masterDbSubPath+FS+dbName +"/ .;" // Copying the master DB.
+                + " ls -al" // DEBUG
+                ;
+        
             results =
                 runUserCommandRemotely(command,
                 host,
                 testUser,
-                // dbName, // unneccessary?
                 "initSlave ");
         }
         util.DEBUG(results);
@@ -2325,7 +2168,10 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG(debugId+"+++ StartServer " + serverVM + " / " + serverVersion);
                 
         String serverClassPath = serverVersion + FS+"derby.jar"
-                + PS + serverVersion + FS+"derbynet.jar";
+                + PS + serverVersion + FS+"derbynet.jar"
+                + PS + test_jars; // Required if the test (run on the client) 
+                                  // defines and uses functions on test classes.
+                                  // Example: PADSTRING in StressMultiTest.
         if ( serverHost.equals("localhost") )
         { // Use full classpath when running locally. Can not vary server versions!
             serverClassPath = classPath;
@@ -2336,9 +2182,9 @@ public class ReplicationRun extends BaseTestCase
         
         securityOption = "-noSecurityManager";
         
-        String workingDirName = userDir+FS+dbSubDirPath;// "system" for this server
+        String workingDirName = masterDatabasePath +FS+ masterDbSubPath;
         
-        final String[] commandElements = {BaseTestCase.getJavaExecutableName()
+        final String[] commandElements = {ReplicationRun.getMasterJavaExecutableName()
                 , " -Dderby.system.home=" + workingDirName
                 , " -Dderby.infolog.append=true"
                 // , " -Dderby.language.logStatementText=true" // Goes into derby.log: Gets HUGE!
@@ -2372,25 +2218,12 @@ public class ReplicationRun extends BaseTestCase
         }
         util.DEBUG(debugId+"envElements:    " + tmp);
 
-        File workingDir = new File(workingDirName);
-        
         if ( serverHost.equalsIgnoreCase("localhost") || localEnv )
         {
             // util.writeToFile(derbyProperties, fullDbDirPath+FS+"derby.properties");
         }
         
         String shellCmd = null;
-        /* 
-        if ( serverHost.equalsIgnoreCase("localhost") )
-        {
-            // 1. Can not select jvm or Derby version in this case.
-            // 2. Master and slave would run in same VM. Mixing derby.logs!
-            return startServer_direct(serverHost, 
-                    interfacesToListenOn, serverPort, 
-                    fullDbDirPath,
-                    securityOption);
-        }
-        else */
         if ( serverHost.equalsIgnoreCase("localhost") )
         {
             util.DEBUG(debugId+"Starting server on localhost "+ serverHost);
@@ -2400,15 +2233,15 @@ public class ReplicationRun extends BaseTestCase
         {
             util.DEBUG(debugId+"Starting server on non-local host "+ serverHost);
             
-            String[] shEnvElements = {"setenv CLASS_PATH "+serverClassPath
-                    , "setenv PATH "+serverVM+FS+".."+FS+"bin:${PATH}"};
+            String[] shEnvElements = {"CLASS_PATH="+serverClassPath
+                    , "PATH="+serverVM+FS+".."+FS+"bin:${PATH}"};
             String shellEnv = "";
             for ( int i=0;i<shEnvElements.length;i++)
             {shellEnv = shellEnv + shEnvElements[i] + ";";}
             util.DEBUG(debugId+"shellEnv: " + shellEnv);
             
             shellCmd = "cd " + workingDirName + ";pwd;"
-                    + shellEnv + ";"
+                    + shellEnv // + ";"
                     + fullCmd;
             
             util.DEBUG(debugId+"shellCmd: " + shellCmd);
@@ -2456,6 +2289,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("");
         return null;
     }
+    /* 
     private NetworkServerControl startServer_direct(String serverHost, 
             String interfacesToListenOn, 
             int serverPort, 
@@ -2485,6 +2319,7 @@ public class ReplicationRun extends BaseTestCase
         // Both are run in the same VM! Not a good idea?
         return server;
     }
+     */
 
 
     void killMaster(String masterServerHost, int masterServerPort)
@@ -2530,7 +2365,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("+++ stopServer " + serverVM + " / " + serverVersion
                 + " " + debugId);
         
-        String serverJvm = BaseTestCase.getJavaExecutableName();
+        String serverJvm = ReplicationRun.getServerJavaExecutableName(serverHost,serverVM);
         String serverClassPath = serverVersion + FS+"derby.jar"
                 + PS + serverVersion + FS+"derbynet.jar";
         if ( serverHost.equals("localhost") )
@@ -2588,15 +2423,17 @@ public class ReplicationRun extends BaseTestCase
         {
             util.DEBUG(debugId+"Stopping server on non-local host "+ serverHost);
             
-            String[] shEnvElements = {"setenv CLASS_PATH "+serverClassPath
-                    , "setenv PATH "+serverVM+FS+".."+FS+"bin:${PATH}"
+            String[] shEnvElements = {"CLASS_PATH="+serverClassPath
+                    , "PATH="+serverVM+FS+".."+FS+"bin:${PATH}"
                     };
             String shellEnv = "";
             for ( int i=0;i<shEnvElements.length;i++)
             {shellEnv = shellEnv + shEnvElements[i] + ";";}
             util.DEBUG(debugId+"shellEnv: " + shellEnv);
             
-            shellCmd = "pwd;" + shellEnv + ";"  + fullCmd;
+            shellCmd = "pwd;" 
+                    + shellEnv // + ";"  
+                    + fullCmd;
             util.DEBUG(debugId+"shellCmd: " + shellCmd);
             
             shellCmd = remoteShell + " "
@@ -2623,7 +2460,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("");
         
     }
-    
+    /*
     private void processOutput(String id, Process proc, PrintWriter out)
     throws Exception
     {
@@ -2648,7 +2485,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG(id+"----     ",out);
         
     }
-    
+    */
     private String processOutput(Process proc)
     throws Exception
     {
@@ -2742,6 +2579,7 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG(id+"----     ");
         
     }
+    /*
     private void processDEBUGOutput(String id, Process proc, PrintWriter out)
     throws Exception
     {
@@ -2766,13 +2604,13 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG(id+"----     ",out);
         
     }
-    
+    */
     private void pingServer( String hostName, int port, int iterations)
     throws Exception
     {
-        util.DEBUG("+++ pingServer");
+        util.DEBUG("+++ pingServer: " + hostName +":" + port);
         ping( new NetworkServerControl(InetAddress.getByName(hostName),port), iterations);
-        util.DEBUG("--- pingServer");
+        util.DEBUG("--- pingServer: " + hostName +":" + port);
     }
     
     private	void ping( NetworkServerControl controller, int iterations )
@@ -2848,7 +2686,7 @@ public class ReplicationRun extends BaseTestCase
         { // Use full classpath when running locally. Can not vary server versions!
             ijClassPath = classPath;
         }
-            String clientJvm = BaseTestCase.getJavaExecutableName();
+            String clientJvm = ReplicationRun.getClientJavaExecutableName();
             String command = "rm -rf /"+masterDatabasePath+FS+dbSubPath+FS+database+";" // FIXME! for slave load!
                     + clientJvm // "java"
                     + " -Dij.driver=" + DRIVER_CLASS_NAME
@@ -3505,6 +3343,14 @@ test.postStoppedSlaveServer.return=true
         return DriverManager.getConnection(connectionURL);
     }
     
+    String masterDbPath(String dbName)
+    {
+        return masterDatabasePath+FS+masterDbSubPath+FS+dbName;
+    }
+    String slaveDbPath(String dbName)
+    {
+        return slaveDatabasePath+FS+slaveDbSubPath+FS+dbName;
+    }
     String masterURL(String dbName)
     {
         return DB_PROTOCOL
@@ -3636,5 +3482,37 @@ test.postStoppedSlaveServer.return=true
 
             return null;
         }
+    }
+    private static String getMasterJavaExecutableName()
+    {
+        if ( masterServerHost.matches("localhost") )
+        {
+            return BaseTestCase.getJavaExecutableName();
+        }
+        return masterJvmVersion+FS+".."+FS+"bin"+FS+"java";
+    }
+    private static String getSlaveJavaExecutableName()
+    {
+        if ( slaveServerHost.matches("localhost") )
+        {
+            return BaseTestCase.getJavaExecutableName();
+        }
+        return slaveJvmVersion+FS+".."+FS+"bin"+FS+"java";
+    }
+    private static String getClientJavaExecutableName()
+    {
+        if ( testClientHost.matches("localhost") )
+        {
+            return BaseTestCase.getJavaExecutableName();
+        }
+        return jvmVersion+FS+".."+FS+"bin"+FS+"java";
+    }
+    private static String getServerJavaExecutableName(String serverHost,String serverVM)
+    {
+        if ( serverHost.matches("localhost") )
+        {
+            return BaseTestCase.getJavaExecutableName();
+        }
+        return serverVM+FS+".."+FS+"bin"+FS+"java";        
     }
 }
