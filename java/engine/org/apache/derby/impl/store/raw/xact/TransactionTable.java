@@ -947,7 +947,14 @@ public class TransactionTable implements Formatable
 		if (SanityManager.DEBUG)
 			SanityManager.DEBUG("TranTrace", toString());
 
-		synchronized(this)
+        // Synchronize on trans to prevent problems that could occur if
+        // elements are added to or removed from the Hashtable while we're
+        // looping through the elements. Possible problems include:
+        //   - ArrayIndexOutOfBoundsException if a transaction is added after
+        //     the call to trans.size()
+        //   - Assert failure, tx table has null entry (DERBY-3757)
+        //   - NoSuchElementException (DERBY-3916)
+        synchronized (trans)
 		{
 			int ntran = trans.size();
 			tinfo = new TransactionTableEntry[ntran];
