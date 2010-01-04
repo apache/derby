@@ -113,6 +113,8 @@ public class ReplicationRun_Distributed extends ReplicationRun
                 slaveReplPort,
                 testClientHost);
         
+        // Allow the slave to reach the required state before attempting to start master:
+        util.sleep(sleepTime, "Before startMaster");  // startMaster_ij should retry connection? 
         startMaster(jvmVersion, replicatedDb,
                 masterServerHost, // Where the startMaster command must be given
                 masterServerPort, // master server interface accepting client requests
@@ -165,14 +167,18 @@ public class ReplicationRun_Distributed extends ReplicationRun
     throws IOException
     {
         
-        System.out.println("*** Properties -----------------------------------------");
+        util.DEBUG("*** Properties -----------------------------------------");
         userDir = System.getProperty("user.dir");
-        System.out.println("user.dir:          " + userDir);
+        util.DEBUG("user.dir:          " + userDir);
         
-        System.out.println("derby.system.home: " + System.getProperty("derby.system.home"));
+        userHome = System.getProperty("user.home");
+        util.DEBUG("user.home:          " + userHome);
+        util.writeToFile("exit;", userHome+FS+"ij_dummy_script.sql");
+        
+        util.DEBUG("derby.system.home: " + System.getProperty("derby.system.home"));
         
         String realPropertyFile = REPLICATIONTEST_PROPFILE; // Is just the plain file name in ${user.dir}
-        System.out.println("realPropertyFile: " + realPropertyFile);
+        util.DEBUG("realPropertyFile: " + realPropertyFile);
         
         InputStream isCp =  new FileInputStream(userDir + FS + realPropertyFile);
         Properties cp = new Properties();
@@ -182,108 +188,124 @@ public class ReplicationRun_Distributed extends ReplicationRun
         // Now we can get the derby jar path, jvm path etc.
         
         util.printDebug = cp.getProperty("test.printDebug","false").equalsIgnoreCase("true");
-        System.out.println("printDebug: " + util.printDebug);
+        util.DEBUG("printDebug: " + util.printDebug);
         
         showSysinfo = cp.getProperty("test.showSysinfo","false").equalsIgnoreCase("true");
-        System.out.println("showSysinfo: " + showSysinfo);
+        util.DEBUG("showSysinfo: " + showSysinfo);
         
-        testUser = cp.getProperty("test.testUser","false");
-        System.out.println("testUser: " + testUser);
+        testUser = cp.getProperty("test.testUser","UNKNOWN");
+        util.DEBUG("testUser: " + testUser);
         
         masterServerHost = cp.getProperty("test.masterServerHost",masterServerHost);
-        System.out.println("masterServerHost: " + masterServerHost);
+        util.DEBUG("masterServerHost: " + masterServerHost);
+        cp.setProperty("test.serverHost", masterServerHost); // Set for initially running tests against master.
         
         masterServerPort = Integer.parseInt(cp.getProperty("test.masterServerPort",""+masterServerPort));
-        System.out.println("masterServerPort: " + masterServerPort);
+        util.DEBUG("masterServerPort: " + masterServerPort);
+        cp.setProperty("test.serverPort", ""+masterServerPort); // Set for initially running tests against master.
         
         slaveServerHost = cp.getProperty("test.slaveServerHost",slaveServerHost);
-        System.out.println("slaveServerHost: " + slaveServerHost);
+        util.DEBUG("slaveServerHost: " + slaveServerHost);
         
         slaveServerPort = Integer.parseInt(cp.getProperty("test.slaveServerPort",""+slaveServerPort));
-        System.out.println("slaveServerPort: " + slaveServerPort);
+        util.DEBUG("slaveServerPort: " + slaveServerPort);
         
         slaveReplPort = Integer.parseInt(cp.getProperty("test.slaveReplPort",""+slaveReplPort));
-        System.out.println("slaveReplPort: " + slaveReplPort);
+        util.DEBUG("slaveReplPort: " + slaveReplPort);
         
         testClientHost = cp.getProperty("test.testClientHost",testClientHost);
-        System.out.println("testClientHost: " + testClientHost);
+        util.DEBUG("testClientHost: " + testClientHost);
         
         masterDatabasePath = cp.getProperty("test.master.databasepath");
-        System.out.println("masterDatabasePath: " + masterDatabasePath);
+        util.DEBUG("masterDatabasePath: " + masterDatabasePath);
         
         slaveDatabasePath = cp.getProperty("test.slave.databasepath");
-        System.out.println("slaveDatabasePath: " + slaveDatabasePath);
+        util.DEBUG("slaveDatabasePath: " + slaveDatabasePath);
         
         replicatedDb = cp.getProperty("test.databaseName","test");
-        System.out.println("replicatedDb: " + replicatedDb);
+        util.DEBUG("replicatedDb: " + replicatedDb);
         
         bootLoad = cp.getProperty("test.bootLoad");
-        System.out.println("bootLoad: " + bootLoad);
+        util.DEBUG("bootLoad: " + bootLoad);
         
         freezeDB = cp.getProperty("test.freezeDB");
-        System.out.println("freezeDB: " + freezeDB);
+        util.DEBUG("freezeDB: " + freezeDB);
         
         unFreezeDB = cp.getProperty("test.unFreezeDB");
-        System.out.println("unFreezeDB: " + unFreezeDB);
+        util.DEBUG("unFreezeDB: " + unFreezeDB);
+        
+        simpleLoad = System.getProperty("derby.tests.replSimpleLoad", "true")
+                                                     .equalsIgnoreCase("true");
+        util.DEBUG("simpleLoad: " + simpleLoad);
+        simpleLoadTuples = Integer.parseInt(cp.getProperty("test.simpleloadtuples","10000"));
+        util.DEBUG("simpleLoadTuples: " + simpleLoadTuples);
         
         replicationTest = cp.getProperty("test.replicationTest");
-        System.out.println("replicationTest: " + replicationTest);
+        util.DEBUG("replicationTest: " + replicationTest);
         replicationVerify = cp.getProperty("test.replicationVerify");
-        System.out.println("replicationVerify: " + replicationVerify);
+        util.DEBUG("replicationVerify: " + replicationVerify);
+        junitTest = cp.getProperty("test.junitTest", "true")
+                                                     .equalsIgnoreCase("true");
+        util.DEBUG("junitTest: " + junitTest);
         
+        THREADS = Integer.parseInt(cp.getProperty("test.stressMultiThreads","0"));
+        util.DEBUG("THREADS: " + THREADS);
+        MINUTES = Integer.parseInt(cp.getProperty("test.stressMultiMinutes","0"));
+        util.DEBUG("MINUTES: " + MINUTES);
+                
         sqlLoadInit = cp.getProperty("test.sqlLoadInit");
-        System.out.println("sqlLoadInit: " + sqlLoadInit);
+        util.DEBUG("sqlLoadInit: " + sqlLoadInit);
 
         
         specialTestingJar = cp.getProperty("test.derbyTestingJar", null);
-        System.out.println("specialTestingJar: " + specialTestingJar);
+        util.DEBUG("specialTestingJar: " + specialTestingJar);
         
         jvmVersion = cp.getProperty("jvm.version");
-        System.out.println("jvmVersion: " + jvmVersion);
+        util.DEBUG("jvmVersion: " + jvmVersion);
         
         masterJvmVersion = cp.getProperty("jvm.masterversion");
         if ( masterJvmVersion == null )
         {masterJvmVersion = jvmVersion;}
-        System.out.println("masterJvmVersion: " + masterJvmVersion);
+        util.DEBUG("masterJvmVersion: " + masterJvmVersion);
         
         slaveJvmVersion = cp.getProperty("jvm.slaveversion");
         if ( slaveJvmVersion == null )
         {slaveJvmVersion = jvmVersion;}
-        System.out.println("slaveJvmVersion: " + slaveJvmVersion);
+        util.DEBUG("slaveJvmVersion: " + slaveJvmVersion);
         
         derbyVersion = cp.getProperty("derby.version");
-        System.out.println("derbyVersion: " + derbyVersion);
+        util.DEBUG("derbyVersion: " + derbyVersion);
         
         derbyMasterVersion = cp.getProperty("derby.masterversion");
         if ( derbyMasterVersion == null )
         {derbyMasterVersion = derbyVersion;}
-        System.out.println("derbyMasterVersion: " + derbyMasterVersion);
+        util.DEBUG("derbyMasterVersion: " + derbyMasterVersion);
         
         derbySlaveVersion = cp.getProperty("derby.slaveversion");
         if ( derbySlaveVersion == null )
         {derbySlaveVersion = derbyVersion;}
-        System.out.println("derbySlaveVersion: " + derbySlaveVersion);
+        util.DEBUG("derbySlaveVersion: " + derbySlaveVersion);
         
         String derbyTestingJar = derbyVersion + FS+"derbyTesting.jar";
         if ( specialTestingJar != null )  derbyTestingJar = specialTestingJar;
-        System.out.println("derbyTestingJar: " + derbyTestingJar);
+        util.DEBUG("derbyTestingJar: " + derbyTestingJar);
         
         junit_jar = cp.getProperty("junit_jar");
-        System.out.println("junit_jar: " + junit_jar);
+        util.DEBUG("junit_jar: " + junit_jar);
         
         test_jars = derbyTestingJar
                 + ":" + junit_jar
                 ;
-        System.out.println("test_jars: " + test_jars);
+        util.DEBUG("test_jars: " + test_jars);
         
         sleepTime = Integer.parseInt(cp.getProperty("test.sleepTime","15000"));
-        System.out.println("sleepTime: " + sleepTime);
+        util.DEBUG("sleepTime: " + sleepTime);
         
         runUnReplicated = cp.getProperty("test.runUnReplicated","false").equalsIgnoreCase("true");
-        System.out.println("runUnReplicated: " + runUnReplicated);
+        util.DEBUG("runUnReplicated: " + runUnReplicated);
         
         localEnv = cp.getProperty("test.localEnvironment","false").equalsIgnoreCase("true");
-        System.out.println("localEnv: " + localEnv);
+        util.DEBUG("localEnv: " + localEnv);
         
         derbyProperties = 
                  "derby.infolog.append=true"+LF
@@ -291,7 +313,7 @@ public class ReplicationRun_Distributed extends ReplicationRun
                 +"derby.drda.traceAll=true"+LF;
 
         
-        System.out.println("--------------------------------------------------------");
+        util.DEBUG("--------------------------------------------------------");
         
         masterPreRepl = new Load("masterPreRepl", cp);
         masterPostRepl = new Load("masterPostRepl", cp);
@@ -299,16 +321,18 @@ public class ReplicationRun_Distributed extends ReplicationRun
         masterPostSlave = new Load("masterPostSlave", cp);
         slavePostSlave = new Load("slavePostSlave", cp);
         
-        System.out.println("--------------------------------------------------------");
+        util.DEBUG("--------------------------------------------------------");
         // for SimplePerfTest
         tuplesToInsertPerf = Integer.parseInt(cp.getProperty("test.inserts","10000"));
+        util.DEBUG("tuplesToInsertPerf: " + tuplesToInsertPerf);
         commitFreq = Integer.parseInt(cp.getProperty("test.commitFreq","0")); // "0" is autocommit
+        util.DEBUG("commitFreq: " + commitFreq);
         
-        System.out.println("--------------------------------------------------------");
+        util.DEBUG("--------------------------------------------------------");
         
         state.initEnvironment(cp);
        
-        System.out.println("--------------------------------------------------------");
+        util.DEBUG("--------------------------------------------------------");
        
     }
 }

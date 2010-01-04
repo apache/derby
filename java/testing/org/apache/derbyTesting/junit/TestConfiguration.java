@@ -355,6 +355,26 @@ public class TestConfiguration {
 
         return (suite);
     }
+    public static Test existingServerSuite(Class testClass, 
+            boolean cleanDB,
+            String hostName,
+            int portNumber,
+            String dbPath)
+    {
+         final TestSuite suite = new TestSuite(suiteName(testClass));
+         
+        if (cleanDB)
+        {
+            suite.addTest(new CleanDatabaseTestSetup(
+                    clientExistingServerSuite(testClass, hostName, portNumber, dbPath)));
+        }
+        else
+        {
+            suite.addTest(clientExistingServerSuite(testClass, hostName, portNumber, dbPath));
+        }
+
+        return (suite);
+    }
 
     /**
      * Return a Test suite that contains all the test fixtures
@@ -455,6 +475,14 @@ public class TestConfiguration {
         TestSuite suite = new TestSuite(testClass,
                 suiteName(testClass)+":client");
         return existingServerDecorator(suite, hostName, portNumber); 
+               // Will not start server and does not stop it when done!.
+    }
+    public static Test clientExistingServerSuite(Class testClass, 
+            String hostName, int portNumber, String dbPath)
+    {
+        TestSuite suite = new TestSuite(testClass,
+                suiteName(testClass)+":client");
+        return existingServerDecorator(suite, hostName, portNumber, dbPath); 
                // Will not start server and does not stop it when done!.
     }
 
@@ -561,6 +589,25 @@ public class TestConfiguration {
         Test r =
                 new ServerSetup(test, hostName, PortNumber);
         ((ServerSetup)r).setJDBCClient(JDBCClient.DERBYNETCLIENT);
+        return r;
+    }
+    /**
+    * A variant of defaultServerDecorator allowing 
+    * non-default hostname, portnumber and database name.
+    */
+    public static Test existingServerDecorator(Test test, 
+            String hostName, int PortNumber, String dbPath)
+    {
+    	// Need to have network server and client and not
+        // running in J2ME (JSR169).
+        if (!(Derby.hasClient() && Derby.hasServer())
+                || JDBC.vmSupportsJSR169())
+            return new TestSuite("empty: no network server support");
+
+        Test r =
+                new ServerSetup(test, hostName, PortNumber);
+        ((ServerSetup)r).setJDBCClient(JDBCClient.DERBYNETCLIENT);
+        ((ServerSetup)r).setDbPath(dbPath);
         return r;
     }
    
@@ -988,6 +1035,29 @@ public class TestConfiguration {
             String hostName, int port)
     {
         this.defaultDbName = copy.defaultDbName;
+        this.usedDbNames.addAll(copy.usedDbNames);        
+        logicalDbMapping.putAll(copy.logicalDbMapping);
+        this.userName = copy.userName;
+        this.userPassword = copy.userPassword;
+
+        this.isVerbose = copy.isVerbose;
+        this.doTrace = copy.doTrace;
+        this.port = port;
+        this.jmxPort = copy.jmxPort;
+        
+        this.jdbcClient = client;
+        this.hostName = hostName;
+
+        this.ssl = copy.ssl;
+        
+        this.url = createJDBCUrlWithDatabaseName(defaultDbName);
+        initConnector(copy.connector);
+    }
+
+    TestConfiguration(TestConfiguration copy, JDBCClient client,
+            String hostName, int port, String dataBasePath)
+    {
+        this.defaultDbName = dataBasePath;
         this.usedDbNames.addAll(copy.usedDbNames);        
         logicalDbMapping.putAll(copy.logicalDbMapping);
         this.userName = copy.userName;

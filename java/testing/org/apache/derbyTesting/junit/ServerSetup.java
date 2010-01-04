@@ -33,11 +33,19 @@ public final class ServerSetup extends ChangeConfigurationSetup {
     private final String host;
     private final int port;
     private JDBCClient client;
+    private String dbPath;
     
     public ServerSetup(Test test, String host, int port) {
         super(test);
         this.host = host;
         this.port = port;
+    }
+
+    public ServerSetup(Test test, String host, int port, String dbPath) {
+        super(test);
+        this.host = host;
+        this.port = port;
+        this.dbPath = dbPath;
     }
 
     TestConfiguration getNewConfiguration(TestConfiguration old) {
@@ -46,11 +54,25 @@ public final class ServerSetup extends ChangeConfigurationSetup {
             (client == null) ? JDBCClient.DERBYNETCLIENT : client, host, port);
     }
 
+    TestConfiguration getNewConfiguration(TestConfiguration old, String dbPath) {
+               
+        return new TestConfiguration(old,
+            (client == null) ? JDBCClient.DERBYNETCLIENT : client, host, port, 
+            dbPath);
+    }
+
     /**
      * Specify a JDBCClient to use in place of the default DERBYNETCLIENT.
      */
     void setJDBCClient(JDBCClient newClient)
     {
         this.client = newClient;
+    }
+    /**
+     * Specify a dbPath to use in place of the default.
+     */
+    void setDbPath(String dbPath)
+    {
+        this.dbPath = dbPath;
     }
 }
