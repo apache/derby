@@ -10151,4 +10151,19 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         george.close();
         monica.close();
     }
+    
+    /**
+     * DERBY-4502
+     *
+     * Allow creation of views against system tables when authorization is enabled.
+     */
+    public void test_derby_4502() throws Exception
+    {
+        Connection mamta1 = openUserConnection("mamta1");
+        Statement st_mamta1 = mamta1.createStatement();
+
+        st_mamta1.execute(
+            "create view v_4502( a ) as select tablename from sys.systables");
+    }
+    
 }

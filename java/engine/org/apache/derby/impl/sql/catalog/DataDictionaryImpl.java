@@ -7097,6 +7097,10 @@ public final class	DataDictionaryImpl
         SchemaDescriptor sd = locateSchemaRow
             (SchemaDescriptor.IBM_SYSTEM_SCHEMA_NAME, tc );
         authorizationDatabaseOwner = sd.getAuthorizationId();
+
+        systemSchemaDesc.setAuthorizationId( authorizationDatabaseOwner );
+        sysIBMSchemaDesc.setAuthorizationId( authorizationDatabaseOwner );
+        systemUtilSchemaDesc.setAuthorizationId( authorizationDatabaseOwner );
     }
     
 	/**

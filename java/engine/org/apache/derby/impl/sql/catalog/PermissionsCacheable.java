@@ -75,6 +75,7 @@ class PermissionsCacheable implements Cacheable
 				TableDescriptor td = dd.getTableDescriptor( tablePermsKey.getTableUUID());
 				SchemaDescriptor sd = td.getSchemaDescriptor();
 				if( sd.isSystemSchema())
+                {
 					// RESOLVE The access to system tables is hard coded to SELECT only to everyone.
 					// Is this the way we want Derby to work? Should we allow revocation of read access
 					// to system tables? If so we must explicitly add a row to the SYS.SYSTABLEPERMISSIONS
@@ -84,18 +85,25 @@ class PermissionsCacheable implements Cacheable
 															(String) null,
 															tablePermsKey.getTableUUID(),
 															"Y", "N", "N", "N", "N", "N");
+                    // give the permission the same UUID as the system table
+                    ((TablePermsDescriptor) permissions).setUUID( tablePermsKey.getTableUUID() );
+                }
 				else if( tablePermsKey.getGrantee().equals( sd.getAuthorizationId()))
+                {
 					permissions = new TablePermsDescriptor( dd,
 															tablePermsKey.getGrantee(),
 															Authorizer.SYSTEM_AUTHORIZATION_ID,
 															tablePermsKey.getTableUUID(),
 															"Y", "Y", "Y", "Y", "Y", "Y");
+                }
 				else
+                {
 					permissions = new TablePermsDescriptor( dd,
 															tablePermsKey.getGrantee(),
 															(String) null,
 															tablePermsKey.getTableUUID(),
 															"N", "N", "N", "N", "N", "N");
+                }
 			}
 		}
 		else if( key instanceof ColPermsDescriptor)

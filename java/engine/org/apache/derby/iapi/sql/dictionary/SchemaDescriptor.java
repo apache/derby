@@ -155,7 +155,7 @@ public final class SchemaDescriptor extends TupleDescriptor
 	//// Implementation
 	private final String			name;
 	private UUID			oid;
-	private final String			aid;
+	private String			aid;
 
     private final boolean isSystem;
     private final boolean isSYSIBM;
@@ -216,6 +216,17 @@ public final class SchemaDescriptor extends TupleDescriptor
 	public String getAuthorizationId()
 	{
 		return aid;
+	}
+
+	/**
+	 * Sets the authorization id of the schema. This is only used by the DataDictionary
+     * during boot in order to patch up the authorization ids on system schemas.
+	 *
+	 * @param newAuthorizationID What is is
+	 */
+	public void setAuthorizationId( String newAuthorizationID )
+	{
+		aid = newAuthorizationID;
 	}
 
 	/**
