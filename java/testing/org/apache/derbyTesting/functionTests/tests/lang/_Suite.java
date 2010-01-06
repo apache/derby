@@ -207,6 +207,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(UserLobTest.suite());
         suite.addTest(OffsetFetchNextTest.suite());
         suite.addTest(SequenceTest.suite());
+        suite.addTest(OrderByInSubqueries.suite());
         suite.addTest(OLAPTest.suite());
 
         return suite;

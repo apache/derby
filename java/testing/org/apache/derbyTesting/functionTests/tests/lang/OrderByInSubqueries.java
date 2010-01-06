@@ -288,6 +288,16 @@ public class OrderByInSubqueries extends BaseJDBCTestCase {
                 {"8", null},
                 {"1", null}});
 
+        // DERBY-4496
+        s.executeUpdate("create table t4496(x varchar(100))");
+        s.execute("insert into t4496(x) select ibmreqd from " +
+                  "    (select * from sysibm.sysdummy1" +
+                  "         order by length(ibmreqd)) t1");
+
+        JDBC.assertFullResultSet(
+            s.executeQuery("select * from t4496"),
+            new String[][]{{"Y"}});
+
         rollback();
     }
 

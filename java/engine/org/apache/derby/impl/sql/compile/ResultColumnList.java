@@ -646,16 +646,19 @@ public class ResultColumnList extends QueryTreeNodeVector
 		 */
 		if (SanityManager.DEBUG)
 		{
-			 if ((! countMismatchAllowed) && visibleSize() != nameList.size())
+             if ( (! countMismatchAllowed) &&
+                  visibleSize() != nameList.visibleSize() )
 			 {
 				SanityManager.THROWASSERT(
 					"The size of the 2 lists is expected to be the same. " +
 					"visibleSize() = " + visibleSize() +
-					", nameList.size() = " + nameList.size());
+                    ", nameList.visibleSize() = " + nameList.visibleSize());
 			 }
 		 }
 
-		int size = (countMismatchAllowed) ? nameList.size() : visibleSize();
+        int size =
+            (countMismatchAllowed) ? nameList.visibleSize() : visibleSize();
+
 		for (int index = 0; index < size; index++)
 		{
 			ResultColumn thisResultColumn = (ResultColumn) elementAt(index);
@@ -2050,7 +2053,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 		if (derivedRCL.size() != size() &&
 		    ! derivedRCL.getCountMismatchAllowed())
 		{
-			if (visibleSize() != derivedRCL.size()) {
+            if (visibleSize() != derivedRCL.visibleSize()) {
 				throw StandardException.newException(SQLState.LANG_DERIVED_COLUMN_LIST_MISMATCH, tableName);
 			}
 		}
