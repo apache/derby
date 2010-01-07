@@ -74,8 +74,16 @@ public class NextSequenceNode extends ValueNode {
 
         ValueNode returnNode = this;
 
-        return returnNode;
+        // set up dependency on sequence and compile a check for USAGE
+        // priv if needed
+        getCompilerContext().createDependency( sequenceDescriptor );
 
+        if ( isPrivilegeCollectionRequired() )
+        {
+            getCompilerContext().addRequiredUsagePriv( sequenceDescriptor );
+        }
+
+        return returnNode;
     }
 
 

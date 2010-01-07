@@ -2254,7 +2254,7 @@ public final class	DataDictionaryImpl
         {
             if (isSchemaReferenced(tc, getNonCoreTI(SYSSEQUENCES_CATALOG_NUM),
                                    SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX2_ID,
-                                   2,
+                                   1,
                                    schemaIdOrderable))
             {
                 return false;

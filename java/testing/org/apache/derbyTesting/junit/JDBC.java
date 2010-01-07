@@ -314,6 +314,20 @@ public class JDBC {
         
         dropUsingDMD(s, rs, schema, "TABLE_NAME", "SYNONYM");
                 
+        // sequences
+        if ( sysSequencesExists( conn ) )
+        {
+            psf = conn.prepareStatement
+                (
+                 "SELECT SEQUENCENAME FROM SYS.SYSSEQUENCES A, SYS.SYSSCHEMAS S" +
+                 " WHERE A.SCHEMAID = S.SCHEMAID " +
+                 " AND S.SCHEMANAME = ?");
+            psf.setString(1, schema);
+            rs = psf.executeQuery();
+            dropUsingDMD(s, rs, schema, "SEQUENCENAME", "SEQUENCE");
+            psf.close();
+        }
+
 		// Finally drop the schema if it is not APP
 		if (!schema.equals("APP")) {
 			s.executeUpdate("DROP SCHEMA " + JDBC.escape(schema) + " RESTRICT");
@@ -321,6 +335,31 @@ public class JDBC {
 		conn.commit();
 		s.close();
 	}
+
+    /**
+     * Return true if the SYSSEQUENCES table exists.
+     */
+    private static boolean sysSequencesExists( Connection conn ) throws SQLException
+    {
+        PreparedStatement ps = null;
+        ResultSet rs =  null;
+        try {
+            ps = conn.prepareStatement
+                (
+                 "select count(*) from sys.systables t, sys.sysschemas s\n" +
+                 "where t.schemaid = s.schemaid\n" +
+                 "and ( cast(s.schemaname as varchar(128)))= 'SYS'\n" +
+                 "and ( cast(t.tablename as varchar(128))) = 'SYSSEQUENCES'" );
+            rs = ps.executeQuery();
+            rs.next();
+            return ( rs.getInt( 1 ) > 0 );
+        }
+        finally
+        {
+            if ( rs != null ) { rs.close(); }
+            if ( ps != null ) { ps.close(); }
+        }
+    }
 	
 	/**
 	 * DROP a set of objects based upon a ResultSet from a

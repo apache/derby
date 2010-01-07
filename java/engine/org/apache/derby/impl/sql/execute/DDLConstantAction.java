@@ -55,6 +55,7 @@ import org.apache.derby.iapi.sql.dictionary.RoleGrantDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.StatementColumnPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementPermission;
+import org.apache.derby.iapi.sql.dictionary.StatementGenericPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementSchemaPermission;
 import org.apache.derby.iapi.sql.dictionary.StatementRolePermission;
 import org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission;
@@ -332,7 +333,7 @@ abstract class DDLConstantAction implements ConstantAction
 			PermissionsDescriptor permDesc;
 			// Now, it is time to add into dependency system the FOREIGN
 			// constraint's dependency on REFERENCES privilege, or, if it is a
-			// CHECK constraint, any EXECUTE privileges. If the REFERENCES is
+			// CHECK constraint, any EXECUTE or USAGE privileges. If the REFERENCES is
 			// revoked from the constraint owner, the constraint will get
 			// dropped automatically.
 			List requiredPermissionsList = activation.getPreparedStatement().getRequiredPermissionsList();
@@ -361,7 +362,8 @@ abstract class DDLConstantAction implements ConstantAction
 						if (!statementTablePermission.getTableUUID().equals(refTableUUID))
 							continue;
 					} else if (statPerm instanceof StatementSchemaPermission
-						    || statPerm instanceof StatementRolePermission) {
+						    || statPerm instanceof StatementRolePermission
+                               || statPerm instanceof StatementGenericPermission ) {
 						continue;
 					} else {
 						if (SanityManager.DEBUG) {
@@ -380,14 +382,14 @@ abstract class DDLConstantAction implements ConstantAction
 					}
 
 
-					// We know that we are working with a REFERENCES or EXECUTE
+					// We know that we are working with a REFERENCES, EXECUTE, or USAGE
 					// privilege. Find all the PermissionDescriptors for this
 					// privilege and make constraint depend on it through
 					// dependency manager.  The REFERENCES privilege could be
 					// defined at the table level or it could be defined at
 					// individual column levels. In addition, individual column
 					// REFERENCES privilege could be available at the user
-					// level, PUBLIC or role level.  EXECUTE privilege could be
+					// level, PUBLIC or role level.  EXECUTE and USAGE privileges could be
 					// available at the user level, PUBLIC or role level.
 					permDesc = statPerm.getPermissionDescriptor(lcc.getAuthorizationId(), dd);				
 					if (permDesc == null) 
