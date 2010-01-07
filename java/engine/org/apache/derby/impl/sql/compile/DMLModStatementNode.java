@@ -361,7 +361,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			(FromBaseTable)
 				(getNodeFactory().getNode(
 										C_NodeTypes.FROM_BASE_TABLE,
-										targetTableName,
+										synonymTableName != null ? synonymTableName : targetTableName,
 										null,
 										null,
 										null,

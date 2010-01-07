@@ -27,6 +27,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 
 /**
  * Synonym testing using junit
@@ -45,7 +46,7 @@ public class SynonymTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         TestSuite suite = new TestSuite(SynonymTest.class, "SynonymTest");
-        return suite;
+        return new CleanDatabaseTestSetup(suite);
     }
 
     /**
@@ -67,5 +68,28 @@ public class SynonymTest extends BaseJDBCTestCase {
         stmt.executeUpdate("drop view v1");
         stmt.executeUpdate("drop synonym mySyn");
         stmt.close();
+    }
+
+    /**
+     * Test that synonyms are dereferenced properly for a searched DELETE.
+     *
+     * This test verifies that DERBY-4110 is fixed.
+     */
+    public void testSynonymsInSearchedDeleteDERBY4110()
+        throws SQLException
+    {
+        Statement st = createStatement();
+        st.executeUpdate("create schema test1");
+        st.executeUpdate("create schema test2");
+        st.executeUpdate("create table test1.t1 ( id bigint not null )");
+        st.executeUpdate("insert into test1.t1 values (1),(2)");
+        st.executeUpdate("create synonym test2.t1 for test1.t1");
+        st.executeUpdate("create unique index idx4110 on test1.t1 (id)");
+        st.executeUpdate("set schema test2");
+        st.executeUpdate("delete from t1 where id = 2"); // DERBY-4110 here
+        st.executeUpdate("drop synonym test2.t1");
+        st.executeUpdate("drop table test1.t1");
+        st.executeUpdate("drop schema test2 restrict");
+        st.executeUpdate("drop schema test1 restrict");
     }
 }
