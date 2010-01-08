@@ -62,6 +62,9 @@ import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.util.PropertyUtil;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -84,6 +87,9 @@ public class JoinNode extends TableOperatorNode
 	public static final int RIGHTOUTERJOIN = 4;
 	public static final int FULLOUTERJOIN = 5;
 	public static final int UNIONJOIN = 6;
+
+    /** If this flag is true, this node represents a natural join. */
+    private boolean naturalJoin;
 
 	private boolean optimized;
 
@@ -620,6 +626,22 @@ public class JoinNode extends TableOperatorNode
 		return resultColumn;
 	}
 
+    /**
+     * Bind the expressions under this node.
+     */
+    public void bindExpressions(FromList fromListParam)
+            throws StandardException
+    {
+        super.bindExpressions(fromListParam);
+
+        // Now that both the left and the right side of the join have been
+        // bound, we know the column names and can transform a natural join
+        // into a join with a USING clause.
+        if (naturalJoin) {
+            usingClause = getCommonColumnsForNaturalJoin();
+        }
+    }
+
 	/**
 	 * Bind the result columns of this ResultSetNode when there is no
 	 * base table to bind them to.  This is useful for SELECT statements,
@@ -830,13 +852,7 @@ public class JoinNode extends TableOperatorNode
 			 * We need to bind the CRs a side at a time to ensure that
 			 * we don't find an bogus ambiguous column reference. (Bug 377)
 			 */
-			joinClause = (AndNode) getNodeFactory().getNode(
-												C_NodeTypes.AND_NODE,
-												null,
-												null,
-												getContextManager());
-			AndNode	currAnd = (AndNode) joinClause;
-			ValueNode trueNode = (ValueNode) getNodeFactory().getNode(
+			joinClause = (ValueNode) getNodeFactory().getNode(
 											C_NodeTypes.BOOLEAN_CONSTANT_NODE,
 											Boolean.TRUE,
 											getContextManager());
@@ -848,20 +864,6 @@ public class JoinNode extends TableOperatorNode
 				ColumnReference leftCR;
 				ColumnReference rightCR;
 				ResultColumn	rc = (ResultColumn) usingClause.elementAt(index);
-
-				/* currAnd starts as first point of insertion (leftOperand == null)
-				 * and becomes last point of insertion.
-				 */
-				if (currAnd.getLeftOperand() != null)
-				{
-					currAnd.setRightOperand(
-						(AndNode) getNodeFactory().getNode(
-												C_NodeTypes.AND_NODE,
-												null,
-												null,
-												getContextManager()));
-					currAnd = (AndNode) currAnd.getRightOperand();
-				}
 
 				/* Create and bind the left CR */
 				fromListParam.insertElementAt(leftResultSet, 0);
@@ -896,15 +898,17 @@ public class JoinNode extends TableOperatorNode
 										getContextManager());
 				equalsNode.bindComparisonOperator();
 
-				currAnd.setLeftOperand(equalsNode);
-				/* The right deep chain of AndNodes ends in a BinaryTrueNode.
-				 * NOTE: We set it for every AndNode, even though we will
-				 * overwrite it if this is not the last column in the list,
-				 * because postBindFixup() expects both the AndNode to have
-				 * both the left and right operands.
-				 */
-				currAnd.setRightOperand(trueNode);
-				currAnd.postBindFixup();
+                // Create a new join clause by ANDing the new = condition and
+                // the old join clause.
+                AndNode newJoinClause = (AndNode) getNodeFactory().getNode(
+                        C_NodeTypes.AND_NODE,
+                        equalsNode,
+                        joinClause,
+                        getContextManager());
+
+                newJoinClause.postBindFixup();
+
+                joinClause = newJoinClause;
 			 }
 		}
 
@@ -947,6 +951,58 @@ public class JoinNode extends TableOperatorNode
 		}
 	}
 
+    /**
+     * Generate a result column list with all the column names that appear on
+     * both sides of the join operator. Those are the columns to use as join
+     * columns in a natural join.
+     *
+     * @return RCL with all the common columns
+     * @throws StandardException on error
+     */
+    private ResultColumnList getCommonColumnsForNaturalJoin()
+            throws StandardException {
+        ResultColumnList leftRCL =
+                getLeftResultSet().getAllResultColumns(null);
+        ResultColumnList rightRCL =
+                getRightResultSet().getAllResultColumns(null);
+
+        List columnNames = extractColumnNames(leftRCL);
+        columnNames.retainAll(extractColumnNames(rightRCL));
+
+        ResultColumnList commonColumns =
+                (ResultColumnList) getNodeFactory().getNode(
+                        C_NodeTypes.RESULT_COLUMN_LIST,
+                        getContextManager());
+
+        for (Iterator it = columnNames.iterator(); it.hasNext(); ) {
+            String name = (String) it.next();
+            ResultColumn rc = (ResultColumn) getNodeFactory().getNode(
+                    C_NodeTypes.RESULT_COLUMN,
+                    name,
+                    null,
+                    getContextManager());
+            commonColumns.addResultColumn(rc);
+        }
+
+        return commonColumns;
+    }
+
+    /**
+     * Extract all the column names from a result column list.
+     *
+     * @param rcl the result column list to extract the names from
+     * @return a list of all the column names in the RCL
+     */
+    private static List extractColumnNames(ResultColumnList rcl) {
+        ArrayList names = new ArrayList();
+
+        for (int i = 0; i < rcl.size(); i++) {
+            ResultColumn rc = (ResultColumn) rcl.elementAt(i);
+            names.add(rc.getName());
+        }
+
+        return names;
+    }
 
 	/** 
 	 * Put a ProjectRestrictNode on top of each FromTable in the FromList.
@@ -1878,6 +1934,14 @@ public class JoinNode extends TableOperatorNode
 	{
 		this.aggregateVector = aggregateVector;
 	}
+
+    /**
+     * Flag this as a natural join so that an implicit USING clause will
+     * be generated in the bind phase.
+     */
+    void setNaturalJoin() {
+        naturalJoin = true;
+    }
 
 	/**
 	 * Return the logical left result set for this qualified

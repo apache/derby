@@ -1430,6 +1430,7 @@ public class SQLParser
 	 *	CROSS JOIN
 	 *	LEFT OUTER JOIN
 	 *	RIGHT OUTER JOIN
+	 *	NATURAL [ { RIGHT | LEFT } [ OUTER ] | INNER ] JOIN
 	 *
 	 * @return	TRUE iff the next set of tokens is the beginning of a
 	 *			joinedTableExpression().
@@ -1450,6 +1451,10 @@ public class SQLParser
 			retval = true;
 		}
 		else if (tokKind1 == CROSS && tokKind2 == JOIN)
+		{
+			retval = true;
+		}
+		else if (tokKind1 == NATURAL)
 		{
 			retval = true;
 		}
@@ -1757,6 +1762,68 @@ public class SQLParser
 			(expression instanceof UnionNode &&
 			 ((UnionNode)expression).tableConstructor());
 	}
+
+    /**
+     * Construct a new join node.
+     *
+     * @param leftRSN the left side of the join
+     * @param rightRSN the right side of the join
+     * @param onClause the ON clause, or null if there is no ON clause
+     * @param usingClause the USING clause, or null if there is no USING clause
+     * @param joinType the type of the join (one of the constants INNERJOIN,
+     *                 LEFTOUTERJOIN or RIGHTOUTERJOIN in JoinNode)
+     * @return a new join node
+     */
+    private JoinNode newJoinNode(ResultSetNode leftRSN, ResultSetNode rightRSN,
+                         ValueNode onClause, ResultColumnList usingClause,
+                         int joinType)
+    throws StandardException
+    {
+        switch(joinType)
+        {
+            case JoinNode.INNERJOIN:
+                return (JoinNode) nodeFactory.getNode(
+                        C_NodeTypes.JOIN_NODE,
+                        leftRSN,
+                        rightRSN,
+                        onClause,
+                        usingClause,
+                        null,
+                        null,
+                        null,
+                        getContextManager());
+
+            case JoinNode.LEFTOUTERJOIN:
+                return (JoinNode) nodeFactory.getNode(
+                        C_NodeTypes.HALF_OUTER_JOIN_NODE,
+                        leftRSN,
+                        rightRSN,
+                        onClause,
+                        usingClause,
+                        Boolean.FALSE,
+                        null,
+                        getContextManager());
+
+            case JoinNode.RIGHTOUTERJOIN:
+                return (JoinNode) nodeFactory.getNode(
+                        C_NodeTypes.HALF_OUTER_JOIN_NODE,
+                        leftRSN,
+                        rightRSN,
+                        onClause,
+                        usingClause,
+                        Boolean.TRUE,
+                        null,
+                        getContextManager());
+
+            default:
+                if (SanityManager.DEBUG)
+                {
+                    SanityManager.THROWASSERT("Unexpected joinType: " + joinType);
+                }
+                return null;
+        }
+    }
+
 }
 
 PARSER_END(SQLParser)
@@ -9210,6 +9277,11 @@ joinedTableExpression(ResultSetNode leftRSN, boolean nestedInParens) throws Stan
 	{
 		return joinNode;
 	}
+|
+	joinNode = naturalJoin(leftRSN, nestedInParens)
+	{
+		return joinNode;
+	}
 }
 
 TableOperatorNode
@@ -9221,16 +9293,12 @@ throws StandardException :
 {
     <CROSS> <JOIN> rightRSN = tableFactor()
     {
-        TableOperatorNode ton = (TableOperatorNode) nodeFactory.getNode(
-                C_NodeTypes.JOIN_NODE,
+        TableOperatorNode ton = newJoinNode(
                 leftRSN,
                 rightRSN,
                 null, // no ON clause in CROSS JOIN
                 null, // no USING clause in CROSS JOIN
-                null,
-                null,
-                null,
-                getContextManager());
+                JoinNode.INNERJOIN);
         ton.setNestedInParens(nestedInParens);
         return ton;
     }
@@ -9267,58 +9335,28 @@ qualifiedJoin(ResultSetNode leftRSN, boolean nestedInParens) throws StandardExce
 							JoinNode.joinTypeToString(joinType));
 		}
 
-		switch(joinType)
-		{
-			case JoinNode.INNERJOIN:
-				ton = (TableOperatorNode) nodeFactory.getNode(
-									C_NodeTypes.JOIN_NODE,
-									leftRSN,
-									rightRSN,
-									onClause,
-									usingClause,
-									null,
-									null,
-									null,
-									getContextManager());
-				break;
-
-			case JoinNode.LEFTOUTERJOIN:
-				ton = (TableOperatorNode) nodeFactory.getNode(
-										C_NodeTypes.HALF_OUTER_JOIN_NODE,
-										leftRSN,
-										rightRSN,
-										onClause,
-										usingClause,
-										Boolean.FALSE,
-										null,
-										getContextManager());
-				break;
-
-			case JoinNode.RIGHTOUTERJOIN:
-				ton = (TableOperatorNode) nodeFactory.getNode(
-										C_NodeTypes.HALF_OUTER_JOIN_NODE,
-										leftRSN,
-										rightRSN,
-										onClause,
-										usingClause,
-										Boolean.TRUE,
-										null,
-										getContextManager());
-				break;
-
-
-			default:
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.ASSERT(false, "Unexpected joinType");
-				}
-				return null;
-		}
+		ton = newJoinNode(leftRSN, rightRSN, onClause, usingClause, joinType);
 
 		/* Mark whether or not we are nested within parens */
 		ton.setNestedInParens(nestedInParens);
 		return ton;
 	}
+}
+
+TableOperatorNode naturalJoin(ResultSetNode leftRSN, boolean nestedInParens)
+throws StandardException :
+{
+    int joinType = JoinNode.INNERJOIN;
+    ResultSetNode rightRSN;
+}
+{
+    <NATURAL> [ joinType = joinType() ] <JOIN> rightRSN = tableFactor()
+    {
+        JoinNode node = newJoinNode(leftRSN, rightRSN, null, null, joinType);
+        node.setNestedInParens(nestedInParens);
+        node.setNaturalJoin();
+        return node;
+    }
 }
 
 int

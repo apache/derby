@@ -701,6 +701,233 @@ public class JoinTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Tests for the NATURAL JOIN syntax added in DERBY-4495.
+     */
+    public void testNaturalJoin() throws SQLException {
+        // No auto-commit to make it easier to clean up the test tables.
+        setAutoCommit(false);
+
+        final String[][] T1 = {
+            {"1", "2", "3"}, {"4", "5", "6"}, {"7", "8", "9"}
+        };
+
+        final String[][] T2 = {
+            {"4", "3", "2"}, {"1", "2", "3"},  {"3", "2", "1"}
+        };
+
+        final String[][] T3 = {{"4", "100"}};
+
+        Statement s = createStatement();
+        s.execute("create table t1(a int, b int, c int)");
+        s.execute("create table t2(d int, c int, b int)");
+        s.execute("create table t3(d int, e int)");
+
+        fillTable("insert into t1 values (?,?,?)", T1);
+        fillTable("insert into t2 values (?,?,?)", T2);
+        fillTable("insert into t3 values (?,?)", T3);
+
+        // Join on single common column (D)
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from t2 natural join t3"),
+                new String[][] {{"4", "3", "2", "100"}});
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from t3 natural join t2"),
+                new String[][] {{"4", "100", "3", "2"}});
+
+        // Join on two common columns (B and C). Expected column ordering:
+        //    1) all common columns, same order as in left table
+        //    2) all non-common columns from left table
+        //    3) all non-common columns from right table
+        ResultSet rs = s.executeQuery("select * from t1 natural join t2");
+        JDBC.assertColumnNames(rs, new String[] {"B", "C", "A", "D"});
+        JDBC.assertUnorderedResultSet(
+                rs, new String[][] {{"2", "3", "1", "4"}});
+
+        rs = s.executeQuery("select * from t2 natural join t1");
+        JDBC.assertColumnNames(rs, new String[] {"C", "B", "D", "A"});
+        JDBC.assertUnorderedResultSet(
+                rs, new String[][] {{"3", "2", "4", "1"}});
+
+        // No common column names means cross join
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from t1 natural join t3"),
+                cross(T1, T3));
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from t1 as a(c1, c2, c3) " +
+                               "natural join t2 as b(c4, c5, c6)"),
+                cross(T1, T2));
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from (values 1,2) v1(x) " +
+                               "natural join (values 'a','b') v2(y)"),
+                new String[][] {{"1","a"}, {"1","b"}, {"2","a"}, {"2","b"}});
+
+        // Join two sub-queries
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from (select * from t1) table1 " +
+                               "natural join (select * from t2) table2"),
+                new String[][] {{"2", "3", "1", "4"}});
+
+        // Expressions with no explicit names are not common columns because
+        // we give them different implicit names (typically 1, 2, 3, etc...)
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from (select b+c from t1) as x " +
+                               "natural join (select b+c from t2) as y"),
+                cross(new String[][] {{"5"}, {"11"}, {"17"}}, // b+c in t1
+                      new String[][] {{"5"}, {"5"}, {"3"}})); // b+c in t2
+
+        // Expressions with explicit names may be common columns, if the
+        // names are equal
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from (select b+c c1 from t1) as x " +
+                               "natural join (select b+c c1 from t2) as y"),
+                new String[][] {{"5"}, {"5"}});
+
+        // Multiple JOIN operators
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from t1 natural join t2 " +
+                               "natural join t3"),
+                new String[][] {{"4", "2", "3", "1", "100"}});
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from (t1 natural join t2) " +
+                               "natural join t3"),
+                new String[][] {{"4", "2", "3", "1", "100"}});
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from t1 natural join " +
+                               "(t2 natural join t3)"),
+                new String[][] {{"2", "3", "1", "4", "100"}});
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery(
+                    "select * from t1 natural join t2 cross join t3"),
+                new String[][] {{"2", "3", "1", "4", "4", "100"}});
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery(
+                    "select * from t1 natural join t2 inner join t3 on 1=1"),
+                new String[][] {{"2", "3", "1", "4", "4", "100"}});
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery(
+                    "select * from t1 cross join t2 natural join t3"),
+                new String[][] {
+                    {"4", "1", "2", "3", "3", "2", "100"},
+                    {"4", "4", "5", "6", "3", "2", "100"},
+                    {"4", "7", "8", "9", "3", "2", "100"}});
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery(
+                    "select * from t1 inner join t2 on 1=1 natural join t3"),
+                new String[][] {
+                    {"4", "1", "2", "3", "3", "2", "100"},
+                    {"4", "4", "5", "6", "3", "2", "100"},
+                    {"4", "7", "8", "9", "3", "2", "100"}});
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery(
+                    "select * from t1 inner join t2 natural join t3 on 1=1"),
+                new String[][] {
+                    {"1", "2", "3", "4", "3", "2", "100"},
+                    {"4", "5", "6", "4", "3", "2", "100"},
+                    {"7", "8", "9", "4", "3", "2", "100"}});
+
+        // NATURAL JOIN in INSERT context
+        s.execute("create table insert_src (c1 int, c2 int, c3 int, c4 int)");
+        s.execute("insert into insert_src select * from t1 natural join t2");
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from insert_src"),
+                new String[][] {{"2", "3", "1", "4"}});
+
+        // Asterisked identifier chains (common columns should not be included)
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select t1.* from t1 natural join t2"),
+                "1");
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select t2.* from t1 natural join t2"),
+                "4");
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select t1.*, t2.* from t1 natural join t2"),
+                new String[][] {{"1", "4"}});
+
+        // NATURAL INNER JOIN (same as NATURAL JOIN because INNER is default)
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from t1 natural inner join t2"),
+                new String[][] {{"2", "3", "1", "4"}});
+
+        // NATURAL LEFT (OUTER) JOIN
+        String[][] ljRows = {
+            {"2", "3", "1", "4"},
+            {"5", "6", "4", null},
+            {"8", "9", "7", null}
+        };
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from t1 natural left join t2"),
+                ljRows);
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from t1 natural left outer join t2"),
+                ljRows);
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery(
+                    "select b, t1.b, t2.b from t1 natural left join t2"),
+                new String[][] {
+                    {"2", "2", "2"},
+                    {"5", "5", null},
+                    {"8", "8", null}});
+
+        // NATURAL RIGHT (OUTER) JOIN
+        String[][] rjRows = {
+            {"1", "2", null, "3"},
+            {"2", "3",  "1", "4"},
+            {"3", "2", null, "1"}
+        };
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from t1 natural right join t2"),
+                rjRows);
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from t1 natural right outer join t2"),
+                rjRows);
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery(
+                    "select b, t1.b, t2.b from t1 natural right join t2"),
+                new String[][] {
+                    {"1", null, "1"},
+                    {"2",  "2", "2"},
+                    {"3", null, "3"}});
+
+        // ***** Negative tests *****
+
+        // ON or USING clause not allowed with NATURAL
+        assertStatementError(
+                SYNTAX_ERROR, s,
+                "select * from t1 natural join t2 on t1.b=t2.b");
+        assertStatementError(
+                SYNTAX_ERROR, s,
+                "select * from t1 natural join t2 using (b)");
+
+        // CROSS JOIN cannot be used together with NATURAL
+        assertStatementError(
+                SYNTAX_ERROR, s,
+                "select * from t1 natural cross join t2");
+
+        // T has one column named D, T2 CROSS JOIN T3 has two columns named D,
+        // so it's not clear which columns to join on
+        assertStatementError(
+                AMBIGUOUS_COLNAME, s,
+                "select * from t1 t(d,x,y) natural join (t2 cross join t3)");
+
+        // Only common columns, so asterisked identifier chains expand to
+        // zero columns
+        assertStatementError(
+                NO_COLUMNS, s,
+                "select x.* from t1 x natural join t1 y");
+        assertStatementError(
+                NO_COLUMNS, s,
+                "select y.* from t1 x natural join t1 y");
+        assertStatementError(
+                NO_COLUMNS, s,
+                "select x.*, y.* from t1 x natural join t1 y");
+
+        // Incompatible types
+        assertStatementError(
+            NON_COMPARABLE, s,
+            "select * from t1 natural join (values ('one', 'two')) v1(a,b)");
+    }
+
+    /**
      * Test that ON clauses can contain subqueries (DERBY-4380).
      */
     public void testSubqueryInON() throws SQLException {
