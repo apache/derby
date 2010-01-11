@@ -635,7 +635,7 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
      * {@code SELECT} subqueries with {@code ORDER BY} and {@code OFFSET/FETCH}.
      * <p/>
      * This test is a variant made my modifying {@code
-     * testSelectSubqueriesOrderBy} with suitable {@codeOFFSET/FETCH FIRST}
+     * testSelectSubqueriesOrderBy} with suitable {@code OFFSET/FETCH FIRST}
      * clauses.
      */
     public void testSelectSubqueriesOrderByAndOffsetFetch()
