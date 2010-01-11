@@ -21,30 +21,28 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.error.PublicAPI;
-import org.apache.derby.iapi.db.TriggerExecutionContext;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.ResultSet;
-import org.apache.derby.iapi.sql.execute.CursorResultSet;
-import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.sql.execute.ExecutionStmtValidator;
-import org.apache.derby.iapi.sql.execute.ConstantAction;
-import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.jdbc.ConnectionContext; 
-import org.apache.derby.catalog.UUID;
+import java.sql.SQLException;
 import java.util.Enumeration;
-import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Map;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.util.Vector;
+
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.db.TriggerExecutionContext;
 import org.apache.derby.iapi.error.ExceptionSeverity;
+import org.apache.derby.iapi.error.PublicAPI;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.ConnectionContext;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.CursorResultSet;
+import org.apache.derby.iapi.sql.execute.ExecRow;
+import org.apache.derby.iapi.sql.execute.ExecutionStmtValidator;
+import org.apache.derby.iapi.types.DataValueDescriptor;
 /**
  * There is one of these beasts per INSERT/DELETE/UPDATE 
  * statement.  It fulfills the contract for the externally

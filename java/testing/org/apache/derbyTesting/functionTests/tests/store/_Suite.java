@@ -65,6 +65,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(ClobReclamationTest.suite());
         suite.addTest(IndexSplitDeadlockTest.suite());
         suite.addTest(HoldCursorJDBC30Test.suite());
+        suite.addTest(AccessTest.suite());
         
         /* Tests that only run in sane builds */
         if (SanityManager.DEBUG) {

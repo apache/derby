@@ -20,8 +20,12 @@
  */
 package org.apache.derbyTesting.functionTests.suites;
 
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
 
+import org.apache.derbyTesting.functionTests.tests.store.AccessTest;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
@@ -98,7 +102,42 @@ public final class EncryptionSuite extends BaseJDBCTestCase {
         // no tests that were previously run under encryption converted.
         suite.addTestSuite(EncryptionSuite.class);
         
+        Properties sysProps = new Properties();
+        sysProps.put("derby.optimizer.optimizeJoinOrder", "false");
+        sysProps.put("derby.optimizer.ruleBasedOptimization", "true");
+        sysProps.put("derby.optimizer.noTimeout", "true");
+        
+        suite.addTestSuite(AccessTest.class);
+        
         return suite;
+    }
+    
+    protected void setUp() {
+        
+        try { 
+                Connection conn = getConnection();
+                Statement s = createStatement();
+
+                s.execute("CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), "
+                        + "LENGTH INTEGER) RETURNS VARCHAR(32000) EXTERNAL NAME " +
+                        "'org.apache.derbyTesting.functionTests.util.Formatters" +
+                ".padString' LANGUAGE JAVA PARAMETER STYLE JAVA");
+                s.close();
+                conn.close();
+
+        } catch (SQLException se) {
+            // ignore
+        }
+    }
+    
+    public void tearDown() throws Exception {
+        Statement st = createStatement();
+        super.tearDown();
+        try {
+            st.executeUpdate("DROP FUNCTION PADSTRING");
+        } catch (SQLException e) {
+            // never mind.
+        }
     }
     
     /**
@@ -110,4 +149,6 @@ public final class EncryptionSuite extends BaseJDBCTestCase {
     {
         getConnection().close();
     }
+    
+    
 }

@@ -35,6 +35,8 @@ public class RuntimeStatisticsParser {
     private String statistics = "";
     private boolean scrollInsensitive = false;
     private final HashSet qualifiers;
+    private String [] startPosition = {"None"};
+    private String [] stopPosition = {"None"};
 
     /**
      * Create a RuntimeStatistics object to parse the text and extract
@@ -75,6 +77,9 @@ public class RuntimeStatisticsParser {
             scrollInsensitive = true;
 
         qualifiers = findQualifiers();
+        
+        startPosition = getStartPosition();
+        stopPosition = getStopPosition();
     }
     
 
@@ -206,9 +211,17 @@ public class RuntimeStatisticsParser {
                     tableName + " ")!= -1);
     }
     
+    /**
+     * @param tableName
+     * @param indexName
+     * @return true if passed indexName was used for Index Scan ResultSet 
+     *     for the passed tableName
+     */
+    public boolean usedConstraintForIndexScan(String tableName){
+        return (statistics.indexOf("Index Scan ResultSet for " + 
+                    tableName + " using constraint")!= -1);
+    }
     
-    
-
     /**
      * Return whether or not an index scan result set was used in the query.
      */
@@ -281,8 +294,36 @@ public class RuntimeStatisticsParser {
     public boolean hasLessThanQualifier() {
         return qualifiers.contains(new Qualifier("<", false));
     }
-  
     
+    /**
+     * Return whether or not the query used an equals scan qualifier.
+     */
+    public boolean hasEqualsQualifier() {
+        return qualifiers.contains(new Qualifier("=", false));
+    }
+    
+    /**
+     * Return whether there are no qualifiers (i.e. qualifiers: None)
+     */
+    public boolean hasNoQualifiers() {
+        int startPos = statistics.indexOf("qualifiers:\n");
+        if (startPos >= 0) {
+            // start search after "qualifiers:\n"
+            String searchString = statistics.substring(startPos + 12);
+            if (searchString.indexOf("None")>1)
+                return true;
+            else
+            {
+                System.out.println("statistics.substring: " + searchString);
+                return false;
+            }
+        }
+        else {
+            throw new AssertionError(
+                    "Expected to find \"qualifiers: None\", " +
+                    "but didn't even find 'qualifiers'");
+        }
+    }  
 
     /**
      * Return whether or not the query plan includes a line of the form
@@ -365,5 +406,41 @@ public class RuntimeStatisticsParser {
     public String toString() {
         return statistics;
     }
+    
+    /**
+     * Find the start position ; sometimes using a scan start / stop is
+     * a way of doing qualifiers using an index
+     * @ return the String array following start position:
+     */
+    public String [] getStartPosition() {
+        int startStartIndex = statistics.indexOf("start position:");
+        int endStartIndex = statistics.indexOf("stop position:");
+        if (startStartIndex >= 0 && endStartIndex >= 0)
+        {
+            String positionLines = statistics.substring(startStartIndex, endStartIndex);
+            String [] startPositionLines = positionLines.split("\n");
+            return startPositionLines;}
+        else 
+            return null;
+        
+    }
+
+    /**
+     * Find the stop position ; sometimes using a scan start / stop is
+     * a way of doing qualifiers using an index
+     * @ return the String array following start position:
+     */
+    public String [] getStopPosition() {
+        int startStopIndex = statistics.indexOf("stop position:");
+        int endStopIndex = statistics.indexOf("qualifiers:");
+        if (startStopIndex >= 0 && endStopIndex >= 0)
+        {
+            String positionLines = statistics.substring(startStopIndex, endStopIndex);
+            String [] startPositionLines = positionLines.split("\n");
+            return startPositionLines;}
+        else 
+            return null;
+    }
+
 }
     

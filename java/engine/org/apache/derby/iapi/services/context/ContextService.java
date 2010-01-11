@@ -21,18 +21,15 @@
 
 package org.apache.derby.iapi.services.context;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.util.HashSet;
+import java.util.Iterator;
+
 import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
-
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.util.Hashtable;
-import java.util.Enumeration;
-
-import java.util.HashSet;
-import java.util.Iterator;
 
 /**
 	A set of static methods to supply easier access to contexts.

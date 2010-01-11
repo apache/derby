@@ -21,43 +21,31 @@
 
 package org.apache.derbyTesting.functionTests.harness;
 
-import org.apache.derby.tools.sysinfo;
-import org.apache.derby.tools.ij;
-import org.apache.derby.iapi.reference.Attribute;
-
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ByteArrayInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.PrintStream;
 import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.lang.ClassNotFoundException;
-import java.lang.ClassFormatError;
-import java.lang.Thread;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Locale;
-import java.util.Vector;
-import java.sql.Timestamp;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.DriverManager;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.net.URL;
+import java.util.Vector;
 
 import junit.framework.TestSuite;
+
+import org.apache.derby.iapi.reference.Attribute;
 
 public class RunTest
 {
