@@ -1686,6 +1686,24 @@ public abstract class ResultSetNode extends QueryTreeNode
 		}
 	}
 
+
+    /**
+     * Push down the offset and fetch first parameters, if any. This method
+     * should be overridden by the result sets that need this.
+     *
+     * @param offset    the OFFSET, if any
+     * @param fetchFirst the OFFSET FIRST, if any
+     */
+    void pushOffsetFetchFirst(ValueNode offset, ValueNode fetchFirst)
+    {
+        if (SanityManager.DEBUG)
+        {
+            SanityManager.THROWASSERT(
+                "pushOffsetFetchFirst() not expected to be called for " +
+                getClass().getName());
+        }
+    }
+
 	/**
 	 * General logic shared by Core compilation and by the Replication Filter
 	 * compiler. A couple ResultSets (the ones used by PREPARE SELECT FILTER)
@@ -1900,17 +1918,5 @@ public abstract class ResultSetNode extends QueryTreeNode
 		}
 
 		return null;
-	}
-	
-	/**
-	 * Override this for nodes that can take an ORDER BY
-	 */
-	public void setOrderBy(OrderByList orderCols) throws StandardException {
-		if (SanityManager.DEBUG)
-		{
-			SanityManager.THROWASSERT(
-				"ORDER BY attempted set for wrong node type:" +
-				getClass().getName());
-		}
 	}
 }

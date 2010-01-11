@@ -167,6 +167,8 @@ public class SubqueryNode extends ValueNode
 	private boolean doneInvariantCheck;
 
 	private OrderByList orderByList;
+    private ValueNode   offset;
+    private ValueNode   fetchFirst;
 
 	/* Subquery types.
 	 * NOTE: FROM_SUBQUERY only exists for a brief second in the parser.  It
@@ -204,17 +206,23 @@ public class SubqueryNode extends ValueNode
 	 * @param subqueryType	The type of the subquery
 	 * @param leftOperand	The left operand, if any, of the subquery
 	 * @param orderCols     ORDER BY list
+     * @param offset        OFFSET n ROWS
+     * @param fetchFirst    FETCH FIRST n ROWS ONLY
 	 */
 
 	public void init(
 							Object resultSet,
 							Object subqueryType,
 							Object leftOperand,
-					        Object orderCols)
+                            Object orderCols,
+                            Object offset,
+                            Object fetchFirst)
 	{
 		this.resultSet = (ResultSetNode) resultSet;
 		this.subqueryType = ((Integer) subqueryType).intValue();
 		this.orderByList = (OrderByList)orderCols;
+        this.offset = (ValueNode)offset;
+        this.fetchFirst = (ValueNode)fetchFirst;
 
 		/* Subqueries are presumed not to be under a top level AndNode by
 		 * default.  This is because expression normalization only recurses
@@ -280,6 +288,18 @@ public class SubqueryNode extends ValueNode
 				printLabel(depth, "orderByList: ");
 				orderByList.treePrint(depth + 1);
 			}
+
+            if (offset != null)
+            {
+                printLabel(depth, "offset: ");
+                offset.treePrint(depth + 1);
+            }
+
+            if (fetchFirst != null)
+            {
+                printLabel(depth, "fetchFirst: ");
+                fetchFirst.treePrint(depth + 1);
+            }
 		}
 	}
 
@@ -528,6 +548,8 @@ public class SubqueryNode extends ValueNode
 			orderByList.bindOrderByColumns(resultSet);
 		}
 
+        bindOffsetFetch(offset, fetchFirst);
+
 		/* reject any untyped nulls in the subquery */
 		resultSet.bindUntypedNullsToResultColumns(null);
         
@@ -644,7 +666,9 @@ public class SubqueryNode extends ValueNode
 		 */
 		flattenable = (resultSet instanceof RowResultSetNode) &&
 					  underTopAndNode && !havingSubquery &&
-			          orderByList == null &&
+                      orderByList == null &&
+                      offset == null &&
+                      fetchFirst == null &&
 					  !isWhereExistsAnyInWithWhereSubquery() &&
 					  parentComparisonOperator instanceof BinaryComparisonOperatorNode;
 
@@ -714,7 +738,9 @@ public class SubqueryNode extends ValueNode
 
 		flattenable = (resultSet instanceof SelectNode) &&
  			          !((SelectNode)resultSet).hasWindows() &&
-			          orderByList == null &&
+                      orderByList == null &&
+                      offset == null &&
+                      fetchFirst == null &&
 					  underTopAndNode && !havingSubquery &&
 					  !isWhereExistsAnyInWithWhereSubquery() &&
 					  (isIN() || isANY() || isEXISTS() || flattenableNotExists ||
@@ -822,6 +848,8 @@ public class SubqueryNode extends ValueNode
 			orderByList = null;
 		}
 
+
+        resultSet.pushOffsetFetchFirst(offset, fetchFirst);
 
 		/* We transform the leftOperand and the select list for quantified 
 		 * predicates that have a leftOperand into a new predicate and push it
@@ -2499,13 +2527,33 @@ public class SubqueryNode extends ValueNode
 		}
 	}
 
-	/**
-	 * Get ORDER BY list (used to construct FROM_SUBQUERY only), cf.
-	 * FromSubquery, for which this node is transient.
-	 *
-	 * @return order by list if specified, else null.
-	 */
-	public OrderByList getOrderByList() {
-		return orderByList;
-	}
+    /**
+     * Get ORDER BY list (used to construct FROM_SUBQUERY only), cf.
+     * FromSubquery, for which this node is transient.
+     *
+     * @return order by list if specified, else null.
+     */
+    public OrderByList getOrderByList() {
+        return orderByList;
+    }
+
+    /**
+     * Get OFFSET  (used to construct FROM_SUBQUERY only), cf.
+     * FromSubquery, for which this node is transient.
+     *
+     * @return offset if specified, else null.
+     */
+    public ValueNode getOffset() {
+        return offset;
+    }
+
+    /**
+     * Get FETCH FIRST (used to construct FROM_SUBQUERY only), cf.
+     * FromSubquery, for which this node is transient.
+     *
+     * @return fetch first if specified, else null.
+     */
+    public ValueNode getFetchFirst() {
+        return fetchFirst;
+    }
 }

@@ -158,6 +158,8 @@ class RowCountResultSet extends NoPutResultSetImpl
 
         source.reopenCore();
 
+        virginal = true;
+        rowsFetched = 0;
         isOpen = true;
 
         numOpens++;

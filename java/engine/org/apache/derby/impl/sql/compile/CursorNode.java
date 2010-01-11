@@ -280,7 +280,7 @@ public class CursorNode extends DMLStatementNode
 		}
 
 
-		bindOffsetFetch();
+        bindOffsetFetch(offset, fetchFirst);
 
 		// bind the updatability
 
@@ -362,46 +362,6 @@ public class CursorNode extends DMLStatementNode
 		}
 
 	}
-
-
-	private void bindOffsetFetch() throws StandardException {
-
-		if (offset instanceof ConstantNode) {
-			DataValueDescriptor dvd = ((ConstantNode)offset).getValue();
-			long val = dvd.getLong();
-
-			if (val < 0) {
-				throw StandardException.newException(
-					SQLState.LANG_INVALID_ROW_COUNT_OFFSET,
-					Long.toString(val) );
-			}
-		} else if (offset instanceof ParameterNode) {
-			offset.
-				setType(new DataTypeDescriptor(
-							TypeId.getBuiltInTypeId(Types.BIGINT),
-							false /* ignored tho; ends up nullable,
-									 so we test for NULL at execute time */));
-		}
-
-
-		if (fetchFirst instanceof ConstantNode) {
-			DataValueDescriptor dvd = ((ConstantNode)fetchFirst).getValue();
-			long val = dvd.getLong();
-
-			if (val < 1) {
-				throw StandardException.newException(
-					SQLState.LANG_INVALID_ROW_COUNT_FIRST,
-					Long.toString(val) );
-			}
-		} else if (fetchFirst instanceof ParameterNode) {
-			fetchFirst.
-				setType(new DataTypeDescriptor(
-							TypeId.getBuiltInTypeId(Types.BIGINT),
-							false /* ignored tho; ends up nullable,
-									 so we test for NULL at execute time*/));
-		}
-	}
-
 
 
 	/**
@@ -570,7 +530,9 @@ public class CursorNode extends DMLStatementNode
 			orderByList = null;
 		}
 
-		super.optimizeStatement(offset, fetchFirst);
+        resultSet.pushOffsetFetchFirst(offset, fetchFirst);
+
+        super.optimizeStatement();
 
 	}
 

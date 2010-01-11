@@ -107,6 +107,10 @@ public class SelectNode extends ResultSetNode
 	OrderByList orderByList;
 	boolean		orderByQuery ;
 
+    ValueNode   offset;  // OFFSET n ROWS, if given
+    ValueNode   fetchFirst; // FETCH FIRST n ROWS ONLY, if given
+
+
 	/* PredicateLists for where clause */
 	PredicateList wherePredicates;
 
@@ -916,7 +920,20 @@ public class SelectNode extends ResultSetNode
 		orderByQuery = true;
 	}
 
-	/** 
+    /**
+     * Push down the offset and fetch first parameters to this node.
+     *
+     * @param offset    the OFFSET, if any
+     * @param fetchFirst the OFFSET FIRST, if any
+     */
+    void pushOffsetFetchFirst(ValueNode offset, ValueNode fetchFirst)
+    {
+        this.offset = offset;
+        this.fetchFirst = fetchFirst;
+    }
+
+
+    /**
 	 * Put a ProjectRestrictNode on top of each FromTable in the FromList.
 	 * ColumnReferences must continue to point to the same ResultColumn, so
 	 * that ResultColumn must percolate up to the new PRN.  However,
@@ -1393,6 +1410,13 @@ public class SelectNode extends ResultSetNode
 			return false;
 		}
 
+        /* Don't flatten if selectNode has OFFSET or FETCH */
+        if ((offset     != null) ||
+            (fetchFirst != null))
+        {
+            return false;
+        }
+
 		return true;
 	}
 
@@ -1573,7 +1597,7 @@ public class SelectNode extends ResultSetNode
 												getContextManager());
 				prnRSN.costEstimate = costEstimate.cloneMe();
 			}
-			
+
 			// There may be columns added to the select projection list
 			// a query like:
 			// select a, b from t group by a,b order by a+b
@@ -1605,6 +1629,22 @@ public class SelectNode extends ResultSetNode
 								getContextManager());
 			}
 		}
+
+        if (offset != null || fetchFirst != null) {
+            // Keep the same RCL on top, since there may be references to
+            // its result columns above us.
+            ResultColumnList topList = prnRSN.getResultColumns();
+            ResultColumnList newSelectList = topList.copyListAndObjects();
+            prnRSN.setResultColumns(newSelectList);
+            topList.genVirtualColumnNodes(prnRSN, newSelectList);
+            prnRSN = (RowCountNode)getNodeFactory().getNode(
+                C_NodeTypes.ROW_COUNT_NODE,
+                prnRSN,
+                topList,
+                offset,
+                fetchFirst,
+                getContextManager());
+        }
 
 
 		if (wasGroupBy &&

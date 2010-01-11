@@ -312,14 +312,34 @@ public class IntersectOrExceptNode extends SetOperatorNode
 
 		addNewNodesCalled = true;
 
-        if( orderByList == null)
-            return this;
-        // Generate an order by node on top of the intersect/except
-        return (ResultSetNode) getNodeFactory().getNode( C_NodeTypes.ORDER_BY_NODE,
-                                                         this,
-                                                         orderByList,
-                                                         tableProperties,
-                                                         getContextManager());
+        ResultSetNode treeTop = this;
+
+        if( orderByList != null) {
+            // Generate an order by node on top of the intersect/except
+            treeTop = (ResultSetNode) getNodeFactory().getNode(
+                C_NodeTypes.ORDER_BY_NODE,
+                treeTop,
+                orderByList,
+                tableProperties,
+                getContextManager());
+        }
+
+        if (offset != null || fetchFirst != null) {
+            ResultColumnList newRcl =
+                treeTop.getResultColumns().copyListAndObjects();
+            newRcl.genVirtualColumnNodes(treeTop, treeTop.getResultColumns());
+
+            treeTop = (RowCountNode)getNodeFactory().getNode(
+                C_NodeTypes.ROW_COUNT_NODE,
+                treeTop,
+                newRcl,
+                offset,
+                fetchFirst,
+                getContextManager());
+        }
+
+        return treeTop;
+
     } // end of addNewNodes
 
     /**

@@ -111,7 +111,9 @@ public final class InsertNode extends DMLModStatementNode
 	protected	boolean				bulkInsert;
 	private 	boolean				bulkInsertReplace;
 	private     OrderByList         orderByList;
-	
+    private     ValueNode           offset;
+    private     ValueNode           fetchFirst;
+
 	protected   RowLocation[] 		autoincRowLocation;
 	/**
 	 * Initializer for an InsertNode.
@@ -134,7 +136,9 @@ public final class InsertNode extends DMLModStatementNode
 			Object insertColumns,
 			Object queryExpression,
 			Object targetProperties,
-            Object orderByList)
+            Object orderByList,
+            Object offset,
+            Object fetchFirst)
 	{
 		/* statementType gets set in super() before we've validated
 		 * any properties, so we've kludged the code to get the
@@ -149,6 +153,8 @@ public final class InsertNode extends DMLModStatementNode
 		targetColumnList = (ResultColumnList) insertColumns;
 		this.targetProperties = (Properties) targetProperties;
 		this.orderByList = (OrderByList) orderByList;
+        this.offset = (ValueNode)offset;
+        this.fetchFirst = (ValueNode)fetchFirst;
 
 		/* Remember that the query expression is the source to an INSERT */
 		getResultSetNode().setInsertSource();
@@ -442,6 +448,8 @@ public final class InsertNode extends DMLModStatementNode
 
 			orderByList.bindOrderByColumns(resultSet);
 		}
+
+        bindOffsetFetch(offset, fetchFirst);
 
 		resultSet = enhanceAndCheckForAutoincrement(resultSet, inOrder, colMap);
 
@@ -838,8 +846,12 @@ public final class InsertNode extends DMLModStatementNode
 			}
 
 			resultSet.pushOrderByList(orderByList);
+
 			orderByList = null;
 		}
+
+        resultSet.pushOffsetFetchFirst(offset, fetchFirst);
+
 		super.optimizeStatement();
 	}
 

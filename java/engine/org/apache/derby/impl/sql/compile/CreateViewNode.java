@@ -69,6 +69,8 @@ public class CreateViewNode extends DDLStatementNode
 	ProviderInfo[]		providerInfos;
 	ColumnInfo[]		colInfos;
 	private OrderByList orderByList;
+    private ValueNode   offset;
+    private ValueNode   fetchFirst;
 
 	/**
 	 * Initializer for a CreateViewNode
@@ -81,6 +83,8 @@ public class CreateViewNode extends DDLStatementNode
 	 *							(NONE for now)
 	 * @param qeText			The text for the queryExpression
 	 * @param orderCols         ORDER BY list
+     * @param offset            OFFSET if any, or null
+     * @param fetchFirst        FETCH FIRST if any, or null
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -90,7 +94,9 @@ public class CreateViewNode extends DDLStatementNode
 				   Object	 queryExpression,
 				   Object checkOption,
 				   Object qeText,
-				   Object orderCols)
+                   Object orderCols,
+                   Object offset,
+                   Object fetchFirst)
 		throws StandardException
 	{
 		initAndCheck(newObjectName);
@@ -99,6 +105,8 @@ public class CreateViewNode extends DDLStatementNode
 		this.checkOption = ((Integer) checkOption).intValue();
 		this.qeText = ((String) qeText).trim();
 		this.orderByList = (OrderByList)orderCols;
+        this.offset = (ValueNode)offset;
+        this.fetchFirst = (ValueNode)fetchFirst;
 
 		implicitCreateSchema = true;
 	}
@@ -411,7 +419,15 @@ public class CreateViewNode extends DDLStatementNode
 		}
 	}
 
-	public OrderByList getOrderByList() {
-		return orderByList;
-	}
+    public OrderByList getOrderByList() {
+        return orderByList;
+    }
+
+    public ValueNode getOffset() {
+        return offset;
+    }
+
+    public ValueNode getFetchFirst() {
+        return fetchFirst;
+    }
 }

@@ -2243,8 +2243,6 @@ public class FromBaseTable extends FromTable
 
 				rsn = cvn.getParsedQueryExpression();
 
-				OrderByList orderByList = cvn.getOrderByList();
-
 				/* If the view contains a '*' then we mark the views derived column list
 				 * so that the view will still work, and return the expected results,
 				 * if any of the tables referenced in the view have columns added to
@@ -2274,7 +2272,9 @@ public class FromBaseTable extends FromTable
 				fsq = (FromSubquery) getNodeFactory().getNode(
 					C_NodeTypes.FROM_SUBQUERY,
 					rsn,
-					orderByList,
+                    cvn.getOrderByList(),
+                    cvn.getOffset(),
+                    cvn.getFetchFirst(),
 					(correlationName != null) ? 
                         correlationName : getOrigTableName().getTableName(), 
 					resultColumns,

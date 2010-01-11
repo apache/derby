@@ -558,6 +558,26 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         stm.close();
     }
 
+
+    public void testValues() throws SQLException {
+        Statement stm = createStatement();
+
+        queryAndCheck(
+            stm,
+            "values 4" +
+            "    fetch first 2 row only",
+            new String [][] {{"4"}});
+
+        queryAndCheck(
+            stm,
+            "values 4" +
+            "    offset 1 row",
+            new String [][] {});
+
+
+        stm.close();
+    }
+
     /**
      * Positive tests, result set metadata
      */

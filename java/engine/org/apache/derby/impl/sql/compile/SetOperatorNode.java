@@ -61,7 +61,8 @@ abstract class SetOperatorNode extends TableOperatorNode
 	boolean			all;
 
 	OrderByList orderByList;
-
+    ValueNode   offset; // OFFSET n ROWS
+    ValueNode   fetchFirst; // FETCH FIRST n ROWS ONLY
 	// List of scoped predicates for pushing during optimization.
 	private PredicateList leftOptPredicates;
 	private PredicateList rightOptPredicates;
@@ -797,7 +798,20 @@ abstract class SetOperatorNode extends TableOperatorNode
 		this.orderByList = orderByList;
 	}
 
-	/** 
+    /**
+     * Push down the offset and fetch first parameters, if any, to this node.
+     *
+     * @param offset    the OFFSET, if any
+     * @param fetchFirst the OFFSET FIRST, if any
+     */
+    void pushOffsetFetchFirst(ValueNode offset, ValueNode fetchFirst)
+    {
+        this.offset = offset;
+        this.fetchFirst = fetchFirst;
+    }
+
+
+    /**
 	 * Put a ProjectRestrictNode on top of each FromTable in the FromList.
 	 * ColumnReferences must continue to point to the same ResultColumn, so
 	 * that ResultColumn must percolate up to the new PRN.  However,

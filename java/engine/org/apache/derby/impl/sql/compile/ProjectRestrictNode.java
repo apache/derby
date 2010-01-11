@@ -1877,4 +1877,15 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		childResult.pushOrderByList(orderByList);
 	}
 
+    /**
+     * Push down the offset and fetch first parameters, if any, to the
+     * underlying child result set.
+     *
+     * @param offset    the OFFSET, if any
+     * @param fetchFirst the OFFSET FIRST, if any
+     */
+    void pushOffsetFetchFirst(ValueNode offset, ValueNode fetchFirst)
+    {
+        childResult.pushOffsetFetchFirst(offset, fetchFirst);
+    }
 }

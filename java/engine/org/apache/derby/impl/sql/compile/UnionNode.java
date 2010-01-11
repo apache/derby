@@ -480,6 +480,22 @@ public class UnionNode extends SetOperatorNode
 											tableProperties,
 											getContextManager());
 		}
+
+
+        if (offset != null || fetchFirst != null) {
+            ResultColumnList newRcl =
+                treeTop.getResultColumns().copyListAndObjects();
+            newRcl.genVirtualColumnNodes(treeTop, treeTop.getResultColumns());
+
+            treeTop = (RowCountNode)getNodeFactory().getNode(
+                C_NodeTypes.ROW_COUNT_NODE,
+                treeTop,
+                newRcl,
+                offset,
+                fetchFirst,
+                getContextManager());
+        }
+
 		return treeTop;
 	}
 

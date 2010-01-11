@@ -61,6 +61,8 @@ public class RowResultSetNode extends FromTable
 	SubqueryList subquerys;
 	Vector		 aggregateVector;
 	OrderByList	 orderByList;
+    ValueNode    offset; // OFFSET n ROWS
+    ValueNode    fetchFirst; // FETCH FIRST n ROWS ONLY
 
 	/**
 	 * Initializer for a RowResultSetNode.
@@ -370,7 +372,20 @@ public class RowResultSetNode extends FromTable
 		this.orderByList = orderByList;
 	}
 
-	/** 
+    /**
+     * Push down the offset and fetch first parameters, if any, to this node.
+     *
+     * @param offset    the OFFSET, if any
+     * @param fetchFirst the OFFSET FIRST, if any
+     */
+    void pushOffsetFetchFirst(ValueNode offset, ValueNode fetchFirst)
+    {
+        this.offset = offset;
+        this.fetchFirst = fetchFirst;
+    }
+
+
+    /**
 	 * Put a ProjectRestrictNode on top of each FromTable in the FromList.
 	 * ColumnReferences must continue to point to the same ResultColumn, so
 	 * that ResultColumn must percolate up to the new PRN.  However,
@@ -628,6 +643,21 @@ public class RowResultSetNode extends FromTable
 											tableProperties,
 											getContextManager());
 		}
+
+        if (offset != null || fetchFirst != null) {
+            ResultColumnList newRcl =
+                treeTop.getResultColumns().copyListAndObjects();
+            newRcl.genVirtualColumnNodes(treeTop, treeTop.getResultColumns());
+
+            treeTop = (RowCountNode)getNodeFactory().getNode(
+                C_NodeTypes.ROW_COUNT_NODE,
+                treeTop,
+                newRcl,
+                offset,
+                fetchFirst,
+                getContextManager());
+        }
+
 		return treeTop;
 	}
 

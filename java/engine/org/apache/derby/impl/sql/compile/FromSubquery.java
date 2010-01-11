@@ -47,6 +47,8 @@ public class FromSubquery extends FromTable
 {
 	ResultSetNode	subquery;
 	private OrderByList orderByList;
+    private ValueNode offset;
+    private ValueNode fetchFirst;
 
 	/**
 	 * DERBY-3270: If this subquery represents an expanded view, this holds the
@@ -59,6 +61,8 @@ public class FromSubquery extends FromTable
 	 *
 	 * @param subquery		The subquery
 	 * @param orderByList   ORDER BY list if any, or null
+     * @param offset        OFFSET if any, or null
+     * @param fetchFirst    FETCH FIRST if any, or null
 	 * @param correlationName	The correlation name
 	 * @param derivedRCL		The derived column list
 	 * @param tableProperties	Properties list associated with the table
@@ -66,6 +70,8 @@ public class FromSubquery extends FromTable
 	public void init(
 					Object subquery,
 					Object orderByList,
+                    Object offset,
+                    Object fetchFirst,
 					Object correlationName,
 				 	Object derivedRCL,
 					Object tableProperties)
@@ -73,6 +79,8 @@ public class FromSubquery extends FromTable
 		super.init(correlationName, tableProperties);
 		this.subquery = (ResultSetNode) subquery;
 		this.orderByList = (OrderByList)orderByList;
+        this.offset = (ValueNode)offset;
+        this.fetchFirst = (ValueNode)fetchFirst;
 		resultColumns = (ResultColumnList) derivedRCL;
 	}
 
@@ -94,12 +102,24 @@ public class FromSubquery extends FromTable
 				subquery.treePrint(depth + 1);
 			}
 
-			if (orderByList != null)
-			{
-				printLabel(depth, "orderByList: ");
-				orderByList.treePrint(depth + 1);
-			}
-		}
+            if (orderByList != null)
+            {
+                printLabel(depth, "orderByList: ");
+                orderByList.treePrint(depth + 1);
+            }
+
+            if (offset != null)
+            {
+                printLabel(depth, "offset: ");
+                offset.treePrint(depth + 1);
+            }
+
+            if (fetchFirst != null)
+            {
+                printLabel(depth, "fetchFirst: ");
+                fetchFirst.treePrint(depth + 1);
+            }
+        }
 	}
 
 	/** 
@@ -236,6 +256,8 @@ public class FromSubquery extends FromTable
 			orderByList.bindOrderByColumns(subquery);
 		}
 
+        bindOffsetFetch(offset, fetchFirst);
+
 		/* Now that we've bound the expressions in the subquery, we 
 		 * can propagate the subquery's RCL up to the FromSubquery.
 		 * Get the subquery's RCL, assign shallow copy back to
@@ -355,6 +377,8 @@ public class FromSubquery extends FromTable
 			subquery.pushOrderByList(orderByList);
 			orderByList = null;
 		}
+
+        subquery.pushOffsetFetchFirst(offset, fetchFirst);
 
 		/* We want to chop out the FromSubquery from the tree and replace it 
 		 * with a ProjectRestrictNode.  One complication is that there may be 

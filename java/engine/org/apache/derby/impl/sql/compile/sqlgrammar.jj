@@ -4981,7 +4981,6 @@ ResultSetNode
 nonJoinQueryPrimary() throws StandardException :
 {
 	ResultSetNode	primary;
-	OrderByList orderCols = null;
 }
 {
 	primary = simpleTable()
@@ -4990,13 +4989,8 @@ nonJoinQueryPrimary() throws StandardException :
 	}
 |
 	<LEFT_PAREN> primary = queryExpression(null, NO_SET_OP)
-                 [ orderCols = orderByClause() ]
 	<RIGHT_PAREN>
 	{
-		if (orderCols != null) {
-			primary.setOrderBy(orderCols);
-		}
-
 		return primary;
 	}
 }
@@ -8386,6 +8380,8 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 	ResultSetNode	queryExpression;
 	ResultColumnList	columnList = null;
 	OrderByList orderCols = null;
+    ValueNode offset = null;
+    ValueNode fetchFirst = null;
 }
 {
 	[
@@ -8400,6 +8396,8 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 	[ targetProperties = propertyList(false) <CHECK_PROPERTIES>]
 	queryExpression = queryExpression(null, NO_SET_OP)
 	[ orderCols = orderByClause() ]
+    [ offset = offsetClause() ]
+    [ fetchFirst = fetchFirstClause() ]
 	{
 		if (orderCols != null && isTableValueConstructor(queryExpression)) {
 			// Not allowed by the standard since this is a <contextually typed
@@ -8411,6 +8409,13 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 				SQLState.LANG_SYNTAX_ERROR, "ORDER BY");
 		}
 
+        if ((offset != null || fetchFirst != null) &&
+                isTableValueConstructor(queryExpression)) {
+            throw StandardException.newException(
+                SQLState.LANG_SYNTAX_ERROR,
+                (offset != null) ? "OFFSET" : "FETCH");
+        }
+
 		return (StatementNode) nodeFactory.getNode(
 							C_NodeTypes.INSERT_NODE,
 							targetTable,
@@ -8418,6 +8423,8 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 							queryExpression,
 							targetProperties,
 							orderCols,
+                            offset,
+                            fetchFirst,
 							getContextManager());
 	}
 	/* RESOLVE: Ignoring default values for now
@@ -8656,10 +8663,14 @@ subquery(int subqueryType, ValueNode leftOperand) throws StandardException :
 	ResultSetNode	queryExpression;
 	SubqueryNode	subqueryNode;
 	OrderByList orderCols = null;
+    ValueNode offset = null;
+    ValueNode fetchFirst = null;
 }
 {
 	queryExpression = queryExpression(null, NO_SET_OP)
 	[ orderCols = orderByClause() ]
+    [ offset = offsetClause() ]
+    [ fetchFirst = fetchFirstClause() ]
 	{
 		subqueryNode = (SubqueryNode) nodeFactory.getNode(
 										C_NodeTypes.SUBQUERY_NODE,
@@ -8667,6 +8678,8 @@ subquery(int subqueryType, ValueNode leftOperand) throws StandardException :
 										ReuseFactory.getInteger(subqueryType),
 										leftOperand,
 										orderCols,
+                                        offset,
+                                        fetchFirst,
 										getContextManager());
 		return subqueryNode;
 	}
@@ -9141,6 +9154,8 @@ FromTable tableFactor() throws StandardException :
 											C_NodeTypes.FROM_SUBQUERY,
 											derivedTable.getResultSet(),
 											derivedTable.getOrderByList(),
+                                            derivedTable.getOffset(),
+                                            derivedTable.getFetchFirst(),
 											correlationName,
 											derivedRCL,
 											((optionalTableClauses != null) ?
@@ -10718,12 +10733,16 @@ viewDefinition(Token beginToken) throws StandardException :
 	Token				checkTok = null;
 	Token				endToken;
 	OrderByList         orderCols = null;
+    ValueNode           offset = null;
+    ValueNode           fetchFirst = null;
 }
 {
 	<VIEW> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 		[ <LEFT_PAREN> resultColumns = viewColumnList() <RIGHT_PAREN> ]
 		<AS> queryExpression = queryExpression(null, NO_SET_OP)
 		[ orderCols = orderByClause() ]
+        [ offset = offsetClause() ]
+        [ fetchFirst = fetchFirstClause() ]
 	{
 		checkOptionType = ViewDescriptor.NO_CHECK_OPTION;
 		endToken = getToken(0);
@@ -10745,6 +10764,8 @@ viewDefinition(Token beginToken) throws StandardException :
 												beginToken.beginOffset,
 												endToken.endOffset,false),
 								orderCols,
+                                offset,
+                                fetchFirst,
 								getContextManager());
 	}
 }
