@@ -58,7 +58,6 @@ public class CreateSequenceNode extends DDLStatementNode
      * @param maxValue Largest value returned by the sequence generator
      * @param minValue Smallest value returned by the sequence generator
      * @param cycle True if the generator should wrap around, false otherwise
-     * @param sequenceName The name of the new sequence
      *
      * @throws org.apache.derby.iapi.error.StandardException on error
      */

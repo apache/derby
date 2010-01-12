@@ -213,7 +213,6 @@ public class RuntimeStatisticsParser {
     
     /**
      * @param tableName
-     * @param indexName
      * @return true if passed indexName was used for Index Scan ResultSet 
      *     for the passed tableName
      */
@@ -410,7 +409,7 @@ public class RuntimeStatisticsParser {
     /**
      * Find the start position ; sometimes using a scan start / stop is
      * a way of doing qualifiers using an index
-     * @ return the String array following start position:
+     * @return the String array following start position:
      */
     public String [] getStartPosition() {
         int startStartIndex = statistics.indexOf("start position:");
@@ -428,7 +427,7 @@ public class RuntimeStatisticsParser {
     /**
      * Find the stop position ; sometimes using a scan start / stop is
      * a way of doing qualifiers using an index
-     * @ return the String array following start position:
+     * @return the String array following start position:
      */
     public String [] getStopPosition() {
         int startStopIndex = statistics.indexOf("stop position:");
