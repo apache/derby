@@ -45,9 +45,10 @@ public class DB_Alias
 	 * functions, and UDTs in a given database and write it to
 	 * output via Logs.java.
 	 * @param conn Connection to the source database.
+	 * @param at10_6 True if the database is at 10.6 or higher
 	 ****/
 
-	public static void doProceduresFunctionsAndUDTs(Connection conn)
+	public static void doProceduresFunctionsAndUDTs(Connection conn, boolean at10_6 )
 		throws SQLException {
 
 		// First do stored procedures.
@@ -65,7 +66,10 @@ public class DB_Alias
         // to interleave routine and UDT ddl.
         //
 
-        generateDDL( ps, UDT_TYPE ); // UDT_TYPE => for UDTs
+        if ( at10_6 )
+        {
+            generateDDL( ps, UDT_TYPE ); // UDT_TYPE => for UDTs
+        }
         generateDDL( ps, PROCEDURE_TYPE );	// PROCEDURE_TYPE => for PROCEDURES
 		generateDDL( ps, FUNCTION_TYPE );	// FUNCTION_TYPE => for FUNCTIONS
 

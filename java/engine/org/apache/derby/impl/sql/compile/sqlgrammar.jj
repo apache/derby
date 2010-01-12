@@ -2320,6 +2320,7 @@ TOKEN [IGNORE_CASE] :
 |	<COMMITTED: "committed">
 |   <CONCAT: "concat">
 |	<CONTAINS: "contains">
+|	<CYCLE: "cycle">
 |	<DATA: "data">
 |	<DATE: "date">
 |	<DAY: "day">
@@ -2341,6 +2342,8 @@ TOKEN [IGNORE_CASE] :
 |	<LOCKS: "locks">
 |	<LOCKSIZE: "locksize">
 |	<LOGGED: "logged">
+|	<MAXVALUE: "maxvalue">
+|	<MINVALUE: "minvalue">
 |       <MOD: "mod">
 |	<MODIFIES: "modifies">
 |	<MODIFY: "modify">
@@ -10049,17 +10052,95 @@ StatementNode
 sequenceDefinition() throws StandardException :
 {
 	TableName qualifiedSequenceName = null;
+	DataTypeDescriptor dtd =  null;
+	Long initialValue = null;
+	Long stepValue = null;
+	Long maxValue = null;
+	Long minValue = null;
+    Boolean cycle = Boolean.FALSE;
 }
 {
 	<SEQUENCE> qualifiedSequenceName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+    [ <AS> dtd = exactIntegerType() ]
+    [ <START> <WITH> initialValue = exactIntegerObject() ]
+    [ <INCREMENT> <BY> stepValue = exactIntegerObject() ]
+    [
+        ( <MAXVALUE> maxValue = exactIntegerObject() )
+        |
+        LOOKAHEAD( { getToken( 2 ).kind == MAXVALUE } )
+        ( <NO> <MAXVALUE> )
+    ]
+    [
+        ( <MINVALUE> minValue = exactIntegerObject() )
+        |
+        LOOKAHEAD( { getToken( 2 ).kind == MINVALUE } )
+        ( <NO> <MINVALUE> )
+    ]
+    [ cycle = cycleClause() ]
 	{
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_6, "SEQUENCES");
 		return (StatementNode) nodeFactory.getNode(
 			C_NodeTypes.CREATE_SEQUENCE_NODE,
 			qualifiedSequenceName,
+            dtd,
+            initialValue,
+            stepValue,
+            maxValue,
+            minValue,
+            cycle,
 			getContextManager());
 	}
 }
+
+/*
+ * <A NAME="cycleClause">cycleClause</A>
+ */
+Boolean
+cycleClause() throws StandardException :
+{
+}
+{
+    <CYCLE>
+    {
+        return Boolean.TRUE;
+    }
+|
+    <NO> <CYCLE>
+    {
+        return Boolean.FALSE;
+    }
+}
+
+/*
+ * <A NAME="exactIntegerObject">exactNumberObject</A>
+ */
+Long
+exactIntegerObject() throws StandardException :
+{
+	long exactNumeric;
+}
+{
+	exactNumeric = exactNumber()
+    {
+        return new Long( exactNumeric );
+    }
+}
+
+/*
+ * <A NAME="stepValue">stepValue</A>
+ */
+Long
+stepValue() throws StandardException :
+{
+	long stepValue;
+}
+{
+	<INCREMENT> <BY> stepValue = exactNumber()
+    {
+        return new Long( stepValue );
+    }
+}
+
 
 /*
  * <A NAME="dropSequenceStatement">dropSequenceStatement</A>

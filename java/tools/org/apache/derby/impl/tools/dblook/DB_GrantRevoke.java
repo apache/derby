@@ -36,13 +36,31 @@ public class DB_GrantRevoke {
 	 * Generate Grant & Revoke statements if sqlAuthorization is on
 	 * 
 	 * @param conn Connection to use
+	 * @param at10_6 True if the databse level is 10.6 or higher
 	 */
-	public static void doAuthorizations(Connection conn)
+	public static void doAuthorizations(Connection conn, boolean at10_6)
 		throws SQLException {
 
 		// First generate table privilege statements
 		Statement stmt = conn.createStatement();
-		ResultSet rs = stmt.executeQuery("SELECT GRANTEE, SCHEMANAME, TABLENAME, SELECTPRIV, " +
+        ResultSet rs;
+
+        if ( at10_6 )
+        {
+            // Generate udt privilege statements
+            rs = stmt.executeQuery("SELECT P.GRANTEE, S.SCHEMANAME, A.ALIAS, P.PERMISSION, P.OBJECTTYPE FROM " +
+                                   "SYS.SYSPERMS P, SYS.SYSALIASES A, SYS.SYSSCHEMAS S WHERE A.SCHEMAID = " +
+                                   "S.SCHEMAID AND P.OBJECTID = A.ALIASID AND A.ALIASTYPE='A'");
+            generateUDTPrivs(rs);
+            
+            // Generate sequence privilege statements
+            rs = stmt.executeQuery("SELECT P.GRANTEE, S.SCHEMANAME, SEQ.SEQUENCENAME, P.PERMISSION, P.OBJECTTYPE FROM " +
+                                   "SYS.SYSPERMS P, SYS.SYSSEQUENCES SEQ, SYS.SYSSCHEMAS S WHERE SEQ.SCHEMAID = " +
+                                   "S.SCHEMAID AND P.OBJECTID = SEQ.SEQUENCEID");
+            generateSequencePrivs(rs);
+        }
+
+        rs = stmt.executeQuery("SELECT GRANTEE, SCHEMANAME, TABLENAME, SELECTPRIV, " +
 			"DELETEPRIV, INSERTPRIV, UPDATEPRIV, REFERENCESPRIV, TRIGGERPRIV FROM " +
 			"SYS.SYSTABLEPERMS P, SYS.SYSTABLES T, SYS.SYSSCHEMAS S WHERE T.SCHEMAID = " +
 			"S.SCHEMAID AND T.TABLEID = P.TABLEID");
@@ -53,12 +71,6 @@ public class DB_GrantRevoke {
 			"SYS.SYSCOLPERMS P, SYS.SYSTABLES T, SYS.SYSSCHEMAS S WHERE T.SCHEMAID = " +
 			"S.SCHEMAID AND T.TABLEID = P.TABLEID");
 		generateColumnPrivs(rs, conn);
-
-		// Generate udt privilege statements
-		rs = stmt.executeQuery("SELECT P.GRANTEE, S.SCHEMANAME, A.ALIAS, P.PERMISSION, P.OBJECTTYPE FROM " +
-			"SYS.SYSPERMS P, SYS.SYSALIASES A, SYS.SYSSCHEMAS S WHERE A.SCHEMAID = " +
-			"S.SCHEMAID AND P.OBJECTID = A.ALIASID AND A.ALIASTYPE='A'");
-		generateUDTPrivs(rs);
 
 		// Generate routine privilege statements
 		rs = stmt.executeQuery("SELECT GRANTEE, SCHEMANAME, ALIAS, ALIASTYPE FROM " +
@@ -306,6 +318,40 @@ public class DB_GrantRevoke {
 			if (firstTime) {
 				Logs.reportString("----------------------------------------------");
 				Logs.reportMessage("DBLOOK_UDTPrivHeader");
+				Logs.reportString("----------------------------------------------\n");
+			}
+
+			Logs.writeToNewDDL(genericPrivStatement(fullName, authName, permission, objectType ));
+			Logs.writeStmtEndToNewDDL();
+			Logs.writeNewlineToNewDDL();
+			firstTime = false;
+		}
+	}
+	/** ************************************************
+	 * Generate sequence privilege statements
+	 *
+	 * @param rs ResultSet holding required information
+	 ****/
+	public static void generateSequencePrivs(ResultSet rs) throws SQLException
+	{
+		boolean firstTime = true;
+		while (rs.next()) {
+			String authName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(1)));
+			String schemaName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(2)));
+			String sequenceName = dblook.addQuotes
+				(dblook.expandDoubleQuotes(rs.getString(3)));
+			String fullName = schemaName + "." + sequenceName;
+			String permission = rs.getString(4);
+			String objectType = rs.getString(5);
+
+			if (dblook.isIgnorableSchema(schemaName))
+				continue;
+
+			if (firstTime) {
+				Logs.reportString("----------------------------------------------");
+				Logs.reportMessage("DBLOOK_SequencePrivHeader");
 				Logs.reportString("----------------------------------------------\n");
 			}
 

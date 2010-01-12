@@ -94,3 +94,9 @@ create trigger trigOne after insert on bar.t1 for each row update bar.t1 set i =
 
 create type price external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java;
 
+-- ----------------------------------------------
+-- Sequences
+-- ----------------------------------------------
+
+create sequence sequence_1;
+

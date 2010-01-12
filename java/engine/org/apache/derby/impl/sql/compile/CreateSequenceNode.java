@@ -26,14 +26,25 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.types.TypeId;
+
 
 /**
  * A CreateSequenceNode is the root of a QueryTree that
  * represents a CREATE SEQUENCE statement.
  */
 
-public class CreateSequenceNode extends DDLStatementNode {
-    private TableName sequenceName;
+public class CreateSequenceNode extends DDLStatementNode
+{
+    private TableName _sequenceName;
+    private DataTypeDescriptor _dataType;
+    private Long _initialValue;
+    private Long _stepValue;
+    private Long _maxValue;
+    private Long _minValue;
+    private Boolean _cycle;
 
     public static final int SEQUENCE_ELEMENT_COUNT = 1;
 
@@ -41,12 +52,35 @@ public class CreateSequenceNode extends DDLStatementNode {
      * Initializer for a CreateSequenceNode
      *
      * @param sequenceName The name of the new sequence
-     * @throws org.apache.derby.iapi.error.StandardException
-     *          Thrown on error
+     * @param dataType Exact numeric type of the new sequence
+     * @param initialValue Starting value
+     * @param stepValue Increment amount
+     * @param maxValue Largest value returned by the sequence generator
+     * @param minValue Smallest value returned by the sequence generator
+     * @param cycle True if the generator should wrap around, false otherwise
+     * @param sequenceName The name of the new sequence
+     *
+     * @throws org.apache.derby.iapi.error.StandardException on error
      */
-    public void init(Object sequenceName) throws StandardException {
-        this.sequenceName = (TableName) sequenceName;
-        initAndCheck(sequenceName);
+    public void init
+        (
+         Object sequenceName,
+         Object dataType,
+         Object initialValue,
+         Object stepValue,
+         Object maxValue,
+         Object minValue,
+         Object cycle
+         ) throws StandardException {
+        _sequenceName = (TableName) sequenceName;
+        initAndCheck(_sequenceName);
+
+        _dataType = (DataTypeDescriptor) dataType;
+        _initialValue = (Long) initialValue;
+        _stepValue = (Long) stepValue;
+        _maxValue = (Long) maxValue;
+        _minValue = (Long) minValue;
+        _cycle = (Boolean) cycle;
 
         // automcatically create the schema if it doesn't exist
         implicitCreateSchema = true;
@@ -62,7 +96,7 @@ public class CreateSequenceNode extends DDLStatementNode {
     public String toString() {
         if (SanityManager.DEBUG) {
             return super.toString() +
-                    "sequenceName: " + "\n" + sequenceName + "\n";
+                    "sequenceName: " + "\n" + _sequenceName + "\n";
         } else {
             return "";
         }
@@ -80,11 +114,19 @@ public class CreateSequenceNode extends DDLStatementNode {
         // this method also compiles permissions checks
         SchemaDescriptor sd = getSchemaDescriptor();
 
-//        sequenceName.bind( getDataDictionary() );
-        // set the default schema name if the user did not explicitly specify a schema
-        if (sequenceName.getSchemaName() == null) {
-            sequenceName.setSchemaName(sd.getSchemaName());
+       // set the default schema name if the user did not explicitly specify a schema
+        if (_sequenceName.getSchemaName() == null) {
+            _sequenceName.setSchemaName(sd.getSchemaName());
         }
+
+        // Right now we only support vanilla sequences
+        if ( (_dataType != null) && ( !_dataType.getTypeId().equals( TypeId.INTEGER_ID ) ) ) { throw unimplementedFeature(); }
+        if ( (_initialValue != null) && ( _initialValue.longValue() != -2147483648L ) ) { throw unimplementedFeature(); }
+        if ( (_stepValue != null) && ( _stepValue.longValue() != 1L ) ) { throw unimplementedFeature(); }
+        if ( (_maxValue != null) && ( _maxValue.longValue() != 2147483647L ) ) { throw unimplementedFeature(); }
+        if ( (_minValue != null) && ( _minValue.longValue() != -2147483648L ) ) { throw unimplementedFeature(); }
+        if ( (_cycle != null) && ( _cycle != Boolean.FALSE ) ) { throw unimplementedFeature(); }
+        
     }
 
     public String statementToString() {
@@ -101,6 +143,13 @@ public class CreateSequenceNode extends DDLStatementNode {
      */
     public ConstantAction makeConstantAction() {
         return getGenericConstantActionFactory().
-                getCreateSequenceConstantAction(sequenceName);
+                getCreateSequenceConstantAction(_sequenceName);
     }
+
+    /** Report an unimplemented feature */
+    private StandardException unimplementedFeature()
+    {
+        return StandardException.newException( SQLState.BTREE_UNIMPLEMENTED_FEATURE );
+    }
+
 }

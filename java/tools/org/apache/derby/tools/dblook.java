@@ -45,6 +45,7 @@ import org.apache.derby.impl.tools.dblook.DB_Jar;
 import org.apache.derby.impl.tools.dblook.DB_Key;
 import org.apache.derby.impl.tools.dblook.DB_Table;
 import org.apache.derby.impl.tools.dblook.DB_Schema;
+import org.apache.derby.impl.tools.dblook.DB_Sequence;
 import org.apache.derby.impl.tools.dblook.DB_Alias;
 import org.apache.derby.impl.tools.dblook.DB_Trigger;
 import org.apache.derby.impl.tools.dblook.DB_View;
@@ -516,6 +517,8 @@ public final class dblook {
 			this.conn = DriverManager.getConnection(sourceDBUrl);
 			prepForDump();
 
+            boolean at10_6 = atVersion( conn, 10, 6 );
+
 			// Generate DDL.
 
 			// Start with schemas, since we might need them to
@@ -523,10 +526,12 @@ public final class dblook {
 			DB_Schema.doSchemas(this.conn,
 				(tableList != null) && (targetSchema == null));
 
+            DB_Sequence.doSequences( conn );
+
 			if (tableList == null) {
 			// Don't do these if user just wants table-related objects.
 				DB_Jar.doJars(sourceDBName, this.conn);
-				DB_Alias.doProceduresFunctionsAndUDTs(this.conn);
+				DB_Alias.doProceduresFunctionsAndUDTs(this.conn, at10_6 );
 			}
 
 			DB_Table.doTables(this.conn, tableIdToNameMap);
@@ -541,7 +546,7 @@ public final class dblook {
 			DB_Trigger.doTriggers(this.conn);
 
 			DB_Roles.doRoles(this.conn);
-			DB_GrantRevoke.doAuthorizations(this.conn);
+			DB_GrantRevoke.doAuthorizations(this.conn, at10_6);
 
 			// That's it; we're done.
 			if (getColNameFromNumberQuery != null)
@@ -1155,5 +1160,37 @@ public final class dblook {
 
 	}
 
+    /**
+     * Return true if we are at 10.6 or later.
+     */
+    private static boolean atVersion( Connection conn, int major, int minor ) throws SQLException
+    {
+        PreparedStatement ps = null;
+        ResultSet rs =  null;
+        try {
+            ps = conn.prepareStatement( "values syscs_util.syscs_get_database_property('DataDictionaryVersion')" );
+            rs = ps.executeQuery();
+
+            rs.next();
+
+            String versionString = rs.getString( 1 );
+            int  dotIdx = versionString.indexOf( '.' );
+            int actualMajor = Integer.parseInt( versionString.substring( 0, dotIdx ) );
+            int actualMinor = Integer.parseInt( versionString.substring( dotIdx + 1, versionString.length() ) );
+
+            if ( actualMajor > major ) { return true; }
+            if ( actualMajor < major ) { return false; }
+
+            boolean result = ( actualMinor >= minor );
+            
+            return result;
+        }
+        finally
+        {
+            if ( rs != null ) { rs.close(); }
+            if ( ps != null ) { ps.close(); }
+        }
+    }
+	
 }
 

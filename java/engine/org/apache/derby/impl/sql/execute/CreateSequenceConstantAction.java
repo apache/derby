@@ -89,7 +89,7 @@ class CreateSequenceConstantAction extends DDLConstantAction {
 
         seqDef = ddg.newSequenceDescriptor(schemaDescriptor,
                 dd.getUUIDFactory().createUUID(),
-                sequenceName, DataTypeDescriptor.INTEGER_NOT_NULL, 0, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, false);        // is definition
+                sequenceName, DataTypeDescriptor.INTEGER_NOT_NULL, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, false);        // is definition
 
         dd.addDescriptor(seqDef,
                 null,  // parent

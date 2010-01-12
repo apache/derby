@@ -5786,6 +5786,16 @@ File wombat.sql was NOT empty.  Contents are:
 -- ----------------------------------------------
 CREATE SCHEMA "BAR"
 -- ----------------------------------------------
+-- DDL Statements for sequences
+-- ----------------------------------------------
+CREATE SEQUENCE "APP"."SEQUENCE_1"
+    AS INTEGER 
+    START WITH -2147483648
+    INCREMENT BY 1
+    MAXVALUE 2147483647
+    MINVALUE -2147483648
+    NO CYCLE
+-- ----------------------------------------------
 -- DDL Statements for jars
 -- **** NOTE **** In order for jar files to be loaded correctly,
 -- you must either 1) ensure that the DBJARS directory (created
@@ -5864,6 +5874,17 @@ File wombat.sql was NOT empty.  Contents are:
 -- ----------------------------------------------
 CREATE SCHEMA "BAR";
 -- ----------------------------------------------
+-- DDL Statements for sequences
+-- ----------------------------------------------
+CREATE SEQUENCE "APP"."SEQUENCE_1"
+    AS INTEGER 
+    START WITH -2147483648
+    INCREMENT BY 1
+    MAXVALUE 2147483647
+    MINVALUE -2147483648
+    NO CYCLE
+;
+-- ----------------------------------------------
 -- DDL Statements for tables
 -- ----------------------------------------------
 CREATE TABLE "BAR"."T1" ("C" CHAR(5) NOT NULL, "I" INTEGER, "VC" VARCHAR(10), "FKCHAR" CHAR(5));
@@ -5920,6 +5941,17 @@ Msg Test 4
 -- DDL Statements for schemas
 -- ----------------------------------------------
 CREATE SCHEMA "BAR" #
+-- ----------------------------------------------
+-- DDL Statements for sequences
+-- ----------------------------------------------
+CREATE SEQUENCE "APP"."SEQUENCE_1"
+    AS INTEGER 
+    START WITH -2147483648
+    INCREMENT BY 1
+    MAXVALUE 2147483647
+    MINVALUE -2147483648
+    NO CYCLE
+ #
 -- ----------------------------------------------
 -- DDL Statements for jars
 -- **** NOTE **** In order for jar files to be loaded correctly,
