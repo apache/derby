@@ -417,8 +417,18 @@ public class RuntimeStatisticsParser {
         if (startStartIndex >= 0 && endStartIndex >= 0)
         {
             String positionLines = statistics.substring(startStartIndex, endStartIndex);
-            String [] startPositionLines = positionLines.split("\n");
-            return startPositionLines;}
+            if (JDBC.vmSupportsJSR169())
+            {
+                // do something else then split.
+                String [] startPositionLines = Utilities.split(positionLines, '\n');
+                return startPositionLines;
+            }
+            else
+            {
+                String [] startPositionLines = positionLines.split("\n");
+                return startPositionLines;
+            }
+        }
         else 
             return null;
         
@@ -435,8 +445,18 @@ public class RuntimeStatisticsParser {
         if (startStopIndex >= 0 && endStopIndex >= 0)
         {
             String positionLines = statistics.substring(startStopIndex, endStopIndex);
-            String [] startPositionLines = positionLines.split("\n");
-            return startPositionLines;}
+            if (JDBC.vmSupportsJSR169())
+            {
+                // do something else then split.
+                String [] stopPositionLines = Utilities.split(positionLines, '\n');
+                return stopPositionLines;
+            }
+            else
+            {
+                String [] stopPositionLines = positionLines.split("\n");
+                return stopPositionLines;
+            }
+        }
         else 
             return null;
     }
