@@ -122,6 +122,17 @@ public class StatementColumnPermission extends StatementTablePermission
 												true /* grantable permissions */,
 												authorizationId,
 												permittedColumns);
+		
+		//DERBY-4191
+		//If we are looking for select privilege on ANY column,
+		//then we can quit as soon as we find some column with select
+		//privilege. This is needed for queries like
+		//select count(*) from t1
+		//select count(1) from t1
+		//select 1 from t1
+		//select t1.c1 from t1, t2
+		if (privType == Authorizer.MIN_SELECT_PRIV && permittedColumns != null)
+			return;
 
 		FormatableBitSet unresolvedColumns = (FormatableBitSet)columns.clone();
 
@@ -181,18 +192,59 @@ public class StatementColumnPermission extends StatementTablePermission
 
 				while (unresolvedColumns.anySetBit() >= 0 &&
 					   (r = rci.next()) != null ) {
+					//The user does not have needed privilege directly 
+					//granted to it, so let's see if he has that privilege
+					//available to him/her through his roles.
+					permittedColumns = tryRole(lcc, dd,	forGrant, r);
+					//DERBY-4191
+					//If we are looking for select privilege on ANY column,
+					//then we can quit as soon as we find some column with select
+					//privilege through this role. This is needed for queries like
+					//select count(*) from t1
+					//select count(1) from t1
+					//select 1 from t1
+					//select t1.c1 from t1, t2
+					if (privType == Authorizer.MIN_SELECT_PRIV && permittedColumns != null) {
+						DependencyManager dm = dd.getDependencyManager();
+						RoleGrantDescriptor rgd =
+							dd.getRoleDefinitionDescriptor(role);
+						ContextManager cm = lcc.getContextManager();
 
-					unresolvedColumns = tryRole(lcc, dd, forGrant,
-												r, unresolvedColumns);
+						dm.addDependency(ps, rgd, cm);
+						dm.addDependency(activation, rgd, cm);
+						return;
+					}
+
+					//Use the privileges obtained through the role to satisfy
+					//the column level privileges we need. If all the remaining
+					//column level privileges are satisfied through this role,
+					//we will quit out of this while loop
+					for(int i = unresolvedColumns.anySetBit();
+						i >= 0;
+						i = unresolvedColumns.anySetBit(i)) {
+
+						if(permittedColumns != null && permittedColumns.get(i)) {
+							unresolvedColumns.clear(i);
+						}
+					}
 				}
 			}
 		}
+		TableDescriptor td = getTableDescriptor(dd);
+		//if we are still here, then that means that we didn't find any select
+		//privilege on the table or any column in the table
+		if (privType == Authorizer.MIN_SELECT_PRIV)
+			throw StandardException.newException( forGrant ? SQLState.AUTH_NO_TABLE_PERMISSION_FOR_GRANT
+					  : SQLState.AUTH_NO_TABLE_PERMISSION,
+					  authorizationId,
+					  getPrivName(),
+					  td.getSchemaName(),
+					  td.getName());
 
 		int remains = unresolvedColumns.anySetBit();
 
 		if (remains >= 0) {
 			// No permission on this column.
-			TableDescriptor td = getTableDescriptor(dd);
 			ColumnDescriptor cd = td.getColumnDescriptor(remains + 1);
 
 			if(cd == null) {
@@ -378,23 +430,20 @@ public class StatementColumnPermission extends StatementTablePermission
 
 
 	/**
-	 * Given the set of yet unresolved column permissions, try to use
-	 * the supplied role r to resolve them. After this is done, return
-	 * the set of columns still unresolved. If the role is used for
-	 * anything, record a dependency.
+	 * Try to use the supplied role r to see what column privileges are we 
+	 * entitled to. 
 	 *
 	 * @param lcc language connection context
 	 * @param dd  data dictionary
 	 * @param forGrant true of a GRANTable permission is sought
 	 * @param r the role to inspect to see if it can supply the required
 	 *          privileges
-	 * @param unresolvedColumns the set of columns yet unaccounted for
+	 * return the set of columns on which we have privileges through this role
 	 */
 	private FormatableBitSet tryRole(LanguageConnectionContext lcc,
 									 DataDictionary dd,
 									 boolean forGrant,
-									 String r,
-									 FormatableBitSet unresolvedColumns)
+									 String r)
 			throws StandardException {
 
 		FormatableBitSet permittedColumns = null;
@@ -407,17 +456,7 @@ public class StatementColumnPermission extends StatementTablePermission
 
 		// if grantable is given, applicable in both cases, so use union
 		permittedColumns = addPermittedColumns(dd, true, r, permittedColumns);
-
-		for(int i = unresolvedColumns.anySetBit();
-			i >= 0;
-			i = unresolvedColumns.anySetBit(i)) {
-
-			if(permittedColumns != null && permittedColumns.get(i)) {
-				unresolvedColumns.clear(i);
-			}
-		}
-
-		return unresolvedColumns;
+		return permittedColumns;
 	}
 
 

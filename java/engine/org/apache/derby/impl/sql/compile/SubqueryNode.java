@@ -28,6 +28,7 @@ import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.reference.SQLState;
@@ -497,6 +498,17 @@ public class SubqueryNode extends ValueNode
 		 * any *'s have been replaced, so that they don't get expanded.
 		 */
 		CompilerContext cc = getCompilerContext();
+		/* DERBY-4191
+		 * We should make sure that we require select privileges
+		 * on the tables in the underlying subquery and not the
+		 * parent sql's privilege. eg
+		 * update t1 set c1=(select c2 from t2) 
+		 * For the query above, when working with the subquery, we should
+		 * require select privilege on t2.c2 rather than update privilege.
+		 * Prior to fix for DERBY-4191, we were collecting update privilege
+		 * requirement for t2.c2 rather than select privilege 
+		 */
+		cc.pushCurrentPrivType(Authorizer.SELECT_PRIV);
 
 		resultSet = resultSet.bindNonVTITables(getDataDictionary(), fromList);
 		resultSet = resultSet.bindVTITables(fromList);
@@ -574,6 +586,7 @@ public class SubqueryNode extends ValueNode
 		/* Add this subquery to the subquery list */
 		subqueryList.addSubqueryNode(this);
 
+		cc.popCurrentPrivType();
 		return this;
 	}
 

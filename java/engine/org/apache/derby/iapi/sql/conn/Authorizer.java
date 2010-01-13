@@ -58,8 +58,23 @@ public interface Authorizer
 	public static final int TRIGGER_PRIV = 5;
 	public static final int EXECUTE_PRIV = 6;
 	public static final int USAGE_PRIV = 7;
-    public static final int PRIV_TYPE_COUNT = 8;
-
+    /* 
+     * DERBY-4191
+     * Used to check if user has a table level select privilege/any column 
+     * level select privilege to fulfill the requirements for following kind 
+     * of queries
+     * select count(*) from t1
+     * select count(1) from t1
+     * select 1 from t1
+     * select t1.c1 from t1, t2
+     * DERBY-4191 was added for Derby bug where for first 3 queries above,
+     * we were not requiring any select privilege on t1. And for the 4th
+     * query, we were not requiring any select privilege on t2 since no
+     * column was selected from t2
+     */
+	public static final int MIN_SELECT_PRIV = 8;
+    public static final int PRIV_TYPE_COUNT = 9;
+    
 	/* Used to check who can create schemas or who can modify objects in schema */
 	public static final int CREATE_SCHEMA_PRIV = 16;
 	public static final int MODIFY_SCHEMA_PRIV = 17;
