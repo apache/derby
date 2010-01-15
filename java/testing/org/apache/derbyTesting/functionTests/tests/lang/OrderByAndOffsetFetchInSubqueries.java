@@ -986,4 +986,38 @@ public class OrderByAndOffsetFetchInSubqueries extends BaseJDBCTestCase {
 
         rollback();
     }
+
+
+    /**
+     * {@code SELECT} subqueries with {@code ORDER BY} - check sort avoidance
+     */
+    public void testSelectSubqueriesSortAvoidance() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        ResultSet rs;
+        RuntimeStatisticsParser rtsp;
+        s.executeUpdate("create table ts(i int, j int)");
+        PreparedStatement ps = prepareStatement("insert into ts values(?,?)");
+        for (int i=0; i < 100; i++) {
+            ps.setInt(1,i);
+            ps.setInt(2,i*2);
+            ps.execute();
+        }
+
+        s.executeUpdate("create unique index t_i on ts(i)");
+        s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+
+        // ORDER BY inside a subquery should make use of index to avoid
+        // sorting.
+        rs = s.executeQuery("select * from (select i from ts order by i)tt");
+        rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
+
+        // Verify that we use the index scan here and no sorting is incurred
+        assertTrue(rtsp.usedSpecificIndexForIndexScan("TS","T_I"));
+        assertFalse(rtsp.whatSortingRequired());
+
+        s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)");
+        rollback();
+    }
+
 }

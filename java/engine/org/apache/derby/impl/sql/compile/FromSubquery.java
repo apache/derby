@@ -258,12 +258,7 @@ public class FromSubquery extends FromTable
 
         bindOffsetFetch(offset, fetchFirst);
 
-		/* Now that we've bound the expressions in the subquery, we 
-		 * can propagate the subquery's RCL up to the FromSubquery.
-		 * Get the subquery's RCL, assign shallow copy back to
-		 * it and create new VirtualColumnNodes for the original's
-		 * ResultColumn.expressions.
-		 * NOTE: If the size of the derived column list is less than
+        /* NOTE: If the size of the derived column list is less than
 		 * the size of the subquery's RCL and the derived column list is marked
 		 * for allowing a size mismatch, then we have a select * view
 		 * on top of a table that has had columns added to it via alter table.
@@ -282,9 +277,12 @@ public class FromSubquery extends FromTable
 			}
 		}
 
-		subquery.setResultColumns(subqueryRCL.copyListAndObjects());
-		subqueryRCL.genVirtualColumnNodes(subquery, subquery.getResultColumns());
-		resultColumns = subqueryRCL;
+        /*
+         * Create RCL based on subquery, adding a level of VCNs.
+         */
+         ResultColumnList newRcl = subqueryRCL.copyListAndObjects();
+         newRcl.genVirtualColumnNodes(subquery, subquery.getResultColumns());
+         resultColumns = newRcl;
 
 		/* Propagate the name info from the derived column list */
 		if (derivedRCL != null)
