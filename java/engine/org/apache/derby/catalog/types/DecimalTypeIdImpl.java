@@ -28,6 +28,12 @@ import java.sql.Types;
 
 public class DecimalTypeIdImpl extends BaseTypeIdImpl
 {
+	/**
+	 * Public niladic constructor. Needed for Serializable interface to work.
+	 *
+	 */
+	public	DecimalTypeIdImpl() { super(); }
+
 	/* this class is needed because writeexternal for this class stores
 	   extra information; when the object is sent over the wire the niladic
 	   constructor is first called and then we call the readExternal method. 

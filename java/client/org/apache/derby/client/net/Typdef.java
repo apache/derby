@@ -425,10 +425,10 @@ public class Typdef implements java.lang.Cloneable {
         new FdocaSimpleDataArray(0x4E, FdocaConstants.FDOCA_TYPE_VARCHAR, Cursor.VARIABLE_STRING, CCSIDMBC, 1, 1, 32767, TWOBYTELENGTH),
         /* 0x4F null  MBCS */
         new FdocaSimpleDataArray(0x4F, FdocaConstants.FDOCA_TYPE_NVARCHAR, Cursor.VARIABLE_STRING, CCSIDMBC, 1, 1, 32767, TWOBYTELENGTH),
-        /* 0x50 Empties */
-        null,
-        /* 0x51 Empties */
-        null,
+        /* 0x50 UDT */
+        new FdocaSimpleDataArray(0x50, FdocaConstants.FDOCA_TYPE_VARBYTES, Cursor.VARIABLE_BYTES, NOCCSID, 0, 1, 32767, TWOBYTELENGTH),
+        /* 0x51 null UDT */
+        new FdocaSimpleDataArray(0x51, FdocaConstants.FDOCA_TYPE_NVARBYTES, Cursor.VARIABLE_BYTES, NOCCSID, 0, 1, 32767, TWOBYTELENGTH),
         /* 0x52 Empties */
         null,
         /* 0x53 Empties */
@@ -765,8 +765,8 @@ public class Typdef implements java.lang.Cloneable {
         java.sql.Types.VARCHAR, // 0x4D null SBCS
         java.sql.Types.VARCHAR, // 0x4E MBCS
         java.sql.Types.VARCHAR, // 0x4F null MBCS
-        0x00, // 0x50 Empties
-        0x00, // 0x51 Empties
+        java.sql.Types.JAVA_OBJECT, // 0x50 UDT
+        java.sql.Types.JAVA_OBJECT, // 0x51 null UDT
         0x00, // 0x52 Empties
         0x00, // 0x53 Empties
         0x00, // 0x54 Empties

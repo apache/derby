@@ -25,6 +25,8 @@ import org.apache.derby.shared.common.reference.SQLState;
 import java.sql.SQLException;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
 
 // When we calculate column offsets make sure we calculate the correct offsets for double byte charactr5er data
@@ -649,6 +651,34 @@ public abstract class Cursor {
         return bytes;
     }
 
+    // Deserialize a UDT from a database java.sql.Types.JAVA_OBJECT field.
+    // This is used for user defined types.
+    private final Object get_UDT(int column) throws SqlException {
+        byte[] bytes;
+        int columnLength = 0;
+        columnLength = (maxFieldSize_ == 0) ? columnDataComputedLength_[column - 1] - 2 :
+                java.lang.Math.min(maxFieldSize_, columnDataComputedLength_[column - 1] - 2);
+        bytes = new byte[columnLength];
+        System.arraycopy(dataBuffer_, columnDataPosition_[column - 1] + 2, bytes, 0, bytes.length);
+
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream( bytes );
+            ObjectInputStream ois = new ObjectInputStream( bais );
+
+            return ois.readObject();
+        }
+        catch (Exception e)
+        {
+            throw new SqlException
+                (
+                 agent_.logWriter_, 
+                 new ClientMessageId (SQLState.NET_MARSHALLING_UDT_ERROR),
+                 e.getMessage(),
+                 e
+                 );
+        }
+    }
+
     /**
      * Instantiate an instance of Calendar that can be re-used for getting
      * Time, Timestamp, and Date values from this cursor.  Assumption is
@@ -1030,6 +1060,10 @@ public abstract class Cursor {
                         agent_.crossConverters_.getStringFromBytes(get_VARCHAR_FOR_BIT_DATA(column));
                 return (maxFieldSize_ == 0) ? tempString :
                         tempString.substring(0, java.lang.Math.min(maxFieldSize_, tempString.length()));
+            case java.sql.Types.JAVA_OBJECT:
+                Object obj = get_UDT( column );
+                if ( obj == null ) { return null; }
+                else { return obj.toString(); }
             case java.sql.Types.BLOB:
                 Blob b = getBlobColumn_(column, agent_, false);
                 tempString = agent_.crossConverters_.
@@ -1297,6 +1331,8 @@ public abstract class Cursor {
         case java.sql.Types.VARBINARY:
         case java.sql.Types.LONGVARBINARY:
             return get_VARCHAR_FOR_BIT_DATA(column);
+        case java.sql.Types.JAVA_OBJECT:
+            return get_UDT( column );
         case java.sql.Types.BLOB:
             return getBlobColumn_(column, agent_, true);
         case java.sql.Types.CLOB:

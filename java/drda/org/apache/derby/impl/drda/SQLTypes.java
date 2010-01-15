@@ -122,6 +122,7 @@ class SQLTypes {
  /**  Map JDBC Type to DB2 SqlType
   * @param jdbctype   JDBC Type from java.sql.Types
   * @param nullable   true if this is a nullable type
+	 * @param appRequester - state variable for the connection
   * @param outlen     output parameter with type length
   *
   * @return Corresponding DB2 SQL Type (See DRDA Manual FD:OCA Meta 
@@ -130,7 +131,7 @@ class SQLTypes {
   * @exception SQLException thrown for unrecognized SQLType
   */
 
- static protected int mapJdbcTypeToDB2SqlType (int jdbctype, boolean nullable,
+    static protected int mapJdbcTypeToDB2SqlType (int jdbctype, boolean nullable, AppRequester appRequester,
 											   int[] outlen)
 	 throws SQLException
   {
@@ -140,7 +141,7 @@ class SQLTypes {
 		  nullAddVal =1; 
 	  
 	  // Call FdocaConstants just to get the length
-	  FdocaConstants.mapJdbcTypeToDrdaType(jdbctype,nullable,outlen);
+	  FdocaConstants.mapJdbcTypeToDrdaType(jdbctype,nullable,appRequester,outlen);
 
 	  switch(jdbctype)
 	  {
@@ -176,7 +177,14 @@ class SQLTypes {
 		  case java.sql.Types.LONGVARBINARY:
 			  return DRDAConstants.DB2_SQLTYPE_LONG + nullAddVal;
 		  case java.sql.Types.JAVA_OBJECT:
-			  return DRDAConstants.DB2_SQLTYPE_LONG + nullAddVal;
+              if ( appRequester.supportsUDTs() )
+              {
+                  return DRDAConstants.DB2_SQLTYPE_FAKE_UDT + nullAddVal;
+              }
+              else
+              {
+                  return DRDAConstants.DB2_SQLTYPE_LONG + nullAddVal;
+              }
 		  case java.sql.Types.BLOB:
 			  return DRDAConstants.DB2_SQLTYPE_BLOB + nullAddVal;
 		  case java.sql.Types.CLOB:

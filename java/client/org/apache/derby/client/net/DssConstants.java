@@ -21,8 +21,10 @@
 
 package org.apache.derby.client.net;
 
+import org.apache.derby.iapi.reference.DRDAConstants;
+
 class DssConstants {
-    static final int MAX_DSS_LEN = 32767;
+    static final int MAX_DSS_LEN = DRDAConstants.DATA_STREAM_STRUCTURE_MAX_LENGTH;
 
     // Registered SNA GDS identifier indicating DDM data (xD0 for DDM data).
     static final int GDS_ID = 0xD0;

@@ -4943,6 +4943,19 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <arg>value</arg>
             </msg>
 
+            <msg>
+                <name>XN020.S</name>
+                <text>Error marshalling or unmarshalling a user defined type: {0}</text>
+                <arg>messageDetail</arg>
+            </msg>
+
+            <msg>
+                <name>XN021.S</name>
+                <text>An object of type {0} cannot be cast to an object of type {1}.</text>
+                <arg>sourceClassName</arg>
+                <arg>targetClassName</arg>
+            </msg>
+
         </family>
 
 

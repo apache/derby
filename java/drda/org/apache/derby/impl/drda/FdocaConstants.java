@@ -129,10 +129,11 @@ class FdocaConstants
 	 * Map jdbctype to fdoca drda type
 	 * @param jdbcType - Jdbc type for mappingy
 	 * @param nullable - true if type is nullable
+	 * @param appRequester - state variable for the connection
 	 * @param outlen - output parameter with length of type.
 	 * @return standard drdaTypeLength. -1 if we don't know.
 	 **/
-	protected static int mapJdbcTypeToDrdaType(int jdbcType, boolean nullable,
+	protected static int mapJdbcTypeToDrdaType(int jdbcType, boolean nullable, AppRequester appRequester,
 											   int[] outlen)
 		throws SQLException
 	{
@@ -195,8 +196,18 @@ class FdocaConstants
 				// we will just convert a java object to a string
 				// since jcc doesn't support it.
 			case java.sql.Types.JAVA_OBJECT:
-				drdaType = DRDAConstants.DRDA_TYPE_NLONG;
-				outlen[0] = LONGVARCHAR_MAX_LEN;
+                //boolean b = false;
+                //if ( b )
+                if ( appRequester.supportsUDTs() )
+                {
+                    drdaType = DRDAConstants.DRDA_TYPE_NUDT;
+                    outlen[0] = -1;
+                }
+                else
+                {
+                    drdaType = DRDAConstants.DRDA_TYPE_NLONG;
+                    outlen[0] = LONGVARCHAR_MAX_LEN;
+                }
 				break;
 			case java.sql.Types.LONGVARCHAR:
 					drdaType = DRDAConstants.DRDA_TYPE_NLONG;

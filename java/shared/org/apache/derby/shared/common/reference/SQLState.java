@@ -1596,6 +1596,8 @@ public interface SQLState {
     String NET_PREMATURE_EOS                                        = "XN017.S";
     String NET_READER_LENGTH_TOO_SMALL                              = "XN018.S";
     String NET_XARETVAL_ERROR                                       = "XN019.S";
+    String NET_MARSHALLING_UDT_ERROR                     = "XN020.S";
+    String NET_UDT_COERCION_ERROR                               = "XN021.S";
     
     // XML - Derby-specific XML errors not covered by
     // SQL standard.

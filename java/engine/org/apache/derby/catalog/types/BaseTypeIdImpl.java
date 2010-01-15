@@ -39,6 +39,7 @@ import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.info.JVMInfo;
+import org.apache.derby.iapi.util.IdUtil;
 
 import java.sql.Types;
 
@@ -137,7 +138,7 @@ public class BaseTypeIdImpl implements Formatable
     public String   getSQLTypeName()
     {
         if ( schemaName == null ) { return unqualifiedName; }
-        else { return doubleQuote( schemaName ) + '.' + doubleQuote( unqualifiedName ); }
+        else { return IdUtil.mkQualifiedName( schemaName, unqualifiedName ); }
     }
 
     /** Get the schema name of this type. Non-null only for UDTs */
@@ -183,7 +184,7 @@ public class BaseTypeIdImpl implements Formatable
     {
         String retval = getSQLTypeName();
 
-        switch (formatId)
+        switch (getTypeFormatId())
         {
           case StoredFormatIds.BIT_TYPE_ID_IMPL:
           case StoredFormatIds.VARBIT_TYPE_ID_IMPL:
@@ -255,7 +256,39 @@ public class BaseTypeIdImpl implements Formatable
      */
     public int getTypeFormatId()
     {
-        return formatId;
+        if ( formatId != 0 ) { return formatId; }
+        else
+        {
+            //
+            // If you serialize this class outside the formatable machinery, you
+            // will lose the format id. This can happen if you pass one of these
+            // objects across the network. Here we recover the format id.
+            //
+            if ( "BOOLEAN".equals( unqualifiedName ) ) { return StoredFormatIds.BOOLEAN_TYPE_ID_IMPL; }
+            else if ( "BIGINT".equals( unqualifiedName ) ) { return StoredFormatIds.LONGINT_TYPE_ID_IMPL; }
+            else if ( "INTEGER".equals( unqualifiedName ) ) { return StoredFormatIds.INT_TYPE_ID_IMPL; }
+            else if ( "SMALLINT".equals( unqualifiedName ) ) { return StoredFormatIds.SMALLINT_TYPE_ID_IMPL; }
+            else if ( "TINYINT".equals( unqualifiedName ) ) { return StoredFormatIds.TINYINT_TYPE_ID_IMPL; }
+            else if ( "LONGINT".equals( unqualifiedName ) ) { return StoredFormatIds.LONGINT_TYPE_ID_IMPL; }
+            else if ( "DECIMAL".equals( unqualifiedName ) ) { return StoredFormatIds.DECIMAL_TYPE_ID_IMPL; }
+            else if ( "NUMERIC".equals( unqualifiedName ) ) { return StoredFormatIds.DECIMAL_TYPE_ID_IMPL; }
+            else if ( "DOUBLE".equals( unqualifiedName ) ) { return StoredFormatIds.DOUBLE_TYPE_ID_IMPL; }
+            else if ( "REAL".equals( unqualifiedName ) ) { return StoredFormatIds.REAL_TYPE_ID_IMPL; }
+            else if ( "REF".equals( unqualifiedName ) ) { return StoredFormatIds.REF_TYPE_ID_IMPL; }
+            else if ( "CHAR".equals( unqualifiedName ) ) { return StoredFormatIds.CHAR_TYPE_ID_IMPL; }
+            else if ( "VARCHAR".equals( unqualifiedName ) ) { return StoredFormatIds.VARCHAR_TYPE_ID_IMPL; }
+            else if ( "LONG VARCHAR".equals( unqualifiedName ) ) { return StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL; }
+            else if ( "CLOB".equals( unqualifiedName ) ) { return StoredFormatIds.CLOB_TYPE_ID_IMPL; }
+            else if ( "CHAR FOR BIT DATA".equals( unqualifiedName ) ) { return StoredFormatIds.BIT_TYPE_ID_IMPL; }
+            else if ( "VARCHAR FOR BIT DATA".equals( unqualifiedName ) ) { return StoredFormatIds.VARBIT_TYPE_ID_IMPL; }
+            else if ( "LONG VARCHAR FOR BIT DATA".equals( unqualifiedName ) ) { return StoredFormatIds.LONGVARBIT_TYPE_ID_IMPL; }
+            else if ( "BLOB".equals( unqualifiedName ) ) { return StoredFormatIds.BLOB_TYPE_ID_IMPL; }
+            else if ( "DATE".equals( unqualifiedName ) ) { return StoredFormatIds.DATE_TYPE_ID_IMPL; }
+            else if ( "TIME".equals( unqualifiedName ) ) { return StoredFormatIds.TIME_TYPE_ID_IMPL; }
+            else if ( "TIMESTAMP".equals( unqualifiedName ) ) { return StoredFormatIds.TIMESTAMP_TYPE_ID_IMPL; }
+            else if ( "XML".equals( unqualifiedName ) ) { return StoredFormatIds.XML_TYPE_ID_IMPL; }
+            else { return 0; }
+        }
     }
 
     /**
@@ -310,7 +343,7 @@ public class BaseTypeIdImpl implements Formatable
 
     private void setTypeIdSpecificInstanceVariables()
     {
-        switch (formatId)
+        switch (getTypeFormatId())
         {
           case StoredFormatIds.BOOLEAN_TYPE_ID_IMPL:
               schemaName = null;
@@ -441,7 +474,7 @@ public class BaseTypeIdImpl implements Formatable
           default:
                 if (SanityManager.DEBUG)
                 {
-                        SanityManager.THROWASSERT("Unexpected formatId " + formatId);
+                    SanityManager.THROWASSERT("Unexpected formatId " + getTypeFormatId());
                 }
                 break;
         }

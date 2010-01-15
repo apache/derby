@@ -24,6 +24,7 @@ package org.apache.derby.impl.drda;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -34,9 +35,11 @@ import java.nio.charset.CodingErrorAction;
 import java.sql.SQLException;
 import java.util.Arrays;
 
+import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
 
 /**
 	The DDMWriter is used to write DRDA protocol.   The DRDA Protocol is
@@ -1088,6 +1091,51 @@ class DDMWriter
 	protected void writeLDString(String s) throws DRDAProtocolException
 	{
 		writeLDString(s,0);
+	}
+
+	/**
+	 * Write a value of a user defined type.
+	 *
+	 * @param val object to be written
+	 *
+	 * @exception DRDAProtocolException
+	 */
+	protected void writeUDT( Object val, int index ) throws DRDAProtocolException
+	{
+        // should not be called if val is null
+        if ( val == null )
+        {
+            SanityManager.THROWASSERT( "UDT is null" );
+        }
+
+        byte[] buffer = null;
+        int length = 0;
+
+        try {
+            DynamicByteArrayOutputStream dbaos = new DynamicByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream( dbaos );
+
+            oos.writeObject( val );
+
+            buffer = dbaos.getByteArray();
+            length = dbaos.getUsed();
+            
+        } catch(IOException e)
+        {
+            agent.markCommunicationsFailure
+                ( e,"DDMWriter.writeUDT()", "", e.getMessage(), "" );
+        }
+
+        if ( length > DRDAConstants.MAX_DRDA_UDT_SIZE )
+        {
+            agent.markCommunicationsFailure
+                ( "DDMWriter.writeUDT()", "User defined type is longer than " + DRDAConstants.MAX_DRDA_UDT_SIZE + " bytes.", "", "" );
+        }
+        else
+        {
+            writeShort( length );
+            writeBytes( buffer, 0, length );
+        }
 	}
 
 	/**

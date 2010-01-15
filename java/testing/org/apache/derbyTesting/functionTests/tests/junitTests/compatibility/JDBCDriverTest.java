@@ -1,4 +1,4 @@
-/*
+/**
 
    Derby - Class org.apache.derbyTesting.functionTests.tests.compatibility.JDBCDriverTest
 
@@ -255,10 +255,243 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		createSchema( conn );
 
 		datatypesTest( conn );
+        udtTest( conn );
 
 		close( conn );
 	}
 	
+	/////////////////////////////////////////////////////////////
+	//
+	//	TEST UDTs
+	//
+	/////////////////////////////////////////////////////////////
+
+	//
+	// Verify the metadata for user defined types.
+	//
+	private	void	udtTest( Connection conn )
+		throws Exception
+	{
+        //
+        // We must expect the wrong metadata in a network configuration
+        // unless both the client and the server are at 10.6 or higher.
+        // See DERBY-4491.
+        //
+        boolean correctBehavior =
+            usingEmbeddedClient() ||
+            (
+             getServerVersion().atLeast( DRB_10_6 ) &&
+             getDriverVersion().atLeast( DRB_10_6 )
+             );
+
+        String query = "select aliasinfo from sys.sysaliases";
+        
+        if ( correctBehavior )
+        {
+            String aliasInfoClassName = "org.apache.derby.catalog.AliasInfo";
+            
+            checkRSMD
+                (
+                 conn,
+                 query,
+                 aliasInfoClassName,
+                 15,
+                 java.sql.Types.JAVA_OBJECT,
+                 aliasInfoClassName,
+                 0,
+                 0
+                 );
+        }
+        else
+        {
+            checkRSMD
+                (
+                 conn,
+                 query,
+                 "byte[]",
+                 65400,
+                 java.sql.Types.LONGVARBINARY,
+                 "LONG VARCHAR FOR BIT DATA",
+                 32700,
+                 0
+                 );
+        }
+
+
+        if ( serverSupportsUDTs() )
+        {
+            query = "select a from t_price";
+            PreparedStatement ps = conn.prepareStatement( query );
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            Object price = rs.getObject( 1 );
+            String actualClassName = price.getClass().getName();
+            rs.close();
+            ps.close();
+
+            if ( correctBehavior )
+            {
+                String priceClassName = "org.apache.derbyTesting.functionTests.tests.lang.Price";
+                checkRSMD
+                    (
+                     conn,
+                     query,
+                     priceClassName,
+                     15,
+                     java.sql.Types.JAVA_OBJECT,
+                     "\"APP\".\"PRICE\"",
+                     0,
+                     0
+                     );
+
+                assertEquals( priceClassName, actualClassName );
+            }
+            else
+            {
+                checkRSMD
+                    (
+                     conn,
+                     query,
+                     "byte[]",
+                     65400,
+                     java.sql.Types.LONGVARBINARY,
+                     "LONG VARCHAR FOR BIT DATA",
+                     32700,
+                     0
+                     );
+                
+                assertEquals( "java.lang.String", actualClassName );
+            }
+
+            query = "insert into t_price( a ) values ( ? )";
+            
+            if ( correctBehavior )
+            {
+                checkPMD
+                    (
+                     conn,
+                     query,
+                     "org.apache.derbyTesting.functionTests.tests.lang.Price",
+                     java.sql.Types.JAVA_OBJECT,
+                     "\"APP\".\"PRICE\"",
+                     0,
+                     0
+                     );
+            }
+            else
+            {
+                checkPMD
+                    (
+                     conn,
+                     query,
+                     "byte[]",
+                     java.sql.Types.LONGVARBINARY,
+                     "LONG VARCHAR FOR BIT DATA",
+                     32700,
+                     0
+                     );
+            }
+
+            //
+            // Should only be able to stuff an object into the column if both
+            // the client and server are at 10.6 or higher.
+            //
+            ps = conn.prepareStatement( query );
+            byte[] someBytes = new byte[] { (byte) 1, (byte) 2, (byte) 3 };
+            ByteArrayInputStream bais = new ByteArrayInputStream( someBytes );
+            
+            try {
+                ps.setObject( 1, org.apache.derbyTesting.functionTests.tests.lang.Price.makePrice() );
+                ps.executeUpdate();
+
+                if ( !correctBehavior ) { fail( "setObject( Price ) unexpectedly worked." ); }
+            }
+            catch (SQLException se)
+            {
+                if ( correctBehavior ) { fail( "setObject( Price ) unexpectedly failed." ); }
+            }
+            try {
+                ps.setObject( 1, someBytes );
+                ps.executeUpdate();
+
+                fail( "setObject( byte[] ) unexpectedly worked." );
+            }
+            catch (SQLException se) {}
+            try {
+                ps.setBytes( 1, someBytes );
+                ps.executeUpdate();
+
+                fail( "setBytes( byte[] ) unexpectedly worked." );
+            }
+            catch (SQLException se) {}
+            try {
+                ps.setBinaryStream( 1, bais, 3 );
+                ps.executeUpdate();
+
+                fail( "setBinaryStream( InputStream ) unexpectedly worked." );
+            }
+            catch (SQLException se) {}
+
+            ps.close();
+        }
+    }
+    
+    /**
+     * Check the ResultSetMetaData for a query whose first column is a UDT.
+     */
+    private void checkRSMD
+        (
+         Connection conn,
+         String query,
+         String expectedClassName,
+         int expectedDisplaySize,
+         int expectedJDBCType,
+         String expectedSQLTypeName,
+         int expectedPrecision,
+         int expectedScale
+         ) throws Exception
+    {
+        PreparedStatement ps = conn.prepareStatement( query );
+        ResultSet rs = ps.executeQuery();
+        ResultSetMetaData rsmd = rs.getMetaData();
+
+        assertEquals( expectedClassName, rsmd.getColumnClassName( 1 ) );
+        assertEquals( expectedDisplaySize , rsmd.getColumnDisplaySize( 1 ));
+        assertEquals( expectedJDBCType, rsmd.getColumnType( 1 ) );
+        assertEquals( expectedSQLTypeName, rsmd.getColumnTypeName( 1 ) );
+        assertEquals( expectedPrecision, rsmd.getPrecision( 1 ) );
+        assertEquals( expectedScale, rsmd.getScale( 1 ) );
+
+        rs.close();
+        ps.close();
+    }
+    
+    /**
+     * Check the ParameterMetaData for a statement whose first parameter is a UDT.
+     */
+    private void checkPMD
+        (
+         Connection conn,
+         String query,
+         String expectedClassName,
+         int expectedJDBCType,
+         String expectedSQLTypeName,
+         int expectedPrecision,
+         int expectedScale
+         ) throws Exception
+    {
+        PreparedStatement ps = conn.prepareStatement( query );
+        ParameterMetaData pmd = ps.getParameterMetaData();
+
+        assertEquals( pmd.getParameterClassName( 1 ), expectedClassName );
+        assertEquals( pmd.getParameterType( 1 ), expectedJDBCType );
+        assertEquals( pmd.getParameterTypeName( 1 ), expectedSQLTypeName );
+        assertEquals( pmd.getPrecision( 1 ), expectedPrecision );
+        assertEquals( pmd.getScale( 1 ), expectedScale );
+
+        ps.close();
+    }
+
 	/////////////////////////////////////////////////////////////
 	//
 	//	TEST DATATYPES
@@ -799,6 +1032,8 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		throws Exception
 	{
 		createTable( conn, ALL_TYPES_TABLE, ALL_TYPES );
+
+        createUDTObjects( conn );
 	}
 
 	//
@@ -838,6 +1073,33 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		close( ps );
 	}
 
+    //
+    // Create an ANSI UDT and a table with that type of column--
+    // if the server is at 10.6 or higher.
+    //
+    private void createUDTObjects( Connection conn ) throws Exception
+    {
+        if ( !serverSupportsUDTs() ) { return; }
+
+        PreparedStatement ps;
+
+        ps = conn.prepareStatement( "create type price external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        ps.execute();
+        ps.close();
+
+        ps = conn.prepareStatement( "create function makePrice( ) returns price language java parameter style java no sql external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.makePrice'\n" );
+        ps.execute();
+        ps.close();
+
+        ps = conn.prepareStatement( "create table t_price( a price )\n" );
+        ps.execute();
+        ps.close();
+
+        ps = conn.prepareStatement( "insert into t_price( a ) values ( makePrice() )\n" );
+        ps.execute();
+        ps.close();
+    }
+
 
 	//
 	// Helper methods for declaring a table.
@@ -864,7 +1126,21 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	private	void	dropSchema( Connection conn )
 	{
 		dropTable( conn, ALL_TYPES_TABLE );
+        dropUDTObjects( conn );
 	}
+
+    //
+    // Drop objects needed by UDT tests. We only do this if the server
+    // is at 10.6 or higher.
+    //
+    private void dropUDTObjects( Connection conn )
+    {
+        if ( !serverSupportsUDTs() ) { return; }
+
+        dropFunction( conn, "MAKEPRICE" );
+        dropTable( conn, "T_PRICE" );
+        dropUDT( conn, "PRICE" );
+    }
 
 	//
 	// Logic for stuffing a data value into a column, given its type.

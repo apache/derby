@@ -22,31 +22,44 @@
 package org.apache.derby.shared.common.reference;
 import java.sql.ParameterMetaData;
 /**
+        <P>
         This class contains public statics that map directly
         to the new public statics in the jdbc 3.0 classes.
         By providing an intermediary class, we can use the
         same statics without having to import the jdbc 3.0 classes
         into other classes.
+        </P>
 
 
         <P>
+        This class also contains some constants shared by the network server and client.
+        </P>
+
+        <P>
         This class should not be shipped with the product.
+        </P>
 
         <P>
         This class has no methods, all it contains are constants
         are public, static and final since they are declared in an interface.
+        </P>
 */
 
 public interface JDBC30Translation {
 
-        /*
-        ** public statics from 3.0 version of java.sql.ParameterMetaData
-        */
-        public static final int PARAMETER_NO_NULLS = ParameterMetaData.parameterNoNulls;
-        public static final int PARAMETER_NULLABLE = ParameterMetaData.parameterNullable;
-        public static final int PARAMETER_NULLABLE_UNKNOWN = ParameterMetaData.parameterNullableUnknown;
-        public static final int PARAMETER_MODE_UNKNOWN = ParameterMetaData.parameterModeUnknown;
-        public static final int PARAMETER_MODE_IN = ParameterMetaData.parameterModeIn;
-        public static final int PARAMETER_MODE_IN_OUT = ParameterMetaData.parameterModeInOut;
-        public static final int PARAMETER_MODE_OUT = ParameterMetaData.parameterModeOut;
+    /*
+    ** public statics from 3.0 version of java.sql.ParameterMetaData
+    */
+    public static final int PARAMETER_NO_NULLS = ParameterMetaData.parameterNoNulls;
+    public static final int PARAMETER_NULLABLE = ParameterMetaData.parameterNullable;
+    public static final int PARAMETER_NULLABLE_UNKNOWN = ParameterMetaData.parameterNullableUnknown;
+    public static final int PARAMETER_MODE_UNKNOWN = ParameterMetaData.parameterModeUnknown;
+    public static final int PARAMETER_MODE_IN = ParameterMetaData.parameterModeIn;
+    public static final int PARAMETER_MODE_IN_OUT = ParameterMetaData.parameterModeInOut;
+    public static final int PARAMETER_MODE_OUT = ParameterMetaData.parameterModeOut;
+
+    // Constants shared by network client and server
+    public static final int DEFAULT_COLUMN_DISPLAY_SIZE = 15;
+    public static final int UNKNOWN_SCALE = 0;
+    public static final int UNKNOWN_PRECISION = 0;
 }

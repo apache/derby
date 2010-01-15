@@ -1042,7 +1042,7 @@ public class CompatibilityCombinations extends BaseTestCase
             );
             DEBUG("************** Do .start().");
             serverThread.start();
-            pingServer(5); // Wait for the server to come up in a reasonable time....
+            pingServer(1, envElements); // Wait for the server to come up in a reasonable time....
             serverThread.join();
             DEBUG("************** Done .join().");
         }
@@ -1173,27 +1173,32 @@ public class CompatibilityCombinations extends BaseTestCase
      * come up in a reasonable amount of time, (re-)throw the
      * final exception.
      * </p>
-     * @param iterations How many times to try pinging the server to see if it is running.
-     * Sleeps <CODE>SLEEP_TIME_MILLIS</CODE> between tries.
+     * @param iterations How many times to try pinging the server to see if it is running. Sleeps <CODE>SLEEP_TIME_MILLIS</CODE> between tries.
+     * @param serverEnvironment Paths used in bringing up server
      * @throws java.lang.Exception .
      */
     // Copied from org.apache.derbyTesting.functionTests.tests.junitTests.compatibility.Pinger
-    private	void	pingServer( int iterations )
+    private	void	pingServer( int iterations, String[] serverEnvironment )
     throws Exception
     {
         DEBUG("+++ pingServer");
-        ping( new NetworkServerControl(), iterations );
+        ping( new NetworkServerControl(), iterations, serverEnvironment );
         DEBUG("--- pingServer");
     }
     
-    
-  private	void	ping( NetworkServerControl controller, int iterations )
+    /**
+     * It used to be possible to ping down-rev servers using an up-rev NetworkServerControl.
+     * This is no longer possible. So we will just take it on faith that the server comes up after
+     * a decent interval.
+     */
+    private	void	ping( NetworkServerControl controller, int iterations, String[] serverEnvironment )
     throws Exception
     {
         Exception	finalException = null;
         
         for ( int i = 0; i < iterations; i++ )
         {
+            /*
             try
             {
                 controller.ping();
@@ -1202,12 +1207,22 @@ public class CompatibilityCombinations extends BaseTestCase
             }
             catch (Exception e)
           { finalException = e; }
+            */
             
             Thread.sleep( SLEEP_TIME_MILLIS );
         }
-        
-        System.out.println( "Server did not come up: " + finalException.getMessage() );
+
+        /*
+        StringBuffer buffer = new StringBuffer();
+        buffer.append( "Server did not come up: " + finalException.getMessage() );
+        int pathCount = serverEnvironment.length;
+        for ( int i = 0; i < pathCount; i++ )
+        {
+            buffer.append( "\n\t" + serverEnvironment[ i ] );
+        }
+        System.out.println( buffer.toString() );
         finalException.printStackTrace();
+        */
         
     }
     

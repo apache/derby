@@ -23,9 +23,13 @@ package org.apache.derby.client.net;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
+import org.apache.derby.shared.common.io.DynamicByteArrayOutputStream;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.reference.DRDAConstants;
 
 import java.io.BufferedInputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 
 import java.io.IOException;
@@ -1604,10 +1608,63 @@ public class Request {
     // ldSize and bytes.length may not be the same.  this is true
     // when writing graphic ld strings.
     private final void writeLDBytesX(int ldSize, byte[] bytes) {
+        writeLDBytesXSubset( ldSize, bytes.length, bytes );
+    }
+
+    // private helper method for writing just a subset of a byte array
+    private final void writeLDBytesXSubset( int ldSize, int bytesToCopy, byte[] bytes )
+    {
         bytes_[offset_++] = (byte) ((ldSize >>> 8) & 0xff);
         bytes_[offset_++] = (byte) (ldSize & 0xff);
-        System.arraycopy(bytes, 0, bytes_, offset_, bytes.length);
-        offset_ += bytes.length;
+        System.arraycopy( bytes, 0, bytes_, offset_, bytesToCopy );
+        offset_ += bytesToCopy;
+    }
+
+    final void writeUDT( Object val ) throws SqlException
+    {
+        // should not be called if val is null
+        if ( val == null )
+        {
+            SanityManager.THROWASSERT( "UDT is null" );
+        }
+
+        byte[] buffer = null;
+        int length = 0;
+        
+        try
+        {
+            DynamicByteArrayOutputStream dbaos = new DynamicByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream( dbaos );
+
+            oos.writeObject( val );
+
+            buffer = dbaos.getByteArray();
+            length = dbaos.getUsed();
+        }
+        catch (Exception e)
+        {
+            throw new SqlException
+                (
+                 netAgent_.logWriter_, 
+                 new ClientMessageId (SQLState.NET_MARSHALLING_UDT_ERROR),
+                 e.getMessage(),
+                 e
+                 );
+        }
+
+        if ( length > DRDAConstants.MAX_DRDA_UDT_SIZE )
+        {
+            throw new SqlException
+                (
+                 netAgent_.logWriter_, 
+                 new ClientMessageId(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+                 Integer.toString( DRDAConstants.MAX_DRDA_UDT_SIZE ),
+                 val.getClass().getName()
+                 );
+        }
+
+        ensureLength( offset_ + length + 2 );
+        writeLDBytesXSubset( length, length, buffer );
     }
 
     // does it follows

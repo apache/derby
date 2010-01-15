@@ -30,6 +30,7 @@ import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.types.StringDataValue;
+import org.apache.derby.shared.common.reference.JDBC30Translation;
                              
 public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 {
@@ -135,6 +136,9 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 		this.typeId = typeId;
 		this.isNullable = isNullable;
 		this.maximumWidth = maximumWidth;
+
+        this.scale = JDBC30Translation.UNKNOWN_SCALE;
+        this.precision = JDBC30Translation.UNKNOWN_PRECISION;
 	}
 
 	/**

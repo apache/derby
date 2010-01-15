@@ -2076,19 +2076,26 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
     // SQLUDTGRP : EARLY FDOCA GROUP
     // SQL User-Defined Data Group Description
     //
-    // FORMAT FOR SQLAM >= 7
-    //   SQLUDTXTYPE; PROTOCOL TYPE I4; ENVLID 0X02; Length Override 4
-    //   SQLUDTRDB; PROTOCOL TYPE VCS; ENVLID 0X32; Length Override 255
-    //   SQLUDTSCHEMA_m; PROTOCOL TYPE VCM; ENVLID 0X3E; Length Override 255
-    //   SQLUDTSCHEMA_s; PROTOCOL TYPE VCS; ENVLID 0X32; Length Override 255
-    //   SQLUDTNAME_m; PROTOCOL TYPE VCM; ENVLID 0X3E; Length Override 255
-    //   SQLUDTNAME_s; PROTOCOL TYPE VCS; ENVLID 0X32; Length Override 255
+    // For an explanation of the format, see the header comment on
+    // DRDAConnThread.writeSQLUDTGRP().
+    //
     private void parseSQLUDTGRP(ColumnMetaData columnMetaData,
-                                int columnNumber) throws DisconnectException {
-        if (readFastUnsignedByte() == CodePoint.NULLDATA) {
-            return;
-        }
+                                int columnNumber) throws DisconnectException
+    {
+        int jdbcType = columnMetaData.types_[columnNumber];
 
+        if ( !(jdbcType == Types.JAVA_OBJECT) || !netAgent_.netConnection_.serverSupportsUDTs() )
+        {
+            if (readFastUnsignedByte() == CodePoint.NULLDATA) { return; }
+        }
+        else
+        {
+            String typeName = parseFastVCMorVCS();
+            String className = parseFastVCMorVCS();
+
+            columnMetaData.sqlUDTname_[columnNumber] = typeName;
+            columnMetaData.sqlUDTclassName_[columnNumber] = className;
+        }
     }
 
     // SQLDOPTGRP : EARLY FDOCA GROUP

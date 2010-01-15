@@ -65,6 +65,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 	private	static	final	String	TABLE = "table";
 	private	static	final	String	FUNCTION = "function";
 	private	static	final	String	PROCEDURE = "procedure";
+	private	static	final	String	TYPE = "type";
 	
 	//
 	// These are properties for the Derby connection URL.
@@ -513,7 +514,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 	 */
 	protected	static	void	dropTable( Connection conn, String name )
 	{
-		dropSchemaObject( conn, TABLE, name );
+		dropSchemaObject( conn, TABLE, name, false );
 	}
 
 	/**
@@ -527,7 +528,7 @@ public	class	DerbyJUnitTest	extends	TestCase
 	 */
 	protected	static	void	dropFunction( Connection conn, String name )
 	{
-		dropSchemaObject( conn, FUNCTION, name );
+		dropSchemaObject( conn, FUNCTION, name, false );
 	}
 
 	/**
@@ -541,7 +542,21 @@ public	class	DerbyJUnitTest	extends	TestCase
 	 */
 	protected	static	void	dropProcedure( Connection conn, String name )
 	{
-		dropSchemaObject( conn, PROCEDURE, name );
+		dropSchemaObject( conn, PROCEDURE, name, false );
+	}
+
+	/**
+	 * <p>
+	 * Drop a UDT regardless of whether it exists. If the UDT does
+	 * not exist, don't log an error unless
+	 * running in debug mode. This method is to be used for reinitializing
+	 * a schema in case a previous test run failed to clean up after itself.
+	 * Do not use this method if you need to verify that the UDT really exists.
+	 * </p>
+	 */
+	protected	static	void	dropUDT( Connection conn, String name )
+	{
+		dropSchemaObject( conn, TYPE, name, true );
 	}
 
 	/**
@@ -553,12 +568,14 @@ public	class	DerbyJUnitTest	extends	TestCase
 	 * Do not use this method if you need to verify that the object really exists.
 	 * </p>
 	 */
-	protected	static	void	dropSchemaObject( Connection conn, String genus, String objectName )
+	protected	static	void	dropSchemaObject( Connection conn, String genus, String objectName, boolean restrict )
 	{
 		PreparedStatement	ps = null;
 		
 		try {
-			ps = prepare( conn, "drop " + genus + " " + objectName );
+            String text = "drop " + genus + " " + objectName;
+            if ( restrict ) { text = text + " restrict"; }
+			ps = prepare( conn, text );
 
 			ps.execute();
 		}

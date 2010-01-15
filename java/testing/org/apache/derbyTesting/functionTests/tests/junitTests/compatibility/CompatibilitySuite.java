@@ -53,11 +53,16 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 	public	static	final	Version	DRB_10_0 = new Version( 10, 0 );
 	public	static	final	Version	DRB_10_1 = new Version( 10, 1 );
 	public	static	final	Version	DRB_10_2 = new Version( 10, 2 );
+	public	static	final	Version	DRB_10_3 = new Version( 10, 3 );
+	public	static	final	Version	DRB_10_4 = new Version( 10, 4 );
+	public	static	final	Version	DRB_10_5 = new Version( 10, 5 );
+	public	static	final	Version	DRB_10_6 = new Version( 10, 6 );
 
 	// Supported VM versions.
 	public	static	final	Version	VM_1_3 = new Version( 1, 3 );
 	public	static	final	Version	VM_1_4 = new Version( 1, 4 );
 	public	static	final	Version	VM_1_5 = new Version( 1, 5 );
+	public	static	final	Version	VM_1_6 = new Version( 1, 6 );
 
 	public	static	final	String	SERVER_VERSION_FUNCTION = "getVMVersion";
 	
@@ -179,6 +184,16 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 	 * </p>
 	 */
 	public	Version	getClientVMVersion() { return _clientVMLevel; }
+
+    /**
+     * <p>
+     *  Report whether the server supports ANSI UDTs.
+     * </p>
+     */
+    public boolean serverSupportsUDTs()
+    {
+        return getServerVersion().atLeast( DRB_10_6 );
+    }
 
 	/////////////////////////////////////////////////////////////
 	//

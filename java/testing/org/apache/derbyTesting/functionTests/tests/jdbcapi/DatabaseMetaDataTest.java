@@ -14,7 +14,8 @@
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
+   See the License for the specific language go1481
+   verning permissions and
    limitations under the License.
 
  */
@@ -1473,7 +1474,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * for a SELECT * from the table. All columns in
      * all tables are checked.
      */
-    public void testGetColumnsReadOnly() throws SQLException
+    public void testGetColumnsReadOnly() throws Exception
     {
         ResultSet[] rs = getColumns(null, null, null, null);
         for ( int j =0 ; j<2 ; j++) {
@@ -1487,7 +1488,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void testGetColumnsModify() throws SQLException {
+    public void testGetColumnsModify() throws Exception {
            
         // skip XML datatype as our cross check with
         // ResultSetMetaData will fail
@@ -1746,7 +1747,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      */
     private void crossCheckGetColumnsAndResultSetMetaData(ResultSet rs,
             boolean partial, int odbc)
-    throws SQLException
+    throws Exception
     {
         Statement s = createStatement();
         while (rs.next())
@@ -1798,11 +1799,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      *    in using BUFFER_LENGTH (ODBC) or no(JDBC).
      * @throws SQLException
      */
-    public static void crossCheckGetColumnRowAndResultSetMetaData(
+    public void crossCheckGetColumnRowAndResultSetMetaData(
             ResultSet rs, ResultSetMetaData rsmdt, int odbc)
-        throws SQLException
+        throws Exception
     {
         int col = rs.getInt("ORDINAL_POSITION");
+        Version dataVersion = getDataVersion( getConnection() );
         
         assertEquals("RSMD.getCatalogName",
                 rsmdt.getCatalogName(col), rs.getString("TABLE_CAT"));
@@ -1829,7 +1831,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             assertEquals("DATA_TYPE",
                     Types.SMALLINT, rsmdt.getColumnType(col));
         }
-        else if (dmdColumnType == Types.JAVA_OBJECT && usingDerbyNetClient())
+        else if (dmdColumnType == Types.JAVA_OBJECT && usingDerbyNetClient()
+                 &&  ( dataVersion.compareTo( new Version( 10, 6, 0, 0 ) ) < 0 ) )
         {
             // DMD returns JAVA_OBJECT
             // RSMD returns LONGVARBINARY!                    

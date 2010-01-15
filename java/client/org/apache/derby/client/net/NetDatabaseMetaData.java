@@ -36,6 +36,9 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
      */
     private boolean supportsSessionDataCaching_;
 
+    /** True if the server supports UDTs */
+    private boolean supportsUDTs_;
+    
     public NetDatabaseMetaData(NetAgent netAgent, NetConnection netConnection) {
         // Consider setting product level during parse
         super(netAgent, netConnection, new ProductLevel(netConnection.productID_,
@@ -94,6 +97,9 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
 
         supportsSessionDataCaching_ =
                 productLevel_.greaterThanOrEqualTo(10, 4, 0);
+
+        supportsUDTs_ =
+                productLevel_.greaterThanOrEqualTo(10, 6, 0);
     }
 
     /**
@@ -115,6 +121,14 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
      * @return true if the server supports this
      */
     final boolean serverSupportsSessionDataCaching() {
+        return supportsSessionDataCaching_;
+    }
+
+    /**
+     * Check if server supports UDTs
+     * @return true if the server supports this
+     */
+    final boolean serverSupportsUDTs() {
         return supportsSessionDataCaching_;
     }
 }

@@ -23,8 +23,10 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
 
 import junit.framework.Test;
@@ -88,7 +90,7 @@ public class UDTTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(UDTTest.class);
+        TestSuite suite = (TestSuite) TestConfiguration.defaultSuite(UDTTest.class);
         Test        result = new CleanDatabaseTestSetup( suite );
 
         return result;
@@ -194,10 +196,10 @@ public class UDTTest  extends GeneratedColumnsHelper
         assertResults
             (
              conn,
-             "select getCurrencyCode( totalPrice ), getAmount( totalPrice ), getTimeInstant( totalPrice ) from orders",
+             "select getCurrencyCode( totalPrice ), getTimeInstant( totalPrice ) from orders",
              new String[][]
              {
-                 { "USD" ,         "9.99000" ,        "2009-10-16 14:24:43.0" },
+                 { "USD" ,         "2009-10-16 14:24:43.0" },
              },
              false
              );
@@ -644,6 +646,79 @@ public class UDTTest  extends GeneratedColumnsHelper
 
     }
     
+    /**
+     * <p>
+     * Check result set metadata for UDT columns.
+     * </p>
+     */
+    public void test_09_resultSetMetaData() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create type price_09_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement( conn, "create table t_09_a( a price_09_a )\n" );
+
+        // ANSI UDT
+        checkRSMD
+            (
+             conn,
+             "select a from t_09_a\n",
+             "org.apache.derbyTesting.functionTests.tests.lang.Price",
+             15,
+             java.sql.Types.JAVA_OBJECT,
+             "\"APP\".\"PRICE_09_A\"",
+             0,
+             0
+             );
+
+        // old-style objects in Derby system tables do not have
+        // schema-qualified type names
+        checkRSMD
+            (
+             conn,
+             "select aliasinfo from sys.sysaliases\n",
+             "org.apache.derby.catalog.AliasInfo",
+             15,
+             java.sql.Types.JAVA_OBJECT,
+             "org.apache.derby.catalog.AliasInfo",
+             0,
+             0
+             );
+    }
+
+    /**
+     * <p>
+     * Check parameter metadata for UDT parameters.
+     * </p>
+     */
+    public void test_10_parameterMetaData() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create type price_10_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
+        goodStatement( conn, "create table t_10_a( a price_09_a )\n" );
+
+        // ANSI UDT
+        checkPMD
+            (
+             conn,
+             "insert into t_10_a( a ) values ( ? )\n",
+             "org.apache.derbyTesting.functionTests.tests.lang.Price",
+             java.sql.Types.JAVA_OBJECT,
+             "\"APP\".\"PRICE_09_A\"",
+             0,
+             0
+             );
+
+        //
+        // I don't know of any way to create a statement with a parameter
+        // whose type is an old-style object from Derby's system tables.
+        // If you figure out how to trick Derby into letting you do that,
+        // this would be a good place to assert the shape of the parameter
+        // meta data for that statement.
+        //
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // PROCEDURES
@@ -652,6 +727,14 @@ public class UDTTest  extends GeneratedColumnsHelper
 
     public static void oneArgPriceProc( Price price1 ) {}
     public static void twoArgPriceProc( Price price1, Price price2 ) {}
+
+    public static void changeCurrencyCode( String newCurrencyCode, Price[] price )
+    {
+        Price oldPrice = price[ 0 ];
+        Price newPrice = new Price( newCurrencyCode, oldPrice.amount, oldPrice.timeInstant );
+
+        price[ 0 ] = newPrice;
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -701,6 +784,62 @@ public class UDTTest  extends GeneratedColumnsHelper
         ps.close();
 
         return retval;
+    }
+
+    /**
+     * Check the ResultSetMetaData for a query whose first column is a UDT.
+     */
+    private void checkRSMD
+        (
+         Connection conn,
+         String query,
+         String expectedClassName,
+         int expectedDisplaySize,
+         int expectedJDBCType,
+         String expectedSQLTypeName,
+         int expectedPrecision,
+         int expectedScale
+         ) throws Exception
+    {
+        PreparedStatement ps = conn.prepareStatement( query );
+        ResultSet rs = ps.executeQuery();
+        ResultSetMetaData rsmd = rs.getMetaData();
+
+        assertEquals( rsmd.getColumnClassName( 1 ), expectedClassName );
+        assertEquals( rsmd.getColumnDisplaySize( 1 ), expectedDisplaySize );
+        assertEquals( rsmd.getColumnType( 1 ), expectedJDBCType );
+        assertEquals( rsmd.getColumnTypeName( 1 ), expectedSQLTypeName );
+        assertEquals( rsmd.getPrecision( 1 ), expectedPrecision );
+        assertEquals( rsmd.getScale( 1 ), expectedScale );
+
+        rs.close();
+        ps.close();
+    }
+    
+    /**
+     * Check the ParameterMetaData for a statement whose first parameter is a UDT.
+     */
+    private void checkPMD
+        (
+         Connection conn,
+         String query,
+         String expectedClassName,
+         int expectedJDBCType,
+         String expectedSQLTypeName,
+         int expectedPrecision,
+         int expectedScale
+         ) throws Exception
+    {
+        PreparedStatement ps = conn.prepareStatement( query );
+        ParameterMetaData pmd = ps.getParameterMetaData();
+
+        assertEquals( pmd.getParameterClassName( 1 ), expectedClassName );
+        assertEquals( pmd.getParameterType( 1 ), expectedJDBCType );
+        assertEquals( pmd.getParameterTypeName( 1 ), expectedSQLTypeName );
+        assertEquals( pmd.getPrecision( 1 ), expectedPrecision );
+        assertEquals( pmd.getScale( 1 ), expectedScale );
+
+        ps.close();
     }
 
 }

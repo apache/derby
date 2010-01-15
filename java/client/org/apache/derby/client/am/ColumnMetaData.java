@@ -67,6 +67,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
     public String[] sqlLabel_;  // column label
     public short[] sqlUnnamed_;
     public String[] sqlComment_;
+    public String[] sqlUDTname_;
+    public String[] sqlUDTclassName_;
 
     //Data from SQLDXGRP
     public short[] sqlxKeymem_;
@@ -148,6 +150,9 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
 
         sqlName_ = new String[upperBound];
         sqlxParmmode_ = new short[upperBound];
+
+        sqlUDTname_ = new String[upperBound];
+        sqlUDTclassName_ = new String[upperBound];
     }
 
     protected void finalize() throws java.lang.Throwable {
@@ -312,6 +317,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return 8;
             case Types.TIMESTAMP:
                 return 26;
+            case Types.JAVA_OBJECT:
+                return JDBC30Translation.DEFAULT_COLUMN_DISPLAY_SIZE;
             case Types.BINARY:
             case Types.VARBINARY:
             case Types.LONGVARBINARY:
@@ -442,6 +449,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return 8;
             case Types.TIMESTAMP:
                 return 26;
+            case Types.JAVA_OBJECT:
+                return JDBC30Translation.UNKNOWN_PRECISION;
             default:
                 throw new SqlException(logWriter_, 
                 		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
@@ -603,6 +612,9 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             case DRDAConstants.DB2_SQLTYPE_NUMERIC:
             case DRDAConstants.DB2_SQLTYPE_NNUMERIC:
                 return "NUMERIC";
+            case DRDAConstants.DB2_SQLTYPE_FAKE_UDT:
+            case DRDAConstants.DB2_SQLTYPE_FAKE_NUDT:
+                return sqlUDTname_[ column - 1 ];
             default:
                 throw new SqlException(logWriter_, 
                 		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
@@ -715,6 +727,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
                 return "java.sql.Clob";
             case java.sql.Types.REF:
                 return "java.sql.Ref";
+            case java.sql.Types.JAVA_OBJECT:
+                return sqlUDTclassName_[ column - 1 ];
             default:
                 throw new SqlException(logWriter_, 
                 		new ClientMessageId (SQLState.UNSUPPORTED_TYPE));
@@ -833,6 +847,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             return Types.BLOB;
         case java.sql.Types.CLOB:
             return Types.CLOB;
+        case java.sql.Types.JAVA_OBJECT:
+            return Types.JAVA_OBJECT;
         case java.sql.Types.NULL:
         case java.sql.Types.OTHER:
             throw new SqlException(logWriter_, 
@@ -863,6 +879,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         sqlLabel_ = null;
         sqlUnnamed_ = null;
         sqlComment_ = null;
+        sqlUDTname_ = null;
+        sqlUDTclassName_ = null;
         sqlxKeymem_ = null;
         sqlxGenerated_ = null;
         sqlxParmmode_ = null;

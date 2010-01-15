@@ -1735,6 +1735,18 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     /**
+     * Check whether the server supports UDTs
+     * @return true if UDTs are supported
+     */
+    protected final boolean serverSupportsUDTs() {
+
+        NetDatabaseMetaData metadata =
+            (NetDatabaseMetaData) databaseMetaData_;
+
+        return metadata.serverSupportsUDTs();
+    }
+
+    /**
      * Checks whether the server supports locators for large objects.
      *
      * @return {@code true} if LOB locators are supported.

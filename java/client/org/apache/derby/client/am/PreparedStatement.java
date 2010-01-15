@@ -1000,7 +1000,7 @@ public class PreparedStatement extends Statement
         setInput(parameterIndex, x);
 
     }
-
+    
     /**
      * sets the parameter to the  Binary Stream object
      *
@@ -1420,7 +1420,14 @@ public class PreparedStatement extends Statement
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setObject", parameterIndex, x);
                 }
-                if (x instanceof String) {
+
+                int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
+
+                if ( paramType == java.sql.Types.JAVA_OBJECT )
+                {
+                    setUDTX( parameterIndex, x );
+                }
+                else if (x instanceof String) {
                     setString(parameterIndex, (String) x);
                 } else if (x instanceof Integer) {
                     setInt(parameterIndex, ((Integer) x).intValue());
@@ -1466,6 +1473,53 @@ public class PreparedStatement extends Statement
         {
             throw se.getSQLException();
         }            
+    }
+
+    /**
+     * Set a UDT parameter to an object value.
+     */
+    private void setUDTX(int parameterIndex, Object x) throws SqlException, SQLException
+    {
+        int paramType = getColumnMetaDataX().getColumnType(parameterIndex);
+        int expectedType = java.sql.Types.JAVA_OBJECT;
+        
+        if ( !( paramType == expectedType ) )
+        {
+            PossibleTypes.throw22005Exception
+                (agent_.logWriter_, expectedType, paramType );
+        }
+        
+        parameterMetaData_.clientParamtertype_[parameterIndex - 1] = expectedType;
+        if (x == null) {
+            setNullX(parameterIndex, expectedType );
+            return;
+        }
+
+        //
+        // Make sure that we are setting the parameter to an instance of the UDT.
+        //
+        
+        Throwable problem = null;
+        String sourceClassName = x.getClass().getName();
+        String targetClassName = getColumnMetaDataX().getColumnClassName(parameterIndex);
+
+        try {
+            Class targetClass = Class.forName( targetClassName );
+            if ( targetClass.isInstance( x ) )
+            {
+                setInput(parameterIndex, x);
+                return;
+            }
+        }
+        catch (ClassNotFoundException e) { problem = e; }
+
+        throw new SqlException
+            (
+             agent_.logWriter_,
+             new ClientMessageId( SQLState.NET_UDT_COERCION_ERROR ),
+             new Object[] { sourceClassName, targetClassName },
+             problem
+             );
     }
 
     public void setObject(int parameterIndex, Object x, int targetJdbcType) throws SQLException {
@@ -3068,23 +3122,6 @@ public class PreparedStatement extends Statement
                                         type ) >= 0;
             
         }
-        
-        /*
-        static SqlException throwLangDataTypeSetException( LogWriter logWriter, 
-                                                           int valType,
-                                                           int paramType)
-    
-            throws SqlException{
-            
-            throw new SqlException( logWriter,
-                                    new ClientMessageId(SQLState.LANG_DATA_TYPE_SET_MISMATCH) ,
-                                    new Object[]{ 
-                                        Types.getTypeString(valType),
-                                        Types.getTypeString(paramType) 
-                                    },
-                                    (Throwable) null);
-        }
-        */
         
         static SqlException throw22005Exception( LogWriter logWriter, 
                                                  int valType,

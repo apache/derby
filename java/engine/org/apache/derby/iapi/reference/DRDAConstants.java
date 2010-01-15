@@ -41,6 +41,9 @@ public	interface	DRDAConstants
 	//
 	public	static	final	String	DERBY_DRDA_SERVER_ID = "CSS";
 	public	static	final	String	DERBY_DRDA_CLIENT_ID = "DNC";
+
+    // Maximum size of a DDM block
+    public static final int DATA_STREAM_STRUCTURE_MAX_LENGTH = 32767;
 	
 	///////////////////////
 	//
@@ -126,6 +129,12 @@ public	interface	DRDAConstants
 	public	static final int DRDA_TYPE_NMDATALINK = 0x4F;
 
 	// --- Override LIDs 0x50 - 0xAF
+
+    // this type is shown in the DRDA spec, volume 1, in the
+    // section on SQLUDTGRP
+	public	static final int DRDA_TYPE_UDT = 0x50;
+	public	static final int DRDA_TYPE_NUDT = 0x51;
+    
 	public	static final int DRDA_TYPE_LOBBYTES = 0xC8;
 	public	static final int DRDA_TYPE_NLOBBYTES = 0xC9;
 	public	static final int DRDA_TYPE_LOBCSBCS = 0xCA;
@@ -141,7 +150,11 @@ public	interface	DRDAConstants
 	
 	// public	static final int DRDA_TYPE_BOOLEAN = 0xBE;
 	// public	static final int DRDA_TYPE_NBOOLEAN = 0xBF;
-	
+
+    // This is the maximum size which a udt can serialize to in order to
+    // be transported across DRDA
+    public static final int MAX_DRDA_UDT_SIZE = DATA_STREAM_STRUCTURE_MAX_LENGTH;
+    
 	///////////////////////
 	//
 	// DB2 datatypes
@@ -211,5 +224,9 @@ public	interface	DRDAConstants
 	// extensions to the db2 datatypes
     // public	static final  int DB2_SQLTYPE_BOOLEAN = 1000;     // BOOLEAN
     // public	static final  int DB2_SQLTYPE_NBOOLEAN = 1001;
+
+    // there is no DB2 type for UDTs. we invent one
+    public   static final int DB2_SQLTYPE_FAKE_UDT = 2000;
+    public   static final int DB2_SQLTYPE_FAKE_NUDT = 2001;
 
 }

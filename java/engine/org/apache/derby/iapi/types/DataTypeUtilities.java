@@ -23,6 +23,7 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
@@ -201,7 +202,7 @@ public abstract class DataTypeUtilities  {
 			default: 
 				// MaximumWidth is -1 when it is unknown.
 				int w = storageLength;
-				size = (w > 0 ? w : 15);
+				size = (w > 0 ? w : JDBC30Translation.DEFAULT_COLUMN_DISPLAY_SIZE);
 				break;
 		}
 		return size;

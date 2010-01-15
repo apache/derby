@@ -77,6 +77,8 @@ public class Types {
 
     public final static int CLOB = java.sql.Types.CLOB;          // 2005;
 
+    public final static int JAVA_OBJECT = java.sql.Types.JAVA_OBJECT;          // 2000;
+
     // hide the default constructor
     private Types() {
    }
@@ -169,6 +171,8 @@ public class Types {
             return Types.CLOB;
         case DRDAConstants.DB2_SQLTYPE_BLOB:    // large object bytes
             return java.sql.Types.BLOB;
+        case DRDAConstants.DB2_SQLTYPE_FAKE_UDT:    // user defined types
+            return java.sql.Types.JAVA_OBJECT;
         default:
             return 0;
         }

@@ -23,6 +23,7 @@ package org.apache.derby.impl.drda;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -4698,6 +4699,12 @@ class DRDAConnThread extends Thread {
 				ps.setBytes(i+1, paramVal);
 				break;
 			}
+			case DRDAConstants.DRDA_TYPE_NUDT:
+			{
+                Object paramVal = readUDT();
+				ps.setObject(i+1, paramVal);
+				break;
+			}
 			case DRDAConstants.DRDA_TYPE_NLOBBYTES:
 			case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
 			case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
@@ -4762,6 +4769,28 @@ class DRDAConnThread extends Thread {
 			}
 		}
 	}
+
+    /** Read a UDT from the stream */
+    private Object readUDT() throws DRDAProtocolException
+    {
+        int length = reader.readNetworkShort();	//protocol control data always follows big endian
+        if (SanityManager.DEBUG) { trace("===== udt param length is: " + length); }
+        byte[] bytes = reader.readBytes(length);
+        
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream( bytes );
+            ObjectInputStream ois = new ObjectInputStream( bais );
+
+            return ois.readObject();
+        }
+        catch (Exception e)
+        {
+            markCommunicationsFailure
+                ( e,"DRDAConnThread.readUDT()", "", e.getMessage(), "*" );
+            return null;
+        }
+    }
+
 
 	private long readLobLength(int extLenIndicator) 
 		throws DRDAProtocolException
@@ -4833,7 +4862,7 @@ class DRDAConnThread extends Thread {
 			if (sqlamLevel >= MGRLVL_7 &&
 				FdocaConstants.isNullable(drdaType))
 				checkNullability = true;
-	
+
 			try {	
 				final byte[] paramBytes;
 				final String paramString;
@@ -6597,7 +6626,7 @@ class DRDAConnThread extends Thread {
 												 (pmeta.isNullable(i) == JDBC30Translation.PARAMETER_NULLABLE));
 			int colType = (hasRs ? rsmeta.getColumnType(i) : pmeta.getParameterType(i));
 			int[] outlen = {-1};
-			int drdaType = FdocaConstants.mapJdbcTypeToDrdaType(colType,nullable,outlen);
+			int drdaType = FdocaConstants.mapJdbcTypeToDrdaType( colType, nullable, appRequester, outlen );
 				
 
 			boolean isDecimal = ((drdaType | 1) == DRDAConstants.DRDA_TYPE_NDECIMAL);
@@ -7028,7 +7057,7 @@ class DRDAConnThread extends Thread {
 					
 					if (stmt.isOutputParam(i)) {
 						int[] outlen = new int[1];
-						drdaType = FdocaConstants.mapJdbcTypeToDrdaType(stmt.getOutputParamType(i),true,outlen);
+						drdaType = FdocaConstants.mapJdbcTypeToDrdaType( stmt.getOutputParamType(i), true, appRequester, outlen );
 						precision = stmt.getOutputParamPrecision(i);
 						scale = stmt.getOutputParamScale(i);
                                                 
@@ -7352,9 +7381,9 @@ class DRDAConnThread extends Thread {
 			(pmeta.isNullable(jdbcElemNum) == JDBC30Translation.PARAMETER_NULLABLE);
 		
 		int sqlType = SQLTypes.mapJdbcTypeToDB2SqlType(elemType,
-													   nullable,
+													   nullable, appRequester,
 													   outlen);
-		
+
 		if (outlen[0] == -1) //some types not set
 		{
 			switch (elemType)
@@ -7461,13 +7490,68 @@ class DRDAConnThread extends Thread {
 	}
 
   
+	/**
+	 * Write SQLUDTGRP (SQL Descriptor User-Defined Type Group Descriptor)
+	 * 
+	 * This is the format from the DRDA spec, Volume 1, section 5.6.4.10.
+     * However, this format is not rich enough to carry the information needed
+     * by JDBC. This format does not have a subtype code for JAVA_OBJECT and
+     * this format does not convey the Java class name needed
+     * by ResultSetMetaData.getColumnClassName().
+	 *
+	 *   SQLUDXTYPE; DRDA TYPE I4; ENVLID 0x02; Length Override 4
+     *                        Constants which map to java.sql.Types constants DISTINCT, STRUCT, and REF.
+     *                        But DRDA does not define a constant which maps to java.sql.Types.JAVA_OBJECT.
+	 *   SQLUDTRDB; DRDA TYPE VCS; ENVLID 0x32; Length Override 255
+     *                       Database name.
+	 *   SQLUDTSCHEMA_m; DRDA TYPE VCM; ENVLID 0x3E; Length Override 255
+	 *   SQLUDTSCHEMA_s; DRDA TYPE VCS; ENVLID 0x32; Length Override 255
+     *                         Schema name. One of the above.
+	 *   SQLUDTNAME_m; DRDA TYPE VCM; ENVLID 0x3E; Length Override 255
+	 *   SQLUDTNAME_s; DRDA TYPE VCS; ENVLID 0x32; Length Override 255
+     *                         Unqualified UDT name. One of the above.
+	 *
+	 * Instead, we use the following format and only for communication between
+     * Derby servers and Derby clients which are both at version 10.6 or higher.
+     * For all other client/server combinations, we send null.
+	 *
+	 *   SQLUDTNAME_m; DRDA TYPE VCM; ENVLID 0x3E; Length Override 255
+	 *   SQLUDTNAME_s; DRDA TYPE VCS; ENVLID 0x32; Length Override 255
+     *                         Fully qualified UDT name. One of the above.
+	 *   SQLUDTCLASSNAME_m; DRDA TYPE VCM; ENVLID 0x3E; Length Override FdocaConstants.LONGVARCHAR_MAX_LEN
+	 *   SQLUDTCLASSNAME_s; DRDA TYPE VCS; ENVLID 0x32; Length Override FdocaConstants.LONGVARCHAR_MAX_LEN
+     *                         Name of the Java class bound to the UDT. One of the above.
+	 *
+	 * @param rsmeta	resultset meta data
+	 * @param pmeta		parameter meta data
+	 * @param elemNum	column number we are returning (in case of result set), or,
+	 *					parameter number (in case of parameter)
+	 * @param rtnOutput	whether this is for a result set	
+	 *
+	 * @throws DRDAProtocolException
+     * @throws SQLException
+	 */
 	private void writeSQLUDTGRP(ResultSetMetaData rsmeta,
 								ParameterMetaData pmeta,
 								int jdbcElemNum, boolean rtnOutput)
 		throws DRDAProtocolException,SQLException
 	{
-		writer.writeByte(CodePoint.NULLDATA);
+        int jdbcType = rtnOutput ?
+            rsmeta.getColumnType( jdbcElemNum) : pmeta.getParameterType( jdbcElemNum );
 
+        if ( !(jdbcType == Types.JAVA_OBJECT) || !appRequester.supportsUDTs() )
+        {
+            writer.writeByte(CodePoint.NULLDATA);
+            return;
+        }
+        
+		String typeName = rtnOutput ?
+            rsmeta.getColumnTypeName( jdbcElemNum ) : pmeta.getParameterTypeName( jdbcElemNum );
+        String className = rtnOutput ?
+            rsmeta.getColumnClassName( jdbcElemNum ) : pmeta.getParameterClassName( jdbcElemNum );
+        
+		writeVCMorVCS( typeName );
+		writeVCMorVCS( className );
 	}
 
 	private void writeSQLDOPTGRP(ResultSetMetaData rsmeta,
@@ -7673,6 +7757,9 @@ class DRDAConnThread extends Thread {
 				case DRDAConstants.DRDA_TYPE_NLOBLOC:
 				case DRDAConstants.DRDA_TYPE_NCLOBLOC:
 					writer.writeInt(((EngineLOB)val).getLocator());
+					break;
+				case DRDAConstants.DRDA_TYPE_NUDT:
+					writer.writeUDT( val, index );
 					break;
 				default:
 					if (SanityManager.DEBUG) 

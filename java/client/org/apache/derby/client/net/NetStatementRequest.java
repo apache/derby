@@ -758,6 +758,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                          i);
                         }
                         break;
+                    case DRDAConstants.DRDA_TYPE_NUDT:
+                        writeUDT( inputs[i] );
+                        break;
                     case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
                     case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
                         // check for a promoted Clob
@@ -1340,6 +1343,10 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NLOBBYTES;
                         lidAndLengths[i][1] = buildPlaceholderLength(ba.length);
                     }
+                    break;
+                case java.sql.Types.JAVA_OBJECT:
+                    lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NUDT;
+                    lidAndLengths[i][1] = 32767;
                     break;
                 case java.sql.Types.BLOB:
                     java.sql.Blob b = (java.sql.Blob) inputRow[i];
