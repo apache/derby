@@ -629,11 +629,6 @@ public class SQLChar
         }
     }
 
-    private int readCharacterLength(ObjectInput in) throws IOException {
-         int utflen = in.readUnsignedShort();
-        return utflen;
-    }
-
     /**
      * Wraps an {@code IOException} in a {@code StandardException} then throws
      * the wrapping exception.
