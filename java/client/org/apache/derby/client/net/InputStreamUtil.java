@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.shared.common.io.InputStreamUtil
+   Derby - Class org.apache.derby.client.net.InputStreamUtil
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,7 +19,7 @@
 
  */
 
-package org.apache.derby.shared.common.io;
+package org.apache.derby.client.net;
 
 import java.io.*;
 
@@ -27,8 +27,11 @@ import java.io.*;
 	Utility methods for InputStream that are stand-ins for
 	a small subset of DataInput methods. This avoids pushing
 	a DataInputStream just to get this functionality.
+
+    This code is cloned from org.apache.derby.iapi.services.io.InputStreamUtil
+    for use by the client.
 */
-public class InputStreamUtil {
+public final class InputStreamUtil {
     private static final int SKIP_FRAGMENT_SIZE = Integer.MAX_VALUE;
 
 	/**

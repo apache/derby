@@ -23,9 +23,7 @@ package org.apache.derby.client.net;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.shared.common.io.DynamicByteArrayOutputStream;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.reference.DRDAConstants;
 
 import java.io.BufferedInputStream;
@@ -1620,14 +1618,9 @@ public class Request {
         offset_ += bytesToCopy;
     }
 
+    // should not be called if val is null
     final void writeUDT( Object val ) throws SqlException
     {
-        // should not be called if val is null
-        if ( val == null )
-        {
-            SanityManager.THROWASSERT( "UDT is null" );
-        }
-
         byte[] buffer = null;
         int length = 0;
         

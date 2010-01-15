@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.shared.common.io.DynamicByteArrayOutputStream
+   Derby - Class org.apache.derby.client.net.DynamicByteArrayOutputStream
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -19,9 +19,7 @@
 
  */
 
-package org.apache.derby.shared.common.io;
-
-import org.apache.derby.shared.common.sanity.SanityManager;
+package org.apache.derby.client.net;
 
 import java.io.InputStream;
 import java.io.IOException;
@@ -32,6 +30,9 @@ import java.io.OutputStream;
 	array of bytes.   In addition to dynamic resizing, this extension allows
 	the user of this class to have more control over the position of the stream
 	and can get a direct reference of the array.
+
+    This code is cloned from org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream
+    for use by the client.
 */
 public class DynamicByteArrayOutputStream extends OutputStream {
 
