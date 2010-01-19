@@ -125,36 +125,27 @@ public class TransactionTable implements Formatable
 	{
 		TransactionId id = xact.getId();
 
+        TransactionTableEntry newEntry = new TransactionTableEntry(
+                xact, id, 0, exclude ? TransactionTableEntry.EXCLUDE : 0);
+
 		synchronized(this)
 		{
-			TransactionTableEntry ent = findTransactionEntry(id);
+            Object oldEntry = trans.put(id, newEntry);
 
-			if (ent == null)
-			{
-				ent = new TransactionTableEntry
-					(xact, id, 0, 
-					 exclude ? TransactionTableEntry.EXCLUDE : 0);
+            if (SanityManager.DEBUG)
+            {
+                SanityManager.ASSERT(
+                        oldEntry == null,
+                        "Trying to add a transaction that's already " +
+                        "in the transaction table");
 
-				trans.put(id, ent);
-
-				if (SanityManager.DEBUG)
+                if (SanityManager.DEBUG_ON("TranTrace"))
                 {
-                    if (SanityManager.DEBUG_ON("TranTrace"))
-                    {
-                        SanityManager.DEBUG(
-                            "TranTrace", "adding transaction " + id);
-                        SanityManager.showTrace(new Throwable("TranTrace"));
-                    }
+                    SanityManager.DEBUG(
+                        "TranTrace", "adding transaction " + id);
+                    SanityManager.showTrace(new Throwable("TranTrace"));
                 }
-			}
-
-			if (SanityManager.DEBUG)
-			{
-				if (exclude != ent.needExclusion())
-					SanityManager.THROWASSERT(
-					  "adding the same transaction with different exclusion: " +
-					  exclude + " " + ent.needExclusion());
-			}
+            }
 		}
 
 		if (SanityManager.DEBUG) {
