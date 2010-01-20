@@ -51,7 +51,6 @@ public class NetServer
     Process pr;
     BackgroundStreamSaver outSaver, errSaver;
     FileOutputStream fosOut, fosErr;
-    private String java;
 	private boolean startServer;  // whether test will start it's own server
 
 	//  Variables for test connection
