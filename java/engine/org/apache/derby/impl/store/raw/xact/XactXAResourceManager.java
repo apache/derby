@@ -37,14 +37,8 @@ import org.apache.derby.iapi.store.raw.GlobalTransactionId;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.Transaction;
 
-
-import org.apache.derby.impl.store.raw.xact.GlobalXactId;
-import org.apache.derby.impl.store.raw.xact.TransactionTable;
-import org.apache.derby.impl.store.raw.xact.TransactionTableEntry;
-import org.apache.derby.impl.store.raw.xact.Xact;
-
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.transaction.xa.Xid;
 import javax.transaction.xa.XAResource;
@@ -250,7 +244,7 @@ public class XactXAResourceManager implements XAResourceManager
 
         if ((flags & XAResource.TMSTARTRSCAN) != 0)
         {
-            Hashtable   trans_hashtable = transaction_table.getTableForXA();
+            Map         trans_hashtable = transaction_table.getTableForXA();
             XAXactId[]  xid_list        = new XAXactId[trans_hashtable.size()];
             int         num_prepared    = 0;
 
@@ -259,11 +253,11 @@ public class XactXAResourceManager implements XAResourceManager
             {
                 int i = 0;
 
-                for (Enumeration e = trans_hashtable.elements(); 
-                     e.hasMoreElements(); i++) 
+                for (Iterator it = trans_hashtable.values().iterator();
+                     it.hasNext(); i++)
                 {
                     Xact xact = 
-                        ((TransactionTableEntry) e.nextElement()).getXact();
+                        ((TransactionTableEntry) it.next()).getXact();
 
                     if (xact.isPrepared())
                     {
