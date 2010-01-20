@@ -1103,9 +1103,12 @@ class DDMWriter
 	protected void writeUDT( Object val, int index ) throws DRDAProtocolException
 	{
         // should not be called if val is null
-        if ( val == null )
-        {
-            SanityManager.THROWASSERT( "UDT is null" );
+		if (SanityManager.DEBUG)
+		{
+            if ( val == null )
+            {
+                SanityManager.THROWASSERT( "UDT is null" );
+            }
         }
 
         byte[] buffer = null;
