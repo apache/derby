@@ -693,10 +693,16 @@ public class UDTTest  extends GeneratedColumnsHelper
      */
     public void test_10_parameterMetaData() throws Exception
     {
+        //
+        // Parameter meta data is not available on JSR-169 platforms,
+        // so skip this test in those environments.
+        //
+        if ( JDBC.vmSupportsJSR169() ) { return; }
+        
         Connection conn = getConnection();
 
         goodStatement( conn, "create type price_10_a external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n" );
-        goodStatement( conn, "create table t_10_a( a price_09_a )\n" );
+        goodStatement( conn, "create table t_10_a( a price_10_a )\n" );
 
         // ANSI UDT
         checkPMD
@@ -705,7 +711,7 @@ public class UDTTest  extends GeneratedColumnsHelper
              "insert into t_10_a( a ) values ( ? )\n",
              "org.apache.derbyTesting.functionTests.tests.lang.Price",
              java.sql.Types.JAVA_OBJECT,
-             "\"APP\".\"PRICE_09_A\"",
+             "\"APP\".\"PRICE_10_A\"",
              0,
              0
              );
