@@ -7524,7 +7524,7 @@ class DRDAConnThread extends Thread {
 	 *
 	 * @param rsmeta	resultset meta data
 	 * @param pmeta		parameter meta data
-	 * @param elemNum	column number we are returning (in case of result set), or,
+	 * @param jdbcElemNum	column number we are returning (in case of result set), or,
 	 *					parameter number (in case of parameter)
 	 * @param rtnOutput	whether this is for a result set	
 	 *
