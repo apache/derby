@@ -438,14 +438,17 @@ public class TransactionTable implements Formatable
 				CompressedNumber.writeInt(out, count);
 
 				// now write them out
-				for (Iterator it = trans.values().iterator(); it.hasNext(); )
+				if (count > 0)
 				{
-					TransactionTableEntry ent =
-							(TransactionTableEntry) it.next();
-					if (ent != null && ent.isUpdate())
+					for (Iterator it = trans.values().iterator(); it.hasNext();)
 					{
-						// only writes out update transaction
-						out.writeObject(ent);
+						TransactionTableEntry ent =
+								(TransactionTableEntry) it.next();
+						if (ent != null && ent.isUpdate())
+						{
+							// only write out update transactions
+							out.writeObject(ent);
+						}
 					}
 				}
 			}
