@@ -731,16 +731,24 @@ public class StreamFileContainer implements TypedFormat, PrivilegedExceptionActi
 		if (column instanceof InputStream) 
         {
 			InputStream inColumn = (InputStream) column;
-			int bufferLen = inColumn.available();
+            // Set a reasonable buffer size.
+            // To avoid extremely inefficient reads, and an infinite loop when
+            // InputStream.available() returns zero, a lower limit is set on
+            // the buffer size. To avoid using too much memory (especially in
+            // multi-user environments) an upper limit is set as well.
+            // The limits can be tuned, but note that using a too high default
+            // or lower limit can put unnecessary pressure on the memory sub-
+            // system and the GC process.
+            int bufferLen = Math.min(Math.max(inColumn.available(), 64), 8192);
 			byte[] bufData = new byte[bufferLen];
 
 			do 
             {
-				int lenRead = inColumn.read(bufData, bufferLen, 0);
+                int lenRead = inColumn.read(bufData);
 				if (lenRead != -1) 
                 {
 					fieldDataLength += lenRead;
-					out.write(bufData, lenRead, 0);
+                    out.write(bufData, 0, lenRead);
 				} 
                 else
                 {
