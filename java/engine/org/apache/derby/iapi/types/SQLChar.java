@@ -1618,7 +1618,8 @@ readingLoop:
     /**
      * Set the value from the stream which is in the on-disk format.
      * @param theStream On disk format of the stream
-     * @param valueLength length of the logical value in characters.
+     * @param valueLength length of the logical value in characters, or
+     *      <code>DataValueDescriptor.UNKNOWN_LOGICAL_LENGTH</code>
      */
     public final void setValue(InputStream theStream, int valueLength)
     {
