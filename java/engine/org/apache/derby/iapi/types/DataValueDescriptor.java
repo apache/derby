@@ -95,6 +95,12 @@ import java.util.Calendar;
 public interface DataValueDescriptor extends Storable, Orderable
 {
 
+    /**
+     * Constant indicating that the logical length of a value (i.e. chars for
+     * string types or bytes for binary types) is unknown.
+     */
+    int UNKNOWN_LOGICAL_LENGTH = -1;
+
 	/**
 	 * Gets the length of the data value.  The meaning of this is
 	 * implementation-dependent.  For string types, it is the number of
@@ -826,14 +832,24 @@ public interface DataValueDescriptor extends Storable, Orderable
     boolean     unknownRV)
 				throws StandardException;
 
-	/**
-		Set the value to be the contents of the stream.
-		The reading of the stream may be delayed until execution time.
-		The format of the stream is required to be the format of this type.
-
-		@param	theStream	stream of correctly formatted data
-		@param	valueLength	logical length of the stream's value in units of this type (e.g. chars for string types).
-	*/
+    /**
+     * Set the value to be the contents of the stream.
+     * <p>
+     * The reading of the stream may be delayed until execution time, and the
+     * format of the stream is required to be the format of this type.
+     * <p>
+     * Note that the logical length excludes any header bytes and marker bytes
+     * (for instance the Derby specific EOF stream marker). Specifying the
+     * logical length may improve performance in some cases, but specifying
+     * that the length is unknown (<code>UNKNOWN_LOGICAL_LENGTH</code> should
+     * always leave the system in a functional state. Specifying an incorrect
+     * length will cause errors.
+     *
+     * @param theStream	stream of correctly formatted data
+     * @param valueLength logical length of the stream's value in units of this
+     *      type (e.g. chars for string types), or
+     *      <code>UNKNOWN_LOGICAL_LENGTH</code> if the logical length is unknown
+     */
 	public void setValue(InputStream theStream, int valueLength) throws StandardException;
 
 	/**

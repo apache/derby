@@ -748,18 +748,15 @@ public abstract class EmbedPreparedStatement
             DataTypeDescriptor dtd[] = preparedStatement
                     .getParameterTypes();
             int colWidth = dtd[parameterIndex - 1].getMaximumWidth();
-            // Default to max column width. This will be used to limit the
-            // amount of data read when operating on "lengthless" streams.
-            int usableLength = colWidth;
+            // Holds either UNKNOWN_LOGICAL_LENGTH or the exact logical length.
+            int usableLength = DataValueDescriptor.UNKNOWN_LOGICAL_LENGTH;
 
             if (!lengthLess) {
                 // We cast the length from long to int. This wouldn't be
                 // appropriate if the limit of 2G-1 is decided to be increased
                 // at a later stage.
-                int intLength = (int)length;
+                usableLength = (int)length;
                 int truncationLength = 0;
-
-                usableLength = intLength;
 
                 // Currently long varchar does not allow for truncation of
                 // trailing blanks.
@@ -781,11 +778,9 @@ public abstract class EmbedPreparedStatement
                     // usableLength is the length of the data from stream that
                     // can be inserted which is min(colWidth,length) provided
                     // length - colWidth has trailing blanks only
-                    // we have used intLength into which the length variable had
-                    // been cast to an int and stored
-                    if (intLength > colWidth) {
+                    if (usableLength > colWidth) {
+                        truncationLength = usableLength - colWidth;
                         usableLength = colWidth;
-                        truncationLength = intLength - usableLength;
                     }
                 }
                 // Create a stream with truncation.
@@ -925,8 +920,8 @@ public abstract class EmbedPreparedStatement
         try {
             RawToBinaryFormatStream rawStream;
             if (lengthLess) {
-                // Force length to -1 for good measure.
-                length = -1;
+                // Indicate that we don't know the logical length of the stream.
+                length = DataValueDescriptor.UNKNOWN_LOGICAL_LENGTH;
                 DataTypeDescriptor dtd[] = 
                     preparedStatement.getParameterTypes();
                 rawStream = new RawToBinaryFormatStream(x,

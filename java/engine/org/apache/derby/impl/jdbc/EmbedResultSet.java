@@ -2828,8 +2828,8 @@ public abstract class EmbedResultSet extends ConnectionChild
             }
             rawStream = new RawToBinaryFormatStream(x, (int)length);
         } else {
-            // Force length to -1 if stream is length less.
-            length = -1;
+            // Force length to UNKNOWN_LOGICAL_LENGTH if stream is length less.
+            length = DataValueDescriptor.UNKNOWN_LOGICAL_LENGTH;
             rawStream = new RawToBinaryFormatStream(x,
                     getMaxColumnWidth(columnIndex),
                     getColumnSQLType(columnIndex));
@@ -2936,7 +2936,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                     !getEmbedConnection().getDatabase().getDataDictionary().
                     checkVersion(DataDictionary.DD_VERSION_CURRENT, null)));
             ReaderToUTF8Stream utfIn;
-            int usableLength = -1;
+            int usableLength = DataValueDescriptor.UNKNOWN_LOGICAL_LENGTH;
             if (!lengthLess) {
                 // check for -ve length here
                 if (length < 0)
@@ -2993,8 +2993,6 @@ public abstract class EmbedResultSet extends ConnectionChild
                                                dvd.getStreamHeaderGenerator());
             }
 
-            // NOTE: The length argument to setValue is not used. If that
-            //       changes, the value might also have to change.
             dvd.setValue(utfIn, usableLength);
         } catch (StandardException t) {
             throw noStateChangeException(t);
