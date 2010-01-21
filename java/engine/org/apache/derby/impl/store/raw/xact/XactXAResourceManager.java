@@ -37,8 +37,7 @@ import org.apache.derby.iapi.store.raw.GlobalTransactionId;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 import org.apache.derby.iapi.store.raw.Transaction;
 
-import java.util.Iterator;
-import java.util.Map;
+import java.util.ArrayList;
 
 import javax.transaction.xa.Xid;
 import javax.transaction.xa.XAResource;
@@ -244,48 +243,33 @@ public class XactXAResourceManager implements XAResourceManager
 
         if ((flags & XAResource.TMSTARTRSCAN) != 0)
         {
-            Map         trans_hashtable = transaction_table.getTableForXA();
-            XAXactId[]  xid_list        = new XAXactId[trans_hashtable.size()];
-            int         num_prepared    = 0;
+            final ArrayList xid_list = new ArrayList();
 
-            // Need to hold sync while linear searching the hash table.
-            synchronized (trans_hashtable)
-            {
-                int i = 0;
-
-                for (Iterator it = trans_hashtable.values().iterator();
-                     it.hasNext(); i++)
-                {
-                    Xact xact = 
-                        ((TransactionTableEntry) it.next()).getXact();
-
+            // Create a visitor that adds each of the prepared transactions
+            // to xid_list.
+            final TransactionTable.EntryVisitor visitor =
+                    new TransactionTable.EntryVisitor() {
+                public void visit(TransactionTableEntry entry) {
+                    Xact xact = entry.getXact();
                     if (xact.isPrepared())
                     {
                         GlobalTransactionId xa_id = xact.getGlobalId();
 
-                        xid_list[i] = 
+                        xid_list.add(
                             new XAXactId(
                                 xa_id.getFormat_Id(), 
                                 xa_id.getGlobalTransactionId(), 
-                                xa_id.getBranchQualifier());
-                        num_prepared++;
+                                xa_id.getBranchQualifier()));
                     }
                 }
-            }
+            };
 
-            // now need to squish the nulls out of the array to return. 
-            ret_xid_list = new XAXactId[num_prepared];
-            int ret_index = 0;
-            for (int i = xid_list.length; i-- > 0; )
-            {
-                if (xid_list[i] != null)
-                    ret_xid_list[ret_index++] = xid_list[i];
-            }
+            // Collect the prepared transactions.
+            transaction_table.visitEntries(visitor);
 
-            if (SanityManager.DEBUG)
-            {
-                SanityManager.ASSERT(ret_index == num_prepared);
-            }
+            // Convert the list to an array suitable for being returned.
+            ret_xid_list = new XAXactId[xid_list.size()];
+            ret_xid_list = (XAXactId[]) xid_list.toArray(ret_xid_list);
         }
         else
         {

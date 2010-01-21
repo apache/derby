@@ -117,7 +117,38 @@ public class TransactionTable implements Formatable
 		return (TransactionTableEntry)trans.get(id);
 	}
 
+    /**
+     * Interface for visiting entries in the transaction table.
+     * @see #visitEntries(EntryVisitor)
+     */
+    static interface EntryVisitor {
+        /**
+         * Visit an entry. {@link #visitEntries(EntryVisitor)} will call this
+         * method once for each entry in the transaction table.
+         *
+         * @param entry the {@code TransactionTableEntry} being visited
+         */
+        void visit(TransactionTableEntry entry);
+    }
 
+    /**
+     * <p>
+     * Visit all the entries in the transaction table.
+     * </p>
+     *
+     * <p>
+     * MT - MT safe
+     * </p>
+     *
+     * @param visitor the visitor to apply on each transaction table entry
+     */
+    void visitEntries(EntryVisitor visitor) {
+        synchronized (trans) {
+            for (Iterator it = trans.values().iterator(); it.hasNext(); ) {
+                visitor.visit((TransactionTableEntry) it.next());
+            }
+        }
+    }
 
 
 	void add(Xact xact, boolean exclude)
@@ -275,27 +306,6 @@ public class TransactionTable implements Formatable
      * Transaction table methods used by XA.
      **************************************************************************
      */
-
-    /**
-     * Return the hash table to the XA layer.
-     * <p>
-     * The XA code will do linear read-only operations on the hash table,
-     * write operations are only done in this module.  It is a little ugly
-     * to export the hash table, but I wanted to move the XA specific code
-     * into the XA module, so that we could configure out the XA code if
-     * necessary.
-     * <p>
-     *
-	 * Must be MT -safe, depends on sync hash table, and must get 
-     *     synchronized(hash_table) for linear searches.
-     *
-	 * @return The ContextManager of the transaction being searched for.
-     *
-     **/
-	public Map getTableForXA()
-	{
-        return(trans);
-	}
 
 	/**
 	    Change transaction to prepared.
