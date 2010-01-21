@@ -21,29 +21,21 @@
 
 package org.apache.derby.impl.sql;
 
-import org.apache.derby.iapi.services.loader.ClassFactory;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.loader.ClassInspector;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
+import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.reference.JDBC30Translation;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.ParameterValueSet;
-
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.UserDataValue;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.types.SQLBit;
+import org.apache.derby.iapi.types.SQLBlob;
+import org.apache.derby.iapi.types.SQLChar;
 
 import java.io.InputStream;
-import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.sql.Types;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 
 /**
  * Implementation of ParameterValueSet
@@ -269,7 +261,24 @@ final class GenericParameterValueSet implements ParameterValueSet
 
 			if (oldp.isSet)
 			{
-				pvstarget.getParameterForSet(i).setValue(oldp.getValue());
+                DataValueDescriptor dvd = oldp.getValue();
+                InputStream is = null;
+                // See if the value type can hold a stream.
+                // SQLBinary isn't public, check for both SQLBlob and SQLBit.
+                if (dvd instanceof SQLChar || dvd instanceof SQLBlob ||
+                        dvd instanceof SQLBit) {
+                    is = dvd.getStream();
+                }
+                if (is != null) {
+                    // DERBY-4455: Don't materialize the stream when
+                    // transferring it. If the stream has been drained already,
+                    // and the user doesn't set a new value before executing
+                    // the prepared statement again, Derby will fail.
+                    pvstarget.getParameterForSet(i).setValue(is,
+                            DataValueDescriptor.UNKNOWN_LOGICAL_LENGTH);
+                } else {
+                    pvstarget.getParameterForSet(i).setValue(dvd);
+                }
 			}
 		}
 	}
