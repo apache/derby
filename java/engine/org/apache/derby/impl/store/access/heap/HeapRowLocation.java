@@ -101,15 +101,6 @@ public class HeapRowLocation extends DataType implements RowLocation
 		return null;
 	}
 
-	/*
-	** Methods of CloneableObject.
-	*/
-	public Object cloneObject()
-	{
-		return getClone();
-		
-	}
-
 	public DataValueDescriptor getClone() {
 		return new HeapRowLocation(this);
 	}

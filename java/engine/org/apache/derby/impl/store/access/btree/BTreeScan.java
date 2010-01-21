@@ -264,9 +264,8 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
             new DataValueDescriptor[this.init_template.length];
 
         scan_position.current_lock_template[this.init_template.length - 1] = 
-            scan_position.current_lock_row_loc = 
-                (RowLocation) ((RowLocation) 
-                     init_template[init_template.length - 1]).cloneObject(); 
+            scan_position.current_lock_row_loc = (RowLocation)
+                init_template[init_template.length - 1].getClone();
 
         // Verify that all columns in start key value, stop key value, and
         // qualifiers are present in the list of columns described by the

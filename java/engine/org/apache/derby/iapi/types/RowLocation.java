@@ -21,7 +21,6 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
 /**
 
   Holds the location of a row within a given conglomerate.
@@ -36,6 +35,6 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 **/
 
-public interface RowLocation extends DataValueDescriptor, CloneableObject
+public interface RowLocation extends DataValueDescriptor
 {
 }

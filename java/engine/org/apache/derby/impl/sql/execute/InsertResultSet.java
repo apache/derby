@@ -186,7 +186,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		/* Set up sorters, etc. if 1st row and there are indexes */
 		if (constants.irgs.length > 0)
 		{
-			RowLocation rlClone = (RowLocation) rowLocation.cloneObject();
+           RowLocation rlClone = (RowLocation) rowLocation.getClone();
 
 			// Objectify any the streaming columns that are indexed.
 			for (int i = 0; i < execRow.getRowArray().length; i++)
@@ -1645,8 +1645,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                 (templateColArray[fkInfo.colArray[i] - 1]).getClone();
 		}
 
-		newRowColArray[i] = 
-            (DataValueDescriptor) fkInfo.rowLocation.cloneObject();
+       newRowColArray[i] = fkInfo.rowLocation.getClone();
 
 		return newRow;
 	}

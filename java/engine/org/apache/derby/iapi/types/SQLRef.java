@@ -200,7 +200,7 @@ public class SQLRef extends DataType implements RefDataValue
 		if (value == null)
 			return new SQLRef();
 		else
-			return new SQLRef((RowLocation) value.cloneObject());
+           return new SQLRef((RowLocation) value.getClone());
 	}
 
 	/**

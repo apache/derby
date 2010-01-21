@@ -326,21 +326,24 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 					getPreparedStatement().getSavedObject(itemNumber).getClass().getName() +
 					", query is " + getPreparedStatement().getSource());
 			}
-			RowLocation rl = (RowLocation) getPreparedStatement().getSavedObject(itemNumber);
-			if (! (rl.cloneObject() instanceof RowLocation))
+        }
+        RowLocation rl = (RowLocation)
+                getPreparedStatement().getSavedObject(itemNumber);
+        /* We have to return a clone of the saved RowLocation due
+         * to the shared cache of SPSs.
+         */
+        Object rlClone = rl.getClone();
+        if (SanityManager.DEBUG) {
+            if (! (rlClone instanceof RowLocation))
 			{
 				SanityManager.THROWASSERT(
-					"rl.cloneObject() expected to be " +
-					"instance of RowLocation, not " +
-					rl.getClass().getName() +
-					", query is " + getPreparedStatement().getSource());
+                    "rl.getClone() expected to be " +
+                    "instance of RowLocation, not " +
+                    rlClone.getClass().getName() + ", query is " +
+                    getPreparedStatement().getSource());
 			}
 		}
-		/* We have to return a clone of the saved RowLocation due
-		 * to the shared cache of SPSs.
-		 */
-		return (RowLocation)
-			((RowLocation)(getPreparedStatement().getSavedObject(itemNumber))).cloneObject();
+        return (RowLocation)rlClone;
 	}
 
 	/*

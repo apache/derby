@@ -3071,7 +3071,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		indexRows[index].getNewObjectArray();
 		// Associate the index row with the source row
 		compressIRGs[index].getIndexRow(currentRow, 
-									    (RowLocation) rl.cloneObject(), 
+                                        (RowLocation) rl.getClone(),
 										indexRows[index],
 										(FormatableBitSet) null);
 
