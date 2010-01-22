@@ -50,16 +50,6 @@ public final class AccessTest extends BaseJDBCTestCase {
         super(name);
     }
     
-    public void tearDown() throws Exception {
-        Statement st = createStatement();
-        super.tearDown();
-        try {
-            st.executeUpdate("DROP FUNCTION PADSTRING");
-        } catch (SQLException e) {
-            // never mind.
-        }
-    }
-    
     public static Test suite() {
         Properties sysProps = new Properties();
         sysProps.put("derby.optimizer.optimizeJoinOrder", "false");
