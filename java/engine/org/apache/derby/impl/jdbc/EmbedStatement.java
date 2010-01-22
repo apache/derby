@@ -1203,12 +1203,9 @@ public class EmbedStatement extends ConnectionChild
 					}
 				}
 
-				// if this was a prepared statement, this just
-				// gets it for us, it won't recompile unless it is invalid.
+				// Get the statement. We don't care if it's invalid, because it
+				// will be recompiled when we execute it if needed (DERBY-3024).
 				PreparedStatement ps = a.getPreparedStatement();
-				ps.rePrepare(lcc);
-				addWarning(ps.getCompileTimeWarnings());
-
 
 				/*
 				** WARNING WARNING
@@ -1233,6 +1230,7 @@ public class EmbedStatement extends ConnectionChild
 				a.reset();
 				a.setMaxRows(maxRows);
                 ResultSet resultsToWrap = ps.execute(a, timeoutMillis);
+                addWarning(ps.getCompileTimeWarnings());
 				addWarning(a.getWarnings());
 
 
