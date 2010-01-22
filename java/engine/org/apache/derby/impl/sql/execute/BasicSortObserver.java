@@ -22,11 +22,6 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.store.access.SortObserver;
-import org.apache.derby.iapi.services.io.Storable;
-
-import org.apache.derby.iapi.types.CloneableObject;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -166,8 +161,9 @@ public class BasicSortObserver implements SortObserver
 		DataValueDescriptor[] newArray = new DataValueDescriptor[origArray.length];
 		for (int i = 0; i < origArray.length; i++)
 		{
-			// the only difference between getClone and cloneObject is cloneObject does
-			// not objectify a stream.  We use getClone here.  Beetle 4896.
+            // History: We used to materialize streams when getting a clone
+            //          here (i.e. used getClone, not cloneObject). We still do.
+            // Beetle 4896.
 			newArray[i] = origArray[i].getClone();
 		}
 

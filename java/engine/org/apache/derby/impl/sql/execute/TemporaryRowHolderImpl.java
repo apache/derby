@@ -25,22 +25,18 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
-import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.TemporaryRowHolder;
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
 
-import org.apache.derby.iapi.types.CloneableObject;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.SQLRef;
 import org.apache.derby.iapi.types.SQLLongint;
 
 
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import java.util.Properties;
 
 /**
@@ -195,7 +191,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 			if (cols[i] != null)
 			{
 				/* Rows are 1-based, cols[] is 0-based */
-				cloned.setColumn(i + 1, (DataValueDescriptor)((CloneableObject) cols[i]).cloneObject());
+                cloned.setColumn(i + 1, cols[i].cloneObject());
 			}
 		}
 		if (inputRow instanceof IndexValueRow)

@@ -24,7 +24,6 @@ package org.apache.derby.iapi.types;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.CloneableObject;
 import org.apache.derby.iapi.types.Orderable;
 
 import org.apache.derby.iapi.reference.SQLState;
@@ -35,7 +34,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 
 import java.io.InputStream;
-import java.lang.Comparable;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -65,7 +63,7 @@ import java.util.Calendar;
  *
  */
 public abstract class DataType
-	implements DataValueDescriptor, CloneableObject, Comparable
+    implements DataValueDescriptor, Comparable
 {
 	/*
 	 * DataValueDescriptor Interface
@@ -593,12 +591,18 @@ public abstract class DataType
 		throwLangSetMismatch(theValue);
 	}
 
-	/**
-	 * From CloneableObject
-	 *
-	 * @return clone of me as an Object
-	 */
-	public Object cloneObject()
+    /**
+     * Default implementation of shallow cloning, which forwards to the deep
+     * clone method.
+     * <p>
+     * For many of the data types, a shallow clone will be the same as a deep
+     * clone. The data types requiring special handling of shallow clones have
+     * to override this method (for instance types whose value can be
+     * represented as a stream).
+     *
+     * @return A shallow clone.
+     */
+    public DataValueDescriptor cloneObject()
 	{
 		return getClone();
 	}

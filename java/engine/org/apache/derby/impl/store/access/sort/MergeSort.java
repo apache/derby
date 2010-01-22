@@ -30,7 +30,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.ScanControllerRowSource;
 import org.apache.derby.iapi.store.access.conglomerate.Sort;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
-import org.apache.derby.iapi.types.CloneableObject;
 import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.RowUtil;
 import org.apache.derby.iapi.store.access.ScanController;
@@ -459,13 +458,6 @@ class MergeSort implements Sort
 						"col[" + colid + "]  is null");
 				}
 						
-                if (!(col1 instanceof CloneableObject))
-				{
-					SanityManager.THROWASSERT(
-						"col[" + colid + "] (" +col1.getClass().getName()+
-						") is not a CloneableObject.");
-				}
-
                 if (col1.getClass() != col2.getClass())
                 {
                     SanityManager.THROWASSERT(

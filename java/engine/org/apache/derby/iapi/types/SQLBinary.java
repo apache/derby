@@ -608,17 +608,13 @@ abstract class SQLBinary
 		return SQLBinary.compare(getBytes(), other.getBytes());
 	}
 
-	/*
-	 * CloneableObject interface
-	 */
-
-	/** From CloneableObject
-	 *	Shallow clone a StreamStorable without objectifying.  This is used to avoid
-	 *	unnecessary objectifying of a stream object.  The only difference of this method
-	 *  from getClone is this method does not objectify a stream.  beetle 4896
-	 */
-	public final Object cloneObject()
-	{
+    /**
+     * Shallow clone a StreamStorable without objectifying.
+     * This is used to avoid unnecessary objectifying of a stream object.
+     *
+     *  Beetle 4896
+     */
+    public final DataValueDescriptor cloneObject() {
         if ( _blobValue != null )
         {
             SQLBinary self = (SQLBinary) getNewNull();

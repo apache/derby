@@ -284,6 +284,17 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 */
 	InputStream	getStream() throws StandardException;
 
+    /**
+     * Get a shallow copy of this <code>DataValueDescriptor</code>.
+     * <p>
+     * This is used by the sorter to clone columns. It should be cloning the
+     * column holder but not its value. The only difference between this method
+     * and <code>getClone</code> is this one does not objectify a stream.
+     *
+     * @return A clone of this descriptor, which shares the internal state.
+     */
+    public DataValueDescriptor cloneObject();
+
 	/**
 	 * Clone this DataValueDescriptor. Results in a new object
 	 * that has the same value as this but can be modified independently.

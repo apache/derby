@@ -21,13 +21,8 @@
 
 package org.apache.derby.iapi.store.access;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.io.Storable;
-
 import org.apache.derby.iapi.error.StandardException; 
 
-import org.apache.derby.iapi.types.CloneableObject;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
@@ -354,8 +349,9 @@ public class BackingStoreHashtable
     {
         DataValueDescriptor[] new_row = new DataValueDescriptor[old_row.length];
 
-		// the only difference between getClone and cloneObject is cloneObject does
-		// not objectify a stream.  We use getClone here.  Beetle 4896.
+        // History: We used to materialize streams when getting a clone
+        //          here (i.e. used getClone, not cloneObject). We still do.
+        // Beetle 4896.
         for (int i = 0; i < old_row.length; i++)
         {
             if( old_row[i] != null)
@@ -376,13 +372,13 @@ public class BackingStoreHashtable
         throws StandardException
     {
         DataValueDescriptor[] new_row = new DataValueDescriptor[old_row.length];
-        // the only difference between getClone and cloneObject is cloneObject does
-        // not objectify a stream.  We use cloneObject here.  DERBY-802
+        // History: We used to *not* materialize streams when getting a clone
+        //          here (i.e. used cloneObject, not getClone). We still do.
+        // DERBY-802
         for (int i = 0; i < old_row.length; i++)
         {
             if( old_row[i] != null)
-                new_row[i] = (DataValueDescriptor) 
-                    ((CloneableObject) old_row[i]).cloneObject();
+                new_row[i] = old_row[i].cloneObject();
         }
 
         return(new_row);

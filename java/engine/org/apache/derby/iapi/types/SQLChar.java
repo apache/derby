@@ -1313,13 +1313,13 @@ readingLoop:
      * CloneableObject interface
      */
 
-    /** From CloneableObject
+    /**
      *  Shallow clone a StreamStorable without objectifying.  This is used to 
      *  avoid unnecessary objectifying of a stream object.  The only 
      *  difference of this method from getClone is this method does not 
      *  objectify a stream.
      */
-    public Object cloneObject()
+    public DataValueDescriptor cloneObject()
     {
         if ((stream == null) && (_clobValue == null)) {  return getClone(); }
         
