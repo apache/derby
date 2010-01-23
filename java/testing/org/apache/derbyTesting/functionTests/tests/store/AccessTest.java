@@ -987,6 +987,9 @@ public final class AccessTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, expColNames);
         expRS = new String [][]{{"20"}};
         JDBC.assertFullResultSet(rs, expRS, true);
+
+        st.executeUpdate("drop table long1");
+        st.executeUpdate("drop table long2");
     }
 
     // regression test case for a Cloudscape era bug, 1552
@@ -1515,6 +1518,8 @@ public final class AccessTest extends BaseJDBCTestCase {
         st.executeUpdate("insert into a values (2)");
 
         checkSpaceTable(st, "5");
+
+        st.executeUpdate("drop table a");
     }
     
     private void checkSpaceTable(Statement st, String expValue)
@@ -1791,6 +1796,8 @@ public final class AccessTest extends BaseJDBCTestCase {
     // ----------------------------------------------------
     public void testQualifiers() throws Exception
     {
+        setAutoCommit(false);
+
         ResultSet rs = null;
         Statement st = createStatement();
 
@@ -1838,8 +1845,6 @@ public final class AccessTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, expColNames);
         expRS = new String [][]{{"1", "10", "100"}, {"3", "30", "300"}};
         JDBC.assertFullResultSet(rs, expRS, true);
-
-        st.executeUpdate("DROP FUNCTION PADSTRING");
 
         rollback();
         st.close();
