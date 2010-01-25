@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.StreamCorruptedException;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
@@ -43,7 +42,7 @@ import org.apache.derby.iapi.services.context.ContextService;
   information about the streams format and capabilites.
   */
 public final class FormatIdInputStream extends DataInputStream
-	 implements ErrorObjectInput, Resetable
+    implements ErrorObjectInput, Resetable, CloneableStream
 {
 	protected ClassFactory cf;
 	private ErrorInfo errorInfo;
@@ -235,5 +234,14 @@ public final class FormatIdInputStream extends DataInputStream
         ((Resetable) in).closeStream();
     }
 
-}
+    /*** CloneableStream interface ***/
 
+    public InputStream cloneStream() {
+        if (SanityManager.DEBUG)
+            SanityManager.ASSERT(in instanceof CloneableStream);
+
+        InputStream new_input_stream = ((CloneableStream) in).cloneStream();
+
+        return(new FormatIdInputStream(new_input_stream));
+    }
+}

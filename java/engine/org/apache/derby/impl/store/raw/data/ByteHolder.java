@@ -21,12 +21,9 @@
 
 package org.apache.derby.impl.store.raw.data;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Vector;
 
 /**
   Holder for a growing sequence of bytes. The ByteHolder supports a
@@ -152,4 +149,14 @@ public interface ByteHolder
 	  Return true if this is in writing mode.
 	  */
 	public boolean writingMode();
+
+    /**
+     * Return a byte holder matching existing type and size of current
+     * ByteHolder, but don't bother to fill the bytes. Normal usage is expected
+     * to reset the holding stream to the beginning, so the copy of current
+     * state would be wasted.
+     *
+     * @return An empty <code>ByteHolder</code>.
+     */
+    public ByteHolder cloneEmpty();
 }

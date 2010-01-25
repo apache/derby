@@ -24,12 +24,16 @@ package org.apache.derby.impl.store.raw.data;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
+import org.apache.derby.iapi.services.io.CloneableStream;
+
 import org.apache.derby.iapi.store.raw.RecordHandle;
 
 import org.apache.derby.iapi.types.Resetable;
+
 import org.apache.derby.iapi.store.raw.LockingPolicy;
 import org.apache.derby.iapi.store.access.TransactionController;
 
+import java.io.InputStream;
 import java.io.IOException;
 
 /**
@@ -48,7 +52,7 @@ the datatype's stream is set using:
 
 public class OverflowInputStream
 extends BufferedByteHolderInputStream
-implements Resetable
+implements Resetable, CloneableStream
 {
     /**************************************************************************
      * Fields of the class
@@ -104,9 +108,7 @@ implements Resetable
     BaseContainerHandle owner,
     long                overflowPage, 
     int                 overflowId, 
-    RecordHandle        recordToLock)
-        throws IOException, StandardException
-    {
+    RecordHandle        recordToLock) {
         super(bh);
         this.owner              = owner;
         this.overflowPage       = overflowPage;
@@ -114,8 +116,6 @@ implements Resetable
         this.firstOverflowPage  = overflowPage;
         this.firstOverflowId    = overflowId;
         this.recordToLock       = recordToLock;
-
-        fillByteHolder();
     }
 
     /**************************************************************************
@@ -156,7 +156,11 @@ implements Resetable
             }
             catch (StandardException se)
             {
-                throw new IOException(se.toString());
+                // Simplify this code when we can use the Java 1.5 constructor
+                // taking the cause as an argument.
+                IOException ioe = new IOException(se.toString());
+                ioe.initCause(se);
+                throw ioe;
             }
 
             this.bh.startReading();
@@ -298,9 +302,6 @@ implements Resetable
         // completely clear the byte holder
         this.bh.clear();
         this.bh.startReading();
-
-        // fill the byte holder
-        fillByteHolder();
     }
 
     /**
@@ -313,5 +314,33 @@ implements Resetable
     {
         owner.close();
         initialized = false;
+    }
+
+    /**************************************************************************
+     * Public Methods of CloneableStream Interface
+     **************************************************************************/
+
+    /**
+     * Clone this object.
+     * <p>
+     * Creates a deep copy of this object. The returned stream has its own
+     * working buffers and can be initialized, reset and read independently
+     * from this stream.
+     * <p>
+     * The cloned stream is set back to the beginning of stream, no matter
+     * where the current stream happens to be positioned.
+     *
+     * @return Copy of this stream which can be used independently.
+     */
+    public InputStream cloneStream() {
+        OverflowInputStream ret_stream = 
+            new OverflowInputStream(
+                bh.cloneEmpty(),
+                owner, 
+                firstOverflowPage, 
+                firstOverflowId, 
+                recordToLock);
+
+        return(ret_stream);
     }
 }

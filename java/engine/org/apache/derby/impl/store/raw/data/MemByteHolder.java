@@ -417,6 +417,13 @@ implements ByteHolder
 		return writing;
 	}
 
+    /**
+     * @see ByteHolder#cloneEmpty
+     */
+    public ByteHolder cloneEmpty() {
+        return(new MemByteHolder(bufSize));
+    }
+
 	/**
 	  Get the next buffer for writing bytes.
 	  @exception IOException	Thrown on error
