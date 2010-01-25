@@ -209,37 +209,32 @@ public final class FormatIdInputStream extends DataInputStream
 
     /*** Resetable interface ***/
 
+    /** @see Resetable#resetStream() */
     public void resetStream()
         throws IOException, StandardException
     {
-        if (SanityManager.DEBUG)
-            SanityManager.ASSERT(in instanceof Resetable);
         ((Resetable) in).resetStream();
     }
 
 
+    /** @see Resetable#initStream() */
     public void initStream()
         throws StandardException
     {
-        if (SanityManager.DEBUG)
-            SanityManager.ASSERT(in instanceof Resetable);
         ((Resetable) in).initStream();
     }
 
 
+    /** @see Resetable#closeStream() */
     public void closeStream()
     {
-        if (SanityManager.DEBUG)
-            SanityManager.ASSERT(in instanceof Resetable);
         ((Resetable) in).closeStream();
     }
 
     /*** CloneableStream interface ***/
 
+    /** @see CloneableStream#cloneStream() */
     public InputStream cloneStream() {
-        if (SanityManager.DEBUG)
-            SanityManager.ASSERT(in instanceof CloneableStream);
-
         InputStream new_input_stream = ((CloneableStream) in).cloneStream();
 
         return(new FormatIdInputStream(new_input_stream));
