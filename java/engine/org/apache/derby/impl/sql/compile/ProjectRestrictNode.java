@@ -1417,8 +1417,15 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 
 
 		// Map the result columns to the source columns
-		int[] mapArray = resultColumns.mapSourceColumns();
+
+        ResultColumnList.ColumnMapping mappingArrays =
+            resultColumns.mapSourceColumns();
+
+        int[] mapArray = mappingArrays.mapArray;
+        boolean[] cloneMap = mappingArrays.cloneMap;
+
 		int mapArrayItem = acb.addItem(new ReferencedColumnsDescriptorImpl(mapArray));
+        int cloneMapItem = acb.addItem(cloneMap);
 
 		/* Will this node do a projection? */
 		boolean doesProjection = true;
@@ -1456,13 +1463,14 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		 *  arg6: constantExpress - Expression for constant restriction
 		 *			(for example, where 1 = 2)
 		 *  arg7: mapArrayItem - item # for mapping of source columns
-		 *  arg8: reuseResult - whether or not the result row can be reused
-		 *						(ie, will it always be the same)
-		 *  arg9: doesProjection - does this node do a projection
-		 *  arg10: estimated row count
-		 *  arg11: estimated cost
-		 *  arg12: close method
-		 */
+         *  arg8: cloneMapItem - item # for mapping of columns that need cloning
+         *  arg9: reuseResult - whether or not the result row can be reused
+         *                      (ie, will it always be the same)
+         *  arg10: doesProjection - does this node do a projection
+         *  arg11: estimated row count
+         *  arg12: estimated cost
+         *  arg13: close method
+         */
 
 		acb.pushGetResultSetFactoryExpression(mb);
 		if (genChildResultSet)
@@ -1591,13 +1599,14 @@ public class ProjectRestrictNode extends SingleChildResultSetNode
 		}
 		
 		mb.push(mapArrayItem);
+        mb.push(cloneMapItem);
 		mb.push(resultColumns.reusableResult());
 		mb.push(doesProjection);
 		mb.push(costEstimate.rowCount());
 		mb.push(costEstimate.getEstimatedCost());
 
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, (String) null, "getProjectRestrictResultSet",
-					ClassName.NoPutResultSet, 10);
+                    ClassName.NoPutResultSet, 11);
 	}
 
 	/**

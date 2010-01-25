@@ -26,6 +26,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.Types;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.apache.derby.catalog.types.DefaultInfoImpl;
 import org.apache.derby.iapi.error.StandardException;
@@ -3496,13 +3498,22 @@ public class ResultColumnList extends QueryTreeNodeVector
 	 * -1.
 	 * This is useful for determining if we need to do reflection
 	 * at execution time.
+     * <p/>
+     * Also build an array of boolean for columns that point to the same virtual
+     * column and have types that are streamable to be able to determine if
+     * cloning is needed at execution time.
 	 *
 	 * @return	Array representiong mapping of RCs to source RCs.
 	 */
-	int[] mapSourceColumns()
+    ColumnMapping mapSourceColumns()
 	{
-		int[]			mapArray = new int[size()];
+        int[] mapArray = new int[size()];
+        boolean[] cloneMap = new boolean[size()];
+
 		ResultColumn	resultColumn;
+
+        // key: virtual column number, value: index
+        Map seenMap = new HashMap();
 
 		int size = size();
 
@@ -3521,7 +3532,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 				else
 				{
 					// Virtual column #s are 1-based
-					mapArray[index] = vcn.getSourceColumn().getVirtualColumnId();
+                    ResultColumn rc = vcn.getSourceColumn();
+                    updateArrays(mapArray, cloneMap, seenMap, rc, index);
+
 				}
 			}
 			else if (resultColumn.getExpression() instanceof ColumnReference)
@@ -3536,7 +3549,9 @@ public class ResultColumnList extends QueryTreeNodeVector
 				else
 				{
 					// Virtual column #s are 1-based
-					mapArray[index] = cr.getSource().getVirtualColumnId();
+                    ResultColumn rc = cr.getSource();
+
+                    updateArrays(mapArray, cloneMap, seenMap, rc, index);
 				}
 			}
 			else
@@ -3545,7 +3560,8 @@ public class ResultColumnList extends QueryTreeNodeVector
 			}
 		}
 
-		return mapArray;
+        ColumnMapping result = new ColumnMapping(mapArray, cloneMap);
+        return result;
 	}
 
 	/** Set the nullability of every ResultColumn in this list 
@@ -4239,4 +4255,53 @@ public class ResultColumnList extends QueryTreeNodeVector
 			return "";
 		}
 	}
+
+
+    private static boolean streamableType(ResultColumn rc) {
+        DataTypeDescriptor dtd = rc.getType();
+        TypeId s = TypeId.getBuiltInTypeId(dtd.getTypeName());
+
+        if (s != null) {
+            return s.streamStorable();
+        } else {
+            return false;
+        }
+    }
+
+
+    private static void updateArrays(int[] mapArray,
+                             boolean[] cloneMap,
+                             Map seenMap,
+                             ResultColumn rc,
+                             int index) {
+
+        int vcId = rc.getVirtualColumnId();
+
+        mapArray[index] = vcId;
+
+        if (streamableType(rc)) {
+            Integer seenIndex =
+                (Integer)seenMap.get(new Integer(vcId));
+
+            if (seenIndex != null) {
+                // We have already mapped this column at index
+                // seenIndex, so mark occurence 2..n  for cloning.
+                cloneMap[index] = true;
+            } else {
+                seenMap.put(new Integer(vcId), new Integer(index));
+            }
+        }
+    }
+
+
+    public class ColumnMapping {
+
+        public final int[] mapArray;
+        public final boolean[] cloneMap;
+
+        public ColumnMapping(int[] mapArray, boolean[] cloneMap) {
+            this.mapArray = mapArray;
+            this.cloneMap = cloneMap;
+        }
+    }
 }

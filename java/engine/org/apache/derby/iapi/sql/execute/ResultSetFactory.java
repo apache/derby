@@ -294,7 +294,8 @@ public interface ResultSetFactory {
 				Boolean restriction() throws StandardException;
 			</verbatim>
 		@param mapArrayItem	Item # for mapping of source to target columns
-		@param reuseResult	Whether or not to reuse the result row.
+        @param cloneMapItem Item # for columns that need cloning
+        @param reuseResult  Whether or not to reuse the result row.
 		@param doesProjection	Whether or not this PRN does a projection
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
@@ -308,6 +309,7 @@ public interface ResultSetFactory {
 		GeneratedMethod projection, int resultSetNumber,
 		GeneratedMethod constantRestriction,
 		int mapArrayItem,
+        int cloneMapItem,
 		boolean reuseResult,
 		boolean doesProjection,
 		double optimizerEstimatedRowCount,
