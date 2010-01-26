@@ -107,16 +107,6 @@ class InsertVTIResultSet extends DMLVTIResultSet
 			throw StandardException.unexpectedUserException(t);
 		}
 
-		/* Get or re-use the row changer.
-		 * NOTE: We need to set ourself as the top result set
-		 * if this is not the 1st execution.  (Done in constructor
-		 * for 1st execution.)
-		 */
-		if (! firstExecute)
-		{
-			lcc.getStatementContext().setTopResultSet(this, subqueryTrackingArray);
-		}
-
 		/* The source does not know whether or not we are doing a
 		 * deferred mode insert.  If we are, then we must clear the
 		 * index scan info from the activation so that the row changer

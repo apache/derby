@@ -75,8 +75,6 @@ class DeleteVTIResultSet extends DMLVTIResultSet
 	*/
 	protected void openCore() throws StandardException
 	{
-		lcc.getStatementContext().setTopResultSet(this, subqueryTrackingArray);
-
 		ExecRow row = getNextRowCore(sourceResultSet);
 
 		if (row != null)

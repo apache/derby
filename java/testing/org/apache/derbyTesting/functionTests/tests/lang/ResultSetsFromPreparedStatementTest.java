@@ -174,6 +174,8 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
 
     private static final long DERBY_DEFAULT_TIMEOUT = 60;
 
+    private static final String SQLSTATE_NULL_INTO_NON_NULL = "23502";
+
     /**
      * Creates a String containing an insert statement for the
      * specified table containing the specified number of '?'
@@ -2632,5 +2634,31 @@ public class ResultSetsFromPreparedStatementTest extends BaseJDBCTestCase
         Statement stm = createStatement();
         stm.execute("SET SCHEMA " + schema);
         stm.close();
+    }
+
+    /**
+     * Test case for DERBY-4488, where the third execution of a statement
+     * that attempted to insert a NULL into a non-nullable column failed with
+     * a NullPointerException.
+     */
+    public void testInsertNullIntoNonNullableColumn() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create table d4488_t1 (pk int primary key)");
+        s.execute("insert into d4488_t1 values 1");
+        s.execute("create table d4488_t2 (c1 int, c2 int not null)");
+        commit();
+
+        PreparedStatement ps = prepareStatement(
+                "insert into d4488_t2(c1) select 1 from d4488_t1");
+        for (int i = 0; i < 5; i++) {
+            // Expect this to fail, but not with NullPointerException.
+            assertStatementError(SQLSTATE_NULL_INTO_NON_NULL, ps);
+            // Need a rollback here in order to close the index scan on
+            // D4488_T1, otherwise the NPE won't reproduce. Alternatively,
+            // run with auto-commit enabled.
+            rollback();
+        }
     }
 }

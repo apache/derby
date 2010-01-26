@@ -40,11 +40,8 @@ class SetTransactionResultSet extends MiscResultSet
      * Construct a SetTransactionResultSet
 	 *
 	 *  @param activation		Describes run-time environment.
-	 *
-	 *  @exception StandardException Standard Derby error policy.
      */
     SetTransactionResultSet(Activation activation)
-		 throws StandardException
     {
 		super(activation);
 	}

@@ -62,7 +62,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 abstract class NoRowsResultSetImpl implements ResultSet
 {
 	final Activation    activation;
-	NoPutResultSet[]	subqueryTrackingArray;
+    private NoPutResultSet[] subqueryTrackingArray;
 
 	private final boolean statisticsTimingOn;
 	/** True if the result set has been opened, and not yet closed. */
@@ -84,7 +84,6 @@ abstract class NoRowsResultSetImpl implements ResultSet
     private DataValueDescriptor[]  normalizedGeneratedValues;
 
 	NoRowsResultSetImpl(Activation activation)
-		throws StandardException
 	{
 		this.activation = activation;
 
@@ -102,12 +101,6 @@ abstract class NoRowsResultSetImpl implements ResultSet
 		 */
 		beginTime = getCurrentTimeMillis();
 		beginExecutionTime = beginTime;
-
-		StatementContext sc = lcc.getStatementContext();
-		sc.setTopResultSet(this, (NoPutResultSet[]) null);
-
-		// Pick up any materialized subqueries
-		subqueryTrackingArray = sc.getSubqueryTrackingArray();
 	}
 
 	/**
@@ -118,6 +111,14 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 */
 	void setup() throws StandardException {
 		isOpen = true;
+
+        StatementContext sc = lcc.getStatementContext();
+        sc.setTopResultSet(this, subqueryTrackingArray);
+
+        // Pick up any materialized subqueries
+        if (subqueryTrackingArray == null) {
+            subqueryTrackingArray = sc.getSubqueryTrackingArray();
+        }
 	}
 
     /**
