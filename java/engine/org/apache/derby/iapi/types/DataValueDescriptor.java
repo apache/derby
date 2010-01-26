@@ -293,7 +293,7 @@ public interface DataValueDescriptor extends Storable, Orderable
      *
      * @return A clone of this descriptor, which shares the internal state.
      */
-    public DataValueDescriptor cloneObject();
+    public DataValueDescriptor cloneHolder();
 
 	/**
 	 * Clone this DataValueDescriptor. Results in a new object

@@ -602,8 +602,7 @@ public abstract class DataType
      *
      * @return A shallow clone.
      */
-    public DataValueDescriptor cloneObject()
-	{
+    public DataValueDescriptor cloneHolder() {
 		return getClone();
 	}
 

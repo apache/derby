@@ -169,18 +169,25 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 		lastArraySlot = -1;
 	}
 
-	/* Avoid materializing a stream just because it goes through a temp table.  It is OK to
-	 * have a stream in the temp table (in memory or spilled to disk).  The assumption is
-	 * that one stream does not appear in two rows.  For "update", one stream can be in two
-	 * rows and the materialization is done in UpdateResultSet.  Note to future users of this
-	 * class who may insert a stream into this temp holder: (1) As mentioned above, one
-	 * un-materialized stream can't appear in two rows; you need to objectify it first otherwise.
-	 * (2) If you need to retrieve a un-materialized stream more than once from the temp holder,
-	 * you need to either materialize the stream the first time, or, if there's a memory constraint,
-	 * in the first time create a RememberBytesInputStream with the byte holder being
-	 * BackingStoreByteHolder, finish it, and reset it after usage.
-	 * beetle 4896.
-	 */
+    /* Avoid materializing a stream just because it goes through a temp table.
+     * It is OK to have a stream in the temp table (in memory or spilled to
+     * disk). The assumption is that one stream does not appear in two rows.
+     * For "update", one stream can be in two rows and the materialization is
+     * done in UpdateResultSet. Note to future users of this class who may
+     * insert a stream into this temp holder:
+     *   (1) As mentioned above, one un-materialized stream can't appear in two
+     *       rows; you need to objectify it first otherwise.
+     *   (2) If you need to retrieve an un-materialized stream more than once
+     *       from the temp holder, you need to either materialize the stream
+     *       the first time, or, if there's a memory constraint, in the first
+     *       time create a RememberBytesInputStream with the byte holder being
+     *       BackingStoreByteHolder, finish it, and reset it after usage.
+     *       A third option is to create a stream clone, but this requires that
+     *       the container handles are kept open until the streams have been
+     *       drained.
+     *
+     * Beetle 4896.
+     */
 	private ExecRow cloneRow(ExecRow inputRow)
 	{
 		DataValueDescriptor[] cols = inputRow.getRowArray();
@@ -191,7 +198,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 			if (cols[i] != null)
 			{
 				/* Rows are 1-based, cols[] is 0-based */
-                cloned.setColumn(i + 1, cols[i].cloneObject());
+                cloned.setColumn(i + 1, cols[i].cloneHolder());
 			}
 		}
 		if (inputRow instanceof IndexValueRow)

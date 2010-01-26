@@ -1319,10 +1319,9 @@ readingLoop:
      *  difference of this method from getClone is this method does not 
      *  objectify a stream.
      */
-    public DataValueDescriptor cloneObject()
-    {
+    public DataValueDescriptor cloneHolder() {
         if ((stream == null) && (_clobValue == null)) {  return getClone(); }
-        
+
         SQLChar self = (SQLChar) getNewNull();
         self.copyState(this);
 

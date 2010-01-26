@@ -373,12 +373,13 @@ public class BackingStoreHashtable
     {
         DataValueDescriptor[] new_row = new DataValueDescriptor[old_row.length];
         // History: We used to *not* materialize streams when getting a clone
-        //          here (i.e. used cloneObject, not getClone). We still do.
+        //          here (i.e. used cloneObject, not getClone).
+        //          We still don't materialize, just clone the holder.
         // DERBY-802
         for (int i = 0; i < old_row.length; i++)
         {
             if( old_row[i] != null)
-                new_row[i] = old_row[i].cloneObject();
+                new_row[i] = old_row[i].cloneHolder();
         }
 
         return(new_row);

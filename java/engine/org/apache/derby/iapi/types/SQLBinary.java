@@ -614,18 +614,23 @@ abstract class SQLBinary
      *
      *  Beetle 4896
      */
-    public final DataValueDescriptor cloneObject() {
-        if ( _blobValue != null )
-        {
-            SQLBinary self = (SQLBinary) getNewNull();
-            self.setValue(_blobValue);
+    public final DataValueDescriptor cloneHolder() {
+        if (stream == null && _blobValue == null) {
+            return getClone();
+        } else {
+            // Cast to SQLBinary to avoid having to catch StandardException.
+            SQLBinary self = (SQLBinary)getNewNull();
+            if (stream != null) {
+                // Just reference the same stream in the cloned holder.
+                self.setValue(stream, streamValueLength);
+            } else if (_blobValue != null) {
+                // Just reference the same BLOB value in the cloned holder.
+                self.setValue(_blobValue);
+            } else {
+                throw new IllegalStateException("unknown BLOB value repr");
+            }
             return self;
         }
-		if (stream == null) { return getClone(); }
-        
-		SQLBinary self = (SQLBinary) getNewNull();
-		self.setValue(stream, streamValueLength);
-		return self;
 	}
 
 	/*
