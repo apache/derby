@@ -28,6 +28,7 @@ import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.RawToBinaryFormatStream;
 import org.apache.derby.iapi.types.Resetable;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 
@@ -160,9 +161,20 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(!dvd.isNull(), "blob is created on top of a null column");
 
+        /*
+           We support three scenarios at this point:
+            a) The Blob value is already represented as bytes in memory.
+               This is the case for small Blobs (less than 32 KB).
+            b) The Blob value is represented as a resetable stream.
+               This is the case for Blobs coming from the store
+               (note the comment about SQLBit below).
+            c) The Blob value is represented as a wrapped user stream.
+               This stream cannot be reset, which means we have to drain the
+               stream and store it temporarily until it is either discarded or
+               inserted into the database.
+         */
         InputStream dvdStream = dvd.getStream();
-        if (dvdStream == null)
-        {
+        if (dvdStream == null) { // a) Blob already materialized in memory
             materialized = true;
             streamPositionOffset = Integer.MIN_VALUE;
             // copy bytes into memory so that blob can live after result set
@@ -178,9 +190,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 throw StandardException.newException (
                                         SQLState.SET_STREAM_FAILURE, e);
             }
-        }
-        else
-        {
+        } else if (dvdStream instanceof Resetable) { // b) Resetable stream
             materialized = false;
 
             /*
@@ -215,6 +225,39 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             } catch (IOException ioe) {
                 throw StandardException.newException(
                      SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION, ioe, "BLOB");
+            }
+        } else { // c) Non-resetable stream
+            // The code below will only work for RawToBinaryFormatStream.
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(
+                        dvdStream instanceof RawToBinaryFormatStream,
+                        "Invalid stream type: " + dvdStream.getClass());
+            }
+            // The source stream isn't resetable, so we have to write it to a
+            // temporary location to be able to support the Blob operations.
+            materialized = true;
+            streamPositionOffset = Integer.MIN_VALUE;
+            try {
+                control = new LOBStreamControl(getEmbedConnection());
+                BinaryToRawStream tmpStream =
+                        new BinaryToRawStream(dvdStream, con);
+                // Transfer the data.
+                byte[] bytes = new byte[4096]; // 4 KB buffer
+                long pos = 0;
+                while (true) {
+                    int read = tmpStream.read(bytes, 0, bytes.length);
+                    if (read < 1) {
+                        // Reached EOF, or stream is behaving badly.
+                        break;
+                    }
+                    // If the stream is larger than the maximum allowed by
+                    // Derby, the call below will thrown an exception.
+                    pos = control.write(bytes, 0, read, pos);
+                }
+                tmpStream.close();
+            } catch (IOException ioe) {
+                throw StandardException.newException (
+                                        SQLState.SET_STREAM_FAILURE, ioe);
             }
         }
         //add entry in connection so it can be cleared 

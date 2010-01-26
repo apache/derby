@@ -31,6 +31,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.io.IOException;
 import java.io.InputStream;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 
 /**
  * Tests reading and updating binary large objects (BLOBs).
@@ -349,7 +350,35 @@ final public class BLOBTest extends BaseJDBCTestCase
         verifyNewValueInTable(newVal, newSize);
     }
     
-    
+    /**
+     * Tests that a stream value in a values clause can be cast to a BLOB.
+     * <p>
+     * See DERBY-4102 (test case resulted in a ClassCastException earlier).
+     *
+     * @throws IOException if something goes wrong
+     * @throws SQLException if something goes wrong
+     */
+    public void testBlobCastInValuesClause()
+            throws IOException, SQLException {
+        // The length must be at least 32 KB.
+        final int length = 38*1024;
+        PreparedStatement ps = prepareStatement("values cast(? as blob)");
+        ps.setBinaryStream(1, new LoopingAlphabetStream(length), length);
+        ResultSet rs = ps.executeQuery();
+        assertTrue(rs.next());
+        Blob b = rs.getBlob(1);
+        assertEquals(length, b.length());
+        // Select some parts of the Blob, moving backwards.
+        assertEquals(100, b.getBytes(32*1024-27, 100).length);
+        assertEquals(1029, b.getBytes(19*1024, 1029).length);
+        // Compare a fresh stream with the one from the Blob.
+        assertEquals(new LoopingAlphabetStream(length), b.getBinaryStream());
+        assertEquals(-1, b.position(new byte[] {(byte)'a', (byte)'A'}, 1));
+        assertEquals(length, b.length());
+        assertFalse(rs.next());
+        rs.close();
+    }
+
     /**
      * Verifies that the table has row with column val=newVal
      * and that it its data and size columns are consistent.
