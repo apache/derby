@@ -38,6 +38,7 @@ import org.apache.derby.iapi.store.raw.xact.TransactionId;
 
 import org.apache.derby.iapi.services.io.CompressedNumber;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
@@ -81,6 +82,13 @@ import java.io.IOException;
 	simultaneously (except during recovery)
 
 	<P><B> This class depends on Hashtable synchronization!! </B>
+    To allow thread-safe iteration over the values in the Hashtable, callers
+    must synchronize on the Hashtable while iterating. The method {@link
+    #visitEntries(EntryVisitor)} abstracts the synchronization and iteration
+    so that the callers don't need to synchronize explicitly when they go
+    through the contents of the table. Methods that are only called during
+    recovery don't need to take MT considerations, and can safely use iterators
+    with no additional synchronization.
 
 */
 
@@ -124,11 +132,15 @@ public class TransactionTable implements Formatable
     static interface EntryVisitor {
         /**
          * Visit an entry. {@link #visitEntries(EntryVisitor)} will call this
-         * method once for each entry in the transaction table.
+         * method once for each entry in the transaction table, or until
+         * {@code false} is returned by this method.
          *
          * @param entry the {@code TransactionTableEntry} being visited
+         * @return {@code true} if the scan of the transaction table should
+         * continue, or {@code false} if the visitor has completed its work
+         * and no more entries need to be visited
          */
-        void visit(TransactionTableEntry entry);
+        boolean visit(TransactionTableEntry entry);
     }
 
     /**
@@ -145,7 +157,11 @@ public class TransactionTable implements Formatable
     void visitEntries(EntryVisitor visitor) {
         synchronized (trans) {
             for (Iterator it = trans.values().iterator(); it.hasNext(); ) {
-                visitor.visit((TransactionTableEntry) it.next());
+                if (!visitor.visit((TransactionTableEntry) it.next())) {
+                    // The visitor returned false, meaning that it's done with
+                    // all of its work and we can stop the scan.
+                    break;
+                }
             }
         }
     }
@@ -348,31 +364,21 @@ public class TransactionTable implements Formatable
      * @param global_id The global transaction we are searching for.
      **/
 	public ContextManager findTransactionContextByGlobalId(
-    GlobalXactId global_id)
+    final GlobalXactId global_id)
 	{
-        ContextManager cm              = null;
+        final ContextManager[] cm = new ContextManager[1];
 
-        // Need to hold sync while linear searching the hash table.
-        synchronized (trans)
-        {
-            for (Iterator it = trans.values().iterator(); it.hasNext(); )
-            {
-                TransactionTableEntry entry = (TransactionTableEntry) it.next();
-
-                if (entry != null)
-                {
-                    GlobalTransactionId entry_gid = entry.getGid();
-
-                    if (entry_gid != null && entry_gid.equals(global_id))
-                    {
-                        cm = entry.getXact().getContextManager();
-                        break;
-                    }
+        visitEntries(new EntryVisitor() {
+            public boolean visit(TransactionTableEntry entry) {
+                GlobalTransactionId entry_gid = entry.getGid();
+                if (entry_gid != null && entry_gid.equals(global_id)) {
+                    cm[0] = entry.getXact().getContextManager();
                 }
+                return cm[0] == null; // continue until context is found
             }
-        }
-              
-		return(cm);
+        });
+
+        return cm[0];
 	}
 
 
@@ -391,17 +397,57 @@ public class TransactionTable implements Formatable
 	{
 		synchronized (this)
 		{
-			for (Iterator it = trans.values().iterator(); it.hasNext(); )
-			{
-				TransactionTableEntry ent = (TransactionTableEntry) it.next();
-				if (ent != null && ent.isUpdate())
-					return true;
-			}
+            UpdateTransactionCounter counter =
+                    new UpdateTransactionCounter(true);
+            visitEntries(counter);
+            return counter.getCount() > 0;
 		}
-		return false;
 	}
 
+    /**
+     * Visitor class that counts update transactions. Note that update
+     * transactions may be added or removed concurrently unless the caller
+     * synchronizes on "this" (the {@code TransactionTable} instance) while
+     * applying the visitor.
+     */
+    private static class UpdateTransactionCounter implements EntryVisitor
+    {
+        private final boolean stopOnFirst;
+        private int count;
 
+        /**
+         * Create an instance of this visitor.
+         *
+         * @param stopOnFirst if {@code true}, stop the scan as soon as we
+         * have found one update transaction (useful if all we care about is
+         * whether or not the transaction table contains an update transaction);
+         * otherwise, scan the entire transaction table
+         */
+        UpdateTransactionCounter(boolean stopOnFirst) {
+            this.stopOnFirst = stopOnFirst;
+        }
+
+        /**
+         * Check if the entry represents an update transaction, and update
+         * the counter accordingly.
+         */
+        public boolean visit(TransactionTableEntry entry) {
+            if (entry.isUpdate()) {
+                count++;
+            }
+            // Continue the scan if a full scan was requested, or if no update
+            // transactions have been found yet.
+            return !stopOnFirst || (count == 0);
+        }
+
+        /**
+         * Get the number of update transactions seen by this visitor
+         * @return number of update transactions
+         */
+        int getCount() {
+            return count;
+        }
+    }
 
 	/************************************************************
 	 * methods called only by checkpoint
@@ -420,47 +466,59 @@ public class TransactionTable implements Formatable
 	/**
 	  @exception IOException problem reading the transaction table
 	*/
-	public void writeExternal(ObjectOutput out) throws IOException 
+	public void writeExternal(final ObjectOutput out) throws IOException
 	{
 		//don't let the transactions status change while writing out(beetle:5533)
-		//Note: syncing both on trans and this variable could be avoided if
-		//all the routines in this class are sycned on "this" and does not
-		//depend on hash table synchronization. But that will be overkill 
-		//because this routine gets called only on checkpoints and others
-		//are used more often.
+        // We don't care if transactions are added or removed from the table
+        // while we're writing it out, as long as the number of update
+        // transactions is constant. Synchronizing on "this" prevents other
+        // threads from adding or removing update transactions.
 
 		synchronized(this)
-		{	
-			// don't touch the transaction table when I am being written out
-			synchronized(trans)
-			{
-				int count = 0;
+        {
+            UpdateTransactionCounter counter =
+                    new UpdateTransactionCounter(false);
+            visitEntries(counter);
 
-				// first count up the number of active update transactions 
-				for (Iterator it = trans.values().iterator(); it.hasNext(); )
-				{
-					TransactionTableEntry ent =
-							(TransactionTableEntry) it.next();
-					if (ent != null && ent.isUpdate())
-						count++;
-				}
+            int count = counter.getCount();
 
-				CompressedNumber.writeInt(out, count);
+            CompressedNumber.writeInt(out, count);
 
-				// now write them out
-				if (count > 0)
-				{
-					for (Iterator it = trans.values().iterator(); it.hasNext();)
-					{
-						TransactionTableEntry ent =
-								(TransactionTableEntry) it.next();
-						if (ent != null && ent.isUpdate())
-						{
-							// only write out update transactions
-							out.writeObject(ent);
-						}
-					}
-				}
+            // now write them out
+            if (count > 0)
+            {
+                // Count the number of writes in debug builds.
+                final int[] writeCount =
+                        SanityManager.DEBUG ? new int[1] : null;
+
+                final IOException[] thrownException = new IOException[1];
+
+                visitEntries(new EntryVisitor() {
+                    public boolean visit(TransactionTableEntry entry) {
+                        try {
+                            if (entry.isUpdate()) {
+                                // only write out update transactions
+                                out.writeObject(entry);
+                                if (SanityManager.DEBUG) {
+                                    writeCount[0]++;
+                                }
+                            }
+                        } catch (IOException ioe) {
+                            thrownException[0] = ioe;
+                            return false; // stop on error
+                        }
+                        return true; // go through entire table
+                    }
+                });
+
+                if (thrownException[0] != null) {
+                    throw thrownException[0];
+                }
+
+                // Verify that we wrote the expected number of transactions.
+                if (SanityManager.DEBUG) {
+                    SanityManager.ASSERT(count == writeCount[0]);
+                }
 			}
 		}
 	}
@@ -855,32 +913,20 @@ public class TransactionTable implements Formatable
         }
 		else
 		{
-			LogInstant logInstant = null;
-            
-            // bug 5632: need to sychronize so that another thread does not 
-            // come in and disrupt the for loop, we got an exception on next,
-            // likely because hash table changed by another thread after
-            // hasMoreElements() called, but before nextElement().
-
-            synchronized (trans)
-            {
-                for (Iterator it = trans.values().iterator(); it.hasNext(); )
-                {
-                    TransactionTableEntry ent =
-                        (TransactionTableEntry) it.next();
-
-                    if (ent != null && ent.isUpdate())
-                    {
-                        if (logInstant == null || 
-                            ent.getFirstLog().lessThan(logInstant))
-                        {
-                            logInstant = ent.getFirstLog();
+            final LogInstant[] logInstant = new LogInstant[1];
+            visitEntries(new EntryVisitor() {
+                public boolean visit(TransactionTableEntry entry) {
+                    if (entry.isUpdate()) {
+                        if ((logInstant[0] == null) ||
+                                entry.getFirstLog().lessThan(logInstant[0])) {
+                            logInstant[0] = entry.getFirstLog();
                         }
                     }
+                    return true; // scan entire transaction table
                 }
-            }
+            });
 
-			return logInstant;
+            return logInstant[0];
 		}
 	}
 
@@ -935,77 +981,60 @@ public class TransactionTable implements Formatable
 		if (trans.isEmpty())
 			return null;
 
-		// while taking a snap shot, no adding or removing of transaction
-		TransactionInfo[] tinfo;
+        if (SanityManager.DEBUG) {
+            SanityManager.DEBUG("TranTrace", toString());
+        }
 
-        // Synchronize on trans to prevent problems that could occur if
-        // elements are added to or removed from the Hashtable while we're
-        // looping through the elements. Possible problems include:
-        //   - ArrayIndexOutOfBoundsException if a transaction is added after
-        //     the call to trans.size()
-        //   - Assert failure, tx table has null entry (DERBY-3757)
-        //   - NoSuchElementException (DERBY-3916)
-        synchronized (trans)
-		{
-			if (SanityManager.DEBUG)
-				SanityManager.DEBUG("TranTrace", toString());
+        final ArrayList tinfo = new ArrayList();
 
-			int ntran = trans.size();
-			tinfo = new TransactionTableEntry[ntran];
+        // Get clones of all the entries in the transaction table.
+        visitEntries(new EntryVisitor() {
+            public boolean visit(TransactionTableEntry entry) {
+                tinfo.add(entry.clone());
+                return true; // scan entire transaction table
+            }
+        });
 
-			int i = 0;
-
-			for (Iterator it = trans.values().iterator(); it.hasNext(); )
-			{
-				TransactionTableEntry ent = (TransactionTableEntry) it.next();
-
-				if (ent != null)
-					tinfo[i++] = (TransactionTableEntry)ent.clone();
-
-				if (SanityManager.DEBUG)
-					SanityManager.ASSERT(ent != null, "transaction table has null entry");
-			}
-		}
-
-		return tinfo;
+        return (TransactionTableEntry[])
+                tinfo.toArray(new TransactionTableEntry[tinfo.size()]);
 	}
 
 	public String toString()
 	{
 		if (SanityManager.DEBUG)
 		{
-			StringBuffer str = new StringBuffer(1000).
+			final StringBuffer str = new StringBuffer(1000).
 				append("\n**************************\n").
 				append(super.toString()).
 				append("\nTransaction Table: size = ").append(trans.size()).
 				append(" largestUpdateXactId = ").append(largestUpdateXactId).
 				append("\n");
 
-			boolean hasReadOnlyTransaction = false;
+            final boolean[] hasReadOnlyTransaction = new boolean[1];
 
-			for (Iterator it = trans.values().iterator(); it.hasNext(); )
-			{
-				TransactionTableEntry ent = (TransactionTableEntry) it.next();
+            visitEntries(new EntryVisitor() {
+                public boolean visit(TransactionTableEntry entry) {
+                    if (entry.isUpdate()) {
+                        str.append(entry.toString());
+                    } else {
+                        hasReadOnlyTransaction[0] = true;
+                    }
+                    return true; // scan the entire transaction table
+                }
+            });
 
-				if (ent != null && ent.isUpdate())
-					str.append(ent.toString());
-
-				if (ent != null && !ent.isUpdate())
-					hasReadOnlyTransaction = true;
-			}
-
-			if (hasReadOnlyTransaction)
+            if (hasReadOnlyTransaction[0])
 			{
 				str.append("\n READ ONLY TRANSACTIONS \n");
 
-				for (Iterator it = trans.values().iterator(); it.hasNext(); )
-				{
-					TransactionTableEntry ent =
-						(TransactionTableEntry) it.next();
-
-					if (ent != null && !ent.isUpdate())
-						str.append(ent.toString());
-				}
+                visitEntries(new EntryVisitor() {
+                    public boolean visit(TransactionTableEntry entry) {
+                        if (!entry.isUpdate()) {
+                            str.append(entry.toString());
+                        }
+                        return true; // scan the entire transaction table
+                    }
+                });
 			}
 			str.append("---------------------------");
 			return str.toString();

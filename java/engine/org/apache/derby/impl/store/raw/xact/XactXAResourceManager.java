@@ -249,7 +249,7 @@ public class XactXAResourceManager implements XAResourceManager
             // to xid_list.
             final TransactionTable.EntryVisitor visitor =
                     new TransactionTable.EntryVisitor() {
-                public void visit(TransactionTableEntry entry) {
+                public boolean visit(TransactionTableEntry entry) {
                     Xact xact = entry.getXact();
                     if (xact.isPrepared())
                     {
@@ -261,6 +261,7 @@ public class XactXAResourceManager implements XAResourceManager
                                 xa_id.getGlobalTransactionId(), 
                                 xa_id.getBranchQualifier()));
                     }
+                    return true; // scan the entire transaction table
                 }
             };
 
