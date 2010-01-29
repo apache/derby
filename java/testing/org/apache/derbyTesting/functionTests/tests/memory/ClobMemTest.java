@@ -190,5 +190,78 @@ public class ClobMemTest extends BaseJDBCTestCase {
     }
 
 
+    /**
+     * Tests that a clob can be safely occur multiple times in a SQL
+     * select and test that large objects streams are not being
+     * materialized when cloned.  Same as
+     * testDerby4477_3645_3646_Repro_lowmem, but now using clob rather
+     * than blob.
+     * @see BlobMemTest#testDerby4477_3645_3646_Repro_lowmem
+     */
+    public void testDerby4477_3645_3646_Repro_lowmem_clob()
+            throws SQLException, IOException {
 
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        // int clobsize = LONG_BLOB_LENGTH;
+        int clobsize = 35000;
+
+        s.executeUpdate(
+            "CREATE TABLE T_MAIN(" +
+            "ID INT  GENERATED ALWAYS AS IDENTITY PRIMARY KEY, " +
+            "V CLOB(" + clobsize + ") )");
+
+        PreparedStatement ps = prepareStatement(
+            "INSERT INTO T_MAIN(V) VALUES (?)");
+
+        int blobLen = clobsize;
+        LoopingAlphabetReader stream = new LoopingAlphabetReader(blobLen);
+        ps.setCharacterStream(1, stream, blobLen);
+
+        ps.executeUpdate();
+        ps.close();
+
+        s.executeUpdate("CREATE TABLE T_COPY ( V1 CLOB(" + clobsize +
+                        "), V2 CLOB(" + clobsize + "))");
+
+        // This failed in the repro for DERBY-3645 solved as part of
+        // DERBY-4477:
+        s.executeUpdate("INSERT INTO T_COPY SELECT  V, V FROM T_MAIN");
+
+        // Check that the two results are identical:
+        ResultSet rs = s.executeQuery("SELECT * FROM T_COPY");
+        rs.next();
+        Reader is = rs.getCharacterStream(1);
+
+        stream.reopen();
+        assertEquals(stream, is);
+
+        is = rs.getCharacterStream(2);
+
+        stream.reopen();
+        assertEquals(stream, is);
+        rs.close();
+
+        // This failed in the repro for DERBY-3646 solved as part of
+        // DERBY-4477 (repro slightly rewoked here):
+        rs = s.executeQuery("SELECT 'I', V, ID, V from T_MAIN");
+        rs.next();
+
+        is = rs.getCharacterStream(2);
+        stream.reopen();
+        assertEquals(stream, is);
+
+        is = rs.getCharacterStream(4);
+        stream.reopen();
+        assertEquals(stream, is);
+
+        // clean up
+        stream.close();
+        is.close();
+        s.close();
+        rs.close();
+
+        rollback();
+    }
 }

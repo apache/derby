@@ -390,6 +390,9 @@ final public class BLOBTest extends BaseJDBCTestCase
      * Tests that a lob can be safely occur multiple times in a SQL select.
      * <p/>
      * See DERBY-4477.
+     * <p/>
+     * @see org.apache.derbyTesting.functionTests.tests.memory.BlobMemTest#testDerby4477_3645_3646_Repro_lowmem
+     * @see org.apache.derbyTesting.functionTests.tests.memory.ClobMemTest#testDerby4477_3645_3646_Repro_lowmem_clob
      */
     public void testDerby4477_3645_3646_Repro() throws SQLException, IOException {
         setAutoCommit(false);

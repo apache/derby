@@ -177,6 +177,15 @@ public class LoopingAlphabetReader
     }
 
     /**
+     * Reopen the stream.
+     */
+    public void reopen()
+            throws IOException {
+        this.closed = false;
+        reset();
+    }
+
+    /**
      * Return remaining characters in the stream.
      */
     public int available() {

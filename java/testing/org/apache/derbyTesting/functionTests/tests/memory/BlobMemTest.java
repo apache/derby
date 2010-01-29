@@ -27,7 +27,6 @@ import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import java.sql.PreparedStatement;
 import java.util.Arrays;
 import java.util.Properties;
@@ -38,6 +37,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.harness.JavaVersionHolder;
 import org.apache.derbyTesting.functionTests.tests.lang.SimpleTest;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -212,6 +212,78 @@ public class BlobMemTest extends BaseJDBCTestCase {
         return new SystemPropertyTestSetup(suite,p);
     }
 
-      
+    /**
+     * Tests that a blob can be safely occur multiple times in a SQL select and
+     * test that large objects streams are not being materialized when cloned.
+     * <p/>
+     * See DERBY-4477.
+     * @see org.apache.derbyTesting.functionTests.tests.jdbcapi.BLOBTest#testDerby4477_3645_3646_Repro
+     * @see ClobMemTest#testDerby4477_3645_3646_Repro_lowmem_clob
+     */
+    public void testDerby4477_3645_3646_Repro_lowmem()
+            throws SQLException, IOException {
 
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        // int blobsize = LONG_BLOB_LENGTH;
+        int blobsize = 35000;
+
+        s.executeUpdate(
+            "CREATE TABLE T_MAIN(" +
+            "ID INT  GENERATED ALWAYS AS IDENTITY PRIMARY KEY, " +
+            "V BLOB(" + blobsize + ") )");
+
+        PreparedStatement ps = prepareStatement(
+            "INSERT INTO T_MAIN(V) VALUES (?)");
+
+        int blobLen = blobsize;
+        LoopingAlphabetStream stream = new LoopingAlphabetStream(blobLen);
+        ps.setBinaryStream(1, stream, blobLen);
+
+        ps.executeUpdate();
+        ps.close();
+
+        s.executeUpdate("CREATE TABLE T_COPY ( V1 BLOB(" + blobsize +
+                        "), V2 BLOB(" + blobsize + "))");
+
+        // This failed in the repro for DERBY-3645 solved as part of
+        // DERBY-4477:
+        s.executeUpdate("INSERT INTO T_COPY SELECT  V, V FROM T_MAIN");
+
+        // Check that the two results are identical:
+        ResultSet rs = s.executeQuery("SELECT * FROM T_COPY");
+        rs.next();
+        InputStream is = rs.getBinaryStream(1);
+
+        stream.reset();
+        assertEquals(stream, is);
+
+        is = rs.getBinaryStream(2);
+
+        stream.reset();
+        assertEquals(stream, is);
+        rs.close();
+
+        // This failed in the repro for DERBY-3646 solved as part of
+        // DERBY-4477 (repro slightly rewoked here):
+        rs = s.executeQuery("SELECT 'I', V, ID, V from T_MAIN");
+        rs.next();
+
+        is = rs.getBinaryStream(2);
+        stream.reset();
+        assertEquals(stream, is);
+
+        is = rs.getBinaryStream(4);
+        stream.reset();
+        assertEquals(stream, is);
+
+        // clean up
+        stream.close();
+        is.close();
+        s.close();
+        rs.close();
+
+        rollback();
+    }
 }
