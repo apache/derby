@@ -52,12 +52,6 @@ public class ClobMemTest extends BaseJDBCTestCase {
         super(name);
     }
 
-    public void tearDown() throws SQLException {
-        rollback();
-    }
-
-
-
     /**
      * Insert a clob and test length.
      *

@@ -54,12 +54,6 @@ public class BlobMemTest extends BaseJDBCTestCase {
         super(name);
     }
 
-    public void tearDown() throws SQLException {
-        rollback();
-    }
-    
-    
-    
     /**
      * Insert a blob and test length.    
      * 
