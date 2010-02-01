@@ -47,6 +47,7 @@ import org.apache.derby.iapi.store.access.StaticCompiledOpenConglomInfo;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.AliasInfo;
@@ -323,10 +324,32 @@ public class GenericConstantActionFactory
 	 * Make the ConstantAction for a CREATE SEQUENCE statement.
 	 *
 	 * @param sequenceName	Name of sequence.
+     * @param dataType
+     * @param initialValue
+     * @param stepValue
+     * @param maxValue
+     * @param minValue
+     * @param cycle
 	 */
-	public	ConstantAction	getCreateSequenceConstantAction(TableName sequenceName)
+	public	ConstantAction	getCreateSequenceConstantAction
+    (
+            TableName   sequenceName,
+            DataTypeDescriptor dataType,
+            long        initialValue,
+            long        stepValue,
+            long        maxValue,
+            long        minValue,
+            boolean     cycle
+    )
 	{
-        return new CreateSequenceConstantAction(sequenceName.getSchemaName(), sequenceName.getTableName());
+        return new CreateSequenceConstantAction(sequenceName.getSchemaName(),
+                sequenceName.getTableName(),
+                dataType,
+                initialValue,
+                stepValue,
+                maxValue,
+                minValue,
+                cycle);
 	}
 
     /**

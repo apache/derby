@@ -71,17 +71,42 @@ public class CreateSequenceNode extends DDLStatementNode
          Object minValue,
          Object cycle
          ) throws StandardException {
+
         _sequenceName = (TableName) sequenceName;
         initAndCheck(_sequenceName);
 
-        _dataType = (DataTypeDescriptor) dataType;
-        _initialValue = (Long) initialValue;
-        _stepValue = (Long) stepValue;
-        _maxValue = (Long) maxValue;
-        _minValue = (Long) minValue;
-        _cycle = (Boolean) cycle;
+        if (dataType != null) {
+            _dataType = (DataTypeDescriptor) dataType;
+        } else {
+            _dataType = DataTypeDescriptor.INTEGER;
+        }
 
-        // automcatically create the schema if it doesn't exist
+        _stepValue = (stepValue != null ? (Long) stepValue : new Long(1));
+
+        if (_dataType.getTypeId().equals(TypeId.SMALLINT_ID)) {
+            _minValue = (minValue != null ? (Long) minValue : new Long(Short.MIN_VALUE));
+            _maxValue = (maxValue != null ? (Long) maxValue : new Long(Short.MAX_VALUE));
+        } else if (_dataType.getTypeId().equals(TypeId.INTEGER_ID)) {
+            _minValue = (minValue != null ? (Long) minValue : new Long(Integer.MIN_VALUE));
+            _maxValue = (maxValue != null ? (Long) maxValue : new Long(Integer.MAX_VALUE));
+        } else {
+            // Could only be BIGINT
+            _minValue = (minValue != null ? (Long) minValue : new Long(Long.MIN_VALUE));
+            _maxValue = (maxValue != null ? (Long) maxValue : new Long(Long.MAX_VALUE));
+        }
+
+        if (initialValue != null) {
+            _initialValue = (Long) initialValue;
+        } else {
+            if (_stepValue.longValue() > 0L) {
+                _initialValue = _minValue;
+            } else {
+                _initialValue = _maxValue;
+            }
+        }
+        _cycle = (cycle != null ? (Boolean) cycle : Boolean.FALSE);
+
+        // automatically create the schema if it doesn't exist
         implicitCreateSchema = true;
     }
 
@@ -113,19 +138,94 @@ public class CreateSequenceNode extends DDLStatementNode
         // this method also compiles permissions checks
         SchemaDescriptor sd = getSchemaDescriptor();
 
-       // set the default schema name if the user did not explicitly specify a schema
+        // set the default schema name if the user did not explicitly specify a schema
         if (_sequenceName.getSchemaName() == null) {
             _sequenceName.setSchemaName(sd.getSchemaName());
         }
 
-        // Right now we only support vanilla sequences
-        if ( (_dataType != null) && ( !_dataType.getTypeId().equals( TypeId.INTEGER_ID ) ) ) { throw unimplementedFeature(); }
-        if ( (_initialValue != null) && ( _initialValue.longValue() != -2147483648L ) ) { throw unimplementedFeature(); }
-        if ( (_stepValue != null) && ( _stepValue.longValue() != 1L ) ) { throw unimplementedFeature(); }
-        if ( (_maxValue != null) && ( _maxValue.longValue() != 2147483647L ) ) { throw unimplementedFeature(); }
-        if ( (_minValue != null) && ( _minValue.longValue() != -2147483648L ) ) { throw unimplementedFeature(); }
-        if ( (_cycle != null) && ( _cycle != Boolean.FALSE ) ) { throw unimplementedFeature(); }
-        
+        if (_dataType.getTypeId().equals(TypeId.SMALLINT_ID)) {
+            if (_minValue.longValue() < Short.MIN_VALUE || _minValue.longValue() >= Short.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        "MINVALUE",
+                        "SMALLINT",
+                        Short.MIN_VALUE + "",
+                        Short.MAX_VALUE + "");
+            }
+            if (_maxValue.longValue() <= Short.MIN_VALUE || _maxValue.longValue() > Short.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        "MAXVALUE",
+                        "SMALLINT",
+                        Short.MIN_VALUE + "",
+                        Short.MAX_VALUE + "");
+            }
+        } else if (_dataType.getTypeId().equals(TypeId.INTEGER_ID)) {
+            if (_minValue.longValue() < Integer.MIN_VALUE || _minValue.longValue() >= Integer.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        "MINVALUE",
+                        "INTEGER",
+                        Integer.MIN_VALUE + "",
+                        Integer.MAX_VALUE + "");
+            }
+            if (_maxValue.longValue() <= Integer.MIN_VALUE || _maxValue.longValue() > Integer.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        "MAXVALUE",
+                        "INTEGER",
+                        Integer.MIN_VALUE + "",
+                        Integer.MAX_VALUE + "");
+            }
+        } else {
+            // BIGINT
+            if (_minValue.longValue() < Long.MIN_VALUE || _minValue.longValue() >= Long.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        "MINVALUE",
+                        "BIGINT",
+                        Long.MIN_VALUE + "",
+                        Long.MAX_VALUE + "");
+            }
+            if (_maxValue.longValue() <= Long.MIN_VALUE || _maxValue.longValue() > Long.MAX_VALUE) {
+                throw StandardException.newException(
+                        SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                        "MAXVALUE",
+                        "BIGINT",
+                        Long.MIN_VALUE + "",
+                        Long.MAX_VALUE + "");
+            }
+        }
+
+        if (_minValue.longValue() >= _maxValue.longValue()) {
+            throw StandardException.newException(
+                    SQLState.LANG_SEQ_MIN_EXCEEDS_MAX,
+                    _minValue.toString(),
+                    _maxValue.toString());
+        }
+
+        if (_initialValue.longValue() < _minValue.longValue() || _initialValue.longValue() > _maxValue.longValue()) {
+             throw StandardException.newException(
+                     SQLState.LANG_SEQ_INVALID_START,
+                     _initialValue.toString(),
+                     _minValue.toString(),
+                     _maxValue.toString());
+        }       
+
+        if (_stepValue.longValue() == 0L) {
+            throw StandardException.newException(
+                    SQLState.LANG_SEQ_INCREMENT_ZERO);
+        }
+
+        if (_stepValue.longValue() > _maxValue.longValue()
+                || _stepValue.longValue() < _minValue.longValue()) {
+            throw StandardException.newException(
+                    SQLState.LANG_SEQ_INCREMENT_OUT_OF_RANGE,
+                    _stepValue.toString(),
+                    _minValue.toString(),
+                    _maxValue.toString());
+        }
+
     }
 
     public String statementToString() {
@@ -141,14 +241,16 @@ public class CreateSequenceNode extends DDLStatementNode
      *          Thrown on failure
      */
     public ConstantAction makeConstantAction() {
-        return getGenericConstantActionFactory().
-                getCreateSequenceConstantAction(_sequenceName);
+             return getGenericConstantActionFactory().
+                getCreateSequenceConstantAction(
+                        _sequenceName,
+                        _dataType,
+                        _initialValue.longValue(),
+                        _stepValue.longValue(),
+                        _maxValue.longValue(),
+                        _minValue.longValue(),
+                        _cycle.booleanValue());
     }
 
-    /** Report an unimplemented feature */
-    private StandardException unimplementedFeature()
-    {
-        return StandardException.newException( SQLState.BTREE_UNIMPLEMENTED_FEATURE );
-    }
 
 }

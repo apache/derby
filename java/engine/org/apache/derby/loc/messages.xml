@@ -2074,6 +2074,43 @@ Guide.
             </msg>
 
             <msg>
+                <name>42XAC</name>
+                <text>'INCREMENT BY' value can not be zero.</text>
+            </msg>
+
+            <msg>
+                <name>42XAD</name>
+                <text>Invalid 'INCREMENT BY' value '{0}'. Must be between 'MINVALUE: {1}' and 'MAXVALUE: {2}'.</text>
+                <arg>stepValue</arg>
+                <arg>minValue</arg>
+                <arg>maxValue</arg>
+            </msg>
+
+             <msg>
+                <name>42XAE</name>
+                <text>'{0}' value out of range of datatype '{1}'. Must be between '{2}' and '{3}'.</text>
+                <arg>argName</arg>
+                <arg>datatypeName</arg>
+                <arg>minValue</arg>
+                <arg>maxValue</arg>
+            </msg>
+
+            <msg>
+                <name>42XAF</name>
+                <text>Invalid 'MINVALUE' value '{0}'. Must be smaller than 'MAXVALUE: {1}'.</text>
+                <arg>minValue</arg>
+                <arg>maxValue</arg>
+            </msg>
+
+            <msg>
+                <name>42XAG</name>
+                <text>Invalid 'START WITH' value '{0}'. Must be between '{1}' and '{2}'.</text>
+                <arg>startValue</arg>
+                <arg>minValue</arg>
+                <arg>maxValue</arg>
+            </msg>
+
+            <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>
                 <arg>className</arg>

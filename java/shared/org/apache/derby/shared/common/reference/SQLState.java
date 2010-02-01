@@ -911,7 +911,12 @@ public interface SQLState {
     String LANG_NEEDS_DATATYPE                                                      = "42XA9";
     String LANG_GEN_COL_BEFORE_TRIG                                             = "42XAA";
     String LANG_NOT_NULL_NEEDS_DATATYPE                                    = "42XAB";
-	String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
+    String LANG_SEQ_INCREMENT_ZERO                                     = "42XAC";
+    String LANG_SEQ_INCREMENT_OUT_OF_RANGE                             = "42XAD";
+    String LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE                          = "42XAE";
+    String LANG_SEQ_MIN_EXCEEDS_MAX                                    = "42XAF";
+    String LANG_SEQ_INVALID_START                                      = "42XAG";    
+    String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
 	// String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE                = "42Y02";
 	String LANG_NO_SUCH_METHOD_ALIAS                                   = "42Y03.S.0";

@@ -5789,7 +5789,7 @@ CREATE SCHEMA "BAR"
 -- DDL Statements for sequences
 -- ----------------------------------------------
 CREATE SEQUENCE "APP"."SEQUENCE_1"
-    AS INTEGER 
+    AS INTEGER
     START WITH -2147483648
     INCREMENT BY 1
     MAXVALUE 2147483647
@@ -5877,7 +5877,7 @@ CREATE SCHEMA "BAR";
 -- DDL Statements for sequences
 -- ----------------------------------------------
 CREATE SEQUENCE "APP"."SEQUENCE_1"
-    AS INTEGER 
+    AS INTEGER
     START WITH -2147483648
     INCREMENT BY 1
     MAXVALUE 2147483647
@@ -5945,7 +5945,7 @@ CREATE SCHEMA "BAR" #
 -- DDL Statements for sequences
 -- ----------------------------------------------
 CREATE SEQUENCE "APP"."SEQUENCE_1"
-    AS INTEGER 
+    AS INTEGER
     START WITH -2147483648
     INCREMENT BY 1
     MAXVALUE 2147483647

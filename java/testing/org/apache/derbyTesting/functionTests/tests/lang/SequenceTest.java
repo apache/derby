@@ -32,11 +32,12 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derby.iapi.reference.SQLState;
 
 /**
  * Test sequences.
  */
-public class SequenceTest extends BaseJDBCTestCase {
+public class SequenceTest extends GeneratedColumnsHelper {
 
     private static final String TEST_DBO = "TEST_DBO";
     private static final String ALPHA = "ALPHA";
@@ -194,6 +195,98 @@ public class SequenceTest extends BaseJDBCTestCase {
         adminCon.close();
     }
 
+    public void testCreateSequenceWithArguments() throws Exception {
+        Connection alphaCon = openUserConnection(ALPHA);
+
+        goodStatement(alphaCon,
+                "CREATE SEQUENCE small1 AS SMALLINT START WITH 0 INCREMENT BY 1");
+
+        goodStatement(alphaCon,
+                "CREATE SEQUENCE small2 AS SMALLINT START WITH " + Short.MIN_VALUE
+                        + " MAXVALUE " + Short.MAX_VALUE);
+
+        goodStatement(alphaCon,
+                "CREATE SEQUENCE small3 AS SMALLINT START WITH 1200"
+                        + " INCREMENT BY -5 MAXVALUE 32000 NO MINVALUE CYCLE");
+
+        // maxvalue out of range
+        expectCompilationError(alphaCon,
+                SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                "CREATE SEQUENCE small3 AS SMALLINT START WITH " + Short.MIN_VALUE
+                        + " MAXVALUE " + Integer.MAX_VALUE);
+
+         // start with out of range
+        expectCompilationError(alphaCon,
+                SQLState.LANG_SEQ_INVALID_START,
+                "CREATE SEQUENCE small4 AS SMALLINT START WITH " + Integer.MIN_VALUE);
+
+        // minvalue larger than maxvalue negative
+        expectCompilationError(alphaCon,
+                SQLState.LANG_SEQ_MIN_EXCEEDS_MAX,
+                "CREATE SEQUENCE small5 AS SMALLINT MAXVALUE -20000 MINVALUE -1");
+
+        goodStatement(alphaCon,
+                "CREATE SEQUENCE int1 AS INTEGER START WITH " + Integer.MIN_VALUE + " INCREMENT BY -10 CYCLE");
+
+        goodStatement(alphaCon,
+                "CREATE SEQUENCE int2 AS INTEGER INCREMENT BY 5"
+                        + " MAXVALUE " + Integer.MAX_VALUE);
+
+        goodStatement(alphaCon,
+                "CREATE SEQUENCE int3 AS INTEGER START WITH 1200 INCREMENT BY 5 "
+                        + "NO MAXVALUE MINVALUE -320000 CYCLE");
+
+        // minvalue out of range
+        expectCompilationError(alphaCon,
+                SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                "CREATE SEQUENCE int4 AS INTEGER START WITH " + Integer.MIN_VALUE
+                        + " MAXVALUE " + Short.MAX_VALUE
+                        + " MINVALUE " + Long.MIN_VALUE);
+
+        // increment out of range
+        expectCompilationError(alphaCon,
+                SQLState.LANG_SEQ_INCREMENT_OUT_OF_RANGE,
+                "CREATE SEQUENCE int5 AS INTEGER INCREMENT BY " + Long.MAX_VALUE);
+
+        // increment 0
+        expectCompilationError(alphaCon,
+                SQLState.LANG_SEQ_INCREMENT_ZERO,
+                "CREATE SEQUENCE int5 AS INTEGER INCREMENT BY 0");
+
+       // increment too big
+        expectCompilationError(alphaCon,
+                SQLState.LANG_SEQ_INCREMENT_OUT_OF_RANGE,
+                "CREATE SEQUENCE int6 AS INTEGER INCREMENT BY " + Long.MAX_VALUE);
+
+        goodStatement(alphaCon,
+                "CREATE SEQUENCE long1 AS BIGINT START WITH " + Long.MIN_VALUE + " INCREMENT BY -100 NO CYCLE");
+
+        goodStatement(alphaCon,
+                "CREATE SEQUENCE long2 AS BIGINT INCREMENT BY 25"
+                        + " MAXVALUE " + Integer.MAX_VALUE);
+
+        goodStatement(alphaCon,
+                "CREATE SEQUENCE long3 AS BIGINT START WITH 0 INCREMENT BY 5 "
+                        + "NO MAXVALUE MINVALUE " + Long.MIN_VALUE + " CYCLE");
+
+        // invalid minvalue
+        expectCompilationError(alphaCon,
+                SQLState.LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE,
+                "CREATE SEQUENCE long4 AS BIGINT START WITH " + Integer.MAX_VALUE
+                        + " MINVALUE " + Long.MAX_VALUE);
+
+        // minvalue larger than maxvalue
+        expectCompilationError(alphaCon,
+                SQLState.LANG_SEQ_MIN_EXCEEDS_MAX,
+                "CREATE SEQUENCE long5 AS BIGINT START WITH 0 MAXVALUE 100000 MINVALUE 100001");
+
+        // should fail for non-int TYPES
+        expectCompilationError(alphaCon,
+                SQLState.LANG_SYNTAX_ERROR,
+                "CREATE SEQUENCE char1 AS CHAR INCREMENT BY 1");
+
+    }
+
     /**
      * initial test for next value
      * @throws SQLException on error
@@ -203,5 +296,6 @@ public class SequenceTest extends BaseJDBCTestCase {
         s.executeUpdate("CREATE SEQUENCE mySeq1");
         s.execute("SELECT NEXT VALUE FOR mySeq1 from sys.systables");
     }
+
 
 }

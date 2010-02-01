@@ -39,8 +39,14 @@ import org.apache.derby.shared.common.reference.SQLState;
  */
 class CreateSequenceConstantAction extends DDLConstantAction {
 
-    private String sequenceName;
-    private String schemaName;
+    private String _sequenceName;
+    private String _schemaName;
+    private DataTypeDescriptor _dataType;
+    private long _initialValue;
+    private long _stepValue;
+    private long _maxValue;
+    private long _minValue;
+    private boolean _cycle;
 
     // CONSTRUCTORS
     /**
@@ -48,10 +54,33 @@ class CreateSequenceConstantAction extends DDLConstantAction {
      * When executed, will create a sequence by the given name.
      *
      * @param sequenceName The name of the sequence being created
+     * @param dataType Exact numeric type of the new sequence
+     * @param initialValue Starting value
+     * @param stepValue Increment amount
+     * @param maxValue Largest value returned by the sequence generator
+     * @param minValue Smallest value returned by the sequence generator
+     * @param cycle True if the generator should wrap around, false otherwise
      */
-    public CreateSequenceConstantAction(String schemaName, String sequenceName) {
-        this.schemaName = schemaName;
-        this.sequenceName = sequenceName;
+    public CreateSequenceConstantAction
+    (
+            String schemaName,
+            String sequenceName,
+            DataTypeDescriptor dataType,
+            long initialValue,
+            long stepValue,
+            long maxValue,
+            long minValue,
+            boolean cycle
+    )
+    {
+        this._schemaName = schemaName;
+        this._sequenceName = sequenceName;
+        this._dataType = dataType;
+        this._initialValue = initialValue;
+        this._stepValue = stepValue;
+        this._maxValue = maxValue;
+        this._minValue = minValue;
+        this._cycle = cycle;
     }
 
     // INTERFACE METHODS
@@ -74,22 +103,30 @@ class CreateSequenceConstantAction extends DDLConstantAction {
 
         dd.startWriting(lcc);
 
-        schemaDescriptor = DDLConstantAction.getSchemaDescriptorForCreate(dd, activation, schemaName);
+        schemaDescriptor = DDLConstantAction.getSchemaDescriptorForCreate(dd, activation, _schemaName);
 
         //
         // Check if this sequence already exists. If it does, throw.
         //
-        SequenceDescriptor seqDef = dd.getSequenceDescriptor(schemaDescriptor, sequenceName);
+        SequenceDescriptor seqDef = dd.getSequenceDescriptor(schemaDescriptor, _sequenceName);
 
         if (seqDef != null) {
             throw StandardException.
                     newException(SQLState.LANG_OBJECT_ALREADY_EXISTS,
-                            seqDef.getDescriptorType(), sequenceName);
+                            seqDef.getDescriptorType(), _sequenceName);
         }
 
-        seqDef = ddg.newSequenceDescriptor(schemaDescriptor,
+        seqDef = ddg.newSequenceDescriptor(
+                schemaDescriptor,
                 dd.getUUIDFactory().createUUID(),
-                sequenceName, DataTypeDescriptor.INTEGER_NOT_NULL, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, false);        // is definition
+                _sequenceName,
+                _dataType,
+                _initialValue,   // current value
+                _initialValue,
+                _minValue,
+                _maxValue,
+                _stepValue,
+                _cycle);        // whether the sequence can wrap-around
 
         dd.addDescriptor(seqDef,
                 null,  // parent
@@ -103,6 +140,6 @@ class CreateSequenceConstantAction extends DDLConstantAction {
     public String toString() {
         // Do not put this under SanityManager.DEBUG - it is needed for
         // error reporting.
-        return "CREATE SEQUENCE " + sequenceName;
+        return "CREATE SEQUENCE " + _sequenceName;
     }
 }
