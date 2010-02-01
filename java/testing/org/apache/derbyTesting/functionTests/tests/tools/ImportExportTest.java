@@ -66,22 +66,36 @@ public class ImportExportTest extends BaseJDBCTestCase {
 		return new CleanDatabaseTestSetup(test) {
             protected void decorateSQL(Statement s) throws SQLException {
 
+                s.execute( "create type Price external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java" );
+                s.execute( "create type hashmap external name 'java.util.HashMap' language java" );
+
+                s.execute( "create function makePrice( ) returns price " +
+                           "language java parameter style java no sql " +
+                           "external name 'org.apache.derbyTesting.functionTests.tests.lang.Price.makePrice'" );
+
+                s.execute( "create function makeHashMap( ) returns hashmap " +
+                           "language java parameter style java no sql " +
+                           "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.makeHashMap'" );
+
                 s.execute("CREATE TABLE T1 (COLUMN1 VARCHAR(5) , COLUMN2 VARCHAR(8) , " +
 						   "COLUMN3 SMALLINT , COLUMN4 CHAR(11) , COLUMN5 DATE , COLUMN6 DECIMAL(5,1) , " +
 						   "COLUMN7 DOUBLE PRECISION , COLUMN8 INT , COLUMN9 BIGINT , COLUMN10 NUMERIC , " +
 						   "COLUMN11 REAL , COLUMN12 SMALLINT , COLUMN13 TIME , COLUMN14 TIMESTAMP , "+
-						   "COLUMN15 SMALLINT , COLUMN16 VARCHAR(1))");
+						   "COLUMN15 SMALLINT , COLUMN16 VARCHAR(1), COLUMN17 PRICE)");
                 s.execute("CREATE TABLE T2 (COLUMN1 VARCHAR(5) , COLUMN2 VARCHAR(8) , " +
 						   "COLUMN3 SMALLINT, COLUMN4 CHAR(11) , COLUMN5 DATE , COLUMN6 DECIMAL(5,1) , " +
 						   "COLUMN7 DOUBLE PRECISION , COLUMN8 INT , COLUMN9 BIGINT , COLUMN10 NUMERIC , " +
 						   "COLUMN11 REAL , COLUMN12 SMALLINT , COLUMN13 TIME , COLUMN14 TIMESTAMP , "+
-						   "COLUMN15 SMALLINT , COLUMN16 VARCHAR(1))");
+						   "COLUMN15 SMALLINT , COLUMN16 VARCHAR(1), COLUMN17 PRICE)");
                 s.execute("create table T4 (   Account int,    Name   char(30), Jobdesc char(40), " +
                            "Company varchar(35), Address1 varchar(40), Address2 varchar(40), " +
                            "City    varchar(20), State   char(5), Zip char(10), Country char(10), " +
                            "Phone1  char(20), Phone2  char(20), email   char(30), web     char(30), " +
                            "Fname   char(30), Lname   char(30), Comment char(30), AccDate char(30), " +
                            "Payment decimal(8,2), Balance decimal(8,2))");
+
+                s.execute( "create table t5( a int, b price )" );
+                s.execute( "create table t6( a int, b hashmap )" );
                 }
         };
 	}
@@ -224,9 +238,28 @@ public class ImportExportTest extends BaseJDBCTestCase {
         JDBC.assertSingleValueResultSet(
                 s.executeQuery("select count(*) from " + escapedName),
                 Integer.toString(rowsInTable));
-        JDBC.assertEmpty(s.executeQuery(
-                "select * from " + escapedName +
-                " except all select * from T1"));
+    }
+
+    /**
+     * Test that you can't import the wrong type of object into a UDT column.
+     */
+    public void testCastingProblem() throws Exception
+    {
+        resetTables();
+
+        final String fileName = SupportFilesSetup.
+                getReadWrite("castCheck.dat").getPath();
+
+        // export table which has a HashMap column
+        doExportToFile( fileName, null, "T6", null, null, null );
+
+        // try to import the HashMap into a Price column
+        try {
+            doImportFromFile( fileName, null, "T5", null, null, null, 0 );
+            fail();
+		} catch (SQLException e) {
+			assertSQLState("XJ001", e);
+		}
     }
 
     private void doImport(String fromTable, String toSchema, String toTable,
@@ -345,14 +378,17 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	private void resetTables() throws Exception {
 		runSQLCommands("delete from t1");
 		runSQLCommands("delete from t2");
+		runSQLCommands("delete from t5");
+		runSQLCommands("delete from t6");
 		runSQLCommands("INSERT INTO T1 VALUES (null,'aa',1,'a',DATE('1998-06-30'),"+
-		               "1,1,1,1,1,1,1,TIME('12:00:00'),TIMESTAMP('1998-06-30 12:00:00.0'),1,'a')");
+		               "1,1,1,1,1,1,1,TIME('12:00:00'),TIMESTAMP('1998-06-30 12:00:00.0'),1,'a', makePrice() )");
         runSQLCommands("INSERT INTO T1 VALUES (null,'bb',1,'b',DATE('1998-06-30'),"+
-					   "2,2,2,2,2,2,2,TIME('12:00:00'),TIMESTAMP('1998-06-30 12:00:00.0'),2,'b')");
+					   "2,2,2,2,2,2,2,TIME('12:00:00'),TIMESTAMP('1998-06-30 12:00:00.0'),2,'b', makePrice() )");
         runSQLCommands("INSERT INTO T1 VALUES (null,'cc',1,'c',DATE('1998-06-30'),"+
-					   "3,3,3,3,3,3,3,TIME('12:00:00'),TIMESTAMP('1998-06-30 12:00:00.0'),3,'c')");
+					   "3,3,3,3,3,3,3,TIME('12:00:00'),TIMESTAMP('1998-06-30 12:00:00.0'),3,'c', makePrice())");
         runSQLCommands("INSERT INTO T1 VALUES (null,'dd',1,'d',DATE('1998-06-30'),"+
-					   "4,4,4,4,4,4,4,TIME('12:00:00'),TIMESTAMP('1998-06-30 12:00:00.0'),4,'d')");
+					   "4,4,4,4,4,4,4,TIME('12:00:00'),TIMESTAMP('1998-06-30 12:00:00.0'),4,'d', makePrice())");
+        runSQLCommands( "insert into t6 values( 1, makeHashMap() )" );
 	}
 
 }

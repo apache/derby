@@ -22,6 +22,8 @@
 package org.apache.derby.catalog.types;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.error.StandardException;
 
 import java.sql.Types;
 import java.io.ObjectOutput;
@@ -81,9 +83,28 @@ public class UserDefinedTypeIdImpl extends BaseTypeIdImpl
 
 	public UserDefinedTypeIdImpl(String className)
 	{
-		super(className);
-		this.className = className;
-		JDBCTypeId = java.sql.Types.JAVA_OBJECT;
+        try {
+            //
+            // If the name begins with a quote, then it is the schema-qualified name
+            // of a UDT. Parse the name.
+            //
+            if ( className.charAt( 0 ) == '"' )
+            {
+                String[] nameParts = IdUtil.parseMultiPartSQLIdentifier( className );
+                
+                schemaName = nameParts[ 0 ];
+                unqualifiedName = nameParts[ 1 ];
+                className = null;
+            }
+            else
+            {
+                schemaName = null;
+                unqualifiedName = className;
+                this.className = className;
+            }
+            
+            JDBCTypeId = java.sql.Types.JAVA_OBJECT;
+        } catch (Exception e) { throw new IllegalArgumentException( e.getMessage() ); }
 	}
 
 	/**

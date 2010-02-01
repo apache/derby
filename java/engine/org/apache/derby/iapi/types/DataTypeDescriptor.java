@@ -1806,8 +1806,9 @@ public final class DataTypeDescriptor implements Formatable
         switch (typeId.getJDBCTypeId())
         {
             case Types.BOOLEAN:
+                return false;
             case Types.JAVA_OBJECT:
-            	return false;
+            	return getTypeId().getBaseTypeId().isAnsiUDT();
             case Types.DECIMAL:
                 return
                 (getPrecision() <= typeId.getMaximumPrecision()) &&

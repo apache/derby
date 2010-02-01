@@ -64,13 +64,15 @@ public class Import extends ImportAbstract{
                   String characterDelimiter,  String codeset, 
                   int noOfColumnsExpected,  String columnTypes, 
                   boolean lobsInExtFile,
-                  int importCounter ) throws SQLException 
+                  int importCounter,
+                  String columnTypeNames, String udtClassNamesString ) throws SQLException 
 	{
-
 		try{
 			this.inputFileName = inputFileName;
             this.noOfColumnsExpected = noOfColumnsExpected;
             this.tableColumnTypesStr = columnTypes;
+            this.columnTypeNamesString = columnTypeNames;
+            this.udtClassNamesString = udtClassNamesString;
 			controlFileReader = new ControlInfo();
 			controlFileReader.setControlProperties(characterDelimiter,
 												   columnDelimiter, codeset);
@@ -205,6 +207,17 @@ public class Import extends ImportAbstract{
                                                    tableName, insertColumnList, 
                                                    columnIndexes, COLUMNNAMEPREFIX);
 
+            String columnTypeNames = null;
+            String udtClassNames = null;
+            try {
+                columnTypeNames = columnInfo.getColumnTypeNames();
+                udtClassNames = columnInfo.getUDTClassNames();
+            }
+            catch (Throwable t)
+            {
+                throw formatImportError( (Import) _importers.get( importCounter ), inputFileName, t );
+            }
+
             StringBuffer sb = new StringBuffer("new ");
             sb.append("org.apache.derby.impl.load.Import");
             sb.append("(") ;
@@ -224,6 +237,10 @@ public class Import extends ImportAbstract{
             sb.append(lobsInExtFile);
             sb.append(", ");
             sb.append( importCounter.intValue() );
+            sb.append(", ");
+            sb.append(quoteStringArgument( columnTypeNames ) );
+            sb.append(", ");
+            sb.append(quoteStringArgument( udtClassNames ) );
             sb.append(" )") ;
             
             String importvti = sb.toString();

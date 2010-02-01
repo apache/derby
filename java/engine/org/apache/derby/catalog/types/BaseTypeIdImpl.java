@@ -74,7 +74,7 @@ public class BaseTypeIdImpl implements Formatable
     private int   formatId;
 
     // schema where the type lives. only for UDTs
-    private String schemaName;
+    protected String schemaName;
 
     // unqualified type name
     String unqualifiedName;

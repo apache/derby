@@ -28,6 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Timestamp;
+import java.util.HashMap;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -727,7 +728,7 @@ public class UDTTest  extends GeneratedColumnsHelper
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // PROCEDURES
+    // PROCEDURES AND FUNCTIONS
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -741,6 +742,17 @@ public class UDTTest  extends GeneratedColumnsHelper
 
         price[ 0 ] = newPrice;
     }
+
+    public static HashMap makeHashMap() { return new HashMap(); }
+
+    public static HashMap putValue( HashMap map, String key, String value )
+    {
+        map.put( key, value );
+
+        return map;
+    }
+
+    
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

@@ -21,12 +21,14 @@
 
 package org.apache.derby.impl.load;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.ResultSetMetaData;
 import org.apache.derby.vti.VTITemplate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.reference.SQLState;
@@ -49,13 +51,17 @@ abstract class ImportAbstract extends VTITemplate {
   int lineNumber = 0;
   String[] nextRow;
 
-  ResultSetMetaData importResultSetMetaData;
+  ImportResultSetMetaData importResultSetMetaData;
   int noOfColumnsExpected;
 
   protected boolean lobsInExtFile = false;
 
   String tableColumnTypesStr;
   int[] tableColumnTypes;
+  String columnTypeNamesString;
+  String[] columnTypeNames;
+  String  udtClassNamesString;
+  HashMap udtClasses;
   private boolean wasNull;
 
 	static final String COLUMNNAMEPREFIX = "COLUMN";
@@ -84,10 +90,12 @@ abstract class ImportAbstract extends VTITemplate {
     nextRow = new String[numberOfColumns];
     tableColumnTypes = ColumnInfo.getExpectedVtiColumnTypes(tableColumnTypesStr,
                                                             numberOfColumns);
+    columnTypeNames =  ColumnInfo.getExpectedColumnTypeNames( columnTypeNamesString, numberOfColumns );
+    udtClasses = ColumnInfo.getExpectedUDTClasses( udtClassNamesString );
 	// get the ResultSetMetaData now as we know it's needed
 	importResultSetMetaData =
 		new ImportResultSetMetaData(numberOfColumns, columnNames, columnWidths,
-                                    tableColumnTypes);
+                                    tableColumnTypes, columnTypeNames, udtClasses );
 
 
     //FIXME don't go through the resultset here. just for testing
@@ -170,7 +178,7 @@ abstract class ImportAbstract extends VTITemplate {
 
     /**
      * Returns <code> java.sql.Clob </code> type object that 
-     * contains the columnn data from the import file. 
+     * contains the column data from the import file. 
      * @param columnIndex number of the column. starts at 1.
      * @exception SQLException if any occurs during create of the clob object.
      */
@@ -197,7 +205,7 @@ abstract class ImportAbstract extends VTITemplate {
 	
     /**
      * Returns <code> java.sql.Blob </code> type object that 
-     * contains the columnn data from the import file. 
+     * contains the column data from the import file. 
      * @param columnIndex number of the column. starts at 1.
      * @exception SQLException if any occurs during create of the blob object.
      */
@@ -246,11 +254,57 @@ abstract class ImportAbstract extends VTITemplate {
         return blob;
 	}
 
+    /**
+     * Returns Object that contains the column data 
+     * from the import file. 
+     * @param columnIndex number of the column. starts at 1.
+     * @exception SQLException if any error occurs.
+     */
+	public Object getObject(int columnIndex) throws SQLException
+    {
+        byte[] bytes = getBytes( columnIndex );
 
+        try {
+            Class udtClass = importResultSetMetaData.getUDTClass( columnIndex );
+            
+            Object obj = readObject( bytes );
+            
+            //
+            // We need to make sure that the user is not trying to import some
+            // other object into the target column. This could happen if, for instance,
+            // you try to import the exported contents of a table which has the same
+            // shape as the target table except that its udt columns are of different type.
+            //
+            if ( (obj !=null) && (!udtClass.isInstance( obj )) )
+            {
+                throw new ClassCastException( obj.getClass().getName() + " -> " + udtClass.getName() );
+            }
+            
+            return obj;
+        }
+        catch (Exception e) { throw importError( e ); }
+    }
+
+    /** Read a serializable from a set of bytes. */
+    public static Object readObject( byte[] bytes ) throws Exception
+    {
+        ByteArrayInputStream bais = new ByteArrayInputStream( bytes );
+        ObjectInputStream ois = new ObjectInputStream( bais );
+
+        return ois.readObject();
+    }
+
+    /** Read an object which was serialized to a string using StringUtil */
+    public static Object destringifyObject( String raw ) throws Exception
+    {
+        byte[] bytes = StringUtil.fromHexString( raw, 0, raw.length());
+
+        return readObject( bytes );
+    }
 
 
     /**
-     * Returns byte array that contains the columnn data 
+     * Returns byte array that contains the column data 
      * from the import file. 
      * @param columnIndex number of the column. starts at 1.
      * @exception SQLException if any error occurs.

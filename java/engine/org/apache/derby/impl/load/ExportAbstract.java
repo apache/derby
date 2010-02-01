@@ -27,7 +27,11 @@ import java.sql.ResultSetMetaData;
 import java.sql.Types;
 import java.util.Date;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.Reader;
+
+import org.apache.derby.iapi.services.io.DynamicByteArrayOutputStream;
+import org.apache.derby.iapi.util.StringUtil;
 
 /**
  * 
@@ -110,7 +114,14 @@ abstract class ExportAbstract {
                // TODO : handling of Nulls. 
            }
 		   else {
-			   rowObjects[colNum]=rs.getString(colNum + 1);
+               String columnValue;
+               int jdbcColumnNumber = colNum + 1;
+               
+               if ( rsm.getColumnType( jdbcColumnNumber ) == java.sql.Types.JAVA_OBJECT )
+               { columnValue = stringifyObject( rs.getObject( jdbcColumnNumber ) ); }
+               else { columnValue = rs.getString( jdbcColumnNumber ); }
+               
+			   rowObjects[colNum] = columnValue;
            }
        }
        return rowObjects;
@@ -119,6 +130,20 @@ abstract class ExportAbstract {
 	exportResultSetForObject.close();
     return null;
   }
+
+    // write a Serializable as a string
+    public static String stringifyObject( Object udt ) throws Exception
+    {
+        DynamicByteArrayOutputStream dbaos = new DynamicByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream( dbaos );
+        
+        oos.writeObject( udt );
+        
+        byte[] buffer = dbaos.getByteArray();
+        int length = dbaos.getUsed();
+        
+        return StringUtil.toHexString( buffer, 0, length );
+    }
 
   //returns the control file reader corresponding to the control file passed
   protected ControlInfo getControlFileReader(){

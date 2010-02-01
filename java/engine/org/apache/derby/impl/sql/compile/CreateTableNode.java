@@ -367,8 +367,8 @@ public class CreateTableNode extends DDLStatementNode
 							schemaCollationName);
 				}
 
-				ColumnDefinitionNode column = new ColumnDefinitionNode();
-				column.init(rc.getName(), null, rc.getType(), null);
+				ColumnDefinitionNode column = (ColumnDefinitionNode) getNodeFactory().getNode
+                    ( C_NodeTypes.COLUMN_DEFINITION_NODE, rc.getName(), null, rc.getType(), null, getContextManager() );
 				tableElementList.addTableElement(column);
 			}
 		} else {

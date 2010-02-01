@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.load;
 
+import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
@@ -60,6 +61,7 @@ class ColumnInfo {
 	private Connection conn;
 	private String tableName;
 	private String schemaName;
+    private HashMap udtClassNames;
 
 	/**
 	 * Initialize the column type and name  information
@@ -84,6 +86,7 @@ class ColumnInfo {
 		insertColumnNames = new ArrayList(1);
 		columnTypes = new ArrayList(1);
         jdbcColumnTypes = new ArrayList(1);
+        udtClassNames = new HashMap();
 		noOfColumns = 0;
 		this.conn = conn;
 
@@ -198,6 +201,11 @@ class ColumnInfo {
 				columnTypes.add(sqlType);
                 jdbcColumnTypes.add(new Integer(dataType));
 				noOfColumns++;
+
+                if ( dataType == java.sql.Types.JAVA_OBJECT )
+                {
+                    udtClassNames.put( "COLUMN" +  noOfColumns, getUDTClassName( dmd, typeName ) );
+                }
 			}else
 			{
 				rs.close();
@@ -211,14 +219,43 @@ class ColumnInfo {
 		return foundTheColumn;
 	}
 
+    // look up the class name of a UDT
+    private String getUDTClassName( DatabaseMetaData dmd, String sqlTypeName )
+        throws SQLException
+    {
+        String className = null;
+        
+        try {
+            // special case for system defined types
+            if ( sqlTypeName.charAt( 0 ) != '"' ) { return sqlTypeName; }
+
+            String[] nameParts = IdUtil.parseMultiPartSQLIdentifier( sqlTypeName );
+
+            String schemaName = nameParts[ 0 ];
+            String unqualifiedName = nameParts[ 1 ];
+
+            ResultSet rs = dmd.getUDTs( null, schemaName, unqualifiedName, new int[] { java.sql.Types.JAVA_OBJECT } );
+
+            if ( rs.next() )
+            {
+                className = rs.getString( 4 );
+            }
+            rs.close();
+        }
+        catch (Exception e) { throw new SQLException( e.getMessage() ); }
+
+        if ( className == null ) { className = "???"; }
+        
+        return className;
+    }
+
 
 	//return true if the given type is supported by import/export
 	public  static final boolean importExportSupportedType(int type){
 
 		return !(type == java.sql.Types.BIT ||
-				 type == java.sql.Types.JAVA_OBJECT ||
 				 type == java.sql.Types.OTHER ||
-				 type == JDBC40Translation.SQLXML); 
+				 type == JDBC40Translation.SQLXML ); 
 	}
 
 
@@ -257,6 +294,25 @@ class ColumnInfo {
 			return "";
 	}
 
+    /**
+     * Get the column type names.
+     */
+    public String getColumnTypeNames()
+        throws Exception
+    {
+        // we use the object serializer logic
+        return ExportAbstract.stringifyObject( columnTypes );
+    }
+
+    /**
+     * Get the class names of udt columns as a string.
+     */
+    public String getUDTClassNames()
+        throws Exception
+    {
+        // we use the object serializer logic
+        return ExportAbstract.stringifyObject( udtClassNames );
+    }
 
 	/*
 	 * Returns a  string of columns with proper casting/conversion
@@ -404,7 +460,7 @@ class ColumnInfo {
 
     /*
      * Get the expected vti data column types. This information was 
-     * passed earlies as string to the vti. This rourine extract the 
+     * earlier passed as a string to the vti. This routine extracts the 
      * information from the string.
      * @param columnTypesStr  import data column type information , 
      *                        encoded as string. 
@@ -415,7 +471,6 @@ class ColumnInfo {
     public static int[] getExpectedVtiColumnTypes(String columnTypesStr, 
                                                   int noOfColumns) 
     {
-
         // extract the table column types. Break the comma seperated 
         // column types into java.sql.Types int values from the columnTypes 
         // string that got passed to the import VTI.
@@ -435,6 +490,7 @@ class ColumnInfo {
             vtiColumnTypes[i] = java.sql.Types.VARCHAR;
 
         StringTokenizer st = new StringTokenizer(columnTypesStr , ",");
+
         while (st.hasMoreTokens()) 
         {
             String colTypeInfo = (st.nextToken()).trim();
@@ -454,8 +510,79 @@ class ColumnInfo {
                 vtiColumnTypes[colIndex-1] = colType;
             
         }
+        
         return vtiColumnTypes;
     }
+
+
+    /*
+     * Get the expected vti column type names. This information was 
+     * passed earlier as a string to the vti. This routine extracts the 
+     * information from the string.
+     * @param columnTypeNamesString  import data column type information, encoded as string. 
+     * @param noOfColumns     number of columns in the import file.
+     * 
+     * @see getColumnTypeNames()
+     */
+    public static String[] getExpectedColumnTypeNames
+        ( String columnTypeNamesString, int noOfColumns )
+        throws Exception
+    {
+        ArrayList list = (ArrayList) ImportAbstract.destringifyObject( columnTypeNamesString );
+
+        String[] retval = new String[ list.size() ];
+
+        list.toArray( retval );
+        
+        return retval;
+    }
+
+    /*
+     * Get the expected classes bound to UDT columns. This information was 
+     * passed earlier as a string to the vti. This routine extracts the 
+     * information from the string.
+     * @param stringVersion The result of calling toString() on the original HashMap<String><String>.
+     * @return a HashMap<String><Class> mapping column names to their udt classes
+     * 
+     * @see initializeColumnInfo()
+     */
+    public static HashMap getExpectedUDTClasses( String stringVersion )
+        throws Exception
+    {
+        // deserialize the original HashMap<String><String>
+        HashMap stringMap = deserializeHashMap( stringVersion );
+
+        if ( stringMap == null ) { return null; }
+        
+        HashMap retval = new HashMap();
+        Iterator keys = stringMap.keySet().iterator();
+
+        while ( keys.hasNext() )
+        {
+            String columnName = (String) keys.next();
+            String className = (String) stringMap.get( columnName );
+
+            Class classValue = Class.forName( className );
+
+            retval.put( columnName, classValue );
+        }
+
+        return retval;
+    }
+    
+    /*
+     * Deserialize a HashMap produced by ExportAbstract.stringifyObject()
+     */
+    public static HashMap deserializeHashMap( String stringVersion )
+        throws Exception
+    {
+        if ( stringVersion == null ) { return null; }
+
+        HashMap retval = (HashMap) ImportAbstract.destringifyObject( stringVersion );
+
+        return retval;
+    }
+    
 }
 
 

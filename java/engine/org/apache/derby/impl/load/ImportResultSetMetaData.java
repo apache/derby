@@ -22,6 +22,7 @@
 package org.apache.derby.impl.load;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import org.apache.derby.vti.VTIMetaDataTemplate;
 
 import org.apache.derby.iapi.reference.Limits;
@@ -32,16 +33,22 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
   private final String[] columnNames;
   private final int[] columnWidths;
   // types of the table columns that the data is imported. 
-  private final int[] tableColumnTypes ; 
+  private final int[] tableColumnTypes ;
+  private final String[] columnTypeNames;
+  private final HashMap udtClasses;
 
   public ImportResultSetMetaData(int numberOfColumns, 
                                  String[] columnNames,
                                  int[] columnWidths, 
-                                 int[] tableColumnTypes) {
+                                 int[] tableColumnTypes,
+                                 String[] columnTypeNames,
+                                 HashMap udtClasses ) {
     this.numberOfColumns = numberOfColumns;
     this.columnNames = columnNames;
     this.columnWidths = columnWidths;
     this.tableColumnTypes = tableColumnTypes;
+    this.columnTypeNames = columnTypeNames;
+    this.udtClasses = udtClasses;
   }
 
 	public int getColumnCount() {
@@ -99,6 +106,10 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
             // CHAR FOR BIT DATA 
             colType = java.sql.Types.BINARY;
             break;
+        case java.sql.Types.JAVA_OBJECT: 
+            // User-defined type
+            colType = java.sql.Types.JAVA_OBJECT;
+            break;
         default: 
             // all other data in the import file is 
             // assumed to be in varchar format.
@@ -118,4 +129,19 @@ class ImportResultSetMetaData extends VTIMetaDataTemplate {
        return columnWidths[column-1];
   }
 
+	public  String getColumnTypeName(int column) throws SQLException
+    {
+		return columnTypeNames[ column - 1 ];
+	}
+
+    /**
+     * Get the class bound to a UDT column.
+     */
+    public Class getUDTClass( int column ) throws SQLException
+    {
+        String columnName = getColumnName( column );
+        
+        return (Class) udtClasses.get( getColumnName( column ) );
+    }
+    
 }
