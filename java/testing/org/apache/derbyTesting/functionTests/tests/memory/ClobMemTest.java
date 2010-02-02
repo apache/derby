@@ -234,12 +234,12 @@ public class ClobMemTest extends BaseJDBCTestCase {
         rs.next();
         Reader is = rs.getCharacterStream(1);
 
-        stream.reopen();
+        stream = new LoopingAlphabetReader(blobLen);
         assertEquals(stream, is);
 
         is = rs.getCharacterStream(2);
 
-        stream.reopen();
+        stream = new LoopingAlphabetReader(blobLen);
         assertEquals(stream, is);
         rs.close();
 
@@ -249,11 +249,11 @@ public class ClobMemTest extends BaseJDBCTestCase {
         rs.next();
 
         is = rs.getCharacterStream(2);
-        stream.reopen();
+        stream = new LoopingAlphabetReader(blobLen);
         assertEquals(stream, is);
 
         is = rs.getCharacterStream(4);
-        stream.reopen();
+        stream = new LoopingAlphabetReader(blobLen);
         assertEquals(stream, is);
 
         // clean up
