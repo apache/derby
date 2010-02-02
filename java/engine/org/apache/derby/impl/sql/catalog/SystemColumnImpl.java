@@ -26,6 +26,7 @@ import java.sql.Types;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.error.StandardException;
 
 /**
  * Implements the description of a column in a system table.
@@ -129,7 +130,9 @@ class SystemColumnImpl implements SystemColumn
      * @return Object representing the column.
      */
     static SystemColumn getJavaColumn(String name, String javaClassName,
-            boolean nullability) {
+            boolean nullability)
+        throws StandardException
+    {
 
         TypeId typeId = TypeId.getUserDefinedTypeId(javaClassName, false);
 

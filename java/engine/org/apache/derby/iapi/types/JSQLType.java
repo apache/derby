@@ -23,6 +23,7 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.Formatable;
+import org.apache.derby.iapi.error.StandardException;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -175,6 +176,7 @@ public final class JSQLType implements Formatable
 	public	DataTypeDescriptor	getSQLType
 	(
     )
+        throws StandardException
 	{
 		// might not be filled in if this is a JAVA_CLASS or JAVA_PRIMITIVE
 		if ( sqlType == null )

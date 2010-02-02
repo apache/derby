@@ -430,6 +430,7 @@ public class SYSCONGLOMERATESRowFactory extends CatalogRowFactory
 	 */
     	        
 	public SystemColumn[]	buildColumnList()
+        throws StandardException
 	{
             return new SystemColumn[] {
                SystemColumnImpl.getUUIDColumn("SCHEMAID", false),

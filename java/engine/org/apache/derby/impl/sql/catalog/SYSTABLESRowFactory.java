@@ -422,6 +422,7 @@ class SYSTABLESRowFactory extends CatalogRowFactory
 	 * @return array of SystemColumn suitable for making this catalog.
 	 */
 	public SystemColumn[]	buildColumnList()
+        throws StandardException
 	{
         return new SystemColumn[] {
             SystemColumnImpl.getUUIDColumn("TABLEID", false),

@@ -279,6 +279,7 @@ public class SQLParser
 
 	private DataTypeDescriptor getDataTypeServices(int type, int precision, int scale,
 			int length)
+        throws StandardException
 	{
 		return new DataTypeDescriptor(
 					TypeId.getBuiltInTypeId(type),
@@ -290,6 +291,7 @@ public class SQLParser
 	}
 
 	private DataTypeDescriptor getJavaClassDataTypeDescriptor(TableName typeName) 
+        throws StandardException
 	{
 		return new DataTypeDescriptor
             (

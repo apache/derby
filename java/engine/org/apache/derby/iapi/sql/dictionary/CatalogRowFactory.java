@@ -327,7 +327,7 @@ public abstract	class CatalogRowFactory
 		throws StandardException;
 
 	/** builds a column list for the catalog */
-	public abstract SystemColumn[]	buildColumnList();
+	public abstract SystemColumn[]	buildColumnList() throws StandardException;
 
 	/** Return the column positions for a given index number */
 	public int[] getIndexColumnPositions(int indexNumber)

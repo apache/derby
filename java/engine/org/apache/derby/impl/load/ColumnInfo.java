@@ -242,7 +242,7 @@ class ColumnInfo {
             }
             rs.close();
         }
-        catch (Exception e) { throw new SQLException( e.getMessage() ); }
+        catch (Exception e) { throw LoadError.unexpectedError( e ); }
 
         if ( className == null ) { className = "???"; }
         

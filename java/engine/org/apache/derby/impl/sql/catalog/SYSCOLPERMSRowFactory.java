@@ -174,6 +174,7 @@ class SYSCOLPERMSRowFactory extends PermissionsCatalogRowFactory
 
 	/** builds a column list for the catalog */
     public SystemColumn[] buildColumnList()
+        throws StandardException
     {
         return new SystemColumn[] {
            SystemColumnImpl.getUUIDColumn("COLPERMSID", false),

@@ -33,6 +33,7 @@ import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.error.StandardException;
 
 /**
  * TypeId describes the static information about a SQL type
@@ -373,6 +374,7 @@ public final class TypeId
     }
 
         public static TypeId getUserDefinedTypeId(String className, boolean delimitedIdentifier)
+            throws StandardException
         {
                 return new TypeId(StoredFormatIds.USERDEFINED_TYPE_ID_V3,
                                         new UserDefinedTypeIdImpl(className), delimitedIdentifier
@@ -390,6 +392,7 @@ public final class TypeId
      * @return A bound type TypeId describing this ANSI UDT.
      */
     public static TypeId getUserDefinedTypeId(String schemaName, String unqualifiedName, String className )
+        throws StandardException
     {
         return new TypeId
             (
@@ -409,6 +412,7 @@ public final class TypeId
          *         null if there is no corresponding type.
          */
         public static TypeId getSQLTypeForJavaType(String javaTypeName)
+            throws StandardException
         {
                 if (javaTypeName.equals("java.lang.Boolean") ||
                         javaTypeName.equals("boolean"))

@@ -323,7 +323,9 @@ public class SYSPERMSRowFactory extends PermissionsCatalogRowFactory {
      *
      * @return array of SystemColumn suitable for making this catalog.
      */
-    public SystemColumn[] buildColumnList() {
+    public SystemColumn[] buildColumnList()
+        throws StandardException
+    {
         return new SystemColumn[]{
                 SystemColumnImpl.getUUIDColumn("UUID", false),
                 SystemColumnImpl.getColumn("OBJECTTYPE", Types.VARCHAR, false, 36),

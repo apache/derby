@@ -283,7 +283,9 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory {
      *
      * @return array of SystemColumn suitable for making this catalog.
      */
-    public SystemColumn[] buildColumnList() {
+    public SystemColumn[] buildColumnList()
+        throws StandardException
+    {
         return new SystemColumn[]{
 
                 SystemColumnImpl.getUUIDColumn("SEQUENCEID", false),

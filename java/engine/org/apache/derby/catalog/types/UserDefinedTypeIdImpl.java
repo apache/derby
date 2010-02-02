@@ -81,30 +81,28 @@ public class UserDefinedTypeIdImpl extends BaseTypeIdImpl
 	 * @param className	The SQL name of the type
 	 */
 
-	public UserDefinedTypeIdImpl(String className)
+	public UserDefinedTypeIdImpl(String className) throws StandardException
 	{
-        try {
-            //
-            // If the name begins with a quote, then it is the schema-qualified name
-            // of a UDT. Parse the name.
-            //
-            if ( className.charAt( 0 ) == '"' )
-            {
-                String[] nameParts = IdUtil.parseMultiPartSQLIdentifier( className );
-                
-                schemaName = nameParts[ 0 ];
-                unqualifiedName = nameParts[ 1 ];
-                className = null;
-            }
-            else
-            {
-                schemaName = null;
-                unqualifiedName = className;
-                this.className = className;
-            }
+        //
+        // If the name begins with a quote, then it is the schema-qualified name
+        // of a UDT. Parse the name.
+        //
+        if ( className.charAt( 0 ) == '"' )
+        {
+            String[] nameParts = IdUtil.parseMultiPartSQLIdentifier( className );
             
-            JDBCTypeId = java.sql.Types.JAVA_OBJECT;
-        } catch (Exception e) { throw new IllegalArgumentException( e.getMessage() ); }
+            schemaName = nameParts[ 0 ];
+            unqualifiedName = nameParts[ 1 ];
+            className = null;
+        }
+        else
+        {
+            schemaName = null;
+            unqualifiedName = className;
+            this.className = className;
+        }
+        
+        JDBCTypeId = java.sql.Types.JAVA_OBJECT;
 	}
 
 	/**

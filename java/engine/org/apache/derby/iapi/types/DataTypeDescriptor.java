@@ -320,6 +320,7 @@ public final class DataTypeDescriptor implements Formatable
 	(
 		String	javaTypeName
 	)
+        throws StandardException
 	{
 			return DataTypeDescriptor.getSQLDataTypeDescriptor(javaTypeName, true);
 	}
@@ -340,6 +341,7 @@ public final class DataTypeDescriptor implements Formatable
 		String	javaTypeName, 
 		boolean	isNullable
 	)
+        throws StandardException
 	{
 		TypeId typeId = TypeId.getSQLTypeForJavaType(javaTypeName);
 		if (typeId == null)
@@ -373,6 +375,7 @@ public final class DataTypeDescriptor implements Formatable
 		boolean	isNullable, 
 		int 	maximumWidth
 	)
+        throws StandardException
 	{
 		TypeId typeId = TypeId.getSQLTypeForJavaType(javaTypeName);
 		if (typeId == null)
