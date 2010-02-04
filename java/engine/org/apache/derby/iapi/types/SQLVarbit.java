@@ -21,32 +21,15 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.BitDataValue;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.types.Orderable;
+import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.NumberDataValue;
-
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.util.StringUtil;
 
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-import java.io.IOException;
 
 /**
  * SQLVarbit represents the SQL type VARCHAR FOR BIT DATA
