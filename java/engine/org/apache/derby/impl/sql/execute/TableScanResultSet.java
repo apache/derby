@@ -540,7 +540,7 @@ class TableScanResultSet extends ScanResultSet
 						getSparseRowAndMap();
             	   	baseCC.fetch(
         	 	      	      rl, sparseRow.getRowArray(), sparseRowMap);
-					RowLocation rl2 = (RowLocation) rl.getClone();
+                    RowLocation rl2 = (RowLocation) rl.cloneValue(false);
 					currentRow.setColumn(currentRow.nColumns(), rl2);
 					candidate.setColumn(candidate.nColumns(), rl2);		// have to be consistent!
 

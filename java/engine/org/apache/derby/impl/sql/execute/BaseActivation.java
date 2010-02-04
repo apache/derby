@@ -332,7 +332,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
         /* We have to return a clone of the saved RowLocation due
          * to the shared cache of SPSs.
          */
-        Object rlClone = rl.getClone();
+        Object rlClone = rl.cloneValue(false);
         if (SanityManager.DEBUG) {
             if (! (rlClone instanceof RowLocation))
 			{

@@ -105,10 +105,10 @@ class CollatorSQLLongvarchar extends SQLLongvarchar implements CollationElements
 	 * DataValueDescriptor interface
 	 */
 
-	/**
-	 * @see DataValueDescriptor#getClone
-	 */
-	public DataValueDescriptor getClone()
+    /**
+     * @see DataValueDescriptor#cloneValue
+     */
+    public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		try
 		{

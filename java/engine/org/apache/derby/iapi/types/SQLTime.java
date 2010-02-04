@@ -246,8 +246,8 @@ public final class SQLTime extends DataType
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public DataValueDescriptor getClone()
+	/** @see DataValueDescriptor#cloneValue */
+	public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		// Call constructor with all of our info
 		return new SQLTime(encodedTime, encodedTimeFraction);

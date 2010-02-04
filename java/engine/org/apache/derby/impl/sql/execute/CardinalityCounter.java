@@ -105,7 +105,7 @@ public class CardinalityCounter implements RowLocationRetRowSource
 		cloned = new DataValueDescriptor[clonee.length];
 		for (int i = 0; i < clonee.length - 1; i++)
 		{
-			cloned[i] = ((DataValueDescriptor)clonee[i]).getClone();
+			cloned[i] = clonee[i].cloneValue(false);
 		}
 		return cloned;
 	}

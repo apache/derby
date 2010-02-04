@@ -109,9 +109,8 @@ public final class SQLTinyint
 		value = val;
 	}
 
-	/* This constructor gets used for the getClone() method */
-	public SQLTinyint(byte val, boolean isnull)
-	{
+	/* This constructor gets used for the cloneValue() method */
+	private SQLTinyint(byte val, boolean isnull) {
 		value = val;
 		this.isnull = isnull;
 	}
@@ -296,8 +295,8 @@ public final class SQLTinyint
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public DataValueDescriptor getClone()
+	/** @see DataValueDescriptor#cloneValue */
+	public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		return new SQLTinyint(value, isnull);
 	}

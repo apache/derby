@@ -244,8 +244,8 @@ public final class SQLDate extends DataType
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public DataValueDescriptor getClone()
+	/** @see DataValueDescriptor#cloneValue */
+	public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		// Call constructor with all of our info
 		return new SQLDate(encodedDate);
@@ -941,7 +941,7 @@ public final class SQLDate extends DataType
             if( operand.isNull())
                 return new SQLDate();
             if( operand instanceof SQLDate)
-                return (SQLDate) operand.getClone();
+                return (SQLDate) operand.cloneValue(false);
 
             if( operand instanceof SQLTimestamp)
             {

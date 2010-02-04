@@ -240,7 +240,7 @@ public class TestDiskHashtable
 
         DataValueDescriptor[] row = new DataValueDescriptor[ aRow.length];
         for( int i = 0; i < row.length; i++)
-            row[i] = aRow[i].getClone();
+            row[i] = aRow[i].cloneValue(false);
         
         for( int key0Idx = 0; key0Idx < key0Count; key0Idx++)
         {

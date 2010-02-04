@@ -616,7 +616,7 @@ abstract class SQLBinary
      */
     public final DataValueDescriptor cloneHolder() {
         if (stream == null && _blobValue == null) {
-            return getClone();
+            return cloneValue(false);
         } else {
             // Cast to SQLBinary to avoid having to catch StandardException.
             SQLBinary self = (SQLBinary)getNewNull();
@@ -637,8 +637,8 @@ abstract class SQLBinary
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public final DataValueDescriptor getClone()
+	/** @see DataValueDescriptor#cloneValue */
+	public final DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		try
 		{

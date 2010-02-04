@@ -603,7 +603,7 @@ public abstract class DataType
      * @return A shallow clone.
      */
     public DataValueDescriptor cloneHolder() {
-		return getClone();
+		return cloneValue(false);
 	}
 
 	// International support

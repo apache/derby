@@ -104,10 +104,10 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
 	 * DataValueDescriptor interface
 	 */
 
-	/**
-	 * @see DataValueDescriptor#getClone
-	 */
-	public DataValueDescriptor getClone()
+    /**
+     * @see DataValueDescriptor#cloneValue
+     */
+    public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		try
 		{

@@ -285,23 +285,47 @@ public interface DataValueDescriptor extends Storable, Orderable
 	InputStream	getStream() throws StandardException;
 
     /**
-     * Get a shallow copy of this <code>DataValueDescriptor</code>.
+     * Get a shallow copy of this {@code codeDataValueDescriptor} (DVD).
      * <p>
-     * This is used by the sorter to clone columns. It should be cloning the
-     * column holder but not its value. The only difference between this method
-     * and <code>getClone</code> is this one does not objectify a stream.
+     * The primary use of this method is to avoid materializing streams for
+     * data types like BLOB and CLOB.
+     * <p>
+     * In general the orginal DVD should be recycled or discarded when this
+     * method is invoked to ensure that changes to the original DVD don't
+     * affect the clone (or the other way around). Note that it is not safe to
+     * assume that a number of these clones can be used for read-only access to
+     * the same value.
+     * <p>
+     * <em>Implementation note:</em> The reason why the clones can't be
+     * guaranteed to work as "read clones" is that if the value is represented
+     * as a stream, the state of the stream will change on read operations.
+     * Since all the clones share the same stream, this may lead to wrong
+     * results, data corruption or crashes.
      *
      * @return A clone of this descriptor, which shares the internal state.
      */
     public DataValueDescriptor cloneHolder();
 
-	/**
-	 * Clone this DataValueDescriptor. Results in a new object
-	 * that has the same value as this but can be modified independently.
-	 *
-	 * @return A clone of the DataValueDescriptor with the same initial value as this.
-	 */
-	public DataValueDescriptor getClone();
+    /**
+     * Clone this DataValueDescriptor. Results in a new object
+     * that has the same value as this but can be modified independently.
+     * <p>
+     * Even though the objects can be modified independently regardless of the
+     * value of {@code forceMaterialization}, both the clone and the
+     * original may be dependent on the store state if
+     * {@code forceMaterialization} is set to {@code false}. An example is if
+     * you need to access the value you just read using {@code cloneValue}
+     * after the current transaction has ended, or after the source result set
+     * has been closed.
+     *
+     * @param forceMaterialization any streams representing the data value will
+     *      be materialized if {@code true}, the data value will be kept as a
+     *      stream if possible if {@code false}
+     * @return A clone of the {@code DataValueDescriptor} with the same initial
+     *      value as this.
+     */
+    public abstract DataValueDescriptor cloneValue(
+            boolean forceMaterialization);
 
     /**
      * Recycle this DataValueDescriptor if possible. Create and return a new

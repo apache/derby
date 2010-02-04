@@ -237,8 +237,8 @@ public final class SQLLongint
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public DataValueDescriptor getClone()
+	/** @see DataValueDescriptor#cloneValue */
+	public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		return new SQLLongint(value, isnull);
 	}
@@ -310,7 +310,7 @@ public final class SQLLongint
 		value = val;
 	}
 
-	/* This constructor gets used for the getClone() method */
+	/* This constructor gets used for the cloneValue method */
 	private SQLLongint(long val, boolean isnull)
 	{
 		value = val;

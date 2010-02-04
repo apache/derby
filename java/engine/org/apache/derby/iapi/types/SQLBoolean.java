@@ -325,8 +325,8 @@ public final class SQLBoolean
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public DataValueDescriptor getClone()
+	/** @see DataValueDescriptor#cloneValue */
+	public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		return new SQLBoolean(value, isnull);
 	}
@@ -396,7 +396,7 @@ public final class SQLBoolean
 			value = obj.booleanValue();
 	}
 
-	/* This constructor gets used for the getClone() method */
+    /* This constructor gets used for the cloneValue method */
 	private SQLBoolean(boolean val, boolean isnull)
 	{
 		value = val;

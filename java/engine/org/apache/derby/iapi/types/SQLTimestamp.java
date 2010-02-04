@@ -269,8 +269,8 @@ public final class SQLTimestamp extends DataType
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public DataValueDescriptor getClone()
+	/** @see DataValueDescriptor#cloneValue */
+	public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		// Call constructor with all of our info
 		return new SQLTimestamp(encodedDate, encodedTime, nanos);
@@ -973,7 +973,7 @@ public final class SQLTimestamp extends DataType
             if( operand.isNull())
                 return new SQLTimestamp();
             if( operand instanceof SQLTimestamp)
-                return (SQLTimestamp) operand.getClone();
+                return (SQLTimestamp) operand.cloneValue(false);
 
             String str = operand.getString();
             if( str.length() == 14)

@@ -315,8 +315,8 @@ public class UserType extends DataType
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public DataValueDescriptor getClone()
+    /** @see DataValueDescriptor#cloneValue */
+    public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		// Call constructor with all of our info
 		return new UserType(value);

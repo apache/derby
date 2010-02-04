@@ -1316,11 +1316,13 @@ readingLoop:
     /**
      *  Shallow clone a StreamStorable without objectifying.  This is used to 
      *  avoid unnecessary objectifying of a stream object.  The only 
-     *  difference of this method from getClone is this method does not 
+     *  difference of this method from cloneValue is this method does not
      *  objectify a stream.
      */
     public DataValueDescriptor cloneHolder() {
-        if ((stream == null) && (_clobValue == null)) {  return getClone(); }
+        if ((stream == null) && (_clobValue == null)) {
+            return cloneValue(false);
+        }
 
         SQLChar self = (SQLChar) getNewNull();
         self.copyState(this);
@@ -1332,8 +1334,8 @@ readingLoop:
      * DataValueDescriptor interface
      */
 
-    /** @see DataValueDescriptor#getClone */
-    public DataValueDescriptor getClone()
+    /** @see DataValueDescriptor#cloneValue */
+    public DataValueDescriptor cloneValue(boolean forceMaterialization)
     {
         try
         {

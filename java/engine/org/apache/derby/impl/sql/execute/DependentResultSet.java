@@ -284,7 +284,7 @@ class DependentResultSet extends ScanResultSet implements CursorResultSet
 			indexSC =  openIndexScanController(searchRow);
 			//create a template for the index row
 			indexRow = indexQualifierRow.getClone();
-			indexRow.setColumn(numFkColumns + 1, rowLocation.getClone());	
+			indexRow.setColumn(numFkColumns + 1, rowLocation.cloneValue(false));
 
 		}else
 		{

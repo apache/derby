@@ -975,7 +975,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 		// 1st element is the key
 		hashRowArray[0] = new SQLInteger(position);
 		if (isForUpdate()) {
-			hashRowArray[POS_ROWLOCATION] = rowLoc.getClone();
+			hashRowArray[POS_ROWLOCATION] = rowLoc.cloneValue(false);
 			hashRowArray[POS_ROWDELETED] = new SQLBoolean(false);
 			hashRowArray[POS_ROWUPDATED] = new SQLBoolean(rowUpdated);
 		}

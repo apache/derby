@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -34,7 +33,6 @@ import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
 import org.apache.derby.catalog.types.StatisticsImpl;
-import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
@@ -44,7 +42,6 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.StatementType;
-import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
@@ -82,7 +79,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.impl.sql.catalog.DDColumnDependableFinder;
 import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
@@ -3071,7 +3067,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		indexRows[index].getNewObjectArray();
 		// Associate the index row with the source row
 		compressIRGs[index].getIndexRow(currentRow, 
-                                        (RowLocation) rl.getClone(),
+                                        (RowLocation) rl.cloneValue(false),
 										indexRows[index],
 										(FormatableBitSet) null);
 

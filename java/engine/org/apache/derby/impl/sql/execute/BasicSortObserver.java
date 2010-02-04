@@ -162,9 +162,11 @@ public class BasicSortObserver implements SortObserver
 		for (int i = 0; i < origArray.length; i++)
 		{
             // History: We used to materialize streams when getting a clone
-            //          here (i.e. used getClone, not cloneObject). We still do.
+            //          here (i.e. used cloneValue, not cloneObject). We still
+            //          do.
+            //          TODO: change to 'true' below and add comment.
             // Beetle 4896.
-			newArray[i] = origArray[i].getClone();
+			newArray[i] = origArray[i].cloneValue(false);
 		}
 
 		return newArray;

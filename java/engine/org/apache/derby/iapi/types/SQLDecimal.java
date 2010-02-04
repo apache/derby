@@ -555,11 +555,10 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 	 * DataValueDescriptor interface
 	 */
 
-	/**
-	 * <B> WARNING </B> clone is a shallow copy
- 	 * @see DataValueDescriptor#getClone 
-	 */
-	public DataValueDescriptor getClone()
+    /**
+     * @see DataValueDescriptor#cloneValue
+     */
+    public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		return new SQLDecimal(getBigDecimal());
 	}

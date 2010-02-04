@@ -169,7 +169,7 @@ abstract class DMLWriteResultSet extends NoRowsResultSetImpl
 						DataValueDescriptor c = row.getColumn(i);
 						if (c instanceof StreamStorable)
 							if (((StreamStorable)c).returnStream() == stream)
-								row.setColumn(i, col.getClone());
+								row.setColumn(i, col.cloneValue(false));
 					}
 				}
 			}

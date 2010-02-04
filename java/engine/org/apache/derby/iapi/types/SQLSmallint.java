@@ -252,8 +252,8 @@ public final class SQLSmallint
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public DataValueDescriptor getClone()
+	/** @see DataValueDescriptor#cloneValue */
+	public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		return new SQLSmallint(value, isnull);
 	}
@@ -334,9 +334,8 @@ public final class SQLSmallint
 		value = val;
 	}
 
-	/* This constructor gets used for the getClone() method */
-	public SQLSmallint(short val, boolean isnull)
-	{
+	/* This constructor gets used for the cloneValue() method */
+	private SQLSmallint(short val, boolean isnull) {
 		value = val;
 		this.isnull = isnull;
 	}

@@ -109,7 +109,7 @@ public class BTreeMaxScan extends BTreeScan
         // run into a null.  Use this template to probe the "next" row so
         // that if we need to finish, fetch_row will have the right value.
         DataValueDescriptor[] check_row_template = new DataValueDescriptor[1];
-        check_row_template[0] = fetch_row[0].getClone();
+        check_row_template[0] = fetch_row[0].cloneValue(false);
         FetchDescriptor check_row_desc = RowUtil.getFetchDescriptorConstant(1);
 
         // reopen the scan for reading from the beginning of the table.

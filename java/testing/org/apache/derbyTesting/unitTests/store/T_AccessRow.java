@@ -129,7 +129,7 @@ public class T_AccessRow
 	public DataValueDescriptor[] getRowArrayClone() {
 		DataValueDescriptor[] retval = new DataValueDescriptor[column.length];
 		for (int index = 0; index < column.length; index++)
-			retval[index] = column[index].getClone();
+			retval[index] = column[index].cloneValue(false);
 		return retval;
 	}
 }

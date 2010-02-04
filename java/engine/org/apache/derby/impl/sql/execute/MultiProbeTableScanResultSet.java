@@ -204,7 +204,7 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
                 new DataValueDescriptor[origProbeValues.length];
 
             for (int i = 0; i < pVals.length; i++)
-                pVals[i] = origProbeValues[i].getClone();
+                pVals[i] = origProbeValues[i].cloneValue(false);
 
             if (sortRequired == RowOrdering.ASCENDING)
                 java.util.Arrays.sort(pVals);

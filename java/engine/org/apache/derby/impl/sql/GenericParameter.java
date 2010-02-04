@@ -21,35 +21,16 @@
 
 package org.apache.derby.impl.sql;
 
-import org.apache.derby.iapi.services.loader.ClassInspector;
-
-import org.apache.derby.iapi.sql.ParameterValueSet;
-
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.BitDataValue;
-import org.apache.derby.iapi.types.DateTimeDataValue;
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.UserDataValue;
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.*;
-
 import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.reference.JDBC30Translation;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.types.*;
-import org.apache.derby.iapi.types.*;
+import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.types.TypeId;
 
 import java.sql.Types;
-
-import java.lang.reflect.Array;
 
 /**
  * A parameter.  Originally lifted from ParameterValueSet.
@@ -145,7 +126,8 @@ final class GenericParameter
 	public GenericParameter getClone(GenericParameterValueSet pvs)
 	{
 		GenericParameter gpClone = new GenericParameter(pvs, isReturnOutputParameter);
-		gpClone.initialize(this.getValue().getClone(), jdbcTypeId, declaredClassName);
+        gpClone.initialize(this.getValue().cloneValue(false),
+                           jdbcTypeId, declaredClassName);
 		gpClone.isSet = true;
 
 		return gpClone;

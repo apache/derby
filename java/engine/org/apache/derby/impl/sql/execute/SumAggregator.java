@@ -56,10 +56,10 @@ public  class SumAggregator
 		*/
 		if (value == null)
 		{ 
-			/* NOTE: We need to call getClone() since value gets 
+			/* NOTE: We need to call cloneValue since value gets
 			 * reused underneath us
 			 */
-			value = addend.getClone();
+			value = addend.cloneValue(false);
 		}
 		else
 		{

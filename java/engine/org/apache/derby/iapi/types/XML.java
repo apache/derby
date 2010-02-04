@@ -154,7 +154,7 @@ public class XML
     }
 
     /**
-     * Private constructor used for the getClone() method.
+     * Private constructor used for the {@code cloneValue} method.
      * Returns a new instance of XML whose fields are clones
      * of the values received.
      *
@@ -163,10 +163,13 @@ public class XML
      * @param xmlType Qualified XML type for "val"
      * @param seqWithAttr Whether or not "val" corresponds to
      *  sequence with one or more top-level attribute nodes.
+     * @param materialize whether or not to force materialization of the
+     *      underlying source data
      */
-    private XML(SQLChar val, int xmlType, boolean seqWithAttr)
-    {
-        xmlStringValue = (val == null ? null : (SQLChar)val.getClone());
+    private XML(SQLChar val, int xmlType, boolean seqWithAttr,
+            boolean materialize) {
+        xmlStringValue = (val == null ? null
+                                      : (SQLChar)val.cloneValue(materialize));
         setXType(xmlType);
         if (seqWithAttr)
             markAsHavingTopLevelAttr();
@@ -177,11 +180,11 @@ public class XML
      * */
 
     /**
-     * @see DataValueDescriptor#getClone
+     * @see DataValueDescriptor#cloneValue
      */
-    public DataValueDescriptor getClone()
-    {
-        return new XML(xmlStringValue, getXType(), hasTopLevelAttr());
+    public DataValueDescriptor cloneValue(boolean forceMaterialization) {
+        return new XML(xmlStringValue, getXType(), hasTopLevelAttr(),
+                forceMaterialization);
     }
 
     /**

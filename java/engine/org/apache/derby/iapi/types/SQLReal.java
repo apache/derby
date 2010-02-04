@@ -281,8 +281,8 @@ public final class SQLReal
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public DataValueDescriptor getClone()
+	/** @see DataValueDescriptor#cloneValue */
+	public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		SQLReal ret = new SQLReal();
 		ret.value = this.value;

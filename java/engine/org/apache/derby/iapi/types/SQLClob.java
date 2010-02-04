@@ -97,8 +97,8 @@ public class SQLClob
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public DataValueDescriptor getClone()
+	/** @see DataValueDescriptor#cloneValue */
+	public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
         // TODO: Should this be rewritten to clone the stream instead of
         //       materializing the value if possible?

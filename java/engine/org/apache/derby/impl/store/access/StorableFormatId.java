@@ -181,20 +181,9 @@ public class StorableFormatId extends DataType
     }
 
 	/**
-	 * <U>Shallow copy</U>. 
-	 * <p> 
-	 * Clone the DataValueDescriptor and copy its contents.
-	 * We clone the data value wrapper (e.g. SQLDecimal)
-	 * and reuse its contents (the underlying BigDecimal).
-	 * The resultant DataValueDescriptor will point to the same
-	 * value as the original DataValueDescriptor (unless the value
-	 * is a primitive type, e.g. SQLInteger/integer).
-	 *
-	 * @return A clone of the DataValueDescriptor reusing its contents.
-     *
-     * @see org.apache.derby.iapi.types.DataValueDescriptor#getClone
+     * @see org.apache.derby.iapi.types.DataValueDescriptor#cloneValue
 	 */
-	public DataValueDescriptor getClone()
+    public DataValueDescriptor cloneValue(boolean forceMaterialization)
     {
         if (SanityManager.DEBUG)
             SanityManager.THROWASSERT("Not implemented!.");

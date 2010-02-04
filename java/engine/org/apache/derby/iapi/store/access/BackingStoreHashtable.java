@@ -355,7 +355,7 @@ public class BackingStoreHashtable
         for (int i = 0; i < old_row.length; i++)
         {
             if( old_row[i] != null)
-                new_row[i] = old_row[i].getClone();
+                new_row[i] = old_row[i].cloneValue(false);
         }
 
         return(new_row);

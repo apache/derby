@@ -67,10 +67,10 @@ public final class MaxMinAggregator
 				  (!isMax && (value.compare(addend) > 0))
 				  )
 		{
-			/* NOTE: We need to call getClone() since value gets
+			/* NOTE: We need to call cloneValue since value gets
 			 * reused underneath us
 			 */
-			value = addend.getClone();
+			value = addend.cloneValue(false);
 		}
 	}
 

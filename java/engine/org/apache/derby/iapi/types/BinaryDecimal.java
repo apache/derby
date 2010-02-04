@@ -666,10 +666,10 @@ return divide(dividend, divisor, result, -1);
 		return getDecimalValuePrecision();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.apache.derby.iapi.types.DataValueDescriptor#getClone()
-	 */
-	public DataValueDescriptor getClone() {
+    /**
+     * @see org.apache.derby.iapi.types.DataValueDescriptor#cloneValue
+     */
+    public DataValueDescriptor cloneValue(boolean forceMaterialization) {
 		BinaryDecimal dvd = (BinaryDecimal) getNewNull();
 		
 		if (this.data2c != null)

@@ -188,8 +188,8 @@ public class SQLRef extends DataType implements RefDataValue
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#getClone */
-	public DataValueDescriptor getClone()
+    /** @see DataValueDescriptor#cloneValue */
+    public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		/* In order to avoid a throws clause nightmare, we only call
 		 * the constructors which do not have a throws clause.
@@ -200,7 +200,7 @@ public class SQLRef extends DataType implements RefDataValue
 		if (value == null)
 			return new SQLRef();
 		else
-           return new SQLRef((RowLocation) value.getClone());
+           return new SQLRef((RowLocation) value.cloneValue(false));
 	}
 
 	/**

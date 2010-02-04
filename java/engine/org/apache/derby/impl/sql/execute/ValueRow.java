@@ -127,7 +127,7 @@ public class ValueRow implements ExecRow
 			if (column[colCtr] != null)
 			{
 				/* Rows are 1-based, column[] is 0-based */
-				rowClone.setColumn(colCtr + 1, column[colCtr].getClone());
+                rowClone.setColumn(colCtr +1, column[colCtr].cloneValue(false));
 			}
 		}
 		return rowClone;
@@ -145,22 +145,7 @@ public class ValueRow implements ExecRow
 			if (column[colCtr] != null)
 			{
 				/* Rows are 1-based, column[] is 0-based */
-				if (column[colCtr] instanceof RowLocation)
-				{
-					/*
-					** The getClone() method for a RowLocation has the same
-					** name as for DataValueDescriptor, but it's on a different
-					** interface, so the cast must be different.
-					**
-					*/
-					rowClone.setColumn(colCtr + 1, column[colCtr].getClone());
-				}
-				else
-				{
-					// otherwise, get a new null
-					rowClone.setColumn(colCtr + 1,
-						((DataValueDescriptor) (column[colCtr])).getNewNull());
-				}
+                rowClone.setColumn(colCtr + 1, column[colCtr].getNewNull());
 			}
 		}
 		return rowClone;
@@ -184,7 +169,7 @@ public class ValueRow implements ExecRow
 	// position is 1-based
 	public final DataValueDescriptor cloneColumn(int columnPosition)
 	{
-		return column[columnPosition -1].getClone();
+        return column[columnPosition -1].cloneValue(false);
 	}
 
 	/*
@@ -231,7 +216,7 @@ public class ValueRow implements ExecRow
 		{
 			if (column[colCtr] != null)
 			{
-				columnClones[colCtr] = column[colCtr].getClone();
+                columnClones[colCtr] = column[colCtr].cloneValue(false);
 			}
 		}
 

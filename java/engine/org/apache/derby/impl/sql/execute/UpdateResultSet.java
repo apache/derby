@@ -689,14 +689,15 @@ class UpdateResultSet extends DMLWriteResultSet
 			}
 
 			Hashtable past2FutureTbl = tableScan.past2FutureTbl;
-			/* If hash table is not full, we add it in.  The key of the hash entry
-			 * is the string value of the RowLocation.  If the hash table is full,
-			 * as the comments above this function say, we scan forward.
-			 *
-			 * Need to save a clone because when we get cached currentRow, "rl" shares the
-			 * same reference, so is changed at the same time.
-			 */
-			RowLocation updatedRL = (RowLocation) rl.getClone();
+            /* If hash table is not full, we add it in.
+             * The key of the hash entry is the string value of the RowLocation.
+             * If the hash table is full, as the comments above this function
+             * say, we scan forward.
+             *
+             * Need to save a clone because when we get cached currentRow, "rl"
+             * shares the same reference, so is changed at the same time.
+             */
+            RowLocation updatedRL = (RowLocation) rl.cloneValue(false);
 
 			if (past2FutureTbl.size() < maxCapacity)
 				past2FutureTbl.put(updatedRL, updatedRL);
@@ -759,7 +760,7 @@ class UpdateResultSet extends DMLWriteResultSet
 		{
 			DataValueDescriptor aCol = aRow.getColumn(i);
 			if (aCol != null)
-				tableScan.lastCursorKey.setColumn(i, aCol.getClone());
+                tableScan.lastCursorKey.setColumn(i, aCol.cloneValue(false));
 		}
 	}
 
