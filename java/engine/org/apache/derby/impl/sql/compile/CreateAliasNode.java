@@ -211,11 +211,9 @@ public class CreateAliasNode extends DDLStatementNode
                 if ( returnType != null )
                 {
                     DataTypeDescriptor dtd = DataTypeDescriptor.getType( returnType );
-                    if ( dtd.getTypeId().isUserDefinedTypeId() )
-                    {
-                        dtd = bindUserType( dtd );
-                        returnType = dtd.getCatalogType();
-                    }
+                    
+                    dtd = bindUserType( dtd );
+                    returnType = dtd.getCatalogType();
                 }
 
 				aliasInfo = new RoutineAliasInfo(this.methodName, paramCount, names, types, modes, drs,

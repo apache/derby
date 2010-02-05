@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -607,6 +608,52 @@ public class UDTTest  extends GeneratedColumnsHelper
              badDropSQLState
              );
 
+        // table function with a udt column
+        createTypeStatement = "create type hashmap_07 external name 'java.util.HashMap' language java\n";
+        dropTypeStatement = "drop type hashmap_07 restrict\n";
+        createObjectStatement = 
+            "create function hashmapReader_07() returns table\n" +
+            "(\n" +
+            "    a int,\n" +
+            "    b hashmap_07\n" +
+            ")\n" +
+            "language java parameter style derby_jdbc_result_set\n" +
+            "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.hashmapReader'\n";
+        dropObjectStatement = "drop function hashmapReader_07\n";
+        badDropSQLState = ROUTINE_DEPENDS_ON_TYPE;
+        verifyDropRestrictions
+            (
+             conn,
+             createTypeStatement,
+             dropTypeStatement,
+             createObjectStatement,
+             dropObjectStatement,
+             badDropSQLState
+             );
+
+        // table function with a udt column and udt arg
+        createTypeStatement = "create type hashmap_07_a external name 'java.util.HashMap' language java\n";
+        dropTypeStatement = "drop type hashmap_07_a restrict\n";
+        createObjectStatement = 
+            "create function hashmapReader_07_a( a hashmap_07_a ) returns table\n" +
+            "(\n" +
+            "    a int,\n" +
+            "    b hashmap_07_a\n" +
+            ")\n" +
+            "language java parameter style derby_jdbc_result_set\n" +
+            "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.hashmapReader'\n";
+        dropObjectStatement = "drop function hashmapReader_07_a\n";
+        badDropSQLState = ROUTINE_DEPENDS_ON_TYPE;
+        verifyDropRestrictions
+            (
+             conn,
+             createTypeStatement,
+             dropTypeStatement,
+             createObjectStatement,
+             dropObjectStatement,
+             badDropSQLState
+             );
+
     }
 
     /**
@@ -726,6 +773,56 @@ public class UDTTest  extends GeneratedColumnsHelper
         //
     }
 
+    /**
+     * <p>
+     * Verify that table functions can have UDT columns.
+     * </p>
+     */
+    public void test_11_tableFunctionColumns() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create type hashmap_11 external name 'java.util.HashMap' language java\n" );
+        goodStatement
+            (
+             conn,
+             "create function makeHashMap_11() returns hashmap_11\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.makeHashMap'\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create function putValue_11( map hashmap_11, k varchar( 100 ), v varchar( 100 ) ) returns hashmap_11\n" +
+             "language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.putValue'\n"
+             );
+        goodStatement( conn, "create table t_11( intCol int, varcharCol varchar( 10 ), hashmapCol hashmap_11 )\n" );
+        goodStatement
+            (
+             conn,
+             "create function hashmapReader() returns table\n" +
+             "(\n" +
+             "    a int,\n" +
+             "    b hashmap_11\n" +
+             ")\n" +
+             "language java parameter style derby_jdbc_result_set\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.hashmapReader'\n"
+             );
+        goodStatement( conn, "insert into t_11( intCol, varcharCol, hashmapCol ) values ( 2, 'def', putValue_11( makeHashMap_11(), 'kangaroo', 'foo' ) )\n" );
+
+        assertResults
+            (
+             conn,
+             "select * from table( hashmapReader() ) s",
+             new String[][]
+             {
+                 { "2" ,         "{kangaroo=foo}" },
+             },
+             true
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // PROCEDURES AND FUNCTIONS
@@ -750,6 +847,15 @@ public class UDTTest  extends GeneratedColumnsHelper
         map.put( key, value );
 
         return map;
+    }
+
+    public static ResultSet hashmapReader() throws Exception
+    {
+        Connection conn = DriverManager.getConnection( "jdbc:default:connection" );
+
+        PreparedStatement ps = conn.prepareStatement( "select intCol, hashmapCol from t_11" );
+
+        return ps.executeQuery();
     }
 
     

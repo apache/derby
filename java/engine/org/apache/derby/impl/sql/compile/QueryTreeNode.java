@@ -26,6 +26,8 @@ import java.util.Map;
 
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.types.SynonymAliasInfo;
+import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derby.catalog.types.RowMultiSetImpl;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.error.StandardException;
@@ -1631,6 +1633,9 @@ public abstract class QueryTreeNode implements Visitable
      */
     public DataTypeDescriptor bindUserType( DataTypeDescriptor originalDTD ) throws StandardException
     {
+        // if the type is a table type, then we need to bind its user-typed columns
+        if ( originalDTD.getCatalogType().isRowMultiSet() ) { return bindRowMultiSet( originalDTD ); }
+        
         // nothing to do if this is not a user defined type
         if ( !originalDTD.getTypeId().userType() ) { return originalDTD; }
 
@@ -1663,6 +1668,43 @@ public abstract class QueryTreeNode implements Visitable
         return result;
     }
 
+    /**
+     * Bind the UDTs in a table type.
+     *
+     * @param originalDTD A datatype: might be an unbound UDT and might not be
+     *
+     * @return The bound table type if originalDTD was an unbound table type; otherwise returns originalDTD.
+     */
+    public DataTypeDescriptor bindRowMultiSet( DataTypeDescriptor originalDTD ) throws StandardException
+    {
+        if ( !originalDTD.getCatalogType().isRowMultiSet() ) { return originalDTD; }
+
+        RowMultiSetImpl originalMultiSet = (RowMultiSetImpl) originalDTD.getTypeId().getBaseTypeId();
+        String[] columnNames = originalMultiSet.getColumnNames();
+        TypeDescriptor[] columnTypes = originalMultiSet.getTypes();
+        int columnCount = columnTypes.length;
+
+        for ( int i = 0; i < columnCount; i++ )
+        {
+            TypeDescriptor columnType = columnTypes[ i ];
+
+            if ( columnType.isUserDefinedType() )
+            {
+                DataTypeDescriptor newColumnDTD = DataTypeDescriptor.getType( columnType );
+
+                newColumnDTD = bindUserType( newColumnDTD );
+
+                TypeDescriptor newColumnType = newColumnDTD.getCatalogType();
+
+                // poke the bound type back into the multi set descriptor
+                columnTypes[ i ] = newColumnType;
+            }
+        }
+
+        return originalDTD;
+    }
+        
+    
     /**
      * Declare a dependency on a type and check that you have privilege to use
      * it. This is only used if the type is an ANSI UDT.

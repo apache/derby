@@ -1000,6 +1000,21 @@ abstract class DDLConstantAction implements ConstantAction
             if ( returnTypeAD != null ) { udtMap.put( returnTypeAD.getObjectID().toString(), returnTypeAD ); }
         }
 
+        // table functions can have udt columns. track those dependencies.
+        if ( (rawReturnType != null) && rawReturnType.isRowMultiSet() )
+        {
+            TypeDescriptor[] columnTypes = rawReturnType.getRowTypes();
+            int columnCount = columnTypes.length;
+
+            for ( int i = 0; i < columnCount; i++ )
+            {
+                AliasDescriptor       columnTypeAD = dd.getAliasDescriptorForUDT
+                    ( tc, DataTypeDescriptor.getType( columnTypes[ i ] ) );
+
+                if ( columnTypeAD != null ) { udtMap.put( columnTypeAD.getObjectID().toString(), columnTypeAD ); }
+            }
+        }
+
         TypeDescriptor[]      paramTypes = aliasInfo.getParameterTypes();
         if ( paramTypes != null )
         {
