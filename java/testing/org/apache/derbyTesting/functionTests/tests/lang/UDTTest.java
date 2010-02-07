@@ -823,6 +823,86 @@ public class UDTTest  extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Verify that you can store large objects in UDT columns.
+     * </p>
+     */
+    public void test_12_largeUDTs() throws Exception
+    {
+        Connection conn = getConnection();
+
+        //
+        // Store and retrieve a UDT which is more than 90K bytes long
+        //
+        goodStatement( conn, "create type IntArray external name 'org.apache.derbyTesting.functionTests.tests.lang.IntArray' language java\n" );
+        goodStatement
+            ( conn,
+              "create function makeIntArray( arrayLength int ) returns IntArray\n" +
+              "language java parameter style java no sql external name 'org.apache.derbyTesting.functionTests.tests.lang.IntArray.makeIntArray'\n" );
+        goodStatement
+            ( conn,
+              "create function setCell( array IntArray, cellNumber int, cellValue int ) returns IntArray\n" +
+              "language java parameter style java no sql external name 'org.apache.derbyTesting.functionTests.tests.lang.IntArray.setCell'\n" );
+        goodStatement
+            ( conn,
+              "create function getCell( array IntArray, cellNumber int ) returns int\n" +
+              "language java parameter style java no sql external name 'org.apache.derbyTesting.functionTests.tests.lang.IntArray.getCell'\n" );
+        goodStatement( conn, "create table t_12( id int generated always as identity, data IntArray )\n" );
+        goodStatement( conn, "insert into t_12( data ) values ( setCell( makeIntArray( 3 ), 1, 5 ) )\n" );
+        goodStatement( conn, "insert into t_12( data ) values ( setCell( makeIntArray( 100000 ), 90000, 3 ) )\n" );
+
+        assertResults
+            (
+             conn,
+             "select getCell( data, 1 ), getCell( data, 2 ) from t_12 where id = 1",
+             new String[][]
+             {
+                 { "5" ,         "0" },
+             },
+             true
+             );
+
+        assertResults
+            (
+             conn,
+             "select getCell( data, 1 ), getCell( data, 90000 ) from t_12 where id = 2",
+             new String[][]
+             {
+                 { "0" ,         "3" },
+             },
+             true
+             );
+        
+        //
+        // Store and retrieve a UDT which is more than 1000K bytes long
+        //
+        goodStatement( conn, "create type FakeByteArray external name 'org.apache.derbyTesting.functionTests.tests.lang.FakeByteArray' language java\n" );
+        goodStatement
+            ( conn,
+              "create function makeFakeByteArray( l int, f int ) returns FakeByteArray\n" +
+              "language java parameter style java no sql external name 'org.apache.derbyTesting.functionTests.tests.lang.FakeByteArray.makeFakeByteArray'\n" );
+        goodStatement
+            ( conn,
+              "create function toString( arg FakeByteArray ) returns varchar( 30 )\n" +
+              "language java parameter style java no sql external name 'org.apache.derbyTesting.functionTests.tests.lang.FakeByteArray.toString'\n" );
+        goodStatement( conn, "create table t_12_a( id int generated always as identity, data FakeByteArray )\n" );
+        goodStatement( conn, "insert into t_12_a( data ) values ( makeFakeByteArray( 3, 33 ) )\n" );
+        goodStatement( conn, "insert into t_12_a( data ) values ( makeFakeByteArray( 1000000, 44 ) )\n" );
+
+        assertResults
+            (
+             conn,
+             "select id, toString( data ) from t_12_a order by id",
+             new String[][]
+             {
+                 { "1" ,         "[ 3, 33 ]" },
+                 { "2" ,         "[ 1000000, 44 ]" },
+             },
+             true
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // PROCEDURES AND FUNCTIONS
