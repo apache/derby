@@ -902,6 +902,25 @@ public class UDTTest  extends GeneratedColumnsHelper
              );
     }
     
+    /**
+     * <p>
+     * Verify that implementing the SQLData interface does not make an object storeable.
+     * </p>
+     */
+    public void test_13_sqlData() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create type SampleSQLData external name 'org.apache.derbyTesting.functionTests.tests.lang.SampleSQLData' language java\n" );
+        goodStatement
+            ( conn,
+              "create function makeSampleSQLData( l int ) returns SampleSQLData\n" +
+              "language java parameter style java no sql external name 'org.apache.derbyTesting.functionTests.tests.lang.SampleSQLData.makeSampleSQLData'\n" );
+        goodStatement( conn, "create table t_13_a( id int generated always as identity, data SampleSQLData )\n" );
+
+        expectExecutionError( conn, JAVA_EXCEPTION, "insert into t_13_a( data ) values ( makeSampleSQLData( 3 ) )\n" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // PROCEDURES AND FUNCTIONS
