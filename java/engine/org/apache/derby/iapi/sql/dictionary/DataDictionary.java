@@ -1629,6 +1629,24 @@ public interface DataDictionary
 		throws StandardException;
 	
 	/**
+	 * Get the next number from an ANSI/ISO sequence generator
+     * which was created with the CREATE SEQUENCE statement. May
+     * raise an exception if the sequence was defined as NO CYCLE and
+     * the range of the sequence is exhausted. May allocate a range of
+     * sequence numbers and update the CURRENTVALUE column of the
+     * corresponding row in SYSSEQUENCES. This work is done in the
+     * execution transaction of the current session.
+	 * 
+	 * @param sequenceUUIDstring String value of the UUID which identifies the sequence
+	 * @param returnValue This is a data value to be stuffed with the next sequence number.
+     *
+     * @throws StandardException if the sequence does not cycle and its range is exhausted
+	 */
+    public void getCurrentValueAndAdvance
+        ( String sequenceUUIDstring, NumberDataValue returnValue )
+        throws StandardException;
+
+	/**
 	 * Gets all statistics Descriptors for a given table.
 	 */
 	public List getStatisticsDescriptors(TableDescriptor td)

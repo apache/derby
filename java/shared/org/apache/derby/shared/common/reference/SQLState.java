@@ -699,6 +699,7 @@ public interface SQLState {
 	String LANG_DATE_RANGE_EXCEPTION                                   = "22007.S.180";
 	String LANG_DATE_SYNTAX_EXCEPTION                                  = "22007.S.181";
     String LANG_INVALID_FUNCTION_ARGUMENT                              = "22008.S";
+    String LANG_SEQUENCE_GENERATOR_EXHAUSTED                              = "2200H.S";
 	String LANG_SUBSTR_START_OR_LEN_OUT_OF_RANGE                        = "22011";
 	String LANG_SUBSTR_START_ADDING_LEN_OUT_OF_RANGE                        = "22011.S.1";
 	String LANG_DIVIDE_BY_ZERO                                         = "22012";
@@ -1358,6 +1359,7 @@ public interface SQLState {
 	String LANG_INVALID_CALL_TO_EXECUTE_UPDATE		                   = "X0Y79.S";
 	String LANG_NULL_DATA_IN_NON_NULL_COLUMN               	   	   	   = "X0Y80.S";
     String LANG_IGNORE_MISSING_INDEX_ROW_DURING_DELETE                 = "X0Y83.S";
+    String LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE                 = "X0Y84.S";
 
 
 	// TEMPORARY EXECUTION RESTRICTIONS

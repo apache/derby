@@ -53,7 +53,6 @@ public class UDTTest  extends GeneratedColumnsHelper
     ///////////////////////////////////////////////////////////////////////////////////
 
     public static final String OBJECT_EXISTS = "X0Y68";
-    public static final String NONEXISTENT_OBJECT = "42Y55";
     public static final String SYNTAX_ERROR = "42X01";
     public static final String VIEW_DEPENDS_ON_TYPE = "X0Y23";
     public static final String TRIGGER_DEPENDS_ON_TYPE = "X0Y24";

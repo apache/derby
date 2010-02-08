@@ -21,9 +21,12 @@
 package org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
@@ -69,6 +72,11 @@ public class NextSequenceNode extends ValueNode {
         SchemaDescriptor sd = getSchemaDescriptor(sequenceName.getSchemaName());
         sequenceDescriptor = getDataDictionary().getSequenceDescriptor(sd, sequenceName.getTableName());
 
+        if ( sequenceDescriptor == null )
+        {
+                throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, "SEQUENCE", sequenceName.getFullTableName());
+        }
+
         // set the datatype of the value node
         this.setType(sequenceDescriptor.getDataType());
 
@@ -88,17 +96,26 @@ public class NextSequenceNode extends ValueNode {
 
 
     public void generateExpression
+        (
+         ExpressionClassBuilder acb,
+         MethodBuilder mb
+         )
+        throws StandardException
+    {
+        String sequenceUUIDstring = sequenceDescriptor.getUUID().toString();
+        int dataTypeFormatID = sequenceDescriptor.getDataType().getNull().getTypeFormatId();
+        
+		mb.pushThis();
+		mb.push( sequenceUUIDstring );
+		mb.push( dataTypeFormatID );
+		mb.callMethod
             (
-                    ExpressionClassBuilder acb,
-                    MethodBuilder mb
-            ) throws StandardException {
-
-        //TODO : Proper implementation for value generation
-        generateConstant(acb, mb);    //dummy method to return a constant
-
-        acb.generateDataValue(mb, getTypeCompiler(),
-                getTypeServices().getCollationType(), (LocalField) null);
-
+             VMOpcode.INVOKEVIRTUAL,
+             ClassName.BaseActivation,
+             "getCurrentValueAndAdvance",
+             ClassName.NumberDataValue,
+             2
+             );
     }
 
     /**

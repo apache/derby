@@ -75,6 +75,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.util.ReuseFactory;
 
 /**
@@ -659,6 +660,27 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 			((InsertResultSet)resultSet).getSetAutoincrementValue(columnPosition, increment);
 		return l;
 
+	}
+
+	/**
+	 * Called by generated code to get the next number in an ANSI/ISO sequence
+     * and advance the sequence. Raises an exception if the sequence was declared
+     * NO CYCLE and its range is exhausted.
+	 *
+     * @param sequenceUUIDstring The string value of the sequence's UUID
+     * @param typeFormatID The format id of the data type to be returned. E.g., StoredFormatIds.SQL_INTEGER_ID.
+     *
+	 * @return The next number in the sequence
+	 */
+	protected NumberDataValue getCurrentValueAndAdvance
+        ( String sequenceUUIDstring, int typeFormatID )
+	       throws StandardException
+	{
+        NumberDataValue ndv = (NumberDataValue) getDataValueFactory().getNull( typeFormatID, StringDataValue.COLLATION_TYPE_UCS_BASIC );
+
+        lcc.getDataDictionary().getCurrentValueAndAdvance( sequenceUUIDstring, ndv );
+
+        return ndv;
 	}
 
 	/**

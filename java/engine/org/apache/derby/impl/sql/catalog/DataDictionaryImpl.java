@@ -369,10 +369,12 @@ public final class	DataDictionaryImpl
 	CacheManager	OIDTdCache;
 	CacheManager	nameTdCache;
 	private CacheManager	spsNameCache;
+    private CacheManager sequenceGeneratorCache;
 	private Hashtable		spsIdHash;
 	// private Hashtable       spsTextHash;
 	int				tdCacheSize;
-	int				stmtCacheSize;	
+	int				stmtCacheSize;
+    private int seqgenCacheSize;
 
     /* Cache of permissions data */
     CacheManager permissionsCache;
@@ -602,6 +604,10 @@ public final class	DataDictionaryImpl
 		stmtCacheSize = PropertyUtil.intPropertyValue(Property.LANG_SPS_CACHE_SIZE, value,
 									   0, Integer.MAX_VALUE, Property.LANG_SPS_CACHE_SIZE_DEFAULT);
 
+		value = startParams.getProperty(Property.LANG_SEQGEN_CACHE_SIZE);
+		seqgenCacheSize = PropertyUtil.intPropertyValue(Property.LANG_SEQGEN_CACHE_SIZE, value,
+									   0, Integer.MAX_VALUE, Property.LANG_SEQGEN_CACHE_SIZE_DEFAULT);
+
 		value = startParams.getProperty(Property.LANG_PERMISSIONS_CACHE_SIZE);
 		permissionsCacheSize = PropertyUtil.intPropertyValue(Property.LANG_PERMISSIONS_CACHE_SIZE, value,
 									   0, Integer.MAX_VALUE, Property.LANG_PERMISSIONS_CACHE_SIZE_DEFAULT);
@@ -640,6 +646,8 @@ public final class	DataDictionaryImpl
 			// spsTextHash = new Hashtable(stmtCacheSize);
 		}
 
+		sequenceGeneratorCache = cf.newCacheManager
+            ( this, "SequenceGeneratorCache", seqgenCacheSize, seqgenCacheSize );
 
 		/* Get the object to coordinate cache transitions */
 		cacheCoordinator = new ShExLockable();
@@ -868,15 +876,11 @@ public final class	DataDictionaryImpl
 	*/
 	public Cacheable newCacheable(CacheManager cm) {
 
-		if (cm == OIDTdCache)
-			return new OIDTDCacheable(this);
-		else if (cm == nameTdCache)
-			return new NameTDCacheable(this);
-        else if( cm == permissionsCache)
-            return new PermissionsCacheable(this);
-		else {
-			return new SPSNameCacheable(this);
-		}
+		if ( cm == OIDTdCache ) { return new OIDTDCacheable( this ); }
+		else if ( cm == nameTdCache ) { return new NameTDCacheable( this ); }
+        else if ( cm == permissionsCache ) { return new PermissionsCacheable( this ); }
+        else if ( cm == sequenceGeneratorCache ) { return new SequenceUpdater.SyssequenceUpdater( this ); }
+		else { return new SPSNameCacheable( this ); }
 	}
 
 	/*
@@ -8134,6 +8138,8 @@ public final class	DataDictionaryImpl
 		nameTdCache.ageOut();
 		OIDTdCache.cleanAll();
 		OIDTdCache.ageOut();
+		sequenceGeneratorCache.cleanAll();
+		sequenceGeneratorCache.ageOut();
 		if (spsNameCache != null)
 		{
 			//System.out.println("CLEARING SPS CACHE");
@@ -9389,6 +9395,146 @@ public final class	DataDictionaryImpl
 								 SYSCOLUMNSRowFactory.SYSCOLUMNS_INDEX1_ID);
 	}
 
+	/**
+	 * Computes the RowLocation in SYSSEQUENCES for a particular sequence. Also
+     * constructs the sequence descriptor.
+	 * 
+	 * @param tc			Transaction Controller to use.
+	 * @param sequenceIDstring UUID of the sequence as a string
+	 * @param rowLocation OUTPUT param for returing the row location
+	 * @param sequenceDescriptor OUTPUT param for return the sequence descriptor
+     *
+	 * @return The RowLocation of that sequence in SYSSEQUENCES
+	 * 
+	 * @exception StandardException thrown on failure.
+	 */ 
+	void computeSequenceRowLocation
+        ( TransactionController tc, String sequenceIDstring, RowLocation[] rowLocation, SequenceDescriptor[] sequenceDescriptor )
+		throws StandardException								  
+	{
+		TabInfoImpl ti = getNonCoreTI(SYSSEQUENCES_CATALOG_NUM);
+		ExecIndexRow keyRow = null;
+		ExecRow row;
+
+		keyRow = (ExecIndexRow)exFactory.getIndexableRow(1);
+		keyRow.setColumn(1, new SQLChar( sequenceIDstring ) );
+        
+		rowLocation[ 0 ] = ti.getRowLocation( tc, keyRow, SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX1_ID );
+        
+        sequenceDescriptor[ 0 ] = (SequenceDescriptor)
+            getDescriptorViaIndexMinion
+            (
+             SYSSEQUENCESRowFactory.SYSSEQUENCES_INDEX1_ID,
+             keyRow,
+             (ScanQualifier[][]) null,
+             ti,
+             (TupleDescriptor) null,
+             (List) null,
+             false,
+             TransactionController.ISOLATION_REPEATABLE_READ,
+             tc);
+	}
+
+	/**
+	 * Set the current value of an ANSI/ISO sequence. This method does not perform
+     * any sanity checking but assumes that the caller knows what they are doing. If the
+     * old value on disk is not what we expect it to be, then we are in a race with another
+     * session. They won and we don't update the value on disk. However, if the old value
+     * is null, that is a signal to us that we should update the value on disk anyway.
+	 * 
+	 * @param tc			Transaction Controller to use.
+	 * @param rowLocation Row in SYSSEQUENCES to update.
+     * @param wait True if we should wait for locks
+     * @param oldValue What we expect to find in the CURRENTVALUE column.
+     * @param newValue What to stuff into the CURRENTVALUE column.
+	 * 
+	 * @return Returns true if the value was successfully updated, false if we lost a race with another session.
+     *
+	 * @exception StandardException thrown on failure.
+	 */
+    boolean updateCurrentSequenceValue
+        ( TransactionController tc, RowLocation rowLocation, boolean wait, Long oldValue, Long newValue )
+        throws StandardException
+    {
+  		int columnNum = SYSSEQUENCESRowFactory.SYSSEQUENCES_CURRENT_VALUE;
+		FormatableBitSet columnToUpdate = new FormatableBitSet( SYSSEQUENCESRowFactory.SYSSEQUENCES_COLUMN_COUNT );
+		TabInfoImpl ti = getNonCoreTI( SYSSEQUENCES_CATALOG_NUM );
+  		ConglomerateController heapCC = null;
+		SYSSEQUENCESRowFactory	rf = (SYSSEQUENCESRowFactory) ti.getCatalogRowFactory();
+		ExecRow row = rf.makeEmptyRow();
+        
+		// FormatableBitSet is 0 based.
+        columnToUpdate.set( columnNum - 1 ); // current value.
+        
+        try
+        {
+			/* if wait is true then we need to do a wait while trying to
+			   open/fetch from the conglomerate. note we use wait both to
+			   open as well as fetch from the conglomerate.
+			*/
+            heapCC = 
+                tc.openConglomerate(
+                    ti.getHeapConglomerate(), 
+                    false,
+                    (TransactionController.OPENMODE_FORUPDATE |
+                     ((wait) ? 0 : TransactionController.OPENMODE_LOCK_NOWAIT)),
+                    TransactionController.MODE_RECORD,
+                    TransactionController.ISOLATION_REPEATABLE_READ);
+
+            heapCC.fetch( rowLocation, row.getRowArray(), columnToUpdate, wait );
+
+			NumberDataValue oldValueOnDisk = (NumberDataValue) row.getColumn( columnNum );
+
+            SQLLongint expectedOldValue;
+            if ( oldValue == null ) { expectedOldValue = new SQLLongint(); }
+            else { expectedOldValue = new SQLLongint( oldValue.longValue() ); }
+
+            // only update value if what's on disk is what we expected
+            if ( ( oldValue == null ) || ( expectedOldValue.compare( oldValueOnDisk ) == 0 ) )
+            {
+                SQLLongint newValueOnDisk;
+                if ( newValue == null ) { newValueOnDisk = new SQLLongint(); }
+                else { newValueOnDisk = new SQLLongint( newValue.longValue() ); }
+                
+                row.setColumn( columnNum, newValueOnDisk );
+                heapCC.replace( rowLocation, row.getRowArray(), columnToUpdate );
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        finally
+        {
+            if (heapCC != null) { heapCC.close(); }
+        }
+    }
+    
+	/**
+	 * @see org.apache.derby.iapi.sql.dictionary.DataDictionary#getCurrentValueAndAdvance
+	 */
+    public void getCurrentValueAndAdvance
+        ( String sequenceUUIDstring, NumberDataValue returnValue )
+        throws StandardException
+    {
+        SequenceUpdater sequenceUpdater = null;
+
+        try {
+            sequenceUpdater = (SequenceUpdater) sequenceGeneratorCache.find( sequenceUUIDstring );
+
+            sequenceUpdater.getCurrentValueAndAdvance( returnValue );
+        }
+        finally
+        {
+            if ( sequenceUpdater != null )
+            {
+                sequenceGeneratorCache.release( sequenceUpdater );
+            }
+        }
+    }
+    
     public RowLocation getRowLocationTemplate(LanguageConnectionContext lcc,
                                               TableDescriptor td)
           throws StandardException

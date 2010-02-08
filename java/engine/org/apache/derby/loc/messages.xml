@@ -653,6 +653,12 @@ Guide.
             </msg>
 
             <msg>
+                <name>2200H.S</name>
+                <text>Sequence generator '{0}' does not cycle. No more values can be obtained from this sequence generator.</text>
+                <arg>sequenceName</arg>
+            </msg>
+
+            <msg>
                 <name>2200L</name>
                 <text>Values assigned to XML columns must be well-formed DOCUMENT nodes.</text>
             </msg>
@@ -3390,6 +3396,12 @@ Guide.
                 <text>WARNING: While deleting a row from a table the index row for base table row {0} was not found in index with conglomerate id {1}.  This problem has automatically been corrected as part of the delete operation.</text>
                 <arg>rowName</arg>
                 <arg>id</arg>
+            </msg>
+
+            <msg>
+                <name>X0Y84.S</name>
+                <text>Too much contention on sequence {0}.</text>
+                <arg>sequenceName</arg>
             </msg>
 
         </family>

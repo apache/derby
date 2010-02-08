@@ -683,6 +683,13 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return null;
 	}
 
+    public void getCurrentValueAndAdvance
+        ( String sequenceUUIDstring, NumberDataValue returnValue )
+        throws StandardException
+    {
+		// TODO Auto-generated method stub
+    }
+    
 	public RowLocation getRowLocationTemplate(LanguageConnectionContext lcc,
 			TableDescriptor td) throws StandardException {
 		// TODO Auto-generated method stub

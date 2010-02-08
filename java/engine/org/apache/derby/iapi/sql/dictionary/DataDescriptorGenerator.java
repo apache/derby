@@ -528,7 +528,7 @@ public class DataDescriptorGenerator
             UUID uuid,
             String sequenceName,
             DataTypeDescriptor dataType,
-            long currentValue,
+            Long currentValue,
             long startValue,
             long minimumValue,
             long maximumValue,

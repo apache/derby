@@ -598,6 +598,15 @@ public interface Property {
 	int		LANG_SPS_CACHE_SIZE_DEFAULT =32;
 
 	/**
+	 * The size of the sequence generator cache 
+	 * used by the data dictionary.  Database.  Static.
+	 * <p>
+	 * Externally visible.
+	 */
+	String	LANG_SEQGEN_CACHE_SIZE = "derby.language.sequenceGeneratorCacheSize";
+	int		LANG_SEQGEN_CACHE_SIZE_DEFAULT =32;
+
+	/**
 	  derby.language.stalePlanCheckInterval
 
 	  <P>

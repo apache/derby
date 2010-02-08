@@ -45,25 +45,27 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import java.sql.Types;
 
 /**
- * Factory for creating a SYSSEQUENCES row.
+ * Factory for creating a SYSSEQUENCES row. The contract of this table is this:
+ * if the CURRENTVALUE column is null, then the sequence is exhausted and
+ * no more values can be generated from it.
  */
 
-public class SYSSEQUENCESRowFactory extends CatalogRowFactory {
+public class SYSSEQUENCESRowFactory extends CatalogRowFactory
+{
+    public static final String TABLENAME_STRING = "SYSSEQUENCES";
 
-    private static final String TABLENAME_STRING = "SYSSEQUENCES";
-
-    private static final int SYSSEQUENCES_COLUMN_COUNT = 10;
+    public static final int SYSSEQUENCES_COLUMN_COUNT = 10;
     /* Column #s for sysinfo (1 based) */
-    private static final int SYSSEQUENCES_SEQUENCEID = 1;
-    private static final int SYSSEQUENCES_SEQUENCENAME = 2;
-    private static final int SYSSEQUENCES_SCHEMAID = 3;
-    private static final int SYSSEQUENCES_SEQUENCEDATATYPE = 4;
-    private static final int SYSSEQUENCES_CURRENT_VALUE = 5;
-    private static final int SYSSEQUENCES_START_VALUE = 6;
-    private static final int SYSSEQUENCES_MINIMUM_VALUE = 7;
-    private static final int SYSSEQUENCES_MAXIMUM_VALUE = 8;
-    private static final int SYSSEQUENCES_INCREMENT = 9;
-    private static final int SYSSEQUENCES_CYCLE_OPTION = 10;
+    public static final int SYSSEQUENCES_SEQUENCEID = 1;
+    public static final int SYSSEQUENCES_SEQUENCENAME = 2;
+    public static final int SYSSEQUENCES_SCHEMAID = 3;
+    public static final int SYSSEQUENCES_SEQUENCEDATATYPE = 4;
+    public static final int SYSSEQUENCES_CURRENT_VALUE = 5;
+    public static final int SYSSEQUENCES_START_VALUE = 6;
+    public static final int SYSSEQUENCES_MINIMUM_VALUE = 7;
+    public static final int SYSSEQUENCES_MAXIMUM_VALUE = 8;
+    public static final int SYSSEQUENCES_INCREMENT = 9;
+    public static final int SYSSEQUENCES_CYCLE_OPTION = 10;
 
     private static final int[][] indexColumnPositions =
             {
@@ -118,12 +120,12 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory {
         String sequenceName = null;
         String schemaIdString = null;
         TypeDescriptor typeDesc = null;
-        long currentValue = 0;
+        Long currentValue = null;
         long startValue = 0;
         long minimumValue = 0;
         long maximumValue = 0;
         long increment = 0;
-        boolean cycle = false;
+        boolean canCycle = false;
 
 
         if (td != null) {
@@ -143,7 +145,7 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory {
             minimumValue = sd.getMinimumValue();
             maximumValue = sd.getMaximumValue();
             increment = sd.getIncrement();
-            cycle = sd.isCycle();
+            canCycle = sd.canCycle();
         }
 
         /* Build the row to insert */
@@ -162,7 +164,10 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory {
         row.setColumn(SYSSEQUENCES_SEQUENCEDATATYPE, new UserType(typeDesc));
 
         /* 5th column is CURRENTVALUE */
-        row.setColumn(SYSSEQUENCES_CURRENT_VALUE, new SQLLongint(currentValue));
+        SQLLongint curVal;
+        if ( currentValue == null ) { curVal = new SQLLongint(); }
+        else { curVal = new SQLLongint( currentValue.longValue() ); }
+        row.setColumn(SYSSEQUENCES_CURRENT_VALUE, curVal );
 
         /* 6th column is STARTVALUE */
         row.setColumn(SYSSEQUENCES_START_VALUE, new SQLLongint(startValue));
@@ -177,7 +182,7 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory {
         row.setColumn(SYSSEQUENCES_INCREMENT, new SQLLongint(increment));
 
         /* 10th column is CYCLEOPTION */
-        row.setColumn(SYSSEQUENCES_CYCLE_OPTION, new SQLChar(cycle ? "Y" : "N"));
+        row.setColumn(SYSSEQUENCES_CYCLE_OPTION, new SQLChar(canCycle ? "Y" : "N"));
 
         return row;
     }
@@ -203,7 +208,7 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory {
         UUID ouuid;
         String sequenceName;
         UUID suuid;
-        long currentValue;
+        Long currentValue;
         long startValue;
         long minimumValue;
         long maximumValue;
@@ -246,7 +251,8 @@ public class SYSSEQUENCESRowFactory extends CatalogRowFactory {
                 DataTypeDescriptor.getType(catalogType);
 
         col = row.getColumn(SYSSEQUENCES_CURRENT_VALUE);
-        currentValue = col.getLong();
+        if ( col.isNull() ) { currentValue = null; }
+        else { currentValue = new Long( col.getLong() ) ; }
 
         col = row.getColumn(SYSSEQUENCES_START_VALUE);
         startValue = col.getLong();

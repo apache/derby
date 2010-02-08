@@ -37,6 +37,10 @@ import org.apache.derby.impl.sql.catalog.DDdependableFinder;
 
 /**
  * This class is used by rows in the SYS.SYSSEQUENCES system table.
+ * See the header comment of SYSSEQUENCESRowFactory for the
+ * contract of that table. In particular, if the CURRENTVALUE column
+ * is null, then the sequence has been exhausted and no more values
+ * can be generated from it.
  */
 public class SequenceDescriptor extends TupleDescriptor
         implements Provider, Dependent, PrivilegedSQLObject
@@ -47,12 +51,12 @@ public class SequenceDescriptor extends TupleDescriptor
     private final SchemaDescriptor schemaDescriptor;
     private UUID schemaId;
     private DataTypeDescriptor dataType;
-    private long currentValue;
+    private Long currentValue; // could be null
     private long startValue;
     private long minimumValue;
     private long maximumValue;
     private long increment;
-    private boolean cycle;
+    private boolean canCycle;
 
     /**
      * Constructor
@@ -64,8 +68,8 @@ public class SequenceDescriptor extends TupleDescriptor
      */
 
     public SequenceDescriptor(DataDictionary dataDictionary, SchemaDescriptor sd, UUID sequenceUUID, String sequenceName,
-                              DataTypeDescriptor dataType, long currentValue,
-                              long startValue, long minimumValue, long maximumValue, long increment, boolean cycle) {
+                              DataTypeDescriptor dataType, Long currentValue,
+                              long startValue, long minimumValue, long maximumValue, long increment, boolean canCycle) {
         super(dataDictionary);
         if (SanityManager.DEBUG) {
             if (sd.getSchemaName() == null) {
@@ -83,7 +87,7 @@ public class SequenceDescriptor extends TupleDescriptor
         this.minimumValue = minimumValue;
         this.maximumValue = maximumValue;
         this.increment = increment;
-        this.cycle = cycle;
+        this.canCycle = canCycle;
     }
 
    /**
@@ -113,7 +117,7 @@ public class SequenceDescriptor extends TupleDescriptor
                     "minimumValue: " + minimumValue + "\n" +
                     "maximumValue: " + maximumValue + "\n" +
                     "increment: " + increment + "\n" +
-                    "cycle: " + cycle + "\n";
+                    "canCycle: " + canCycle + "\n";
         } else {
             return "";
         }
@@ -284,7 +288,7 @@ public class SequenceDescriptor extends TupleDescriptor
         return dataType;
     }
 
-    public long getCurrentValue() {
+    public Long getCurrentValue() {
         return currentValue;
     }
 
@@ -304,7 +308,7 @@ public class SequenceDescriptor extends TupleDescriptor
         return increment;
     }
 
-    public boolean isCycle() {
-        return cycle;
+    public boolean canCycle() {
+        return canCycle;
     }
 }

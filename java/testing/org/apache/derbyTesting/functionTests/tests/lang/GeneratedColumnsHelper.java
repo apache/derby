@@ -56,6 +56,8 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    protected static final    String OBJECT_DOES_NOT_EXIST = "42X94";
+    protected static final    String NONEXISTENT_OBJECT = "42Y55";
     protected static  final   String  REDUNDANT_CLAUSE = "42613";
     protected static  final   String  CANT_CONTAIN_NULLS = "42831";
     protected static  final   String  ILLEGAL_AGGREGATE = "42XA1";

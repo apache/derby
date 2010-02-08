@@ -69,18 +69,18 @@ public class SequenceTest extends GeneratedColumnsHelper {
         return authorizedTest;
     }
 
-    public void testCreateSequence() throws SQLException {
+    public void test_01_CreateSequence() throws SQLException {
         Statement s = createStatement();
         s.executeUpdate("CREATE SEQUENCE mySeq");
     }
 
-    public void testDropSequence() throws SQLException {
+    public void test_02_DropSequence() throws SQLException {
         Statement s = createStatement();
         s.executeUpdate("CREATE SEQUENCE mySeq1");
         s.executeUpdate("DROP SEQUENCE mySeq1");
     }
 
-    public void testDuplicateCreationFailure() throws SQLException {
+    public void test_03_DuplicateCreationFailure() throws SQLException {
         Statement s = null;
         try {
             s = createStatement();
@@ -93,7 +93,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
         }
     }
 
-    public void testImplicitSchemaCreation() throws SQLException {
+    public void test_04_ImplicitSchemaCreation() throws SQLException {
         Connection adminCon = openUserConnection(TEST_DBO);
 
         Connection alphaCon = openUserConnection(ALPHA);
@@ -107,7 +107,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
         adminCon.close();
     }
 
-    public void testCreateWithSchemaSpecified() throws SQLException {
+    public void test_05CreateWithSchemaSpecified() throws SQLException {
 
         // create DB
         Connection alphaCon = openUserConnection(ALPHA);
@@ -120,7 +120,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
         alphaCon.close();
     }
 
-    public void testCreateWithSchemaSpecifiedCreateTrue() throws SQLException {
+    public void test_06_CreateWithSchemaSpecifiedCreateTrue() throws SQLException {
         Connection alphaCon = openUserConnection(ALPHA);
         Statement stmt = alphaCon.createStatement();
 
@@ -131,7 +131,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
         alphaCon.close();
     }
 
-    public void testCreateWithSchemaDropWithNoSchema() throws SQLException {
+    public void test_07_CreateWithSchemaDropWithNoSchema() throws SQLException {
         Connection alphaCon = openUserConnection(ALPHA);
         Statement stmt = alphaCon.createStatement();
 
@@ -145,7 +145,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
     /**
      * Test trying to drop a sequence in a schema that doesn't belong to one
      */
-    public void testDropOtherSchemaSequence() throws SQLException {
+    public void test_08_DropOtherSchemaSequence() throws SQLException {
         Connection adminCon = openUserConnection(TEST_DBO);
 
         Connection alphaCon = openUserConnection(ALPHA);
@@ -171,7 +171,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
     /**
      * Test trying to create a sequence in a schema that doesn't belong to one
      */
-    public void testCreateOtherSchemaSequence() throws SQLException {
+    public void test_09_CreateOtherSchemaSequence() throws SQLException {
         // create DB
         Connection adminCon = openUserConnection(TEST_DBO);
 
@@ -291,7 +291,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
      * initial test for next value
      * @throws SQLException on error
      */
-    public void testNextValue() throws SQLException {
+    public void test_10_NextValue() throws SQLException {
         Statement s = createStatement();
         s.executeUpdate("CREATE SEQUENCE mySeq1");
         s.execute("SELECT NEXT VALUE FOR mySeq1 from sys.systables");
