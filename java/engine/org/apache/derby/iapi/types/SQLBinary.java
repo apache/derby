@@ -638,7 +638,7 @@ abstract class SQLBinary
 	 */
 
 	/** @see DataValueDescriptor#cloneValue */
-	public final DataValueDescriptor cloneValue(boolean forceMaterialization)
+	public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
 		try
 		{

@@ -26,6 +26,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
+import org.apache.derby.iapi.services.io.CloneableStream;
 import org.apache.derby.iapi.services.io.FormatIdInputStream;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
@@ -97,25 +98,63 @@ public class SQLClob
 	 * DataValueDescriptor interface
 	 */
 
-	/** @see DataValueDescriptor#cloneValue */
-	public DataValueDescriptor cloneValue(boolean forceMaterialization)
-	{
-        // TODO: Should this be rewritten to clone the stream instead of
-        //       materializing the value if possible?
-		try
-		{
-            SQLClob clone = new SQLClob(getString());
-            // Copy the soft upgrade mode state.
-            clone.inSoftUpgradeMode = inSoftUpgradeMode;
+    /**
+     * Returns a clone of this CLOB value.
+     * <p>
+     * Unlike the other binary types, CLOBs can be very large. We try to clone
+     * the underlying stream when possible to avoid having to materialize the
+     * value into memory.
+     *
+     * @param forceMaterialization any streams representing the data value will
+     *      be materialized if {@code true}, the data value will be kept as a
+     *      stream if possible if {@code false}
+     * @return A clone of this CLOB value.
+     * @see DataValueDescriptor#cloneValue
+     */
+    public DataValueDescriptor cloneValue(boolean forceMaterialization) {
+        // TODO: Add optimization for materializing "smallish" streams. This
+        //       may be more effective because the data doesn't have to be
+        //       decoded multiple times.
+        final SQLClob clone = new SQLClob();
+        // Copy the soft upgrade mode state.
+        clone.inSoftUpgradeMode = inSoftUpgradeMode;
+        
+        // Shortcut cases where the value is NULL.
+        if (isNull()) {
             return clone;
-		}
-		catch (StandardException se)
-		{
-			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("Unexpected exception", se);
-			return null;
-		}
-	}
+        }
+
+        if (!forceMaterialization) {
+            if (stream != null && stream instanceof CloneableStream) {
+                int length = UNKNOWN_LOGICAL_LENGTH;
+                if (csd != null && csd.getCharLength() > 0) {
+                    length = (int)csd.getCharLength();
+                }
+                clone.setValue(((CloneableStream)stream).cloneStream(), length);
+            } else if (_clobValue != null) {
+                // Assumes the Clob object can be shared between value holders.
+                clone.setValue(_clobValue);
+            }
+            // At this point we may still not have cloned the value because we
+            // have a stream that isn't cloneable.
+            // TODO: Add functionality to materialize to temporary disk storage
+            //       to avoid OOME for large CLOBs.
+        }
+
+        // See if we are forced to materialize the value, either because
+        // requested by the user or because we don't know how to clone it.
+        if (clone.isNull() || forceMaterialization) {
+            try {
+                clone.setValue(getString());
+            } catch (StandardException se) {
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT("Unexpected exception", se);
+                }
+                return null;
+            }
+        }
+        return clone;
+    }
 
 	/**
 	 * @see DataValueDescriptor#getNewNull

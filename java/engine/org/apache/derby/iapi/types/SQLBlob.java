@@ -24,7 +24,10 @@ package org.apache.derby.iapi.types;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.CloneableStream;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
+
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.sql.Blob;
 import java.sql.ResultSet;
@@ -75,6 +78,61 @@ public class SQLBlob extends SQLBinary
 	{
 		return Limits.DB2_LOB_MAXWIDTH;
 	}
+
+    /**
+     * Returns a clone of this BLOB value.
+     * <p>
+     * Unlike the other binary types, BLOBs can be very large. We try to clone
+     * the underlying stream when possible to avoid having to materialize the
+     * value into memory.
+     *
+     * @param forceMaterialization any streams representing the data value will
+     *      be materialized if {@code true}, the data value will be kept as a
+     *      stream if possible if {@code false}
+     * @return A clone of this BLOB value.
+     */
+    public DataValueDescriptor cloneValue(boolean forceMaterialization) {
+        // TODO: Add optimization for materializing "smallish" streams. This
+        //       may be more effective because the data doesn't have to be
+        //       decoded multiple times.
+        final SQLBlob clone = new SQLBlob();
+
+        // Shortcut cases where value is NULL.
+        if (isNull()) {
+            return clone;
+        }
+
+        if (!forceMaterialization && dataValue == null) {
+            if (stream != null && stream instanceof CloneableStream) {
+                clone.setStream( ((CloneableStream)stream).cloneStream());
+                if (streamValueLength != -1) {
+                    clone.streamValueLength = streamValueLength;
+                }
+            } else if (_blobValue != null) {
+                // Assumes the Blob object can be shared between value holders.
+                clone.setValue(_blobValue);
+            }
+            // At this point we may still not have cloned the value because we
+            // have a stream that isn't cloneable.
+            // TODO: Add functionality to materialize to temporary disk storage
+            //       to avoid OOME for large BLOBs.
+        }
+
+        // See if we are forced to materialize the value, either because
+        // requested by the user or because we don't know how to clone it.
+        if (clone.isNull() || forceMaterialization) {
+            try {
+                // NOTE: The byte array holding the value is shared.
+                clone.setValue(getBytes());
+            } catch (StandardException se) {
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT("Unexpected exception", se);
+                }
+                return null;
+            }
+        }
+        return clone;
+    }
 
     /**
      * @see DataValueDescriptor#getNewNull
