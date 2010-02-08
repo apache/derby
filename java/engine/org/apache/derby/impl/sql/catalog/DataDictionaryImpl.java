@@ -9404,8 +9404,6 @@ public final class	DataDictionaryImpl
 	 * @param rowLocation OUTPUT param for returing the row location
 	 * @param sequenceDescriptor OUTPUT param for return the sequence descriptor
      *
-	 * @return The RowLocation of that sequence in SYSSEQUENCES
-	 * 
 	 * @exception StandardException thrown on failure.
 	 */ 
 	void computeSequenceRowLocation
