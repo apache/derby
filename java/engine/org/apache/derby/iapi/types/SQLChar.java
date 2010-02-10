@@ -3040,7 +3040,7 @@ readingLoop:
      *      in soft upgrade mode, {@code false} if not, and {@code null} if
      *      unknown
      */
-    public void setSoftUpgradeMode(Boolean inSoftUpgradeMode) {
+    public void setStreamHeaderFormat(Boolean inSoftUpgradeMode) {
         // Ignore this for CHAR, VARCHAR and LONG VARCHAR.
     }
     

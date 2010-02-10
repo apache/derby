@@ -616,7 +616,7 @@ public class SQLClob
      * <p>
      * <em>NOTE</em>: To guarantee a successful generation, one of the following
      * two conditions must be met at header or EOF generation time:
-     * <ul> <li>{@code setSoftUpgradeMode} has been invoked before the header
+     * <ul> <li>{@code setStreamHeaderFormat} has been invoked before the header
      *          generator was obtained.</li>
      *      <li>There is context at generation time, such that the mode can be
      *          determined by obtaining the database context and by consulting
@@ -645,7 +645,7 @@ public class SQLClob
      * @param inSoftUpgradeMode {@code TRUE} if the database is accessed in
      *      soft upgrade mode, {@code FALSE} is not, or {@code null} if unknown
      */
-    public void setSoftUpgradeMode(Boolean inSoftUpgradeMode) {
+    public void setStreamHeaderFormat(Boolean inSoftUpgradeMode) {
         this.inSoftUpgradeMode = inSoftUpgradeMode;
     }
 

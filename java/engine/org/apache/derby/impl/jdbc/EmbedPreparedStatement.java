@@ -93,12 +93,13 @@ public abstract class EmbedPreparedStatement
 	protected PreparedStatement	preparedStatement;
 	private Activation			activation;
     /**
-     * Tells if we're accessing a database in soft upgrade mode or not.
+     * Tells which header format to use when writing CLOBs into the store.
      * <p>
-     * This is lazily set if we need it.
-     * @see #isSoftUpgraded()
+     * This is lazily set if we need it, and there are currently only two
+     * valid header formats to choose between.
+     * @see #usePreTenFiveHdrFormat()
      */
-    private Boolean inSoftUpgradeMode;
+    private Boolean usePreTenFiveHdrFormat;
         
         private BrokeredConnectionControl bcc=null;
 
@@ -743,7 +744,7 @@ public abstract class EmbedPreparedStatement
             ReaderToUTF8Stream utfIn;
             final StringDataValue dvd = (StringDataValue)
                     getParms().getParameter(parameterIndex -1);
-            dvd.setSoftUpgradeMode(isSoftUpgraded());
+            dvd.setStreamHeaderFormat(usePreTenFiveHdrFormat());
             // Need column width to figure out if truncation is needed
             DataTypeDescriptor dtd[] = preparedStatement
                     .getParameterTypes();
@@ -809,21 +810,23 @@ public abstract class EmbedPreparedStatement
 	}
 
     /**
-     * Tells if the database being accessed is soft upgraded or not.
+     * Determines which header format to use for CLOBs when writing them to
+     * the store.
      *
-     * @return {@code true} if database is soft upgraded, {@code false} if not.
+     * @return {@code true} if the pre Derby 10.5 header format is to be used,
+     *      {@code false} if the new header format can be used (10.5 or newer)
      * @throws StandardException if obtaining the access mode fails
      */
-    private Boolean isSoftUpgraded()
+    private Boolean usePreTenFiveHdrFormat()
             throws StandardException {
-        // Determine if we are accessing a soft upgraded database or not.
+        // Determine the version of the database we are accessing.
         // This is required to write the correct stream header format for Clobs.
-        if (inSoftUpgradeMode == null) {
-            inSoftUpgradeMode = Boolean.valueOf(
-                lcc.getDataDictionary().checkVersion(
-                    DataDictionary.DD_VERSION_CURRENT, null));
+        if (usePreTenFiveHdrFormat == null) {
+            usePreTenFiveHdrFormat = Boolean.valueOf(
+                !lcc.getDataDictionary().checkVersion(
+                    DataDictionary.DD_VERSION_DERBY_10_5, null));
         }
-        return inSoftUpgradeMode;
+        return usePreTenFiveHdrFormat;
     }
 
     /**

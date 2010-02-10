@@ -2930,11 +2930,10 @@ public abstract class EmbedResultSet extends ConnectionChild
                     getDVDforColumnToBeUpdated(columnIndex, updateMethodName);
             // In the case of updatable result sets, we cannot guarantee that a
             // context is pushed when the header needs to be generated. To fix
-            // this, tell the DVD/generator whether we are running in soft
-            // upgrade mode or not.
-            dvd.setSoftUpgradeMode(Boolean.valueOf(
+            // this, tell the DVD/generator which header format to use.
+            dvd.setStreamHeaderFormat(Boolean.valueOf(
                     !getEmbedConnection().getDatabase().getDataDictionary().
-                    checkVersion(DataDictionary.DD_VERSION_CURRENT, null)));
+                    checkVersion(DataDictionary.DD_VERSION_DERBY_10_5, null)));
             ReaderToUTF8Stream utfIn;
             int usableLength = DataValueDescriptor.UNKNOWN_LOGICAL_LENGTH;
             if (!lengthLess) {
