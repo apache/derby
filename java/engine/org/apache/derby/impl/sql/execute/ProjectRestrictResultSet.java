@@ -518,21 +518,9 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
                 // See if the column has been marked for cloning.
                 // If the value isn't a stream, don't bother cloning it.
                 if (cloneMap[index] && dvd.getStream() != null) {
-
-                    // Enable this code after DERBY-3650 is in: FIXME
-                    //
-                    // long length = dvd.getLengthIfKnown();
-                    //
-                    // If the stream isn't clonable, we have to load the stream.
-                    // if ((length > 32*1024 || length == -1) &&
-                    //     dvd.getStream() instanceof CloneableStream) {
-                    //     // Copy the stream, the value may be large.
-                    //     dvd = dvd.copyForRead();
-                    // } else {
-                    //     // Load the stream, then we don't have to clone.
-                    ((StreamStorable)dvd).loadStream();
-                    // }
+                    dvd = dvd.cloneValue(false);
                 }
+
                 result.setColumn(index + 1, dvd);
 			}
 		}

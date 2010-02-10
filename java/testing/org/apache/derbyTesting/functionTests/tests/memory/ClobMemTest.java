@@ -204,8 +204,7 @@ public class ClobMemTest extends BaseJDBCTestCase {
         setAutoCommit(false);
 
         Statement s = createStatement();
-        // int clobsize = LONG_BLOB_LENGTH;
-        int clobsize = 35000;
+        int clobsize = LONG_CLOB_LENGTH;
 
         s.executeUpdate(
             "CREATE TABLE T_MAIN(" +

@@ -226,8 +226,7 @@ public class BlobMemTest extends BaseJDBCTestCase {
         setAutoCommit(false);
 
         Statement s = createStatement();
-        // int blobsize = LONG_BLOB_LENGTH;
-        int blobsize = 35000;
+        int blobsize = LONG_BLOB_LENGTH;
 
         s.executeUpdate(
             "CREATE TABLE T_MAIN(" +
