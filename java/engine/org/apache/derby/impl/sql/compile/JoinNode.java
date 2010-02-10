@@ -29,6 +29,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Optimizable;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicate;
 import org.apache.derby.iapi.sql.compile.OptimizablePredicateList;
@@ -806,6 +807,8 @@ public class JoinNode extends TableOperatorNode
 											getContextManager());
 		aggregateVector = new Vector();
 
+        CompilerContext cc = getCompilerContext();
+        
 		/* ON clause */
 		if (joinClause != null)
 		{
@@ -821,9 +824,11 @@ public class JoinNode extends TableOperatorNode
 			fromList.addElement((FromTable) leftResultSet);
 			fromList.addElement((FromTable) rightResultSet);
 
+            int previousReliability = orReliability( CompilerContext.ON_CLAUSE_RESTRICTION );
 			joinClause = joinClause.bindExpression(
 									  fromList, subqueryList,
 									  aggregateVector);
+            cc.setReliability( previousReliability );
 
 			// SQL 2003, section 7.7 SR 5
 			SelectNode.checkNoWindowFunctions(joinClause, "ON");

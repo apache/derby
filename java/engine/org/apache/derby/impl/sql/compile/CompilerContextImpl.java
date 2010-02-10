@@ -36,6 +36,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PermDescriptor;
@@ -162,6 +163,7 @@ public class CompilerContextImpl extends ContextImpl
 		returnParameterFlag = false;
 		initRequiredPriv();
 		defaultSchemaStack = null;
+        referencedSequences = null;
 	}
 
 	//
@@ -994,6 +996,23 @@ public class CompilerContextImpl extends ContextImpl
 		return list;
 	} // end of getRequiredPermissionsList
 
+	public void addReferencedSequence( SequenceDescriptor sd )
+    {
+        if ( referencedSequences == null ) { referencedSequences = new HashMap(); }
+
+        referencedSequences.put( sd.getUUID(), sd );
+    }
+
+	/**
+	 * Report whether the given sequence has been referenced already.
+	 */
+    public boolean isReferenced( SequenceDescriptor sd )
+    {
+        if ( referencedSequences == null ) { return false; }
+
+        return referencedSequences.containsKey( sd.getUUID() );
+    }
+
 	/*
 	** Context state must be reset in restContext()
 	*/
@@ -1049,4 +1068,5 @@ public class CompilerContextImpl extends ContextImpl
 	private HashMap requiredRoutinePrivileges;
 	private HashMap requiredUsagePrivileges;
 	private HashMap requiredRolePrivileges;
+    private HashMap referencedSequences;
 } // end of class CompilerContextImpl

@@ -30,6 +30,7 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.sql.conn.Authorizer;
 
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
@@ -573,12 +574,18 @@ public class SelectNode extends ResultSetNode
 		whereSubquerys = (SubqueryList) getNodeFactory().getNode(
 												C_NodeTypes.SUBQUERY_LIST,
 												getContextManager());
+        
+        CompilerContext cc = getCompilerContext();
+        
 		if (whereClause != null)
 		{
-			getCompilerContext().pushCurrentPrivType( Authorizer.SELECT_PRIV);
+			cc.pushCurrentPrivType( Authorizer.SELECT_PRIV);
+
+            int previousReliability = orReliability( CompilerContext.WHERE_CLAUSE_RESTRICTION );
 			whereClause = whereClause.bindExpression(fromListParam, 
 										whereSubquerys,
 										whereAggregates);
+            cc.setReliability( previousReliability );
 			
 			/* RESOLVE - Temporarily disable aggregates in the HAVING clause.
 			** (We may remove them in the parser anyway.)
@@ -605,7 +612,10 @@ public class SelectNode extends ResultSetNode
 			checkNoWindowFunctions(whereClause, "WHERE");
 		}
 
-		if (havingClause != null) {
+		if (havingClause != null)
+        {
+            int previousReliability = orReliability( CompilerContext.HAVING_CLAUSE_RESTRICTION );
+
 			havingAggregates = new Vector();
 			havingSubquerys = (SubqueryList) getNodeFactory().getNode(
 					C_NodeTypes.SUBQUERY_LIST,
@@ -614,6 +624,8 @@ public class SelectNode extends ResultSetNode
 					fromListParam, havingSubquerys, havingAggregates);
 			havingClause = havingClause.checkIsBoolean();
 			checkNoWindowFunctions(havingClause, "HAVING");
+            
+            cc.setReliability( previousReliability );
 		}
 		
 		/* Restore fromList */

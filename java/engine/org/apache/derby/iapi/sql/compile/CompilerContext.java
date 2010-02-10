@@ -33,6 +33,7 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
+import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -103,6 +104,8 @@ public interface CompilerContext extends Context
 	public  static  final   int			NON_DETERMINISTIC_ILLEGAL		=	0x00001000;
 	public  static  final   int			SQL_IN_ROUTINES_ILLEGAL		=	0x00002000;
 
+	public  static  final   int			NEXT_VALUE_FOR_ILLEGAL		=	0x00004000;
+
 	/** Standard SQL is legal */
 	public	static	final	int			SQL_LEGAL					=	(INTERNAL_SQL_ILLEGAL);
 
@@ -116,7 +119,8 @@ public interface CompilerContext extends Context
 																		    SUBQUERY_ILLEGAL |
 																			USER_ILLEGAL |
 																			SCHEMA_ILLEGAL |
-																			INTERNAL_SQL_ILLEGAL
+																			INTERNAL_SQL_ILLEGAL |
+                                                                            NEXT_VALUE_FOR_ILLEGAL
 																		  );
 
 	public	static	final	int			DEFAULT_RESTRICTION		= (
@@ -129,9 +133,16 @@ public interface CompilerContext extends Context
 	public	static	final	int			GENERATION_CLAUSE_RESTRICTION		= (
 		                                                                    CHECK_CONSTRAINT |
 																			NON_DETERMINISTIC_ILLEGAL |
-                                                                            SQL_IN_ROUTINES_ILLEGAL
+                                                                            SQL_IN_ROUTINES_ILLEGAL |
+                                                                            NEXT_VALUE_FOR_ILLEGAL
 																			);
 
+	public	static	final	int			WHERE_CLAUSE_RESTRICTION		= NEXT_VALUE_FOR_ILLEGAL;
+	public	static	final	int			HAVING_CLAUSE_RESTRICTION		= NEXT_VALUE_FOR_ILLEGAL;
+	public	static	final	int			ON_CLAUSE_RESTRICTION		= NEXT_VALUE_FOR_ILLEGAL;
+	public	static	final	int			AGGREGATE_RESTRICTION		= NEXT_VALUE_FOR_ILLEGAL;
+	public	static	final	int			CONDITIONAL_RESTRICTION		= NEXT_VALUE_FOR_ILLEGAL;
+	public	static	final	int			GROUP_BY_RESTRICTION		= NEXT_VALUE_FOR_ILLEGAL;
 
 	/////////////////////////////////////////////////////////////////////////////////////
 	//
@@ -583,4 +594,15 @@ public interface CompilerContext extends Context
 	 * @return The list of required privileges.
 	 */
 	public List getRequiredPermissionsList();
+    
+	/**
+	 * Add a sequence descriptor to the list of referenced sequences.
+	 */
+	public void addReferencedSequence( SequenceDescriptor sd );
+
+	/**
+	 * Report whether the given sequence has been referenced already.
+	 */
+    public boolean isReferenced( SequenceDescriptor sd );
+
 }

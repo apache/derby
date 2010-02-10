@@ -2117,6 +2117,17 @@ Guide.
             </msg>
 
             <msg>
+                <name>42XAH</name>
+                <text>A NEXT VALUE FOR expression may not appear in many contexts, including WHERE, ON, HAVING, ORDER BY, DISTINCT, CASE, GENERATION, and AGGREGATE clauses as well as WINDOW functions and CHECK constraints.</text>
+            </msg>
+
+            <msg>
+                <name>42XAI</name>
+                <text>The statement references the following sequence more than once: '{0}'.</text>
+                <arg>sequenceName</arg>
+            </msg>
+
+            <msg>
                 <name>42Y00</name>
                 <text>Class '{0}' does not implement org.apache.derby.iapi.db.AggregateDefinition and thus cannot be used as an aggregate expression.</text>
                 <arg>className</arg>

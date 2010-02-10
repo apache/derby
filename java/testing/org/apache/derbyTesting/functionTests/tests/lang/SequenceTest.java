@@ -297,5 +297,69 @@ public class SequenceTest extends GeneratedColumnsHelper {
         s.execute("SELECT NEXT VALUE FOR mySeq1 from sys.systables");
     }
 
+    /**
+     * Verify that sequences can't be used in many contexts.
+     */
+    public void test_11_forbiddenContexts() throws Exception
+    {
+        Connection conn = openUserConnection(ALPHA);
+
+        goodStatement( conn, "create sequence seq_11_a\n" );
+        goodStatement( conn, "create sequence seq_11_b\n" );
+
+        String illegalSequence = SQLState.LANG_NEXT_VALUE_FOR_ILLEGAL;
+        
+        // sequences not allowed in WHERE clause
+        expectCompilationError( conn, illegalSequence, "select * from sys.systables where ( next value for seq_11_a ) > 100\n" );
+
+        // sequences not allowed in HAVING clause
+        expectCompilationError
+            ( conn, illegalSequence,
+              "select max( conglomeratenumber ), tableid\n" +
+              "from sys.sysconglomerates\n" +
+              "group by tableid\n" +
+              "having max( conglomeratenumber ) > ( next value for seq_11_a )\n"
+              );
+        
+        // sequences not allowed in ON clause
+        expectCompilationError
+            ( conn, illegalSequence, "select * from sys.sysconglomerates left join sys.sysschemas on conglomeratenumber = ( next value for seq_11_a )\n" );
+
+        // sequences not allowed in CHECK constraints
+        expectCompilationError
+            ( conn, illegalSequence, "create table t_11_1( a int check ( a > ( next value for seq_11_a ) ) )\n" );
+
+        // sequences not allowed in generated columns
+        expectCompilationError
+            ( conn, illegalSequence, "create table t_11_1( a int, b generated always as ( a + ( next value for seq_11_a ) ) )\n" );
+
+        // sequences not allowed in aggregates
+        expectCompilationError
+            ( conn, illegalSequence, "select max( next value for seq_11_a ) from sys.systables\n" );
+
+        // sequences not allowed in CASE expressions
+        expectCompilationError
+            ( conn, illegalSequence, "values case when ( next value for seq_11_a ) < 0 then 100 else 200 end\n" );
+
+        // sequences not allowed in DISTINCT clauses
+        expectCompilationError
+            ( conn, illegalSequence, "select distinct( next value for seq_11_a ) from sys.systables\n" );
+
+        // sequences not allowed in ORDER BY clauses
+        expectCompilationError
+            ( conn, illegalSequence, "select tableid, ( next value for seq_11_a ) a from sys.systables order by a\n" );
+
+        // sequences not allowed in GROUP BY expressions
+        expectCompilationError
+            ( conn, illegalSequence, "select max( tableid ), ( next value for seq_11_a ) from sys.systables group by ( next value for seq_11_a )\n" );
+
+        // given sequence only allowed once per statement. see DERBY-4513.
+        expectCompilationError
+            ( conn, SQLState.LANG_SEQUENCE_REFERENCED_TWICE, "select next value for seq_11_a, next value for seq_11_a from sys.systables where 1=2\n" );
+
+        // however, two different sequences can appear in a statement
+        goodStatement( conn, "select next value for seq_11_a, next value for seq_11_b from sys.systables where 1=2\n" );
+    }
+
 
 }

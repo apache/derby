@@ -286,19 +286,22 @@ public class SequencePermsTest extends GeneratedColumnsHelper
              );
 
         // constraint
-        createStatement = "create table t_02( c int check ( ( next value for ruth.seq_02 ) < c ) )\n";
-        dropStatement = "drop table t_02\n";
-        badRevokeSQLState = OPERATION_FORBIDDEN;
-        verifyRevokePrivilege
-            (
-             ruthConnection,
-             frankConnection,
-             grantUsage,
-             revokeUsage,
-             createStatement,
-             dropStatement,
-             badRevokeSQLState
-             );
+        //
+        // no longer possible because syntax is illegal. see DERBY-4513
+        //
+        //        createStatement = "create table t_02( c int check ( ( next value for ruth.seq_02 ) < c ) )\n";
+        //        dropStatement = "drop table t_02\n";
+        //        badRevokeSQLState = OPERATION_FORBIDDEN;
+        //        verifyRevokePrivilege
+        //            (
+        //             ruthConnection,
+        //             frankConnection,
+        //             grantUsage,
+        //             revokeUsage,
+        //             createStatement,
+        //             dropStatement,
+        //             badRevokeSQLState
+        //             );
 
         
     }

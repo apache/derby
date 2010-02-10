@@ -29,6 +29,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.types.TypeId;
@@ -379,6 +380,10 @@ public class ConditionalNode extends ValueNode
 		Vector	aggregateVector) 
 			throws StandardException
 	{
+        CompilerContext cc = getCompilerContext();
+        
+        int previousReliability = orReliability( CompilerContext.CONDITIONAL_RESTRICTION );
+        
 		testCondition = testCondition.bindExpression(fromList,
 			subqueryList,
 			aggregateVector);
@@ -545,6 +550,8 @@ public class ConditionalNode extends ValueNode
 			thenElseList.setElementAt(cast, 1);
 		}
 
+        cc.setReliability( previousReliability );
+        
 		return this;
 	}
 

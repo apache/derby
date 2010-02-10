@@ -1768,6 +1768,20 @@ public abstract class QueryTreeNode implements Visitable
 		throw StandardException.newException(sqlState, fragmentType);
     }
 
+    /**
+     * OR in more reliability bits and return the old reliability value.
+     */
+    public int orReliability( int newBits )
+    {
+        CompilerContext cc = getCompilerContext();
+        
+        int previousReliability = cc.getReliability();
+
+        cc.setReliability( previousReliability | newBits );
+
+        return previousReliability;
+    }
+
 
     /**
      * Bind the parameters of OFFSET n ROWS and FETCH FIRST n ROWS ONLY, if

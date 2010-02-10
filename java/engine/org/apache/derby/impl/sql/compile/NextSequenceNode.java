@@ -26,6 +26,7 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -66,7 +67,14 @@ public class NextSequenceNode extends ValueNode {
     public ValueNode bindExpression(
             FromList fromList, SubqueryList subqueryList,
             Vector aggregateVector, boolean forQueryRewrite)
-            throws StandardException {
+            throws StandardException
+    {
+        CompilerContext cc = getCompilerContext();
+        
+        if ( (cc.getReliability() & CompilerContext.NEXT_VALUE_FOR_ILLEGAL) != 0 )
+        {
+            throw StandardException.newException( SQLState.LANG_NEXT_VALUE_FOR_ILLEGAL );
+        }
 
         // lookup sequence object in the data dictionary
         SchemaDescriptor sd = getSchemaDescriptor(sequenceName.getSchemaName());
@@ -79,6 +87,17 @@ public class NextSequenceNode extends ValueNode {
 
         // set the datatype of the value node
         this.setType(sequenceDescriptor.getDataType());
+
+        //
+        // The statement is only allowed to refer to a given sequence once.
+        // See DERBY-4513.
+        //
+        if ( cc.isReferenced( sequenceDescriptor ) )
+        {
+            throw StandardException.newException
+                ( SQLState.LANG_SEQUENCE_REFERENCED_TWICE, sequenceName.getFullTableName() );
+        }
+        cc.addReferencedSequence( sequenceDescriptor );
 
         ValueNode returnNode = this;
 

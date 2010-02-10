@@ -24,6 +24,7 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.Visitable;
 
@@ -103,9 +104,11 @@ public class GroupByColumn extends OrderedColumn
 				throws StandardException
 	{
 		/* Bind the ColumnReference to the FromList */
+        int previousReliability = orReliability( CompilerContext.GROUP_BY_RESTRICTION );
 		columnExpression = (ValueNode) columnExpression.bindExpression(fromList,
 							  subqueryList,
 							  aggregateVector);
+        getCompilerContext().setReliability( previousReliability );
 
 		// Verify that we can group on the column
 		if (columnExpression.isParameterNode()) 

@@ -341,6 +341,15 @@ public class SQLParser
 											"TRUE");
 	}
 
+    /**
+		Prevent NEXT VALUE FOR clauses when we get to the bind() phase.
+    */
+	private void forbidNextValueFor()
+	{
+        CompilerContext cc = getCompilerContext();
+
+        cc.setReliability( cc.getReliability() | CompilerContext.NEXT_VALUE_FOR_ILLEGAL );
+	}
 
 	/**
 		Check that the current mode supports internal extensions.
@@ -4855,6 +4864,8 @@ unionOrExcept(ResultSetNode term) throws StandardException :
 				queryExpression(term,
 								(tok != null) ? UNION_ALL_OP : UNION_OP)
 	{
+        if ( (tok != null) && (tok.kind == DISTINCT) ) { forbidNextValueFor(); }
+        
 		return expression;
 	}
 |
@@ -4862,6 +4873,8 @@ unionOrExcept(ResultSetNode term) throws StandardException :
 				queryExpression(term,
 								(tok != null) ? EXCEPT_ALL_OP : EXCEPT_OP)
 	{
+        if ( (tok != null) && (tok.kind == DISTINCT) ) { forbidNextValueFor(); }
+        
 		return expression;
 	}
 }
@@ -4975,6 +4988,8 @@ intersect(ResultSetNode term) throws StandardException :
 	<INTERSECT> [ tok = <ALL> | <DISTINCT> ] expression =
 				nonJoinQueryTerm(term, (tok != null) ? INTERSECT_ALL_OP : INTERSECT_OP)
 	{
+        if ( (tok != null) && (tok.kind == DISTINCT) ) { forbidNextValueFor(); }
+        
 		return expression;
 	}
 }
@@ -5061,6 +5076,8 @@ setQuantifier() :
 	)
 	<DISTINCT>
 	{
+        forbidNextValueFor();
+        
 		return true;
 	}
 |
@@ -8086,6 +8103,8 @@ orderByClause() throws StandardException :
 {
 	<ORDER> <BY> orderCols = sortSpecificationList()
 	{
+        forbidNextValueFor();
+        
 		return orderCols;
 	}
 }

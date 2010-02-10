@@ -278,10 +278,14 @@ public class AggregateNode extends UnaryOperatorNode
 		/* Add ourselves to the aggregateVector before we do anything else */
 		aggregateVector.addElement(this);
 
+        CompilerContext cc = getCompilerContext();
+        
         // operand being null means a count(*)
 		if (operand != null)
 		{
+            int previousReliability = orReliability( CompilerContext.AGGREGATE_RESTRICTION );
             bindOperand(fromList, subqueryList, aggregateVector);
+            cc.setReliability( previousReliability );
             
 			/*
 			** Make sure that we don't have an aggregate 
