@@ -51,7 +51,7 @@ class TransactionMapFactory {
      * is used to ensure thread-safety.
      * </p>
      *
-     * @return
+     * @return a thread-safe map instance
      */
     Map newMap() {
         return new Hashtable();
