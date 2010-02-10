@@ -39,7 +39,6 @@ import org.apache.derby.iapi.store.raw.xact.TransactionId;
 import org.apache.derby.iapi.services.io.CompressedNumber;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -98,6 +97,7 @@ public class TransactionTable implements Formatable
 	 * Fields
 	 */
 
+    private final TransactionMapFactory mapFactory;
 	private final Map trans;
 
 	private TransactionId largestUpdateXactId;
@@ -107,7 +107,8 @@ public class TransactionTable implements Formatable
 	*/
 	public TransactionTable()
 	{
-		trans = new Hashtable(17);
+        mapFactory = XactFactory.getMapFactory();
+        trans = mapFactory.newMap();
 	}
 
 	/*************************************************************
@@ -152,18 +153,30 @@ public class TransactionTable implements Formatable
      * MT - MT safe
      * </p>
      *
+     * <p>
+     * Entries that are added to or removed from the transaction table while
+     * it's being traversed, may or may not be visited. All the entries that
+     * are present in the map when this method is called, and have not been
+     * removed when the method returns, will have been visited exactly once
+     * (except if the {@code visit()} method returns false before all entries
+     * have been visited, in which case the traversal of the map will stop
+     * earlier).
+     * </p>
+     *
+     * <p>
+     * Note however that this method does not guarantee that a single
+     * {@code TransactionTableEntry} is not accessed concurrently by multiple
+     * threads. If the visitor accesses some of the entry's mutable state, the
+     * caller must ensure that appropriate synchronization protection is in
+     * place. For example, if accessing the update state of the entry, the
+     * caller must synchronize on "this" (the {@code TransactionTable}
+     * instance).
+     * </p>
+     *
      * @param visitor the visitor to apply on each transaction table entry
      */
     void visitEntries(EntryVisitor visitor) {
-        synchronized (trans) {
-            for (Iterator it = trans.values().iterator(); it.hasNext(); ) {
-                if (!visitor.visit((TransactionTableEntry) it.next())) {
-                    // The visitor returned false, meaning that it's done with
-                    // all of its work and we can stop the scan.
-                    break;
-                }
-            }
-        }
+        mapFactory.visitEntries(trans, visitor);
     }
 
 
