@@ -1373,24 +1373,12 @@ public final class DataTypeDescriptor implements Formatable
     		else
     			return false;
 
-		//User types are comparable to other user types only if
-		//(for now) they are the same type and are being used to
-		//implement some JDBC type.  This is sufficient for
-		//date/time types; it may be generalized later for e.g.
-		//comparison of any user type with one of its subtypes.
-		if (typeId.isUserDefinedTypeId() || typeId.getJDBCTypeId() == Types.OTHER) {
-        	if (forEquals)
-        		return true;
-        	try {
-        	
-        		Class thisClass = cf.getClassInspector().getClass(
-				typeId.getCorrespondingJavaTypeName());
-        		
-        		return java.lang.Comparable.class.isAssignableFrom(thisClass);
-        	} catch (ClassNotFoundException cnfe) {
-        		return false;
-        	}			
-		}
+        // Right now, user defined types are not comparable.
+        // This removes old logic which we might want
+        // to revive when we support comparable UDTs. See
+        // DERBY-4470.
+		if (typeId.isUserDefinedTypeId() || typeId.getJDBCTypeId() == Types.OTHER)
+		{ return false; }
 
 		return false;
 	}

@@ -97,6 +97,10 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  VIEW_DEPENDS_ON_PRIVILEGE = "X0Y23";
     protected static  final   String  NON_EMPTY_SCHEMA = "X0Y54";
     protected static  final   String  JAVA_EXCEPTION = "XJ001";
+    protected static  final   String  ILLEGAL_UDT_CLASS = "42Z10";
+    protected static  final   String  FORBIDDEN_ORDERING_OPERATION = "X0X67";
+    protected static  final   String  ILLEGAL_AGG = "42Y22";
+    protected static  final   String  ILLEGAL_COMPARISON = "42818";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

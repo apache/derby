@@ -921,6 +921,104 @@ public class UDTTest  extends GeneratedColumnsHelper
         expectExecutionError( conn, JAVA_EXCEPTION, "insert into t_13_a( data ) values ( makeSampleSQLData( 3 ) )\n" );
     }
     
+    /**
+     * <p>
+     * Verify that you can't bind UDTs to the classes which back the system types.
+     * </p>
+     */
+    public void test_14_systemClasses() throws Exception
+    {
+        Connection conn = getConnection();
+
+        //
+        // Before checking types, make sure that all types we understand are accounted for.
+        // If a new system type is added, then we need to add it to the following block
+        // of compilation errors.
+        //
+        assertEquals( 20, vetDatatypeCount( conn ) );
+        
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'byte[]' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.lang.Boolean' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.lang.Integer' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.lang.Long' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.lang.Float' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.lang.Double' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.lang.String' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.math.BigDecimal' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.sql.Blob' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.sql.Clob' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.sql.Date' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.sql.Ref' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.sql.Time' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.sql.Timestamp' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'org.apache.derby.iapi.types.XML' language java\n" );
+        expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'org.apache.derby.Foo' language java\n" );
+    }
+    private int vetDatatypeCount( Connection conn ) throws Exception
+    {
+        ResultSet rs = conn.getMetaData().getTypeInfo();
+        int expectedTypeCount = 0;
+        while ( rs.next() ) { expectedTypeCount++; }
+        rs.close();
+
+        expectedTypeCount--; // eliminate JAVA_OBJECT
+
+        int actualTypeCount = org.apache.derby.iapi.types.TypeId.getAllBuiltinTypeIds().length;
+        actualTypeCount--;  // eliminate BOOLEAN
+        actualTypeCount--;  // eliminate TINYINT
+        actualTypeCount--;  // eliminate REF
+        actualTypeCount++;  // add FLOAT (synonym of REAL)
+
+        //
+        // Make sure that all types have been added to TypeId.getAllBuiltinTypeIds().
+        //
+        assertEquals( expectedTypeCount, actualTypeCount );
+
+        return actualTypeCount;
+    }
+    
+
+    /**
+     * <p>
+     * Verify that UDTs have no ordering.
+     * </p>
+     */
+    public void test_15_ordering() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // Create a Comparable type. We can't take advantage of that interface yet.
+        goodStatement( conn, "create type IntArray_15 external name 'org.apache.derbyTesting.functionTests.tests.lang.IntArray' language java\n" );
+        goodStatement
+            ( conn,
+              "create function makeIntArray_15( arrayLength int ) returns IntArray_15\n" +
+              "language java parameter style java no sql external name 'org.apache.derbyTesting.functionTests.tests.lang.IntArray.makeIntArray'\n" );
+        goodStatement( conn, "create table t_15( a IntArray_15 )\n" );
+        goodStatement( conn, "insert into t_15( a ) values ( makeIntArray_15( 3 ) )\n" );
+        goodStatement( conn, "insert into t_15( a ) values ( makeIntArray_15( 4 ) )\n" );
+
+        expectCompilationError( FORBIDDEN_ORDERING_OPERATION, "create index t_15_idx on t_15( a )\n" );
+        expectCompilationError( FORBIDDEN_ORDERING_OPERATION, "select * from t_15 order by a\n" );
+        expectCompilationError( FORBIDDEN_ORDERING_OPERATION, "select * from t_15 group by a\n" );
+        expectCompilationError( FORBIDDEN_ORDERING_OPERATION, "select distinct a from t_15\n" );
+        expectCompilationError( ILLEGAL_AGG, "select max( a ) from t_15\n" );
+        expectCompilationError( ILLEGAL_AGG, "select min( a ) from t_15\n" );
+        expectCompilationError( ILLEGAL_AGG, "select avg( a ) from t_15\n" );
+        expectCompilationError( FORBIDDEN_ORDERING_OPERATION, "select * from t_15 union select * from t_15\n" );
+        expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 where a = makeIntArray( 3 )\n" );
+        expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 where a between makeIntArray( 2 ) and makeIntArray( 4 )\n" );
+        expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 l, t_15 r where l.a = r.a\n" );
+        expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 l, t_15 r where l.a < r.a\n" );
+        expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 l, t_15 r where l.a > r.a\n" );
+        expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 l, t_15 r where l.a <= r.a\n" );
+        expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 l, t_15 r where l.a >= r.a\n" );
+        expectCompilationError( FORBIDDEN_ORDERING_OPERATION, "select count( distinct a ) from t_15\n" );
+
+        // but these don't involve any comparisons
+        goodStatement( conn, "select count(*) from t_15\n" );
+        goodStatement( conn, "select all * from t_15\n" );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // PROCEDURES AND FUNCTIONS
@@ -955,8 +1053,6 @@ public class UDTTest  extends GeneratedColumnsHelper
 
         return ps.executeQuery();
     }
-
-    
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

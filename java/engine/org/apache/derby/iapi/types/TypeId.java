@@ -267,6 +267,32 @@ public final class TypeId
         private static final TypeId XML_ID = create(
                 StoredFormatIds.XML_TYPE_ID, StoredFormatIds.XML_TYPE_ID_IMPL);
 
+    private static final TypeId[] ALL_BUILTIN_TYPE_IDS =
+    {
+        BOOLEAN_ID,
+        SMALLINT_ID,
+        INTEGER_ID,
+        CHAR_ID,
+        TINYINT_ID,
+        BIGINT_ID,
+        REAL_ID,
+        DOUBLE_ID,
+        DECIMAL_ID,
+        NUMERIC_ID,
+        VARCHAR_ID,
+        DATE_ID,
+        TIME_ID,
+        TIMESTAMP_ID,
+        BIT_ID,
+        VARBIT_ID,
+        REF_ID,
+        LONGVARCHAR_ID,
+        LONGVARBIT_ID,
+        BLOB_ID,
+        CLOB_ID,
+        XML_ID,
+    };
+
         /**
          * Implementation of DECIMAL datatype for generating holders through getNull.
          * Set by the booted DataValueFactory implementation.
@@ -286,6 +312,20 @@ public final class TypeId
         {
             return new TypeId(typeFormatId, new BaseTypeIdImpl(implTypeFormatId)); 
         }
+
+    /**
+     * Return all of the builtin type ids.
+     */
+    public static TypeId[] getAllBuiltinTypeIds()
+    {
+        int count = ALL_BUILTIN_TYPE_IDS.length;
+
+        TypeId[] retval = new TypeId[ count ];
+
+        for ( int i = 0; i < count; i++ ) { retval[ i ] = ALL_BUILTIN_TYPE_IDS[ i ]; }
+
+        return retval;
+    }
         
         
         /**
@@ -795,6 +835,7 @@ public final class TypeId
 
                         case StoredFormatIds.REF_TYPE_ID:
                                 typePrecedence = REF_PRECEDENCE;
+                                javaTypeName = "java.sql.Ref";
                                 isRefTypeId = true;
                                 break;
 
@@ -1123,24 +1164,28 @@ public final class TypeId
                         case StoredFormatIds.USERDEFINED_TYPE_ID_V3:
                                 /* Is this type orderable? */
 
+                            // The following code is disabled until we support
+                            // comparable UDTs.
+                            return false;
+
                                 // For user java classes we are orderable if we
                                 // implement java.lang.Orderable (JDK1.2) or
                                 // have a int compareTo(Object) method (JDK1.1 or JDK1.2)
-                                UserDefinedTypeIdImpl baseUserTypeId =
-                                                                                (UserDefinedTypeIdImpl) baseTypeId;
-
-                                String className = baseUserTypeId.getClassName();
-
-                                try 
-                                {
-                                        Class c = cf.getClassInspector().getClass(className);
-                                        orderable = java.lang.Comparable.class.isAssignableFrom(c);
-                                } 
-                                catch (ClassNotFoundException cnfe) 
-                                {
-                                        orderable = false;
-                                } 
-                                break;
+                            //                                UserDefinedTypeIdImpl baseUserTypeId =
+                            //                                                                                (UserDefinedTypeIdImpl) baseTypeId;
+                            //
+                            //                                String className = baseUserTypeId.getClassName();
+                            //
+                            //                                try 
+                            //                                {
+                            //                                        Class c = cf.getClassInspector().getClass(className);
+                            //                                        orderable = java.lang.Comparable.class.isAssignableFrom(c);
+                            //                                } 
+                            //                                catch (ClassNotFoundException cnfe) 
+                            //                                {
+                            //                                        orderable = false;
+                            //                                } 
+                                //                                break;
 
                         default:
                                 orderable = true;
@@ -1187,10 +1232,6 @@ public final class TypeId
         {
                 if (SanityManager.DEBUG)
                 {
-                        if (formatId == StoredFormatIds.REF_TYPE_ID)
-                        {
-                                SanityManager.THROWASSERT("getCorrespondingJavaTypeName not implemented for StoredFormatIds.REF_TYPE_ID");
-                        }
                         SanityManager.ASSERT(javaTypeName != null,
                                 "javaTypeName expected to be non-null");
                 }

@@ -6148,6 +6148,12 @@ MessageId.java.
             </msg>
 
             <msg>
+                <name>42Z10</name>
+                <text>The Java class bound to a user defined type may not be a class used internally by Derby: '{0}'.</text>
+                <arg>javaClassName</arg>
+            </msg>
+
+            <msg>
                 <name>42Z11.U</name>
                 <text>stream</text>
             </msg>

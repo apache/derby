@@ -327,17 +327,52 @@ public class CreateAliasNode extends DDLStatementNode
 
             bindParameterTypes( (RoutineAliasInfo)aliasInfo );
 		}
+        
+        // validity checking for UDTs
+        if ( aliasType == AliasInfo.ALIAS_TYPE_UDT_AS_CHAR )
+        {
+            //
+            // Make sure that the java class name is not the name of a builtin
+            // type. This skirts problems caused by logic across the system
+            // which assumes a tight association between the builtin SQL types
+            // and the Java classes which implement them.
+            //
+            // For security reasons we do not allow the user to bind a UDT
+            // to a Derby class.
+            //
+            TypeId[] allSystemTypeIds = TypeId.getAllBuiltinTypeIds();
+            int systemTypeCount = allSystemTypeIds.length;
+
+            boolean foundConflict = javaClassName.startsWith( "org.apache.derby." );
+
+            if ( !foundConflict )
+            {
+                for ( int i = 0; i < systemTypeCount; i++ )
+                {
+                    TypeId systemType = allSystemTypeIds[ i ];
+                    String systemTypeName = systemType.getCorrespondingJavaTypeName();
+                    
+                    if ( systemTypeName.equals( javaClassName ) )
+                    {
+                        foundConflict = true;
+                        break;
+                    }
+                }
+            }
+            
+            if ( foundConflict )
+            {
+                throw StandardException.newException
+                    ( SQLState.LANG_UDT_BUILTIN_CONFLICT, javaClassName );
+            }
+            
+            return;
+        }
+
 		// Procedures and functions do not check class or method validity until
 		// runtime execution. Synonyms do need some validity checks.
 		if (aliasType != AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR)
 			return;
-
-        // validity checking for UDTs
-        if ( aliasType == AliasInfo.ALIAS_TYPE_UDT_AS_CHAR )
-        {
-            // nothing to do yet
-            return;
-        }
 
 		// Don't allow creating synonyms in SESSION schema. Causes confusion if
 		// a temporary table is created later with same name.
