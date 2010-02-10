@@ -89,7 +89,11 @@ public interface MessageId {
     String STORE_DURABILITY_TESTMODE_NO_SYNC = "D013"; // for derby.system.durability is 
                                                        // set to test
     String STORE_BOOT_READONLY_MSG          = "D014";
-
+    /**
+     * When the specified overflow page isn't found while streaming from a
+     * page overflow chain (large data values, typically BLOB or CLOB).
+     */
+    String STORE_STREAM_OVERFLOW_PAGE_NOT_FOUND = "D015";
 
 	/*
 	** ClassManager

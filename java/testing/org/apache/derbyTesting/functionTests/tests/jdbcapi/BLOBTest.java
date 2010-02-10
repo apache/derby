@@ -35,6 +35,7 @@ import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Random;
@@ -542,6 +543,68 @@ final public class BLOBTest extends BaseJDBCTestCase
         actionTypesCompareMainToAction(5);
 
         rollback();
+    }
+
+    /**
+     * Checks that Derby fails with an exception when a transaction using
+     * READ_UNCOMMITTED obtains a stream from a BLOB (reads one byte) and at
+     * the same time another connection deletes the BLOB.
+     * <p>
+     * Earlier only parts of the BLOB was returned, without errors. It was
+     * impossible to tell for the user that only parts of the value was
+     * retrieved.
+     * <p>
+     * See DERBY-2992.
+     */
+    public void testDerby2992_Repro()
+            throws IOException, SQLException {
+        // Autocommit doesn't seem to be enabled here in all cases.
+        setAutoCommit(true);
+
+        final String TBL = "D2992BLOB";
+        // Switch to READ UNCOMMITTED.
+        getConnection().setTransactionIsolation(
+                Connection.TRANSACTION_READ_UNCOMMITTED);
+        Statement stmt = createStatement();
+        dropTable(TBL);
+        stmt.executeUpdate("create table " + TBL + " (b blob)");
+        stmt.close();
+
+        PreparedStatement ps = prepareStatement("insert into " + TBL +
+                " values (?)");
+        int length = 65*1024*1024; // 65K
+        ps.setBinaryStream(1, new LoopingAlphabetStream(length), length);
+        ps.executeUpdate();
+        ps.close();
+
+        stmt = createStatement();
+        ResultSet rs = stmt.executeQuery("select B from " + TBL);
+        assertTrue(rs.next());
+
+        // Read one byte, keep the stream / rs open.
+        InputStream is = rs.getBinaryStream(1);
+        int i = is.read();
+        assertTrue(i != -1);
+
+        // Open a second connection and delete the BLOB.
+        Connection secondCon = openUserConnection("APP");
+        Statement secondStmt = secondCon.createStatement();
+        assertEquals(1, secondStmt.executeUpdate("delete from " + TBL));
+        secondCon.close();
+
+        // Continue reading the BLOB through the stream.
+        // The stream has now probably read one page of data, and as we progress
+        // it will have to fetch the next page. However, the next page has been
+        // deleted.
+        byte[] buf = new byte[4096];
+        try {
+            // Drain the stream.
+            while (is.read(buf) != -1) { }
+            // Expect the read call above to fail at some point.
+            fail("The read should have failed, value has been deleted");
+        } catch (EOFException eofe) {
+            // As we expected, everything's fine.
+        }
     }
 
     public static void setRandomValue(

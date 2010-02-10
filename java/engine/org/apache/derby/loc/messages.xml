@@ -7524,6 +7524,11 @@ Shutting down instance {0}</text>
                 <text>in READ ONLY mode</text>
             </msg>
 
+            <msg>
+                <name>D015</name>
+                <text>Could not read further because another transaction has modified the value.</text>
+            </msg>
+
         </family>
 
 
