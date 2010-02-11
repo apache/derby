@@ -376,6 +376,16 @@ class CreateTableConstantAction extends DDLConstantAction
 		{
 			lcc.addDeclaredGlobalTempTable(td);
 		}
+
+		// Indicate that the CREATE TABLE statement itself depends on the
+		// table it is creating. Normally such statement dependencies are
+		// added during compilation, but here we have a bootstrapping issue
+		// because the table doesn't exist until the CREATE TABLE statement
+		// has been executed, so we had to defer the creation of this
+		// dependency until now. (DERBY-4479)
+		dd.getDependencyManager().addDependency(
+			activation.getPreparedStatement(), td, lcc.getContextManager());
+
 	}
 
 
