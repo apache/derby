@@ -779,6 +779,11 @@ public class UDTTest  extends GeneratedColumnsHelper
      */
     public void test_11_tableFunctionColumns() throws Exception
     {
+        //
+        // This test uses DriverManager.
+        //
+        if ( JDBC.vmSupportsJSR169() ) { return; }
+
         Connection conn = getConnection();
 
         goodStatement( conn, "create type hashmap_11 external name 'java.util.HashMap' language java\n" );
@@ -909,6 +914,11 @@ public class UDTTest  extends GeneratedColumnsHelper
      */
     public void test_13_sqlData() throws Exception
     {
+        //
+        // SQLData not defined in JSR 169.
+        //
+        if ( JDBC.vmSupportsJSR169() ) { return; }
+
         Connection conn = getConnection();
 
         goodStatement( conn, "create type SampleSQLData external name 'org.apache.derbyTesting.functionTests.tests.lang.SampleSQLData' language java\n" );
@@ -1005,8 +1015,8 @@ public class UDTTest  extends GeneratedColumnsHelper
         expectCompilationError( ILLEGAL_AGG, "select min( a ) from t_15\n" );
         expectCompilationError( ILLEGAL_AGG, "select avg( a ) from t_15\n" );
         expectCompilationError( FORBIDDEN_ORDERING_OPERATION, "select * from t_15 union select * from t_15\n" );
-        expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 where a = makeIntArray( 3 )\n" );
-        expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 where a between makeIntArray( 2 ) and makeIntArray( 4 )\n" );
+        expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 where a = makeIntArray_15( 3 )\n" );
+        expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 where a between makeIntArray_15( 2 ) and makeIntArray_15( 4 )\n" );
         expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 l, t_15 r where l.a = r.a\n" );
         expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 l, t_15 r where l.a < r.a\n" );
         expectCompilationError( ILLEGAL_COMPARISON, "select * from t_15 l, t_15 r where l.a > r.a\n" );
