@@ -1029,6 +1029,173 @@ public class UDTTest  extends GeneratedColumnsHelper
         goodStatement( conn, "select all * from t_15\n" );
     }
 
+    /**
+     * <p>
+     * Verify implicit and explicit casts.
+     * </p>
+     */
+    public void test_16_casts() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create type javaSerializable external name 'java.io.Serializable' language java\n" );
+        goodStatement( conn, "create type javaNumber external name 'java.lang.Number' language java\n" );
+        goodStatement( conn, "create type javaDate external name 'java.util.Date' language java\n" );
+        goodStatement
+            ( conn,
+              "create function makeNumber( arg int ) returns javaNumber\n" +
+              "language java parameter style java no sql external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.makeNumber'\n" );
+        goodStatement( conn, "create table t_16( a int generated always as identity, b javaNumber )\n" );
+        goodStatement( conn, "create table t_16_1( a int generated always as identity, b javaDate )\n" );
+        goodStatement( conn, "create table t_16_2( a int generated always as identity, b javaSerializable )\n" );
+        goodStatement( conn, "insert into t_16( b ) values ( makeNumber( 1 ) )\n" );
+        goodStatement( conn, "insert into t_16( b ) select b from t_16\n" );
+        
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16( b ) values ( 1 )\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16( b ) values ( 1.0 )\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16( b ) values ( '1' )\n" );
+        
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_1( b ) values ( date('1994-02-23') )\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_1( b ) values ( time('15:09:02') )\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_1( b ) values ( timestamp('1960-01-01 23:03:20') )\n" );
+
+        // subtypes not recognized yet
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_2( b ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_2( b ) values( cast (null as javaNumber) )\n" );
+
+        // casts to other udts not allowed
+        expectCompilationError( BAD_CAST, "select cast (b as javaDate) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as javaSerializable) from t_16\n" );
+
+        //
+        // If this fails, it means that we need to add another system type to the
+        // cast checks below.
+        //
+        assertEquals( 20, vetDatatypeCount( conn ) );
+        
+        // casts to system types not allowed
+        expectCompilationError( BAD_CAST, "select cast (b as bigint) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as blob) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as char( 1 ) ) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as char( 1 ) for bit data) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as clob) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as date) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as decimal) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as double) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as float) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as int) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as long varchar) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as long varchar for bit data) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as numeric) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as real) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as smallint) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as time) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as timestamp) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as varchar(10)) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as varchar(10) for bit data) from t_16\n" );
+        expectCompilationError( BAD_CAST, "select cast (b as xml) from t_16\n" );
+
+
+        //
+        // If this fails, it means that we need to add another system type to the
+        // t_16_all_types table and add a corresponding cast check below.
+        //
+        assertEquals( 20, vetDatatypeCount( conn ) );
+        
+        goodStatement
+            (
+             conn,
+             "create table t_16_all_types\n" +
+             "(\n" +
+             "    a01 bigint,\n" +
+             "    a02 blob,\n" +
+             "    a03 char( 1 ),\n" +
+             "    a04 char( 1 ) for bit data ,\n" +
+             "    a05 clob,\n" +
+             "    a06 date,\n" +
+             "    a07 decimal,\n" +
+             "    a08 double,\n" +
+             "    a09 float,\n" +
+             "    a10 int,\n" +
+             "    a11 long varchar,\n" +
+             "    a12 long varchar for bit data,\n" +
+             "    a13 numeric,\n" +
+             "    a14 real,\n" +
+             "    a15 smallint,\n" +
+             "    a16 time,\n" +
+             "    a17 timestamp,\n" +
+             "    a18 varchar(10),\n" +
+             "    a19 varchar(10) for bit data,\n" +
+             "    a20 xml\n" +
+             ")"
+             );
+
+        expectCompilationError( BAD_CAST, "select cast( a01 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a02 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a03 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a04 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a05 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a06 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a07 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a08 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a09 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a10 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a11 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a12 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a13 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a14 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a15 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a16 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a17 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a18 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a19 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a20 as javaSerializable ) from t_16_all_types\n" );
+
+
+        //
+        // If this fails, it means that we need to add another system type to the
+        // implicit casts which follow.
+        //
+        assertEquals( 20, vetDatatypeCount( conn ) );
+        
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a01 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a02 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a03 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a04 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a05 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a06 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a07 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a08 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a09 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a10 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a11 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a12 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a13 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a14 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a15 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a16 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a17 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a18 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a19 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a20 ) select b from t_16\n" );
+        
+        // test cast from the half-supported boolean type
+        expectCompilationError( BAD_CAST, "select cast (isindex as javaNumber) from sys.sysconglomerates\n" );
+
+        // good cast to self
+        assertResults
+            (
+             conn,
+             "select cast (b as javaNumber) from t_16",
+             new String[][]
+             {
+                 { "1" },
+                 { "1" },
+             },
+             false
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // PROCEDURES AND FUNCTIONS
@@ -1063,6 +1230,8 @@ public class UDTTest  extends GeneratedColumnsHelper
 
         return ps.executeQuery();
     }
+
+    public static Number makeNumber( int arg ) { return new Integer( arg ); }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //

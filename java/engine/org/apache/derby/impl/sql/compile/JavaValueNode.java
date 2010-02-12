@@ -77,6 +77,14 @@ abstract class JavaValueNode extends QueryTreeNode
         // * Collation type of schema where method is defined. 
 	private int collationType;
 
+    /**
+     * Get the resolved data type of this node. May be overridden by descendants.
+     */
+    public DataTypeDescriptor getDataType() throws StandardException
+    {
+        return DataTypeDescriptor.getSQLDataTypeDescriptor( getJavaTypeName()) ;
+    }
+
 	public boolean isPrimitiveType() throws StandardException
 	{
 		JSQLType	myType = getJSQLType();

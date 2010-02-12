@@ -57,6 +57,7 @@ public class BitTypeCompiler extends BaseTypeCompiler
         public boolean convertible(TypeId otherType, 
 								   boolean forDataTypeFunction)
         {
+            if ( otherType.getBaseTypeId().isAnsiUDT() ) { return false; }
 
 
 			return (otherType.isBitTypeId() ||

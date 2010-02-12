@@ -51,6 +51,8 @@ public final class CharTypeCompiler extends BaseTypeCompiler
          */
         public boolean convertible(TypeId otherType, boolean forDataTypeFunction)
         {
+            if ( otherType.getBaseTypeId().isAnsiUDT() ) { return false; }
+            
 			// LONGVARCHAR can only be converted from  character types
 			// or CLOB or boolean.
 			if (getTypeId().isLongVarcharTypeId())

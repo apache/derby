@@ -246,7 +246,7 @@ public class JavaToSQLValueNode extends ValueNode
 		/* Bind the expression under us */
 		javaNode = javaNode.bindExpression(fromList, subqueryList, aggregateVector);
 
-		DataTypeDescriptor dts = DataTypeDescriptor.getSQLDataTypeDescriptor(javaNode.getJavaTypeName());
+		DataTypeDescriptor dts = javaNode.getDataType();
 		if (dts == null)
 		{
 			throw StandardException.newException(SQLState.LANG_NO_CORRESPONDING_S_Q_L_TYPE, 
@@ -255,7 +255,7 @@ public class JavaToSQLValueNode extends ValueNode
 
         TypeDescriptor catalogType = dts.getCatalogType();
 
-        if ( catalogType.getTypeName().equals( "java.sql.ResultSet" ) )
+        if ( catalogType.isRowMultiSet() || (catalogType.getTypeName().equals( "java.sql.ResultSet" )) )
         {
 			throw StandardException.newException(SQLState.LANG_TABLE_FUNCTION_NOT_ALLOWED);
         }

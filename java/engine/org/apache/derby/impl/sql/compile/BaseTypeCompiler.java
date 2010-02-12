@@ -274,6 +274,7 @@ abstract class BaseTypeCompiler implements TypeCompiler
 	public boolean numberConvertible(TypeId otherType, 
 									 boolean forDataTypeFunction)
 	{
+        if ( otherType.getBaseTypeId().isAnsiUDT() ) { return false; }
 
 		// Can't convert numbers to long types
 		if (otherType.isLongConcatableTypeId())
@@ -312,6 +313,8 @@ abstract class BaseTypeCompiler implements TypeCompiler
 									TypeId otherType,
 									ClassFactory cf)
 	{
+        if ( otherType.getBaseTypeId().isAnsiUDT() ) { return false; }
+
 		/*
 		** Numbers can be stored into from other number types.
 		** Also, user types with compatible classes can be stored into numbers.

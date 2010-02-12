@@ -1251,6 +1251,21 @@ abstract class MethodCallNode extends JavaValueNode
 		return variance;
 	}
 
+    /**
+     * Override method in ancestor.
+     */
+    public DataTypeDescriptor getDataType() throws StandardException
+    {
+        if ( routineInfo != null )
+        {
+            TypeDescriptor td = routineInfo.getReturnType();
+
+            if ( td != null ) { return DataTypeDescriptor.getType( td ); }
+        }
+
+        return super.getDataType();
+    }
+
 
 	/////////////////////////////////////////////////////////////////////
 	//

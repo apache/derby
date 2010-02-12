@@ -30,6 +30,7 @@ import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
+import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.compiler.LocalField;
@@ -42,11 +43,8 @@ public class UserDefinedTypeCompiler extends BaseTypeCompiler
 	/* TypeCompiler methods */
 
 	/**
-	 * User types are convertible to other user types only if
-	 * (for now) they are the same type and are being used to
-	 * implement some JDBC type.  This is sufficient for
-	 * date/time types; it may be generalized later for e.g.
-	 * comparison of any user type with one of its subtypes.
+	 * Right now, casting is not allowed from one user defined type
+     * to another.
 	 *
 	 * @param otherType 
 	 * @param forDataTypeFunction
@@ -56,8 +54,18 @@ public class UserDefinedTypeCompiler extends BaseTypeCompiler
 	 */
 	public boolean convertible(TypeId otherType, boolean forDataTypeFunction)
 	{
+        if ( getTypeId().getBaseTypeId().isAnsiUDT() )
+        {
+            if ( !otherType.getBaseTypeId().isAnsiUDT() ) { return false; }
+            
+            UserDefinedTypeIdImpl thisTypeID = (UserDefinedTypeIdImpl) getTypeId().getBaseTypeId();
+            UserDefinedTypeIdImpl thatTypeID = (UserDefinedTypeIdImpl) otherType.getBaseTypeId();
+            
+            return thisTypeID.getSQLTypeName().equals( thatTypeID.getSQLTypeName() );
+        }
+        
 		/*
-		** We are a user defined type, we are
+		** We are a non-ANSI user defined type, we are
 		** going to have to let the client find out
 		** the hard way.
 		*/
@@ -71,12 +79,13 @@ public class UserDefinedTypeCompiler extends BaseTypeCompiler
 	}
 
 	/**
-	 * User types are storable into other user types that they
+     * ANSI UDTs can only be stored into values of exactly their own
+     * type. This restriction can be lifted when we implement the
+     * ANSI subclassing clauses.
+     *
+	 * Old-style User types are storable into other user types that they
 	 * are assignable to. The other type must be a subclass of
 	 * this type, or implement this type as one of its interfaces.
-	 *
-	 * Built-in types are also storable into user types when the built-in
-	 * type's corresponding Java type is assignable to the user type.
 	 *
 	 * @param otherType the type of the instance to store into this type.
 	 * @param cf		A ClassFactory
@@ -84,6 +93,18 @@ public class UserDefinedTypeCompiler extends BaseTypeCompiler
 	 */
 	public boolean storable(TypeId otherType, ClassFactory cf)
 	{
+        if ( !otherType.isUserDefinedTypeId() ) { return false; }
+
+        UserDefinedTypeIdImpl thisTypeID = (UserDefinedTypeIdImpl) getTypeId().getBaseTypeId();
+        UserDefinedTypeIdImpl thatTypeID = (UserDefinedTypeIdImpl) otherType.getBaseTypeId();
+
+        if ( thisTypeID.isAnsiUDT() != thatTypeID.isAnsiUDT() ) { return false; }
+
+        if ( thisTypeID.isAnsiUDT() )
+        {
+            return thisTypeID.getSQLTypeName().equals( thatTypeID.getSQLTypeName() );
+        }
+        
 		return cf.getClassInspector().assignableTo(
 			   otherType.getCorrespondingJavaTypeName(),
 			   getTypeId().getCorrespondingJavaTypeName());

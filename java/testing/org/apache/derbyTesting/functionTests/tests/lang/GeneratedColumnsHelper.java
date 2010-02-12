@@ -101,6 +101,8 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  FORBIDDEN_ORDERING_OPERATION = "X0X67";
     protected static  final   String  ILLEGAL_AGG = "42Y22";
     protected static  final   String  ILLEGAL_COMPARISON = "42818";
+    protected static  final   String  ILLEGAL_STORAGE = "42821";
+    protected static  final   String  BAD_CAST = "42846";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
