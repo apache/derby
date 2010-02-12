@@ -913,12 +913,12 @@ public interface SQLState {
     String LANG_GEN_COL_BEFORE_TRIG                                             = "42XAA";
     String LANG_NOT_NULL_NEEDS_DATATYPE                                    = "42XAB";
     String LANG_SEQ_INCREMENT_ZERO                                     = "42XAC";
-    String LANG_SEQ_INCREMENT_OUT_OF_RANGE                             = "42XAD";
     String LANG_SEQ_ARG_OUT_OF_DATATYPE_RANGE                          = "42XAE";
     String LANG_SEQ_MIN_EXCEEDS_MAX                                    = "42XAF";
     String LANG_SEQ_INVALID_START                                      = "42XAG";    
     String LANG_NEXT_VALUE_FOR_ILLEGAL                                      = "42XAH";    
     String LANG_SEQUENCE_REFERENCED_TWICE                                      = "42XAI";    
+    String LANG_DUPLICATE_CS_CLAUSE                                      = "42XAJ";    
     String LANG_INVALID_USER_AGGREGATE_DEFINITION2                     = "42Y00";
 	String LANG_INVALID_CHECK_CONSTRAINT                               = "42Y01";
 	// String LANG_NO_ALTER_TABLE_COMPRESS_ON_TARGET_TABLE                = "42Y02";

@@ -217,15 +217,6 @@ public class CreateSequenceNode extends DDLStatementNode
                     SQLState.LANG_SEQ_INCREMENT_ZERO);
         }
 
-        if (_stepValue.longValue() > _maxValue.longValue()
-                || _stepValue.longValue() < _minValue.longValue()) {
-            throw StandardException.newException(
-                    SQLState.LANG_SEQ_INCREMENT_OUT_OF_RANGE,
-                    _stepValue.toString(),
-                    _minValue.toString(),
-                    _maxValue.toString());
-        }
-
     }
 
     public String statementToString() {

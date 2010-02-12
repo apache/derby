@@ -2084,14 +2084,6 @@ Guide.
                 <text>'INCREMENT BY' value can not be zero.</text>
             </msg>
 
-            <msg>
-                <name>42XAD</name>
-                <text>Invalid 'INCREMENT BY' value '{0}'. Must be between 'MINVALUE: {1}' and 'MAXVALUE: {2}'.</text>
-                <arg>stepValue</arg>
-                <arg>minValue</arg>
-                <arg>maxValue</arg>
-            </msg>
-
              <msg>
                 <name>42XAE</name>
                 <text>'{0}' value out of range of datatype '{1}'. Must be between '{2}' and '{3}'.</text>
@@ -2125,6 +2117,12 @@ Guide.
                 <name>42XAI</name>
                 <text>The statement references the following sequence more than once: '{0}'.</text>
                 <arg>sequenceName</arg>
+            </msg>
+
+            <msg>
+                <name>42XAJ</name>
+                <text>The CREATE SEQUENCE statement has a redundant '{0}' clause.</text>
+                <arg>clauseName</arg>
             </msg>
 
             <msg>

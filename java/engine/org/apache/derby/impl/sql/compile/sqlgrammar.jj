@@ -205,6 +205,15 @@ public class SQLParser
     private static final int INTERSECT_OP = 5;
     private static final int INTERSECT_ALL_OP = 6;
 
+    // indexes into array of optional clauses for CREATE SEQUENCE statement
+    private static final int IDX_DATA_TYPE = 0;
+    private static final int IDX_START_WITH_OPTION = IDX_DATA_TYPE + 1;
+    private static final int IDX_INCREMENT_BY_OPTION = IDX_START_WITH_OPTION + 1;
+    private static final int IDX_MAX_VALUE_OPTION = IDX_INCREMENT_BY_OPTION + 1;
+    private static final int IDX_MIN_VALUE_OPTION = IDX_MAX_VALUE_OPTION + 1;
+    private static final int IDX_CYCLE_OPTION = IDX_MIN_VALUE_OPTION + 1;
+    private static final int IDX_OPTION_COUNT = IDX_CYCLE_OPTION + 1;
+
 	private Object[]					paramDefaults;
 	private String						statementSQLText;
 	private NodeFactory					nodeFactory;
@@ -10079,27 +10088,38 @@ sequenceDefinition() throws StandardException :
 	Long maxValue = null;
 	Long minValue = null;
     Boolean cycle = Boolean.FALSE;
+    Object[] optionalClauses = new Object[ IDX_OPTION_COUNT ];
 }
 {
 	<SEQUENCE> qualifiedSequenceName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
-    [ <AS> dtd = exactIntegerType() ]
-    [ <START> <WITH> initialValue = exactIntegerObject() ]
-    [ <INCREMENT> <BY> stepValue = exactIntegerObject() ]
-    [
-        ( <MAXVALUE> maxValue = exactIntegerObject() )
-        |
-        LOOKAHEAD( { getToken( 2 ).kind == MAXVALUE } )
-        ( <NO> <MAXVALUE> )
-    ]
-    [
-        ( <MINVALUE> minValue = exactIntegerObject() )
-        |
-        LOOKAHEAD( { getToken( 2 ).kind == MINVALUE } )
-        ( <NO> <MINVALUE> )
-    ]
-    [ cycle = cycleClause() ]
+    ( sequenceGeneratorOption( optionalClauses ) ) *
 	{
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_6, "SEQUENCES");
+
+        if ( optionalClauses[ IDX_DATA_TYPE ] != null )
+        { dtd = (DataTypeDescriptor) optionalClauses[ IDX_DATA_TYPE ]; }
+
+        if ( optionalClauses[ IDX_START_WITH_OPTION ] != null )
+        { initialValue = (Long) optionalClauses[ IDX_START_WITH_OPTION ]; }
+
+        if ( optionalClauses[ IDX_INCREMENT_BY_OPTION ] != null )
+        { stepValue = (Long) optionalClauses[ IDX_INCREMENT_BY_OPTION ]; }
+
+        if (
+                (optionalClauses[ IDX_MAX_VALUE_OPTION ] != null) &&
+                ( !( optionalClauses[ IDX_MAX_VALUE_OPTION ] instanceof Boolean ) )
+            )
+        { maxValue = (Long) optionalClauses[ IDX_MAX_VALUE_OPTION ]; }
+
+        if (
+                (optionalClauses[ IDX_MIN_VALUE_OPTION ] != null) &&
+                ( !( optionalClauses[ IDX_MIN_VALUE_OPTION ] instanceof Boolean ) )
+            )
+        { minValue = (Long) optionalClauses[ IDX_MIN_VALUE_OPTION ]; }
+
+        if ( optionalClauses[ IDX_CYCLE_OPTION ] != null )
+        { cycle = (Boolean) optionalClauses[ IDX_CYCLE_OPTION ]; }
+
 		return (StatementNode) nodeFactory.getNode(
 			C_NodeTypes.CREATE_SEQUENCE_NODE,
 			qualifiedSequenceName,
@@ -10114,21 +10134,82 @@ sequenceDefinition() throws StandardException :
 }
 
 /*
- * <A NAME="cycleClause">cycleClause</A>
+ * <A NAME="sequenceGeneratorOption">sequenceGeneratorOption</A>
  */
-Boolean
-cycleClause() throws StandardException :
+void
+sequenceGeneratorOption( Object[] optionalClauses ) throws StandardException :
 {
+    Object option =  null;
+    int  optionIndex = -1;
+    Boolean[] cycleOption = new Boolean[ 1 ];
+    String optionName = null;
+    Token optionToken = null;
 }
 {
-    <CYCLE>
+    (
+        optionToken = <AS> option = exactIntegerType()
+        { optionIndex = IDX_DATA_TYPE; }
+	|
+        optionToken = <START> <WITH> option = exactIntegerObject()
+        { optionIndex = IDX_START_WITH_OPTION; }
+	|
+        optionToken = <INCREMENT> <BY> option = exactIntegerObject()
+        { optionIndex = IDX_INCREMENT_BY_OPTION; }
+	|
+        (
+            ( optionToken = <MAXVALUE> option = exactIntegerObject() )
+            |
+            LOOKAHEAD( { getToken( 2 ).kind == MAXVALUE } )
+            ( <NO> optionToken = <MAXVALUE> ) { option = Boolean.FALSE; }
+        )
+        { optionIndex = IDX_MAX_VALUE_OPTION; }
+	|
+        (
+            ( optionToken = <MINVALUE> option = exactIntegerObject() )
+            |
+            LOOKAHEAD( { getToken( 2 ).kind == MINVALUE } )
+            ( <NO> optionToken = <MINVALUE> ) { option = Boolean.FALSE; }
+        )
+        { optionIndex = IDX_MIN_VALUE_OPTION; }
+	|
+        optionToken = cycleClause( cycleOption )
+        {
+            option = cycleOption[ 0 ];
+            optionIndex = IDX_CYCLE_OPTION;
+        }
+    )
+	{
+        if ( optionIndex != -1 )
+        {
+            if ( optionalClauses[ optionIndex ] != null )
+            {
+                throw StandardException.newException( SQLState.LANG_DUPLICATE_CS_CLAUSE, optionToken.image );
+            }
+
+            optionalClauses[ optionIndex ] = option;
+        }
+	}
+}
+
+/*
+ * <A NAME="cycleClause">cycleClause</A>
+ */
+Token
+cycleClause( Boolean[] cycleOption ) throws StandardException :
+{
+    Token token = null;
+}
+{
+    token = <CYCLE>
     {
-        return Boolean.TRUE;
+        cycleOption[0] = Boolean.TRUE;
+        return token;
     }
 |
-    <NO> <CYCLE>
+    <NO> token = <CYCLE>
     {
-        return Boolean.FALSE;
+        cycleOption[0] = Boolean.FALSE;
+        return token;
     }
 }
 

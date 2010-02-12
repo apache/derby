@@ -21,6 +21,8 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -195,7 +197,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
         adminCon.close();
     }
 
-    public void testCreateSequenceWithArguments() throws Exception {
+    public void test_09a_createSequenceWithArguments() throws Exception {
         Connection alphaCon = openUserConnection(ALPHA);
 
         goodStatement(alphaCon,
@@ -243,20 +245,10 @@ public class SequenceTest extends GeneratedColumnsHelper {
                         + " MAXVALUE " + Short.MAX_VALUE
                         + " MINVALUE " + Long.MIN_VALUE);
 
-        // increment out of range
-        expectCompilationError(alphaCon,
-                SQLState.LANG_SEQ_INCREMENT_OUT_OF_RANGE,
-                "CREATE SEQUENCE int5 AS INTEGER INCREMENT BY " + Long.MAX_VALUE);
-
         // increment 0
         expectCompilationError(alphaCon,
                 SQLState.LANG_SEQ_INCREMENT_ZERO,
                 "CREATE SEQUENCE int5 AS INTEGER INCREMENT BY 0");
-
-       // increment too big
-        expectCompilationError(alphaCon,
-                SQLState.LANG_SEQ_INCREMENT_OUT_OF_RANGE,
-                "CREATE SEQUENCE int6 AS INTEGER INCREMENT BY " + Long.MAX_VALUE);
 
         goodStatement(alphaCon,
                 "CREATE SEQUENCE long1 AS BIGINT START WITH " + Long.MIN_VALUE + " INCREMENT BY -100 NO CYCLE");
@@ -359,6 +351,123 @@ public class SequenceTest extends GeneratedColumnsHelper {
 
         // however, two different sequences can appear in a statement
         goodStatement( conn, "select next value for seq_11_a, next value for seq_11_b from sys.systables where 1=2\n" );
+    }
+
+    /**
+     * Verify that optional clauses can appear in any order and redundant clauses
+     * are forbidden.
+     */
+    public void test_12_clauseOrder() throws Exception
+    {
+        Connection conn = openUserConnection(ALPHA);
+
+        goodSequence
+            (
+             conn,
+             "seq_12_a", // name
+             "", // clauses
+             "INTEGER", // datatype
+             Integer.MIN_VALUE, // initial
+             Integer.MIN_VALUE, // min
+             Integer.MAX_VALUE, // max
+             1L, // step
+             false // cycle
+             );
+
+        goodSequence
+            (
+             conn,
+             "seq_12_b", // name
+             "minvalue 5 increment by 3 cycle start with 100 maxvalue 1000000 as bigint", // clauses
+             "BIGINT", // datatype
+             100L, // initial
+             5L, // min
+             1000000L, // max
+             3L, // step
+             true // cycle
+             );
+
+        goodSequence
+            (
+             conn,
+             "seq_12_c", // name
+             "increment by 3 as smallint no cycle no maxvalue", // clauses
+             "SMALLINT", // datatype
+             Short.MIN_VALUE, // initial
+             Short.MIN_VALUE, // min
+             Short.MAX_VALUE, // max
+             3L, // step
+             false // cycle
+             );
+
+        goodSequence
+            (
+             conn,
+             "seq_12_d", // name
+             "maxvalue 1000000000 start with -50 increment by -3 cycle no minvalue", // clauses
+             "INTEGER", // datatype
+             -50L, // initial
+             Integer.MIN_VALUE, // min
+             1000000000, // max
+             -3L, // step
+             true // cycle
+             );
+
+        expectCompilationError
+            ( conn, DUPLICATE_CLAUSE, "create sequence bad_12 as smallint as bigint\n" );
+        expectCompilationError
+            ( conn, DUPLICATE_CLAUSE, "create sequence bad_12 start with 3 start with 7\n" );
+        expectCompilationError
+            ( conn, DUPLICATE_CLAUSE, "create sequence bad_12 minvalue 5 no minvalue\n" );
+        expectCompilationError
+            ( conn, DUPLICATE_CLAUSE, "create sequence bad_12 maxvalue 5 no maxvalue\n" );
+        expectCompilationError
+            ( conn, DUPLICATE_CLAUSE, "create sequence bad_12 increment by 7 increment by -7\n" );
+        expectCompilationError
+            ( conn, DUPLICATE_CLAUSE, "create sequence bad_12 no cycle cycle\n" );
+    }
+
+    private void goodSequence
+        (
+         Connection conn,
+         String sequenceName,
+         String clauses,
+         String datatype,
+         long initialValue,
+         long minValue,
+         long maxValue,
+         long stepValue,
+         boolean cycle
+         )
+        throws Exception
+    {
+        String statement = "create sequence " + sequenceName + " " + clauses;
+    
+        goodStatement( conn, statement );
+
+        PreparedStatement ps = chattyPrepare
+            (
+             conn,
+             "select sequencedatatype, startvalue, minimumvalue, maximumvalue, increment, cycleoption\n" +
+             "from sys.syssequences\n" +
+             "where sequencename = ?"
+             );
+        ps.setString( 1, sequenceName.toUpperCase() );
+
+        ResultSet rs = ps.executeQuery();
+
+        rs.next();
+        int col = 1;
+
+        assertEquals( datatype, rs.getString( col++ ) );
+        assertEquals( initialValue, rs.getLong( col++ ) );
+        assertEquals( minValue, rs.getLong( col++ ) );
+        assertEquals( maxValue, rs.getLong( col++ ) );
+        assertEquals( stepValue, rs.getLong( col++ ) );
+        assertEquals( cycle, rs.getString( col++ ).equals( "Y" ) );
+
+        rs.close();
+        ps.close();
     }
 
 
