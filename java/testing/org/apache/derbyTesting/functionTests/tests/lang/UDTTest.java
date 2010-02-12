@@ -22,6 +22,7 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.math.BigDecimal;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ParameterMetaData;
@@ -1196,6 +1197,34 @@ public class UDTTest  extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Verify that you can use UDTs as output parameters in database procedures.
+     * </p>
+     */
+    public void test_17_outputParameters() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create type intArray_17 external name 'org.apache.derbyTesting.functionTests.tests.lang.IntArray' language java\n" );
+        goodStatement
+            ( conn,
+              "create procedure changeIntArray_17\n" +
+              "( in newSize int, inout oldIntArray intArray_17 )\n" +
+              "language java parameter style java no sql\n" +
+              "external name 'org.apache.derbyTesting.functionTests.tests.lang.UDTTest.changeIntArray'\n" );
+        
+        CallableStatement cs = chattyPrepareCall( conn, "call changeIntArray_17( ?, ? )" );
+        cs.registerOutParameter( 2, java.sql.Types.JAVA_OBJECT );
+        cs.setInt( 1, 2 );
+        cs.setObject( 2,  new IntArray( new int[ 5 ] ) );
+        cs.execute();
+        Object obj = cs.getObject( 2 );
+        cs.close();
+
+        assertEquals( "[ 0, 0 ]", obj.toString() );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // PROCEDURES AND FUNCTIONS
@@ -1205,12 +1234,11 @@ public class UDTTest  extends GeneratedColumnsHelper
     public static void oneArgPriceProc( Price price1 ) {}
     public static void twoArgPriceProc( Price price1, Price price2 ) {}
 
-    public static void changeCurrencyCode( String newCurrencyCode, Price[] price )
+    public static void changeIntArray( int newSize, IntArray[] array )
     {
-        Price oldPrice = price[ 0 ];
-        Price newPrice = new Price( newCurrencyCode, oldPrice.amount, oldPrice.timeInstant );
+        IntArray newArray = new IntArray( new int[ newSize ] );
 
-        price[ 0 ] = newPrice;
+        array[ 0 ] = newArray;
     }
 
     public static HashMap makeHashMap() { return new HashMap(); }

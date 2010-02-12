@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -161,6 +162,17 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
         println( "Preparing statement:\n\t" + text );
         
         return conn.prepareStatement( text );
+    }
+
+    /**
+     * Prepare a callable statement and report its sql text.
+     */
+    protected CallableStatement   chattyPrepareCall( Connection conn, String text )
+        throws SQLException
+    {
+        println( "Preparing callable statement:\n\t" + text );
+        
+        return conn.prepareCall( text );
     }
 
     /**

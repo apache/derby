@@ -1162,6 +1162,7 @@ public class StaticMethodCallNode extends MethodCallNode
 						DataTypeDescriptor paramdtd = sqlParamNode.getTypeServices();
 
 						boolean isNumericType = paramdtd.getTypeId().isNumericTypeId();
+						boolean isAnsiUDT = paramdtd.getTypeId().getBaseTypeId().isAnsiUDT();
 
 						// is the underlying type for the OUT/INOUT parameter primitive.
 						boolean isPrimitive = ((java.lang.reflect.Method) method).getParameterTypes()[i].getComponentType().isPrimitive();
@@ -1192,6 +1193,12 @@ public class StaticMethodCallNode extends MethodCallNode
 						if (isNumericType && !isPrimitive)
 						{
 							mb.upCast("java.lang.Number");
+						}
+
+						// The value needs to be set thorugh the setValue(Object) method.
+						if (isAnsiUDT)
+						{
+							mb.upCast("java.lang.Object");
 						}
 
 						mb.callMethod(VMOpcode.INVOKEINTERFACE, null, "setValue", "void", 1);

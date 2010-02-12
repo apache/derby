@@ -446,6 +446,15 @@ public interface DataValueDescriptor extends Storable, Orderable
 	public void setValue(boolean theValue) throws StandardException;
 
 	/**
+	 * Set the value of this DataValueDescriptor to the given Object value
+	 *
+	 * @param theValue	The value to set this DataValueDescriptor to
+	 *
+	 * @exception StandardException		Thrown on error
+	 */
+	public void setValue(Object theValue) throws StandardException;
+
+	/**
 	 * Set the value of this DataValueDescriptor.
 	 *
 	 * @param theValue	The byte value to set this DataValueDescriptor to

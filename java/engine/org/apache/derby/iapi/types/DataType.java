@@ -358,6 +358,17 @@ public abstract class DataType
 	 * Set the value of this DataValueDescriptor.
 	 * At DataType level just throws an error lower classes will override
 	 *
+	 * @param theValue	The Object value to set this DataValueDescriptor to
+	 */
+	public void setValue(Object theValue) throws StandardException
+	{
+		throwLangSetMismatch("java.lang.Object");
+	}
+
+	/**
+	 * Set the value of this DataValueDescriptor.
+	 * At DataType level just throws an error lower classes will override
+	 *
 	 * @param theValue	The BigDecimal value to set this DataValueDescriptor to
 	 */
 	public void setValue(String theValue) throws StandardException
