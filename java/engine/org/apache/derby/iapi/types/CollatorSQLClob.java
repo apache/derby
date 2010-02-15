@@ -109,17 +109,26 @@ class CollatorSQLClob extends SQLClob implements CollationElementsInterface
      */
     public DataValueDescriptor cloneValue(boolean forceMaterialization)
 	{
-		try
-		{
-			return new CollatorSQLClob(getString(), 
-					holderForCollationSensitiveInfo.getCollatorForCollation());
-		}
-		catch (StandardException se)
-		{
-			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("Unexpected exception", se);
-			return null;
-		}
+        if (forceMaterialization) {
+            try {
+                return new CollatorSQLClob(getString(),
+                    holderForCollationSensitiveInfo.getCollatorForCollation());
+            }
+            catch (StandardException se)
+            {
+                if (SanityManager.DEBUG)
+                    SanityManager.THROWASSERT("Unexpected exception", se);
+                return null;
+            }
+        } else {
+            // If materialization isn't forced, let SQLClob (super) decide how
+            // to clone the value.
+           SQLClob clob = (SQLClob)super.cloneValue(forceMaterialization);
+           CollatorSQLClob clone = new CollatorSQLClob(
+                   holderForCollationSensitiveInfo.getCollatorForCollation());
+           clone.copyState(clob);
+           return clone;
+        }
 	}
 
 	/**
