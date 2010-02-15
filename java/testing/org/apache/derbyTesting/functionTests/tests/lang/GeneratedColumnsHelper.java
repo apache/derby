@@ -95,7 +95,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  GRANT_REVOKE_NOT_ALLOWED = "42509";
     protected static  final   String  ROUTINE_DEPENDS_ON_TYPE = "X0Y30";
     protected static  final   String  TABLE_DEPENDS_ON_TYPE = "X0Y29";
-    protected static  final   String  VIEW_DEPENDS_ON_PRIVILEGE = "X0Y23";
+    protected static  final   String  VIEW_DEPENDENCY = "X0Y23";
     protected static  final   String  NON_EMPTY_SCHEMA = "X0Y54";
     protected static  final   String  JAVA_EXCEPTION = "XJ001";
     protected static  final   String  ILLEGAL_UDT_CLASS = "42Z10";
@@ -105,6 +105,7 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
     protected static  final   String  ILLEGAL_STORAGE = "42821";
     protected static  final   String  BAD_CAST = "42846";
     protected static  final   String  DUPLICATE_CLAUSE = "42XAJ";
+    protected static  final   String  FORBIDDEN_DROP_TRIGGER = "X0Y24";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -444,6 +445,47 @@ public class GeneratedColumnsHelper extends BaseJDBCTestCase
             (
              grantorConnection,
              revokeStatement
+             );
+    }
+
+    /**
+     * Test that a restricted drop is blocked by an object.
+     */
+    protected void verifyRestrictedDrop
+        (
+         Connection conn,
+         String createDependentObject,
+         String dropDependentObject,
+         String createStatement,
+         String dropStatement,
+         String badDropState
+         ) throws Exception
+    {
+        goodStatement
+            (
+             conn,
+             createStatement
+             );
+        goodStatement
+            (
+             conn,
+             createDependentObject
+             );
+        expectExecutionError
+            (
+             conn,
+             badDropState,
+             dropStatement
+             );
+        goodStatement
+            (
+             conn,
+             dropDependentObject
+             );
+        goodStatement
+            (
+             conn,
+             dropStatement
              );
     }
 

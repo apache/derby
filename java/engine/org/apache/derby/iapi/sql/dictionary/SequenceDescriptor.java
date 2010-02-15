@@ -124,7 +124,7 @@ public class SequenceDescriptor extends TupleDescriptor
     }
 
     /**
-     * Drop this sequence descriptor
+     * Drop this sequence descriptor. Only restricted drops allowed right now.
      *
      * @throws StandardException Could not be dropped.
      */

@@ -258,7 +258,7 @@ public class SequencePermsTest extends GeneratedColumnsHelper
         // view
         createStatement = "create view v_01( a, b ) as select c, next value for ruth.seq_02 from t_01\n";
         dropStatement = "drop view v_01\n";
-        badRevokeSQLState = VIEW_DEPENDS_ON_PRIVILEGE;
+        badRevokeSQLState = VIEW_DEPENDENCY;
         verifyRevokePrivilege
             (
              ruthConnection,
@@ -322,7 +322,7 @@ public class SequencePermsTest extends GeneratedColumnsHelper
         expectExecutionError( dboConnection, NON_EMPTY_SCHEMA, "drop schema irma restrict\n" );
 
         goodStatement
-            (irmaConnection, "drop sequence seq_01\n" );
+            (irmaConnection, "drop sequence seq_01 restrict\n" );
        goodStatement
             ( dboConnection, "drop schema irma restrict\n" );
     }

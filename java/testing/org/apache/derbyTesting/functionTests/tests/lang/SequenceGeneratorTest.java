@@ -533,7 +533,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         }
 
         goodStatement( conn, "values( next value for seq_07 )\n" );
-        goodStatement( conn, "drop sequence seq_07\n" );
+        goodStatement( conn, "drop sequence seq_07 restrict\n" );
         
         expectCompilationError( OBJECT_DOES_NOT_EXIST, "values ( next value for seq_07 )\n" );
     }

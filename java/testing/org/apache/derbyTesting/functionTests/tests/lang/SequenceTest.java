@@ -79,7 +79,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
     public void test_02_DropSequence() throws SQLException {
         Statement s = createStatement();
         s.executeUpdate("CREATE SEQUENCE mySeq1");
-        s.executeUpdate("DROP SEQUENCE mySeq1");
+        s.executeUpdate("DROP SEQUENCE mySeq1 restrict");
     }
 
     public void test_03_DuplicateCreationFailure() throws SQLException {
@@ -91,7 +91,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
         } catch (SQLException sqle) {
             assertSQLState("X0Y68", sqle);
         }finally{
-            s.executeUpdate("DROP SEQUENCE mySeq1"); // Drop the one created.
+            s.executeUpdate("DROP SEQUENCE mySeq1 restrict"); // Drop the one created.
         }
     }
 
@@ -103,7 +103,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
 
         // should implicitly create schema ALPHA
         stmt.executeUpdate("CREATE SEQUENCE alpha_seq");
-        stmt.executeUpdate("DROP SEQUENCE alpha_seq");
+        stmt.executeUpdate("DROP SEQUENCE alpha_seq restrict");
         stmt.close();
         alphaCon.close();
         adminCon.close();
@@ -117,7 +117,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
 
         // should implicitly create schema ALPHA
         stmt.executeUpdate("CREATE SEQUENCE alpha.alpha_seq");
-        stmt.executeUpdate("DROP SEQUENCE alpha.alpha_seq");
+        stmt.executeUpdate("DROP SEQUENCE alpha.alpha_seq restrict");
         stmt.close();
         alphaCon.close();
     }
@@ -128,7 +128,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
 
         // should implicitly create schema ALPHA
         stmt.executeUpdate("CREATE SEQUENCE alpha.alpha_seq");
-        stmt.executeUpdate("DROP SEQUENCE alpha.alpha_seq");
+        stmt.executeUpdate("DROP SEQUENCE alpha.alpha_seq restrict");
         stmt.close();
         alphaCon.close();
     }
@@ -139,7 +139,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
 
         // should implicitly create schema ALPHA
         stmt.executeUpdate("CREATE SEQUENCE alpha.alpha_seq");
-        stmt.executeUpdate("DROP SEQUENCE alpha_seq");
+        stmt.executeUpdate("DROP SEQUENCE alpha_seq restrict");
         stmt.close();
         alphaCon.close();
     }
@@ -158,10 +158,10 @@ public class SequenceTest extends GeneratedColumnsHelper {
         Statement stmtBeta = betaCon.createStatement();
 
         // should implicitly create schema ALPHA
-        assertStatementError("42507", stmtBeta, "DROP SEQUENCE alpha.alpha_seq");
+        assertStatementError("42507", stmtBeta, "DROP SEQUENCE alpha.alpha_seq restrict");
 
         // Cleanup:
-        stmtAlpha.executeUpdate("DROP SEQUENCE alpha_seq");
+        stmtAlpha.executeUpdate("DROP SEQUENCE alpha_seq restrict");
         
         stmtAlpha.close();
         stmtBeta.close();
@@ -188,7 +188,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
         assertStatementError("42507", stmtBeta, "CREATE SEQUENCE alpha.alpha_seq3");
 
         // Cleanup:
-        stmtAlpha.executeUpdate("DROP SEQUENCE alpha_seq");
+        stmtAlpha.executeUpdate("DROP SEQUENCE alpha_seq restrict");
         
         stmtAlpha.close();
         stmtBeta.close();
@@ -468,6 +468,54 @@ public class SequenceTest extends GeneratedColumnsHelper {
 
         rs.close();
         ps.close();
+    }
+
+    /**
+     * Verify that restricted drops prevent objects from being orphaned.
+     */
+    public void test_13_restrictedDrop() throws Exception
+    {
+        Connection conn = openUserConnection(ALPHA);
+
+        goodStatement( conn, "create table t_13_a( a int )" );
+        goodStatement( conn, "create table t_13_b( a int )" );
+
+        String createStatement;
+        String dropStatement;
+        String createDependentObject;
+        String dropDependentObject;
+        String badDropState;
+
+        createStatement = "create sequence seq_13_a";
+        dropStatement = "drop sequence seq_13_a restrict";
+        createDependentObject = "create trigger trig_13 after insert on t_13_a for each row insert into t_13_b( a ) values ( next value for seq_13_a )\n";
+        dropDependentObject = "drop trigger trig_13";
+        badDropState = FORBIDDEN_DROP_TRIGGER;
+        verifyRestrictedDrop
+            (
+             conn,
+             createDependentObject,
+             dropDependentObject,
+             createStatement,
+             dropStatement,
+             badDropState
+             );
+        
+        createStatement = "create sequence seq_13_b";
+        dropStatement = "drop sequence seq_13_b restrict";
+        createDependentObject = "create view v_13( a, b ) as select a, next value for seq_13_b from t_13_a\n";
+        dropDependentObject = "drop view v_13";
+        badDropState = VIEW_DEPENDENCY;
+        verifyRestrictedDrop
+            (
+             conn,
+             createDependentObject,
+             dropDependentObject,
+             createStatement,
+             dropStatement,
+             badDropState
+             );
+
     }
 
 

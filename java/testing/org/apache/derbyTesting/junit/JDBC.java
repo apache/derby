@@ -389,7 +389,7 @@ public class JDBC {
 		{
             String objectName = rs.getString(mdColumn);
             String raw = dropLeadIn + JDBC.escape(schema, objectName);
-            if ( "TYPE".equals( dropType ) ) { raw = raw + " restrict "; }
+            if ( "TYPE".equals( dropType )  || "SEQUENCE".equals( dropType ) ) { raw = raw + " restrict "; }
             ddl.add( raw );
 		}
 		rs.close();

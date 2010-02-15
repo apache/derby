@@ -374,7 +374,7 @@ public class UDTPermsTest extends GeneratedColumnsHelper
         // can't revoke USAGE if a view depends on it
         createStatement = "create view v_alice_02( a ) as select cast (null as ruth.price_ruth_02_a ) from sys.systables\n";
         dropStatement = "drop view v_alice_02\n";
-        badRevokeSQLState = VIEW_DEPENDS_ON_PRIVILEGE;
+        badRevokeSQLState = VIEW_DEPENDENCY;
         verifyRevokePrivilege
             (
              ruthConnection,

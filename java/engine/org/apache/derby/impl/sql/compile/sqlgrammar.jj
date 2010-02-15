@@ -10254,9 +10254,9 @@ dropSequenceStatement() throws StandardException :
 }
 {
 	/*
-	 * DROP SEQUENCE <sequencename>
+	 * DROP SEQUENCE <sequencename> RESTRICT
 	 */
-	<SEQUENCE> sequenceName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH)
+	<SEQUENCE> sequenceName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) <RESTRICT>
 	{
 		checkVersion( DataDictionary.DD_VERSION_DERBY_10_6, "SEQUENCES");
 
