@@ -9692,17 +9692,18 @@ groupingColumnReference(GroupByList groupingCols) throws StandardException :
 {
 	columnExpression = additiveExpression(null, 0, false)
 	{
+		/* Aggregates not allowed in group by */
+		HasNodeVisitor visitor =
+			new HasNodeVisitor(AggregateNode.class);
+		columnExpression.accept(visitor);
+		if (visitor.hasNode())
+		{
+			throw StandardException.newException(SQLState.LANG_AGGREGATE_IN_GROUPBY_LIST);
+		}
 		if (columnExpression.isParameterNode()) 
 	    	{
 			throw StandardException.newException(SQLState.LANG_SYNTAX_ERROR, "?");
 	    	}
-		if (columnExpression instanceof AggregateNode)
-		{
-			AggregateNode agNode = (AggregateNode)columnExpression;
-			throw StandardException.newException(
-				SQLState.LANG_AGGREGATE_IN_GROUPBY_LIST, 
-				agNode.getAggregateName());
-		}        
 		groupingCols.addGroupByColumn(
 			(GroupByColumn) nodeFactory.getNode(
 							C_NodeTypes.GROUP_BY_COLUMN,
