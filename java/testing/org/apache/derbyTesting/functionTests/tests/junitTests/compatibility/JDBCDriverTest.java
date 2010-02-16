@@ -751,7 +751,6 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
      *
      *
      * @param ps the query used to obtain the results
-     * @param columnIndex the index of the column to check
      * @param types the type descriptions of the columns
      * @param rows the values expected to be returned
      * @param casts a list to which objects retrieved from the result rows
