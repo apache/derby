@@ -341,7 +341,7 @@ public class SQLClob
      *
      * @return A descriptor for the stream, which includes a reference to the
      *      stream itself. If the value cannot be represented as a stream,
-     *      {@code null} is returned instead of a decsriptor.
+     *      {@code null} is returned instead of a descriptor.
      * @throws StandardException if obtaining the descriptor fails
      */
     public CharacterStreamDescriptor getStreamWithDescriptor()
