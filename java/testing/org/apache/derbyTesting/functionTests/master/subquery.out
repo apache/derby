@@ -1748,4 +1748,45 @@ ij> select * from t1 where exists (select * from (values null) as t2);
 ERROR 42X07: Null is only allowed in a VALUES clause within an INSERT statement.
 ij> drop table t1;
 0 rows inserted/updated/deleted
+ij> -- DERBY-4549: NPE in JBitSet
+CREATE TABLE ABC (ID INT);
+0 rows inserted/updated/deleted
+ij> CREATE TABLE DEF (ID INT);
+0 rows inserted/updated/deleted
+ij> -- compilation of the statement used to fail with NPE
+PREPARE PS AS 'SELECT * FROM ABC t1
+WHERE (SELECT DISTINCT t2.ID FROM DEF t2) IN (SELECT t3.ID FROM DEF t3)';
+ij> -- empty tables, empty result
+EXECUTE PS;
+ID         
+-----------
+ij> -- now, test with data in the tables
+INSERT INTO ABC VALUES 1, 2;
+2 rows inserted/updated/deleted
+ij> EXECUTE PS;
+ID         
+-----------
+ij> INSERT INTO DEF VALUES 2;
+1 row inserted/updated/deleted
+ij> EXECUTE PS;
+ID         
+-----------
+1          
+2          
+ij> INSERT INTO DEF VALUES 2;
+1 row inserted/updated/deleted
+ij> EXECUTE PS;
+ID         
+-----------
+1          
+2          
+ij> INSERT INTO DEF VALUES 3;
+1 row inserted/updated/deleted
+ij> -- will fail because left operand of IN is no longer scalar
+EXECUTE PS;
+ERROR 21000: Scalar subquery is only allowed to return a single row.
+ij> DROP TABLE ABC;
+0 rows inserted/updated/deleted
+ij> DROP TABLE DEF;
+0 rows inserted/updated/deleted
 ij> 

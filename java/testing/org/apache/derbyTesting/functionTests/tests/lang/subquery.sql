@@ -583,3 +583,24 @@ select * from (values null) as t2;
 select * from t1 where exists (select 1 from (values null) as t2);
 select * from t1 where exists (select * from (values null) as t2);
 drop table t1;
+
+-- DERBY-4549: NPE in JBitSet
+CREATE TABLE ABC (ID INT);
+CREATE TABLE DEF (ID INT);
+-- compilation of the statement used to fail with NPE
+PREPARE PS AS 'SELECT * FROM ABC t1
+WHERE (SELECT DISTINCT t2.ID FROM DEF t2) IN (SELECT t3.ID FROM DEF t3)';
+-- empty tables, empty result
+EXECUTE PS;
+-- now, test with data in the tables
+INSERT INTO ABC VALUES 1, 2;
+EXECUTE PS;
+INSERT INTO DEF VALUES 2;
+EXECUTE PS;
+INSERT INTO DEF VALUES 2;
+EXECUTE PS;
+INSERT INTO DEF VALUES 3;
+-- will fail because left operand of IN is no longer scalar
+EXECUTE PS;
+DROP TABLE ABC;
+DROP TABLE DEF;
