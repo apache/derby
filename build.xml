@@ -21,6 +21,7 @@
 <!-- Set Properties -->
   <!-- User settings -->
   <property file="${user.home}/ant.properties"/>
+  <property file="ant.properties"/>
   <!-- Set property lib dir -->
   <property name="properties.dir" value="tools/ant/properties"/>
   <!-- Significant dirs -->
