@@ -876,9 +876,12 @@ public class NetConnectionReply extends Reply
         checkRequiredObjects(svrcodReceived);
 
         netAgent_.setSvrcod(svrcod);
+        NetSqlca netSqlca = parseSQLCARD(null); 
+        netAgent_.netConnection_.completeSqlca(netSqlca); 
         agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
             new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
-            msgutil_.getTextMessage(MessageId.CONN_DRDA_CMDCHKRM)));
+            msgutil_.getTextMessage(MessageId.CONN_DRDA_CMDCHKRM),
+            new Exception(netSqlca.getSqlErrmc()))); 
     }
 
 
