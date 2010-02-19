@@ -179,6 +179,13 @@ ij> SHOW SYNONYMS IN USER1;
 TABLE_SCHEM         |TABLE_NAME                    |REMARKS             
 ------------------------------------------------------------------------
 USER1               |T3                            |                    
+ij> --
+-- DERBY-4553
+--
+GET SCROLL INSENSITIVE CURSOR CURS AS 'SELECT * FROM APP.T1';
+ij> GETCURRENTROWNUMBER CURS;
+0
+ij> CLOSE CURS;
 ij> -- DERBY-2019: ensure that tables with mixed-case names can be described:
 SET SCHEMA APP;
 0 rows inserted/updated/deleted

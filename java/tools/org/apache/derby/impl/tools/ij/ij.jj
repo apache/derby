@@ -2428,8 +2428,7 @@ throws SQLException
 		rs = (ResultSet) s.getCursor(c);
 		JDBCDisplayUtil.checkNotNull(rs,"cursor");
 
-	LocalizedResource.OutputWriter().println(utilInstance.getCurrentRowNumber(rs));
-		return null;
+		return new ijVectorResult(utilInstance.getCurrentRowNumber(rs), null);
 	}
 }
 

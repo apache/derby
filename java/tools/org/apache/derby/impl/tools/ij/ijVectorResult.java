@@ -25,7 +25,7 @@ import java.util.Vector;
 import java.sql.SQLWarning;
 
 /**
- * This is an impl for a simple Vector of strings.
+ * This is an impl for a simple Vector of objects.
  *
  */
 class ijVectorResult extends ijResultImpl {
@@ -37,6 +37,22 @@ class ijVectorResult extends ijResultImpl {
 		vec = v;
 		warns = w;
 	}
+
+	/**
+	 * Initialize a new vector containing only one object.
+	 */
+	ijVectorResult(Object value, SQLWarning w) {
+		this(new Vector(1), w);
+		vec.add(value);
+	}
+
+	/**
+	 * Initialize a new vector containing only one integer value.
+	 */
+	ijVectorResult(int value, SQLWarning w) {
+		this(new Integer(value), w);
+	}
+
 
 	public boolean isVector() { return true; }
 

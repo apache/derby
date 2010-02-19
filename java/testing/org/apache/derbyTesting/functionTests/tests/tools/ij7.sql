@@ -59,6 +59,13 @@ SHOW FUNCTIONS IN APP;
 SHOW FUNCTIONS;
 SHOW SYNONYMS IN USER1;
 
+--
+-- DERBY-4553
+--
+GET SCROLL INSENSITIVE CURSOR CURS AS 'SELECT * FROM APP.T1';
+GETCURRENTROWNUMBER CURS;
+CLOSE CURS;
+
 -- DERBY-2019: ensure that tables with mixed-case names can be described:
 SET SCHEMA APP;
 create table "CamelCaseTable" (c1 int, c2 varchar(20));
