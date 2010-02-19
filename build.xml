@@ -507,12 +507,11 @@
 
   <!-- Run the MessageBundleTest -->
   <target name="runmessagecheck">
-    <taskdef 
-      name="runMessageBundleTest"
-      classname="org.apache.derbyBuild.MessageBundleTest"
-      classpath="${out.dir}"
-    />
-    <runMessageBundleTest/>
+    <java   fork="true" 
+       classname="org.apache.derbyBuild.MessageBundleTest"
+     failonerror="true"
+       classpath="${out.dir}"
+     />
   </target>
 
 <!-- ==================================================================== -->

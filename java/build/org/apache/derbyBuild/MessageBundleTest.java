@@ -30,8 +30,7 @@ import java.util.ResourceBundle;
 import java.util.Locale;
 import java.util.Iterator;
 
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
+import java.lang.Exception;
 
 
 /**
@@ -42,7 +41,7 @@ import org.apache.tools.ant.Task;
  * that don't have matching ids in the SQLState and MessageId files.   The
  * first is a bug, the second is something to be aware of.
  */
-public class MessageBundleTest extends Task {
+public class MessageBundleTest {
 
     static boolean failbuild = false;
 
@@ -54,7 +53,7 @@ public class MessageBundleTest extends Task {
     public MessageBundleTest()
     {}
     
-    public void execute() throws BuildException
+    public static void main(String [] args) throws Exception
     {
         MessageBundleTest t = new MessageBundleTest();
         try {
@@ -66,7 +65,7 @@ public class MessageBundleTest extends Task {
             e.printStackTrace();
         }
         if (failbuild) 
-            throw new BuildException("Message check failed. \n" +
+            throw new Exception("Message check failed. \n" +
                 "See error in build output or call ant runmessagecheck.");
     }    
     
