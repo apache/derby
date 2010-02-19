@@ -40,20 +40,27 @@ Short description of the required steps:
  b) Specify required information for one or all of the following sub-steps.
     To successfully generate and deploy release artifacts, all of these
     must be specified:
-      - The Derby release version, which must be specified in all POMs.
-        Compile and execute the Java program SetDerbyVersion, i.e.:
-        javac SetDerbyVersion && java -cp . SetDerbyVersion
+
+      - The Derby release version.
+        The version must be specified in all POMs. Compile and execute the
+        Java program SetDerbyVersion, found in the 'maven2' directory, i.e.:
+            javac SetDerbyVersion && java -cp . SetDerbyVersion
+
         Alternatively, use search and replace (i.e. Perl or sed) - make sure
-        you don't replace version tags that aren't supposed to modified.
+        you don't replace version tags that aren't supposed to be modified.
         Make sure you diff the POMs to verify the changes.
         Note that the Java program performs some extra sanity checks.
-      - Passphrase for your GPG signing key. Required for step (c) and (d).
-        See the top-level POM for details, brief instructions in (c).
-      - User credentials for deployment. Required for step (d).
-        Several options for how to configure Maven seem to exist, but only
-        one of them has been reported to work for most scenarios. If your
-        system doesn't have executables called 'ssh' and 'scp', then please
-        figure out how to successfully specify alternative executables...
+
+      - Passphrase for your GPG signing key.
+        Required for step (c) and (d). See the top-level POM for details, brief
+        instructions in (c).
+
+      - User credentials for deployment.
+        Required for step (d).  Several options for how to configure Maven seem
+        to exist, but only one of them has been reported to work for most
+        scenarios. If your system doesn't have executables called 'ssh' and
+        'scp', then please figure out how to successfully specify alternative
+        executables...
 
         The local username will be used when accessing the Apache server using
         the external SSH commands. If your local username isn't the same as
@@ -69,11 +76,11 @@ Short description of the required steps:
         possible, but attempts to do so have failed so far.
 
  c) 'mvn clean install'
-    Generates the artifacts, signatures for the artifacts using GnuPG and
-    installs the artifacts in the local repository.
+    Generates the artifacts, uses GnuPG to generate signatures for the
+    artifacts, and installs the artifacts in the local repository.
     You are required to provide your private key and the passphrase to GnuPG.
     Using a passphrase agent is recommended, but you can also specify it on
-    the command line when invoking maven with -Dgpg.passphrase=PASSPHRASE.
+    the command line when invoking Maven with -Dgpg.passphrase=PASSPHRASE.
 
     WARNING: Do not specify your passphrase in the POM that is deployed on
              the Maven repositories!
@@ -83,8 +90,8 @@ Short description of the required steps:
     The clean target is included to avoid unintentionally installing/deploying
     artifacts not supposed to be deployed.
     If you just want to build the artifacts, use 'mvn package' or 'mvn verify'.
-    The former will generate the artifact jar, the latter will additionally
-    generate/include the POM to be deployed and the signatures.
+    The former will generate the artifact jars, the latter will additionally
+    generate/include the POMs to be deployed and the signatures.
 
     NOTE: Do not run 'mvn package|verify install', that is to combine either
           package or verify with install, as this causes the
@@ -106,7 +113,7 @@ Short description of the required steps:
     ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ -user \$USER -exec chmod g+w {} \;"
 
     To verify the group ownership and permissions, run the two following SSH
-    commands. If everything is set correctly, the should return no file names.
+    commands. If everything is set correctly, they should return no file names.
 
     ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ \! -group apcvs"
     ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ \! -perm -g+w"
