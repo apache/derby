@@ -2058,12 +2058,14 @@ public class TableFunctionTest extends BaseJDBCTestCase
                     break;
 
                 case Types.BLOB:
-                    actualValue = squeezeString(  rs.getBlob( column ) );
-                    actualValueByName = squeezeString(  rs.getBlob( columnName ) );
+                    Blob blob = rs.getBlob(column);
+                    actualValue = squeezeString(blob);
+                    actualValueByName = squeezeString(blob);
                     break;
                 case Types.CLOB:
-                    actualValue = squeezeString(  rs.getClob( column ) );
-                    actualValueByName = squeezeString(  rs.getClob( columnName ) );
+                    Clob clob = rs.getClob(column);
+                    actualValue = squeezeString(clob);
+                    actualValueByName = squeezeString(clob);
                     break;
 
                 case Types.BINARY:

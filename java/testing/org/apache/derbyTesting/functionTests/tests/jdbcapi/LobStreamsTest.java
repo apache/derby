@@ -27,14 +27,15 @@ import java.io.Writer;
 
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Decorator;
@@ -87,6 +88,127 @@ public class LobStreamsTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Originally tested that the usage pattern {@code rs.getBlob().method()}
+     * didn't cause the underlying source stream to be closed too early. This
+     * behavior was forbidden, the test now checks that an exception is thrown.
+     * <p>
+     * Test description: Select from a BLOB column, access the BLOB using the
+     * pattern rs.getBlob(1).blobMethod() (note that we do not keep a reference
+     * to the Blob-object), provoke/invoke GC and finalization, and finally try
+     * to access the same BLOB again (through a different/another call to
+     * rs.getBlob(1)).
+     * <p>
+     * Note that the BLOB must be of a certain size (i.e. multiple pages), such
+     * that it is stored/accessed as a stream in store.
+     * <p>
+     * See DERBY-3844 and DERBY-4440.
+     *
+     * @throws Exception if something goes wrong
+     */
+    public void testGettingBlobTwice()
+            throws Exception {
+        setAutoCommit(false);
+        // We need a Blob represented as a stream in store.
+        int length = 71*1024+7;
+        PreparedStatement ps =
+                prepareStatement("insert into testBlobX1(a,b) values (?,?)");
+        ps.setInt(1, 2);
+        ps.setBinaryStream(2, new LoopingAlphabetStream(length), length);
+        ps.executeUpdate();
+        ps.close();
+
+        // Get a result set with the Blob.
+        ps = prepareStatement("select b from testBlobX1 where a = ?");
+        ps.setInt(1, 2);
+        ResultSet rs = ps.executeQuery();
+        assertTrue(rs.next());
+        Blob b = rs.getBlob(1);
+        try {
+            // Get the length, but don't keep a reference to the Blob.
+            assertEquals(length, rs.getBlob(1).length());
+            fail("Getting the Blob the second time should have failed");
+        } catch (SQLException sqle) {
+            assertSQLState("XCL18", sqle);
+        }
+
+        // Increase the likelyhood of getting the finalizer run.
+        // Create some junk to fill up the heap, hopefully not JIT'ed away...
+        int size = 10*1024; // 10 K
+        byte[] bytes = null;
+        for (int i=0; i < 50; i++) {
+            bytes = new byte[size *(i +1)];
+        }
+        // For good measure...
+        System.gc();
+        System.runFinalization();
+        try {
+            Thread.sleep(100L);
+        } catch (InterruptedException ie) {
+            // No need to reset the interrupted flag here in the test.
+        }
+
+        // This will fail if the finalizer caused the source stream to be
+        // closed and the source page to be unlatched.
+        InputStream is = b.getBinaryStream();
+        while (is.read() != -1) {
+            // Keep on reading...
+        }
+        assertNotNull(bytes);
+    }
+
+    /**
+     * Tests that accessing the same Clob multiple times on a row results in
+     * an exception being thrown.
+     *
+     * @throws Exception if something goes wrong
+     */
+    public void testGettingClobTwice()
+            throws SQLException {
+        // We need a few Clobs.
+        int length = 71*1024+7;
+        PreparedStatement ps =
+                prepareStatement("insert into testBlobX1(a,c) values (?,?)");
+        ps.setInt(1, 3);
+        ps.setCharacterStream(2, new LoopingAlphabetReader(length), length);
+        ps.executeUpdate();
+        ps.setInt(1, 4);
+        ps.setString(2, "short clob");
+        ps.executeUpdate();
+        ps.close();
+
+        // Get a result set with the Clobs.
+        final int clobCount = 2;
+        int count = 0;
+        ps = prepareStatement(
+                "select c from testBlobX1 where a >= ? and a <= ?");
+        ps.setInt(1, 3);
+        ps.setInt(2, 4);
+        ResultSet rs = ps.executeQuery();
+        assertTrue(rs.next());
+        do {
+            count++;
+            // First get a Clob.
+            Clob c = rs.getClob(1);
+            // Get a second Clob, which should fail.
+            try {
+                rs.getClob(1);
+                fail("Getting the Clob the second time should have failed");
+            } catch (SQLException sqle) {
+                assertSQLState("XCL18", sqle);
+            }
+            // Finally try to access the column as a stream.
+            try {
+                rs.getCharacterStream(1);
+                fail("Getting the Clob the third time should have failed");
+            } catch (SQLException sqle) {
+                assertSQLState("XCL18", sqle);
+            }
+        } while (rs.next());
+        rs.close();
+        assertEquals(clobCount, count);
+    }
+
+    /**
      * Tests the BlobOutputStream.write(byte  b[], int off, int len) method
      **/
     public void testBlobWrite3Param() throws Exception {
@@ -120,13 +242,14 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         rs3 = stmt3.executeQuery();
         assertTrue("FAIL -- blob not found", rs3.next());
 
-        long new_length = rs3.getBlob(1).length();
+        blob = rs3.getBlob(1);
+        long new_length = blob.length();
         assertEquals("FAIL -- wrong blob length;",
                 streamSize[0], new_length);
 
         // Check contents ...
         InputStream fStream = new LoopingAlphabetStream(streamSize[0]);
-        InputStream lStream = rs3.getBlob(1).getBinaryStream();
+        InputStream lStream = blob.getBinaryStream();
         assertTrue("FAIL - Blob and file contents do not match",
                 compareLob2File(fStream, lStream));
 
@@ -169,12 +292,13 @@ public class LobStreamsTest extends BaseJDBCTestCase {
 
         assertTrue("FAIL -- blob not found", rs3.next());
 
-        long new_length = rs3.getBlob(1).length();
+        blob = rs3.getBlob(1);
+        long new_length = blob.length();
         assertEquals("FAIL -- wrong blob length", streamSize[1], new_length);
 
         // Check contents ...
         InputStream fStream = new LoopingAlphabetStream(streamSize[1]);
-        InputStream lStream = rs3.getBlob(1).getBinaryStream();
+        InputStream lStream = blob.getBinaryStream();
         assertTrue("FAIL - Blob and file contents do not match",
                 compareLob2File(fStream, lStream));
 
@@ -216,12 +340,13 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         rs3 = stmt3.executeQuery();
         assertTrue("FAIL -- clob not found", rs3.next());
 
-        long new_length = rs3.getClob(1).length();
+        clob = rs3.getClob(1);
+        long new_length = clob.length();
         assertEquals("FAIL -- wrong clob length", streamSize[1], new_length);
 
         // Check contents ...
         InputStream fStream = new LoopingAlphabetStream(streamSize[1]);
-        InputStream lStream = rs3.getClob(1).getAsciiStream();
+        InputStream lStream = clob.getAsciiStream();
         assertTrue("FAIL - Clob and file contents do not match", compareLob2File(fStream, lStream));
         fStream.close();
         lStream.close();
@@ -264,12 +389,13 @@ public class LobStreamsTest extends BaseJDBCTestCase {
 
         assertTrue("FAIL -- clob not found", rs3.next());
 
-        long new_length = rs3.getClob(1).length();
+        clob = rs3.getClob(1);
+        long new_length = clob.length();
         assertEquals("FAIL -- wrong clob length",
                 streamSize[0], new_length);
         // Check contents ...
         InputStream fStream = new LoopingAlphabetStream(streamSize[0]);
-        InputStream lStream = rs3.getClob(1).getAsciiStream();
+        InputStream lStream = clob.getAsciiStream();
         assertTrue("FAIL - Clob and file contents do not match",
                 compareLob2File(fStream, lStream));
 
@@ -306,12 +432,13 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         rs3 = stmt3.executeQuery();
 
         assertTrue("FAIL -- clob not found", rs3.next());
-        long new_length = rs3.getClob(1).length();
+        clob = rs3.getClob(1);
+        long new_length = clob.length();
         assertEquals("FAIL -- wrong clob length",
                 testdata.length, new_length);
 
         // Check contents ...
-        Reader lStream = rs3.getClob(1).getCharacterStream();
+        Reader lStream = clob.getCharacterStream();
         assertTrue("FAIL - Clob and buffer contents do not match",
                 compareClobReader2CharArray(testdata, lStream));
 
@@ -344,11 +471,13 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         rs3.close();
         rs3 = stmt3.executeQuery();
         assertTrue("FAIL -- clob not found", rs3.next());
-        long new_length = rs3.getClob(1).length();
+
+        clob = rs3.getClob(1);
+        long new_length = clob.length();
         assertEquals("FAIL -- wrong clob length", unicodeTestString.length(), new_length);
 
         // Check contents ...
-        Reader lStream = rs3.getClob(1).getCharacterStream();
+        Reader lStream = clob.getCharacterStream();
         assertTrue("FAIL - Clob and buffer contents do not match",
                 compareClobReader2CharArray(
                     unicodeTestString.toCharArray(),
@@ -383,11 +512,13 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         rs3.close();
         rs3 = stmt3.executeQuery();
         assertTrue("FAIL -- clob not found", rs3.next());
-        long new_length = rs3.getClob(1).length();
+
+        clob = rs3.getClob(1);
+        long new_length = clob.length();
         assertEquals("FAIL -- wrong clob length", unicodeTestString.length(), new_length);
 
         // Check contents ...
-        Reader lStream = rs3.getClob(1).getCharacterStream();
+        Reader lStream = clob.getCharacterStream();
         assertTrue("FAIL - Clob and buffer contents do not match",
                 compareClobReader2CharArray(
                     unicodeTestString.toCharArray(),
@@ -425,11 +556,12 @@ public class LobStreamsTest extends BaseJDBCTestCase {
         rs3.close();
         rs3 = stmt3.executeQuery();
         assertTrue("FAIL -- clob not found", rs3.next());
-        long new_length = rs3.getClob(1).length();
-        Clob fish = rs3.getClob(1);
+
+        clob = rs3.getClob(1);
+        long new_length = clob.length();
         assertEquals("FAIL -- wrong clob length", 1, new_length);
         // Check contents ...
-        Reader lStream = rs3.getClob(1).getCharacterStream();
+        Reader lStream = clob.getCharacterStream();
         char clobchar = (char) lStream.read();
         assertEquals("FAIL - fetched Clob and original contents do " +
                 "not match", testchar, clobchar);

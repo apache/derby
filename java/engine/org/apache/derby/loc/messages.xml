@@ -3875,7 +3875,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XCL18.S</name>
-                <text>Stream of column value in result cannot be retrieved twice</text>
+                <text>Stream or LOB value cannot be retrieved more than once</text>
             </msg>
 
             <msg>

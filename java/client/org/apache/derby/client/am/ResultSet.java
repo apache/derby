@@ -25,9 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.SQLException;
+import java.util.Arrays;
 import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 public abstract class ResultSet implements java.sql.ResultSet,
@@ -204,8 +204,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
     // Keep maxRows in the ResultSet, so that changes to maxRow in the statement
     // do not affect the resultSet after it has been created
     private int maxRows_;
-    
-    private boolean[] streamUsedFlags_;
+
+    /**
+     * Indicates which columns have been fetched as a stream or as a LOB for a
+     * row. Created on-demand by a getXXXStream or a get[BC]lob call. Note that
+     * we only track columns that can be accessed as a stream or a LOB object.
+     */
+    private boolean[] columnUsedFlags_;
     
     //---------------------constructors/finalizer---------------------------------
 
@@ -293,8 +298,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         // discard all previous updates when moving the cursor
         resetUpdatedColumns();
-	
-	unuseStreams();
+
+        unuseStreamsAndLOBs();
 
         // for TYPE_FORWARD_ONLY ResultSet, just call cursor.next()
         if (resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) {
@@ -1119,7 +1124,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
 
             checkGetterPreconditions(column);
-        useStream(column);
+            useStreamOrLOB(column);
 
             java.io.InputStream result = null;
             if (wasNonNullSensitiveUpdate(column)) {
@@ -1150,7 +1155,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
 
             checkGetterPreconditions(column);
-        useStream(column);
+            useStreamOrLOB(column);
 
             java.io.InputStream result = null;
             if (wasNonNullSensitiveUpdate(column)) {
@@ -1201,7 +1206,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
 
             checkGetterPreconditions(column);
-        useStream(column);
+            useStreamOrLOB(column);
 
             java.io.Reader result = null;
             if (wasNonNullSensitiveUpdate(column)) {
@@ -1232,6 +1237,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "getBlob", column);
             }
             checkGetterPreconditions(column);
+            useStreamOrLOB(column);
             java.sql.Blob result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (java.sql.Blob) agent_.crossConverters_.setObject(java.sql.Types.BLOB,
@@ -1261,6 +1267,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "getClob", column);
             }
             checkGetterPreconditions(column);
+            useStreamOrLOB(column);
             java.sql.Clob result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (java.sql.Clob) agent_.crossConverters_.setObject(java.sql.Types.CLOB,
@@ -2096,8 +2103,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     private void beforeFirstX() throws SqlException {
         
-	resetRowsetFlags();
-	unuseStreams();
+        resetRowsetFlags();
+        unuseStreamsAndLOBs();
 
         moveToCurrentRowX();
 
@@ -2137,7 +2144,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     private void afterLastX() throws SqlException {
         resetRowsetFlags();
-    unuseStreams();
+        unuseStreamsAndLOBs();
     
         moveToCurrentRowX();
 
@@ -2189,7 +2196,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         resetUpdatedColumns();
 
         resetRowsetFlags();
-    unuseStreams();
+        unuseStreamsAndLOBs();
 
         // if first row is not in the current rowset, fetch the first rowset from the server.
         // rowIsInCurrentRowset with orientation first will always return false for dynamic cursors.
@@ -2244,7 +2251,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         resetUpdatedColumns();
 
         resetRowsetFlags();
-	unuseStreams();
+        unuseStreamsAndLOBs();
 
         // only get the rowCount for static cursors.
         if (rowCountIsUnknown()) {
@@ -2361,7 +2368,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         resetUpdatedColumns();
 
         resetRowsetFlags();
-	unuseStreams();
+        unuseStreamsAndLOBs();
 
         if (maxRows_ > 0) {
             // if "row" is positive and > maxRows, fetch afterLast
@@ -2444,8 +2451,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         // discard all previous updates when moving the cursor.
         resetUpdatedColumns();
-	
-	unuseStreams();
+        unuseStreamsAndLOBs();
 
         // If the resultset is empty, relative(n) is a null operation
         if (resultSetContainsNoRows()) {
@@ -2571,8 +2577,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         // discard all previous updates when moving the cursor.
         resetUpdatedColumns();
-	
-	unuseStreams();
+        unuseStreamsAndLOBs();
 
         isBeforeFirst_ = false;
         isFirst_ = false;
@@ -3691,9 +3696,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
             } catch ( SQLException sqle ) {
                 throw new SqlException(sqle);
             }
-	    
-    	    unuseStreams();
-	    
+
+            unuseStreamsAndLOBs();
+
         }
     }
 
@@ -5486,33 +5491,34 @@ public abstract class ResultSet implements java.sql.ResultSet,
 	}
     
     
-    void useStream(int columnIndex) throws SqlException {
-	
-	if(streamUsedFlags_[columnIndex - 1]){
-	    throw new SqlException(agent_.logWriter_,
-            new ClientMessageId(SQLState.LANG_STREAM_RETRIEVED_ALREADY));
-	}
+    /**
+     * Mark a column as already having a stream or LOB accessed from it.
+     * If the column was already accessed, throw an exception.
+     *
+     * @param columnIndex 1-based column index
+     * @throws SQLException if the column has already been accessed
+     */
+    void useStreamOrLOB(int columnIndex) throws SqlException {
+        if (columnUsedFlags_ == null) {
+            columnUsedFlags_ = new boolean[resultSetMetaData_.columns_];
+        }
+        if (columnUsedFlags_[columnIndex - 1]) {
+            throw new SqlException(agent_.logWriter_,
+                new ClientMessageId(SQLState.LANG_STREAM_RETRIEVED_ALREADY));
+        }
 
-	streamUsedFlags_[columnIndex - 1] = true;
-
+        columnUsedFlags_[columnIndex - 1] = true;
     }
 
 
-    private void unuseStreams(){
-	
-	if(streamUsedFlags_ == null){
-	    streamUsedFlags_ = new boolean[ resultSetMetaData_.columns_ ];
-	    return;
-	}
-
-	for(int i = 0;
-	    i < streamUsedFlags_.length;
-	    i ++){
-	    
-	    streamUsedFlags_[i] = false;
-	    
-	}
-	
+    /**
+     * Clears the flags for used columns, typically invoked when changing the
+     * result set position.
+     */
+    private void unuseStreamsAndLOBs() {
+        if(columnUsedFlags_ != null){
+            Arrays.fill(columnUsedFlags_, false);
+        }
     }
 
     private SQLException jdbc3MethodNotSupported()

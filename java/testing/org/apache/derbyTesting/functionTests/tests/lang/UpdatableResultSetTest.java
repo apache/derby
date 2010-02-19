@@ -4518,11 +4518,12 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                             rs1.getBytes(updateXXXName)));
         } else if (sqlType == 13 && JDBC.vmSupportsJDBC3()) {
             // verify update made to CLOB column with updateXXX methods
-            int len = (int)rs.getClob(sqlType).length();
+            Clob clob = rs.getClob(sqlType);
+            int len = (int)clob.length();
             assertEquals("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
                     " using " + allUpdateXXXNames[updateXXXName - 1],
                     rs1.getString(updateXXXName).trim(), 
-                    rs.getClob(sqlType).getSubString(1, len).trim());
+                    clob.getSubString(1, len).trim());
         } else if (sqlType == 14) {
             // verify update made to DATE column with updateXXX methods
             assertEquals("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
@@ -4540,10 +4541,11 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     rs1.getTimestamp(updateXXXName), rs.getTimestamp(sqlType));
         } else if (sqlType == 17 && JDBC.vmSupportsJDBC3()) {
             // verify update made to BLOB column with updateXXX methods
-            long len = rs.getBlob(sqlType).length();
+            Blob blob = rs.getBlob(sqlType);
+            long len = blob.length();
             assertTrue("FAIL - wrong value on " + allSQLTypes[sqlType - 1] + 
                     " using " + allUpdateXXXNames[updateXXXName - 1],
-                    Arrays.equals(rs.getBlob(sqlType).getBytes(1, (int)len), 
+                    Arrays.equals(blob.getBytes(1, (int)len),
                     rs1.getBytes(updateXXXName)));
         }
         
