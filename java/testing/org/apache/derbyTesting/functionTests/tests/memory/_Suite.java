@@ -35,6 +35,15 @@ public class _Suite extends BaseJDBCTestCase {
 
     public static Test suite() throws Exception{
         TestSuite suite = new TestSuite("Memory Suite");
+        //Disable following TriggerTests until DERBY-1482 has been fixed.
+        //Without that fix, the test will run into OOM errors for all
+        //the test fixtures. This test is written for triggers defined
+        //on table with LOB columns. No matter whether the LoB columns
+        //are touched in the trigger action, it appears that Derby is
+        //streaming the before and after values of LOB columns. Once
+        //the streaming problem has been resolved, we should be able
+        //to uncomment the following test.
+        //suite.addTest(TriggerTests.suite());
         suite.addTest(BlobMemTest.suite());
         suite.addTest(ClobMemTest.suite());
         suite.addTest(MultiByteClobTest.suite());
