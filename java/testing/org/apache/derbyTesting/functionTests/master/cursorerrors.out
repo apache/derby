@@ -114,7 +114,7 @@ get cursor c12 as 'select * from t1 a, t1 b where a.c1 <> 1 and a.c1/a.c1 = 1';
 ERROR 22012: Attempt to divide by zero.
 ij> -- next should fail, since no cursor
 next c12;
-IJ ERROR: Unable to establish cursor
+IJ ERROR: Unable to establish cursor C12@CONNECTION0
 ij> -- join #2, error on 2nd row on left
 get cursor c13 as 'select * from t1 a, t1 b where b.c1 = 1 and a.c1/a.c1 = 1';
 ij> -- (1, 1)

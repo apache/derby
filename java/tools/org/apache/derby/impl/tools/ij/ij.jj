@@ -308,6 +308,45 @@ class ij {
 	void haveConnection() {
 		JDBCDisplayUtil.checkNotNull(theConnection, "connection");
 	}
+	
+	/**
+		Find a session by its name. Throws an exception if the session does 
+		not exists.
+	*/
+	Session findSession(String name) {
+		Session session = currentConnEnv.getSession(name);
+		
+		if (session == null)
+			throw ijException.noSuchConnection(name);
+		
+		return session;
+	}
+	
+	/**
+		Find a prepared statement. Throws an exception if the session does 
+		not exists or the prepared statement can't be found.
+	*/
+	PreparedStatement findPreparedStatement(QualifiedIdentifier qi) {
+		Session session = findSession(qi.getSessionName());
+		PreparedStatement ps = session.getPreparedStatement(qi.getLocalName());
+		
+		JDBCDisplayUtil.checkNotNull(ps, "prepared statement " + qi);
+		
+		return ps;
+	}
+	
+	/**
+		Find a cursor. Throws an exception if the session does not exits or
+		it deosn't have the correspondig cursor.
+	*/
+	ResultSet findCursor(QualifiedIdentifier qi) {
+		Session 	session	= findSession(qi.getSessionName());
+		ResultSet	c		= session.getCursor(qi.getLocalName());
+		
+		JDBCDisplayUtil.checkNotNull(c, "cursor " + qi);
+		
+		return c;
+	}
 
 	/**
 		We do not reuse statement objects at all, because
@@ -405,10 +444,11 @@ class ij {
 		a select only waits for the execute to complete; the
 		logic to step through the result set is in the caller.
 	 **/
-	ijResult executeAsync(String stmt, String name) {
-		AsyncStatement as = new AsyncStatement(theConnection, stmt);
+	ijResult executeAsync(String stmt, QualifiedIdentifier qi) {
+		Session sn = findSession(qi.getSessionName());
+		AsyncStatement as = new AsyncStatement(sn.getConnection(), stmt);
 
-		currentConnEnv.getSession().addAsyncStatement(name,as);
+		sn.addAsyncStatement(qi.getLocalName(),as);
 
 		as.start();
 
@@ -1252,7 +1292,8 @@ TOKEN [IGNORE_CASE] :
 
 TOKEN :
 {	/* Operators and punctuation -- to avoid lexical errors for SQL-J stuff, mostly */
-	<COMMA: ",">
+	<AT: "@">
+|	<COMMA: ",">
 |   <LEFT_PAREN: "(">
 |   <RIGHT_PAREN: ")">
 |   <DOUBLE_QUOTE: "\"">
@@ -2136,18 +2177,19 @@ throws SQLException
 :
 {
 	Token t;
-	String i;
+	QualifiedIdentifier qi;
 	PreparedStatement ps;
 	String sVal;
 }
 {
-	<PREPARE> i=identifier() <AS> t=<STRING>
+	<PREPARE> qi=qualifiedIdentifier() <AS> t=<STRING>
 	{
-		haveConnection();
+		Session session = findSession(qi.getSessionName());
+
 		sVal = stringValue(t.image);
-		ps = theConnection.prepareStatement(sVal);
+		ps = session.getConnection().prepareStatement(sVal);
 		JDBCDisplayUtil.checkNotNull(ps,"prepared statement");
-		currentConnEnv.getSession().addPreparedStatement(i,ps);
+		session.addPreparedStatement(qi.getLocalName(),ps);
 
 		// all we want callers to see are the warnings.
 		SQLWarning w = ps.getWarnings();
@@ -2167,7 +2209,7 @@ throws SQLException
 	Token scrolling = null;
 	Token withtoken = null;
 	int holdType = theConnection.getHoldability();
-	String c;
+	QualifiedIdentifier qi;
 	Statement st = null;
 	String sVal;
 	ResultSet rs = null;
@@ -2175,19 +2217,21 @@ throws SQLException
 }
 {
 	<GET> [ scrolling = <SCROLL>  scrollType = scrollType()]
-	[ withtoken = <WITH> holdType = holdType()] <CURSOR> c=identifier() <AS> s=<STRING>
+		  [ withtoken = <WITH> holdType = holdType()] 
+	      <CURSOR> qi=qualifiedIdentifier() <AS> s=<STRING>
 	{
 		sVal = stringValue(s.image);
 		try {
+			Session sn = findSession(qi.getSessionName());
+			
 			st = theConnection.createStatement(
 				scrollType, ResultSet.CONCUR_READ_ONLY, holdType);
 			JDBCDisplayUtil.checkNotNull(st,"cursor");
-			st.setCursorName(c);
+			st.setCursorName(qi.getLocalName());
 			rs = st.executeQuery(sVal);
 			JDBCDisplayUtil.checkNotNull(rs,"cursor");
-			Session sn = currentConnEnv.getSession();
-			sn.addCursorStatement(c,st);
-			sn.addCursor(c,rs);
+			sn.addCursorStatement(qi.getLocalName(),st);
+			sn.addCursor(qi.getLocalName(),rs);
 		} catch (SQLException e) {
 			if (rs!=null) rs.close();
 			if (st!=null) st.close();
@@ -2248,18 +2292,13 @@ throws SQLException
 :
 {
 	int row;
-	String c;
-	ResultSet rs;
+	QualifiedIdentifier qi;
 }
 {
-	<ABSOLUTE> row = intLiteral() c=identifier()
+	<ABSOLUTE> row = intLiteral() qi=qualifiedIdentifier()
 	{
-		haveConnection();
 		// Verify that we have JDBC 2.0
-		Session s = currentConnEnv.getSession();
-		rs = (ResultSet) s.getCursor(c);
-		JDBCDisplayUtil.checkNotNull(rs,"cursor");
-
+		ResultSet rs = findCursor(qi);
 		return utilInstance.absolute(rs, row);
 	}
 }
@@ -2270,18 +2309,13 @@ throws SQLException
 :
 {
 	int row;
-	String c;
-	ResultSet rs;
+	QualifiedIdentifier qi;
 }
 {
-	<RELATIVE> row = intLiteral() c=identifier()
+	<RELATIVE> row = intLiteral() qi=qualifiedIdentifier()
 	{
-		haveConnection();
 		// Verify that we have JDBC 2.0
-		Session s = currentConnEnv.getSession();
-		rs = (ResultSet) s.getCursor(c);
-		JDBCDisplayUtil.checkNotNull(rs,"cursor");
-
+		ResultSet rs = findCursor(qi);
 		return utilInstance.relative(rs, row);
 	}
 }
@@ -2291,18 +2325,13 @@ BeforeFirstStatement()
 throws SQLException
 :
 {
-	String c;
-	ResultSet rs;
+	QualifiedIdentifier qi;
 }
 {
-	<BEFORE> <FIRST> c=identifier()
+	<BEFORE> <FIRST> qi=qualifiedIdentifier()
 	{
-		haveConnection();
 		// Verify that we have JDBC 2.0
-		Session s = currentConnEnv.getSession();
-		rs = (ResultSet) s.getCursor(c);
-		JDBCDisplayUtil.checkNotNull(rs,"cursor");
-
+		ResultSet rs = findCursor(qi);
 		return utilInstance.beforeFirst(rs);
 	}
 }
@@ -2312,18 +2341,13 @@ FirstStatement()
 throws SQLException
 :
 {
-	String c;
-	ResultSet rs;
+	QualifiedIdentifier qi;
 }
 {
-	<FIRST> c=identifier()
+	<FIRST> qi=qualifiedIdentifier()
 	{
-		haveConnection();
 		// Verify that we have JDBC 2.0
-		Session s = currentConnEnv.getSession();
-		rs = (ResultSet) s.getCursor(c);
-		JDBCDisplayUtil.checkNotNull(rs,"cursor");
-
+		ResultSet rs = findCursor(qi);
 		return utilInstance.first(rs);
 	}
 }
@@ -2333,17 +2357,13 @@ NextStatement()
 throws SQLException
 :
 {
-	String c;
-	ResultSet rs;
+	QualifiedIdentifier qi;
 }
 {
-	<NEXT> c=identifier()
+	<NEXT> qi=qualifiedIdentifier()
 	{
-		haveConnection();
-		Session s = currentConnEnv.getSession();
-		rs = (ResultSet) s.getCursor(c);
-		JDBCDisplayUtil.checkNotNull(rs,"cursor");
-
+		// Verify that we have JDBC 2.0
+		ResultSet rs = findCursor(qi);
 		return new ijRowResult(rs, rs.next());
 	}
 }
@@ -2353,18 +2373,13 @@ AfterLastStatement()
 throws SQLException
 :
 {
-	String c;
-	ResultSet rs;
+	QualifiedIdentifier qi;
 }
 {
-	<AFTER> <LAST> c=identifier()
+	<AFTER> <LAST> qi=qualifiedIdentifier()
 	{
-		haveConnection();
 		// Verify that we have JDBC 2.0
-		Session s = currentConnEnv.getSession();
-		rs = (ResultSet) s.getCursor(c);
-		JDBCDisplayUtil.checkNotNull(rs,"cursor");
-
+		ResultSet rs = findCursor(qi);
 		return utilInstance.afterLast(rs);
 	}
 }
@@ -2374,18 +2389,13 @@ LastStatement()
 throws SQLException
 :
 {
-	String c;
-	ResultSet rs;
+	QualifiedIdentifier qi;
 }
 {
-	<LAST> c=identifier()
+	<LAST> qi=qualifiedIdentifier()
 	{
-		haveConnection();
 		// Verify that we have JDBC 2.0
-		Session s = currentConnEnv.getSession();
-		rs = (ResultSet) s.getCursor(c);
-		JDBCDisplayUtil.checkNotNull(rs,"cursor");
-
+		ResultSet rs = findCursor(qi);
 		return utilInstance.last(rs);
 	}
 }
@@ -2395,18 +2405,13 @@ PreviousStatement()
 throws SQLException
 :
 {
-	String c;
-	ResultSet rs;
+	QualifiedIdentifier qi;
 }
 {
-	<PREVIOUS> c=identifier()
+	<PREVIOUS> qi=qualifiedIdentifier()
 	{
-		haveConnection();
 		// Verify that we have JDBC 2.0
-		Session s = currentConnEnv.getSession();
-		rs = (ResultSet) s.getCursor(c);
-		JDBCDisplayUtil.checkNotNull(rs,"cursor");
-
+		ResultSet rs = findCursor(qi);
 		return utilInstance.previous(rs);
 	}
 }
@@ -2416,18 +2421,13 @@ GetCurrentRowNumber()
 throws SQLException
 :
 {
-	ResultSet rs;
-	String c;
+	QualifiedIdentifier qi;
 }
 {
-	<GETCURRENTROWNUMBER> c=identifier()
+	<GETCURRENTROWNUMBER> qi=qualifiedIdentifier()
 	{
-		haveConnection();
 		// Verify that we have JDBC 2.0
-		Session s = currentConnEnv.getSession();
-		rs = (ResultSet) s.getCursor(c);
-		JDBCDisplayUtil.checkNotNull(rs,"cursor");
-
+		ResultSet rs = findCursor(qi);
 		return new ijVectorResult(utilInstance.getCurrentRowNumber(rs), null);
 	}
 }
@@ -2437,23 +2437,22 @@ CloseStatement()
 throws SQLException
 :
 {
-	String c;
-	ResultSet rs;
+	QualifiedIdentifier qi;
 	Statement s;
 }
 {
-	<CLOSE> c=identifier()
+	<CLOSE> qi=qualifiedIdentifier()
 	{
-		haveConnection();
-		Session sn = currentConnEnv.getSession();
-		rs = (ResultSet) sn.getCursor(c);
-		JDBCDisplayUtil.checkNotNull(rs,"cursor");
-		s = (Statement) sn.getCursorStatement(c);
-		JDBCDisplayUtil.checkNotNull(s,"cursor");
+		Session sn = findSession(qi.getSessionName());
+		
+		ResultSet rs = sn.getCursor(qi.getLocalName());
+		JDBCDisplayUtil.checkNotNull(rs,"cursor " + qi);
+		s = (Statement) sn.getCursorStatement(qi.getLocalName());
+		JDBCDisplayUtil.checkNotNull(s,"cursor" + qi);
 		rs.close();
 		s.close();
-		sn.removeCursor(c);
-		sn.removeCursorStatement(c);
+		sn.removeCursor(qi.getLocalName());
+		sn.removeCursorStatement(qi.getLocalName());
 
 		return null;
 	}
@@ -2521,31 +2520,31 @@ ExecuteStatement()
 throws SQLException
 :
 {
-	String i = null;
+	QualifiedIdentifier qi = null;
 	Token s = null;
 	PreparedStatement ps;
 	String sVal = null;
 
-	String iUsing = null;
+	QualifiedIdentifier qiUsing = null;
 	Token sUsing = null;
 	Token	usingObject = null;
 }
 {
 	<EXECUTE> 
-	( i=identifier()
+	( qi=qualifiedIdentifier()
 	| s=<STRING>
 	)
-	( <USING> ( iUsing=identifier()
+	( <USING> ( qiUsing=qualifiedIdentifier()
 			| sUsing=<STRING>
 			)
 	)?
 	{
-	    if (iUsing!=null || sUsing!=null) { // parameters in use
+	    if (qiUsing!=null || sUsing!=null) { // parameters in use
 			String sUsingVal = null;
 			PreparedStatement psUsing;
 			SQLWarning warns = null;
 
-			haveConnection();
+			// haveConnection();
 
 			/*
 				Steps:
@@ -2559,9 +2558,8 @@ throws SQLException
 				get the prepared statement
 			 */
 			boolean closeWhenDone = false; // will we close the ps when done?
-    		if (i!=null) {
-				ps = (PreparedStatement) currentConnEnv.getSession().getPreparedStatement(i);
-				JDBCDisplayUtil.checkNotNull(ps,"prepared statement "+i);
+    		if (qi!=null) {
+    			ps = findPreparedStatement(qi);
     		}
     		else { // (s!=null)
 				sVal = stringValue(s.image);
@@ -2575,9 +2573,8 @@ throws SQLException
 			/*
 				execute the using statement
 			 */
-    		if (iUsing!=null) {
-				psUsing = (PreparedStatement) currentConnEnv.getSession().getPreparedStatement(iUsing);
-				JDBCDisplayUtil.checkNotNull(psUsing,"prepared statement "+iUsing);
+    		if (qiUsing!=null) {
+    			psUsing = findPreparedStatement(qiUsing);
     		}
     		else { // (sUsing!=null)
 				sUsingVal = stringValue(sUsing.image);
@@ -2668,10 +2665,9 @@ throws SQLException
 				throw ijException.noUsingResults();
 		}
 		else { // no parameters in use
-	    	if (i!=null) {
+	    	if (qi!=null) {
 				haveConnection();
-				ps = (PreparedStatement) currentConnEnv.getSession().getPreparedStatement(i);
-				JDBCDisplayUtil.checkNotNull(ps,"prepared statement "+i);
+				ps = findPreparedStatement(qi);
 				ps.execute();
 
 				return new ijStatementResult(ps,false);
@@ -2699,12 +2695,12 @@ throws SQLException
 :
 {
 	Token s = null;
-	String n = null;
+	QualifiedIdentifier qi;
 }
 {
-	<ASYNC> n=identifier() s=<STRING>
+	<ASYNC> qi=qualifiedIdentifier() s=<STRING>
 	{
-	    return executeAsync(stringValue(s.image), n);
+	    return executeAsync(stringValue(s.image), qi);
 	}
 }
 
@@ -2724,13 +2720,14 @@ throws SQLException
 :
 {
 	Token s = null;
-	String n = null;
+	QualifiedIdentifier qi;
 }
 {
-	<WAIT> <FOR> n=identifier()
+	<WAIT> <FOR> qi=qualifiedIdentifier()
 	{
-		AsyncStatement as = currentConnEnv.getSession().getAsyncStatement(n);
-		if (as == null) throw ijException.noSuchAsyncStatement(n);
+		Session sn = findSession(qi.getSessionName());
+		AsyncStatement as = sn.getAsyncStatement(qi.getLocalName());
+		if (as == null) throw ijException.noSuchAsyncStatement(qi.toString());
 		try {
 		    as.join(); // we wait for it to finish.
 		} catch (InterruptedException ie) {
@@ -2752,18 +2749,17 @@ RemoveStatement()
 throws SQLException
 :
 {
-	String i;
+	QualifiedIdentifier qi;
 	PreparedStatement ps;
 }
 {
-	<REMOVE> i=identifier()
+	<REMOVE> qi=qualifiedIdentifier()
 	{
-		haveConnection();
-		Session s = currentConnEnv.getSession();
-		ps = (PreparedStatement) s.getPreparedStatement(i);
-		JDBCDisplayUtil.checkNotNull(ps,"prepared statement "+i);
+		Session s = findSession(qi.getSessionName());
+		ps = (PreparedStatement) s.getPreparedStatement(qi.getLocalName());
+		JDBCDisplayUtil.checkNotNull(ps,"prepared statement "+qi);
 		ps.close();
-		s.removePreparedStatement(i);
+		s.removePreparedStatement(qi.getLocalName());
 
 		return null;
 	}
@@ -3083,6 +3079,27 @@ identifier() :
 		// identifiers are case insensitive, so we map them up.
 		// ij doesn't recognize any use of delimited identifiers in its syntax.
 		return (t.image.toUpperCase(Locale.ENGLISH));
+	}
+}
+
+/**
+	A qualified identifier is localName [ <AT> sessionName ]
+*/
+QualifiedIdentifier
+qualifiedIdentifier() :
+{
+	String	sn	= null;
+	String	ln	= null;
+}
+{
+	ln=identifier() [ <AT> sn=identifier() ]
+	{
+		if (sn == null) {
+			haveConnection();
+			sn = currentConnEnv.getSession().getName();
+		}
+		
+		return new QualifiedIdentifier(sn, ln);
 	}
 }
 

@@ -2527,9 +2527,9 @@ ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compat
 ij> prepare p1 as 'select 1 from all1 where si like ?';
 ERROR 42884: No authorized routine named 'LIKE' of type 'FUNCTION' having compatible arguments was found.
 ij> execute p1 using 'values 1';
-IJ ERROR: Unable to establish prepared statement P1
+IJ ERROR: Unable to establish prepared statement P1@CONNECTION0
 ij> execute p1 using 'values ''1''';
-IJ ERROR: Unable to establish prepared statement P1
+IJ ERROR: Unable to establish prepared statement P1@CONNECTION0
 ij> -- conversions involving non-canonical date, time, and timestamp strings
 create table t (d date, t time, ts timestamp);
 0 rows inserted/updated/deleted

@@ -144,6 +144,10 @@ class ConnectionEnv {
 		return sessions;
 	}
 
+	Session getSession(String name) {
+		return (Session) sessions.get(name);
+	}
+
 	Session setCurrentSession(String name) {
 		currSession = (Session) sessions.get(name);
 		return currSession;

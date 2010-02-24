@@ -137,7 +137,7 @@ ij> create index date on date(date);
 ij> drop table date;
 0 rows inserted/updated/deleted
 ij> remove date;
-IJ ERROR: Unable to establish prepared statement DATE
+IJ ERROR: Unable to establish prepared statement DATE@CONNECTION0
 ij> -- TIME
 create table time (time time);
 0 rows inserted/updated/deleted
@@ -174,7 +174,7 @@ ij> create index time on time(time);
 ij> drop table time;
 0 rows inserted/updated/deleted
 ij> remove time;
-IJ ERROR: Unable to establish prepared statement TIME
+IJ ERROR: Unable to establish prepared statement TIME@CONNECTION0
 ij> -- TIMESTAMP
 create table timestamp (timestamp timestamp);
 0 rows inserted/updated/deleted
@@ -211,7 +211,7 @@ ij> create index timestamp on timestamp(timestamp);
 ij> drop table timestamp;
 0 rows inserted/updated/deleted
 ij> remove timestamp;
-IJ ERROR: Unable to establish prepared statement TIMESTAMP
+IJ ERROR: Unable to establish prepared statement TIMESTAMP@CONNECTION0
 ij> -- 
 create table DOMAIN (domain int);
 0 rows inserted/updated/deleted

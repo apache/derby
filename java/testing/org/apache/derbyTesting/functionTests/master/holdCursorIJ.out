@@ -60,7 +60,7 @@ next jdk4;
 No current row
 ij> close jdk4;
 ij> next jdk4;
-IJ ERROR: Unable to establish cursor
+IJ ERROR: Unable to establish cursor JDK4@CONNECTION0
 ij> -- clean up.
 close jdk1;
 ij> close jdk2;
@@ -313,7 +313,7 @@ ij> next jdk4;
 No current row
 ij> close jdk4;
 ij> first jdk4;
-IJ ERROR: Unable to establish cursor
+IJ ERROR: Unable to establish cursor JDK4@CONNECTION0
 ij> -- ninth test - close the updateable holdable cursor after commit
 -- we get npe
 get with hold cursor jdk4 as 'SELECT * FROM T1 FOR UPDATE';
