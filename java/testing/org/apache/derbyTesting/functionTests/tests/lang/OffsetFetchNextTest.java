@@ -115,6 +115,9 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         assertStatementError(LANG_INVALID_ROW_COUNT_OFFSET, st,
                              "select * from t1 offset -1 rows");
 
+        assertStatementError(LANG_SYNTAX_ERROR, st,
+                             "select * from t1 offset -? rows");
+
         assertStatementError(LANG_INVALID_ROW_COUNT_FIRST, st,
                              "select * from t1 fetch first 0 rows only");
 
@@ -139,12 +142,35 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     public void testNewKeywordNonReserved()
             throws Exception
     {
-        prepareStatement("select a,b as OFFSET from t1 OFFSET 0 rows");
+        setAutoCommit(false);
+        prepareStatement("select a,b as offset from t1 offset 0 rows");
 
         // Column and table correlation name usage
-        prepareStatement("select a,b from t1 AS OFFSET");
+        prepareStatement("select a,b from t1 as offset");
 
-        prepareStatement("select a,b OFFSET from t1 OFFSET");
+        prepareStatement("select a,b offset from t1 offset");
+        prepareStatement("select a,b offset from t1 offset +2 rows");
+        prepareStatement("select a offset,b from t1 offset ? rows");
+        prepareStatement("select offset.a, offset.b offset from t1 as offset offset ? rows");
+
+        // DERBY-4562
+        Statement s = createStatement();
+        s.executeUpdate("create table t4562(i int, offset int)");
+        ResultSet rs = s.executeQuery(
+            "select * from t4562 where i > 0 and offset + i < 0 offset 2 rows");
+        rs.next();
+
+        rs = s.executeQuery(
+            "select * from t4562 where i > 0 and offset - i < 0 offset 2 rows");
+        rs.next();
+
+        rs = s.executeQuery(
+            "select * from t4562 where i > 0 and offset * i < 0 offset 2 rows");
+        rs.next();
+
+        rs.close();
+
+        rollback();
     }
 
 
