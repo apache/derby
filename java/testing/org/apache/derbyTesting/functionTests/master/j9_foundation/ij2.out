@@ -28,7 +28,7 @@ I
 ij> remove s;
 ij> -- now it won't find s
 execute s;
-IJ ERROR: Unable to establish prepared statement S
+IJ ERROR: Unable to establish prepared statement S@CONNECTION0
 ij> prepare s as 'select * from t where i=?';
 ij> -- fails, needs parameter
 execute s;
