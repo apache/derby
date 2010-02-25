@@ -211,6 +211,10 @@ abstract class SQLBinary
 	 */
 	public final InputStream	getStream() throws StandardException
 	{
+        if (!hasStream()) {
+            throw StandardException.newException(
+                    SQLState.LANG_STREAM_INVALID_ACCESS, getTypeName());
+        }
 		return (stream);
 	}
 
@@ -1262,7 +1266,7 @@ abstract class SQLBinary
         }
 
         // Check if we have a stream.
-        if (getStream() != null) {
+        if (hasStream()) {
             return (getTypeName() + "(" + getStream().toString() + ")");
         }
 

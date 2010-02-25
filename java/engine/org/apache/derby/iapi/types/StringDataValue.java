@@ -229,9 +229,9 @@ public interface StringDataValue extends ConcatableDataValue
      * is capable of repositioning itself.
      *
      * @return A descriptor for the stream, which includes a reference to the
-     *      stream itself, or {@code null} if the value cannot be represented
-     *      as a stream.
-     * @throws StandardException if obtaining the descriptor fails
+     *      stream itself.
+     * @throws StandardException if obtaining the descriptor fails, or if the
+     *      value isn't represented as a stream.
      */
     public CharacterStreamDescriptor getStreamWithDescriptor()
             throws StandardException;

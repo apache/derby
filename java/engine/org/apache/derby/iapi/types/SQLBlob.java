@@ -80,6 +80,16 @@ public class SQLBlob extends SQLBinary
 	}
 
     /**
+     * Tells if this BLOB value is, or will be, represented by a stream.
+     *
+     * @return {@code true} if the value is represented by a stream,
+     *      {@code false} otherwise.
+     */
+    public boolean hasStream() {
+        return stream != null;
+    }
+
+    /**
      * Returns a clone of this BLOB value.
      * <p>
      * Unlike the other binary types, BLOBs can be very large. We try to clone

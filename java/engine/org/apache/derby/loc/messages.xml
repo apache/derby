@@ -6157,6 +6157,12 @@ MessageId.java.
             </msg>
 
             <msg>
+                <name>42Z12.U</name>
+                <text>Internal error: Invalid attempt to access a {0} as a stream</text>
+                <arg>dataType</arg>
+            </msg>
+
+            <msg>
                 <name>42Z30.U</name>
                 <text>time spent in this ResultSet =</text>
             </msg>

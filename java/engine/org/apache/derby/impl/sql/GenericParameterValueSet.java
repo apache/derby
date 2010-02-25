@@ -264,17 +264,12 @@ final class GenericParameterValueSet implements ParameterValueSet
                 DataValueDescriptor dvd = oldp.getValue();
                 InputStream is = null;
                 // See if the value type can hold a stream.
-                // SQLBinary isn't public, check for both SQLBlob and SQLBit.
-                if (dvd instanceof SQLChar || dvd instanceof SQLBlob ||
-                        dvd instanceof SQLBit) {
-                    is = dvd.getStream();
-                }
-                if (is != null) {
+                if (dvd.hasStream()) {
                     // DERBY-4455: Don't materialize the stream when
                     // transferring it. If the stream has been drained already,
                     // and the user doesn't set a new value before executing
                     // the prepared statement again, Derby will fail.
-                    pvstarget.getParameterForSet(i).setValue(is,
+                    pvstarget.getParameterForSet(i).setValue(dvd.getStream(),
                             DataValueDescriptor.UNKNOWN_LOGICAL_LENGTH);
                 } else {
                     pvstarget.getParameterForSet(i).setValue(dvd);

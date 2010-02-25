@@ -172,8 +172,9 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                stream and store it temporarily until it is either discarded or
                inserted into the database.
          */
-        InputStream dvdStream = dvd.getStream();
-        if (dvdStream == null) { // a) Blob already materialized in memory
+        if (dvd.hasStream()) { // Cases b) and c)
+            streamPositionOffset = handleStreamValue(dvd.getStream(), con);
+        } else { // a) Blob already materialized in memory
             materialized = true;
             streamPositionOffset = Integer.MIN_VALUE;
             // copy bytes into memory so that blob can live after result set
@@ -189,7 +190,29 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 throw StandardException.newException (
                                         SQLState.SET_STREAM_FAILURE, e);
             }
-        } else if (dvdStream instanceof Resetable) { // b) Resetable stream
+        }
+        //add entry in connection so it can be cleared 
+        //when transaction is not valid
+        con.addLOBReference (this);
+    }
+
+
+    /**
+     * Constructs a Blob object on top of a stream.
+     *
+     * @param dvdStream the source stream
+     * @param con the connection owning the Blob
+     * @return The offset into the stream where the user data begins (used if
+     *      resetting the stream).
+     * @throws StandardException if accessing the stream fails, or if writing
+     *      data to temporary storage fails
+     */
+    private int handleStreamValue(InputStream dvdStream, EmbedConnection con)
+            throws StandardException {
+        int offset = 0;
+        // b) Resetable stream
+        //    In this case the stream is coming from the Derby store.
+        if (dvdStream instanceof Resetable) {
             materialized = false;
 
             /*
@@ -210,7 +233,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 // The BinaryToRawStream will read the encoded length bytes.
                 BinaryToRawStream tmpStream =
                         new BinaryToRawStream(myStream, con);
-                streamPositionOffset = (int)myStream.getPosition();
+                offset = (int)myStream.getPosition();
                 // Check up front if the stream length is specified.
                 streamLength = tmpStream.getLength();
                 tmpStream.close();
@@ -225,7 +248,10 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 throw StandardException.newException(
                      SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION, ioe, "BLOB");
             }
-        } else { // c) Non-resetable stream
+        // c) Non-resetable stream
+        //    This is most likely a stream coming in from the user, and we
+        //    don't have any guarantees on how it behaves.
+        } else {
             // The code below will only work for RawToBinaryFormatStream.
             if (SanityManager.DEBUG) {
                 SanityManager.ASSERT(
@@ -235,7 +261,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             // The source stream isn't resetable, so we have to write it to a
             // temporary location to be able to support the Blob operations.
             materialized = true;
-            streamPositionOffset = Integer.MIN_VALUE;
+            offset = Integer.MIN_VALUE;
             try {
                 control = new LOBStreamControl(getEmbedConnection());
                 BinaryToRawStream tmpStream =
@@ -259,11 +285,8 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                                         SQLState.SET_STREAM_FAILURE, ioe);
             }
         }
-        //add entry in connection so it can be cleared 
-        //when transaction is not valid
-        con.addLOBReference (this);
+        return offset;
     }
-
 
     /**
      * Sets the position of the Blob to {@code logicalPos}, where position 0 is

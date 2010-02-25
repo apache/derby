@@ -517,7 +517,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 
                 // See if the column has been marked for cloning.
                 // If the value isn't a stream, don't bother cloning it.
-                if (cloneMap[index] && dvd.getStream() != null) {
+                if (cloneMap[index] && dvd.hasStream()) {
                     dvd = dvd.cloneValue(false);
                 }
 

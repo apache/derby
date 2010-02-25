@@ -111,21 +111,9 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
             SanityManager.ASSERT(!dvd.isNull(),
                                  "clob is created on top of a null column");
 
-        CharacterStreamDescriptor csd = dvd.getStreamWithDescriptor();
         // See if a String or a stream will be the source of the Clob.
-        if (csd == null) {
-            try {
-                clob = new TemporaryClob(dvd.getString(),
-                        this);
-            }
-            catch (SQLException sqle) {
-                throw StandardException.newException (sqle.getSQLState(), sqle);
-            }
-            catch (IOException e) {
-                throw StandardException.newException (
-                                        SQLState.SET_STREAM_FAILURE, e);
-            }
-        } else {
+        if (dvd.hasStream()) {
+            CharacterStreamDescriptor csd = dvd.getStreamWithDescriptor();
             /*
              We are expecting this stream to be a FormatIdInputStream with an
              OverflowInputStream inside. FormatIdInputStream implements
@@ -150,6 +138,18 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                             .newException(SQLState.BLOB_ACCESSED_AFTER_COMMIT);
                 }
                 throw se;
+            }
+        } else {
+            try {
+                clob = new TemporaryClob(dvd.getString(),
+                        this);
+            }
+            catch (SQLException sqle) {
+                throw StandardException.newException (sqle.getSQLState(), sqle);
+            }
+            catch (IOException e) {
+                throw StandardException.newException (
+                                        SQLState.SET_STREAM_FAILURE, e);
             }
         }
         con.addLOBReference (this);

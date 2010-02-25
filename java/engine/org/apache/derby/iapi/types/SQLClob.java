@@ -350,7 +350,8 @@ public class SQLClob
             // Lazily reset the descriptor here, to avoid further changes in
             // {@code SQLChar}.
             csd = null;
-            return null;
+            throw StandardException.newException(
+                    SQLState.LANG_STREAM_INVALID_ACCESS, getTypeName());
         }
         // NOTE: Getting down here several times is potentially dangerous.
         // When the stream is published, we can't assume we know the position
@@ -421,6 +422,16 @@ public class SQLClob
         return this.csd;
     }
 
+    /**
+     * Tells if this CLOB value is, or will be, represented by a stream.
+     *
+     * @return {@code true} if the value is represented by a stream,
+     *      {@code false} otherwise.
+     */
+    public boolean hasStream() {
+        return stream != null;
+    }
+
 	public Time	getTime(java.util.Calendar cal) throws StandardException
 	{
 		throw dataTypeConversion("java.sql.Time");
@@ -443,7 +454,7 @@ public class SQLClob
         }
 
         // Check if we have a stream.
-        if (getStream() != null) {
+        if (hasStream()) {
             return (getTypeName() + "(" + getStream().toString() + ")");
         }
 

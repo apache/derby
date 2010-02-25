@@ -566,24 +566,25 @@ public class SQLChar
     /**
      * @exception StandardException     Thrown on error
      */
-    public InputStream  getStream() throws StandardException
-    {
+    public InputStream  getStream() throws StandardException {
+        if (!hasStream()) {
+            throw StandardException.newException(
+                    SQLState.LANG_STREAM_INVALID_ACCESS, getTypeName());
+        }
         return stream;
     }
 
     /**
      * Returns a descriptor for the input stream for this character data value.
      *
-     * @return Unless the method is overridden, {@code null} is returned.
-     * @throws StandardException if obtaining the descriptor fails
+     * @return Nothing, throws exception.
+     * @throws StandardException if the value isn't represented by a stream
      * @see SQLClob#getStreamWithDescriptor()
      */
     public CharacterStreamDescriptor getStreamWithDescriptor()
             throws StandardException {
-        // For now return null for all non-Clob types.
-        // TODO: Is this what we want, or do we want to treat some of the other
-        //       string types as streams as well?
-        return null;
+        throw StandardException.newException(
+                SQLState.LANG_STREAM_INVALID_ACCESS, getTypeName());
     }
 
     /**

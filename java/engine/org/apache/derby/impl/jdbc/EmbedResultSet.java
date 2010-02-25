@@ -1135,26 +1135,24 @@ public abstract class EmbedResultSet extends ConnectionChild
 			pushStack = true;
 			setupContextStack();
 
-            CharacterStreamDescriptor csd = dvd.getStreamWithDescriptor();
-
-            if (csd == null) {
-
+            java.io.Reader ret; // The reader we will return to the user
+            if (dvd.hasStream()) {
+                CharacterStreamDescriptor csd = dvd.getStreamWithDescriptor();
+                // See if we have to enforce a max field size.
+                if (lmfs > 0) {
+                    csd = new CharacterStreamDescriptor.Builder().copyState(csd).
+                            maxCharLength(lmfs).build();
+                }
+                ret = new UTF8Reader(csd, this, syncLock);
+            } else {
 				String val = dvd.getString();
 				if (lmfs > 0) {
 					if (val.length() > lmfs)
 						val = val.substring(0, lmfs);
 				}
-				java.io.Reader ret = new java.io.StringReader(val);
-				currentStream = ret;
-				return ret;
-			}
-
-            // See if we have to enforce a max field size.
-            if (lmfs > 0) {
-                csd = new CharacterStreamDescriptor.Builder().copyState(csd).
-                        maxCharLength(lmfs).build();
+                ret = new java.io.StringReader(val);
             }
-            java.io.Reader ret = new UTF8Reader(csd, this, syncLock);
+
 			currentStream = ret;
 			return ret;
 
@@ -3976,7 +3974,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 				// should set up a context stack if we have a long column,
 				// since a blob may keep a pointer to a long column in the
 				// database
-				if (dvd.getStream() != null)
+				if (dvd.hasStream())
 					pushStack = true;
 
 				if (pushStack)
@@ -4027,14 +4025,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 				if (wasNull = dvd.isNull())
 					return null;
 
-				// should set up a context stack if we have a long column,
-				// since a Clob may keep a pointer to a long column in the
-				// database
-				if (dvd.getStream() != null)
-					pushStack = true;
-
-				if (pushStack)
-					setupContextStack();
+                // Set up a context stack if we have CLOB whose value is a long
+                // column in the database.
+                if (dvd.hasStream()) {
+                    pushStack = true;
+                    setupContextStack();
+                }
 
                 return new EmbedClob(getEmbedConnection(), dvd);
 			} catch (Throwable t) {

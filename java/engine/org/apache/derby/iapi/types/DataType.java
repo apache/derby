@@ -231,6 +231,19 @@ public abstract class DataType
 	}
 
     /**
+     * Tells that the value isn't represented as a stream, which is true for
+     * most Derby data types.
+     * <p>
+     * This method will be overridden by types able to use a stream as the
+     * source.
+     *
+     * @return {@code false}
+     */
+    public boolean hasStream() {
+        return false;
+    }
+
+    /**
      * Gets the value in the data stream descriptor as a trace string.
      * This default implementation simply forwards the call to
      * <code>getString</code>.

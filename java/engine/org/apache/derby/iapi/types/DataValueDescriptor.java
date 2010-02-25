@@ -273,16 +273,36 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 */
 	Object	getObject() throws StandardException;
 
-	/**
-	 * Gets the value in the data value descriptor as a Java InputStream.
-	 * Only data types that implements StreamStorable will have stream states.
-	 *
-	 * @return	The stream state of the data value.
-	 *
-	 * @exception StandardException   Throws an exception if the data value
-	 *								  cannot be received as a stream.
-	 */
-	InputStream	getStream() throws StandardException;
+    /**
+     * Gets the value in the data value descriptor as a stream of bytes.
+     * <p>
+     * Only data types that implement {@code StreamStorable} will have stream
+     * states, and the method {@code hasStream} should be called to determine
+     * if the value in question is, or will be, represented by a stream.
+     *
+     * @return The stream state of the data value.
+     * @throws StandardException Throws an exception if the data value
+     *      cannot be received as a stream.
+     *
+     * @see #hasStream()
+     * @see StringDataValue#getStreamWithDescriptor()
+     */
+    InputStream getStream() throws StandardException;
+
+    /**
+     * Tells if this data value is, or will be, represented by a stream.
+     * <p>
+     * This method should be called to determine if the methods {@code
+     * getStream} or {@code DataValueDescriptor.getStreamWithDescriptor} can
+     * be invoked.
+     *
+     * @return {@code true} if the value will be a stream, {@code false}
+     *      otherwise.
+     *
+     * @see #getStream()
+     * @see StringDataValue#getStreamWithDescriptor()
+     */
+    boolean hasStream();
 
     /**
      * Get a shallow copy of this {@code codeDataValueDescriptor} (DVD).

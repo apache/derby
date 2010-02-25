@@ -1132,12 +1132,12 @@ public abstract class EmbedCallableStatement20
                     pushStack = true;
                     setupContextStack();
 
-                    CharacterStreamDescriptor csd =
+                    if (param.hasStream()) {
+                        CharacterStreamDescriptor csd =
                             param.getStreamWithDescriptor();
-                    if (csd == null) {
-                        reader = new StringReader(param.getString());
-                    } else {
                         reader = new UTF8Reader(csd, this, syncObject);
+                    } else {
+                        reader = new StringReader(param.getString());
                     }
                 } catch (Throwable t) {
                     throw EmbedResultSet.noStateChangeException(t);
