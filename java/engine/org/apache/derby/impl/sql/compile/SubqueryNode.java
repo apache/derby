@@ -571,6 +571,12 @@ public class SubqueryNode extends ValueNode
 
 		resultSet = resultSet.preprocess(numTables, null, (FromList) null);
 
+        if (leftOperand != null)
+        {
+            leftOperand = leftOperand.preprocess(numTables,
+                    outerFromList, outerSubqueryList, outerPredicateList);
+        }
+
 		// Eliminate any unnecessary DISTINCTs
 		if (resultSet instanceof SelectNode)
 		{
