@@ -1211,12 +1211,11 @@ public abstract class EmbedCallableStatement20
                 pushStack = true;
                 setupContextStack();
 
-                StreamStorable ss = (StreamStorable)param;
-                InputStream stream = ss.returnStream();
-                if (stream == null) {
-                    stream = new ByteArrayInputStream(param.getBytes());
+                InputStream stream; // The stream we will return to the user
+                if (param.hasStream()) {
+                    stream = new BinaryToRawStream(param.getStream(), param);
                 } else {
-                    stream = new BinaryToRawStream(stream, param);
+                    stream = new ByteArrayInputStream(param.getBytes());
                 }
                 return stream;
             } catch (Throwable t) {

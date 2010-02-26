@@ -1246,17 +1246,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 			pushStack = true;
 			setupContextStack();
 
-			StreamStorable ss = (StreamStorable) dvd;
-
-			InputStream stream = ss.returnStream();
-
-			if (stream == null)
-			{
-				stream = new NewByteArrayInputStream(dvd.getBytes());
-			} else
-			{
-				stream = new BinaryToRawStream(stream, dvd);
-			}
+            InputStream stream; // The stream we will return to the user
+            if (dvd.hasStream()) {
+                stream = new BinaryToRawStream(dvd.getStream(), dvd);
+            } else {
+                stream = new NewByteArrayInputStream(dvd.getBytes());
+            }
 
             if (lmfs > 0)
             {
