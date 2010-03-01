@@ -75,6 +75,7 @@ public final class ToolScripts extends ScriptTestCase {
      * (ie. can not run on JSR169).
      */
     private static final String[] JDBC3_TESTS = {
+    	"qualifiedIdentifiers"
     };
 
 
