@@ -19,6 +19,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class TriggerTests extends BaseJDBCTestCase {
 
 	final int lobsize = 300000*1024;
+	boolean isDerby1482Fixed = false;
 	/**
 	 * Insert trigger tests
 	 * ****************
@@ -302,13 +303,16 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertAfterTrigger() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 		s.execute("create trigger trigger1 AFTER INSERT on table1 referencing " +
 			"new as n_row for each row " +
 			"insert into table2(id, updates) values (n_row.id, -1)");
 		commit();
-   		runInsertTriggerTest();		       	
+   		runtest2InsertTriggerTest();		       	
 	}
 
 	/**
@@ -319,6 +323,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertAfterTriggerStoredProc() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_InsertAfterTrigger_update_table " +
@@ -329,7 +336,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 			"new as n_row for each row " +
 			"call proc_test1_InsertAfterTrigger_update_table(n_row.id)");
 		commit();
-   		runInsertTriggerTest();		       	
+   		runtest2InsertTriggerTest();		       	
 	}
 
 	/**
@@ -353,6 +360,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1DeleteAfterTrigger() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 		s.execute("create trigger trigger1 after DELETE on table1 referencing " +
@@ -370,6 +380,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1DeleteAfterTriggerStoredProc() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_DeleteAfterTrigger_update_table " +
@@ -418,6 +431,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateAfterTrigger() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 		s.execute("create trigger trigger1 after update of status on table1 referencing " +
@@ -435,6 +451,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateAfterTriggerStoredProc() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_UpdateAfterTrigger_update_table " +
@@ -470,13 +489,16 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertBeforeTrigger() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 		s.execute("create trigger trigger1 no cascade before INSERT on table1 referencing " +
 			"new as n_row for each row " +
 			"select updates from table2 where table2.id = n_row.id");
 		commit();
-   		runInsertTriggerTest();		       	
+   		runtest2InsertTriggerTest();		       	
 	}
 
 	/**
@@ -487,6 +509,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertBeforeTriggerStoredProc() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_InsertBeforeTrigger_select_table " +
@@ -496,7 +521,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 		s.execute("create trigger trigger1 no cascade before INSERT on table1 referencing " +
 			"new as n_row for each row call proc_test1_InsertBeforeTrigger_select_table(n_row.id)");
 		commit();
-		runInsertTriggerTest();
+		runtest2InsertTriggerTest();
 	}
 	
 	/**
@@ -521,6 +546,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1DeleteBeforeTrigger() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 		s.execute("create trigger trigger1 no cascade before DELETE on table1 referencing " +
@@ -538,7 +566,10 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1DeleteBeforeTriggerStoredProc() throws SQLException{
-        basicSetup();
+		if (isDerby1482Fixed == false)
+			return;
+		
+       basicSetup();
         Statement s = createStatement();
 
         s.execute("create procedure proc_test1_DeleteBeforeTrigger_select_table " +
@@ -588,6 +619,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateBeforeTrigger() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 
@@ -606,6 +640,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateBeforeTriggerStoredProc() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_UpdateBeforeTrigger_select_table " +
@@ -642,6 +679,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2InsertAfterTriggerAccessLOB() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 
@@ -659,7 +699,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 				"new as n_row for each row " +
 				"insert into table2(id, bl_table2) values (n_row.id, n_row.bl)");
 		commit();
-   		runInsertTriggerTest();
+   		runtest2InsertTriggerTest();
 	}
 
 	/**
@@ -670,6 +710,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2DeleteAfterTriggerAccessLOB() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
         //The default table2 created by basicSetup does not match the 
@@ -713,6 +756,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2UpdateAfterTriggerAccessLOB() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
         //The default table2 created by basicSetup does not match the 
@@ -740,6 +786,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2InsertAfterTriggerUpdatedLOB() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 
@@ -758,7 +807,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 				"new as n_row for each row " +
 				"update table1 set bl_null=n_row.bl where bl_null is null");
 		commit();
-   		runInsertTriggerTest();
+   		runtest2InsertTriggerTest();
 	}
 
 	/**
@@ -769,6 +818,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2UpdateAfterTriggerUpdatedLOB() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 
@@ -797,6 +849,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2InsertBeforeTriggerAccessLOB() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
         //The default table2 created by basicSetup does not match the 
@@ -813,7 +868,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 		ps.setInt(1, 1);
         ps.executeUpdate();
 		commit();
-   		runInsertTriggerTest();
+   		runtest2InsertTriggerTest();
 	}
 	
 	/**
@@ -823,6 +878,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2DeleteBeforeTriggerAccessLOB() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 
@@ -850,6 +908,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2UpdateBeforeTriggerAccessLOB() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 
@@ -888,6 +949,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test3UpdateAfterTrigger() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 		s.execute("create trigger trigger1 after update of bl on table1 referencing " +
@@ -906,6 +970,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test3UpdateAfterTriggerStoredProc() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 	
@@ -944,6 +1011,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test3UpdateBeforeTrigger() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 
@@ -962,6 +1032,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test3UpdateBeforeTriggerStoredProc() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 
@@ -1007,6 +1080,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test4UpdateAfterTriggerAccessLOB() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
 	    Statement s = createStatement();
 
@@ -1034,6 +1110,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */ 
 	public void test4UpdateAfterTriggerUpdatedLOB() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
         Statement s = createStatement();
 
@@ -1064,6 +1143,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test4UpdateBeforeTrigger() throws SQLException{
+		if (isDerby1482Fixed == false)
+			return;
+		
         basicSetup();
 	    Statement s = createStatement();
 
@@ -1096,7 +1178,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 		s.execute("create trigger trigger1 AFTER INSERT on table1 " +
 			"insert into table2(id, updates) values (100, -1)");
 		commit();
-   		runInsertTriggerTest();		       	
+   		runtest1InsertTriggerTest();		       	
 	}
 	 
 	/**
@@ -1111,7 +1193,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 		s.execute("create trigger trigger1 NO CASCADE BEFORE INSERT on table1 " +
 			"select updates from table2 where table2.id = 1");
 		commit();
-   		runInsertTriggerTest();		       	
+   		runtest1InsertTriggerTest();		       	
 	}
 	 
 	/**
@@ -1153,8 +1235,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	public void test5UpdateAfterTriggerNoReferencingClause() throws SQLException{
         basicSetup();
         Statement s = createStatement();
-		s.execute("create trigger trigger1 AFTER UPDATE of status on table1 referencing " +
-				"new as n_row for each row " +
+		s.execute("create trigger trigger1 AFTER UPDATE of status on table1 " +
 				"update table2 set updates = updates + 1 where table2.id = 1");
 		commit();
    		runtest1UpdateTrigger();		       	
@@ -1169,21 +1250,32 @@ public class TriggerTests extends BaseJDBCTestCase {
 	public void test5UpdateBeforeTriggerNoReferencingClause() throws SQLException{
         basicSetup();
         Statement s = createStatement();
-		s.execute("create trigger trigger1 NO CASCADE BEFORE UPDATE of status on table1 referencing " +
-				"new as n_row for each row " +
+		s.execute("create trigger trigger1 NO CASCADE BEFORE UPDATE of status on table1 " +
 				"select updates from table2 where table2.id = 1");
 		commit();
    		runtest1UpdateTrigger();		       	
 	}
-	
+
 	/**
 	 * Following will do an insert into table1 which will cause insert 
-	 * trigger to fire. 
+	 * trigger to fire. The insert does not involve the LOB column.
 	 *
 	 * @throws SQLException
 	 */
-	public void runInsertTriggerTest() throws SQLException{
-		System.out.println("Inserting into table1 to cause insert trigger to fire");
+	public void runtest1InsertTriggerTest() throws SQLException{
+		PreparedStatement ps = prepareStatement(
+				"insert into table1(id, status) values(101, 0)");
+        ps.executeUpdate();
+        commit();
+	}
+	
+	/**
+	 * Following will do an insert into table1 which will cause insert 
+	 * trigger to fire. The insert involves the LOB column.
+	 *
+	 * @throws SQLException
+	 */
+	public void runtest2InsertTriggerTest() throws SQLException{
 		PreparedStatement ps = prepareStatement(
 				"insert into table1(id, status, bl) values(101, 0, ?)");
         ps.setBinaryStream(1, new LoopingAlphabetStream(lobsize), lobsize);
@@ -1193,12 +1285,11 @@ public class TriggerTests extends BaseJDBCTestCase {
 	
 	/**
 	 * Following will update a row in table1 which will cause update 
-	 * trigger to fire. 
+	 * trigger to fire. The update does not involve the LOB column.
 	 *
 	 * @throws SQLException
 	 */
 	public void runtest1UpdateTrigger() throws SQLException{
-		System.out.println("Updating table1(int) to cause update trigger to fire");
 		PreparedStatement ps = prepareStatement(
 				"update table1 set status = 1 where id = 1");
         ps.executeUpdate();
@@ -1207,12 +1298,11 @@ public class TriggerTests extends BaseJDBCTestCase {
 	
 	/**
 	 * Following will update a row in table1 which will cause update 
-	 * trigger to fire. 
+	 * trigger to fire. The update involves the LOB column.
 	 *
 	 * @throws SQLException
 	 */
 	public void runtest2UpdateTrigger() throws SQLException{
-		System.out.println("Updating table1(blob column1) to cause update trigger to fire");
 		PreparedStatement ps = prepareStatement(
 				"update table1 set bl = ? where id = 1");
         ps.setBinaryStream(1, new LoopingAlphabetStream(lobsize), lobsize);
@@ -1222,12 +1312,11 @@ public class TriggerTests extends BaseJDBCTestCase {
 	
 	/**
 	 * Following will update a row in table1 which will cause update 
-	 * trigger to fire. 
+	 * trigger to fire. The update involves the LOB column.
 	 *
 	 * @throws SQLException
 	 */
 	public void runtest3UpdateTrigger() throws SQLException{
-		System.out.println("Updating table1(blob column2) to cause update trigger to fire");
 		PreparedStatement ps = prepareStatement(
 				"update table1 set bl_null=null where id = 1");
         ps.executeUpdate();
@@ -1241,7 +1330,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void runDeleteTriggerTest() throws SQLException{
-		System.out.println("Deleting from table1 to cause delete trigger to fire");
 		PreparedStatement ps = prepareStatement(
 				"delete from table1 where id=1");
         ps.executeUpdate();

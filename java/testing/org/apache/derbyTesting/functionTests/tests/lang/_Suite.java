@@ -59,6 +59,7 @@ public class _Suite extends BaseTestCase  {
         // the nightly runs.
         // suite.addTest(largeCodeGen.suite());
 	  
+		suite.addTest(org.apache.derbyTesting.functionTests.tests.memory.TriggerTests.suite());
 	  suite.addTest(CheckConstraintTest.suite());
         suite.addTest(AnsiTrimTest.suite());
         suite.addTest(AlterTableTest.suite());

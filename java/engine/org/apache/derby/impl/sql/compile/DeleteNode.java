@@ -33,6 +33,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 
 
 import org.apache.derby.iapi.sql.ResultSet;
@@ -70,6 +71,8 @@ import org.apache.derby.impl.sql.execute.FKInfo;
 import java.lang.reflect.Modifier;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.io.FormatableProperties;
+
+import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -908,7 +911,15 @@ public class DeleteNode extends DMLModStatementNode
 	  *	3)	adds the index descriptors to a list of conglomerate
 	  *		descriptors.
 	  *	4)	finds all DELETE triggers on the table
-	  *	5)	if there are any DELETE triggers, marks all columns in the bitmap
+	  *	5)	if there are any DELETE triggers, then do one of the following
+	  *     a)If all of the triggers have MISSING referencing clause, then that
+	  *      means that the trigger actions do not have access to before and
+	  *      after values. In that case, there is no need to blanketly decide 
+	  *      to include all the columns in the read map just because there are
+	  *      triggers defined on the table.
+	  *     b)Since one/more triggers have REFERENCING clause on them, get all
+	  *      the columns because we don't know what the user will ultimately 
+	  *      reference.
 	  *	6)	adds the triggers to an evolving list of triggers
 	  *
 	  *	@param	conglomVector		OUT: vector of affected indices
@@ -952,18 +963,41 @@ public class DeleteNode extends DMLModStatementNode
 		DMLModStatementNode.getXAffectedIndexes(baseTable,  null, columnMap, conglomVector );
 
 		/*
-	 	** If we have any triggers, then get all the columns
-		** because we don't know what the user will ultimately
-		** reference.
+	 	** If we have any DELETE triggers, then do one of the following
+	 	** 1)If all of the triggers have MISSING referencing clause, then that
+	 	** means that the trigger actions do not have access to before and 
+	 	** after values. In that case, there is no need to blanketly decide to
+	 	** include all the columns in the read map just because there are
+	 	** triggers defined on the table.
+	 	** 2)Since one/more triggers have REFERENCING clause on them, get all 
+	 	** the columns because we don't know what the user will ultimately reference.
 	 	*/
 		baseTable.getAllRelevantTriggers( StatementType.DELETE, (int[])null, relevantTriggers );
-		if ( relevantTriggers.size() > 0 ) { needsDeferredProcessing[0] = true; }
 
 		if (relevantTriggers.size() > 0)
 		{
-			for (int i = 1; i <= columnCount; i++)
+			needsDeferredProcessing[0] = true;
+			
+			boolean needToIncludeAllColumns = false;
+			Enumeration descs = relevantTriggers.elements();
+			while (descs.hasMoreElements())
 			{
-				columnMap.set(i);
+				TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
+				//Does this trigger have REFERENCING clause defined on it
+				if (!trd.getReferencingNew() && !trd.getReferencingOld())
+					continue;
+				else
+				{
+					needToIncludeAllColumns = true;
+					break;
+				}
+			}
+
+			if (needToIncludeAllColumns) {
+				for (int i = 1; i <= columnCount; i++)
+				{
+					columnMap.set(i);
+				}
 			}
 		}
 
