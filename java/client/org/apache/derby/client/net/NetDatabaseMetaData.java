@@ -129,6 +129,6 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
      * @return true if the server supports this
      */
     final boolean serverSupportsUDTs() {
-        return supportsSessionDataCaching_;
+        return supportsUDTs_;
     }
 }
