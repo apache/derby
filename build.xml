@@ -1341,6 +1341,7 @@
       <attribute name="Bundle-Vendor" value="Apache Software Foundation"/>
       <attribute name="Bundle-Name" value="Apache Derby ${major}.${minor}"/>
       <attribute name="Bundle-Version" value="${major}.${minor}.${maint}.${changenumber}"/>
+      <attribute name="Bundle-ManifestVersion" value="2"/>
 
       	<attribute name="Sealed" value="true"/>
     	<section name="org/apache/derby/impl/tools/sysinfo/">
