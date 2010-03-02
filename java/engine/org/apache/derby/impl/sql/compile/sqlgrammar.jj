@@ -1177,6 +1177,48 @@ public class SQLParser
 	}
 
 
+
+    /**
+     * Determine if we are seeing an offsetClause or the identifier OFFSET
+     * (Derby does not make it a reserved word).  "n" must be an integer
+     * literal or a dynamic parameter specification.
+     *
+     * @return true if it is an offsetClause.
+     */
+    private boolean seeingOffsetClause()
+    {
+        int nesting = 0;
+
+        // Token number, i == 1: OFFSET
+        int i = 2;
+
+        int tokKind = getToken(i).kind;
+
+        // check for integer literal or ? followed by ROW(S)
+        if (tokKind == PLUS_SIGN ||
+            tokKind == MINUS_SIGN) {
+
+            tokKind = getToken(++i).kind;
+
+            if (tokKind == EXACT_NUMERIC) {
+
+                tokKind = getToken(++i).kind;
+
+                return (tokKind == ROW ||
+                        tokKind == ROWS);
+            }
+        } else if (tokKind == EXACT_NUMERIC) {
+
+            tokKind = getToken(++i).kind;
+
+            return (tokKind == ROW ||
+                    tokKind == ROWS);
+        }
+
+        return false;
+    }
+
+
 	/**
 	 * Determine whether the next sequence of tokens can be the beginning
 	 * of a rowValueConstructorList. A rowValueConstructorList is a comma-
@@ -13892,9 +13934,7 @@ nonReservedKeyword()  :
 	|	tok = <OFF>
 	|	LOOKAHEAD({
 			getToken(1).kind == OFFSET &&
-			!(getToken(2).kind == PLUS_SIGN ||
-			  getToken(2).kind == MINUS_SIGN ||
-			  getToken(2).kind == EXACT_NUMERIC)
+			!seeingOffsetClause()
 		})
 		tok = <OFFSET>
 	|	tok = <OLD>
