@@ -129,6 +129,8 @@ public class ReplicationRun extends BaseTestCase
     static String LF = null;
     
     static final String remoteShell = "/usr/bin/ssh -x"; // or /usr/bin/ssh ?
+
+    private static final long DEFAULT_SERVER_START_TIMEOUT = 75000;
     
     Utils util = new Utils();
     
@@ -2448,9 +2450,14 @@ public class ReplicationRun extends BaseTestCase
                 }
             }
             );
+            // DERBY-4564. Make replication tests use derby.tests.networkServerTimeout proeprty
+            String userStartTimeout = getSystemProperty("derby.tests.networkServerStartTimeout");
+            long startTimeout = (userStartTimeout != null )? 
+            		Long.parseLong(userStartTimeout): DEFAULT_SERVER_START_TIMEOUT;
+            long iterations = startTimeout / PINGSERVER_SLEEP_TIME_MILLIS;		
             util.DEBUG(debugId+"************** Do .start().");
             serverThread.start();
-            pingServer(serverHost, serverPort, 150); // Wait for the server to come up in a reasonable time....
+            pingServer(serverHost, serverPort, (int) iterations); // Wait for the server to come up in a reasonable time....
 
         }
         
@@ -2800,8 +2807,7 @@ public class ReplicationRun extends BaseTestCase
                 + iterations + " * " + PINGSERVER_SLEEP_TIME_MILLIS + "ms.: "
                 + finalException.getMessage();
         util.DEBUG( msg );
-        finalException.printStackTrace(); // REMOVE?
-        throw new Exception(msg);
+        throw finalException;
         
     }
 
