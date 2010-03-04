@@ -70,6 +70,8 @@ public class PoissonLoadGenerator implements LoadGenerator {
             client = c;
         }
 
+        public Client getClient() { return client; }
+
         /**
          * Tell the client to stop waiting.
          */
@@ -195,5 +197,10 @@ public class PoissonLoadGenerator implements LoadGenerator {
         out.println("Average response time (ms):\t" + avgResp);
         out.println("Minimum response time (ms):\t" + min);
         out.println("Maximum response time (ms):\t" + max);
+        
+        for (int i = 0; i < threads.length; i++)
+        {
+            threads[i].getClient().printReport( out );
+        }
     }
 }

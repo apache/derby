@@ -21,6 +21,7 @@ limitations under the License.
 
 package org.apache.derbyTesting.perf.clients;
 
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -47,4 +48,11 @@ public interface Client {
      * @throws SQLException if a database error occurs
      */
     void doWork() throws SQLException;
+    
+    /**
+     * Print a report from the test run.
+     *
+     * @param out stream to print the report to
+     */
+    void printReport(PrintStream out);
 }

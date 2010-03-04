@@ -22,6 +22,7 @@ limitations under the License.
 package org.apache.derbyTesting.perf.clients;
 
 import java.io.ByteArrayInputStream;
+import java.io.PrintStream;
 import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -116,4 +117,6 @@ public class SingleRecordUpdateClient implements Client {
         conn.commit();
     }
 
+    public void printReport(PrintStream out) {}
+    
 }

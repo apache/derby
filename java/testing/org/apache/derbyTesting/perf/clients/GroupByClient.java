@@ -21,6 +21,7 @@ limitations under the License.
 
 package org.apache.derbyTesting.perf.clients;
 
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
@@ -214,4 +215,6 @@ public class GroupByClient implements Client
         conn.commit();
     }
 
+    public void printReport(PrintStream out) {}
+    
 }

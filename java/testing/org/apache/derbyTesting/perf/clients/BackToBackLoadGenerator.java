@@ -52,6 +52,8 @@ public class BackToBackLoadGenerator implements LoadGenerator {
             client = c;
         }
 
+        public Client getClient() { return client; }
+
         public void run() {
             try {
                 while (!stop) {
@@ -128,5 +130,10 @@ public class BackToBackLoadGenerator implements LoadGenerator {
         out.println("Test duration (s):\t" + ((double) time / 1000));
         out.println("Number of transactions:\t" + count);
         out.println("Average throughput (tx/s):\t" + tps);
+        
+        for (int i = 0; i < threads.length; i++)
+        {
+            threads[i].getClient().printReport( out );
+        }
     }
 }

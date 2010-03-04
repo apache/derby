@@ -21,6 +21,7 @@ limitations under the License.
 
 package org.apache.derbyTesting.perf.clients;
 
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -114,6 +115,8 @@ public class SingleRecordSelectClient implements Client {
         conn.commit();
     }
 
+    public void printReport(PrintStream out) {}
+    
     /**
      * Make sure the text column is retrieved and read. Different methods
      * are used for the retrieval based on whether the column is a VARCHAR,

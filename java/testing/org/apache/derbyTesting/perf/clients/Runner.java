@@ -244,6 +244,12 @@ public class Runner {
 "              in the database has (default: 10)\n" +
 "            - accountsPerBranch=NN: specifies the number of accounts in\n" +
 "              each branch (default: 100000)\n" +
+"      * seq_gen - sequence generator concurrency. Accepts\n" +
+"                    the following load-specific options (see also -load_opts):\n" +
+"            - numberOfGenerators: number of sequences to create\n" +
+"            - tablesPerGenerator: number of tables to create per sequence\n" +
+"            - insertsPerTransaction: number of inserts to perform per transaction\n" +
+"            - debugging: 1 means print debug chatter, 0 means do not print the chatter\n" +
 "  -load_opts: comma-separated list of load-specific options\n" +
 "  -gen: load generator, default: b2b, valid types:\n" +
 "      * b2b - clients perform operations back-to-back\n" +
@@ -311,6 +317,8 @@ public class Runner {
                 getLoadOpt("branches", 1),
                 getLoadOpt("tellersPerBranch", 10),
                 getLoadOpt("accountsPerBranch", 100000));
+        } else if (load.equals("seq_gen")) {
+            return new SequenceGeneratorConcurrency.Filler();
         }
         System.err.println("unknown load: " + load);
         printUsage(System.err);
@@ -347,6 +355,8 @@ public class Runner {
                 getLoadOpt("branches", 1),
                 getLoadOpt("tellersPerBranch", 10),
                 getLoadOpt("accountsPerBranch", 100000));
+        } else if (load.equals("seq_gen")) {
+            return new SequenceGeneratorConcurrency.SGClient();
         }
         System.err.println("unknown load: " + load);
         printUsage(System.err);
