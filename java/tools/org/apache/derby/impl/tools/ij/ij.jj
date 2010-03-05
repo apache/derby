@@ -2224,7 +2224,7 @@ throws SQLException
 		try {
 			Session sn = findSession(qi.getSessionName());
 			
-			st = theConnection.createStatement(
+			st = sn.getConnection().createStatement(
 				scrollType, ResultSet.CONCUR_READ_ONLY, holdType);
 			JDBCDisplayUtil.checkNotNull(st,"cursor");
 			st.setCursorName(qi.getLocalName());

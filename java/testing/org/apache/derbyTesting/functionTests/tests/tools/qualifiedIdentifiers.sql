@@ -40,9 +40,10 @@ set connection DERBY4550_1;
 execute fred_select2;
 remove fred_select2;
 
--- setup cursor/switch connection/use
-get scroll insensitive cursor fred_cursor as 'select b from t1';
 set connection DERBY4550_2;
+
+-- cursors
+get scroll insensitive cursor fred_cursor@DERBY4550_1 as 'select b from t1';
 next fred_cursor@DERBY4550_1;
 -- getcurrentrownumber fred_cursor@DERBY4550_1;
 last fred_cursor@DERBY4550_1;

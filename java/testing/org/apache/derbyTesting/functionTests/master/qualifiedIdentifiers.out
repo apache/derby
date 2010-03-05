@@ -56,9 +56,9 @@ B
 200        
 300        
 ij(DERBY4550_1)> remove fred_select2;
-ij(DERBY4550_1)> -- setup cursor/switch connection/use
-get scroll insensitive cursor fred_cursor as 'select b from t1';
 ij(DERBY4550_1)> set connection DERBY4550_2;
+ij(DERBY4550_2)> -- cursors
+get scroll insensitive cursor fred_cursor@DERBY4550_1 as 'select b from t1';
 ij(DERBY4550_2)> next fred_cursor@DERBY4550_1;
 B          
 -----------
