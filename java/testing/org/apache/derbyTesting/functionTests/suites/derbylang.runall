@@ -22,7 +22,6 @@ lang/maxMemPerTab.java
 lang/nestedCommit.sql
 lang/openScans.sql
 lang/orderbyElimination.sql
-lang/outerjoin.sql
 lang/outparams.java
 lang/paramij.sql
 lang/partdml.sql
