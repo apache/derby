@@ -315,7 +315,7 @@ To run the tests, consult the testing
 <p>
 You can customize the Derby build by setting variables in a file
 called <i>ant.properties</i>. The Ant tool looks for this file in your
-home directory and in the top of the source tree.  
+home directory. 
 To find out where Ant thinks your home directory is,
 issue the following command and look for "user.home" in the output:
 </p>
@@ -327,6 +327,9 @@ ant -diagnostics
 </blockquote>
 
 <br/>
+<p>
+Alternatively, or additionally, you can place properties in a file called 'local.properties' in the top of the source tree. Properties placed in this file have precedence over those in user.home/ant.properties. 
+</p>
 <p>
 Here are some Derby-specific variables which you may want to set in <i>ant.properties</i>:
 </p>
