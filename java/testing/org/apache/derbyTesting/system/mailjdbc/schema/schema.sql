@@ -24,12 +24,11 @@ CREATE TABLE inbox (id bigint generated always as identity (start with 1,increme
 					folder_id Integer,
 					to_delete smallint default 0,
 					exp_date timestamp,
-					attach_id smallint default 0,
 					size_problem varchar(32672),
 					CONSTRAINT inbox__pk PRIMARY KEY (id));
 					
 CREATE TABLE attach (id bigint not null,
-					attach_id integer not null,
+				attach_id bigint generated always as identity (start with 1, increment by 1),
 		      		attachment blob(5M),
 		      		CONSTRAINT attach__pk PRIMARY KEY (id,attach_id),
 		      		constraint attach_fk foreign key (id) references inbox(id)
@@ -48,9 +47,7 @@ insert into folders (foldername) values('folder4');
 insert into folders (foldername) values('folder5');
 
 
-CREATE INDEX id_Index ON inbox(id); 
 CREATE INDEX to_delete_Index ON inbox(to_delete); 
 CREATE INDEX to_name_Index ON inbox(to_name); 
 CREATE INDEX date_Index ON inbox(date); 
-CREATE INDEX attach_Index ON inbox(attach_id); 
 CREATE INDEX attach_at_Index ON attach(attach_id); 

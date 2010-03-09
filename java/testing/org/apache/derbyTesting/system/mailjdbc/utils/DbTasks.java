@@ -51,7 +51,7 @@ public class DbTasks {
 	public static int insert_count = 0;
 
 	public static int delete_count = 0;
-
+	
 	public static int clob_count = 0;
 
 	public static int blob_count = 0;
@@ -81,6 +81,12 @@ public class DbTasks {
 			setSystemProperty("ij.password", "Refresh");
 		} else {
 			setSystemProperty("driver", "org.apache.derby.jdbc.ClientDriver");
+			MailJdbc.logAct
+			.logMsg(" \n*****************************************************");
+			MailJdbc.logAct
+			.logMsg("\n\n\tStarting the test in NetworkServer mode");
+			MailJdbc.logAct
+			.logMsg("\n\n*****************************************************");
 			if (useexistingdb)
 				setSystemProperty("database",
 					"jdbc:derby://localhost:1527/mailsdb");
@@ -89,12 +95,7 @@ public class DbTasks {
 					"jdbc:derby://localhost:1527/mailsdb;create=true");
 			setSystemProperty("ij.user", "REFRESH");
 			setSystemProperty("ij.password", "Refresh");
-			MailJdbc.logAct
-					.logMsg(" \n*****************************************************");
-			MailJdbc.logAct
-					.logMsg("\n\n\tStarting the test in NetworkServer mode");
-			MailJdbc.logAct
-					.logMsg("\n\n*****************************************************");
+			
 		}
 		try {
 			if (useexistingdb)
@@ -127,7 +128,7 @@ public class DbTasks {
 
 	}
 
-	public  static Connection getConnection(String usr, String passwd){
+	public static Connection getConnection(String usr, String passwd){
 		try {
 			// Returns the Connection object
 			Class.forName(System.getProperty("driver")).newInstance();
@@ -152,41 +153,41 @@ public class DbTasks {
 		boolean saveAutoCommit = conn.getAutoCommit();
 		int saveIsolation = conn.getTransactionIsolation();
 		Statement stmt = null;
-		Statement stmt1 = null;
-		int count = 0;
-		int count1 = 0;
+		Statement attach_stmt = null;
+		int inbox_count = 0;
+		int attach_count = 0;
 		long size = 0;
 		try {
 			conn.setAutoCommit(false);
 			conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
 			long s_select = System.currentTimeMillis();
 			stmt = conn.createStatement();
-			stmt1 = conn.createStatement();
+			attach_stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(Statements.getRowCount);
-			ResultSet rs1 = stmt1.executeQuery(Statements.getRowCountAtach);
+			ResultSet rs1 = attach_stmt.executeQuery(Statements.getRowCountAttach);
 			while (rs.next()) {
-				count = rs.getInt(1);
+				inbox_count = rs.getInt(1);
 			}
 			while (rs1.next()) {
-				count1 = rs1.getInt(1);
+				attach_count = rs1.getInt(1);
 			}
-			if (count == 0)
+			if (inbox_count == 0)
 				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 						+ "Inbox is empty");
 			long e_select = System.currentTimeMillis();
 			MailJdbc.logAct
 					.logMsg(LogFile.INFO + thread_name + " : "
 							+ "The number of mails in the REFRESH.INBOX are : "
-							+ count);
+							+ inbox_count);
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-					+ "The number of mails in the attachment table are : "
-					+ count1);
+					+ "The number of mails in the REFRESH.ATTACH are : "
+					+ attach_count);
 			log.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Time taken to scan the entire REFRESH.INBOX for count :"
 					+ PerfTime.readableTime(e_select - s_select));
 			rs.close();
-			stmt1.close();
 			rs1.close();
+			attach_stmt.close();
 		} catch (SQLException sqe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
 					+ "SQL Exception while reading : " + sqe.getMessage());
@@ -196,47 +197,51 @@ public class DbTasks {
 			throw sqe;
 		}
 		try {
-			int attach_id = 0;
-			if((count - 1) <= 0)
-				attach_id = 0;
-			else
-				 attach_id = Rn.nextInt(count - 1);
-			ResultSet rs = stmt
-					.executeQuery("select attachment from REFRESH.attach where id  = "
-							+ attach_id);
-			long start = System.currentTimeMillis();
-			if (rs.next()) {
-				size = rs.getBlob(1).length();
-				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-						+ "size of the attachment for id " + attach_id
-						+ " is : " + size);
-			} else
-				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-						+ "no attachment");
-			rs.close();
-
-			long end = System.currentTimeMillis();
-			log.logMsg(LogFile.INFO + thread_name + " : "
-					+ "Time taken to get the blob :"
-					+ PerfTime.readableTime(end - start));
-			rs = stmt
-					.executeQuery("select message from REFRESH.INBOX where id  = "
-							+ attach_id);
+			int inbox_id = 0;
+			if((inbox_count - 1) <= 0)
+				inbox_id = 1;
+			else {
+				 inbox_id = Rn.nextInt(inbox_count - 1);
+				 if (inbox_id == 0)
+					 inbox_id = 1;
+			}
 			long start_t = System.currentTimeMillis();
-			if (rs.next()) {
-				size = rs.getClob(1).length();
+
+			ResultSet inbox_rs = stmt
+					.executeQuery("select message from REFRESH.INBOX where id  = "
+							+ inbox_id);
+			
+			if (inbox_rs.next()) {
+				size = inbox_rs.getClob(1).length();
 				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-						+ "size of the message for id " + attach_id + " is : "
+						+ "size of the message for id " + inbox_id + " is : "
 						+ size);
 			} else
 				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-						+ "mail with the id " + attach_id + " does not exist");
+						+ "mail with the id " + inbox_id + " does not exist");
 			long end_t = System.currentTimeMillis();
 			log.logMsg(LogFile.INFO + thread_name + " : "
 					+ "Time taken to get the clob :"
 					+ PerfTime.readableTime(end_t - start_t));
-			rs.close();
-			stmt.close();
+			inbox_rs.close();
+			ResultSet attach_rs = stmt
+					.executeQuery("select attachment from REFRESH.attach where id  = "
+							+ inbox_id);
+			long start = System.currentTimeMillis();
+			if (attach_rs.next()) {
+				size = attach_rs.getBlob(1).length();
+				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
+						+ "size of the attachment for id " + inbox_id
+						+ " is : " + size);
+			} else
+				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
+						+ "no attachment");
+			attach_rs.close();
+   			stmt.close();
+			long end = System.currentTimeMillis();
+			log.logMsg(LogFile.INFO + thread_name + " : "
+					+ "Time taken to get the blob :"
+					+ PerfTime.readableTime(end - start));
 			conn.commit();
 		} catch (SQLException sqe) {
 			MailJdbc.logAct
@@ -259,52 +264,51 @@ public class DbTasks {
 
 	public synchronized void deleteMailByUser (Connection conn,
 			String thread_name) throws Exception{
-		// Delete done by the user. Thre user will mark the mails to be deleted
-		// and then
+		// Delete done by the user. The user will mark the mails to be deleted
+	
 		boolean saveAutoCommit = conn.getAutoCommit();
 		int id_count = 0;
 		int id = 0;
-		int for_id = 0;
 		try {
 			conn.setAutoCommit(false);
 			PreparedStatement updateUser = conn
 					.prepareStatement(Statements.updateStr);
 			Statement stmt = conn.createStatement();
 			ResultSet rs = stmt
-					.executeQuery("select max(id)from REFRESH.INBOX ");
+					.executeQuery("select max(id) from REFRESH.INBOX ");
 			if (rs.next())
 				id_count = rs.getInt(1);
+			rs.close();
+			stmt.close();
 			short to_delete = 1;
 			if((id_count -1) <= 0 )
 				id = id_count;
 			else
-				id = Rn.nextInt(id_count - 1);
+			{
+			    id = Rn.nextInt(id_count - 1);
+			    if (id == 0)
+			    	id = 1;
+			}
 			long s_update = System.currentTimeMillis();
 			int delete_count = 0;
 			for (int i = 0; i < id; i++) {
 				updateUser.setShort(1, to_delete);
-				if((id_count -1) <= 0 )
-					for_id = id_count;
-				else
-					for_id = Rn.nextInt(id_count - 1);
-				updateUser.setInt(2, for_id);
+				updateUser.setInt(2, i);
 				int del = updateUser.executeUpdate();
 				delete_count = delete_count + del;
 			}
 			long e_update = System.currentTimeMillis();
 			log.logMsg(LogFile.INFO + thread_name + " : "
-					+ " Time taken to mark the mails to be deleted :"
+					+ " Time taken to mark " + id + " mails to be deleted :"
 					+ PerfTime.readableTime(e_update - s_update));
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-					+ "The number of mails marked to be deleted  by user:"
+					+ "The number of mails marked to be deleted from REFRESH.INBOX is: "
 					+ delete_count);
-			rs.close();
 			updateUser.close();
-			stmt.close();
 			conn.commit();
 		} catch (SQLException sqe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
-					+ "Exception while deleting mail by user: "
+					+ "Exception while deleting mail REFRESH.INBOX"
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
@@ -325,8 +329,6 @@ public class DbTasks {
 			PreparedStatement deleteThread = conn
 					.prepareStatement(Statements.deleteStr);
 			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt
-					.executeQuery("select count(*) from REFRESH.INBOX where to_delete=1");
 			long s_delete = System.currentTimeMillis();
 			int count = 0;
 			count = deleteThread.executeUpdate();
@@ -335,15 +337,14 @@ public class DbTasks {
 					+ "Time taken to delete mails by thread :"
 					+ PerfTime.readableTime(e_delete - s_delete));
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : " + count
-					+ " rows deleted");
+					+ " rows deleted from REFRESH.INBOX");
 			delete_count = delete_count + count;
 			deleteThread.close();
-			rs.close();
 			stmt.close();
 			conn.commit();
 		} catch (SQLException sqe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
-					+ "Exception while deleting mail by Thread: "
+					+ "Exception while deleting mail from REFRESH.INBOX, REFRESH.ATTACH by Thread: "
 					+ sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
@@ -371,11 +372,20 @@ public class DbTasks {
 			else {
 				int message_id = 0;
 				int count = rs.getInt(1);
-				int folder_id = Rn.nextInt(5 - 1);
-				if (count == 0)
-					message_id = 0;
+                //If there is zero row, nothing to do	
+				if (count==0)
+					return;
+				//If there is just one row, id is 1 (start from 1)
+				if (count <= 1) 
+					message_id = 1;
 				else
 				    message_id = Rn.nextInt(count - 1);
+				if (message_id == 0)
+					message_id = 1;
+				//Assign the folder to be between 1 to 5
+				int folder_id = Rn.nextInt(5 - 1);
+				if (folder_id == 0)
+					folder_id = 1;
 				moveToFolder.setInt(1, folder_id);
 				moveToFolder.setInt(2, message_id);
 				long s_folder = System.currentTimeMillis();
@@ -386,7 +396,7 @@ public class DbTasks {
 						+ PerfTime.readableTime(e_folder - s_folder));
 				MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 						+ "Mail with id : " + message_id
-						+ " is moved to folder with id : " + folder_id);
+						+ " is moved to folder" + folder_id);
 			}
 			stmt.close();
 			moveToFolder.close();
@@ -408,11 +418,9 @@ public class DbTasks {
 
 	public void insertMail(Connection conn, String thread_name)
 			throws Exception {
-		// Inserting rows to the inbox table. Making attach_id of randomly
-		// selected rows to be one
-		// and for those rows inserting blobs in the attach table
-		Statement stmt = conn.createStatement();
-		int num = Rn.nextInt(10 - 1);
+		// Inserting rows to the inbox table. 
+		// inbox table would have random attachments - (attach table)
+		// The random attachment depends on no of rows id in inbox
 		InputStream streamIn = null;
 		Reader streamReader = null;
 		boolean saveAutoCommit = conn.getAutoCommit();
@@ -423,8 +431,14 @@ public class DbTasks {
 					Statements.insertStr, Statement.RETURN_GENERATED_KEYS);
 			String name = new String("ABCD");
 			String l_name = new String("WXYZ");
-			long s_insert = System.currentTimeMillis();
+			long total_ins_inb = 0;
+			long total_ins_att = 0;
+			int row_count = 0;
+			int num = Rn.nextInt(10 - 1);
+			if (num == 0) 
+				num = 1;
 			for (int i = 0; i < num; i++) {
+				long s_insert = System.currentTimeMillis();
 				String new_name = new String(increment(name, 60));
 				String new_lname = new String(decrement(l_name, 60));
 				insertFirst.setString(1, new_name);
@@ -445,93 +459,78 @@ public class DbTasks {
 					errorPrint(e);
 					throw e;
 				}
-				int rand_num = Rn.nextInt(10 - 1);
-				if (i == rand_num) {
-					ResultSet rs = stmt
-							.executeQuery("select count(*) from REFRESH.INBOX where attach_id>0");
-					while (rs.next()) {
-						id_count = rs.getInt(1);
-						insertFirst.setInt(5, rs.getInt(1) + 1);
-					}
-
-					rs.close();
-					conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-				} else
-					insertFirst.setInt(5, 0);
 				insertFirst
 						.setString(
-								6,
+								5,
 								"This column is used only to by pass the space problem. If the problem still exists, then we are going to "
 										+ "have a serious issue here.*****************************************************************************************************");
 				int result = insertFirst.executeUpdate();
 				if (result != 0) {
 					insert_count = insert_count + 1;
 				}
-			}
-			insertFirst.close();
-			conn.commit();
-			streamReader.close();
+				streamReader.close();
 
-			long e_insert = System.currentTimeMillis();
-			log.logMsg(LogFile.INFO + thread_name + " : "
-					+ "Time taken to insert " + num + "rows :"
-					+ PerfTime.readableTime(e_insert - s_insert));
-			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-					+ "number of mails inserted : " + num);
-
-		} catch (SQLException sqe) {
-			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-					+ "Error while inserting into REFRESH.INBOX:"
-					+ sqe.getMessage());
-			sqe.printStackTrace();
-			errorPrint(sqe);
-			conn.rollback();
-			throw sqe;
-		}
-		try {
-			PreparedStatement insertAttach = conn
+				long e_insert = System.currentTimeMillis();
+				total_ins_inb = total_ins_inb + (e_insert - s_insert);
+				PreparedStatement insertAttach = conn
 					.prepareStatement(Statements.insertStrAttach);
-			Statement stmt1 = conn.createStatement();
-			ResultSet rs = stmt1
-					.executeQuery("select id,attach_id from REFRESH.INBOX where attach_id >"
-							+ id_count);
-			int row_count = 0;
-			long a_start = System.currentTimeMillis();
-			while (rs.next()) {
-				insertAttach.setInt(1, rs.getInt(1));
-				insertAttach.setInt(2, rs.getInt(2));
-				try {
-					// to create a stream of random length between 0 and 5M
-					int blobLength = Rn.nextInt(5130000 - 0 + 1) + 0;
-					streamIn = new LoopingAlphabetStream(blobLength);
-					insertAttach.setBinaryStream(3, streamIn, blobLength);
-				} catch (Exception e) {
-					MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
+				Statement stmt1 = conn.createStatement();
+				ResultSet rs = insertFirst.getGeneratedKeys();
+				//10/1 chance to have attactment
+				int numa = Rn.nextInt(10 - 1);
+				if (numa == 0)
+					numa = 1;
+				if (i == numa) {
+					int attachid  = 0;
+				while (rs.next()) {
+					attachid = rs.getInt(1);	
+				}
+				// insert from 1 to 5 attachments
+				int num_attach = Rn.nextInt(5 - 1);
+				if (num_attach == 0)
+					num_attach = 1;
+				for (int j = 0; j < num_attach; j++) { 
+					long a_start = System.currentTimeMillis();
+					insertAttach.setInt(1, attachid);
+					//attach_id should be automatically generated
+					try {
+						// to create a stream of random length between 0 and 5M
+						int blobLength = Rn.nextInt(5130000 - 0 + 1) + 0;
+						streamIn = new LoopingAlphabetStream(blobLength);
+						insertAttach.setBinaryStream(2, streamIn, blobLength);
+					} catch (Exception e) {
+						MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
 							+ "Exception : " + e.getMessage());
-					errorPrint(e);
-					throw e;
+						errorPrint(e);
+						throw e;
+					}
+					int result_attach = insertAttach.executeUpdate();
+					streamIn.close();
+					if (result_attach != 0) {
+						blob_count = blob_count + 1;
+						row_count++;
+					}
+					long a_end = System.currentTimeMillis();
+					total_ins_att = total_ins_att + (a_end - a_start);
+				 }
 				}
-				int result_attach = insertAttach.executeUpdate();
-				streamIn.close();
-				if (result_attach != 0) {
-					blob_count = blob_count + 1;
-					row_count++;
-				}
-
-			}
-			long a_end = System.currentTimeMillis();
-			log.logMsg(LogFile.INFO + thread_name + " : "
-					+ "Time taken to insert " + row_count + "attachments :"
-					+ PerfTime.readableTime(a_end - a_start));
 			id_count++;
 			rs.close();
-			stmt.close();
 			stmt1.close();
 			insertAttach.close();
+			} 
+			log.logMsg(LogFile.INFO + thread_name + " : "
+					+ "Time taken to insert " + num + " rows to REFRESH.INBOX :"
+					+ PerfTime.readableTime(total_ins_inb));
+			log.logMsg(LogFile.INFO + thread_name + " : "
+					+ "Time taken to insert " + row_count + " rows to REFRESH.ATTACH :"			
+					+ PerfTime.readableTime(total_ins_att));
+			insertFirst.close();
 			conn.commit();
-		} catch (SQLException sqe) {
-			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-					+ "Error while inserting attachments:" + sqe.getMessage());
+		}
+		catch (SQLException sqe) {
+			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
+					+ "Error while inserting REFRESH.ATTACH:" + sqe.getMessage());
 			sqe.printStackTrace();
 			errorPrint(sqe);
 			conn.rollback();
@@ -550,22 +549,20 @@ public class DbTasks {
 			conn.setAutoCommit(false);
 			long s_delExp = System.currentTimeMillis();
 			Statement selExp = conn.createStatement();
-			PreparedStatement deleteExp = conn
-					.prepareStatement(Statements.delExp);
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
-					+ "delete mails which are older than 1 day");
+				+ "delete mails which are older than 1 day with sleep 250000 ");
 			int count = 0;
 			count = selExp.executeUpdate(Statements.del_jdbc_exp);
+			selExp.close();
+			conn.commit();
 			long e_delExp = System.currentTimeMillis();
 			log.logMsg(LogFile.INFO + thread_name + " : "
-					+ "Time taken to delete " + count + "mails :"
+					+ PerfTime.readableTime(s_delExp) + " : "
+					+ "Time taken to delete " + count + " mails :"
 					+ PerfTime.readableTime(e_delExp - s_delExp));
 			MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 					+ " number of mails deleted : " + count);
 			delete_count = delete_count + count;
-			deleteExp.close();
-			selExp.close();
-			conn.commit();
 		} catch (SQLException sqe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " : "
 					+ "Error while deleting mails by expiry manager: "
@@ -651,7 +648,7 @@ public class DbTasks {
 				+ "Finished Compressing the table: " + tabname);
 		log.logMsg(LogFile.INFO + thread_name + " : "
 				+ "Time taken to compress the table : " + tabname
-				+ PerfTime.readableTime(e_compress - s_compress));
+				+ " " + PerfTime.readableTime(e_compress - s_compress));
 		dbsize = databaseSize(new File("mailsdb"));
 		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
 				+ "dbsize after compress : " + dbsize);
@@ -670,13 +667,15 @@ public class DbTasks {
 			Statement stmt = conn.createStatement();
 			Statement stmt1 = conn.createStatement();
 			Statement stmt2 = conn.createStatement();
-			Statement stmt3 = conn.createStatement();
 			ResultSet rs = stmt
 					.executeQuery("select count(*) from REFRESH.INBOX ");
 			while (rs.next())
 				count = rs.getInt(1);
-			if (count > 12) {
-				diff = count - 12;
+			//Generate the random number between (count - 36)==>24 to 1
+			if (count > 50) {
+				diff = Rn.nextInt((count - 36) - 1);
+				if (diff == 0) 
+					diff = 1;
 				ResultSet rs1 = stmt1
 						.executeQuery("select id from REFRESH.INBOX");
 				while (rs1.next()) {
@@ -685,7 +684,7 @@ public class DbTasks {
 				}
 				for (int i = 0; i <= diff; i++) {
 					del_count = del_count
-							+ stmt3
+							+ stmt2
 									.executeUpdate("delete from REFRESH.INBOX where id ="
 											+ idArray.get(i));
 
@@ -697,7 +696,6 @@ public class DbTasks {
 			stmt.close();
 			stmt1.close();
 			stmt2.close();
-			stmt3.close();
 		} catch (Exception fe) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + thread_name + " :  "
 					+ fe.getMessage());
@@ -767,15 +765,15 @@ public class DbTasks {
 		MailJdbc.logAct.logMsg(LogFile.INFO + key + "=" + value);
 	}
 
-	public void totals() {
-		MailJdbc.logAct.logMsg(LogFile.INFO + " total number of inserts : "
+	public void totals(String thread_name) {
+		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : " + "total number of inserts : "
 				+ insert_count);
-		MailJdbc.logAct.logMsg(LogFile.INFO + " total number of deletes : "
+		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : " + "total number of deletes : "
 				+ delete_count);
-		MailJdbc.logAct.logMsg(LogFile.INFO
-				+ " total number of clobs inserted : " + insert_count);
-		MailJdbc.logAct.logMsg(LogFile.INFO
-				+ " total number of blobs inserted : " + blob_count);
+		//This number does not fit into reality. Reader should use 
+		//number of rows in REFRESH.ATTACH.
+		MailJdbc.logAct.logMsg(LogFile.INFO + thread_name + " : "
+				+ "total number of blobs had inserted : " + blob_count);
 	}
 
 	public static String decrement(String name, int maxLength) {

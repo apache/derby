@@ -37,6 +37,9 @@ public class Backup extends Thread{
 	
 	public Backup(String name)throws Exception{
 		setName(name);
+		//After fix of Derby-1062 only owner can perform backup
+		//Please refer Derby-4295
+		//conn = DbTasks.getConnection("BACKUP", "Backup");
 		conn = DbTasks.getConnection("REFRESH", "Refresh");
 	}
 

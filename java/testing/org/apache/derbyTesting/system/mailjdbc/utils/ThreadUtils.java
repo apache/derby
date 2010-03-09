@@ -34,11 +34,11 @@ import org.apache.derbyTesting.system.mailjdbc.tasks.Refresh;
 public class ThreadUtils {
 	private static ArrayList userThreads = new ArrayList();
 
-	public static ThreadUtils util = new ThreadUtils();
+	public static ThreadUtils threadutil = new ThreadUtils();
 
 	//constructor which will start the threads
 	public static void startThreads() {
-		util.run();
+		threadutil.run();
 	}
 
 	public void run() {
@@ -56,12 +56,12 @@ public class ThreadUtils {
 			userThreads.add(t);
 			//Starting Purge Thread
 			t = new Purge("Purging Thread");
-			int sleep_time = (int) (Math.random() * 500);//TODO : Change this
-														 // number to a
-														 // meaningful one)
+			int sleep_time = (int) 150000; //Due the cascade constriant
+									      // This is the number that
+										  // make sure insert attachment has been finished
 			Thread.sleep(sleep_time);
 			t.start();
-			MailJdbc.logAct.logMsg(LogFile.INFO + "Started: " + t.getName());
+			MailJdbc.logAct.logMsg(LogFile.INFO + "Started: " + t.getName() + " with 150000 sleep time");
 			userThreads.add(t);
 			//Starting Backup Thread
 			t = new Backup("Backup Thread");
@@ -90,12 +90,14 @@ public class ThreadUtils {
 	public static synchronized Thread getThread(String name) {
 		if (name.equalsIgnoreCase("Refresh Thread")) {
 			return (Refresh) userThreads.get(0);
+		} if (name.equalsIgnoreCase("Purging Thread")) {
+			return (Purge) userThreads.get(2);
 		} else {
 			return null;
 		}
 	}
 
 	public ThreadUtils getInstance() {
-		return util;
+		return threadutil;
 	}
 }

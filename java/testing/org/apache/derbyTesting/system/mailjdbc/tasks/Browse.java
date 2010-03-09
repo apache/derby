@@ -48,10 +48,10 @@ public class Browse extends Thread {
 				readInbox(conn, this.getName());
 				deleteMailByUser(conn, this.getName());
 				moveToFolders(conn, this.getName());
-				Thread.sleep(30000);
-				//Checking whther Refresh thread is running after doing the
-				// work
-				// If not interrupt the thread to do a refresh
+				//Try to avoid deadlock situation with delete from Refresh thread
+				Thread.sleep(100000);
+				//Checking whether Refresh thread is running after doing Browse work
+				//If Refresh is not running, interrupt the thread
 				if (ThreadUtils.isThreadRunning("Refresh Thread")) {
 					MailJdbc.logAct.logMsg("******** Refresh is running");
 				} else {
@@ -71,7 +71,7 @@ public class Browse extends Thread {
 
 	public void readInbox(Connection conn, String thread_name) throws Exception{
 		dbtasks.readMail(conn, thread_name);
-		dbtasks.totals();
+		dbtasks.totals(thread_name);
 	}
 
 	public void deleteMailByUser(Connection conn, String thread_name) throws Exception{

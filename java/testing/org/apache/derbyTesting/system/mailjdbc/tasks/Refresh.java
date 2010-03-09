@@ -24,6 +24,7 @@ package org.apache.derbyTesting.system.mailjdbc.tasks;
  */
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import org.apache.derbyTesting.system.mailjdbc.MailJdbc;
 import org.apache.derbyTesting.system.mailjdbc.utils.DbTasks;
@@ -50,10 +51,13 @@ public class Refresh extends Thread {
 			while (true) {
 				doWork();
 				try {
-					Thread.sleep(60000);
+					Thread.sleep(150000);
 				} catch (InterruptedException ie) {
 					MailJdbc.logAct.logMsg("#### " + getName()
 							+ "...Interrupted");
+					conn.commit();
+					MailJdbc.logAct.logMsg("#### " + getName()
+							+ "...commit connection...");
 				}
 			}
 		} catch (Exception e) {
@@ -73,21 +77,32 @@ public class Refresh extends Thread {
 		//Thread is running and does inserting the mails and deleting the mails
 		try {
 			insertMail(conn, this.getName());
-
+			//Try to avoid deadlock situation by Purge thread
+            Thread.sleep(60000);
 		} catch (Exception e) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR + "insertMail() failed "
 					+ e.getMessage());
 		}
 		try {
-			MailJdbc.logAct.logMsg(LogFile.INFO + "Deleting mail by refresh");
+			MailJdbc.logAct.logMsg(LogFile.INFO + "Deleting mail by Refresh Thread : ");
 			deleteMailByRefresh(conn, this.getName());
 		} catch (Exception e) {
 			MailJdbc.logAct.logMsg(LogFile.ERROR
 					+ "deleteMailByRefresh() failed " + e.getMessage());
+			try {
+				conn.rollback();
+			} catch (SQLException se) {
+				MailJdbc.logAct.logMsg(LogFile.ERROR
+						+ "rollback connection on Refresh failed..."
+						+ se.getMessage());
+			}  			
+			MailJdbc.logAct.logMsg("#### " + getName()
+					+ "...rollback connection after deleteMailByRefresh...");
 		}
-		isRunning = false;
 		MailJdbc.logAct.logMsg(LogFile.INFO + "Refresh doWork() completed");
+		isRunning = false;
 	}
+
 
 	public void grantRevoke(Connection conn, String thread_name)
 			throws Exception {

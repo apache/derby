@@ -23,15 +23,17 @@ package org.apache.derbyTesting.system.mailjdbc.utils;
 public class Statements {
 	public static String readStr = "select * from REFRESH.INBOX";
 
-	public static String insertStr = "insert into REFRESH.INBOX(from_name,to_name,date,Message,attach_id,size_problem) values (?,?,?,?,?,?)";
+	public static String insertStr = "insert into REFRESH.INBOX(from_name,to_name,date,Message,size_problem) values (?,?,?,?,?)";
+	
+	public static String insertStrAttach = "insert into REFRESH.ATTACH (id,attachment) values (?,?)";
 
-	public static String deleteStr = "delete  from REFRESH.INBOX where to_delete = 1";
-
+	public static String deleteStr = "delete from REFRESH.INBOX where to_delete = 1";
+	
 	public static String updateStr = "update REFRESH.INBOX set to_delete = ? where id = ?";
+	
+	public static String getRowCount = "select count(*) from REFRESH.INBOX";
 
-	public static String getRowCount = "select count(*)from REFRESH.INBOX";
-
-	public static String getRowCountAtach = "select count(*) from REFRESH.ATTACH";
+	public static String getRowCountAttach = "select count(*) from REFRESH.ATTACH";
 
 	public static String getRowCountin = "select count(*)from REFRESH.INBOX where to_name = ?";
 
@@ -47,11 +49,7 @@ public class Statements {
 
 	public static String del_jdbc_exp = "delete from REFRESH.INBOX where (values {fn TIMESTAMPDIFF(SQL_TSI_DAY,  date,CURRENT_TIMESTAMP)})>1";
 
-	public static String insertStrAttach = "insert into REFRESH.ATTACH (id,attach_id,attachment) values (?,?,?)";
-
 	public static String getTableCount = "select count(*) from sys.systables";
-
-	public static String getRowCountAttach = "select count(*) from REFRESH.ATTACH";
 
 	public static String grantSel1 = "grant select on REFRESH.INBOX to BROWSE";
 
@@ -84,7 +82,7 @@ public class Statements {
 	public static String grantDel2 = "grant delete on REFRESH.ATTACH to PURGE";
 
 	public static String grantDel3 = "grant delete on REFRESH.FOLDERS to BROWSE";
-
+	
 	public static String grantExe1 = "grant execute on procedure SYSCS_UTIL.SYSCS_BACKUP_DATABASE to BACKUP";
 
 	public static String grantExe2 = "grant execute on procedure SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE  to BACKUP";

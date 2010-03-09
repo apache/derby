@@ -47,12 +47,13 @@ public class Purge extends Thread {
 			while (true) {
 				//Wait for some activity to happen before deleting the mails,
 				// so sleep for sometime
-				Thread.sleep(120000);
+				Thread.sleep(250000);
 				//Deleting mails
 				purgeFromInbox(conn);
 				//Gets the size of the database
 				DoDbSizeCheck();
-				int sleep_time = (int) (Math.random() * 15000);
+				//Try to avoid deadlock with Refresh thread delete statement
+				int sleep_time = (int) 200000;
 				Thread.sleep(sleep_time);
 			}
 		} catch (Exception e) {
