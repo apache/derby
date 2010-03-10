@@ -2453,7 +2453,7 @@ public class ReplicationRun extends BaseTestCase
             // DERBY-4564. Make replication tests use derby.tests.networkServerTimeout proeprty
             String userStartTimeout = getSystemProperty("derby.tests.networkServerStartTimeout");
             long startTimeout = (userStartTimeout != null )? 
-            		Long.parseLong(userStartTimeout): DEFAULT_SERVER_START_TIMEOUT;
+            		(Long.parseLong(userStartTimeout) * 1000): DEFAULT_SERVER_START_TIMEOUT;
             long iterations = startTimeout / PINGSERVER_SLEEP_TIME_MILLIS;		
             util.DEBUG(debugId+"************** Do .start().");
             serverThread.start();
