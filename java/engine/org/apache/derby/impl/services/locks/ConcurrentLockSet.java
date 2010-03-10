@@ -886,6 +886,11 @@ forever:	for (;;) {
         waitTimeout = timeout;
     }
 	
+    /**
+     * Get the wait timeout in milliseconds.
+     */
+    public int getWaitTimeout() { return waitTimeout; }
+    
 	/*
 	** Non public methods
 	*/

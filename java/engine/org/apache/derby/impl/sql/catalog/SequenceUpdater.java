@@ -108,13 +108,6 @@ public abstract class SequenceUpdater implements Cacheable
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    //
-    // This is the number of times we attempt to get a sequence number in case we
-    // find ourselves in a race against another session which is draining numbers
-    // from the same sequence generator.
-    //
-    private static final int RETRY_COUNT = 3;
-
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // CONSTANT STATE
@@ -127,8 +120,11 @@ public abstract class SequenceUpdater implements Cacheable
     // This is the key used to lookup this generator in the cache.
     protected String _uuidString;
 
-    // This is the object which allocates ranges of sequence values */
+    // This is the object which allocates ranges of sequence values
     protected SequenceGenerator _sequenceGenerator;
+
+    // This is the lock timeout in milliseconds; a negative number means no timeout
+    private long _lockTimeoutInMillis;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -137,11 +133,16 @@ public abstract class SequenceUpdater implements Cacheable
     ///////////////////////////////////////////////////////////////////////////////////
 
     /** No-arg constructor to satisfy the Cacheable contract */
-    public SequenceUpdater() {}
+    public SequenceUpdater()
+    {
+        _lockTimeoutInMillis = getLockTimeout();
+    }
 
     /** Normal constructor */
     public SequenceUpdater( DataDictionaryImpl dd )
     {
+        this();
+        
         _dd = dd;
     }
     
@@ -289,12 +290,14 @@ public abstract class SequenceUpdater implements Cacheable
     public void getCurrentValueAndAdvance
         ( NumberDataValue returnValue ) throws StandardException
     {
+        Long startTime = null;
+        
         //
         // We try to get a sequence number. We try a couple times in case we find
         // ourselves in a race with another session which is draining numbers from
         // the same sequence generator.
         //
-        for ( int i = 0; i < RETRY_COUNT; i++ )
+        while ( true )
         {
             long[] cvaa = _sequenceGenerator.getCurrentValueAndAdvance();
             
@@ -331,7 +334,20 @@ public abstract class SequenceUpdater implements Cacheable
             // we or another session may have allocated more sequence numbers on disk. We go back
             // in to try to grab one of those numbers.
             //
-
+            if ( startTime == null )
+            {
+                // get the system time only if we have to
+                startTime = new Long( System.currentTimeMillis() );
+                continue;
+            }
+            
+            if (
+                (_lockTimeoutInMillis >= 0L) &&
+                ( (System.currentTimeMillis() - startTime.longValue()) > _lockTimeoutInMillis )
+                )
+            {
+                break;
+            }
             
         } // end of retry loop
 
@@ -376,11 +392,10 @@ public abstract class SequenceUpdater implements Cacheable
         TransactionController executionTransaction = getLCC().getTransactionExecute();
         TransactionController nestedTransaction = null;
 
-        // Try to get a nested transaction.
         try {
             nestedTransaction = executionTransaction.startNestedUserTransaction( false );
         } catch (StandardException se) {}
-
+        
         // First try to do the work in the nested transaction. Fail if we can't
         // get a lock immediately.
         if ( nestedTransaction != null )
@@ -398,9 +413,10 @@ public abstract class SequenceUpdater implements Cacheable
                 nestedTransaction.destroy();
             }
         }
-
+        
         // If we get here, we failed to do the work in the nested transaction.
         // Fall back on the execution transaction
+        
         return updateCurrentValueOnDisk( executionTransaction, oldValue, newValue, true );
     }
 
@@ -410,6 +426,12 @@ public abstract class SequenceUpdater implements Cacheable
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /** Get the time we wait for a lock, in milliseconds--overridden by unit tests */
+    protected int getLockTimeout()
+    {
+        return getLCC().getTransactionExecute().getAccessManager().getLockFactory().getWaitTimeout();
+    }
+    
 	private static LanguageConnectionContext getLCC()
     {
 		return (LanguageConnectionContext) 

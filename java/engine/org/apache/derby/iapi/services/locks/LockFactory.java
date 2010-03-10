@@ -190,6 +190,12 @@ public interface LockFactory extends PropertySetCallback {
 							  Object group, Lockable ref, Object qualifier);
 
 	/**
+		Get the lock timeout in milliseconds. A negative number means that
+        there is no timeout.
+	*/
+	public int getWaitTimeout();
+
+	/**
 		Install a limit that is called when the size of the group exceeds
 		the required limit.
 		<BR>

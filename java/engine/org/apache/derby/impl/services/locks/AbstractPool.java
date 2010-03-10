@@ -323,6 +323,12 @@ abstract class AbstractPool implements LockFactory
 			group, ref, qualifier);
 	}
 
+	/**
+		Get the lock timeout in milliseconds. A negative number means that
+        there is no timeout.
+	*/
+	public int getWaitTimeout() { return lockTable.getWaitTimeout(); }
+
 	public void setLimit(CompatibilitySpace compatibilitySpace,
 						 Object group, int limit, Limit callback) {
 		((LockSpace) compatibilitySpace).setLimit(group, limit, callback);

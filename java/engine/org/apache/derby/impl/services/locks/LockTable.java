@@ -136,6 +136,11 @@ interface LockTable {
     void setWaitTimeout(int timeout);
 
     /**
+     * Get the wait timeout in milliseconds.
+     */
+    int getWaitTimeout();
+
+    /**
      * Enable or disable tracing of deadlocks.
      *
      * @param flag <code>true</code> enables tracing, <code>false</code>

@@ -654,6 +654,10 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         {
             return updateCurrentValueOnDisk( null, oldValue, newValue, false );
         }
+        
+        // overridden to avoid a null pointer exception when we don't have a language context
+        protected int getLockTimeout() { return 1000; }
+    
     }
 
 }

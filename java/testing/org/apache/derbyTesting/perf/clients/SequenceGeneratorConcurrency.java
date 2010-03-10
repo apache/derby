@@ -215,7 +215,7 @@ public class SequenceGeneratorConcurrency
                     _psArray[ sequence ][ table ].executeUpdate();
                 }
             }
-            catch (SQLException t)
+            catch (Throwable t)
             {
                 debugPrint
                     (
