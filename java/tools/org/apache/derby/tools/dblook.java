@@ -526,7 +526,7 @@ public final class dblook {
 			DB_Schema.doSchemas(this.conn,
 				(tableList != null) && (targetSchema == null));
 
-            DB_Sequence.doSequences( conn );
+            if ( at10_6 ) { DB_Sequence.doSequences( conn ); }
 
 			if (tableList == null) {
 			// Don't do these if user just wants table-related objects.
