@@ -28,6 +28,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.CallableStatement;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 import javax.sql.DataSource;
@@ -37,6 +38,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.catalog.TypeDescriptor;
+import org.apache.derbyTesting.junit.JDBC;
 
 
 /**
@@ -317,5 +319,147 @@ public class Changes10_6 extends UpgradeChange {
 
         return ((Integer) meth.invoke( typeDescriptor, null )).intValue();
     }
-    
+
+    /**
+     * Make sure builtin authentication only uses the new configurable hash
+     * scheme in hard-upgraded databases. See DERBY-4483.
+     */
+    public void testBuiltinAuthenticationWithConfigurableHash()
+            throws SQLException {
+
+        // This test needs to enable authentication, which is not supported
+        // in the default database for the upgrade tests, so roll our own.
+        DataSource ds = JDBCDataSource.getDataSourceLogical("BUILTIN_10_6");
+
+        // Add create=true or upgrade=true, as appropriate, since we don't
+        // get this for free when we don't use the default database.
+        if (getPhase() == PH_CREATE) {
+            JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+        } else if (getPhase() == PH_HARD_UPGRADE) {
+            JDBCDataSource.setBeanProperty(
+                    ds, "connectionAttributes", "upgrade=true");
+        }
+
+        // Connect as database owner, possibly creating or upgrading the
+        // database.
+        Connection c = ds.getConnection("dbo", "the boss");
+
+        // Let's first verify that all the users can connect after the changes
+        // in the previous phase. Would for instance fail in post soft upgrade
+        // if soft upgrade saved passwords using the new scheme.
+        verifyCanConnect(ds);
+
+        CallableStatement setProp = c.prepareCall(
+                "call syscs_util.syscs_set_database_property(?, ?)");
+
+        if (getPhase() == PH_CREATE) {
+            // The database is being created. Make sure that builtin
+            // authentication is enabled.
+
+            setProp.setString(1, "derby.connection.requireAuthentication");
+            setProp.setString(2, "true");
+            setProp.execute();
+
+            setProp.setString(1, "derby.authentication.provider");
+            setProp.setString(2, "BUILTIN");
+            setProp.execute();
+        }
+
+        // Set (or reset) passwords for all users.
+        setPasswords(setProp);
+        setProp.close();
+
+        // We should still be able to connect.
+        verifyCanConnect(ds);
+
+        // Check that the passwords are stored using the expected scheme (new
+        // configurable hash scheme in hard upgrade, old scheme otherwise).
+        verifyPasswords(c, getPhase() == PH_HARD_UPGRADE);
+
+        c.close();
+
+        // The framework doesn't know how to shutdown a database using
+        // authentication, so do it manually as database owner here.
+        JDBCDataSource.setBeanProperty(ds, "user", "dbo");
+        JDBCDataSource.setBeanProperty(ds, "password", "the boss");
+        JDBCDataSource.shutdownDatabase(ds);
+    }
+
+    /**
+     * Information about users for the test of builtin authentication with
+     * configurable hash algorithm. Two-dimensional array of strings where
+     * each row contains (1) a user name, (2) a password, (3) the name of a
+     * digest algorithm with which the password should be hashed, (4) the
+     * hashed password when the old scheme is used, and (5) the hashed
+     * password when the new scheme is used.
+     */
+    private static final String[][] USERS = {
+        { "dbo", "the boss", null,
+                  "3b6071d99b1d48ab732e75a8de701b6c77632db65898",
+                  "3b6071d99b1d48ab732e75a8de701b6c77632db65898"
+        },
+        { "pat", "postman", "MD5",
+                  "3b609129e181a7f7527697235c8aead65c461a0257f3",
+                  "3b61aaca567ed43d1ba2e6402cbf1a723407:MD5"
+        },
+        { "sam", "fireman", "SHA-256",
+                  "3b609e5173cfa03620061518adc92f2a58c7b15cf04f",
+                  "3b61aff1a3f161b6c0ce856c4ce99ce6d779bad9cc1" +
+                  "44136099bc4b2b0742ed87899:SHA-256"
+        },
+    };
+
+    /**
+     * Set the passwords for all users specified in {@code USERS}.
+     *
+     * @param cs a callable statement that sets database properties
+     */
+    private void setPasswords(CallableStatement cs) throws SQLException {
+        for (int i = 0; i < USERS.length; i++) {
+            // Use the specified algorithm, if possible. (Will be ignored if
+            // the data dictionary doesn't support the new scheme.)
+            cs.setString(1, "derby.authentication.builtin.algorithm");
+            cs.setString(2, USERS[i][2]);
+            cs.execute();
+            // Set the password.
+            cs.setString(1, "derby.user." + USERS[i][0]);
+            cs.setString(2, USERS[i][1]);
+            cs.execute();
+        }
+    }
+
+    /**
+     * Verify that all passwords for the users in {@code USERS} are stored
+     * as expected. Raise an assert failure on mismatch.
+     *
+     * @param c a connection to the database
+     * @param newScheme if {@code true}, the passwords are expected to have
+     * been hashed with the new scheme; otherwise, the passwords are expected
+     * to have been hashed with the old scheme
+     */
+    private void verifyPasswords(Connection c, boolean newScheme)
+            throws SQLException {
+        PreparedStatement ps = c.prepareStatement(
+                "values syscs_util.syscs_get_database_property(?)");
+        for (int i = 0; i < USERS.length; i++) {
+            String expectedToken = USERS[i][newScheme ? 4 : 3];
+            ps.setString(1, "derby.user." + USERS[i][0]);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), expectedToken);
+        }
+        ps.close();
+    }
+
+    /**
+     * Verify that all users specified in {@code USERS} can connect to the
+     * database.
+     *
+     * @param ds a data source for connecting to the database
+     * @throws SQLException if one of the users cannot connect to the database
+     */
+    private void verifyCanConnect(DataSource ds) throws SQLException {
+        for (int i = 0; i < USERS.length; i++) {
+            Connection c = ds.getConnection(USERS[i][0], USERS[i][1]);
+            c.close();
+        }
+    }
 }

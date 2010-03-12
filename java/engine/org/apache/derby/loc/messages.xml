@@ -3624,6 +3624,12 @@ Guide.
                 <arg>failureMessage</arg>
             </msg>
 
+            <msg>
+                <name>XBCXW.S</name>
+                <text>The message digest algorithm '{0}' is not supported by any of the available cryptography providers. Please install a cryptography provider that supports that algorithm, or specify another algorithm in the derby.authentication.builtin.algorithm property.</text>
+                <arg>algorithmName</arg>
+            </msg>
+
         </family>
 
 

@@ -22,13 +22,14 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.security.AccessController;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -57,6 +58,13 @@ public class AuthenticationTest extends BaseJDBCTestCase {
 
     private static final String zeus = "\u0396\u0395\u03A5\u03A3";
     private static final String apollo = "\u0391\u09A0\u039F\u039B\u039B\u039A\u0390";
+
+    private static final String BUILTIN_ALGO_PROP =
+            "derby.authentication.builtin.algorithm";
+
+    private static final String USER_PREFIX = "derby.user.";
+
+    private static final String NO_SUCH_ALGO = "XBCXW";
     
     /** Creates a new instance of the Test */
     public AuthenticationTest(String name) {
@@ -107,13 +115,38 @@ public class AuthenticationTest extends BaseJDBCTestCase {
 
         test = new AuthenticationTest("testSystemShutdown");
         setBaseProps(suite, test);
+
+        // The test cases below test the configurable hash authentication
+        // mechanism added in DERBY-4483. Set the property that specifies the
+        // hash algorithm to some valid value for these tests. Not all tests
+        // depend on the property being set prior to their invocation, but by
+        // setting it in a decorator we ensure that it will be automatically
+        // cleared on tear down, so that it will be safe for all of these tests
+        // to change the property without worrying about resetting it later.
+        Properties confHashProps = new Properties();
+        confHashProps.setProperty(BUILTIN_ALGO_PROP, "MD5");
+
+        test = new AuthenticationTest("testVariousBuiltinAlgorithms");
+        setBaseProps(suite, test, confHashProps);
         
+        test = new AuthenticationTest("testNoCollisionsWithConfigurableHash");
+        setBaseProps(suite, test, confHashProps);
+
+        test = new AuthenticationTest("testInvalidAlgorithmName");
+        setBaseProps(suite, test, confHashProps);
+
         // This test needs to run in a new single use database as we're setting
         // a number of properties
         return TestConfiguration.singleUseDatabaseDecorator(suite);
     }
     
     protected static void setBaseProps(TestSuite suite, Test test) 
+    {
+        setBaseProps(suite, test, null);
+    }
+
+    private static void setBaseProps(
+            TestSuite suite, Test test, Properties extraDbProps)
     {
         // Use DatabasePropertyTestSetup.builtinAuthentication decorator
         // to set the user properties required by this test (and shutdown 
@@ -126,6 +159,11 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         Properties props = new Properties();
         props.setProperty("derby.infolog.append", "true");
         props.setProperty("derby.debug.true", "AuthenticationTrace");
+
+        if (extraDbProps != null) {
+            props.putAll(extraDbProps);
+        }
+
         Properties sysprops = new Properties();
         sysprops.put("derby.user.system", "admin");
         sysprops.put("derby.user.mickey", "mouse");
@@ -1058,6 +1096,95 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         assertSystemShutdownOK("", "system", "admin");
         openDefaultConnection("system", "admin").close(); // just so teardown works.
     }
+
+    /**
+     * DERBY-4483: Test that setting the property
+     * {@code derby.authentication.builtin.algorithm} changes which hash
+     * algorithm is used to protect the stored password token.
+     */
+    public void testVariousBuiltinAlgorithms() throws SQLException {
+        setAutoCommit(true);
+        String[] algorithms = { null, "MD5", "SHA-1", "SHA-256", "SHA-512" };
+        for (int i = 0; i < algorithms.length; i++) {
+            String algo = algorithms[i];
+            setDatabaseProperty(BUILTIN_ALGO_PROP, algo);
+
+            for (int j = 0; j < USERS.length; j++) {
+                String user = USERS[j];
+                String password = user + PASSWORD_SUFFIX;
+                String userProp = USER_PREFIX + user;
+
+                // Set the password for the user
+                setDatabaseProperty(userProp, password);
+
+                // Get the stored password token and verify that it
+                // hashed the way we expect it to be
+                String token = getDatabaseProperty(userProp);
+                if (algo == null) {
+                    assertTrue("Expected old authentication schema: " + token,
+                               token.startsWith("3b60"));
+                } else {
+                    assertTrue("Expected configurable hash schema: " + token,
+                               token.startsWith("3b61"));
+                    assertTrue("Expected algorithm " + algo + ":" + token,
+                               token.endsWith(":" + algo));
+                }
+
+                // Verify that we can still connect as that user
+                openDefaultConnection(user, password).close();
+            }
+        }
+    }
+
+    /**
+     * DERBY-4483: Test that slightly different passwords result in different
+     * hashes, and also that using the same password for different users
+     * results in a unique hashes with the configurable hash authentication
+     * scheme.
+     */
+    public void testNoCollisionsWithConfigurableHash() throws SQLException {
+        assertNotNull("hash algorithm not set up",
+                      getDatabaseProperty(BUILTIN_ALGO_PROP));
+
+        // Store a set of generated password tokens to detect collisions
+        HashSet tokens = new HashSet();
+
+        for (int i = 0; i < USERS.length; i++) {
+            String user = USERS[i];
+            String userProp = USER_PREFIX + user;
+            assertNotNull("missing user " + user,
+                          getDatabaseProperty(userProp));
+
+            // Start with the password "testing", and then change one of the
+            // characters
+            char[] pw = new char[] { 't', 'e', 's', 't', 'i', 'n', 'g' };
+            for (int j = 0; j < 100; j++) {
+                String pass = new String(pw);
+                setDatabaseProperty(userProp, pass);
+
+                assertTrue("collision detected",
+                           tokens.add(getDatabaseProperty(userProp)));
+                pw[pw.length / 2]++;
+            }
+        }
+    }
+
+    /**
+     * DERBY-4483: Test that we fail gracefully if an invalid algorithm name
+     * is specified in {@code derby.authentication.builtin.algorithm}.
+     */
+    public void testInvalidAlgorithmName() throws SQLException {
+        setDatabaseProperty(BUILTIN_ALGO_PROP, "not-a-valid-name");
+
+        for (int i = 0; i < USERS.length; i++) {
+            try {
+                setDatabaseProperty(USER_PREFIX + USERS[i], "abcdef");
+                fail();
+            } catch (SQLException sqle) {
+                assertSQLState(NO_SUCH_ALGO, sqle);
+            }
+        }
+    }
     
     protected void assertFailSetDatabaseProperty(
         String propertyName, String value, Connection conn) 
@@ -1080,6 +1207,15 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         setDBP.setString(2, value);
         setDBP.execute();
         setDBP.close();
+    }
+
+    /**
+     * Set a database property in the default connection.
+     */
+    void setDatabaseProperty(String propertyName, String value)
+            throws SQLException
+    {
+        setDatabaseProperty(propertyName, value, getConnection());
     }
     
     protected void useUserValue(int expectedUpdateCount, String user, String sql)

@@ -711,6 +711,13 @@ public interface Property {
 	public static final String AUTHENTICATION_SERVER_PARAMETER =
 								"derby.authentication.server";
 
+    /**
+     * Property that specifies the name of the hash algorithm to use with
+     * the configurable hash authentication scheme.
+     */
+    public static final String AUTHENTICATION_BUILTIN_ALGORITHM =
+            "derby.authentication.builtin.algorithm";
+
 	/*
 	** Log
 	*/

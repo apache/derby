@@ -244,6 +244,7 @@ public interface SQLState {
     String CANNOT_REENCRYPT_LOG_ARCHIVED_DATABASE     = "XBCXT.S";
     String DATABASE_ENCRYPTION_FAILED                 = "XBCXU.S";
     String DATABASE_REENCRYPTION_FAILED               = "XBCXV.S";
+    String DIGEST_NO_SUCH_ALGORITHM                   = "XBCXW.S";
 
 	/*
 	** Cache Service

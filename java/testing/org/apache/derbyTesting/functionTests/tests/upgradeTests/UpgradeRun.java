@@ -73,7 +73,8 @@ class UpgradeRun extends UpgradeClassLoader
                                                     // based collation
         new AdditionalDb("NO_ENCRYPT_10_2", true),
         new AdditionalDb("ENCRYPT_10_2",  true),
-        new AdditionalDb("ROLES_10_5", false)
+        new AdditionalDb("ROLES_10_5", false),
+        new AdditionalDb("BUILTIN_10_6", false),
     };
     
     public final static Test suite(final int[] version) {

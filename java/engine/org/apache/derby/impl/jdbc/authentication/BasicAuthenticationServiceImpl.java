@@ -21,26 +21,20 @@
 
 package org.apache.derby.impl.jdbc.authentication;
 
-import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.authentication.UserAuthenticator;
 import org.apache.derby.iapi.services.property.PropertyUtil;
-import org.apache.derby.iapi.services.daemon.Serviceable;
-import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.util.StringUtil;
+import org.apache.derby.impl.jdbc.Util;
 
 import java.util.Properties;
 // security imports - for SHA-1 digest
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.io.Serializable;
-import java.util.Dictionary;
+import java.sql.SQLException;
 
 /**
  * This authentication service is the basic Derby user authentication
@@ -147,6 +141,7 @@ public final class BasicAuthenticationServiceImpl
 								 String databaseName,
 								 Properties info
 									)
+            throws SQLException
 	{
         // Client security mechanism if any specified
         // Note: Right now it is only used to handle clients authenticating
@@ -199,7 +194,14 @@ public final class BasicAuthenticationServiceImpl
             if (secMec != SECMEC_USRSSBPWD)
             {
                 // encrypt passed-in password
-                passedUserPassword = encryptPassword(userPassword);
+                try {
+                    passedUserPassword = encryptPasswordUsingStoredAlgorithm(
+                            userName, userPassword, definedUserPassword);
+                } catch (StandardException se) {
+                    // The UserAuthenticator interface does not allow us to
+                    // throw a StandardException, so convert to SQLException.
+                    throw Util.generateCsSQLException(se);
+                }
             }
             else
             {
@@ -246,4 +248,37 @@ public final class BasicAuthenticationServiceImpl
 		// We do have a valid user
 		return true;
 	}
+
+    /**
+     * Encrypt a password using the same algorithm as we used to generate the
+     * stored password token.
+     *
+     * @param user the user whose password to encrypt
+     * @param password the plaintext password
+     * @param storedPassword the password token that's stored in the database
+     * @return a digest of the password created the same way as the stored
+     *         password
+     * @throws StandardException if the password cannot be encrypted with the
+     *         requested algorithm
+     */
+    private String encryptPasswordUsingStoredAlgorithm(
+                String user, String password, String storedPassword)
+            throws StandardException
+    {
+        if (storedPassword.startsWith(ID_PATTERN_SHA1_SCHEME)) {
+            return encryptPasswordSHA1Scheme(password);
+        } else if (storedPassword.startsWith(
+                        ID_PATTERN_CONFIGURABLE_HASH_SCHEME)) {
+            String algorithm = storedPassword.substring(
+                    storedPassword.indexOf(SEPARATOR_CHAR) + 1);
+            return encryptPasswordConfigurableScheme(user, password, algorithm);
+        } else {
+            if (SanityManager.DEBUG) {
+                SanityManager.THROWASSERT(
+                        "Unknown authentication scheme for token " +
+                        storedPassword);
+            }
+            return null;
+        }
+    }
 }
