@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import java.util.Locale;
 import java.text.DateFormat;
-import java.text.RuleBasedCollator;
 
 /**
 	A LocaleFinder gets a Locale and things associated with Locales.
@@ -36,14 +35,6 @@ public interface LocaleFinder {
 	 * @exception StandardException		Thrown on error
 	 */
 	Locale getCurrentLocale() throws StandardException;
-
-	/**
-	 * Get a RuleBasedCollator corresponding to the Locale returned by
-	 * getCurrentLocale().
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	RuleBasedCollator getCollator() throws StandardException;
 
 	/**
 	 * Get a formatter for formatting dates. The implementation may cache this

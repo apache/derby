@@ -88,8 +88,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Locale;
 import java.lang.reflect.Method;
-import java.text.Collator;
-import java.text.RuleBasedCollator;
 import java.text.DateFormat;
 
 /**
@@ -127,7 +125,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 	// so that XA class use can be isolated to XA modules.
 	protected Object resourceAdapter;
 	private Locale databaseLocale;
-	private RuleBasedCollator ruleBasedCollator;
 	private DateFormat dateFormat;
 	private DateFormat timeFormat;
 	private DateFormat timestampFormat;
@@ -494,23 +491,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 			return databaseLocale;
 		throw noLocale();
 	}
-
-	/** @exception StandardException	Thrown on error */
-	public RuleBasedCollator getCollator() throws StandardException {
-		RuleBasedCollator retval = ruleBasedCollator;
-
-		if (retval == null) {
-			if (databaseLocale != null) {
-				retval = ruleBasedCollator =
-					(RuleBasedCollator) Collator.getInstance(databaseLocale);
-			} else {
-				throw noLocale();
-			}
-		}
-
-		return retval;
-	}
-
 
 	/** @exception StandardException	Thrown on error */
 	public DateFormat getDateFormat() throws StandardException {

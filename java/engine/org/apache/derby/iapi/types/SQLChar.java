@@ -2934,7 +2934,12 @@ readingLoop:
     protected RuleBasedCollator getCollatorForCollation() 
         throws StandardException
     {
-        return getLocaleFinder().getCollator();
+        if (SanityManager.DEBUG) {
+            // Sub-classes that support collation will override this method,
+            // do don't expect it to be called here in the base class.
+            SanityManager.THROWASSERT("No support for collators in base class");
+        }
+        return null;
     }
 
     protected LocaleFinder getLocaleFinder()
