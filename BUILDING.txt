@@ -273,7 +273,8 @@ On many platforms, you can skip this section if you are happy with the
 defaults which the Derby build provides. However, please consult this
 section if the Derby build fails on your platform or if you want to
 override the build defaults. By editting the ant environment file
-(called ant.properties and located in your home directory), you can
+(called ant.properties and located in your home directory, or an optional
+file called local.properties in the top of the source tree), you can
 override the following defaults:
 
 - The location of the compiler libraries for jdk 1.4 and Java 5.
