@@ -17,13 +17,7 @@
 # specific language governing permissions and limitations
 # under the License.
 
-if [ -z "$DERBY_HOME" ]; then
-  echo "Error: DERBY_HOME is not set. Please set the DERBY_HOME environment variable"
-  echo "to the location of your Derby installation."
-  exit 1
-fi
-
-. $DERBY_HOME/bin/derby_common.sh
-
-derby_exec_command="exec \"$JAVACMD\" $DERBY_OPTS -classpath \"$LOCALCLASSPATH\" org.apache.derby.drda.NetworkServerControl shutdown $@"
+# Execute derby using eval/exec to preserve spaces in paths,
+# java options, and derby args
+derby_exec_command="exec \"$JAVACMD\" $DERBY_OPTS -classpath \"$LOCALCLASSPATH\" org.apache.derby.tools.ij $@"
 eval $derby_exec_command

@@ -32,7 +32,7 @@
 
 <!-- Targets -->
 
-  <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,jdbc3stubs,jdbc4stubs,felixStubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo"/>
+  <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,jdbc3stubs,jdbc4stubs,felixStubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo,binscripts"/>
   <target name="all" depends="buildsource,demo,testing,pptesting,runmessagecheck"/>
 
 <!-- ==================================================================== -->
@@ -726,6 +726,44 @@
      </javac>
 
   </target>
+
+<!-- =================================================================== -->
+<!--                     Build the Unix shell scripts under bin          -->
+<!-- =================================================================== -->
+
+<target name="binscripts">
+  <antcall target="makebinscript">
+    <param name="script" value="dblook"/>
+  </antcall>
+
+  <antcall target="makebinscript">
+    <param name="script" value="ij"/>
+  </antcall>
+
+  <antcall target="makebinscript">
+    <param name="script" value="sysinfo"/>
+  </antcall>
+
+  <antcall target="makebinscript">
+    <param name="script" value="NetworkServerControl"/>
+  </antcall>
+
+  <antcall target="makebinscript">
+    <param name="script" value="startNetworkServer"/>
+  </antcall>
+
+  <antcall target="makebinscript">
+    <param name="script" value="stopNetworkServer"/>
+  </antcall>
+</target>
+
+<target name="makebinscript">
+  <concat destfile="bin/${script}">
+    <fileset file="bin/templates/derby_common.sh"/>
+    <fileset file="bin/templates/${script}"/>
+  </concat>
+  <chmod perm="+x" file="bin/${script}"/>
+</target>
 
 <!-- =================================================================== -->
 <!--                     Remove generated message files                   -->
@@ -1835,23 +1873,23 @@
     <property file="${basedir}/snapshot/maintversion.properties"/>
     <zip destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
       <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
-      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
+      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </zip>
     <tar destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
       <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
-      <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
+      <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </tar>
 
     <!-- debug archives - DERBY-178 --> 
     <zip destfile="${basedir}/snapshot/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
       <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
-      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,CHANGES,README,javadoc/publishedapi/**"/>
+      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,CHANGES,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </zip>
     <tar destfile="${basedir}/snapshot/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
       <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
-      <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**"/>
+      <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </tar>
 
     <copy file="${basedir}/jars/insane/derby_core_plugin_${major}.${minor}.${interim}.zip"
