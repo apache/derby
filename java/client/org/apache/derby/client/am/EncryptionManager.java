@@ -525,7 +525,7 @@ public class EncryptionManager {
     /**
      * Strong Password Substitution (USRSSBPWD).
      *
-     * This method generate a password subtitute to send to the target
+     * This method generates a password substitute to send to the target
      * server.
      * 
      * Substitution algorithm works as follow:
@@ -587,6 +587,15 @@ public class EncryptionManager {
         //
         // Encrypt the password as it is done by the derby engine - Note that
         // this code (logic) is not shared yet - will be in next revision.
+        //
+        // Note that this code assumes that the Derby engine has encrypted
+        // the password using one particular algorithm (based on SHA-1). After
+        // DERBY-4483, it is possible that the engine uses another algorithm.
+        // Since the engine has no way to decrypt the encrypted password, it
+        // has no way to compared the stored password with the hash we send, so
+        // authentication will fail unless the engine actually uses the SHA-1
+        // based scheme.
+
         messageDigest.reset();
 
 		messageDigest.update(this.toHexByte(password, 0, password.length()));

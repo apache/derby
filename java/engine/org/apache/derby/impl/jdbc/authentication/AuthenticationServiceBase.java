@@ -594,7 +594,7 @@ public abstract class AuthenticationServiceBase
     /**
      * Strong Password Substitution (USRSSBPWD).
      *
-     * This method generate a password subtitute to authenticate a client
+     * This method generates a password substitute to authenticate a client
      * which is using a DRDA security mechanism such as SECMEC_USRSSBPWD.
      *
      * Depending how the user is defined in Derby and if BUILTIN
@@ -604,6 +604,17 @@ public abstract class AuthenticationServiceBase
      * means we're presented with a password substitute and we need to
      * generate a substitute password coming from the store to compare with
      * the one passed-in.
+     *
+     * The substitution algorithm used is the same as the one used in the
+     * SHA-1 authentication scheme ({@link #ID_PATTERN_SHA1_SCHEME}), so in
+     * the case of database passwords stored using that scheme, we can simply
+     * compare the received hash with the stored hash. If the configurable
+     * hash authentication scheme {@link #ID_PATTERN_CONFIGURABLE_HASH_SCHEME}
+     * is used, we have no way to find out if the received hash matches the
+     * stored password, since we cannot decrypt the hashed passwords and
+     * re-apply another hash algorithm. Therefore, strong password substitution
+     * only works if the database-level passwords are stored with the SHA-1
+     * scheme.
      *
      * NOTE: A lot of this logic could be shared with the DRDA decryption
      *       and client encryption managers - This will be done _once_
@@ -632,9 +643,6 @@ public abstract class AuthenticationServiceBase
                 boolean databaseUser) {
 
         MessageDigest messageDigest = null;
-
-        // Pattern that is prefixed to the BUILTIN encrypted password
-        String ID_PATTERN_NEW_SCHEME = "3b60";
 
         // PWSEQs's 8-byte value constant - See DRDA Vol 3
         byte SECMEC_USRSSBPWD_PWDSEQS[] = {
@@ -694,12 +702,21 @@ public abstract class AuthenticationServiceBase
             bytePasswd = StringUtil.toHexByte(password, 0, password.length());
             messageDigest.update(bytePasswd);
             byte[] encryptVal = messageDigest.digest();
-            hexString = ID_PATTERN_NEW_SCHEME +
+            hexString = ID_PATTERN_SHA1_SCHEME +
                 StringUtil.toHexString(encryptVal, 0, encryptVal.length);
         }
         else
+        {
             // Already encrypted from the database store
+            // NOTE: If the password was stored with the configurable hash
+            // authentication scheme, the stored password will have been hashed
+            // with a different algorithm than the hashed password sent from
+            // the client. Since there's no way to decrypt the stored password
+            // and rehash it with the algorithm that the client uses, we are
+            // not able to compare the passwords, and the connection attempt
+            // will fail.
             hexString = password;
+        }
 
         // Generate the password substitute now
 

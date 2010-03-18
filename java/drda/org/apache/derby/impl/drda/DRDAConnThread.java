@@ -8464,6 +8464,8 @@ class DRDAConnThread extends Thread {
      *	SECMEC_USRSSBPWD is ONLY supported by the target server if:
      *	    - current authentication provider is Derby BUILTIN or
      *	      NONE. (database / system level) (Phase I)
+     *      - database-level password must have been encrypted with the
+     *        SHA-1 based authentication scheme
      *		- Application requester is 'DNC' (Derby Network Client)
      *		  (Phase I)
      *
