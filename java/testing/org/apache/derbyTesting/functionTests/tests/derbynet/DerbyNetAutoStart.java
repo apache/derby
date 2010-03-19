@@ -82,6 +82,7 @@ public class DerbyNetAutoStart
     private static StringBuffer basePropertiesSB = new StringBuffer();
     private static File derbyPropertiesFile;
     private static final Properties authenticationProperties;
+    private static Process serverProcess;
     static
     {
         authenticationProperties = new Properties();
@@ -95,16 +96,22 @@ public class DerbyNetAutoStart
     public static void main( String[] args)
     {
         setup( args);
-        runAllTests();
-        if( passed)
-        {
-            System.out.println( "PASSED.");
-            System.exit(0);
-        }
-        else
-        {
-            System.out.println( "FAILED.");
-            System.exit(1);
+        try { 
+            runAllTests();
+            if( passed)
+            {
+                System.out.println( "PASSED.");
+                System.exit(0);
+            }
+            else
+            {
+                System.out.println( "FAILED.");
+                System.exit(1);
+            }
+            // ensure the serverProcess goes away in case of an error somewhere
+        } finally {
+            if (serverProcess != null)
+                serverProcess.destroy();
         }
     } // end of main
 
@@ -150,7 +157,7 @@ public class DerbyNetAutoStart
 					}
 					// Block so other process can get connections
 					while (isServerStarted(server))
-						Thread.sleep(500);
+						Thread.sleep(1000);
                     System.exit(0);
                 }
             }
@@ -329,7 +336,7 @@ public class DerbyNetAutoStart
         {
             try
             {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             }
             catch( InterruptedException ie){};
 
@@ -340,7 +347,7 @@ public class DerbyNetAutoStart
             }
             catch( SQLException sqle)
             {
-                if( ntries > 20)
+                if( ntries > 60)
                 {
                     System.out.println( "Server start failed: " +
 										sqle.getMessage());
@@ -553,7 +560,7 @@ public class DerbyNetAutoStart
                 }
                 catch( SQLException sqle)
                 {
-                    if( ntries > 5)
+                    if( ntries > 20)
                     {
                         passed = false;
                         System.out.println( "  Could not access database through the network server.");
