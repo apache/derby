@@ -306,12 +306,17 @@ to specify your environment and options:
     On newer Windows systems, ${user.home} is often equivalent
     to the value of the environment variable %USERPROFILE%.
 
-    NOTE: It is not a requirement that ant.properties reside in your
-    user.home directory. The file can be placed anywhere accessible
-    on the local filesystem, but ant must then be invoked with the
-    -propertyfile option:
+    NOTE: It is not a requirement that an ant.properties file resides 
+    in your user.home directory. The file can be placed anywhere 
+    accessible on the local filesystem, but ant must then be invoked 
+    with the -propertyfile option:
 
-    ant -propertyfile {path_to_propertyfile}
+    ant -propertyfile {path_to_propertyfile} 
+
+    Alternatively or additionally, you can create a file called
+    local.properties at the top of the checked out tree. Property
+    settings in this file take precedence over those in the 
+    ant.properties file in the user.home directory.
 
 (2) Create a file called "ant.properties" in your ${user.home} 
     directory and define the following variables in 
