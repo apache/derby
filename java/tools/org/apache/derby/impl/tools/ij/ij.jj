@@ -34,8 +34,6 @@ PARSER_BEGIN(ij)
 
 package org.apache.derby.impl.tools.ij;
 
-import org.apache.derby.iapi.reference.JDBC20Translation;
-
 import org.apache.derby.tools.JDBCDisplayUtil;
 
 
@@ -65,6 +63,7 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.List;
 import java.util.ArrayList;
+import javax.transaction.xa.XAResource;
 
 
 /**
@@ -3562,42 +3561,42 @@ throws SQLException
 {
 	<XA_ENDRSCAN>
 	{
-		return JDBC20Translation.XA_ENDRSCAN;
+		return XAResource.TMENDRSCAN;
 	}
 |
 	<XA_FAIL>
 	{
-		return JDBC20Translation.XA_FAIL;
+		return XAResource.TMFAIL;
 	}
 |
 	<XA_JOIN>
 	{
-		return JDBC20Translation.XA_JOIN;
+		return XAResource.TMJOIN;
 	}
 |
 	<XA_NOFLAGS>
 	{
-		return JDBC20Translation.XA_NOFLAGS;
+		return XAResource.TMNOFLAGS;
 	}
 |
 	<XA_RESUME>
 	{
-		return JDBC20Translation.XA_RESUME;
+		return XAResource.TMRESUME;
 	}
 |	
 	<XA_STARTRSCAN>
 	{
-		return JDBC20Translation.XA_STARTRSCAN;
+		return XAResource.TMSTARTRSCAN;
 	}
 |
 	<XA_SUCCESS>
 	{
-		return JDBC20Translation.XA_SUCCESS;
+		return XAResource.TMSUCCESS;
 	}
 |
 	<XA_SUSPEND>
 	{
-		return JDBC20Translation.XA_SUSPEND;
+		return XAResource.TMSUSPEND;
 	}
 
 }

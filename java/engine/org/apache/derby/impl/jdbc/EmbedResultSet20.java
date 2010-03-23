@@ -21,32 +21,21 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.iapi.reference.JDBC20Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.sql.ResultSet;
 
-import org.apache.derby.iapi.sql.execute.ExecCursorTableReference;
-
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.conn.StatementContext;
                                          
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import java.sql.Statement;
 import java.sql.SQLException;
-import java.sql.Types;
 
 /* ---- New jdbc 2.0 types ----- */
 import java.sql.Array;
-import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.Ref;
 
 import java.math.BigDecimal;
-import java.net.URL;
 
 /**
  * This class extends the EmbedResultSet class in order to support new

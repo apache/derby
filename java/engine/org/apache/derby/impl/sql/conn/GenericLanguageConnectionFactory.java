@@ -21,17 +21,12 @@
 
 package org.apache.derby.impl.sql.conn;
 
-import org.apache.derby.iapi.reference.JDBC20Translation;
-import org.apache.derby.iapi.reference.JDBC30Translation;
-
 import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 
 import org.apache.derby.iapi.sql.LanguageFactory;
 import org.apache.derby.impl.sql.GenericStatement;
-
-import org.apache.derby.impl.sql.conn.CachedStatement;
 
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.services.compiler.JavaFactory;
@@ -48,14 +43,10 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
 
-import org.apache.derby.iapi.sql.Activation;
-
-import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.services.property.PropertyFactory;
 
 import org.apache.derby.iapi.sql.Statement;
 import org.apache.derby.iapi.sql.compile.OptimizerFactory;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
@@ -65,7 +56,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
-import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.context.ContextManager;
 
 import org.apache.derby.iapi.services.cache.CacheFactory;
@@ -76,13 +66,11 @@ import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.property.PropertySetCallback;
 
-import org.apache.derby.iapi.services.i18n.LocaleFinder;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.EngineType;
 
 import java.util.Properties;
-import java.util.Locale;
 import java.util.Dictionary;
 import java.io.Serializable;
 import org.apache.derby.iapi.util.IdUtil;

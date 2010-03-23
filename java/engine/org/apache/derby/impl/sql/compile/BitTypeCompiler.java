@@ -27,10 +27,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
-import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.iapi.types.BitDataValue;
-import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -38,9 +34,6 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
 
 import org.apache.derby.iapi.reference.ClassName;
-
-import java.sql.Types;
-import org.apache.derby.iapi.reference.JDBC20Translation;
 
 /**
  * This class implements TypeCompiler for the SQL BIT datatype.
