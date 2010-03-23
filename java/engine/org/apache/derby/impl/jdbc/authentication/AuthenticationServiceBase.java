@@ -468,8 +468,7 @@ public abstract class AuthenticationServiceBase
 
 		algorithm.reset();
 		byte[] bytePasswd = null;
-        bytePasswd = StringUtil.toHexByte(
-                plainTxtUserPassword,0,plainTxtUserPassword.length());
+        bytePasswd = toHexByte(plainTxtUserPassword);
 		algorithm.update(bytePasswd);
 		byte[] encryptVal = algorithm.digest();
         String hexString = ID_PATTERN_SHA1_SCHEME +
@@ -477,6 +476,47 @@ public abstract class AuthenticationServiceBase
 		return (hexString);
 
 	}
+
+    /**
+     * <p>
+     * Convert a string into a byte array in hex format.
+     * </p>
+     *
+     * <p>
+     * For each character (b) two bytes are generated, the first byte
+     * represents the high nibble (4 bits) in hexadecimal ({@code b & 0xf0}),
+     * the second byte represents the low nibble ({@code b & 0x0f}).
+     * </p>
+     *
+     * <p>
+     * The character at {@code str.charAt(0)} is represented by the first two
+     * bytes in the returned String.
+     * </p>
+     *
+     * <p>
+     * New code is encouraged to use {@code String.getBytes(String)} or similar
+     * methods instead, since this method does not preserve all bits for
+     * characters whose codepoint exceeds 8 bits. This method is preserved for
+     * compatibility with the SHA-1 authentication scheme.
+     * </p>
+     *
+     * @param str string
+     * @return the byte[] (with hexadecimal format) form of the string (str)
+     */
+    private static byte[] toHexByte(String str)
+    {
+        byte[] data = new byte[str.length() * 2];
+
+        for (int i = 0; i < str.length(); i++)
+        {
+            char ch = str.charAt(i);
+            int high_nibble = (ch & 0xf0) >>> 4;
+            int low_nibble = (ch & 0x0f);
+            data[i] = (byte)high_nibble;
+            data[i+1] = (byte)low_nibble;
+        }
+        return data;
+    }
 
     /**
      * <p>
@@ -671,7 +711,7 @@ public abstract class AuthenticationServiceBase
         messageDigest.reset();
 
         byte[] bytePasswd = null;
-        byte[] userBytes = StringUtil.toHexByte(userName, 0, userName.length());
+        byte[] userBytes = toHexByte(userName);
 
         if (SanityManager.DEBUG)
         {
@@ -699,7 +739,7 @@ public abstract class AuthenticationServiceBase
         // substitute generation right afterwards.
         if (!databaseUser)
         {
-            bytePasswd = StringUtil.toHexByte(password, 0, password.length());
+            bytePasswd = toHexByte(password);
             messageDigest.update(bytePasswd);
             byte[] encryptVal = messageDigest.digest();
             hexString = ID_PATTERN_SHA1_SCHEME +
@@ -722,8 +762,7 @@ public abstract class AuthenticationServiceBase
 
         // Generate some 20-byte password token
         messageDigest.update(userBytes);
-        messageDigest.update(
-                StringUtil.toHexByte(hexString, 0, hexString.length()));
+        messageDigest.update(toHexByte(hexString));
         byte[] passwordToken = messageDigest.digest();
         
         // Now we generate the 20-byte password substitute
