@@ -25,10 +25,10 @@ import java.util.*;
  */
 class JiraIssue {
     private static final long NO_RELEASE_NOTE = -1;
-    private static final String JIRA_ITEM = "item";
+    private static final String JIRA_ITEM = "h3";
     private static final String JIRA_ID = "id";
     private static final String JIRA_NAME = "name";
-    private static final String JIRA_TITLE = "title";
+    private static final String JIRA_TITLE = "a";
     private static final String JIRA_KEY = "key";
     private static final String JIRA_ATTACHMENT = "attachment";
     private static final String JIRA_FIXVERSION = "fixVersion";
@@ -48,21 +48,11 @@ class JiraIssue {
      */
     public JiraIssue(Element itemElement) throws Exception {
         ElementFacade ef = new ElementFacade(itemElement);
-        key = ef.getTextByTagName(JIRA_KEY);
         title = ef.getTextByTagName(JIRA_TITLE);
+        //key = ef.getTextByTagName(JIRA_KEY);
+        key = parseKey( title );
 
-        NodeList attachmentsList =
-                itemElement.getElementsByTagName(JIRA_ATTACHMENT);
-
-        for (int i = 0; i < attachmentsList.getLength(); i++) {
-            Element attachment = (Element) attachmentsList.item(i);
-            String name = attachment.getAttribute(JIRA_NAME);
-            if (RELEASE_NOTE_NAME.equals(name)) {
-                releaseNoteAttachmentID =
-                        Math.max(releaseNoteAttachmentID,
-                        Long.parseLong(attachment.getAttribute(JIRA_ID)));
-            }
-        }
+        releaseNoteAttachmentID = getReleaseNoteAttachmentID( key, itemElement );
 
         //
         // A JIRA title has the following form:
@@ -78,6 +68,65 @@ class JiraIssue {
         i.hasNext();) {
             fixVersionSet.add(i.next());
         }
+    }
+
+    /**
+     * Look up the attachment id for the release note attached to
+     * an issue.
+     */
+    private long getReleaseNoteAttachmentID
+        ( String key, Element itemElement )
+        throws Exception
+    {
+        long result = NO_RELEASE_NOTE;
+
+        //
+        // The following code used to work before the time of Derby 10.6.
+        // With that release, the list of attachments stopped appearing in
+        // the xml reports.
+        //
+        //        NodeList attachmentsList =
+        //                itemElement.getElementsByTagName(JIRA_ATTACHMENT);
+        //
+        //        for (int i = 0; i < attachmentsList.getLength(); i++) {
+        //            Element attachment = (Element) attachmentsList.item(i);
+        //            String name = attachment.getAttribute(JIRA_NAME);
+        //            if (RELEASE_NOTE_NAME.equals(name)) {
+        //                result =
+        //                        Math.max(result,
+        //                        Long.parseLong(attachment.getAttribute(JIRA_ID)));
+        //            }
+        //        }
+
+        //
+        // As a consequence, we now hardcode the attachment ids.
+        // The attachment id is in the link of the latest release note
+        // attached to the issue.
+        //
+        if ( key.equals( "DERBY-4432" ) ) { result = 12424709L; }
+        else if ( key.equals( "DERBY-4380" ) ) { result = 12434514L; }
+        else if ( key.equals( "DERBY-4355" ) ) { result = 12419298L; }
+        else if ( key.equals( "DERBY-4312" ) ) { result = 12414219L; }
+        else if ( key.equals( "DERBY-4230" ) ) { result = 12409466L; }
+        else if ( key.equals( "DERBY-4191" ) ) { result = 12430699L; }
+        else if ( key.equals( "DERBY-3991" ) ) { result = 12409798L; }
+        else if ( key.equals( "DERBY-3844" ) ) { result = 12436979L; }
+        else if ( key.equals( "DERBY-2769" ) ) { result = 12418474L; }
+        
+        return result;
+    }
+
+    /**
+     * Extract the JIRA key (DERBY-XXXX) from the raw title.
+     * A JIRA  raw title has the following form:
+     *
+     *  "[DERBY-2598] new upgrade  test failures after change 528033"
+     */
+    private String parseKey( String rawTitle ) throws Exception
+    {
+        String result = rawTitle.substring(1, title.indexOf(']') );
+
+        return result;
     }
 
     /**
@@ -111,7 +160,7 @@ class JiraIssue {
             }
             if (!skip)
             {
-                System.out.println("adding: " + candidate.getKey());
+                //System.out.println("adding: " + candidate.getKey());
                 jiraIssues.add(candidate);
             }
         }
@@ -159,7 +208,7 @@ class JiraIssue {
      * @return URL for this Jira issue
      */
     public String getJiraAddress() {
-        return "http://issues.apache.org/jira/browse/" + key;
+        return "https://issues.apache.org/jira/browse/" + key;
     }
 
     /**

@@ -301,7 +301,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
         for (Iterator i = JiraIssue.createJiraIssueList(bugListDoc,
                 excludeReleaseIDList).iterator(); i.hasNext();) {
             JiraIssue issue = (JiraIssue) i.next();
-            println("Fixed: "+ issue.getKey());
+            //println("Fixed: "+ issue.getKey());
             Element row = insertRow(table);
             Element linkColumn = insertColumn(row);
             Element descriptionColumn = insertColumn(row);
