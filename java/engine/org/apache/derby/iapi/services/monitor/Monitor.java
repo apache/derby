@@ -602,7 +602,7 @@ public class Monitor {
         // This is mostly due to the fact that the current implementation for
         // the on-disk back end doesn't handle logDevice when dropping.
         // Security is another concern.
-        if (!name.startsWith(PersistentService.INMEMORY)) {
+        if (!name.startsWith(PersistentService.INMEMORY + ":")) {
             throw StandardException.newException(
                     SQLState.SERVICE_DIRECTORY_REMOVE_ERROR, name);
         }
