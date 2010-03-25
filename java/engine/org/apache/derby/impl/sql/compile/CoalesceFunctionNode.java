@@ -30,12 +30,12 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
+
+import org.apache.derby.iapi.util.JBitSet;
 
 import java.lang.reflect.Modifier;
 
@@ -374,6 +374,17 @@ public class CoalesceFunctionNode extends ValueNode
 		}
 		return returnNode;
 	}
+    /**
+     * Categorize this predicate.
+     *
+     * @see ValueNode#categorize(JBitSet, boolean)
+     */
+    public boolean categorize(JBitSet referencedTabs, boolean simplePredsOnly)
+        throws StandardException
+    {
+        return argumentsList.categorize(referencedTabs, simplePredsOnly);
+    }
+
 	/**
 	 * Preprocess an expression tree.  We do a number of transformations
 	 * here (including subqueries, IN lists, LIKE and BETWEEN) plus

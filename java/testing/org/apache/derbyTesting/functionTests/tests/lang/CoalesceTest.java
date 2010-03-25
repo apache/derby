@@ -1184,6 +1184,26 @@ public class CoalesceTest extends BaseJDBCTestCase
                 "1");
     }
 
+    /**
+     * Regression test for DERBY-4594. A join with COALESCE in the WHERE
+     * clause failed with NullPointerException or with
+     * ArrayIndexOutOfBoundsException because the predicates had not been
+     * properly categorized in CoalesceFunctionNode.
+     */
+    public void testPredicateCategorizationDerby4594() throws SQLException {
+        s.execute("create table d4594_t1 (a1 int)");
+        s.execute("create table d4594_t2 (a2 int)");
+        s.execute("insert into d4594_t1 values 1");
+        // failed with NullPointerException
+        JDBC.assertEmpty(s.executeQuery(
+                "select 1 from d4594_t1 join d4594_t2 on 1=1 " +
+                "where coalesce(a2, 0) <> 1"));
+        // failed with ArrayIndexOutOfBoundsException
+        JDBC.assertEmpty(s.executeQuery(
+                "select 1 from d4594_t1 left join d4594_t2 on 1=1 " +
+                "where coalesce(a2, 0) <> 1"));
+    }
+
     /**************supporting methods *******************/
     private void dumpRS(ResultSet rs, String expectedValue) throws SQLException
     {
