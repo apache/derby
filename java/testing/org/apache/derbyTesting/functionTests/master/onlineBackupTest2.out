@@ -124,13 +124,13 @@ create index idx1 on t1(a) ;
 ij(C2)> set connection c1;
 ij(C1)> -- make sure backup does not already exists at the backup location.
 values removeDirectory('extinout/ulbackup1');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-true                                                                                                                            
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+true                                                                                                
 ij(C1)> values fileExists('extinout/ulbackup1');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-false                                                                                                                           
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+false                                                                                               
 ij(C1)> async bthread1 'call SYSCS_UTIL.SYSCS_BACKUP_DATABASE(
                                     ''extinout/ulbackup1'')' ;
 ij(C1)> set connection c2;
@@ -140,9 +140,9 @@ call sleep(1000);
 0 rows inserted/updated/deleted
 ij(C2)> -- make sure backup did not really proceed, backup dir should not exist
 values fileExists('extinout/ulbackup1');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-false                                                                                                                           
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+false                                                                                               
 ij(C2)> -- rollback the unlogged op for backup to proceed.
 rollback;
 ij(C2)> set connection c1;
@@ -151,9 +151,9 @@ wait for bthread1;
 0 rows inserted/updated/deleted
 ij(C1)> -- check if backup is created.
 values fileExists('extinout/ulbackup1');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-true                                                                                                                            
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+true                                                                                                
 ij(C1)> commit;
 ij(C1)> -- case2: simple backup call with the default wait for ulogged ops
 set connection c2;
@@ -162,13 +162,13 @@ ij(C2)> create index idx1 on t1(a) ;
 ij(C2)> set connection c1;
 ij(C1)> -- make sure backup does not already exists at the backup location.
 values removeDirectory('extinout/ulbackup2');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-true                                                                                                                            
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+true                                                                                                
 ij(C1)> values fileExists('extinout/ulbackup2');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-false                                                                                                                           
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+false                                                                                               
 ij(C1)> async bthread1 
   'call SYSCS_UTIL.SYSCS_BACKUP_DATABASE(''extinout/ulbackup2'')';
 ij(C1)> set connection c2;
@@ -178,9 +178,9 @@ call sleep(1000);
 0 rows inserted/updated/deleted
 ij(C2)> -- make sure backup did not really proceed, backup dir should not exist
 values fileExists('extinout/ulbackup2');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-false                                                                                                                           
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+false                                                                                               
 ij(C2)> -- rollback the unlogged op for backup to proceed.
 rollback;
 ij(C2)> set connection c1;
@@ -189,9 +189,9 @@ wait for bthread1;
 0 rows inserted/updated/deleted
 ij(C1)> -- check if backup is created.
 values fileExists('extinout/ulbackup2');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-true                                                                                                                            
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+true                                                                                                
 ij(C1)> commit;
 ij(C1)> --- case 3: log archive backup with with unlogged ops pending.
 set connection c2;
@@ -200,13 +200,13 @@ ij(C2)> create index idx1 on t1(a) ;
 ij(C2)> set connection c1;
 ij(C1)> --make sure backup does not already exists at the backup location.
 values removeDirectory('extinout/ulbackup3');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-true                                                                                                                            
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+true                                                                                                
 ij(C1)> values fileExists('extinout/ulbackup3');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-false                                                                                                                           
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+false                                                                                               
 ij(C1)> async bthread1 
   'call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
                                     ''extinout/ulbackup3'' , 1)' ;
@@ -217,9 +217,9 @@ call sleep(1000);
 0 rows inserted/updated/deleted
 ij(C2)> -- make sure backup did not really proceed, backup dir should not exist
 values fileExists('extinout/ulbackup3');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-false                                                                                                                           
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+false                                                                                               
 ij(C2)> -- rollback the unlogged op for backup to proceed.
 rollback;
 ij(C2)> set connection c1;
@@ -228,9 +228,9 @@ wait for bthread1;
 0 rows inserted/updated/deleted
 ij(C1)> -- check if backup is created.
 values fileExists('extinout/ulbackup3');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-true                                                                                                                            
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+true                                                                                                
 ij(C1)> call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
 0 rows inserted/updated/deleted
 ij(C1)> -- case4 : log archive backup with the defailt wait for unlogged ops.
@@ -240,13 +240,13 @@ ij(C2)> create index idx1 on t1(a) ;
 ij(C2)> set connection c1;
 ij(C1)> --make sure backup does not already exists at the backup location.
 values removeDirectory('extinout/ulbackup4');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-true                                                                                                                            
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+true                                                                                                
 ij(C1)> values fileExists('extinout/ulbackup4');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-false                                                                                                                           
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+false                                                                                               
 ij(C1)> async bthread1 
   'call SYSCS_UTIL.SYSCS_BACKUP_DATABASE_AND_ENABLE_LOG_ARCHIVE_MODE(
                                     ''extinout/ulbackup4'' , 1)' ;
@@ -257,9 +257,9 @@ call sleep(1000);
 0 rows inserted/updated/deleted
 ij(C2)> -- make sure backup did not really proceed, backup dir should not exist
 values fileExists('extinout/ulbackup4');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-false                                                                                                                           
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+false                                                                                               
 ij(C2)> -- commit the unlogged op for backup to proceed.
 commit;
 ij(C2)> set connection c1;
@@ -268,9 +268,9 @@ wait for bthread1;
 0 rows inserted/updated/deleted
 ij(C1)> -- check if backup is created.
 values fileExists('extinout/ulbackup4');
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-true                                                                                                                            
+1                                                                                                   
+----------------------------------------------------------------------------------------------------
+true                                                                                                
 ij(C1)> call SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE(1);
 0 rows inserted/updated/deleted
 ij(C1)> 

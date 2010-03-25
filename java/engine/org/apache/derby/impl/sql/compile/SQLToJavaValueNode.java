@@ -207,6 +207,14 @@ public class SQLToJavaValueNode extends JavaValueNode
 		return this;
 	}
 
+    /**
+     * Override behavior in superclass.
+     */
+    public DataTypeDescriptor getDataType() throws StandardException
+    {
+        return value.getTypeServices();
+    }
+
 	/**
 	 * Remap all ColumnReferences in this tree to be clones of the
 	 * underlying expression.

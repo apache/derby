@@ -412,22 +412,22 @@ EXTERNAL NAME 'java.lang.Integer.toXXString()';
 0 rows inserted/updated/deleted
 ij> -- these are ok
 VALUES SIGNATURE_BUG_DERBY_258_NS(2356, 16);
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-934                                                                                                                             
+1                   
+--------------------
+934                 
 ij> VALUES SIGNATURE_BUG_DERBY_258_NS(2356, 10);
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-2356                                                                                                                            
+1                   
+--------------------
+2356                
 ij> VALUES SIGNATURE_BUG_DERBY_258_NS(2356, 2);
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-100100110100                                                                                                                    
+1                   
+--------------------
+100100110100        
 ij> -- Must resolve as above
 VALUES SIGNATURE_BUG_DERBY_258_D(2356, 16);
-1                                                                                                                               
---------------------------------------------------------------------------------------------------------------------------------
-934                                                                                                                             
+1                   
+--------------------
+934                 
 ij> -- no method to resolve to (with specified signature)
 VALUES SIGNATURE_BUG_DERBY_258_E();
 ERROR 42X50: No method was found that matched the method call java.lang.Integer.toXXString(), tried all combinations of object and primitive types and any possible type conversion for any  parameters the method call may have. The method might exist but it is not public and/or static, or the parameter types are not method invocation convertible.

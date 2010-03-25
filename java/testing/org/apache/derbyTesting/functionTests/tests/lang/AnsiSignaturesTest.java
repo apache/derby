@@ -90,7 +90,7 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
-        TestSuite suite = (TestSuite) TestConfiguration.embeddedSuite(AnsiSignaturesTest.class);
+        TestSuite suite = (TestSuite) TestConfiguration.defaultSuite(AnsiSignaturesTest.class);
 
         return new CleanDatabaseTestSetup( suite );
     }
