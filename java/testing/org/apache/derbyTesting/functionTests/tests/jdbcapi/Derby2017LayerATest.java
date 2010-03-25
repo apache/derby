@@ -435,7 +435,6 @@ public class Derby2017LayerATest
      * is issued when an insert fails.
      *
      * @param INSERT the data to insert
-     * @param MASTER the expected outcome
      * @param autoCommit the auto-commit state to use
      * @param rollbackOnError whether or not to issue a rollback if an insert
      *      fails
