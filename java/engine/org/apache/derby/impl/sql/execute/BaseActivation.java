@@ -417,6 +417,13 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 
 			LanguageConnectionContext lcc = getLanguageConnectionContext();
 
+            // Remove all the dependencies this activation has. It won't need
+            // them after it's closed, so let's free up the memory in the
+            // dependency manager. (DERBY-4571)
+            DependencyManager dm =
+                    lcc.getDataDictionary().getDependencyManager();
+            dm.clearDependencies(lcc, this);
+
 			lcc.removeActivation(this);
 			if (preStmt != null) {
 				preStmt.finish(lcc);
