@@ -22,6 +22,7 @@
 package org.apache.derby.impl.jdbc.authentication;
 
 import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.authentication.UserAuthenticator;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
@@ -233,20 +234,24 @@ public final class BasicAuthenticationServiceImpl
             }
         }
 
-		if (definedUserPassword == null)
-			// no such user found
-			return false;
-
-		// check if the passwords match
-		if (!definedUserPassword.equals(passedUserPassword))
-			return false;
-
+        // Check if the passwords match.
 		// NOTE: We do not look at the passed-in database name value as
 		// we rely on the authorization service that was put in
 		// in 2.0 . (if a database name was passed-in)
+        boolean passwordsMatch =
+                (definedUserPassword != null) &&
+                definedUserPassword.equals(passedUserPassword);
 
-		// We do have a valid user
-		return true;
+        // Provide extra information on mismatch if strong password
+        // substitution is used, since the problem may be that the stored
+        // password was stored using the configurable hash authentication
+        // scheme which is incompatible with strong password substitution.
+        if (!passwordsMatch && secMec == SECMEC_USRSSBPWD) {
+            throw Util.generateCsSQLException(
+                    SQLState.NET_CONNECT_SECMEC_INCOMPATIBLE_SCHEME);
+        }
+
+        return passwordsMatch;
 	}
 
     /**

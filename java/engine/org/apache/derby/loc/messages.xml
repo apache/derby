@@ -416,6 +416,11 @@ Guide.
             </msg>
 
             <msg>
+                <name>08004.C.12</name>
+                <text>Connection authentication failure occurred. Either the supplied credentials were invalid, or the database uses a password encryption scheme not compatible with the strong password substitution security mechanism. If this error started after upgrade, refer to the release note for DERBY-4483 for options.</text>
+            </msg>
+
+            <msg>
                 <name>08006.C</name>
                 <text>A network protocol error was encountered and the connection has been terminated: {0}</text>
 		<arg>error</arg>
