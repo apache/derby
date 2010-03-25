@@ -70,7 +70,10 @@ public class Changes10_6 extends UpgradeChange {
 
     private static final   String CREATE_TYPE_DDL = "create type fooType external name 'mypackage.foo' language java\n";
     private static final   String DROP_TYPE_DDL = "drop type fooType restrict\n";
-    
+
+    private static final String HASH_ALGORITHM_PROPERTY =
+            "derby.authentication.builtin.algorithm";
+
     public Changes10_6(String name) {
         super(name);
     }
@@ -321,6 +324,18 @@ public class Changes10_6 extends UpgradeChange {
     }
 
     /**
+     * Verify that we don't enable the configurable hash authentication
+     * scheme when we upgrade a database. See DERBY-4483.
+     */
+    public void testBuiltinAuthenticationHashNotChangedOnUpgrade()
+            throws SQLException {
+        // We enable the configurable hash authentication scheme by setting
+        // a property, so check that it's NULL in all phases to verify that
+        // it's not enabled on upgrade.
+        assertNull(getDatabaseProperty(HASH_ALGORITHM_PROPERTY));
+    }
+
+    /**
      * Make sure builtin authentication only uses the new configurable hash
      * scheme in hard-upgraded databases. See DERBY-4483.
      */
@@ -418,7 +433,7 @@ public class Changes10_6 extends UpgradeChange {
         for (int i = 0; i < USERS.length; i++) {
             // Use the specified algorithm, if possible. (Will be ignored if
             // the data dictionary doesn't support the new scheme.)
-            cs.setString(1, "derby.authentication.builtin.algorithm");
+            cs.setString(1, HASH_ALGORITHM_PROPERTY);
             cs.setString(2, USERS[i][2]);
             cs.execute();
             // Set the password.

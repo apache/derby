@@ -761,6 +761,13 @@ public final class	DataDictionaryImpl
 					bootingTC.setProperty(Property.SQL_AUTHORIZATION_PROPERTY,"true",true);
 					usesSqlAuthorization=true;
 				}
+
+                // Set default hash algorithm used to protect passwords stored
+                // in the database for BUILTIN authentication.
+                bootingTC.setProperty(
+                        Property.AUTHENTICATION_BUILTIN_ALGORITHM,
+                        Property.AUTHENTICATION_BUILTIN_ALGORITHM_DEFAULT,
+                        false);
 			} else {
 				// Get the ids for non-core tables
 				loadDictionaryTables(bootingTC, ddg, startParams);

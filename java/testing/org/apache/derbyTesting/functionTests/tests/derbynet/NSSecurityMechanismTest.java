@@ -1106,7 +1106,9 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      *
      * We want to test a combination of USRSSBPWD with BUILTIN as password
      * substitute is only supported with NONE or BUILTIN Derby authentication
-     * scheme right now (DERBY-528).
+     * scheme right now (DERBY-528). Also, it doesn't work if passwords are
+     * hashed with the configurable hash authentication scheme (DERBY-4483)
+     * before they are stored in the database, so we'll need to disable that.
      * 
      * @throws Exception if there an unexpected error
      */
@@ -1121,6 +1123,12 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         // Turn on BUILTIN authentication
         CallableStatement cs = conn.prepareCall(
             "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, ?)");
+
+        // First, disable the configurable hash authentication scheme so that
+        // passwords are stored using the old hash algorithm.
+        cs.setString(1, "derby.authentication.builtin.algorithm");
+        cs.setString(2, null);
+        cs.execute();
 
         cs.setString(1, "derby.user.neelima");
         cs.setString(2, "lee");

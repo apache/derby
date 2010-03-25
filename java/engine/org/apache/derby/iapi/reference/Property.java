@@ -718,6 +718,13 @@ public interface Property {
     public static final String AUTHENTICATION_BUILTIN_ALGORITHM =
             "derby.authentication.builtin.algorithm";
 
+    /**
+     * Default value for derby.authentication.builtin.algorithm when creating
+     * a new database.
+     */
+    public static final String AUTHENTICATION_BUILTIN_ALGORITHM_DEFAULT =
+            "SHA-256";
+
 	/*
 	** Log
 	*/

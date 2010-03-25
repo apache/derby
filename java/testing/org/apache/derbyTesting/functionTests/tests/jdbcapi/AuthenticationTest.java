@@ -116,6 +116,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         test = new AuthenticationTest("testSystemShutdown");
         setBaseProps(suite, test);
 
+        test = new AuthenticationTest("testDefaultHashAlgorithm");
+        setBaseProps(suite, test);
+
         // The test cases below test the configurable hash authentication
         // mechanism added in DERBY-4483. Set the property that specifies the
         // hash algorithm to some valid value for these tests. Not all tests
@@ -1095,6 +1098,15 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             dbName, "APP", "APP" + PASSWORD_SUFFIX);
         assertSystemShutdownOK("", "system", "admin");
         openDefaultConnection("system", "admin").close(); // just so teardown works.
+    }
+
+    /**
+     * DERBY-4483: Test that the database by default has the configurable
+     * hash authentication scheme enabled.
+     */
+    public void testDefaultHashAlgorithm() throws SQLException {
+        // SHA-256 should be the default hash algorithm now
+        assertEquals("SHA-256", getDatabaseProperty(BUILTIN_ALGO_PROP));
     }
 
     /**
