@@ -53,13 +53,13 @@ ERROR XJ015: Derby system shutdown.
 ij> -- configure the database for encrypion with an external encryption key.
 -- this should fail because of the global transacton in the prepared state.
 connect 'jdbc:derby:wombat_en;dataEncryption=true;encryptionKey=6162636465666768';
-ERROR XJ040: Failed to start database 'wombat_en', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat_en' with class loader XXXX,  see the next exception for details.
 ERROR XBCXO: Cannot encrypt the database when there is a global transaction in the prepared state.
 ij> ---attempt to configure the database for encrypion with a boot password.
 -- this should fail because of the global transacton in 
 -- the prepared state.
 connect 'jdbc:derby:wombat_en;dataEncryption=true;bootPassword=xyz1234abc';
-ERROR XJ040: Failed to start database 'wombat_en', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat_en' with class loader XXXX,  see the next exception for details.
 ERROR XBCXO: Cannot encrypt the database when there is a global transaction in the prepared state.
 ij> -- now reboot the db and commit the transaction in the prepapred state. 
 xa_datasource 'wombat_en';
@@ -107,7 +107,7 @@ ij> -- attempt to reconfigure the database with a new password.
 -- this should fail because of the global transaction in the prepared state
 -- after recovery.
 connect 'jdbc:derby:wombat_en;bootPassword=xyz1234abc;newBootPassword=new1234xyz';
-ERROR XJ040: Failed to start database 'wombat_en', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat_en' with class loader XXXX,  see the next exception for details.
 ERROR XBCXP: Cannot re-encrypt the database with a new boot password or an external encryption key when there is a global transaction in the prepared state.
 ij> -- now reboot the db and commit the transaction in the prepared state. 
 connect 'jdbc:derby:wombat_en;bootPassword=xyz1234abc';

@@ -107,7 +107,7 @@ ij> connect 'wombat_key;shutdown=true';
 ERROR 08006: Database 'wombat_key' shutdown.
 ij> --- attempt to boot with the old encrytion key, it should fail.
 connect 'jdbc:derby:wombat_key;encryptionKey=6162636465666768';
-ERROR XJ040: Failed to start database 'wombat_key', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat_key' with class loader XXXX,  see the next exception for details.
 ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and try again. 
 ij> -- test confugring the database for encrypion with a boot password. 
 connect 'wombat_pwd;create=true';
@@ -198,6 +198,6 @@ ij> connect 'wombat_pwd;shutdown=true';
 ERROR 08006: Database 'wombat_pwd' shutdown.
 ij> -- attempt to boot the database with the old password, it should fail. 
 connect 'jdbc:derby:wombat_pwd;bootPassword=xyz1234abc';
-ERROR XJ040: Failed to start database 'wombat_pwd', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat_pwd' with class loader XXXX,  see the next exception for details.
 ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> 

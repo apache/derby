@@ -180,7 +180,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XJ004","Database '{0}' not found.","40000"},
         		{"XJ015","Derby system shutdown.","50000"},
         		{"XJ028","The URL '{0}' is not properly formed.","40000"},
-        		{"XJ040","Failed to start database '{0}', see the next exception for details.","40000"},
+        		{"XJ040","Failed to start database '{0}' with class loader {1}, see the next exception for details.","40000"},
         		{"XJ041","Failed to create database '{0}', see the next exception for details.","40000"},
                 {"XJ048","Conflicting boot attributes specified: {0}","40000"},
         		{"XJ049","Conflicting create attributes specified.","40000"},
