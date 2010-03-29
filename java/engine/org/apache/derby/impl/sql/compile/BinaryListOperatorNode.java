@@ -412,20 +412,12 @@ public abstract class BinaryListOperatorNode extends ValueNode
 		{
 			return false;
 		}
-		
-		int sz = getRightOperandList().size();
-		if (sz != other.rightOperandList.size())
-		{
-			return false;
-		}
-		for (int i = 0; i < sz; i++)
-		{
-			ValueNode e = (ValueNode)rightOperandList.elementAt(i);
-			if (!e.isEquivalent((ValueNode)other.rightOperandList.elementAt(i))) 
-			{
-				return false;
-			}
-		}
+
+        if (!rightOperandList.isEquivalent(other.rightOperandList))
+        {
+            return false;
+        }
+
 		return true;
 	}
 }

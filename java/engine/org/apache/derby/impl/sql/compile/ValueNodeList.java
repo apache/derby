@@ -583,6 +583,34 @@ public class ValueNodeList extends QueryTreeNodeVector
 		return this;
 	}
 
+    /**
+     * Check if all the elements in this list are equivalent to the elements
+     * in another list. The two lists must have the same size, and the
+     * equivalent nodes must appear in the same order in both lists, for the
+     * two lists to be equivalent.
+     *
+     * @param other the other list
+     * @return {@code true} if the two lists contain equivalent elements, or
+     * {@code false} otherwise
+     * @throws StandardException thrown on error
+     * @see ValueNode#isEquivalent(ValueNode)
+     */
+    boolean isEquivalent(ValueNodeList other) throws StandardException {
+        if (size() != other.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < size(); i++) {
+            ValueNode vn1 = (ValueNode) elementAt(i);
+            ValueNode vn2 = (ValueNode) other.elementAt(i);
+            if (!vn1.isEquivalent(vn2)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 	/**
 	 * Return whether or not this expression tree represents a constant expression.
 	 *

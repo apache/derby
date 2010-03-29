@@ -360,22 +360,12 @@ public class CoalesceFunctionNode extends ValueNode
 		}
 		
 		CoalesceFunctionNode other = (CoalesceFunctionNode)o;
-		if (other.argumentsList.size() != argumentsList.size())
+
+        if (!argumentsList.isEquivalent(other.argumentsList))
 		{
 			return false;
-			
 		}
-		
-		int size = argumentsList.size();
-		for (int index = 0; index < size; index++)
-		{
-			ValueNode v1 = (ValueNode)argumentsList.elementAt(index);
-			ValueNode v2 = (ValueNode)other.argumentsList.elementAt(index);
-			if (!v1.isEquivalent(v2)) 
-			{
-				return false;
-			}
-		}
+
 		return true;
 	}
 
@@ -389,12 +379,7 @@ public class CoalesceFunctionNode extends ValueNode
 	{
 		super.acceptChildren(v);
 
-		int size = argumentsList.size();
-		for (int index = 0; index < size; index++)
-		{
-			argumentsList.setElementAt(
-					(QueryTreeNode)(argumentsList.elementAt(index)).accept(v), index);
-		}
+        argumentsList = (ValueNodeList) argumentsList.accept(v);
 	}
 
     /**
@@ -429,14 +414,12 @@ public class CoalesceFunctionNode extends ValueNode
 								PredicateList outerPredicateList) 
 					throws StandardException
 	{
-		int argumentsListSize = argumentsList.size();
-		for (int i=0; i < argumentsListSize; i++) {
-			((ValueNode)argumentsList.elementAt(i)).preprocess
-				(numTables,
-				 outerFromList,
-				 outerSubqueryList,
-				 outerPredicateList);
-		}
+        argumentsList.preprocess(
+                numTables,
+                outerFromList,
+                outerSubqueryList,
+                outerPredicateList);
+
 		return this;
 	}
 
@@ -450,10 +433,7 @@ public class CoalesceFunctionNode extends ValueNode
     public ValueNode remapColumnReferencesToExpressions()
             throws StandardException
     {
-        for (int i = 0; i < argumentsList.size(); i++) {
-            ValueNode vn = (ValueNode) argumentsList.elementAt(i);
-            vn.remapColumnReferencesToExpressions();
-        }
+        argumentsList = argumentsList.remapColumnReferencesToExpressions();
         return this;
     }
 

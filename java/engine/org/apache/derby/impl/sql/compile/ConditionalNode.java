@@ -755,22 +755,8 @@ public class ConditionalNode extends ValueNode
 		if (isSameNodeType(o)) 
 		{
 			ConditionalNode other = (ConditionalNode)o;
-			if (thenElseList.size() == other.thenElseList.size()
-					&& (testCondition.isEquivalent(other.testCondition))) 
-			{
-				int sz = thenElseList.size();
-				for (int i = 0; i < sz; i++)
-				{
-					ValueNode v1 = (ValueNode)thenElseList.elementAt(i);
-					ValueNode v2 = (ValueNode)other.thenElseList.elementAt(i);
-					if (!v1.isEquivalent(v2)) 
-					{
-						return false;
-					}
-					
-				}
-				return true;
-			}
+            return testCondition.isEquivalent(other.testCondition) &&
+                    thenElseList.isEquivalent(other.thenElseList);
 		}
 		return false;
 	}
