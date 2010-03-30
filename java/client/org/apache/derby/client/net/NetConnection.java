@@ -1298,7 +1298,14 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
 
     private void constructExtnam() throws SqlException {
-        extnam_ = "derbydnc" + java.lang.Thread.currentThread().getName();
+        /* Construct the EXTNAM based on the thread name */
+        char[] chars = java.lang.Thread.currentThread().getName().toCharArray();
+
+        /* DERBY-4584: Replace non-EBCDIC characters (> 0xff) with '?' */
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] > 0xff) chars[i] = '?';
+        }
+        extnam_ = "derbydnc" + new String(chars);
     }
 
     private void constructPrddta() throws SqlException {
