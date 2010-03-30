@@ -480,7 +480,7 @@ public void testNorwayCollation() throws SQLException {
 
   /**
    * Test order by with English collation
-   * 
+   *
   * @throws SQLException
   */
 public void testEnglishCollation() throws SQLException {
@@ -490,13 +490,13 @@ public void testEnglishCollation() throws SQLException {
       setUpTable(s);
 
       //The collation should be TERRITORY_BASED for this database
-      checkLangBasedQuery(s, 
+      checkLangBasedQuery(s,
       		"VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')",
 			new String[][] {{"TERRITORY_BASED"}});
 
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
       		new String[][] {{"6","aacorn"},{"4","Acorn"},{"2","\u0104corn"},{"0","Smith"},
-      		{"5","\u015Amith"},{"1","Zebra"},{"3","\u017Bebra"} });      
+      		{"5","\u015Amith"},{"1","Zebra"},{"3","\u017Bebra"} });
 
       //COMPARISONS INVOLVING CONSTANTS
       //In English, 'aacorn' != 'Acorn'
@@ -505,7 +505,7 @@ public void testEnglishCollation() throws SQLException {
       //In English, 'aacorn' is < 'Acorn'
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' < 'Acorn'",
       		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"},
-      		{"3","\u017Bebra"}, {"4","Acorn"}, {"5","\u015Amith"}, 
+      		{"3","\u017Bebra"}, {"4","Acorn"}, {"5","\u015Amith"},
 			{"6","aacorn"} });
 
       //COMPARISONS INVOLVING CONSTANT and PERSISTENT COLUMN
@@ -513,19 +513,19 @@ public void testEnglishCollation() throws SQLException {
       		new String[][] {{"0","Smith"}, {"2","\u0104corn"}, {"4","Acorn"},
       		{"6","aacorn"} });
       checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME between 'Acorn' and 'Zebra' ",
-      		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"}, 
+      		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"},
       		{"4","Acorn"}, {"5","\u015Amith"} });
-      //After index creation, the query above will return same data but in 
+      //After index creation, the query above will return same data but in
       //different order
       /*s.executeUpdate("CREATE INDEX CUSTOMER_INDEX1 ON CUSTOMER(NAME)");
       s.executeUpdate("INSERT INTO CUSTOMER VALUES (NULL, NULL)");
-      checkLangBasedQuery(s, 
-      		"SELECT ID, NAME FROM CUSTOMER -- derby-properties index=customer_index1 \r WHERE NAME between 'Acorn' and " + 
+      checkLangBasedQuery(s,
+      		"SELECT ID, NAME FROM CUSTOMER -- derby-properties index=customer_index1 \r WHERE NAME between 'Acorn' and " +
 			" 'Zebra'", //ORDER BY NAME",
-      		new String[][] {{"4","Acorn"}, {"2","\u0104corn"}, {"0","Smith"}, 
+      		new String[][] {{"4","Acorn"}, {"2","\u0104corn"}, {"0","Smith"},
       		{"5","\u015Amith"}, {"1","Zebra"} });
       */
-      //For collated databases, COMPARISONS OF USER PERSISTENT CHARACTER 
+      //For collated databases, COMPARISONS OF USER PERSISTENT CHARACTER
       //COLUMN AND CHARACTER CONSTANT WILL FAIL IN SYSTEM SCHEMA.
       s.executeUpdate("set schema SYS");
       assertStatementError("42818", s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ");
@@ -533,9 +533,67 @@ public void testEnglishCollation() throws SQLException {
       //Do some testing with MAX/MIN operators
       s.executeUpdate("set schema APP");
       checkLangBasedQuery(s, "SELECT MAX(NAME) maxName FROM CUSTOMER ORDER BY maxName ",
-      		new String[][] {{"\u017Bebra"}});   
+      		new String[][] {{"\u017Bebra"}});
       checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
-      		new String[][] {{"aacorn"}});   
+      		new String[][] {{"aacorn"}});
+
+      commonTestingForTerritoryBasedDB(s);
+
+      s.close();
+      }
+
+  /**
+   * Test with Swedish case insensitive collation
+   *
+  * @throws SQLException
+  */
+public void testSwedishCaseInsensitiveCollation() throws SQLException {
+
+      getConnection().setAutoCommit(false);
+      Statement s = createStatement();
+      setUpTable(s);
+
+      //The collation should be TERRITORY_BASED for this database
+      checkLangBasedQuery(s,
+      		"VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')",
+			new String[][] {{"TERRITORY_BASED:SECONDARY"}});
+
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER ORDER BY NAME",
+      		new String[][] {{"6","aacorn"},{"4","Acorn"},{"2","\u0104corn"},{"0","Smith"},
+      		{"5","\u015Amith"},{"1","Zebra"},{"3","\u017Bebra"} });
+
+      //COMPARISONS INVOLVING CONSTANTS
+      //In Swedish, 'aacorn' != 'Acorn'
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where 'aacorn' = 'Acorn' ",
+      		null);
+
+      //In case insensitive Swedish, 'aacorn' == 'AaCorn'
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where NAME = 'AaCorn' ORDER BY NAME ",
+      		new String[][] {{"6","aacorn"}});
+
+      //Selection with LIKE
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER where NAME like 'a%'",
+      		new String[][] {{"4","Acorn"}, {"6","aacorn"} });
+
+      //COMPARISONS INVOLVING CONSTANT and PERSISTENT COLUMN
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME <= 'Smith' ",
+      		new String[][] {{"0","Smith"}, {"2","\u0104corn"}, {"4","Acorn"},
+      		{"6","aacorn"} });
+      checkLangBasedQuery(s, "SELECT ID, NAME FROM CUSTOMER WHERE NAME between 'acorn' and 'zebra' ",
+      		new String[][] {{"0","Smith"}, {"1","Zebra"}, {"2","\u0104corn"},
+      		{"4","Acorn"}, {"5","\u015Amith"} });
+
+	  //For collated databases, COMPARISONS OF USER PERSISTENT CHARACTER
+      //COLUMN AND CHARACTER CONSTANT WILL FAIL IN SYSTEM SCHEMA.
+      s.executeUpdate("set schema SYS");
+      assertStatementError("42818", s, "SELECT ID, NAME FROM APP.CUSTOMER WHERE NAME <= 'Smith' ");
+
+      //Do some testing with MAX/MIN operators
+      s.executeUpdate("set schema APP");
+      checkLangBasedQuery(s, "SELECT MAX(NAME) maxName FROM CUSTOMER ORDER BY maxName ",
+      		new String[][] {{"\u017Bebra"}});
+      checkLangBasedQuery(s, "SELECT MIN(NAME) minName FROM CUSTOMER ORDER BY minName ",
+      		new String[][] {{"aacorn"}});
 
       commonTestingForTerritoryBasedDB(s);
 
@@ -1304,7 +1362,7 @@ public void testMissingCollatorSupport() throws SQLException {
 
         suite.addTest(new CleanDatabaseTestSetup(
                 new CollationTest("testDefaultCollation")));
-        suite.addTest(collatedSuite("en", "testEnglishCollation"));
+        suite.addTest(collatedSuite("en", false, "testEnglishCollation"));
          
         // Only add tests for other locales if they are in fact supported 
         // by the jvm.
@@ -1312,6 +1370,7 @@ public void testMissingCollatorSupport() throws SQLException {
         boolean norwegian = false; 
         boolean polish = false;
         boolean french = false;
+        boolean swedish = false;
         for (int i=0; i<availableLocales.length ; i++) {
             if("no".equals(availableLocales[i].getLanguage())) {
                 norwegian = true;
@@ -1322,15 +1381,21 @@ public void testMissingCollatorSupport() throws SQLException {
             if("fr".equals(availableLocales[i].getLanguage())) {
                 french = true;
             }
+            if("sv".equals(availableLocales[i].getLanguage())) {
+                swedish = true;
+            }
         }
         if(norwegian) {
-            suite.addTest(collatedSuite("no", "testNorwayCollation"));
+            suite.addTest(collatedSuite("no", false, "testNorwayCollation"));
         }
         if(polish) {
-            suite.addTest(collatedSuite("pl", "testPolishCollation"));
+            suite.addTest(collatedSuite("pl", false, "testPolishCollation"));
         }
         if(french) {
-            suite.addTest(collatedSuite("fr", "testFrenchCollation"));
+            suite.addTest(collatedSuite("fr", false, "testFrenchCollation"));
+        }
+        if(swedish) {
+            suite.addTest(collatedSuite("sv", true, "testSwedishCaseInsensitiveCollation"));
         }
         return suite;
     }
@@ -1354,10 +1419,11 @@ public void testMissingCollatorSupport() throws SQLException {
    * a primary fixture from this test plus potentially other
    * fixtures.
    * @param locale Locale to use for the database
+   * @param caseInsensitive Indicates if the database should use a case insensitive collation.
    * @param baseFixture Base fixture from this test.
    * @return suite of tests to run for the given locale
    */
-  private static Test collatedSuite(String locale, String baseFixture)
+  private static Test collatedSuite(String locale, boolean caseInsensitive, String baseFixture)
   {
       TestSuite suite = new TestSuite("CollationTest:territory=" + locale);
       suite.addTest(new CollationTest(baseFixture));
@@ -1376,7 +1442,9 @@ public void testMissingCollatorSupport() throws SQLException {
           suite.addTest(GroupByExpressionTest.suite());
           suite.addTest(UpdatableResultSetTest.suite());    	  
       }
-      return Decorator.territoryCollatedDatabase(suite, locale);
+      return caseInsensitive
+		  ? Decorator.territoryCollatedCaseInsensitiveDatabase(suite, locale)
+		  : Decorator.territoryCollatedDatabase(suite, locale);
   }
 
 }

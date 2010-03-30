@@ -1090,13 +1090,27 @@ public final class DataTypeDescriptor implements Formatable
 	}
 
 	/**
-	 * Gets the name of this datatype.
-     * <p>
-     * Used to generate strings decribing collation type for error messages.
-	 * 
-	 *
-	 *  @return	the name of the collation being used in this type.
-	 */
+     * Obtain the collation type from a collation property value.
+	 * @return The collation type, or -1 if not recognized.
+     */
+	public static int getCollationType(String collationName)
+	{
+		if (collationName.equalsIgnoreCase(Property.UCS_BASIC_COLLATION))
+			return StringDataValue.COLLATION_TYPE_UCS_BASIC;
+		else if (collationName.equalsIgnoreCase(Property.TERRITORY_BASED_COLLATION))
+			return StringDataValue.COLLATION_TYPE_TERRITORY_BASED;
+		else if (collationName.equalsIgnoreCase(Property.TERRITORY_BASED_PRIMARY_COLLATION))
+			return StringDataValue.COLLATION_TYPE_TERRITORY_BASED_PRIMARY;
+		else if (collationName.equalsIgnoreCase(Property.TERRITORY_BASED_SECONDARY_COLLATION))
+			return StringDataValue.COLLATION_TYPE_TERRITORY_BASED_SECONDARY;
+		else if (collationName.equalsIgnoreCase(Property.TERRITORY_BASED_TERTIARY_COLLATION))
+			return StringDataValue.COLLATION_TYPE_TERRITORY_BASED_TERTIARY;
+		else if (collationName.equalsIgnoreCase(Property.TERRITORY_BASED_IDENTICAL_COLLATION))
+			return StringDataValue.COLLATION_TYPE_TERRITORY_BASED_IDENTICAL;
+		else
+			return -1;
+	}
+
     /**
      * Gets the name of the collation type in this descriptor if the collation
      * derivation is not NONE. If the collation derivation is NONE, then this
@@ -1110,15 +1124,36 @@ public final class DataTypeDescriptor implements Formatable
      */
     public String getCollationName()
     {
-        return(
-                getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE ?
-                        Property.COLLATION_NONE :
-                getCollationType() == StringDataValue.COLLATION_TYPE_UCS_BASIC ?
-                        Property.UCS_BASIC_COLLATION :
-                        Property.TERRITORY_BASED_COLLATION);
+		if (getCollationDerivation() == StringDataValue.COLLATION_DERIVATION_NONE)
+			return Property.COLLATION_NONE;
+		else
+			return getCollationName(getCollationType());
     }
 
     /**
+     * Gets the name of the specified collation type.
+     * @param collationType The collation type.
+     * @return The name, e g "TERRITORY_BASED:PRIMARY".
+     */
+    public static String getCollationName(int collationType)
+    {
+		switch (collationType) {
+			case StringDataValue.COLLATION_TYPE_TERRITORY_BASED :
+				return Property.TERRITORY_BASED_COLLATION;
+			case StringDataValue.COLLATION_TYPE_TERRITORY_BASED_PRIMARY :
+				return Property.TERRITORY_BASED_PRIMARY_COLLATION;
+			case StringDataValue.COLLATION_TYPE_TERRITORY_BASED_SECONDARY :
+				return Property.TERRITORY_BASED_SECONDARY_COLLATION;
+			case StringDataValue.COLLATION_TYPE_TERRITORY_BASED_TERTIARY :
+				return Property.TERRITORY_BASED_TERTIARY_COLLATION;
+			case StringDataValue.COLLATION_TYPE_TERRITORY_BASED_IDENTICAL :
+				return Property.TERRITORY_BASED_IDENTICAL_COLLATION;
+			default :
+				return Property.UCS_BASIC_COLLATION;
+		}
+    }
+
+     /**
      * Get the collation derivation for this type. This applies only for
      * character string types. For the other types, this api should be
      * ignored.

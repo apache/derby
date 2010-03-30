@@ -150,13 +150,17 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
 	    		//If the user has requested for territory based database, then 
 	    		//verify that JVM has Collator support for the database locale.
 	    		String userDefinedCollation = 
-	    			properties.getProperty(Attribute.COLLATION);		
+	    			properties.getProperty(Attribute.COLLATION);
 	    		if (userDefinedCollation != null) {//Invalid value handling
-	    			if (!userDefinedCollation.equalsIgnoreCase(Property.UCS_BASIC_COLLATION)
-	    					&& !userDefinedCollation.equalsIgnoreCase(Property.TERRITORY_BASED_COLLATION))
-	    				throw StandardException.newException(SQLState.INVALID_COLLATION, userDefinedCollation);
-	    			if (userDefinedCollation.equalsIgnoreCase(Property.TERRITORY_BASED_COLLATION))
-	    				collatorForCharacterTypes = verifyCollatorSupport();
+					int collationType = DataTypeDescriptor.getCollationType(userDefinedCollation);
+					if (collationType != StringDataValue.COLLATION_TYPE_UCS_BASIC) {
+						if (collationType >= StringDataValue.COLLATION_TYPE_TERRITORY_BASED
+								&& collationType <  StringDataValue.COLLATION_TYPE_TERRITORY_BASED_IDENTICAL) {
+							int strength = collationType - StringDataValue.COLLATION_TYPE_TERRITORY_BASED_PRIMARY;
+							collatorForCharacterTypes = verifyCollatorSupport(strength);
+						} else
+							throw StandardException.newException(SQLState.INVALID_COLLATION, userDefinedCollation);
+					}
 	    		}    		
 	    	}
     	}
@@ -1047,7 +1051,9 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     		//This is the first access to Collator because otherwise
     		//it will not be null. Verify that JVM has support for
     		//the Collator for the database locale.
-    		collatorForCharacterTypes = verifyCollatorSupport();
+			//	Calculate the collator strength. COLLATION_TYPE_TERRITORY_BASED use strength -1, i e unspecified.
+			int strength = collationType - StringDataValue.COLLATION_TYPE_TERRITORY_BASED_PRIMARY;
+    		collatorForCharacterTypes = verifyCollatorSupport(strength);
     		return collatorForCharacterTypes;    	    		
     	} else
     		return collatorForCharacterTypes;    	
@@ -1055,11 +1061,12 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
     
     /**
      * Verify that JVM has support for the Collator for the datbase's locale.
-     * 
+     *
+	 * @param strength Collator strength or -1 for locale default.
      * @return Collator for database's locale
      * @throws StandardException if JVM does not have support for Collator
      */
-    private RuleBasedCollator verifyCollatorSupport() 
+    private RuleBasedCollator verifyCollatorSupport(int strength)
     throws StandardException {
     	Locale[] availLocales =  Collator.getAvailableLocales();
     	//Verify that Collator can be instantiated for the given locale.
@@ -1076,7 +1083,12 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
 					SQLState.COLLATOR_NOT_FOUND_FOR_LOCALE, 
 					databaseLocale.toString());
     	
-    	return (RuleBasedCollator) Collator.getInstance(databaseLocale);
+    	RuleBasedCollator collator = (RuleBasedCollator)Collator.getInstance(databaseLocale);
+
+		if (strength != -1)
+			collator.setStrength(strength);
+
+		return collator;
     }
     /** 
      * @see DataValueFactory#getNull(int, int)

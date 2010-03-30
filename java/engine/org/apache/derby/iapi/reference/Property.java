@@ -915,13 +915,22 @@ public interface Property {
 	public static final String SERVICE_LOCALE = "derby.serviceLocale";
 
 	public static final String COLLATION = "derby.database.collation";
-	// These are the 2 possible values for collation type if the collation 
+	// These are the six possible values for collation type if the collation
 	// derivation is not NONE. If collation derivation is NONE, then collation
-	// type should be ignored.
+	// type should be ignored. The TERRITORY_BASED collation uses the default
+	// collator strength while the four with a colon uses a specific strength.
 	public static final String UCS_BASIC_COLLATION =
 								"UCS_BASIC";
 	public static final String TERRITORY_BASED_COLLATION =
 								"TERRITORY_BASED";
+	public static final String TERRITORY_BASED_PRIMARY_COLLATION =
+								"TERRITORY_BASED:PRIMARY";
+	public static final String TERRITORY_BASED_SECONDARY_COLLATION =
+								"TERRITORY_BASED:SECONDARY";
+	public static final String TERRITORY_BASED_TERTIARY_COLLATION =
+								"TERRITORY_BASED:TERTIARY";
+	public static final String TERRITORY_BASED_IDENTICAL_COLLATION =
+								"TERRITORY_BASED:IDENTICAL";
 	// Define a static string for collation derivation NONE
 	public static final String COLLATION_NONE =
 		"NONE";

@@ -356,15 +356,10 @@ public class CreateTableNode extends DDLStatementNode
 				if (dtd.getTypeId().isStringTypeId() && 
 						dtd.getCollationType() != schemaCollationType)
 				{
-					String schemaCollationName =
-			        	(schemaCollationType == 
-			        		StringDataValue.COLLATION_TYPE_UCS_BASIC ? 
-			                Property.UCS_BASIC_COLLATION : 
-			                Property.TERRITORY_BASED_COLLATION);
 					throw StandardException.newException(
 							SQLState.LANG_CAN_NOT_CREATE_TABLE,
 							dtd.getCollationName(),
-							schemaCollationName);
+							DataTypeDescriptor.getCollationName(schemaCollationType));
 				}
 
 				ColumnDefinitionNode column = (ColumnDefinitionNode) getNodeFactory().getNode

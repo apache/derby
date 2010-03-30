@@ -157,6 +157,25 @@ public class Decorator {
     }
     
     /**
+     * Decorate a set of tests to use an single
+     * use database with TERRITORY_BASED:SECONDARY collation
+     * set to the passed in locale. Database is created
+     * by the setUp method of the decorator.
+     * @param locale Locale used to set territory JDBC attribute. If null
+     * then only collation=TERRITORY_BASED:SECONDARY will be set.
+     */
+    public static Test territoryCollatedCaseInsensitiveDatabase(Test test, final String locale)
+    {
+
+        String attributes = "collation=TERRITORY_BASED:SECONDARY";
+
+        if (locale != null)
+            attributes = attributes.concat(";territory=" + locale);
+
+        return attributesDatabase(attributes, test);
+    }
+
+    /**
      * Decorate a test (or suite of tests) to use a single use database
      * as the default database. The database is created by the setUp
      * method of the decorator. The database will be created using

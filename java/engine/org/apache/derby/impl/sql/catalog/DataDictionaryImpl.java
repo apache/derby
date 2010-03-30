@@ -708,12 +708,11 @@ public final class	DataDictionaryImpl
 						Property.COLLATION, Property.UCS_BASIC_COLLATION);
 			}
 
-			//Initialize the collation type of user schemas after looking at 
+			//Initialize the collation type of user schemas by looking at
 			//collation property/attribute.
-			if (userDefinedCollation.equalsIgnoreCase(Property.UCS_BASIC_COLLATION))
-				collationTypeOfUserSchemas = StringDataValue.COLLATION_TYPE_UCS_BASIC;
-			else
-				collationTypeOfUserSchemas = StringDataValue.COLLATION_TYPE_TERRITORY_BASED;
+			collationTypeOfUserSchemas = DataTypeDescriptor.getCollationType(userDefinedCollation);
+			if (SanityManager.DEBUG)
+				SanityManager.ASSERT((collationTypeOfUserSchemas != -1), "Invalid collation type: "+userDefinedCollation);
 
 			//Now is also a good time to create schema descriptor for global
 			//temporary tables. Since this is a user schema, it should use the
