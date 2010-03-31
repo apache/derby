@@ -725,6 +725,14 @@ public interface Property {
     public static final String AUTHENTICATION_BUILTIN_ALGORITHM_DEFAULT =
             "SHA-256";
 
+    /**
+     * Alternative default value for derby.authentication.builtin.algorithm if
+     * {@link #AUTHENTICATION_BUILTIN_ALGORITHM_DEFAULT} is not available at
+     * database creation time.
+     */
+    public static final String AUTHENTICATION_BUILTIN_ALGORITHM_FALLBACK =
+            "SHA-1";
+
 	/*
 	** Log
 	*/

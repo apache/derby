@@ -158,6 +158,8 @@ import java.util.LinkedList;
 import java.util.Enumeration;
 import java.io.InputStream;
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import java.sql.Types;
 
@@ -765,7 +767,7 @@ public final class	DataDictionaryImpl
                 // in the database for BUILTIN authentication.
                 bootingTC.setProperty(
                         Property.AUTHENTICATION_BUILTIN_ALGORITHM,
-                        Property.AUTHENTICATION_BUILTIN_ALGORITHM_DEFAULT,
+                        findDefaultBuiltinAlgorithm(),
                         false);
 			} else {
 				// Get the ids for non-core tables
@@ -829,6 +831,24 @@ public final class	DataDictionaryImpl
 		setDependencyManager();
 		booting = false;
 	}
+
+    /**
+     * Find the default message digest algorithm to use for BUILTIN
+     * authentication on this database.
+     *
+     * @return the name of the algorithm to use as the default
+     */
+    private String findDefaultBuiltinAlgorithm() {
+        try {
+            // First check for the preferred default, and return it if present
+            MessageDigest.getInstance(
+                    Property.AUTHENTICATION_BUILTIN_ALGORITHM_DEFAULT);
+            return Property.AUTHENTICATION_BUILTIN_ALGORITHM_DEFAULT;
+        } catch (NoSuchAlgorithmException nsae) {
+            // Couldn't find the preferred algorithm, so use the fallback
+            return Property.AUTHENTICATION_BUILTIN_ALGORITHM_FALLBACK;
+        }
+    }
 
     private CacheManager getPermissionsCache() throws StandardException
     {

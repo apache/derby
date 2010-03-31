@@ -22,6 +22,8 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -1105,8 +1107,25 @@ public class AuthenticationTest extends BaseJDBCTestCase {
      * hash authentication scheme enabled.
      */
     public void testDefaultHashAlgorithm() throws SQLException {
-        // SHA-256 should be the default hash algorithm now
-        assertEquals("SHA-256", getDatabaseProperty(BUILTIN_ALGO_PROP));
+        // SHA-256 should be the default hash algorithm now, if it's supported
+        // on the platform. Otherwise, we fall back to SHA-1.
+        String expected = supportsAlgorithm("SHA-256") ? "SHA-256" : "SHA-1";
+        assertEquals(expected, getDatabaseProperty(BUILTIN_ALGO_PROP));
+    }
+
+    /**
+     * Check if a message digest algorithm is supported on this platform.
+     *
+     * @param algorithm the algorithm to check
+     * @return true if the algorithm is supported, false otherwise
+     */
+    private boolean supportsAlgorithm(String algorithm) {
+        try {
+            MessageDigest.getInstance(algorithm);
+            return true;
+        } catch (NoSuchAlgorithmException nsae) {
+            return false;
+        }
     }
 
     /**
@@ -1119,6 +1138,12 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         String[] algorithms = { null, "MD5", "SHA-1", "SHA-256", "SHA-512" };
         for (int i = 0; i < algorithms.length; i++) {
             String algo = algorithms[i];
+
+            if (algo != null && !supportsAlgorithm(algo)) {
+                // DERBY-4602: Skip algorithms not supported on this platform
+                continue;
+            }
+
             setDatabaseProperty(BUILTIN_ALGO_PROP, algo);
 
             for (int j = 0; j < USERS.length; j++) {
