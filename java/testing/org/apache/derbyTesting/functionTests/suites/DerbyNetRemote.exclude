@@ -11,11 +11,9 @@
 #     the server machine
 # derbynet/maxthreads - tries to use NetworkServerControl statements
 # derbynet/runtimeinfo - tries to use NetworkServerControl statements
-# derbynet/sysinfo - tries to use NetworkServerControl statements
 # thus not suitable for remote server testing in its current form. - DERBY-928
 # derbynet/timeslice - tries to use NetworkServerControl statements
 # derbynet/DerbyNetAutoStart - tries to start networkserver
-# derbynet/sysinfo_withproperties - tries to use NetworkServerControl statements and test requires server to 
 # be started with a specific property. see DERBY-928 for reference
 # lang/wisconsin - optimization is quite different when running remote server.
 # junitTests/derbyNet/CompatibilityTest.java - tries to start and shutdown the server
@@ -25,8 +23,6 @@ derbynet/dblook_test_net.java
 derbynet/dblook_test_net_territory.java
 derbynet/maxthreads.java
 derbynet/runtimeinfo.java
-derbynet/sysinfo.java
-derbynet/sysinfo_withproperties.java
 derbynet/timeslice.java
 derbynet/DerbyNetAutoStart.java
 lang/wisconsin.java

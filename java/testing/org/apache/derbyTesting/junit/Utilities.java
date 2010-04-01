@@ -154,51 +154,6 @@ public class Utilities {
                     System.out.println("};\n");
             }
         }
-        /**
-         * Execute a java command and return the process.
-         * The caller should decide what to do with the process, if anything,
-         * typical activities would be to do a pr.waitFor, or to
-         * get a getInputStream or getErrorStream
-         * Note, that for verifying the output of a Java process, there is
-         * BaseTestCase.assertExecJavaCmdAsExpected
-         * 
-         * @param args
-         * @return the Process 
-         * @throws InterruptedException
-         */
-        public static Process execJavaCmd(String[] args) throws IOException, InterruptedException {
-            
-            int totalSize = 3 + args.length;
-            String[] cmd = new String[totalSize];
-            cmd[0] = "java";
-            cmd[1] = "-classpath";
-            cmd[2] = BaseTestCase.getSystemProperty("java.class.path");
-                    
-            System.arraycopy(args, 0, cmd, 3, args.length);
-            
-            final String[] command = cmd;
-            Process pr = null;
-            try {
-                pr = (Process) AccessController
-                    .doPrivileged(new PrivilegedExceptionAction() {
-                        public Object run() throws IOException {
-                            Process result = null;
-        
-                                result = Runtime.getRuntime().exec(command);
-        
-                            return result;
-                        }
-                    });
-            } catch (PrivilegedActionException pe) {
-                Exception e = pe.getException();
-                if (e instanceof IOException)
-                    throw (IOException) e;
-                else
-                    throw (SecurityException) e;
-            }
-            
-            return pr;
-        }
         
     /**
      * Calls the public method <code>getInfo</code> of the sysinfo tool within

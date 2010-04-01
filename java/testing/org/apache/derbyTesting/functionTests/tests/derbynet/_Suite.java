@@ -53,6 +53,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(BadConnectionTest.suite());
         suite.addTest(NetHarnessJavaTest.suite());
         suite.addTest(SecureServerTest.suite());
+        suite.addTest(SysinfoTest.suite());
         suite.addTest(SSLTest.suite());
         suite.addTest(NetIjTest.suite());
         suite.addTest(NSinSameJVMTest.suite());

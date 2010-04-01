@@ -473,7 +473,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
             "org.apache.derby.drda.NetworkServerControl", "-p",
             String.valueOf(fourthAlternatePort).toString(), 
             "-noSecurityManager", "start"};
-        Utilities.execJavaCmd(commandArray);
+        execJavaCmd(commandArray);
         
         if (!canPingServer(fourthAlternatePort, true)) {
             actionResult = "Can not ping server specified with -p";
@@ -486,7 +486,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
                 "org.apache.derby.drda.NetworkServerControl", "-p",
                 String.valueOf(fourthAlternatePort).toString(), 
                 "-noSecurityManager", "shutdown"};
-        Utilities.execJavaCmd(commandArray);
+        execJavaCmd(commandArray);
 
         if (canPingServer(fourthAlternatePort, false)) {
             actionResult = "Can still ping server specified with -p";
