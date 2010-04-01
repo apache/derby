@@ -417,10 +417,9 @@ public class Changes10_6 extends UpgradeChange {
                   "3b609129e181a7f7527697235c8aead65c461a0257f3",
                   "3b61aaca567ed43d1ba2e6402cbf1a723407:MD5"
         },
-        { "sam", "fireman", "SHA-256",
+        { "sam", "fireman", "SHA-1",
                   "3b609e5173cfa03620061518adc92f2a58c7b15cf04f",
-                  "3b61aff1a3f161b6c0ce856c4ce99ce6d779bad9cc1" +
-                  "44136099bc4b2b0742ed87899:SHA-256"
+                  "3b6197160362c0122fcd7a63a9da58fd0781140901fb:SHA-1"
         },
     };
 
