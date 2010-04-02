@@ -1,7 +1,6 @@
 lang/DB2IsolationLevels.sql
 lang/LOBDB2compatibility.sql
 lang/aggregateOptimization.sql
-lang/autoincrement.sql
 lang/compressTable.sql
 lang/consistencyChecker.sql
 lang/currentSchema.sql
