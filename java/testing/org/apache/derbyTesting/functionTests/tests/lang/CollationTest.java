@@ -1394,10 +1394,28 @@ public void testMissingCollatorSupport() throws SQLException {
         if(french) {
             suite.addTest(collatedSuite("fr", false, "testFrenchCollation"));
         }
-        if(swedish) {
+        if(swedish && !hasBuggySwedishLocale()) {
             suite.addTest(collatedSuite("sv", true, "testSwedishCaseInsensitiveCollation"));
         }
         return suite;
+    }
+
+    /**
+     * Check whether the JVM suffers from this bug:
+     * http://bugs.sun.com/view_bug.do?bug_id=4804273
+     * If it does, the tests that use Swedish locale will fail.
+     *
+     * @return true if the bug is present, false otherwise
+     */
+    private static boolean hasBuggySwedishLocale() {
+        Collator c = Collator.getInstance(new Locale("sv"));
+        if (c.compare("aa", "ab") < 0) {
+            // OK, aa should be less than ab with Swedish collation
+            return false;
+        } else {
+            // this is a bug
+            return true;
+        }
     }
 
   /**
