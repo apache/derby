@@ -108,7 +108,9 @@ public class SysinfoTest extends BaseJDBCTestCase {
      * Creates a suite with two testcases, with and without some extra 
      * system properties.
      * 
-     * @return
+     * @return an empty suite if derbynet.jar is not available, and
+     *      if the JVM only supports JSR169, otherwise, return a suite with
+     *      6 tests, 3 with properties set, 3 without.
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("SysinfoTest");

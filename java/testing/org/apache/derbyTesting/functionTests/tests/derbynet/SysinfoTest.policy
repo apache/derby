@@ -1,0 +1,411 @@
+//
+// *  Derby - Class org.apache.derbyTesting.functionTests.tests.lang.SysinfoTest
+// *  
+// * Licensed to the Apache Software Foundation (ASF) under one
+// * or more contributor license agreements.  See the NOTICE file
+// * distributed with this work for additional information
+// * regarding copyright ownership.  The ASF licenses this file
+// * to you under the Apache License, Version 2.0 (the
+// * "License"); you may not use this file except in compliance
+// * with the License.  You may obtain a copy of the License at
+// *
+// *   http://www.apache.org/licenses/LICENSE-2.0
+// *
+// * Unless required by applicable law or agreed to in writing,
+// * software distributed under the License is distributed on an
+// * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// * KIND, either express or implied.  See the License for the
+// * specific language governing permissions and limitations
+// * under the License.
+// *
+
+//
+// Policy file with minimal set of permissions to run derby's
+// functional tests.
+//
+// The test harness sets up four variables used by this policy file
+//
+// derbyTesting.codejar - URL to the jar files when they are in the classpath
+// derbyTesting.codeclasses - URL to the classes directory when it is in the classpath
+//
+// Only one of derbyTesting.codejar and derbyTesting.codeclasses will be valid, the
+// other will be set to a bogus URL like file://unused
+//
+// derbyTesting.codedir - File location of either derbyTesting.codejar or derbyTesting.codeclasses.
+// Only required due to a BUG (see below for more info).
+//
+// derbyTesting.jaxpjar - URL to the jar file containing the JAXP implementation
+//     for XML-based tests (ex. lang/XMLBindingTest.java).
+//
+// derbyTesting.serverhost - Host name or ip where network server is started 
+// derbyTesting.clienthost - specifies the clients ip address/hostName. 
+//     when testing with networkserver on a remote host, this needs to be passed in 
+//     with the NetworkServerControl start command
+
+//
+// Permissions for the embedded engine (derby.jar)
+//
+grant codeBase "${derbyTesting.codejar}derby.jar" {
+  permission java.util.PropertyPermission "derby.*", "read";
+permission java.util.PropertyPermission "derby.storage.jvmInstanceId", 
+      "write"; 
+  // The next two properties are used to determine if the VM is 32 or 64 bit.
+  permission java.util.PropertyPermission "sun.arch.data.model", "read";
+  permission java.util.PropertyPermission "os.arch", "read";
+  permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
+  
+  // unit tests (e.g. store/T_RecoverFullLog) set this property 
+  // (called from derbyTesting.jar through code in derby.jar)
+  permission java.util.PropertyPermission "derbyTesting.unittest.*", "write";
+
+  permission java.lang.RuntimePermission "createClassLoader";
+
+  // permissions so that we can set the context class loader to
+  // null for daemon threads to avoid class loader leak.
+  // DERBY-3745
+  permission java.lang.RuntimePermission "getClassLoader";
+  permission java.lang.RuntimePermission "setContextClassLoader";
+
+  permission java.security.SecurityPermission "getPolicy";
+  
+  permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";
+  permission java.io.FilePermission "${derby.system.home}${/}derby.log", "read, write, delete";
+  // [DERBY-2000] The write permission was added to allow creation of the
+  // derby.system.home directory when running tests under a security manager.
+  permission java.io.FilePermission "${derby.system.home}", "read, write";
+  
+  // all databases under derby.system.home 
+  permission java.io.FilePermission "${derby.system.home}${/}-", "read, write, delete";
+
+  // Import/export and other support files from these locations in tests
+  permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
+  permission java.io.FilePermission "${user.dir}${/}extinout${/}-", "read,  write, delete";
+  permission java.io.FilePermission "${user.dir}${/}extout${/}-", "read,write";
+  permission java.io.FilePermission "${user.dir}${/}extinout", "read,write";
+  
+  // These permissions are needed to load the JCE for encryption with Sun and IBM JDK131.
+  // JDK14 has the JCE  preloaded
+  permission java.security.SecurityPermission "insertProvider.SunJCE";
+  permission java.security.SecurityPermission "insertProvider.IBMJCE";
+  
+//
+// Permissions needed for JMX based management and monitoring, which is only
+// available for JVMs supporting "platform management", that is J2SE 5.0 or better.
+//
+// Allows this code to create an MBeanServer:
+//
+  permission javax.management.MBeanServerPermission "createMBeanServer";
+//
+// Allows access to Derby's built-in MBeans, within the domain org.apache.derby.
+// Derby must be allowed to register and unregister these MBeans.
+// To fine tune this permission, see the javadoc of javax.management.MBeanPermission
+// or the JMX Instrumentation and Agent Specification.
+//
+  permission javax.management.MBeanPermission "org.apache.derby.*#[org.apache.derby:*]","registerMBean,unregisterMBean";
+//
+// Trusts Derby code to be a source of MBeans and to register these in the MBean server.
+//
+  permission javax.management.MBeanTrustPermission "register";
+
+  // Gives permission for jmx to be used against Derby but
+  // only if JMX authentication is not being used.
+  // In that case the application would need to create
+  // a whole set of fine-grained permissions to allow specific
+  // users access to MBeans and actions they perform.
+  permission org.apache.derby.security.SystemPermission "jmx", "control";
+  permission org.apache.derby.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.security.SystemPermission "server", "monitor";  
+ 
+  // These permissions are needed when testing code instrumented with EMMA.
+  // They will only be used if the emma.active system property property is set,
+  // which should be set to "" for the permissions to be correct.
+  permission java.util.PropertyPermission "${emma.active}user.dir", "read";
+  permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
+  permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
+  
+  // These permissions are needed by AssertFailure to dump the thread stack
+  // traces upon failure.
+  permission java.lang.RuntimePermission "getStackTrace";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
+};
+
+//
+// Permissions for the network server (derbynet.jar)
+//
+grant codeBase "${derbyTesting.codejar}derbynet.jar" {
+  permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
+  
+  // accept is needed for the server accepting connections
+  // connect is needed for ping command (which is in the server jar)
+  permission java.net.SocketPermission "127.0.0.1", "accept,connect";
+  permission java.net.SocketPermission "localhost", "accept,connect";
+  permission java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect";
+  permission java.net.SocketPermission "${derbyTesting.serverhost}", "accept,connect";
+  // Need to be able to write to trace file for NetworkServerControlApiTest
+  permission java.io.FilePermission "${user.dir}${/}system${/}trace${/}-", "write"; 
+    // Needed for NetworkServerMBean access (see JMX section above)
+  permission org.apache.derby.security.SystemPermission "server", "control,monitor";
+  
+};
+
+//
+// Permissions for the network client (derbyclient.jar)
+//
+grant codeBase "${derbyTesting.clientjar}derbyclient.jar" {
+  permission java.net.SocketPermission "127.0.0.1", "connect,resolve";
+  permission java.net.SocketPermission "localhost", "connect,resolve";
+  permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
+
+  // DERBY-1883: Since some classes that are included in both derby.jar and
+  // derbyclient.jar read properties, derbyclient.jar needs permission to read
+  // derby.* properties to avoid failures when it is listed before derby.jar in
+  // the classpath.
+  permission java.util.PropertyPermission "derby.*", "read";
+
+  // DERBY-2302: derbyclient.jar needs to be able to read the user.dir property in order to
+  // do tracing in that directory. Also, it needs read/write permissions in user.dir in order
+  // to create the trace files in that directory.
+  permission java.util.PropertyPermission "user.dir", "read";
+  permission java.io.FilePermission "${user.dir}${/}-", "read, write"; 
+  
+  // These permissions are needed by AssertFailure to dump the thread stack
+  // traces upon failure.
+  permission java.lang.RuntimePermission "getStackTrace";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
+
+};
+
+//
+// Permissions for the tools (derbytools.jar)
+// Ideally this would be more secure, for now the
+// focus is on getting the engine & network server secure.
+//
+grant codeBase "${derbyTesting.codejar}derbytools.jar" {
+  // Access all properties using System.getProperties -
+  // ij enumerates the properties in order to open connections
+  // for any property set in ij.connection.* and set protocols
+  // for any property in ij.protocol.*
+  permission java.util.PropertyPermission "*", "read, write";
+  
+  // Read all files under ${user.dir}
+  permission java.io.FilePermission "${user.dir}${/}-", "read";
+  
+  // IjTestCases read, write, and delete ij's output in the extinout dir
+  permission java.io.FilePermission "${user.dir}${/}extinout${/}-", "read, write, delete";
+ 
+  // ij needs permission to read the sql files in this jar
+  permission java.io.FilePermission "${derbyTesting.testjarpath}", "read";
+  
+};
+
+//
+// Permissions for the tests (derbyTesting.jar)
+// We are liberal here, it's not a goal to make the test harness
+// or tests secure.
+//
+grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
+  // Access all properties using System.getProperties
+  permission java.util.PropertyPermission "*", "read, write";
+  
+  // Access all files under ${user.dir}to write the test directory structure
+  permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
+
+  // When running with useprocess=false need to install and uninstall
+  // the security manager and allow setIO to change the system err and out
+  // streams. Currently the nist suite runs with useprocess=false.
+  permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.security.SecurityPermission "getPolicy";
+  permission java.lang.RuntimePermission "setIO";  
+
+  // These permissions are needed to dump the thread stack
+  // traces upon failure.
+  permission java.lang.RuntimePermission "getStackTrace";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
+  
+  // Allow MBeanTest to register the application management MBean.
+  permission javax.management.MBeanServerPermission "createMBeanServer";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.Management#[org.apache.derby:type=Management]","registerMBean,unregisterMBean";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.Management#-[-]", "instantiate";
+  permission javax.management.MBeanTrustPermission "register";
+   
+  // And to find and use Derby's MBeans
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,invoke";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "getMBeanInfo";
+  permission javax.management.MBeanPermission "-#-[-]", "queryNames";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "queryNames";
+  
+  // Test code needs this as well for the platform MBeanServer
+  // tests where the testing code is in the stack frame.
+  permission org.apache.derby.security.SystemPermission "jmx", "control";
+  permission org.apache.derby.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.security.SystemPermission "server", "control,monitor";
+  
+  // These permissions are needed when testing code instrumented with EMMA.
+  permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
+  
+  //client side: test execs another jvm with relative path
+  permission java.io.FilePermission "<<ALL FILES>>", "execute";
+};
+
+//
+// super-set of the jar permissions for running out of the classes directory
+//
+grant codeBase "${derbyTesting.codeclasses}" {
+  // for sysinfo test, with classes, we need read access for this...
+  // can't use derbyTesting.codeclasses as it has backslashes on windows
+  permission java.io.FilePermission "${sysinfotest.classesdir}", "read";
+
+  // Access all properties using System.getProperties
+  permission java.util.PropertyPermission "*", "read, write";
+  
+  permission java.util.PropertyPermission "derby.*", "read";
+  permission java.lang.RuntimePermission "createClassLoader";
+
+  // permissions so that we can set the context class loader to
+  // null for daemon threads to avoid class loader leak.
+  // DERBY-3745
+  permission java.lang.RuntimePermission "getClassLoader";
+  permission java.lang.RuntimePermission "setContextClassLoader";
+
+  permission java.security.SecurityPermission "getPolicy";
+   
+  permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";
+  permission java.io.FilePermission "${derby.system.home}${/}derby.log", "read, write, delete";
+  permission java.io.FilePermission "${derby.system.home}", "read";
+  permission java.io.FilePermission "${derby.system.home}${/}-", "read, write, delete";
+
+  // combination of client and server side.
+  permission java.net.SocketPermission "127.0.0.1", "accept,connect,resolve";
+  permission java.net.SocketPermission "localhost", "accept,connect,resolve";
+  permission java.net.SocketPermission "${derbyTesting.clienthost}", "accept,connect";
+  permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
+  
+  // Access all files under ${user.dir}to write the test directory structure
+  // Also covers extin, extout and extinout locations
+  permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
+    
+  // These permissions are needed to load the JCE for encryption with Sun and IBM JDK131.
+  // JDK14 has the JCE  preloaded
+  permission java.security.SecurityPermission "insertProvider.SunJCE";
+  permission java.security.SecurityPermission "insertProvider.IBMJCE";
+
+  // When running with useprocess=false need to install and uninstall
+  // the security manager and allow setIO to change the system err and out
+  // streams. Currently the nist suite runs with useprocess=false.
+  permission java.lang.RuntimePermission "setSecurityManager";
+  permission java.lang.RuntimePermission "setIO"; 
+
+  // These permissions are needed by stress.multi to dump the thread stack
+  // traces upon failure.
+  permission java.lang.RuntimePermission "getStackTrace";
+  permission java.lang.RuntimePermission "modifyThreadGroup";
+  
+    // Allow MBeanTest to register the application management MBean.
+  permission javax.management.MBeanServerPermission "createMBeanServer";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.Management#[org.apache.derby:type=Management]","registerMBean,unregisterMBean";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.Management#-[-]", "instantiate";
+  permission javax.management.MBeanTrustPermission "register";
+  
+  // Allows access to Derby's built-in MBeans, within the domain org.apache.derby.
+  permission javax.management.MBeanPermission "org.apache.derby.*#[org.apache.derby:*]","registerMBean,unregisterMBean";
+  
+   
+  // And to find and use Derby's MBeans
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#[org.apache.derby:*]", "getAttribute,invoke";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "getMBeanInfo";
+  permission javax.management.MBeanPermission "-#-[-]", "queryNames";
+  permission javax.management.MBeanPermission "org.apache.derby.mbeans.*#-[org.apache.derby:*]", "queryNames";
+  
+  // Test code needs this as well for the platform MBeanServer
+  // tests where the testing code is in the stack frame.
+  permission org.apache.derby.security.SystemPermission "jmx", "control";
+  permission org.apache.derby.security.SystemPermission "engine", "monitor";
+  permission org.apache.derby.security.SystemPermission "server", "control,monitor";
+  
+  //client side: test execs another jvm with relative path
+  permission java.io.FilePermission "<<ALL FILES>>", "execute";
+};
+
+// JUnit jar file tries to read junit.properties in the user's
+// home directory and seems to require permission to read the
+// property user.home as well.
+// junit.swingui.TestRunner writes to .junitsession on exit.
+grant codeBase "${derbyTesting.junit}" {
+    permission java.util.PropertyPermission "user.home", "read";
+    permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
+    permission java.io.FilePermission "${user.home}${/}.junitsession", "write";
+
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+  
+    // These permissions are needed when testing code instrumented with EMMA.
+    permission java.util.PropertyPermission "${emma.active}user.dir", "read";
+    permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
+    permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
+    
+    //client side: test execs another jvm with relative path
+    permission java.io.FilePermission "<<ALL FILES>>", "execute";
+};
+
+// Due to a problem running tests/derbynet/CompatibilityTest in the old test
+// harness, permission to read junit.properties is granted to all. This can be 
+// removed when CompatibilityTest is rewritten to conform to our current Junit
+// usage. See DERBY-2076.
+grant {
+    permission java.io.FilePermission "${user.home}${/}junit.properties", "read";
+};
+
+// Ant's junit runner requires setOut to redirect the System output streams
+// to the forked JVM used when running junit tests inside Ant. Ant requires
+// forking the JVM if you want to run tests in a different directory than the
+// current one.
+grant codeBase "${derbyTesting.antjunit}" {
+    permission java.lang.RuntimePermission "setIO";
+
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+
+    // These permissions are needed when testing code instrumented with EMMA.
+    permission java.util.PropertyPermission "${emma.active}user.dir", "read";
+    permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
+    permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
+};
+
+// functionTests.tests.lang.RoutineSecurityTest requires this grant
+// to check to see if permissions are granted through generated code
+// through this mechanism.
+grant {
+    permission java.util.PropertyPermission "derbyRoutineSecurityTest.yes", "read";
+    
+
+};
+
+// When inserting XML values that use external DTD's, the JAXP parser
+// needs permission to read the DTD files.  We assume that all DTD
+// files will be copied to extin/ by whichever tests need them.  So
+// grant the JAXP parser permissions to read that directory.
+grant codeBase "${derbyTesting.jaxpjar}" {
+  permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
+};
+
+
+// These permissions are needed when testing code instrumented with EMMA.
+// They are all related to writing coverage statistics to a file that by default
+// is named coverage.ec placed in the directory where the test is executed.
+grant codeBase "${derbyTesting.emma}" {
+    permission java.util.PropertyPermission "user.dir", "read";
+    permission java.io.FilePermission "${user.dir}${/}coverage.ec", "read, write";
+    permission java.lang.RuntimePermission "writeFileDescriptor";
+};
+
+// Permissions for package-private tests run from 'classes.pptesting'
+grant codeBase "${derbyTesting.ppcodeclasses}" {
+
+  // Needed for ProtocolTest - allows connection to a server
+  permission java.net.SocketPermission "127.0.0.1", "connect,resolve";
+  permission java.net.SocketPermission "localhost", "connect,resolve";
+  permission java.net.SocketPermission "${derbyTesting.serverhost}", "connect,resolve";
+
+  // Allows reading support files in 'extin'
+  permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
+};
