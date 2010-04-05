@@ -126,6 +126,10 @@ This is a feature release. The following new features were added:
 <b>Context-sniffing scripts</b> - Ability of shipped scripts to locate Derby jars when DERBY_HOME isn't set.</li>
 	
 
+<li>
+<b>Case-insensitive strings</b> - Ability to ignore case in string comparisons and sorts.</li>
+	
+
 </ul>
 
 
@@ -137,6 +141,42 @@ This is a feature release. The following new features were added:
 <table border="2">
 <tr>
 <td><b>Issue Id</b></td><td><b>Description</b></td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4604">DERBY-4604</a></td><td>
+test lang.CollationTest.testSwedishCaseInsensitiveCollation fails with 
+IBM's weme6.2/1.4.2. &amp; Sun's 1.4.2</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4603">DERBY-4603</a></td><td>
+test testBuiltinAuthenticationWithConfigurableHash fails from 
+upgradeTests.Changes10_6 with ibm's j9</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4602">DERBY-4602</a></td><td>10
+ failures &amp; 11 errors with IBM weme6.2/j9/cdc-foundation after 
+revision 922304 for DERBY-4483</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4600">DERBY-4600</a></td><td>
+Use ValueNodeList helper methods in CoalesceFunctionNode</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4594">DERBY-4594</a></td><td>
+ArrayIndexOutOfBoundsException thrown in PreparedStatement execution</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4592">DERBY-4592</a></td><td>
+Documentation: Update Sun trademarks in manuals</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4590">DERBY-4590</a></td><td>You
+ can drop a file-system database from a directory named "memory"</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4584">DERBY-4584</a></td><td>
+Unable to connect to network server if client thread name has Japanese 
+characters</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4578">DERBY-4578</a></td><td>
@@ -160,9 +200,18 @@ test failure in ij7 with cdc foundation profile (ibm's weme6.2)</td>
 failures in ij2 test with cdc/foundation (ibm's weme 6.2)</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4568">DERBY-4568</a></td><td>
+Documentation needed for sequence generators</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4567">DERBY-4567</a></td><td>
 Update the Tools documentation to describe the qualified identifiers 
 which Sylvain just added to ij</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4564">DERBY-4564</a></td><td>
+Replication tests do not pick up derby.tests.networkServerStartTimeout 
+setting</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4563">DERBY-4563</a></td><td>
@@ -901,6 +950,10 @@ insert/update/delete</td>
 OFFSET and FETCH FIRST documentation improvement</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4191">DERBY-4191</a></td><td>
+Lack of SELECT privilege does not prevent SELECT COUNT(*)</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4190">DERBY-4190</a></td><td>
 Incorrect example for SYSCS_DIAG.CONTAINED_ROLES in the reference manual</td>
 </tr>
@@ -1437,6 +1490,10 @@ Select statement returns wrong number of rows if you compare an integer
 column with a boolean expression in the where clause</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-870">DERBY-870</a></td><td>
+Update documentation on setting up LDAP user authentication.</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-711">DERBY-711</a></td><td>The 
 documentation should explain that Derby database files are 
 platform-independent</td>
@@ -1467,6 +1524,21 @@ Thread termination -&gt; XSDG after operation is 'complete'</td>
 <blockquote>
 <p>Compared with the previous release (10.5.3.0), Derby release 10.6.0.0 introduces the following new features and incompatibilities. These merit your special attention.</p>
 <ul>
+<li>
+<a href="#Note for DERBY-4602">
+<p>Note for DERBY-4602: 
+Default hash algorithm for BUILTIN authentication changed to SHA-256
+</p>
+</a>
+</li>
+<li>
+<a href="#Note for DERBY-4483">
+<p>Note for DERBY-4483: 
+Strong password substitution cannot be used with new defaults for
+BUILTIN authentication.
+</p>
+</a>
+</li>
 <li>
 <a href="#Note for DERBY-4432">
 <p>Note for DERBY-4432: 
@@ -1533,6 +1605,350 @@ Comprehensive validity checks for the parameters of <tt>Clob.setString</tt> have
 </a>
 </li>
 </ul>
+<hr>
+<h3>
+<a name="Note for DERBY-4602"></a>Note for DERBY-4602</h3>
+<blockquote>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+Default hash algorithm for BUILTIN authentication changed to SHA-256
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+If a database that uses BUILTIN authentication is opened on a
+platform that does not support the new default hash algorithm
+(SHA-256), the following exception may be seen when connecting to the
+database or when setting the password for a user:
+</p>
+
+
+<pre>
+ERROR XBCXW: The message digest algorithm 'SHA-256' is not supported
+by any of the available cryptography providers. Please install a
+cryptography provider that supports that algorithm, or specify another
+algorithm in the derby.authentication.builtin.algorithm property.
+</pre>
+
+
+<p>
+The default algorithm is initialized to SHA-256 when the database is
+created. However, if SHA-256 is not available, it is initialized to
+the old default (SHA-1) instead. The error message above should
+therefore only be seen if the database was created on a platform that
+supports SHA-256 and opened on a platform that doesn't support
+SHA-256.
+</p>
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+Databases created on a platform with support for the new default
+algorithm (SHA-256) may now require some changes before they can be
+used together with BUILTIN authentication on platforms that don't
+support the new algorithm. In previous releases, differences in the
+set of supported hash algorithms did not cause a need for changes
+when moving databases across platforms.
+</p>
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+The default algorithm in previous releases (SHA-1) is not considered
+secure enough for most uses by U.S. government agencies. SHA-256 is
+widely recognized as more secure than SHA-1 and is therefore used as
+the default if the platform on which the database is created supports
+the algorithm.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+If a database cannot be used on a platform because of this issue, one
+of the following steps must be taken:
+</p>
+
+
+<h5>Alternative 1</h5>
+
+<p>
+Recreate the database on the platform that doesn't support
+SHA-256. The new database will use the more widely available SHA-1
+algorithm as default.
+</p>
+
+
+<h5>Alternative 2</h5>
+
+<p>
+Install a Java Cryptography Extension (JCE) Provider that supports the
+SHA-256 algorithm.
+</p>
+
+
+<h5>Alternative 3</h5>
+
+<p>
+On the platform on which the database was created, change the default
+algorithm to SHA-1 (or to some other algorithm known to be supported
+on the target platform) by executing the following SQL statement:
+</p>
+
+
+<pre>
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(
+        'derby.authentication.builtin.algorithm', 'SHA-1')
+</pre>
+
+
+<p>
+If there are any users defined at the database level before the
+algorithm is changed to SHA-1, their passwords will have to be set
+again to ensure that they are rehashed with SHA-1. For example, if
+there's a user called 'alice' with the password 'secret', the password
+must be updated with this SQL statement before it can be used on the
+platform with no support for SHA-256:
+</p>
+
+
+<pre>
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(
+        'derby.user.alice, 'secret)
+</pre>
+
+
+</blockquote>
+<hr>
+<h3>
+<a name="Note for DERBY-4483"></a>Note for DERBY-4483</h3>
+<blockquote>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+Strong password substitution cannot be used with new defaults for
+BUILTIN authentication.
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+In a database created with the new version of Derby, the BUILTIN
+authentication provider will by default store passwords in a way
+that's not compatible with the strong password substitution security
+mechanism. Applications that attempt to connect to the database using
+the Derby network client driver with <tt>securityMechanism=8</tt> in
+the connection URL, will therefore fail to connect. The connection
+attempt will be refused with the following error message:
+</p>
+
+
+<pre>
+ERROR 08004: DERBY SQL error: SQLCODE: -1, SQLSTATE: 08004, SQLERRMC:
+Connection authentication failure occurred. Either the supplied
+credentials were invalid, or the database uses a password encryption
+scheme which is not compatible with the strong password substitution
+security mechanism. If this error started after upgrade, refer to the
+release note for DERBY-4483 for options.
+</pre>
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+Applications that use BUILTIN authentication and the strong password
+substitution security mechanism will not be able to establish
+connections to the database if the database uses the new defaults for
+BUILTIN authentication.
+</p>
+
+
+<p>
+Only databases created with the new version of Derby will
+automatically use the new defaults. Databases upgraded from previous
+versions of Derby will continue to use the old defaults, and they will
+not be affected unless the settings for BUILTIN authentication are
+changed manually to enable the new behaviour.
+</p>
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+The default BUILTIN authentication scheme used in previous releases
+has a weakness that makes it vulnerable to attacks. In the new
+release, an alternative BUILTIN authentication scheme without this
+vulnerability has been added. Despite this new scheme's
+incompatibility with strong password substitution, it was made the
+default for databases created with the new release of Derby in order
+to improve out-of-the-box security.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+Applications that are affected by this incompatibility can be made to
+work by making one of the following changes:
+</p>
+
+
+<h5>Alternative 1: Use another security mechanism</h5>
+
+
+<p>
+You can switch to another security mechanism by changing the value of
+the <tt>securityMechanism</tt> connection attribute. Only the strong
+password substitution security mechanism is incompatible with the new
+BUILTIN authentication. Note that if you pick one of the security
+mechanisms that send your credentials unencrypted over the network,
+you may want to enable network encryption and authentication with
+SSL/TLS. Details about how to change security mechanisms and how to
+enable SSL/TLS can be found in the Derby Server and Administration
+Guide.
+</p>
+
+
+<h5>Alternative 2: Revert to the old BUILTIN authentication behaviour</h5>
+
+
+<p>
+It is possible to revert to the old behaviour for BUILTIN
+authentication, which will make it possible to connect when using the
+strong password substitution security mechanism. To revert to the old
+behaviour, set the database
+property <tt>derby.authentication.builtin.algorithm</tt>
+to <tt>NULL</tt> (or to an empty string) by executing this SQL statement:
+</p>
+
+
+<pre>
+CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(
+        'derby.authentication.builtin.algorithm', NULL)
+</pre>
+
+
+<p>
+If you have created any users before setting the above property
+to <tt>NULL</tt>, you will also need to set the passwords for all
+those users again to ensure that they are stored using the old format,
+since setting this property does not change how any existing passwords
+are stored. Users whose passwords are stored using the old format will
+be able to connect to the database with strong password substitution.
+</p>
+
+
+</blockquote>
 <hr>
 <h3>
 <a name="Note for DERBY-4432"></a>Note for DERBY-4432</h3>

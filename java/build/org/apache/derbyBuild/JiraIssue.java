@@ -103,7 +103,9 @@ class JiraIssue {
         // The attachment id is in the link of the latest release note
         // attached to the issue.
         //
-        if ( key.equals( "DERBY-4432" ) ) { result = 12424709L; }
+        if ( key.equals( "DERBY-4602" ) ) { result = 12440335L; }
+        else if ( key.equals( "DERBY-4483" ) ) { result = 12439775L; }
+        else if ( key.equals( "DERBY-4432" ) ) { result = 12424709L; }
         else if ( key.equals( "DERBY-4380" ) ) { result = 12434514L; }
         else if ( key.equals( "DERBY-4355" ) ) { result = 12419298L; }
         else if ( key.equals( "DERBY-4312" ) ) { result = 12414219L; }

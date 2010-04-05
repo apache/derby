@@ -139,6 +139,8 @@ This is a feature release. The following new features were added:
 	
 <li><b>Context-sniffing scripts</b> - Ability of shipped scripts to locate Derby jars when DERBY_HOME isn't set.</li>
 	
+<li><b>Case-insensitive strings</b> - Ability to ignore case in string comparisons and sorts.</li>
+	
 </ul>
 
 </newFeatures>
