@@ -33,20 +33,43 @@ import org.apache.derbyTesting.junit.JDBCPerfTestCase;
 public class HeapScan extends JDBCPerfTestCase {
 
     PreparedStatement select = null;
+    private PreparedStatement selectWithPred;
     protected static String tableName = "SCANTEST";
     protected static int rowcount = 10000;
+    private boolean binaryData;
 
     /**
      * @return suite of tests
      */
     public static Test suite()
     {
+        TestSuite suite = new TestSuite("HeapScanTests");
+        suite.addTest(baseSuite("HeapScan:CHAR", false));
+        suite.addTest(baseSuite("HeapScan:BINARY", true));
+        return suite;
+    }
+
+    /**
+     * Create a suite of all the tests in this class with the appropriate
+     * decorator.
+     *
+     * @param name the name of the returned test suite
+     * @param binaryData whether or not these tests should use binary data
+     * instead of character data
+     * @return a test suite
+     */
+    private static Test baseSuite(String name, boolean binaryData) {
         int iterations = 700, repeats = 4;
 
-        TestSuite heapScan = new TestSuite("HeapScanTests");
-        heapScan.addTest(new HeapScan("Scan100",iterations,repeats));
-        heapScan.addTest(new HeapScan("Scan100GetData",iterations,repeats));
-        return new BaseLoad100TestSetup(heapScan,rowcount,tableName);
+        TestSuite heapScan = new TestSuite(name);
+        heapScan.addTest(new HeapScan("Scan100", binaryData,
+                                      iterations, repeats));
+        heapScan.addTest(new HeapScan("Scan100GetData", binaryData,
+                                      iterations, repeats));
+        heapScan.addTest(new HeapScan("Scan100WithPredicate", binaryData,
+                                      iterations, repeats));
+        return new BaseLoad100TestSetup(
+                heapScan, rowcount, tableName, binaryData);
     }
 
     /**
@@ -57,7 +80,22 @@ public class HeapScan extends JDBCPerfTestCase {
      */
     public HeapScan(String name,int iterations, int repeats)
     {
+        this(name, false, iterations, repeats);
+    }
+
+    /**
+     * Scan tests.
+     * @param name test name
+     * @param binaryData whether or not binary data should be used instead
+     *                   of character data
+     * @param iterations iterations of the test to measure
+     * @param repeats number of times to repeat the test
+     */
+    public HeapScan(String name, boolean binaryData,
+                    int iterations, int repeats)
+    {
         super(name,iterations,repeats);
+        this.binaryData = binaryData;
     }
 
     /**
@@ -66,6 +104,20 @@ public class HeapScan extends JDBCPerfTestCase {
     public void setUp() throws Exception {
 
         select = openDefaultConnection().prepareStatement("SELECT * FROM "+tableName);
+
+        // Create a SELECT statement that uses predicates. Also initialize
+        // the predicates with some data of the correct type for this test
+        // (either character data or binary data).
+        selectWithPred = prepareStatement(
+                "SELECT * FROM " + tableName + " WHERE " +
+                "c6=? OR c7=? OR c8=? OR c9=?");
+        Object predicate = "abcdef";
+        if (binaryData) {
+            predicate = ((String) predicate).getBytes("US-ASCII");
+        }
+        for (int i = 1; i <= 4; i++) {
+            selectWithPred.setObject(i, predicate);
+        }
     }
 
 
@@ -117,10 +169,10 @@ public class HeapScan extends JDBCPerfTestCase {
             int i4 = rs.getInt(4);
             int i5 = rs.getInt(5);
 
-            String c6 = rs.getString(6);
-            String c7 = rs.getString(7);
-            String c8 = rs.getString(8);
-            String c9 = rs.getString(9);
+            Object c6 = rs.getObject(6);
+            Object c7 = rs.getObject(7);
+            Object c8 = rs.getObject(8);
+            Object c9 = rs.getObject(9);
 
             actualCount++;
         }
@@ -130,12 +182,25 @@ public class HeapScan extends JDBCPerfTestCase {
     }
 
     /**
+     * Test the performance of a table scan that needs to compare all the
+     * char values in the table with some specified values. Used to test the
+     * performance gains in DERBY-4608.
+     */
+    public void Scan100WithPredicate() throws SQLException {
+        ResultSet rs = selectWithPred.executeQuery();
+        assertFalse("should be empty", rs.next());
+        rs.close();
+        commit();
+    }
+
+    /**
      * Cleanup - close resources opened in this test.
      **/
     public void tearDown() throws Exception {
 
         select.close();
         select = null;
+        selectWithPred = null; // will be closed in super.tearDown()
         super.tearDown();
     }
 }

@@ -575,8 +575,7 @@ abstract class SQLBinary
 									"Some fool passed in a "+ other.getClass().getName() + ", "
                                     + otherTypeFormatId  + " to SQLBinary.compare()");
 			}
-			String otherString = other.getString();
-			if (this.getString() == null  || otherString == null)
+			if (this.isNull() || other.isNull())
 				return unknownRV;
 		}
 		/* Do the comparison */

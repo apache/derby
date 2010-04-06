@@ -20,6 +20,7 @@
  */
 package org.apache.derbyTesting.perf.basic.jdbc;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -37,6 +38,9 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
  * column 5 has unique values, column 6 is set to a constant value,
  *  column 7 has 1% of rows with known pattern,
  * column 8 has constant value,column 9 has values having the same suffix.
+ * One of the constructors allows the data type of the last four columns to be
+ * changed to CHAR(20) FOR BIT DATA.
+ *
  * Connection props :  autocommit - false, default isolation level- Read Committed.
  *
  * If any indexes have to be created or any other schema additions need to be made, then
@@ -46,6 +50,7 @@ public class BaseLoad100TestSetup extends CleanDatabaseTestSetup {
 
     protected int rowsToLoad=10000;
     protected String tableName = "BASELOAD100";
+    private boolean binaryData;
 
     /**
      *
@@ -82,9 +87,21 @@ public class BaseLoad100TestSetup extends CleanDatabaseTestSetup {
      */
     public BaseLoad100TestSetup(Test test,int rowsToLoad, String tableName)
     {
+        this(test, rowsToLoad, tableName, false);
+    }
+
+    /**
+     * @param test name of test
+     * @param rowsToLoad number of rows to insert
+     * @param tableName name of the table to insert the rows into
+     * @param binaryData whether or not c6, ..., c9 should contain binary data
+     */
+    public BaseLoad100TestSetup(
+            Test test, int rowsToLoad, String tableName, boolean binaryData) {
         super(test);
         this.tableName = tableName;
         this.rowsToLoad = rowsToLoad;
+        this.binaryData = binaryData;
     }
 
     /**
@@ -112,10 +129,17 @@ public class BaseLoad100TestSetup extends CleanDatabaseTestSetup {
     protected void decorateSQL(Statement s)
         throws SQLException
     {
-        s.execute("CREATE TABLE " +tableName+" ("
-                + "i1 INT, i2 INT, i3 INT, i4 INT, i5 INT, "
-                + "c6 CHAR(20), c7 CHAR(20), c8 CHAR(20), c9 CHAR(20))");
-
+        StringBuffer ddl = new StringBuffer();
+        ddl.append("CREATE TABLE ").append(tableName);
+        ddl.append("(i1 INT, i2 INT, i3 INT, i4 INT, i5 INT");
+        for (int i = 6; i <= 9; i++) {
+            ddl.append(", c").append(i).append(" CHAR(20)");
+            if (binaryData) {
+                ddl.append(" FOR BIT DATA");
+            }
+        }
+        ddl.append(')');
+        s.execute(ddl.toString());
     }
 
     /**
@@ -137,20 +161,36 @@ public class BaseLoad100TestSetup extends CleanDatabaseTestSetup {
 
             insert.setInt(4, 2);
             insert.setInt(5, i);
-            insert.setString(6, "01234567890123456789");
+            insert.setObject(6, convertData("01234567890123456789"));
 
             // 1% of rows with a known pattern for like etc.
             if ((i % 100) == 34)
-                insert.setString(7, "012345javaone6789");
+                insert.setObject(7, convertData("012345javaone6789"));
             else
-                insert.setString(7, "01234567890123456789");
+                insert.setObject(7, convertData("01234567890123456789"));
 
-            insert.setString(8, "01234567890123456789");
+            insert.setObject(8, convertData("01234567890123456789"));
 
-            insert.setString(9, (i + 1000) + "0123456789012");
+            insert.setObject(9, convertData((i + 1000) + "0123456789012"));
             insert.executeUpdate();
         }
         insert.getConnection().commit();
     }
 
+    /**
+     * Convert a string to a data type appropriate for the columns c6 to c9,
+     * that is, either a {@code String} value or a {@code byte[]} value.
+     *
+     * @param string the string to generate the value from
+     * @return either {@code string}, or a {@code byte[]} value representing
+     * {@code string} if {@code binaryData} is {@code true}
+     * @throws IOException if the string cannot be converted to a byte array
+     */
+    private Object convertData(String string) throws IOException {
+        if (binaryData) {
+            return string.getBytes("US-ASCII");
+        } else {
+            return string;
+        }
+    }
 }
