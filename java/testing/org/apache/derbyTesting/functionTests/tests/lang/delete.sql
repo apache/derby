@@ -230,3 +230,44 @@ autocommit on;
 
 drop table bug171_employee;
 drop table bug171_bonuses;
+
+--
+-- Test case for DERBY-4585
+--
+create table d4585_t1 (id int primary key, a int);
+create table d4585_t2 (id int primary key, b int,
+                       constraint fk_t2 foreign key (b) references d4585_t1);
+create table d4585_t3 (id int primary key, c int);
+create table d4585_t4 (d int references d4585_t2);
+
+insert into d4585_t1 values (16,51),(30,12),(39,24),(48,1),(53,46),(61,9);
+
+insert into d4585_t2 values
+    (2,16),(3,61),(4,16),(6,30),(7,16),(10,48),(13,30),(15,48),(17,61),
+    (18,30),(21,48),(22,53),(23,61),(25,48),(26,30),(27,48),(29,16),(31,39),
+    (33,30),(35,61),(37,30),(40,53),(42,53),(45,16),(49,30),(54,53),(57,53),
+    (58,61),(60,30),(63,61),(64,30);
+
+insert into d4585_t3 values
+    (1,50),(5,50),(8,50),(9,50),(11,36),(12,50),(14,50),(19,50),(20,50),
+    (24,36),(28,50),(32,50),(34,50),(38,50),(41,50),(43,50),(46,36),(47,36),
+    (51,36),(52,50),(55,36),(56,44),(59,36),(62,36);
+
+insert into d4585_t4 values (7), (33), (57);
+
+-- The query below resulted in a NullPointerException if a certain query plan
+-- was chosen. Use an optimizer override to force that plan.
+delete from d4585_t4 where d in
+  (select id from d4585_t2 --derby-properties constraint=fk_t2
+    where b in (select t1.id
+                       from d4585_t1 t1, d4585_t3 t3
+                       where t1.a=t3.id and t3.c=36));
+
+-- Verify that the correct rows were deleted.
+select * from d4585_t4;
+
+-- Clean up
+drop table d4585_t4;
+drop table d4585_t3;
+drop table d4585_t2;
+drop table d4585_t1;

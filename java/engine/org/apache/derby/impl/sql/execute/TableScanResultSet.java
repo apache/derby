@@ -682,7 +682,15 @@ class TableScanResultSet extends ScanResultSet
 				}
 	        	scanController.close();
 				scanController = null; // should not access after close
-				activation.clearIndexScanInfo();
+
+                // Updatable index scans are cached in the activation for
+                // easy access from IndexChanger. Remember to clear the cached
+                // info here, but only if this is the result set that cached
+                // it in the first place (DERBY-4585).
+                if (forUpdate && isKeyed) {
+                    activation.clearIndexScanInfo();
+                }
+
 			}
 			scanControllerOpened = false;
 			startPosition = null;
