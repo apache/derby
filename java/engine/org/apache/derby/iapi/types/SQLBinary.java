@@ -572,8 +572,9 @@ abstract class SQLBinary
                           && (StoredFormatIds.SQL_BLOB_ID == getTypeFormatId()))
                         ))
 				SanityManager.THROWASSERT(
-									"Some fool passed in a "+ other.getClass().getName() + ", "
-                                    + otherTypeFormatId  + " to SQLBinary.compare()");
+                        "An object of type " + other.getClass().getName() +
+                        ", with format id " + otherTypeFormatId +
+                        ", was passed to SQLBinary.compare()");
 			}
 			if (this.isNull() || other.isNull())
 				return unknownRV;
