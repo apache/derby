@@ -63,7 +63,7 @@ public class CoveredIdxScan extends HeapScan {
      */
     public void setUp() throws Exception {
 
-        select = openDefaultConnection().prepareStatement("SELECT i1 FROM "+tableName +
+        select = prepareStatement("SELECT i1 FROM " + tableName +
         " WHERE i1 > ? and i1 <= ?");
     }
 
@@ -102,8 +102,8 @@ public class CoveredIdxScan extends HeapScan {
             actualCount++;
         }
         assertEquals(rowcount,actualCount);
-        getConnection().commit();
         rs.close();
+        commit();
     }
 
 

@@ -103,7 +103,7 @@ public class HeapScan extends JDBCPerfTestCase {
      */
     public void setUp() throws Exception {
 
-        select = openDefaultConnection().prepareStatement("SELECT * FROM "+tableName);
+        select = prepareStatement("SELECT * FROM " + tableName);
 
         // Create a SELECT statement that uses predicates. Also initialize
         // the predicates with some data of the correct type for this test
@@ -147,7 +147,7 @@ public class HeapScan extends JDBCPerfTestCase {
 
         assertEquals(actualCount,rowcount);
         rs.close();
-        getConnection().commit();
+        commit();
 
     }
 
@@ -177,8 +177,8 @@ public class HeapScan extends JDBCPerfTestCase {
             actualCount++;
         }
         assertEquals(actualCount,rowcount);
-        getConnection().commit();
         rs.close();
+        commit();
     }
 
     /**
@@ -197,10 +197,11 @@ public class HeapScan extends JDBCPerfTestCase {
      * Cleanup - close resources opened in this test.
      **/
     public void tearDown() throws Exception {
-
-        select.close();
+        // The statements will be closed by BaseJDBCTestCase.tearDown(), but
+        // we need to set the fields to null to allow them to be garbage
+        // collected.
         select = null;
-        selectWithPred = null; // will be closed in super.tearDown()
+        selectWithPred = null;
         super.tearDown();
     }
 }
