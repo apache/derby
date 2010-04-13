@@ -252,12 +252,54 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 
 		datatypesTest( conn );
         udtTest( conn );
+        derby_2602_test( conn );
 
 		close( conn );
 	}
 	
 	/////////////////////////////////////////////////////////////
 	//
+	//	DERBY-2602
+	//
+	/////////////////////////////////////////////////////////////
+
+    //
+    // Verify that timestamps retain their nanosecond-precision
+    // across the network from release 10.6 onward.
+    //
+	private	void	derby_2602_test( Connection conn )
+		throws Exception
+	{
+        //
+        // We must expect truncation of timestamps in a network configuration
+        // unless both the client and the server are at 10.6 or higher.
+        // See DERBY-2602.
+        //
+        boolean correctBehavior =
+            usingEmbeddedClient() ||
+            (
+             getServerVersion().atLeast( DRB_10_6 ) &&
+             getDriverVersion().atLeast( DRB_10_6 )
+             );
+
+        Timestamp ts = Timestamp.valueOf("2004-02-14 17:14:24.976255123");
+		PreparedStatement	insert = prepare( conn, "insert into t_2602( a ) values ( ? )" );
+        insert.setTimestamp(1,ts);
+        insert.executeUpdate();
+        insert.close();
+
+		PreparedStatement	select = prepare( conn, "select a from t_2602" );
+        ResultSet selectRS = select.executeQuery();
+        selectRS.next();
+        Timestamp resultTS = selectRS.getTimestamp( 1 );
+        int resultNanos = resultTS.getNanos();
+
+        int expectedResult = correctBehavior ? 976255123  : 976255000;
+        assertEquals( expectedResult, resultNanos );
+    }
+    
+	/////////////////////////////////////////////////////////////
+    //
 	//	TEST UDTs
 	//
 	/////////////////////////////////////////////////////////////
@@ -1030,6 +1072,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		createTable( conn, ALL_TYPES_TABLE, ALL_TYPES );
 
         createUDTObjects( conn );
+        create_derby_2602_objects( conn );
 	}
 
 	//
@@ -1096,6 +1139,18 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
         ps.close();
     }
 
+    //
+    // Create a table with a timestamp column.
+    //
+    private void create_derby_2602_objects( Connection conn ) throws Exception
+    {
+        PreparedStatement ps;
+
+        ps = conn.prepareStatement( "create table t_2602( a timestamp )\n" );
+        ps.execute();
+        ps.close();
+    }
+
 
 	//
 	// Helper methods for declaring a table.
@@ -1123,6 +1178,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	{
 		dropTable( conn, ALL_TYPES_TABLE );
         dropUDTObjects( conn );
+        drop_derby_2602_objects( conn );
 	}
 
     //
@@ -1136,6 +1192,14 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
         dropFunction( conn, "MAKEPRICE" );
         dropTable( conn, "T_PRICE" );
         dropUDT( conn, "PRICE" );
+    }
+
+    //
+    // Drop objects needed by DERBY-2602 tests.
+    //
+    private void drop_derby_2602_objects( Connection conn )
+    {
+        dropTable( conn, "T_2602" );
     }
 
 	//

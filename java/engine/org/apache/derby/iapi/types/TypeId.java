@@ -28,6 +28,7 @@ import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.DecimalTypeIdImpl;
 import org.apache.derby.catalog.types.TypeDescriptorImpl;
 import org.apache.derby.catalog.types.UserDefinedTypeIdImpl;
+import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
@@ -117,7 +118,10 @@ public final class TypeId
         // used as the "precision" for those types.
         public static final int DATE_MAXWIDTH           = 10;	// yyyy-mm-dd
         public static final int TIME_MAXWIDTH           = 8;	// hh:mm:ss
-        public static final int TIMESTAMP_MAXWIDTH      = 26;	// yyyy-mm-dd hh:mm:ss.ffffff
+
+        // I believe that the following is wrong. The format of java.sql.Timestamp.toString()
+        // is yyyy-mm-dd hh:mm:ss.fffffffff
+        public static final int TIMESTAMP_MAXWIDTH      = DRDAConstants.DRDA_TIMESTAMP_LENGTH;	// yyyy-mm-dd hh:mm:ss.ffffff
 
         // Scale DOES exist for time values.  For a TIMESTAMP value,
         // it's 6 ('ffffff'); for a TIME value, it's 0 (because there

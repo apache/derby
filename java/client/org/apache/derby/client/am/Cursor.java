@@ -546,7 +546,8 @@ public abstract class Cursor {
                 dataBuffer_,
                 columnDataPosition_[column - 1],
                 getRecyclableCalendar(), 
-                charsetName_[column - 1]);
+                charsetName_[column - 1],
+                agent_.connection_.serverSupportsTimestampNanoseconds());
     } catch (java.io.UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
                  new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),

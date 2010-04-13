@@ -1764,6 +1764,15 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         return serverSupportsLayerBStreaming();
     }
 
+    /** Return true if the server supports nanoseconds in timestamps */
+    protected final boolean serverSupportsTimestampNanoseconds()
+    {
+        NetDatabaseMetaData metadata =
+            (NetDatabaseMetaData) databaseMetaData_;
+
+        return metadata.serverSupportsTimestampNanoseconds();
+    }
+    
     /**
      * Returns if a transaction is in process
      * @return open

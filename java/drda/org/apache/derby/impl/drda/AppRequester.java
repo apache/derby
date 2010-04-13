@@ -302,4 +302,19 @@ class AppRequester
 	protected boolean supportsUDTs() {
 		return (clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 6, 0));
 	}
+
+	protected boolean supportsTimestampNanoseconds() {
+		return (clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 6, 0));
+	}
+
+    /**
+     * The timestamp length may be truncated for old versions of Derby.
+     * See DERBY-2602.
+     */
+    protected int getTimestampLength()
+    {
+        return supportsTimestampNanoseconds() ?
+            DRDAConstants.JDBC_TIMESTAMP_LENGTH : DRDAConstants.DRDA_TIMESTAMP_LENGTH;
+    }
+
 }

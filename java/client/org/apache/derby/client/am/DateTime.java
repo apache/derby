@@ -22,6 +22,7 @@ package org.apache.derby.client.am;
 
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.iapi.reference.DRDAConstants;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
@@ -45,7 +46,7 @@ public class DateTime {
 
     private static final int dateRepresentationLength = 10;
     private static final int timeRepresentationLength = 8;
-    private static final int timestampRepresentationLength = 26;
+    private static final int timestampRepresentationLength = DRDAConstants.DRDA_TIMESTAMP_LENGTH;
 
     // *********************************************************
     // ********** Output converters (byte[] -> class) **********
@@ -146,52 +147,53 @@ public class DateTime {
     }
 
     /**
-     * Expected character representation is DERBY string representation of a timestamp:
-     * <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>.
+     * See getTimestampLength() for an explanation of how timestamps are formatted.
      * 
      * @param buffer
      * @param offset
      * @param recyclableCal
      * @param encoding                encoding of buffer
+     * @param supportsTimestampNanoseconds true if the server supports nanoseconds in timestamps
      * @return TimeStamp translated from buffer with specified encoding
      * @throws UnsupportedEncodingException
      */
     public static final java.sql.Timestamp timestampBytesToTimestamp(byte[] buffer,
                                                                      int offset,
                                                                      Calendar recyclableCal, 
-                                                                     String encoding) 
+                                                                     String encoding,
+                                                                     boolean supportsTimestampNanoseconds) 
     throws UnsupportedEncodingException
     {
         int year, month, day, hour, minute, second, fraction;
-        String timestamp = new String(buffer, offset, 
-                DateTime.timestampRepresentationLength,encoding);
+        String timestamp = new String
+            ( buffer, offset, getTimestampLength( supportsTimestampNanoseconds ), encoding );
        
         Calendar cal = getCleanCalendar(recyclableCal);
 
         /* java.sql.Timestamp has nanosecond precision, so we have to keep
-         * the parsed microseconds value and use that to set nanos.
+         * the parsed nanoseconds value and use that to set nanos.
          */
-        int micros = parseTimestampString(timestamp, cal);
+        int nanos = parseTimestampString(timestamp, cal, supportsTimestampNanoseconds);
         java.sql.Timestamp ts = new java.sql.Timestamp(cal.getTimeInMillis());
-        ts.setNanos(micros * 1000);
+        ts.setNanos( nanos );
         return ts;
     }
 
     /**
-     * Parse a String of the form <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>
+     * Parse a String of the form <code>yyyy-mm-dd-hh.mm.ss.ffffff[fff]</code>
      * and store the various fields into the received Calendar object.
      *
      * @param timestamp Timestamp value to parse, as a String.
-     * @param cal Calendar into which to store the parsed fields.  Should
-     *  not be null.
+     * @param cal Calendar into which to store the parsed fields.  Should not be null.
+     * @param supportsTimestampNanoseconds true if the server supports nanoseconds in timestamps
      *
-     * @return The microseconds field as parsed from the timestamp string.
+     * @return The nanoseconds field as parsed from the timestamp string.
      *  This cannot be set in the Calendar object but we still want to
      *  preserve the value, in case the caller needs it (for example, to
-     *  create a java.sql.Timestamp with microsecond precision).
+     *  create a java.sql.Timestamp with nanosecond precision).
      */
     private static int parseTimestampString(String timestamp,
-        Calendar cal)
+        Calendar cal, boolean supportsTimestampNanoseconds )
     {
         int zeroBase = ((int) '0');
 
@@ -221,20 +223,28 @@ public class DateTime {
                 10 * (((int) timestamp.charAt(17)) - zeroBase) +
                 (((int) timestamp.charAt(18)) - zeroBase));
 
-        int micros = 
-                100000 * (((int) timestamp.charAt(20)) - zeroBase) +
-                10000 * (((int) timestamp.charAt(21)) - zeroBase) +
-                1000 * (((int) timestamp.charAt(22)) - zeroBase) +
-                100 * (((int) timestamp.charAt(23)) - zeroBase) +
-                10 * (((int) timestamp.charAt(24)) - zeroBase) +
-                (((int) timestamp.charAt(25)) - zeroBase);
-
-        /* The "ffffff" that we parsed is microseconds.  In order to
+        int nanos = 
+                100000000 * (((int) timestamp.charAt(20)) - zeroBase) +
+                10000000 * (((int) timestamp.charAt(21)) - zeroBase) +
+                1000000 * (((int) timestamp.charAt(22)) - zeroBase) +
+                100000 * (((int) timestamp.charAt(23)) - zeroBase) +
+                10000 * (((int) timestamp.charAt(24)) - zeroBase) +
+                1000 * (((int) timestamp.charAt(25)) - zeroBase);
+ 
+        if ( supportsTimestampNanoseconds )
+        {
+            nanos += 100 * (((int) timestamp.charAt(26)) - zeroBase);
+            nanos += 10 * (((int) timestamp.charAt(27)) - zeroBase);
+            nanos += (((int) timestamp.charAt(28)) - zeroBase);
+        }
+        
+        /* The "ffffff[fff]" that we parsed is nanoseconds.  In order to
          * capture that information inside of the MILLISECOND field
-         * we have to divide by 1000.
+         * we have to divide by 1000000.
          */
-        cal.set(Calendar.MILLISECOND, micros / 1000);
-        return micros;
+        cal.set(Calendar.MILLISECOND, nanos / 1000000);
+        
+        return nanos;
     }
 
     // ********************************************************
@@ -328,20 +338,20 @@ public class DateTime {
     }
 
     /**
-     * java.sql.Timestamp is converted to a character representation which is in DERBY string 
-     * representation of a timestamp: <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>.
-     * and then converted to bytes using UTF8 encoding
+     * See getTimestampLength() for an explanation of how timestamps are formatted.
+     *
      * @param buffer  bytes in UTF8 encoding of the timestamp
      * @param offset  write into the buffer from this offset 
      * @param timestamp  timestamp value
-     * @return DateTime.timestampRepresentationLength. This is the fixed 
-     * length in bytes, taken to represent the timestamp value
+     * @param supportsTimestampNanoseconds true if the server supports nanoseconds in timestamps
+     * @return DateTime.timestampRepresentationLength. This is the fixed  length in bytes, taken to represent the timestamp value
      * @throws SqlException
      * @throws UnsupportedEncodingException
      */
     public static final int timestampToTimestampBytes(byte[] buffer,
                                                       int offset,
-                                                      java.sql.Timestamp timestamp) 
+                                                      java.sql.Timestamp timestamp,
+                                                      boolean supportsTimestampNanoseconds) 
     throws SqlException,UnsupportedEncodingException {
         int year = timestamp.getYear() + 1900;
         if (year > 9999) {
@@ -356,8 +366,10 @@ public class DateTime {
         int second = timestamp.getSeconds();
         int microsecond = timestamp.getNanos() / 1000;
 
-        char[] timestampChars = new char[DateTime.timestampRepresentationLength];
+        int arrayLength = getTimestampLength( supportsTimestampNanoseconds );
+        char[] timestampChars = new char[ arrayLength ];
         int zeroBase = (int) '0';
+
         timestampChars[0] = (char) (year / 1000 + zeroBase);
         timestampChars[1] = (char) ((year % 1000) / 100 + zeroBase);
         timestampChars[2] = (char) ((year % 100) / 10 + zeroBase);
@@ -385,13 +397,23 @@ public class DateTime {
         timestampChars[24] = (char) ((microsecond % 100) / 10 + zeroBase);
         timestampChars[25] = (char) (microsecond % 10 + zeroBase);
         
+        if ( supportsTimestampNanoseconds )
+        {
+            int nanosecondsOnly = timestamp.getNanos() % 1000;
+            
+            timestampChars[ 26 ] = (char) (nanosecondsOnly / 100 + zeroBase);
+            timestampChars[ 27 ] = (char) ((nanosecondsOnly % 100) / 10 + zeroBase);
+            timestampChars[ 28 ] = (char) (nanosecondsOnly % 10 + zeroBase);
+        }
+
         // Network server expects to read the timestamp parameter value bytes with
         // UTF-8 encoding.  Reference - DERBY-1127
         // see DRDAConnThread.readAndSetParams
-        byte[] timestampBytes = (new String(timestampChars)).getBytes(Typdef.UTF8ENCODING);
-        System.arraycopy(timestampBytes, 0, buffer, offset, DateTime.timestampRepresentationLength);
+        String newtimestampString = new String(timestampChars);
+        byte[] timestampBytes = newtimestampString.getBytes(Typdef.UTF8ENCODING);
+        System.arraycopy(timestampBytes, 0, buffer, offset, arrayLength);
 
-        return DateTime.timestampRepresentationLength;
+        return arrayLength;
     }
 
     // *********************************************************
@@ -504,8 +526,7 @@ public class DateTime {
     
     
     /**
-     * Expected character representation is DERBY string representation of a timestamp:
-     * <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>.
+     * See getTimestampLength() for an explanation of how timestamps are formatted.
      * 
      * @param buffer
      * @param offset
@@ -547,8 +568,7 @@ public class DateTime {
 
    
     /**
-     * Expected character representation is DERBY string representation of a timestamp:
-     * <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>.
+     * See getTimestampLength() for an explanation of how timestamps are formatted.
      * 
      * @param buffer
      * @param offset
@@ -587,7 +607,7 @@ public class DateTime {
         /* Note that "parseTimestampString()" returns microseconds but we
          * ignore micros because java.sql.Time only has millisecond precision.
          */
-        parseTimestampString(timestamp, cal);
+        parseTimestampString(timestamp, cal, false);
 
         /* Java API indicates that the date components of a Time value
          * must be set to January 1, 1970. So override those values now.
@@ -712,122 +732,21 @@ public class DateTime {
     }
 
     /**
-     * java.sql.Date is converted to character representation that is in DERBY string 
-     * representation of a timestamp:<code>yyyy-mm-dd-hh.mm.ss.ffffff</code> and then 
-     * converted to bytes using UTF8 encoding and written out to the buffer
-     * @param buffer
-     * @param offset offset in buffer to start writing to
-     * @param date date value
-     * @return DateTime.timestampRepresentationLength. This is the fixed length
-     * in bytes, taken to represent the timestamp value.
-     * @throws SqlException
-     * @throws UnsupportedEncodingException
+     * Return the length of a timestamp depending on whether timestamps
+     * should have full nanosecond precision or be truncated to just microseconds.
+     * java.sql.Timestamp is converted to a character representation which is a DERBY string 
+     * representation of a timestamp converted to bytes using UTF8 encoding.
+     * For Derby 10.6 and above, this is <code>yyyy-mm-dd-hh.mm.ss.fffffffff</code>.
+     * For Derby 10.5 and below, this is <code>yyyy-mm-dd-hh.mm.ss.ffffff</code>. See DERBY-2602.
+     * and then converted to bytes using UTF8 encoding
+     *
+     * @param supportsTimestampNanoseconds true if the connection supports nanoseconds in timestamps
      */
-    public static final int dateToTimestampBytes(byte[] buffer,
-                                                 int offset,
-                                                 java.sql.Date date)
-    throws SqlException, UnsupportedEncodingException {
-        int year = date.getYear() + 1900;
-        if (year > 9999) {
-            throw new SqlException(null,
-                new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
-                new Integer(year), "9999");
-        }
-        int month = date.getMonth() + 1;
-        int day = date.getDate();
-
-        char[] timestampChars = new char[DateTime.timestampRepresentationLength];
-        int zeroBase = (int) '0';
-        timestampChars[0] = (char) (year / 1000 + zeroBase);
-        timestampChars[1] = (char) ((year % 1000) / 100 + zeroBase);
-        timestampChars[2] = (char) ((year % 100) / 10 + zeroBase);
-        timestampChars[3] = (char) (year % 10 + +zeroBase);
-        timestampChars[4] = '-';
-        timestampChars[5] = (char) (month / 10 + zeroBase);
-        timestampChars[6] = (char) (month % 10 + zeroBase);
-        timestampChars[7] = '-';
-        timestampChars[8] = (char) (day / 10 + zeroBase);
-        timestampChars[9] = (char) (day % 10 + zeroBase);
-        timestampChars[10] = '-';
-        timestampChars[11] = '0';
-        timestampChars[12] = '0';
-        timestampChars[13] = '.';
-        timestampChars[14] = '0';
-        timestampChars[15] = '0';
-        timestampChars[16] = '.';
-        timestampChars[17] = '0';
-        timestampChars[18] = '0';
-        timestampChars[19] = '.';
-        timestampChars[20] = '0';
-        timestampChars[21] = '0';
-        timestampChars[22] = '0';
-        timestampChars[23] = '0';
-        timestampChars[24] = '0';
-        timestampChars[25] = '0';
-        
-        // Network server expects to read the timestamp parameter value bytes with
-        // UTF-8 encoding.  Reference - DERBY-1127
-        // see DRDAConnThread.readAndSetParams 
-        byte[] timestampBytes = (new String(timestampChars)).getBytes(Typdef.UTF8ENCODING);
-        System.arraycopy(timestampBytes, 0, buffer, offset, DateTime.timestampRepresentationLength);
-
-        return DateTime.timestampRepresentationLength;
+    public static int getTimestampLength( boolean supportsTimestampNanoseconds )
+    {
+        return supportsTimestampNanoseconds ?
+            DRDAConstants.JDBC_TIMESTAMP_LENGTH : DRDAConstants.DRDA_TIMESTAMP_LENGTH;
     }
 
-    /**
-     * java.sql.Time is converted to a character representation that is in DERBY string representation of a timestamp:
-     * <code>yyyy-mm-dd-hh.mm.ss.ffffff</code> and converted to bytes using UTF8 encoding 
-     * @param buffer
-     * @param offset offset in buffer to start writing to
-     * @param time time value
-     * @return DateTime.timestampRepresentationLength which is the fixed length
-     * taken up by the conversion of time to timestamp in bytes
-     * @throws UnsupportedEncodingException
-     */
-    public static final int timeToTimestampBytes(byte[] buffer,
-                                                 int offset,
-                                                 java.sql.Time time)
-    throws UnsupportedEncodingException {
-        int hour = time.getHours();
-        int minute = time.getMinutes();
-        int second = time.getSeconds();
-
-        char[] timestampChars = new char[DateTime.timestampRepresentationLength];
-        int zeroBase = (int) '0';
-        timestampChars[0] = '1';
-        timestampChars[1] = '9';
-        timestampChars[2] = '0';
-        timestampChars[3] = '0';
-        timestampChars[4] = '-';
-        timestampChars[5] = '0';
-        timestampChars[6] = '1';
-        timestampChars[7] = '-';
-        timestampChars[8] = '0';
-        timestampChars[9] = '1';
-        timestampChars[10] = '-';
-        timestampChars[11] = (char) (hour / 10 + zeroBase);
-        timestampChars[12] = (char) (hour % 10 + zeroBase);
-        timestampChars[13] = '.';
-        timestampChars[14] = (char) (minute / 10 + zeroBase);
-        timestampChars[15] = (char) (minute % 10 + zeroBase);
-        timestampChars[16] = '.';
-        timestampChars[17] = (char) (second / 10 + zeroBase);
-        timestampChars[18] = (char) (second % 10 + zeroBase);
-        timestampChars[19] = '.';
-        timestampChars[20] = '0';
-        timestampChars[21] = '0';
-        timestampChars[22] = '0';
-        timestampChars[23] = '0';
-        timestampChars[24] = '0';
-        timestampChars[25] = '0';
-
-        // Network server expects to read the timestamp parameter value bytes with
-        // UTF-8 encoding.  Reference - DERBY-1127
-        // see DRDAConnThread.readAndSetParams for TIMESTAMP
-        byte[] timestampBytes = (new String(timestampChars)).getBytes(Typdef.UTF8ENCODING);
-        System.arraycopy(timestampBytes, 0, buffer, offset, DateTime.timestampRepresentationLength);
-
-        return DateTime.timestampRepresentationLength;
-    }
 }
 

@@ -20,6 +20,7 @@
 */
 package org.apache.derby.client.net;
 
+import org.apache.derby.client.am.DateTime;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
@@ -1554,9 +1555,12 @@ public class Request {
 
     final void writeTimestamp(java.sql.Timestamp timestamp) throws SqlException {
         try{
-            ensureLength(offset_ + 26);
-            org.apache.derby.client.am.DateTime.timestampToTimestampBytes(bytes_, offset_, timestamp);
-            offset_ += 26;
+            boolean supportsTimestampNanoseconds = netAgent_.netConnection_.serverSupportsTimestampNanoseconds();
+            int length = DateTime.getTimestampLength( supportsTimestampNanoseconds );
+            ensureLength( offset_ + length );
+            org.apache.derby.client.am.DateTime.timestampToTimestampBytes
+                ( bytes_, offset_, timestamp, supportsTimestampNanoseconds );
+            offset_ += length;
         }catch(UnsupportedEncodingException e) {
             throw new SqlException(netAgent_.logWriter_,  
                     new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),

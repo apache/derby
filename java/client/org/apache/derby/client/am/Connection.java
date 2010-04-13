@@ -1006,6 +1006,9 @@ public abstract class Connection implements java.sql.Connection,
      */
     protected abstract boolean serverSupportsLocators();
 
+    /** Return true if the server supports nanoseconds in timestamps */
+    protected abstract boolean serverSupportsTimestampNanoseconds();
+
     public int getTransactionIsolation() throws SQLException {
     	
     	// Store the current auto-commit value and use it to restore 

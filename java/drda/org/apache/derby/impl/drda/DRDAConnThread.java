@@ -4648,7 +4648,9 @@ class DRDAConnThread extends Thread {
 			{
 				// JCC represents ts in a slightly different format than Java standard, so
 				// we do the conversion to Java standard here.
-				String paramVal = reader.readStringData(26).trim();  //parameter may be char value
+                int timestampLength = appRequester.getTimestampLength();
+                
+				String paramVal = reader.readStringData( timestampLength ).trim();  //parameter may be char value
 				if (SanityManager.DEBUG)
 					trace("ntimestamp parameter value is: "+paramVal);
 				try {
@@ -7706,17 +7708,18 @@ class DRDAConnThread extends Thread {
 					break;
 				case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
 					// we need to send it in a slightly different format, and pad it
-					// up to or truncate it into 26 chars
+					// up to or truncate it to the correct number of characters
+                    int timestampLength = appRequester.getTimestampLength();
 					String ts1 = ((java.sql.Timestamp) val).toString();
 					String ts2 = ts1.replace(' ','-').replace(':','.');
 					int tsLen = ts2.length();
-					if (tsLen < 26)
+					if (tsLen < timestampLength)
 					{
-						for (int i = 0; i < 26-tsLen; i++)
+						for (int i = 0; i < timestampLength-tsLen; i++)
 							ts2 += "0";
 					}
-					else if (tsLen > 26)
-						ts2 = ts2.substring(0,26);
+					else if (tsLen > timestampLength)
+						ts2 = ts2.substring(0,timestampLength);
 					writer.writeString(ts2);
 					break;
 				case DRDAConstants.DRDA_TYPE_NCHAR:

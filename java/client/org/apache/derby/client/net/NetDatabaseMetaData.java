@@ -39,6 +39,9 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
     /** True if the server supports UDTs */
     private boolean supportsUDTs_;
     
+    /** True if the server supports nanoseconds in timestamps */
+    private boolean supportsTimestampNanoseconds_;
+    
     public NetDatabaseMetaData(NetAgent netAgent, NetConnection netConnection) {
         // Consider setting product level during parse
         super(netAgent, netConnection, new ProductLevel(netConnection.productID_,
@@ -100,6 +103,9 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
 
         supportsUDTs_ =
                 productLevel_.greaterThanOrEqualTo(10, 6, 0);
+
+        supportsTimestampNanoseconds_ =
+                productLevel_.greaterThanOrEqualTo(10, 6, 0);
     }
 
     /**
@@ -130,5 +136,13 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
      */
     final boolean serverSupportsUDTs() {
         return supportsUDTs_;
+    }
+
+    /**
+     * Check if server supports nanoseconds in timestamps
+     * @return true if the server supports this
+     */
+    final boolean serverSupportsTimestampNanoseconds() {
+        return supportsTimestampNanoseconds_;
     }
 }

@@ -25,6 +25,7 @@ import org.apache.derby.client.am.Lob;
 import org.apache.derby.client.am.Blob;
 import org.apache.derby.client.am.Clob;
 import org.apache.derby.client.am.ColumnMetaData;
+import org.apache.derby.client.am.DateTime;
 import org.apache.derby.client.am.ResultSet;
 import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
@@ -1260,10 +1261,10 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     break;
                 case java.sql.Types.TIMESTAMP:
                     // for input, output, and inout parameters
-                    // lid: PROTOCOL_TYPE_NTIME, length overrid: 26
+                    // lid: PROTOCOL_TYPE_NTIMESTAMP, length overrid: 26 or 29
                     // dataFormat: java.sql.Timestamp
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NTIMESTAMP;
-                    lidAndLengths[i][1] = 26;
+                    lidAndLengths[i][1] = DateTime.getTimestampLength( netAgent_.netConnection_.serverSupportsTimestampNanoseconds() );
                     break;
                 case java.sql.Types.BIGINT:
                     // if SQLAM < 6 this should be mapped to decimal (19,0) in common layer

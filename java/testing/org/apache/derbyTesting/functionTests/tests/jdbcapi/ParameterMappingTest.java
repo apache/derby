@@ -885,11 +885,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                         assertEquals("17:14:24",s);
                         break;
                     case java.sql.Types.TIMESTAMP:
-                    	// DERBY-2602 Client TIMESTAMP is truncated
-                        if (usingEmbedded())
-                            assertEquals("2004-02-14 17:14:24.097625551",s);
-                        else
-                            assertEquals("2004-02-14 17:14:24.097625",s);
+                        assertEquals("2004-02-14 17:14:24.097625551",s);
                         break;
                     case java.sql.Types.CLOB:
                         assertEquals("67",s);
@@ -3613,18 +3609,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             assertNotNull(val);
             break;
         case java.sql.Types.TIMESTAMP:
-        	//DERBY-2602 Client TIMESTAMP is truncated
             if (param == 2)
-                if (usingEmbedded())
-                    assertEquals("2004-03-12 21:14:24.938222433", val.toString());
-                else
-                    assertEquals("2004-03-12 21:14:24.938222", val.toString());
+                assertEquals("2004-03-12 21:14:24.938222433", val.toString());
             else if (param == 3)
-                if (usingEmbedded())
-                    assertEquals("2004-04-12 04:25:26.462983731", val.toString());
-                else
-                    assertEquals("2004-04-12 04:25:26.462983", val.toString());
-            break;
+                assertEquals("2004-04-12 04:25:26.462983731", val.toString());
+           break;
         }
     }
 
