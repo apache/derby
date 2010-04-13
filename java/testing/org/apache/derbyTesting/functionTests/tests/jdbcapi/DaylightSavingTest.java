@@ -64,11 +64,12 @@ public class DaylightSavingTest extends BaseJDBCTestCase {
                 "ID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY, " +
                 "TS TIMESTAMP, T TIME, D DATE, T2 TIME, D2 DATE)");
 
+        Calendar localCal = Calendar.getInstance();
+
         // Switch from CST to CDT in 2010 happened at 2010-03-14 02:00:00 CST,
         // or 2010-03-14 08:00:00 GMT, so create some times/dates around that
         // time.
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        cal.clear();
         cal.set(Calendar.YEAR, 2010);
         cal.set(Calendar.MONTH, Calendar.MARCH);
         cal.set(Calendar.DAY_OF_MONTH, 12);
@@ -142,6 +143,82 @@ public class DaylightSavingTest extends BaseJDBCTestCase {
                     rs.getDate(5, cal));
         }
         JDBC.assertEmpty(rs);
+
+        // Now verify that we can successfully get values set in with an
+        // updatable result set. Note that updateTimestamp(), updateTime() and
+        // updateDate() don't take a Calendar argument, so the updated values
+        // will be stored in the local timezone. What we test here, is that
+        // updateX(col, val) followed by getX(col, val, cal) performs the
+        // correct translation from local calendar to GMT calendar.
+        Statement updStmt = createStatement(
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+        rs = updStmt.executeQuery("SELECT TS, T, D FROM DERBY4582");
+        for (int i = 0; i < timestamps.length; i++) {
+            assertTrue("found only " + i + " rows", rs.next());
+            Timestamp ts1 = timestamps[i];
+            rs.updateTimestamp(1, ts1);
+            assertEquals("TS (default calendar)", ts1, rs.getTimestamp(1));
+            Timestamp ts2 = rs.getTimestamp(1, cal);
+            cal.clear();
+            cal.setTime(ts2);
+            assertEquals("TS.YEAR",
+                    ts1.getYear() + 1900, cal.get(Calendar.YEAR));
+            assertEquals("TS.MONTH",
+                    ts1.getMonth(), cal.get(Calendar.MONTH));
+            assertEquals("TS.DATE",
+                    ts1.getDate(), cal.get(Calendar.DAY_OF_MONTH));
+            assertEquals("TS.HOURS",
+                    ts1.getHours(), cal.get(Calendar.HOUR_OF_DAY));
+            assertEquals("TS.MINUTES",
+                    ts1.getMinutes(), cal.get(Calendar.MINUTE));
+            assertEquals("TS.SECONDS",
+                    ts1.getSeconds(), cal.get(Calendar.SECOND));
+            assertEquals("TS.NANOS",
+                    ts1.getNanos(), ts2.getNanos());
+
+            Time t1 = times[i];
+            rs.updateTime(2, t1);
+            assertEquals("T (default calendar)",
+                    stripDate(t1, localCal), rs.getTime(2));
+            Time t2 = rs.getTime(2, cal);
+            cal.clear();
+            cal.setTime(t2);
+            assertEquals("T.HOURS",
+                    t1.getHours(), cal.get(Calendar.HOUR_OF_DAY));
+            assertEquals("T.MINUTES",
+                    t1.getMinutes(), cal.get(Calendar.MINUTE));
+            assertEquals("T.SECONDS",
+                    t1.getSeconds(), cal.get(Calendar.SECOND));
+
+            Date d1 = dates[i];
+            rs.updateDate(3, d1);
+            assertEquals("D (default calendar)",
+                    stripTime(d1, localCal), rs.getDate(3));
+            Date d2 = rs.getDate(3, cal);
+            cal.clear();
+            cal.setTime(d2);
+            assertEquals("D.YEAR",
+                    d1.getYear() + 1900, cal.get(Calendar.YEAR));
+            assertEquals("D.MONTH",
+                    d1.getMonth(), cal.get(Calendar.MONTH));
+            assertEquals("D.DATE",
+                    d1.getDate(), cal.get(Calendar.DAY_OF_MONTH));
+
+            rs.updateRow();
+        }
+        JDBC.assertEmpty(rs);
+
+        // Verify that the values touched by the updatable result set made it
+        // into the database.
+        rs = s.executeQuery("SELECT TS, T, D FROM DERBY4582 ORDER BY TS");
+        for (int i = 0; i < timestamps.length; i++) {
+            assertTrue("found only " + i + " rows", rs.next());
+            assertEquals("TS", timestamps[i], rs.getTimestamp(1));
+            assertEquals("T", stripDate(times[i], localCal), rs.getTime(2));
+            assertEquals("D", stripTime(dates[i], localCal), rs.getDate(3));
+        }
+        JDBC.assertEmpty(rs);
+
     }
 
     /**
