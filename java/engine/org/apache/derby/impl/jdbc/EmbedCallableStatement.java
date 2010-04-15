@@ -405,11 +405,12 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 	 * @see CallableStatement#getDate
      * @exception SQLException NoOutputParameters thrown.
      */
-    public Date getDate(int parameterIndex) throws SQLException
+    public Date getDate(int parameterIndex, Calendar cal) throws SQLException
 	{
 		checkStatus();
 		try {
-			Date v =  getParms().getParameterForGet(parameterIndex-1).getDate(getCal());
+            Date v = getParms().
+                    getParameterForGet(parameterIndex-1).getDate(cal);
 			wasNull = (v == null);
 			return v;
 		} catch (StandardException e)
@@ -423,11 +424,12 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 	 * @see CallableStatement#getTime
      * @exception SQLException NoOutputParameters thrown.
      */
-	public Time getTime(int parameterIndex) throws SQLException 
+    public Time getTime(int parameterIndex, Calendar cal) throws SQLException
 	{
 		checkStatus();
 		try {
-			Time v =  getParms().getParameterForGet(parameterIndex-1).getTime(getCal());
+            Time v = getParms().
+                    getParameterForGet(parameterIndex-1).getTime(cal);
 			wasNull = (v == null);
 			return v;
 		} catch (StandardException e)
@@ -441,12 +443,13 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 	 * @see CallableStatement#getTimestamp
      * @exception SQLException NoOutputParameters thrown.
      */
-    public Timestamp getTimestamp(int parameterIndex)
+    public Timestamp getTimestamp(int parameterIndex, Calendar cal)
 	    throws SQLException 
 	{
 		checkStatus();
 		try {
-			Timestamp v =  getParms().getParameterForGet(parameterIndex-1).getTimestamp(getCal());
+            Timestamp v = getParms().
+                    getParameterForGet(parameterIndex-1).getTimestamp(cal);
 			wasNull = (v == null);
 			return v;
 		} catch (StandardException e)
@@ -462,10 +465,10 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
      * null
      * @exception SQLException if a database-access error occurs.
      */
-    public java.sql.Date getDate(int parameterIndex, Calendar cal) 
+    public java.sql.Date getDate(int parameterIndex)
       throws SQLException 
 	{
-		return getDate(parameterIndex);
+        return getDate(parameterIndex, getCal());
 	}
 
     /**
@@ -476,10 +479,10 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 	 * null
      * @exception SQLException if a database-access error occurs.
      */
-    public java.sql.Time getTime(int parameterIndex, Calendar cal) 
+    public java.sql.Time getTime(int parameterIndex)
       throws SQLException 
 	{
-		return getTime(parameterIndex);
+        return getTime(parameterIndex, getCal());
 	}
 
     /**
@@ -491,10 +494,10 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
      * null
      * @exception SQLException if a database-access error occurs.
      */
-    public java.sql.Timestamp getTimestamp(int parameterIndex, Calendar cal) 
+    public java.sql.Timestamp getTimestamp(int parameterIndex)
       throws SQLException 
 	{
-		return getTimestamp(parameterIndex);
+        return getTimestamp(parameterIndex, getCal());
 	}
 
     /**
