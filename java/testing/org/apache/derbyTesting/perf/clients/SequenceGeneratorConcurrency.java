@@ -24,6 +24,7 @@ package org.apache.derbyTesting.perf.clients;
 import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -119,7 +120,7 @@ public class SequenceGeneratorConcurrency
             {
                 runDDL( conn, "create sequence " + makeSequenceName( sequence ) );
 
-                for ( int table = 0; table < tablesPerGenerator; table++ )
+                for ( int table = 1; table <= tablesPerGenerator; table++ )
                 {
                     runDDL( conn, "create table " + makeTableName( sequence, table ) + "( a int )" );
                 }
@@ -165,7 +166,7 @@ public class SequenceGeneratorConcurrency
             _errorLog = new HashMap();
             _loadOptions = new LoadOptions();
 
-            _psArray = new PreparedStatement[ _loadOptions.getNumberOfGenerators() ] [ _loadOptions.getTablesPerGenerator() ];
+            _psArray = new PreparedStatement[ _loadOptions.getNumberOfGenerators() ] [ _loadOptions.getTablesPerGenerator() + 1 ];
             _randomNumberGenerator = new Random();
 
             if ( _loadOptions.debugging() )
@@ -187,12 +188,17 @@ public class SequenceGeneratorConcurrency
             {
                 String sequenceName = makeSequenceName( sequence );
 
-                for ( int table = 0; table < tablesPerGenerator; table++ )
+                for ( int table = 0; table <= tablesPerGenerator; table++ )
                 {
                     String tableName = makeTableName( sequence, table );
+
+                    PreparedStatement ps;
+                    String valuesClause = "values ( next value for " + sequenceName + " )";
+
+                    if ( table == 0 ) { ps = prepareStatement( _conn, debugging, valuesClause ); }
+                    else { ps = prepareStatement( _conn, debugging, "insert into " + tableName + "( a ) " + valuesClause ); }
                     
-                    _psArray[ sequence ][ table ] = prepareStatement
-                        ( _conn, debugging, "insert into " + tableName + "( a ) values ( next value for " + sequenceName + " )" );
+                    _psArray[ sequence ][ table ] = ps;
                 }
             }
 
@@ -203,16 +209,36 @@ public class SequenceGeneratorConcurrency
         public void doWork() throws SQLException
         {
             int sequence = getPositiveRandomNumber() % _loadOptions.getNumberOfGenerators();
-            int table = getPositiveRandomNumber() % _loadOptions.getTablesPerGenerator();
+            int tablesPerGenerator = _loadOptions.getTablesPerGenerator();
+            int table = tablesPerGenerator == 0 ? 0 : (getPositiveRandomNumber() % tablesPerGenerator) + 1;
             int insertsPerTransaction = _loadOptions.getInsertsPerTransaction();
             boolean debugging = _loadOptions.debugging();
 
             int rowNumber = 0;
 
+            PreparedStatement ps = null;
+            ResultSet rs = null;
+            
             try {
                 for ( ; rowNumber < insertsPerTransaction; rowNumber++ )
                 {
-                    _psArray[ sequence ][ table ].executeUpdate();
+                    rs = null;
+                    ps = null;
+                    
+                    ps = _psArray[ sequence ][ table ];
+
+                    if ( table == 0 )
+                    {
+                        rs = ps.executeQuery();
+                        rs.next();
+
+                        rs = close( rs, debugging );
+                    }
+                    else
+                    {
+                        ps.executeUpdate();
+                    }
+                    
                 }
             }
             catch (Throwable t)
@@ -222,10 +248,14 @@ public class SequenceGeneratorConcurrency
                      "Error on client " + _clientNumber +
                      " on sequence " + sequence +
                      " in transaction " + _transactionCount +
-                     " on row " + rowNumber
+                     " on row " + rowNumber +
+                     ": " + t.getMessage()
                      );
 
                 addError( t );
+                
+                rs = close( rs, debugging );
+                
                 _conn.rollback();
 
                 return;
@@ -234,6 +264,32 @@ public class SequenceGeneratorConcurrency
             _conn.commit();
             
             _transactionCount++;
+        }
+
+        private ResultSet close( ResultSet rs, boolean debugging )
+        {
+            try {
+                if ( rs != null ) { rs.close(); }
+            }
+            catch (SQLException se)
+            {
+                if ( debugging ) { debugPrint( "Oops! " + se.getMessage() ); }
+            }
+
+            return null;
+        }
+
+        private PreparedStatement close( PreparedStatement ps, boolean debugging )
+        {
+            try {
+                if ( ps != null ) { ps.close(); }
+            }
+            catch (SQLException se)
+            {
+                if ( debugging ) { debugPrint( "Oops! " + se.getMessage() ); }
+            }
+
+            return null;
         }
 
         private int getPositiveRandomNumber()
