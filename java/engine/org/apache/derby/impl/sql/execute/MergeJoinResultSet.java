@@ -254,15 +254,25 @@ class MergeJoinResultSet extends JoinResultSet
 		for (colInCtr = 1, colOutCtr = 1; colInCtr <= leftNumCols;
 			 colInCtr++, colOutCtr++)
 		{
-				 mergedRow.setColumn(colOutCtr, 
-									 leftRow.getColumn(colInCtr));
+            DataValueDescriptor src_col = leftRow.getColumn(colInCtr);
+            // Clone the value if it is represented by a stream (DERBY-3650).
+            if (src_col != null && src_col.hasStream()) {
+                src_col = src_col.cloneValue(false);
+            }
+
+            mergedRow.setColumn(colOutCtr, src_col);
 		}
 
 		for (colInCtr = 1; colInCtr <= rightNumCols; 
 			 colInCtr++, colOutCtr++)
 		{
-				 mergedRow.setColumn(colOutCtr, 
-									 rightRow.getColumn(colInCtr));
+            DataValueDescriptor src_col = rightRow.getColumn(colInCtr);
+            // Clone the value if it is represented by a stream (DERBY-3650).
+            if (src_col != null && src_col.hasStream()) {
+                src_col = src_col.cloneValue(false);
+            }
+
+            mergedRow.setColumn(colOutCtr, src_col);
 		}
 
 		setCurrentRow(mergedRow);
