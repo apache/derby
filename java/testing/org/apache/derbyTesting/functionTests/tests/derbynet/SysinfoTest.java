@@ -208,10 +208,10 @@ public class SysinfoTest extends BaseJDBCTestCase {
 
         Process p = execJavaCmd(SysInfoCmd);
         String s = readProcessOutput(p);
-
         s = sed(s);
-
+ 
         print("testSysinfo", s);
+  
         assertMatchingStringExists(s);
     }
 
@@ -243,8 +243,12 @@ public class SysinfoTest extends BaseJDBCTestCase {
                 "-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         Process p = execJavaCmd(SysInfoLocaleCmd);
         String s = readProcessOutput(p);
+        //System.out.println("before sed");
+        //System.out.println(s);
         s = sed(s);
 
+        //System.out.println("after sed");
+        //System.out.println(s);
         print("testSysinfoLocale", s);
         assertMatchingStringExists(s);
     }
@@ -260,8 +264,10 @@ public class SysinfoTest extends BaseJDBCTestCase {
         /**
          * Lines containing these strings will be deleted from the output before
          * asserting that output is correct.
+         * ibm jvm prints extra line for java.fullversion
          */
-        String[] sed = {"Version", "version", "Java", "OS", 
+        String[] sed = {"Version", "version", "Java", "OS",
+        		"J9VM", "JIT", "GC",
                 "[0-9*]\\.[0-9*]\\.[0-9*]","JRE - JDBC","derby.drda.traceDirectory",
                 "Unable to access Protection Domain","listing properties",
                 "Current Locale",           //Remove these because locale info is

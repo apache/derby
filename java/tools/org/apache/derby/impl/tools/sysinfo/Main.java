@@ -303,23 +303,49 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 	localAW.println("java.specification.name: " + getJavaProperty("java.specification.name"));
 	localAW.println("java.specification.version: " + getJavaProperty("java.specification.version"));
+	printPropertyIfNotNull(localAW, "java.runtime.version");
+	printPropertyIfNotNull(localAW, "java.fullversion");
 
 
   } // end of reportJavaInfo
 
-
-
   /**
-    Return Java properties from java.lang.System. Will catch
-    SecurityExceptions and note them for displaying information.
+   * Print property only if not null
+   * 
+   * @param localAW This is PrintWriter to print to
+   * @param property This is system property string
+   */
+  private static void printPropertyIfNotNull(java.io.PrintWriter localAW, String property) {
+    String propertyValue = getJavaProperty(property, true);	
 
-    @return the Java property value or a string capturing a
-    security exception.
+    if (propertyValue != null) {
+        localAW.println(property + ": " + propertyValue);
+    }
+}
+  
+  /**
+   * Return Java properties from java.lang.System. Will catch
+   * SecurityExceptions and note them for displaying information.
+   * @param whichProperty This is the name of the property
+   * 
+   * @return getJavaProperty(whichProperty, false) 
+   */
+  private static String getJavaProperty (final String whichProperty) {
+	  return getJavaProperty(whichProperty, false);  
+  }
+ 
+  /**
+   * Return Java properties from java.lang.System. Will catch
+   * SecurityExceptions and note them for displaying information.
+   * @param whichProperty This is the name of the property
+   * @param nullUnavailable return nothing if no such java property and nullUnavailable is true
+   * @return the Java property value or a string capturing a
+   * security exception.
    */
 
-  private static String getJavaProperty (final String whichProperty) {
+  private static String getJavaProperty (final String whichProperty, boolean nullUnavailable) {
 
-    final   String unavailable = Main.getTextMessage ("SIF01.H");
+    final   String unavailable = nullUnavailable ? null : Main.getTextMessage ("SIF01.H");
 
     try {
         String  property = (String) AccessController.doPrivileged( new PrivilegedAction()
