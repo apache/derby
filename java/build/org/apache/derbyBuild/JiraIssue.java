@@ -217,7 +217,7 @@ class JiraIssue {
      * @return Full URL to the latest release note
      */
     public String getReleaseNoteAddress() {
-        return "http://issues.apache.org/jira/secure/attachment/" +
+        return "https://issues.apache.org/jira/secure/attachment/" +
                 releaseNoteAttachmentID + "/releaseNote.html";
     }
 }
