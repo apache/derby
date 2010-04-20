@@ -66,7 +66,10 @@ class JiraIssue {
 
         for (Iterator i = ef.getTextListByTagName(JIRA_FIXVERSION).iterator();
         i.hasNext();) {
-            fixVersionSet.add(i.next());
+
+            String nextVersion = (String) i.next();
+
+            fixVersionSet.add( nextVersion );
         }
     }
 
@@ -108,9 +111,9 @@ class JiraIssue {
         else if ( key.equals( "DERBY-4432" ) ) { result = 12424709L; }
         else if ( key.equals( "DERBY-4380" ) ) { result = 12434514L; }
         else if ( key.equals( "DERBY-4355" ) ) { result = 12419298L; }
-        else if ( key.equals( "DERBY-4312" ) ) { result = 12414219L; }
+        else if ( key.equals( "DERBY-4312" ) ) { result = 12442288L; }
         else if ( key.equals( "DERBY-4230" ) ) { result = 12409466L; }
-        else if ( key.equals( "DERBY-4191" ) ) { result = 12430699L; }
+        else if ( key.equals( "DERBY-4191" ) ) { result = 12442312L; }
         else if ( key.equals( "DERBY-3991" ) ) { result = 12409798L; }
         else if ( key.equals( "DERBY-3844" ) ) { result = 12436979L; }
         else if ( key.equals( "DERBY-2769" ) ) { result = 12418474L; }

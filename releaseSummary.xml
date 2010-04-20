@@ -47,6 +47,7 @@ with real information.
 <excludeReleaseID>10.4.1.3</excludeReleaseID>
 <excludeReleaseID>10.4.2.0</excludeReleaseID>
 <excludeReleaseID>10.5.1.1</excludeReleaseID>
+<excludeReleaseID>10.5.2.0</excludeReleaseID>
 <excludeReleaseID>10.5.3.0</excludeReleaseID>
 
 <buildInfo>
@@ -119,7 +120,7 @@ This is a feature release. The following new features were added:
 
 <li><b>GROUP BY ROLLUP</b> - A subset of the SQL Standard ROLLUP functionality on the GROUP BY clause. See feature T431 of the SQL Standard.</li>
 	
-<li><b>CROSS JOIN</b> - CROSS JOIN syntax. See features F401-04 of the SQL Standard.</li>
+<li><b>CROSS JOIN</b> - CROSS JOIN syntax. See feature F401-04 of the SQL Standard.</li>
 	
 <li><b>Named columns join</b> - USING clauses in joins.</li>
 	

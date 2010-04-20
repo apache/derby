@@ -87,7 +87,7 @@ This is a feature release. The following new features were added:
 	
 
 <li>
-<b>CROSS JOIN</b> - CROSS JOIN syntax. See features F401-04 of the SQL Standard.</li>
+<b>CROSS JOIN</b> - CROSS JOIN syntax. See feature F401-04 of the SQL Standard.</li>
 	
 
 <li>
@@ -1610,8 +1610,7 @@ CROSS is now a reserved keyword and cannot be used as an unquoted identifier.
 <li>
 <a href="#Note for DERBY-4312">
 <p>Note for DERBY-4312: 
-After the change for DERBY-4312, if a user attempts to reuse a stream set on a <code> PreparedStatement </code> with <code> setAsciiStream()</code>, <code>setCharacterStream()</code>, or  <code> setBinaryStream() </code> after commit, the incorrect error XJ215 will no longer be thrown.  Because of this,  users attempting to reuse streams may be exposed to DERBY-4315 - Attempt to reuse streams in client on insert gives protocol exception and inserts wrong data.
-
+Stream re-use problems now more likely.
 </p>
 </a>
 </li>
@@ -1625,7 +1624,7 @@ After the change for DERBY-4312, if a user attempts to reuse a stream set on a <
 <li>
 <a href="#Note for DERBY-4191">
 <p>Note for DERBY-4191: 
-Make sure that user has at least one column level select privilege or table level select privilege for queries that do not select a specific column from the tables involved in the SELECT statement. Additionally, subqueries will require that the user has necessary select privileges in order to execute it.
+Some queries require additional SELECT privileges now.
 </p>
 </a>
 </li>
@@ -2357,8 +2356,7 @@ to <code>select * from "CROSS"</code>.
 <h4>Summary of Change</h4>
 
 <p>
-After the change for DERBY-4312, if a user attempts to reuse a stream set on a <code> PreparedStatement </code> with <code> setAsciiStream()</code>, <code>setCharacterStream()</code>, or  <code> setBinaryStream() </code> after commit, the incorrect error XJ215 will no longer be thrown.  Because of this,  users attempting to reuse streams may be exposed to DERBY-4315 - Attempt to reuse streams in client on insert gives protocol exception and inserts wrong data.
-
+Stream re-use problems now more likely.
 </p>
 
 
@@ -2553,29 +2551,91 @@ Users must drop an recreate affected views to see the fix for DERBY-4230.
 <h4>Summary of Change</h4>
 
 <p>
-Make sure that user has at least one column level select privilege or table level select privilege for queries that do not select a specific column from the tables involved in the SELECT statement. Additionally, subqueries will require that the user has necessary select privileges in order to execute it.
+Some queries require additional SELECT privileges now.
 </p>
 
-
-<!-- 
-  In the previous release, because of Derby bug, users were able to do selects from table even when they didn't have select privilege available on it. For eg the query below in previous release would succeed even if the user didn't have any select privilege on anotheruser.table1
-    select 1 from anotheruser.table1
-  Also, in the previous release, following query executed fine even if the user had only update privilege available on anotheruser.table1
-    update anotheruser.table1 set a = ( select max(a) + 2 from anotheruser.table1 ); 
-  Now, Derby raises a SQLException for those missing select privileges.
--->
 
 
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-Previous release incorrectly allowed a query execution despite insufficient privileges.
+In previous releases, certain queries incorrectly succeeded when the
+user lacked sufficient SELECT privileges. For instance, the following
+query succeeded even if the user did not have SELECT privilege on the table:
+</p>
+
+
+<blockquote>
+<pre>
+    select 1 from anotheruser.table1
+</pre>
+</blockquote>
+
+
+<p>
+And the following query succeeded if the user had UPDATE but not
+SELECT privilege on the column:
+</p>
+
+
+<blockquote>
+<pre>
+    update anotheruser.table1 set a = ( select max(a) + 2 from anotheruser.table1 ); 
+</pre>
+</blockquote>
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+Now Derby raises a SQLException for those situations. For the first
+query above, the user must now enjoy SELECT privilege on at least one
+column in the table. For the second query, the user must now enjoy
+SELECT as well as UPDATE privilege on the affected column.
 </p>
 
 
 <!-- 
-  The previous behavior incorrectly allowed users to execute a query even when the necessary privileges were not granted to them.
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
 -->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+The old behavior violated the SQL Standard. The new behavior is correct.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+Database Administrators may need to grant users additional SELECT privileges.
+</p>
 
 
 
