@@ -32,6 +32,7 @@ import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 
 import java.io.IOException;
+import org.apache.derby.client.am.DateTimeValue;
 
 public class Request {
 
@@ -1528,7 +1529,7 @@ public class Request {
         offset_ += length;
     }
 
-    final void writeDate(java.sql.Date date) throws SqlException {
+    final void writeDate(DateTimeValue date) throws SqlException {
         try
         {
             ensureLength(offset_ + 10);
@@ -1541,7 +1542,7 @@ public class Request {
         }
     }
 
-    final void writeTime(java.sql.Time time) throws SqlException {
+    final void writeTime(DateTimeValue time) throws SqlException {
         try{
             ensureLength(offset_ + 8);
             org.apache.derby.client.am.DateTime.timeToTimeBytes(bytes_, offset_, time);
@@ -1553,7 +1554,7 @@ public class Request {
       }
     }
 
-    final void writeTimestamp(java.sql.Timestamp timestamp) throws SqlException {
+    final void writeTimestamp(DateTimeValue timestamp) throws SqlException {
         try{
             boolean supportsTimestampNanoseconds = netAgent_.netConnection_.serverSupportsTimestampNanoseconds();
             int length = DateTime.getTimestampLength( supportsTimestampNanoseconds );

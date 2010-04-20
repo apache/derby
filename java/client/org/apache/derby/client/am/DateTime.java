@@ -264,16 +264,16 @@ public class DateTime {
      */
     public static final int dateToDateBytes(byte[] buffer,
                                             int offset,
-                                            java.sql.Date date) 
+                                            DateTimeValue date)
     throws SqlException,UnsupportedEncodingException {
-        int year = date.getYear() + 1900;
+        int year = date.getYear();
         if (year > 9999) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
                 new Integer(year), "9999");
         }
         int month = date.getMonth() + 1;
-        int day = date.getDate();
+        int day = date.getDayOfMonth();
 
         char[] dateChars = new char[DateTime.dateRepresentationLength];
         int zeroBase = (int) '0';
@@ -311,7 +311,7 @@ public class DateTime {
      */
     public static final int timeToTimeBytes(byte[] buffer,
                                             int offset,
-                                            java.sql.Time time)
+                                            DateTimeValue time)
     throws UnsupportedEncodingException {
         int hour = time.getHours();
         int minute = time.getMinutes();
@@ -350,17 +350,17 @@ public class DateTime {
      */
     public static final int timestampToTimestampBytes(byte[] buffer,
                                                       int offset,
-                                                      java.sql.Timestamp timestamp,
+                                                      DateTimeValue timestamp,
                                                       boolean supportsTimestampNanoseconds) 
     throws SqlException,UnsupportedEncodingException {
-        int year = timestamp.getYear() + 1900;
+        int year = timestamp.getYear();
         if (year > 9999) {
             throw new SqlException(null,
                 new ClientMessageId(SQLState.YEAR_EXCEEDS_MAXIMUM),
                 new Integer(year), "9999");
         }
         int month = timestamp.getMonth() + 1;
-        int day = timestamp.getDate();
+        int day = timestamp.getDayOfMonth();
         int hour = timestamp.getHours();
         int minute = timestamp.getMinutes();
         int second = timestamp.getSeconds();

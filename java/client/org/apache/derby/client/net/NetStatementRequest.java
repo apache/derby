@@ -20,6 +20,9 @@
 */
 package org.apache.derby.client.net;
 
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import org.apache.derby.iapi.reference.DRDAConstants;
 import org.apache.derby.client.am.Lob;
 import org.apache.derby.client.am.Blob;
@@ -31,6 +34,7 @@ import org.apache.derby.client.am.Section;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.Types;
 import org.apache.derby.client.am.ClientMessageId;
+import org.apache.derby.client.am.DateTimeValue;
 import org.apache.derby.client.am.Utils;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -735,13 +739,37 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                 protocolTypesAndLengths[i][1] & 0xff); // described scale, not actual
                         break;
                     case DRDAConstants.DRDA_TYPE_NDATE:
-                        writeDate((java.sql.Date) inputs[i]);
+                        // The value may be a Date if it comes from one of the
+                        // methods that don't specify the calendar, or a
+                        // DateTimeValue if it comes from a method that does
+                        // specify the calendar. Convert to DateTimeValue if
+                        // needed.
+                        DateTimeValue dateVal = (inputs[i] instanceof Date) ?
+                                    new DateTimeValue((Date) inputs[i]) :
+                                    (DateTimeValue) inputs[i];
+                        writeDate(dateVal);
                         break;
                     case DRDAConstants.DRDA_TYPE_NTIME:
-                        writeTime((java.sql.Time) inputs[i]);
+                        // The value may be a Time if it comes from one of the
+                        // methods that don't specify the calendar, or a
+                        // DateTimeValue if it comes from a method that does
+                        // specify the calendar. Convert to DateTimeValue if
+                        // needed.
+                        DateTimeValue timeVal = (inputs[i] instanceof Time) ?
+                                    new DateTimeValue((Time) inputs[i]) :
+                                    (DateTimeValue) inputs[i];
+                        writeTime(timeVal);
                         break;
                     case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
-                        writeTimestamp((java.sql.Timestamp) inputs[i]);
+                        // The value may be a Timestamp if it comes from one of
+                        // the methods that don't specify the calendar, or a
+                        // DateTimeValue if it comes from a method that does
+                        // specify the calendar. Convert to DateTimeValue if
+                        // needed.
+                        DateTimeValue tsVal = (inputs[i] instanceof Timestamp) ?
+                                    new DateTimeValue((Timestamp) inputs[i]) :
+                                    (DateTimeValue) inputs[i];
+                        writeTimestamp(tsVal);
                         break;
                     case DRDAConstants.DRDA_TYPE_NINTEGER8:
                         writeLongFdocaData(((Long) inputs[i]).longValue());

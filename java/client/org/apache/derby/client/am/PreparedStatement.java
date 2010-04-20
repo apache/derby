@@ -27,9 +27,13 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.jdbc.ClientDriver;
 
@@ -718,12 +722,14 @@ public class PreparedStatement extends Statement
         }
     }
 
-    public void setDate(int parameterIndex, java.sql.Date x) throws SQLException {
+    public void setDate(int parameterIndex, Date x, Calendar calendar)
+            throws SQLException {
         try
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "setDate", parameterIndex, x);
+                    agent_.logWriter_.traceEntry(
+                            this, "setDate", parameterIndex, x, calendar);
                 }
                 
                 final int paramType = 
@@ -738,12 +744,19 @@ public class PreparedStatement extends Statement
                 }
                 
                 checkForClosedStatement();
+
+                if (calendar == null) {
+                    throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId(SQLState.INVALID_API_PARAMETER),
+                        "null", "calendar", "setDate()");
+                }
+
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.DATE;
                 if (x == null) {
                     setNull(parameterIndex, java.sql.Types.DATE);
                     return;
                 }
-                setInput(parameterIndex, x);
+                setInput(parameterIndex, new DateTimeValue(x, calendar));
             }
         }
         catch ( SqlException se )
@@ -752,41 +765,12 @@ public class PreparedStatement extends Statement
         }
     }
 
-    public void setDate(int parameterIndex,
-                        java.sql.Date x,
-                        java.util.Calendar calendar) throws SQLException {
-        try
-        {
-            synchronized (connection_) {
-                if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "setDate", parameterIndex, x, calendar);
-                }
-                checkForClosedStatement();
-                if (calendar == null) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.INVALID_API_PARAMETER),
-                        "null", "calendar", "setDate");
-                }
-                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-                targetCalendar.clear();
-                targetCalendar.setTime(x);
-                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-                defaultCalendar.clear();
-                defaultCalendar.setTime(x);
-                long timeZoneOffset =
-                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-                java.sql.Date adjustedDate = ((timeZoneOffset == 0) || (x == null)) ? x : new java.sql.Date(x.getTime() + timeZoneOffset);
-                setDate(parameterIndex, adjustedDate);
-            }
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
+    public void setDate(int parameterIndex, Date x) throws SQLException {
+        setDate(parameterIndex, x, Calendar.getInstance());
     }
 
-    public void setTime(int parameterIndex, java.sql.Time x) throws SQLException {
+    public void setTime(int parameterIndex, Time x, Calendar calendar)
+            throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -804,47 +788,19 @@ public class PreparedStatement extends Statement
                                                        paramType );
                 }
                 
-                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TIME;
-                if (x == null) {
-                    setNull(parameterIndex, java.sql.Types.TIME);
-                    return;
-                }
-                setInput(parameterIndex, x);
-
-            }
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
-    }
-
-    public void setTime(int parameterIndex,
-                        java.sql.Time x,
-                        java.util.Calendar calendar) throws SQLException {
-        try
-        {
-            synchronized (connection_) {
-                if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "setTime", parameterIndex, x, calendar);
-                }
-                checkForClosedStatement();
                 if (calendar == null) {
                     throw new SqlException(agent_.logWriter_,
                         new ClientMessageId(SQLState.INVALID_API_PARAMETER),
                         "null", "calendar", "setTime()");
                 }
-                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-                targetCalendar.clear();
-                targetCalendar.setTime(x);
-                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-                defaultCalendar.clear();
-                defaultCalendar.setTime(x);
-                long timeZoneOffset =
-                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-                java.sql.Time adjustedTime = ((timeZoneOffset == 0) || (x == null)) ? x : new java.sql.Time(x.getTime() + timeZoneOffset);
-                setTime(parameterIndex, adjustedTime);
+
+                parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TIME;
+                if (x == null) {
+                    setNull(parameterIndex, java.sql.Types.TIME);
+                    return;
+                }
+                setInput(parameterIndex, new DateTimeValue(x, calendar));
+
             }
         }
         catch ( SqlException se )
@@ -853,7 +809,12 @@ public class PreparedStatement extends Statement
         }
     }
 
-    public void setTimestamp(int parameterIndex, java.sql.Timestamp x) throws SQLException {
+    public void setTime(int parameterIndex, Time x) throws SQLException {
+        setTime(parameterIndex, x, Calendar.getInstance());
+    }
+
+    public void setTimestamp(int parameterIndex, Timestamp x, Calendar calendar)
+            throws SQLException {
         try
         {
             synchronized (connection_) {
@@ -872,16 +833,19 @@ public class PreparedStatement extends Statement
                     
                 }
                 
+                if (calendar == null) {
+                    throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId(SQLState.INVALID_API_PARAMETER),
+                        "null", "calendar", "setTimestamp()");
+                }
+
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.TIMESTAMP;
 
                 if (x == null) {
                     setNull(parameterIndex, java.sql.Types.TIMESTAMP);
                     return;
                 }
-                setInput(parameterIndex, x);
-                // once the nanosecond field of timestamp is trim to microsecond for DERBY, should we throw a warning
-                //if (getParameterType (parameterIndex) == java.sql.Types.TIMESTAMP && x.getNanos() % 1000 != 0)
-                //  accumulateWarning (new SqlWarning (agent_.logWriter_, "DERBY timestamp can only store up to microsecond, conversion from nanosecond to microsecond causes rounding."));
+                setInput(parameterIndex, new DateTimeValue(x, calendar));
             }
         }
         catch ( SqlException se )
@@ -890,41 +854,9 @@ public class PreparedStatement extends Statement
         }
     }
 
-    public void setTimestamp(int parameterIndex,
-                             java.sql.Timestamp x,
-                             java.util.Calendar calendar) throws SQLException {
-        try
-        {
-            synchronized (connection_) {
-                if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "setTimestamp", parameterIndex, x, calendar);
-                }
-                checkForClosedStatement();
-                if (calendar == null) {
-                    throw new SqlException(agent_.logWriter_, 
-                        new ClientMessageId(SQLState.INVALID_API_PARAMETER),
-                        "null", "calendar", "setTimestamp()");
-                }
-                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-                targetCalendar.clear();
-                targetCalendar.setTime(x);
-                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-                defaultCalendar.clear();
-                defaultCalendar.setTime(x);
-                long timeZoneOffset =
-                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-                java.sql.Timestamp adjustedTimestamp = ((timeZoneOffset == 0) || (x == null)) ? x : new java.sql.Timestamp(x.getTime() + timeZoneOffset);
-                if (x != null) {
-                    adjustedTimestamp.setNanos(x.getNanos());
-                }
-                setTimestamp(parameterIndex, adjustedTimestamp);
-            }
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
+    public void setTimestamp(int parameterIndex, Timestamp x)
+            throws SQLException {
+        setTimestamp(parameterIndex, x, Calendar.getInstance());
     }
 
     public void setString(int parameterIndex, String x) throws SQLException {
