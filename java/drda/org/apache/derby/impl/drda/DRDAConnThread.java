@@ -38,10 +38,14 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.Vector;
 
 import org.apache.derby.catalog.SystemProcedures;
@@ -4527,6 +4531,28 @@ class DRDAConnThread extends Thread {
 		return ((stmt != null && stmt.typDefNam != null) ? stmt.byteOrder : database.byteOrder);
 	}
 
+    /** A cached {@code Calendar} instance using the GMT time zone. */
+    private Calendar gmtCalendar;
+
+    /**
+     * Get a {@code Calendar} instance with time zone set to GMT. The instance
+     * is cached for reuse by this thread. This calendar can be used to
+     * consistently read and write date and time values using the same
+     * calendar. Since the local default calendar may not be able to represent
+     * all times (for instance because the time would fall into a non-existing
+     * hour of the day when switching to daylight saving time, see DERBY-4582),
+     * we use the GMT time zone which doesn't observe daylight saving time.
+     *
+     * @return a calendar in the GMT time zone
+     */
+    private Calendar getGMTCalendar() {
+        if (gmtCalendar == null) {
+            TimeZone gmt = TimeZone.getTimeZone("GMT");
+            gmtCalendar = Calendar.getInstance(gmt);
+        }
+        return gmtCalendar;
+    }
+
 	/**
 	 * Read different types of input parameters and set them in
 	 * PreparedStatement
@@ -4619,7 +4645,8 @@ class DRDAConnThread extends Thread {
 				if (SanityManager.DEBUG) 
 					trace("ndate parameter value is: \""+paramVal+"\"");
 				try {
-					ps.setDate(i+1, java.sql.Date.valueOf(paramVal));
+                    Calendar cal = getGMTCalendar();
+                    ps.setDate(i+1, parseDate(paramVal, cal), cal);
 				} catch (java.lang.IllegalArgumentException e) {
 					// Just use SQLSTATE as message since, if user wants to
 					// retrieve it, the message will be looked up by the
@@ -4637,7 +4664,8 @@ class DRDAConnThread extends Thread {
 				if (SanityManager.DEBUG) 
 					trace("ntime parameter value is: "+paramVal);
 				try {
-					ps.setTime(i+1, java.sql.Time.valueOf(paramVal));
+                    Calendar cal = getGMTCalendar();
+                    ps.setTime(i+1, parseTime(paramVal, cal), cal);
 				} catch (java.lang.IllegalArgumentException e) {
 					throw new SQLException(SQLState.LANG_DATE_SYNTAX_EXCEPTION,
 						SQLState.LANG_DATE_SYNTAX_EXCEPTION.substring(0,5));
@@ -4654,18 +4682,10 @@ class DRDAConnThread extends Thread {
 				if (SanityManager.DEBUG)
 					trace("ntimestamp parameter value is: "+paramVal);
 				try {
-					String tsString = paramVal.substring(0,10) + " " +
-						paramVal.substring(11,19).replace('.', ':') +
-						paramVal.substring(19);
-					if (SanityManager.DEBUG)
-						trace("tsString is: "+tsString);
-					ps.setTimestamp(i+1, java.sql.Timestamp.valueOf(tsString));
+                    Calendar cal = getGMTCalendar();
+                    ps.setTimestamp(i+1, parseTimestamp(paramVal, cal), cal);
 				} catch (java.lang.IllegalArgumentException e1) {
-				// thrown by Timestamp.valueOf(...) for bad syntax...
-					throw new SQLException(SQLState.LANG_DATE_SYNTAX_EXCEPTION,
-						SQLState.LANG_DATE_SYNTAX_EXCEPTION.substring(0,5));
-				} catch (java.lang.StringIndexOutOfBoundsException e2) {
-				// can be thrown by substring(...) if syntax is invalid...
+				// thrown by parseTimestamp(...) for bad syntax...
 					throw new SQLException(SQLState.LANG_DATE_SYNTAX_EXCEPTION,
 						SQLState.LANG_DATE_SYNTAX_EXCEPTION.substring(0,5));
 				}
@@ -4815,7 +4835,127 @@ class DRDAConnThread extends Thread {
 
 
 	}
-	
+
+    /**
+     * Parse a date string as it is received from the client.
+     *
+     * @param dateString the date string to parse
+     * @param cal the calendar in which the date is parsed
+     * @return a Date object representing the date in the specified calendar
+     * @see org.apache.derby.client.am.DateTime#dateToDateBytes
+     * @throws IllegalArgumentException if the date is not correctly formatted
+     */
+    private java.sql.Date parseDate(String dateString, Calendar cal) {
+        // Get each component out of YYYY-MM-DD
+        String[] components = dateString.split("-");
+        if (components.length != 3) {
+            throw new IllegalArgumentException();
+        }
+
+        cal.clear();
+
+        // Set date components
+        cal.set(Calendar.YEAR, Integer.parseInt(components[0]));
+        cal.set(Calendar.MONTH, Integer.parseInt(components[1]) - 1);
+        cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(components[2]));
+
+        // Normalize time components as specified by java.sql.Date
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        return new java.sql.Date(cal.getTimeInMillis());
+    }
+
+    /**
+     * Parse a time string as it is received from the client.
+     *
+     * @param timeString the time string to parse
+     * @param cal the calendar in which the time is parsed
+     * @return a Date object representing the time in the specified calendar
+     * @see org.apache.derby.client.am.DateTime#timeToTimeBytes
+     * @throws IllegalArgumentException if the time is not correctly formatted
+     */
+    private Time parseTime(String timeString, Calendar cal) {
+        // Get each component out of HH:MM:SS
+        String[] components = timeString.split(":");
+        if (components.length != 3) {
+            throw new IllegalArgumentException();
+        }
+
+        cal.clear();
+
+        // Normalize date components as specified by java.sql.Time
+        cal.set(Calendar.YEAR, 1970);
+        cal.set(Calendar.MONTH, Calendar.JANUARY);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+
+        // Set time components
+        cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(components[0]));
+        cal.set(Calendar.MINUTE, Integer.parseInt(components[1]));
+        cal.set(Calendar.SECOND, Integer.parseInt(components[2]));
+
+        // No millisecond resolution for Time
+        cal.set(Calendar.MILLISECOND, 0);
+
+        return new Time(cal.getTimeInMillis());
+    }
+
+    /**
+     * Parse a timestamp string as it is received from the client.
+     *
+     * @param timeString the time string to parse
+     * @param cal the calendar in which the timestamp is parsed
+     * @return a Date object representing the timestamp in the specified
+     * calendar
+     * @see org.apache.derby.client.am.DateTime#timestampToTimestampBytes
+     * @throws IllegalArgumentException if the timestamp is not correctly
+     * formatted
+     */
+    private Timestamp parseTimestamp(String timeString, Calendar cal) {
+        // Get each component out of YYYY-MM-DD-HH.MM.SS.fffffffff
+        String[] components = timeString.split("[-.]");
+        if (components.length != 7) {
+            throw new IllegalArgumentException();
+        }
+
+        cal.clear();
+        cal.set(Calendar.YEAR, Integer.parseInt(components[0]));
+        cal.set(Calendar.MONTH, Integer.parseInt(components[1]) - 1);
+        cal.set(Calendar.DAY_OF_MONTH, Integer.parseInt(components[2]));
+        cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(components[3]));
+        cal.set(Calendar.MINUTE, Integer.parseInt(components[4]));
+        cal.set(Calendar.SECOND, Integer.parseInt(components[5]));
+
+        int nanos = 0;
+
+        final int radix = 10;
+        String nanoString = components[6];
+
+        // Get up to nine digits from the nano second component
+        for (int i = 0; i < 9; i++) {
+            // Scale up the intermediate result
+            nanos *= radix;
+
+            // Add the next digit, if there is one. Continue the loop even if
+            // there are no more digits, since we still need to scale up the
+            // intermediate result as if the fraction part were padded with
+            // zeros.
+            if (i < nanoString.length()) {
+                int digit = Character.digit(nanoString.charAt(i), radix);
+                if (digit == -1) {
+                    // not a digit
+                    throw new IllegalArgumentException();
+                }
+                nanos += digit;
+            }
+        }
+
+        Timestamp ts = new Timestamp(cal.getTimeInMillis());
+        ts.setNanos(nanos);
+        return ts;
+    }
 
 	private void readAndSetAllExtParams(final DRDAStatement stmt, final boolean streamLOB) 
 		throws SQLException, DRDAProtocolException
