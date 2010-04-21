@@ -132,9 +132,9 @@ public class ReleaseNotesGenerator extends GeneratorBase {
     /////////////////////////////////////////////////////////////////////////
 
     private ReleaseNoteReader releaseNoteReader = new ReleaseNoteReader(docBldr);
+    private ReportParser reportParser = ReportParser.makeReportParser();
     // set on the command line or by ant
-    private String releaseNotesListFileName;
-    private Document releaseNotesDoc;
+
     private ArrayList missingReleaseNotes = new ArrayList();
 
 
@@ -161,20 +161,6 @@ public class ReleaseNotesGenerator extends GeneratorBase {
     //  ANT Task BEHAVIOR
     //
     /////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Ant accessor to set the name of the JIRA-generated list of bugs which
-     * have release notes
-     * @param releaseNotesListFileName name of the xml file from the release
-     * note Jira filter/query
-     * @throws Exception
-     */
-    public void setReleaseNotesListFileName(String releaseNotesListFileName)
-            throws Exception {
-        this.releaseNotesListFileName = releaseNotesListFileName;
-        releaseNotesDoc = docBldr.parse(new File(releaseNotesListFileName));
-    }
-
 
     /**
      * This is Ant's entry point into this task.
@@ -298,15 +284,17 @@ public class ReleaseNotesGenerator extends GeneratorBase {
             (bugListSection, DEFAULT_TABLE_BORDER_WIDTH,
             new String[] { ISSUE_ID_HEADLINE, DESCRIPTION_HEADLINE });
 
-        for (Iterator i = JiraIssue.createJiraIssueList(bugListDoc,
-                excludeReleaseIDList).iterator(); i.hasNext();) {
+        bugListDoc.reset();
+        
+        for ( Iterator i = JiraIssue.createJiraIssueList( bugListDoc, excludeReleaseIDList, reportParser ).iterator(); i.hasNext(); )
+        {
             JiraIssue issue = (JiraIssue) i.next();
             //println("Fixed: "+ issue.getKey());
             Element row = insertRow(table);
             Element linkColumn = insertColumn(row);
             Element descriptionColumn = insertColumn(row);
             Element hotlink = createLink(outputDoc, issue.getJiraAddress(),
-                    issue.getKey());
+                    "DERBY-" + issue.getKey());
             Text title = outputDoc.createTextNode(issue.getTitle());
 
             linkColumn.appendChild(hotlink);
@@ -336,8 +324,10 @@ public class ReleaseNotesGenerator extends GeneratorBase {
         addParagraph(issuesSection, deltaStatement);
         Element toc = createList(issuesSection);
 
-        for (Iterator i = JiraIssue.createJiraIssueList(releaseNotesDoc,
-                excludeReleaseIDList).iterator(); i.hasNext();) {
+        bugListDoc.reset();
+        
+        for ( Iterator i = JiraIssue.createJiraIssueList( bugListDoc, excludeReleaseIDList, reportParser ).iterator(); i.hasNext(); )
+        {
             JiraIssue issue = (JiraIssue) i.next();
             if (issue.hasReleaseNote()) {
                 Node summaryText = null;
@@ -352,13 +342,13 @@ public class ReleaseNotesGenerator extends GeneratorBase {
                             getReleaseNoteDetails(releaseNote);
                 } catch (Throwable t) {
                     errors.add(formatError("Unable to read or parse " +
-                            "release note for " +
+                            "release note for DERBY-" +
                             issue.getKey(), t));
                     missingReleaseNotes.add(issue);
                     continue;
                 }
 
-                String key = "Note for " + issue.getKey();
+                String key = "Note for DERBY-" + issue.getKey();
                 //println("Release note: "+issue.getKey()+" - "+issue.getTitle());
                 Element paragraph = outputDoc.createElement(PARAGRAPH);
                 paragraph.appendChild(outputDoc.createTextNode(key + ": "));
@@ -455,7 +445,6 @@ public class ReleaseNotesGenerator extends GeneratorBase {
 
         setSummaryFileName( args[ idx++ ] );
         setBugListFileName( args[ idx++ ] );
-        setReleaseNotesListFileName( args[ idx++ ] );
         setOutputFileName( args[ idx++ ] );
 
         return true;

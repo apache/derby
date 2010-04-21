@@ -86,6 +86,8 @@ public class ChangesFileGenerator extends GeneratorBase {
     // major sections
     private static  final   String  BUG_FIXES_SECTION = "CHANGES";
 
+    private ReportParser reportParser = ReportParser.makeReportParser();
+
     /**
      * Only different from the default no-args constructor in that it has a
      * throws clause.
@@ -195,8 +197,8 @@ public class ChangesFileGenerator extends GeneratorBase {
             (bugListSection, DEFAULT_TABLE_BORDER_WIDTH,
             new String[] { ISSUE_ID_HEADLINE, DESCRIPTION_HEADLINE });
 
-        for (Iterator i = JiraIssue.createJiraIssueList(bugListDoc,
-                excludeReleaseIDList).iterator(); i.hasNext();) {
+        for (Iterator i = JiraIssue.createJiraIssueList( bugListDoc, excludeReleaseIDList, reportParser ).iterator(); i.hasNext(); )
+        {
             JiraIssue issue = (JiraIssue) i.next();
             println(issue.getKey());
             Element row = insertRow(table);

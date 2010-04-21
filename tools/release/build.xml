@@ -55,7 +55,6 @@
 
   <property name="relnotes.src.summary" value="${basedir}/releaseSummary.xml" />
   <property name="relnotes.src.buglist" value="${relnotes.src.reports}/fixedBugsList.xml" />
-  <property name="relnotes.src.notes" value="${relnotes.src.reports}/releaseNotesList.xml" />
   <property name="relnotes.out.filename" value="${basedir}/RELEASE-NOTES.html" />
   <property name="changesfile.src.buglist" value="${relnotes.src.reports}/changes.xml" />
   <property name="changesfile.out.filename" value="${basedir}/CHANGES.html" />
@@ -109,18 +108,15 @@
    Generate the Release Notes
 
    The ${relnotes.src.reports} property must point at a
-   directory containing the two JIRA reports:
+   directory containing a JIRA report:
 
      fixedBugsList.xml  - This is a JIRA xml report of issues fixed in the release.
-
-     releaseNotesList.xml - This is a JIRA xml report of issues having detailed release notes.
 -->
   <target name="genrelnotes">
 
      <generateReleaseNotes
        summaryFileName="${relnotes.src.summary}"
        bugListFileName="${relnotes.src.buglist}"
-       releaseNotesListFileName="${relnotes.src.notes}"
        outputFileName="${relnotes.out.filename}"
      />
 

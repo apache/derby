@@ -15,152 +15,69 @@ limitations under the License.
 package org.apache.derbyBuild;
 
 import org.w3c.dom.*;
+import java.io.InputStream;
 import java.util.*;
 
 
 /**
  *
- * An issue from a JIRA report.
+ * An issue from a JIRA report. The constructor of this class parses text produced by
+ * a JIRA report. This parsing logic probably has to be rewritten for every release because
+ * the format of the JIRA reports is not stable.
  *
  */
 class JiraIssue {
-    private static final long NO_RELEASE_NOTE = -1;
-    private static final String JIRA_ITEM = "h3";
-    private static final String JIRA_ID = "id";
-    private static final String JIRA_NAME = "name";
-    private static final String JIRA_TITLE = "a";
-    private static final String JIRA_KEY = "key";
-    private static final String JIRA_ATTACHMENT = "attachment";
-    private static final String JIRA_FIXVERSION = "fixVersion";
     private static final String RELEASE_NOTE_NAME = "releaseNote.html";
 
     private String key;
     private String title;
-    private long releaseNoteAttachmentID = NO_RELEASE_NOTE;
-    private HashSet fixVersionSet = new HashSet();
+    private long releaseNoteAttachmentID = ReportParser.NO_RELEASE_NOTE;
+    private HashSet fixVersionSet;
 
     /**
-     * Create an object instance from an XML document Element. The Element given
-     * as argument is assumed to be an 'item' sub-tree from the XML file
-     * representation of a Jira filter/query.
-     * @param itemElement the 'item' subtree representing a Jira issue
-     * @throws java.lang.Exception
+     * Create an object instance from a TagReader.
      */
-    public JiraIssue(Element itemElement) throws Exception {
-        ElementFacade ef = new ElementFacade(itemElement);
-        title = ef.getTextByTagName(JIRA_TITLE);
-        //key = ef.getTextByTagName(JIRA_KEY);
-        key = parseKey( title );
-
-        releaseNoteAttachmentID = getReleaseNoteAttachmentID( key, itemElement );
-
-        //
-        // A JIRA title has the following form:
-        //
-        //  "[DERBY-2598] new upgrade  test failures after change 528033"
-        //
-        // We strip off the leading JIRA id because that information already
-        // lives in the key.
-        //
-        title = title.substring(title.indexOf(']') + 2);
-
-        for (Iterator i = ef.getTextListByTagName(JIRA_FIXVERSION).iterator();
-        i.hasNext();) {
-
-            String nextVersion = (String) i.next();
-
-            fixVersionSet.add( nextVersion );
-        }
-    }
-
-    /**
-     * Look up the attachment id for the release note attached to
-     * an issue.
-     */
-    private long getReleaseNoteAttachmentID
-        ( String key, Element itemElement )
-        throws Exception
+    public JiraIssue(  ReportParser rp, TagReader tr ) throws Exception
     {
-        long result = NO_RELEASE_NOTE;
-
-        //
-        // The following code used to work before the time of Derby 10.6.
-        // With that release, the list of attachments stopped appearing in
-        // the xml reports.
-        //
-        //        NodeList attachmentsList =
-        //                itemElement.getElementsByTagName(JIRA_ATTACHMENT);
-        //
-        //        for (int i = 0; i < attachmentsList.getLength(); i++) {
-        //            Element attachment = (Element) attachmentsList.item(i);
-        //            String name = attachment.getAttribute(JIRA_NAME);
-        //            if (RELEASE_NOTE_NAME.equals(name)) {
-        //                result =
-        //                        Math.max(result,
-        //                        Long.parseLong(attachment.getAttribute(JIRA_ID)));
-        //            }
-        //        }
-
-        //
-        // As a consequence, we now hardcode the attachment ids.
-        // The attachment id is in the link of the latest release note
-        // attached to the issue.
-        //
-        if ( key.equals( "DERBY-4602" ) ) { result = 12440335L; }
-        else if ( key.equals( "DERBY-4483" ) ) { result = 12439775L; }
-        else if ( key.equals( "DERBY-4432" ) ) { result = 12424709L; }
-        else if ( key.equals( "DERBY-4380" ) ) { result = 12434514L; }
-        else if ( key.equals( "DERBY-4355" ) ) { result = 12419298L; }
-        else if ( key.equals( "DERBY-4312" ) ) { result = 12442288L; }
-        else if ( key.equals( "DERBY-4230" ) ) { result = 12409466L; }
-        else if ( key.equals( "DERBY-4191" ) ) { result = 12442312L; }
-        else if ( key.equals( "DERBY-3991" ) ) { result = 12409798L; }
-        else if ( key.equals( "DERBY-3844" ) ) { result = 12436979L; }
-        else if ( key.equals( "DERBY-2769" ) ) { result = 12418474L; }
-        
-        return result;
-    }
-
-    /**
-     * Extract the JIRA key (DERBY-XXXX) from the raw title.
-     * A JIRA  raw title has the following form:
-     *
-     *  "[DERBY-2598] new upgrade  test failures after change 528033"
-     */
-    private String parseKey( String rawTitle ) throws Exception
-    {
-        String result = rawTitle.substring(1, title.indexOf(']') );
-
-        return result;
+        key = rp.parseKey( tr );
+        title = rp.parseTitle( tr );
+        fixVersionSet = rp.parseFixedVersions( tr );
+        releaseNoteAttachmentID = rp.getReleaseNoteAttachmentID( tr );
     }
 
     /**
      * Factory method which extracts a list of JiraIssue objects from a Jira
      * report (supplied as an XML Document). Issues with a fixVersion contained
      * in the exclude list will be omitted from the list.
-     * @param report the Jira report to extract issues from (as a Document object)
+     * @param masterReport a TagReader holding the JIRA report of all the fixed bugs
      * @param excludeReleaseIDList list of fixVersions that disqualifies an issue
+     * @param parser a class to parse content in the master report
      * @return a List of JiraIssue objects
      * @throws java.lang.Exception
      */
-    public static List createJiraIssueList(Document report,
-            List excludeReleaseIDList) throws Exception {
-        Element reportRoot = report.getDocumentElement();
-        NodeList itemList = reportRoot.getElementsByTagName(JIRA_ITEM);
-        int count = itemList.getLength();
+    public static List createJiraIssueList
+        ( TagReader masterReport, List excludeReleaseIDList, ReportParser parser ) throws Exception
+    {
+        int issueCount = 0;
+
         ArrayList jiraIssues = new ArrayList();
 
-        boolean skip;
-        for (int i = 0; i < count; i++) {
-            skip=false;
-            JiraIssue candidate = new JiraIssue((Element) itemList.item(i));
-            for (Iterator ex = excludeReleaseIDList.iterator(); ex.hasNext();) {
+        while( true )
+        {
+            TagReader nextIssue = parser.parseNextIssue( masterReport );
+            if ( nextIssue == null ) { break; }
+
+            JiraIssue candidate = new JiraIssue( parser, nextIssue );
+
+            boolean skip = false;
+            for (Iterator ex = excludeReleaseIDList.iterator(); ex.hasNext();)
+            {
                 String rid = (String) ex.next();
-                if (candidate.isFixedIn(rid)) {
-                    System.out.println("Already fixed: "+candidate.getKey()+
-                            " (in "+rid+")");
+                if (candidate.isFixedIn(rid))
+                {
+                    //System.out.println("Already fixed: "+candidate.getKey()+ " (in "+rid+")");
                     skip=true;
-                    continue;
+                    break;
                 }
             }
             if (!skip)
@@ -169,11 +86,12 @@ class JiraIssue {
                 jiraIssues.add(candidate);
             }
         }
+
         return jiraIssues;
     }
 
     /**
-     * @return the issue's key (jira number DERBY-xxx)
+     * @return the issue's key (jira number, e.g., 1234)
      */
     public String getKey() {
         return key;
@@ -197,7 +115,7 @@ class JiraIssue {
      * @return true iff this issue has a release note attached
      */
     public boolean hasReleaseNote() {
-        return (releaseNoteAttachmentID > NO_RELEASE_NOTE);
+        return (releaseNoteAttachmentID > ReportParser.NO_RELEASE_NOTE);
     }
 
     /**
@@ -213,7 +131,7 @@ class JiraIssue {
      * @return URL for this Jira issue
      */
     public String getJiraAddress() {
-        return "https://issues.apache.org/jira/browse/" + key;
+        return "https://issues.apache.org/jira/browse/DERBY-" + key;
     }
 
     /**
