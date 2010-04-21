@@ -21,11 +21,15 @@
 */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Calendar;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -908,6 +912,44 @@ public final class DateTimeTest extends BaseJDBCTestCase {
         dropTable("convstrtest");
         
         st.close();
+    }
+
+    /**
+     * Regression test case for DERBY-4621, which caused the conversion of
+     * timestamp and time values to varchar to generate wrong results when
+     * a Calendar object was supplied.
+     */
+    public void testConversionToString() throws SQLException {
+        String timestampString = "2010-04-20 15:17:36.0";
+        String timeString = "15:17:36";
+        String dateString = "2010-04-20";
+
+        Timestamp ts = Timestamp.valueOf(timestampString);
+        Time t = Time.valueOf(timeString);
+        Date d = Date.valueOf(dateString);
+
+        PreparedStatement ps =
+                prepareStatement("VALUES CAST(? AS VARCHAR(40))");
+
+        ps.setTimestamp(1, ts);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), timestampString);
+
+        // Used to give wrong result - 2010-04-20 03:17:36
+        ps.setTimestamp(1, ts, Calendar.getInstance());
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), timestampString);
+
+        ps.setTime(1, t);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), timeString);
+
+        // Used to give wrong result - 03:17:36
+        ps.setTime(1, t, Calendar.getInstance());
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), timeString);
+
+        ps.setDate(1, d);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), dateString);
+
+        ps.setDate(1, d, Calendar.getInstance());
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), dateString);
     }
     
     public void testConversion_Aggregates() throws SQLException{
