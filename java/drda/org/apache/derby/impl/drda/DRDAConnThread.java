@@ -4987,7 +4987,7 @@ class DRDAConnThread extends Thread {
 
 	/**
 	 * Read different types of input parameters and set them in PreparedStatement
-	 * @param i			index of the parameter
+     * @param i zero-based index of the parameter
 	 * @param stmt			associated ps
 	 * @param drdaType	drda type of the parameter
 	 *
@@ -4998,127 +4998,52 @@ class DRDAConnThread extends Thread {
 									 int drdaType, int extLen, boolean streamLOB)
 				throws DRDAProtocolException, SQLException
 		{
-			PreparedStatement ps = stmt.getPreparedStatement();
+            // Note the switch from zero-based to one-based index below.
 			drdaType = (drdaType & 0x000000ff); // need unsigned value
 			boolean checkNullability = false;
 			if (sqlamLevel >= MGRLVL_7 &&
 				FdocaConstants.isNullable(drdaType))
 				checkNullability = true;
 
+            final EXTDTAReaderInputStream stream =
+                reader.getEXTDTAReaderInputStream(checkNullability);
+
+            // Determine encoding first, mostly for debug/tracing purposes
+            String encoding = "na";
+            switch (drdaType) {
+                case DRDAConstants.DRDA_TYPE_LOBCSBCS:
+                case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
+                    encoding = stmt.ccsidSBCEncoding;
+                    break;
+                case DRDAConstants.DRDA_TYPE_LOBCDBCS:
+                case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
+                    encoding = stmt.ccsidDBCEncoding;
+                    break;
+                case DRDAConstants.DRDA_TYPE_LOBCMIXED:
+                case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
+                    encoding = stmt.ccsidMBCEncoding;
+                    break;
+            }
+
+            traceEXTDTARead(drdaType, i+1, stream, streamLOB, encoding);
+
 			try {	
-				final byte[] paramBytes;
-				final String paramString;
-				
 				switch (drdaType)
 				{
 					case  DRDAConstants.DRDA_TYPE_LOBBYTES:
 					case  DRDAConstants.DRDA_TYPE_NLOBBYTES:
-						paramString = "";
-						final boolean useSetBinaryStream = 
-							stmt.getParameterMetaData().getParameterType(i+1)==Types.BLOB;
-						
-						if (streamLOB && useSetBinaryStream) {
-							paramBytes = null;
-							final EXTDTAReaderInputStream stream = 
-								reader.getEXTDTAReaderInputStream(checkNullability);
-                            // Save the streamed parameter so we can drain it if it does not get used
-                            // by embedded when the statement is executed. DERBY-3085
-                            stmt.setStreamedParameter(stream);
-                            if( stream instanceof StandardEXTDTAReaderInputStream ){
-                                
-                                final StandardEXTDTAReaderInputStream stdeis = 
-                                    (StandardEXTDTAReaderInputStream) stream ;
-                                ps.setBinaryStream( i + 1, 
-                                                    stdeis, 
-                                                    (int) stdeis.getLength() );
-                                
-                            } else if( stream instanceof LayerBStreamedEXTDTAReaderInputStream ) {
-                                
-                                ( ( EnginePreparedStatement ) ps).setBinaryStream( i + 1, 
-                                                                                   stream);
-                                
-							} else if( stream == null ){
-                                ps.setBytes(i+1, null);
-                                
-                            } else {
-                                throw new IllegalStateException();
-                            }
-							
-							if (SanityManager.DEBUG) {
-								if (stream==null) {
-									trace("parameter value : NULL");
-								} else {
-									trace("parameter value will be streamed");
-								}
-							}
-						} else {
-                            final EXTDTAReaderInputStream stream = 
-								reader.getEXTDTAReaderInputStream(checkNullability);
-							
-                            if ( stream == null ) {
-								
-                                ps.setBytes(i+1, 
-                                            null );
-                                
-                                if (SanityManager.DEBUG) {
-									trace("parameter value : NULL");
-                                }
-                                
-							} else {
-
-                                ByteArrayInputStream bais = 
-                                    convertAsByteArrayInputStream( stream );
-                                
-                                if (SanityManager.DEBUG) {
-									trace("parameter value is a LOB with length:" +
-										  bais.available() );
-								}
-                                
-								ps.setBinaryStream(i+1, 
-                                                   bais,
-												   bais.available() );
-                                
-							}
-							
-						}
+                        setAsBinaryStream(stmt, i+1, stream, streamLOB);
 						break;
 					case DRDAConstants.DRDA_TYPE_LOBCSBCS:
 					case DRDAConstants.DRDA_TYPE_NLOBCSBCS:
-                        
-                        setAsCharacterStream(stmt,
-                                             i,
-                                             checkNullability,
-                                             reader,
-                                             streamLOB,
-                                             stmt.ccsidSBCEncoding );
-
-						break;
 					case DRDAConstants.DRDA_TYPE_LOBCDBCS:
 					case DRDAConstants.DRDA_TYPE_NLOBCDBCS:
-                        
-                        setAsCharacterStream(stmt,
-                                             i,
-                                             checkNullability,
-                                             reader,
-                                             streamLOB,
-                                             stmt.ccsidDBCEncoding);
-                        
-						break;
 					case DRDAConstants.DRDA_TYPE_LOBCMIXED:
 					case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
-
-                        setAsCharacterStream(stmt,
-                                             i,
-                                             checkNullability,
-                                             reader,
-                                             streamLOB,
-                                             stmt.ccsidMBCEncoding);
-                        
+                        setAsCharacterStream(stmt, i+1, stream, streamLOB,
+                                encoding);
 						break;
 					default:
-						paramBytes = null;
-						paramString = "";
-
 						invalidValue(drdaType);
 				}
 			     
@@ -8281,6 +8206,41 @@ class DRDAConnThread extends Thread {
 			server.consoleMessage(value, true);
 	}
 
+
+    /**
+     * Sends a trace string to the console when reading an EXTDTA value (if
+     * tracing is enabled).
+     *
+     * @param drdaType the DRDA type of the EXTDTA value
+     * @param index the one-based parameter index
+     * @param stream the stream being read
+     * @param streamLOB whether or not the value is being streamed as the last
+     *      parameter value in the DRDA protocol flow
+     * @param encoding the encoding of the data, if any
+     */
+    private void traceEXTDTARead(int drdaType, int index,
+                                 EXTDTAReaderInputStream stream,
+                                 boolean streamLOB, String encoding) {
+        if (SanityManager.DEBUG && server.debugOutput == true) {
+            StringBuffer sb = new StringBuffer("Reading/setting EXTDTA: ");
+            // Data: t<type>/i<ob_index>/<streamLOB>/<encoding>/
+            //       <statusByteExpected>/b<byteLength>
+            sb.append("t").append(drdaType).append("/i").append(index).
+                    append("/").append(streamLOB).
+                    append("/").append(encoding).append("/").
+                    append(stream.readStatusByte). append("/b");
+            if (stream == null) {
+                sb.append("NULL");
+            } else if (stream.isLayerBStream()) {
+                sb.append("UNKNOWN_LENGTH");
+            } else {
+                sb.append(
+                        ((StandardEXTDTAReaderInputStream)stream).getLength());
+            }
+            trace(sb.toString());
+        }
+    }
+
 	/***
 	 * Show runtime memory
 	 *
@@ -8761,19 +8721,26 @@ class DRDAConnThread extends Thread {
     }
     
     
-    private static ByteArrayInputStream 
+    private static InputStream
         convertAsByteArrayInputStream( EXTDTAReaderInputStream stream )
         throws IOException {
-        
+
+        // Suppress the exception that may be thrown when reading the status
+        // byte here, we want the embedded statement to fail while executing.
+        stream.setSuppressException(true);
+
         final int byteArrayLength = 
             stream instanceof StandardEXTDTAReaderInputStream ?
             (int) ( ( StandardEXTDTAReaderInputStream ) stream ).getLength() : 
-            32;// default length
-        
+            1 + stream.available(); // +1 to avoid infinite loop
+
+        // TODO: We will run into OOMEs for large values here.
+        //       Could avoid this by saving value temporarily to disk, for
+        //       instance by using the existing LOB code.
         PublicBufferOutputStream pbos = 
             new PublicBufferOutputStream( byteArrayLength );
-        
-        byte[] buffer = new byte[32 * 1024];
+
+        byte[] buffer = new byte[Math.min(byteArrayLength, 32*1024)];
         
         int c = 0;
         
@@ -8783,9 +8750,17 @@ class DRDAConnThread extends Thread {
             pbos.write( buffer, 0, c );
         }
 
-        return new ByteArrayInputStream( pbos.getBuffer(),
-                                         0, 
-                                         pbos.getCount() );
+        // Check if the client driver encountered any errors when reading the
+        // source on the client side.
+        if (stream.isStatusSet() &&
+                stream.getStatus() != DRDAConstants.STREAM_OK) {
+            // Create a stream that will just fail when accessed.
+            return new FailingEXTDTAInputStream(stream.getStatus());
+        } else {
+            return new ByteArrayInputStream( pbos.getBuffer(),
+                                             0,
+                                             pbos.getCount() );
+        }
 
     }
     
@@ -8806,37 +8781,87 @@ class DRDAConnThread extends Thread {
         
     }
     
-    private static void setAsCharacterStream(DRDAStatement stmt,
-                                             int i,
-                                             boolean checkNullability,
-                                             DDMReader reader,
-                                             boolean streamLOB,
-                                             String encoding) 
-        throws DRDAProtocolException ,
-               SQLException ,
-               IOException {
+    /**
+     * Sets the specified character EXTDTA parameter of the embedded statement.
+     *
+     * @param stmt the DRDA statement to use
+     * @param i the one-based index of the parameter
+     * @param extdtaStream the EXTDTA stream to read data from
+     * @param streamLOB whether or not the stream content is streamed as the
+     *      last value in the DRDA protocol flow
+     * @param encoding the encoding of the EXTDTA stream
+     * @throws IOException if reading from the stream fails
+     * @throws SQLException if setting the stream fails
+     */
+    private static void setAsCharacterStream(
+                                         DRDAStatement stmt,
+                                         int i,
+                                         EXTDTAReaderInputStream extdtaStream,
+                                         boolean streamLOB,
+                                         String encoding)
+           throws IOException, SQLException {
         PreparedStatement ps = stmt.getPreparedStatement();
         EnginePreparedStatement engnps = 
             ( EnginePreparedStatement ) ps;
         
-        final EXTDTAReaderInputStream extdtastream = 
-            reader.getEXTDTAReaderInputStream(checkNullability);
         // DERBY-3085. Save the stream so it can be drained later
         // if not  used.
         if (streamLOB)
-            stmt.setStreamedParameter(extdtastream);
+            stmt.setStreamedParameter(extdtaStream);
         
         final InputStream is = 
             streamLOB ?
-            (InputStream) extdtastream :
-            convertAsByteArrayInputStream( extdtastream );
+            (InputStream) extdtaStream :
+            convertAsByteArrayInputStream( extdtaStream );
         
         final InputStreamReader streamReader = 
             new InputStreamReader( is,
                                    encoding ) ;
         
-        engnps.setCharacterStream( i + 1, 
-                                   streamReader );
+        engnps.setCharacterStream(i, streamReader);
     }
 
+    /**
+     * Sets the specified binary EXTDTA parameter of the embedded statement.
+     *
+     * @param stmt the DRDA statement to use
+     * @param index the one-based index of the parameter
+     * @param stream the EXTDTA stream to read data from
+     * @param streamLOB whether or not the stream content is streamed as the
+     *      last value in the DRDA protocol flow
+     * @throws IOException if reading from the stream fails
+     * @throws SQLException  if setting the stream fails
+     */
+    private static void setAsBinaryStream(DRDAStatement stmt,
+                                          int index,
+                                          EXTDTAReaderInputStream stream,
+                                          boolean streamLOB)
+            throws IOException, SQLException {
+        int type = stmt.getParameterMetaData().getParameterType(index);
+        boolean useSetBinaryStream = (type == Types.BLOB);
+        PreparedStatement ps = stmt.getPreparedStatement();
+
+        if (streamLOB && useSetBinaryStream) {
+            // Save the streamed parameter so we can drain it if it does not
+            // get used by embedded when the statement is executed. DERBY-3085
+            stmt.setStreamedParameter(stream);
+            if (stream == null) {
+                ps.setBytes(index, null);
+            } else if (!stream.isLayerBStream()) {
+                int length = (int)((StandardEXTDTAReaderInputStream)
+                                                            stream).getLength();
+                ps.setBinaryStream(index, stream, length);
+
+            } else {
+                ((EnginePreparedStatement)ps).setBinaryStream(index, stream);
+            }
+        } else {
+            if (stream == null) {
+                ps.setBytes(index, null);
+            } else {
+                InputStream bais = convertAsByteArrayInputStream(stream);
+                ps.setBinaryStream(index, bais, bais.available());
+            }
+        }
+    }
 }

@@ -38,6 +38,14 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
 
     /** True if the server supports UDTs */
     private boolean supportsUDTs_;
+
+    /**
+     * True if the server supports aborting a statement whilst transferring
+     * EXTDTA objects. Note that there are two types of aborts, depending on
+     * whether an object is being transferred to the server using DDM layer B
+     * streaming or not.
+     */
+    private boolean supportsEXTDTAAbort_;
     
     /** True if the server supports nanoseconds in timestamps */
     private boolean supportsTimestampNanoseconds_;
@@ -106,6 +114,9 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
 
         supportsTimestampNanoseconds_ =
                 productLevel_.greaterThanOrEqualTo(10, 6, 0);
+
+        supportsEXTDTAAbort_ =
+                productLevel_.greaterThanOrEqualTo(10, 6, 0);
     }
 
     /**
@@ -144,5 +155,13 @@ public class NetDatabaseMetaData extends org.apache.derby.client.am.DatabaseMeta
      */
     final boolean serverSupportsTimestampNanoseconds() {
         return supportsTimestampNanoseconds_;
+    }
+
+    /**
+     * Check if server supports product specific EXTDTA abort protocol.
+     * @return {@code true} if the server supports this.
+     */
+    final boolean serverSupportsEXTDTAAbort() {
+        return supportsEXTDTAAbort_;
     }
 }

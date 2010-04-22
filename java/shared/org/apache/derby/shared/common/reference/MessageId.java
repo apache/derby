@@ -193,6 +193,11 @@ public interface MessageId {
      * read ahead limit of the mark was exceeded.
      */
     String STREAM_MARK_UNSET_OR_EXCEEDED                    = "I027";
+    /**
+     * Error message when the client encounters a read error when reading a
+     * user stream, which it is in the process of sending to the server.
+     */
+    String STREAM_DRDA_CLIENTSIDE_EXTDTA_READ_ERROR         = "I028";
 
     /*
      * Monitor

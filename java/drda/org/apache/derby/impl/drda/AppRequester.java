@@ -295,6 +295,16 @@ class AppRequester
 		
 	}
 
+    /**
+     * Tells whether the client sends a trailing Derby-specific status byte
+     * when transferring EXTDTA objects.
+     *
+     * @return {@code true} if the status byte is sent, {@code false} if not
+     */
+    protected boolean supportsEXTDTAAbort() {
+        return (clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 6, 0));
+    }
+
 	protected boolean supportsSessionDataCaching() {
 		return (clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 4, 0));
 	}

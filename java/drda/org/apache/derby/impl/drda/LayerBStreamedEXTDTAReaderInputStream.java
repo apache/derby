@@ -38,13 +38,16 @@ final class LayerBStreamedEXTDTAReaderInputStream extends EXTDTAReaderInputStrea
     /**
      * Constructor
      * @param reader The reader to get data from
+     * @param readStatusByte whether or not to read the trailing Derby-specific
+     *      EXTDTA stream status byte
      * @exception DRDAProtocolException if thrown while initializing current 
      *                                  buffer.
      */
-    LayerBStreamedEXTDTAReaderInputStream(final DDMReader reader) 
+    LayerBStreamedEXTDTAReaderInputStream(final DDMReader reader,
+                                          boolean readStatusByte)
         throws DRDAProtocolException
     {
-        super();
+        super(true, readStatusByte);
         this.reader = reader;
         this.currentBuffer = 
             reader.readLOBInitStream();
@@ -63,13 +66,11 @@ final class LayerBStreamedEXTDTAReaderInputStream extends EXTDTAReaderInputStrea
      * @see        java.io.InputStream#read()
      */
     public final int read() 
-        throws IOException
-    {
-        int val = (currentBuffer == null) ? -1 : currentBuffer.read();
-        if (val < 0) {
-            val = refreshCurrentBuffer();
-        }
-        return val;
+            throws IOException {
+        // Reuse the other read method for simplicity.
+        byte[] b = new byte[1];
+        int read = read(b);
+        return (read == 1 ? b[0] : -1);
     }
     
     /**
@@ -95,20 +96,48 @@ final class LayerBStreamedEXTDTAReaderInputStream extends EXTDTAReaderInputStrea
      * @see        java.io.InputStream#read(byte[], int, int)
      */
     public final int read(final byte[] b,
-                          final int off,
-                          final int len) 
+                          int off,
+                          int len) 
         throws IOException
     {
-        int val = currentBuffer.read(b, off, len);
-        
-        if (val < 0 && 
-            reader.doingLayerBStreaming() ) {
-            
-            currentBuffer = 
-                reader.readLOBContinuationStream();
-            val = currentBuffer.read(b, off, len);
-            
+        if (currentBuffer == null) {
+            return -1;
         }
+
+        // WARNING: We are relying on ByteArrayInputStream.available below.
+        //          Replacing the stream class with another stream class may
+        //          not give expected results.
+
+        int val;
+        if (reader.doingLayerBStreaming()) {
+            // Simple read, we will either read part of the current buffer or
+            // all of it. We know there is at least one more byte on the wire.
+            val = currentBuffer.read(b, off, len);
+            if (currentBuffer.available() == 0) {
+                currentBuffer = reader.readLOBContinuationStream();
+            }
+        } else if (readStatusByte) {
+            // Reading from the last buffer, make sure we handle the Derby-
+            // specific status byte and that we don't return it to the user.
+            int maxToRead = currentBuffer.available() -1;
+            val = currentBuffer.read(b, off, Math.min(maxToRead, len));
+            if (maxToRead == 0) {
+                // Only status byte left.
+                checkStatus(currentBuffer.read());
+                val = -1;
+                currentBuffer = null;
+            } else if (maxToRead == val) {
+                checkStatus(currentBuffer.read());
+                currentBuffer = null;
+            }
+        } else {
+            // Reading from the last buffer, no Derby-specific status byte sent.
+            val = currentBuffer.read(b, off, len);
+            if (currentBuffer.available() == 0) {
+                currentBuffer = null;
+            }
+        }
+
         return val;
     }
 
@@ -123,31 +152,23 @@ final class LayerBStreamedEXTDTAReaderInputStream extends EXTDTAReaderInputStrea
      * @return     the number of bytes that can be read from this input stream
      *             without blocking.     
      */
-    public final int available() 
-    {
-        return currentBuffer.available();
+    public final int available() {
+        int avail = 0;
+        if (currentBuffer != null) {
+            avail = currentBuffer.available();
+            if (readStatusByte && !reader.doingLayerBStreaming()) {
+                avail--;
+            }
+        }
+        return avail;
     }
 
     
-    /**
-     * Refresh the current buffer from the DDMReader
-     * @exception IOException if there is a IOException when
-     *                        refreshing the buffer from DDMReader
-     * @return the next byte of data, or <code>-1</code> if the end of the
-     *         stream is reached and layer B streaming was finished.
-     */
-    private int refreshCurrentBuffer() 
-        throws IOException
-    {
-        
-        if( ! reader.doingLayerBStreaming() )
-            return -1;
-        
-        currentBuffer = 
-            reader.readLOBContinuationStream();
-        return currentBuffer.read();
+    protected void onClientSideStreamingError() {
+        // Clean state and return -1 on subsequent calls.
+        // The status byte is the last byte, so no need to drain the source.
+        currentBuffer = null;
     }
-    
     
     /** DDMReader. Used to get more data. */
     private final DDMReader reader;

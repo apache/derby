@@ -278,6 +278,10 @@ public class Request {
     
     // We need to reuse the agent's sql exception accumulation mechanism
     // for this write exception, pad if the length is too big, and truncation if the length is too small
+    // WARNING: The code encrypting EXTDTA still has the problems described by
+    //          DERBY-2017. The server doesn't support this security mechanism
+    //          (see for instance DERBY-1345), and it is not clear whether this
+    //          piece of code is ever used.
     final private void writeEncryptedScalarStream(boolean chained,
                                                   boolean chainedWithSameCorrelator,
                                                   int codePoint,
@@ -285,9 +289,6 @@ public class Request {
                                                   java.io.InputStream in,
                                                   boolean writeNullByte,
                                                   int parameterIndex) throws DisconnectException, SqlException {
-        
-
-			
 		int leftToRead = length;
 		int extendedLengthByteCount = prepScalarStream(chained,
 													   chainedWithSameCorrelator,
@@ -321,7 +322,8 @@ public class Request {
 				bytesRead = in.read(clearedBytes, pos, leftToRead);
 				totalBytesRead += bytesRead;
 			} catch (java.io.IOException e) {
-				padScalarStreamForError(leftToRead, bytesToRead);
+                padScalarStreamForError(leftToRead, bytesToRead,
+                        false, (byte)-1);
 				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
 				netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
 																   new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
@@ -440,8 +442,24 @@ public class Request {
     }
 	
 	
-	// We need to reuse the agent's sql exception accumulation mechanism
-    // for this write exception, pad if the length is too big, and truncation if the length is too small
+    /**
+     * Writes a stream with a known length onto the wire.
+     * <p>
+     * To avoid DRDA protocol exceptions, the data is truncated or padded as
+     * required to complete the transfer. This can be avoided by implementing
+     * the request abort mechanism specified by DRDA, but it is rather complex
+     * and may not be worth the trouble.
+     * <p>
+     * Also note that any exceptions generated while writing the stream will
+     * be accumulated and raised at a later time.
+     *
+     * @param length the byte length of the stream
+     * @param in the stream to transfer
+     * @param writeNullByte whether or not to write a NULL indicator
+     * @param parameterIndex one-based parameter index
+     * @throws DisconnectException if a severe error condition is encountered,
+     *      causing the connection to be broken
+     */
 	final private void writePlainScalarStream(boolean chained,
                                               boolean chainedWithSameCorrelator,
                                               int codePoint,
@@ -449,33 +467,49 @@ public class Request {
                                               java.io.InputStream in,
                                               boolean writeNullByte,
                                               int parameterIndex) throws DisconnectException, SqlException {
+        // We don't have the metadata available when we create this request
+        // object, so we have to check here if we are going to write the status
+        // byte or not.
+        final boolean writeEXTDTAStatusByte =
+                netAgent_.netConnection_.serverSupportsEXTDTAAbort();
+
+        // If the Derby specific status byte is sent, the number of bytes to
+        // send differs from the number of bytes to read (off by one byte).
 		int leftToRead = length;
+        int bytesToSend = writeEXTDTAStatusByte ? leftToRead + 1 : leftToRead;
 		int extendedLengthByteCount = prepScalarStream(chained,
 													   chainedWithSameCorrelator,
 													   writeNullByte,
-													   leftToRead);
+                                                       bytesToSend);
 		int bytesToRead;
 				
 		if (writeNullByte) {
-			bytesToRead = Math.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - 1 - extendedLengthByteCount);
+            bytesToRead = Math.min(bytesToSend, DssConstants.MAX_DSS_LEN - 6 - 4 - 1 - extendedLengthByteCount);
 		} else {
-			bytesToRead = Math.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - extendedLengthByteCount);
+            bytesToRead = Math.min(bytesToSend, DssConstants.MAX_DSS_LEN - 6 - 4 - extendedLengthByteCount);
 		}
-				
+
+        // If we are sending the status byte and we can send the user value as
+        // one DSS, correct for the status byte (otherwise we read one byte too
+        // much from the stream).
+        if (writeEXTDTAStatusByte && bytesToRead == bytesToSend) {
+            bytesToRead--;
+        }
+
 		buildLengthAndCodePointForLob(codePoint,
-									  leftToRead,
+                                      bytesToSend,
 									  writeNullByte,
 									  extendedLengthByteCount);
-
+        byte status = DRDAConstants.STREAM_OK;
 		int bytesRead = 0;
-		int totalBytesRead = 0;
 		do {
 			do {
 				try {
 					bytesRead = in.read(bytes_, offset_, bytesToRead);
-					totalBytesRead += bytesRead;
 				} catch (java.io.IOException e) {
-					padScalarStreamForError(leftToRead, bytesToRead);
+                    status = DRDAConstants.STREAM_READ_ERROR;
+                    padScalarStreamForError(leftToRead, bytesToRead,
+                            writeEXTDTAStatusByte, status);
 					// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
 					netAgent_.accumulateReadException(new SqlException(
 																	   netAgent_.logWriter_,
@@ -487,7 +521,9 @@ public class Request {
 					return;
 				}
 				if (bytesRead == -1) {
-					padScalarStreamForError(leftToRead, bytesToRead);
+                    status = DRDAConstants.STREAM_TOO_SHORT;
+                    padScalarStreamForError(leftToRead, bytesToRead,
+                            writeEXTDTAStatusByte, status);
 					// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
 					netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
 																	   new ClientMessageId(SQLState.NET_PREMATURE_EOS),
@@ -506,12 +542,14 @@ public class Request {
 		// check to make sure that the specified length wasn't too small
 		try {
 			if (in.read() != -1) {
+                status = DRDAConstants.STREAM_TOO_LONG;
 				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
 				netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
 																   new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
 																   new Integer(parameterIndex)));
 			}
 		} catch (java.io.IOException e) {
+            status = DRDAConstants.STREAM_READ_ERROR;
 			netAgent_.accumulateReadException(new SqlException(
 															   netAgent_.logWriter_,
 															   new ClientMessageId(
@@ -520,18 +558,50 @@ public class Request {
 															   e.getMessage(),
 															   e));
 		}
+        // Write the status byte to the send buffer.
+        if (writeEXTDTAStatusByte) {
+            writeEXTDTAStatus(status);
+        }
 	}
 
 
-    // We need to reuse the agent's sql exception accumulation mechanism
-    // for this write exception, pad if the length is too big, and truncation if the length is too small
+
+    /**
+     * Writes a stream with unknown length onto the wire.
+     * <p>
+     * To avoid DRDA protocol exceptions, the data is truncated or padded as
+     * required to complete the transfer. This can be avoided by implementing
+     * the request abort mechanism specified by DRDA, but it is rather complex
+     * and may not be worth the trouble.
+     * <p>
+     * Also note that any exceptions generated while writing the stream will
+     * be accumulated and raised at a later time.
+     * <p>
+     * <em>Implementation note:</em> This method does not support sending
+     * values with a specified length using layer B streaming and at the same
+     * time applying length checking. For large values layer B streaming may be
+     * more efficient than using layer A streaming.
+     *
+     * @param in the stream to transfer
+     * @param writeNullByte whether or not to write a NULL indicator
+     * @param parameterIndex one-based parameter index
+     * @throws DisconnectException if a severe error condition is encountered,
+     *      causing the connection to be broken
+     */
 	final private void writePlainScalarStream(boolean chained,
                                               boolean chainedWithSameCorrelator,
                                               int codePoint,
                                               java.io.InputStream in,
                                               boolean writeNullByte,
-                                              int parameterIndex) throws DisconnectException, SqlException {
+                                              int parameterIndex)
+            throws DisconnectException {
 		
+        // We don't have the metadata available when we create this request
+        // object, so we have to check here if we are going to write the status
+        // byte or not.
+        final boolean writeEXTDTAStatusByte =
+                netAgent_.netConnection_.serverSupportsEXTDTAAbort();
+
         in = new BufferedInputStream( in );
 
         flushExistingDSS();
@@ -582,10 +652,10 @@ public class Request {
                 }
                 
             }
-            
-            
         } catch (java.io.IOException e) {
-            
+            if (writeEXTDTAStatusByte) {
+                writeEXTDTAStatus(DRDAConstants.STREAM_READ_ERROR);
+            }
             final SqlException sqlex = 
                 new SqlException(netAgent_.logWriter_,
                                  new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
@@ -597,30 +667,10 @@ public class Request {
             
 					return;
         }
-        
-        
-        
-		// check to make sure that the specified length wasn't too small
-		try {
-			if (in.read() != -1) {
-				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
 
-                final SqlException sqlex = 
-                    new SqlException(netAgent_.logWriter_,
-                                     new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
-                                     new Integer(parameterIndex));
-
-				netAgent_.accumulateReadException(sqlex);
-			}
-		} catch (java.io.IOException e) {
-			netAgent_.accumulateReadException(new SqlException(
-															   netAgent_.logWriter_,
-															   new ClientMessageId(
-																				   SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
-															   new Integer(parameterIndex),
-															   e.getMessage(),
-															   e));
-		}
+        if (writeEXTDTAStatusByte) {
+            writeEXTDTAStatus(DRDAConstants.STREAM_OK);
+        }
 	}
 
 
@@ -773,9 +823,29 @@ public class Request {
     }
     
 
-    // the offset_ must not be updated when an error is encountered
-    // note valid data may be overwritten
-    protected final void padScalarStreamForError(int leftToRead, int bytesToRead) throws DisconnectException {
+    /**
+     * Pads a value with zeros until it has reached its defined length.
+     * <p>
+     * This functionality was introduced to handle the error situation where
+     * the actual length of the user stream is shorter than specified. To avoid
+     * DRDA protocol errors (or in this case a hang), we have to pad the data
+     * until the specified length has been reached. In a later increment the
+     * Derby-specific EXTDTA status flag was introduced to allow the client to
+     * inform the server that the value sent is invalid.
+     *
+     * @param leftToRead total number of bytes left to read
+     * @param bytesToRead remaining bytes to read before flushing
+     * @param writeStatus whether or not to wrote the Derby-specific trailing
+     *      EXTDTA status flag (see DRDAConstants)
+     * @param status the EXTDTA status (for this data value), ignored if
+     *      {@code writeStatus} is {@code false}
+     * @throws DisconnectException if flushing the buffer fails
+     */
+    protected final void padScalarStreamForError(int leftToRead,
+                                                 int bytesToRead,
+                                                 boolean writeStatus,
+                                                 byte status)
+            throws DisconnectException {
         do {
             do {
                 bytes_[offset_++] = (byte) (0x0); // use 0x0 as the padding byte
@@ -785,6 +855,11 @@ public class Request {
 
             bytesToRead = flushScalarStreamSegment(leftToRead, bytesToRead);
         } while (leftToRead > 0);
+
+        // Append the EXTDTA status flag if appropriate.
+        if (writeStatus) {
+            writeEXTDTAStatus(status);
+        }
     }
 
     private final void writeExtendedLengthBytes(int extendedLengthByteCount, long length) {
@@ -1758,7 +1833,25 @@ public class Request {
         }
         
     }
-    
+
+    /**
+     * Writes the Derby-specific EXTDTA status flag to the send buffer.
+     * <p>
+     * The existing buffer is flushed to make space for the flag if required.
+     *
+     * @param flag the Derby-specific EXTDTA status flag
+     * @throws DisconnectException if flushing the buffer fails
+     */
+    private void writeEXTDTAStatus(byte flag)
+            throws DisconnectException {
+        // Write the status byte to the send buffer.
+        // Make sure we have enough space for the status byte.
+        if (offset_ == bytes_.length) {
+            flushScalarStreamSegment(1, 0); // Trigger a flush.
+        }
+        bytes_[offset_++] = flag;
+        // The last byte will be sent on the next flush.
+    }
 
     public void setDssLengthLocation(int location) {
         dssLengthLocation_ = location;

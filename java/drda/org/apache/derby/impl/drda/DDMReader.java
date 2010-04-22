@@ -992,13 +992,18 @@ class DDMReader
 	{
 		if (checkNullability && isEXTDTANull()) {
 			return null;
+        }
+
+        // Check if we must read the status byte sent by the client.
+        boolean readEXTDTAStatusByte =
+                agent.getSession().appRequester.supportsEXTDTAAbort();
             
-		} else if ( doingLayerBStreaming ){
-			return new LayerBStreamedEXTDTAReaderInputStream(this);
-        
+        if (doingLayerBStreaming) {
+            return new LayerBStreamedEXTDTAReaderInputStream(
+                    this, readEXTDTAStatusByte);
         } else {
-            return new StandardEXTDTAReaderInputStream(this);
-            
+            return new StandardEXTDTAReaderInputStream(
+                    this, readEXTDTAStatusByte);
         }
 
 	}

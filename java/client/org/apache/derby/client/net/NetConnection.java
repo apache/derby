@@ -1753,6 +1753,13 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         return metadata.serverSupportsUDTs();
     }
 
+    protected final boolean serverSupportsEXTDTAAbort() {
+        NetDatabaseMetaData metadata =
+            (NetDatabaseMetaData) databaseMetaData_;
+
+        return metadata.serverSupportsEXTDTAAbort();
+    }
+
     /**
      * Checks whether the server supports locators for large objects.
      *

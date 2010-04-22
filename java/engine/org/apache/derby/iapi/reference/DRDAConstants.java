@@ -236,4 +236,19 @@ public	interface	DRDAConstants
     public   static final int DRDA_TIMESTAMP_LENGTH = 26;
     public   static final int JDBC_TIMESTAMP_LENGTH = 29;
 
+    // Values for the EXTDTA stream status byte.
+    // The use of this status byte is a product specific extension. The same
+    // goes for the values below, they are not described by DRDA (nor DDM).
+
+    /** Constant indicating a valid stream transfer. */
+    public static final byte STREAM_OK = 0x7F;
+    /**
+     * Constant indicating that the client encountered an error when reading
+     * the user stream.
+     */
+    public static final byte STREAM_READ_ERROR = 0x01;
+    /** Constant indicating that the user stream was too short. */
+    public static final byte STREAM_TOO_SHORT = 0x02;
+    /** Constant indicating that the user stream was too long. */
+    public static final byte STREAM_TOO_LONG = 0x04;
 }

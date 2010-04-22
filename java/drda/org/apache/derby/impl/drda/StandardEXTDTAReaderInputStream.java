@@ -19,9 +19,10 @@
    under the License.
 */
 package org.apache.derby.impl.drda;
-import java.io.InputStream;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Implementation of InputStream which get EXTDTA from the DDMReader.
@@ -31,20 +32,31 @@ import java.io.IOException;
 final class StandardEXTDTAReaderInputStream extends EXTDTAReaderInputStream 
 {
     /**
-     * Constructor
+     * Constructor.
+     *
      * @param reader The reader to get data from
+     * @param readStatusByte whether or not to read the trailing Derby-specific
+     *      EXTDTA stream status byte
      * @exception DRDAProtocolException if thrown while initializing current 
      *                                  buffer.
      */
-    StandardEXTDTAReaderInputStream(final DDMReader reader) 
+    StandardEXTDTAReaderInputStream(final DDMReader reader,
+                                    boolean readStatusByte)
         throws DRDAProtocolException
     {
-        super();
+        super(false, readStatusByte);
         this.reader = reader;
-        this.length = reader.getDdmLength();        
-        this.remainingBytes = length;
+        // Exclude the status byte in the byte count.
+        if (readStatusByte) {
+            this.remainingBytes = reader.getDdmLength() -1;
+        } else {
+            this.remainingBytes = reader.getDdmLength();
+        }
+        this.length = remainingBytes;
+        // Make sure we read the product specific extension byte off the wire.
+        // It will be read here if the value fits into a single DSS.
         this.currentBuffer = 
-            reader.readLOBInitStream(remainingBytes);
+            reader.readLOBInitStream(remainingBytes + (readStatusByte ? 1 : 0));
     }
 
     /**
@@ -60,19 +72,13 @@ final class StandardEXTDTAReaderInputStream extends EXTDTAReaderInputStream
      * @see        java.io.InputStream#read()
      */
     public final int read() 
-        throws IOException
-    {
-        if (remainingBytes <= 0) {
-            return -1;
-        }
-        int val = (currentBuffer == null) ? -1 : currentBuffer.read();
-        if (val < 0) {
-            val = refreshCurrentBuffer();
-        }
-        remainingBytes--;
-        return val;
+            throws IOException {
+        // Reuse the other read method for simplicity.
+        byte[] b = new byte[1];
+        int read = read(b);
+        return (read == 1 ? b[0] : -1);
     }
-    
+
     /**
      * Reads up to <code>len</code> bytes of data from the input stream into
      * an array of bytes.  An attempt is made to read as many as
@@ -97,17 +103,31 @@ final class StandardEXTDTAReaderInputStream extends EXTDTAReaderInputStream
      */
     public final int read(final byte[] b,
                           final int off,
-                          final int len) 
+                          int len) 
         throws IOException
     {
         if (remainingBytes <= 0) {
             return -1;
         }
+        // Adjust length to avoid reading the trailing status byte.
+        len = (int)Math.min(remainingBytes, (long)len);
         int val = currentBuffer.read(b, off, len);
         if (val < 0) {
-            currentBuffer = 
-                reader.readLOBContinuationStream(remainingBytes);
+            nextBuffer();
             val = currentBuffer.read(b, off, len);
+        }
+        // If we are reading the last data byte, check the status byte.
+        if (readStatusByte && val == remainingBytes) {
+            if (currentBuffer.available() == 0) {
+                // Fetch the last buffer (containing only the status byte).
+                nextBuffer();
+            }
+            checkStatus(currentBuffer.read());
+            // Sanity check.
+            if (currentBuffer.read() != -1) {
+                throw new IllegalStateException(
+                        "Remaining bytes in buffer after status byte");
+            }
         }
         remainingBytes -= val;
         return val;
@@ -129,13 +149,22 @@ final class StandardEXTDTAReaderInputStream extends EXTDTAReaderInputStream
         if (remainingBytes <= 0) {
             return 0;
         }
-        return currentBuffer.available();
+        int inBuffer = currentBuffer.available();
+        // Adjust for the status byte if required.
+        if (readStatusByte && inBuffer > remainingBytes) {
+            inBuffer--;
+        }
+        return inBuffer;
     }
 
     /**
-     * Return the length if this stream. The length includes data which has 
-     * been read.
-     * @return length of this stream.
+     * Returns the number of bytes returned by this stream.
+     * <p>
+     * The length includes data which has been already read at the invocation
+     * time, but doesn't include any meta data (like the Derby-specific
+     * EXTDTA status byte).
+     *
+     * @return The number of bytes that will be returned by this stream.
      */
     final long getLength() 
     {
@@ -143,33 +172,36 @@ final class StandardEXTDTAReaderInputStream extends EXTDTAReaderInputStream
     }
     
     /**
-     * Refresh the current buffer from the DDMReader
-     * @exception IOException if there is a IOException when
-     *                        refreshing the buffer from DDMReader
-     * @return the next byte of data, or <code>-1</code> if the end of the
-     *         stream is reached.
+     * Fetches the next buffer.
+     *
+     * @throws IOException if fetching the buffer fails
      */
-    private int refreshCurrentBuffer() 
-        throws IOException
-    {
-        if (remainingBytes > 0) {
-            currentBuffer = 
-                reader.readLOBContinuationStream(remainingBytes);
-            return currentBuffer.read();
-        } else {
-            return -1;
-        }
+    private void nextBuffer()
+            throws IOException {
+        // Make sure we read the status byte off the wire if it was sent.
+        long wireBytes = readStatusByte ? remainingBytes +1 : remainingBytes;
+        currentBuffer = reader.readLOBContinuationStream(wireBytes);
     }
-    
+
+    /**
+     * Cleans up and closes the stream.
+     */
+    protected void onClientSideStreamingError() {
+        // Clean state and return -1 on subsequent calls.
+        // The status byte is the last byte, so no need to drain the source.
+        currentBuffer = null;
+        remainingBytes = -1;
+    }
+
     /** Length of stream */
     private final long length;
     
     /** DDMReader. Used to get more data. */
     private final DDMReader reader;
-    
+
     /** Remaining bytes in stream */
     private long remainingBytes;
-    
+
     /** Current data buffer */
     private ByteArrayInputStream currentBuffer;
 

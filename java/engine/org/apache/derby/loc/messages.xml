@@ -7595,6 +7595,11 @@ Shutting down instance {0} with class loader {1} </text>
                 <text>No mark set, or mark read ahead limit exceeded.</text>
             </msg>
 
+            <msg>
+                <name>I028</name>
+                <text>Stream read error on client side when transferring user data to server.</text>
+            </msg>
+
         </family>
 
 
