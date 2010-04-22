@@ -249,10 +249,7 @@ public class PropertySetter extends Task
     {
         refreshProperties();
 
-        if ( isSet( PROPERTY_SETTER_DEBUG_FLAG ) )
-        {
-            echo( "\nPropertySetter environment =\n\n" + showEnvironment() + "\n\n" );
-        }
+        debug( "\nPropertySetter environment =\n\n" + showEnvironment() + "\n\n" );
 
         try {
             //
@@ -263,7 +260,11 @@ public class PropertySetter extends Task
             //
             // There's nothing to do if the classpath properties are already set.
             //
-            if ( isSet( J14CLASSPATH ) && isSet( J15CLASSPATH ) && isSet( J16CLASSPATH ) ) { return; }
+            if ( isSet( J14CLASSPATH ) && isSet( J15CLASSPATH ) &&
+                    isSet( J16CLASSPATH ) ) {
+                debug("All required properties already set.");
+                return;
+            }
             
             //
             // If the library properties are set, then use them to set the
@@ -615,11 +616,9 @@ public class PropertySetter extends Task
                         } catch (IOException ioeIgnored) {
                             // Obtaining the manifest failed for some reason.
                             // If in debug mode, let the user know.
-                            if (isSet(PROPERTY_SETTER_DEBUG_FLAG)) {
-                                echo("Failed to obtain manifest for " +
+                            debug("Failed to obtain manifest for " +
                                         rtArchive.getAbsolutePath() + ": " +
                                         ioeIgnored.getMessage());
-                            }
                             continue;
                         }
                         JDKInfo jdk = inspectJarManifest(mf, f);
@@ -672,9 +671,7 @@ public class PropertySetter extends Task
                 return null;
             }
             //javac located, we're good to go.
-            if (isSet(PROPERTY_SETTER_DEBUG_FLAG)) {
-                System.out.println("found JDK: " + info);
-            }
+            debug("found JDK: " + info);
             return info;
         }
         return null;
@@ -716,10 +713,8 @@ public class PropertySetter extends Task
         }
         // See if we found any suitable JDKs.
         if (candidates.size() == 0) {
-            if (isSet(PROPERTY_SETTER_DEBUG_FLAG)) {
-                System.out.println("INFO: No valid JDK with specification " +
+            debug("INFO: No valid JDK with specification " +
                         "version '" + specificationVersion + "' found");
-            }
             return null;
         }
 
@@ -738,14 +733,11 @@ public class PropertySetter extends Task
                 for (JDKInfo jdk : candidates) {
                     if (jdk.implementationVersion.equals(version) &&
                             isSameVendor(targetVendor, jdk.vendor)) {
-                        if (isSet(PROPERTY_SETTER_DEBUG_FLAG)) {
-                            System.out.println(
-                                    "Chosen JDK for specification version " +
-                                    specificationVersion + " (vendor " +
-                                    (targetVendor == null ? "ignored"
-                                                          : jdkVendor) +
-                                    "): " + jdk);
-                        }
+                        debug("Chosen JDK for specification version " +
+                                specificationVersion + " (vendor " +
+                                (targetVendor == null ? "ignored"
+                                                      : jdkVendor) +
+                                "): " + jdk);
                         return new File(jdk.path, jreLib).getAbsolutePath();
                     }
                 }
@@ -914,6 +906,17 @@ public class PropertySetter extends Task
         File[]  jars = dir.listFiles( new JarFilter() );
 
         Arrays.sort( jars );
+        // Guard against empty JDK library directories.
+        // Can happen if the JDK is uninstalled when there are custom libs in
+        // the jre/lib/ext directory.
+        // This issue only affects the old algorithm for finding JDKs
+        // (looks for specific directory names), which is used as a fallback
+        // when the new algorithm (looks for specific JAR files) doesn't find
+        // the required JDKs.
+        if (jars.length == 0) {
+            debug("INFO: Empty or invalid JDK lib directory: " + dir);
+            return null;
+        }
 
         int             count = jars.length;
         StringBuffer    buffer = new StringBuffer();
@@ -1192,5 +1195,17 @@ public class PropertySetter extends Task
         buffer.append( "\n" );
     }
 
+    /**
+     * Emits a debug message to the console if debugging is enabled.
+     * <p>
+     * Debugging is controlled by {@linkplain #PROPERTY_SETTER_DEBUG_FLAG}.
+     *
+     * @param msg the message to print
+     */
+    private void debug(CharSequence msg) {
+        if (isSet(PROPERTY_SETTER_DEBUG_FLAG)) {
+            System.out.println(msg);
+        }
+    }
 }
 
