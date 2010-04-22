@@ -153,7 +153,7 @@ public abstract class ReportParser
      * <p>
      * A ReportParser which understands the format of Apache JIRA reports
      * in April 2010. This ReportParser assumes that the report includes the following
-     * columns and was produced by selecting "Full Content" option under "Content View"
+     * columns and was produced by selecting the "Printable" option under "Content View"
      * and then saved to disk. For the 10.6.1 release, I produced the report using the JIRA filter called
      * "10.6.1 Fixed Bugs List":
      * </p>
