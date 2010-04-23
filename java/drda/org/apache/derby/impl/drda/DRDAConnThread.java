@@ -7111,7 +7111,8 @@ class DRDAConnThread extends Thread {
 										  precision,scale,rs.wasNull(),stmt);
 							break;
 						default:
-							writeFdocaVal(i, rs.getObject(i),drdaType,
+                            val = getObjectForWriteFdoca(rs, i, drdaType);
+                            writeFdocaVal(i, val, drdaType,
 										  precision,scale,rs.wasNull(),stmt);
 					}
 				}
@@ -7130,7 +7131,8 @@ class DRDAConnThread extends Thread {
                                                 
 						if (SanityManager.DEBUG)
 							trace("***getting Object "+i);
-						val = ((CallableStatement) stmt.ps).getObject(i);
+                        val = getObjectForWriteFdoca(
+                                (CallableStatement) stmt.ps, i, drdaType);
 						valNull = (val == null);
 						writeFdocaVal(i,val,drdaType,precision, scale, valNull,stmt);
 					}
@@ -7177,6 +7179,90 @@ class DRDAConnThread extends Thread {
 			stmt.setHasdata(hasdata);
 		return moreData;
 	}
+
+    /**
+     * <p>
+     * Get a column value of the specified type from a {@code ResultSet}, in
+     * a form suitable for being writted by {@link #writeFdocaVal}. For most
+     * types, this means just calling {@code ResultSet.getObject(int)}.
+     * </p>
+     *
+     * <p>
+     * The only exception currently is the data types representing dates and
+     * times, as they need to be fetched using the same
+     * {@code java.util.Calendar} as {@link #writeFdocaVal} uses when writing
+     * them (DERBY-4582).
+     * </p>
+     *
+     * <p>
+     * <b>Note:</b> Changes made in this method should also be made in the
+     * corresponding method for {@code CallableStatement}:
+     * {@link #getObjectForWriteFdoca(java.sql.CallableStatement, int, int)}.
+     * </p>
+     *
+     * @param rs the result set to fetch the object from
+     * @param index the column index
+     * @param drdaType the DRDA type of the object to fetch
+     * @return an object with the value of the column
+     * @throws if a database error occurs while fetching the column value
+     * @see #getObjectForWriteFdoca(java.sql.CallableStatement, int, int)
+     */
+    private Object getObjectForWriteFdoca(ResultSet rs, int index, int drdaType)
+            throws SQLException {
+        // convert to corresponding nullable type to reduce number of cases
+        int ndrdaType = drdaType | 1;
+        switch (ndrdaType) {
+            case DRDAConstants.DRDA_TYPE_NDATE:
+                return rs.getDate(index, getGMTCalendar());
+            case DRDAConstants.DRDA_TYPE_NTIME:
+                return rs.getTime(index, getGMTCalendar());
+            case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
+                return rs.getTimestamp(index, getGMTCalendar());
+            default:
+                return rs.getObject(index);
+        }
+    }
+
+    /**
+     * <p>
+     * Get the value of an output parameter of the specified type from a
+     * {@code CallableStatement}, in a form suitable for being writted by
+     * {@link #writeFdocaVal}. For most types, this means just calling
+     * {@code CallableStatement.getObject(int)}.
+     * </p>
+     *
+     * <p>
+     * This method should behave like the corresponding method for
+     * {@code ResultSet}, and changes made to one of these methods, must be
+     * reflected in the other method. See
+     * {@link #getObjectForWriteFdoca(java.sql.ResultSet, int, int)}
+     * for details.
+     * </p>
+     *
+     * @param cs the callable statement to fetch the object from
+     * @param index the parameter index
+     * @param drdaType the DRDA type of the object to fetch
+     * @return an object with the value of the output parameter
+     * @throws if a database error occurs while fetching the parameter value
+     * @see #getObjectForWriteFdoca(java.sql.ResultSet, int, int)
+     */
+    private Object getObjectForWriteFdoca(CallableStatement cs,
+                                          int index, int drdaType)
+            throws SQLException {
+        // convert to corresponding nullable type to reduce number of cases
+        int ndrdaType = drdaType | 1;
+        switch (ndrdaType) {
+            case DRDAConstants.DRDA_TYPE_NDATE:
+                return cs.getDate(index, getGMTCalendar());
+            case DRDAConstants.DRDA_TYPE_NTIME:
+                return cs.getTime(index, getGMTCalendar());
+            case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
+                return cs.getTimestamp(index, getGMTCalendar());
+            default:
+                return cs.getObject(index);
+        }
+    }
+
 	/**
 	 * Split QRYDTA into blksize chunks
 	 *
@@ -7766,26 +7852,13 @@ class DRDAConnThread extends Thread {
 					writer.writeBigDecimal(bd,precision,scale);
 					break;
 				case DRDAConstants.DRDA_TYPE_NDATE:
-					writer.writeString(((java.sql.Date) val).toString());
+					writer.writeString(formatDate((java.sql.Date) val));
 					break;
 				case DRDAConstants.DRDA_TYPE_NTIME:
-					writer.writeString(((java.sql.Time) val).toString());
+					writer.writeString(formatTime((Time) val));
 					break;
 				case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
-					// we need to send it in a slightly different format, and pad it
-					// up to or truncate it to the correct number of characters
-                    int timestampLength = appRequester.getTimestampLength();
-					String ts1 = ((java.sql.Timestamp) val).toString();
-					String ts2 = ts1.replace(' ','-').replace(':','.');
-					int tsLen = ts2.length();
-					if (tsLen < timestampLength)
-					{
-						for (int i = 0; i < timestampLength-tsLen; i++)
-							ts2 += "0";
-					}
-					else if (tsLen > timestampLength)
-						ts2 = ts2.substring(0,timestampLength);
-					writer.writeString(ts2);
+                    writer.writeString(formatTimestamp((Timestamp) val));
 					break;
 				case DRDAConstants.DRDA_TYPE_NCHAR:
 					writer.writeString(((String) val).toString());
@@ -7857,6 +7930,102 @@ class DRDAConnThread extends Thread {
 		}
 		
 	}
+
+    /**
+     * Convert a {@code java.sql.Date} to a string with the format expected
+     * by the client.
+     *
+     * @param date the date to format
+     * @return a string on the format YYYY-MM-DD representing the date
+     * @see org.apache.derby.client.am.DateTime#dateBytesToDate
+     */
+    private String formatDate(java.sql.Date date) {
+        Calendar cal = getGMTCalendar();
+        cal.clear();
+        cal.setTime(date);
+
+        char[] buf = "YYYY-MM-DD".toCharArray();
+        padInt(buf, 0, 4, cal.get(Calendar.YEAR));
+        padInt(buf, 5, 2, cal.get(Calendar.MONTH) + 1);
+        padInt(buf, 8, 2, cal.get(Calendar.DAY_OF_MONTH));
+
+        return new String(buf);
+    }
+
+    /**
+     * Convert a {@code java.sql.Time} to a string with the format expected
+     * by the client.
+     *
+     * @param time the time to format
+     * @return a string on the format HH:MM:SS representing the time
+     * @see org.apache.derby.client.am.DateTime#timeBytesToTime
+     */
+    private String formatTime(Time time) {
+        Calendar cal = getGMTCalendar();
+        cal.clear();
+        cal.setTime(time);
+
+        char[] buf = "HH:MM:SS".toCharArray();
+        padInt(buf, 0, 2, cal.get(Calendar.HOUR_OF_DAY));
+        padInt(buf, 3, 2, cal.get(Calendar.MINUTE));
+        padInt(buf, 6, 2, cal.get(Calendar.SECOND));
+
+        return new String(buf);
+    }
+
+    /**
+     * Convert a {@code java.sql.Timestamp} to a string with the format
+     * expected by the client.
+     *
+     * @param ts the timestamp to format
+     * @return a string on the format YYYY-MM-DD-HH.MM.SS.ffffff[fff]
+     * @see org.apache.derby.client.am.DateTime#timestampBytesToTimestamp
+     */
+    private String formatTimestamp(Timestamp ts) {
+        Calendar cal = getGMTCalendar();
+        cal.clear();
+        cal.setTime(ts);
+
+        char[] buf = new char[appRequester.getTimestampLength()];
+        padInt(buf, 0, 4, cal.get(Calendar.YEAR));
+        buf[4] = '-';
+        padInt(buf, 5, 2, cal.get(Calendar.MONTH) + 1);
+        buf[7] = '-';
+        padInt(buf, 8, 2, cal.get(Calendar.DAY_OF_MONTH));
+        buf[10] = '-';
+        padInt(buf, 11, 2, cal.get(Calendar.HOUR_OF_DAY));
+        buf[13] = '.';
+        padInt(buf, 14, 2, cal.get(Calendar.MINUTE));
+        buf[16] = '.';
+        padInt(buf, 17, 2, cal.get(Calendar.SECOND));
+        buf[19] = '.';
+
+        int nanos = ts.getNanos();
+        if (appRequester.supportsTimestampNanoseconds()) {
+            padInt(buf, 20, 9, nanos);
+        } else {
+            padInt(buf, 20, 6, nanos / 1000);
+        }
+
+        return new String(buf);
+    }
+
+    /**
+     * Insert an integer into a char array and pad it with leading zeros if
+     * its string representation is shorter than {@code length} characters.
+     *
+     * @param buf the char array
+     * @param offset where in the array to start inserting the value
+     * @param length the desired length of the inserted string
+     * @param value the integer value to insert
+     */
+    private void padInt(char[] buf, int offset, int length, int value) {
+        final int radix = 10;
+        for (int i = offset + length - 1; i >= offset; i--) {
+            buf[i] = Character.forDigit(value % radix, radix);
+            value /= radix;
+        }
+    }
 
 	/**
 	 * Methods to keep track of required codepoints
