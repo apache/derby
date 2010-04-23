@@ -960,19 +960,6 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         }
         psFetchBlob.setInt(1, failedKey);
         rs = psFetchBlob.executeQuery();
-        // When using the Derby client driver, the data seems to be padded
-        // with 0s and inserted... Thus, the select returns a row.
-        if (!usingEmbedded()) {
-            assertTrue(rs.next());
-            InputStream is = rs.getBinaryStream(1);
-            int lastByte = -1;
-            int b = 99; // Just a value > 0.
-            while (b > -1) {
-                lastByte = b;
-                b = is.read();
-            }
-            assertEquals("Last padded byte is not 0", 0, lastByte);
-        }
         assertFalse(rs.next());
         rs.close();
         rollback();
