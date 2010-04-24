@@ -30,25 +30,33 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+
+import java.math.BigInteger;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import java.util.Arrays;
+
 /**
  * Tests that inserts with streams whose lengths differs from the the length
  * specified don't insert data into the database when they shouldn't.
  * <p>
  * The test uses various combinations of auto-commit and rollback.
- * <p>
- * TODO: Enable this test as part of the JDBCAPI suite when DERBY-2017 is fixed.
  */
 public class Derby2017LayerATest
         extends BaseJDBCTestCase {
+
+    /** The encoding used when generating a byte array from a string. */
+    public static final String UTF8 = "UTF-8";
 
     public Derby2017LayerATest(String name) {
         super(name);
@@ -68,9 +76,9 @@ public class Derby2017LayerATest
         // Run the tests below with the client driver only.
         TestSuite clientSuite = new TestSuite("Client only tests");
         clientSuite.addTest(new Derby2017LayerATest(
-                "cs_FailedStreamInsertBufferBoundaries"));
+                "cs_FailedStreamInsertCharBufferBoundaries"));
         clientSuite.addTest(new Derby2017LayerATest(
-                "cs_StreamInsertBufferBoundary"));
+                "cs_StreamInsertCharBufferBoundary"));
         ts.addTest(TestConfiguration.clientServerDecorator(clientSuite));
 
         return ts;
@@ -82,7 +90,7 @@ public class Derby2017LayerATest
      * lengths. It will work also before the fix for DERBY-2017, but will fail
      * if an incorrect fix is applied.
      */
-    public void cs_StreamInsertBufferBoundary()
+    public void cs_StreamInsertCharBufferBoundary()
             throws IOException, SQLException {
         rollback();
         Statement stmt = createStatement();
@@ -141,7 +149,7 @@ public class Derby2017LayerATest
     /**
      * Runs some failing inserts around buffer boundaries.
      */
-    public void cs_FailedStreamInsertBufferBoundaries()
+    public void cs_FailedStreamInsertCharBufferBoundaries()
             throws IOException, SQLException {
         int[] INSERT;
         for (int i=0; i < 1024; i++) {
@@ -155,11 +163,11 @@ public class Derby2017LayerATest
                 0+i,
             };
             // We test only one combination of auto-commit and rollback here.
-            doInsertTest(INSERT, true, false);
+            doInsertTest(INSERT, false, false);
         }
     }
 
-    public void testFailedStreamInsertLong()
+    public void testFailedStreamInsertCharLong()
             throws IOException, SQLException {
         int[] INSERT = new int[] {
             10*1024+1,
@@ -180,7 +188,7 @@ public class Derby2017LayerATest
      * Inserts data by reading from streams, where two of these will thrown
      * an {@code IOException}. Data from these streams should not be committed.
      */
-    public void testFailedStreamInsertIOException()
+    public void testFailedStreamInsertCharIOException()
             throws IOException, SQLException {
         String[] INSERT = new String[] {
                 "row 1", "row 2", "row 3",
@@ -247,7 +255,7 @@ public class Derby2017LayerATest
         JDBC.assertFullResultSet(rs, MASTER);
     }
 
-    public void testFailedStreamInsert()
+    public void testFailedStreamInsertChar()
             throws IOException, SQLException {
         String[] INSERT = new String[] {
                 "This is row 1",
@@ -271,7 +279,7 @@ public class Derby2017LayerATest
         doInsertTest(INSERT, MASTER, false, false);
     }
 
-    public void testFailedStreamInsertAutoCommit()
+    public void testFailedStreamInsertCharAutoCommit()
             throws IOException, SQLException {
         String[] INSERT = new String[] {
                 "This is row 1",
@@ -294,7 +302,7 @@ public class Derby2017LayerATest
         doInsertTest(INSERT, MASTER, true, false);
     }
 
-    public void testFailedStreamInsertRollbackOnError()
+    public void testFailedStreamInsertCharRollbackOnError()
             throws IOException, SQLException {
         String[] INSERT = new String[] {
                 "This is row 1",
@@ -317,7 +325,7 @@ public class Derby2017LayerATest
         doInsertTest(INSERT, MASTER, false, true);
     }
 
-    public void testFailedStreamInsertAutoCommitRollbackOnError()
+    public void testFailedStreamInsertCharAutoCommitRollbackOnError()
             throws IOException, SQLException {
         String[] INSERT = new String[] {
                 "This is row 1",
@@ -337,6 +345,34 @@ public class Derby2017LayerATest
                 {"This is row 6"},
                 {"This is row 7"},
             };
+        doInsertTest(INSERT, MASTER, true, true);
+    }
+
+    public void testFailedStreamInsertBinary()
+            throws IOException, SQLException {
+        byte[][] INSERT = generateDefaultInsert();
+        String[][] MASTER = generateMaster(INSERT, new int[] {3, 4});
+        doInsertTest(INSERT, MASTER, false, false);
+    }
+
+    public void testFailedStreamInsertBinaryAutoCommit()
+            throws IOException, SQLException {
+        byte[][] INSERT = generateDefaultInsert();
+        String[][] MASTER = generateMaster(INSERT, new int[] {3, 4});
+        doInsertTest(INSERT, MASTER, true, false);
+    }
+
+    public void testFailedStreamInsertBinaryRollbackOnError()
+            throws IOException, SQLException {
+        byte[][] INSERT = generateDefaultInsert();
+        String[][] MASTER = generateMaster(INSERT, new int[] {0, 1, 2, 3, 4});
+        doInsertTest(INSERT, MASTER, false, true);
+    }
+
+    public void testFailedStreamInsertBinaryAutoCommitRollbackOnError()
+            throws IOException, SQLException {
+        byte[][] INSERT = generateDefaultInsert();
+        String[][] MASTER = generateMaster(INSERT, new int[] {3, 4});
         doInsertTest(INSERT, MASTER, true, true);
     }
 
@@ -544,6 +580,94 @@ public class Derby2017LayerATest
     }
 
     /**
+     * Performs the base test cycle; insert 3 valid rows, try to insert 2
+     * invalid rows, insert 2 valid rows.
+     * <p>
+     * The outcome depends on whether auto-commit is on, and whether a rollback
+     * is issued when an insert fails.
+     *
+     * @param INSERT the data to insert
+     * @param MASTER the expected outcome
+     * @param autoCommit the auto-commit state to use
+     * @param rollbackOnError whether or not to issue a rollback if an insert
+     *      fails
+     *
+     * @throws IOException if something goes wrong
+     * @throws SQLException if something goes wrong
+     */
+    private void doInsertTest(byte[][] INSERT, String[][] MASTER,
+                              boolean autoCommit, boolean rollbackOnError)
+            throws IOException, SQLException {
+        // A few sanity checks.
+        assertEquals("Expects 7 rows", 7, INSERT.length);
+        assertTrue(MASTER.length < INSERT.length);
+
+        rollback();
+        Statement stmt = createStatement();
+        try {
+            stmt.executeUpdate("create table t2017_binary (b blob)");
+        } catch (SQLException sqle) {
+            assertSQLState("X0Y32", sqle);
+            stmt.executeUpdate("delete from t2017_binary");
+        }
+        commit();
+
+        setAutoCommit(autoCommit);
+        PreparedStatement ps = prepareStatement(
+                "insert into t2017_binary values (?)");
+        // Insert the 3 first rows.
+        for (int i=0; i < 3; i++) {
+            ps.setBytes(1, INSERT[i]);
+            assertEquals(1, ps.executeUpdate());
+        }
+
+        // Insert the 4th row with a stream that's longer than the specified
+        // length, then the 5th row that's shorter. Both should fail, and the
+        // data shouldn't be inserted into the database.
+
+        InputStream r4 = new ByteArrayInputStream(INSERT[3]);
+        ps.setBinaryStream(1, r4, INSERT[3].length - 5);
+        try {
+            ps.executeUpdate();
+            fail("Insert should have failed, stream too long");
+        } catch (SQLException sqle) {
+            // The states are different between client and embedded.
+            assertSQLState(usingEmbedded() ? "XSDA4" : "XN015", sqle);
+            if (rollbackOnError) {
+                rollback();
+            }
+        }
+
+        InputStream r5 = new ByteArrayInputStream(INSERT[4]);
+        ps.setBinaryStream(1, r5, INSERT[4].length + 5);
+        try {
+            ps.executeUpdate();
+            fail("Insert should have failed, stream too short");
+        } catch (SQLException sqle) {
+            // The states are different between client and embedded.
+            assertSQLState(usingEmbedded() ? "XSDA4" : "XN017", sqle);
+            if (rollbackOnError) {
+                rollback();
+            }
+        }
+
+        // The errors above should have statement severity. Insert the last
+        // two rows and make sure the transaction commits.
+        for (int i=5; i < INSERT.length; i++) {
+            ps.setBytes(1, INSERT[i]);
+            assertEquals(1, ps.executeUpdate());
+        }
+
+        if (!autoCommit) {
+            commit();
+        }
+
+        // Select data in the table, compare to MASTER
+        ResultSet rs = stmt.executeQuery("select * from t2017_binary");
+        JDBC.assertFullResultSet(rs, MASTER);
+    }
+
+    /**
      * WARNING: This reader is not a general purpose reader!!!
      * <p>
      * Reader thrown an exception when a certain amount of characters has been
@@ -599,5 +723,62 @@ public class Derby2017LayerATest
         public void close() {
             in.close();
         }
+    }
+
+    /**
+     * Helper method returning the default bytes used for testing binary data.
+     *
+     * @return A byte array with byte arrays ("rows").
+     */
+    public static byte[][] generateDefaultInsert() {
+        try {
+            byte[][] INSERT = new byte[][] {
+                "This is row 1".getBytes(UTF8),
+                "This is row 2".getBytes(UTF8),
+                "This is row 3".getBytes(UTF8),
+                "This is row 4, a bit too long".getBytes(UTF8),
+                "This is row 5, a bit too short".getBytes(UTF8),
+                "This is row 6".getBytes(UTF8),
+                "This is row 7".getBytes(UTF8),
+            };
+            return INSERT;
+        } catch (UnsupportedEncodingException uuee) {
+            // Just return null, should never happen if UTF-8 is used.
+            return null;
+        }
+    }
+
+    /**
+     * Helper method returning a string array with the expected values from the
+     * database (based on the values inserted).
+     * <p>
+     * The purpose of this method is to convert from byte[] to String (as
+     * done by {@code ResultSet.getString()} when invoked on a column with
+     * binary data).
+     *
+     * @param insert the data inserted
+     * @param excludes the rows that is expected to fail, will be ignored
+     * @return A string array with expected strings.
+     */
+    public static String[][] generateMaster(byte[][] insert, int[] excludes) {
+        Arrays.sort(excludes);
+        int exIx = 0;
+        String[][] res = new String[insert.length - excludes.length][];
+        int resIx = 0;
+        for (int i=0; i < insert.length; i++) {
+            if (i == excludes[exIx]) {
+                if (exIx < excludes.length -1) {
+                    exIx++;
+                }
+                continue;
+            }
+            String str = new BigInteger(1, insert[i]).toString(16);
+            // Pad if there are missing nulls.
+            while (str.length() < insert[i].length *2) {
+                str = "0" + str;
+            }
+            res[resIx++] = new String[] {str};
+        }
+        return res;
     }
 }

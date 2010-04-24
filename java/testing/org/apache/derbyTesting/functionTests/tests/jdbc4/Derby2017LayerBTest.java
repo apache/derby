@@ -21,9 +21,9 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
+import java.io.ByteArrayInputStream;
 import junit.framework.Test;
 
-import org.apache.derbyTesting.functionTests.tests.jdbcapi.Derby2017LayerATest.FailingReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -31,6 +31,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 
@@ -39,13 +40,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static org.apache.derbyTesting.functionTests.tests.jdbcapi.Derby2017LayerATest.*;
+
 /**
  * Tests that inserts with streams that throws an {@code IOException} don't
  * insert data into the database when they shouldn't.
  * <p>
  * The test uses various combinations of auto-commit and rollback.
- * <p>
- * TODO: Enable this test as part of the JDBC4 suite when DERBY-2017 is fixed.
  */
 public class Derby2017LayerBTest
         extends BaseJDBCTestCase {
@@ -64,7 +65,7 @@ public class Derby2017LayerBTest
         return TestConfiguration.defaultSuite(Derby2017LayerBTest.class);
     }
 
-    public void testStreamInsertBufferBoundary()
+    public void testStreamInsertCharBufferBoundary()
             throws IOException, SQLException {
         // NOTE: Many of these lengths are implementation dependent, and the
         //       code paths in LayerBStreamedEXTDTAReaderInputStream may change
@@ -118,7 +119,7 @@ public class Derby2017LayerBTest
      * None of the inserts should be successful, as an {@code IOException} is
      * thrown by all of the streams.
      */
-    public void testFailedStreamInsertBufferBoundariesImpl()
+    public void testFailedStreamInsertCharBufferBoundariesImpl()
             throws IOException, SQLException {
         // NOTE: Many of these lengths are implementation dependent, and the
         //       code paths in LayerBStreamedEXTDTAReaderInputStream may change
@@ -194,7 +195,7 @@ public class Derby2017LayerBTest
         assertEquals(0, rs.getInt(1));
     }
 
-    public void testFailedStreamInsert()
+    public void testFailedStreamInsertChar()
             throws IOException, SQLException {
         String[] INSERT = new String[] {
                 "This is row 1",
@@ -217,7 +218,7 @@ public class Derby2017LayerBTest
         doInsertTest(INSERT, MASTER, false, false);
     }
 
-    public void testFailedStreamInsertAutoCommit()
+    public void testFailedStreamInsertCharAutoCommit()
             throws IOException, SQLException {
         String[] INSERT = new String[] {
                 "This is row 1",
@@ -240,7 +241,7 @@ public class Derby2017LayerBTest
         doInsertTest(INSERT, MASTER, true, false);
     }
 
-    public void testFailedStreamInsertRollbackOnError()
+    public void testFailedStreamInsertCharRollbackOnError()
             throws IOException, SQLException {
         String[] INSERT = new String[] {
                 "This is row 1",
@@ -263,7 +264,7 @@ public class Derby2017LayerBTest
         doInsertTest(INSERT, MASTER, false, true);
     }
 
-    public void testFailedStreamInsertAutoCommitRollbackOnError()
+    public void testFailedStreamInsertCharAutoCommitRollbackOnError()
             throws IOException, SQLException {
         String[] INSERT = new String[] {
                 "This is row 1",
@@ -283,6 +284,34 @@ public class Derby2017LayerBTest
                 {"This is row 6"},
                 {"This is row 7"},
             };
+        doInsertTest(INSERT, MASTER, true, true);
+    }
+
+    public void testFailedStreamInsertBinary()
+            throws IOException, SQLException {
+        byte[][] INSERT = generateDefaultInsert();
+        String[][] MASTER = generateMaster(INSERT, new int[] {3, 4});
+        doInsertTest(INSERT, MASTER, false, false);
+    }
+
+    public void testFailedStreamInsertBinaryAutoCommit()
+            throws IOException, SQLException {
+        byte[][] INSERT = generateDefaultInsert();
+        String[][] MASTER = generateMaster(INSERT, new int[] {3, 4});
+        doInsertTest(INSERT, MASTER, true, false);
+    }
+
+    public void testFailedStreamInsertBinaryRollbackOnError()
+            throws IOException, SQLException {
+        byte[][] INSERT = generateDefaultInsert();
+        String[][] MASTER = generateMaster(INSERT, new int[] {0, 1, 2, 3, 4});
+        doInsertTest(INSERT, MASTER, false, true);
+    }
+
+    public void testFailedStreamInsertBinaryAutoCommitRollbackOnError()
+            throws IOException, SQLException {
+        byte[][] INSERT = generateDefaultInsert();
+        String[][] MASTER = generateMaster(INSERT, new int[] {3, 4});
         doInsertTest(INSERT, MASTER, true, true);
     }
 
@@ -372,5 +401,115 @@ public class Derby2017LayerBTest
         // Select data in the table, compare to MASTER
         ResultSet rs = stmt.executeQuery("select * from t2017");
         JDBC.assertFullResultSet(rs, MASTER);
+    }
+
+    /**
+     * Performs the base test cycle; insert 3 valid rows, try to insert 2
+     * invalid rows, insert 2 valid rows.
+     * <p>
+     * The outcome depends on whether auto-commit is on, and whether a rollback
+     * is issued when an insert fails.
+     *
+     * @param INSERT the data to insert
+     * @param MASTER the expected outcome
+     * @param autoCommit the auto-commit state to use
+     * @param rollbackOnError whether or not to issue a rollback if an insert
+     *      fails
+     *
+     * @throws IOException if something goes wrong
+     * @throws SQLException if something goes wrong
+     */
+    private void doInsertTest(byte[][] INSERT, String[][] MASTER,
+                              boolean autoCommit, boolean rollbackOnError)
+            throws IOException, SQLException {
+        // A few sanity checks.
+        assertEquals("Expects 7 rows", 7, INSERT.length);
+        assertTrue(MASTER.length < INSERT.length);
+
+        rollback();
+        Statement stmt = createStatement();
+        try {
+            stmt.executeUpdate("create table t2017_binary (b blob)");
+        } catch (SQLException sqle) {
+            assertSQLState("X0Y32", sqle);
+            stmt.executeUpdate("delete from t2017_binary");
+        }
+        commit();
+
+        setAutoCommit(autoCommit);
+        PreparedStatement ps = prepareStatement(
+                "insert into t2017_binary values (?)");
+        // Insert the 3 first rows.
+        for (int i=0; i < 3; i++) {
+            ps.setBinaryStream(1, new ByteArrayInputStream(INSERT[i]));
+            assertEquals(1, ps.executeUpdate());
+        }
+
+        // Insert the 4th and 5th row with a stream that throws an exception.
+        // Partial data read shouldn't be inserted into the database.
+
+        InputStream r4 = new FailingInputStream(new FailingReader(10, 3));
+        ps.setBinaryStream(1, r4);
+        try {
+            ps.executeUpdate();
+            fail("Insert should have failed");
+        } catch (SQLException sqle) {
+            // TODO: Check when exception handling has been settled.
+            // The states are different between client and embedded.
+            //assertSQLState(usingEmbedded() ? "XSDA4" : "XJ001", sqle);
+            if (rollbackOnError) {
+                rollback();
+            }
+        }
+
+        InputStream r5 = new FailingInputStream(
+                                    new FailingReader(35002, 35001));
+        ps.setBinaryStream(1, r5);
+        try {
+            ps.executeUpdate();
+            fail("Insert should have failed");
+        } catch (SQLException sqle) {
+            // TODO: Check when exception handling has been settled.
+            // The states are different between client and embedded.
+            //assertSQLState(usingEmbedded() ? "XSDA4" : "XJ001", sqle);
+            if (rollbackOnError) {
+                rollback();
+            }
+        }
+
+        // The errors above should have statement severity. Insert the last
+        // two rows and commit.
+        for (int i=5; i < INSERT.length; i++) {
+            ps.setBinaryStream(1, new ByteArrayInputStream(INSERT[i]));
+            assertEquals(1, ps.executeUpdate());
+        }
+
+        if (!autoCommit) {
+            commit();
+        }
+
+        // Select data in the table, compare to MASTER
+        ResultSet rs = stmt.executeQuery("select * from t2017_binary");
+        JDBC.assertFullResultSet(rs, MASTER);
+    }
+
+    /**
+     * Simple and <b>non-conforming</b> input stream that will fail after a
+     * specified number of bytes read.
+     */
+    private static class FailingInputStream
+            extends InputStream {
+
+        private final FailingReader in;
+
+        public FailingInputStream(FailingReader in) {
+            this.in = in;
+        }
+
+        public int read()
+                throws IOException {
+            int c = in.read();
+            return (byte)c;
+        }
     }
 }
