@@ -24,8 +24,12 @@ package org.apache.derby.client.am;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Calendar;
 import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
@@ -861,7 +865,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Date getDate(int column) throws SQLException {
+    public java.sql.Date getDate(int column, Calendar cal) throws SQLException {
 	    try
         {
             closeCloseFilterInputStream();
@@ -870,11 +874,21 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "getDate", column);
             }
             checkGetterPreconditions(column);
+
+            if (cal == null) {
+                throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(SQLState.CALENDAR_IS_NULL));
+            }
+
             java.sql.Date result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (java.sql.Date) agent_.crossConverters_.setObject(java.sql.Types.DATE, updatedColumns_[column - 1]);
+                // updateDate() doesn't take a calendar, so the retrieved
+                // value will be in the default calendar. Convert it to
+                // the requested calendar before returning it.
+                result = convertFromDefaultCalendar(result, cal);
             } else {
-                result = isNull(column) ? null : cursor_.getDate(column);
+                result = isNull(column) ? null : cursor_.getDate(column, cal);
             }
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getDate", result);
@@ -889,57 +903,35 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Date getDate(int column, java.util.Calendar calendar) throws SQLException {
-        try
-        {
-            closeCloseFilterInputStream();
-
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getDate", column, calendar);
-            }
-            java.sql.Date date = getDate(column);
-            if (calendar == null) {
-                throw new SqlException(agent_.logWriter_, 
-                    new ClientMessageId(SQLState.CALENDAR_IS_NULL));
-            }
-            if (date != null) {
-                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-                targetCalendar.clear();
-                targetCalendar.setTime(date);
-                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-                defaultCalendar.clear();
-                defaultCalendar.setTime(date);
-                long timeZoneOffset =
-                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-                date.setTime(date.getTime() - timeZoneOffset);
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getDate", date);
-            }
-            return date;
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }            
+    public java.sql.Date getDate(int column) throws SQLException {
+        return getDate(column, Calendar.getInstance());
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Time getTime(int column) throws SQLException {
+    public java.sql.Time getTime(int column, Calendar cal) throws SQLException {
         try
         {
             closeCloseFilterInputStream();
 
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getTime", column);
+                agent_.logWriter_.traceEntry(this, "getTime", column, cal);
             }
             checkGetterPreconditions(column);
+
+            if (cal == null) {
+                throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(SQLState.CALENDAR_IS_NULL));
+            }
+
             java.sql.Time result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (java.sql.Time) agent_.crossConverters_.setObject(java.sql.Types.TIME, updatedColumns_[column - 1]);
+                // updateTime() doesn't take a calendar, so the retrieved
+                // value will be in the default calendar. Convert it to
+                // the requested calendar before returning it.
+                result = convertFromDefaultCalendar(result, cal);
             } else {
-                result = isNull(column) ? null : cursor_.getTime(column);
+                result = isNull(column) ? null : cursor_.getTime(column, cal);
             }
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getTime", result);
@@ -954,57 +946,37 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Time getTime(int column, java.util.Calendar calendar) throws SQLException {
-        try
-        {
-            closeCloseFilterInputStream();
-
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getTime", column, calendar);
-            }
-            java.sql.Time time = getTime(column);
-            if (calendar == null) {
-                throw new SqlException(agent_.logWriter_,
-                    new ClientMessageId(SQLState.CALENDAR_IS_NULL));
-            }
-            if (time != null) {
-                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-                targetCalendar.clear();
-                targetCalendar.setTime(time);
-                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-                defaultCalendar.clear();
-                defaultCalendar.setTime(time);
-                long timeZoneOffset =
-                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-                time.setTime(time.getTime() - timeZoneOffset);
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getTime", time);
-            }
-            return time;
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
+    public java.sql.Time getTime(int column) throws SQLException {
+        return getTime(column, Calendar.getInstance());
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Timestamp getTimestamp(int column) throws SQLException {
+    public java.sql.Timestamp getTimestamp(int column, Calendar calendar)
+            throws SQLException {
 	    try
         {
             closeCloseFilterInputStream();
 
             if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getTimestamp", column);
+                agent_.logWriter_.traceEntry(
+                        this, "getTimestamp", column, calendar);
             }
             checkGetterPreconditions(column);
+
+            if (calendar == null) {
+                throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(SQLState.CALENDAR_IS_NULL));
+            }
+
             java.sql.Timestamp result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (java.sql.Timestamp) agent_.crossConverters_.setObject(java.sql.Types.TIMESTAMP, updatedColumns_[column - 1]);
-            } else {
-                result = isNull(column) ? null : cursor_.getTimestamp(column);
+                // updateTimestamp() doesn't take a calendar, so the retrieved
+                // value will be in the default calendar. Convert it to
+                // the requested calendar before returning it.
+                result = convertFromDefaultCalendar(result, calendar);
+            } else if (!isNull(column)) {
+                result = cursor_.getTimestamp(column, calendar);
             }
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getTimestamp", result);
@@ -1019,42 +991,56 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // Live life on the edge and run unsynchronized
-    public java.sql.Timestamp getTimestamp(int column, java.util.Calendar calendar) throws SQLException {
-        try
-        {
-            closeCloseFilterInputStream();
+    public java.sql.Timestamp getTimestamp(int column) throws SQLException {
+        return getTimestamp(column, Calendar.getInstance());
+    }
 
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getTimestamp", column, calendar);
-            }
-            java.sql.Timestamp timestamp = getTimestamp(column);
-            if (calendar == null) {
-                throw new SqlException(agent_.logWriter_, 
-                    new ClientMessageId(SQLState.CALENDAR_IS_NULL));
-            }
-            if (timestamp != null) {
-                int nano = timestamp.getNanos();
-                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(calendar.getTimeZone());
-                targetCalendar.clear();
-                targetCalendar.setTime(timestamp);
-                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-                defaultCalendar.clear();
-                defaultCalendar.setTime(timestamp);
-                long timeZoneOffset =
-                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-                timestamp.setTime(timestamp.getTime() - timeZoneOffset);
-                timestamp.setNanos(nano);
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getTimestamp", timestamp);
-            }
-            return timestamp;
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
+    /**
+     * Convert a date originally set using the default calendar to a value
+     * representing the same date in a different calendar.
+     *
+     * @param date the date to convert
+     * @param cal the calendar to convert it to
+     * @return a date object that represents the date in {@code cal}
+     */
+    private Date convertFromDefaultCalendar(Date date, Calendar cal) {
+        cal.clear();
+        cal.set(date.getYear() + 1900, date.getMonth(), date.getDate(),
+                0, 0, 0); // normalized time: 00:00:00
+        return new Date(cal.getTimeInMillis());
+    }
+
+    /**
+     * Convert a time originally set using the default calendar to a value
+     * representing the same time in a different calendar.
+     *
+     * @param time the time to convert
+     * @param cal the calendar to convert it to
+     * @return a time object that represents the time in {@code cal}
+     */
+    private Time convertFromDefaultCalendar(Time time, Calendar cal) {
+        cal.clear();
+        cal.set(1970, Calendar.JANUARY, 1, // normalized date: 1970-01-01
+                time.getHours(), time.getMinutes(), time.getSeconds());
+        return new Time(cal.getTimeInMillis());
+    }
+
+    /**
+     * Convert a timestamp originally set using the default calendar to a value
+     * representing the same timestamp in a different calendar.
+     *
+     * @param ts the timestamp to convert
+     * @param cal the calendar to convert it to
+     * @return a timestamp object that represents the timestamp in {@code cal}
+     */
+    private Timestamp convertFromDefaultCalendar(Timestamp ts, Calendar cal) {
+        cal.clear();
+        cal.set(ts.getYear() + 1900, ts.getMonth(), ts.getDate(),
+                ts.getHours(), ts.getMinutes(), ts.getSeconds());
+
+        Timestamp result = new Timestamp(cal.getTimeInMillis());
+        result.setNanos(ts.getNanos());
+        return result;
     }
 
     // Live life on the edge and run unsynchronized

@@ -28,6 +28,9 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 import java.io.UnsupportedEncodingException;
+import java.sql.Date;
+import java.sql.Time;
+import java.util.Calendar;
 
 // When we calculate column offsets make sure we calculate the correct offsets for double byte charactr5er data
 // length from server is number of chars, not bytes
@@ -509,11 +512,11 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Date object from the DERBY ISO DATE field.
-    private final java.sql.Date getDATE(int column) throws SqlException {
+    private final Date getDATE(int column, Calendar cal) throws SqlException {
         try {
             return org.apache.derby.client.am.DateTime.dateBytesToDate(dataBuffer_,
                 columnDataPosition_[column - 1],
-                getRecyclableCalendar(), 
+                cal,
                 charsetName_[column - 1]);
         }catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -525,11 +528,11 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Time object from the DERBY ISO TIME field.
-    private final java.sql.Time getTIME(int column) throws SqlException {
+    private final Time getTIME(int column, Calendar cal) throws SqlException {
         try {
             return org.apache.derby.client.am.DateTime.timeBytesToTime(dataBuffer_,
                     columnDataPosition_[column - 1],
-                    getRecyclableCalendar(),
+                    cal,
                     charsetName_[column - 1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -539,13 +542,14 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO TIMESTAMP field.
-    private final java.sql.Timestamp getTIMESTAMP(int column) throws SqlException {
+    private final java.sql.Timestamp getTIMESTAMP(int column, Calendar cal)
+            throws SqlException {
 
         try {
             return org.apache.derby.client.am.DateTime.timestampBytesToTimestamp(
                 dataBuffer_,
                 columnDataPosition_[column - 1],
-                getRecyclableCalendar(), 
+                cal,
                 charsetName_[column - 1],
                 agent_.connection_.serverSupportsTimestampNanoseconds());
     } catch (java.io.UnsupportedEncodingException e) {
@@ -556,11 +560,12 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO DATE field.
-    private final java.sql.Timestamp getTimestampFromDATE(int column) throws SqlException {
+    private final java.sql.Timestamp getTimestampFromDATE(
+            int column, Calendar cal) throws SqlException {
         try {
             return org.apache.derby.client.am.DateTime.dateBytesToTimestamp(dataBuffer_,
                     columnDataPosition_[column - 1],
-                    getRecyclableCalendar(), 
+                    cal,
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -570,11 +575,12 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Timestamp object from the DERBY ISO TIME field.
-    private final java.sql.Timestamp getTimestampFromTIME(int column) throws SqlException {
+    private final java.sql.Timestamp getTimestampFromTIME(
+            int column, Calendar cal) throws SqlException {
         try {
             return org.apache.derby.client.am.DateTime.timeBytesToTimestamp(dataBuffer_,
                     columnDataPosition_[column - 1],
-                    getRecyclableCalendar(),
+                    cal,
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -584,11 +590,12 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Date object from the DERBY ISO TIMESTAMP field.
-    private final java.sql.Date getDateFromTIMESTAMP(int column) throws SqlException {
+    private final java.sql.Date getDateFromTIMESTAMP(int column, Calendar cal)
+            throws SqlException {
         try {
             return org.apache.derby.client.am.DateTime.timestampBytesToDate(dataBuffer_,
                     columnDataPosition_[column - 1],
-                    getRecyclableCalendar(),
+                    cal,
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -598,11 +605,12 @@ public abstract class Cursor {
     }
 
     // Build a JDBC Time object from the DERBY ISO TIMESTAMP field.
-    private final java.sql.Time getTimeFromTIMESTAMP(int column) throws SqlException {
+    private final java.sql.Time getTimeFromTIMESTAMP(int column, Calendar cal)
+            throws SqlException {
         try {
             return org.apache.derby.client.am.DateTime.timestampBytesToTime(dataBuffer_,
                     columnDataPosition_[column - 1],
-                    getRecyclableCalendar(),
+                    cal,
                     charsetName_[column -1]);
         } catch (UnsupportedEncodingException e) {
              throw new SqlException(agent_.logWriter_, 
@@ -612,17 +620,17 @@ public abstract class Cursor {
     }
 
     private final String getStringFromDATE(int column) throws SqlException {
-        return getDATE(column).toString();
+        return getDATE(column, getRecyclableCalendar()).toString();
     }
 
     // Build a string object from the DERBY byte TIME representation.
     private final String getStringFromTIME(int column) throws SqlException {
-        return getTIME(column).toString();
+        return getTIME(column, getRecyclableCalendar()).toString();
     }
 
     // Build a string object from the DERBY byte TIMESTAMP representation.
     private final String getStringFromTIMESTAMP(int column) throws SqlException {
-        return getTIMESTAMP(column).toString();
+        return getTIMESTAMP(column, getRecyclableCalendar()).toString();
     }
 
     // Extract bytes from a database java.sql.Types.BINARY field.
@@ -967,53 +975,60 @@ public abstract class Cursor {
         }
     }
 
-    final java.sql.Date getDate(int column) throws SqlException {
+    final java.sql.Date getDate(int column, Calendar cal) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case java.sql.Types.DATE:
-            return getDATE(column);
+            return getDATE(column, cal);
         case java.sql.Types.TIMESTAMP:
-            return getDateFromTIMESTAMP(column);
+            return getDateFromTIMESTAMP(column, cal);
         case java.sql.Types.CHAR:
-            return agent_.crossConverters_.getDateFromString(getCHAR(column));
+            return agent_.crossConverters_.
+                    getDateFromString(getCHAR(column), cal);
         case java.sql.Types.VARCHAR:
         case java.sql.Types.LONGVARCHAR:
-            return agent_.crossConverters_.getDateFromString(getVARCHAR(column));
+            return agent_.crossConverters_.
+                    getDateFromString(getVARCHAR(column), cal);
         default:
             throw new ColumnTypeConversionException(agent_.logWriter_,
                 "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Date");
         }
     }
 
-    final java.sql.Time getTime(int column) throws SqlException {
+    final java.sql.Time getTime(int column, Calendar cal) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case java.sql.Types.TIME:
-            return getTIME(column);
+            return getTIME(column, cal);
         case java.sql.Types.TIMESTAMP:
-            return getTimeFromTIMESTAMP(column);
+            return getTimeFromTIMESTAMP(column, cal);
         case java.sql.Types.CHAR:
-            return agent_.crossConverters_.getTimeFromString(getCHAR(column));
+            return agent_.crossConverters_.
+                    getTimeFromString(getCHAR(column), cal);
         case java.sql.Types.VARCHAR:
         case java.sql.Types.LONGVARCHAR:
-            return agent_.crossConverters_.getTimeFromString(getVARCHAR(column));
+            return agent_.crossConverters_.
+                    getTimeFromString(getVARCHAR(column), cal);
         default:
             throw new ColumnTypeConversionException(agent_.logWriter_,
                 "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Time");
         }
     }
 
-    final java.sql.Timestamp getTimestamp(int column) throws SqlException {
+    final java.sql.Timestamp getTimestamp(int column, Calendar cal)
+            throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case java.sql.Types.TIMESTAMP:
-            return getTIMESTAMP(column);
+            return getTIMESTAMP(column, cal);
         case java.sql.Types.DATE:
-            return getTimestampFromDATE(column);
+            return getTimestampFromDATE(column, cal);
         case java.sql.Types.TIME:
-            return getTimestampFromTIME(column);
+            return getTimestampFromTIME(column, cal);
         case java.sql.Types.CHAR:
-            return agent_.crossConverters_.getTimestampFromString(getCHAR(column));
+            return agent_.crossConverters_.
+                    getTimestampFromString(getCHAR(column), cal);
         case java.sql.Types.VARCHAR:
         case java.sql.Types.LONGVARCHAR:
-            return agent_.crossConverters_.getTimestampFromString(getVARCHAR(column));
+            return agent_.crossConverters_.
+                    getTimestampFromString(getVARCHAR(column), cal);
         default:
             throw new ColumnTypeConversionException(agent_.logWriter_,
                 "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Timestamp");
@@ -1317,11 +1332,11 @@ public abstract class Cursor {
         case java.sql.Types.DECIMAL:
             return get_DECIMAL(column);
         case java.sql.Types.DATE:
-            return getDATE(column);
+            return getDATE(column, getRecyclableCalendar());
         case java.sql.Types.TIME:
-            return getTIME(column);
+            return getTIME(column, getRecyclableCalendar());
         case java.sql.Types.TIMESTAMP:
-            return getTIMESTAMP(column);
+            return getTIMESTAMP(column, getRecyclableCalendar());
         case java.sql.Types.CHAR:
             return getCHAR(column);
         case java.sql.Types.VARCHAR:

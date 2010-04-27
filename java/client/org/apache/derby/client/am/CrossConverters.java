@@ -21,6 +21,10 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Calendar;
 import org.apache.derby.shared.common.reference.SQLState;
 
 // All currently supported derby types are mapped to one of the following jdbc types:
@@ -558,13 +562,13 @@ final class CrossConverters {
                 return new java.math.BigDecimal(source);
 
             case java.sql.Types.DATE:
-                return date_valueOf(source);
+                return date_valueOf(source, null);
 
             case java.sql.Types.TIME:
-                return time_valueOf(source);
+                return time_valueOf(source, null);
 
             case java.sql.Types.TIMESTAMP:
-                return timestamp_valueOf(source);
+                return timestamp_valueOf(source, null);
 
             case Types.CHAR:
             case Types.VARCHAR:
@@ -1221,9 +1225,10 @@ final class CrossConverters {
 
     //---------------------------- getDate*() methods ----------------------------
 
-    final java.sql.Date getDateFromString(String source) throws SqlException {
+    final Date getDateFromString(String source, Calendar cal)
+            throws SqlException {
         try {
-            return date_valueOf(source);
+            return date_valueOf(source, cal);
         } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
             		new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
@@ -1240,9 +1245,10 @@ final class CrossConverters {
 
     //---------------------------- getTime*() methods ----------------------------
 
-    final java.sql.Time getTimeFromString(String source) throws SqlException {
+    final Time getTimeFromString(String source, Calendar cal)
+            throws SqlException {
         try {
-            return time_valueOf(source);
+            return time_valueOf(source, cal);
         } catch (java.lang.IllegalArgumentException e) { // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
             		new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
@@ -1255,9 +1261,10 @@ final class CrossConverters {
 
     //---------------------------- getTimestamp*() methods -----------------------
 
-    final java.sql.Timestamp getTimestampFromString(String source) throws SqlException {
+    final Timestamp getTimestampFromString(String source, Calendar cal)
+            throws SqlException {
         try {
-            return timestamp_valueOf(source);
+            return timestamp_valueOf(source, cal);
         } catch (java.lang.IllegalArgumentException e) {  // subsumes NumberFormatException
             throw new SqlException(agent_.logWriter_, 
             		new ClientMessageId (SQLState.LANG_DATE_SYNTAX_EXCEPTION), e);
@@ -1272,33 +1279,209 @@ final class CrossConverters {
         return new java.sql.Timestamp(source.getTime());
     }
 
-    final java.sql.Date date_valueOf(String s) throws java.lang.IllegalArgumentException {
+    /**
+     * Convert a string to a date in the specified calendar. Accept the same
+     * format as {@code java.sql.Date.valueOf()}.
+     *
+     * @param s the string to parse
+     * @param cal the calendar (or null to use the default calendar)
+     * @return a {@code java.sql.Date} value that represents the date in the
+     * calendar {@code cal}
+     * @throws IllegalArgumentException if the format of the string is invalid
+     */
+    final Date date_valueOf(String s, Calendar cal) {
         String formatError = "JDBC Date format must be yyyy-mm-dd";
         if (s == null) {
             throw new java.lang.IllegalArgumentException(formatError);
         }
         s = s.trim();
-        return java.sql.Date.valueOf(s);
+
+        if (cal == null) {
+            return Date.valueOf(s);
+        }
+
+        cal.clear();
+        initDatePortion(cal, s);
+
+        // Normalize time components as specified by java.util.Date.
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        return new Date(cal.getTimeInMillis());
     }
 
+    /**
+     * Initialize the date components of a {@code java.util.Calendar} from
+     * a string on the format YYYY-MM-DD. All other components are left
+     * untouched.
+     *
+     * @param cal the calendar whose date components to initialize
+     * @param date a string representing a date
+     * @throws IllegalArgumentException if the date string is not on the
+     * format YYYY-MM-DD
+     */
+    private static void initDatePortion(Calendar cal, String date) {
 
-    final java.sql.Time time_valueOf(String s) throws java.lang.IllegalArgumentException, NumberFormatException {
+        // Expect string on format YYYY-MM-DD
+        if (date.length() != 10 ||
+                date.charAt(4) != '-' || date.charAt(7) != '-') {
+            throw new IllegalArgumentException();
+        }
+
+        int year =
+                digit(date.charAt(0)) * 1000 +
+                digit(date.charAt(1)) * 100 +
+                digit(date.charAt(2)) * 10 +
+                digit(date.charAt(3));
+
+        int month =
+                digit(date.charAt(5)) * 10 +
+                digit(date.charAt(6));
+
+        int day =
+                digit(date.charAt(8)) * 10 +
+                digit(date.charAt(9));
+
+        cal.set(year, month, day);
+    }
+
+    /**
+     * Convert a character to a digit.
+     *
+     * @param ch the character
+     * @return the corresponding digit (0-9)
+     * @throws IllegalArgumentException if {@code ch} doesn't represent a digit
+     */
+    private static int digit(char ch) {
+        int result = Character.digit(ch, 10);
+        if (result == -1) {
+            throw new IllegalArgumentException();
+        }
+        return result;
+    }
+
+    /**
+     * Convert a string to a time in the specified calendar. Accept the same
+     * format as {@code java.sql.Time.valueOf()}.
+     *
+     * @param s the string to parse
+     * @param cal the calendar (or null to use the default calendar)
+     * @return a {@code java.sql.Time} value that represents the time in the
+     * calendar {@code cal}
+     * @throws IllegalArgumentException if the format of the string is invalid
+     */
+    final Time time_valueOf(String s, Calendar cal) {
         String formatError = "JDBC Time format must be hh:mm:ss";
         if (s == null) {
             throw new java.lang.IllegalArgumentException();
         }
         s = s.trim();
-        return java.sql.Time.valueOf(s);
+
+        if (cal == null) {
+            return Time.valueOf(s);
+        }
+
+        cal.clear();
+        initTimePortion(cal, s);
+
+        // Normalize date components as specified by java.sql.Time.
+        cal.set(1970, Calendar.JANUARY, 1);
+
+        return new Time(cal.getTimeInMillis());
     }
 
-    final java.sql.Timestamp timestamp_valueOf(String s) throws java.lang.IllegalArgumentException, NumberFormatException {
+    /**
+     * Initialize the time components of a {@code java.util.Calendar} from a
+     * string on the format HH:MM:SS. All other components are left untouched.
+     *
+     * @param cal the calendar whose time components to initialize
+     * @param time a string representing a time
+     * @throws IllegalArgumentException if the time string is not on the
+     * format HH:MM:SS
+     */
+    private void initTimePortion(Calendar cal, String time) {
+        // Expect string on format HH:MM:SS
+        if (time.length() != 8 ||
+                time.charAt(2) != ':' || time.charAt(5) != ':') {
+            throw new IllegalArgumentException();
+        }
+
+        int hour = digit(time.charAt(0)) * 10 + digit(time.charAt(1));
+        int minute = digit(time.charAt(3)) * 10 + digit(time.charAt(4));
+        int second = digit(time.charAt(6)) * 10 + digit(time.charAt(7));
+
+        cal.set(Calendar.HOUR_OF_DAY, hour);
+        cal.set(Calendar.MINUTE, minute);
+        cal.set(Calendar.SECOND, second);
+    }
+
+    /**
+     * Convert a string to a timestamp in the specified calendar. Accept the
+     * same format as {@code java.sql.Timestamp.valueOf()}.
+     *
+     * @param s the string to parse
+     * @param cal the calendar (or null to use the default calendar)
+     * @return a {@code java.sql.Timestamp} value that represents the timestamp
+     * in the calendar {@code cal}
+     * @throws IllegalArgumentException if the format of the string is invalid
+     */
+    final Timestamp timestamp_valueOf(String s, Calendar cal) {
         String formatError = "JDBC Timestamp format must be yyyy-mm-dd hh:mm:ss.fffffffff";
         if (s == null) {
             throw new java.lang.IllegalArgumentException();
         }
 
         s = s.trim();
-        return java.sql.Timestamp.valueOf(s);
+
+        if (cal == null) {
+            return Timestamp.valueOf(s);
+        }
+
+        cal.clear();
+
+        // Split into date and time components
+        String[] dateAndTime = s.split(" ");
+        if (dateAndTime.length != 2) {
+            throw new IllegalArgumentException();
+        }
+
+        String dateString = dateAndTime[0];
+        String timeAndNanoString = dateAndTime[1];
+
+        initDatePortion(cal, dateString);
+
+        // Split the time and nano components. The nano component is optional,
+        // and is separated from the time component with a decimal point.
+        String[] timeAndNanos = timeAndNanoString.split("\\.");
+        if (timeAndNanos.length < 1 || timeAndNanos.length > 2) {
+            throw new IllegalArgumentException();
+        }
+
+        String timeString = timeAndNanos[0];
+
+        initTimePortion(cal, timeString);
+
+        int nanos = 0;
+        if (timeAndNanos.length > 1) {
+            String nanoString = timeAndNanos[1];
+            int extraZeros = 9 - nanoString.length();
+            if (extraZeros < 0) {
+                throw new IllegalArgumentException();
+            }
+            // parseInt() may throw NumberFormatException. NFE is a subclass
+            // of IllegalArgumentException, so no need to document separately
+            // in the javadoc.
+            nanos = Integer.parseInt(nanoString);
+            for (int i = 0; i < extraZeros; i++) {
+                nanos *= 10;
+            }
+        }
+
+        Timestamp ts = new Timestamp(cal.getTimeInMillis());
+        ts.setNanos(nanos);
+        return ts;
     }
 
     private final byte parseByte(String s) throws NumberFormatException {

@@ -25,7 +25,11 @@ import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.io.Reader;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Calendar;
 
 public class CallableStatement extends PreparedStatement
         implements java.sql.PreparedStatement,
@@ -461,17 +465,26 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public java.sql.Date getDate(int parameterIndex) throws SQLException {
+    public Date getDate(int parameterIndex, Calendar cal) throws SQLException {
         try
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "getDate", parameterIndex);
+                    agent_.logWriter_.traceEntry(
+                            this, "getDate", parameterIndex, cal);
                 }
                 super.checkForClosedStatement();
                 checkGetterPreconditions(parameterIndex);
+
+                if (cal == null) {
+                    throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId(SQLState.CALENDAR_IS_NULL));
+                }
+
                 setWasNull(parameterIndex);
-                java.sql.Date result = wasNullX() ? null : singletonRowData_.getDate(parameterIndex);
+                Date result = wasNullX() ?
+                        null :
+                        singletonRowData_.getDate(parameterIndex, cal);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getDate", result);
                 }
@@ -484,47 +497,30 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public java.sql.Date getDate(int parameterIndex, java.util.Calendar cal) throws SQLException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getDate", parameterIndex, cal);
-            }
-            java.sql.Date result = getDate(parameterIndex);
-            if (cal == null) {
-                throw new SqlException(agent_.logWriter_, 
-                    new ClientMessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
-            }
-            if (result != null) {
-                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(cal.getTimeZone());
-                targetCalendar.clear();
-                targetCalendar.setTime(result);
-                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-                defaultCalendar.clear();
-
-                defaultCalendar.setTime(result);
-                long timeZoneOffset =
-                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-                result.setTime(result.getTime() - timeZoneOffset);
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getDate", result);
-            }
-            return result;
-        }
+    public Date getDate(int parameterIndex) throws SQLException {
+        return getDate(parameterIndex, Calendar.getInstance());
     }
 
-    public java.sql.Time getTime(int parameterIndex) throws SQLException {
+    public Time getTime(int parameterIndex, Calendar cal) throws SQLException {
         try
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "getTime", parameterIndex);
+                    agent_.logWriter_.traceEntry(
+                            this, "getTime", parameterIndex, cal);
                 }
                 super.checkForClosedStatement();
                 checkGetterPreconditions(parameterIndex);
+
+                if (cal == null) {
+                    throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId(SQLState.CALENDAR_IS_NULL));
+                }
+
                 setWasNull(parameterIndex);
-                java.sql.Time result = wasNullX() ? null : singletonRowData_.getTime(parameterIndex);
+                Time result = wasNullX() ?
+                        null :
+                        singletonRowData_.getTime(parameterIndex, cal);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getTime", result);
                 }
@@ -537,46 +533,31 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public java.sql.Time getTime(int parameterIndex, java.util.Calendar cal) throws SQLException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getTime", parameterIndex, cal);
-            }
-            java.sql.Time result = getTime(parameterIndex);
-            if (cal == null) {
-                throw new SqlException(agent_.logWriter_, 
-                    new ClientMessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
-            }
-            if (result != null) {
-                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(cal.getTimeZone());
-                targetCalendar.clear();
-                targetCalendar.setTime(result);
-                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-                defaultCalendar.clear();
-                defaultCalendar.setTime(result);
-                long timeZoneOffset =
-                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-                result.setTime(result.getTime() - timeZoneOffset);
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getTime", result);
-            }
-            return result;
-        }
+    public Time getTime(int parameterIndex) throws SQLException {
+        return getTime(parameterIndex, Calendar.getInstance());
     }
 
-    public java.sql.Timestamp getTimestamp(int parameterIndex) throws SQLException {
+    public Timestamp getTimestamp(int parameterIndex, Calendar cal)
+            throws SQLException {
         try
         {
             synchronized (connection_) {
                 if (agent_.loggingEnabled()) {
-                    agent_.logWriter_.traceEntry(this, "getTimestamp", parameterIndex);
+                    agent_.logWriter_.traceEntry(
+                            this, "getTimestamp", parameterIndex, cal);
                 }
                 super.checkForClosedStatement();
                 checkGetterPreconditions(parameterIndex);
+
+                if (cal == null) {
+                    throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId(SQLState.CALENDAR_IS_NULL));
+                }
+
                 setWasNull(parameterIndex);
-                java.sql.Timestamp result = wasNullX() ? null : singletonRowData_.getTimestamp(parameterIndex);
+                Timestamp result = wasNullX() ?
+                        null :
+                        singletonRowData_.getTimestamp(parameterIndex, cal);
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "getTimestamp", result);
                 }
@@ -589,35 +570,8 @@ public class CallableStatement extends PreparedStatement
         }
     }
 
-    public java.sql.Timestamp getTimestamp(int parameterIndex, java.util.Calendar cal) throws SQLException {
-        synchronized (connection_) {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getTimestamp", parameterIndex, cal);
-            }
-            java.sql.Timestamp result = getTimestamp(parameterIndex);
-            if (cal == null) {
-                throw new SqlException(agent_.logWriter_, 
-                    new ClientMessageId(SQLState.CALENDAR_IS_NULL)).getSQLException();
-            }
-            if (result != null) {
-                int nano = result.getNanos();
-                java.util.Calendar targetCalendar = java.util.Calendar.getInstance(cal.getTimeZone());
-                targetCalendar.clear();
-                targetCalendar.setTime(result);
-                java.util.Calendar defaultCalendar = java.util.Calendar.getInstance();
-                defaultCalendar.clear();
-                defaultCalendar.setTime(result);
-                long timeZoneOffset =
-                        targetCalendar.get(java.util.Calendar.ZONE_OFFSET) - defaultCalendar.get(java.util.Calendar.ZONE_OFFSET) +
-                        targetCalendar.get(java.util.Calendar.DST_OFFSET) - defaultCalendar.get(java.util.Calendar.DST_OFFSET);
-                result.setTime(result.getTime() - timeZoneOffset);
-                result.setNanos(nano);
-            }
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getTimestamp", result);
-            }
-            return result;
-        }
+    public Timestamp getTimestamp(int parameterIndex) throws SQLException {
+        return getTimestamp(parameterIndex, Calendar.getInstance());
     }
 
     public String getString(int parameterIndex) throws SQLException {
