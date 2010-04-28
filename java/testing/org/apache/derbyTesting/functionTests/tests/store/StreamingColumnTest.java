@@ -1553,6 +1553,14 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
         try {
             ps.setInt(1, 11);
             rowCount += ps.executeUpdate();
+            // The check below is just to detect a change in behavior for the
+            // client driver (this succeeds with the embedded driver due to
+            // a different implementation). With the client driver the source
+            // stream is read twice, whereas the embedded driver will "cache"
+            // the stream content and can thus use it for a second insert.
+            if (usingDerbyNetClient()) {
+                fail("Expected second executeUpdate with client driver to fail");
+            }
         } catch (SQLException sqle) {
             if (usingDerbyNetClient()) {
             	// DERBY-4315.  This SQLState is wrong for client.
@@ -1562,9 +1570,15 @@ public class StreamingColumnTest extends BaseJDBCTestCase {
             	// Remove special case when DERBY-4315
             	// is fixed or at least throw XJ001 and
             	// avoid bad data insert.
-                assertSQLState("XN017", sqle);
-                // rollback the bad insert.
-                rollback();
+
+                // DERBY-4531: Depending on whether the finalizer has been run
+                //             or not, the SQLState will differ.
+                //             Don't care about this here, accept both.
+                String expectedState = "XN017";
+                if (sqle.getSQLState().equals("XN014")) {
+                    expectedState = "XN014";
+                }
+                assertSQLState(expectedState, sqle);
             } else {
                 println("UNEXPECTED EXCEPTION - streams cannot be "
                         + "re-used but in case of varchar, stream is materialized the"
