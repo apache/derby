@@ -62,7 +62,8 @@ public class DaylightSavingTest extends BaseJDBCTestCase {
         Statement s = createStatement();
         s.execute("CREATE TABLE DERBY4582(" +
                 "ID INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY, " +
-                "TS TIMESTAMP, T TIME, D DATE, T2 TIME, D2 DATE)");
+                "TS TIMESTAMP, T TIME, D DATE, T2 TIME, D2 DATE, " +
+                "TS_STR VARCHAR(100), T_STR VARCHAR(100), D_STR VARCHAR(100))");
 
         Calendar localCal = Calendar.getInstance();
 
@@ -92,20 +93,31 @@ public class DaylightSavingTest extends BaseJDBCTestCase {
 
         // Store the GMT representations of the times.
         PreparedStatement insert = prepareStatement(
-                "INSERT INTO DERBY4582(TS, T, D, T2, D2) VALUES (?,?,?,?,?)");
+                "INSERT INTO DERBY4582 " +
+                "(TS, T, D, T2, D2, TS_STR, T_STR, D_STR) " +
+                "VALUES (?,?,?,?,?,?,?,?)");
         for (int i = 0; i < timestamps.length; i++) {
             Timestamp ts = timestamps[i];
             Time t = times[i];
             Date d = dates[i];
+
             // Set the TIMESTAMP/TIME/DATE values TS/T/D with their respective
             // setter methods.
             insert.setTimestamp(1, ts, cal);
             insert.setTime(2, t, cal);
             insert.setDate(3, d, cal);
+
             // Set the TIME/DATE values T2/D2 with setTimestamp() to verify
             // that this alternative code path also works.
             insert.setTimestamp(4, ts, cal);
             insert.setTimestamp(5, ts, cal);
+
+            // Also insert the values into VARCHAR columns so that we can
+            // check that they are converted correctly.
+            insert.setTimestamp(6, ts, cal);
+            insert.setTime(7, t, cal);
+            insert.setDate(8, d, cal);
+
             insert.execute();
         }
 
@@ -120,6 +132,10 @@ public class DaylightSavingTest extends BaseJDBCTestCase {
             // T2 and D2 should have the same values as T and D.
             assertEquals("T2", stripDate(times[i], cal), rs.getTime(5, cal));
             assertEquals("D2", stripTime(dates[i], cal), rs.getDate(6, cal));
+            // The VARCHAR columns should have the same values as TS, T and D.
+            assertEquals("TS_STR", timestamps[i], rs.getTimestamp(7, cal));
+            assertEquals("T_STR", stripDate(times[i], cal), rs.getTime(8, cal));
+            assertEquals("D_STR", stripTime(dates[i], cal), rs.getDate(9, cal));
         }
         JDBC.assertEmpty(rs);
 

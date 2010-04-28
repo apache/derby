@@ -1338,7 +1338,8 @@ final class CrossConverters {
 
         int month =
                 digit(date.charAt(5)) * 10 +
-                digit(date.charAt(6));
+                digit(date.charAt(6)) - 1; // subtract one since
+                                           // Calendar.JANUARY == 0
 
         int day =
                 digit(date.charAt(8)) * 10 +
