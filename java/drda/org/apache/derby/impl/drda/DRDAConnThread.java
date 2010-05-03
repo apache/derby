@@ -3493,6 +3493,21 @@ class DRDAConnThread extends Thread {
 								 CodePoint.TYPDEFNAM_QTDSQLASC);
 		writeTYPDEFOVR();
 		writer.endDdmAndDss ();
+
+         // Write the initial piggy-backed data, currently the isolation level
+         // and the schema name. Only write it if the client supports session
+         // data caching.
+         // Sending the session data on connection initialization was introduced
+         // in Derby 10.7.
+         if ((appRequester.getClientType() == appRequester.DNC_CLIENT) &&
+                 appRequester.greaterThanOrEqualTo(10, 7, 0)) {
+             try {
+                 writePBSD();
+             } catch (SQLException se) {
+                 server.consoleExceptionPrint(se);
+                 errorInChain(se);
+             }
+         }
 		finalizeChain();
 	}
 	

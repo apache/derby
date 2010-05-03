@@ -60,10 +60,21 @@ public class NetXAConnectionReply extends NetResultSetReply {
     protected void readXaStartUnitOfWork(NetConnection conn) throws DisconnectException {
         startSameIdChainParse();
         parseSYNCCTLreply(conn);
+        // If we are joining or resuming a global transaction, we let the
+        // server set the transcation isolation state for us.
+        // Otherwise we do a normal reset.
+        NetXACallInfo callInfo =
+                conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
+        boolean keep = callInfo.xaFlags_ == XAResource.TMJOIN ||
+                callInfo.xaFlags_ == XAResource.TMRESUME;
+        conn.xares_.setKeepCurrentIsolationLevel(keep);
         endOfSameIdChainData();
     }
 
     protected int readXaEndUnitOfWork(NetConnection conn) throws DisconnectException {
+        // We have ended the XA unit of work, the next logical connection
+        // should be reset using the normal procedure.
+        conn.xares_.setKeepCurrentIsolationLevel(false);
         NetXACallInfo callInfo = conn.xares_.callInfoArray_[conn.currXACallInfoOffset_];
         int xaFlags = callInfo.xaFlags_;
 

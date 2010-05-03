@@ -144,11 +144,7 @@ public class SetTransactionIsolationTest extends BaseJDBCTestCase {
     /**
      * setTransactionIsolation commits?
      */
-    public void testSetTransactionIsolationCommits() throws SQLException {
-        // In the current client implementation, the transaction will
-        // commit when setTransactionIsolation is called, while the
-        // embedded driver will not commit. See
-        // http://issues.apache.org/jira/browse/DERBY-2064
+    public void testSetTransactionIsolationCommitRollback() throws SQLException {
         Connection conn = getConnection();
 
         conn.rollback();
@@ -166,26 +162,7 @@ public class SetTransactionIsolationTest extends BaseJDBCTestCase {
         ResultSet rs = s.executeQuery("select count(*) from t3");
         rs.next();
         int count = rs.getInt(1);
-        boolean passCommitCheck = false;
-        switch (count) {
-        case 1:
-            // Embedded and JCC don't commit
-            if (usingEmbedded())
-                passCommitCheck = true;
-            break;
-        case 2:
-            // Client commits
-            if (usingDerbyNetClient())
-                passCommitCheck = true;
-            break;
-        default:
-
-            fail("FAIL: count="
-                    + count
-                    + ", unexepected behaviour from testSetTransactionIsolationCommits");
-            break;
-        }
-        assertTrue(passCommitCheck);
+        assertEquals(1, count);
         rs.close();
         s.close();
 

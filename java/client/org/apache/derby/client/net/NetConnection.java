@@ -372,7 +372,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
     protected void completeReset(boolean isDeferredReset)
             throws SqlException {
-        super.completeReset(isDeferredReset, closeStatementsOnClose);
+        super.completeReset(isDeferredReset, closeStatementsOnClose, xares_);
     }
 
     public void flowConnect(String password,

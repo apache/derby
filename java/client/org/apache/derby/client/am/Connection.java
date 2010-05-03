@@ -26,6 +26,7 @@ import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.SQLException;
+import org.apache.derby.client.net.NetXAResource;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 public abstract class Connection implements java.sql.Connection,
@@ -104,6 +105,13 @@ public abstract class Connection implements java.sql.Connection,
      * piggy-backing.
      */
     private int isolation_ = TRANSACTION_UNKNOWN;
+    /**
+     * The default isolation level, enforced on connection resets.
+     * <p>
+     * Note that this value may be changed upon connection initialization in
+     * the future, as the server can piggy-back the isolation level.
+     */
+    private int defaultIsolation = TRANSACTION_READ_COMMITTED;
 
     /**
      * Cached copy of the schema name. Updated through piggy-backing and used
@@ -909,6 +917,21 @@ public abstract class Connection implements java.sql.Connection,
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "setTransactionIsolation", level);
         }
+        //This avoids assertion like DERBY-4343 by short-circuiting
+        //setTransactionIsolation. Before this check, for case as users
+        //obtaining the pooled connection for the third time, the variable
+        //isolation_ is reset Connection.completeReset. 
+        //Isolation_ remain as UNKNOWN until getTransactionIsolation is called
+        //or a different statement causing a change of the isolation level
+        //is executed.We might think about change the default value for Isolation_
+        //to DERBY_TRANSACTION_READ_COMMITTED. With introducing 
+        //getTransactionIsolationX and this check, assertion is never reach. 
+        //As part of DERBY-4314 fix, the client driver should act as embedded 
+        //and return here, otherwise setTransactionIsolation will commit 
+        //the transaction which is not the intention.
+        if (level == getTransactionIsolationX()) 
+	    return;
+
         try {
             // Per jdbc spec (see java.sql.Connection.close() javadoc).
             checkForClosedConnection();
@@ -1010,7 +1033,20 @@ public abstract class Connection implements java.sql.Connection,
     protected abstract boolean serverSupportsTimestampNanoseconds();
 
     public int getTransactionIsolation() throws SQLException {
-    	
+
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceEntry(this, "getTransactionIsolation", isolation_);
+        }
+        try {
+            // Per jdbc spec (see java.sql.Connection.close() javadoc).
+            checkForClosedConnection();
+            return getTransactionIsolationX();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+    }
+
+    public int getTransactionIsolationX() throws SQLException {
     	// Store the current auto-commit value and use it to restore 
     	// at the end of this method.
     	boolean currentAutoCommit = autoCommit_;
@@ -1019,9 +1055,6 @@ public abstract class Connection implements java.sql.Connection,
         try
         {
             checkForClosedConnection();
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceExit(this, "getTransactionIsolation", isolation_);
-            }
             
             if (isolation_ != TRANSACTION_UNKNOWN) {
                 if (SanityManager.DEBUG) {
@@ -2093,10 +2126,46 @@ public abstract class Connection implements java.sql.Connection,
         isolation_ = pbIsolation;
     }
 
+    /**
+     * Sets the default isolation level of the connection upon connection
+     * initialization.
+     * <p>
+     * Note that depending on the server version, the default isolation value
+     * may not be piggy-backed on the initialization flow. In that case, the
+     * default is assumed / hardcoded to be READ_COMMITTED.
+     *
+     * @param pbIsolation isolation level as specified by
+     *      {@code java.sql.Connection}
+     */
+    public void completeInitialPiggyBackIsolation(int pbIsolation) {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(
+                    pbIsolation == 
+                        java.sql.Connection.TRANSACTION_READ_UNCOMMITTED ||
+                    pbIsolation ==
+                        java.sql.Connection.TRANSACTION_READ_COMMITTED ||
+                    pbIsolation ==
+                        java.sql.Connection.TRANSACTION_REPEATABLE_READ ||
+                    pbIsolation ==
+                        java.sql.Connection.TRANSACTION_SERIALIZABLE,
+                    "Invalid isolation level value: " + pbIsolation);
+        }
+        defaultIsolation = isolation_ = pbIsolation;
+    }
+
     public void completePiggyBackSchema(String pbSchema) {
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(supportsSessionDataCaching());
         }
+        currentSchemaName_ = pbSchema;
+    }
+
+    /**
+     * Sets the current schema upon connection initialization.
+     *
+     * @param pbSchema the schema name
+     */
+    public void completeInitialPiggyBackSchema(String pbSchema) {
         currentSchemaName_ = pbSchema;
     }
 
@@ -2149,7 +2218,8 @@ public abstract class Connection implements java.sql.Connection,
      *      pooling is enabled, and a more lightweight reset procedure is used.
      */
     protected void completeReset(boolean isDeferredReset,
-                                 boolean closeStatementsOnClose)
+                                 boolean closeStatementsOnClose,
+                                 NetXAResource xares)
             throws SqlException {
         open_ = true;
 
@@ -2160,24 +2230,24 @@ public abstract class Connection implements java.sql.Connection,
         // Iterate through the physical statements and re-enable them for reuse.
 
         if (closeStatementsOnClose) {
-            // NOTE: This is to match previous behavior.
-            //       Investigate and check if it is really necessary.
-            this.isolation_ = TRANSACTION_UNKNOWN;
             java.util.Set keySet = openStatements_.keySet();
             for (java.util.Iterator i = keySet.iterator(); i.hasNext();) {
                 Object o = i.next();
                 ((Statement) o).reset(closeStatementsOnClose);
             }
-        } else {
-            // Must reset transaction isolation level if it has been changed.
-            if (isolation_ != Connection.TRANSACTION_READ_COMMITTED) {
-                // This might not fare well with connection pools, if it has
-                // been configured to deliver connection with a different
-                // isolation level, i.e. it has to set the isolation level again
-                // when it returns connection to client.
-                // TODO: Investigate optimization options.
-                setTransactionIsolationX(Connection.TRANSACTION_READ_COMMITTED);
-            }
+        }
+        // Must reset transaction isolation level if it has been changed,
+        // except when we are doing XA and resuming/joining a global tx.
+        if (xares != null && xares.keepCurrentIsolationLevel()) {
+            // Reset the flag, do nothing else.
+            xares.setKeepCurrentIsolationLevel(false);
+        } else if (isolation_ != defaultIsolation) {
+            // This might not fare well with connection pools, if it has
+            // been configured to deliver connections with a different
+            // isolation level, i.e. it has to set the isolation level again
+            // when it returns connection to client.
+            // TODO: Investigate optimization options.
+            setTransactionIsolationX(defaultIsolation);
         }
 
         if (!isDeferredReset && agent_.loggingEnabled()) {
