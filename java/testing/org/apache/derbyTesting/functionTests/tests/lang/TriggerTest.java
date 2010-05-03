@@ -1422,11 +1422,8 @@ public class TriggerTest extends BaseJDBCTestCase {
     /**
      * Regression test case for DERBY-4610, where a DELETE statement failed
      * because a trigger used the wrong meta-data and mixed up the data types.
-     *
-     * The test case is disabled for now. When the bug has been fixed, enable
-     * it by removing the leading 'x' in the method name.
      */
-    public void xtestDerby4610WrongDataType() throws SQLException {
+    public void testDerby4610WrongDataType() throws SQLException {
         Statement s = createStatement();
         s.execute("create table testtable " +
                   "(id integer, name varchar(20), primary key(id))");
