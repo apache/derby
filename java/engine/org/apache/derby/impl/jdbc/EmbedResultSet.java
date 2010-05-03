@@ -256,7 +256,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		}
 
 		// Fill in the column types
-		resultDescription = theResults.getActivation().getResultDescription();
+		resultDescription = theResults.getResultDescription();
 		
 		// Only incur the cost of allocating and maintaining
 		// updated column information if the columns can be updated.
@@ -2220,19 +2220,20 @@ public abstract class EmbedResultSet extends ConnectionChild
       checksBeforeUpdateOrDelete(methodName, columnIndex);
 
       //1)Make sure for updateXXX methods, the column position is not out of range
-      if (columnIndex < 1 || columnIndex > resultDescription.getColumnCount())
+      ResultDescription rd = theResults.getResultDescription();
+      if (columnIndex < 1 || columnIndex > rd.getColumnCount())
         throw Util.generateCsSQLException(SQLState.LANG_INVALID_COLUMN_POSITION,
-					new Integer(columnIndex), String.valueOf(resultDescription.getColumnCount()));
+					new Integer(columnIndex), String.valueOf(rd.getColumnCount()));
 
       //2)Make sure the column corresponds to a column in the base table and it is not a derived column
-      if (resultDescription.getColumnDescriptor(columnIndex).getSourceTableName() == null)
+      if (rd.getColumnDescriptor(columnIndex).getSourceTableName() == null)
         throw Util.generateCsSQLException(SQLState.COLUMN_NOT_FROM_BASE_TABLE,
 					methodName);
 
       //3)If column not updatable then throw an exception
       if (!getMetaData().isWritable(columnIndex))
         throw Util.generateCsSQLException(SQLState.LANG_COLUMN_NOT_UPDATABLE_IN_CURSOR,
-					resultDescription.getColumnDescriptor(columnIndex).getName(),
+					theResults.getResultDescription().getColumnDescriptor(columnIndex).getName(),
 					getCursorName());
 	}
 
@@ -3585,11 +3586,12 @@ public abstract class EmbedResultSet extends ConnectionChild
                         activation.getPreparedStatement().getTargetTable();
                 // got the underlying (schema.)table name
                 insertSQL.append(getFullBaseTableName(targetTable));
+                ResultDescription rd = theResults.getResultDescription();
 
                 insertSQL.append(" (");
                 // in this for loop we are constructing list of column-names 
                 // and values (?) ,... part of the insert sql
-                for (int i=1; i<=resultDescription.getColumnCount(); i++) { 
+                for (int i=1; i<=rd.getColumnCount(); i++) { 
                     if (foundOneColumnAlready) {
                         insertSQL.append(",");
                         valuesSQL.append(",");
@@ -3597,7 +3599,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                     // using quotes around the column name 
                     // to preserve case sensitivity
                     insertSQL.append(IdUtil.normalToDelimited(
-                            resultDescription.getColumnDescriptor(i).getName()));
+                            rd.getColumnDescriptor(i).getName()));
                     if (columnGotUpdated[i-1]) { 
                         valuesSQL.append("?");
                     } else {
@@ -3625,7 +3627,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 
                 // in this for loop we are assigning values for parameters 
                 //in sql constructed earlier VALUES (?, ..)
-                for (int i=1, paramPosition=0; i<=resultDescription.getColumnCount(); i++) { 
+                for (int i=1, paramPosition=0; i<=rd.getColumnCount(); i++) { 
                     // if the column got updated, do following
                     if (columnGotUpdated[i-1]) {  
                         act.getParameterValueSet().
@@ -3682,14 +3684,15 @@ public abstract class EmbedResultSet extends ConnectionChild
             ExecCursorTableReference targetTable = activation.getPreparedStatement().getTargetTable();
             updateWhereCurrentOfSQL.append(getFullBaseTableName(targetTable));//got the underlying (schema.)table name
             updateWhereCurrentOfSQL.append(" SET ");
-      
-            for (int i=1; i<=resultDescription.getColumnCount(); i++) { //in this for loop we are constructing columnname=?,... part of the update sql
+            ResultDescription rd = theResults.getResultDescription();
+
+            for (int i=1; i<=rd.getColumnCount(); i++) { //in this for loop we are constructing columnname=?,... part of the update sql
                 if (columnGotUpdated[i-1]) { //if the column got updated, do following
                     if (foundOneColumnAlready)
                         updateWhereCurrentOfSQL.append(",");
                     //using quotes around the column name to preserve case sensitivity
                     updateWhereCurrentOfSQL.append(IdUtil.normalToDelimited(
-                            resultDescription.getColumnDescriptor(i).getName()) + "=?");
+                            rd.getColumnDescriptor(i).getName()) + "=?");
                     foundOneColumnAlready = true;
                 }
             }
@@ -3705,7 +3708,7 @@ public abstract class EmbedResultSet extends ConnectionChild
             statementContext.setActivation(act);
 
             //in this for loop we are assigning values for parameters in sql constructed earlier with columnname=?,... 
-            for (int i=1, paramPosition=0; i<=resultDescription.getColumnCount(); i++) { 
+            for (int i=1, paramPosition=0; i<=rd.getColumnCount(); i++) { 
                 if (columnGotUpdated[i-1])  //if the column got updated, do following
                     act.getParameterValueSet().getParameterForSet(paramPosition++).setValue(updateRow.getColumn(i));
             }

@@ -21,14 +21,30 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import java.sql.Timestamp;
-
-import org.apache.derby.catalog.ReferencedColumns;
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
+
+import org.apache.derby.iapi.sql.dictionary.*;
+
+import org.apache.derby.iapi.types.TypeId;
+import org.apache.derby.iapi.sql.depend.Dependent;
+import org.apache.derby.iapi.sql.depend.Provider;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
+
+import org.apache.derby.catalog.AliasInfo;
+import org.apache.derby.catalog.DefaultInfo;
+import org.apache.derby.catalog.Dependable;
+import org.apache.derby.catalog.DependableFinder;
+import org.apache.derby.catalog.ReferencedColumns;
+import org.apache.derby.catalog.types.ReferencedColumnsDescriptorImpl;
+import org.apache.derby.catalog.UUID;
+import org.apache.derby.catalog.Statistics;
+import java.sql.Timestamp;
+import java.io.InputStream;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 /**
@@ -53,7 +69,6 @@ public class DataDescriptorGenerator
 	public	DataDescriptorGenerator( DataDictionary dataDictionary )
 	{
 		this.dataDictionary = dataDictionary;
-        uuidf = dataDictionary.getUUIDFactory();
 	}
 
 	/**
@@ -399,6 +414,8 @@ public class DataDescriptorGenerator
 	  */
 	protected UUIDFactory getUUIDFactory()
 	{
+		if (uuidf == null)
+			uuidf = Monitor.getMonitor().getUUIDFactory();
 		return uuidf;
 	}
 

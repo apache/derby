@@ -51,8 +51,18 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
 	UpdatableVTIConstantAction	constants;
 	TransactionController 	tc;
 
+    ResultDescription 		resultDescription;
 	private int						numOpens;
 	boolean				firstExecute;
+
+	/**
+     * Returns the description of the inserted rows.
+     * REVISIT: Do we want this to return NULL instead?
+	 */
+	public ResultDescription getResultDescription()
+	{
+	    return resultDescription;
+	}
 
     /**
 	 *
@@ -67,6 +77,8 @@ abstract class DMLVTIResultSet extends DMLWriteResultSet
 		constants = (UpdatableVTIConstantAction) constantAction;
 
         tc = activation.getTransactionController();
+
+        resultDescription = sourceResultSet.getResultDescription();
 	}
 	
 	/**

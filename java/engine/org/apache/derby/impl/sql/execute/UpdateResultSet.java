@@ -34,6 +34,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
@@ -61,6 +62,7 @@ class UpdateResultSet extends DMLWriteResultSet
 	private ExecRow 					deferredSparseRow;
 	UpdateConstantAction		constants;
 	
+    private ResultDescription 		resultDescription;
 	private NoPutResultSet			source;
 	NoPutResultSet			savedSource;
 	private RowChanger				rowChanger;
@@ -92,11 +94,20 @@ class UpdateResultSet extends DMLWriteResultSet
 	private ExecRow					deferredTempRow;
 	private ExecRow					deferredBaseRow;
 	private ExecRow					oldDeletedRow;
+	private ResultDescription		triggerResultDescription;
 
 	int lockMode;
 	boolean deferred;
 	boolean beforeUpdateCopyRequired = false;
 
+	/**
+     * Returns the description of the updated rows.
+     * REVISIT: Do we want this to return NULL instead?
+	 */
+	public ResultDescription getResultDescription()
+	{
+	    return resultDescription;
+	}
 
     /*
      * class interface
@@ -180,9 +191,8 @@ class UpdateResultSet extends DMLWriteResultSet
 		heapConglom = constants.conglomId;
 
 		baseRowReadList = constants.getBaseRowReadList();
-        ResultDescription resultDescription;
 		if(passedInRsd ==null)
-			resultDescription = activation.getResultDescription();
+			resultDescription = source.getResultDescription();
 		else
 			resultDescription = passedInRsd;
 		/*
@@ -370,6 +380,9 @@ class UpdateResultSet extends DMLWriteResultSet
 			{
 				deferredTempRow = RowUtil.getEmptyValueRow(numberOfBaseColumns+1, lcc);
 				oldDeletedRow = RowUtil.getEmptyValueRow(numberOfBaseColumns, lcc);
+				triggerResultDescription = (resultDescription != null) ?
+									resultDescription.truncateColumns(numberOfBaseColumns+1) :
+									null;
 			}
 
 			Properties properties = new Properties();
@@ -378,10 +391,12 @@ class UpdateResultSet extends DMLWriteResultSet
 			rowChanger.getHeapConglomerateController().getInternalTablePropertySet(properties);
 			if(beforeUpdateCopyRequired){
 				deletedRowHolder =
-					new TemporaryRowHolderImpl(activation, properties);
+					new TemporaryRowHolderImpl(activation, properties,
+											   triggerResultDescription);
 			}
 			insertedRowHolder =
-				new TemporaryRowHolderImpl(activation, properties);
+				new TemporaryRowHolderImpl(activation, properties,
+										   triggerResultDescription);
 
 			rowChanger.setRowHolder(insertedRowHolder);
 		}
@@ -730,7 +745,7 @@ class UpdateResultSet extends DMLWriteResultSet
 						// in-memory heap grows), hopefully we never spill temp table to disk.
 
 						tableScan.futureForUpdateRows = new TemporaryRowHolderImpl
-							(activation, null, 100, false, true);
+							(activation, null, null, 100, false, true);
 					}
 
 					rlRow.setColumn(1, rowLoc);

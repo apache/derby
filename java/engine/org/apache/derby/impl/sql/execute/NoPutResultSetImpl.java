@@ -93,7 +93,8 @@ extends BasicNoPutResultSetImpl
 						double optimizerEstimatedRowCount,
 						double optimizerEstimatedCost)
 	{
-		super(activation,
+		super(null,
+				activation,
 				optimizerEstimatedRowCount,
 				optimizerEstimatedCost);
 
@@ -105,6 +106,13 @@ extends BasicNoPutResultSetImpl
 	}
 
 	// NoPutResultSet interface
+
+	/**
+     * Returns the description of the table's rows
+	 */
+	public ResultDescription getResultDescription() {
+	    return activation.getResultDescription();
+	}
 
 	/**
 		Return my cursor name for JDBC. Can be null.

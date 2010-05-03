@@ -27,6 +27,7 @@ import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.TemporaryRowHolder;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.store.access.ConglomerateController;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -68,7 +69,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	private ConglomerateController	cc;
 	private Properties				properties;
 	private ScanController			scan;
-
+	private	ResultDescription		resultDescription;
 	/** Activation object with local state information. */
 	Activation						activation;
 
@@ -99,14 +100,17 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 * @param activation the activation
 	 * @param properties the properties of the original table.  Used
 	 *		to help the store use optimal page size, etc.
+	 * @param resultDescription the result description.  Relevant for the getResultDescription
+	 * 		call on the result set returned by getResultSet.  May be null
 	 */
-	TemporaryRowHolderImpl
+	public TemporaryRowHolderImpl
 	(
 		Activation				activation, 
-		Properties 				properties
+		Properties 				properties, 
+		ResultDescription		resultDescription
 	) 
 	{
-		this(activation, properties,
+		this(activation, properties, resultDescription,
 			 DEFAULT_OVERFLOWTHRESHOLD, false, false);
 	}
 	
@@ -117,16 +121,19 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 * @param activation the activation
 	 * @param properties the properties of the original table.  Used
 	 *		to help the store use optimal page size, etc.
+	 * @param resultDescription the result description.  Relevant for the getResultDescription
+	 * 		call on the result set returned by getResultSet.  May be null
 	 * @param isUniqueStream - true , if it has to be temporary row holder unique stream
 	 */
-	TemporaryRowHolderImpl
+	public TemporaryRowHolderImpl
 	(
 		Activation				activation, 
 		Properties 				properties, 
+		ResultDescription		resultDescription,
 		boolean                 isUniqueStream
 	) 
 	{
-		this(activation, properties, 1, isUniqueStream,
+		this(activation, properties, resultDescription, 1, isUniqueStream,
 			 false);
 	}
 
@@ -137,14 +144,17 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 	 * @param activation the activation
 	 * @param properties the properties of the original table.  Used
 	 *		to help the store use optimal page size, etc.
+	 * @param resultDescription the result description.  Relevant for the getResultDescription
+	 * 		call on the result set returned by getResultSet.  May be null
 	 * @param overflowToConglomThreshold on an attempt to insert
 	 * 		this number of rows, the rows will be put
  	 *		into a temporary conglomerate.
 	 */
-	TemporaryRowHolderImpl
+	public TemporaryRowHolderImpl
 	(
 		Activation			 	activation, 
 		Properties				properties,
+		ResultDescription		resultDescription,
 		int 					overflowToConglomThreshold,
 		boolean                 isUniqueStream,
 		boolean					isVirtualMemHeap
@@ -163,6 +173,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 
 		this.activation = activation;
 		this.properties = properties;
+		this.resultDescription = resultDescription;
 		this.isUniqueStream = isUniqueStream;
 		this.isVirtualMemHeap = isVirtualMemHeap;
 		rowArray = new ExecRow[overflowToConglomThreshold];
@@ -473,12 +484,12 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
 		if(isUniqueStream)
 		{
 			return new TemporaryRowHolderResultSet(tc, rowArray,
-												   isVirtualMemHeap,
+												   resultDescription, isVirtualMemHeap,
 												   true, positionIndexConglomId, this);
 		}
 		else
 		{
-			return new TemporaryRowHolderResultSet(tc, rowArray, isVirtualMemHeap, this);
+			return new TemporaryRowHolderResultSet(tc, rowArray, resultDescription, isVirtualMemHeap, this);
 
 		}
 	}

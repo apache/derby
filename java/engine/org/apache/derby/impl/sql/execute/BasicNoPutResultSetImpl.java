@@ -30,6 +30,7 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.Activation;
+import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Row;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -87,6 +88,8 @@ implements NoPutResultSet
 	protected final Activation	    activation;
 	private final boolean				statisticsTimingOn;
 
+	ResultDescription resultDescription;
+
 	private transient TransactionController	tc;
 
 	private int[] baseColumnMap;
@@ -96,6 +99,7 @@ implements NoPutResultSet
 	    <BR>
 		Sets beginTime for all children to use to measue constructor time.
 	 *
+	 *  @param  resultDescription the result description. May be null.
 	 *	@param	activation			The activation
 	 *	@param	optimizerEstimatedRowCount	The optimizer's estimate of the
 	 *										total number of rows for this
@@ -103,13 +107,15 @@ implements NoPutResultSet
 	 *	@param	optimizerEstimatedCost		The optimizer's estimated cost for
 	 *										this result set
 	 */
-	BasicNoPutResultSetImpl(Activation activation,
+	BasicNoPutResultSetImpl(ResultDescription resultDescription,
+							Activation activation,
 							double optimizerEstimatedRowCount,
 							double optimizerEstimatedCost)
 	{
 		this.activation = activation;
 		if (statisticsTimingOn = getLanguageConnectionContext().getStatisticsTiming())
 		    beginTime = startExecutionTime = getCurrentTimeMillis();
+		this.resultDescription = resultDescription;
 		this.optimizerEstimatedRowCount = optimizerEstimatedRowCount;
 		this.optimizerEstimatedCost = optimizerEstimatedCost;
 	}
@@ -623,6 +629,13 @@ implements NoPutResultSet
 	/* The following methods are common to almost all sub-classes.
 	 * They are overriden in selected cases.
 	 */
+
+	/**
+     * Returns the description of the table's rows
+	 */
+	public ResultDescription getResultDescription() {
+	    return resultDescription;
+	}
 
 	/**
 	 * Get the execution time in milliseconds.

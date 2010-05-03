@@ -81,6 +81,15 @@ class DeleteResultSet extends DMLWriteResultSet
 	ExecRow		deferredRLRow = null;
 	int	numberOfBaseColumns = 0;
 
+	/**
+     * Returns the description of the deleted rows.
+     * REVISIT: Do we want this to return NULL instead?
+	 */
+	public ResultDescription getResultDescription()
+	{
+	    return resultDescription;
+	}
+
     /*
      * class interface
      *
@@ -121,7 +130,7 @@ class DeleteResultSet extends DMLWriteResultSet
 		noTriggersOrFks = ((fkInfoArray == null) && (triggerInfo == null));
 		baseRowReadList = constants.getBaseRowReadList();
 		if(source != null)
-			resultDescription = activation.getResultDescription();
+			resultDescription = source.getResultDescription();
 		else
 			resultDescription = constants.resultDescription;
 
@@ -291,13 +300,18 @@ class DeleteResultSet extends DMLWriteResultSet
 			if(cascadeDelete)
 			{
 				rowHolder = new TemporaryRowHolderImpl(activation, properties, 
-						 false);
+						(resultDescription != null) ?
+							resultDescription.truncateColumns(rlColumnNumber) :
+							null, false);
 
 
 			}else
 			{
 
-				rowHolder = new TemporaryRowHolderImpl(activation, properties);
+				rowHolder = new TemporaryRowHolderImpl(activation, properties, 
+						(resultDescription != null) ?
+							resultDescription.truncateColumns(rlColumnNumber) :
+							null);
 
 			}
 

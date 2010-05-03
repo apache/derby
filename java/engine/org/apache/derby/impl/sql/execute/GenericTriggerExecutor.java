@@ -38,13 +38,17 @@ import org.apache.derby.iapi.reference.SQLState;
  * a trigger.  It is subclassed by row and statement
  * executors.
  */
-abstract class GenericTriggerExecutor
+public abstract class GenericTriggerExecutor
 {
-	final InternalTriggerExecutionContext	tec;
-	final TriggerDescriptor					triggerd;
-	final Activation						activation;
-	final LanguageConnectionContext			lcc;
+	protected InternalTriggerExecutionContext	tec;
+	protected TriggerDescriptor					triggerd;
+	protected Activation						activation;
+	protected LanguageConnectionContext			lcc;
 
+	private	boolean			whenClauseRetrieved;
+	private	boolean			actionRetrieved;
+	private SPSDescriptor	whenClause; 
+	private SPSDescriptor	action;
 
 	private ExecPreparedStatement	ps;
 	private Activation 				spsActivation;
@@ -90,12 +94,22 @@ abstract class GenericTriggerExecutor
 
 	protected SPSDescriptor getWhenClause() throws StandardException
 	{
-		return triggerd.getWhenClauseSPS();
+		if (!whenClauseRetrieved)
+		{
+			whenClauseRetrieved = true;
+			whenClause = triggerd.getWhenClauseSPS();
+		}
+		return whenClause;
 	}
 
 	protected SPSDescriptor getAction() throws StandardException
 	{
-		return triggerd.getActionSPS(lcc);
+		if (!actionRetrieved)
+		{
+			actionRetrieved = true;
+			action = triggerd.getActionSPS(lcc);
+		}
+		return action;
 	}
 
 	/**
