@@ -322,8 +322,13 @@ to specify your environment and options:
     to the value of the environment variable %USERPROFILE%.
 
 (2) Create a file called "ant.properties" in your ${user.home} 
-    directory and define the following variables in 
-    "ant.properties". 
+    directory and define the relevant variables. Alternatively or
+    additionally, you can create a file called local.properties at
+    the top of the checked out tree. Property settings in this file
+    take precedence over those in the ant.properties file in the
+    user.home directory.
+
+    You can set the following in the property file(s): 
 
     NOTE TO MAC OS X USERS: See section 5.
  
