@@ -27,6 +27,7 @@ import org.apache.derbyTesting.junit.BaseTestCase;
 
 import junit.framework.Test; 
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Suite to run all JUnit tests in this package:
@@ -46,33 +47,40 @@ public class ReplicationSuite extends BaseTestCase
 
 		TestSuite suite = new TestSuite("ReplicationSuite");
 
-		suite.addTest(ReplicationRun_Local.suite());
-        
-		suite.addTest(ReplicationRun_Local_1.suite());
-        
-		suite.addTest(ReplicationRun_Local_1Indexing.suite());
-		
-		suite.addTest(ReplicationRun_Local_StateTest_part1.suite());
-		suite.addTest(ReplicationRun_Local_StateTest_part1_1.suite());
-		suite.addTest(ReplicationRun_Local_StateTest_part1_2.suite());
-		suite.addTest(ReplicationRun_Local_StateTest_part1_3.suite());
-        
-		suite.addTest(ReplicationRun_Local_StateTest_part2.suite());
-        		
-		// Run this separatly as it produces extra output:
-        // suite.addTest(ReplicationRun_Local_showStateChange.suite());
-        
-        suite.addTest(ReplicationRun_Local_3_p1.suite());
-        suite.addTest(ReplicationRun_Local_3_p2.suite());
-        suite.addTest(ReplicationRun_Local_3_p3.suite());
-        suite.addTest(ReplicationRun_Local_3_p4.suite());
-        
-		suite.addTest(ReplicationRun_Local_3_p5.suite()); // Test for DERBY-3878
-		
-		suite.addTest(ReplicationRun_Local_Encrypted_1.suite());
-		
-		suite.addTest(ReplicationRun_Local_3_p6.suite());
-		
+        // The tests require both DriverManager and ClientDataSource. None
+        // of those classes are available in JSR-169, so only run the test
+        // on platforms that support JDBC3 and higher.
+        if (JDBC.vmSupportsJDBC3()) {
+
+            suite.addTest(ReplicationRun_Local.suite());
+
+            suite.addTest(ReplicationRun_Local_1.suite());
+
+            suite.addTest(ReplicationRun_Local_1Indexing.suite());
+
+            suite.addTest(ReplicationRun_Local_StateTest_part1.suite());
+            suite.addTest(ReplicationRun_Local_StateTest_part1_1.suite());
+            suite.addTest(ReplicationRun_Local_StateTest_part1_2.suite());
+            suite.addTest(ReplicationRun_Local_StateTest_part1_3.suite());
+
+            suite.addTest(ReplicationRun_Local_StateTest_part2.suite());
+
+            // Run this separatly as it produces extra output:
+            // suite.addTest(ReplicationRun_Local_showStateChange.suite());
+
+            suite.addTest(ReplicationRun_Local_3_p1.suite());
+            suite.addTest(ReplicationRun_Local_3_p2.suite());
+            suite.addTest(ReplicationRun_Local_3_p3.suite());
+            suite.addTest(ReplicationRun_Local_3_p4.suite());
+
+            // Test for DERBY-3878
+            suite.addTest(ReplicationRun_Local_3_p5.suite());
+
+            suite.addTest(ReplicationRun_Local_Encrypted_1.suite());
+
+            suite.addTest(ReplicationRun_Local_3_p6.suite());
+        }
+
 		return suite;
 	}
 }

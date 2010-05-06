@@ -25,8 +25,6 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.EnvTest;
-import org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationSuite;
-import org.apache.derbyTesting.junit.JDBC;
 
 public class All extends BaseTestCase {
       
@@ -37,6 +35,10 @@ public class All extends BaseTestCase {
         super(name);
     }
 
+    /**
+     * Generate the {@code suites.All} test suite. Sub-suites should be added
+     * to {@link AllPackages#suite()} and not here.
+     */
     public static Test suite() throws Exception {
 
         TestSuite suite = new TestSuite("All");
@@ -47,14 +49,6 @@ public class All extends BaseTestCase {
         
         // All package tests
         suite.addTest(AllPackages.suite());
-        
-        // Encrypted tests
-        // J2ME (JSR169) does not support encryption.
-        suite.addTest(EncryptionSuite.suite());
-        
-        // Replication tests. Implementation require DataSource. 
-        // Not supp. by JSR169
-        if (JDBC.vmSupportsJDBC3()) suite.addTest(ReplicationSuite.suite());
         
         return suite;
     }

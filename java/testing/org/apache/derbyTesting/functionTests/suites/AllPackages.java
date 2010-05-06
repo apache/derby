@@ -22,12 +22,15 @@ package org.apache.derbyTesting.functionTests.suites;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.tests.replicationTests.ReplicationSuite;
 import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * All package suites for the function tests.
@@ -52,56 +55,90 @@ public class AllPackages extends BaseTestCase {
 
         TestSuite suite = new TestSuite("AllPackages");
 
-        suite.addTest(org.apache.derbyTesting.functionTests.tests.derbynet._Suite.suite());
-        suite.addTest(org.apache.derbyTesting.functionTests.tests.lang._Suite.suite());
-        suite.addTest(org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite.suite());
-        suite.addTest(org.apache.derbyTesting.functionTests.tests.store._Suite.suite());
-        suite.addTest(org.apache.derbyTesting.functionTests.tests.tools._Suite.suite());
-        suite.addTest(org.apache.derbyTesting.functionTests.tests.engine._Suite.suite());
-        suite.addTest(org.apache.derbyTesting.functionTests.tests.demo._Suite.suite());
-        suite.addTest(org.apache.derbyTesting.functionTests.tests.memory._Suite.suite());
-        suite.addTest(org.apache.derbyTesting.functionTests.tests.memorydb._Suite.suite());
-        suite.addTest(org.apache.derbyTesting.functionTests.tests.i18n._Suite.suite());
-        suite.addTest(org.apache.derbyTesting.functionTests.tests.multi.StressMultiTest.suite());
+        for (Iterator it = getTestClasses().iterator(); it.hasNext(); ) {
+            Object testClass = it.next();
+            if (testClass instanceof String) {
+                suite.addTest(addSuiteByReflection((String) testClass));
+            } else {
+                suite.addTest(invokeSuite((Class) testClass));
+            }
+        }
+
+        return suite;
+    }
+
+    /**
+     * <p>
+     * Get a list of test classes to add. The classes that have been compiled
+     * with target level equal to the lowest supported level are included as
+     * {@code java.lang.Class} objects. Classes compiled with higher target
+     * levels are included as {@code java.lang.String}s with the class names
+     * so that this method does not fail with class not found errors on some
+     * platforms.
+     * </p>
+     *
+     * <p>
+     * To construct a test suite from these classes, the classes' static
+     * {@code suite()} methods have to be called.
+     * </p>
+     *
+     * @return list of test classes
+     */
+    private static List getTestClasses() {
+        ArrayList classes = new ArrayList();
+
+        classes.add(org.apache.derbyTesting.functionTests.tests.derbynet._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.lang._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.store._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.tools._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.engine._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.demo._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.memory._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.memorydb._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.i18n._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.multi.StressMultiTest.class);
 
         // Suites that are compiled using Java SE 6 target need to
         // be added this way, otherwise creating the suite
         // will throw an invalid class version error
-        suite.addTest(
-                    addSuiteByReflection(
-                            "org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"));
+        classes.add("org.apache.derbyTesting.functionTests.tests.jdbc4._Suite");
         
         // JMX management tests are compiled and require JDK 1.5
-        suite.addTest(
-                addSuiteByReflection(
-                        "org.apache.derbyTesting.functionTests.tests.management._Suite"));
+        classes.add("org.apache.derbyTesting.functionTests.tests.management._Suite");
 
         // Adding JUnit unit tests here to avoid creating a new JUnit
         // harness above the functionTests and unitTests
         // directories(packages)
-        suite.addTest(org.apache.derbyTesting.unitTests.junit._Suite.suite());
+        classes.add(org.apache.derbyTesting.unitTests.junit._Suite.class);
         
         // Add the upgrade tests,See upgradeTests._Suite
         // for more information on how the old jars are
         // located. If the system property derbyTesting.oldReleasePath
         // is not set then the jars will be loaded from the Apache SVN repo.
-        suite.addTest(
-           org.apache.derbyTesting.functionTests.tests.upgradeTests._Suite.suite());
+        classes.add(
+           org.apache.derbyTesting.functionTests.tests.upgradeTests._Suite.class);
 
-        return suite;
+        // Encrypted tests
+        // J2ME (JSR169) does not support encryption.
+        classes.add(EncryptionSuite.class);
+
+        // Replication tests. Implementation require DataSource.
+        // Not supp. by JSR169
+        classes.add(ReplicationSuite.class);
+
+        return classes;
     }
     
     /**
      * Get a class's set of tests from its suite method through reflection.
+     * Ignore errors caused by the class version of the test class being
+     * higher than what's supported on this platform.
      */
     private static Test addSuiteByReflection(String className) throws Exception
     {
         try {
-            Class clz = Class.forName(className);
-            
-            Method sm = clz.getMethod("suite", null);
-                  
-            return (Test) sm.invoke(null, null);
+            return invokeSuite(Class.forName(className));
         } catch (LinkageError  e) {
             return new TestSuite("SKIPPED: " + className + " - " +
                     e.getMessage());
@@ -119,4 +156,51 @@ public class AllPackages extends BaseTestCase {
         }
     }
 
+    /**
+     * Invoke the static {@code suite()} method on a test class.
+     *
+     * @param klass the test class
+     * @return the test suite returned by {@code suite()}
+     * @throws Exception if the suite() method cannot be called or fails
+     */
+    private static Test invokeSuite(Class klass) throws Exception {
+        Method suite = klass.getMethod("suite", null);
+        return (Test) suite.invoke(null, null);
+    }
+
+    /**
+     * Get the class names of all the top-level JUnit test suites that are
+     * included in {@code suites.All}.
+     *
+     * @return an array containing the class names of all the top-level
+     * test suites
+     */
+    public static String[] getTopLevelSuiteNames() {
+        List testClasses = getTestClasses();
+        String[] names = new String[testClasses.size()];
+
+        for (int i = 0; i < testClasses.size(); i++) {
+            Object testClass = testClasses.get(i);
+            if (testClass instanceof String) {
+                names[i] = (String) testClass;
+            } else {
+                names[i] = ((Class) testClass).getName();
+            }
+        }
+
+        return names;
+    }
+
+    /**
+     * Print the class names of all the test suites included in
+     * {@code suites.All}.
+     *
+     * @param args command line arguments (ignored)
+     */
+    public static void main(String[] args) {
+        String[] names = getTopLevelSuiteNames();
+        for (int i = 0; i < names.length; i++) {
+            System.out.println(names[i]);
+        }
+    }
 }
