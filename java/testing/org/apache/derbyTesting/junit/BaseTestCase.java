@@ -526,20 +526,38 @@ public abstract class BaseTestCase
 	    return pr;
 	}
 
-	/**
-         * Return the executable name for spawning java commands.
-         * This will be <path to j9>/j9  for j9 jvms.
-	 * @return full path to java executable.
-         */
-         public static final String getJavaExecutableName() {
-             String vmname = getSystemProperty("com.ibm.oti.vm.exe");
-             if (vmname == null)
-                 vmname = getSystemProperty("java.home") + File.separator + "bin" +
-                 File.separator +"java";
-             return vmname;
-         }
-          
-   
+    /**
+     * Return the executable name for spawning java commands.
+     * This will be <path to j9>/j9  for j9 jvms.
+     * @return full path to java executable.
+     */
+    public static final String getJavaExecutableName() {
+        String vmname = getSystemProperty("com.ibm.oti.vm.exe");
+
+        if (vmname == null) {
+            vmname = getSystemProperty("java.vm.name");
+
+            // Sun phoneME
+            if ("CVM".equals(vmname)) {
+                vmname = getSystemProperty("java.home") +
+                    File.separator + "bin" +
+                    File.separator + "cvm";
+            } else {
+                vmname = getSystemProperty("java.home") +
+                    File.separator + "bin" +
+                    File.separator + "java";
+            }
+        }
+        return vmname;
+    }
+
+    /**
+     * @return true if this is a j9 VM
+     */
+    public static final boolean isJ9Platform() {
+        return getSystemProperty("com.ibm.oti.vm.exe") != null;
+    }
+
    /**
     * Reads output from a process and returns it as a string.
     * This will block until the process terminates.

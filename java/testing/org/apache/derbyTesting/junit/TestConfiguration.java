@@ -664,6 +664,26 @@ public class TestConfiguration {
         return new DatabaseChangeSetup(new DropDatabaseSetup(test, dbName), dbName, dbName, true);
     }
 
+
+    /**
+     * Decorate a test to use a new database that is created upon the first
+     * connection request to the database and shutdown & deleted at
+     * tearDown. The configuration differs only from the current configuration
+     * by the list of used databases. The generated database name is added at
+     * the end of <code>usedDbNames</code> and assigned as a default database
+     * name.  This decorator expects the database file to be local so it can be
+     * removed.
+     * @param test Test to be decorated
+     * @param dbName We sometimes need to know outside to be able topass it on
+     *               to other VMs/processes.
+     * @return decorated test.
+     */
+    public static TestSetup singleUseDatabaseDecorator(Test test, String dbName)
+    {
+        return new DatabaseChangeSetup(
+            new DropDatabaseSetup(test, dbName), dbName, dbName, true);
+    }
+
     /**
      * Decorate a test to use a new database that is created upon the
      * first connection request to the database and deleted at
