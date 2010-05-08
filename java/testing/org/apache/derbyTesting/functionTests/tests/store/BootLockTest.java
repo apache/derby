@@ -119,12 +119,12 @@ public class BootLockTest extends BaseJDBCTestCase {
         // can check that we get DATA_MULTIPLE_JBMS_FORCE_LOCK if we set
         // derby.database.forceDatabaseLock.
 
-        // FIXME: I tried to use the DatabasePropertyTestSetup.singleProperty,
-        // but for some reason it failed to do the job, no matter where in the
-        // decorator stack in decorateTest I placed it. Should be investigated
-        // so this manual set/reset code of the property can be removed.
-
         if (JDBC.vmSupportsJSR169()) {
+            // Can't use the DatabasePropertyTestSetup.singleProperty, since
+            // that method sets a database property (not a system property),
+            // and the minion is the one creating the database here. An
+            // alternative would be to let minion set it.
+
             oldPropValue =
                 System.getProperty("derby.database.forceDatabaseLock");
             System.setProperty("derby.database.forceDatabaseLock", "true");
