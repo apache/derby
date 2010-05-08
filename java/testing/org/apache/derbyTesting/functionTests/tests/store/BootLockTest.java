@@ -43,9 +43,10 @@ import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 
 /**
- * Testing for FileLocks that prevent Derby Double Boot.
+ * Testing file locks that prevent Derby "double boot" a.k.a "dual boot",
+ * i.e. two VMs booting a database concurrently, a disaster scenario.
  * <p/>
- * For Sun phoneME, test that the property {@code
+ * For phoneME, test that the property {@code
  * derby.database.forceDatabaseLock} protects us.
  * <p/>
  * FIXME: If DERBY-4646 is fixed, the special handling for phoneME
@@ -75,10 +76,9 @@ public class BootLockTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Creates a suite with two testcases, with and without some extra
-     * system properties.
+     * Creates a suite.
      *
-     * @return The test suite with both English and German locales.
+     * @return The test suite
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("BootLockTest");
@@ -172,10 +172,11 @@ public class BootLockTest extends BaseJDBCTestCase {
             minionSysErr = new BufferedReader(
                 new InputStreamReader(p.getErrorStream()));
 
-            // Create a socket so we know when subprogram has booted.  Since we
-            // run this test only in embedded mode, (re)use derby server port.
+            // Create a socket so we know when the minion has booted the db.
+            // Since we run this test only in embedded mode, (re)use derby
+            // server port.
             parentService = new ServerSocket(port);
-            parentService.setSoTimeout(60000); // max we wait is 60s
+            parentService.setSoTimeout(60000); // maximally we wait 60s
 
             try {
 
