@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.net.SocketTimeoutException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Properties;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -38,7 +39,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 
@@ -102,55 +103,17 @@ public class BootLockTest extends BaseJDBCTestCase {
 
         Test test = new TestSuite(BootLockTest.class);
 
+        if (JDBC.vmSupportsJSR169()) {
+            Properties props = new Properties();
+            props.setProperty("derby.database.forceDatabaseLock", "true");
+            test = new SystemPropertyTestSetup(test, props, true);
+        }
+
         test = TestConfiguration.singleUseDatabaseDecorator(test, dbName);
 
         test = SecurityManagerSetup.noSecurityManager(test);
 
         return test;
-    }
-
-    String oldPropValue = null;
-
-    protected void setUp() throws Exception {
-
-        super.setUp();
-
-        // For phoneMe, we won't see DATA_MULTIPLE_JBMS_ON_DB, but instead we
-        // can check that we get DATA_MULTIPLE_JBMS_FORCE_LOCK if we set
-        // derby.database.forceDatabaseLock.
-
-        if (JDBC.vmSupportsJSR169()) {
-            // Can't use the DatabasePropertyTestSetup.singleProperty, since
-            // that method sets a database property (not a system property),
-            // and the minion is the one creating the database here. An
-            // alternative would be to let minion set it.
-
-            oldPropValue =
-                System.getProperty("derby.database.forceDatabaseLock");
-            System.setProperty("derby.database.forceDatabaseLock", "true");
-        }
-    }
-
-
-    protected void tearDown() throws Exception {
-
-        if (JDBC.vmSupportsJSR169()) {
-
-            if (oldPropValue != null) {
-                System.setProperty("derby.database.forceDatabaseLock",
-                                   oldPropValue);
-            } else {
-                // FIXME: Java 1.5 only: improve code when we move to that
-                // source level.
-                // System.clearProperty("derby.database.forceDatabaseLock");
-                System.setProperty("derby.database.forceDatabaseLock",
-                                   "false");
-            }
-
-
-        }
-
-        super.tearDown();
     }
 
 

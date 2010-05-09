@@ -31,12 +31,9 @@ import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
  * Create and boot the supplied db argument. This auxiliary program is used by
  * {@code BootLockTest.java} to boot a db in a different jvm and subsequently
  * attempt a boot to from the original VM to detect dual boot attempt.
-* <p>
- * You can verify this subprogram by invoking it directly as:
- * </p>
- * <p>
- * {@code java org.apache.derbyTesting.functionTests.tests.store.BootLockMinion <dbname>}
- * </p>
+ * <p/>
+ * Started as:
+ * {@code java org.apache.derbyTesting.functionTests.tests.store.BootLockMinion <dbname> <port>}
  */
 
 public class BootLockMinion {
