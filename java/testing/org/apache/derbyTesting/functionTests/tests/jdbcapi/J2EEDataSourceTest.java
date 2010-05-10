@@ -145,6 +145,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             new J2EEDataSourceTest("testCloseActiveConnection_XA_global"));
         suite.addTest(new J2EEDataSourceTest("testDescriptionProperty"));
         suite.addTest(new J2EEDataSourceTest("testConnectionErrorEvent"));
+        suite.addTest(new J2EEDataSourceTest("testIsolationWithFourConnections"));
         suite.addTest(new J2EEDataSourceTest(
                               "testConnectionEventListenerIsNull"));
         suite.addTest(new J2EEDataSourceTest("testReadOnlyToWritableTran"));
@@ -1625,6 +1626,10 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         assertConnectionState(ResultSet.CLOSE_CURSORS_AT_COMMIT, 
             Connection.TRANSACTION_REPEATABLE_READ,
             false, false, conn);
+        //DERBY-4314 create a statement(s2) and execute ddl sql
+        Statement s2 = conn.createStatement();
+        s2.executeUpdate("create table testglobal (i int)");
+        //DERBY-4314 end test
         xar.end(xid2, XAResource.TMSUCCESS);
 
         xar.start(xid, XAResource.TMJOIN);
@@ -2060,7 +2065,46 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         con.close();
         pc.close();
     }
+    /**
+     * Check setTransactioIsolation and with four connection in connection pool
+     * for DERBY-4343 case
+     * 
+     * @throws SQLException
+     */
+    public void testIsolationWithFourConnections()
+            throws SQLException {
+        ConnectionPoolDataSource ds = J2EEDataSource.getConnectionPoolDataSource();
 
+        PooledConnection pc = ds.getPooledConnection();
+        //First connection
+        Connection conn = pc.getConnection();
+        conn.setAutoCommit(false);
+        conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        Statement s = conn.createStatement();
+        ResultSet rs = s.executeQuery("SELECT COUNT(*) FROM SYS.SYSTABLES");
+        rs.next();
+        int ri = rs.getInt(1);
+        rs.close();
+        conn.rollback();
+        conn.close();
+        
+        //Second connection
+        conn = pc.getConnection();
+        conn.close();
+        
+        //Third connection
+        conn = pc.getConnection();
+        conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+        assertEquals(Connection.TRANSACTION_READ_COMMITTED, conn.getTransactionIsolation());
+        conn.close();
+        
+        //Fourth connetion
+        conn = pc.getConnection();
+        conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+        assertEquals(Connection.TRANSACTION_READ_UNCOMMITTED, conn.getTransactionIsolation());
+        conn.close();
+    
+    }
     // test that an xastart in auto commit mode commits the existing work.
     // test fix of a bug ('beetle 5178') wherein XAresource.start() when 
     // auto-commit is true did not implictly commit any transaction
