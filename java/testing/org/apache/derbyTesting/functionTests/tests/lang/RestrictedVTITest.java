@@ -627,7 +627,23 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
              );
 
     }
-    
+
+    /**
+     * Predicates in HAVING clauses are not (yet) pushed down to the VTI.
+     * Tracked as DERBY-4650.
+     */
+    public void test_08_having() throws Exception
+    {
+        assertPR(
+                getConnection(),
+                "select s_r, count(*) from table(integerList()) t " +
+                "group by s_r having s_r > 1",
+                new String[][] {{"100", "1"}, {"1000", "1"}, {"10000", "1"}},
+                "[S_R, null, null, null]",
+                null // DERBY-4650: should be "\"S_R\" > 1" if pushed down
+                );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
