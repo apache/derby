@@ -140,6 +140,17 @@ class FdocaConstants
 		int drdaType = 0;
 		switch (jdbcType) {
 			case Types.BOOLEAN:
+                if ( appRequester.supportsBooleanValues() )
+                {
+                    drdaType = DRDAConstants.DRDA_TYPE_NBOOLEAN;
+                    outlen[0] = 1;
+                }
+                else
+                {
+                    drdaType = DRDAConstants.DRDA_TYPE_NSMALL;
+                    outlen[0] = 2;
+                }
+				break;
 			case java.sql.Types.BIT:
 			case java.sql.Types.TINYINT:
 			case java.sql.Types.SMALLINT:

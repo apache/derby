@@ -57,6 +57,7 @@ public	class	CompatibilitySuite	extends	DerbyJUnitTest
 	public	static	final	Version	DRB_10_4 = new Version( 10, 4 );
 	public	static	final	Version	DRB_10_5 = new Version( 10, 5 );
 	public	static	final	Version	DRB_10_6 = new Version( 10, 6 );
+	public	static	final	Version	DRB_10_7 = new Version( 10, 7 );
 
 	// Supported VM versions.
 	public	static	final	Version	VM_1_3 = new Version( 1, 3 );

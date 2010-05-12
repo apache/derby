@@ -146,6 +146,14 @@ class SQLTypes {
 	  switch(jdbctype)
 	  {
 		  case Types.BOOLEAN:
+              if ( appRequester.supportsBooleanValues() )
+              {
+                  return DRDAConstants.DB2_SQLTYPE_BOOLEAN + nullAddVal;
+              }
+              else
+              {
+                  return DRDAConstants.DB2_SQLTYPE_SMALL + nullAddVal;
+              }
 		  case java.sql.Types.BIT:
 		  case java.sql.Types.TINYINT:
 		  case java.sql.Types.SMALLINT:

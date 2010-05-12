@@ -645,10 +645,10 @@ public class Typdef implements java.lang.Cloneable {
         null,
         /* 0xBD Empties */
         null,
-        /* 0xBE Empties */
-        null,
-        /* 0xBF Empties */
-        null,
+        /* 0xBE Boolean */
+        new FdocaSimpleDataArray(0xBE, FdocaConstants.FDOCA_TYPE_FIXEDBYTES, Cursor.BYTES, NOCCSID, 0, 0, 1, FIXEDLENGTH),
+        /* 0xBF null Boolean */
+        new FdocaSimpleDataArray(0xBF, FdocaConstants.FDOCA_TYPE_NFIXEDBYTES, Cursor.BYTES, NOCCSID, 0, 0, 1, FIXEDLENGTH),
         /* 0xC0 Empties */
         null,
         /* 0xC1 Empties */
@@ -875,8 +875,8 @@ public class Typdef implements java.lang.Cloneable {
         0x00, // 0xBB Empties
         0x00, // 0xBC Empties
         0x00, // 0xBD Empties
-        0x00, // 0xBE Empties
-        0x00, // 0xBF Empties
+        java.sql.Types.BOOLEAN, // 0xBE Boolean
+        java.sql.Types.BOOLEAN, // 0xBF null Boolean
         0x00, // 0xC0 Empties
         0x00, // 0xC1 Empties
         0x00, // 0xC2 Empties

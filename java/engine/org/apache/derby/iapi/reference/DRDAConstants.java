@@ -144,12 +144,8 @@ public	interface	DRDAConstants
 	public	static final int DRDA_TYPE_LOBCMIXED = 0xCE;
 	public	static final int DRDA_TYPE_NLOBCMIXED = 0xCF;
 
-	// Experimental types. These codes will change when the Open Group
-	// publishes an addendum to the DRDA spec covering these
-	// datatypes.
-	
-	// public	static final int DRDA_TYPE_BOOLEAN = 0xBE;
-	// public	static final int DRDA_TYPE_NBOOLEAN = 0xBF;
+	public	static final int DRDA_TYPE_BOOLEAN = 0xBE;
+	public	static final int DRDA_TYPE_NBOOLEAN = 0xBF;
 
     // This is the maximum size which a udt can serialize to in order to
     // be transported across DRDA
@@ -221,9 +217,8 @@ public	interface	DRDAConstants
 	public	static final  int DB2_SQLTYPE_DBCLOB_LOCATOR = 968;  // DBCLOB locator
 	public	static final  int DB2_SQLTYPE_NDBCLOB_LOCATOR = 969;
 
-	// extensions to the db2 datatypes
-    // public	static final  int DB2_SQLTYPE_BOOLEAN = 1000;     // BOOLEAN
-    // public	static final  int DB2_SQLTYPE_NBOOLEAN = 1001;
+    public	static final  int DB2_SQLTYPE_BOOLEAN = 2436;     // BOOLEAN
+    public	static final  int DB2_SQLTYPE_NBOOLEAN = 2437;
 
     // there is no DB2 type for UDTs. we invent one
     public   static final int DB2_SQLTYPE_FAKE_UDT = 2000;

@@ -1781,6 +1781,18 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
     
     /**
+     * Check whether the server supports boolean values
+     * @return true if boolean values are supported
+     */
+    protected final boolean serverSupportsBooleanValues() {
+
+        NetDatabaseMetaData metadata =
+            (NetDatabaseMetaData) databaseMetaData_;
+
+        return metadata.serverSupportsBooleanValues();
+    }
+
+    /**
      * Returns if a transaction is in process
      * @return open
      */

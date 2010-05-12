@@ -34,12 +34,12 @@ ij> -- show all the indexes in the schema
 SHOW INDEXES IN APP;
 TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
 ----------------------------------------------------------------------------
-T1                  |TEST                |1     |3   |A   |NULL    |NULL    
-T2                  |PK                  |0     |3   |A   |NULL    |NULL    
-T2                  |V                   |1     |3   |A   |NULL    |NULL    
+T1                  |TEST                |true  |3   |A   |NULL    |NULL    
+T2                  |PK                  |false |3   |A   |NULL    |NULL    
+T2                  |V                   |true  |3   |A   |NULL    |NULL    
 ij> -- show only indexes in table t1
 SHOW INDEXES FROM APP.t1;
 TABLE_NAME          |COLUMN_NAME         |NON_U&|TYPE|ASC&|CARDINA&|PAGES   
 ----------------------------------------------------------------------------
-T1                  |TEST                |1     |3   |A   |NULL    |NULL    
+T1                  |TEST                |true  |3   |A   |NULL    |NULL    
 ij> 

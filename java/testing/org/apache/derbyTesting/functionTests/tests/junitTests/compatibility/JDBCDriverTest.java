@@ -253,10 +253,85 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		datatypesTest( conn );
         udtTest( conn );
         derby_2602_test( conn );
+        derby_4613_test( conn );
 
 		close( conn );
 	}
 	
+	/////////////////////////////////////////////////////////////
+	//
+	//	DERBY-4613
+    //
+    // Make embedded and network clients treat BOOLEAN values identically.
+	//
+	/////////////////////////////////////////////////////////////
+
+    //
+    // Verify that embedded and network clients handle BOOLEAN values the
+    // same way from release 10.7 onward.
+    //
+	private	void	derby_4613_test( Connection conn )
+		throws Exception
+	{
+        boolean correctBehavior =
+            usingEmbeddedClient() ||
+            (
+             getServerVersion().atLeast( DRB_10_7 ) &&
+             getDriverVersion().atLeast( DRB_10_7 )
+             );
+
+        println( "derby_4613_test correctBehavior = " + correctBehavior );
+
+        vet_isindex_column( conn, correctBehavior, "SYSTABLES_HEAP", false );
+        vet_isindex_column( conn, correctBehavior, "SYSTABLES_INDEX1", true );
+    }
+    /**
+     * <p>
+     * Vet boolean results.
+     * </p>
+     */
+    private void vet_isindex_column( Connection conn, boolean correctBehavior, String conglomerateName, boolean expectedValue ) throws Exception
+    {
+        PreparedStatement ps = prepare( conn, "select isindex from sys.sysconglomerates where conglomeratename = ?" );
+        ps.setString( 1, conglomerateName );
+        ResultSet rs = ps.executeQuery();
+        ResultSetMetaData rsmd = rs.getMetaData();
+
+        int jdbcType = correctBehavior ? Types.BOOLEAN : Types.SMALLINT;
+        String typeName = correctBehavior ? "BOOLEAN" : "SMALLINT";
+        int precision = correctBehavior ? 1 : 5;
+        int scale = 0;
+        int columnDisplaySize = correctBehavior ? 5 : 6;
+        String columnClassName = correctBehavior ? "java.lang.Boolean" : "java.lang.Integer";
+
+        Object objectValue;
+        if ( correctBehavior )
+        {
+            objectValue = new Boolean( expectedValue );
+        }
+        else
+        {
+            objectValue = expectedValue ? new Integer( 1 ) : new Integer( 0 );
+        }        
+        String stringValue = objectValue.toString();
+
+        assertEquals( jdbcType, rsmd.getColumnType( 1 ) );
+        assertEquals( typeName, rsmd.getColumnTypeName( 1 ) );
+        assertEquals( precision, rsmd.getPrecision( 1 ) );
+        assertEquals( scale, rsmd.getScale( 1 ) );
+        assertEquals( columnDisplaySize, rsmd.getColumnDisplaySize( 1 ) );
+        assertEquals( columnClassName, rsmd.getColumnClassName( 1 ) );
+
+        assertEquals( true, rs.next() );
+        
+        assertEquals( expectedValue, rs.getBoolean( 1 ) );
+        assertEquals( objectValue, rs.getObject( 1 ) );
+        assertEquals( stringValue, rs.getString( 1 ) );
+
+        rs.close();
+        ps.close();
+    }
+    
 	/////////////////////////////////////////////////////////////
 	//
 	//	DERBY-2602

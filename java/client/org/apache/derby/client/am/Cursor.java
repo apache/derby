@@ -363,6 +363,14 @@ public abstract class Cursor {
     //------- the following getters are called on known column types -------------
     // Direct conversions only, cross conversions are handled by another set of getters.
 
+    // Build a Java boolean from a 1-byte signed binary representation.
+    private final boolean get_BOOLEAN(int column) {
+        if ( org.apache.derby.client.am.SignedBinary.getByte
+             ( dataBuffer_, columnDataPosition_[column - 1] ) == 0 )
+        { return false; }
+        else { return true; }
+    }
+
     // Build a Java short from a 2-byte signed binary representation.
     private final short get_SMALLINT(int column) {
         return org.apache.derby.client.am.SignedBinary.getShort(dataBuffer_,
@@ -763,6 +771,8 @@ public abstract class Cursor {
 
     final boolean getBoolean(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+        case java.sql.Types.BOOLEAN:
+            return get_BOOLEAN(column);
         case java.sql.Types.SMALLINT:
             return agent_.crossConverters_.getBooleanFromShort(get_SMALLINT(column));
         case java.sql.Types.INTEGER:
@@ -790,6 +800,8 @@ public abstract class Cursor {
     final byte getByte(int column) throws SqlException {
         // This needs to be changed to use jdbcTypes[]
         switch (jdbcTypes_[column - 1]) {
+        case java.sql.Types.BOOLEAN:
+            return agent_.crossConverters_.getByteFromBoolean(get_BOOLEAN(column));
         case java.sql.Types.SMALLINT:
             return agent_.crossConverters_.getByteFromShort(get_SMALLINT(column));
         case java.sql.Types.INTEGER:
@@ -816,6 +828,8 @@ public abstract class Cursor {
 
     final short getShort(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+        case java.sql.Types.BOOLEAN:
+            return agent_.crossConverters_.getShortFromBoolean(get_BOOLEAN(column));
         case java.sql.Types.SMALLINT:
             return get_SMALLINT(column);
         case java.sql.Types.INTEGER:
@@ -842,6 +856,8 @@ public abstract class Cursor {
 
     final int getInt(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+        case java.sql.Types.BOOLEAN:
+            return agent_.crossConverters_.getIntFromBoolean(get_BOOLEAN(column));
         case java.sql.Types.SMALLINT:
             return (int) get_SMALLINT(column);
         case java.sql.Types.INTEGER:
@@ -868,6 +884,8 @@ public abstract class Cursor {
 
     final long getLong(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+        case java.sql.Types.BOOLEAN:
+            return agent_.crossConverters_.getLongFromBoolean(get_BOOLEAN(column));
         case java.sql.Types.SMALLINT:
             return (long) get_SMALLINT(column);
         case java.sql.Types.INTEGER:
@@ -894,6 +912,8 @@ public abstract class Cursor {
 
     final float getFloat(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+        case java.sql.Types.BOOLEAN:
+            return agent_.crossConverters_.getFloatFromBoolean(get_BOOLEAN(column));
         case java.sql.Types.REAL:
             return get_FLOAT(column);
         case java.sql.Types.DOUBLE:
@@ -920,6 +940,8 @@ public abstract class Cursor {
 
     final double getDouble(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+        case java.sql.Types.BOOLEAN:
+            return agent_.crossConverters_.getDoubleFromBoolean(get_BOOLEAN(column));
         case java.sql.Types.REAL:
             double d = (double) get_FLOAT(column);
             return d;
@@ -948,6 +970,8 @@ public abstract class Cursor {
 
     final java.math.BigDecimal getBigDecimal(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+        case java.sql.Types.BOOLEAN:
+            return new java.math.BigDecimal( getInt( column ) );
         case java.sql.Types.DECIMAL:
             return get_DECIMAL(column);
         case java.sql.Types.REAL:
@@ -1039,6 +1063,9 @@ public abstract class Cursor {
         try {
             String tempString = null;
             switch (jdbcTypes_[column - 1]) {
+            case java.sql.Types.BOOLEAN:
+                if ( get_BOOLEAN( column ) ) { return Boolean.TRUE.toString(); }
+                else { return Boolean.FALSE.toString(); }
             case java.sql.Types.CHAR:
                 return getCHAR(column);
             case java.sql.Types.VARCHAR:
@@ -1319,6 +1346,8 @@ public abstract class Cursor {
 
     public final Object getObject(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
+        case java.sql.Types.BOOLEAN:
+            return new Boolean(get_BOOLEAN(column));
         case java.sql.Types.SMALLINT:
             return new Integer(get_SMALLINT(column)); // See Table 4 in JDBC 1 spec (pg. 932 in jdbc book)
         case java.sql.Types.INTEGER:

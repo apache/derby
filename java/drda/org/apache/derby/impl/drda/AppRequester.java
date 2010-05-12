@@ -317,6 +317,10 @@ class AppRequester
 		return (clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 6, 0));
 	}
 
+	protected boolean supportsBooleanValues() {
+		return (clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 7, 0));
+	}
+
     /**
      * The timestamp length may be truncated for old versions of Derby.
      * See DERBY-2602.

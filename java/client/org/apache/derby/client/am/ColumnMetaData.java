@@ -286,6 +286,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             checkForValidColumnIndex(column);
             int jdbcType = types_[column - 1];
             switch (jdbcType) {
+            case Types.BOOLEAN:
+                return 5;
             case Types.INTEGER:
                 return 11;
             case Types.SMALLINT:
@@ -419,6 +421,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             int jdbcType = types_[column - 1];
 
             switch (jdbcType) {
+            case Types.BOOLEAN:
+                return 1;
             case java.sql.Types.NUMERIC:
             case Types.DECIMAL:
                 return sqlPrecision_[column - 1];
@@ -550,6 +554,9 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             int sqlType = sqlType_[column - 1];
 
             switch (sqlType) {
+            case DRDAConstants.DB2_SQLTYPE_BOOLEAN:
+            case DRDAConstants.DB2_SQLTYPE_NBOOLEAN:
+                return "BOOLEAN";
             case DRDAConstants.DB2_SQLTYPE_DATE:
             case DRDAConstants.DB2_SQLTYPE_NDATE:
                 return "DATE";
@@ -684,6 +691,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
 
             int jdbcType = types_[column - 1];
             switch (jdbcType) {
+            case java.sql.Types.BOOLEAN:
+                return "java.lang.Boolean";
             case java.sql.Types.BIT:
                 return "java.lang.Boolean";
             case java.sql.Types.TINYINT:
@@ -809,6 +818,8 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
     // Only used when describe information is not available.
     private int getInternalTypeForGuessedOrRegisteredJdbcType(int guessedOrRegisteredJdbcType) throws SqlException {
         switch (guessedOrRegisteredJdbcType) {
+        case java.sql.Types.BOOLEAN:
+            return Types.BOOLEAN;
         case java.sql.Types.BIT:
         case java.sql.Types.TINYINT:
         case java.sql.Types.SMALLINT:

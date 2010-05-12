@@ -7834,6 +7834,9 @@ class DRDAConnThread extends Thread {
 			long valLength = 0;
 			switch (ndrdaType)
 			{
+			    case DRDAConstants.DRDA_TYPE_NBOOLEAN:
+                    writer.writeBoolean( ((Boolean) val).booleanValue() );
+					break;
 			    case DRDAConstants.DRDA_TYPE_NSMALL:
  					// DB2 does not have a BOOLEAN java.sql.bit type,
 					// so we need to send it as a small

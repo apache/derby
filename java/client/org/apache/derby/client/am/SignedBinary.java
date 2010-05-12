@@ -36,6 +36,13 @@ public class SignedBinary {
     public final static int LITTLE_ENDIAN = 2;
 
     /**
+     * Get a byte from the buffer.
+     */
+    public static final byte getByte(byte[] buffer, int offset) {
+        return buffer[ offset ];
+    }
+
+    /**
      * Build a Java short from a 2-byte signed binary representation.
      *
      * @throws IllegalArgumentException if the specified byte order is not recognized.

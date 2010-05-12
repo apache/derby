@@ -1821,17 +1821,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         // DMD returns BOOLEAN
         // RSMD returns SMALLINT
         int dmdColumnType = rs.getInt("DATA_TYPE");
-        if (dmdColumnType == Types.BOOLEAN && usingDerbyNetClient())
-        {
-            assertEquals("TYPE_NAME",
-                    "BOOLEAN", rs.getString("TYPE_NAME"));
-            assertEquals("TYPE_NAME",
-                    "SMALLINT", rsmdt.getColumnTypeName(col));
-
-            assertEquals("DATA_TYPE",
-                    Types.SMALLINT, rsmdt.getColumnType(col));
-        }
-        else if (dmdColumnType == Types.JAVA_OBJECT && usingDerbyNetClient()
+        if (dmdColumnType == Types.JAVA_OBJECT && usingDerbyNetClient()
                  &&  ( dataVersion.compareTo( new Version( 10, 6, 0, 0 ) ) < 0 ) )
         {
             // DMD returns JAVA_OBJECT
@@ -2047,8 +2037,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     {
         // Client returns BOOLEAN type from the engine as SMALLINT
         int BOOLEAN = Types.BOOLEAN;      
-        if (usingDerbyNetClient())
-            BOOLEAN = Types.SMALLINT;
         
         String[] JDBC_COLUMN_NAMES = new String[] {
                 "TYPE_NAME", "DATA_TYPE", "PRECISION", "LITERAL_PREFIX",
@@ -3731,10 +3719,6 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 // ASC_OR_DESC is Types.CHAR rather than VARCHAR...
                 Types.SMALLINT,Types.VARCHAR,Types.CHAR,Types.INTEGER,
                 Types.INTEGER,Types.VARCHAR};
-        
-        // types.boolean is not supported with networkserver
-        if (usingDerbyNetClient())
-        	columnTypes[4 - 1] = Types.SMALLINT;
         
         boolean [] nullability = {false,false,false,
             false,false,true,true,true,false,false,true,true,true};

@@ -69,6 +69,33 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
     public boolean useServerXAState_ = true;
 
+    /** True if the server supports QRYCLSIMP. */
+    private boolean supportsQryclsimp_;
+    
+    private boolean supportsLayerBStreaming_;
+
+    /**
+     * True if the server supports session data caching
+     */
+    private boolean supportsSessionDataCaching_;
+
+    /** True if the server supports UDTs */
+    private boolean supportsUDTs_;
+
+    /**
+     * True if the server supports aborting a statement whilst transferring
+     * EXTDTA objects. Note that there are two types of aborts, depending on
+     * whether an object is being transferred to the server using DDM layer B
+     * streaming or not.
+     */
+    private boolean supportsEXTDTAAbort_;
+    
+    /** True if the server supports nanoseconds in timestamps */
+    private boolean supportsTimestampNanoseconds_;
+    
+    /** True if the server supports boolean values */
+    private boolean supportsBooleanValues_;
+
     //---------------------constructors/finalizer---------------------------------
 
     protected DatabaseMetaData(Agent agent, Connection connection, ProductLevel productLevel) {
@@ -2258,10 +2285,108 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         return false;
     }
 
-    //--------------------Abstract material layer call-down methods-----------------
+    //-----------------------------helper methods---------------------------------
 
-    // Compute feature set based on release
-    abstract protected void computeFeatureSet_();
+    // Set flags describing the level of support for this connection.
+    // Flags will be set based on manager level and/or specific product identifiers.
+    // Support for a specific server version can be set as follows. For example
+    // if (productLevel_.greaterThanOrEqualTo(11,1,0))
+    //  supportsTheBestThingEver = true
+    //
+    // WARNING WARNING WARNING !!!!
+    //
+    // If you define an instance variable of NetDatabaseMetaData that
+    // you want computeFeatureSet_() to compute, DO NOT assign an
+    // initial value to the variable in the
+    // declaration. NetDatabaseMetaData's constructor will invoke
+    // DatabaseMetaData's constructor, which then invokes
+    // computeFeatureSet_(). Initialization of instance variables in
+    // NetDatabaseMetaData will happen *after* the invocation of
+    // computeFeatureSet_() and will therefore overwrite the computed
+    // values. So, LEAVE INSTANCE VARIABLES UNINITIALIZED!
+    //
+    // END OF WARNING
+    protected void computeFeatureSet_() {
+
+        // Support for QRYCLSIMP was added in 10.2.0
+        if (productLevel_.greaterThanOrEqualTo(10, 2, 0)) {
+            supportsQryclsimp_ = true;
+        } else {
+            supportsQryclsimp_ = false;
+        }
+        
+        supportsLayerBStreaming_ = 
+            productLevel_.greaterThanOrEqualTo(10, 3, 0);
+
+        supportsSessionDataCaching_ =
+                productLevel_.greaterThanOrEqualTo(10, 4, 0);
+
+        supportsUDTs_ =
+                productLevel_.greaterThanOrEqualTo(10, 6, 0);
+
+        supportsTimestampNanoseconds_ =
+                productLevel_.greaterThanOrEqualTo(10, 6, 0);
+
+        supportsEXTDTAAbort_ =
+                productLevel_.greaterThanOrEqualTo(10, 6, 0);
+
+        supportsBooleanValues_ =
+                productLevel_.greaterThanOrEqualTo(10, 7, 0);
+    }
+
+    /**
+     * Check whether the server has full support for the QRYCLSIMP
+     * parameter in OPNQRY.
+     *
+     * @return true if QRYCLSIMP is fully supported
+     */
+    final public boolean serverSupportsQryclsimp() {
+        return supportsQryclsimp_;
+    }
+
+    final public boolean serverSupportsLayerBStreaming() {
+        return supportsLayerBStreaming_;
+    }
+
+    /**
+     * Check if server supports session data caching
+     * @return true if the server supports this
+     */
+    final public boolean serverSupportsSessionDataCaching() {
+        return supportsSessionDataCaching_;
+    }
+
+    /**
+     * Check if server supports UDTs
+     * @return true if the server supports this
+     */
+    final public boolean serverSupportsUDTs() {
+        return supportsUDTs_;
+    }
+
+    /**
+     * Check if server supports nanoseconds in timestamps
+     * @return true if the server supports this
+     */
+    final public boolean serverSupportsTimestampNanoseconds() {
+        return supportsTimestampNanoseconds_;
+    }
+
+    /**
+     * Check if server supports product specific EXTDTA abort protocol.
+     * @return {@code true} if the server supports this.
+     */
+    final public boolean serverSupportsEXTDTAAbort() {
+        return supportsEXTDTAAbort_;
+    }
+
+    /**
+     * Check if server supports boolean values
+     * @return true if the server supports this
+     */
+    final public boolean serverSupportsBooleanValues() {
+        return supportsUDTs_;
+    }
 
     //------------helper methods for meta data info call methods------------------
 
@@ -2269,11 +2394,16 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     private boolean getMetaDataInfoBoolean(int infoCallIndex) throws SQLException {
         try
         {
-			if (metaDataInfoIsCached_) {
-				return ((Integer) metaDataInfoCache_[infoCallIndex]).intValue() != 0;
-			}
-			metaDataInfoCall();
-			return ((Integer) metaDataInfoCache_[infoCallIndex]).intValue() != 0;
+			if ( !metaDataInfoIsCached_) { metaDataInfoCall(); }
+
+            if ( serverSupportsBooleanValues() )
+            {
+                return ((Boolean) metaDataInfoCache_[infoCallIndex]).booleanValue();
+            }
+            else
+            {
+                return ((Integer) metaDataInfoCache_[infoCallIndex]).intValue() != 0;
+            }
         }
         catch ( SqlException se )
         {

@@ -1218,6 +1218,17 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     lidAndLengths[i][1] = 4;
                     break;
                 case java.sql.Types.BOOLEAN:
+                    if ( netAgent_.netConnection_.serverSupportsBooleanValues() )
+                    {
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NBOOLEAN;
+                        lidAndLengths[i][1] = 1;
+                    }
+                    else
+                    {
+                        lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NSMALL;
+                        lidAndLengths[i][1] = 2;
+                    }
+                    break;
                 case java.sql.Types.SMALLINT:
                 case java.sql.Types.TINYINT:
                 case java.sql.Types.BIT:
