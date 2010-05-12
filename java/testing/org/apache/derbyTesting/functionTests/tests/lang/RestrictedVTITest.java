@@ -116,6 +116,18 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
                  "external name 'org.apache.derbyTesting.functionTests.tests.lang.IntegerArrayVTI.getLastRestriction'\n"
                  );
         }
+        if ( !routineExists( conn, "GETCOUNT" ) )
+        {
+            goodStatement
+                (
+                 conn,
+                 "create function getCount\n" +
+                 "()\n" +
+                 "returns int\n" +
+                 "language java parameter style java no sql\n" +
+                 "external name 'org.apache.derbyTesting.functionTests.tests.lang.IntegerArrayVTI.getLastQualifiedRowCount'\n"
+                 );
+        }
         if ( !routineExists( conn, "INTEGERLIST" ) )
         {
             goodStatement
@@ -644,6 +656,74 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
                 );
     }
 
+    /**
+     * Verify that attempts to create a trailing constant qualification do no
+     * cause the VTI to return the wrong rows.
+     * Tracked as DERBY-4651.
+     */
+    public void test_09_4651() throws Exception
+    {
+        Connection conn = getConnection();
+
+        assertPR
+            (
+             conn,
+             "select s_r, s_nr from table( integerList() ) s order by s_r\n",
+             new String[][]
+             {
+                 { "1" ,         "2"  },
+                 { "100" ,         "200"  },
+                 { "1000" ,         "2000"  },
+                 { "10000" ,         "20000"  },
+             },
+             "[S_R, S_NR, null, null]",
+             null,
+             4
+             );
+
+        assertPR
+            (
+             conn,
+             "select s_r, s_nr from table( integerList() ) s where s_r > 500 order by s_r\n",
+             new String[][]
+             {
+                 { "1000" ,         "2000"  },
+                 { "10000" ,         "20000"  },
+             },
+             "[S_R, S_NR, null, null]",
+             "\"S_R\" > 500",
+             2
+             );
+
+        assertPR
+            (
+             conn,
+             "select s_r, s_nr from table( integerList() ) s where s_r > 500 or 1=1 order by s_r\n",
+             new String[][]
+             {
+                 { "1" ,         "2"  },
+                 { "100" ,         "200"  },
+                 { "1000" ,         "2000"  },
+                 { "10000" ,         "20000"  },
+             },
+             "[S_R, S_NR, null, null]",
+             null,
+             4
+             );
+
+        assertPR
+            (
+             conn,
+             "select s_r, s_nr from table( integerList() ) s where s_r > 500 and 1 != 1 order by s_r\n",
+             new String[][]
+             {
+             },
+             "[S_R, S_NR, null, null]",
+             null,
+             4
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
@@ -727,6 +807,34 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
         ps.close();
 
         return retval;
+    }
+
+    /**
+     * <p>
+     * Run a query against a RestrictedVTI, verify that the expected
+     * projection and restriction are pushed into the VTI, and verify
+     * that the VTI returns the expected number of rows.
+     * </p>
+     */
+    private void assertPR
+        (
+         Connection conn,
+         String query,
+         String[][] expectedResults,
+         String expectedProjection,
+         String expectedRestriction,
+         int expectedQualifiedRowCount
+         ) throws Exception
+    {
+        assertPR( conn, query, expectedResults, expectedProjection, expectedRestriction );
+        
+        assertResults
+            (
+             conn,
+             "values ( getCount() )\n",
+             new String[][] { { Integer.toString( expectedQualifiedRowCount ) } },
+             false
+             );
     }
 
     /**

@@ -40,6 +40,7 @@ public class IntegerArrayVTI extends StringArrayVTI implements RestrictedVTI
 
     private static String[] _lastProjection;
     private static Restriction _lastRestriction;
+    private static int _lastQualifedRowCount;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -104,6 +105,27 @@ public class IntegerArrayVTI extends StringArrayVTI implements RestrictedVTI
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
+    // ResultSet OVERRIDES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public boolean next() throws SQLException
+    {
+        while ( true )
+        {
+            boolean anotherRow = super.next();
+            if ( !anotherRow ) { return false; }
+
+            if ( qualifyCurrentRow() )
+            {
+                _lastQualifedRowCount++;
+                return true;
+            }
+        }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
     // RestrictedVTI BEHAVIOR
     //
     ///////////////////////////////////////////////////////////////////////////////////
@@ -112,6 +134,62 @@ public class IntegerArrayVTI extends StringArrayVTI implements RestrictedVTI
     {
         _lastProjection = columnNames;
         _lastRestriction = restriction;
+        _lastQualifedRowCount = 0;
+    }
+
+    // Return true if the qualification succeeds on the current row
+    private boolean qualifyCurrentRow() throws SQLException
+    {
+        if ( _lastRestriction == null ) { return true; }
+
+        return qualifyCurrentRow( _lastRestriction );
+    }
+    private boolean qualifyCurrentRow( Restriction restriction ) throws SQLException
+    {
+        if ( restriction instanceof Restriction.AND )
+        {
+            Restriction.AND and = (Restriction.AND) restriction;
+
+            return qualifyCurrentRow( and.getLeftChild() ) && qualifyCurrentRow( and.getRightChild() );
+        }
+        else if ( restriction instanceof Restriction.OR )
+        {
+            Restriction.OR or = (Restriction.OR) restriction;
+
+            return qualifyCurrentRow( or.getLeftChild() ) || qualifyCurrentRow( or.getRightChild() );
+        }
+        else if ( restriction instanceof Restriction.ColumnQualifier )
+        {
+            return applyColumnQualifier( (Restriction.ColumnQualifier) restriction );
+        }
+        else { throw new SQLException( "Unknown type of Restriction: " + restriction.getClass().getName() ); }
+    }
+    private boolean applyColumnQualifier( Restriction.ColumnQualifier qc ) throws SQLException
+    {
+        int operator = qc.getComparisonOperator();
+        int column = getInt( qc.getColumnName() );
+        boolean columnWasNull = wasNull();
+
+        if ( columnWasNull )
+        {
+            if ( operator == Restriction.ColumnQualifier.ORDER_OP_ISNULL ) { return true; }
+            else if ( operator == Restriction.ColumnQualifier.ORDER_OP_ISNOTNULL ) { return false; }
+            else { return false; }
+        }
+        else if ( operator == Restriction.ColumnQualifier.ORDER_OP_ISNULL ) { return false; }
+        else if ( operator == Restriction.ColumnQualifier.ORDER_OP_ISNOTNULL ) { return true; }
+
+        int constant = ((Integer) qc.getConstantOperand()).intValue();
+
+        switch ( operator )
+        {
+        case Restriction.ColumnQualifier.ORDER_OP_EQUALS: return ( column == constant );
+        case Restriction.ColumnQualifier.ORDER_OP_GREATEROREQUALS: return ( column >= constant );
+        case Restriction.ColumnQualifier.ORDER_OP_GREATERTHAN: return ( column > constant );
+        case Restriction.ColumnQualifier.ORDER_OP_LESSOREQUALS: return ( column <= constant );
+        case Restriction.ColumnQualifier.ORDER_OP_LESSTHAN: return ( column < constant );
+        default: throw new SQLException( "Unknown comparison operator: " + operator );
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -122,5 +200,6 @@ public class IntegerArrayVTI extends StringArrayVTI implements RestrictedVTI
 
     public static String getLastProjection() { return ( (_lastProjection == null) ? null : Arrays.asList( _lastProjection ).toString() ); }
     public static String getLastRestriction() { return ( ( _lastRestriction == null ) ? null : _lastRestriction.toSQL() ); }
+    public static int getLastQualifiedRowCount() { return _lastQualifedRowCount; }
     
 }
