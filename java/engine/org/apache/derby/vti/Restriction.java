@@ -21,7 +21,7 @@
 package org.apache.derby.vti;
 
 import java.io.Serializable;
-import java.sql.SQLException;
+import org.apache.derby.iapi.util.IdUtil;
 
 /**
    <p>
@@ -39,9 +39,6 @@ public abstract class Restriction implements Serializable
      * Turn this Restriction into a string suitable for use in a WHERE clause.
      */
     public abstract String toSQL();
-
-    /** Utility method to double quote a string */
-    protected String doubleQuote( String raw ) { return "\"" + raw + "\""; }
 
     /** Utility method to parenthesize an expression */
     protected String parenthesize( String raw ) { return "( " + raw + " )"; }
@@ -236,7 +233,7 @@ public abstract class Restriction implements Serializable
         {
             StringBuffer buffer = new StringBuffer();
 
-            buffer.append( doubleQuote( _columnName ) );
+            buffer.append( IdUtil.normalToDelimited( _columnName ) );
             buffer.append( " " + OPERATOR_SYMBOLS[ _comparisonOperator ] + " " );
             if ( _constantOperand != null ) { buffer.append( _constantOperand ); }
 

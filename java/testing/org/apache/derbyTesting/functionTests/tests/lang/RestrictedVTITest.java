@@ -24,13 +24,14 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * <p>
@@ -152,6 +153,21 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
                  "parameter style derby_jdbc_result_set\n" +
                  "no sql\n" +
                  "external name 'org.apache.derbyTesting.functionTests.tests.lang.RestrictedVTITest.nullableIntegerList'\n"
+                 );
+        }
+        if ( !routineExists( conn, "INTEGERLISTSPECIALCOLNAMES" ) )
+        {
+            goodStatement
+                (
+                 conn,
+                 "create function integerListSpecialColNames()\n" +
+                 "returns table( \"CoL \"\"1\"\"\" int,\n" +
+                 "\"cOL \"\"2\"\"\" int, col3 int, col4 int )\n" +
+                 "language java\n" +
+                 "parameter style derby_jdbc_result_set\n" +
+                 "no sql\n" +
+                 "external name '" + getClass().getName() +
+                 ".integerListSpecialColNames'\n"
                  );
         }
         if ( !tableExists( conn, "T_4357_1" ) )
@@ -724,6 +740,44 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * Test that {@code Restriction.toSQL()} returns properly quoted column
+     * names. DERBY-4654.
+     */
+    public void test_10_quotes_in_column_names() throws Exception
+    {
+        String[][] expectedRows = new String[][] {{"100", "200", "300", "400"}};
+        String expectedRestriction =
+                "( \"cOL \"\"2\"\"\" < 1000 ) AND ( \"CoL \"\"1\"\"\" > 1 )";
+
+        // Check that we can execute a query against a restricted VTI with
+        // double quotes in the column names.
+        assertPR(
+                getConnection(),
+                "select * from table(integerListSpecialColNames()) t " +
+                "where \"CoL \"\"1\"\"\" > 1 and \"cOL \"\"2\"\"\" < 1000",
+                expectedRows,
+                "[CoL \"1\", cOL \"2\", COL3, COL4]",
+                expectedRestriction);
+
+        // Get the restriction that was pushed down.
+        Statement stmt = createStatement();
+        ResultSet rs = executeQuery(stmt, "values getLastRestriction()");
+        assertTrue("empty result", rs.next());
+        String restriction = rs.getString(1);
+        assertEquals(expectedRestriction, restriction);
+        rs.close();
+
+        // Verify that the returned restriction has correct syntax so that
+        // we can put it directly into the WHERE clause of a select query and
+        // get the same rows as we did above.
+        rs = executeQuery(
+                stmt,
+                "select * from table(integerListSpecialColNames()) t where " +
+                restriction);
+        JDBC.assertUnorderedResultSet(rs, expectedRows);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
@@ -768,7 +822,22 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
              );
     }
     private static Integer i( int intValue ) { return new Integer( intValue ); }
-    
+
+    public static IntegerArrayVTI integerListSpecialColNames()
+    {
+        return new IntegerArrayVTI
+            (
+             new String[] { "CoL \"1\"", "cOL \"2\"", "COL3", "COL4" },
+             new int[][]
+             {
+                 new int[] { 1, 2, 3, 4 },
+                 new int[] { 100, 200, 300, 400 },
+                 new int[] { 1000, 2000, 3000, 4000 },
+                 new int[] { 10000, 20000, 30000, 40000 },
+             }
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
