@@ -1332,10 +1332,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
             AndNode andOperator = (AndNode) clause;
 
             // strip off trailing vacuous TRUE constant if present
-            if (
-                andOperator.getRightOperand() instanceof BooleanConstantNode &&
-                ( ((BooleanConstantNode) andOperator.getRightOperand()).isBooleanTrue() )
-                )
+            if ( andOperator.getRightOperand().isBooleanTrue() )
             { return makeRestriction( andOperator.getLeftOperand(), columnNameMap ); }
             
             Restriction leftRestriction = makeRestriction( andOperator.getLeftOperand(), columnNameMap );
@@ -1350,10 +1347,7 @@ public class FromVTI extends FromTable implements VTIEnvironment
             OrNode orOperator = (OrNode) clause;
             
             // strip off trailing vacuous FALSE constant if present
-            if (
-                orOperator.getRightOperand() instanceof BooleanConstantNode &&
-                ( ((BooleanConstantNode) orOperator.getRightOperand()).isBooleanFalse() )
-                )
+            if ( orOperator.getRightOperand().isBooleanFalse() )
             { return makeRestriction( orOperator.getLeftOperand(), columnNameMap ); }
             
             Restriction leftRestriction = makeRestriction( orOperator.getLeftOperand(), columnNameMap );
