@@ -52,6 +52,18 @@ public  class   AnsiSignatures
     ///////////////////////////////////////////////////////////////////
 
     //
+    // BOOLEAN
+    //
+    
+    // legal resolutions
+    public  static  boolean   boolean_boolean_int( int a ) { return true; }
+    public  static  Boolean boolean_Boolean_int( int a ) { return Boolean.TRUE; }
+
+    // bad return type
+    public  static  byte   boolean_badreturn_byte_int( int a ) { return (byte) -1; }
+
+    
+    //
     // SMALLINT
     //
     

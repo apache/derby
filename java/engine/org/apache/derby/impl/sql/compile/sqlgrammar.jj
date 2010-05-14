@@ -3899,7 +3899,7 @@ columnDefinition(TableElementList tableElementList) throws StandardException :
 
 	/* identifier() used to be columnName() */
 	columnName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true) 
-	[ ( typeDescriptor[0] = dataTypeDDL() ) ]
+	[ ( typeDescriptor[0] = dataTypeDDL( false ) ) ]
 	[ defaultNode = defaultAndConstraints(typeDescriptor, tableElementList, columnName, autoIncrementInfo) ]
 	{
 		// Only pass autoincrement info for autoincrement columns
@@ -3948,13 +3948,13 @@ defaultAndConstraints(DataTypeDescriptor[] typeDescriptor,
  * <A NAME="dataTypeDDL">dataTypeDDL</A>
  */
 DataTypeDescriptor
-dataTypeDDL() throws StandardException :
+dataTypeDDL( boolean booleanDatatypeAllowed ) throws StandardException :
 {
 	DataTypeDescriptor	typeDescriptor;
 }
 {
 	LOOKAHEAD( { commonDatatypeName(false) } )
-	typeDescriptor = dataTypeCommon()
+	typeDescriptor = dataTypeCommon( booleanDatatypeAllowed )
 	{
 		return typeDescriptor;
 	}
@@ -3971,12 +3971,12 @@ dataTypeDDL() throws StandardException :
    the Java interface TypeDescriptor.
 */
 TypeDescriptor
-catalogType() throws StandardException :
+catalogType( boolean booleanDatatypeAllowed ) throws StandardException :
 {
 	DataTypeDescriptor	typeDescriptor;
 }
 {
-	typeDescriptor = dataTypeDDL()
+	typeDescriptor = dataTypeDDL( booleanDatatypeAllowed )
 	{
 		return typeDescriptor.getCatalogType();
 	}
@@ -3995,7 +3995,7 @@ dataTypeCast() throws StandardException :
 	// This lookahead is required because the names of the built-in
 	// datatypes are not reserved words
 	LOOKAHEAD( { commonDatatypeName(true) } )
-	typeDescriptor = dataTypeCommon()
+	typeDescriptor = dataTypeCommon( false )
 	{
 		return typeDescriptor;
 	}
@@ -4010,7 +4010,7 @@ dataTypeCast() throws StandardException :
  * <A NAME="dataTypeCommon">dataTypeCommon</A>
  */
 DataTypeDescriptor
-dataTypeCommon() throws StandardException :
+dataTypeCommon( boolean booleanDatatypeAllowed ) throws StandardException :
 {
 	DataTypeDescriptor	typeDescriptor;
 	boolean checkCS = false;
@@ -4037,7 +4037,11 @@ dataTypeCommon() throws StandardException :
 	typeDescriptor = datetimeType()
 | <BOOLEAN>
 {
-	checkInternalFeature(TypeId.BOOLEAN_NAME);
+	if ( !booleanDatatypeAllowed) { checkInternalFeature(TypeId.BOOLEAN_NAME); }
+	if ((getCompilerContext().getReliability() & CompilerContext.INTERNAL_SQL_ILLEGAL) != 0)
+    {
+        checkVersion(DataDictionary.DD_VERSION_DERBY_10_7, "BOOLEAN");
+    }
 	typeDescriptor = new DataTypeDescriptor(TypeId.BOOLEAN_ID, true);
 }
 |
@@ -7189,7 +7193,7 @@ DataTypeDescriptor xmlSerializeTargetType() throws StandardException :
 			ReuseFactory.getInteger(getToken(1).beginColumn));
 	}
 |
-	<AS> targetType = dataTypeDDL()
+	<AS> targetType = dataTypeDDL( false )
 	{
 		return targetType;
 	}
@@ -10736,7 +10740,7 @@ procedureParameterDefinition(Vector[] list) throws StandardException :
 	[   LOOKAHEAD( { dataTypeCheck(2) })
 	    parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	]
-	typeDescriptor = dataTypeDDL()
+	typeDescriptor = dataTypeDDL( false )
 	{
 		list[0].addElement(parameterName);
 		list[1].addElement(typeDescriptor.getCatalogType());
@@ -10831,7 +10835,7 @@ functionParameterDefinition(Vector[] list) throws StandardException :
 	[   LOOKAHEAD( { dataTypeCheck(2) })
 	    parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	]
-	typeDescriptor = dataTypeDDL() 
+	typeDescriptor = dataTypeDDL( false ) 
 	{
 		list[0].addElement(parameterName);
 		list[1].addElement(typeDescriptor.getCatalogType());
@@ -10850,7 +10854,7 @@ functionReturnDataType() throws StandardException :
 }
 {
     (
-        typeDescriptor = catalogType()
+        typeDescriptor = catalogType( true )
          |
         typeDescriptor = functionTableType()
     )
@@ -10917,7 +10921,7 @@ throws StandardException :
 }
 {
 	name = identifier( Limits.MAX_IDENTIFIER_LENGTH, true )
-	typeDescriptor = dataTypeDDL()
+	typeDescriptor = dataTypeDDL( false )
 	{
 		names.add( name );
 		types.add( typeDescriptor.getCatalogType() );
@@ -13278,7 +13282,7 @@ columnAlterClause(String columnName) throws StandardException :
 }
 {
 	LOOKAHEAD( {getToken(2).kind == DATA} )
-	<SET> <DATA> <TYPE> typeDescriptor = dataTypeDDL()
+	<SET> <DATA> <TYPE> typeDescriptor = dataTypeDDL( false )
 	{
 		return (TableElementNode) nodeFactory.getNode(
 						C_NodeTypes.MODIFY_COLUMN_TYPE_NODE,
@@ -13794,11 +13798,11 @@ List/*<TypeDescriptor>*/ parameterTypeList( ) throws StandardException :
     TypeDescriptor type;
 }
 {
-    [ type = catalogType()
+    [ type = catalogType( false )
         {
             list.add(type);
         }
-      ( <COMMA> type = catalogType()
+      ( <COMMA> type = catalogType( false )
         {
             list.add(type);
         }

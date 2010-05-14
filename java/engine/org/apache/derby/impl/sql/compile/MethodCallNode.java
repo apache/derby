@@ -791,6 +791,7 @@ abstract class MethodCallNode extends JavaValueNode
 
 					if (!requiredType.equals(typeName)) {
 						switch (returnType.getJDBCTypeId()) {
+						case java.sql.Types.BOOLEAN:
 						case java.sql.Types.SMALLINT:
 						case java.sql.Types.INTEGER:
 						case java.sql.Types.BIGINT:

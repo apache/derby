@@ -101,6 +101,19 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    public  void    test_boolean_boolean_int()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "boolean_boolean_int", "boolean", new String[] { "int" }, "3", "true" );
+    }
+    public  void    test_boolean_Boolean_int()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "boolean_Boolean_int", "boolean", new String[] { "int" }, "3", "true" );
+    }
+    
     public  void    test_smallint_short_short()
         throws Exception
     {
@@ -407,6 +420,13 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     // BAD RETURN TYPES
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    public  void    test_boolean_badreturn_byte_int()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "boolean_badreturn_byte_int", "boolean", new String[] { "int" }, "3", "true", TRIED_ALL_COMBINATIONS );
+    }
 
     public  void    test_smallint_badreturn_byte_short()
         throws Exception
