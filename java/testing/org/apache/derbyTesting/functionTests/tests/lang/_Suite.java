@@ -205,6 +205,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(RestrictedVTITest.suite());
         suite.addTest(UDTTest.suite());
         suite.addTest(UDTPermsTest.suite());
+        suite.addTest(BooleanValuesTest.suite());
         suite.addTest(AlterColumnTest.suite());
         suite.addTest(UserLobTest.suite());
         suite.addTest(OffsetFetchNextTest.suite());
