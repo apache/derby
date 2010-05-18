@@ -215,8 +215,8 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         );
         return test;
     }
-
-    private static void verifyProperties(String[] expectedValues) { 
+ 
+    private static Properties getTheProperties() {
         Properties p;
         try {
             p = NetworkServerTestSetup.getNetworkServerControl().getCurrentProperties();
@@ -226,22 +226,45 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
             e.printStackTrace();
             fail("unexpected exception getting properties from server");
         }
-        
-        Enumeration e = p.propertyNames();
+        return p;
+    }
+
+    // check for 1 Property/Value pair, passing in expected as a String
+    // "<propertyName>=<expectedPropertyValue>"
+    private static void verifyProperties(String expectedPropAndValue) {
+        Properties p = getTheProperties();
+        assertPropertyValueCorrect(p, expectedPropAndValue);
+        p=null;
+    }
+ 
+    // check for an array of Property/Value pairs, passing each expected pair 
+    // in as a String "<propertyName>=<expectedPropertyValue>"
+    private static void verifyProperties(String[] expectedValues) { 
+        Properties p = getTheProperties();
         // for debugging:
         for (int i=0 ; i<expectedValues.length; i++){
             println("expV: " + expectedValues[i]);
         }
         assertEquals(expectedValues.length , p.size());
-        for ( int i = 0 ; i < p.size() ; i++)
+        for ( int i = 0 ; i < expectedValues.length ; i++)
         {
-            String propName = (String)e.nextElement();
-            // next line for debugging
-            println("propName: " + propName);
-            String propval = (String)p.get(propName);
-            assertEquals(expectedValues[i], propval);
+            assertPropertyValueCorrect(p, expectedValues[i]);
         }
         p = null;
+    }
+ 
+    private static void assertPropertyValueCorrect(Properties p, String expectedPropAndValue) {
+        String[] expPropValueString = expectedPropAndValue.split("=");
+        try {
+            // for debugging
+            String actualPropertyValue = p.getProperty(expPropValueString[0]);
+            println("exppropName: " + expPropValueString[0]);
+            println("exppropValue: " + expPropValueString[1]);
+            println("actualpropValue: " + actualPropertyValue);
+            assertEquals(expPropValueString[1],actualPropertyValue);
+        } catch(Exception e) {
+            fail("could not find property " + expPropValueString[0]);
+        }
     }
     
     public int getAlternativePort() throws SQLException {
@@ -538,14 +561,18 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     {
         //check that default properties are used
         verifyProperties(new String[] {
-                // getProperties returns properties in sequence:
-                // maxThreads; sslMode; keepAlive; minThreads; portNumber;
-                // logConnections; timeSlice; startNetworkServer; host; traceAll 
-                "0", "off", "true", "0", 
-                String.valueOf(TestConfiguration.getCurrent().getPort()),
-                "false", "0", "false", 
-                String.valueOf(TestConfiguration.getCurrent().getHostName()), 
-                "false"});     
+                "derby.drda.maxThreads=0", 
+                "derby.drda.sslMode=off", 
+                "derby.drda.keepAlive=true", 
+                "derby.drda.minThreads=0", 
+                "derby.drda.portNumber=" + 
+                    String.valueOf(TestConfiguration.getCurrent().getPort()),
+                "derby.drda.logConnections=false", 
+                "derby.drda.timeSlice=0", 
+                "derby.drda.startNetworkServer=false",
+                "derby.drda.host=" +
+                    String.valueOf(TestConfiguration.getCurrent().getHostName()), 
+                "derby.drda.traceAll=false"});
     }
        
     /**
@@ -554,31 +581,10 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     public void testToggleTrace() 
     throws SQLException, IOException, InterruptedException
     {        
-        String[] expectedTraceOff = new String[] {
-                // getProperties returns properties in sequence:
-                // traceDirectory; maxThreads; sslMode; keepAlive; minThreads; 
-                // portNumber; logConnections; timeSlice; startNetworkServer;
-                // host; traceAll
-                getSystemProperty("derby.system.home"),
-                "0", "off", "true", "0", 
-                String.valueOf(TestConfiguration.getCurrent().getPort()),
-                "false", "0", "false", 
-                //String.valueOf(TestConfiguration.getCurrent().getHostName()),
-                "127.0.0.1", 
-                "false"};     
-        String[] expectedTraceOn = new String[] {
-                // getProperties returns properties in sequence:
-                // traceDirectory; maxThreads; sslMode; keepAlive; minThreads; 
-                // portNumber; logConnections; timeSlice; startNetworkServer;
-                // host; traceAll
-                getSystemProperty("derby.system.home"),
-                "0", "off", "true", "0", 
-                String.valueOf(TestConfiguration.getCurrent().getPort()),
-                "false", "0", "false", 
-                //String.valueOf(TestConfiguration.getCurrent().getHostName()),
-                "127.0.0.1", 
-                "true"};     
-        
+        // we only care about the traceAll property, the rest will be unchanged
+        String expectedTraceOff = "derby.drda.traceAll=false";
+        String expectedTraceOn = "derby.drda.traceAll=true";      
+
         verifyProperties(expectedTraceOff);     
 
         String[] traceCmd = new String[] {
@@ -599,31 +605,10 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
     public void testToggleLogConnections() 
     throws SQLException, IOException, InterruptedException
     {
-        String[] expectedLogConnectionsOff = new String[] {
-                // getProperties returns properties in sequence:
-                // traceDirectory; maxThreads; sslMode; keepAlive; minThreads; 
-                // portNumber; logConnections; timeSlice; startNetworkServer;
-                // host; traceAll
-                getSystemProperty("derby.system.home"),
-                "0", "off", "true", "0", 
-                String.valueOf(TestConfiguration.getCurrent().getPort()),
-                "false", "0", "false", 
-                //String.valueOf(TestConfiguration.getCurrent().getHostName()),
-                "127.0.0.1", 
-                "false"};     
-        String[] expectedLogConnectionsOn = new String[] {
-                // getProperties returns properties in sequence:
-                // traceDirectory; maxThreads; sslMode; keepAlive; minThreads; 
-                // portNumber; logConnections; timeSlice; startNetworkServer;
-                // host; traceAll
-                getSystemProperty("derby.system.home"),
-                "0", "off", "true", "0", 
-                String.valueOf(TestConfiguration.getCurrent().getPort()),
-                "true", "0", "false", 
-                //String.valueOf(TestConfiguration.getCurrent().getHostName()),
-                "127.0.0.1", 
-                "false"};     
-        
+        // only care about the LogConnections property; the rest is unchanged
+        String expectedLogConnectionsOff = "derby.drda.logConnections=false";
+        String expectedLogConnectionsOn = "derby.drda.logConnections=true";       
+ 
         verifyProperties(expectedLogConnectionsOff);     
 
         String[] cmd = new String[] {
