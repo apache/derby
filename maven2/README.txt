@@ -82,6 +82,10 @@ Short description of the required steps:
     Using a passphrase agent is recommended, but you can also specify it on
     the command line when invoking Maven with -Dgpg.passphrase=PASSPHRASE.
 
+    For instance:
+
+        mvn -Dgpg.passphrase="my secret passphrase" clean install
+
     WARNING: Do not specify your passphrase in the POM that is deployed on
              the Maven repositories!
 
@@ -100,7 +104,14 @@ Short description of the required steps:
 
  d) 'mvn deploy' or 'mvn clean deploy'
     Deploys the artifacts, including signatures and checksum files, to the
-    Apache Maven 2 repository. The files will then be distributed to mirrors.
+    Apache Maven 2 repository. The files will then be distributed to
+    mirrors. Remember that you will need to specify your gpg
+    passphrase here too.
+
+    For instance:
+
+        mvn -Dgpg.passphrase="my secret passphrase" deploy
+
 
     NOTE: This step has been reported to not work when using username and
     password authentication. Unless you prefer to deploy manually, use a
@@ -108,14 +119,14 @@ Short description of the required steps:
 
     If your umask is set to something else than 0002 (the default is 0022),
     you should log into the Apache server and grant write permission to the
-    group owner (which should be 'apcvs'). Alternatively, use this SSH command:
+    group owner (which should be 'committers'). Alternatively, use this SSH command:
 
     ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ -user \$USER -exec chmod g+w {} \;"
 
     To verify the group ownership and permissions, run the two following SSH
     commands. If everything is set correctly, they should return no file names.
 
-    ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ \! -group apcvs"
+    ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ \! -group committers"
     ssh people.apache.org "find /www/people.apache.org/repo/m2-ibiblio-rsync-repository/org/apache/derby/ \! -perm -g+w"
 
 For each project, the following files should be found in the
@@ -146,6 +157,7 @@ community.
 The dates are when the artifacts were written to the central Maven repository
 (repo1.maven.org/maven2 or repo2.maven.org/maven2).
 
+2010-05-18 10.6.1.0      Might be OK
 2009-10-07 10.5.3.0_1   OK
 2009-08-26 10.5.3.0     BROKEN
     An error in all the POMs made these artifacts unusable (DERBY-4390).
