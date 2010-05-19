@@ -26,8 +26,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -375,15 +373,6 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	private static final int QUARTER_INTERVAL = 7;
 	private static final int YEAR_INTERVAL = 8;
 	
-	private static final int ONE_BILLION = 1000000000;
-	 
-	private static String TODAY;
-	private static String TOMORROW;
-	private static String YEAR_FROM_TOMORROW;
-	private static String YEAR_FROM_TODAY;
-	private static String YESTERDAY;
-	private static String WEEK_FROM_TODAY;
-		
 	/**
 	 * Basic constructor.
 	 */
@@ -400,35 +389,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 				"TimestampArithTest")) {
 
 			protected void setUp() throws Exception {
-				Calendar calendar = Calendar.getInstance();
-
 				super.setUp();
-
-				/*
-				 * Make sure that we are not so close to midnight that TODAY
-				 * might be yesterday before we are finished using it.
-				 */
-				while (calendar.get(Calendar.HOUR) == 23
-						&& calendar.get(Calendar.MINUTE) >= 58) {
-					try {
-						Thread.sleep((60 - calendar.get(Calendar.SECOND)) * 1000);
-					} catch (InterruptedException ie) {
-						// ignore it
-					}
-				}
-
-				TODAY = isoFormatDate(calendar);
-				calendar.add(Calendar.DATE, -1);
-				YESTERDAY = isoFormatDate(calendar);
-				calendar.add(Calendar.DATE, 2);
-				TOMORROW = isoFormatDate(calendar);
-				calendar.add(Calendar.YEAR, 1);
-				YEAR_FROM_TOMORROW = isoFormatDate(calendar);
-				calendar.add(Calendar.DATE, -1);
-				YEAR_FROM_TODAY = isoFormatDate(calendar);
-				calendar.add(Calendar.YEAR, -1); // today
-				calendar.add(Calendar.DATE, 7);
-				WEEK_FROM_TODAY = isoFormatDate(calendar);
 
 				for (int i = 0; i < intervalJdbcNames.length; i++) {
 					tsAddPS[i] = getConnection().prepareStatement(
@@ -576,28 +537,6 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 		}
 	}
 
-	private static String isoFormatDate(Calendar cal) {
-		StringBuffer sb = new StringBuffer();
-		String s = String.valueOf(cal.get(Calendar.YEAR));
-		for (int i = s.length(); i < 4; i++)
-			sb.append('0');
-		sb.append(s);
-		sb.append('-');
-
-		s = String.valueOf(cal.get(Calendar.MONTH) + 1);
-		for (int i = s.length(); i < 2; i++)
-			sb.append('0');
-		sb.append(s);
-		sb.append('-');
-
-		s = String.valueOf(cal.get(Calendar.DAY_OF_MONTH));
-		for (int i = s.length(); i < 2; i++)
-			sb.append('0');
-		sb.append(s);
-
-		return sb.toString();
-	}
-	
 	private static String dateTimeToLiteral(Object ts) {
 		if (ts instanceof java.sql.Timestamp)
 			return "{ts '" + ((java.sql.Timestamp) ts).toString() + "'}";
