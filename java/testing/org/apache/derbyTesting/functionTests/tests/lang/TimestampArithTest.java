@@ -32,6 +32,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Test the JDBC TIMESTAMPADD and TIMESTAMPDIFF escape functions.
@@ -75,8 +76,8 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 				}				
 			} catch (SQLException sqle) {
 				if (expectedSQLState == null) {
-					printStackTrace(sqle);
-					fail("Unexpected exception from statement '" + sql + "'");
+                    fail("Unexpected exception from statement '" + sql + "'",
+                         sqle);
 				}
 				assertSQLState("Incorrect SQLState from statement '" + sql + "'", expectedSQLState, sqle);
 			} 
@@ -93,8 +94,8 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 				}
 			} catch (SQLException sqle) {
 				if (expectedSQLState == null) {
-					printStackTrace(sqle);
-					fail("Unexpected exception from prepared statement '" + sql + "'");
+                    fail("Unexpected exception from prepared statement '" +
+                         sql + "'", sqle);
 				}
 				assertSQLState("Incorrect SQLState from prepared statement '" + sql + "'", expectedSQLState, sqle);
 			} 
@@ -461,28 +462,36 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 	public void testNullInputs() throws SQLException {		
         tsDiffPS[HOUR_INTERVAL].setTimestamp(1, ts( "2005-05-11 15:26:00"));
         tsDiffPS[HOUR_INTERVAL].setNull(2, Types.TIMESTAMP);
-        expectNullResult(tsDiffPS[HOUR_INTERVAL], "TIMESTAMPDIFF with null timestamp in third argument");
-        
-        tsDiffPS[HOUR_INTERVAL].setNull(2, Types.DATE);
-        expectNullResult(tsDiffPS[HOUR_INTERVAL], "TIMESTAMPDIFF with null date in third argument");
 
+        // TIMESTAMPDIFF with null timestamp in third argument
+        expectNullResult(tsDiffPS[HOUR_INTERVAL]);
+
+        // TIMESTAMPDIFF with null date in third argument
+        tsDiffPS[HOUR_INTERVAL].setNull(2, Types.DATE);
+        expectNullResult(tsDiffPS[HOUR_INTERVAL]);
+
+        // TIMESTAMPDIFF with null timestamp in second argument
         tsDiffPS[HOUR_INTERVAL].setTimestamp(2, ts( "2005-05-11 15:26:00"));
         tsDiffPS[HOUR_INTERVAL].setNull(1, Types.TIMESTAMP);
-        expectNullResult(tsDiffPS[HOUR_INTERVAL], "TIMESTAMPDIFF with null timestamp in second argument");
-        
-        tsDiffPS[HOUR_INTERVAL].setNull(1, Types.DATE);
-        expectNullResult(tsDiffPS[HOUR_INTERVAL], "TIMESTAMPDIFF with null date in second argument");
+        expectNullResult(tsDiffPS[HOUR_INTERVAL]);
 
+        // TIMESTAMPDIFF with null date in second argument
+        tsDiffPS[HOUR_INTERVAL].setNull(1, Types.DATE);
+        expectNullResult(tsDiffPS[HOUR_INTERVAL]);
+
+        // TIMESTAMPADD with null integer in second argument
         tsAddPS[MINUTE_INTERVAL].setTimestamp(2, ts( "2005-05-11 15:26:00"));
         tsAddPS[MINUTE_INTERVAL].setNull(1, Types.INTEGER);
-        expectNullResult(tsAddPS[MINUTE_INTERVAL], "TIMESTAMPADD with null integer in second argument");
+        expectNullResult(tsAddPS[MINUTE_INTERVAL]);
 
+        // TIMESTAMPADD with null timestamp in third argument
         tsAddPS[MINUTE_INTERVAL].setInt(1, 1);
         tsAddPS[MINUTE_INTERVAL].setNull(2, Types.TIMESTAMP);
-        expectNullResult(tsAddPS[MINUTE_INTERVAL], "TIMESTAMPADD with null timestamp in third argument");
-        
+        expectNullResult(tsAddPS[MINUTE_INTERVAL]);
+
+        // TIMESTAMPADD with null date in third argument
         tsAddPS[MINUTE_INTERVAL].setNull(2, Types.DATE);
-        expectNullResult(tsAddPS[MINUTE_INTERVAL], "TIMESTAMPADD with null date in third argument");
+        expectNullResult(tsAddPS[MINUTE_INTERVAL]);
 	}
 
 	public void testInvalidLengths() throws SQLException {
@@ -524,18 +533,11 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 			assertSQLState("Unexpected SQLState from " + label, expectedSQLState, sqle);
 		}
 	}
-		
-	private static void expectNullResult(PreparedStatement ps, String label) {
-		ResultSet rs;
-		try {
-			rs = ps.executeQuery();
-		    assertTrue(label + " returned no rows.", rs.next());
-			assertNull(label + " did not return null.", rs.getObject(1));			
-		} catch (SQLException e) {	
-			printStackTrace(e);
-			fail("Unexpected SQL exception from " + label); 
-		}
-	}
+
+    private static void expectNullResult(PreparedStatement ps)
+            throws SQLException {
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), null);
+    }
 
 	private static String dateTimeToLiteral(Object ts) {
 		if (ts instanceof java.sql.Timestamp)
@@ -579,15 +581,7 @@ public class TimestampArithTest extends BaseJDBCTestCase {
 				sb.append('0');
 			s = sb.toString();
 		}
-		try {
-			return java.sql.Timestamp.valueOf(s);
-		} catch (Exception e) {
-			System.out.println(s + " is not a proper timestamp string.");
-			System.out.println(e.getClass().getName() + ": " + e.getMessage());
-			e.printStackTrace();
-			System.exit(1);
-			return null;
-		}
+        return java.sql.Timestamp.valueOf(s);
 	}
 	
 	private static java.sql.Date dt(String s) {
