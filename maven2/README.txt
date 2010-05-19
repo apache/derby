@@ -157,7 +157,7 @@ community.
 The dates are when the artifacts were written to the central Maven repository
 (repo1.maven.org/maven2 or repo2.maven.org/maven2).
 
-2010-05-18 10.6.1.0      Might be OK
+2010-05-18 10.6.1.0      OK
 2009-10-07 10.5.3.0_1   OK
 2009-08-26 10.5.3.0     BROKEN
     An error in all the POMs made these artifacts unusable (DERBY-4390).

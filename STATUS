@@ -20,8 +20,6 @@ Project info
     the Apache DB PMC. Significant contributions over a sustained
     period of time can earn a contributor commit access to the codebase.
 
-  * The Derby sub-project's modules will be available as distinct and discrete downloads.
-
 Official releases:
  * 10.6.1.0 : Released 2010-05-18
  * 10.5.3.0 : Released 2009-08-21
