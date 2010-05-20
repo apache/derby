@@ -29,7 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * Create an encoded stream from a <code>Reader</code>.

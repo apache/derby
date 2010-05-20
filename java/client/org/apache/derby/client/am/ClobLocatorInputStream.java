@@ -21,13 +21,9 @@
 
 package org.apache.derby.client.am;
 
-import java.sql.SQLException;
-
 import java.io.IOException;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.shared.common.error.ExceptionUtil;
-import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * An <code>InputStream</code> that will use an locator to fetch the

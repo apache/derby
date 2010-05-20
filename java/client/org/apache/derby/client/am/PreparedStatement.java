@@ -23,7 +23,7 @@ package org.apache.derby.client.am;
 
 import org.apache.derby.shared.common.reference.JDBC40Translation;
 import org.apache.derby.shared.common.reference.SQLState;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 import java.io.InputStream;
 import java.io.Reader;

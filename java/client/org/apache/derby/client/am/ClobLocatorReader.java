@@ -23,10 +23,7 @@ package org.apache.derby.client.am;
 
 import java.io.IOException;
 
-import java.sql.SQLException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.shared.common.error.ExceptionUtil;
-import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
  * An <code>Reader</code> that will use an locator to fetch the
