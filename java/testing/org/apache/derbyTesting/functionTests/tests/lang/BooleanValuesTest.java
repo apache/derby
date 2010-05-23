@@ -33,6 +33,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.XML;
 
 /**
  * <p>
@@ -84,9 +85,16 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        Test result = (TestSuite) TestConfiguration.defaultSuite(BooleanValuesTest.class);
+        TestSuite suite = new TestSuite("BooleanValuesTest");
 
-        return result;
+        // The test uses XML columns, so it should only run if we have the
+        // required libraries.
+        if (XML.classpathMeetsXMLReqs()) {
+            suite.addTest(
+                    TestConfiguration.defaultSuite(BooleanValuesTest.class));
+        }
+
+        return suite;
     }
 
     protected void    setUp()
