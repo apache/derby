@@ -57,6 +57,8 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    private boolean _supportsXML;
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // CONSTRUCTOR
@@ -71,6 +73,8 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     public BooleanValuesTest(String name)
     {
         super(name);
+
+        _supportsXML = XML.classpathMeetsXMLReqs();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -85,16 +89,9 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
      */
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("BooleanValuesTest");
+        Test result = (TestSuite) TestConfiguration.defaultSuite(BooleanValuesTest.class);
 
-        // The test uses XML columns, so it should only run if we have the
-        // required libraries.
-        if (XML.classpathMeetsXMLReqs()) {
-            suite.addTest(
-                    TestConfiguration.defaultSuite(BooleanValuesTest.class));
-        }
-
-        return suite;
+        return result;
     }
 
     protected void    setUp()
@@ -116,9 +113,14 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         }
         if ( !tableExists( conn, "ALL_TYPES" ) )
         {
-            goodStatement
+            StringBuffer buffer;
+
+            //
+            // create table
+            //
+            buffer = new StringBuffer();
+            buffer.append
                 (
-                 conn,
                  "create table all_types\n" +
                  "(\n" +
                  "    key_col int,\n" +
@@ -139,14 +141,21 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time_col  TIME,\n" +
                  "    timestamp_col  TIMESTAMP,\n" +
                  "    varchar_col  VARCHAR(10),\n" +
-                 "    varchar_for_bit_data_col  VARCHAR (10) FOR BIT DATA,\n" +
-                 "    xml_col  xml\n" +
-                 ")\n"
+                "    varchar_for_bit_data_col  VARCHAR (10) FOR BIT DATA\n"
                  );
+            if ( _supportsXML )
+            {
+                buffer.append( "    ,xml_col  xml\n" );
+            }
+            buffer.append( ")\n" );
+            goodStatement( conn, buffer.toString() );
 
-            goodStatement
+            //
+            // populate table
+            //
+            buffer = new StringBuffer();
+            buffer.append
                 (
-                 conn,
                  "insert into all_types\n" +
                  "(\n" +
                  "    key_col,\n" +
@@ -167,8 +176,14 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time_col,\n" +
                  "    timestamp_col,\n" +
                  "    varchar_col,\n" +
-                 "    varchar_for_bit_data_col,\n" +
-                 "    xml_col\n" +
+                 "    varchar_for_bit_data_col\n"
+                 );
+            if ( _supportsXML )
+            {
+                buffer.append( "    ,xml_col\n" );
+            }
+            buffer.append
+                (
                  ")\n" +
                  "values\n" +
                  "(\n" +
@@ -190,8 +205,14 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time('15:09:02'),\n" +
                  "    timestamp('1962-09-23 03:23:34.234'),\n" +
                  "    '0',\n" +
-                 "    X'DE',\n" +
-                 "    xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html/>' preserve whitespace )\n" +
+                 "    X'DE'\n"
+                 );
+            if ( _supportsXML )
+            {
+                buffer.append( "    , xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html/>' preserve whitespace )\n" );
+            }
+            buffer.append
+                (
                  "),\n" +
                  "(\n" +
                  "    1,\n" +
@@ -212,8 +233,14 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time('15:09:02'),\n" +
                  "    timestamp('1962-09-23 03:23:34.234'),\n" +
                  "    '1',\n" +
-                 "    X'DE',\n" +
-                 "    xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html/>' preserve whitespace )\n" +
+                 "    X'DE'\n"
+                 );
+            if ( _supportsXML )
+            {
+                buffer.append( "    , xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html/>' preserve whitespace )\n"  );
+            }
+            buffer.append
+                 (
                  "),\n" +
                  "(\n" +
                  "    2,\n" +
@@ -234,8 +261,14 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time('15:09:02'),\n" +
                  "    timestamp('1962-09-23 03:23:34.234'),\n" +
                  "    '2',\n" +
-                 "    X'DE',\n" +
-                 "    xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html/>' preserve whitespace )\n" +
+                 "    X'DE'\n"
+                  );
+            if ( _supportsXML )
+            {
+                buffer.append( "    , xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html/>' preserve whitespace )\n" );
+            }
+            buffer.append
+                (
                  "),\n" +
                  "(\n" +
                  "    3,\n" +
@@ -256,12 +289,20 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "    time('15:09:02'),\n" +
                  "    timestamp('1962-09-23 03:23:34.234'),\n" +
                  "    'baffle',\n" +
-                 "    X'DE',\n" +
-                 "    xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html/>' preserve whitespace )\n" +
+                 "    X'DE'\n"
+                 );
+            if ( _supportsXML )
+            {
+                buffer.append( "    , xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html/>' preserve whitespace )\n" );
+            }
+            buffer.append
+                (
                  ")\n"
                  );
+            goodStatement( conn, buffer.toString() );
         }
     }
+
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -354,11 +395,18 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
      */
     public void test_05_undefinedIllegalOutliers() throws Exception
     {
-        expectCompilationError
-            (
-             ILLEGAL_XML_SELECTION,
-             makeQuery( "XML_COL" )
-             );
+        //
+        // We don't test the XML datatype on JDK 1.4 because the Xalan
+        // packages are in the wrong location there.
+        //
+        if ( _supportsXML )
+        {
+            expectCompilationError
+                (
+                 ILLEGAL_XML_SELECTION,
+                 makeQuery( "XML_COL" )
+                 );
+        }
     }
     /**
      * <p>
