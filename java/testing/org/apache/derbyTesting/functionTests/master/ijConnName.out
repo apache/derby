@@ -1,6 +1,4 @@
-ERROR XJ004: Database 'nevercreated' not found.
-ERROR 08001: No suitable driver
-ij(CONNONE)> --
+ij> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -16,14 +14,14 @@ ij(CONNONE)> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
--- assumes the connections connOne, connTwo are set up already
+-- assumes the connection connOne is set up already
 -- and that connThree, connFour failed to be setup correctly (bad URLs)
 -- expect connOne to be active
 show connections;
 CONNONE* - 	jdbc:derby:wombat
-CONNTWO - 	jdbc:derby:lemming
 * = current connection
-ij(CONNONE)> set connection connOne;
+ij> connect 'jdbc:derby:lemming;create=true' as connTwo;
+ij(CONNTWO)> set connection connOne;
 ij(CONNONE)> values 1;
 1          
 -----------

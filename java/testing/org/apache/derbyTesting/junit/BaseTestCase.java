@@ -19,6 +19,7 @@
  */
 package org.apache.derbyTesting.junit;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 import junit.framework.AssertionFailedError;
 
@@ -28,12 +29,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.PrintStream;
 import java.net.URL;
 import java.sql.SQLException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 
 import java.security.PrivilegedActionException;
 
@@ -393,6 +396,114 @@ public abstract class BaseTestCase
 				return null;
         	}
         });
+	}
+    
+	/**
+	 * Execute command using 'java' executable and verify that it completes
+	 * with expected results
+	 * @param expectedString String to compare the resulting output with. May be
+	 *     null if the output is not expected to be of interest.
+	 * @param cmd array of java arguments for command
+	 * @param expectedExitValue expected return value from the command
+	 * @throws InterruptedException
+	 * @throws IOException
+	 */
+	public void assertExecJavaCmdAsExpected(String[] expectedString,
+	        String[] cmd, int expectedExitValue) throws InterruptedException,
+	        IOException {
+
+	    Process pr = execJavaCmd(cmd);
+	    String output = readProcessOutput(pr);
+	    int exitValue = pr.exitValue();
+
+	    Assert.assertEquals(expectedExitValue, exitValue);
+	    if (expectedString != null) {
+	        for (int i = 0; i < expectedString.length; i++) {
+	            assertFalse(output.indexOf(expectedString[i]) < 0);
+	        }
+	    }
+	}
+
+
+	/**
+	 * Execute a java command and return the process.
+	 * The caller should decide what to do with the process, if anything,
+	 * typical activities would be to do a pr.waitFor, or to
+	 * get a getInputStream or getErrorStream
+	 * Note, that for verifying the output of a Java process, there is
+	 * assertExecJavaCmdAsExpected
+	 * 
+	 * @param cmd array of java arguments for command
+	 * @return the process that was started
+	 * @throws IOException
+	 */
+	public Process execJavaCmd(String[] cmd) throws IOException {
+	    int totalSize = 3 + cmd.length;
+	    String[] tcmd = new String[totalSize];
+	    tcmd[0] = "java";
+	    tcmd[1] = "-classpath";
+	    tcmd[2] = BaseTestCase.getSystemProperty("java.class.path");
+
+	    System.arraycopy(cmd, 0, tcmd, 3, cmd.length);
+
+	    final String[] command = tcmd;
+
+	    Process pr = null;
+	    try {
+	        pr = (Process) AccessController
+	        .doPrivileged(new PrivilegedExceptionAction() {
+	            public Object run() throws IOException {
+	                Process result = null;
+	                result = Runtime.getRuntime().exec(command);
+	                return result;
+	            }
+	        });
+	    } catch (PrivilegedActionException pe) {
+	        Exception e = pe.getException();
+	        if (e instanceof IOException)
+	            throw (IOException) e;
+	        else
+	            throw (SecurityException) e;
+	    }
+	    return pr;
+	}
+   
+   /**
+    * Reads output from a process and returns it as a string.
+    * This will block until the process terminates.
+    * 
+    * @param pr a running process
+    * @return output of the process
+    * @throws InterruptedException
+    */
+   public String readProcessOutput(Process pr) throws InterruptedException {
+		InputStream is = pr.getInputStream();
+		if (is == null) {
+			fail("Unexpectedly receiving no text from the process");
+		}
+
+		String output = "";
+		try {
+		    char[] ca = new char[1024];
+		    // Create an InputStreamReader with default encoding; we're hoping
+		    // this to be en. If not, we may not match the expected string.
+		    InputStreamReader inStream;
+		    inStream = new InputStreamReader(is);
+
+		    // keep reading from the stream until all done
+		    int charsRead;
+		    while ((charsRead = inStream.read(ca, 0, ca.length)) != -1)
+		    {
+		        output = output + new String(ca, 0, charsRead);
+		    }
+		} catch (Exception e) {
+		    fail("Exception accessing inputstream from process", e);
+		}
+
+		// wait until the process exits
+		pr.waitFor();
+		
+		return output;
 	}
     
     /**

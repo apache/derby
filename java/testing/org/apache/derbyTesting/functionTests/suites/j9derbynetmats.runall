@@ -2,7 +2,6 @@ derbynet/dblook_test_net.java
 derbynet/dblook_test_net_territory.java
 derbynet/maxthreads.java
 derbynet/runtimeinfo.java
-derbynet/testProperties.java
 derbynet/testconnection.java
 derbynet/timeslice.java
 jdbcapi/metadata.java

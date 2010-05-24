@@ -37,18 +37,14 @@ import org.apache.derbyTesting.junit.SupportFilesSetup;
  * The following tests could not be run this way, reasons for the
  * 
  * dblook_test_net - filters output
- * dataSourcePermissions_net - InvocationTargetException, needs investigation
  * dblook_test_net_territory - filters output 
  * getCurrentProperties - ExceptionInInitializerError, needs investigation
  * maxthreads - forks VM
  * runtimeinfo" - filters output
  * sysinfo" - forks VM
  * sysinfo_withproperties" - forks VM
- * testProperties" - filters output
- * testconnection" - forks VM
  * testij" - filters output
  * timeslice" - forks VM
- * NSinSameJVM" - filters output
  * DerbyNetAutoStart" - forks VM
  */
 public class NetHarnessJavaTest extends HarnessJavaTest {

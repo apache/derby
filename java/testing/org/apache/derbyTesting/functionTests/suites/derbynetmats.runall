@@ -3,10 +3,7 @@ derbynet/dblook_test_net_territory.java
 derbynet/DerbyNetAutoStart.java
 derbynet/maxthreads.java
 derbynet/runtimeinfo.java
-derbynet/sysinfo.java
-derbynet/sysinfo_withproperties.java
 derbynet/testProtocol.java
-derbynet/testProperties.java
 derbynet/testconnection.java
 derbynet/timeslice.java
 jdbcapi/metadata.java
