@@ -148,6 +148,9 @@ Try one of these to confirm that your artifacts are available:
 http://repo1.maven.org/maven2/org/apache/derby/
 http://mvnrepository.com/artifact/org.apache.derby
 
+Note that for the 10.6.1 release, within a day the artifacts turned up in the
+Apache repository (the first link). It took 6 days for the artifacts
+to percolate to the external aggregator site (the second link).
 
 Release history for Maven 2 artifacts
 =====================================
