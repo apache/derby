@@ -52,7 +52,6 @@ public class JDBCHarnessJavaTest extends HarnessJavaTest {
             // "derbyStress",       TODO: Need a way to control heap size from Junit tests
             // "prepStmtMetaData",  TODO: convert - different canon for client
             "maxfieldsize",
-            //"LOBTest", TODO: investigate failure/convert
             "SetQueryTimeoutTest",
             "rsgetXXXcolumnNames",
             
