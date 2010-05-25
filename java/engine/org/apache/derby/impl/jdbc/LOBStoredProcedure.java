@@ -23,12 +23,14 @@ package org.apache.derby.impl.jdbc;
 
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.jdbc.EngineLOB;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.jdbc.InternalDriver;
 
 /**
  * Contains the stored procedures that will be used in the
@@ -389,8 +391,16 @@ public class LOBStoredProcedure {
      * @throws SQLException.
      */
     private static EmbedConnection getEmbedConnection() throws SQLException {
-        return (EmbedConnection)DriverManager
-            .getConnection("jdbc:default:connection");
+        //DERBY-4664 Do not use DriverManager("jdbc:default:connection") because
+        // some other product's Driver might hijack our stored procedure.
+        InternalDriver id = InternalDriver.activeDriver();
+        if (id != null) { 
+            EmbedConnection conn = (EmbedConnection) id.connect("jdbc:default:connection", null);
+            if (conn != null)
+                return conn;
+        }
+        throw Util.noCurrentConnection();
+        
     }
 
     /**
