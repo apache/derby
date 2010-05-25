@@ -34,6 +34,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class InsertTest extends BaseJDBCTestCase {
 
+    private static final String PARAMETER_IN_SELECT_LIST = "42X34";
+
     public InsertTest(String name) {
         super(name);
     }
@@ -133,5 +135,56 @@ public class InsertTest extends BaseJDBCTestCase {
                 s.executeQuery("select * from t3 order by x"),
                 "1");
         s.execute("delete from t3");
+    }
+
+    /**
+     * Regression test for DERBY-4671. Verify that dynamic parameters can be
+     * used in the select list in an INSERT INTO ... SELECT FROM statement.
+     * This used to work, but the fix for DERBY-4420 made it throw a
+     * NullPointerException.
+     */
+    public void testInsertFromSelectWithParameters() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table derby4671(x int)");
+        s.execute("insert into derby4671 values (1), (2)");
+
+        // This call failed with a NullPointerException
+        PreparedStatement ins1 = prepareStatement(
+                "insert into derby4671 select ? from derby4671");
+
+        ins1.setInt(1, 7);
+        assertUpdateCount(ins1, 2);
+
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from derby4671 order by x"),
+                new String[][] {{"1"}, {"2"}, {"7"}, {"7"}});
+
+        // Also verify that it works when the ? is in an expression
+        PreparedStatement ins2 = prepareStatement(
+                "insert into derby4671 select (x+?)*10 from derby4671");
+
+        ins2.setInt(1, 77);
+        assertUpdateCount(ins2, 4);
+
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from derby4671 order by x"),
+                new String[][] {
+                    {"1"}, {"2"}, {"7"}, {"7"},
+                    {"780"}, {"790"}, {"840"}, {"840"}});
+
+        // We only accept ? in the top level select list, so these should
+        // still fail
+        assertCompileError(
+                PARAMETER_IN_SELECT_LIST,
+                "insert into derby4671 select ? from derby4671 "
+                + "union select ? from derby4671");
+        assertCompileError(
+                PARAMETER_IN_SELECT_LIST,
+                "insert into derby4671 select ? from derby4671 "
+                + "except select ? from derby4671");
+        assertCompileError(
+                PARAMETER_IN_SELECT_LIST,
+                "insert into derby4671 select ? from derby4671 "
+                + "intersect select ? from derby4671");
     }
 }

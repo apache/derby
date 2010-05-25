@@ -304,12 +304,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 	}
 
 	/**
-	 * Set the type of each parameter in the result column list if this node
-	 * represents a table constructor (aka VALUES clause). Table constructors
-	 * are represented either by a {@code RowResultSetNode} or by a
-	 * {@code UnionNode} with multiple {@code RowResultSetNode} children and
-	 * whose {@code tableConstructor()} method returns {@code true}. For all
-	 * other nodes, this method should be a no-op.
+	 * Set the type of each parameter in the result column list for this
+	 * table constructor.
 	 *
 	 * @param typeColumns	The ResultColumnList containing the desired result
 	 *						types.
@@ -319,9 +315,17 @@ public abstract class ResultSetNode extends QueryTreeNode
 	void setTableConstructorTypes(ResultColumnList typeColumns)
 			throws StandardException
 	{
-		// Nothing to be done unless this node represents a VALUES clause, in
-		// which case the overrides in RowResultSetNode or UnionNode will do
-		// the necessary work.
+        // VALUES clause needs special handling that's taken care of in a
+        // sub-class. For all other nodes, just go through the result columns
+        // and set the type for dynamic parameters.
+        for (int i = 0; i < resultColumns.size(); i++) {
+            ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+            ValueNode re = rc.getExpression();
+            if (re != null && re.requiresTypeFromContext()) {
+                ResultColumn typeCol = (ResultColumn) typeColumns.elementAt(i);
+                re.setType(typeCol.getTypeServices());
+            }
+        }
 	}
 
 	/**
