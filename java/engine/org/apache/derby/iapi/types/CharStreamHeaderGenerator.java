@@ -134,4 +134,13 @@ public final class CharStreamHeaderGenerator
             return 0;
         }
     }
+
+    /**
+     * Returns the maximum header length.
+     *
+     * @return Maximum header length in bytes.
+     */
+    public int getMaxHeaderLength() {
+        return 2;
+    }
 }

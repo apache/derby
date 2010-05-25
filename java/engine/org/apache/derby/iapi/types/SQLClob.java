@@ -57,10 +57,6 @@ import java.util.Calendar;
 public class SQLClob
 	extends SQLVarchar
 {
-
-    /** The maximum number of bytes used by the stream header. */
-    private static final int MAX_STREAM_HEADER_LENGTH = 5;
-
     /** The header generator used for 10.4 (or older) databases. */
     private static final StreamHeaderGenerator TEN_FOUR_CLOB_HEADER_GENERATOR =
             new ClobStreamHeaderGenerator(true);
@@ -68,6 +64,14 @@ public class SQLClob
     /** The header generator used for 10.5 databases. */
     private static final StreamHeaderGenerator TEN_FIVE_CLOB_HEADER_GENERATOR =
             new ClobStreamHeaderGenerator(false);
+
+    /**
+     * The maximum number of bytes used by the stream header.
+     * <p>
+     * Use the length specified by the ten five header generator.
+     */
+    private static final int MAX_STREAM_HEADER_LENGTH =
+            TEN_FIVE_CLOB_HEADER_GENERATOR.getMaxHeaderLength();
 
     /**
      * The descriptor for the stream. If there is no stream this should be

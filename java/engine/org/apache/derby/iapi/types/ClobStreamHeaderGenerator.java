@@ -239,6 +239,15 @@ public final class ClobStreamHeaderGenerator
     }
 
     /**
+     * Returns the maximum header length.
+     *
+     * @return Maximum header length in bytes.
+     */
+    public int getMaxHeaderLength() {
+        return 5;
+    }
+
+    /**
      * Determines which header format to use.
      * <p>
      * <em>Implementation note:</em> The header format is determined by
