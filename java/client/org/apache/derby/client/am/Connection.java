@@ -2334,10 +2334,6 @@ public abstract class Connection implements java.sql.Connection,
         return databaseMetaData_.productLevel_.versionLevel_;
     }
 
-    public void setInUnitOfWork(boolean inUnitOfWork) {
-        inUnitOfWork_ = inUnitOfWork;
-    }
-    
     /**
      * Return the holdabilty for the Connection. Matches the
      * embedded driver in the restriction that while in a
