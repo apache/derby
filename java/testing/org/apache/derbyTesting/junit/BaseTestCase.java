@@ -558,6 +558,11 @@ public abstract class BaseTestCase
         return getSystemProperty("com.ibm.oti.vm.exe") != null;
     }
 
+    public static final boolean isSunJVM() {
+        return ("Sun Microsystems Inc.".equals(
+                getSystemProperty("java.vendor")));
+    }
+    
    /**
     * Reads output from a process and returns it as a string.
     * This will block until the process terminates.
