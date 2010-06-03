@@ -68,10 +68,8 @@ public class BooleanTypeCompiler extends BaseTypeCompiler
 	/** @see TypeCompiler#storable */
 	public boolean storable(TypeId otherType, ClassFactory cf)
 	{
-		/* Are the types the same or is other type a string or number type? */
-		if (otherType.isBooleanTypeId() ||
-				otherType.isStringTypeId() ||
-				otherType.isNumericTypeId())
+		/* Are the types the same or is other type a string */
+		if ( otherType.isBooleanTypeId() || otherType.isStringTypeId() )
 		{
 			return true;
 		}

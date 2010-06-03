@@ -30,6 +30,7 @@ import org.apache.derby.iapi.services.io.Storable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
@@ -628,7 +629,14 @@ public final class SQLBoolean
 	}
 	protected void setFrom(DataValueDescriptor theValue) throws StandardException {
 
-		setValue(theValue.getBoolean());
+        if ( theValue instanceof SQLChar ) { setValue( theValue.getString() ); }
+		else if ( theValue instanceof SQLBoolean ){ setValue(theValue.getBoolean()); }
+        else
+        {
+            throw StandardException.newException
+                ( SQLState.LANG_DATA_TYPE_SET_MISMATCH, theValue.getTypeName(), getTypeName() );
+
+        }
 	}
 
 
