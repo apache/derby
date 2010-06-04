@@ -1860,12 +1860,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         // test methods against a closed XAConnection and its resource
         try {
+            // (DERBY-2532)
             xac2.getXAResource();
-            // DERBY-2532
-            // Network Server does not think this is worth an exception.
-            if (usingEmbedded())
-                fail("expected SQLException on " +
-                    "closed XAConnection.getXAResource");
+            fail("expected SQLException on closed XAConnection.getXAResource");
         } catch (SQLException sqle) {
             assertSQLState("08003", sqle);
         }
