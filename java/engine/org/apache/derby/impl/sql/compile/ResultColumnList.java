@@ -3913,12 +3913,12 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 				//				DefaultNode defaultNode = (DefaultNode) rc.getExpression();
 				// Get ColumnDescriptor by name or by position?
-				ColumnDescriptor cd;
+				ColumnDescriptor cd = null;
 				if (tcl == null)
 				{
 					cd = ttd.getColumnDescriptor(index + 1);
 				}
-				else
+				else if (index < tcl.size())
 				{
 					ResultColumn trc = (ResultColumn) tcl.elementAt(index);
 					cd = ttd.getColumnDescriptor(trc.getName());
