@@ -86,4 +86,11 @@ public interface StreamHeaderGenerator {
      * @throws IOException if writing to the destination stream fails
      */
     int writeEOF(ObjectOutput out, long valueLength) throws IOException;
+
+    /**
+     * Returns the maximum length of the header.
+     *
+     * @return Max header length in bytes.
+     */
+    int getMaxHeaderLength();
 }

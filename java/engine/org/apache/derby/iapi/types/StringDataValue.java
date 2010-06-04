@@ -208,19 +208,18 @@ public interface StringDataValue extends ConcatableDataValue
      * Note that the generator may fail to generate a header if there is no
      * context at the time the header is asked for, and the mode hasn't been
      * set explicitly.
-     * @see #setSoftUpgradeMode
+     * @see #setStreamHeaderFormat
      */
     public StreamHeaderGenerator getStreamHeaderGenerator();
 
     /**
-     * Tells the data value descriptor whether the database is being accessed
-     * in soft upgrade mode or not.
+     * Tells the data value descriptor which CLOB stream header format to use.
      *
-     * @param inSoftUpgradeMode {@code true} if the database is being accessed
-     *      in soft upgrade mode, {@code false} if not, and {@code null} if
-     *      unknown
+     * @param usePreTenFiveHdrFormat {@code true} if the database accessed is
+     *      prior to version 10.5, {@code false} if the version is 10.5 or
+     *      newer, and {@code null} if unknown at this time
      */
-    public void setSoftUpgradeMode(Boolean inSoftUpgradeMode);
+    public void setStreamHeaderFormat(Boolean usePreTenFiveHdrFormat);
 
     /**
      * Returns a descriptor for the input stream for this data value.

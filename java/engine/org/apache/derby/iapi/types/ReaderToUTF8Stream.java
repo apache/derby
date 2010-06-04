@@ -51,6 +51,8 @@ public final class ReaderToUTF8Stream
 
     /** Constant indicating the first iteration of {@code fillBuffer}. */
     private final static int FIRST_READ = Integer.MIN_VALUE;
+    /** Buffer space reserved for one 3 byte encoded char and the EOF marker. */
+    private final static int READ_BUFFER_RESERVATION = 6;
     /**
      * Constant indicating that no mark is set in the stream, or that the read
      * ahead limit of the mark has been exceeded.
@@ -58,10 +60,11 @@ public final class ReaderToUTF8Stream
     private final static int MARK_UNSET_OR_EXCEEDED = -1;
     /**
      * Buffer to hold the data read from stream and converted to the modified
-     * UTF-8 format. The initial size is 32 KB, but it may grow if the
+     * UTF-8 format. The initial size is dependent on whether the data value
+     * length is known (limited upwards to 32 KB), but it may grow if
      * {@linkplain #mark(int)} is invoked.
      */
-    private byte[] buffer = new byte[32*1024];
+    private byte[] buffer;
 	private int boff;
     private int blen = -1;
     /** Stream mark, set through {@linkplain #mark(int)}. */
@@ -83,7 +86,7 @@ public final class ReaderToUTF8Stream
      * Number of characters to truncate from this stream.
      * The SQL standard allows for truncation of trailing spaces for CLOB,
      * VARCHAR and CHAR. If zero, no characters are truncated, unless the
-     * stream length execeeds the maximum length of the column we are inserting
+     * stream length exceeds the maximum length of the column we are inserting
      * into.
      */
     private final int charsToTruncate;
@@ -124,11 +127,13 @@ public final class ReaderToUTF8Stream
                               String typeName,
                               StreamHeaderGenerator headerGenerator) {
         this.reader = new LimitReader(appReader);
-        reader.setLimit(valueLength);
         this.charsToTruncate = numCharsToTruncate;
         this.valueLength = valueLength;
         this.typeName = typeName;
         this.hdrGen = headerGenerator;
+
+        int absValueLength = Math.abs(valueLength);
+        reader.setLimit(absValueLength);
         if (SanityManager.DEBUG) {
             // Check the type name
             // The national types (i.e. NVARCHAR) are not used/supported.
@@ -138,6 +143,17 @@ public final class ReaderToUTF8Stream
                     typeName.equals(TypeId.CLOB_NAME)) ||
                     typeName.equals(TypeId.LONGVARCHAR_NAME));
         }
+        // Optimization for small values, where we reduce the memory
+        // requirement during encoding/insertion.
+        // Be conservative, assume three bytes per char.
+        int bz = 32*1024; // 32 KB default
+        if (absValueLength < bz / 3) {
+            // Enforce a minimum size of the buffer, otherwise read may loop
+            // indefinitely (must enter for loop in fillBuffer to detect EOF).
+            bz = hdrGen.getMaxHeaderLength() +
+                    Math.max(READ_BUFFER_RESERVATION, absValueLength * 3 +3);
+        }
+        buffer = new byte[bz];
     }
 
     /**
@@ -167,7 +183,6 @@ public final class ReaderToUTF8Stream
             throw new IllegalArgumentException("Maximum length for a capped " +
                     "stream cannot be negative: " + maximumLength);
         }
-        reader.setLimit(maximumLength);
     }
 
     /**
@@ -325,7 +340,7 @@ public final class ReaderToUTF8Stream
         if (mark >= 0) {
             // Add 6 bytes reserved for one 3 byte character encoding and the
             // 3 byte Derby EOF marker (see encoding loop further down).
-            int spaceRequired = readAheadLimit + 6;
+            int spaceRequired = readAheadLimit + READ_BUFFER_RESERVATION;
             if (mark + spaceRequired > buffer.length) {
                 if (blen != -1) {
                     // Calculate the new offset, as we may have to shift bytes
@@ -347,7 +362,7 @@ public final class ReaderToUTF8Stream
 
 		// 6! need to leave room for a three byte UTF8 encoding
 		// and 3 bytes for our special end of file marker.
-		for (; off <= buffer.length - 6; )
+        for (; off <= buffer.length - READ_BUFFER_RESERVATION; )
 		{
 			int c = reader.read();
 			if (c < 0) {
@@ -558,7 +573,7 @@ public final class ReaderToUTF8Stream
      */
     public void reset()
             throws IOException {
-        // Throw execption if the stream has been closed implicitly or
+        // Throw exception if the stream has been closed implicitly or
         // explicitly.
         if (buffer == null) {
             throw new EOFException(MessageService.getTextMessage

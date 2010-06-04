@@ -56,7 +56,8 @@ public final class ClobStreamHeaderGenerator
 
     /**
      * Reference to "owning" DVD, used to update it with information about
-     * whether the database is being accessed in soft upgrade mode or not.
+     * which header format should be used. This is currently only determined by
+     * consulting the data dictionary about the version.
      * <p>
      * This is an optimization to avoid having to consult the data dictionary
      * on every request to generate a header when a data value descriptor is
@@ -64,15 +65,15 @@ public final class ClobStreamHeaderGenerator
      */
     private final StringDataValue callbackDVD;
     /**
-     * {@code true} if database is being accessed in soft upgrade mode,
-     * {@code false} is not. If {@code null}, the mode will be determined by
-     * obtaining the database context through the context service.
+     * {@code true} if the database version is prior to 10.5, {@code false} if
+     * the version is 10.5 or newer. If {@code null}, the version will be
+     * determined by obtaining the database context through the context service.
      */
-    private Boolean inSoftUpgradeMode;
+    private Boolean isPreDerbyTenFive;
 
     /**
      * Creates a new generator that will use the context manager to determine
-     * if the database is being accessed in soft upgrade mode or not.
+     * which header format to use based on the database version.
      *
      * @param dvd the owning data value descriptor
      */
@@ -84,33 +85,34 @@ public final class ClobStreamHeaderGenerator
     }
 
     /**
-     * Creates a new generator for a database in the given mode.
+     * Creates a new generator using the specified header format.
      *
-     * @param inSoftUpgradeMode {@code true} if the database is being accessed
-     *      in soft upgrade mode, {@code false} if not
+     * @param isPreDerbyTenFive {@code true} if the database version is prior
+     *      to 10.5, {@code false} if the version is 10.5 or newer
      */
-    public ClobStreamHeaderGenerator(boolean inSoftUpgradeMode) {
-        // Do not try to determine if we are in soft upgrade mode, use the
-        // specified value for it.
+    public ClobStreamHeaderGenerator(boolean isPreDerbyTenFive) {
+        // Do not try to determine the version through the cottext service, use
+        // the specified value instead.
         this.callbackDVD = null;
-        this.inSoftUpgradeMode = Boolean.valueOf(inSoftUpgradeMode);
+        this.isPreDerbyTenFive = Boolean.valueOf(isPreDerbyTenFive);
     }
 
     /**
      * Tells if the header encodes a character or byte count.
      * <p>
      * Currently the header expects a character count if the header format is
-     * 10.5 (or newer), and a byte count if we are accessing a database in
-     * soft upgrade mode.
+     * 10.5 (or newer), and a byte count if we are accessing a database created
+     * by a version prior to 10.5.
      *
-     * @return {@code false} if in soft upgrade mode, {@code true} if not.
+     * @return {@code false} if a byte count is expected (prior to 10.5),
+     *      {@code true} if a character count is expected (10.5 and newer).
      */
     public boolean expectsCharCount() {
-        if (callbackDVD != null && inSoftUpgradeMode == null) {
-            determineMode();
+        if (callbackDVD != null && isPreDerbyTenFive == null) {
+            determineHeaderFormat();
         }
-        // Expect byte count if in soft upgrade mode, char count otherwise.
-        return !inSoftUpgradeMode.booleanValue();
+        // Expect byte count if older than 10.5, char count otherwise.
+        return !isPreDerbyTenFive.booleanValue();
     }
 
     /**
@@ -123,11 +125,11 @@ public final class ClobStreamHeaderGenerator
      * @return The number of bytes written into the buffer.
      */
     public int generateInto(byte[] buf, int offset, long valueLength) {
-        if (callbackDVD != null && inSoftUpgradeMode == null) {
-            determineMode();
+        if (callbackDVD != null && isPreDerbyTenFive == null) {
+            determineHeaderFormat();
         }
         int headerLength = 0;
-        if (inSoftUpgradeMode == Boolean.FALSE) {
+        if (isPreDerbyTenFive == Boolean.FALSE) {
             // Write a 10.5 stream header format.
             // Assume the length specified is a char count.
             if (valueLength >= 0){
@@ -159,11 +161,11 @@ public final class ClobStreamHeaderGenerator
      */
     public int generateInto(ObjectOutput out, long valueLength)
             throws IOException {
-        if (callbackDVD != null && inSoftUpgradeMode == null) {
-            determineMode();
+        if (callbackDVD != null && isPreDerbyTenFive == null) {
+            determineHeaderFormat();
         }
         int headerLength = 0;
-        if (inSoftUpgradeMode == Boolean.FALSE) {
+        if (isPreDerbyTenFive == Boolean.FALSE) {
             // Write a 10.5 stream header format.
             headerLength = 5;
             // Assume the length specified is a char count.
@@ -195,10 +197,10 @@ public final class ClobStreamHeaderGenerator
      * @return Number of bytes written (zero or more).
      */
     public int writeEOF(byte[] buffer, int offset, long valueLength) {
-        if (callbackDVD != null && inSoftUpgradeMode == null) {
-            determineMode();
+        if (callbackDVD != null && isPreDerbyTenFive == null) {
+            determineHeaderFormat();
         }
-        if (!inSoftUpgradeMode.booleanValue()) {
+        if (!isPreDerbyTenFive.booleanValue()) {
             if (valueLength < 0) {
                 System.arraycopy(DERBY_EOF_MARKER, 0,
                                  buffer, offset, DERBY_EOF_MARKER.length);
@@ -221,10 +223,10 @@ public final class ClobStreamHeaderGenerator
      */
     public int writeEOF(ObjectOutput out, long valueLength)
             throws IOException {
-        if (callbackDVD != null && inSoftUpgradeMode == null) {
-            determineMode();
+        if (callbackDVD != null && isPreDerbyTenFive == null) {
+            determineHeaderFormat();
         }
-        if (!inSoftUpgradeMode.booleanValue()) {
+        if (!isPreDerbyTenFive.booleanValue()) {
             if (valueLength < 0) {
                 out.write(DERBY_EOF_MARKER);
                 return DERBY_EOF_MARKER.length;
@@ -237,10 +239,24 @@ public final class ClobStreamHeaderGenerator
     }
 
     /**
-     * Determines if the database being accessed is accessed in soft upgrade
-     * mode or not.
+     * Returns the maximum header length.
+     *
+     * @return Maximum header length in bytes.
      */
-    private void determineMode() {
+    public int getMaxHeaderLength() {
+        return 5;
+    }
+
+    /**
+     * Determines which header format to use.
+     * <p>
+     * <em>Implementation note:</em> The header format is determined by
+     * consulting the data dictionary throught the context service. If there is
+     * no context, the operation will fail.
+     *
+     * @throws IllegalStateException if there is no context
+     */
+    private void determineHeaderFormat() {
         DatabaseContext dbCtx = (DatabaseContext)
                 ContextService.getContext(DatabaseContext.CONTEXT_ID);
         if (dbCtx == null) {
@@ -249,7 +265,7 @@ public final class ClobStreamHeaderGenerator
         } else {
             DataDictionary dd = dbCtx.getDatabase().getDataDictionary();
             try {
-                inSoftUpgradeMode = Boolean.valueOf(!dd.checkVersion(
+                isPreDerbyTenFive = Boolean.valueOf(!dd.checkVersion(
                         DataDictionary.DD_VERSION_DERBY_10_5, null));
             } catch (StandardException se) {
                 // This should never happen as long as the second argument
@@ -263,7 +279,7 @@ public final class ClobStreamHeaderGenerator
             // being accessed in. It is assumed that a DVD is only shared
             // within a single database, i.e. the mode doesn't change during
             // the lifetime of the DVD.
-            callbackDVD.setSoftUpgradeMode(inSoftUpgradeMode);
+            callbackDVD.setStreamHeaderFormat(isPreDerbyTenFive);
         }
     }
 }

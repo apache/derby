@@ -56,10 +56,6 @@ import java.util.Calendar;
 public class SQLClob
 	extends SQLVarchar
 {
-
-    /** The maximum number of bytes used by the stream header. */
-    private static final int MAX_STREAM_HEADER_LENGTH = 5;
-
     /** The header generator used for 10.4 (or older) databases. */
     private static final StreamHeaderGenerator TEN_FOUR_CLOB_HEADER_GENERATOR =
             new ClobStreamHeaderGenerator(true);
@@ -67,6 +63,14 @@ public class SQLClob
     /** The header generator used for 10.5 databases. */
     private static final StreamHeaderGenerator TEN_FIVE_CLOB_HEADER_GENERATOR =
             new ClobStreamHeaderGenerator(false);
+
+    /**
+     * The maximum number of bytes used by the stream header.
+     * <p>
+     * Use the length specified by the ten five header generator.
+     */
+    private static final int MAX_STREAM_HEADER_LENGTH =
+            TEN_FIVE_CLOB_HEADER_GENERATOR.getMaxHeaderLength();
 
     /**
      * The descriptor for the stream. If there is no stream this should be
@@ -577,7 +581,7 @@ public class SQLClob
      * <p>
      * <em>NOTE</em>: To guarantee a successful generation, one of the following
      * two conditions must be met at header or EOF generation time:
-     * <ul> <li>{@code setSoftUpgradeMode} has been invoked before the header
+     * <ul> <li>{@code setStreamHeaderFormat} has been invoked before the header
      *          generator was obtained.</li>
      *      <li>There is context at generation time, such that the mode can be
      *          determined by obtaining the database context and by consulting
@@ -606,7 +610,7 @@ public class SQLClob
      * @param inSoftUpgradeMode {@code TRUE} if the database is accessed in
      *      soft upgrade mode, {@code FALSE} is not, or {@code null} if unknown
      */
-    public void setSoftUpgradeMode(Boolean inSoftUpgradeMode) {
+    public void setStreamHeaderFormat(Boolean inSoftUpgradeMode) {
         this.inSoftUpgradeMode = inSoftUpgradeMode;
     }
 
