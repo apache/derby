@@ -2373,14 +2373,10 @@ public class ResultColumnList extends QueryTreeNodeVector
 				continue;
 
 			/* 
-			** Check type compatability.  We want to make sure that
-			** the types are assignable in either direction
-			** and they are comparable.
+			** Check type compatability.
 			*/
 			ClassFactory cf = getClassFactory();
-			if (
-				!thisExpr.getTypeCompiler().storable(otherTypeId, cf) &&
-				!otherExpr.getTypeCompiler().storable(thisTypeId, cf))
+			if ( !unionCompatible( thisExpr, otherExpr ) )
 			{
 				throw StandardException.newException(SQLState.LANG_NOT_UNION_COMPATIBLE, 
                                                      thisTypeId.getSQLTypeName(),
@@ -2439,6 +2435,35 @@ public class ResultColumnList extends QueryTreeNodeVector
 			}
 		}
 	}
+
+    /**
+     * Return true if the types of two expressions are union compatible. The rules for union
+     * compatibility are found in the SQL Standard, part 2, section 7.3 (<query expression>),
+     * syntax rule 20.b.ii. That in turn, refers you to section 9.3 (Result of data type combinations).
+     * See, for instance, <a href="https://issues.apache.org/jira/browse/DERBY-4692">DERBY-4692</a>.
+     *
+     * This logic may enforce only a weaker set of rules. Here is the original comment
+     * on the original logic: "We want to make sure that the types are assignable in either direction
+     * and they are comparable." We may need to revisit this code to make it conform to the
+     * Standard.
+     */
+    private boolean unionCompatible( ValueNode left, ValueNode right )
+        throws StandardException
+    {
+        TypeId leftTypeId = left.getTypeId();
+        TypeId rightTypeId = right.getTypeId();
+        ClassFactory cf = getClassFactory();
+
+        if (
+            !left.getTypeCompiler().storable(rightTypeId, cf) &&
+            !right.getTypeCompiler().storable(leftTypeId, cf)
+            )
+        { return false; }
+
+        if ( leftTypeId.isBooleanTypeId() != rightTypeId.isBooleanTypeId() ) { return false; }
+
+        return true;
+    }
 
 	/**
 	 * Do the 2 RCLs have the same type & length.

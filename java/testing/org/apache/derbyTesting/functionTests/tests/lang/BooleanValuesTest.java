@@ -321,7 +321,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
      * <ul>
      * <li>Add a new column to ALL_TYPES and corresponding rows (see setUp())</li>
      * <li>Add the new datatype to one of the tests below</li>
-     * <li>Add a new bad implicit cast to test_06_implicitCasts()</li>
+     * <li>Add a new bad union case to test_06_unions()</li>
      * </ul>
      */
     public void test_01_datatypeCount() throws Exception
@@ -495,97 +495,35 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     
     /**
      * <p>
-     * Test that values are implicitly cast to boolean according to the rules in the SQL Standard,
-     * part 2, section 6.12 (<cast specification>), general rule 20. Other than booleans themselves,
-     * the only legal casts are from string types to boolean. The following transformations are applied
-     * to the strings:
-     * </p>
-     *
-     * <ul>
-     * <li>Trim whitespace off the string</li>
-     * <li>Then apply the rules in section 5.3 (<literal>). This means that the trimmed string must be 'TRUE', 'FALSE', or 'UNKNOWN', regardless of case.</li>
-     * <li>Otherwise, raise an exception.</li>
-     * </ul>
-     *
-     * <p>
-     * See <a href="https://issues.apache.org/jira/browse/DERBY-4658">DERBY-4658</a>.
+     * Test that unions fail if one but not both sides of the union is BOOLEAN. The rules for union
+     * compatibility are found in the SQL Standard, part 2, section 7.3 (<query expression>),
+     * syntax rule 20.b.ii. That in turn, refers you to section 9.3 (Result of data type combinations).
+     * See, for instance, <a href="https://issues.apache.org/jira/browse/DERBY-4692">DERBY-4692</a>.This enforces the rules found 
      * </p>
      */
-    public void test_06_implicitCasts() throws Exception
+    public void test_06_unions() throws Exception
     {
         Connection conn = getConnection();
 
-        vetGoodImplicitCastFromString( conn, "'true'", Boolean.TRUE );
-        vetGoodImplicitCastFromString( conn, "'false'", Boolean.FALSE );
-        vetGoodImplicitCastFromString( conn, "'TRUE'", Boolean.TRUE );
-        vetGoodImplicitCastFromString( conn, "'FALSE'", Boolean.FALSE );
-        vetGoodImplicitCastFromString( conn, "' true '", Boolean.TRUE );
-        vetGoodImplicitCastFromString( conn, "' false '", Boolean.FALSE );
-
-        vetGoodImplicitCastFromString( conn, "cast (null as char( 10 ) )", null );
-        vetGoodImplicitCastFromString( conn, "cast (null as clob )", null );
-        vetGoodImplicitCastFromString( conn, "cast (null as long varchar )", null );
-        vetGoodImplicitCastFromString( conn, "cast (null as varchar( 10 ) )", null );
-
-        vetGoodImplicitCastFromString( conn, "cast ('true' as char( 10 ) )", Boolean.TRUE );
-        vetGoodImplicitCastFromString( conn, "cast ('true' as clob )", Boolean.TRUE );
-        vetGoodImplicitCastFromString( conn, "cast ('true' as long varchar)", Boolean.TRUE );
-        vetGoodImplicitCastFromString( conn, "cast ('true' as varchar( 10 ) )", Boolean.TRUE );
-
-        vetGoodImplicitCastFromString( conn, "cast ('false' as char( 10 ) )", Boolean.FALSE );
-        vetGoodImplicitCastFromString( conn, "cast ('false' as clob )", Boolean.FALSE );
-        vetGoodImplicitCastFromString( conn, "cast ('false' as long varchar)", Boolean.FALSE );
-        vetGoodImplicitCastFromString( conn, "cast ('false' as varchar( 10 ) )", Boolean.FALSE );
-        
-        expectExecutionError( conn, BAD_CAST, makeImplicitCast( "'neither'" ) );
-
-        expectExecutionError( conn, BAD_CAST, makeImplicitCast( "cast ('neither' as char(10))" ) );
-        expectExecutionError( conn, BAD_CAST, makeImplicitCast( "cast ('neither' as clob)" ) );
-        expectExecutionError( conn, BAD_CAST, makeImplicitCast( "cast ('neither' as long varchar)" ) );
-        expectExecutionError( conn, BAD_CAST, makeImplicitCast( "cast ('neither' as varchar(10))" ) );
-
         vetBadImplicitCasts( conn, "bigint_col" );
         vetBadImplicitCasts( conn, "blob_col" );
-        // char type ok
+        vetBadImplicitCasts( conn, "char_col" );
         vetBadImplicitCasts( conn, "char_for_bit_data_col" );
-        // clob type ok
+        vetBadImplicitCasts( conn, "clob_col" );
         vetBadImplicitCasts( conn, "date_col" );
         vetBadImplicitCasts( conn, "decimal_col" );
         vetBadImplicitCasts( conn, "real_col" );
         vetBadImplicitCasts( conn, "double_col" );
         vetBadImplicitCasts( conn, "int_col" );
-        // long varchar type ok
+        vetBadImplicitCasts( conn, "long_varchar_col" );
         vetBadImplicitCasts( conn, "long_varchar_for_bit_data_col" );
         vetBadImplicitCasts( conn, "numeric_col" );
         vetBadImplicitCasts( conn, "smallint_col" );
         vetBadImplicitCasts( conn, "time_col" );
         vetBadImplicitCasts( conn, "timestamp_col" );
-        // varchar type ok
+        vetBadImplicitCasts( conn, "varchar_col" );
         vetBadImplicitCasts( conn, "varchar_for_bit_data_col" );
         if ( _supportsXML ) { vetBadImplicitCasts( conn, "xml_col" ); }
-    }
-    private void vetGoodImplicitCastFromString( Connection conn, String text, Boolean booleanValue ) throws Exception
-    {
-        String expectedValue = null;
-        if ( booleanValue != null ) { expectedValue = booleanValue.toString(); }
-
-        assertResults
-            (
-             conn,
-             makeImplicitCast( text ),
-             new String[][]
-             {
-                 { expectedValue },
-             },
-             false
-             );
-    }
-    private String makeImplicitCast( String text )
-    {
-        return
-            "select isindex from sys.sysconglomerates where conglomeratename = 'foo'\n" +
-            "union\n" +
-            "values ( " + text + " )\n";
     }
     private void vetBadImplicitCasts( Connection conn, String columnName ) throws Exception
     {
