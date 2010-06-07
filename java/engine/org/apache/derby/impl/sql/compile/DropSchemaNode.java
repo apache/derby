@@ -24,6 +24,7 @@ package	org.apache.derby.impl.sql.compile;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -61,7 +62,8 @@ public class DropSchemaNode extends DDLStatementNode
 	{
 		
         LanguageConnectionContext lcc = getLanguageConnectionContext();
-
+        StatementContext stx = lcc.getStatementContext();
+        String currentUser = stx.getSQLSessionContext().getCurrentUser();
 		/* 
 		** Users are not permitted to drop
 		** the SYS or APP schemas.
@@ -80,7 +82,7 @@ public class DropSchemaNode extends DDLStatementNode
         if (isPrivilegeCollectionRequired())
         {
             getCompilerContext().addRequiredSchemaPriv(schemaName, 
-                lcc.getAuthorizationId(), 
+                currentUser,
                 Authorizer.DROP_SCHEMA_PRIV);
         }
 	}

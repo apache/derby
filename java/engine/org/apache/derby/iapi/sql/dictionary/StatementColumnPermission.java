@@ -89,7 +89,6 @@ public class StatementColumnPermission extends StatementTablePermission
 	 * @see StatementPermission#check
 	 */
 	public void check( LanguageConnectionContext lcc,
-					   String authorizationId,
 					   boolean forGrant,
 					   Activation activation)
 		throws StandardException
@@ -97,10 +96,11 @@ public class StatementColumnPermission extends StatementTablePermission
 		DataDictionary dd = lcc.getDataDictionary();
 		ExecPreparedStatement ps = activation.getPreparedStatement();
 
-		if (hasPermissionOnTable(lcc, activation,
-									 authorizationId, forGrant, ps)) {
+        if (hasPermissionOnTable(lcc, activation, forGrant, ps)) {
 			return;
 		}
+
+        String currentUserId = lcc.getCurrentUserId(activation);
 
 		FormatableBitSet permittedColumns = null;
 		if( ! forGrant)
@@ -111,7 +111,7 @@ public class StatementColumnPermission extends StatementTablePermission
 													permittedColumns);
 			permittedColumns = addPermittedColumns( dd,
 													false /* non-grantable permissions */,
-													authorizationId,
+                                                    currentUserId,
 													permittedColumns);
 		}
 		permittedColumns = addPermittedColumns( dd,
@@ -120,7 +120,7 @@ public class StatementColumnPermission extends StatementTablePermission
 												permittedColumns);
 		permittedColumns = addPermittedColumns( dd,
 												true /* grantable permissions */,
-												authorizationId,
+                                                currentUserId,
 												permittedColumns);
 		
 		//DERBY-4191
@@ -162,7 +162,7 @@ public class StatementColumnPermission extends StatementTablePermission
 			// session, is lazily set to none when it is attempted
 			// used.
 			String dbo = dd.getAuthorizationDatabaseOwner();
-			rd = dd.getRoleGrantDescriptor(role, authorizationId, dbo);
+            rd = dd.getRoleGrantDescriptor(role, currentUserId, dbo);
 
 			if (rd == null) {
 				rd = dd.getRoleGrantDescriptor
@@ -236,7 +236,7 @@ public class StatementColumnPermission extends StatementTablePermission
 		if (privType == Authorizer.MIN_SELECT_PRIV)
 			throw StandardException.newException( forGrant ? SQLState.AUTH_NO_TABLE_PERMISSION_FOR_GRANT
 					  : SQLState.AUTH_NO_TABLE_PERMISSION,
-					  authorizationId,
+                      currentUserId,
 					  getPrivName(),
 					  td.getSchemaName(),
 					  td.getName());
@@ -255,7 +255,7 @@ public class StatementColumnPermission extends StatementTablePermission
 					(forGrant
 					 ? SQLState.AUTH_NO_COLUMN_PERMISSION_FOR_GRANT
 					 : SQLState.AUTH_NO_COLUMN_PERMISSION),
-					authorizationId,
+                    currentUserId,
 					getPrivName(),
 					cd.getColumnName(),
 					td.getSchemaName(),

@@ -64,11 +64,10 @@ public final class StatementGenericPermission extends StatementPermission
 	 * @see StatementPermission#check
 	 */
 	public void check( LanguageConnectionContext lcc,
-					   String authorizationId,
 					   boolean forGrant,
 					   Activation activation) throws StandardException
 	{
-        genericCheck( lcc, authorizationId, forGrant, activation, _privilege );
+        genericCheck( lcc, forGrant, activation, _privilege );
 	}
 
 

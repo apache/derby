@@ -2509,6 +2509,7 @@ public final class	DataDictionaryImpl
              oldRai.getParameterStyle(),
              oldRai.getSQLAllowed(),
              oldRai.isDeterministic(),
+             oldRai.hasDefinersRights(),
              oldRai.calledOnNullInput(),
              newReturnType
              );
@@ -7022,6 +7023,7 @@ public final class	DataDictionaryImpl
 							paramCount, paramNames,
 							pt, paramModes, 0,
                             RoutineAliasInfo.PS_JAVA, RoutineAliasInfo.NO_SQL, isDeterministic,
+                            false, /* hasDefinersRights */
 							false, rt);
 
 					// details[2] = class name
@@ -9839,6 +9841,7 @@ public final class	DataDictionaryImpl
                                                     //  CONTAINS_SQL
                                                     //  NO_SQL
                 isDeterministic,             // whether the procedure/function is DETERMINISTIC
+                false,                              // not definer's rights
                 true,                               // true - calledOnNullInput
                 return_type);
 

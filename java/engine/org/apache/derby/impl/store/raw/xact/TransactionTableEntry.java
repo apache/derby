@@ -466,7 +466,7 @@ public class TransactionTableEntry implements Formatable, TransactionInfo, Clone
 			SanityManager.ASSERT(isClone, "Should only call method on a clone");
 
 		getlcc();
-		return (lcc == null) ? null : lcc.getAuthorizationId();
+        return (lcc == null) ? null : lcc.getSessionUserId();
 	}
 
 	public String getTransactionTypeString()

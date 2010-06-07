@@ -124,16 +124,14 @@ public class SpecialFunctionNode extends ValueNode
 		{
 		case C_NodeTypes.USER_NODE:
 		case C_NodeTypes.CURRENT_USER_NODE:
-		case C_NodeTypes.SESSION_USER_NODE:
 		case C_NodeTypes.SYSTEM_USER_NODE:
 			switch (nodeType)
 			{
 				case C_NodeTypes.USER_NODE: sqlName = "USER"; break;
 				case C_NodeTypes.CURRENT_USER_NODE: sqlName = "CURRENT_USER"; break;
-				case C_NodeTypes.SESSION_USER_NODE: sqlName = "SESSION_USER"; break;
 				case C_NodeTypes.SYSTEM_USER_NODE: sqlName = "SYSTEM_USER"; break;
 			}
-			methodName = "getAuthorizationId";
+            methodName = "getCurrentUserId";
 			methodType = "java.lang.String";
             
 			//SQL spec Section 6.4 Syntax Rule 4 says that the collation type 
@@ -143,6 +141,13 @@ public class SpecialFunctionNode extends ValueNode
 			//be implicit. 
             dtd = DataDictionary.TYPE_SYSTEM_IDENTIFIER;
 			break;
+
+        case C_NodeTypes.SESSION_USER_NODE:
+            methodName = "getSessionUserId";
+            methodType = "java.lang.String";
+            sqlName = "SESSION_USER";
+            dtd = DataDictionary.TYPE_SYSTEM_IDENTIFIER;
+            break;
 
 		case C_NodeTypes.CURRENT_SCHEMA_NODE:
 			sqlName = "CURRENT SCHEMA";
@@ -235,7 +240,8 @@ public class SpecialFunctionNode extends ValueNode
 		int argCount = 0;
 
 		if (methodName.equals("getCurrentRoleIdDelimited") ||
-			methodName.equals("getCurrentSchemaName")) {
+                methodName.equals("getCurrentSchemaName") ||
+                methodName.equals("getCurrentUserId")) {
 
 			acb.pushThisAsActivation(mb);
 			argCount++;

@@ -168,8 +168,20 @@ import java.lang.Character;
 public class SQLParser
 {
 	private static final String[] SAVEPOINT_CLAUSE_NAMES = {"UNIQUE", "ON ROLLBACK RETAIN LOCKS", "ON ROLLBACK RETAIN CURSORS"};
-	private static final String[] ROUTINE_CLAUSE_NAMES =
-		{null, "SPECIFIC", "RESULT SET", "LANGUAGE", "EXTERNAL NAME", "PARAMETER STYLE", "SQL", "DETERMINISTIC", "ON NULL INPUT"};
+
+    /* Keep in synch with CreateAliasNode's index constants */
+    private static final String[] ROUTINE_CLAUSE_NAMES =
+        {null,
+         "SPECIFIC",
+         "RESULT SET",
+         "LANGUAGE",
+         "EXTERNAL NAME",
+         "PARAMETER STYLE",
+         "SQL",
+         "DETERMINISTIC",
+         "ON NULL INPUT",
+         "RETURN TYPE",
+         "EXTERNAL SECURITY"};
 	/**
 	   Clauses required for Java routines. Numbers correspond
 	   to offsets in ROUTINE_CLAUSE_NAMES.
@@ -10632,7 +10644,18 @@ void routineElement(boolean isProcedure, boolean isTableFunction, Object[] routi
             checkVersion(DataDictionary.DD_VERSION_DERBY_10_5, "DETERMINISTIC");
         }
 	|
-		<EXTERNAL> <NAME> clauseValue = string() { clausePosition = CreateAliasNode.EXTERNAL_NAME; }
+        <EXTERNAL>
+        ( <NAME> clauseValue = string()
+            { clausePosition = CreateAliasNode.EXTERNAL_NAME; }
+        |
+          <SECURITY>
+            {   checkVersion(DataDictionary.DD_VERSION_DERBY_10_7,
+                            "EXTERNAL SECURITY");
+                checkSqlStandardAccess("EXTERNAL SECURITY");
+                clauseValue = new Boolean(routineSecurityClause());
+                clausePosition = CreateAliasNode.ROUTINE_SECURITY_DEFINER;
+            }
+        )
 	|
 		<PARAMETER> <STYLE> clauseValue = parameterStyle( isTableFunction ) { clausePosition = CreateAliasNode.PARAMETER_STYLE; }
 
@@ -10683,6 +10706,21 @@ Boolean calledOnNullInput(boolean isProcedure) throws StandardException :
 		return calledOnNull;
 	}
 }
+
+boolean  routineSecurityClause() throws StandardException :
+{
+    boolean result = false;
+}
+{
+    (
+        <INVOKER> { result = false;}
+    |   <DEFINER> { result = true; }
+    )
+    {
+        return result;
+    }
+}
+
 
 Short parameterStyle( boolean isTableFunction ) throws StandardException :
 {

@@ -57,6 +57,9 @@ public class RoutineAliasInfo extends MethodAliasInfo
     private static final short SQL_ALLOWED_MASK = (short) 0xF;
     private static final short DETERMINISTIC_MASK = (short) 0x10;
 
+    /** Mask for the SECURITY INVOKER/DEFINER field */
+    private static final short SECURITY_DEFINER_MASK = (short) 0x20;
+
 	private int parameterCount;
 
     /**
@@ -93,6 +96,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
         bits 0-3    sqlAllowed = MODIFIES_SQL_DATA, READS_SQL_DATA,CONTAINS_SQL, or NO_SQL
 
         bit 4         on if function is DETERMINISTIC, off otherwise
+        bit 5         on if running with definer's right, off otherwise
     */
 	private short	sqlOptions;
 
@@ -120,16 +124,35 @@ public class RoutineAliasInfo extends MethodAliasInfo
                             TypeDescriptor[]	parameterTypes, int[] parameterModes, int dynamicResultSets, short parameterStyle, short sqlAllowed,
                             boolean isDeterministic ) {
 
-		this(methodName, parameterCount, parameterNames, parameterTypes, parameterModes, 
-             dynamicResultSets, parameterStyle, sqlAllowed, isDeterministic, true, (TypeDescriptor) null);
+        this(methodName,
+             parameterCount,
+             parameterNames,
+             parameterTypes,
+             parameterModes,
+             dynamicResultSets,
+             parameterStyle,
+             sqlAllowed,
+             isDeterministic,
+             false /* definersRights*/,
+             true,
+             (TypeDescriptor) null);
 	}
 
 	/**
 		Create a RoutineAliasInfo for a PROCEDURE or FUNCTION
 	*/
-	public RoutineAliasInfo(String methodName, int parameterCount, String[] parameterNames,
-		TypeDescriptor[]	parameterTypes, int[] parameterModes, int dynamicResultSets, short parameterStyle, short sqlAllowed,
-                            boolean isDeterministic, boolean calledOnNullInput, TypeDescriptor returnType)
+    public RoutineAliasInfo(String methodName,
+                            int parameterCount,
+                            String[] parameterNames,
+                            TypeDescriptor[] parameterTypes,
+                            int[] parameterModes,
+                            int dynamicResultSets,
+                            short parameterStyle,
+                            short sqlAllowed,
+                            boolean isDeterministic,
+                            boolean definersRights,
+                            boolean calledOnNullInput,
+                            TypeDescriptor returnType)
 	{
 
 		super(methodName);
@@ -141,6 +164,11 @@ public class RoutineAliasInfo extends MethodAliasInfo
 		this.parameterStyle = parameterStyle;
 		this.sqlOptions = (short) (sqlAllowed & SQL_ALLOWED_MASK);
         if ( isDeterministic ) { this.sqlOptions = (short) (sqlOptions | DETERMINISTIC_MASK); }
+
+        if (definersRights) {
+            this.sqlOptions = (short) (sqlOptions | SECURITY_DEFINER_MASK);
+        }
+
 		this.calledOnNullInput = calledOnNullInput;
 		this.returnType = returnType;
 
@@ -220,6 +248,11 @@ public class RoutineAliasInfo extends MethodAliasInfo
     public boolean isDeterministic()
     {
         return ( (sqlOptions & DETERMINISTIC_MASK) != 0 );
+    }
+
+    public boolean hasDefinersRights()
+    {
+        return ( (sqlOptions & SECURITY_DEFINER_MASK) != 0 );
     }
 
 	public boolean calledOnNullInput() {
@@ -375,7 +408,10 @@ public class RoutineAliasInfo extends MethodAliasInfo
         
         if ( isDeterministic() )
         { sb.append( " DETERMINISTIC " ); }
-        
+
+        if ( hasDefinersRights())
+        { sb.append( " EXTERNAL SECURITY DEFINER " ); }
+
 		sb.append(RoutineAliasInfo.SQL_CONTROL[getSQLAllowed()]);
 		if ((returnType == null) &&
 			(dynamicResultSets != 0))

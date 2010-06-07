@@ -129,6 +129,10 @@ public class StaticMethodCallNode extends MethodCallNode
      */
 	private LocalField	returnsNullOnNullState;
 
+    /**
+     * Authorization id of user owning schema in which routine is defined.
+     */
+    private String routineDefiner = null;
 
 	AliasDescriptor	ad;
 
@@ -646,6 +650,8 @@ public class StaticMethodCallNode extends MethodCallNode
 			if (sd.isSystemSchema() && (routineInfo.getReturnType() == null) && routineInfo.getSQLAllowed() != RoutineAliasInfo.NO_SQL)
 				isSystemCode = true;
 
+            routineDefiner = sd.getAuthorizationId();
+
 			break;
 		}
 }
@@ -662,8 +668,11 @@ public class StaticMethodCallNode extends MethodCallNode
 	 * @param acb activation class builder
 	 * @param mb  method builder
 	 */
-	private void generateSetupNestedSessionContext(ActivationClassBuilder acb,
-												   MethodBuilder mb) {
+    private void generateSetupNestedSessionContext(
+        ActivationClassBuilder acb,
+        MethodBuilder mb,
+        boolean hadDefinersRights,
+        String definer) throws StandardException {
 
 		// Generates the following Java code:
 		// ((Activation)this).getLanguageConnectionContext().
@@ -674,9 +683,11 @@ public class StaticMethodCallNode extends MethodCallNode
 					  "getLanguageConnectionContext",
 					  ClassName.LanguageConnectionContext, 0);
 		acb.pushThisAsActivation(mb);
+        mb.push(hadDefinersRights);
+        mb.push(definer);
 		mb.callMethod(VMOpcode.INVOKEINTERFACE, null,
 					  "setupNestedSessionContext",
-					  "void", 1);
+                      "void", 3);
 	}
 
 
@@ -945,8 +956,11 @@ public class StaticMethodCallNode extends MethodCallNode
 			// If no SQL, there is no need to setup a nested session
 			// context.
 			if (sqlAllowed != RoutineAliasInfo.NO_SQL) {
-				generateSetupNestedSessionContext((ActivationClassBuilder) acb,
-												  mb);
+                generateSetupNestedSessionContext(
+                    (ActivationClassBuilder) acb,
+                    mb,
+                    routineInfo.hasDefinersRights(),
+                    routineDefiner);
 			}
 
 			// for a function we need to fetch the current SQL control

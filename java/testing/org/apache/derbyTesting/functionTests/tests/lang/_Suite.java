@@ -87,6 +87,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SQLSessionContextTest.suite());
         suite.addTest(RoutineSecurityTest.suite());
         suite.addTest(RoutineTest.suite());
+        suite.addTest(RoutinesDefinersRightsTest.suite());
         suite.addTest(SQLAuthorizationPropTest.suite());
         suite.addTest(StatementPlanCacheTest.suite());
         suite.addTest(StreamsTest.suite());

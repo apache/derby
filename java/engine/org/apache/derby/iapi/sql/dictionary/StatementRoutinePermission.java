@@ -1,3 +1,4 @@
+
 /*
 
    Derby - Class org.apache.derby.iapi.sql.dictionary.StatementRoutinePermission
@@ -60,11 +61,10 @@ public final class StatementRoutinePermission extends StatementPermission
 	 * @see StatementPermission#check
 	 */
 	public void check( LanguageConnectionContext lcc,
-					   String authorizationId,
 					   boolean forGrant,
 					   Activation activation) throws StandardException
 	{
-        genericCheck( lcc, authorizationId, forGrant, activation, "EXECUTE" );
+        genericCheck( lcc, forGrant, activation, "EXECUTE" );
 	}
 
 	/**

@@ -1289,6 +1289,25 @@ public class JDBC {
         }
     }
 
+
+    /**
+     * Asserts that the current user is the same as the one specified.
+     *
+     * @param con connection to check schema in
+     * @param schema expected user name
+     * @throws SQLException if something goes wrong
+     */
+    public static void assertCurrentUser(Connection con, String user)
+            throws SQLException {
+        Statement stmt = con.createStatement();
+        try {
+            JDBC.assertSingleValueResultSet(
+                    stmt.executeQuery("VALUES CURRENT_USER"), user);
+        } finally {
+            stmt.close();
+        }
+    }
+
     /**
      * Convert byte array to String.
      * Each byte is converted to a hexadecimal string representation.

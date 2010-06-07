@@ -82,7 +82,7 @@ class GrantRoleConstantAction extends DDLConstantAction {
         TransactionController tc = lcc.getTransactionExecute();
         DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 
-        final String grantor = lcc.getAuthorizationId();
+        final String grantor = lcc.getCurrentUserId(activation);
 
         dd.startWriting(lcc);
 

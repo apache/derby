@@ -101,7 +101,7 @@ class SetRoleConstantAction implements ConstantAction
         dd = lcc.getDataDictionary();
         String thisRoleName = roleName;
 
-        final String currentAuthId = lcc.getAuthorizationId();
+        final String currentAuthId = lcc.getCurrentUserId(activation);
         final String dbo = lcc.getDataDictionary().
             getAuthorizationDatabaseOwner();
 
@@ -153,7 +153,7 @@ class SetRoleConstantAction implements ConstantAction
                         (SQLState.ROLE_INVALID_SPECIFICATION, thisRoleName);
                 }
 
-                if (!lcc.roleIsSettable(thisRoleName)) {
+                if (!lcc.roleIsSettable(activation, thisRoleName)) {
                     throw StandardException.newException
                               (SQLState. ROLE_INVALID_SPECIFICATION_NOT_GRANTED,
                                thisRoleName);

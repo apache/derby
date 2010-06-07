@@ -64,8 +64,14 @@ public class CreateAliasNode extends DDLStatementNode
     public static final int DETERMINISTIC = SQL_CONTROL + 1;
     public static final int NULL_ON_NULL_INPUT = DETERMINISTIC + 1;
     public static final int RETURN_TYPE = NULL_ON_NULL_INPUT + 1;
-    public static final int ROUTINE_ELEMENT_COUNT = RETURN_TYPE + 1;
-    
+    public static final int ROUTINE_SECURITY_DEFINER = RETURN_TYPE + 1;
+
+    // Keep ROUTINE_ELEMENT_COUNT last (determines set cardinality).
+    // Note: Remember to also update the map ROUTINE_CLAUSE_NAMES in
+    // sqlgrammar.jj when elements are added.
+    public static final int ROUTINE_ELEMENT_COUNT =
+        ROUTINE_SECURITY_DEFINER + 1;
+
 	private String				javaClassName;
 	private String				methodName;
 	private char				aliasType; 
@@ -198,6 +204,12 @@ public class CreateAliasNode extends DDLStatementNode
 				Boolean isDeterministicO = (Boolean) routineElements[DETERMINISTIC];
                 boolean isDeterministic = (isDeterministicO == null) ? false : isDeterministicO.booleanValue();
 
+                Boolean definersRightsO =
+                    (Boolean) routineElements[ROUTINE_SECURITY_DEFINER];
+                boolean definersRights  =
+                    (definersRightsO == null) ? false :
+                    definersRightsO.booleanValue();
+
 				Boolean calledOnNullInputO = (Boolean) routineElements[NULL_ON_NULL_INPUT];
 				boolean calledOnNullInput;
 				if (calledOnNullInputO == null)
@@ -216,9 +228,20 @@ public class CreateAliasNode extends DDLStatementNode
                     returnType = dtd.getCatalogType();
                 }
 
-				aliasInfo = new RoutineAliasInfo(this.methodName, paramCount, names, types, modes, drs,
-						((Short) routineElements[PARAMETER_STYLE]).shortValue(),	// parameter style
-                        sqlAllowed, isDeterministic, calledOnNullInput, returnType );
+                aliasInfo = new RoutineAliasInfo(
+                    this.methodName,
+                    paramCount,
+                    names,
+                    types,
+                    modes,
+                    drs,
+                    // parameter style:
+                    ((Short) routineElements[PARAMETER_STYLE]).shortValue(),
+                    sqlAllowed,
+                    isDeterministic,
+                    definersRights,
+                    calledOnNullInput,
+                    returnType );
 
 				implicitCreateSchema = true;
 				}

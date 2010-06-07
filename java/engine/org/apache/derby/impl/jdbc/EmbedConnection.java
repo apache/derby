@@ -1243,7 +1243,7 @@ public abstract class EmbedConnection implements EngineConnection
 		try {
 			tr.startTransaction();
 			LanguageConnectionContext lcc = tr.getLcc();
-			String username = lcc.getAuthorizationId();
+            String username = lcc.getSessionUserId();
 
 			DataDictionary dd = lcc.getDataDictionary();
 
@@ -1291,7 +1291,7 @@ public abstract class EmbedConnection implements EngineConnection
 	private void checkIsDBOwner(int operation) throws SQLException
 	{
 		final LanguageConnectionContext lcc = getLanguageConnection();
-		final String actualId = lcc.getAuthorizationId();
+        final String actualId = lcc.getSessionUserId();
 		final String dbOwnerId = lcc.getDataDictionary().
 			getAuthorizationDatabaseOwner();
 		if (!actualId.equals(dbOwnerId)) {

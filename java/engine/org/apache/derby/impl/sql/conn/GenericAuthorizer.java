@@ -61,14 +61,10 @@ implements Authorizer
 
 	private final LanguageConnectionContext lcc;
 	
-	private final String authorizationId; //the userName after parsing by IdUtil 
-	
-	GenericAuthorizer(String authorizationId, 
-						     LanguageConnectionContext lcc)
+    GenericAuthorizer(LanguageConnectionContext lcc)
 		 throws StandardException
 	{
 		this.lcc = lcc;
-		this.authorizationId = authorizationId;
 
 		refresh();
 	}
@@ -148,7 +144,8 @@ implements Authorizer
             // requiredPermissionsList for Database Owner
             if( requiredPermissionsList != null    && 
                 !requiredPermissionsList.isEmpty() && 
-				!authorizationId.equals(dd.getAuthorizationDatabaseOwner()))
+                !lcc.getCurrentUserId(activation).equals(
+                    dd.getAuthorizationDatabaseOwner()))
             {
                 int ddMode = dd.startReading(lcc);
                 
@@ -184,7 +181,7 @@ implements Authorizer
                             iter.hasNext();) 
                         {
                             ((StatementPermission) iter.next()).check
-								(lcc, authorizationId, false, activation);
+                                (lcc, false, activation);
                         }
                     } 
                     finally 
@@ -228,14 +225,6 @@ implements Authorizer
 		return StandardException.newException(sqlState);
 	}
 	
-
-	/**
-	  @see Authorizer#getAuthorizationId
-	  */
-	public String getAuthorizationId()
-	{
-		return authorizationId;
-	}
 
 	private void getUserAccessLevel() throws StandardException
 	{
@@ -283,7 +272,7 @@ implements Authorizer
 		PersistentSet tc = lcc.getTransactionExecute();
 		String listS = (String)
 			PropertyUtil.getServiceProperty(tc, listName);
-		return IdUtil.idOnList(authorizationId,listS);
+        return IdUtil.idOnList(lcc.getSessionUserId(),listS);
 	}
 
 	/**

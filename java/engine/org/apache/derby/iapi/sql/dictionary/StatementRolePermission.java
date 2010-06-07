@@ -54,7 +54,6 @@ public class StatementRolePermission extends StatementPermission
      * @see StatementPermission#check
      */
     public void check(LanguageConnectionContext lcc,
-                      String authid,
                       boolean forGrant,
                       Activation activation
                       ) throws StandardException

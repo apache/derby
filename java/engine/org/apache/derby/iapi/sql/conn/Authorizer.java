@@ -122,11 +122,6 @@ public interface Authorizer
 	public void authorize(Activation activation, int operation)
 				throws StandardException;
 
-    /**
-	  Get the Authorization ID for this Authorizer.
-	  */
-   public String getAuthorizationId();
-
    /**
 	 Get the readOnly status for this authorizer's connection.
 	 */

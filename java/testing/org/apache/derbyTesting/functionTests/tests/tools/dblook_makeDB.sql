@@ -75,6 +75,8 @@ create procedure p_deterministic() deterministic language java parameter style j
 
 create procedure p_not_deterministic() language java not deterministic parameter style java modifies sql data external name 'foo.bar.wibble';
 
+create procedure p_definers_rights() language java  parameter style java modifies sql data external name 'foo.bar.wibble' external security definer;
+
 -- ----------------------------------------------
 -- Functions.
 -- ----------------------------------------------
@@ -86,6 +88,9 @@ create function foo.gatp2(SCH VARCHAR(128), TBL VARCHAR(128)) RETURNS VARCHAR(10
 create function f_deterministic() returns int language java parameter style java deterministic no sql external name 'foo.bar.wibble';
 
 create function f_not_deterministic() returns int language java parameter style java no sql not deterministic external name 'foo.bar.wibble';
+
+create function f_definers_rights() returns int language java parameter style java no sql not deterministic external name 'foo.bar.wibble' external security definer;
+
 
 -- ----------------------------------------------
 -- Tables

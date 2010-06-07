@@ -48,14 +48,12 @@ public abstract class StatementPermission
 	}
 	/**
 	 * @param lcc				LanguageConnectionContext
-	 * @param authorizationId	AuthorizationId
 	 * @param forGrant
 	 * @param activation        activation for statement needing check
 	 *
 	 * @exception StandardException if the permission has not been granted
 	 */
 	public abstract void check( LanguageConnectionContext lcc,
-								String authorizationId,
 								boolean forGrant,
 								Activation activation) throws StandardException;
 
@@ -108,7 +106,6 @@ public abstract class StatementPermission
 	public void genericCheck
         (
          LanguageConnectionContext lcc,
-         String authorizationId,
          boolean forGrant,
          Activation activation,
          String privilegeType )
@@ -117,8 +114,9 @@ public abstract class StatementPermission
 		DataDictionary dd = lcc.getDataDictionary();
 		TransactionController tc = lcc.getTransactionExecute();
 		ExecPreparedStatement ps = activation.getPreparedStatement();
-		
-		PermissionsDescriptor perm = getPermissionDescriptor( authorizationId, dd );
+
+        PermissionsDescriptor perm =
+            getPermissionDescriptor( lcc.getCurrentUserId(activation), dd );
 		if( !isCorrectPermission( perm ) ) { perm = getPermissionDescriptor(Authorizer.PUBLIC_AUTHORIZATION_ID, dd ); }
 
         // if the user has the correct permission, we're done
@@ -138,7 +136,7 @@ public abstract class StatementPermission
 			// used.
 			String dbo = dd.getAuthorizationDatabaseOwner();
 			RoleGrantDescriptor rd = dd.getRoleGrantDescriptor
-				(role, authorizationId, dbo);
+                (role, lcc.getCurrentUserId(activation), dbo);
 
 			if (rd == null) {
 				rd = dd.getRoleGrantDescriptor(
@@ -211,7 +209,7 @@ public abstract class StatementPermission
 				(forGrant
 				 ? SQLState.AUTH_NO_GENERIC_PERMISSION_FOR_GRANT
 				 : SQLState.AUTH_NO_GENERIC_PERMISSION),
-				authorizationId,
+                lcc.getCurrentUserId(activation),
                 privilegeType,
 				getObjectType(),
 				sd.getSchemaName(),

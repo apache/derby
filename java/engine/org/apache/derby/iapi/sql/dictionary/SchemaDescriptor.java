@@ -172,8 +172,8 @@ public final class SchemaDescriptor extends TupleDescriptor
 	 *
      * @param dataDictionary
 	 * @param name	        The schema descriptor for this table.
+     * @param aid           The authorization id
 	 * @param oid	        The object id
-	 * @param aid	        The authorizatin id
      * @param isSystem	    boolean, true iff this is a system schema, like SYS,
      *                      SYSIBM, SYSCAT, SYSFUN, ....
 	 */

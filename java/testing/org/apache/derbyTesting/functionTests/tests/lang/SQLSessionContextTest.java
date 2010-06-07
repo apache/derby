@@ -53,6 +53,8 @@ import org.apache.derbyTesting.junit.JDBC;
  *    {client/server, embedded} x
  *    {data base owner}
  *
+ * See also RoutinesDefinersRightsTest, which tests the current user part of
+ * the SQLSessionContext.
  */
 public class SQLSessionContextTest extends BaseJDBCTestCase
 {

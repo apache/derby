@@ -418,12 +418,21 @@ public interface LanguageConnectionContext extends Context {
 	 */
 	LanguageConnectionFactory getLanguageConnectionFactory();
 
-	/**
-	 *	Get the Authorization Id
-	 *
-	 * @return String	the authorization id
-	 */
-	public String getAuthorizationId();
+    /**
+     * Get the Authorization Id of the current user
+     *
+     * @param a activation
+     * @return String the authorization id
+     */
+    public String getCurrentUserId(Activation a);
+
+    /**
+     *  Get the Authorization Id of the session user
+     *
+     * @return String   the authorization id
+     */
+    public String getSessionUserId();
+
 
 	/**
 	 * Get the default schema (used at compile-time when no activation
@@ -1131,12 +1140,14 @@ public interface LanguageConnectionContext extends Context {
 	 * This method will read (potentially) the dictionary, so it needs
 	 * a transaction context.
 	 *
+     * @param a activation
 	 * @param role string containing role name
 	 *
 	 * @return true if the role can be set
 	 * @throws StandardException standard exception policy
 	 */
-	public boolean roleIsSettable(String role) throws StandardException;
+    public boolean roleIsSettable(Activation a, String role)
+            throws StandardException;
 
 	/**
 	 * Create a new SQL session context for the current activation on the basis
@@ -1155,8 +1166,13 @@ public interface LanguageConnectionContext extends Context {
 	 * @see #setupSubStatementSessionContext
 	 *
 	 * @param a activation of the statement which performs the call.
+     * @param true if the method should run with definer's rights
+     * @param definer authorization id of the definer
 	 */
-	public void setupNestedSessionContext(Activation a);
+    public void setupNestedSessionContext(Activation a,
+                                          boolean definersRights,
+                                          String definer)
+            throws StandardException;
 
 	/**
 	 * Get the value of top level session context of the top level connection.
@@ -1184,7 +1200,8 @@ public interface LanguageConnectionContext extends Context {
 	 * </ul>
 	 * @see #setupNestedSessionContext
 	 */
-	public void setupSubStatementSessionContext(Activation a);
+    public void setupSubStatementSessionContext(Activation a)
+            throws StandardException;
 
 	/**
 	 * Create a fresh SQLSessionContext for this connection.

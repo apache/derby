@@ -70,7 +70,6 @@ public interface SQLSessionContext {
 
     /**
      * Set the SQL role of this SQL connection context
-     * The empty string is returned if role is NONE.
      */
     public void setRole(String role);
 
@@ -78,6 +77,16 @@ public interface SQLSessionContext {
      * Get the SQL role of this SQL connection context
      */
     public String getRole();
+
+    /**
+     * Set the SQL current user of this SQL connection context
+     */
+    public void setUser(String user);
+
+    /**
+     * Get the SQL current user of this SQL connection context
+     */
+    public String getCurrentUser();
 
     /**
      * Set the schema of this SQL connection context

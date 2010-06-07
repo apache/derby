@@ -61,13 +61,12 @@ public class StatementSchemaPermission extends StatementPermission
 	 * @see StatementPermission#check
 	 */
 	public void check( LanguageConnectionContext lcc,
-					   String authid,
 					   boolean forGrant,
 					   Activation activation) throws StandardException
 	{
 		DataDictionary dd =	lcc.getDataDictionary();
 		TransactionController tc = lcc.getTransactionExecute();
-
+        String currentUserId = lcc.getCurrentUserId(activation);
 		switch ( privType )
 		{
 			case Authorizer.MODIFY_SCHEMA_PRIV:
@@ -79,19 +78,25 @@ public class StatementSchemaPermission extends StatementPermission
 				if (sd == null)
 					return;
 
-				if (!authid.equals(sd.getAuthorizationId()))
+                if (!currentUserId.equals(sd.getAuthorizationId()))
 					throw StandardException.newException(
-						SQLState.AUTH_NO_ACCESS_NOT_OWNER, authid, schemaName);
+                        SQLState.AUTH_NO_ACCESS_NOT_OWNER,
+                        currentUserId,
+                        schemaName);
 				break;
 			
 			case Authorizer.CREATE_SCHEMA_PRIV:
-				// Non-DBA Users can only create schemas that match their authid
-				// Also allow only DBA to set authid to another user
-				// Note that for DBA, check interface wouldn't be called at all
-				if ( !schemaName.equals(authid) || 
-						(aid != null && !aid.equals(authid)) )
-					throw StandardException.newException(
-						SQLState.AUTH_NOT_DATABASE_OWNER, authid, schemaName);
+                // Non-DBA Users can only create schemas that match their
+                // currentUserId Also allow only DBA to set currentUserId to
+                // another user Note that for DBA, check interface wouldn't be
+                // called at all
+                if ( !schemaName.equals(currentUserId) ||
+                         (aid != null && !aid.equals(currentUserId)) )
+
+                    throw StandardException.newException(
+                        SQLState.AUTH_NOT_DATABASE_OWNER,
+                        currentUserId,
+                        schemaName);
 				break;
 			
 			default:

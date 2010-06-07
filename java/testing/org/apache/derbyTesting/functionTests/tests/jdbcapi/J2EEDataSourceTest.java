@@ -1998,8 +1998,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Executes a test sequence to make sure the schema is reset between
-     * logical connections.
+     * Executes a test sequence to make sure the schema (and with DERBY-4551,
+     * current user) is correctly reset between logical connections.
      *
      * @param pc pooled connection to get logical connections from
      * @param userSchema name of the default schema for the connection (user)
@@ -2009,20 +2009,24 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             throws SQLException {
         Connection con1 = pc.getConnection();
         JDBC.assertCurrentSchema(con1, userSchema);
+        JDBC.assertCurrentUser(con1, userSchema);
         Statement stmt1 = con1.createStatement();
         // Change the schema.
         stmt1.execute("set schema APP");
         stmt1.close();
         JDBC.assertCurrentSchema(con1, "APP");
+        JDBC.assertCurrentUser(con1, userSchema);
         // Close the logical connection and get a new one.
         con1.close();
         Connection con2 = pc.getConnection();
         // Make sure the schema has been reset from APP to the user name.
         JDBC.assertCurrentSchema(con2, userSchema);
+        JDBC.assertCurrentUser(con2, userSchema);
         con2.close();
         // Try a third time, but don't change the schema now.
         Connection con3 = pc.getConnection();
         JDBC.assertCurrentSchema(con3, userSchema);
+        JDBC.assertCurrentUser(con3, userSchema);
         con3.close();
         pc.close();
     }

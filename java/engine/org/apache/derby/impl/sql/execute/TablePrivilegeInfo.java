@@ -197,7 +197,7 @@ public class TablePrivilegeInfo extends PrivilegeInfo
 	{
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
-		String currentUser = lcc.getAuthorizationId();
+        String currentUser = lcc.getCurrentUserId(activation);
 		TransactionController tc = lcc.getTransactionExecute();
 		SchemaDescriptor sd = td.getSchemaDescriptor();
 		

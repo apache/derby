@@ -62,7 +62,7 @@ public class RoutinePrivilegeInfo extends PrivilegeInfo
 		// Check that the current user has permission to grant the privileges.
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
-		String currentUser = lcc.getAuthorizationId();
+        String currentUser = lcc.getCurrentUserId(activation);
 		TransactionController tc = lcc.getTransactionExecute();
 
 		// Check that the current user has permission to grant the privileges.

@@ -110,7 +110,6 @@ public class StatementTablePermission extends StatementPermission
 	 * @see StatementPermission#check
 	 */
 	public void check( LanguageConnectionContext lcc,
-					   String authorizationId,
 					   boolean forGrant,
 					   Activation activation)
 		throws StandardException
@@ -118,15 +117,15 @@ public class StatementTablePermission extends StatementPermission
 		DataDictionary dd = lcc.getDataDictionary();
 		ExecPreparedStatement ps = activation.getPreparedStatement();
 
-		if (!hasPermissionOnTable(lcc, activation,
-									  authorizationId, forGrant, ps)) {
+        if (!hasPermissionOnTable(lcc, activation, forGrant, ps)) {
 			TableDescriptor td = getTableDescriptor( dd);
-			throw StandardException.newException( forGrant ? SQLState.AUTH_NO_TABLE_PERMISSION_FOR_GRANT
-												  : SQLState.AUTH_NO_TABLE_PERMISSION,
-												  authorizationId,
-												  getPrivName(),
-												  td.getSchemaName(),
-												  td.getName());
+            throw StandardException.newException(
+                (forGrant ? SQLState.AUTH_NO_TABLE_PERMISSION_FOR_GRANT
+                 : SQLState.AUTH_NO_TABLE_PERMISSION),
+                lcc.getCurrentUserId(activation),
+                getPrivName(),
+                td.getSchemaName(),
+                td.getName());
 		}
 	} // end of check
 
@@ -145,26 +144,25 @@ public class StatementTablePermission extends StatementPermission
 	 *
 	 * @param lcc the current language connection context
 	 * @param activation the activation of ps
-	 * @param authorizationId the id of the current user
 	 * @param forGrant true if FOR GRANT is required
 	 * @param ps the prepared statement for which we are checking necessary
 	 *        privileges
 	 */
 	protected boolean hasPermissionOnTable(LanguageConnectionContext lcc,
 										   Activation activation,
-										   String authorizationId,
 										   boolean forGrant,
 										   ExecPreparedStatement ps)
 		throws StandardException
 	{
 		DataDictionary dd = lcc.getDataDictionary();
+        String currentUserId = lcc.getCurrentUserId(activation);
 
 		boolean result =
 			oneAuthHasPermissionOnTable(dd,
 										Authorizer.PUBLIC_AUTHORIZATION_ID,
 										forGrant) ||
 			oneAuthHasPermissionOnTable(dd,
-										authorizationId,
+                                        currentUserId,
 										forGrant);
 		if (!result) {
 			// Since no permission exists for the current user or PUBLIC,
@@ -179,7 +177,7 @@ public class StatementTablePermission extends StatementPermission
 				// used.
 				String dbo = dd.getAuthorizationDatabaseOwner();
 				RoleGrantDescriptor rd = dd.getRoleGrantDescriptor
-					(role, authorizationId, dbo);
+                    (role, currentUserId, dbo);
 
 				if (rd == null) {
 					rd = dd.getRoleGrantDescriptor(

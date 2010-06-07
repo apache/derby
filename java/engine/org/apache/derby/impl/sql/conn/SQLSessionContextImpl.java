@@ -27,12 +27,14 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 public class SQLSessionContextImpl implements SQLSessionContext {
 
+    private String currentUser;
     private String currentRole;
     private SchemaDescriptor currentDefaultSchema;
 
-    public SQLSessionContextImpl (SchemaDescriptor sd) {
+    public SQLSessionContextImpl (SchemaDescriptor sd, String currentUser) {
         currentRole = null;
         currentDefaultSchema = sd;
+        this.currentUser = currentUser;
     }
 
     public void setRole(String role) {
@@ -41,6 +43,14 @@ public class SQLSessionContextImpl implements SQLSessionContext {
 
     public String getRole() {
         return currentRole;
+    }
+
+    public void setUser(String user) {
+        currentUser = user;
+    }
+
+    public String getCurrentUser() {
+        return currentUser;
     }
 
     public void setDefaultSchema(SchemaDescriptor sd) {

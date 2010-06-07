@@ -88,7 +88,7 @@ class CreateRoleConstantAction extends DDLConstantAction {
         // role definition is a database owner power. This may change
         // in the future since this SQL is more liberal.
         //
-        final String currentAuthId = lcc.getAuthorizationId();
+        final String currentAuthId = lcc.getCurrentUserId(activation);
 
         dd.startWriting(lcc);
 

@@ -75,7 +75,7 @@ class RevokeRoleConstantAction extends DDLConstantAction {
         DataDictionary dd = lcc.getDataDictionary();
         TransactionController tc = lcc.getTransactionExecute();
 
-        final String grantor = lcc.getAuthorizationId();
+        final String grantor = lcc.getCurrentUserId(activation);
 
         dd.startWriting(lcc);
 

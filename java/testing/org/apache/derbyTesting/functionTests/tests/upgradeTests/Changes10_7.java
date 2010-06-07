@@ -63,6 +63,7 @@ public class Changes10_7 extends UpgradeChange
 
     private static final String SYNTAX_ERROR = "42X01";
     private static final String  UPGRADE_REQUIRED = "XCL47";
+    private static final String  GRANT_REVOKE_WITH_LEGACY_ACCESS = "42Z60";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -135,6 +136,45 @@ public class Changes10_7 extends UpgradeChange
             break;
         }
         
+        s.close();
+    }
+
+    /**
+     * Make sure that that database is at level 10.7 in order to enjoy
+     * routines with specified EXTERNAL SECURITY INVOKER or DEFINER.
+     */
+    public void testExternalSecuritySpecification() throws SQLException
+    {
+        String functionWithDefinersRights =
+            "create function f_4551( a varchar( 100 ) ) returns int\n" +
+            "language java parameter style java reads sql data\n" +
+            "external security definer\n" +
+            "external name 'Z.getIntValue'\n";
+
+        Statement s = createStatement();
+
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+        case PH_POST_SOFT_UPGRADE:
+            // soft-downgrade: boot with old version after soft-upgrade
+            assertStatementError(
+                SYNTAX_ERROR, s, functionWithDefinersRights );
+            break;
+
+        case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
+            assertStatementError(
+                UPGRADE_REQUIRED, s, functionWithDefinersRights );
+            break;
+
+        case PH_HARD_UPGRADE: // boot with new version and hard-upgrade.
+            // Syntax now accepted and dictionary level ok, but
+            // sqlAuthorization not enabled (a priori) - expected.
+            assertStatementError(GRANT_REVOKE_WITH_LEGACY_ACCESS,
+                                 s, functionWithDefinersRights );
+            break;
+        }
+
         s.close();
     }
 

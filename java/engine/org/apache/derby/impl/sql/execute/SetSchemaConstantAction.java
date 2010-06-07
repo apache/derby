@@ -116,7 +116,7 @@ class SetSchemaConstantAction implements ConstantAction
 		}
 		else if (type == StatementType.SET_SCHEMA_USER)
 		{
-			thisSchemaName = lcc.getAuthorizationId();
+            thisSchemaName = lcc.getCurrentUserId(activation);
 		}
 
                 SchemaDescriptor sd = dd.getSchemaDescriptor(thisSchemaName,

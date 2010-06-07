@@ -349,11 +349,19 @@ public class GenericLanguageConnectionContext
 		triggerTables = new ArrayList();
 	}
 
+    /**
+     * In contrast to current user id, which may change (inside a routine
+     * executing with definer's rights), the sessionUser is constant in a
+     * session.
+     */
+    private String sessionUser = null;
+
 	public void initialize() throws StandardException
 	{
+        sessionUser = IdUtil.getUserAuthorizationId(userName);
 		//
 		//Creating the authorizer authorizes the connection.
-		authorizer = new GenericAuthorizer(IdUtil.getUserAuthorizationId(userName),this);
+        authorizer = new GenericAuthorizer(this);
 
 		/*
 		** Set the authorization id.  User shouldn't
@@ -362,7 +370,7 @@ public class GenericLanguageConnectionContext
 		*/
 		if (SanityManager.DEBUG)
 		{
-			if (getAuthorizationId() == null)
+            if (getSessionUserId() == null)
 			{
 				SanityManager.THROWASSERT("User name is null," +
 					" check the connection manager to make sure it is set" +
@@ -393,14 +401,18 @@ public class GenericLanguageConnectionContext
         */
 		if (cachedInitialDefaultSchemaDescr == null) {
 			DataDictionary dd = getDataDictionary();
-			String authorizationId = getAuthorizationId();
+            String authorizationId = getSessionUserId();
 			SchemaDescriptor sd =
 				dd.getSchemaDescriptor(
-					authorizationId, getTransactionCompile(), false);
+                    getSessionUserId(), getTransactionCompile(), false);
 
 			if (sd == null) {
 				sd = new SchemaDescriptor(
-					dd, authorizationId, authorizationId, (UUID) null, false);
+                    dd,
+                    getSessionUserId(),
+                    getSessionUserId(),
+                    (UUID) null,
+                    false);
 			}
 
 			cachedInitialDefaultSchemaDescr = sd;
@@ -639,6 +651,9 @@ public class GenericLanguageConnectionContext
 
 		// Reset the current role
 		getCurrentSQLSessionContext().setRole(null);
+
+        // Reset the current user
+        getCurrentSQLSessionContext().setUser(getSessionUserId());
 	}
 
     // debug methods
@@ -1872,15 +1887,15 @@ public class GenericLanguageConnectionContext
 		return false;
 	}
 
-	/**
-	 *	Get the Authorization Id (user)
-	 *
-	 * @return String	the authorization id
-	 */
-	public String getAuthorizationId()
-	{ 
-		return authorizer.getAuthorizationId();
-	}
+    /**
+     * Get the session user
+     *
+     * @return String the authorization id of the session user.
+     */
+    public String getSessionUserId()
+    {
+        return sessionUser;
+    }
 
 	/**
 	 * @see LanguageConnectionContext#getDefaultSchema
@@ -3324,6 +3339,14 @@ public class GenericLanguageConnectionContext
 	}
 
 
+    /**
+     * @see LanguageConnectionContext#getCurrentUserId(Activation a)
+     */
+    public String getCurrentUserId(Activation a) {
+        return getCurrentSQLSessionContext(a).getCurrentUser();
+    }
+
+
 	/**
 	 * @see LanguageConnectionContext#getCurrentRoleIdDelimited(Activation a)
 	 */
@@ -3336,7 +3359,7 @@ public class GenericLanguageConnectionContext
 			beginNestedTransaction(true);
 
 			try {
-				if (!roleIsSettable(role)) {
+                if (!roleIsSettable(a, role)) {
 					// invalid role, so lazily reset it.
 					setCurrentRole(a, null);
 					role = null;
@@ -3357,17 +3380,20 @@ public class GenericLanguageConnectionContext
 	/**
 	 * @see LanguageConnectionContext#roleIsSettable(String role)
 	 */
-	public boolean roleIsSettable(String role) throws StandardException {
-		DataDictionary dd = getDataDictionary();
+    public boolean roleIsSettable(Activation a, String role)
+            throws StandardException {
+
+        DataDictionary dd = getDataDictionary();
 		String dbo = dd.getAuthorizationDatabaseOwner();
 
 		RoleGrantDescriptor grantDesc = null;
+        String currentUser = getCurrentUserId(a);
 
-		if (getAuthorizationId().equals(dbo)) {
+        if (currentUser.equals(dbo)) {
 			grantDesc = dd.getRoleDefinitionDescriptor(role);
 		} else {
 			grantDesc = dd.getRoleGrantDescriptor
-				(role, getAuthorizationId(), dbo);
+                (role, currentUser, dbo);
 
 			if (grantDesc == null) {
 				// or if not, via PUBLIC?
@@ -3430,25 +3456,70 @@ public class GenericLanguageConnectionContext
 	/**
 	 * @see LanguageConnectionContext#setupNestedSessionContext(Activation a)
 	 */
-	public void setupNestedSessionContext(Activation a) {
-		setupSessionContextMinion(a, true);
+    public void setupNestedSessionContext(
+        Activation a,
+        boolean definersRights,
+        String definer) throws StandardException {
+
+        setupSessionContextMinion(a, true, definersRights, definer);
 	}
 
-	private void setupSessionContextMinion(Activation a,
-												 boolean push) {
-		SQLSessionContext sc = a.setupSQLSessionContextForChildren(push);
+    private void setupSessionContextMinion(
+        Activation a,
+        boolean push,
+        boolean definersRights,
+        String definer) throws StandardException {
 
-		// Semantics for roles dictate (SQL 4.34.1.1 and 4.27.3.) that the
-		// role is initially inherited from the current session
-		// context. (Since we always run with INVOKER security
-		// characteristic. Derby can't yet run with DEFINER's rights).
-		//
-		sc.setRole(getCurrentRoleId(a));
+        if (SanityManager.DEBUG) {
+            if (definersRights) {
+                SanityManager.ASSERT(push);
+            }
+        }
 
-		// Inherit current default schema. The initial value of the
-		// default schema is implementation defined. In Derby we
-		// inherit it when we invoke stored procedures and functions.
-		sc.setDefaultSchema(getDefaultSchema(a));
+        SQLSessionContext sc = a.setupSQLSessionContextForChildren(push);
+
+        if (definersRights) {
+            sc.setUser(definer);
+        } else {
+            // A priori: invoker's rights: Current user
+            sc.setUser(getCurrentUserId(a));
+        }
+
+
+        if (definersRights) {
+            // No role a priori. Cf. SQL 2008, section 10.4 <routine
+            // invocation>, GR 5 j) i) 1) B) "If the external security
+            // characteristic of R is DEFINER, then the top cell of the
+            // authorization stack of RSC is set to contain only the routine
+            // authorization identifier of R.
+
+            sc.setRole(null);
+        } else {
+            // Semantics for roles dictate (SQL 4.34.1.1 and 4.27.3.) that the
+            // role is initially inherited from the current session context
+            // when we run with INVOKER security characteristic.
+            sc.setRole(getCurrentRoleId(a));
+        }
+
+
+        if (definersRights) {
+            SchemaDescriptor sd = getDataDictionary().getSchemaDescriptor(
+                definer,
+                getTransactionExecute(),
+                false);
+
+            if (sd == null) {
+                sd = new SchemaDescriptor(
+                    getDataDictionary(), definer, definer, (UUID) null, false);
+            }
+
+            sc.setDefaultSchema(sd);
+        } else {
+            // Inherit current default schema. The initial value of the
+            // default schema is implementation defined. In Derby we
+            // inherit it when we invoke stored procedures and functions.
+            sc.setDefaultSchema(getDefaultSchema(a));
+        }
 
 		StatementContext stmctx = getStatementContext();
 
@@ -3472,8 +3543,10 @@ public class GenericLanguageConnectionContext
 	/**
 	 * @see LanguageConnectionContext#setupSubStatementSessionContext(Activation a)
 	 */
-	public void setupSubStatementSessionContext(Activation a) {
-		setupSessionContextMinion(a, false);
+    public void setupSubStatementSessionContext(Activation a)
+            throws StandardException {
+
+        setupSessionContextMinion(a, false, false, null);
 	}
 
 
@@ -3483,7 +3556,8 @@ public class GenericLanguageConnectionContext
 	public SQLSessionContext getTopLevelSQLSessionContext() {
 		if (topLevelSSC == null) {
 			topLevelSSC = new SQLSessionContextImpl(
-				getInitialDefaultSchemaDescriptor());
+                getInitialDefaultSchemaDescriptor(),
+                getSessionUserId());
 		}
 		return topLevelSSC;
 	}
@@ -3494,7 +3568,8 @@ public class GenericLanguageConnectionContext
 	 */
 	public SQLSessionContext createSQLSessionContext() {
 		return new SQLSessionContextImpl(
-			getInitialDefaultSchemaDescriptor());
+            getInitialDefaultSchemaDescriptor(),
+            getSessionUserId() /* a priori */);
 	}
 
 	/**

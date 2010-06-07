@@ -149,7 +149,7 @@ class CreateSchemaConstantAction extends DDLConstantAction
 		String thisAid = aid;
 		if (thisAid == null)
 		{
-			thisAid = lcc.getAuthorizationId();
+            thisAid = lcc.getCurrentUserId(activation);
 		}
 
 		/*
