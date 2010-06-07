@@ -1057,13 +1057,22 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
                         scan_position.current_lock_row_loc,
                         false, init_forUpdate, lock_operation);
 
+                // Special test to see if latch release code works.
+                if (SanityManager.DEBUG)
+                {
+                    latch_released = test_errors(
+                            this, "BTreeScan_delete_useUpdateLocks",
+                            scan_position, getLockingPolicy(),
+                            scan_position.current_leaf, latch_released);
+                }
+
                 if (latch_released)
                 {
                     // lost latch on page in order to wait for row lock.
                     // reposition() will take care of the complexity of
                     // positioning on the correct page if the row has been
                     // moved to another page.
-                    if (reposition(scan_position, false))
+                    if (!reposition(scan_position, false))
                     {
                         throw StandardException.newException(
                                 SQLState.AM_RECORD_NOT_FOUND,

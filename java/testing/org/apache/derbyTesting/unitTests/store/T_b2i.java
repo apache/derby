@@ -173,7 +173,8 @@ public class T_b2i extends T_MultiIterations
 				t_017(tc)   &&
 				t_018(tc)   &&
 				t_019(tc)   &&
-				t_020(tc)   
+				t_020(tc)   &&
+				t_021(tc)
                 )
                 
 			{
@@ -434,17 +435,22 @@ public class T_b2i extends T_MultiIterations
     TransactionController   tc,
     long                    conglomid,
     DataValueDescriptor[]   search_key,
-    DataValueDescriptor[]   template) 
+    boolean useUpdateLocks)
         throws StandardException
     {
         SQLLongint column0 = new SQLLongint(-1);
         SQLLongint column1 = new SQLLongint(-1);
 
+        int openmode = TransactionController.OPENMODE_FORUPDATE;
+        if (useUpdateLocks) {
+            openmode |= TransactionController.OPENMODE_USE_UPDATE_LOCKS;
+        }
+
         // open a new scan
 
         ScanController scan = 
             tc.openScan(conglomid, false,
-                        TransactionController.OPENMODE_FORUPDATE,
+                        openmode,
                         TransactionController.MODE_RECORD,
                         TransactionController.ISOLATION_SERIALIZABLE,
                         (FormatableBitSet) null,
@@ -1573,7 +1579,7 @@ public class T_b2i extends T_MultiIterations
             ((SQLLongint)delete_key[1]).setValue(i);
 
             if (!t_delete(
-                tc, create_ret.index_conglomid, delete_key, index_row.getRow()))
+                tc, create_ret.index_conglomid, delete_key, false))
             {
                 ret_val = false;
             }
@@ -1584,7 +1590,7 @@ public class T_b2i extends T_MultiIterations
             ((SQLLongint)delete_key[1]).setValue(i);
 
             if (!t_delete(
-                tc, create_ret.index_conglomid, delete_key, index_row.getRow()))
+                tc, create_ret.index_conglomid, delete_key, false))
             {
                 ret_val = false;
             }
@@ -1636,7 +1642,7 @@ public class T_b2i extends T_MultiIterations
             ((SQLLongint)delete_key[1]).setValue(i);
 
             if (!t_delete(
-                tc, create_ret.index_conglomid, delete_key, index_row.getRow()))
+                tc, create_ret.index_conglomid, delete_key, false))
             {
                 ret_val = false;
             }
@@ -2216,7 +2222,7 @@ public class T_b2i extends T_MultiIterations
         ((SQLLongint)delete_key[1]).setValue(1000);
 
         if (!t_delete(tc, create_ret.index_conglomid, 
-                 delete_key, create_ret.index_template_row))
+                 delete_key, false))
         {
             throw T_Fail.testFailMsg(
                 "t_008: could not delete key.");
@@ -2284,7 +2290,7 @@ public class T_b2i extends T_MultiIterations
         ((SQLLongint)delete_key[1]).setValue(1000);
 
         if (!t_delete(tc, create_ret.index_conglomid, 
-                 delete_key, create_ret.index_template_row))
+                 delete_key, false))
         {
             throw T_Fail.testFailMsg(
                 "t_008: could not delete key.");
@@ -2782,7 +2788,7 @@ public class T_b2i extends T_MultiIterations
 
         // delete row which was inserted (key = 100, base_rowloc1):
         if (!t_delete(tc, create_ret.index_conglomid, 
-                index_row1.getRow(), create_ret.index_template_row))
+                index_row1.getRow(), false))
         {
             throw T_Fail.testFailMsg(
                 "t_008: could not delete key.");
@@ -4992,6 +4998,87 @@ public class T_b2i extends T_MultiIterations
         REPORT("Ending t_020");
 
         return true;
+    }
+
+    /**
+     * Test latch release at critical time during delete on an index scan that
+     * uses update locks.
+     */
+    protected boolean t_021(TransactionController tc)
+        throws StandardException, T_Fail
+    {
+        REPORT("Starting t_021");
+
+        boolean ret_val = true;
+
+        T_CreateConglomRet create_ret = new T_CreateConglomRet();
+
+        // Create the btree so that it only allows 2 rows per page.
+        createCongloms(tc, 2, false, false, 2, create_ret);
+
+        // Open the base table
+        ConglomerateController base_cc =
+            tc.openConglomerate(
+                create_ret.base_conglomid,
+                false,
+                TransactionController.OPENMODE_FORUPDATE,
+                TransactionController.MODE_RECORD,
+                TransactionController.ISOLATION_SERIALIZABLE);
+
+        // Open the secondary index
+        ConglomerateController index_cc =
+            tc.openConglomerate(
+                create_ret.index_conglomid,
+                false,
+                TransactionController.OPENMODE_FORUPDATE,
+                TransactionController.MODE_RECORD,
+                TransactionController.ISOLATION_SERIALIZABLE);
+
+        // objects used to insert rows into base and index tables.
+        DataValueDescriptor[] r1            = TemplateRow.newU8Row(2);
+        T_SecondaryIndexRow   index_row1    = new T_SecondaryIndexRow();
+        RowLocation           base_rowloc1  = base_cc.newRowLocationTemplate();
+
+        index_row1.init(r1, base_rowloc1, 3);
+
+        // insert one row into the table/index
+        ((SQLLongint)r1[0]).setValue(1);
+        ((SQLLongint)r1[1]).setValue(1);
+
+        // Insert the row into the base table;remember its location.
+        base_cc.insertAndFetchLocation(r1, base_rowloc1);
+
+        // Insert the row into the secondary index.
+        if (index_cc.insert(index_row1.getRow()) != 0)
+            throw T_Fail.testFailMsg("insert failed");
+
+        // Commit the create of the tables.
+        tc.commit();
+
+        // Enable the debug code that releases the latch at critical time.
+        if (SanityManager.DEBUG) {
+            SanityManager.DEBUG_SET("BTreeScan_delete_useUpdateLocks1");
+        }
+
+        // Delete the row using the index and update locks. Before DERBY-4083,
+        // the call to delete() would fail with record not found if the latch
+        // was released.
+        DataValueDescriptor[] delete_key = TemplateRow.newU8Row(2);
+        ((SQLLongint)delete_key[0]).setValue(1);
+        ((SQLLongint)delete_key[1]).setValue(1);
+        if (!t_delete(tc, create_ret.index_conglomid, delete_key, true)) {
+            ret_val = false;
+        }
+
+        // Disable the debug code that releases the latch at critical time.
+        if (SanityManager.DEBUG) {
+            SanityManager.DEBUG_CLEAR("BTreeScan_delete_useUpdateLocks1");
+        }
+
+        tc.commit();
+        REPORT("Ending t_021");
+
+        return ret_val;
     }
 
 	public static String repeatString(String data, int repeat) {
