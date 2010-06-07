@@ -11592,7 +11592,6 @@ literal() throws StandardException :
 |
 	tok = booleanLiteral()
 	{
-		checkInternalFeature(tok.image);
 		return (ValueNode) nodeFactory.getNode(
 									C_NodeTypes.BOOLEAN_CONSTANT_NODE,
 									StringUtil.SQLEqualsIgnoreCase(tok.image, "true") ?

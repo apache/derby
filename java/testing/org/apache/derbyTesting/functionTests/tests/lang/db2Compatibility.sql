@@ -606,15 +606,15 @@ CREATE TABLE t2(col1 int, col2 int);
 INSERT INTO t1 VALUES(3,4);
 INSERT INTO t2 VALUES(3,4);
 
--- (5) TRUE and FALSE constants should be disabled in WHERE clause of SELECT statement
+-- (5) TRUE and FALSE constants are no longer disabled in WHERE clause of SELECT statement
 SELECT * FROM t1 INNER JOIN t2 ON t1.col1 = t2.col1 WHERE true;
 SELECT * FROM t1 INNER JOIN t2 ON t1.col1 = t2.col1 WHERE false;
 
--- (5) TRUE and FALSE constants should be disabled in WHERE clause of DELETE statement
+-- (5) TRUE and FALSE constants are no longer disabled in WHERE clause of DELETE statement
 DELETE FROM t1 where true;
 DELETE FROM t1 where false;
 
--- (5) TRUE and FALSE constants should be disabled in WHERE clause of DELETE statement
+-- (5) TRUE and FALSE constants are no longer disabled in WHERE clause of DELETE statement
 UPDATE t2 SET col1 = NULL WHERE true;
 UPDATE t2 SET col1 = NULL WHERE false;
 

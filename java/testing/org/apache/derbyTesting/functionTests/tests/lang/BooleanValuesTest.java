@@ -549,6 +549,37 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         expectCompilationError( NOT_UNION_COMPATIBLE, query );
     }
 
+    /**
+     * <p>
+     * Verify that boolean literals work.
+     * </p>
+     */
+    public void test_07_booleanLiterals() throws Exception
+    {
+        Connection conn = getConnection();
+
+        assertResults
+            (
+             conn,
+             "values ( true )",
+             new String[][]
+             {
+                 { "true" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "values ( false )",
+             new String[][]
+             {
+                 { "false" },
+             },
+             false
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
