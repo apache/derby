@@ -71,6 +71,10 @@ public class ColumnReference extends ValueNode
 	int				origTableNumber = -1;
 	int				origColumnNumber = -1;
 
+    /* For remembering original (tn,cn) of this CR during join flattening. */
+    private int tableNumberBeforeFlattening = -1;
+    private int columnNumberBeforeFlattening = -1;
+
 	/* Reuse generated code where possible */
 	//Expression genResult;
 
@@ -850,12 +854,6 @@ public class ColumnReference extends ValueNode
 			if (rsn instanceof FromTable)
 			{
 				FromTable ft = (FromTable)rsn;
-				tableNumber = ft.getTableNumber();
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.ASSERT(tableNumber != -1,
-						"tableNumber not expected to be -1");
-				}
 
 				/* It's not enough to just set the table number.  Depending
 				 * on the original query specified and on whether or not
@@ -865,15 +863,52 @@ public class ColumnReference extends ValueNode
 				 * we got here.  In that case we also need to update the
 				 * columnNumber to point to the correct column in "ft".
 				 * See DERBY-2526 for details.
+                 * See DERBY-3023 and DERBY-4679 for further improvement
+                 * details.
 				 */
-				ResultColumn ftRC =
-					ft.getResultColumns().getResultColumn(columnName);
 
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.ASSERT(ftRC != null,
-						"Failed to find column '" + columnName + "' in the " +
-						"RCL for '" + ft.getTableName() + "'.");
+                ResultColumnList rcl = ft.getResultColumns();
+
+                ResultColumn ftRC = null;
+
+
+                // Need to save original (tn,cn) in case we have several
+                // flattenings so we can relocate the correct column many
+                // times. After the first flattening, the (tn,cn) pair points
+                // to the top RCL which is going away..
+                if (tableNumberBeforeFlattening == -1) {
+                    tableNumberBeforeFlattening = tableNumber;
+                    columnNumberBeforeFlattening = columnNumber;
+                }
+
+                // Covers references to a table not being flattened out, e.g.
+                // inside a join tree, which can have many columns in the rcl
+                // with the same name, so looking up via column name can give
+                // the wrong column. DERBY-4679.
+                ftRC = rcl.getResultColumn(
+                    tableNumberBeforeFlattening,
+                    columnNumberBeforeFlattening);
+
+                if (ftRC == null) {
+                    // The above lookup won't work for references to a base
+                    // column, so fall back on column name, which is unique
+                    // then.
+                    ftRC = rcl.getResultColumn(columnName);
+                }
+
+                if (SanityManager.DEBUG) {
+                    SanityManager.ASSERT(
+                        ftRC != null,
+                        "Failed to find column '" + columnName +
+                        "' in the " + "RCL for '" + ft.getTableName() +
+                        "'.");
+                }
+
+                tableNumber = ft.getTableNumber();
+
+				if (SanityManager.DEBUG) {
+					SanityManager.ASSERT(tableNumber != -1,
+						"tableNumber not expected to be -1");
 				}
 
 				/* Use the virtual column id if the ResultColumn's expression

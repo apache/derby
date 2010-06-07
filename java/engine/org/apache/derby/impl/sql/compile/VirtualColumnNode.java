@@ -94,6 +94,8 @@ public class VirtualColumnNode extends ValueNode
 
 			printLabel(depth, "sourceColumn: ");
 		    sourceColumn.treePrint(depth + 1);
+            printLabel(depth, "sourceResultSet: ");
+            sourceResultSet.treePrint(depth + 1);
 		}
 	}
 

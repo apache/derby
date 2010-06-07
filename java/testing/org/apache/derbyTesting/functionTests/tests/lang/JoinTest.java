@@ -1828,4 +1828,86 @@ public class JoinTest extends BaseJDBCTestCase {
         ps.setString(3, c);
         ps.execute();
     }
+
+
+    /**
+     * DERBY-4679. Verify that when transitive closure generates new criteria
+     * into the query, it isn't confused by situations where the same column
+     * name appears in a result column list multiple times due to flattening of
+     * sub-queries.  
+     * <p/>
+     * Flattening requires remapping of (table, column) numbers in column
+     * references. In cases where the same column name appears in a result
+     * column list multiple times, this might earlier lead to remapping
+     * (reassigning) wrong (table, column) numbers to column references in join
+     * predicates transformed to where clauses as a result of the flattening.
+     * <p/>
+     * See also DERBY-2526 and DERBY-3023 whose fixes which were partial
+     * solutions to the problem of wrong column number remappings confusing
+     * the transitive closure of search predicates performed by the
+     * preprocessing step of the optimizer.
+     */
+    public void testDerby_4679() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.execute("create table abstract_instance (" +
+                  "    jz_discriminator int, " +
+                  "    item_id char(32), " +
+                  "    family_item_id char(32), " +
+                  "    state_id char(32), " +
+                  "    visibility bigint)");
+
+        s.execute("create table lab_resource_operatingsystem (" +
+                  "    jz_parent_id char(32), " +
+                  "    item_id char(32))");
+
+        s.execute("create table operating_system_software_install (" +
+                  "    jz_parent_id char(32), " +
+                  "    item_id char(32))");
+
+        s.execute("create table family (" +
+                  "    item_id char(32), " +
+                  "    root_item_id char(32))");
+
+        s.execute("insert into abstract_instance (" +
+                  "    jz_discriminator, " +
+                  "    item_id, " +
+                  "    family_item_id, " +
+                  "    visibility) " +
+                  "values (238, 'aaaa', 'bbbb', 0)," +
+                  "       (0, 'cccc', 'dddd', 0)," +
+                  "       (1, 'eeee', '_5VetVWTeEd-Q8aOqWJPEIQ', 0)");
+
+        s.execute("insert into lab_resource_operatingsystem " +
+                  "values ('aaaa', 'cccc')");
+
+
+        s.execute("insert into operating_system_software_install " +
+                  "values ('cccc', 'eeee')");
+
+        s.execute("insert into family " +
+                  "values ('dddd', '_5ZDlwWTeEd-Q8aOqWJPEIQ')," +
+                  "       ('bbbb', '_5nN9mmTeEd-Q8aOqWJPEIQ')");
+
+        ResultSet rs =
+            s.executeQuery(
+                "select distinct t1.ITEM_ID, t1.state_id, t1.JZ_DISCRIMINATOR from " +
+                "((((((select * from ABSTRACT_INSTANCE z1 where z1.JZ_DISCRIMINATOR = 238) t1 " +
+                "      left outer join LAB_RESOURCE_OPERATINGSYSTEM j1 on (t1.ITEM_ID = j1.JZ_PARENT_ID)) " +
+                "     left outer join ABSTRACT_INSTANCE t2 on (j1.ITEM_ID = t2.ITEM_ID)) " +
+                "    left outer join OPERATING_SYSTEM_SOFTWARE_INSTALL j2 on (t2.ITEM_ID = j2.JZ_PARENT_ID))" +
+                "   left outer join ABSTRACT_INSTANCE t3 on (j2.ITEM_ID = t3.ITEM_ID) " +
+                "  inner join FAMILY t5 on (t2.FAMILY_ITEM_ID = t5.ITEM_ID)) " +
+                " inner join FAMILY t7 on (t1.FAMILY_ITEM_ID = t7.ITEM_ID)) " +
+                "where (t3.FAMILY_ITEM_ID IN('_5VetVWTeEd-Q8aOqWJPEIQ') and " +
+                "      (t5.ROOT_ITEM_ID = '_5ZDlwWTeEd-Q8aOqWJPEIQ') and " +
+                "      (t7.ROOT_ITEM_ID ='_5nN9mmTeEd-Q8aOqWJPEIQ') and " +
+                "      (t1.VISIBILITY = 0))");
+        JDBC.assertFullResultSet(
+            rs,
+            new String[][]{{"aaaa", null, "238"}});
+        rollback();
+    }
+
 }
