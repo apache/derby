@@ -1294,7 +1294,7 @@ public class JDBC {
      * Asserts that the current user is the same as the one specified.
      *
      * @param con connection to check schema in
-     * @param schema expected user name
+     * @param user expected user name
      * @throws SQLException if something goes wrong
      */
     public static void assertCurrentUser(Connection con, String user)

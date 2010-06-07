@@ -1166,7 +1166,7 @@ public interface LanguageConnectionContext extends Context {
 	 * @see #setupSubStatementSessionContext
 	 *
 	 * @param a activation of the statement which performs the call.
-     * @param true if the method should run with definer's rights
+     * @param definersRights if the method should run with definer's rights
      * @param definer authorization id of the definer
 	 */
     public void setupNestedSessionContext(Activation a,

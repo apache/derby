@@ -3378,7 +3378,7 @@ public class GenericLanguageConnectionContext
 
 
 	/**
-	 * @see LanguageConnectionContext#roleIsSettable(String role)
+	 * @see LanguageConnectionContext#roleIsSettable(Activation a, String role)
 	 */
     public boolean roleIsSettable(Activation a, String role)
             throws StandardException {
@@ -3454,7 +3454,7 @@ public class GenericLanguageConnectionContext
 
 
 	/**
-	 * @see LanguageConnectionContext#setupNestedSessionContext(Activation a)
+	 * @see LanguageConnectionContext#setupNestedSessionContext(Activation a, boolean definersRights, String definer)
 	 */
     public void setupNestedSessionContext(
         Activation a,
