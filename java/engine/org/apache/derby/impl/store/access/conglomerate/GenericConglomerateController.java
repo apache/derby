@@ -284,6 +284,14 @@ public abstract class GenericConglomerateController
                 pos, (RowPosition) null, false, true);
         }
 
+        if (pos.current_page == null)
+        {
+            // The page is not latched after locking the row. This happens if
+            // the row was deleted while we were waiting for the lock. Return
+            // false to indicate that the row is no longer valid. (DERBY-4676)
+            return false;
+        }
+
         // Fetch the row.
         // RESOLVE (STO061) - don't know whether the fetch is for update or not.
         //
@@ -379,6 +387,14 @@ public abstract class GenericConglomerateController
         {
             open_conglom.lockPositionForRead(
                 pos, (RowPosition) null, false, waitForLock);
+        }
+
+        if (pos.current_page == null)
+        {
+            // The page is not latched after locking the row. This happens if
+            // the row was deleted while we were waiting for the lock. Return
+            // false to indicate that the row is no longer valid. (DERBY-4676)
+            return false;
         }
 
         // Fetch the row.
