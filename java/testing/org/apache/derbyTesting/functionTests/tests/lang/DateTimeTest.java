@@ -1604,14 +1604,8 @@ public final class DateTimeTest extends BaseJDBCTestCase {
         
         rs = pSt.executeQuery();
         JDBC.assertColumnNames(rs, new String[] { "1", "2" });
-        // See DERBY-3856 - there's a diff between Embedded and DerbyNetClient
-        // in how the cast returns the following...
-        if (usingDerbyNetClient())
-            JDBC.assertFullResultSet(rs, new String[][] { { "1970-01-01",
+        JDBC.assertFullResultSet(rs, new String[][] { { "1970-01-01",
             "2003-03-05 17:05:43.111111" } }, true);
-        else
-            JDBC.assertFullResultSet(rs, new String[][] { { "1970-01-01",
-                "2003-03-05-17.05.43.111111" } }, true);
 
         rs = st.executeQuery("values(2, '20030422190200')");
         rs.next();
@@ -1750,5 +1744,56 @@ public final class DateTimeTest extends BaseJDBCTestCase {
         st.executeUpdate(" drop table nulls");
         
         st.close();
+    }
+
+    /**
+     * Regression test case for DERBY-3856. The embedded driver sometimes
+     * returned an unnormalized datetime string when getString() was used
+     * to retrieve the result from an invocation of the unary TIMESTAMP or
+     * DATE function.
+     */
+    public void testDerby3856() throws SQLException {
+        // TIMESTAMP called on literal has always a returned normalized value.
+        assertSingleValue(
+                "values timestamp('2003-03-05-17.05.43.111111')",
+                "2003-03-05 17:05:43.111111");
+
+        // This one used to return the original unnormalized input with the
+        // embedded driver.
+        assertSingleValue(
+                "values timestamp(cast('2003-03-05-17.05.43.111111' " +
+                "as varchar(32)))",
+                "2003-03-05 17:05:43.111111");
+
+        // DATE called on literal has always a returned normalized value.
+        assertSingleValue("values date('10/07/2008')", "2008-10-07");
+
+        // This one used to return the original unnormalized input with the
+        // embedded driver.
+        assertSingleValue(
+                "values date(cast('10/07/2008' as varchar(10)))",
+                "2008-10-07");
+
+        // TIME called on literal has always a returned normalized string.
+        assertSingleValue("values time('10.00.00')", "10:00:00");
+
+        // TIME has also always returned a normalized value for the variant
+        // with a CAST.
+        assertSingleValue(
+                "values time(cast('10.00.00' as varchar(10)))",
+                "10:00:00");
+    }
+
+    /**
+     * Execute an SQL statement and check that it returns a single, specific
+     * value.
+     *
+     * @param sql the statement to execute
+     * @param expectedValue the expected value
+     */
+    private void assertSingleValue(String sql, String expectedValue)
+            throws SQLException {
+        JDBC.assertSingleValueResultSet(
+                createStatement().executeQuery(sql), expectedValue);
     }
 }

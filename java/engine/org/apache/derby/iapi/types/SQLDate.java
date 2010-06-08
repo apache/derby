@@ -471,7 +471,6 @@ public final class SQLDate extends DataType
             {
             case ISO_SEPARATOR:
                 encodedDate = SQLTimestamp.parseDateOrTimestamp( parser, false)[0];
-                valueString = parser.getTrimmedString();
                 return;
 
             case IBM_USA_SEPARATOR:
@@ -507,7 +506,6 @@ public final class SQLDate extends DataType
         }
         if( validSyntax)
         {
-            valueString = parser.checkEnd();
             encodedDate = computeEncodedDate( year, month, day);
         }
         else
@@ -541,7 +539,6 @@ public final class SQLDate extends DataType
                     throw StandardException.newException( SQLState.LANG_DATE_SYNTAX_EXCEPTION);
                 }
             }
-            valueString = dateStr;
         }
     } // end of parseDate
 

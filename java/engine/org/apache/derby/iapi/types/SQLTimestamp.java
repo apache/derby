@@ -519,7 +519,6 @@ public final class SQLTimestamp extends DataType
             encodedDate = dateTimeNano[0];
             encodedTime = dateTimeNano[1];
             nanos = dateTimeNano[2];
-            valueString = parser.getTrimmedString();
             return;
         }
         catch( StandardException se)
@@ -533,7 +532,6 @@ public final class SQLTimestamp extends DataType
             int[] dateAndTime = parseLocalTimestamp( timestampStr, localeFinder, cal);
             encodedDate = dateAndTime[0];
             encodedTime = dateAndTime[1];
-            valueString = timestampStr;
             return;
         }
         catch( ParseException pe){}
