@@ -209,7 +209,7 @@ class Session
 	 */
 	protected void addDatabase(Database d)
 	{
-		dbtable.put(d.dbName, d);
+		dbtable.put(d.getDatabaseName(), d);
 	}
 
 	/**

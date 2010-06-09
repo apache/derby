@@ -42,9 +42,13 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 */
 class Database
 {
-
-	protected String dbName;			// database name 
-	protected String shortDbName;       // database name without attributes
+    /*
+     * Considering that we are now doing some fiddling with the db name
+     * it is probably wise to keep dbName and shortDbName private and have 
+     * accessors for them.
+     */
+	private String dbName;			// database name 
+	private String shortDbName;       // database name without attributes
 	String attrString="";               // attribute string
 	protected int securityMechanism;	// Security mechanism
 	protected String userId;			// User Id
@@ -113,6 +117,14 @@ class Database
 
 		this.dbName = dbName;
 
+	}
+	
+	public String getDatabaseName() {
+	    return this.dbName;
+	}
+	
+	public String getShortDbName() {
+	    return this.shortDbName;
 	}
 	
 	private void initializeDefaultStatement()

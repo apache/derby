@@ -421,7 +421,7 @@ class DRDAConnThread extends Thread {
 	protected String getDbName()
 	{
 		if (database != null)
-			return database.dbName;
+			return database.getDatabaseName();
 		return null;
 	}
 	/**
@@ -493,7 +493,7 @@ class DRDAConnThread extends Thread {
    
             if (database != null)
             {
-                dbname = database.dbName;
+                dbname = database.getDatabaseName();
             }
             if (e != null) {
                 println2Log(dbname,session.drdaID, e.getMessage());
@@ -533,7 +533,7 @@ class DRDAConnThread extends Thread {
 
 		String dbname = null;
 		if (database != null)
-			dbname = database.dbName;
+			dbname = database.getDatabaseName();
 		throw DRDAProtocolException.newAgentError(this, CodePoint.SVRCOD_PRMDMG, 
 			dbname, msg);
 	}
@@ -1214,7 +1214,7 @@ class DRDAConnThread extends Thread {
 		writer.createDssReply();
 		writer.startDdm(codePoint);
 		writer.writeScalar2Bytes(CodePoint.SVRCOD, CodePoint.SVRCOD_ERROR);
-		writeRDBNAM(database.dbName);
+		writeRDBNAM(database.getDatabaseName());
     	writer.endDdmAndDss();
     	
     	switch(codePoint){
@@ -1345,7 +1345,7 @@ class DRDAConnThread extends Thread {
 		databaseAccessException = null;
 		int retSecChkCode = 0;
 
-		String realName = database.dbName; //first strip off properties
+		String realName = database.getDatabaseName(); //first strip off properties
 		int endOfName = realName.indexOf(';');
 		if (endOfName != -1)
 			realName = realName.substring(0, endOfName);
@@ -1386,7 +1386,7 @@ class DRDAConnThread extends Thread {
         // a password defined as part of the connection URL attributes cannot
         // be substituted (single-hashed) as it is not recoverable.
         if ((database.securityMechanism == CodePoint.SECMEC_USRSSBPWD) &&
-            (database.dbName.indexOf(Attribute.PASSWORD_ATTR) == -1))
+            (database.getDatabaseName().indexOf(Attribute.PASSWORD_ATTR) == -1))
         {
             p.put(Attribute.DRDA_SECMEC,
                   String.valueOf(database.securityMechanism));
@@ -1408,7 +1408,7 @@ class DRDAConnThread extends Thread {
 			{
 				if (SanityManager.DEBUG)
 					trace(se.getMessage());
-	 			println2Log(database.dbName, session.drdaID, se.getMessage());
+	 			println2Log(database.getDatabaseName(), session.drdaID, se.getMessage());
 			}
 
 			if (isAuthenticationException(databaseAccessException)) {
@@ -1428,7 +1428,7 @@ class DRDAConnThread extends Thread {
 			// get the driver loaded again.  We have to get
 			// rid of the client first in case they are holding
 			// the DriverManager lock.
-			println2Log(database.dbName, session.drdaID, 
+			println2Log(database.getDatabaseName(), session.drdaID, 
 						"Driver not loaded"
 						+ e.getMessage());
 				try {
@@ -1442,7 +1442,7 @@ class DRDAConnThread extends Thread {
 					try {
 						server.startNetworkServer();
 					} catch (Exception re) {
-						println2Log(database.dbName, session.drdaID, "Failed attempt to reload driver " +re.getMessage()  );
+						println2Log(database.getDatabaseName(), session.drdaID, "Failed attempt to reload driver " +re.getMessage()  );
 					}
 					throw dpe;
 				}
@@ -1451,9 +1451,9 @@ class DRDAConnThread extends Thread {
 	
 		// Everything worked so log connection to the database.
 		if (getLogConnections())
-	 		println2Log(database.dbName, session.drdaID,
+	 		println2Log(database.getDatabaseName(), session.drdaID,
 				"Apache Derby Network Server connected to database " +
-						database.dbName);
+						database.getDatabaseName());
 		return 0;
 	}
 
@@ -2262,7 +2262,7 @@ class DRDAConnThread extends Thread {
 		writer.createDssReply();
 		writer.startDdm(CodePoint.QRYPOPRM);
 		writer.writeScalar2Bytes(CodePoint.SVRCOD, CodePoint.SVRCOD_ERROR);
-		writeRDBNAM(database.dbName);
+		writeRDBNAM(database.getDatabaseName());
 		writePKGNAMCSN();
 		writer.endDdmAndDss();
 	}
@@ -2281,7 +2281,7 @@ class DRDAConnThread extends Thread {
 		writer.createDssReply();
 		writer.startDdm(CodePoint.QRYNOPRM);
 		writer.writeScalar2Bytes(CodePoint.SVRCOD, svrCod);
-		writeRDBNAM(database.dbName);
+		writeRDBNAM(database.getDatabaseName());
 		writePKGNAMCSN();
 		writer.endDdmAndDss();
 	}
@@ -2300,7 +2300,7 @@ class DRDAConnThread extends Thread {
 		writer.createDssReply();
 		writer.startDdm(CodePoint.OPNQFLRM);
 		writer.writeScalar2Bytes(CodePoint.SVRCOD, CodePoint.SVRCOD_ERROR);
-		writeRDBNAM(database.dbName);
+		writeRDBNAM(database.getDatabaseName());
 		writer.endDdm();
 		writer.startDdm(CodePoint.SQLCARD);
 		writeSQLCAGRP(e, getSqlCode(getExceptionSeverity(e)), 0, 0);
@@ -2849,7 +2849,7 @@ class DRDAConnThread extends Thread {
 		writer.createDssReply();
 		writer.startDdm(CodePoint.ABNUOWRM);
 		writer.writeScalar2Bytes(CodePoint.SVRCOD,CodePoint.SVRCOD_ERROR);
-		writeRDBNAM(database.dbName);
+		writeRDBNAM(database.getDatabaseName());
 		writer.endDdmAndDss();
 	}
 	/**
@@ -3039,7 +3039,7 @@ class DRDAConnThread extends Thread {
                                                 myPublicKey,
                                                 database.secTokenIn);
 						    } catch (SQLException se) {
-							    println2Log(database.dbName, session.drdaID,
+							    println2Log(database.getDatabaseName(), session.drdaID,
                                             se.getMessage());
 							    if (securityCheckCode == 0)
                                     //userid invalid
@@ -3059,7 +3059,7 @@ class DRDAConnThread extends Thread {
                                             myPublicKey,
                                             database.secTokenIn);
 						    } catch (SQLException se) {	
-                                println2Log(database.dbName, session.drdaID,
+                                println2Log(database.getDatabaseName(), session.drdaID,
                                             se.getMessage());
                                 if (securityCheckCode == 0)
                                     //password invalid
@@ -3113,13 +3113,13 @@ class DRDAConnThread extends Thread {
 					String dbname = parseRDBNAM();
 					if (database != null) 
 					{
-						if (database.dbName == null) {
+						if (database.getDatabaseName() == null) {
 							// we didn't get the RDBNAM on ACCSEC. Set it here
 							database.setDatabaseName(dbname);
 							session.addDatabase(database);
 							session.database = database;
 						}
-						else if (!database.dbName.equals(dbname))
+						else if (!database.getDatabaseName().equals(dbname))
 							rdbnamMismatch(CodePoint.SECCHK);
 					}
 					else
@@ -3141,7 +3141,7 @@ class DRDAConnThread extends Thread {
 			missingCodePoint(CodePoint.SECMEC);
 
 		// Check that we have a database name.
-		if (database == null  || database.dbName == null)
+		if (database == null  || database.getDatabaseName() == null)
 			missingCodePoint(CodePoint.RDBNAM);
 
 		//check if we have a userid and password when we need it
@@ -3329,7 +3329,7 @@ class DRDAConnThread extends Thread {
 					String dbname = parseRDBNAM();
 					if (database != null)
 					{ 
-						if (!database.dbName.equals(dbname))
+						if (!database.getDatabaseName().equals(dbname))
 							rdbnamMismatch(CodePoint.ACCRDB);
 					}
 					else
@@ -5389,7 +5389,7 @@ class DRDAConnThread extends Thread {
 		writer.createDssReply();
 		writer.startDdm(CodePoint.RDBUPDRM);
 		writer.writeScalar2Bytes(CodePoint.SVRCOD, CodePoint.SVRCOD_INFO);
-		writeRDBNAM(database.dbName);
+		writeRDBNAM(database.getDatabaseName());
 		writer.endDdmAndDss();
 	}
 
@@ -5435,7 +5435,7 @@ class DRDAConnThread extends Thread {
             if ( appRequester.getClientType() != AppRequester.DNC_CLIENT
                  || appRequester.greaterThanOrEqualTo(10,3,0) ) {
                 // check the database name
-                if (!rdbnam.toString().equals(database.dbName))
+                if (!rdbnam.toString().equals(database.getDatabaseName()))
                     rdbnamMismatch(CodePoint.PKGNAMCSN);
             }
 
@@ -5480,7 +5480,7 @@ class DRDAConnThread extends Thread {
             if ( appRequester.getClientType() != AppRequester.DNC_CLIENT
                  || appRequester.greaterThanOrEqualTo(10,3,0) ) {
                 // check the database name
-                if (!rdbnam.toString().equals(database.dbName))
+                if (!rdbnam.toString().equals(database.getDatabaseName()))
                     rdbnamMismatch(CodePoint.PKGNAMCSN);
             }
 
@@ -6266,7 +6266,7 @@ class DRDAConnThread extends Thread {
 		writer.writeByte(0);		// SQLCAXGRP INDICATOR
 		if (sqlamLevel < 7)
 		{
-			writeRDBNAM(database.dbName);
+			writeRDBNAM(database.getDatabaseName());
 			writeSQLCAERRWARN(updateCount, rowCount);
 		}
 		else
@@ -6388,7 +6388,7 @@ class DRDAConnThread extends Thread {
 
 			String dbname = null;
 			if (database != null)
-				dbname = database.dbName;
+				dbname = database.getDatabaseName();
 
 			writeSQLDCROW(rowNum++, sqlCode, sqlState, dbname, sqlerrmc);
 
@@ -8302,7 +8302,7 @@ class DRDAConnThread extends Thread {
 	private void sendProtocolException(DRDAProtocolException de) {
 		String dbname = null;
 		if (database != null) {
-			dbname = database.dbName;
+			dbname = database.getDatabaseName();
 		}
 
 		try {
@@ -8329,7 +8329,7 @@ class DRDAConnThread extends Thread {
 		String dbname = null;
 		try {
 			if (database != null)
-				dbname = database.dbName;
+				dbname = database.getDatabaseName();
 			println2Log(dbname,session.drdaID, e.getMessage());
 			server.consoleExceptionPrintTrace(e);
 			unExpDe = DRDAProtocolException.newAgentError(this,
@@ -8563,7 +8563,7 @@ class DRDAConnThread extends Thread {
 	{
 		String rdbnam = parseRDBNAM();
 		// using same database so we are done
-		if (database != null && database.dbName.equals(rdbnam))
+		if (database != null && database.getDatabaseName().equals(rdbnam))
 			return;
 		Database d = session.getDatabase(rdbnam);
 		if (d == null)
@@ -8803,7 +8803,7 @@ class DRDAConnThread extends Thread {
         if (appRequester.supportsSecMecUSRSSBPWD() == false)
             return CodePoint.SECCHKCD_NOTSUPPORTED; // Not Supported
 
-        dbName = database.shortDbName;
+        dbName = database.getShortDbName();
         // Check if the database is available (booted)
         // 
         // First we need to have the database name available and it should

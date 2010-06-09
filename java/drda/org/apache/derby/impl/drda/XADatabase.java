@@ -71,7 +71,7 @@ class XADatabase extends Database {
 			xaDataSource = new EmbeddedXADataSource();
 		}
 
-		xaDataSource.setDatabaseName(shortDbName);
+		xaDataSource.setDatabaseName(getShortDbName());
 		appendAttrString(p);
 		if (attrString != null)
 			xaDataSource.setConnectionAttributes(attrString);
