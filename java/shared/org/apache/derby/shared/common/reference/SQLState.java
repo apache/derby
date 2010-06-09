@@ -1702,8 +1702,9 @@ public interface SQLState {
     String NET_SECTKN_TOO_LONG                                  = "08001.C.10";
     String NET_USERID_TOO_LONG                                  = "08001.C.11";
     String NET_PASSWORD_TOO_LONG                                = "08001.C.12";
-
-        
+    String NET_EXTNAM_TOO_LONG                                  = "08001.C.13";
+    String NET_SRVNAM_TOO_LONG                                  = "08001.C.14";    
+    
     // database severity
     String SHUTDOWN_DATABASE = "08006.D";  
     String DROP_DATABASE = "08006.D.1";

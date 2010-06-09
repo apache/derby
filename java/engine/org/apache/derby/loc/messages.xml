@@ -258,6 +258,16 @@ Guide.
                 <name>08001.C.12</name>
                 <text>A connection could not be established because the password has a length of zero or is larger than the maximum allowed by the network protocol.</text>
             </msg>
+			
+			<msg>
+                <name>08001.C.13</name>
+                <text>A connection could not be established because the external name (EXTNAM) has a length of zero or is larger than the maximum allowed by the network protocol.</text>
+            </msg>
+			
+			<msg>
+                <name>08001.C.14</name>
+                <text>A connection could not be established because the server name (SRVNAM) has a length of zero or is larger than the maximum allowed by the network protocol.</text>
+            </msg>
 
             <msg>
                 <name>08001.C.1</name>

@@ -433,16 +433,19 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         int extnamTruncateLength = Math.min(extnam.length(),
                 NetConfiguration.EXTNAM_MAXSIZE);
 
-        writeScalarString(CodePoint.EXTNAM,
-                extnam.substring(0, extnamTruncateLength));
+        // Writing the truncated string as to preserve previous behavior
+        writeScalarString(CodePoint.EXTNAM, extnam.substring(0, extnamTruncateLength), 0,
+                NetConfiguration.EXTNAM_MAXSIZE, SQLState.NET_EXTNAM_TOO_LONG);
     }
 
     // Server Name is the name of the DDM server.
     private void buildSRVNAM(String srvnam) throws SqlException {
         int srvnamTruncateLength = Math.min(srvnam.length(),
                 NetConfiguration.SRVNAM_MAXSIZE);
-        writeScalarString(CodePoint.SRVNAM,
-                srvnam.substring(0, srvnamTruncateLength));
+        
+        // Writing the truncated string as to preserve previous behavior
+        writeScalarString(CodePoint.SRVNAM,srvnam.substring(0, srvnamTruncateLength),
+                0, NetConfiguration.SRVNAM_MAXSIZE,SQLState.NET_SRVNAM_TOO_LONG);
     }
 
     // Server Product Release Level String specifies the product

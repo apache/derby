@@ -95,6 +95,8 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"08001","A connection could not be established because the security token is larger than the maximum allowed by the network protocol.","40000"},
         		{"08001","A connection could not be established because the user id has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
         		{"08001","A connection could not be established because the password has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
+        		{"08001","A connection could not be established because the external name (EXTNAM) has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
+        		{"08001","A connection could not be established because the server name (SRVNAM) has a length of zero or is larger than the maximum allowed by the network protocol.","40000"},
         		{"08001","Required Derby DataSource property {0} not set.","40000"},
         		{"08001","{0} : Error connecting to server {1} on port {2} with message {3}.","40000"},
         		{"08001","SocketException: '{0}'","40000"},
