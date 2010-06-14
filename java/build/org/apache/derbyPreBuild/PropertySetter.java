@@ -274,9 +274,18 @@ public class PropertySetter extends Task
             String  j15lib = getProperty( J15LIB );
             String  j16lib = getProperty( J16LIB );
 
-            if ( j14lib != null ) { setClasspathFromLib(J14CLASSPATH, j14lib, true ); }
-            if ( j15lib != null ) { setClasspathFromLib(J15CLASSPATH, j15lib, true ); }
-            if ( j16lib != null ) { setClasspathFromLib(J16CLASSPATH, j16lib, true ); }
+            if ( j14lib != null ) {
+                debug("'j14lib' explicitly set to '" + j14lib + "'");
+                setClasspathFromLib(J14CLASSPATH, j14lib, true );
+            }
+            if ( j15lib != null ) {
+                debug("'j15lib' explicitly set to '" + j15lib + "'");
+                setClasspathFromLib(J15CLASSPATH, j15lib, true );
+            }
+            if ( j16lib != null ) {
+                debug("'j16lib' explicitly set to '" + j16lib + "'");
+                setClasspathFromLib(J16CLASSPATH, j16lib, true );
+            }
 
             //
             // If the library properties were not set, the following
@@ -405,6 +414,7 @@ public class PropertySetter extends Task
         // Obtain a list of all JDKs available to us, then specify which one to
         // use for the different versions we require.
         List<JDKInfo> jdks = locateJDKs(getJdkSearchPath());
+        debug("\nSelecting JDK candidates:");
         if (default_j14lib == null) {
             default_j14lib = getJreLib(jdks, seed14, jdkVendor);
         }
@@ -577,6 +587,7 @@ public class PropertySetter extends Task
         if (jdkParentDirectories == null) {
             return jdks;
         }
+        debug("\nLocating JDKs:");
 
         File jreLibRel = new File("jre", "lib");
         String[] jarsRelative = new String[] {
@@ -733,7 +744,7 @@ public class PropertySetter extends Task
                 for (JDKInfo jdk : candidates) {
                     if (jdk.implementationVersion.equals(version) &&
                             isSameVendor(targetVendor, jdk.vendor)) {
-                        debug("Chosen JDK for specification version " +
+                        debug("Candidate JDK for specification version " +
                                 specificationVersion + " (vendor " +
                                 (targetVendor == null ? "ignored"
                                                       : jdkVendor) +
@@ -998,8 +1009,11 @@ public class PropertySetter extends Task
         {
             throw new BuildException
                 (
-                 "\nThe build raises version mismatch errors when using the IBM Java 5 compiler with Java 6 libraries.\n" +
-                 "Please either use a Java 6 (or later) compiler or do not set the '" +  J16CLASSPATH + "' and '" + J16LIB + "' variables.\n"
+                 "\nThe build raises version mismatch errors when using a " +
+                 "Java 5 compiler with Java 6 libraries.\n" +
+                 "Please either use a Java 6 (or later) compiler or do not " +
+                 "set the '" +  J16CLASSPATH + "' and '" + J16LIB +
+                 "' variables.\n"
                  );
         }
 
@@ -1013,13 +1027,13 @@ public class PropertySetter extends Task
     private boolean shouldNotSet( String property )
     {
         //
-        // The IBM Java 5 compiler raises version mismatch errors when used
-        // with the IBM Java 6 libraries.
+        // A Java 5 compiler raises version mismatch errors when used
+        // with Java 6 libraries.
         //
-        String  jdkVendor = getProperty( JDK_VENDOR );
         String  javaVersion = getProperty( JAVA_VERSION );
         
-        return ( usingIBMjdk( jdkVendor ) && javaVersion.startsWith( JAVA_5 ) &&  J16CLASSPATH.equals( property  ) );
+        return ( javaVersion.startsWith( JAVA_5 ) &&
+                    J16CLASSPATH.equals( property  ) );
     }
     
     /**
