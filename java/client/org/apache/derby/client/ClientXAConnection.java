@@ -25,10 +25,12 @@ import java.sql.SQLException;
 import javax.sql.XAConnection;
 import javax.transaction.xa.XAResource;
 
+import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.net.NetXAConnection;
 import org.apache.derby.jdbc.ClientXADataSource;
+import org.apache.derby.shared.common.reference.SQLState;
 
 public class ClientXAConnection extends ClientPooledConnection implements XAConnection {
     private static int rmIdSeed_ = 95688932; // semi-random starting value for rmId
@@ -85,7 +87,12 @@ public class ClientXAConnection extends ClientPooledConnection implements XAConn
         if (logWriter_ != null) {
             logWriter_.traceExit(this, "getXAResource", xares_);
         }
-
+        // DERBY-2532
+        if (super.physicalConnection_ == null) {
+            throw new SqlException(logWriter_,
+                    new ClientMessageId(SQLState.NO_CURRENT_CONNECTION)
+                ).getSQLException();
+        }
         return xares_;
     }
 
