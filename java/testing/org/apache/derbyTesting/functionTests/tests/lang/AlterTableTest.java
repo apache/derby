@@ -1154,6 +1154,83 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "session.logged(logged int) on commit delete rows not logged");
     }
 
+    /**
+     * See DERBY-4693 for a case where this was broken.
+     */
+    public void testRenameAutoincrementColumn()
+	throws Exception
+    {
+	// First, the repro from the Jira issue originally logged:
+	Statement st = createStatement();
+	st.executeUpdate("create table d4693" +
+		"(a int generated always as identity, b int)");
+        JDBC.assertFullResultSet(st.executeQuery(
+                "select columnname,columnnumber,columndatatype," +
+		"       autoincrementvalue," +
+		"       autoincrementstart," +
+		"       autoincrementinc" +
+		" from sys.syscolumns where " +
+		"      columnname = 'A' and " +
+		"      referenceid in (select tableid " +
+                "             from sys.systables where tablename = 'D4693')"),
+                new String[][]{ {"A","1","INTEGER NOT NULL","1","1","1"} });
+	st.executeUpdate("insert into d4693 (b) values (1)");
+	st.executeUpdate("rename column d4693.a to a2");
+        JDBC.assertFullResultSet(st.executeQuery(
+                "select columnname,columnnumber,columndatatype," +
+		"       autoincrementvalue," +
+		"       autoincrementstart," +
+		"       autoincrementinc" +
+		" from sys.syscolumns where " +
+		"      columnname = 'A2' and " +
+		"      referenceid in (select tableid " +
+                "             from sys.systables where tablename = 'D4693')"),
+                new String[][]{ {"A2","1","INTEGER NOT NULL","2","1","1"} });
+	st.executeUpdate("insert into d4693 (b) values (2)");
+        JDBC.assertFullResultSet(st.executeQuery(
+                "select a2, b from d4693"),
+                new String[][]{ {"1", "1"}, {"2", "2"} });
+        st.executeUpdate("drop table d4693");
+
+	// Then, a few other arbitrary test cases:
+	String colspecs[] = {
+	    "autoinc int generated always as identity (start with 100)",
+	    "autoinc1 int generated always as identity (increment by 100)",
+	    "autoinc2 int generated always as identity (start with 101, increment by 100)",
+	    "a11 int generated always as identity (start with  0, increment by -1)",
+	    "a21 int generated always as identity (start with  +0, increment by -1)",
+	    "a31 int generated always as identity (start with  -1, increment by -1)",
+	    "a41 int generated always as identity (start with  -11, increment by +100)"
+	};
+	String cn[] = {
+	    "AUTOINC", "AUTOINC1", "AUTOINC2", "A11", "A21", "A31", "A41" };
+	String val[] = {
+	    "100",     "1",        "101",      "0",   "0",   "-1",  "-11" };
+	String start[] = {
+	    "100",     "1",        "101",      "0",   "0",   "-1",  "-11" };
+	String inc[] = {
+	    "1",      "100",       "100",      "-1",  "-1",  "-1",  "100" };
+	for (int i = 0; i < colspecs.length; i++)
+	{
+	    st.executeUpdate("create table d4693 (" + colspecs[i] + ")");
+	    checkValStartInc(st, cn[i], val[i], start[i], inc[i]);
+	    st.executeUpdate("rename column d4693."+cn[i]+" to "+cn[i]+"2");
+	    checkValStartInc(st, cn[i]+"2", val[i], start[i], inc[i]);
+	    st.executeUpdate("drop table d4693");
+	}
+    }
+    private void checkValStartInc(Statement st, String nm, String v,
+					String s, String inc)
+	throws Exception
+    {
+        JDBC.assertFullResultSet(st.executeQuery(
+            "select autoincrementvalue,autoincrementstart,autoincrementinc" +
+		" from sys.syscolumns where columnname = '"+nm+"' and " +
+		"      referenceid in (select tableid " +
+                "             from sys.systables where tablename = 'D4693')"),
+                new String[][]{ {v, s, inc} });
+    }
+
     public void testAlterColumn() throws Exception {
         Statement st = createStatement();
         createTestObjects(st);

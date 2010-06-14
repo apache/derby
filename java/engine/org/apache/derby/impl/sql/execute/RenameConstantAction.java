@@ -50,6 +50,7 @@ import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
+import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
 
 /**
  * This class  describes actions that are ALWAYS performed for a
@@ -331,6 +332,11 @@ class RenameConstantAction extends DDLSingleTableConstantAction
 		 * dependents on the column.
 		 */
 		columnDescriptor = td.getColumnDescriptor(oldObjectName);
+
+		if (columnDescriptor.isAutoincrement())
+			columnDescriptor.setAutoinc_create_or_modify_Start_Increment(
+				ColumnDefinitionNode.CREATE_AUTOINCREMENT);
+
 		columnPosition = columnDescriptor.getPosition();
 		FormatableBitSet toRename = new FormatableBitSet(td.getColumnDescriptorList().size() + 1);
 		toRename.set(columnPosition);
