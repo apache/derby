@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -36,6 +37,7 @@ import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -144,6 +146,30 @@ public class NullableUniqueConstraintTest extends BaseJDBCTestCase {
         con.commit();
         stmt.close ();
         ps.close();
+    }
+
+    /**
+     * Compress table should recreate the indexes correctly rather
+     * than ignoring the unique nullable property of the index
+     * @throws SQLException
+     */
+    public void testDerby4677CompressTable() throws SQLException {
+        Connection con = getConnection();
+        Statement stmt = con.createStatement();
+        stmt.executeUpdate("CREATE TABLE TABLE1(NAME1 INT UNIQUE, "+
+        		"name2 int unique not null, name3 int primary key)");
+        stmt.execute("call syscs_util.syscs_compress_table('APP','TABLE1',1)");
+        stmt.executeUpdate("INSERT INTO TABLE1 VALUES(1,11,111)");
+        //following should run into problem because of constraint on name1
+        assertStatementError("23505", stmt,
+        		"INSERT INTO TABLE1 VALUES(1,22,222)");
+        //following should run into problem because of constraint on name2
+        assertStatementError("23505", stmt,
+        		"INSERT INTO TABLE1 VALUES(3,11,333)");
+        //following should run into problem because of constraint on name3
+        assertStatementError("23505", stmt,
+        		"INSERT INTO TABLE1 VALUES(4,44,111)");
+        stmt.executeUpdate("DROP TABLE TABLE1");    
     }
     
     /**
