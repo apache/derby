@@ -1033,63 +1033,6 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     private static ZipInfoProperties checkFile(String filename)
     {
         // try to create a ZipFile from it
-
-	// Check to see if it's a version of db2jcc.jar and if so, report the version number. 
-	if (filename.indexOf("db2jcc") >= 0)
-	{
-	    Class c = null;
-	    Method m = null;
-	    Object o = null;
-	    Integer build = null;
-	    Integer major = null;
-            Integer minor = null;
-	    try 
-	    {
-                try 
-		{
-		    c = Class.forName("com.ibm.db2.jcc.DB2Driver");
-		    m = c.getMethod("getJCCBuildNumber", null);
-		    o = c.newInstance();
-		    build = (Integer)m.invoke(o,null);
-		} catch (ClassNotFoundException cnfe) {
-		    c = Class.forName("com.ibm.db2.jcc.DB2Version");
-		    m = c.getMethod("getBuildNumber", null);
-		    o = c.newInstance();
-		    build = (Integer)m.invoke(o,null);
-	        } 
-		m = c.getMethod("getMajorVersion", null);
-		major = (Integer)m.invoke(o,null);
-		m = c.getMethod("getMinorVersion", null);
-		minor = (Integer)m.invoke(o,null);
-
-		ProductVersionHolder jccVersion = ProductVersionHolder.getProductVersionHolder(
-			"IBM Corp.",
-			"DB2 Java Common Client",
-			"DRDA:jcc",
-			major.intValue(),
-			minor.intValue(),
-			0,
-			0,
-			build.toString(),
-			Boolean.FALSE);
-
-		ZipInfoProperties zip = new ZipInfoProperties(jccVersion);
-
-                String loc = getFileWhichLoadedClass(c);
-                // For db2jcc.jar, report the actual file from which DB2Driver
-                // was loaded, if we can determine it. For db2jcc_license_c,
-                // report the filename from the classpath, and the version 
-                // info from the DB2Driver that we loaded. This is slightly
-                // misleading, since db2jcc_license_c.jar doesn't really have
-                // a "version", but the two jars are usually linked.
-                if (loc != null && filename.indexOf("license_c") < 0)
-                    zip.setLocation(loc);
-                else
-        zip.setLocation(new File(filename).getCanonicalPath().replace('/', File.separatorChar));
-		return zip;
-            } catch (Exception e) { return null; }
-	}
-
         try
         {
             ZipFile zf = new ZipFile(filename);
