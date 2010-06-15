@@ -31,6 +31,7 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.ConcatableDataValue;
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.services.io.DerbyIOException;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.FormatIdInputStream;
 
@@ -100,6 +101,8 @@ abstract class SQLBinary
 	static final byte PAD = (byte) 0x20;
 
     private static final int BASE_MEMORY_USAGE = ClassSize.estimateBaseFromCatalog( SQLBinary.class);
+
+    private static final int LEN_OF_BUFFER_TO_WRITE_BLOB = 1024;
 
     public int estimateMemoryUsage()
     {
@@ -368,10 +371,23 @@ abstract class SQLBinary
             InputStream         is = _blobValue.getBinaryStream();
             
             writeLength( out, len );
-
-            for ( int i = 0; i < len; i++ )
-            {
-                out.write( is.read() );
+            
+            int bytesRead = 0;
+            int numOfBytes = 0;
+            byte[] buffer = new byte[LEN_OF_BUFFER_TO_WRITE_BLOB];
+            
+            while(bytesRead < len) {
+                numOfBytes = is.read(buffer);
+                
+                if (numOfBytes == -1) {
+                    throw new DerbyIOException(
+                        MessageService.getTextMessage(
+                                SQLState.SET_STREAM_INEXACT_LENGTH_DATA),
+                            SQLState.SET_STREAM_INEXACT_LENGTH_DATA);
+                }
+                
+                out.write(buffer, 0, numOfBytes);
+                bytesRead += numOfBytes; 
             }
         }
         catch (StandardException se) { throw new IOException( se.getMessage() ); }
