@@ -2621,7 +2621,8 @@ public abstract class EmbedConnection implements EngineConnection
 				nse = Util.generateCsSQLException(mse);
 
             throw Util.seeNextException(SQLState.BOOT_DATABASE_FAILED,
-                                        new Object[] { dbname }, nse);
+                                        new Object[] { dbname, 
+                                        (Object) this.getClass().getClassLoader() }, nse);
 		}
 
 		// If database exists, getDatabase() will return the database object.

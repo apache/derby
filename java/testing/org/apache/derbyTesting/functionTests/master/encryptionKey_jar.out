@@ -64,7 +64,7 @@ ij(DB1)> connect 'jdbc:derby:;shutdown=true';
 ERROR XJ015: Derby system shutdown.
 ij(DB1)> -- NEGATIVE CASE: Test with wrong encryption key. This should fail.
 connect 'jdbc:derby:jar:(ina.jar)db1;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666760' AS DB1;
-ERROR XJ040: Failed to start database 'jar:(ina.jar)db1', see the next exception for details.
+ERROR XJ040: Failed to start database 'jar:(ina.jar)db1' with class loader XXXX,  see the next exception for details.
 ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and try again. 
 ij(DB1)> disconnect;
 ij> -- test reading a database from a jar file and loading
@@ -101,6 +101,6 @@ ij(DB2CL)> connect 'jdbc:derby:;shutdown=true';
 ERROR XJ015: Derby system shutdown.
 ij(DB2CL)> -- try with wrong encryption key, this should fail.
 connect 'jdbc:derby:classpath:db2;encryptionAlgorithm=DES/CBC/NoPadding;encryptionKey=6162636465666760' AS DB2CL;
-ERROR XJ040: Failed to start database 'classpath:db2', see the next exception for details.
+ERROR XJ040: Failed to start database 'classpath:db2' with class loader XXXX,  see the next exception for details.
 ERROR XBCXK: The given encryption key does not match the encryption key used when creating the database. Please ensure that you are using the correct encryption key and try again. 
 ij(DB2CL)> exit;

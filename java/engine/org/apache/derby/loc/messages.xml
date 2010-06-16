@@ -4292,8 +4292,9 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XJ040.C</name>
-                <text>Failed to start database '{0}', see the next exception for details.</text>
+                <text>Failed to start database '{0}' with class loader {1}, see the next exception for details.</text>
                 <arg>databaseName</arg>
+		<arg>classLoader</arg>
             </msg>
 
             <msg>
@@ -7294,20 +7295,21 @@ MessageId.java.
             <msg>
                 <name>D001</name>
                 <text>:
- Booting Derby version {0}: instance {1}
-on database directory {2} {3} 
+ Booting Derby version {0}: instance {1} 
+on database directory {2}  with class loader {3}
 </text>
                 <arg>derbyVersion</arg>
                 <arg>id</arg>
                 <arg>directoryName</arg>
-                <arg>readOnlyStatus</arg>
+                <arg>classloader</arg>
             </msg>
 
             <msg>
                 <name>D002</name>
                 <text>:
-Shutting down instance {0}</text>
+Shutting down instance {0} with class loader {1} </text>
                 <arg>id</arg>
+		<arg>classloader</arg>
             </msg>
 
             <msg>
