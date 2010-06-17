@@ -374,7 +374,7 @@ abstract class SQLBinary
             
             int bytesRead = 0;
             int numOfBytes = 0;
-            byte[] buffer = new byte[LEN_OF_BUFFER_TO_WRITE_BLOB];
+            byte[] buffer = new byte[Math.min(len, LEN_OF_BUFFER_TO_WRITE_BLOB)];
             
             while(bytesRead < len) {
                 numOfBytes = is.read(buffer);
