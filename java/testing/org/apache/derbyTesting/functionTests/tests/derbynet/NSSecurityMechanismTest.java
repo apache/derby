@@ -1250,7 +1250,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
 
     private HashMap addRequiredAttributes(HashMap attrs)
     {
-        String hostName = TestConfiguration.DEFAULT_HOSTNAME;
+        String hostName = TestConfiguration.getCurrent().getHostName();
         int port = TestConfiguration.getCurrent().getPort();
         if (usingDB2Client())
         {

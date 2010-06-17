@@ -40,6 +40,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DerbyConstants;
 
 public final class AlterTableTest extends BaseJDBCTestCase {
 
@@ -268,7 +269,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         rs = st.executeQuery(
                 "select tablename, " +
-                "SYSCS_UTIL.SYSCS_CHECK_TABLE('" + TestConfiguration.TEST_DBO +
+                "SYSCS_UTIL.SYSCS_CHECK_TABLE('" + DerbyConstants.TEST_DBO +
                 "', tablename) from " + "sys.systables where tabletype = 'T'");
 
         expRS = new String[][]{
@@ -738,7 +739,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         rs = st.executeQuery(
                 "select tablename, " +
-                "SYSCS_UTIL.SYSCS_CHECK_TABLE('" + TestConfiguration.TEST_DBO +
+                "SYSCS_UTIL.SYSCS_CHECK_TABLE('" + DerbyConstants.TEST_DBO +
                 "', tablename) from " + "sys.systables where tabletype = 'T'");
 
         expColNames = new String[]{"TABLENAME", "2"};
@@ -803,7 +804,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         rs = st.executeQuery(
                 "select tablename, " + "SYSCS_UTIL.SYSCS_CHECK_TABLE('" +
-                TestConfiguration.TEST_DBO + "', tablename) from " +
+                DerbyConstants.TEST_DBO + "', tablename) from " +
                 "sys.systables where tabletype = 'T' and tablename = 'T0_1'");
 
         expColNames = new String[]{"TABLENAME", "2"};
@@ -870,7 +871,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         rs = st.executeQuery(
                 "select tablename, " +
-                "SYSCS_UTIL.SYSCS_CHECK_TABLE('" + TestConfiguration.TEST_DBO +
+                "SYSCS_UTIL.SYSCS_CHECK_TABLE('" + DerbyConstants.TEST_DBO +
                 "', tablename) from " + "sys.systables where tabletype = 'T'");
 
         expRS = new String[][]{
@@ -959,7 +960,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         st.executeUpdate(
                 "alter table x add constraint NEWCONS primary key (x)");
 
-        // schemaname should be TestConfiguration.TEST_DBO
+        // schemaname should be DerbyConstants.TEST_DBO
 
         rs = st.executeQuery(
                 "select schemaname, constraintname from " +
@@ -967,8 +968,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "s.schemaid = c.schemaid order by 1");
 
         JDBC.assertFullResultSet(rs, new String[][]{
-                    {TestConfiguration.TEST_DBO, "P1"},
-                    {TestConfiguration.TEST_DBO, "NEWCONS"}
+                    {DerbyConstants.TEST_DBO, "P1"},
+                    {DerbyConstants.TEST_DBO, "NEWCONS"}
                 });
         //duplicating values ina priary key column
         assertStatementError("23505", st,
@@ -976,20 +977,20 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         st.executeUpdate(
                 " alter table x drop constraint " +
-                TestConfiguration.TEST_DBO + ".newcons");
+                DerbyConstants.TEST_DBO + ".newcons");
 
         st.executeUpdate(
                 " alter table x add constraint newcons primary key (x)");
 
-        // schemaname should be TestConfiguration.TEST_DBO
+        // schemaname should be DerbyConstants.TEST_DBO
 
         rs = st.executeQuery(
                 "select schemaname, constraintname from " +
                 "sys.sysconstraints c, sys.sysschemas s where " +
                 "s.schemaid = c.schemaid order by 1");
         JDBC.assertFullResultSet(rs, new String[][]{
-                    {TestConfiguration.TEST_DBO, "P1"},
-                    {TestConfiguration.TEST_DBO, "NEWCONS"}
+                    {DerbyConstants.TEST_DBO, "P1"},
+                    {DerbyConstants.TEST_DBO, "NEWCONS"}
                 });
 
         //schema does not exist
@@ -1001,7 +1002,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         st.executeUpdate(
                 "alter table x drop constraint " +
-                TestConfiguration.TEST_DBO + ".newcons");
+                DerbyConstants.TEST_DBO + ".newcons");
 
         // bad schema name(table x is not in the same schema of constraint)
         assertStatementError("42X85", st,
@@ -1022,15 +1023,15 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "sys.sysconstraints c, sys.sysschemas s where " +
                 "s.schemaid = c.schemaid order by 1");
         JDBC.assertFullResultSet(rs, new String[][]{
-                    {TestConfiguration.TEST_DBO, "P1"},
-                    {TestConfiguration.TEST_DBO, "CON"}
+                    {DerbyConstants.TEST_DBO, "P1"},
+                    {DerbyConstants.TEST_DBO, "CON"}
                 });
 
         st.executeUpdate("set schema emptyschema");
 
         // fail, cannot find emptyschema.conn
         assertStatementError("42X86", st,
-                "alter table " + TestConfiguration.TEST_DBO +
+                "alter table " + DerbyConstants.TEST_DBO +
                 ".x drop constraint emptyschema.con");
 
         rs = st.executeQuery(
@@ -1038,8 +1039,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "sys.sysconstraints c, sys.sysschemas s where " +
                 "s.schemaid = c.schemaid order by 1");
         JDBC.assertFullResultSet(rs, new String[][]{
-                    {TestConfiguration.TEST_DBO, "P1"},
-                    {TestConfiguration.TEST_DBO, "CON"}
+                    {DerbyConstants.TEST_DBO, "P1"},
+                    {DerbyConstants.TEST_DBO, "CON"}
                 });
 
         st.executeUpdate(" set schema newschema");
@@ -1047,10 +1048,10 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // add constraint, default to table schema
 
         st.executeUpdate(
-                "alter table " + TestConfiguration.TEST_DBO +
+                "alter table " + DerbyConstants.TEST_DBO +
                 ".x add constraint con2 check (x > 1)");
 
-        // added constraint in TestConfiguration.TEST_DBO 
+        // added constraint in DerbyConstants.TEST_DBO
         //(defaults to table's schema)
 
         rs = st.executeQuery(
@@ -1058,12 +1059,12 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "sys.sysconstraints c, sys.sysschemas s where " +
                 "s.schemaid = c.schemaid order by 1,2");
         JDBC.assertFullResultSet(rs, new String[][]{
-                    {TestConfiguration.TEST_DBO, "CON"},
-                    {TestConfiguration.TEST_DBO, "CON2"},
-                    {TestConfiguration.TEST_DBO, "P1"}
+                    {DerbyConstants.TEST_DBO, "CON"},
+                    {DerbyConstants.TEST_DBO, "CON2"},
+                    {DerbyConstants.TEST_DBO, "P1"}
                 });
 
-        st.executeUpdate("drop table " + TestConfiguration.TEST_DBO + ".x");
+        st.executeUpdate("drop table " + DerbyConstants.TEST_DBO + ".x");
         st.executeUpdate("drop schema newschema restrict");
     }
 
@@ -1131,8 +1132,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "alter table t1 drop constraint C1_PLUS_C2");
 
         st.executeUpdate(
-                " alter table " + TestConfiguration.TEST_DBO +
-                ".t1 drop constraint " + TestConfiguration.TEST_DBO +
+                " alter table " + DerbyConstants.TEST_DBO +
+                ".t1 drop constraint " + DerbyConstants.TEST_DBO +
                 ".C1_PLUS_C2");
 
         assertStatementError("42X86", pSt);
@@ -2264,7 +2265,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 st.executeQuery(
                 " select GRANTEE,GRANTOR,TYPE,COLUMNS from sys.syscolperms");
         JDBC.assertFullResultSet(rs, new String[][]{
-                    {"BRYAN", TestConfiguration.TEST_DBO, "s", "{0, 1, 2}"}
+                    {"BRYAN", DerbyConstants.TEST_DBO, "s", "{0, 1, 2}"}
                 });
 
         st.executeUpdate("alter table atdc_10 drop column b restrict");
@@ -2273,7 +2274,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 st.executeQuery(
                 " select GRANTEE,GRANTOR,TYPE,COLUMNS from sys.syscolperms");
         JDBC.assertFullResultSet(rs, new String[][]{
-                    {"BRYAN", TestConfiguration.TEST_DBO, "s", "{0, 1}"}
+                    {"BRYAN", DerbyConstants.TEST_DBO, "s", "{0, 1}"}
                 });
 
         assertStatementError("42X14", st,
@@ -2283,7 +2284,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 st.executeQuery(
                 " select GRANTEE,GRANTOR,TYPE,COLUMNS from sys.syscolperms");
         JDBC.assertFullResultSet(rs, new String[][]{
-                    {"BRYAN", TestConfiguration.TEST_DBO, "s", "{0, 1}"}
+                    {"BRYAN", DerbyConstants.TEST_DBO, "s", "{0, 1}"}
                 });
 
         // Include the test from the DERBY-1909 report:

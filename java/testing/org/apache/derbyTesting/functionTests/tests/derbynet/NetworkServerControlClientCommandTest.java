@@ -22,7 +22,6 @@ limitations under the License.
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Locale;
 
 import junit.framework.Test;
@@ -33,7 +32,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.Utilities;
+import org.apache.derbyTesting.junit.DerbyConstants;
 
 public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
 
@@ -61,7 +60,8 @@ public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
          * The -p parameter isn't specified here.
          * Changed to accomodate DERBY-4217
          */
-        if (TestConfiguration.getCurrent().getPort() == TestConfiguration.DEFAULT_PORT) {
+        if (TestConfiguration.getCurrent().getPort() ==
+                DerbyConstants.DEFAULT_DERBY_PORT) {
 	        assertSuccessfulPing(pingCmd1);
             assertSuccessfulPing(pingCmd3);
         }

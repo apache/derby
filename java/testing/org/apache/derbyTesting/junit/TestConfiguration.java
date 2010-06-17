@@ -65,10 +65,9 @@ public class TestConfiguration {
     
     private final static String DEFAULT_USER_NAME = "APP";
     private final static String DEFAULT_USER_PASSWORD = "APP";
-    public final static int    DEFAULT_PORT = 1527;
+    private final static int    DEFAULT_PORT = 1527;
     private final static String DEFAULT_FRAMEWORK = "embedded";
-    public final static String DEFAULT_HOSTNAME = "localhost";
-    public final static String DEFAULT_SSL = "off";
+    private final static String DEFAULT_HOSTNAME = "localhost";
 
     /**
      * Maximum number of ports used by Suites.All 
@@ -93,8 +92,6 @@ public class TestConfiguration {
         basePort = lastAssignedPort;
     }
     private static int assignedPortCount = 1;
-    
-    public  final   static  String  TEST_DBO = "TEST_DBO";
 
     private FileOutputStream serverOutput;
 		
@@ -830,7 +827,7 @@ public class TestConfiguration {
         
         return changeUserDecorator(
             new DatabaseChangeSetup(setSQLAuthMode, DEFAULT_DBNAME_SQL, DEFAULT_DBNAME_SQL, true),
-            TEST_DBO, "dummy"); // DRDA doesn't like empty pw
+            DerbyConstants.TEST_DBO, "dummy"); // DRDA doesn't like empty pw
     }
 
 
@@ -866,7 +863,7 @@ public class TestConfiguration {
             DEFAULT_DBNAME_SQL, DEFAULT_DBNAME_SQL, true);
 
         return changeUserDecorator(setSQLAuthMode,
-                                   TEST_DBO,
+                                   DerbyConstants.TEST_DBO,
                                    "dummy"); // DRDA doesn't like empty pw
     }
     
@@ -891,7 +888,7 @@ public class TestConfiguration {
             String[] users, String passwordToken)
     {
         String[] usersWithDBO = new String[users.length + 1];
-        usersWithDBO[0] = TEST_DBO;
+        usersWithDBO[0] = DerbyConstants.TEST_DBO;
         System.arraycopy(users, 0, usersWithDBO, 1, users.length);
         return sqlAuthorizationDecorator(
             DatabasePropertyTestSetup.builtinAuthentication(test, 

@@ -30,14 +30,12 @@ import java.sql.CallableStatement;
 import java.sql.SQLException;
 
 import junit.framework.Test;
-import junit.extensions.TestSetup;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.DerbyConstants;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -224,7 +222,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
     private void dbaTest()
         throws Exception
     {
-        Connection  conn = openUserConnection( TestConfiguration.TEST_DBO );
+        Connection  conn = openUserConnection( DerbyConstants.TEST_DBO );
 
         assertTrue( "Initially, should be able to read property.", canReadProperty() );
 
@@ -275,7 +273,7 @@ public class SecurityPolicyReloadingTest extends BaseJDBCTestCase {
         throws Exception
     {
         String          insufficientPrivilege = "XK000";
-        Connection  conn = openUserConnection( TestConfiguration.TEST_DBO );
+        Connection  conn = openUserConnection( DerbyConstants.TEST_DBO );
 
         // First change to a policy which does not permit policy reloading
         changePolicyFile( conn, UNRELOADABLE_SOURCE_POLICY, true, null );
