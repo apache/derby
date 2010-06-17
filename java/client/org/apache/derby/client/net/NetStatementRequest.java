@@ -1757,14 +1757,10 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
             writeShort((short) dataLength);
         } else if (protocolTypesAndLengths[i][1] == 0x8004) {
             writeInt((int) dataLength);  // 4 bytes to encode the length
-        } else if (protocolTypesAndLengths[i][1] == 0x8006)// 6 bytes to encode the length
-        {
-            writeLong(dataLength);
-        }
-        //throw new SqlException (netAgent_.logWriter_, "0x8006 lob place holders not yet supported");
-        else if (protocolTypesAndLengths[i][1] == 0x8008)// 8 bytes to encode the length
-        {
-            writeLong(dataLength);
+        } else if (protocolTypesAndLengths[i][1] == 0x8006) {
+            writeLong6Bytes(dataLength); // 6 bytes to encode the length
+        } else if (protocolTypesAndLengths[i][1] == 0x8008) {
+            writeLong(dataLength); // 8 bytes to encode the length
         }
 
         if (dataLength != 0) {

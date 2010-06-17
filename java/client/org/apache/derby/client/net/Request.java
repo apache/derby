@@ -1551,6 +1551,20 @@ public class Request {
         offset_ += 4;
     }
 
+    /**
+     * Writes a long into the buffer, using six bytes.
+     *
+     * @param v the value to write
+     * @throws IllegalArgumentException if the long value is too large to be
+     *      represented by six bytes.
+     */
+    final void writeLong6Bytes(long v) {
+        ensureLength(offset_ + 6);
+        org.apache.derby.client.am.SignedBinary.long6BytesToBigEndianBytes(
+                bytes_, offset_, v);
+        offset_ += 6;
+    }
+
     // insert a java long into the buffer.
     final void writeLong(long v) {
         ensureLength(offset_ + 8);

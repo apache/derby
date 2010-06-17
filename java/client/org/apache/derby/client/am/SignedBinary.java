@@ -25,6 +25,9 @@ public class SignedBinary {
     private SignedBinary() {
     }
 
+    /** Maximum value that cen be encoded by 6 bytes (signed). */
+    public static final long MAX_LONG_6_BYTES_SIGNED = 0x7FFFFFFFFFFFL;
+
     /**
      * Unix byte-order for signed binary representations.
      */
@@ -94,6 +97,30 @@ public class SignedBinary {
      * Write a Java int to a 4-byte big endian signed binary representation.
      */
     public static final void intToBigEndianBytes(byte[] buffer, int offset, int v) {
+        buffer[offset++] = (byte) ((v >>> 24) & 0xFF);
+        buffer[offset++] = (byte) ((v >>> 16) & 0xFF);
+        buffer[offset++] = (byte) ((v >>> 8) & 0xFF);
+        buffer[offset++] = (byte) ((v >>> 0) & 0xFF);
+    }
+
+    /**
+     * Writes a Java long to a 6-byte big endian signed binary representation.
+     *
+     * @param buffer the buffer to write into
+     * @param offset the offset at which to start writing
+     * @param v the value to be written
+     *
+     * @throws IllegalArgumentException if the long value is too large to be
+     *      represented by six bytes.
+     */
+    public static void long6BytesToBigEndianBytes(byte[] buffer, int offset,
+                                                  long v) {
+        if (v > MAX_LONG_6_BYTES_SIGNED) {
+            throw new IllegalArgumentException("value too large to be " +
+                    "represented by six bytes (signed): " + v);
+        }
+        buffer[offset++] = (byte) ((v >>> 40) & 0xFF);
+        buffer[offset++] = (byte) ((v >>> 32) & 0xFF);
         buffer[offset++] = (byte) ((v >>> 24) & 0xFF);
         buffer[offset++] = (byte) ((v >>> 16) & 0xFF);
         buffer[offset++] = (byte) ((v >>> 8) & 0xFF);
