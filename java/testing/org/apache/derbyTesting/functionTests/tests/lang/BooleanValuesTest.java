@@ -52,6 +52,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     private static final String ILLEGAL_XML_SELECTION = "42Z71";
     private static final String BAD_CAST = "22018";
     private static final String NOT_UNION_COMPATIBLE = "42X61";
+    private static final String BAD_CONVERSION = "42846";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -147,7 +148,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  );
             if ( _supportsXML )
             {
-                buffer.append( "    ,xml_col  xml\n" );
+                buffer.append( "    ,xml_col  XML\n" );
             }
             buffer.append( ")\n" );
             goodStatement( conn, buffer.toString() );
@@ -303,6 +304,74 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  );
             goodStatement( conn, buffer.toString() );
         }
+        
+        if ( !tableExists( conn, "BOOLEANSTRING" ) )
+        {
+            //
+            // create table
+            //
+            goodStatement( conn, "create table booleanString( keyCol int, stringCol varchar( 20 ) )" );
+
+            //
+            // populate it
+            //
+            goodStatement
+                (
+                 conn,
+                 "insert into booleanString( keyCol, stringCol )\n" +
+                 "values ( 0, 'false' ), ( 1, 'true' ), ( 2, null ), ( 3, 'unknown' ), ( 10, ' false ' ), ( 11, ' true ' ), ( 12, null ), ( 13, ' unknown ' )\n"
+                 );
+        }
+
+        if ( !tableExists( conn, "STRING_TYPES" ) )
+        {
+            //
+            // create table
+            //
+            goodStatement
+                (
+                 conn,
+                 "create table string_types\n" +
+                 "(\n" +
+                 "    key_col int,\n" +
+                 "    char_col  CHAR(10),\n" +
+                 "    clob_col  CLOB(2147483647),\n" +
+                 "    long_varchar_col  LONG VARCHAR,\n" +
+                 "    varchar_col  VARCHAR(10)\n" +
+                 ")\n"
+                 );
+
+            //
+            // populate it
+            //
+            goodStatement
+                (
+                 conn,
+                 "insert into string_types\n" +
+                 "( key_col, char_col, clob_col, long_varchar_col, varchar_col )\n" +
+                 "values\n" +
+                 "( 0, 'false', 'false', 'false', 'false' ),\n" +
+                 "( 1, 'true', 'true', 'true', 'true' ),\n" +
+                 "( 2, 'unknown', 'unknown', 'unknown', 'unknown' ),\n" +
+                 "( 3, null, null, null, null ),\n" +
+                 "( 4, ' false ', ' false ', ' false ', ' false ' ),\n" +
+                 "( 5, ' true ', ' true ', ' true ', ' true ' ),\n" +
+                 "( 6, ' unknown ', ' unknown ', ' unknown ', ' unknown ' ),\n" +
+                 "( 7, null, null, null, null ),\n" +
+                 "( 10, 'FALSE', 'FALSE', 'FALSE', 'FALSE' ),\n" +
+                 "( 11, 'TRUE', 'TRUE', 'TRUE', 'TRUE' ),\n" +
+                 "( 12, 'UNKNOWN', 'UNKNOWN', 'UNKNOWN', 'UNKNOWN' ),\n" +
+                 "( 13, NULL, NULL, NULL, NULL ),\n" +
+                 "( 14, ' FALSE ', ' FALSE ', ' FALSE ', ' FALSE ' ),\n" +
+                 "( 15, ' TRUE ', ' TRUE ', ' TRUE ', ' TRUE ' ),\n" +
+                 "( 16, ' UNKNOWN ', ' UNKNOWN ', ' UNKNOWN ', ' UNKNOWN ' ),\n" +
+                 "( 17, NULL, NULL, NULL, NULL ),\n" +
+                 "( 20, 'arg', 'arg', 'arg', 'arg' ),\n" +
+                 "( 21, '0', '0', '0', '0' ),\n" +
+                 "( 22, '1', '1', '1', '1' ),\n" +
+                 "( 23, '2', '2', '2', '2' )\n"
+                 );
+        }
     }
 
 
@@ -322,6 +391,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
      * <li>Add a new column to ALL_TYPES and corresponding rows (see setUp())</li>
      * <li>Add the new datatype to one of the tests below</li>
      * <li>Add a new bad union case to test_06_unions()</li>
+     * <li>Add a new bad explicit cast to test_09_explicitCasts()</li>
      * </ul>
      */
     public void test_01_datatypeCount() throws Exception
@@ -580,6 +650,144 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
              );
     }
     
+    /**
+     * <p>
+     * Verify that explicit casts to and from string work as expected.
+     * </p>
+     */
+    public void test_08_stringCasts() throws Exception
+    {
+        Connection conn = getConnection();
+
+        assertResults( conn, "values ( cast( 'true' as boolean ) )", new String[][] { { "true" } }, false );
+        assertResults( conn, "values ( cast( 'false' as boolean ) )", new String[][] { { "false" } }, false );
+        assertResults( conn, "values ( cast( null as boolean ) )", new String[][] { { null } }, false );
+        assertResults( conn, "values ( cast( 'unknown' as boolean ) )", new String[][] { { null } }, false );
+        assertResults( conn, "values ( cast( ' true ' as boolean ) )", new String[][] { { "true" } }, false );
+        assertResults( conn, "values ( cast( ' false ' as boolean ) )", new String[][] { { "false" } }, false );
+        assertResults( conn, "values ( cast( ' unknown ' as boolean ) )", new String[][] { { null } }, false );
+
+        expectCompilationError( BAD_CAST, "values ( cast( 'arglebargle' as boolean ) )" );
+        expectCompilationError( BAD_CAST, "values ( cast( '1' as boolean ) )" );
+        expectCompilationError( BAD_CAST, "values ( cast( '0' as boolean ) )" );
+        expectCompilationError( BAD_CAST, "values ( cast( '2' as boolean ) )" );
+
+        assertResults
+            (
+             conn,
+             "select keyCol, cast( stringCol as boolean) from booleanString order by keyCol",
+             new String[][]
+             {
+                 { "0", "false" },
+                 { "1", "true" },
+                 { "2", null },
+                 { "3", null },
+                 { "10", "false" },
+                 { "11", "true" },
+                 { "12", null },
+                 { "13", null },
+             },
+             false
+             );
+        
+        goodStatement( conn, "update booleanString set stringCol = 'arglebargle'" );
+        expectExecutionError( conn, BAD_CAST, "select keyCol, cast( stringCol as boolean) from booleanString order by keyCol" );
+
+        goodStatement( conn, "update booleanString set stringCol = '0'" );
+        expectExecutionError( conn, BAD_CAST, "select keyCol, cast( stringCol as boolean) from booleanString order by keyCol" );
+
+        goodStatement( conn, "update booleanString set stringCol = '1'" );
+        expectExecutionError( conn, BAD_CAST, "select keyCol, cast( stringCol as boolean) from booleanString order by keyCol" );
+
+        goodStatement( conn, "update booleanString set stringCol = '2'" );
+        expectExecutionError( conn, BAD_CAST, "select keyCol, cast( stringCol as boolean) from booleanString order by keyCol" );
+
+    }
+    
+    /**
+     * <p>
+     * Verify that most explicit casts to and from boolean are not allowed.
+     * </p>
+     */
+    public void test_09_explicitCasts() throws Exception
+    {
+        Connection conn = getConnection();
+
+        vetBadExplicitCasts( conn, "bigint_col", "BIGINT", "0" );
+        vetBadExplicitCasts( conn, "blob_col", "BLOB(2147483647)", "makeSimpleBlob()" );
+        // CHAR ok
+        vetBadExplicitCasts( conn, "char_for_bit_data_col", "CHAR (10) FOR BIT DATA", "X'DE'" );
+        // CLOB ok
+        vetBadExplicitCasts( conn, "date_col", "DATE", "date('1994-02-23')" );
+        vetBadExplicitCasts( conn, "decimal_col", "DECIMAL(5,2)", "0.00" );
+        vetBadExplicitCasts( conn, "real_col", "REAL", "0.0" );
+        vetBadExplicitCasts( conn, "double_col", "DOUBLE", "0.0" );
+        vetBadExplicitCasts( conn, "int_col", "INTEGER", "0" );
+        // LONG VARCHAR ok
+        vetBadExplicitCasts( conn, "long_varchar_for_bit_data_col", "LONG VARCHAR FOR BIT DATA", "X'DE'" );
+        vetBadExplicitCasts( conn, "numeric_col", "NUMERIC(5,2)", "0.00" );
+        vetBadExplicitCasts( conn, "smallint_col", "SMALLINT", "0" );
+        vetBadExplicitCasts( conn, "time_col", "TIME", "time('15:09:02')" );
+        vetBadExplicitCasts( conn, "timestamp_col", "TIMESTAMP", "timestamp('1962-09-23 03:23:34.234')" );
+        // VARCHAR ok
+        vetBadExplicitCasts( conn, "varchar_for_bit_data_col", "VARCHAR (10) FOR BIT DATA", "X'DE'" );
+        if ( _supportsXML ) { vetBadExplicitCasts( conn, "xml_col", "XML", "xmlparse( document '<?xml version=\"1.0\" encoding=\"UTF-8\"?> <html/>' preserve whitespace )" ); }
+
+        assertResults
+            (
+             conn,
+             "select key_col, cast( char_col as boolean ), cast( clob_col as boolean ), cast( long_varchar_col as boolean ), cast( varchar_col as boolean )\n" +
+             "from string_types where key_col < 18 order by key_col\n",
+             new String[][]
+             {
+                 { "0", "false", "false", "false", "false", },
+                 { "1", "true", "true", "true", "true", },
+                 { "2", null, null, null, null, },
+                 { "3", null, null, null, null, },
+                 { "4", "false", "false", "false", "false", },
+                 { "5", "true", "true", "true", "true", },
+                 { "6", null, null, null, null, },
+                 { "7", null, null, null, null, },
+                 { "10", "false", "false", "false", "false", },
+                 { "11", "true", "true", "true", "true", },
+                 { "12", null, null, null, null, },
+                 { "13", null, null, null, null, },
+                 { "14", "false", "false", "false", "false", },
+                 { "15", "true", "true", "true", "true", },
+                 { "16", null, null, null, null, },
+                 { "17", null, null, null, null, },
+             },
+             false
+             );
+
+        vetBadStringCast( conn, "char_col" );
+        vetBadStringCast( conn, "clob_col" );
+        vetBadStringCast( conn, "long_varchar_col" );
+        vetBadStringCast( conn, "varchar_col" );
+    }
+    private void vetBadStringCast( Connection conn, String columnName ) throws Exception
+    {
+        for ( int i = 20; i < 24; i++ )
+        {
+            expectExecutionError( conn, BAD_CAST, "select cast( " + columnName + " as boolean ) from string_types where key_col = " + i );
+        }
+    }
+    private void vetBadExplicitCasts( Connection conn, String columnName, String dataType, String literal ) throws Exception
+    {
+        vetBadExplicitCastToBoolean( conn, columnName, literal );
+        vetBadExplicitCastFromBoolean( conn, dataType );
+    }
+    private void vetBadExplicitCastToBoolean( Connection conn, String columnName, String literal ) throws Exception
+    {
+        expectCompilationError( BAD_CONVERSION, "values ( cast( " + literal + " as boolean ) )" );
+        expectCompilationError( BAD_CONVERSION, "select cast( " + columnName + " as boolean ) from all_types\n" );
+    }
+    private void vetBadExplicitCastFromBoolean( Connection conn, String dataType ) throws Exception
+    {
+        expectCompilationError( BAD_CONVERSION, "values ( cast( true as " + dataType + " ) )" );
+        expectCompilationError( BAD_CONVERSION, "select cast( isindex as " + dataType + " ) from sys.sysconglomerates" );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES

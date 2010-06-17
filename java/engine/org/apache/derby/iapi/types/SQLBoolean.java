@@ -588,16 +588,22 @@ public final class SQLBoolean
 			if (cleanedValue.equals("TRUE"))
 			{
 				value = true;
+                isnull = false;
 			}
 			else if (cleanedValue.equals("FALSE"))
 			{
 				value = false;
+                isnull = false;
+			}
+			else if (cleanedValue.equals("UNKNOWN"))
+			{
+				value = false;
+                isnull = true;
 			}
 			else
 			{ 
 				throw invalidFormat();
 			}
-			isnull = false;
 		}
 
 	}

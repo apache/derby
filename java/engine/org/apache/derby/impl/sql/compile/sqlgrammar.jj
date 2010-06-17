@@ -4007,7 +4007,7 @@ dataTypeCast() throws StandardException :
 	// This lookahead is required because the names of the built-in
 	// datatypes are not reserved words
 	LOOKAHEAD( { commonDatatypeName(true) } )
-	typeDescriptor = dataTypeCommon( false )
+	typeDescriptor = dataTypeCommon( true )
 	{
 		return typeDescriptor;
 	}

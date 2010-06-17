@@ -462,6 +462,17 @@ public class CastNode extends ValueNode
 											Boolean.FALSE,
 											getContextManager());
 				}
+				else if (cleanCharValue.equals("UNKNOWN"))
+				{
+					ConstantNode cn = (ConstantNode) getNodeFactory().getNode(
+											C_NodeTypes.BOOLEAN_CONSTANT_NODE,
+											null,
+											getContextManager());
+
+                    cn.setNullability( true );
+
+                    return cn;
+				}
 				else
 				{
 					throw StandardException.newException(SQLState.LANG_FORMAT_EXCEPTION, "boolean");

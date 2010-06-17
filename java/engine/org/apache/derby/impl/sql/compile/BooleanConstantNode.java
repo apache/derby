@@ -61,7 +61,16 @@ public final class BooleanConstantNode extends ConstantNode
 		** Is that OK?
 		*/
 
-		if (arg1 instanceof Boolean)
+		if ( arg1 == null )
+		{
+			/* Fill in the type information in the parent ValueNode */
+			super.init(TypeId.BOOLEAN_ID,
+			 Boolean.TRUE,
+			 ReuseFactory.getInteger(1));
+
+            setValue( null );
+		}
+		else if ( arg1 instanceof Boolean )
 		{
 			/* Fill in the type information in the parent ValueNode */
 			super.init(TypeId.BOOLEAN_ID,
