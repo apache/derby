@@ -377,8 +377,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         assertTrue(dmd.supportsColumnAliasing());
         
-        // Bug DERBY-462 should return false.
-        assertTrue(dmd.supportsConvert());
+        assertFalse(dmd.supportsConvert());
         // Simple check since convert is not supported.
         // A comprehensive test should be added when convert
         // is supported, though most likely in a test class
