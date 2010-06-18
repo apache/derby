@@ -414,10 +414,19 @@ public class CastNode extends ValueNode
                         getTypeId().getSQLTypeName());
 			}
 		}	
-		
+
+        //
 		// Preserve the nullability of the operand since a CAST
-		// of a non-NULL value is also non-NULL.
-		setNullability(castOperand.getTypeServices().isNullable());
+		// of a non-NULL value is also non-NULL. However, if the source type is
+        // a non-nullable string type and the target type is a boolean, then the result
+        // still must be nullable because the string "unknown" casts to boolean NULL.
+        //
+        if (
+            castOperand.getTypeServices().getTypeId().isStringTypeId() &&
+            getTypeId().isBooleanTypeId()
+            )
+        { setNullability( true ); }
+		else { setNullability(castOperand.getTypeServices().isNullable()); }
 	}
 
 	/**

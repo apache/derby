@@ -323,6 +323,24 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  );
         }
 
+        if ( !tableExists( conn, "T_4704" ) )
+        {
+            //
+            // create table
+            //
+            goodStatement( conn, "create table t_4704( keyCol int, stringCol varchar( 20 ) not null )" );
+
+            //
+            // populate it
+            //
+            goodStatement
+                (
+                 conn,
+                 "insert into t_4704( keyCol, stringCol )\n" +
+                 "values ( 0, 'false' ), ( 1, 'true' ), ( 2, 'unknown' )\n"
+                 );
+        }
+
         if ( !tableExists( conn, "STRING_TYPES" ) )
         {
             //
@@ -764,6 +782,8 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         vetBadStringCast( conn, "clob_col" );
         vetBadStringCast( conn, "long_varchar_col" );
         vetBadStringCast( conn, "varchar_col" );
+
+        vet4704();
     }
     private void vetBadStringCast( Connection conn, String columnName ) throws Exception
     {
@@ -793,22 +813,27 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
      * columns to BOOLEAN, the result column was marked as non-nullable, even
      * though the VARCHAR could contain the value 'UNKNOWN', in which case
      * the cast should return NULL.
-     *
-     * The test case is disabled for now. Enable it when the bug is fixed.
      */
-    public void disabled_testNullabilityOfCastFromNonNullableVARCHAR()
-            throws SQLException {
-        setAutoCommit(false); // for automatic rollback when test has completed
+    public void vet4704()
+            throws SQLException
+    {
         Statement s = createStatement();
-        s.execute("create table nonnullablestrings(x varchar(10) not null)");
-        s.execute("insert into nonnullablestrings " +
-                  "values 'true', 'false', 'unknown'");
 
-        ResultSet rs = s.executeQuery(
-                "select cast(x as boolean) from nonnullablestrings");
-        JDBC.assertNullability(rs, new boolean[] { true });
-        JDBC.assertFullResultSet(
-                rs, new String[][] { {"true"}, {"false"}, {null} });
+        ResultSet rs = s.executeQuery( "select keyCol, stringCol from t_4704 order by keyCol" );
+        JDBC.assertNullability(rs, new boolean[] { true, false });
+
+        rs = s.executeQuery( "select keyCol, cast(stringCol as boolean) from t_4704 order by keyCol" );
+        JDBC.assertNullability(rs, new boolean[] { true, true });
+        JDBC.assertFullResultSet
+            (
+             rs,
+             new String[][]
+             {
+                 { "0", "false" },
+                 { "1", "true" },
+                 { "2", null },
+             }
+             );
     }
 
     public void test_10_nullabilityOfCastFromLiteral() throws SQLException {
