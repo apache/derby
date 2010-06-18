@@ -21,6 +21,7 @@
  */
 package org.apache.derbyTesting.functionTests.tests.tools;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -123,6 +124,79 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
         doExportTable("APP", "BIN_TAB", fileName, null, null , null);
 	    doImportTable("APP", "BIN_TAB_IMP", fileName, null, null, null, 0);
         verifyData(" * ");
+    }
+    
+    /**
+     * Bulk insert into a table should recreate the indexes correctly rather
+     * than ignoring the unique nullable property of the index.
+     * In the following test case, we have an empty table in which we are
+     * 	trying to do an import from a file with one row worth's data.
+     * 	This combination used to cause bulk insert functionality to 
+     * 	recreate index incorrectly for unique nullable index. This allowed
+     * 	duplicate rows for unique nullable index. Fix for DERBY-4677 resolves
+     * 	the issue.
+     * @throws SQLException
+     */
+    public void testDerby4677BulkInsertIntoEmptyTable() throws SQLException {
+        Connection con = getConnection();
+        Statement stmt = con.createStatement();
+        stmt.executeUpdate("CREATE TABLE TABLE1(NAME1 INT UNIQUE, "+
+        		"name2 int unique not null, name3 int primary key)");
+        stmt.executeUpdate("INSERT INTO TABLE1 VALUES(1,11,111)");
+        String dataFileName =
+            (SupportFilesSetup.getReadWrite("data_file.dat")).getPath();
+        doExportTable("APP", "TABLE1", dataFileName, null, null, "UTF-16");
+        stmt.executeUpdate("DELETE FROM TABLE1");
+        commit();
+        doImportTable("APP", "TABLE1", dataFileName, null, null, "UTF-16",0);
+        //following should run into problem because of constraint on name1
+        assertStatementError("23505", stmt,
+        		"INSERT INTO TABLE1 VALUES(1,22,222)");
+        //following should run into problem because of constraint on name2
+        assertStatementError("23505", stmt,
+        		"INSERT INTO TABLE1 VALUES(3,11,333)");
+        //following should run into problem because of constraint on name3
+        assertStatementError("23505", stmt,
+        		"INSERT INTO TABLE1 VALUES(4,44,111)");
+        stmt.executeUpdate("DROP TABLE TABLE1");    
+    	SupportFilesSetup.deleteFile(dataFileName);
+    }
+    
+    /**
+     * Bulk insert into a table should recreate the indexes correctly rather
+     * than ignoring the unique nullable property of the index.
+     * In the following test case, we have an empty table in which we are
+     * 	trying to do an import from an empty file with the REPLACE option.
+     * 	This combination used to cause bulk insert functionality to 
+     * 	recreate index incorrectly for unique nullable index. This allowed
+     * 	duplicate rows for unique nullable index. Fix for DERBY-4677 resolves
+     * 	the issue.
+     * @throws SQLException
+     */
+    public void testDerby4677BulkInsertWithReplace() throws SQLException {
+        Connection con = getConnection();
+        Statement stmt = con.createStatement();
+        stmt.executeUpdate("CREATE TABLE TABLE1(NAME1 INT UNIQUE, "+
+        		"name2 int unique not null, name3 int primary key)");
+        String emptyFileName =
+            (SupportFilesSetup.getReadWrite("empty_file.dat")).getPath();
+        //there is no data in TABLE1 so empty_file.dat will be empty 
+        //after export. Using following to just create an empty file
+        doExportTable("APP", "TABLE1", emptyFileName, null, null, "UTF-16");
+        commit();
+        doImportTable("APP", "TABLE1", emptyFileName, null, null, "UTF-16",1);
+        stmt.executeUpdate("INSERT INTO TABLE1 VALUES(1,11,111)");
+        //following should run into problem because of constraint on name1
+        assertStatementError("23505", stmt,
+        		"INSERT INTO TABLE1 VALUES(1,22,222)");
+        //following should run into problem because of constraint on name2
+        assertStatementError("23505", stmt,
+        		"INSERT INTO TABLE1 VALUES(3,11,333)");
+        //following should run into problem because of constraint on name3
+        assertStatementError("23505", stmt,
+        		"INSERT INTO TABLE1 VALUES(4,44,111)");
+        stmt.executeUpdate("DROP TABLE TABLE1");    
+    	SupportFilesSetup.deleteFile(emptyFileName);
     }
 
     
