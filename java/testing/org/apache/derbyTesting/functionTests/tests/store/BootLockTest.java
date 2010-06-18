@@ -57,10 +57,15 @@ import org.apache.derby.iapi.store.raw.data.DataFactory;
 public class BootLockTest extends BaseJDBCTestCase {
 
     private final static String dbName = "BootLockTestDB";
-
+    private final static String dbDir = DEFAULT_DB_DIR + File.separator + dbName;
+    private final static String dbLockFile = dbDir + File.separator +
+    DataFactory.DB_LOCKFILE_NAME;
+    private final static String dbExLockFile = dbDir + File.separator +
+    DataFactory.DB_EX_LOCKFILE_NAME;
+    
     private static String[] cmd = new String[]{
         "org.apache.derbyTesting.functionTests.tests.store.BootLockMinion",
-        DEFAULT_DB_DIR + File.separator + dbName,
+        dbDir,
         ""
     };
 
@@ -119,126 +124,97 @@ public class BootLockTest extends BaseJDBCTestCase {
 
     public void testBootLock() throws Exception {
 
-        ServerSocket parentService = null;
-        Socket clientSocket = null;
-        BufferedReader minionSysErr = null;
         Process p = null;
 
+        p = execJavaCmd(cmd);
+        waitForMinionBoot(p,60000);
+
+        // We now know minion has booted
+
         try {
-            int port = TestConfiguration.getCurrent().getPort();
-            cmd[2] = (new Integer(port)).toString();
-
-            p = execJavaCmd(cmd);
-
-            // Attempt to catch any errors happening in minion for better test
-            // diagnosis.
-            minionSysErr = new BufferedReader(
-                new InputStreamReader(p.getErrorStream()));
-
-            // Create a socket so we know when the minion has booted the db.
-            // Since we run this test only in embedded mode, (re)use derby
-            // server port.
-            parentService = new ServerSocket(port);
-            parentService.setSoTimeout(60000); // maximally we wait 60s
-
-            try {
-
-                clientSocket = parentService.accept();
-
-            } catch (SocketTimeoutException e) {
-                p.destroy();
-                p.waitFor();
-
-                StringBuffer failmsg = new StringBuffer();
-                failmsg.append(
-                    "Minion did not start or boot db in 60 seconds.\n" +
-                    "----Minion's stderr:\n");
-
-                String minionErrLine= null ;
-                do {
-                    try {
-                        minionErrLine = minionSysErr.readLine();
-                    } catch (Exception ioe) {
-                        // may not always work, so just bail out.
-                        failmsg.append("could not read minion's stderr");
-                    }
-
-                    if (minionErrLine != null) {
-                        failmsg.append(minionErrLine);
-                    }
-                } while (minionErrLine != null);
-
-                failmsg.append("\n----Minion's stderr ended");
-
-                fail(failmsg.toString());
-            }
-
-            // We now know minion has booted
-
-
-            try {
-                Connection c = getConnection();
-                fail("Dual boot not detected: check BootLockMinion.log");
-            } catch (SQLException e) {
-                if (JDBC.vmSupportsJSR169()) {
-                    assertSQLState(
+            Connection c = getConnection();
+            fail("Dual boot not detected: check BootLockMinion.log");
+        } catch (SQLException e) {
+            if (JDBC.vmSupportsJSR169()) {
+                assertSQLState(
                         "Dual boot not detected: check BootLockMinion.log",
                         DATA_MULTIPLE_JBMS_FORCE_LOCK,
                         e);
-                } else {
-                    assertSQLState(
+            } else {
+                assertSQLState(
                         "Dual boot not detected: check BootLockMinion.log",
                         DATA_MULTIPLE_JBMS_ON_DB,
                         e);
-                }
             }
-
-            p.destroy();
-            p.waitFor();
-
-            // Since all went OK, no need to keep the minion log file.
-            File minionLog = new File("BootLockMinion.log");
-            assertTrue(minionLog.delete());
-
-        } finally {
-            // Make sure we free up any socket resources
-            if (clientSocket != null) {
-                clientSocket.close();
-            }
-
-            if (parentService != null) {
-                parentService.close();
-            }
-
-            if (minionSysErr != null) {
-                minionSysErr.close();
-            }
-
-            // Get rid of minion in case test fails, otherwise redundant.
-            if (p != null) {
+        }
+        finally {
+            if (p!= null) {
                 p.destroy();
                 p.waitFor();
             }
-
-
-            if (JDBC.vmSupportsJSR169()) {
-                // Delete lock files so JUnit machinery can clean up the
-                // one-off database without further warnings on System.err
-                // (phoneMe).
-                File db_lockfile_name = new File(
-                    DEFAULT_DB_DIR + File.separator +
-                    dbName + File.separator +
-                    DataFactory.DB_LOCKFILE_NAME);
-
-                File db_ex_lockfile_name = new File(
-                    DEFAULT_DB_DIR + File.separator +
-                    dbName + File.separator +
-                    DataFactory.DB_EX_LOCKFILE_NAME);
-
-                db_lockfile_name.delete();
-                db_ex_lockfile_name.delete();
-            }
         }
+        // Since all went OK, no need to keep the minion log file.
+        File minionLog = new File("BootLockMinion.log");
+        assertTrue(minionLog.delete());
+
+        if (JDBC.vmSupportsJSR169()) {
+            // Delete lock files so JUnit machinery can clean up the
+            // one-off database without further warnings on System.err
+            // (phoneMe).
+            File db_lockfile_name = new File(dbLockFile);                    
+
+            File db_ex_lockfile_name = new File(dbExLockFile);                    
+
+            db_lockfile_name.delete();
+            db_ex_lockfile_name.delete();
+        }
+    }
+
+    private void waitForMinionBoot(Process p, int waitmillis) throws InterruptedException {
+        StringBuffer failmsg = new StringBuffer();
+        // boolean set to true once we find the  lock file
+        File lockFile = new File(dbLockFile);
+        // Attempt to catch any errors happening in minion for better test
+        // diagnosis.
+        BufferedReader minionSysErr = new BufferedReader(
+            new InputStreamReader(p.getErrorStream()));
+        String minionErrLine= null ;
+        do {
+            if (lockFile.exists()) {
+                // if the lock file is there the database has booted, return
+                return;
+            }
+            // otherwise sleep for a second and try again
+            waitmillis -= 1000;
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                fail(e.getMessage());
+            }
+        } while (waitmillis > 0);
+        
+        // If we got here, the database did not boot. Try to print the error.
+        failmsg.append(
+                "Minion did not start or boot db in 60 seconds.\n" +
+                "----Minion's stderr:\n");
+        do {
+            try {
+                minionErrLine = minionSysErr.readLine();
+            } catch (Exception ioe) {
+                // may not always work, so just bail out.
+                failmsg.append("could not read minion's stderr");
+            }
+
+            if (minionErrLine != null) {
+                failmsg.append(minionErrLine);
+            }
+        } while (minionErrLine != null);
+
+        failmsg.append("\n----Minion's stderr ended");
+        p.destroy();
+        p.waitFor();
+        fail(failmsg.toString());
     }
 
 }

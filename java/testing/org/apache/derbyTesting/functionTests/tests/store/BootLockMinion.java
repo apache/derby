@@ -54,12 +54,6 @@ public class BootLockMinion {
             stmt = con.createStatement();
 
             stmt.execute("create table t1(i int)");
-
-            // Signal to parent that we have booted dbName, so it can try,
-            // too..
-            Socket parentS;
-            parentS = new Socket("localhost", portNumber);
-
             //infinite loop until we get killed by BootLockTest.java
             for(;;)
             {
