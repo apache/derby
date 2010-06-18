@@ -788,6 +788,29 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         expectCompilationError( BAD_CONVERSION, "select cast( isindex as " + dataType + " ) from sys.sysconglomerates" );
     }
 
+    /**
+     * Regression test case for DERBY-4704. When casting non-nullable VARCHAR
+     * columns to BOOLEAN, the result column was marked as non-nullable, even
+     * though the VARCHAR could contain the value 'UNKNOWN', in which case
+     * the cast should return NULL.
+     *
+     * The test case is disabled for now. Enable it when the bug is fixed.
+     */
+    public void disabled_testNullabilityOfCastFromNonNullableVARCHAR()
+            throws SQLException {
+        setAutoCommit(false); // for automatic rollback when test has completed
+        Statement s = createStatement();
+        s.execute("create table nonnullablestrings(x varchar(10) not null)");
+        s.execute("insert into nonnullablestrings " +
+                  "values 'true', 'false', 'unknown'");
+
+        ResultSet rs = s.executeQuery(
+                "select cast(x as boolean) from nonnullablestrings");
+        JDBC.assertNullability(rs, new boolean[] { true });
+        JDBC.assertFullResultSet(
+                rs, new String[][] { {"true"}, {"false"}, {null} });
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
