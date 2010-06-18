@@ -748,6 +748,7 @@ public final class TypeId
                                 break;
 
                         case StoredFormatIds.BOOLEAN_TYPE_ID:
+                                maxPrecision = TypeId.BOOLEAN_MAXWIDTH;
                                 typePrecedence = BOOLEAN_PRECEDENCE;
                                 javaTypeName = "java.lang.Boolean";
                                 maxMaxWidth = TypeId.BOOLEAN_MAXWIDTH;
@@ -940,6 +941,7 @@ public final class TypeId
                               break;
 
                 }
+
         }
         /**
          * JDBC has its own idea of type identifiers which is different from

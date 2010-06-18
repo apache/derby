@@ -297,6 +297,10 @@ public class TypeDescriptorImpl implements TypeDescriptor, Formatable
 				else
 					return 2 * maximumWidth;
 
+			// ODBC does not define a BOOLEAN data type.
+            // However, 1 seems to me like a reasonable byte length for a BOOLEAN.
+            case Types.BOOLEAN: return 1;
+                
 			case Types.ARRAY:
 			case Types.DISTINCT:
 			case Types.NULL:

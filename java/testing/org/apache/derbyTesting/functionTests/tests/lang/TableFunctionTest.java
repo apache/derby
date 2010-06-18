@@ -85,6 +85,12 @@ public class TableFunctionTest extends BaseJDBCTestCase
         { "the", (String) null },
     };
     
+    private static  final   String[][]  BOOLEAN_ROWS =
+    {
+        { "tRuE", "true" },
+        { "fAlSe", "false" },
+    };
+    
     private static  final   String[][]  ALL_TYPES_ROWS =
     {
         {
@@ -109,6 +115,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
             null,   // TIMESTAMP
             null,   // VARCHAR
             null,   // VARCHAR FOR BIT DATA
+            null,   // BOOLEAN
         },
     };
 
@@ -133,7 +140,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
         "getTime " +            // TIME
         "getTimestamp " +       // TIMESTAMP
         "getString " +          // VARCHAR
-        "getBytes ";            // VARCHAR FOR BIT DATA
+        "getBytes " +           // VARCHAR FOR BIT DATA
+        "getBoolean ";            // BOOLEAN
 
     private static  final   String  EXPECTED_GET_XXX_CALLS_JSR169 =
         "getLong " +            // BIGINT
@@ -156,7 +164,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
         "getTime " +            // TIME
         "getTimestamp " +       // TIMESTAMP
         "getString " +          // VARCHAR
-        "getBytes ";            // VARCHAR FOR BIT DATA
+        "getBytes " +           // VARCHAR FOR BIT DATA
+        "getBoolean ";            // BOOLEAN
 
     private static  final   String[]  STRING_TYPES =
     {
@@ -185,7 +194,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     };
 
     private static  final   String  SFT_RETURN_TYPE = "TABLE ( \"INTCOL\" INTEGER, \"VARCHARCOL\" VARCHAR(10) )";
-    private static  final   String  RADT_RETURN_TYPE = "TABLE ( \"COLUMN0\" BIGINT, \"COLUMN1\" BLOB(2147483647), \"COLUMN2\" CHAR(10), \"COLUMN3\" CHAR (10) FOR BIT DATA, \"COLUMN4\" CLOB(2147483647), \"COLUMN5\" DATE, \"COLUMN6\" DECIMAL(5,0), \"COLUMN7\" DOUBLE, \"COLUMN8\" DOUBLE, \"COLUMN9\" REAL, \"COLUMN10\" DOUBLE, \"COLUMN11\" INTEGER, \"COLUMN12\" LONG VARCHAR, \"COLUMN13\" LONG VARCHAR FOR BIT DATA, \"COLUMN14\" NUMERIC(5,0), \"COLUMN15\" REAL, \"COLUMN16\" SMALLINT, \"COLUMN17\" TIME, \"COLUMN18\" TIMESTAMP, \"COLUMN19\" VARCHAR(10), \"COLUMN20\" VARCHAR (10) FOR BIT DATA )";
+    private static  final   String  RADT_RETURN_TYPE = "TABLE ( \"COLUMN0\" BIGINT, \"COLUMN1\" BLOB(2147483647), \"COLUMN2\" CHAR(10), \"COLUMN3\" CHAR (10) FOR BIT DATA, \"COLUMN4\" CLOB(2147483647), \"COLUMN5\" DATE, \"COLUMN6\" DECIMAL(5,0), \"COLUMN7\" DOUBLE, \"COLUMN8\" DOUBLE, \"COLUMN9\" REAL, \"COLUMN10\" DOUBLE, \"COLUMN11\" INTEGER, \"COLUMN12\" LONG VARCHAR, \"COLUMN13\" LONG VARCHAR FOR BIT DATA, \"COLUMN14\" NUMERIC(5,0), \"COLUMN15\" REAL, \"COLUMN16\" SMALLINT, \"COLUMN17\" TIME, \"COLUMN18\" TIMESTAMP, \"COLUMN19\" VARCHAR(10), \"COLUMN20\" VARCHAR (10) FOR BIT DATA, \"COLUMN21\" BOOLEAN )";
     
     private static  final   Integer FUNCTION_COLUMN_IN = new Integer( JDBC40Translation.FUNCTION_PARAMETER_IN );
     private static  final   Integer FUNCTION_RETURN_VALUE = new Integer( JDBC40Translation.FUNCTION_RETURN );
@@ -213,6 +222,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
     private static  final   Integer JDBC_TYPE_LONGVARBINARY = new Integer( Types.LONGVARBINARY );
     private static  final   Integer JDBC_TYPE_LONGVARCHAR = new Integer( Types.LONGVARCHAR );
     private static  final   Integer JDBC_TYPE_VARBINARY = new Integer( Types.VARBINARY );
+    private static  final   Integer JDBC_TYPE_BOOLEAN = new Integer( Types.BOOLEAN );
 
     private static  final   Integer PRECISION_NONE = new Integer( 0 );
     private static  final   Integer PRECISION_INTEGER = new Integer( 10 );
@@ -794,6 +804,27 @@ public class TableFunctionTest extends BaseJDBCTestCase
             ARG_COUNT_2,
             new Integer( 22 )
         },
+        {
+            NO_CATALOG,
+            "APP",
+            "RETURNSALLLEGALDATATYPES",
+            "COLUMN21",
+            FUNCTION_RESULT_COLUMN,
+            JDBC_TYPE_BOOLEAN,
+            "BOOLEAN",
+            new Integer( 1 ),     // PRECISION
+            new Integer( 1 ),         // LENGTH
+            SCALE_UNDEFINED,       // SCALE
+            RADIX_UNDEFINED,    // RADIX
+            ALLOWS_NULLS,
+            EMPTY_REMARKS,
+            UNDEFINED_CHAR_OCTET_LENGTH,    // CHAR_OCTET_LENGTH
+            new Integer( 22 ),           // ORDINAL_POSITION
+            IS_NULLABLE,
+            GENERIC_NAME,
+            ARG_COUNT_2,
+            new Integer( 23 )
+        },
     };
 
     private static  final   String  ESTIMATED_ROW_COUNT = "optimizer estimated row count:";
@@ -1125,7 +1156,31 @@ public class TableFunctionTest extends BaseJDBCTestCase
          "    from TABLE( returnsACoupleRowsAsCHAR() ) s\n",
          CHAR_ROWS,
          new int[] { Types.CHAR, Types.CHAR }
-         );        
+         );
+
+        // boolean valued columns
+        goodStatement
+            (
+             "create function returnsBooleans()\n" +
+             "returns TABLE\n" +
+             "  (\n" +
+             "     column0 varchar( 10 ),\n" +
+             "     column1 boolean\n" +
+             "  )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name '" + getClass().getName() + ".returnsBooleans'\n"
+             );
+        assertResults
+        (
+         "select s.*\n" +
+         "    from TABLE( returnsBooleans() ) s\n",
+         BOOLEAN_ROWS,
+         new int[] { Types.VARCHAR, Types.BOOLEAN }
+         );
+
+
     }
     
     /**
@@ -1169,7 +1224,8 @@ public class TableFunctionTest extends BaseJDBCTestCase
              "column17 TIME,\n" +
              "column18 TIMESTAMP,\n" +
              "column19 VARCHAR( 10 ),\n" +
-             "column20 VARCHAR( 10 ) FOR BIT DATA\n" +
+             "column20 VARCHAR( 10 ) FOR BIT DATA,\n" +
+             "column21 BOOLEAN\n" +
              "  )\n" +
              "language java\n" +
              "parameter style DERBY_JDBC_RESULT_SET\n" +
@@ -1205,6 +1261,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
                     Types.TIMESTAMP,
                     Types.VARCHAR,
                     Types.VARBINARY,
+                    Types.BOOLEAN,
                 }
              );
         
@@ -1262,6 +1319,7 @@ public class TableFunctionTest extends BaseJDBCTestCase
                     Types.TIMESTAMP,
                     Types.VARCHAR,
                     Types.VARBINARY,
+                    Types.BOOLEAN,
                 }
              );
 
@@ -1746,6 +1804,14 @@ public class TableFunctionTest extends BaseJDBCTestCase
         return -value;
     }
     
+    /**
+     * A VTI which returns some boolean values
+     */
+    public  static  ResultSet returnsBooleans()
+    {
+        return makeVTI( BOOLEAN_ROWS );
+    }
+
     /**
      * A VTI which returns a couple rows.
      */
