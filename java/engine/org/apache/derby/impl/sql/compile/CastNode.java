@@ -464,14 +464,10 @@ public class CastNode extends ValueNode
 				}
 				else if (cleanCharValue.equals("UNKNOWN"))
 				{
-					ConstantNode cn = (ConstantNode) getNodeFactory().getNode(
+					return (ValueNode) getNodeFactory().getNode(
 											C_NodeTypes.BOOLEAN_CONSTANT_NODE,
 											null,
 											getContextManager());
-
-                    cn.setNullability( true );
-
-                    return cn;
 				}
 				else
 				{

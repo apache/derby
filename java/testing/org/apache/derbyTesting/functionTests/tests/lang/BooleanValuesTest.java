@@ -811,6 +811,38 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                 rs, new String[][] { {"true"}, {"false"}, {null} });
     }
 
+    public void test_10_nullabilityOfCastFromLiteral() throws SQLException {
+        Statement s = createStatement();
+
+        ResultSet rs = s.executeQuery("values cast('true' as boolean)");
+        JDBC.assertNullability(rs, new boolean[] { false });
+        JDBC.assertSingleValueResultSet(rs, "true");
+
+        rs = s.executeQuery("values cast('false' as boolean)");
+        JDBC.assertNullability(rs, new boolean[] { false });
+        JDBC.assertSingleValueResultSet(rs, "false");
+
+        rs = s.executeQuery("values cast('unknown' as boolean)");
+        JDBC.assertNullability(rs, new boolean[] { true });
+        JDBC.assertSingleValueResultSet(rs, null);
+
+        rs = s.executeQuery(
+                "values (cast('true' as boolean),\n" +
+                "        cast('false' as boolean),\n" +
+                "        cast('unknown' as boolean))");
+        JDBC.assertNullability(rs, new boolean[] { false, false, true });
+        JDBC.assertFullResultSet(
+                rs, new String[][] {{ "true", "false", null }});
+
+        rs = s.executeQuery(
+                "values (cast ('true' as boolean)),\n" +
+                "       (cast ('false' as boolean)),\n" +
+                "       (cast ('unknown' as boolean))");
+        JDBC.assertNullability(rs, new boolean[] { true });
+        JDBC.assertFullResultSet(
+                rs, new String[][] { {"true"}, {"false"}, {null} });
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
