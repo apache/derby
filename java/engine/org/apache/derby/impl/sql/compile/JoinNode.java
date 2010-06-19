@@ -1414,6 +1414,7 @@ public class JoinNode extends TableOperatorNode
 	 * @param outerPList		PredicateList to append wherePredicates to.
 	 * @param sql				The SubqueryList from the outer query
 	 * @param gbl				The group by list, if any
+     * @param havingClause      The HAVING clause, if any
 	 *
 	 * @return FromList		The fromList from the underlying SelectNode.
 	 *
@@ -1422,7 +1423,8 @@ public class JoinNode extends TableOperatorNode
 	public FromList flatten(ResultColumnList rcl,
 							PredicateList outerPList,
 							SubqueryList sql,
-							GroupByList gbl)
+                            GroupByList gbl,
+                            ValueNode havingClause)
 
 			throws StandardException
 	{
@@ -1465,6 +1467,11 @@ public class JoinNode extends TableOperatorNode
 		{
 			gbl.remapColumnReferencesToExpressions();
 		}
+
+        if (havingClause != null) {
+            havingClause.remapColumnReferencesToExpressions();
+        }
+
 
 		if (joinPredicates.size() > 0)
 		{

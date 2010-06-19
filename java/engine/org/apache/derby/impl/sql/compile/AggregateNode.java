@@ -548,26 +548,6 @@ public class AggregateNode extends UnaryOperatorNode
 			operand;
 
 
-		/* The operand for this aggregate node was initialized at bind
-		 * time. Between then and now it's possible that certain changes
-		 * have been made to the query tree which affect this operand. In
-		 * particular, if the operand was pointing to a result column in
-		 * a JoinNode and then that JoinNode was flattened during pre-
-		 * processing, all of the references to that JoinNode--including
-		 * this aggregate's operand--need to be updated to reflect the
-		 * fact that the Join Node no longer exists. So check to see if
-		 * the operand is a column reference, and if so, make a call to
-		 * remap it to its underlying expression. If nothing has happened
-		 * then this will be a no-op; but if something has changed to void
-		 * out the result column to which the operand points, the result
-		 * column will be marked "redundant" and the following call should
-		 * remap as appropriate. DERBY-3880.
-		 */
-		if (operand instanceof ColumnReference)
-		{
-			((ColumnReference)operand).remapColumnReferencesToExpressions();
-		}
-
 		return (ResultColumn) getNodeFactory().getNode(
 								C_NodeTypes.RESULT_COLUMN,
 								"##aggregate expression",

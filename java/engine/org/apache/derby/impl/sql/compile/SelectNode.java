@@ -1087,7 +1087,8 @@ public class SelectNode extends ResultSetNode
 		fromList.flattenFromTables(resultColumns, 
 								   wherePredicates, 
 								   whereSubquerys,
-								   groupByList);
+                                   groupByList,
+                                   havingClause);
 
 		if (wherePredicates != null && wherePredicates.size() > 0 && fromList.size() > 0)
 		{
