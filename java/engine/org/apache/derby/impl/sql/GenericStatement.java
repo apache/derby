@@ -171,11 +171,18 @@ public class GenericStatement
 		// cache of prepared statement objects...
 		synchronized (preparedStmt) 
 		{
+			for (;;)
+			{
+				if (preparedStmt.compilingStatement)
+				{
+					preparedStmt = new GenericPreparedStatement(this);
+					break;
+				}
 
-			for (;;) {
-
-				if (foundInCache) {
-					if (preparedStmt.referencesSessionSchema()) {
+				if (foundInCache)
+				{
+					if (preparedStmt.referencesSessionSchema())
+					{
 						// cannot use this state since it is private to a connection.
 						// switch to a new statement.
 						foundInCache = false;
@@ -189,15 +196,7 @@ public class GenericStatement
 					return preparedStmt;
 				}
 
-				if (!preparedStmt.compilingStatement) {
-					break;
-				}
-
-				try {
-					preparedStmt.wait();
-				} catch (InterruptedException ie) {
-					throw StandardException.interrupt(ie);
-				}
+				break;
 			}
 
 			preparedStmt.compilingStatement = true;
@@ -542,7 +541,6 @@ public class GenericStatement
 		{
 			synchronized (preparedStmt) {
 				preparedStmt.compilingStatement = false;
-				preparedStmt.notifyAll();
 			}
 		}
 
