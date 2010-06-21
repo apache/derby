@@ -252,14 +252,15 @@ public class Request {
 		
 		if (netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRIDDTA ||
 			netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRPWDDTA) {
-			
-			writeEncryptedScalarStream(chained,
-									   chainedWithSameCorrelator,
-									   codePoint,
-									   length,
-									   in,
-									   writeNullByte,
-									   parameterIndex);
+            // DERBY-4706
+            // The network server doesn't support the security mechanisms above.
+            // Further, the code in writeEncryptedScalarStream is/was in a bad
+            // state.
+            // Throw an exception for now until we're positive the code can be
+            // ditched, later this comment/code itself can also be removed.
+            throw new SqlException(netAgent_.logWriter_,
+                    new ClientMessageId(SQLState.NOT_IMPLEMENTED),
+                    "encrypted scalar streams");
 
 		}else{
 			
@@ -275,173 +276,6 @@ public class Request {
 
 	}
     
-    
-    // We need to reuse the agent's sql exception accumulation mechanism
-    // for this write exception, pad if the length is too big, and truncation if the length is too small
-    // WARNING: The code encrypting EXTDTA still has the problems described by
-    //          DERBY-2017. The server doesn't support this security mechanism
-    //          (see for instance DERBY-1345), and it is not clear whether this
-    //          piece of code is ever used.
-    final private void writeEncryptedScalarStream(boolean chained,
-                                                  boolean chainedWithSameCorrelator,
-                                                  int codePoint,
-                                                  int length,
-                                                  java.io.InputStream in,
-                                                  boolean writeNullByte,
-                                                  int parameterIndex) throws DisconnectException, SqlException {
-		int leftToRead = length;
-		int extendedLengthByteCount = prepScalarStream(chained,
-													   chainedWithSameCorrelator,
-													   writeNullByte,
-													   leftToRead);
-		int bytesToRead;
-
-		if (writeNullByte) {
-			bytesToRead = Math.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - 1 - extendedLengthByteCount);
-		} else {
-			bytesToRead = Math.min(leftToRead, DssConstants.MAX_DSS_LEN - 6 - 4 - extendedLengthByteCount);
-		}
-			
-		byte[] lengthAndCodepoint;
-		lengthAndCodepoint = buildLengthAndCodePointForEncryptedLob(codePoint,
-																	leftToRead,
-																	writeNullByte,
-																	extendedLengthByteCount);
-
-
-
-		// we need to stream the input, rather than fully materialize it
-		// write the data
-
-		byte[] clearedBytes = new byte[leftToRead];
-		int bytesRead = 0;
-		int totalBytesRead = 0;
-		int pos = 0;
-		do {
-			try {
-				bytesRead = in.read(clearedBytes, pos, leftToRead);
-				totalBytesRead += bytesRead;
-			} catch (java.io.IOException e) {
-                padScalarStreamForError(leftToRead, bytesToRead,
-                        false, (byte)-1);
-				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-				netAgent_.accumulateReadException(new SqlException(netAgent_.logWriter_,
-																   new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
-																   new Integer(parameterIndex), e.getMessage(), e));
-				return;
-			}
-			if (bytesRead == -1) {
-				//padScalarStreamForError(leftToRead, bytesToRead);
-				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-				/*throw new SqlException(netAgent_.logWriter_,
-				  "End of Stream prematurely reached while reading InputStream, parameter #" +
-				  parameterIndex +
-				  ".  Remaining data has been padded with 0x0.");*/
-				//is it OK to do a chain break Exception here. It's not good to
-				//pad it with 0 and encrypt and send it to the server because it takes too much time
-				//can't just throw a SQLException either because some of the data PRPSQLSTT etc have already
-				//been sent to the server, and server is waiting for EXTDTA, server hangs for this.
-				netAgent_.accumulateChainBreakingReadExceptionAndThrow(
-																	   new DisconnectException(netAgent_,
-																							   new ClientMessageId(SQLState.NET_PREMATURE_EOS_DISCONNECT),
-																							   new Integer(parameterIndex)));
-				return;
-
-				/*netAgent_.accumulateReadException(
-				  new SqlException(netAgent_.logWriter_,
-				  "End of Stream prematurely reached while reading InputStream, parameter #" +
-				  parameterIndex +
-				  ".  Remaining data has been padded with 0x0."));
-				  return;*/
-			} else {
-				pos += bytesRead;
-				//offset_ += bytesRead;  //comment this out for data stream encryption.
-				leftToRead -= bytesRead;
-			}
-
-		} while (leftToRead > 0);
-
-		// check to make sure that the specified length wasn't too small
-		try {
-			if (in.read() != -1) {
-				// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
-				netAgent_.accumulateReadException(new SqlException(
-																   netAgent_.logWriter_,
-																   new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
-																   new Integer(parameterIndex)));
-			}
-		} catch (java.io.IOException e) {
-			netAgent_.accumulateReadException(new SqlException(
-															   netAgent_.logWriter_,
-															   new ClientMessageId(
-																				   SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
-															   new Integer(parameterIndex), 
-															   e.getMessage(), 
-															   e));
-		}
-
-		byte[] newClearedBytes = new byte[clearedBytes.length +
-										  lengthAndCodepoint.length];
-		System.arraycopy(lengthAndCodepoint, 0, newClearedBytes, 0,
-						 lengthAndCodepoint.length);
-		System.arraycopy(clearedBytes, 0, newClearedBytes, lengthAndCodepoint.length, clearedBytes.length);
-		//it's wrong here, need to add in the real length after the codepoing 146c
-		byte[] encryptedBytes;
-		encryptedBytes = netAgent_.netConnection_.getEncryptionManager().
-			encryptData(newClearedBytes,
-						NetConfiguration.SECMEC_EUSRIDPWD,
-						netAgent_.netConnection_.getTargetPublicKey(),
-						netAgent_.netConnection_.getTargetPublicKey());
-
-		int encryptedBytesLength = encryptedBytes.length;
-		int sendingLength = bytes_.length - offset_;
-		if (encryptedBytesLength > (bytes_.length - offset_)) {
-
-			System.arraycopy(encryptedBytes, 0, bytes_, offset_, (bytes_.length - offset_));
-			offset_ = 32767;
-			try {
-				sendBytes(netAgent_.getOutputStream());
-			} catch (java.io.IOException ioe) {
-				netAgent_.throwCommunicationsFailure(ioe);
-			}
-		} else {
-			System.arraycopy(encryptedBytes, 0, bytes_, offset_, encryptedBytesLength);
-			offset_ = offset_ + encryptedBytes.length;
-		}
-
-		encryptedBytesLength = encryptedBytesLength - sendingLength;
-		while (encryptedBytesLength > 0) {
-			//dssLengthLocation_ = offset_;
-			offset_ = 0;
-
-			if ((encryptedBytesLength - 32765) > 0) {
-				bytes_[offset_++] = (byte) (0xff);
-				bytes_[offset_++] = (byte) (0xff);
-				System.arraycopy(encryptedBytes, sendingLength, bytes_, offset_, 32765);
-				encryptedBytesLength -= 32765;
-				sendingLength += 32765;
-				offset_ = 32767;
-				try {
-					sendBytes(netAgent_.getOutputStream());
-				} catch (java.io.IOException ioe) {
-					netAgent_.throwCommunicationsFailure(ioe);
-				}
-			} else {
-				int leftlength = encryptedBytesLength + 2;
-				bytes_[offset_++] = (byte) ((leftlength >>> 8) & 0xff);
-				bytes_[offset_++] = (byte) (leftlength & 0xff);
-
-				System.arraycopy(encryptedBytes, sendingLength, bytes_, offset_, encryptedBytesLength);
-
-				offset_ += encryptedBytesLength;
-				dssLengthLocation_ = offset_;
-				encryptedBytesLength = 0;
-			}
-
-		}
-    }
-	
-	
     /**
      * Writes a stream with a known length onto the wire.
      * <p>
@@ -870,16 +704,6 @@ public class Request {
         }
     }
 
-    private final byte[] writeExtendedLengthBytesForEncryption(int extendedLengthByteCount, long length) {
-        int shiftSize = (extendedLengthByteCount - 1) * 8;
-        byte[] extendedLengthBytes = new byte[extendedLengthByteCount];
-        for (int i = 0; i < extendedLengthByteCount; i++) {
-            extendedLengthBytes[i] = (byte) ((length >>> shiftSize) & 0xff);
-            shiftSize -= 8;
-        }
-        return extendedLengthBytes;
-    }
-
     // experimental lob section - end
 
     // used to finialize a dss which is already in the buffer
@@ -1281,16 +1105,6 @@ public class Request {
         bytes_[offset_++] = (byte) (length & 0xff);
         bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
         bytes_[offset_++] = (byte) (codePoint & 0xff);
-    }
-
-    final byte[] writeEXTDTALengthCodePointForEncryption(int length, int codePoint) {
-        //how to encure length and offset later?
-        byte[] clearedBytes = new byte[4];
-        clearedBytes[0] = (byte) ((length >>> 8) & 0xff);
-        clearedBytes[1] = (byte) (length & 0xff);
-        clearedBytes[2] = (byte) ((codePoint >>> 8) & 0xff);
-        clearedBytes[3] = (byte) (codePoint & 0xff);
-        return clearedBytes;
     }
 
     // insert a 4 byte length/codepoint pair into the buffer followed
@@ -1761,49 +1575,6 @@ public class Request {
         ensureLength(offset_ + s.length());
         offset_ = ccsidManager_.convertFromUCS2(s, bytes_, offset_, netAgent_);
     }
-
-
-    private byte[] buildLengthAndCodePointForEncryptedLob(int codePoint,
-                                                          int leftToRead,
-                                                          boolean writeNullByte,
-                                                          int extendedLengthByteCount) throws DisconnectException {
-        byte[] lengthAndCodepoint = new byte[4];
-        byte[] extendedLengthBytes = new byte[extendedLengthByteCount];
-
-        if (extendedLengthByteCount > 0) {
-            // method should never ensure length
-            lengthAndCodepoint = writeEXTDTALengthCodePointForEncryption(0x8004 + extendedLengthByteCount, codePoint);
-
-            if (writeNullByte) {
-
-                extendedLengthBytes = writeExtendedLengthBytesForEncryption(extendedLengthByteCount, leftToRead + 1);
-            } else {
-                extendedLengthBytes = writeExtendedLengthBytesForEncryption(extendedLengthByteCount, leftToRead);
-            }
-        } else {
-            if (writeNullByte) {
-                lengthAndCodepoint = writeEXTDTALengthCodePointForEncryption(leftToRead + 4 + 1, codePoint);
-            } else {
-                lengthAndCodepoint = writeEXTDTALengthCodePointForEncryption(leftToRead + 4, codePoint);
-            }
-        }
-
-        if (extendedLengthByteCount > 0) {
-            byte[] newLengthAndCodepoint = new byte[4 + extendedLengthBytes.length];
-            System.arraycopy(lengthAndCodepoint, 0, newLengthAndCodepoint, 0, lengthAndCodepoint.length);
-            System.arraycopy(extendedLengthBytes, 0, newLengthAndCodepoint, lengthAndCodepoint.length, extendedLengthBytes.length);
-            lengthAndCodepoint = newLengthAndCodepoint;
-        }
-
-        if (writeNullByte) {
-            byte[] nullByte = new byte[1 + lengthAndCodepoint.length];
-            System.arraycopy(lengthAndCodepoint, 0, nullByte, 0, lengthAndCodepoint.length);
-            nullByte[lengthAndCodepoint.length] = 0;
-            lengthAndCodepoint = nullByte;
-        }
-        return lengthAndCodepoint;
-    }
-
 
     private void buildLengthAndCodePointForLob(int codePoint,
                                                int leftToRead,
