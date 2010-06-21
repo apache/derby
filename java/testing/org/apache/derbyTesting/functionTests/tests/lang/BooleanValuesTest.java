@@ -27,6 +27,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -388,6 +389,20 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "( 21, '0', '0', '0', '0' ),\n" +
                  "( 22, '1', '1', '1', '1' ),\n" +
                  "( 23, '2', '2', '2', '2' )\n"
+                 );
+        }
+        
+        if ( !routineExists( conn, "BOOLEANVALUE" ) )
+        {
+            //
+            // create function
+            //
+            goodStatement
+                (
+                 conn,
+                 "create function booleanValue( b boolean )\n" +
+                 "returns varchar( 100 ) language java parameter style java no sql\n" +
+                 "external name 'org.apache.derbyTesting.functionTests.tests.lang.BooleanValuesTest.booleanValue'\n"
                  );
         }
     }
@@ -868,6 +883,49 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                 rs, new String[][] { {"true"}, {"false"}, {null} });
     }
 
+    /**
+     * <p>
+     * Verify that boolean function parameters behave well.
+     * </p>
+     */
+    public void test_11_booleanFunctionParameters() throws Exception
+    {
+        Connection conn = getConnection();
+
+        assertResults
+            (
+             conn,
+             "values ( booleanValue( true ) ), ( booleanValue( false ) ), ( booleanValue( null ) )",
+             new String[][]
+             {
+                 { "True value", },
+                 { "False value", },
+                 { "Null value", },
+             },
+             false
+             );
+
+        PreparedStatement ps = chattyPrepare( conn, "values ( booleanValue( ? ) )" );
+
+        ps.setBoolean( 1, true );
+        assertScalarResult( ps, "True value" );
+        
+        ps.setBoolean( 1, false );
+        assertScalarResult( ps, "False value" );
+        
+        ps.setNull( 1, Types.BOOLEAN );
+        assertScalarResult( ps, "Null value" );
+
+        ps.close();
+    }
+    private void assertScalarResult( PreparedStatement ps, String result ) throws Exception
+    {
+        ResultSet rs = ps.executeQuery();
+        assertResults( rs, new String[][] {{ result } }, false );
+        rs.close();        
+    }
+                                                                                
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
@@ -879,6 +937,13 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         return new StringColumnVTI.SimpleBlob( new byte[] { 1 } );
     }
     
+    public static String booleanValue( Boolean b )
+    {
+        if ( b == null ) { return "Null value"; }
+        else if ( b.booleanValue() ) { return "True value"; }
+        else { return "False value"; }
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

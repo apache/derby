@@ -101,17 +101,29 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    public  void    test_boolean_boolean_int()
+    public  void    test_boolean_boolean_boolean()
         throws Exception
     {
         declareAndRunFunction
-            ( "boolean_boolean_int", "boolean", new String[] { "int" }, "3", "true" );
+            ( "boolean_boolean_boolean", "boolean", new String[] { "boolean" }, "true", "true" );
     }
-    public  void    test_boolean_Boolean_int()
+    public  void    test_boolean_Boolean_boolean()
         throws Exception
     {
         declareAndRunFunction
-            ( "boolean_Boolean_int", "boolean", new String[] { "int" }, "3", "true" );
+            ( "boolean_Boolean_boolean", "boolean", new String[] { "boolean" }, "true", "true" );
+    }
+    public  void    test_boolean_boolean_Boolean()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "boolean_boolean_Boolean", "boolean", new String[] { "boolean" }, "true", "true" );
+    }
+    public  void    test_boolean_Boolean_Boolean()
+        throws Exception
+    {
+        declareAndRunFunction
+            ( "boolean_Boolean_Boolean", "boolean", new String[] { "boolean" }, "true", "true" );
     }
     
     public  void    test_smallint_short_short()
@@ -490,6 +502,19 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    public  void    test_boolean_amb_boolean_boolean()
+        throws Exception
+    {
+        declareAndFailFunction
+             ( "boolean_amb_boolean_boolean", "boolean", new String[] { "boolean" }, "true", "true", AMBIGUOUS );
+    }
+    public  void    test_boolean_amb_Boolean_boolean()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "boolean_amb_Boolean_boolean", "boolean", new String[] { "boolean" }, "true", "true", AMBIGUOUS );
+    }
+
     public  void    test_smallint_amb_short_short()
         throws Exception
     {
@@ -592,6 +617,19 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    public  void    test_boolean_unres_boolean()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "boolean_unres_boolean", "boolean", new String[] { "boolean" }, "true", "true", TRIED_ALL_COMBINATIONS );
+    }
+    public  void    test_boolean_unres_Boolean()
+        throws Exception
+    {
+        declareAndFailFunction
+            ( "boolean_unres_Boolean", "boolean", new String[] { "boolean" }, "true", "true", TRIED_ALL_COMBINATIONS );
+    }
+    
     public  void    test_smallint_unres_short()
         throws Exception
     {

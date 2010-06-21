@@ -56,24 +56,154 @@ public  class   AnsiSignatures
     //
     
     // legal resolutions
-    public  static  boolean   boolean_boolean_int( int a ) { return true; }
-    public  static  Boolean boolean_Boolean_int( int a ) { return Boolean.TRUE; }
+    public  static  boolean   boolean_boolean_boolean( boolean a ) { return a; }
+    public  static  boolean   boolean_boolean_boolean( int a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( byte a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( short a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( long a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( float a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( double a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( Byte a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( Short a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( Long a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( Float a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( Double a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( BigDecimal a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( Date a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( Time a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( Timestamp a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( String a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( Clob a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( Blob a ) { return false; }
+    public  static  boolean   boolean_boolean_boolean( Object a ) { return false; }
+
+    public  static  Boolean   boolean_Boolean_boolean( boolean a ) { return new Boolean( a ); }
+    public  static  Boolean   boolean_Boolean_boolean( int a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( byte a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( short a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( long a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( float a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( double a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( Byte a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( Short a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( Long a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( Float a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( Double a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( BigDecimal a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( Date a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( Time a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( Timestamp a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( String a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( Clob a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( Blob a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_boolean( Object a ) { return Boolean.FALSE; }
+
+    public  static  boolean   boolean_boolean_Boolean( Boolean a ) { return a.booleanValue(); }
+    public  static  boolean   boolean_boolean_Boolean( int a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( byte a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( short a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( long a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( float a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( double a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( Byte a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( Short a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( Long a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( Float a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( Double a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( BigDecimal a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( Date a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( Time a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( Timestamp a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( String a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( Clob a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( Blob a ) { return false; }
+    public  static  boolean   boolean_boolean_Boolean( Object a ) { return false; }
+
+    public  static  Boolean   boolean_Boolean_Boolean( Boolean a ) { return a; }
+    public  static  Boolean   boolean_Boolean_Boolean( int a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( byte a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( short a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( long a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( float a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( double a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( Byte a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( Short a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( Long a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( Float a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( Double a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( BigDecimal a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( Date a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( Time a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( Timestamp a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( String a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( Clob a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( Blob a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_Boolean_Boolean( Object a ) { return Boolean.FALSE; }
 
     // bad return type
     public  static  byte   boolean_badreturn_byte_int( int a ) { return (byte) -1; }
 
+    public  static  boolean   boolean_amb_boolean_boolean( boolean a ) { return false; }
+    public  static  boolean   boolean_amb_boolean_boolean( Boolean a ) { return false; }
+    public  static  Boolean boolean_amb_Boolean_boolean( boolean a ) { return Boolean.FALSE; }
+    public  static  Boolean boolean_amb_Boolean_boolean( Boolean a ) { return Boolean.FALSE; }
     
+    // unresolvable
+    public  static  boolean   boolean_unres_boolean( int a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( byte a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( short a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( long a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( float a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( double a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Integer a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Byte a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Short a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Long a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Float a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Double a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( BigDecimal a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Date a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Time a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Timestamp a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( String a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Clob a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Blob a ) { return false; }
+    public  static  boolean   boolean_unres_boolean( Object a ) { return false; }
+
+    public  static  Boolean   boolean_unres_Boolean( int a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( byte a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( short a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( long a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( float a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( double a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Integer a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Byte a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Short a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Long a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Float a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Double a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( BigDecimal a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Date a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Time a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Timestamp a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( String a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Clob a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Blob a ) { return Boolean.FALSE; }
+    public  static  Boolean   boolean_unres_Boolean( Object a ) { return Boolean.FALSE; }
+
     //
     // SMALLINT
     //
     
     // legal resolutions
     public  static  short   smallint_short_short( short a ) { return a; }
+    public  static  short   smallint_short_short( boolean a ) { return (short) -1; }
     public  static  short   smallint_short_short( byte a ) { return (short) -1; }
     public  static  short   smallint_short_short( int a ) { return (short) -1; }
     public  static  short   smallint_short_short( long a ) { return (short) -1; }
     public  static  short   smallint_short_short( float a ) { return (short) -1; }
     public  static  short   smallint_short_short( double a ) { return (short) -1; }
+    public  static  short   smallint_short_short( Boolean a ) { return (short) -1; }
     public  static  short   smallint_short_short( Byte a ) { return (short) -1; }
     public  static  short   smallint_short_short( Short a ) { return (short) -1; }
     public  static  short   smallint_short_short( Long a ) { return (short) -1; }
@@ -89,11 +219,13 @@ public  class   AnsiSignatures
     public  static  short   smallint_short_short( Object a ) { return (short) -1; }
     
     public  static  short   smallint_short_Integer( Integer a ) { return a.shortValue(); }
+    public  static  short   smallint_short_Integer( boolean a ) { return (short) -1; }
     public  static  short   smallint_short_Integer( byte a ) { return (short) -1; }
     public  static  short   smallint_short_Integer( int a ) { return (short) -1; }
     public  static  short   smallint_short_Integer( long a ) { return (short) -1; }
     public  static  short   smallint_short_Integer( float a ) { return (short) -1; }
     public  static  short   smallint_short_Integer( double a ) { return (short) -1; }
+    public  static  short   smallint_short_Integer( Boolean a ) { return (short) -1; }
     public  static  short   smallint_short_Integer( Byte a ) { return (short) -1; }
     public  static  short   smallint_short_Integer( Short a ) { return (short) -1; }
     public  static  short   smallint_short_Integer( Long a ) { return (short) -1; }
@@ -109,11 +241,13 @@ public  class   AnsiSignatures
     public  static  short   smallint_short_Integer( Object a ) { return (short) -1; }
 
     public  static  Integer smallint_Integer_short( short a ) { return new Integer( a ); }
+    public  static  Integer smallint_Integer_short( boolean a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_short( byte a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_short( int a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_short( long a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_short( float a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_short( double a ) { return new Integer( -1 ); }
+    public  static  Integer smallint_Integer_short( Boolean a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_short( Byte a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_short( Short a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_short( Long a ) { return new Integer( -1 ); }
@@ -129,11 +263,13 @@ public  class   AnsiSignatures
     public  static  Integer smallint_Integer_short( Object a ) { return new Integer( -1 ); }
 
     public  static  Integer smallint_Integer_Integer( Integer a ) { return a; }
+    public  static  Integer smallint_Integer_Integer( boolean a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_Integer( byte a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_Integer( int a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_Integer( long a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_Integer( float a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_Integer( double a ) { return new Integer( -1 ); }
+    public  static  Integer smallint_Integer_Integer( Boolean a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_Integer( Byte a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_Integer( Short a ) { return new Integer( -1 ); }
     public  static  Integer smallint_Integer_Integer( Long a ) { return new Integer( -1 ); }
@@ -165,11 +301,13 @@ public  class   AnsiSignatures
     public  static  byte   smallint_amb_byte_short( Integer a ) { return (byte) -1; }
     
     // unresolvable
+    public  static  short   smallint_unres_short( boolean a ) { return (short) -1; }
     public  static  short   smallint_unres_short( byte a ) { return (short) -1; }
     public  static  short   smallint_unres_short( int a ) { return (short) -1; }
     public  static  short   smallint_unres_short( long a ) { return (short) -1; }
     public  static  short   smallint_unres_short( float a ) { return (short) -1; }
     public  static  short   smallint_unres_short( double a ) { return (short) -1; }
+    public  static  short   smallint_unres_short( Boolean a ) { return (short) -1; }
     public  static  short   smallint_unres_short( Byte a ) { return (short) -1; }
     public  static  short   smallint_unres_short( Short a ) { return (short) -1; }
     public  static  short   smallint_unres_short( Long a ) { return (short) -1; }
@@ -184,12 +322,14 @@ public  class   AnsiSignatures
     public  static  short   smallint_unres_short( Blob a ) { return (short) -1; }
     public  static  short   smallint_unres_short( Object a ) { return (short) -1; }
 
+    public  static  Short   smallint_unres_Short( boolean a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( byte a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( short a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( int a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( long a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( float a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( double a ) { return new Short( (short) -1 ); }
+    public  static  Short   smallint_unres_Short( Boolean a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( Byte a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( Short a ) { return new Short( (short) -1 ); }
     public  static  Short   smallint_unres_Short( Long a ) { return new Short( (short) -1 ); }
@@ -212,11 +352,13 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  int   integer_int_int( int a ) { return a; }
+    public  static  int   integer_int_int( boolean a ) { return -1; }
     public  static  int   integer_int_int( byte a ) { return -1; }
     public  static  int   integer_int_int( short a ) { return -1; }
     public  static  int   integer_int_int( long a ) { return -1; }
     public  static  int   integer_int_int( float a ) { return -1; }
     public  static  int   integer_int_int( double a ) { return -1; }
+    public  static  int   integer_int_int( Boolean a ) { return -1; }
     public  static  int   integer_int_int( Byte a ) { return -1; }
     public  static  int   integer_int_int( Short a ) { return -1; }
     public  static  int   integer_int_int( Long a ) { return -1; }
@@ -232,11 +374,13 @@ public  class   AnsiSignatures
     public  static  int   integer_int_int( Object a ) { return -1; }
 
     public  static  int   integer_int_Integer( Integer a ) { return a.intValue(); }
+    public  static  int   integer_int_Integer( boolean a ) { return -1; }
     public  static  int   integer_int_Integer( byte a ) { return -1; }
     public  static  int   integer_int_Integer( short a ) { return -1; }
     public  static  int   integer_int_Integer( long a ) { return -1; }
     public  static  int   integer_int_Integer( float a ) { return -1; }
     public  static  int   integer_int_Integer( double a ) { return -1; }
+    public  static  int   integer_int_Integer( Boolean a ) { return -1; }
     public  static  int   integer_int_Integer( Byte a ) { return -1; }
     public  static  int   integer_int_Integer( Short a ) { return -1; }
     public  static  int   integer_int_Integer( Long a ) { return -1; }
@@ -252,11 +396,13 @@ public  class   AnsiSignatures
     public  static  int   integer_int_Integer( Object a ) { return -1; }
 
     public  static  Integer integer_Integer_int( int a ) { return new Integer( a ); }
+    public  static  Integer integer_Integer_int( boolean a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_int( byte a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_int( short a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_int( long a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_int( float a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_int( double a ) { return new Integer( -1 ); }
+    public  static  Integer integer_Integer_int( Boolean a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_int( Byte a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_int( Short a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_int( Long a ) { return new Integer( -1 ); }
@@ -272,11 +418,13 @@ public  class   AnsiSignatures
     public  static  Integer integer_Integer_int( Object a ) { return new Integer( -1 ); }
 
     public  static  Integer integer_Integer_Integer( Integer a ) { return a; }
+    public  static  Integer integer_Integer_Integer( boolean a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_Integer( byte a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_Integer( short a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_Integer( long a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_Integer( float a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_Integer( double a ) { return new Integer( -1 ); }
+    public  static  Integer integer_Integer_Integer( Boolean a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_Integer( Byte a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_Integer( Short a ) { return new Integer( -1 ); }
     public  static  Integer integer_Integer_Integer( Long a ) { return new Integer( -1 ); }
@@ -303,11 +451,13 @@ public  class   AnsiSignatures
     public  static  byte   integer_amb_byte_int( Integer a ) { return (byte) -1; }
     
     // unresolvable
+    public  static  int   integer_unres_int( boolean a ) { return -1; }
     public  static  int   integer_unres_int( byte a ) { return -1; }
     public  static  int   integer_unres_int( short a ) { return -1; }
     public  static  int   integer_unres_int( long a ) { return -1; }
     public  static  int   integer_unres_int( float a ) { return -1; }
     public  static  int   integer_unres_int( double a ) { return -1; }
+    public  static  int   integer_unres_int( Boolean a ) { return -1; }
     public  static  int   integer_unres_int( Byte a ) { return -1; }
     public  static  int   integer_unres_int( Short a ) { return -1; }
     public  static  int   integer_unres_int( Long a ) { return -1; }
@@ -322,11 +472,13 @@ public  class   AnsiSignatures
     public  static  int   integer_unres_int( Blob a ) { return -1; }
     public  static  int   integer_unres_int( Object a ) { return -1; }
 
+    public  static  Integer   integer_unres_Integer( boolean a ) { return new Integer( -1 ); }
     public  static  Integer   integer_unres_Integer( byte a ) { return new Integer( -1 ); }
     public  static  Integer   integer_unres_Integer( short a ) { return new Integer( -1 ); }
     public  static  Integer   integer_unres_Integer( long a ) { return new Integer( -1 ); }
     public  static  Integer   integer_unres_Integer( float a ) { return new Integer( -1 ); }
     public  static  Integer   integer_unres_Integer( double a ) { return new Integer( -1 ); }
+    public  static  Integer   integer_unres_Integer( Boolean a ) { return new Integer( -1 ); }
     public  static  Integer   integer_unres_Integer( Byte a ) { return new Integer( -1 ); }
     public  static  Integer   integer_unres_Integer( Short a ) { return new Integer( -1 ); }
     public  static  Integer   integer_unres_Integer( Long a ) { return new Integer( -1 ); }
@@ -347,11 +499,13 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  long   bigint_long_long( long a ) { return a; }
+    public  static  long   bigint_long_long( boolean a ) { return -1L; }
     public  static  long   bigint_long_long( byte a ) { return -1L; }
     public  static  long   bigint_long_long( short a ) { return -1L; }
     public  static  long   bigint_long_long( int a ) { return -1L; }
     public  static  long   bigint_long_long( float a ) { return -1L; }
     public  static  long   bigint_long_long( double a ) { return -1L; }
+    public  static  long   bigint_long_long( Boolean a ) { return -1L; }
     public  static  long   bigint_long_long( Byte a ) { return -1L; }
     public  static  long   bigint_long_long( Short a ) { return -1L; }
     public  static  long   bigint_long_long( Integer a ) { return -1L; }
@@ -367,11 +521,13 @@ public  class   AnsiSignatures
     public  static  long   bigint_long_long( Object a ) { return -1L; }
 
     public  static  long   bigint_long_Long( Long a ) { return a.longValue(); }
+    public  static  long   bigint_long_Long( boolean a ) { return -1L; }
     public  static  long   bigint_long_Long( byte a ) { return -1L; }
     public  static  long   bigint_long_Long( short a ) { return -1L; }
     public  static  long   bigint_long_Long( int a ) { return -1L; }
     public  static  long   bigint_long_Long( float a ) { return -1L; }
     public  static  long   bigint_long_Long( double a ) { return -1L; }
+    public  static  long   bigint_long_Long( Boolean a ) { return -1L; }
     public  static  long   bigint_long_Long( Byte a ) { return -1L; }
     public  static  long   bigint_long_Long( Short a ) { return -1L; }
     public  static  long   bigint_long_Long( Integer a ) { return -1L; }
@@ -387,11 +543,13 @@ public  class   AnsiSignatures
     public  static  long   bigint_long_Long( Object a ) { return -1L; }
 
     public  static  Long bigint_Long_long( long a ) { return new Long( a ); }
+    public  static  Long bigint_Long_long( boolean a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_long( byte a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_long( short a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_long( int a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_long( float a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_long( double a ) { return new Long( -1L ); }
+    public  static  Long bigint_Long_long( Boolean a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_long( Byte a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_long( Short a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_long( Integer a ) { return new Long( -1L ); }
@@ -407,11 +565,13 @@ public  class   AnsiSignatures
     public  static  Long bigint_Long_long( Object a ) { return new Long( -1L ); }
 
     public  static  Long bigint_Long_Long( Long a ) { return a; }
+    public  static  Long bigint_Long_Long( boolean a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_Long( byte a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_Long( short a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_Long( int a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_Long( float a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_Long( double a ) { return new Long( -1L ); }
+    public  static  Long bigint_Long_Long( Boolean a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_Long( Byte a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_Long( Short a ) { return new Long( -1L ); }
     public  static  Long bigint_Long_Long( Integer a ) { return new Long( -1L ); }
@@ -438,11 +598,13 @@ public  class   AnsiSignatures
     public  static  byte   bigint_amb_byte_long( Long a ) { return (byte) -1; }
     
     // unresolvable
+    public  static  long   bigint_unres_long( boolean a ) { return -1L; }
     public  static  long   bigint_unres_long( byte a ) { return -1L; }
     public  static  long   bigint_unres_long( short a ) { return -1L; }
     public  static  long   bigint_unres_long( int a ) { return -1L; }
     public  static  long   bigint_unres_long( float a ) { return -1L; }
     public  static  long   bigint_unres_long( double a ) { return -1L; }
+    public  static  long   bigint_unres_long( Boolean a ) { return -1L; }
     public  static  long   bigint_unres_long( Byte a ) { return -1L; }
     public  static  long   bigint_unres_long( Short a ) { return -1L; }
     public  static  long   bigint_unres_long( Integer a ) { return -1L; }
@@ -457,11 +619,13 @@ public  class   AnsiSignatures
     public  static  long   bigint_unres_long( Blob a ) { return -1L; }
     public  static  long   bigint_unres_long( Object a ) { return -1L; }
 
+    public  static  Long   bigint_unres_Long( boolean a ) { return new Long( -1L ); }
     public  static  Long   bigint_unres_Long( byte a ) { return new Long( -1L ); }
     public  static  Long   bigint_unres_Long( short a ) { return new Long( -1L ); }
     public  static  Long   bigint_unres_Long( int a ) { return new Long( -1L ); }
     public  static  Long   bigint_unres_Long( float a ) { return new Long( -1L ); }
     public  static  Long   bigint_unres_Long( double a ) { return new Long( -1L ); }
+    public  static  Long   bigint_unres_Long( Boolean a ) { return new Long( -1L ); }
     public  static  Long   bigint_unres_Long( Byte a ) { return new Long( -1L ); }
     public  static  Long   bigint_unres_Long( Short a ) { return new Long( -1L ); }
     public  static  Long   bigint_unres_Long( Integer a ) { return new Long( -1L ); }
@@ -482,11 +646,13 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  float   real_float_float( float a ) { return a; }
+    public  static  float   real_float_float( boolean a ) { return -1.0F; }
     public  static  float   real_float_float( byte a ) { return -1.0F; }
     public  static  float   real_float_float( short a ) { return -1.0F; }
     public  static  float   real_float_float( int a ) { return -1.0F; }
     public  static  float   real_float_float( long a ) { return -1.0F; }
     public  static  float   real_float_float( double a ) { return -1.0F; }
+    public  static  float   real_float_float( Boolean a ) { return -1.0F; }
     public  static  float   real_float_float( Byte a ) { return -1.0F; }
     public  static  float   real_float_float( Short a ) { return -1.0F; }
     public  static  float   real_float_float( Integer a ) { return -1.0F; }
@@ -502,11 +668,13 @@ public  class   AnsiSignatures
     public  static  float   real_float_float( Object a ) { return -1.0F; }
 
     public  static  float   real_float_Float( Float a ) { return a.floatValue(); }
+    public  static  float   real_float_Float( boolean a ) { return -1.0F; }
     public  static  float   real_float_Float( byte a ) { return -1.0F; }
     public  static  float   real_float_Float( short a ) { return -1.0F; }
     public  static  float   real_float_Float( int a ) { return -1.0F; }
     public  static  float   real_float_Float( long a ) { return -1.0F; }
     public  static  float   real_float_Float( double a ) { return -1.0F; }
+    public  static  float   real_float_Float( Boolean a ) { return -1.0F; }
     public  static  float   real_float_Float( Byte a ) { return -1.0F; }
     public  static  float   real_float_Float( Short a ) { return -1.0F; }
     public  static  float   real_float_Float( Integer a ) { return -1.0F; }
@@ -522,11 +690,13 @@ public  class   AnsiSignatures
     public  static  float   real_float_Float( Object a ) { return -1.0F; }
 
     public  static  Float real_Float_float( float a ) { return new Float( a ); }
+    public  static  Float real_Float_float( boolean a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_float( byte a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_float( short a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_float( int a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_float( long a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_float( double a ) { return new Float( -1.0F ); }
+    public  static  Float real_Float_float( Boolean a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_float( Byte a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_float( Short a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_float( Integer a ) { return new Float( -1.0F ); }
@@ -542,11 +712,13 @@ public  class   AnsiSignatures
     public  static  Float real_Float_float( Object a ) { return new Float( -1.0F ); }
 
     public  static  Float real_Float_Float( Float a ) { return a; }
+    public  static  Float real_Float_Float( boolean  a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_Float( byte  a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_Float( short a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_Float( int a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_Float( long a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_Float( double a ) { return new Float( -1.0F ); }
+    public  static  Float real_Float_Float( Boolean a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_Float( Byte a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_Float( Short a ) { return new Float( -1.0F ); }
     public  static  Float real_Float_Float( Integer a ) { return new Float( -1.0F ); }
@@ -573,11 +745,13 @@ public  class   AnsiSignatures
     public  static  byte   real_amb_byte_float( Float a ) { return (byte) -1; }
     
     // unresolvable
+    public  static  float   real_unres_float( boolean a ) { return -1.0F; }
     public  static  float   real_unres_float( byte a ) { return -1.0F; }
     public  static  float   real_unres_float( short a ) { return -1.0F; }
     public  static  float   real_unres_float( int a ) { return -1.0F; }
     public  static  float   real_unres_float( long a ) { return -1.0F; }
     public  static  float   real_unres_float( double a ) { return -1.0F; }
+    public  static  float   real_unres_float( Boolean a ) { return -1.0F; }
     public  static  float   real_unres_float( Byte a ) { return -1.0F; }
     public  static  float   real_unres_float( Short a ) { return -1.0F; }
     public  static  float   real_unres_float( Integer a ) { return -1.0F; }
@@ -592,11 +766,13 @@ public  class   AnsiSignatures
     public  static  float   real_unres_float( Blob a ) { return -1.0F; }
     public  static  float   real_unres_float( Object a ) { return -1.0F; }
 
+    public  static  Float   real_unres_Float( boolean a ) { return new Float( -1.0F ); }
     public  static  Float   real_unres_Float( byte a ) { return new Float( -1.0F ); }
     public  static  Float   real_unres_Float( short a ) { return new Float( -1.0F ); }
     public  static  Float   real_unres_Float( int a ) { return new Float( -1.0F ); }
     public  static  Float   real_unres_Float( long a ) { return new Float( -1.0F ); }
     public  static  Float   real_unres_Float( double a ) { return new Float( -1.0F ); }
+    public  static  Float   real_unres_Float( Boolean a ) { return new Float( -1.0F ); }
     public  static  Float   real_unres_Float( Byte a ) { return new Float( -1.0F ); }
     public  static  Float   real_unres_Float( Short a ) { return new Float( -1.0F ); }
     public  static  Float   real_unres_Float( Integer a ) { return new Float( -1.0F ); }
@@ -617,11 +793,13 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  double   double_double_double( double a ) { return a; }
+    public  static  double   double_double_double( boolean a ) { return -1.0; }
     public  static  double   double_double_double( byte a ) { return -1.0; }
     public  static  double   double_double_double( short a ) { return -1.0; }
     public  static  double   double_double_double( int a ) { return -1.0; }
     public  static  double   double_double_double( long a ) { return -1.0; }
     public  static  double   double_double_double( float a ) { return -1.0; }
+    public  static  double   double_double_double( Boolean a ) { return -1.0; }
     public  static  double   double_double_double( Byte a ) { return -1.0; }
     public  static  double   double_double_double( Short a ) { return -1.0; }
     public  static  double   double_double_double( Integer a ) { return -1.0; }
@@ -637,11 +815,13 @@ public  class   AnsiSignatures
     public  static  double   double_double_double( Object a ) { return -1.0; }
 
     public  static  double   double_double_Double( Double a ) { return a.doubleValue(); }
+    public  static  double   double_double_Double( boolean a ) { return -1.0; }
     public  static  double   double_double_Double( byte a ) { return -1.0; }
     public  static  double   double_double_Double( short a ) { return -1.0; }
     public  static  double   double_double_Double( int a ) { return -1.0; }
     public  static  double   double_double_Double( long a ) { return -1.0; }
     public  static  double   double_double_Double( float a ) { return -1.0; }
+    public  static  double   double_double_Double( Boolean a ) { return -1.0; }
     public  static  double   double_double_Double( Byte a ) { return -1.0; }
     public  static  double   double_double_Double( Short a ) { return -1.0; }
     public  static  double   double_double_Double( Integer a ) { return -1.0; }
@@ -657,11 +837,13 @@ public  class   AnsiSignatures
     public  static  double   double_double_Double( Object a ) { return -1.0; }
 
     public  static  Double double_Double_double( double a ) { return new Double( a ); }
+    public  static  Double double_Double_double( boolean a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_double( byte a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_double( short a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_double( int a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_double( long a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_double( float a ) { return new Double( -1.0 ); }
+    public  static  Double double_Double_double( Boolean a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_double( Byte a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_double( Short a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_double( Integer a ) { return new Double( -1.0 ); }
@@ -677,11 +859,13 @@ public  class   AnsiSignatures
     public  static  Double double_Double_double( Object a ) { return new Double( -1.0 ); }
 
     public  static  Double double_Double_Double( Double a ) { return a; }
+    public  static  Double double_Double_Double( boolean a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_Double( byte a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_Double( short a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_Double( int a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_Double( long a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_Double( float a ) { return new Double( -1.0 ); }
+    public  static  Double double_Double_Double( Boolean a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_Double( Byte a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_Double( Short a ) { return new Double( -1.0 ); }
     public  static  Double double_Double_Double( Integer a ) { return new Double( -1.0 ); }
@@ -708,11 +892,13 @@ public  class   AnsiSignatures
     public  static  byte   double_amb_byte_double( Double a ) { return (byte) -1; }
     
     // unresolvable
+    public  static  double   double_unres_double( boolean a ) { return -1.0; }
     public  static  double   double_unres_double( byte a ) { return -1.0; }
     public  static  double   double_unres_double( short a ) { return -1.0; }
     public  static  double   double_unres_double( int a ) { return -1.0; }
     public  static  double   double_unres_double( long a ) { return -1.0; }
     public  static  double   double_unres_double( float a ) { return -1.0; }
+    public  static  double   double_unres_double( Boolean a ) { return -1.0; }
     public  static  double   double_unres_double( Byte a ) { return -1.0; }
     public  static  double   double_unres_double( Short a ) { return -1.0; }
     public  static  double   double_unres_double( Integer a ) { return -1.0; }
@@ -727,11 +913,13 @@ public  class   AnsiSignatures
     public  static  double   double_unres_double( Blob a ) { return -1.0; }
     public  static  double   double_unres_double( Object a ) { return -1.0; }
  
+    public  static  Double   double_unres_Double( boolean a ) { return new Double( -1.0 ); }
     public  static  Double   double_unres_Double( byte a ) { return new Double( -1.0 ); }
     public  static  Double   double_unres_Double( short a ) { return new Double( -1.0 ); }
     public  static  Double   double_unres_Double( int a ) { return new Double( -1.0 ); }
     public  static  Double   double_unres_Double( long a ) { return new Double( -1.0 ); }
     public  static  Double   double_unres_Double( float a ) { return new Double( -1.0 ); }
+    public  static  Double   double_unres_Double( Boolean a ) { return new Double( -1.0 ); }
     public  static  Double   double_unres_Double( Byte a ) { return new Double( -1.0 ); }
     public  static  Double   double_unres_Double( Short a ) { return new Double( -1.0 ); }
     public  static  Double   double_unres_Double( Integer a ) { return new Double( -1.0 ); }
@@ -752,12 +940,14 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( BigDecimal a ) { return a; }
+    public  static  BigDecimal   numeric_BigDecimal_BigDecimal( boolean a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( byte a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( int a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( short a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( long a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( float a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( double a ) { return new BigDecimal( -1.0 ); }
+    public  static  BigDecimal   numeric_BigDecimal_BigDecimal( Boolean a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( Byte a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( Short a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   numeric_BigDecimal_BigDecimal( Integer a ) { return new BigDecimal( -1.0 ); }
@@ -778,12 +968,14 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( BigDecimal a ) { return a; }
+    public  static  BigDecimal   decimal_BigDecimal_BigDecimal( boolean a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( byte a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( int a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( short a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( long a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( float a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( double a ) { return new BigDecimal( -1.0 ); }
+    public  static  BigDecimal   decimal_BigDecimal_BigDecimal( Boolean a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( Byte a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( Short a ) { return new BigDecimal( -1.0 ); }
     public  static  BigDecimal   decimal_BigDecimal_BigDecimal( Integer a ) { return new BigDecimal( -1.0 ); }
@@ -804,13 +996,15 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  String   varchar_String_String( String a ) { return a; }
+    public  static  String   varchar_String_String( boolean a ) { return "-1"; }
     public  static  String   varchar_String_String( byte a ) { return "-1"; }
     public  static  String   varchar_String_String( short a ) { return "-1"; }
     public  static  String   varchar_String_String( int a ) { return "-1"; }
     public  static  String   varchar_String_String( long a ) { return "-1"; }
     public  static  String   varchar_String_String( float a ) { return "-1"; }
     public  static  String   varchar_String_String( double a ) { return "-1"; }
-    public  static  String   varchar_String_String( Byte a ) { return "-1"; }
+    public  static  String   varchar_String_String( Boolean a ) { return "-1"; }
+     public  static  String   varchar_String_String( Byte a ) { return "-1"; }
     public  static  String   varchar_String_String( Short a ) { return "-1"; }
     public  static  String   varchar_String_String( Integer a ) { return "-1"; }
     public  static  String   varchar_String_String( Long a ) { return "-1"; }
@@ -829,12 +1023,14 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  String   char_String_String( String a ) { return a; }
+    public  static  String   char_String_String( boolean a ) { return "-1"; }
     public  static  String   char_String_String( byte a ) { return "-1"; }
     public  static  String   char_String_String( short a ) { return "-1"; }
     public  static  String   char_String_String( int a ) { return "-1"; }
     public  static  String   char_String_String( long a ) { return "-1"; }
     public  static  String   char_String_String( float a ) { return "-1"; }
     public  static  String   char_String_String( double a ) { return "-1"; }
+    public  static  String   char_String_String( Boolean a ) { return "-1"; }
     public  static  String   char_String_String( Byte a ) { return "-1"; }
     public  static  String   char_String_String( Short a ) { return "-1"; }
     public  static  String   char_String_String( Integer a ) { return "-1"; }
@@ -854,12 +1050,14 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  String   longvarchar_String_String( String a ) { return a; }
+    public  static  String   longvarchar_String_String( boolean a ) { return "-1"; }
     public  static  String   longvarchar_String_String( byte a ) { return "-1"; }
     public  static  String   longvarchar_String_String( short a ) { return "-1"; }
     public  static  String   longvarchar_String_String( int a ) { return "-1"; }
     public  static  String   longvarchar_String_String( long a ) { return "-1"; }
     public  static  String   longvarchar_String_String( float a ) { return "-1"; }
     public  static  String   longvarchar_String_String( double a ) { return "-1"; }
+    public  static  String   longvarchar_String_String( Boolean a ) { return "-1"; }
     public  static  String   longvarchar_String_String( Byte a ) { return "-1"; }
     public  static  String   longvarchar_String_String( Short a ) { return "-1"; }
     public  static  String   longvarchar_String_String( Integer a ) { return "-1"; }
@@ -903,11 +1101,13 @@ public  class   AnsiSignatures
     // legal resolutions
 
     public  static  byte[]  binary_bytes_bytes( byte[] a ) { return a; }
+    public  static  byte[]  binary_bytes_bytes( boolean a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  binary_bytes_bytes( byte a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  binary_bytes_bytes( int a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  binary_bytes_bytes( long a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  binary_bytes_bytes( float a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  binary_bytes_bytes( double a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  binary_bytes_bytes( Boolean a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  binary_bytes_bytes( Byte a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  binary_bytes_bytes( Short a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  binary_bytes_bytes( Long a ) { return new byte[] { (byte) -1 }; }
@@ -934,11 +1134,13 @@ public  class   AnsiSignatures
     // legal resolutions
 
     public  static  byte[]  varbinary_bytes_bytes( byte[] a ) { return a; }
+    public  static  byte[]  varbinary_bytes_bytes( boolean a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  varbinary_bytes_bytes( byte a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  varbinary_bytes_bytes( int a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  varbinary_bytes_bytes( long a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  varbinary_bytes_bytes( float a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  varbinary_bytes_bytes( double a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  varbinary_bytes_bytes( Boolean a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  varbinary_bytes_bytes( Byte a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  varbinary_bytes_bytes( Short a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  varbinary_bytes_bytes( Long a ) { return new byte[] { (byte) -1 }; }
@@ -966,11 +1168,13 @@ public  class   AnsiSignatures
     // legal resolutions
 
     public  static  byte[]  longvarbinary_bytes_bytes( byte[] a ) { return a; }
+    public  static  byte[]  longvarbinary_bytes_bytes( boolean a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  longvarbinary_bytes_bytes( byte a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  longvarbinary_bytes_bytes( int a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  longvarbinary_bytes_bytes( long a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  longvarbinary_bytes_bytes( float a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  longvarbinary_bytes_bytes( double a ) { return new byte[] { (byte) -1 }; }
+    public  static  byte[]  longvarbinary_bytes_bytes( Boolean a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  longvarbinary_bytes_bytes( Byte a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  longvarbinary_bytes_bytes( Short a ) { return new byte[] { (byte) -1 }; }
     public  static  byte[]  longvarbinary_bytes_bytes( Long a ) { return new byte[] { (byte) -1 }; }
@@ -996,12 +1200,14 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  Date   date_Date_Date( Date a ) { return a; }
+    public  static  Date   date_Date_Date( boolean a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( byte a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( short a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( int a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( long a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( float a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( double a ) { return new Date( -1L ); }
+    public  static  Date   date_Date_Date( Boolean a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( Byte a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( Short a ) { return new Date( -1L ); }
     public  static  Date   date_Date_Date( Integer a ) { return new Date( -1L ); }
@@ -1021,12 +1227,14 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  Time   time_Time_Time( Time a ) { return a; }
+    public  static  Time   time_Time_Time( boolean a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( byte a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( short a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( int a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( long a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( float a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( double a ) { return new Time( -1L ); }
+    public  static  Time   time_Time_Time( Boolean a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( Byte a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( Short a ) { return new Time( -1L ); }
     public  static  Time   time_Time_Time( Integer a ) { return new Time( -1L ); }
@@ -1046,12 +1254,14 @@ public  class   AnsiSignatures
     
     // legal resolutions
     public  static  Timestamp   timestamp_Timestamp_Timestamp( Timestamp a ) { return a; }
+    public  static  Timestamp   timestamp_Timestamp_Timestamp( boolean a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( byte a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( short a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( int a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( long a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( float a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( double a ) { return new Timestamp( -1L ); }
+    public  static  Timestamp   timestamp_Timestamp_Timestamp( Boolean a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( Byte a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( Short a ) { return new Timestamp( -1L ); }
     public  static  Timestamp   timestamp_Timestamp_Timestamp( Integer a ) { return new Timestamp( -1L ); }
@@ -1072,11 +1282,13 @@ public  class   AnsiSignatures
     // legal resolutions
 
     public  static  Clob  clob_Clob_String( String a ) { return new StringColumnVTI.SimpleClob( a ); }
+    public  static  Clob  clob_Clob_String( boolean a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
     public  static  Clob  clob_Clob_String( byte a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
     public  static  Clob  clob_Clob_String( int a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
     public  static  Clob  clob_Clob_String( long a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
     public  static  Clob  clob_Clob_String( float a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
     public  static  Clob  clob_Clob_String( double a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Boolean a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
     public  static  Clob  clob_Clob_String( Byte a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
     public  static  Clob  clob_Clob_String( Short a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
     public  static  Clob  clob_Clob_String( Long a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
@@ -1097,11 +1309,13 @@ public  class   AnsiSignatures
     // legal resolutions
 
     public  static  Blob  blob_Blob_String( String a ) throws Exception { return new StringColumnVTI.SimpleBlob( a.getBytes( "UTF-8" ) ); }
+    public  static  Blob  blob_Blob_String( boolean a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
     public  static  Blob  blob_Blob_String( byte a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
     public  static  Blob  blob_Blob_String( int a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
     public  static  Blob  blob_Blob_String( long a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
     public  static  Blob  blob_Blob_String( float a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
     public  static  Blob  blob_Blob_String( double a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Boolean a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
     public  static  Blob  blob_Blob_String( Byte a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
     public  static  Blob  blob_Blob_String( Short a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
     public  static  Blob  blob_Blob_String( Long a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }

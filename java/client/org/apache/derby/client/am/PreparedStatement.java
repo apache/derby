@@ -2769,7 +2769,8 @@ public class PreparedStatement extends Statement
                 java.sql.Types.SMALLINT,
                 java.sql.Types.REAL,
                 java.sql.Types.DOUBLE,
-                java.sql.Types.VARCHAR } );
+                java.sql.Types.VARCHAR,
+                java.sql.Types.BOOLEAN } );
         
         /**
          * This is possibleTypes of variable which can be set by setDate method.

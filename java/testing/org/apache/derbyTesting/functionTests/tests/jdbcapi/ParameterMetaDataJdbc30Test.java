@@ -249,6 +249,38 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 		ps.close();
 	}
 
+	/**
+         * Test boolean parameters
+     	 *
+	 * @exception SQLException if database access errors or other errors occur
+         */
+	public void testBooleanParameters() throws SQLException
+    {
+        Statement stmt = createStatement();
+        stmt.executeUpdate
+            (
+             "create function booleanValue( b boolean )\n" +
+             "returns varchar( 100 ) language java parameter style java no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.BooleanValuesTest.booleanValue'\n"
+             );
+        stmt.close();
+        PreparedStatement ps = prepareStatement("values( booleanValue( ? ) )");
+
+        ParameterMetaData paramMetaData = ps.getParameterMetaData();
+		assertEquals("Unexpected parameter count", 1, paramMetaData.getParameterCount());
+
+		//expected values to be stored in a 2dim. array
+        String [][] parameterMetaDataArray0 =
+            {
+                //isNullable, isSigned, getPrecision, getScale, getParameterType, getParameterTypeName, getParameterClassName, getParameterMode
+                {"PARAMETER_NULLABLE", "false", "1", "0", "16", "BOOLEAN", "java.lang.Boolean", "PARAMETER_MODE_IN"},
+            };
+
+        testParameterMetaData(paramMetaData, parameterMetaDataArray0);
+
+		ps.close();
+	}
+
 	/** 
 	 * DERBY-44 added support for SELECT ... WHERE column LIKE ? ESCAPE ?
          * This test case tests
