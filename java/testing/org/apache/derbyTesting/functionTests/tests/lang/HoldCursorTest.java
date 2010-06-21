@@ -31,6 +31,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * Test hold cursor after commit
@@ -45,26 +46,35 @@ public class HoldCursorTest extends BaseJDBCTestCase {
 	/**
      * Create a suite of tests.
      */
-	
-	
-	  public static Test suite() {
+    public static Test suite() {
         TestSuite suite = new TestSuite("HoldCursorTest");
-        suite.addTest(baseSuite("HoldCursorTest:embedded"));
-        suite.addTest(baseSuite("HoldCursorTest:client"));
+
+        suite.addTest(baseSuite(true));
+        suite.addTest(baseSuite(false));
+
         return suite;
     }
-    private static Test baseSuite(String name) {
 
+    private static Test baseSuite(boolean embeddedMode) {
+        String name = "HoldCursorTest:" + (embeddedMode ? "embedded" : "client");
         TestSuite suite = new TestSuite(name);
 
         // Add tests that every JVM jdk1.4 or above should be able to run.
         suite.addTestSuite(HoldCursorTest.class);
+
         if (!JDBC.vmSupportsJSR169()) {
              suite.addTest (new HoldCursorTest("StatementsInProcedureTest"));
+        }
 
-           }
-        return new CleanDatabaseTestSetup(suite); 
+        Test test = suite;
+
+        if (!embeddedMode) {
+            test = TestConfiguration.clientServerDecorator(suite);
+        }
+
+        return new CleanDatabaseTestSetup(test);
     }
+
     /**
      * Set the fixture up with tables and insert rows .
      */
