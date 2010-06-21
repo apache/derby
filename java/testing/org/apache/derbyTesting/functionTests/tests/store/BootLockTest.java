@@ -62,6 +62,7 @@ public class BootLockTest extends BaseJDBCTestCase {
     DataFactory.DB_LOCKFILE_NAME;
     private final static String dbExLockFile = dbDir + File.separator +
     DataFactory.DB_EX_LOCKFILE_NAME;
+    private final static String servicePropertiesFileName = dbDir + File.separator + "service.properties";
     
     private static String[] cmd = new String[]{
         "org.apache.derbyTesting.functionTests.tests.store.BootLockMinion",
@@ -174,23 +175,27 @@ public class BootLockTest extends BaseJDBCTestCase {
         StringBuffer failmsg = new StringBuffer();
         // boolean set to true once we find the  lock file
         File lockFile = new File(dbLockFile);
+        File servicePropertiesFile = new File(servicePropertiesFileName);
         // Attempt to catch any errors happening in minion for better test
         // diagnosis.
         BufferedReader minionSysErr = new BufferedReader(
             new InputStreamReader(p.getErrorStream()));
         String minionErrLine= null ;
         do {
-            if (lockFile.exists()) {
-                // if the lock file is there the database has booted, return
-                Thread.sleep(10000); 
-               return;
+            if (lockFile.exists() && servicePropertiesFile.exists()) { 
+                // if the lock file is there and service.properties,
+                // the database has booted, return. If we don't check for
+                // service.properties, we may get just an error that the
+                // directory already exists. We'll give a few seconds too
+                // for service.properties to finish writing.
+                Thread.sleep(3000);
+                return;
             }
             // otherwise sleep for a second and try again
             waitmillis -= 1000;
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 fail(e.getMessage());
             }
         } while (waitmillis > 0);
