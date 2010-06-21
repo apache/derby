@@ -39,7 +39,6 @@ import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 public class BootLockMinion {
     public static void main(String[] args) {
         String dbName = args[0];
-        int portNumber = Integer.decode(args[1]).intValue();
         Connection con;
         Statement stmt;
         System.setProperty("derby.stream.error.file",

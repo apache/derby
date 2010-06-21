@@ -182,7 +182,8 @@ public class BootLockTest extends BaseJDBCTestCase {
         do {
             if (lockFile.exists()) {
                 // if the lock file is there the database has booted, return
-                return;
+                Thread.sleep(10000); 
+               return;
             }
             // otherwise sleep for a second and try again
             waitmillis -= 1000;
