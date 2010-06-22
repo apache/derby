@@ -173,6 +173,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                 "testClientTraceFileDSConnectionAttribute"));
         suite.addTest(new J2EEDataSourceTest(
                 "testClientMessageTextConnectionAttribute"));
+        suite.addTest(new J2EEDataSourceTest("testConnectionFlowCommit"));
         return suite;
     }
     
@@ -2067,6 +2068,64 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         pc.close();
     }
     /**
+     * check whether commit without statement will flow by checking its transaction id
+     * on client. This test is run only for client where commits without an
+     * active transactions will not flow to the server.
+     * DERBY-4653
+     * 
+     * @throws SQLException
+     **/
+    public void testConnectionFlowCommit()
+            throws SQLException {
+        ConnectionPoolDataSource ds = J2EEDataSource.getConnectionPoolDataSource();
+
+        PooledConnection pc = ds.getPooledConnection();
+        Connection conn = pc.getConnection();
+
+        testConnectionFlowCommitWork(conn, 1);
+        conn.close();
+        
+        //Test for XADataSource
+        XADataSource xs = J2EEDataSource.getXADataSource();
+        XAConnection xc = xs.getXAConnection();
+        conn = xc.getConnection();
+        testConnectionFlowCommitWork(conn, 1);
+        conn.close();
+        
+        //Test for DataSource
+        DataSource jds = JDBCDataSource.getDataSource();
+        conn = jds.getConnection();
+        testConnectionFlowCommitWork(conn, 1);
+        conn.close();       
+    }
+
+    /**
+     * Doing the work for test Connection.flowcommit() and Connection.flowrollback()
+     * @param conn
+     * @throws SQLException
+     **/  
+    private void testConnectionFlowCommitWork(Connection conn, int expectednumtransaction) throws SQLException {
+        //DERBY 4653 - make sure commit with no work does not flow in client
+        int startXactId = getClientTransactionID(conn);
+        Statement s = conn.createStatement();
+        ResultSet rs = s.executeQuery("values 1");
+        rs.next();
+        assertEquals(1, rs.getInt(1));
+        rs.close();
+        conn.commit();
+        // second commit should not flow
+        conn.commit();
+        int endXactId = getClientTransactionID(conn);
+        
+        //to verify the fix for DERBY-4653. Only one transaction
+        assertTrue("Should have had 1 xact, startXactId = "
+                    + startXactId + " endXactId = " + endXactId ,
+                    ((endXactId - startXactId) == 1) );
+        
+        s.close();
+    }
+    
+    /**
      * Check setTransactioIsolation and with four connection in connection pool
      * for DERBY-4343 case
      * 
@@ -2106,6 +2165,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         conn.close();
     
     }
+    
     // test that an xastart in auto commit mode commits the existing work.
     // test fix of a bug ('beetle 5178') wherein XAresource.start() when 
     // auto-commit is true did not implictly commit any transaction

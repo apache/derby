@@ -1303,6 +1303,29 @@ public abstract class BaseJDBCTestCase
      
     }
   
+    /**
+     * Attempts to obtain the client-side transaction counter from the given
+     * connection, which is internal state information.
+     * <p>
+     * <em>NOTE:</em> Use with care, accesses internal state.
+     *
+     * @param conn the connection
+     * @return Internal client transaction id.
+     * @throws SQLException if the given connection is an embedded connection,
+     *      or if invoking the required method fails
+     **/
+    public static int getClientTransactionID(Connection conn)
+            throws SQLException {
+        try {
+            Method m = conn.getClass().getMethod(
+                    "getTransactionID", new Class[] {});
+            return ((Integer) m.invoke(conn, new Object[] {} )).intValue();
+        } catch (Exception e) {
+            SQLException se = new SQLException(e.getMessage());
+            se.initCause(e);
+            throw se;
+        }
+    }
 
     /**
      * Return estimated row count for runtime statistics.  

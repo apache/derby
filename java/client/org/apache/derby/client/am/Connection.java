@@ -570,11 +570,10 @@ public abstract class Connection implements java.sql.Connection,
         // But note that rollback() is less harmless, rollback() shouldn't be used in auto-commit mode.
         // This behavior is subject to further review.
 
-        //   if (!this.inUnitOfWork)
-        //     return;
-        // We won't try to be "too smart", if the user requests a commit, we'll flow a commit,
-        // regardless of whether or not we're in a unit of work or in auto-commit mode.
-        //
+        //DERBY-4653
+        //If we are not in a transaction, we don't want to flow commit. We just return.
+        if (!this.inUnitOfWork_)
+             return;       
         if (isXAConnection_) {
             agent_.beginWriteChainOutsideUOW();
             writeCommit();

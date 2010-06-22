@@ -577,6 +577,20 @@ public class LogicalConnection implements java.sql.Connection {
 		}
     }
 
+    /**
+     * Returns the client-side transaction id from am.Connection. 
+     * <p>
+     * <em>NOTE:</em> This method was added for testing purposes. Avoid use in
+     * production code if possible.
+     **/
+    public int getTransactionID() {
+        if (physicalConnection_ == null) {
+            return -1;
+        } else {
+            return physicalConnection_.getTransactionID();
+        }
+    }
+    
     //----------------------------------------------------------------------------
 
     public int getServerVersion() {
