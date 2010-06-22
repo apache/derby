@@ -75,6 +75,9 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         s.execute("CREATE FUNCTION DUMMY4 ( X VARCHAR(128), Y INTEGER ) "+
                   "RETURNS INTEGER PARAMETER STYLE JAVA NO SQL LANGUAGE "+
                   "JAVA EXTERNAL NAME 'java.some.func'");
+        s.execute("CREATE FUNCTION DUMMY5 ( X BOOLEAN ) "+
+                  "RETURNS BOOLEAN PARAMETER STYLE JAVA NO SQL LANGUAGE "+
+                  "JAVA EXTERNAL NAME 'java.some.func'");
     }
 
     private static Test baseSuite(String name) {
@@ -145,6 +148,7 @@ public class TestDbMetaData extends BaseJDBCTestCase {
         { null, "APP", "DUMMY2", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "APP", "DUMMY3", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "APP", "DUMMY4", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
+        { null, "APP", "DUMMY5", "java.some.func", FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
         { null, "SYSCS_UTIL", "SYSCS_CHECK_TABLE",
           "org.apache.derby.catalog.SystemProcedures.SYSCS_CHECK_TABLE",
           FUNCTION_NO_TABLE_VALUE, GENERIC_NAME },
@@ -353,6 +357,14 @@ public class TestDbMetaData extends BaseJDBCTestCase {
               "INTEGER", new Integer(10), new Integer(4), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(2),
               "YES", GENERIC_NAME, new Integer(2), new Integer(1) },
+            { null, "APP", "DUMMY5", "", new Integer(4), new Integer(16),
+              "BOOLEAN", new Integer(1), new Integer(1), null,
+              null, new Integer(1), null, null, new Integer(0),
+              "YES", GENERIC_NAME, new Integer(1), new Integer(-1) },
+            { null, "APP", "DUMMY5", "X", new Integer(1), new Integer(16),
+              "BOOLEAN", new Integer(1), new Integer(1), null,
+              null, new Integer(1), null, null, new Integer(1),
+              "YES", GENERIC_NAME, new Integer(1), new Integer(0) },
         };
         JDBC.assertFullResultSet(rs, expectedRows, false);
     }
@@ -379,6 +391,10 @@ public class TestDbMetaData extends BaseJDBCTestCase {
               "INTEGER", new Integer(10), new Integer(4), new Integer(0),
               new Integer(10), new Integer(1), null, null, new Integer(0),
               "YES", GENERIC_NAME, new Integer(2), new Integer(-1) },
+            { null, "APP", "DUMMY5", "", new Integer(4), new Integer(16),
+              "BOOLEAN", new Integer(1), new Integer(1), null,
+              null, new Integer(1), null, null, new Integer(0),
+              "YES", GENERIC_NAME, new Integer(1), new Integer(-1) },
         };
         JDBC.assertFullResultSet(rs, expectedRows, false);
     }
