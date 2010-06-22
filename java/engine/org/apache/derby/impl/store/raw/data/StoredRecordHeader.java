@@ -73,7 +73,7 @@ public final class StoredRecordHeader
      *                            When RECORD_OVERFLOW and 
      *                            RECORD_HAS_FIRST_FIELD both are set, part of 
      *                            record is on the page, the record header 
-     *                            also stores the overflow point to the next 
+     *                            also stores the overflow pointer to the next 
      *                            part of the record.
      * RECORD_VALID_MASK        - A mask of valid bits that can be set 
      *                            currently, such that the following assert can
@@ -511,7 +511,7 @@ public final class StoredRecordHeader
 	
 		// In releases prior to 1.3 an overflow record was handled
 		// by an overflow header pointing to a complete record on
-		// another page. This header had the has overflow bit set but not
+		// another page. This header had the overflow bit set but not
 		// the has first field bit. This header also did not have the
 		// number of fields written out, but it can be seen as
 		// a header with 0 fields and a first field of 0.
