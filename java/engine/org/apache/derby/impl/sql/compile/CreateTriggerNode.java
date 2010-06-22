@@ -70,7 +70,132 @@ public class CreateTriggerNode extends DDLStatementNode
 
 	private SchemaDescriptor	triggerSchemaDescriptor;
 	private SchemaDescriptor	compSchemaDescriptor;
+	
+	/*
+	 * The following arrary will include columns that will cause the trigger to
+	 * fire. This information will get saved in SYSTRIGGERS.
+	 * 
+	 * The array will be null for all kinds of insert and delete triggers but
+	 * it will be non-null for a subset of update triggers.
+	 *  
+	 * For update triggers, the array will be null if no column list is 
+	 * supplied in the CREATE TRIGGER trigger column clause as shown below.
+	 * The UPDATE trigger below will fire no matter which column in table1
+	 * gets updated.
+	 * eg
+	 * CREATE TRIGGER tr1 AFTER UPDATE ON table1 
+	 *    REFERENCING OLD AS oldt NEW AS newt
+	 *    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+	 * 
+	 * For update triggers, this array will be non-null if specific trigger
+	 * column(s) has been specified in the CREATE TRIGGER sql. The UPDATE
+	 * trigger below will fire when an update happens on column c12 in table1.
+	 * eg
+	 * CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
+	 *    REFERENCING OLD AS oldt NEW AS newt
+	 *    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+	 * 
+	 * Array referencedColInts along with referencedColsInTriggerAction will 
+	 * be used to determine which columns from the triggering table need to 
+	 * be read in when the trigger fires, thus making sure that we do not
+	 * read the columns from the trigger table that are not required for
+	 * trigger execution.
+	 */
 	private int[]				referencedColInts;
+	
+	/*
+	 * The following array (which was added as part of DERBY-1482) will 
+	 * include columns referenced in the trigger action through the 
+	 * REFERENCING clause(old/new transition variables), in other trigger
+	 * action columns. This information will get saved in SYSTRIGGERS
+	 * (with the exception of triggers created in pre-10.7 dbs. For 
+	 * pre-10.7 dbs, this information will not get saved in SYSTRIGGERS
+	 * in order to maintain backward compatibility.
+	 * 
+	 * Unlike referencedColInts, this array can be non-null for all 3 types
+	 * of triggers, namely, INSERT, UPDATE AND DELETE triggers. This array
+	 * will be null if no columns in the trigger action are referencing
+	 * old/new transition variables
+	 * 
+	 * eg of a trigger in 10.7 and higher dbs which will cause 
+	 * referencedColsInTriggerAction to be null
+	 * CREATE TRIGGER tr1 NO CASCADE BEFORE UPDATE of c12 ON table1
+	 *    SELECT c24 FROM table2 WHERE table2.c21 = 1
+	 * 
+	 * eg of a trigger in 10.7 and higher dbs which will cause 
+	 * referencedColsInTriggerAction to be non-null
+	 * For the trigger below, old value of column c14 from trigger table is
+	 * used in the trigger action through old/new transition variables. A
+	 * note of this requirement to read c14 will be made in
+	 * referencedColsInTriggerAction array.
+	 * eg
+	 * CREATE TRIGGER tr1 AFTER UPDATE ON table1 
+	 *    REFERENCING OLD AS oldt NEW AS newt
+	 *    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+	 * 
+	 * The exception to the rules above for trigger action columns information
+	 * in referencedColsInTriggerAction is a trigger that was created with
+	 * pre-10.7 release. Prior to 10.7, we did not collect any information
+	 * about trigger action columns. So, any of the 2 kinds of trigger shown
+	 * above prior to 10.7 will not have any trigger action column info on
+	 * them in SYSTRIGGERS table. In order to cover the pre-existing pre-10.7
+	 * triggers and all the other kinds of triggers, we will follow following
+	 * 4 rules during trigger execution.
+	 *   Rule1)If trigger column information is null, then read all the
+	 *   columns from trigger table into memory irrespective of whether
+	 *   there is any trigger action column information. 2 egs of such
+	 *   triggers
+	 *      create trigger tr1 after update on t1 for each row values(1);
+	 *      create trigger tr1 after update on t1 referencing old as oldt
+	 *      	for each row insert into t2 values(2,oldt.j,-2);
+	 *   Rule2)If trigger column information is available but no trigger
+	 *   action column information is found and no REFERENCES clause is
+	 *   used for the trigger, then only read the columns identified by
+	 *   the trigger column. eg
+	 *      create trigger tr1 after update of c1 on t1 
+	 *      	for each row values(1);
+	 *   Rule3)If trigger column information and trigger action column
+	 *   information both are not null, then only those columns will be
+	 *   read into memory. This is possible only for triggers created in
+	 *   release 10.7 or higher. Because prior to that we did not collect
+	 *   trigger action column informatoin. eg
+	 *      create trigger tr1 after update of c1 on t1
+	 *      	referencing old as oldt for each row
+	 *      	insert into t2 values(2,oldt.j,-2);
+	 *   Rule4)If trigger column information is available but no trigger
+	 *   action column information is found but REFERENCES clause is used
+	 *   for the trigger, then read all the columns from the trigger
+	 *   table. This will cover soft-upgrade and hard-upgrade scenario
+	 *   for triggers created pre-10.7. This rule prevents us from having
+	 *   special logic for soft-upgrade. Additionally, this logic makes
+	 *   invalidation of existing triggers unnecessary during
+	 *   hard-upgrade. The pre-10.7 created triggers will work just fine
+	 *   even though for some triggers, they would have trigger action
+	 *   columns missing from SYSTRIGGERS. A user can choose to drop and
+	 *   recreate such triggers to take advantage of Rule 3 which will
+	 *   avoid unnecessary column reads during trigger execution.
+	 *   eg trigger created prior to 10.7
+	 *      create trigger tr1 after update of c1 on t1
+	 *      	referencing old as oldt for each row
+	 *      	insert into t2 values(2,oldt.j,-2);
+	 *   To reiterate, Rule4) is there to cover triggers created with
+	 *   pre-10,7 releases but now that database has been
+	 *   hard/soft-upgraded to 10.7 or higher version. Prior to 10.7,
+	 *   we did not collect any information about trigger action columns.
+	 *   
+	 *   The only place we will need special code for soft-upgrade is during
+	 *   trigger creation. If we are in soft-upgrade mode, we want to make sure
+	 *   that we do not save information about trigger action columns in
+	 *   SYSTRIGGERS because the releases prior to 10.7 do not understand
+	 *   trigger action column information.
+	 *   
+	 * Array referencedColInts along with referencedColsInTriggerAction will 
+	 * be used to determine which columns from the triggering table needs to 
+	 * be read in when the trigger fires, thus making sure that we do not
+	 * read the columns from the trigger table that are not required for
+	 * trigger execution.
+	 */
+	private int[]				referencedColsInTriggerAction;
 	private TableDescriptor		triggerTableDescriptor;
 	private	UUID				actionCompSchemaId;
 
@@ -336,7 +461,8 @@ public class CreateTriggerNode extends DDLStatementNode
 	}
 
 	/*
-	** BIND OLD/NEW TRANSITION TABLES/VARIABLES
+	** BIND OLD/NEW TRANSITION TABLES/VARIABLES AND collect TRIGGER ACTION
+	** COLUMNS referenced through REFERECING CLAUSE in CREATE TRIGGER statement
 	**
 	** 1) validate the referencing clause (if any)
 	**
@@ -354,7 +480,15 @@ public class CreateTriggerNode extends DDLStatementNode
 	**	variables (since they are no longer 'normal' column references
 	** 	that will be checked during bind)
 	**
-	** 4) reparse the new action text
+	** 4) collect all column references in trigger action through new/old 
+	** transition variables. Information about them will be saved in
+	** SYSTRIGGERS table DERBY-1482(if we are dealing with pre-10.7 db, then we
+	** will not put any information about trigger action columns in the system
+	** table to ensure backward compatibility). This information along with the
+	** trigger columns will decide what columns from the trigger table will be
+	** fetched into memory during trigger execution.
+	**
+	** 5) reparse the new action text
 	**
 	** You might be wondering why we regenerate the text and reparse
 	** instead of just reworking the tree to have the nodes we want.
@@ -364,7 +498,40 @@ public class CreateTriggerNode extends DDLStatementNode
 	** triggers so it would be quite arduous to figure out that an
 	** sps is a trigger and munge up its query tree after figuring
 	** out what its OLD/NEW tables are, etc.  Also, it is just plain
-	** easier to just generate the sql and rebind.  
+	** easier to just generate the sql and rebind.
+	**
+	** More information on step 4 above. 
+	** DERBY-1482 One of the work done by this method for row level triggers
+	** is to find the columns which are referenced in the trigger action 
+	** through the REFERENCES clause ie thro old/new transition variables.
+	** This information will be saved in SYSTRIGGERS so it can be retrieved
+	** during the trigger execution time. The purpose of this is to recognize
+	** what columns from the trigger table should be read in during trigger
+	** execution. Before these code change, during trigger execution, Derby
+	** was opting to read all the columns from the trigger table even if they
+	** were not all referenced during the trigger execution. This caused Derby
+	** to run into OOM at times when it could really be avoided.
+	**
+	** We go through the trigger action text and collect the column positions
+	** of all the REFERENCEd columns through new/old transition variables. We
+	** keep that information in SYSTRIGGERS. At runtime, when the trigger is
+	** fired, we will look at this information along with trigger columns from
+	** the trigger definition and only fetch those columns into memory rather
+	** than all the columns from the trigger table.
+	** This is especially useful when the table has LOB columns and those
+	** columns are not referenced in the trigger action and are not recognized
+	** as trigger columns. For such cases, we can avoid reading large values of
+	** LOB columns into memory and thus avoiding possibly running into OOM 
+	** errors.
+	** 
+	** If there are no trigger columns defined on the trigger, we will read all
+	** the columns from the trigger table when the trigger fires because no
+	** specific columns were identified as trigger column by the user. The 
+	** other case where we will opt to read all the columns are when trigger
+	** columns and REFERENCING clause is identified for the trigger but there
+	** is no trigger action column information in SYSTRIGGERS. This can happen
+	** for triggers created prior to 10.7 release and later that database got
+	** hard/soft-upgraded to 10.7 or higher release.
 	*/
 	private boolean bindReferencesClause(DataDictionary dd) throws StandardException
 	{
@@ -373,22 +540,233 @@ public class CreateTriggerNode extends DDLStatementNode
         // the actions of before triggers may not reference generated columns
         if ( isBefore ) { forbidActionsOnGenCols(); }
         
+		//Total Number of columns in the trigger table
+		int numberOfColsInTriggerTable = triggerTableDescriptor.getNumberOfColumns();
+
 		StringBuffer newText = new StringBuffer();
 		boolean regenNode = false;
 		int start = 0;
 		if (isRow)
 		{
-			/*
-			** For a row trigger, we find all column references.  If
-			** they are referencing NEW or OLD we turn them into
-			** getTriggerExecutionContext().getOldRow().getInt('C');
-			*/
+			ResultColumn rc;
+			
+			//The purpose of following array(triggerActionColsOnly) is to
+			//identify all the columns from the trigger action which are
+			//referenced though old/new transition variables(in other words,
+			//accessed through the REFERENCING clause section of
+			//CREATE TRIGGER sql). This array will be initialized to -1 at the
+			//beginning. By the end of this method, all the columns referenced
+			//by the trigger action through the REFERENCING clause will have
+			//their column positions in the trigger table noted in this array.
+			//eg
+			//CREATE TABLE table1 (c11 int, c12 int, c13 int, c14 int, c15 int);
+			//CREATE TABLE table2 (c21 int, c22 int, c23 int, c24 int, c25 int);
+			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
+			//    REFERENCING OLD AS oldt NEW AS newt
+			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+			//For the trigger above, triggerActionColsOnly will finally have 
+			//[-1,-1,-1,4,-1]. We will note all the entries for this array
+			//which are not -1 into SYSTRIGGERS(-1 indiciates columns with
+			//those column positions from the trigger table are not being
+			//referenced in the trigger action through the old/new transition
+			//variables.
+			int[] triggerActionColsOnly = new int[numberOfColsInTriggerTable];
+			for (int i=0; i < numberOfColsInTriggerTable; i++)
+				triggerActionColsOnly[i]=-1;
+			
+			//The purpose of following array(triggerColsAndTriggerActionCols)
+			//is to identify all the trigger columns and all the columns from
+			//the trigger action which are referenced though old/new 
+			//transition variables(in other words, accessed through the
+			//REFERENCING clause section of CREATE TRIGGER sql). This array 
+			//will be initialized to -1 at the beginning. By the end of this
+			//method, all the columns referenced by the trigger action 
+			//through the REFERENCING clause and all the trigger columns will
+			//have their column positions in the trigger table noted in this
+			//array.
+			//eg
+			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
+			//    REFERENCING OLD AS oldt NEW AS newt
+			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+			//For the trigger above, triggerColsAndTriggerActionCols will
+			//finally have [-1,2,-1,4,-1] This list will include all the
+			//columns that need to be fetched into memory during trigger
+			//execution. All the columns with their entries marked -1 will
+			//not be read into memory because they are not referenced in the
+			//trigger action through old/new transition variables and they are
+			//not recognized as trigger columns.
+			int[] triggerColsAndTriggerActionCols = new int[numberOfColsInTriggerTable];
+			for (int i=0; i < numberOfColsInTriggerTable; i++) 
+				triggerColsAndTriggerActionCols[i]=-1;
+			
+			if (triggerCols == null || triggerCols.size() == 0) {
+				//This means that even though the trigger is defined at row 
+				//level, it is either an INSERT/DELETE trigger. Or it is an
+				//UPDATE trigger with no specific column(s) identified as the
+				//trigger column(s). In these cases, Derby is going to read all
+				//the columns from the trigger table during trigger execution.
+				//eg of an UPDATE trigger with no specific trigger column(s) 
+				// CREATE TRIGGER tr1 AFTER UPDATE ON table1 
+				//    REFERENCING OLD AS oldt NEW AS newt
+				//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+				for (int i=0; i < numberOfColsInTriggerTable; i++) {
+					triggerColsAndTriggerActionCols[i]=i+1;
+				}
+			} else {
+				//This is the most interesting case for us. If we are here, 
+				//then it means that the trigger is defined at the row level
+				//and a set of trigger columns are specified in the CREATE
+				//TRIGGER statement. This can only happen for an UPDATE
+				//trigger.
+				//eg
+				//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
+				//    REFERENCING OLD AS oldt NEW AS newt
+				//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+				
+				for (int i=0; i < triggerCols.size(); i++){
+					rc = (ResultColumn)triggerCols.elementAt(i);
+					ColumnDescriptor cd = triggerTableDescriptor.getColumnDescriptor(rc.getName());
+					//Following will catch the case where an invalid trigger column
+					//has been specified in CREATE TRIGGER statement.
+					//CREATE TRIGGER tr1 AFTER UPDATE OF c1678 ON table1 
+					//    REFERENCING OLD AS oldt NEW AS newt
+					//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+					if (cd == null)
+					{
+						throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, 
+																	rc.getName(),
+																	tableName);
+					}
+					//Make a note of this trigger column's column position in
+					//triggerColsAndTriggerActionCols. This will tell us that 
+					//this column needs to be read in when the trigger fires.
+					//eg for the CREATE TRIGGER below, we will make a note of
+					//column c12's position in triggerColsAndTriggerActionCols
+					//eg
+					//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
+					//    REFERENCING OLD AS oldt NEW AS newt
+					//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+					triggerColsAndTriggerActionCols[cd.getPosition()-1]=cd.getPosition();				
+				}
+			}
+			//By this time, we have collected the positions of the trigger
+			//columns in array triggerColsAndTriggerActionCols. Now we need
+			//to start looking at the columns in trigger action to collect
+			//all the columns referenced through REFERENCES clause. These
+			//columns will be noted in triggerColsAndTriggerActionCols and
+			//triggerActionColsOnly arrays.
+
 			CollectNodesVisitor visitor = new CollectNodesVisitor(ColumnReference.class);
 			actionNode.accept(visitor);
 			Vector refs = visitor.getList();
 			/* we need to sort on position in string, beetle 4324
 			 */
 			QueryTreeNode[] cols = sortRefs(refs, true);
+
+			//At the end of the for loop below, we will have both arrays
+			//triggerColsAndTriggerActionCols & triggerActionColsOnly
+			//filled up with the column positions of the columns which are
+			//either trigger columns or triger action columns which are
+			//referenced through old/new transition variables. 
+			//eg
+			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
+			//    REFERENCING OLD AS oldt NEW AS newt
+			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+			//For the above trigger, before the for loop below, the contents
+			//of the 2 arrays will be as follows
+			//triggerActionColsOnly [-1,-1,-1,-1,-1]
+			//triggerColsAndTriggerActionCols [-1,2,-1,-1,-1]
+			//After the for loop below, the 2 arrays will look as follows
+			//triggerActionColsOnly [-1,-1,-1,4,-1]
+			//triggerColsAndTriggerActionCols [-1,2,-1,4,-1]
+			//If the database is at 10.6 or earlier version(meaning we are in
+			//soft-upgrade mode), then we do not want to collect any 
+			//information about trigger action columns. The collection and 
+			//usage of trigger action columns was introduced in 10.7 DERBY-1482
+			boolean in10_7_orHigherVersion =
+					getLanguageConnectionContext().getDataDictionary().checkVersion(
+							DataDictionary.DD_VERSION_DERBY_10_7,null);
+			for (int i = 0; i < cols.length; i++)
+			{
+				ColumnReference ref = (ColumnReference) cols[i];
+				/*
+				** Only occurrences of those OLD/NEW transition tables/variables 
+				** are of interest here.  There may be intermediate nodes in the 
+				** parse tree that have its own RCL which contains copy of 
+				** column references(CR) from other nodes. e.g.:  
+				**
+				** CREATE TRIGGER tt 
+				** AFTER INSERT ON x
+				** REFERENCING NEW AS n 
+				** FOR EACH ROW
+				**    INSERT INTO y VALUES (n.i), (999), (333);
+				** 
+				** The above trigger action will result in InsertNode that 
+				** contains a UnionNode of RowResultSetNodes.  The UnionNode
+				** will have a copy of the CRs from its left child and those CRs 
+				** will not have its beginOffset set which indicates they are 
+				** not relevant for the conversion processing here, so we can 
+				** safely skip them. 
+				*/
+				if (ref.getBeginOffset() == -1) 
+				{
+					continue;
+				}
+
+				TableName tableName = ref.getTableNameNode();
+				if ((tableName == null) ||
+					((oldTableName == null || !oldTableName.equals(tableName.getTableName())) &&
+					(newTableName == null || !newTableName.equals(tableName.getTableName()))))
+				{
+					continue;
+				}
+
+				if (tableName.getBeginOffset() == -1)
+				{
+					continue;
+				}
+
+				checkInvalidTriggerReference(tableName.getTableName());
+				String colName = ref.getColumnName();
+
+				ColumnDescriptor triggerColDesc;
+				//Following will catch the case where an invalid column is
+				//used in trigger action through the REFERENCING clause. The
+				//following tigger is trying to use oldt.c13 but there is no
+				//column c13 in trigger table table1
+				//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
+				//    REFERENCING OLD AS oldt NEW AS newt
+				//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14567;
+				if ((triggerColDesc = triggerTableDescriptor.getColumnDescriptor(colName)) == 
+	                null) {
+					throw StandardException.newException(
+			                SQLState.LANG_COLUMN_NOT_FOUND, tableName+"."+colName);
+					}
+
+				if (in10_7_orHigherVersion) {
+					int triggerColDescPosition = triggerColDesc.getPosition();
+					triggerColsAndTriggerActionCols[triggerColDescPosition-1]=triggerColDescPosition;
+					triggerActionColsOnly[triggerColDescPosition-1]=triggerColDescPosition;
+				}
+			}
+
+			//Now that we know what columns we need for trigger columns and
+			//trigger action columns, we can get rid of remaining -1 entries
+			//for the remaining columns from trigger table.
+			//eg
+			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
+			//    REFERENCING OLD AS oldt NEW AS newt
+			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+			//For the above trigger, before the justTheRequiredColumns() call,
+			//the content of triggerColsAndTriggerActionCols array were as
+			//follows [-1, 2, -1, 4, -1]
+			//After the justTheRequiredColumns() call below, 
+			//triggerColsAndTriggerActionCols will have [2,4]. What this means
+			//that, at run time, during trigger execution, these are the only
+			//2 column positions that will be read into memory from the
+			//trigger table. The columns in other column positions are not
+			//needed for trigger execution.
+			triggerColsAndTriggerActionCols = justTheRequiredColumns(triggerColsAndTriggerActionCols);
 
 			for (int i = 0; i < cols.length; i++)
 			{
@@ -434,14 +812,68 @@ public class CreateTriggerNode extends DDLStatementNode
 				}
 
 				regenNode = true;
-				checkInvalidTriggerReference(tableName.getTableName());
 				String colName = ref.getColumnName();
 				int columnLength = ref.getEndOffset() - ref.getBeginOffset() + 1;
 
 				newText.append(originalActionText.substring(start, tokBeginOffset-actionOffset));
-				newText.append(genColumnReferenceSQL(dd, colName, tableName.getTableName(), tableName.getTableName().equals(oldTableName)));
+				int colPositionInRuntimeResultSet = -1;
+				ColumnDescriptor triggerColDesc = triggerTableDescriptor.getColumnDescriptor(colName);
+				int colPositionInTriggerTable = triggerColDesc.getPosition();
+
+				//This part of code is little tricky and following will help
+				//understand what mapping is happening here.
+				//eg
+				//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
+				//    REFERENCING OLD AS oldt NEW AS newt
+				//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+				//For the above trigger, triggerColsAndTriggerActionCols will 
+				//have [2,4]. What this means that, at run time, during trigger
+				//execution, these are the only 2 column positions that will be
+				//read into memory from the trigger table. The columns in other
+				//column positions are not needed for trigger execution. But
+				//even though column positions in original trigger table are 2
+				//and 4, their relative column positions in the columns read at
+				//execution time is really [1,2]. At run time, when the trigger
+				//gets fired, column position 2 from the trigger table will be
+				//read as the first column and column position 4 from the
+				//trigger table will be read as the second column. And those
+				//relative column positions at runtime is what should be used
+				//during trigger action conversion from
+				//UPDATE table2 SET c24=oldt.c14
+				//to
+				//UPDATE table2 SET c24=org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getOldRow().getInt(2)
+				//Note that the generated code above refers to column c14 from
+				//table1 by position 2 rather than position 4. Column c14's
+				//column position in table1 is 4 but in the relative columns
+				//that will be fetched during trigger execution, it's position
+				//is 2. That is what the following code is doing.
+				if (in10_7_orHigherVersion && triggerColsAndTriggerActionCols != null){
+					for (int j=0; j<triggerColsAndTriggerActionCols.length; j++){
+						if (triggerColsAndTriggerActionCols[j] == colPositionInTriggerTable)
+							colPositionInRuntimeResultSet=j+1;
+					}
+				} else
+					colPositionInRuntimeResultSet=colPositionInTriggerTable;
+
+				newText.append(genColumnReferenceSQL(dd, colName, 
+						tableName.getTableName(), 
+						tableName.getTableName().equals(oldTableName),
+						colPositionInRuntimeResultSet));
 				start = tokEndOffset- actionOffset + columnLength + 2;
 			}
+			//By this point, we are finished transforming the trigger action if
+			//it has any references to old/new transition variables.
+
+			//Now that we know what columns we need for trigger action columns,
+			//we can get rid of -1 entries for the remaining columns from
+			//trigger table.
+			//The final step is to put all the column positions from the 
+			//trigger table of the columns which are referenced in the trigger
+			//action through old/new transition variables. This information
+			//will be saved in SYSTRIGGERS and will be used at trigger 
+			//execution time to decide which columns need to be read into
+			//memory for trigger action
+			referencedColsInTriggerAction = justTheRequiredColumns(triggerActionColsOnly);
 		}
 		else
 		{
@@ -489,8 +921,17 @@ public class CreateTriggerNode extends DDLStatementNode
 					newText.append(baseTableName).append(" ");
 				}
 				start=tokEndOffset-actionOffset+1;
+				//If we are dealing with statement trigger, then we will read 
+				//all the columns from the trigger table since trigger will be
+				//fired for any of the columns in the trigger table.
+				referencedColInts= new int[numberOfColsInTriggerTable];
+				for (int j=0; j < numberOfColsInTriggerTable; j++)
+					referencedColInts[j]=j+1;
 			}
 		}
+
+		if (referencedColsInTriggerAction != null)
+			java.util.Arrays.sort(referencedColsInTriggerAction);
 
 		/*
 		** Parse the new action text with the substitutions.
@@ -510,6 +951,33 @@ public class CreateTriggerNode extends DDLStatementNode
 		return regenNode;
 	}
 
+	/*
+	 * The arrary passed will have either -1 or a column position as it's 
+	 * elements. If the array only has -1 as for all it's elements, then
+	 * this method will return null. Otherwise, the method will create a
+	 * new arrary with all -1 entries removed from the original arrary.
+	 */
+	private int[] justTheRequiredColumns(int[] columnsArrary) {
+		int countOfColsRefedInArray = 0;
+		int numberOfColsInTriggerTable = triggerTableDescriptor.getNumberOfColumns();
+
+		//Count number of non -1 entries
+		for (int i=0; i < numberOfColsInTriggerTable; i++) {
+			if (columnsArrary[i] != -1)
+				countOfColsRefedInArray++;
+		}
+
+		if (countOfColsRefedInArray > 0){
+			int[] tempArrayOfNeededColumns = new int[countOfColsRefedInArray];
+			int j=0;
+			for (int i=0; i < numberOfColsInTriggerTable; i++) {
+				if (columnsArrary[i] != -1)
+					tempArrayOfNeededColumns[j++] = columnsArrary[i];
+			}
+			return tempArrayOfNeededColumns;
+		} else
+			return null;
+	}
 	/*
 	** Sort the refs into array.
 	*/
@@ -628,7 +1096,8 @@ public class CreateTriggerNode extends DDLStatementNode
 		DataDictionary	dd, 
 		String			colName, 
 		String			tabName,
-		boolean			isOldTable
+		boolean			isOldTable,
+		int				colPositionInRuntimeResultSet
 	) throws StandardException
 	{
 		ColumnDescriptor colDesc = null;
@@ -672,7 +1141,7 @@ public class CreateTriggerNode extends DDLStatementNode
                 "CAST (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().");
             methodCall.append(isOldTable ? "getOldRow()" : "getNewRow()");
             methodCall.append(".getObject(");
-            methodCall.append(colDesc.getPosition());
+            methodCall.append(colPositionInRuntimeResultSet);
             methodCall.append(") AS ");
 
             /*
@@ -720,7 +1189,7 @@ public class CreateTriggerNode extends DDLStatementNode
                 "org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().");
             methodCall.append(isOldTable ? "getOldRow()" : "getNewRow()");
             methodCall.append(".getString(");
-            methodCall.append(colDesc.getPosition());
+            methodCall.append(colPositionInRuntimeResultSet);
             methodCall.append(") AS CLOB) PRESERVE WHITESPACE ) ");
 
             return methodCall.toString();
@@ -853,6 +1322,7 @@ public class CreateTriggerNode extends DDLStatementNode
 												actionCompSchemaId,
 											(Timestamp)null,	// creation time
 											referencedColInts,
+											referencedColsInTriggerAction,
 											originalActionText,
 											oldTableInReferencingClause,
 											newTableInReferencingClause,

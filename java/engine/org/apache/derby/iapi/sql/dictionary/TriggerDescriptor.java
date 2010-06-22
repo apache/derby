@@ -75,6 +75,7 @@ import java.io.IOException;
  * <li>	public TableDescriptor getTableDescriptor()
  * <li> public ReferencedColumns getReferencedColumnsDescriptor()
  * <li> public int[] getReferencedCols();
+ * <li> public int[] getReferencedColsInTriggerAction();
  * <li> public boolean isEnabled();
  * <li> public void setEnabled();
  * <li> public void setDisabled();
@@ -115,6 +116,7 @@ public class TriggerDescriptor extends TupleDescriptor
 	private SPSDescriptor		whenSPS;
 	private	boolean				isEnabled;
 	private	int[]				referencedCols;
+	private	int[]				referencedColsInTriggerAction;
 	private	Timestamp			creationTimestamp;
 	private UUID				triggerSchemaId;
 	private UUID				triggerTableId;
@@ -141,6 +143,9 @@ public class TriggerDescriptor extends TupleDescriptor
 	 * @param actionSPSId	the spsid for the trigger action (may be null)
 	 * @param creationTimestamp	when was this trigger created?
 	 * @param referencedCols	what columns does this trigger reference (may be null)
+	 * @param referencedColsInTriggerAction	what columns does the trigger 
+	 *						action reference through old/new transition variables
+	 *						(may be null)
 	 * @param triggerDefinition The original user text of the trigger action
 	 * @param referencingOld whether or not OLD appears in REFERENCING clause
 	 * @param referencingNew whether or not NEW appears in REFERENCING clause
@@ -162,6 +167,7 @@ public class TriggerDescriptor extends TupleDescriptor
 		UUID				actionSPSId,
 		Timestamp			creationTimestamp,
 		int[]				referencedCols,
+		int[]				referencedColsInTriggerAction,
 		String				triggerDefinition,
 		boolean				referencingOld,
 		boolean				referencingNew,
@@ -181,6 +187,7 @@ public class TriggerDescriptor extends TupleDescriptor
 		this.whenSPSId = whenSPSId;
 		this.isEnabled = isEnabled;
 		this.referencedCols = referencedCols;
+		this.referencedColsInTriggerAction = referencedColsInTriggerAction;
 		this.creationTimestamp = creationTimestamp;
 		this.triggerDefinition = triggerDefinition;
 		this.referencingOld = referencingOld;
@@ -394,6 +401,16 @@ public class TriggerDescriptor extends TupleDescriptor
 	public int[] getReferencedCols()
 	{
 		return referencedCols;
+	}
+
+	/**
+	 * Get the referenced column array for the trigger action columns.
+	 *
+	 * @return the referenced column array
+	 */
+	public int[] getReferencedColsInTriggerAction()
+	{
+		return referencedColsInTriggerAction;
 	}
 
 	/**
@@ -787,6 +804,15 @@ public class TriggerDescriptor extends TupleDescriptor
 				referencedCols[i] = in.readInt();
 			}
 		}
+		length = in.readInt();
+		if (length != 0)
+		{
+			referencedColsInTriggerAction = new int[length];
+			for (int i = 0; i < length; i++)
+			{
+				referencedColsInTriggerAction[i] = in.readInt();
+			}
+		}
 		triggerDefinition = (String)in.readObject();
 		referencingOld = in.readBoolean();
 		referencingNew = in.readBoolean();
@@ -850,6 +876,18 @@ public class TriggerDescriptor extends TupleDescriptor
 			for (int i = 0; i < referencedCols.length; i++)
 			{
 				out.writeInt(referencedCols[i]);
+			}
+		}	
+		if (referencedColsInTriggerAction == null)
+		{
+			out.writeInt(0);
+		}
+		else
+		{
+			out.writeInt(referencedColsInTriggerAction.length);
+			for (int i = 0; i < referencedColsInTriggerAction.length; i++)
+			{
+				out.writeInt(referencedColsInTriggerAction[i]);
 			}
 		}	
 		out.writeObject(triggerDefinition);

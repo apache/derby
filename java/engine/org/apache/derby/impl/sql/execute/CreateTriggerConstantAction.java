@@ -81,6 +81,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 	private UUID					spsCompSchemaId;
 	private Timestamp				creationTimestamp;
 	private int[]					referencedCols;
+	private int[]					referencedColsInTriggerAction;
 
 	// CONSTRUCTORS
 
@@ -104,6 +105,9 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 	 * @param creationTimestamp	when was this trigger created?  if null, will be
 	 *						set to the time that executeConstantAction() is invoked
 	 * @param referencedCols	what columns does this trigger reference (may be null)
+	 * @param referencedColsInTriggerAction	what columns does the trigger 
+	 *						action reference through old/new transition variables
+	 *						(may be null)
 	 * @param originalActionText The original user text of the trigger action
 	 * @param referencingOld whether or not OLD appears in REFERENCING clause
 	 * @param referencingNew whether or not NEW appears in REFERENCING clause
@@ -126,6 +130,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		UUID				spsCompSchemaId,
 		Timestamp			creationTimestamp,
 		int[]				referencedCols,
+		int[]				referencedColsInTriggerAction,
 		String				originalActionText,
 		boolean				referencingOld,
 		boolean				referencingNew,
@@ -148,6 +153,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		this.spsCompSchemaId = spsCompSchemaId;
 		this.creationTimestamp = creationTimestamp;
 		this.referencedCols = referencedCols;
+		this.referencedColsInTriggerAction = referencedColsInTriggerAction;
 		this.originalActionText = originalActionText;
 		this.referencingOld = referencingOld;
 		this.referencingNew = referencingNew;
@@ -304,6 +310,7 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 									actionSPSId,
 									creationTimestamp == null ? new Timestamp(System.currentTimeMillis()) : creationTimestamp,
 									referencedCols,
+									referencedColsInTriggerAction,
 									originalActionText,
 									referencingOld,
 									referencingNew,

@@ -39,4 +39,15 @@ public interface ReferencedColumns
 	 *			of the columns that are referenced in this check constraint.
 	 */
 	public int[]	getReferencedColumnPositions();
+	
+	/**
+	 * Returns an array of 1-based column positions in the trigger table.
+	 * These columns are the ones referenced in the trigger action through
+	 * the old/new transition variables.
+	 *
+	 * @return	An array of ints representing the 1-based column positions
+	 *			of the columns that are referenced in the trigger action
+	 *			through the old/new transition variables.
+	 */
+	public int[]	getTriggerActionReferencedColumnPositions();
 }

@@ -2033,7 +2033,7 @@ E
 T8
 null
 <systemid>
-null
+(1,2)
 select * from oldtable
 true
 false
@@ -4215,7 +4215,7 @@ E
 T8
 null
 <systemid>
-null
+(1,2)
 select * from oldtable
 true
 false
@@ -4933,7 +4933,7 @@ E
 T8
 null
 <systemid>
-null
+(1,2)
 select * from oldtable
 true
 false

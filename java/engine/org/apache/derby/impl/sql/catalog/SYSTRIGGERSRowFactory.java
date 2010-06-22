@@ -181,8 +181,9 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 			enabled = triggerDescriptor.isEnabled() ? "E" : "D";
 			tuuid = triggerDescriptor.getTableDescriptor().getUUID();
 			int[] refCols = triggerDescriptor.getReferencedCols();
-			rcd = (refCols != null) ? new
-				ReferencedColumnsDescriptorImpl(refCols) : null;
+			int[] refColsInTriggerAction = triggerDescriptor.getReferencedColsInTriggerAction();
+			rcd = (refCols != null || refColsInTriggerAction != null) ? new
+				ReferencedColumnsDescriptorImpl(refCols, refColsInTriggerAction) : null;
 
 			actionSPSID =  triggerDescriptor.getActionId();
 			whenSPSID =  triggerDescriptor.getWhenClauseId();
@@ -377,7 +378,7 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 		// 12th column is REFERENCEDCOLUMNS user type org.apache.derby.catalog.ReferencedColumns
 		col = row.getColumn(12);
 		rcd = (ReferencedColumns) col.getObject();
-
+		
 		// 13th column is TRIGGERDEFINITION (longvarhar)
 		col = row.getColumn(13);
 		triggerDefinition = col.getString();
@@ -412,6 +413,7 @@ public class SYSTRIGGERSRowFactory extends CatalogRowFactory
 									actionSPSID,
 									createTime,
 									(rcd == null) ? (int[])null : rcd.getReferencedColumnPositions(),
+									(rcd == null) ? (int[])null : rcd.getTriggerActionReferencedColumnPositions(),
 									triggerDefinition,
 									referencingOld,
 									referencingNew,

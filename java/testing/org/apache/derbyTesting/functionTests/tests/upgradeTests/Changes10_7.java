@@ -140,6 +140,133 @@ public class Changes10_7 extends UpgradeChange
     }
 
     /**
+     * Make sure that DERBY-1482 changes do not break backward compatibility
+     */
+    public void testTriggers() throws SQLException
+    {
+        Statement s = createStatement();
+        ResultSet rs;
+        boolean modeDb2SqlOptional = oldAtLeast(10, 3);
+
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+            s.execute("CREATE TABLE DERBY1482_table1(c11 int, c12 int)");
+            s.execute("INSERT INTO DERBY1482_table1 VALUES (1,10)");
+            s.execute("CREATE TABLE DERBY1482_table2(c21 int, c22 int)");
+            s.execute("CREATE TABLE DERBY1482_table3(c31 int, c32 int)");
+            s.execute("CREATE TABLE DERBY1482_table4(c41 int, c42 int)");
+            s.execute("CREATE TABLE DERBY1482_table5(c51 int, c52 int)");
+            //Create the first trigger in the older release where the
+            //database has been created. Every update of DERBY1482_table1.c12
+            //will cause an insert into DERBY1482_table2 through this trigger tr1.
+            s.execute("CREATE TRIGGER tr1 AFTER UPDATE OF c12 " +
+            		"ON DERBY1482_table1 REFERENCING OLD AS oldt " +
+            		"FOR EACH ROW " +
+                    (modeDb2SqlOptional?"":"MODE DB2SQL ") +
+                    "INSERT INTO DERBY1482_table2 VALUES(-1, oldt.c12)");
+            
+            //Now do an update which will fire trigger tr1
+            s.executeUpdate("UPDATE DERBY1482_table1 SET c12=-1 WHERE c11=1");
+            //Verify that trigger tr1 has inserted one row in DERBY1482_table2
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table2");
+            JDBC.assertFullResultSet(rs, new String[][]{{"1"}});
+            break;
+
+        case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
+            //Now do an update while in the soft upgrade. This should
+        	//fire trigger tr1
+            s.executeUpdate("UPDATE DERBY1482_table1 SET c12=-1 WHERE c11=1");
+            //Verify that now we have 2 rows in DERBY1482_table2 because trigger tr1
+            //has fired twice so far. Once in PH_CREATE phase and once
+            //in PH_SOFT_UPGRADE phase
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table2");
+            JDBC.assertFullResultSet(rs, new String[][]{{"2"}});
+            //Create trigger tr2 in soft upgrade mode. DERBY-1482 changes
+            //will not put anything about trigger action columns in 
+            //SYSTRIGGERS to maintain backward compatibility. Only 10.7
+            //and up recognize additional information about trigger action
+            //columns in SYSTRIGGERS.
+            s.execute("CREATE TRIGGER tr2 AFTER UPDATE OF c12 ON DERBY1482_table1 " +
+            		"REFERENCING OLD AS oldt FOR EACH ROW " +
+                    (modeDb2SqlOptional?"":"MODE DB2SQL ") +
+            		"INSERT INTO DERBY1482_table3 VALUES(-1, oldt.c12)");
+            //Now do an update which will fire triggers tr1 and tr2
+            s.executeUpdate("UPDATE DERBY1482_table1 SET c12=-1 WHERE c11=1");
+            //Verify that trigger tr1 has inserted one more row in DERBY1482_table2
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table2");
+            JDBC.assertFullResultSet(rs, new String[][]{{"3"}});
+            //Verify that trigger tr2 has inserted one row in DERBY1482_table3
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table3");
+            JDBC.assertFullResultSet(rs, new String[][]{{"1"}});
+            break;
+
+        case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old version after soft-upgrade
+            //Now do an update when we are back with the older release
+        	//after the soft upgrade. This should fire trigger tr1 and tr2
+            s.executeUpdate("UPDATE DERBY1482_table1 SET c12=-1 WHERE c11=1");
+            //Verify that now we have 4 rows in DERBY1482_table2 and 2 rows in DERBY1482_table3
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table2");
+            JDBC.assertFullResultSet(rs, new String[][]{{"4"}});
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table3");
+            JDBC.assertFullResultSet(rs, new String[][]{{"2"}});
+            //Create trigger tr3 with the older release. Triggers created in
+            //soft-upgrade mode and with older release should work fine.
+            s.execute("CREATE TRIGGER tr3 AFTER UPDATE OF c12 ON DERBY1482_table1 " +
+            		"REFERENCING OLD AS oldt FOR EACH ROW " +
+                    (modeDb2SqlOptional?"":"MODE DB2SQL ") +
+            		"INSERT INTO DERBY1482_table4 VALUES(-1, oldt.c12)");
+            //Now do an update which will fire triggers tr1, tr2 and tr3
+            s.executeUpdate("UPDATE DERBY1482_table1 SET c12=-1 WHERE c11=1");
+            //Verify that trigger tr1 has inserted one more row in DERBY1482_table2
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table2");
+            JDBC.assertFullResultSet(rs, new String[][]{{"5"}});
+            //Verify that trigger tr2 has inserted one more row in DERBY1482_table3
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table3");
+            JDBC.assertFullResultSet(rs, new String[][]{{"3"}});
+            //Verify that trigger tr3 has inserted one row in DERBY1482_table4
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table4");
+            JDBC.assertFullResultSet(rs, new String[][]{{"1"}});
+            break;
+
+        case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
+        	//Do an update after we have hard upgraded to 10.7 and make sure
+        	//that all the triggers (created with older release and created
+        	//in soft-upgrade mode) work fine.
+            s.executeUpdate("UPDATE DERBY1482_table1 SET c12=-1 WHERE c11=1");
+            //Verify that now we have 6 rows in DERBY1482_table2, 4 rows in DERBY1482_table3, 2 rows in DERBY1482_table4
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table2");
+            JDBC.assertFullResultSet(rs, new String[][]{{"6"}});
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table3");
+            JDBC.assertFullResultSet(rs, new String[][]{{"4"}});
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table4");
+            JDBC.assertFullResultSet(rs, new String[][]{{"2"}});
+            //Create trigger DERBY1482_table4 in the hard-upgraded db.
+            s.execute("CREATE TRIGGER tr4 AFTER UPDATE OF c12 ON DERBY1482_table1 " +
+            		"REFERENCING OLD AS oldt FOR EACH ROW " +
+                    (modeDb2SqlOptional?"":"MODE DB2SQL ") +
+            		"INSERT INTO DERBY1482_table5 VALUES(-1, oldt.c12)");
+            //All 4 triggers tr1, tr2, tr3 and tr4 should fire 
+            //Now do an update which will fire all 4 triggers tr1,tr2,tr3,tr4
+            s.executeUpdate("UPDATE DERBY1482_table1 SET c12=-1 WHERE c11=1");
+            //Verify that trigger tr1 has inserted one more row in DERBY1482_table2
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table2");
+            JDBC.assertFullResultSet(rs, new String[][]{{"7"}});
+            //Verify that trigger tr2 has inserted one more row in DERBY1482_table3
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table3");
+            JDBC.assertFullResultSet(rs, new String[][]{{"5"}});
+            //Verify that trigger tr3 has inserted one more row in DERBY1482_table4
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table4");
+            JDBC.assertFullResultSet(rs, new String[][]{{"3"}});
+            //Verify that trigger tr4 has inserted one row in DERBY1482_table5
+            rs = s.executeQuery("SELECT COUNT(*) FROM DERBY1482_table5");
+            JDBC.assertFullResultSet(rs, new String[][]{{"1"}});
+            break;
+        }
+        s.close();
+    }
+
+    /**
      * Make sure that that database is at level 10.7 in order to enjoy
      * routines with specified EXTERNAL SECURITY INVOKER or DEFINER.
      */

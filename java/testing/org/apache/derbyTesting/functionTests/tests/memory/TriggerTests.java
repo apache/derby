@@ -19,7 +19,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class TriggerTests extends BaseJDBCTestCase {
 
 	final int lobsize = 300000*1024;
-	boolean isDerby1482Fixed = false;
+	boolean testWithLargeDataInLOB = true;
+	
 	/**
 	 * Insert trigger tests
 	 * ****************
@@ -216,10 +217,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * clause, meaning that before and after values are not available to
 	 * the trigger action. 
 	 * ****************
-	 * 15)test5UpdateBeforeTriggerNoReferencingClause
+	 * 16)test5UpdateBeforeTriggerNoReferencingClause
 	 * 	This test creates an BEFORE UPDATE trigger but has no REFERENCING
 	 * clause, meaning that before and after values are not available to
 	 * the trigger action. 
+	 * ****************
+	 * 17)test6UpdateAfterTriggerNoTriggerColumn
+	 *  This test create an AFTER UPDATE trigger but does not identify any
+	 * trigger columns. It has REFERENCING clause. Void of trigger columns
+	 * will cause all the columns to be read into memory.
 	 * ****************
 	 */
     public TriggerTests(String name) {
@@ -230,7 +236,8 @@ public class TriggerTests extends BaseJDBCTestCase {
         Test suite = new CleanDatabaseTestSetup(TestConfiguration
                 .embeddedSuite(TriggerTests.class));
         Properties p = new Properties();
-        // use small pageCacheSize so we don't run out of memory on the insert.
+        // use small pageCacheSize so we don't run out of memory on the insert
+        // of large LOB columns.
         p.setProperty("derby.storage.pageCacheSize", "100");
         return new SystemPropertyTestSetup(suite,p);
     }
@@ -299,20 +306,18 @@ public class TriggerTests extends BaseJDBCTestCase {
 
 	/**
 	 * This test creates an AFTER INSERT trigger which inserts non-lob
-	 * columns into another table.
+	 * columns into another table. The triggering INSERT does not insert
+	 * any value into LOB column
 	 * @throws SQLException
 	 */
-	public void test1InsertAfterTrigger() throws SQLException{
-		if (isDerby1482Fixed == false)
-			return;
-		
+	public void test1InsertAfterTrigger() throws SQLException{	
         basicSetup();
         Statement s = createStatement();
 		s.execute("create trigger trigger1 AFTER INSERT on table1 referencing " +
 			"new as n_row for each row " +
 			"insert into table2(id, updates) values (n_row.id, -1)");
 		commit();
-   		runtest2InsertTriggerTest();		       	
+   		runtest1InsertTriggerTest();		       	
 	}
 
 	/**
@@ -323,20 +328,17 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertAfterTriggerStoredProc() throws SQLException{
-		if (isDerby1482Fixed == false)
-			return;
-		
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_InsertAfterTrigger_update_table " +
         		"(p1 int) parameter style java language "+
         		"java MODIFIES SQL DATA external name "+
-        		"'org.apache.derbyTesting.functionTests.tests.lang.derby1482TriggerTests.proc_test1_InsertAfterTrigger_update_table'");
+        		"'org.apache.derbyTesting.functionTests.tests.memory.TriggerTests.proc_test1_InsertAfterTrigger_update_table'");
 		s.execute("create trigger trigger1 after INSERT on table1 referencing " +
 			"new as n_row for each row " +
 			"call proc_test1_InsertAfterTrigger_update_table(n_row.id)");
 		commit();
-   		runtest2InsertTriggerTest();		       	
+   		runtest1InsertTriggerTest();		       	
 	}
 
 	/**
@@ -346,7 +348,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public static void proc_test1_InsertAfterTrigger_update_table(int p1) throws SQLException {
-    	System.out.println("Test1 : Inside the procedure called by the INSERT AFTER TRIGGER action");
         Connection conn = DriverManager.getConnection("jdbc:default:connection");
         PreparedStatement ps = conn.prepareStatement(
         		"insert into table2(id, updates) values (" + p1 + ",-1)");
@@ -357,10 +358,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	/**
 	 * This test creates an AFTER DELETE trigger which delets from another
 	 * table using non-lob from the triggering table in the where clause.
+	 * 
+	 * DELETE triggers read all the columns from the trigger table. Following
+	 * test is on a trigger table with large data in LOB columns and hence it
+	 * will run out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test1DeleteAfterTrigger() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -377,10 +383,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * trigger action is a stored procedure call. The work done by the trigger
 	 * action SQL in test1DeleteAfterTrigger gets done inside the stored procedure
 	 * for this test.
+	 * 
+	 * DELETE triggers read all the columns from the trigger table. Following
+	 * test is on a trigger table with large data in LOB columns and hence it
+	 * will run out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test1DeleteAfterTriggerStoredProc() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -388,7 +399,7 @@ public class TriggerTests extends BaseJDBCTestCase {
         s.execute("create procedure proc_test1_DeleteAfterTrigger_update_table " +
         		"(p1 int) parameter style java language "+
         		"java MODIFIES SQL DATA external name "+
-        		"'org.apache.derbyTesting.functionTests.tests.lang.derby1482TriggerTests.proc_test1_DeleteAfterTrigger_update_table'");
+        		"'org.apache.derbyTesting.functionTests.tests.memory.TriggerTests.proc_test1_DeleteAfterTrigger_update_table'");
 
 		s.execute("create trigger trigger1 after DELETE on table1 referencing " +
 				"old as o_row for each row " +
@@ -404,7 +415,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public static void proc_test1_DeleteAfterTrigger_update_table(int p1) throws SQLException {
-    	System.out.println("Test1 : Inside the procedure called by the DELETE AFTER TRIGGER action");
         Connection conn = DriverManager.getConnection("jdbc:default:connection");
         PreparedStatement ps = conn.prepareStatement(
         		"delete from table1 where id=" + p1);
@@ -431,9 +441,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateAfterTrigger() throws SQLException{
-		if (isDerby1482Fixed == false)
-			return;
-		
         basicSetup();
         Statement s = createStatement();
 		s.execute("create trigger trigger1 after update of status on table1 referencing " +
@@ -451,15 +458,12 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateAfterTriggerStoredProc() throws SQLException{
-		if (isDerby1482Fixed == false)
-			return;
-		
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_UpdateAfterTrigger_update_table " +
         		"(p1 int) parameter style java language "+
         		"java MODIFIES SQL DATA external name "+
-        		"'org.apache.derbyTesting.functionTests.tests.lang.derby1482TriggerTests.proc_test1_UpdateAfterTrigger_update_table'");
+        		"'org.apache.derbyTesting.functionTests.tests.memory.TriggerTests.proc_test1_UpdateAfterTrigger_update_table'");
 
 		s.execute("create trigger trigger1 after update of status on table1 REFERENCING " +
 				"NEW as n_row for each row call proc_test1_UpdateAfterTrigger_update_table(n_row.id)");
@@ -474,7 +478,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public static void proc_test1_UpdateAfterTrigger_update_table(int p1) throws SQLException {
-    	System.out.println("Test1 : Inside the procedure called by the UPDATE AFTER TRIGGER action");
         Connection conn = DriverManager.getConnection("jdbc:default:connection");
         PreparedStatement ps = conn.prepareStatement("update table2 "+
         		"set updates = updates + 1 where table2.id = " + p1);
@@ -489,8 +492,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertBeforeTrigger() throws SQLException{
-		if (isDerby1482Fixed == false)
-			return;
 		
         basicSetup();
         Statement s = createStatement();
@@ -498,7 +499,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 			"new as n_row for each row " +
 			"select updates from table2 where table2.id = n_row.id");
 		commit();
-   		runtest2InsertTriggerTest();		       	
+   		runtest1InsertTriggerTest();		       	
 	}
 
 	/**
@@ -509,19 +510,16 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertBeforeTriggerStoredProc() throws SQLException{
-		if (isDerby1482Fixed == false)
-			return;
-		
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_InsertBeforeTrigger_select_table " +
         		"(p1 int) parameter style java language "+
         		"java READS SQL DATA external name "+
-        		"'org.apache.derbyTesting.functionTests.tests.lang.derby1482TriggerTests.proc_test1_InsertBeforeTrigger_select_table'");
+        		"'org.apache.derbyTesting.functionTests.tests.memory.TriggerTests.proc_test1_InsertBeforeTrigger_select_table'");
 		s.execute("create trigger trigger1 no cascade before INSERT on table1 referencing " +
 			"new as n_row for each row call proc_test1_InsertBeforeTrigger_select_table(n_row.id)");
 		commit();
-		runtest2InsertTriggerTest();
+		runtest1InsertTriggerTest();
 	}
 	
 	/**
@@ -531,7 +529,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public static void proc_test1_InsertBeforeTrigger_select_table(int p1) throws SQLException {
-    	System.out.println("Test1 : Inside the procedure called by the INSERT BEFORE TRIGGER action");
         Connection conn = DriverManager.getConnection("jdbc:default:connection");
         PreparedStatement ps = conn.prepareStatement("select updates from " +
         		"table2 where table2.id = " + p1);
@@ -543,10 +540,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * This test creates a BEFORE DELETE trigger which selects 
 	 * columns from another table using "new" non-lob column for 
 	 * join clause.
+	 * 
+	 * DELETE triggers read all the columns from the trigger table. Following
+	 * test is on a trigger table with large data in LOB columns and hence it
+	 * will run out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test1DeleteBeforeTrigger() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -563,10 +565,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * trigger action is a stored procedure call. The work done by the trigger
 	 * action SQL in test1DeleteBeforeTrigger gets done inside the stored procedure
 	 * for this test.
+	 * 
+	 * DELETE triggers read all the columns from the trigger table. Following
+	 * test is on a trigger table with large data in LOB columns and hence it
+	 * will run out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test1DeleteBeforeTriggerStoredProc() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
        basicSetup();
@@ -575,7 +582,7 @@ public class TriggerTests extends BaseJDBCTestCase {
         s.execute("create procedure proc_test1_DeleteBeforeTrigger_select_table " +
         		"(p1 int) parameter style java language "+
         		"java READS SQL DATA external name "+
-        		"'org.apache.derbyTesting.functionTests.tests.lang.derby1482TriggerTests.proc_test1_DeleteBeforeTrigger_select_table'");
+        		"'org.apache.derbyTesting.functionTests.tests.memory.TriggerTests.proc_test1_DeleteBeforeTrigger_select_table'");
 
         s.execute("create trigger trigger1 no cascade before DELETE on table1 referencing " +
 				"old as o_row for each row call proc_test1_DeleteBeforeTrigger_select_table(o_row.id)");
@@ -590,7 +597,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public static void proc_test1_DeleteBeforeTrigger_select_table(int p1) throws SQLException {
-    	System.out.println("Test1 : Inside the procedure called by the DELETE BEFORE TRIGGER action");
         Connection conn = DriverManager.getConnection("jdbc:default:connection");
         PreparedStatement ps = conn.prepareStatement("select updates from " +
         		"table2 where table2.id = " + p1);
@@ -619,9 +625,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateBeforeTrigger() throws SQLException{
-		if (isDerby1482Fixed == false)
-			return;
-		
         basicSetup();
         Statement s = createStatement();
 
@@ -640,15 +643,12 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateBeforeTriggerStoredProc() throws SQLException{
-		if (isDerby1482Fixed == false)
-			return;
-		
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_UpdateBeforeTrigger_select_table " +
         		"(p1 int) parameter style java language "+
         		"java READS SQL DATA external name "+
-        		"'org.apache.derbyTesting.functionTests.tests.lang.derby1482TriggerTests.proc_test1_UpdateBeforeTrigger_select_table'");
+        		"'org.apache.derbyTesting.functionTests.tests.memory.TriggerTests.proc_test1_UpdateBeforeTrigger_select_table'");
 
 		s.execute("create trigger trigger1 no cascade before update of status on table1 REFERENCING " +
 				"NEW as n_row for each row call proc_test1_UpdateBeforeTrigger_select_table(n_row.id)");
@@ -663,7 +663,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public static void proc_test1_UpdateBeforeTrigger_select_table(int p1) throws SQLException {
-    	System.out.println("Test1 : Inside the procedure called by the UPDATE BEFORE TRIGGER action");
         Connection conn = DriverManager.getConnection("jdbc:default:connection");
         PreparedStatement ps = conn.prepareStatement("select updates from " +
         		"table2 where table2.id = " + p1);
@@ -676,10 +675,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * inserts lob columns from triggering table into another table. So, this
 	 * test does access the LOB from the triggering table inside the trigger
 	 * action.
+	 * 
+	 * INSERT trigger in this test is inserting large data in the LOB column
+	 * which will be used in the INSERT trigger and hence it will run out of 
+	 * memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test2InsertAfterTriggerAccessLOB() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -707,10 +711,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * deletes row from another table using triggering table's "new" LOB value
 	 * in the join clause. So, this test does access the LOB from the 
 	 * triggering table inside the trigger action.
+	 * 
+	 * DELETE triggers read all the columns from the trigger table. Following
+	 * test is on a trigger table with large data in LOB columns and hence it
+	 * will run out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test2DeleteAfterTriggerAccessLOB() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -753,10 +762,14 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * 	table1 but the update that caused the trigger is not updating 
 	 * 	the BLOB column
 	 * 
+	 * UPDATE trigger in this test is working with large data in the LOB column
+	 * inside the trigger action and hence it will run out of memory. For that 
+	 * reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test2UpdateAfterTriggerAccessLOB() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -783,10 +796,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * updates a lob column from the row just inserted. So, this test does
 	 * update the LOB from the triggering table inside the trigger
 	 * action.
+	 * 
+	 * INSERT trigger in this test is inserting large data in the LOB column
+	 * which will be used in the INSERT trigger and hence it will run out of 
+	 * memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test2InsertAfterTriggerUpdatedLOB() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -815,10 +833,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * updates a lob column from the row that just got updated. So, this test 
 	 * does update the LOB from the triggering table inside the trigger
 	 * action. 
+	 * 
+	 * UPDATE trigger in this test is working with large data in the LOB column
+	 * inside the trigger action and hence it will run out of memory. For that 
+	 * reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test2UpdateAfterTriggerUpdatedLOB() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -846,10 +869,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * This test creates a BEFORE INSERT trigger which selects "new"
 	 * lob column from just inserted row. This test does access the
 	 * LOB.
+	 * 
+	 * INSERT trigger in this test is inserting large data in the LOB column
+	 * which will be used in the INSERT trigger action and hence it will run  
+	 * out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test2InsertBeforeTriggerAccessLOB() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -875,10 +903,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * This test creates a BEFORE DELETE trigger which selects "old"
 	 * lob column from just deleted row. This test does access the
 	 * LOB.
+	 * 
+	 * DELETE triggers read all the columns from the trigger table. Following
+	 * test is on a trigger table with large data in LOB columns and hence it
+	 * will run out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test2DeleteBeforeTriggerAccessLOB() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -905,10 +938,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * This test creates a BEFORE UPDATE trigger which selects "new"
 	 * lob column from just updated row. This test does access the
 	 * LOB. 
+	 * 
+	 * UPDATE trigger in this test is working with large data in the LOB column
+	 * inside the trigger action and hence it will run out of memory. For that 
+	 * reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test2UpdateBeforeTriggerAccessLOB() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -946,10 +984,13 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * 	the trigger action will update table2 with non-LOB value from
 	 * 	table1
 	 * 
+	 * UPDATE trigger is defined on LOB column with large data and hence it 
+	 * will run out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test3UpdateAfterTrigger() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -967,10 +1008,13 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * action SQL in test3UpdateAfterTrigger gets done inside the stored procedure
 	 * for this test.
 	 * 
+	 * UPDATE trigger is defined on LOB column with large data and hence it 
+	 * will run out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test3UpdateAfterTriggerStoredProc() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -979,7 +1023,7 @@ public class TriggerTests extends BaseJDBCTestCase {
         s.execute("create procedure proc_test3_UpdateAfterTrigger_update_table " +
         		"(p1 int, p2 int) parameter style java language "+
         		"java MODIFIES SQL DATA external name "+
-        		"'org.apache.derbyTesting.functionTests.tests.lang.derby1482TriggerTests.proc_test3_UpdateAfterTrigger_update_table'");
+        		"'org.apache.derbyTesting.functionTests.tests.memory.TriggerTests.proc_test3_UpdateAfterTrigger_update_table'");
 
 		s.execute("create trigger trigger1 after update of bl on table1 REFERENCING " +
 				"NEW as n_row for each row call proc_test3_UpdateAfterTrigger_update_table(n_row.status, n_row.id)");
@@ -995,7 +1039,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public static void proc_test3_UpdateAfterTrigger_update_table(int p1, int p2) throws SQLException {
-    	System.out.println("Test3 : Inside the procedure called by the UPDATE AFTER TRIGGER action");
         Connection conn = DriverManager.getConnection("jdbc:default:connection");
         PreparedStatement ps = conn.prepareStatement("update table2 "+
         		"set updates = " + p1 + " where table2.id = " + p2);
@@ -1008,10 +1051,14 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * from another table using "new" non-LOB column from the triggering
 	 * table. This test has update trigger defined on the LOB column
 	 * but does not access/update that LOB column in the trigger action.
+	 * 
+	 * UPDATE trigger is defined on LOB column with large data and hence it 
+	 * will run out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test3UpdateBeforeTrigger() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -1029,10 +1076,14 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * trigger action is a stored procedure call. The work done by the trigger
 	 * action SQL in test3UpdateBeforeTrigger gets done inside the stored procedure
 	 * for this test.
+	 * 
+	 * UPDATE trigger is defined on LOB column with large data and hence it 
+	 * will run out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test3UpdateBeforeTriggerStoredProc() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -1041,7 +1092,7 @@ public class TriggerTests extends BaseJDBCTestCase {
         s.execute("create procedure proc_test3_UpdateBeforeTrigger_select_table " +
         		"(p1 int) parameter style java language "+
         		"java READS SQL DATA external name "+
-        		"'org.apache.derbyTesting.functionTests.tests.lang.derby1482TriggerTests.proc_test3_UpdateBeforeTrigger_select_table'");
+        		"'org.apache.derbyTesting.functionTests.tests.memory.TriggerTests.proc_test3_UpdateBeforeTrigger_select_table'");
 
 		s.execute("create trigger trigger1 no cascade before update of bl on table1 REFERENCING " +
 				"NEW as n_row for each row call proc_test3_UpdateBeforeTrigger_select_table(n_row.id)");
@@ -1056,7 +1107,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public static void proc_test3_UpdateBeforeTrigger_select_table(int p1) throws SQLException {
-    	System.out.println("Test3 : Inside the procedure called by the UPDATE BEFORE TRIGGER action");
         Connection conn = DriverManager.getConnection("jdbc:default:connection");
         PreparedStatement ps = conn.prepareStatement("select updates from " +
         		"table2 where table2.id = " + p1);
@@ -1077,10 +1127,13 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * 	trigger got fired for update of LOB column on the triggering
 	 * 	table.
 	 * 
+	 * UPDATE trigger is defined on LOB column with large data and hence it 
+	 * will run out of memory. For that reason, the test is disabled.
+	 * 
 	 * @throws SQLException
 	 */
 	public void test4UpdateAfterTriggerAccessLOB() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -1102,15 +1155,20 @@ public class TriggerTests extends BaseJDBCTestCase {
 		commit();		
    		runtest2UpdateTrigger();
 	}
-
+	
 	/**
 	 * The after update trigger on LOB column which then gets updated in the
 	 * trigger action. So this test updates the LOB in the trigger action
-	 * and is also the cause of the update trigger to fire. 
+	 * and is also the cause of the update trigger to fire.
+	 * 
+	 * The UPDATE trigger access the large data in LOB column inside the 
+	 * trigger action which will cause the test to run out of memory. For
+	 * this reason, this test is disabled.
+	 *  
 	 * @throws SQLException
 	 */ 
 	public void test4UpdateAfterTriggerUpdatedLOB() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -1140,10 +1198,15 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * This test creates a BEFORE UPDATE trigger on LOB column and
 	 * the trigger action selects "new" lob column from just updated 
 	 * row. This test does access the LOB. 
+	 * 
+	 * The UPDATE trigger access the large data in LOB column inside the 
+	 * trigger action and it is defined on the LOB column which will cause 
+	 * the test to run out of memory. For this reason, this test is disabled.
+	 *  
 	 * @throws SQLException
 	 */
 	public void test4UpdateBeforeTrigger() throws SQLException{
-		if (isDerby1482Fixed == false)
+		if (testWithLargeDataInLOB)
 			return;
 		
         basicSetup();
@@ -1254,6 +1317,39 @@ public class TriggerTests extends BaseJDBCTestCase {
 				"select updates from table2 where table2.id = 1");
 		commit();
    		runtest1UpdateTrigger();		       	
+	}
+
+	/**
+	 * This test create an AFTER UPDATE trigger but does not identify any
+	 * trigger columns. It has REFERENCING clause. Void of trigger columns
+	 * will cause all the columns to be read into memory.
+	 * 
+	 * When no trigger columns are defined for an UPDATE trigger, all the 
+	 * columns get read into memory. Since the trigger table has large data
+	 * in LOB columns, it will run out of memory. For that reason, the test 
+	 * is disabled.
+	 */
+	public void test6UpdateAfterTriggerNoTriggerColumn() throws SQLException{
+		if (testWithLargeDataInLOB)
+			return;
+		
+        basicSetup();
+	    Statement s = createStatement();
+
+        //The default table2 created by basicSetup does not match the 
+        //requirement of this test so dropping and recreating it.
+        s.execute("drop table table2");
+		s.execute("create table table2 (id int, bl_table2 blob(2G))");
+		s.execute("create trigger trigger1 after update on table1 referencing " +
+				"new as n_row for each row " +
+				"update table2 set bl_table2 = n_row.bl where table2.id = n_row.id");
+
+		PreparedStatement ps = prepareStatement(
+				"insert into table2 (id) values (?)");
+		ps.setInt(1, 1);
+	    ps.executeUpdate();
+		commit();		
+ 		runtest2UpdateTrigger();
 	}
 
 	/**

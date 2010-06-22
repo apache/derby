@@ -357,6 +357,9 @@ public class DataDescriptorGenerator
 	 * @param actionSPSId	the spsid for the trigger action (may be null)
 	 * @param creationTimestamp	when was this trigger created?
 	 * @param referencedCols	what columns does this trigger reference (may be null)
+	 * @param referencedColsInTriggerAction	what columns does the trigger 
+	 *						action reference through old/new transition variables
+	 *						(may be null)
 	 * @param triggerDefinition The original user text of the trigger action
 	 * @param referencingOld whether or not OLD appears in REFERENCING clause
 	 * @param referencingNew whether or not NEW appears in REFERENCING clause
@@ -379,6 +382,7 @@ public class DataDescriptorGenerator
 		UUID				actionSPSId,
 		Timestamp			creationTimestamp,
 		int[]				referencedCols,
+		int[]				referencedColsInTriggerAction,
 		String				triggerDefinition,
 		boolean				referencingOld,
 		boolean				referencingNew,
@@ -400,6 +404,7 @@ public class DataDescriptorGenerator
 					actionSPSId,
 					creationTimestamp,
 					referencedCols,
+					referencedColsInTriggerAction,
 					triggerDefinition,
 					referencingOld,
 					referencingNew,

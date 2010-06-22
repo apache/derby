@@ -716,8 +716,8 @@ public class DeleteNode extends DMLModStatementNode
 		Vector		conglomVector = new Vector();
 		relevantTriggers = new GenericDescriptorList();
 
-		FormatableBitSet	columnMap = DeleteNode.getDeleteReadMap(baseTable, conglomVector, relevantTriggers, needsDeferredProcessing );
-
+		FormatableBitSet	columnMap = DeleteNode.getDeleteReadMap(baseTable,conglomVector, relevantTriggers, needsDeferredProcessing);
+		
 		markAffectedIndexes( conglomVector );
 
 		adjustDeferredFlag( needsDeferredProcessing[0] );
@@ -983,7 +983,8 @@ public class DeleteNode extends DMLModStatementNode
 			while (descs.hasMoreElements())
 			{
 				TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
-				//Does this trigger have REFERENCING clause defined on it
+				//Does this trigger have REFERENCING clause defined on it.
+				//If yes, then read all the columns from the trigger table.
 				if (!trd.getReferencingNew() && !trd.getReferencingOld())
 					continue;
 				else

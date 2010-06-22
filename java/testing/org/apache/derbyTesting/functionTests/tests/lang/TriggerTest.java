@@ -439,6 +439,94 @@ public class TriggerTest extends BaseJDBCTestCase {
         s.executeUpdate("INSERT INTO TRADE VALUES(1, 1, 10)");
         commit();      
     }
+
+    //DERBY-1482
+    public void testReadRequiredColumnsOnlyFromTriggerTable() throws SQLException, IOException {
+        Statement s = createStatement();
+
+        s.executeUpdate("CREATE TABLE table1 (c11 int, c12 int, c13 int, c14 int, c15 int)");
+        s.executeUpdate("INSERT INTO table1 VALUES(1,2,3,4,5)");
+        s.executeUpdate("CREATE TABLE table2 (c21 int, c22 int, c23 int, c24 int, c25 int)");
+        s.executeUpdate("INSERT INTO table2 VALUES(2,2,3,-1,5)");
+        //Notice that following trigger references columns from trigger table
+        //randomly ie columns c12 and c14 are not the 1st 2 columns in trigger
+        //table but they will be the first 2 columns in the resultset generated
+        //for the trigger. The internal code generation for CreateTriggerNode
+        //has been written to handle this mismatch of column numbering
+        //between trigger table and trigger runtime resultset
+        s.executeUpdate("CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 " +
+        		" REFERENCING OLD AS oldt NEW AS newt" +
+        		" FOR EACH ROW UPDATE table2 SET c24=oldt.c14");
+        commit();      
+
+        s.executeUpdate("update table1 set c12 = -9 where c11=1");
+        ResultSet rs = s.executeQuery("SELECT * FROM table2");
+        String[][] result = {
+                {"2","2","3","4","5"},
+            };
+        JDBC.assertFullResultSet(rs, result);
+            
+        //couple negative test
+        //give invalid column in trigger column
+        String triggerStmt = "CREATE TRIGGER tr1 AFTER UPDATE OF c12xxx ON table1 " +
+        		" REFERENCING OLD AS oldt NEW AS newt" +
+        		" FOR EACH ROW UPDATE table2 SET c24=oldt.c14";
+        assertStatementError("42X14", s, triggerStmt);
+        
+        //give invalid column in trigger action
+        triggerStmt = "CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 " +
+		" REFERENCING OLD AS oldt NEW AS newt" +
+		" FOR EACH ROW UPDATE table2 SET c24=oldt.c14xxx";
+        assertStatementError("42X04", s, triggerStmt);
+        
+        //Test case involving before and after values of LOB columns
+        s.executeUpdate("create table derby1482_lob1 (str1 Varchar(80), " +
+        		"c_lob CLOB(50M))");
+        s.executeUpdate("create table derby1482_lob1_log(oldvalue CLOB(50M), " +
+        		"newvalue  CLOB(50M), " +
+        		"chng_time timestamp default current_timestamp)");
+        s.executeUpdate("create trigger tr1_derby1482_lob1 after update of c_lob " +
+        		"on derby1482_lob1 REFERENCING OLD AS old NEW AS new " +
+        		"FOR EACH ROW MODE DB2SQL "+
+        		"insert into derby1482_lob1_log(oldvalue, newvalue) values " +
+        		"(old.c_lob, new.c_lob)");
+        s.executeUpdate("INSERT INTO derby1482_lob1 VALUES ('1',null)");
+        s.executeUpdate("update derby1482_lob1 set c_lob = null");
+        rs = s.executeQuery("SELECT oldvalue, newvalue FROM derby1482_lob1_log");
+        result = new String [][] {{null, null}};
+        JDBC.assertFullResultSet(rs, result);
+        
+        //Test case involving a trigger which updates the trigger table
+        s.executeUpdate("create table derby1482_selfUpdate (i int, j int)");
+        s.executeUpdate("insert into derby1482_selfUpdate values (1,10)");
+        s.executeUpdate("create trigger tr_derby1482_selfUpdate " + 
+        		"after update of i on derby1482_selfUpdate " +
+        		"referencing old as old for each row " +
+        		"update derby1482_selfUpdate set j = old.j+1");
+        s.executeUpdate("update derby1482_selfUpdate set i=i+1");
+        rs = s.executeQuery("SELECT * FROM derby1482_selfUpdate");
+        result = new String [][] {{"2","11"}};
+        JDBC.assertFullResultSet(rs, result);
+        
+        //Test case where trigger definition uses REFERENCING clause but does
+        //not use those columns in trigger action
+        s.executeUpdate("create table t1_noTriggerActionColumn "+
+        		"(id int, status smallint)");
+        s.executeUpdate("insert into t1_noTriggerActionColumn values(11,1)");
+        s.executeUpdate("create table t2_noTriggerActionColumn " +
+        		"(id int, updates int default 0)");
+        s.executeUpdate("insert into t2_noTriggerActionColumn values(1,1)");
+        s.executeUpdate("create trigger tr1_noTriggerActionColumn " +
+        		"after update of status on t1_noTriggerActionColumn " +
+        		"referencing new as n_row for each row " +
+        		"update t2_noTriggerActionColumn set " +
+        		"updates = updates + 1 " +
+        		"where t2_noTriggerActionColumn.id = 1");
+        s.executeUpdate("update t1_noTriggerActionColumn set status=-1");
+        rs =s.executeQuery("SELECT * FROM t2_noTriggerActionColumn");
+        result = new String [][] {{"1","2"}};
+        JDBC.assertFullResultSet(rs, result);
+    }
     
     /** 
      * Test for DERBY-3238 trigger fails with IOException if triggering table has large lob.
@@ -501,7 +589,7 @@ public class TriggerTest extends BaseJDBCTestCase {
         
         s.executeUpdate("drop table lob1");
         s.executeUpdate("drop table t_lob1_log");
-        
+
         // now referencing the lob column
         trig = " create trigger t_lob1 after update of c_lob on lob1 ";
         trig = trig + " REFERENCING OLD AS old NEW AS new FOR EACH ROW MODE DB2SQL ";

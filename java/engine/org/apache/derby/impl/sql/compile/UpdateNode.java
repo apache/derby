@@ -938,15 +938,55 @@ public final class UpdateNode extends DMLModStatementNode
 	  *	4)	finds all constraints which overlap the updated columns
 	  *		and adds the constrained columns to the bitmap
 	  *	5)	finds all triggers which overlap the updated columns.
-	  *	6)	if there are any UPDATE triggers, then do one of the following
-	  *     a)If all of the triggers have MISSING referencing clause, then that
-	  *      means that the trigger actions do not have access to before and
-	  *      after values. In that case, there is no need to blanketly decide 
-	  *      to include all the columns in the read map just because there are
-	  *      triggers defined on the table.
-	  *     b)Since one/more triggers have REFERENCING clause on them, get all
-	  *      the columns because we don't know what the user will ultimately 
-	  *      reference.
+	  *	6)	Go through all those triggers from step 5 and for each one of
+	  *     those triggers, follow the rules below to decide which columns
+	  *     should be read.
+	  *       Rule1)If trigger column information is null, then read all the
+	  *       columns from trigger table into memory irrespective of whether
+	  *       there is any trigger action column information. 2 egs of such
+	  *       triggers
+	  *         create trigger tr1 after update on t1 for each row values(1);
+	  *         create trigger tr1 after update on t1 referencing old as oldt
+	  *         	for each row insert into t2 values(2,oldt.j,-2); 
+	  *       Rule2)If trigger column information is available but no trigger 
+	  *       action column information is found and no REFERENCES clause is
+	  *       used for the trigger, then read all the columns identified by 
+	  *       the trigger column. eg 
+	  *         create trigger tr1 after update of c1 on t1 
+	  *         	for each row values(1);
+	  *       Rule3)If trigger column information and trigger action column
+	  *       information both are not null, then only those columns will be
+	  *       read into memory. This is possible only for triggers created in
+	  *       release 10.7 or higher. Because prior to that we did not collect
+	  *       trigger action column informatoin. eg
+	  *         create trigger tr1 after update of c1 on t1 
+	  *         	referencing old as oldt for each row 
+	  *         	insert into t2 values(2,oldt.j,-2);
+	  *       Rule4)If trigger column information is available but no trigger 
+	  *       action column information is found but REFERENCES clause is used
+	  *       for the trigger, then read all the columns from the trigger 
+	  *       table. This will cover soft-upgrade and hard-upgrade scenario
+	  *       for triggers created pre-10.7. This rule prevents us from having
+	  *       special logic for soft-upgrade. Additionally, this logic makes
+	  *       invalidation of existing triggers unnecessary during 
+	  *       hard-upgrade. The pre-10.7 created triggers will work just fine
+	  *       even though for some triggers, they would have trigger action
+	  *       columns missing. A user can choose to drop and recreate such 
+	  *       triggers to take advantage of Rule 3 which will avoid unnecssary
+	  *       column reads during trigger execution.
+	  *       eg trigger created prior to 10.7
+	  *         create trigger tr1 after update of c1 on t1 
+	  *         	referencing old as oldt for each row 
+	  *         	insert into t2 values(2,oldt.j,-2);
+	  *       To reiterate, Rule4) is there to cover triggers created with
+	  *       pre-10,7 releases but now that database has been
+	  *       hard/soft-upgraded to 10.7 or higher version. Prior to 10.7,
+	  *       we did not collect any information about trigger action columns.
+	  *       Rule5)The only place we will need special code for soft-upgrade
+	  *       is during trigger creation. If we are in soft-upgrade mode, we
+	  *       want to make sure that we do not save information about trigger
+	  *       action columns in SYSTRIGGERS because the releases prior to 10.7
+	  *       do not understand trigger action column information.
 	  *	7)	adds the triggers to an evolving list of triggers
 	  *	8)	finds all generated columns whose generation clauses mention
       *        the updated columns and adds all of the mentioned columns
@@ -1039,43 +1079,64 @@ public final class UpdateNode extends DMLModStatementNode
         addGeneratedColumnPrecursors( baseTable, affectedGeneratedColumns, columnMap );
         
 		/*
-	 	** If we have any UPDATE triggers, then do one of the following
-	 	** 1)If all of the triggers have MISSING referencing clause, then that
-	 	** means that the trigger actions do not have access to before and 
-	 	** after values. In that case, there is no need to blanketly decide to
-	 	** include all the columns in the read map just because there are
-	 	** triggers defined on the table.
-	 	** 2)Since one/more triggers have REFERENCING clause on them, get all 
-	 	** the columns because we don't know what the user will ultimately reference.
+	 	* If we have any UPDATE triggers, then we will follow the 4 rules
+	 	* mentioned in the comments at the method level.
 	 	*/
 		baseTable.getAllRelevantTriggers( StatementType.UPDATE, changedColumnIds, relevantTriggers );
 
 		if (relevantTriggers.size() > 0)
-		{ 
+		{
 			needsDeferredProcessing[0] = true;
-			
-			boolean needToIncludeAllColumns = false;
 			Enumeration descs = relevantTriggers.elements();
 			while (descs.hasMoreElements())
 			{
 				TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
-				//Does this trigger have REFERENCING clause defined on it
-				if (!trd.getReferencingNew() && !trd.getReferencingOld())
-					continue;
-				else
-				{
-					needToIncludeAllColumns = true;
-					break;
-				}
-			}
+				
+				int[] referencedColsInTriggerAction = trd.getReferencedColsInTriggerAction();
+				int[] triggerCols = trd.getReferencedCols();
+				if (triggerCols == null || triggerCols.length == 0) {
+					for (int i=0; i < columnCount; i++) {
+						columnMap.set(i+1);
+					}
+					//no need to go through the test of the trigger because
+					//we have already decided to read all the columns 
+					//because no trigger action columns were found for the
+					//trigger that we are considering right now.
+					break; 
+				} else {
+					if (referencedColsInTriggerAction == null || 
+							referencedColsInTriggerAction.length == 0) {
+						//Does this trigger have REFERENCING clause defined on it
+						if (!trd.getReferencingNew() && !trd.getReferencingOld()) {
+							for (int ix = 0; ix < triggerCols.length; ix++)
+							{
+								columnMap.set(triggerCols[ix]);
+							}
+						} else {
+							for (int i=0; i < columnCount; i++) {
+								columnMap.set(i+1);
+							}							
+							//no need to go through the test of the trigger because
+							//we have already decided to read all the columns 
+							//because no trigger action columns were found for the
+							//trigger that we are considering right now.
+							break; 
+						}
+					} else {
+						for (int ix = 0; ix < triggerCols.length; ix++)
+						{
+							columnMap.set(triggerCols[ix]);
+						}
+						for (int ix = 0; ix < referencedColsInTriggerAction.length; ix++)
+						{
+							columnMap.set(referencedColsInTriggerAction[ix]);
+						}
+					}
+				}			
 
-			if (needToIncludeAllColumns) {
-				for (int i = 1; i <= columnCount; i++)
-				{
-					columnMap.set(i);
-				}
 			}
 		}
+
 
 		return	columnMap;
 	}
