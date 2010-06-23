@@ -354,7 +354,8 @@ public class BaseDataFileFactory
         String readOnlyMsg = (isReadOnly()) 
             ? MessageService.getTextMessage(MessageId.STORE_BOOT_READONLY_MSG)
             : "";
-
+        boolean logBootTrace = Boolean.valueOf(startParams.getProperty(Property.LOG_BOOT_TRACE,
+               PropertyUtil.getSystemProperty(Property.LOG_BOOT_TRACE))).booleanValue();
 		logMsg(CheapDateFormatter.formatDate(bootTime) +
 			   MessageService.getTextMessage(MessageId.STORE_BOOT_MSG,
                                              jbmsVersion,
@@ -364,6 +365,8 @@ public class BaseDataFileFactory
                                              (Object) this.getClass().getClassLoader()
                                              ));
 
+        if (logBootTrace)
+           Monitor.logThrowable(new Throwable("boot trace"));
 		uf = null;
 
 
@@ -461,6 +464,7 @@ public class BaseDataFileFactory
 		}
 
 		long shutdownTime = System.currentTimeMillis();
+		boolean logBootTrace = PropertyUtil.getSystemBoolean(Property.LOG_BOOT_TRACE);
 		logMsg("\n" + CheapDateFormatter.formatDate(shutdownTime) +
                 MessageService.getTextMessage(
                     MessageId.STORE_SHUTDOWN_MSG,
@@ -469,6 +473,10 @@ public class BaseDataFileFactory
                     // Cast to object so we don't get just the toString() 
                     // method
                     (Object) this.getClass().getClassLoader()));
+	
+		if (logBootTrace)
+			Monitor.logThrowable(new Throwable("shutdown trace"));
+			
 		istream.println(LINE);
 
 		if (!isCorrupt) 
