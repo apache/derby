@@ -1,7 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.
-                                         tools.ImportExportBinaryDataTest
+   Derby - Class org.apache.derbyTesting.functionTests.tests.tools.ImportExportBinaryDataTest
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -382,6 +381,15 @@ public class ImportExportBinaryDataTest extends ImportExportBaseTest {
 	
 	try {
 	    doExportTable("APP", "DERBY_2925_TAB", fileName, null, null , null);
+	    fail("export should have failed on existing data file.");
+	}
+	catch (SQLException e) {
+	    assertSQLState("XIE0S", e);
+	}
+
+    // should not be able to subvert the check by turning the file name into an url
+	try {
+	    doExportTable("APP", "DERBY_2925_TAB", "file:" + fileName, null, null , null);
 	    fail("export should have failed on existing data file.");
 	}
 	catch (SQLException e) {

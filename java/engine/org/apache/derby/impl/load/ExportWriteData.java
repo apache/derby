@@ -27,11 +27,11 @@ import java.io.OutputStreamWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.Reader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 import java.io.IOException;
 import java.io.File;
+
+import org.apache.derby.iapi.services.io.FileUtil;
 
 //this class takes the passed row and writes it into the data file using the
 //properties from the control file
@@ -96,15 +96,9 @@ final class ExportWriteData extends ExportWriteDataAbstract
 
   //prepares the o/p file for writing
   private void openFiles() throws Exception {
-    try {
-      URL url = new URL(outputFileName);
-      outputFileName = url.getFile();
-	  if (lobsInExtFile) {
-		  url = new URL(lobsFileName);
-		  lobsFileName = url.getFile();
-	  }
-    } catch (MalformedURLException ex) {}
 
+    outputFileName = FileUtil.stripProtocolFromFileName( outputFileName );
+    if ( lobsInExtFile ) { lobsFileName = FileUtil.stripProtocolFromFileName( lobsFileName ); }
     
     FileOutputStream anOutputStream = null;
     BufferedOutputStream buffered = null;

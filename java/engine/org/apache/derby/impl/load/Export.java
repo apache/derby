@@ -30,6 +30,7 @@ import java.security.PrivilegedAction;
 import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.FileUtil;
 
 
 /**
@@ -122,7 +123,8 @@ public class Export extends ExportAbstract{
             throw PublicAPI.wrapStandardException(
                       StandardException.newException(
 		      SQLState.LOB_DATA_FILE_NULL));
-        }
+            }
+            fileName = FileUtil.stripProtocolFromFileName( fileName );
             File file = new File(fileName);
 
             return fileExists(file);
@@ -139,7 +141,8 @@ public class Export extends ExportAbstract{
             throw PublicAPI.wrapStandardException(
                       StandardException.newException(
                       SQLState.DATA_FILE_NULL));
-        }
+            }
+            fileName = FileUtil.stripProtocolFromFileName( fileName );
             File file = new File(fileName);
 
             return fileExists(file);

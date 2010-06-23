@@ -26,7 +26,6 @@ import org.apache.derby.io.StorageFile;
 import java.io.InputStream;
 
 import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**

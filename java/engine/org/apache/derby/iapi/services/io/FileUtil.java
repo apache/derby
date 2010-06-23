@@ -26,6 +26,8 @@ import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
 	A set of public static methods for dealing with File objects.
@@ -554,4 +556,21 @@ nextFile:	for (int i = 0; i < list.length; i++) {
 		else
 			return new File(parent, name);
 	}
+
+	/**
+		Remove the leading 'file://' protocol from a filename which has been
+        expressed as an URL. If the filename is not an URL, then nothing is done.
+        Otherwise, an URL like 'file:///tmp/foo.txt' is transformed into the legal
+        file name '/tmp/foo.txt'.
+	*/
+    public static String stripProtocolFromFileName( String originalName )
+    {
+        String result = originalName;
+        try {
+            URL url = new URL(originalName);
+            result = url.getFile();
+        } catch (MalformedURLException ex) {}
+
+        return result;
+    }
 }
