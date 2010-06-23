@@ -609,6 +609,7 @@ public abstract class EmbedPreparedStatement
      * UNICODE parameter value
      * @param length the number of bytes in the stream
 	 * @exception SQLException thrown on failure.
+     * @deprecated
      */
     public void setUnicodeStream(int parameterIndex, InputStream x, int length)
 	    throws SQLException

@@ -313,7 +313,7 @@ public class propertyconfig {
 		FileOutputStream os = new FileOutputStream(outputfile);
 		try
 		{
-			outputProp.save(os, 
+			outputProp.store(os,
 							header.
 							concat("# config is ").concat(config).
 							concat(footer));
