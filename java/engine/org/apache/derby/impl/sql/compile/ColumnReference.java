@@ -887,7 +887,8 @@ public class ColumnReference extends ValueNode
                 // the wrong column. DERBY-4679.
                 ftRC = rcl.getResultColumn(
                     tableNumberBeforeFlattening,
-                    columnNumberBeforeFlattening);
+                    columnNumberBeforeFlattening,
+                    columnName);
 
                 if (ftRC == null) {
                     // The above lookup won't work for references to a base

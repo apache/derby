@@ -321,11 +321,19 @@ public class ResultColumnList extends QueryTreeNodeVector
      * table may appear multiple times in the queries with separate correlation
      * names, and/or column names from different tables may be the same (hence
      * looking up by column name will not always work), cf DERBY-4679.
+     * <p/>
+     * {@code columnName} is used to assert that we find the right column.
+     * If we found a match on (tn, cn) but columnName is wrong, return null.
+     * Once we trust table numbers and column numbers to always be correct,
+     * cf. DERBY-4695, we can remove this parameter.
      *
      * @param tableNumber the table number to look for
      * @param columnNumber the column number to look for
+     * @param columnName name of the desired column
      */
-    public ResultColumn getResultColumn(int tableNumber, int columnNumber)
+    public ResultColumn getResultColumn(int tableNumber,
+                                        int columnNumber,
+                                        String columnName)
     {
         int size = size();
 
@@ -347,10 +355,28 @@ public class ResultColumnList extends QueryTreeNodeVector
                         if (ft.getTableNumber() == tableNumber &&
                                 rc.getColumnPosition() == columnNumber) {
 
-                            // Found matching (t,c) within this top resultColumn
-                            resultColumn.setReferenced();
-                            return resultColumn;
-
+                            // Found matching (t,c) within this top
+                            // resultColumn. Now do sanity check that column
+                            // name is correct. Remove when DERBY-4695 is
+                            // fixed.
+                            if (columnName.equals(
+                                        vcn.getSourceColumn().getName())) {
+                                resultColumn.setReferenced();
+                                return resultColumn;
+                            } else {
+                                if (SanityManager.DEBUG) {
+                                    SanityManager.ASSERT(
+                                        false,
+                                        "wrong (tn,cn) for column " +
+                                        columnName +
+                                        " found: this pair points to " +
+                                        vcn.getSourceColumn().getName());
+                                }
+                                // Fall back on column name based lookup,
+                                // cf. DERBY-4679. See ColumnReference#
+                                // remapColumnReferencesToExpressions
+                                return null;
+                            }
                         } else {
                             rc = vcn.getSourceColumn();
                         }
