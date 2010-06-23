@@ -2082,20 +2082,20 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         PooledConnection pc = ds.getPooledConnection();
         Connection conn = pc.getConnection();
 
-        testConnectionFlowCommitWork(conn, 1);
+        testConnectionFlowCommitWork(conn);
         conn.close();
         
         //Test for XADataSource
         XADataSource xs = J2EEDataSource.getXADataSource();
         XAConnection xc = xs.getXAConnection();
         conn = xc.getConnection();
-        testConnectionFlowCommitWork(conn, 1);
+        testConnectionFlowCommitWork(conn);
         conn.close();
         
         //Test for DataSource
         DataSource jds = JDBCDataSource.getDataSource();
         conn = jds.getConnection();
-        testConnectionFlowCommitWork(conn, 1);
+        testConnectionFlowCommitWork(conn);
         conn.close();       
     }
 
@@ -2104,8 +2104,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * @param conn
      * @throws SQLException
      **/  
-    private void testConnectionFlowCommitWork(Connection conn, int expectednumtransaction) throws SQLException {
+    private void testConnectionFlowCommitWork(Connection conn) throws SQLException {
         //DERBY 4653 - make sure commit with no work does not flow in client
+        conn.setAutoCommit(false);
         int startXactId = getClientTransactionID(conn);
         Statement s = conn.createStatement();
         ResultSet rs = s.executeQuery("values 1");
