@@ -1108,6 +1108,7 @@ abstract class MethodCallNode extends JavaValueNode
 						// as it (incorrectly but historically always has) maps a DECIMAL to a double. 
 
 						switch (ctid.getJDBCTypeId()) {
+						case java.sql.Types.BOOLEAN:
 						case java.sql.Types.SMALLINT:
 						case java.sql.Types.INTEGER:
 						case java.sql.Types.BIGINT:

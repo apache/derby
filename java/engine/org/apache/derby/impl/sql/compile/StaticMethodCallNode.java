@@ -457,6 +457,7 @@ public class StaticMethodCallNode extends MethodCallNode
 
 					String arrayType;
 					switch (typeId.getJDBCTypeId()) {
+						case java.sql.Types.BOOLEAN:
 						case java.sql.Types.SMALLINT:
 						case java.sql.Types.INTEGER:
 						case java.sql.Types.BIGINT:

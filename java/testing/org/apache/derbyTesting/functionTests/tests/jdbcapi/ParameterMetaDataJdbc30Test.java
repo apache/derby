@@ -281,6 +281,56 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 		ps.close();
 	}
 
+    /**
+     * Testing a callable statement by calling a SQL procedure with 
+     * boolean IN parameters, OUT parameters and IN_OUT parameters.
+     */
+	public void testBooleanProcedureArgs() throws Exception
+    {
+        Statement stmt = createStatement();
+
+        stmt.executeUpdate("create procedure booleanProc" + 
+                           "( in inarg boolean, out outarg boolean, inout inoutarg boolean )" + 
+                           "language java external name "+ 
+                           "'org.apache.derbyTesting.functionTests." +
+                           "tests.jdbcapi.ParameterMetaDataJdbc30Test.booleanProc' " +
+                           "parameter style java");
+        
+        CallableStatement cs = prepareCall("CALL booleanProc(?,?,?)");
+        cs.registerOutParameter(2,Types.BOOLEAN);
+        cs.registerOutParameter(3,Types.BOOLEAN);
+
+        //verify the meta data for the parameters
+        ParameterMetaData paramMetaData = cs.getParameterMetaData();
+		assertEquals("Unexpected parameter count", 3, paramMetaData.getParameterCount());
+        
+		//expected values to be stored in a 2dim. array	
+		String [][] parameterMetaDataArray0 =
+            {
+                //isNullable, isSigned, getPrecision, getScale, getParameterType, getParameterTypeName, getParameterClassName, getParameterMode
+                {"PARAMETER_NULLABLE", "false", "1", "0", "16", "BOOLEAN", "java.lang.Boolean", "PARAMETER_MODE_IN"},
+                {"PARAMETER_NULLABLE", "false", "1", "0", "16", "BOOLEAN", "java.lang.Boolean", "PARAMETER_MODE_OUT"},
+                {"PARAMETER_NULLABLE", "false", "1", "0", "16", "BOOLEAN", "java.lang.Boolean", "PARAMETER_MODE_IN_OUT"},
+            };
+        
+		testParameterMetaData(paramMetaData, parameterMetaDataArray0);
+
+        cs.setBoolean( 1,  true );
+        cs.setBoolean( 3, true );
+        cs.execute();
+        assertEquals( true, cs.getBoolean( 2 ) );
+        assertEquals( false, cs.getBoolean( 3 ) );
+
+        cs.setObject( 1,  Boolean.FALSE );
+        cs.setObject( 3, Boolean.FALSE );
+        cs.execute();
+        assertEquals( false, cs.getBoolean( 2 ) );
+        assertEquals( true, cs.getBoolean( 3 ) );
+
+		stmt.close();
+		cs.close();
+	}
+
 	/** 
 	 * DERBY-44 added support for SELECT ... WHERE column LIKE ? ESCAPE ?
          * This test case tests
@@ -850,4 +900,11 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
          */
         public static void dummyDecimal(BigDecimal in_param, BigDecimal in_param2, BigDecimal[] in_param3, BigDecimal[] in_param4) {
 	 }
+
+    /** Java method for testing procedures with boolean args */
+    public static void booleanProc( boolean inarg, boolean[] outarg, boolean[] inoutarg )
+    {
+        outarg[ 0 ] = inarg;
+        inoutarg[ 0 ] = !inoutarg[ 0 ];
+    }
 }

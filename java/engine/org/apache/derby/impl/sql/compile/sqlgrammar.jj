@@ -10778,7 +10778,7 @@ procedureParameterDefinition(Vector[] list) throws StandardException :
 	[   LOOKAHEAD( { dataTypeCheck(2) })
 	    parameterName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
 	]
-	typeDescriptor = dataTypeDDL( false )
+	typeDescriptor = dataTypeDDL( true )
 	{
 		list[0].addElement(parameterName);
 		list[1].addElement(typeDescriptor.getCatalogType());

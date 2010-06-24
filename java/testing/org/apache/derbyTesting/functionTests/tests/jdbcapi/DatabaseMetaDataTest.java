@@ -4370,8 +4370,12 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     // Possible TODO: 
     //   rewrite data portion of this test to compare results from 
     //   metadata with sys.sys* query results (leave shape check in place)
-    public void testGetProceduresGetProcColumns() throws SQLException {
-        
+    public void testGetProceduresGetProcColumns() throws Exception {
+
+        boolean supportsBoolean = true;
+        Version dataVersion = getDataVersion( getConnection() );
+        if ( dataVersion.compareTo( new Version( 10, 7, 0, 0 ) ) < 0 ) { supportsBoolean = false; }
+
         Statement s = createStatement();
         getConnection().setAutoCommit(false);
         
@@ -4406,7 +4410,15 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         s.execute("create procedure GETPCTEST4Bx(out retparam INTEGER) "+
                 "language java external name " +
                 "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.getpc4b'" +
-        " parameter style java"); 
+        " parameter style java");
+
+        if ( supportsBoolean )
+        {
+            s.execute("create procedure GETPCTEST5(in inarg boolean, out outarg boolean, inout inoutarg boolean) "+
+                      "language java external name " +
+                      "'org.apache.derbyTesting.functionTests.tests.jdbcapi.DatabaseMetaDataTest.foo'" +
+                      " parameter style java");
+        }
         
         ResultSet rs[] = getProcedures(null, "%", "GETPCTEST%");
         String[][] expRS = new String[][] {
@@ -4418,10 +4430,22 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {"","APP","GETPCTEST4B","null","null","null","getpc4b","1"},
                 {"","APP","GETPCTEST4BX","null","null","null","getpc4b","1"},
         };
+
+        if ( supportsBoolean )
+        {
+            expRS = appendArray
+                (
+                 expRS,
+                 new String[][]
+                 {
+                     {"","APP","GETPCTEST5","null","null","null","foo","1"},
+                 }
+                 );
+        }
         for (int j=0 ; j<2 ; j++)
         {
             int rowcount = 0;
-            while (rowcount < 7){
+            while (rowcount < expRS.length){
                 rs[j].next();
                 assertEquals(expRS[rowcount][0], rs[j].getString(1));
                 assertEquals(expRS[rowcount][1], rs[j].getString(2));
@@ -4457,12 +4481,25 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {null,"APP","GETPCTEST3A","STRING2","4","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","2","YES","genid","2","1"},
                 {null,"APP","GETPCTEST3B","STRING3","1","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","1","YES","genid","2","0"},
                 {null,"APP","GETPCTEST3B","STRING4","2","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","2","YES","genid","2","1"},
-                {null,"APP","GETPCTEST4BX","RETPARAM","4","4","INTEGER","10","4","0","10","1",null,null,"4",null,null,"1","YES","genid","1","0"}
+                {null,"APP","GETPCTEST4BX","RETPARAM","4","4","INTEGER","10","4","0","10","1",null,null,"4",null,null,"1","YES","genid","1","0"},
         };
+        if ( supportsBoolean )
+        {
+            expRS = appendArray
+                (
+                 expRS,
+                 new String[][]
+                 {
+                     {null,"APP","GETPCTEST5","INARG","1","16","BOOLEAN","1","1",null,null,"1",null,null,"16",null,null,"1","YES","genid","3","0"},
+                     {null,"APP","GETPCTEST5","OUTARG","4","16","BOOLEAN","1","1",null,null,"1",null,null,"16",null,null,"2","YES","genid","3","1"},
+                     {null,"APP","GETPCTEST5","INOUTARG","2","16","BOOLEAN","1","1",null,null,"1",null,null,"16",null,null,"3","YES","genid","3","2"},
+                 }
+                 );
+        }
         for (int j=0 ; j<2 ; j++)
         {
             int rowcount = 0;
-            while (rowcount < 19){
+            while (rowcount < expRS.length){
                 rs[j].next();
                 for (int k=0 ; k<19 ; k++){
                     if (j == 0 && (k == 14 || k == 15))
@@ -4495,6 +4532,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             }
         }
         
+        if ( supportsBoolean ) { s.execute("drop procedure GETPCTEST5"); }
         s.execute("drop procedure GETPCTEST4Bx");
         s.execute("drop procedure GETPCTEST4B");
         s.execute("drop procedure GETPCTEST4A");
@@ -4503,6 +4541,20 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         s.execute("drop procedure GETPCTEST2");
         s.execute("drop procedure GETPCTEST1");
         commit();
+    }
+    private String[][] appendArray( String[][] target, String[][] suffix )
+    {
+        int targetLength = target.length;
+        int suffixLength = suffix.length;
+        int resultLength = targetLength + suffixLength;
+
+        String[][] result = new String[ resultLength ][];
+        for ( int i = 0; i < targetLength; i++ ) { result[ i ] = target[ i ]; }
+        for ( int i = 0; i < suffixLength; i++ ) { result[ targetLength + i ] = suffix[ i ]; }
+
+        println( "Appended array" );
+
+        return result;
     }
 
     /**
