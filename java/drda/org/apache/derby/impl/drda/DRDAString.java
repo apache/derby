@@ -112,7 +112,7 @@ final class DRDAString {
     public String toString() {
         if (cachedString == null) {
             cachedString =
-                ccsidManager.convertToUCS2(buffer);
+                ccsidManager.convertToJavaString(buffer);
         }
         return cachedString;
     }

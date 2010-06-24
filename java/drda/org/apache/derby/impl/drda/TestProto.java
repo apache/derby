@@ -52,7 +52,6 @@ public class TestProto {
 	private static final CodePointNameTable codePointNameTable = new CodePointNameTable();
 	private static final Hashtable codePointValueTable = new Hashtable();
 	private static final Hashtable commandTable = new Hashtable();
-	private	static final CcsidManager ccsidManager = new EbcdicCcsidManager();
 	//commands
 	private static final int CREATE_DSS_REQUEST = 1;
 	private static final int CREATE_DSS_OBJECT = 2;
@@ -124,7 +123,7 @@ public class TestProto {
 	private Socket monitorSocket = null;
 	private InputStream monitorIs = null;
 	private OutputStream monitorOs = null;
-	private DDMWriter writer = new DDMWriter(ccsidManager, null, null);
+	private DDMWriter writer = new DDMWriter(null, null);
 	private DDMReader reader;
 	private boolean failed = false;
 	private StreamTokenizer tkn;
@@ -140,7 +139,7 @@ public class TestProto {
 
 		try 
 		{
-			reader = new DDMReader(ccsidManager, monitorIs);
+			reader = new DDMReader(monitorIs);
 			processFile(filename);
 		}
 		catch (Exception e)
@@ -402,7 +401,7 @@ public class TestProto {
 				break;
 			case WRITE_SCALAR_PADDED_BYTES:
 				writer.writeScalarPaddedBytes(getCP(), getBytes(), getInt(),
-					ccsidManager.space);
+					writer.getCurrentCcsidManager().space);
 				break;
 			case WRITE_BYTE:
 				writer.writeByte(getInt());
@@ -435,7 +434,8 @@ public class TestProto {
 				int reqLen = getInt();
 				int strLen = str.length();
 				if (strLen < reqLen)
-					writer.padBytes(ccsidManager.space, reqLen-strLen);
+					writer.padBytes(writer.getCurrentCcsidManager().space, 
+					                reqLen-strLen);
 				break;
 			case READ_REPLY_DSS:
 				reader.readReplyDss();
@@ -680,7 +680,7 @@ public class TestProto {
 		if (!str.startsWith("0x"))
 		{
 			//just convert the string to ebcdic byte array
-			return ccsidManager.convertFromUCS2(str);
+			return writer.getCurrentCcsidManager().convertFromJavaString(str);
 		}
 		else
 		{
@@ -953,7 +953,7 @@ public class TestProto {
 	 */
 	private byte[] getEBCDIC(String str)
 	{
-		return ccsidManager.convertFromUCS2(str);
+		return writer.getCurrentCcsidManager().convertFromJavaString(str);
 	}
 	/**
 	 * Write an encoded string

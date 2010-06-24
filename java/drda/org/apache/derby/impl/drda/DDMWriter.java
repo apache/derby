@@ -69,7 +69,11 @@ class DDMWriter
 	// top of the stack
 	private int top;
 
-	// CCSID manager for translation of strings in the protocol to EBCDIC
+	// CCSID manager for translation of strings in the protocol to UTF-8 and EBCDIC
+	private EbcdicCcsidManager ebcdicCcsidManager;
+	private Utf8CcsidManager utf8CcsidManager;
+	
+	// Current CCSID manager
 	private CcsidManager ccsidManager;
 
 	// DRDA connection thread for this writer
@@ -120,10 +124,14 @@ class DDMWriter
     
     volatile long totalByteCount = 0;
     
-	DDMWriter (CcsidManager ccsidManager, DRDAConnThread agent, DssTrace dssTrace)
+	DDMWriter (DRDAConnThread agent, DssTrace dssTrace)
 	{
+	    // Create instances of the two ccsid managers and default to EBCDIC
+	    this.ebcdicCcsidManager = new EbcdicCcsidManager();
+	    this.utf8CcsidManager = new Utf8CcsidManager();
+	    this.ccsidManager = this.ebcdicCcsidManager;
+	    
 		this.buffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE);
-		this.ccsidManager = ccsidManager;
 		this.agent = agent;
 		this.prevHdrLocation = -1;
 		this.previousCorrId = DssConstants.CORRELATION_ID_UNKNOWN;
@@ -138,6 +146,21 @@ class DDMWriter
 			.onUnmappableCharacter(CodingErrorAction.REPLACE);
 	}
 
+	// Switch the ccsidManager to the UTF-8 instance
+	protected void setUtf8Ccsid() {
+	    ccsidManager = utf8CcsidManager;
+	}
+	
+	// Switch the ccsidManager to the EBCDIC instance
+	protected void setEbcdicCcsid() {
+	    ccsidManager = ebcdicCcsidManager;
+	}
+	
+	// Get the current ccsidManager
+	protected CcsidManager getCurrentCcsidManager() {
+	    return ccsidManager;
+	}
+	
 	/**
 	 * reset values for sending next message
 	 *
@@ -883,7 +906,7 @@ class DDMWriter
 		ensureLength ((stringLength * 2)  + 4);
 		buffer.putShort((short) (stringLength + 4));
 		buffer.putShort((short) codePoint);
-		ccsidManager.convertFromUCS2(string, buffer);
+		ccsidManager.convertFromJavaString(string, buffer);
 	}
 
 	/**
@@ -901,7 +924,7 @@ class DDMWriter
 		ensureLength (paddedLength + 4);
 		buffer.putShort((short) (paddedLength + 4));
 		buffer.putShort((short) codePoint);
-		ccsidManager.convertFromUCS2(string, buffer);
+		ccsidManager.convertFromJavaString(string, buffer);
 		padBytes(ccsidManager.space, fillLength);
 	}
 
@@ -918,7 +941,7 @@ class DDMWriter
 
 		int fillLength = paddedLength -stringLength;
 		ensureLength (paddedLength);
-		ccsidManager.convertFromUCS2(string, buffer);
+		ccsidManager.convertFromJavaString(string, buffer);
 		padBytes(ccsidManager.space, fillLength);
 	}
 

@@ -124,14 +124,14 @@ class EbcdicCcsidManager extends CcsidManager
 	  );
 	}
 
-	byte[] convertFromUCS2 (String sourceString)
+	byte[] convertFromJavaString (String sourceString)
 	{
 		ByteBuffer buf = ByteBuffer.allocate(sourceString.length());
-		convertFromUCS2(sourceString, buf);
+		convertFromJavaString(sourceString, buf);
 		return buf.array();
 	}
 
-	void convertFromUCS2 (String sourceString, ByteBuffer buffer)
+	void convertFromJavaString (String sourceString, ByteBuffer buffer)
 	{
 		for (int i=0; i < sourceString.length(); i++) {
 			char c = sourceString.charAt (i);
@@ -142,7 +142,7 @@ class EbcdicCcsidManager extends CcsidManager
 		}
 	}
 
-	String convertToUCS2 (byte[] sourceBytes)
+	String convertToJavaString (byte[] sourceBytes)
 	{
 		int i = 0;
 		char[] theChars = new char[sourceBytes.length];
@@ -156,7 +156,7 @@ class EbcdicCcsidManager extends CcsidManager
 		return new String (theChars);
 	}
 
-	String convertToUCS2 (byte[] sourceBytes, int offset, int numToConvert)
+	String convertToJavaString (byte[] sourceBytes, int offset, int numToConvert)
 	{
 		int i = 0,j = 0;
 		char[] theChars = new char[numToConvert];

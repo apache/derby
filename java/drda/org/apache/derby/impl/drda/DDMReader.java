@@ -109,6 +109,8 @@ class DDMReader
     };
 
 	private DRDAConnThread agent;
+	private Utf8CcsidManager utf8CcsidManager;
+	private EbcdicCcsidManager ebcdicCcsidManager;
 	private CcsidManager ccsidManager;
 
 	// data buffer
@@ -175,11 +177,11 @@ class DDMReader
 	 * It is used by TestProto to read the protocol returned by the
 	 * server 
 	 */
-	DDMReader(CcsidManager ccsidManager, InputStream inputStream)
+	DDMReader(InputStream inputStream)
 	{
 		buffer = new byte[DEFAULT_BUFFER_SIZE];
 		ddmCollectionLenStack = new long[MAX_MARKS_NESTING];
-		this.ccsidManager = ccsidManager;
+		
 		this.inputStream = inputStream;
 		initialize(null, null);
 		// turn off tracing
@@ -202,9 +204,11 @@ class DDMReader
 	protected void initialize(DRDAConnThread agent, DssTrace dssTrace)
   	{
 		this.agent = agent;
+		this.utf8CcsidManager = new Utf8CcsidManager();
+        this.ebcdicCcsidManager = new EbcdicCcsidManager();
+        this.ccsidManager = ebcdicCcsidManager;
 		if (agent != null)
 		{
-			ccsidManager = agent.ccsidManager;
 			inputStream = agent.getInputStream();
 		}
 		topDdmCollectionStack = EMPTY_STACK;
@@ -218,6 +222,21 @@ class DDMReader
 		this.dssTrace = dssTrace;
 	}
 
+	// Switch the ccsidManager to the UTF-8 instance
+    protected void setUtf8Ccsid() {
+        ccsidManager = utf8CcsidManager;
+    }
+    
+    // Switch the ccsidManager to the EBCDIC instance
+    protected void setEbcdicCcsid() {
+        ccsidManager = ebcdicCcsidManager;
+    }
+    
+    // Get the current ccsidManager
+    protected CcsidManager getCurrentCcsidManager() {
+        return ccsidManager;
+    }
+    
 	protected boolean terminateChainOnErr()
 	{
 		return terminateChainOnErr;
@@ -1378,7 +1397,7 @@ class DDMReader
 		if (plainText == null)
 			return null;
 		else
-			return ccsidManager.convertToUCS2(plainText);
+			return ccsidManager.convertToJavaString(plainText);
 	}
 
 	/**
@@ -1394,7 +1413,7 @@ class DDMReader
 	{
 		ensureBLayerDataInBuffer (length, ADJUST_LENGTHS);
 
-		String result = ccsidManager.convertToUCS2 (buffer, pos, length);
+		String result = ccsidManager.convertToJavaString(buffer, pos, length);
 		pos += length;
 		return result;
 	}
@@ -1587,7 +1606,7 @@ class DDMReader
 	 */
 	protected String convertBytes(byte[] buf)
 	{
-		return ccsidManager.convertToUCS2 (buf, 0, buf.length);
+		return ccsidManager.convertToJavaString (buf, 0, buf.length);
 	}
 
 	// Private methods

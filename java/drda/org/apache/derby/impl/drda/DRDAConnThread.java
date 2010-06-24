@@ -102,7 +102,6 @@ class DRDAConnThread extends Thread {
 	private static final int ROLLBACK = 2;
 
 
-	protected CcsidManager ccsidManager = new EbcdicCcsidManager();
 	private int correlationID;
 	private InputStream sockis;
 	private OutputStream sockos;
@@ -155,13 +154,13 @@ class DRDAConnThread extends Thread {
 	 * <code>parsePKGNAMCSN()</code>. */
 	private Pkgnamcsn prevPkgnamcsn = null;
 	/** Current RDB Package Name. */
-	private DRDAString rdbnam = new DRDAString(ccsidManager);
+	private DRDAString rdbnam = null;
 	/** Current RDB Collection Identifier. */
-	private DRDAString rdbcolid = new DRDAString(ccsidManager);
+	private DRDAString rdbcolid = null;
 	/** Current RDB Package Identifier. */
-	private DRDAString pkgid = new DRDAString(ccsidManager);
+	private DRDAString pkgid = null;
 	/** Current RDB Package Consistency Token. */
-	private DRDAString pkgcnstkn = new DRDAString(ccsidManager);
+	private DRDAString pkgcnstkn = null;
 	/** Current RDB Package Section Number. */
 	private int pkgsn;
 
@@ -605,7 +604,14 @@ class DRDAConnThread extends Thread {
 		sockos = session.sessionOutput;
 
 		reader = new DDMReader(this, session.dssTrace);
-		writer = new DDMWriter(ccsidManager, this, session.dssTrace);
+		writer = new DDMWriter(this, session.dssTrace);
+		
+		/* At this stage we can initialize the strings as we have
+		 * the CcsidManager for the DDMWriter. */
+		rdbnam = new DRDAString(writer.getCurrentCcsidManager());
+	    rdbcolid = new DRDAString(writer.getCurrentCcsidManager());
+	    pkgid = new DRDAString(writer.getCurrentCcsidManager());
+	    pkgcnstkn = new DRDAString(writer.getCurrentCcsidManager());
 	}
 
 	/**

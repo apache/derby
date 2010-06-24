@@ -152,8 +152,8 @@ public class ProtocolTest
         try {
             Reader cmdStream = new StringReader(this.commandSequence);
             processCommands(cmdStream,
-                            new DDMReader(ccsidManager, monitorIs),
-                            new DDMWriter(ccsidManager, null, null),
+                            new DDMReader(monitorIs),
+                            new DDMWriter(null, null),
                             monitorOs);
         } finally {
             monitorIs.close();
@@ -554,7 +554,7 @@ public class ProtocolTest
         if (!str.startsWith("0x"))
         {
             //just convert the string to ebcdic byte array
-            return ccsidManager.convertFromUCS2(str);
+            return ccsidManager.convertFromJavaString(str);
         }
         else
         {
@@ -768,7 +768,7 @@ public class ProtocolTest
      */
     private byte[] getEBCDIC(String str)
     {
-        return ccsidManager.convertFromUCS2(str);
+        return ccsidManager.convertFromJavaString(str);
     }
 
     /**

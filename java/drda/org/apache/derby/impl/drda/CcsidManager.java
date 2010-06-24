@@ -44,7 +44,7 @@ abstract class CcsidManager
   //
   // @param sourceString A Java String to convert.
   // @return A new byte array representing the String in a particular ccsid.
-  abstract byte[] convertFromUCS2 (String sourceString);
+  abstract byte[] convertFromJavaString (String sourceString);
 
 
     /**
@@ -54,21 +54,26 @@ abstract class CcsidManager
      * @param sourceString  A Java String to convert.
      * @param buffer        The buffer to convert the String into.
      */
-    abstract void convertFromUCS2(String sourceString, ByteBuffer buffer);
+    abstract void convertFromJavaString(String sourceString, ByteBuffer buffer);
 
   // Convert a byte array representing characters in a particular ccsid into a Java String.
   //
   // @param sourceBytes An array of bytes to be converted.
   // @return String A new Java String Object created after conversion.
-  abstract String convertToUCS2 (byte[] sourceBytes);
+  abstract String convertToJavaString (byte[] sourceBytes);
 
 
-  // Convert a byte array representing characters in a particular ccsid into a Java String.
-  //
-  // @param sourceBytes An array of bytes to be converted.
-  // @param offset  An offset indicating first byte to convert.
-  // @param numToConvert The number of bytes to be converted.
-  // @return A new Java String Object created after conversion.
-  abstract String convertToUCS2 (byte[] sourceBytes, int offset, int numToConvert);
+  /**
+   * Convert a byte array representing characters in a particular ccsid into a Java String.
+   * 
+   * Mind the fact that for certain encodings (e.g. UTF8), the offset and numToConvert
+   * actually represent characters and 1 character does not always equal to 1 byte.
+   * 
+   * @param sourceBytes An array of bytes to be converted.
+   * @param offset An offset indicating first byte to convert.
+   * @param numToConvert The number of bytes to be converted.
+   * @return A new Java String Object created after conversion.
+   */
+  abstract String convertToJavaString (byte[] sourceBytes, int offset, int numToConvert);
 
 }
