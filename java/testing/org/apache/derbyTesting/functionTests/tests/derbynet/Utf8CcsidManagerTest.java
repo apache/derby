@@ -42,7 +42,7 @@ public class Utf8CcsidManagerTest extends BaseTestCase {
     /**
      * Use the Utf8CcsidManager to convert strings from UCS2/UTF-16 into UTF-8
      */
-    public void testConvertFromUCS2() throws Exception {
+    public void testConvertFromJavaString() throws Exception {
         // Get the UTF-16 representation of "Hello World" in Chinese
         String ucs2String = new String(new String("\u4f60\u597d\u4e16\u754c").getBytes("UTF-16"),"UTF-16");
         
@@ -73,7 +73,7 @@ public class Utf8CcsidManagerTest extends BaseTestCase {
     /**
      * Use the Utf8CcsidManager to convert strings from UTF-8 into UCS2/UTF-16
      */
-    public void testConvertToUCS2() throws Exception {
+    public void testConvertToJavaString() throws Exception {
         // Get the UTF-8 bytes for "Hello World" in Chinese
         byte[] utf8Bytes = new String("\u4f60\u597d\u4e16\u754c").getBytes("UTF-8");
         
