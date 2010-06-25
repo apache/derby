@@ -116,6 +116,9 @@ public class Sed
         searchStrings.addElement("^Transaction:\\(.*\\) *\\|"); 
         searchStrings.addElement("^Read [0-9]* of [0-9]* bytes$");
         searchStrings.addElement("Directory .*connect.wombat.seg0");
+        //DERBY-4588 - filter out specific class and object id
+        searchStrings.addElement("with class loader .*,");
+        
         // Filter for constraint names - bug 5622 - our internal constraint names are too long. To be db2 compatible, we have reworked them.
         StringBuffer constraintNameFilter = new StringBuffer(); 
         constraintNameFilter.append("SQL[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]");
@@ -208,6 +211,7 @@ public class Sed
         subStrings.addElement("Transaction:(XXX)|");
         subStrings.addElement("Read ... bytes");
         subStrings.addElement("Directory DBLOCATION/seg0");
+        subStrings.addElement("with class loader XXXX, ");
         subStrings.addElement("xxxxGENERATED-IDxxxx");
         subStrings.addElement("xxxxFILTERED-UUIDxxxx");
         subStrings.addElement("xxxxxxFILTERED-TIMESTAMPxxxxx");

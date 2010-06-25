@@ -24,7 +24,7 @@ ERROR XJ015: Derby system shutdown.
 ij> -- test for bug 3668
 -- try the old password, should fail
 connect 'jdbc:derby:wombat;bootPassword=Thursday';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> connect 'jdbc:derby:wombat;bootPassword=Wednesday';
 ij> -- switch back to old password
@@ -85,13 +85,13 @@ ij> disconnect;
 ij> connect 'jdbc:derby:;shutdown=true';
 ERROR XJ015: Derby system shutdown.
 ij> connect 'jdbc:derby:wombat';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> connect 'jdbc:derby:wombat;bootPassword=Thursday';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> connect 'jdbc:derby:wombat;bootPassword=Saturday';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> connect 'jdbc:derby:wombat;bootPassword=derbypwd';
 ij> values SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('bootPassword');
@@ -119,7 +119,7 @@ ij> disconnect;
 ij> connect 'jdbc:derby:;shutdown=true';
 ERROR XJ015: Derby system shutdown.
 ij> connect 'jdbc:derby:wombat;bootPassword=derbypwd';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.  
 ij> connect 'jdbc:derby:wombat;bootPassword=derbypwdxx';
 ij> select * from t1;
