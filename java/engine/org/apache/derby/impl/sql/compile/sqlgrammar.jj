@@ -7205,7 +7205,7 @@ DataTypeDescriptor xmlSerializeTargetType() throws StandardException :
 			ReuseFactory.getInteger(getToken(1).beginColumn));
 	}
 |
-	<AS> targetType = dataTypeDDL( false )
+	<AS> targetType = dataTypeDDL( true )
 	{
 		return targetType;
 	}
@@ -13835,11 +13835,11 @@ List/*<TypeDescriptor>*/ parameterTypeList( ) throws StandardException :
     TypeDescriptor type;
 }
 {
-    [ type = catalogType( false )
+    [ type = catalogType( true )
         {
             list.add(type);
         }
-      ( <COMMA> type = catalogType( false )
+      ( <COMMA> type = catalogType( true )
         {
             list.add(type);
         }

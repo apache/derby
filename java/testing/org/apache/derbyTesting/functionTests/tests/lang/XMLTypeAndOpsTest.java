@@ -653,6 +653,9 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         assertStatementError("42X01", st, "select xmlserialize(x as) from t1");
         assertStatementError("42Z73", st,
             " select xmlserialize(x as int) from t1");
+
+        assertStatementError("42Z73", st,
+            " select xmlserialize(x as boolean) from t1");
         
         assertStatementError("42Z73", st,
             " select xmlserialize(x as varchar(20) for bit data) from t1");

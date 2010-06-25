@@ -306,6 +306,21 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st_satConnection.executeUpdate(
             " drop function f_abs");
         
+        // DERBY-4714
+        
+        st_satConnection.executeUpdate(
+            "CREATE FUNCTION F_4714(P1 BOOLEAN) RETURNS BOOLEAN NO "
+            + "SQL RETURNS NULL ON NULL INPUT EXTERNAL NAME "
+            + "'org.apache.derbyTesting.functionTests.tests.lang.BooleanValuesTest.booleanValue' LANGUAGE JAVA PARAMETER STYLE JAVA");
+
+        st_satConnection.executeUpdate(
+            " grant execute on function F_4714(boolean) to bar");
+        st_satConnection.executeUpdate(
+            " revoke execute on function F_4714(boolean) from bar restrict");
+
+        st_satConnection.executeUpdate(
+            " drop function F_4714");
+        
         // Tests with views
         
         st_satConnection.executeUpdate(
