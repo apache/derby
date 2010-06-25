@@ -15,10 +15,11 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.JDBC;
 
 public class TriggerTests extends BaseJDBCTestCase {
 
-	final int lobsize = 300000*1024;
+	final int lobsize = 50000*1024;
 	boolean testWithLargeDataInLOB = true;
 	
 	/**
@@ -328,6 +329,12 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertAfterTriggerStoredProc() throws SQLException{
+        // JSR169 cannot run with tests with stored procedures
+        // that do database access - for they require a
+        // DriverManager connection to jdbc:default:connection;
+        // DriverManager is not supported with JSR169.
+        if (JDBC.vmSupportsJSR169()) 
+        	return;
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_InsertAfterTrigger_update_table " +
@@ -458,6 +465,12 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateAfterTriggerStoredProc() throws SQLException{
+        // JSR169 cannot run with tests with stored procedures
+        // that do database access - for they require a
+        // DriverManager connection to jdbc:default:connection;
+        // DriverManager is not supported with JSR169.
+        if (JDBC.vmSupportsJSR169()) 
+        	return;
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_UpdateAfterTrigger_update_table " +
@@ -510,6 +523,12 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertBeforeTriggerStoredProc() throws SQLException{
+        // JSR169 cannot run with tests with stored procedures
+        // that do database access - for they require a
+        // DriverManager connection to jdbc:default:connection;
+        // DriverManager is not supported with JSR169.
+        if (JDBC.vmSupportsJSR169()) 
+        	return;
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_InsertBeforeTrigger_select_table " +
@@ -643,6 +662,12 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateBeforeTriggerStoredProc() throws SQLException{
+        // JSR169 cannot run with tests with stored procedures
+        // that do database access - for they require a
+        // DriverManager connection to jdbc:default:connection;
+        // DriverManager is not supported with JSR169.
+        if (JDBC.vmSupportsJSR169()) 
+        	return;
         basicSetup();
         Statement s = createStatement();
         s.execute("create procedure proc_test1_UpdateBeforeTrigger_select_table " +
