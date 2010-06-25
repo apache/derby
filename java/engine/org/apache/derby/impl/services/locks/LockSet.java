@@ -273,12 +273,18 @@ final class LockSet implements LockTable {
 
 forever:	for (;;) {
 
-                byte wakeupReason = waitingLock.waitForGrant(actualTimeout);
-                
+                byte wakeupReason = 0;
                 ActiveLock nextWaitingLock = null;
                 Object[] deadlockData = null;
 
                 try {
+                    try {
+                        wakeupReason = waitingLock.waitForGrant(actualTimeout);
+                    } catch(StandardException e) {
+                        nextWaitingLock = control.getNextWaiter(waitingLock, true, this);
+                        throw e;
+                    }
+
                     boolean willQuitWait;
                     Enumeration timeoutLockTable = null;
                     long currentTime = 0;
