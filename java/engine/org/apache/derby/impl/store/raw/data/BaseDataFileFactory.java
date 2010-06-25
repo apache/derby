@@ -367,8 +367,10 @@ public class BaseDataFileFactory
 			   MessageService.getTextMessage(MessageId.STORE_BOOT_MSG,
                                              jbmsVersion,
                                              identifier,
-                                             dataDirectory,
-                                             readOnlyMsg));
+                                             dataDirectory + " " + readOnlyMsg,
+                                             // cast to Object so we get object hash code
+                                             (Object) this.getClass().getClassLoader()
+                                             ));
 
         if (logBootTrace)
            Monitor.logThrowable(new Throwable("boot trace"));
@@ -473,7 +475,11 @@ public class BaseDataFileFactory
 		logMsg("\n" + CheapDateFormatter.formatDate(shutdownTime) +
                 MessageService.getTextMessage(
                     MessageId.STORE_SHUTDOWN_MSG,
-                    getIdentifier()));
+                    getIdentifier(), 
+                    // print object and ide of classloader.
+                    // Cast to object so we don't get just the toString() 
+                    // method
+                    (Object) this.getClass().getClassLoader()));
 	
 		if (logBootTrace)
 			Monitor.logThrowable(new Throwable("shutdown trace"));

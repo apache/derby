@@ -259,7 +259,7 @@ ij> ---check the error case of log device only existing when
 -- we try to do createFrom .
 --following connection shoul fail.
 connect 'erwombat;createFrom=extinout/mybackup/wombat;logDevice=extinout/crwombatlog';
-ERROR XJ040: Failed to start database 'erwombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'erwombat' with class loader XXXX,  see the next exception for details.
 ERROR XSLAT: The log directory 'extinout<ps>crwombatlog<ps>log' exists. The directory might belong to another database. Check that the location specified for the logDevice attribute is correct.
 ij> connect 'wombat;restoreFrom=extinout/mybackup/wombat;logDevice=extinout/wombatlog';
 ij> values SUBSTR(SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('logDevice'), LOCATE('wombatlog',SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('logDevice')),9);
@@ -806,7 +806,7 @@ ij> disconnect;
 ij> --NEGATIVE TEST with  RESTORE FLAGS
 -- with createFrom option should give erro on existing database
 connect 'wombat;createFrom=extinout/mybackup/wombat';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XBM0J: Directory DBLOCATION/wombat already exists.
 ij> -- specify conflictint attributes; it should fail.
 connect 'wombat;create=true;createFrom=extinout/mybackup/wombat';
@@ -821,13 +821,13 @@ ij> connect 'wombat;createFrom=extinout/mybackup/wombat;rollForwardRecoveryFrom=
 ERROR XJ081: Conflicting create/restore/recovery attributes specified.
 ij> -- With wrong back up path name it shoud fail.
 connect 'wombat;rollForwardRecoveryFrom=nobackup/wombat';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XBM0Y: Backup database directory nobackup<ps>wombat not found. Please make sure that the specified backup path is right.
 ij> connect 'wombat;restoreFrom=nobackup/wombat';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XBM0Y: Backup database directory nobackup<ps>wombat not found. Please make sure that the specified backup path is right.
 ij> connect 'wombat2;createFrom=nobackup/wombat';
-ERROR XJ040: Failed to start database 'wombat2', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat2' with class loader XXXX,  see the next exception for details.
 ERROR XBM0Y: Backup database directory nobackup<ps>wombat not found. Please make sure that the specified backup path is right.
 ij> --Simulate missing files by renaming some files in backup(like a corrupted backup and check 
 --whether we get proper error messages
@@ -836,21 +836,21 @@ connect 'wombat2;restoreFrom=extinout/mybackup/wombat';
 ij> call RENAME_FILE('extinout/mybackup/wombat/','service.properties','service.properties.old');
 0 rows inserted/updated/deleted
 ij> connect 'wombat;restoreFrom=extinout/mybackup/wombat';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XBM0Q: File extinout<ps>mybackup<ps>wombat<ps>service.properties not found. Please make sure that backup copy is the correct one and it is not corrupted.
 ij> call RENAME_FILE('extinout/mybackup/wombat/','service.properties.old','service.properties');
 0 rows inserted/updated/deleted
 ij> call RENAME_FILE('extinout/mybackup/wombat/','log','log.old');
 0 rows inserted/updated/deleted
 ij> connect 'wombat;restoreFrom=extinout/mybackup/wombat';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XSLAS: Log directory extinout<ps>mybackup<ps>wombat<ps>log not found in backup during restore. Please make sure that backup copy is the correct one and it is not corrupted.
 ij> call RENAME_FILE('extinout/mybackup/wombat/','log.old','log');
 0 rows inserted/updated/deleted
 ij> call RENAME_FILE('extinout/mybackup/wombat/','seg0','data.old');
 0 rows inserted/updated/deleted
 ij> connect 'wombat;restoreFrom=extinout/mybackup/wombat';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XSDG6: Data segment directory not found in extinout<ps>mybackup<ps>wombat backup during restore. Please make sure that backup copy is the right one and it is not corrupted.
 ij> call RENAME_FILE('extinout/mybackup/wombat/','data.old','seg0');
 0 rows inserted/updated/deleted
@@ -859,21 +859,21 @@ ij> --try error cases with createFrom;if root created is not getting cleaned up,
 call RENAME_FILE('extinout/mybackup/wombat/','service.properties','service.properties.old');
 0 rows inserted/updated/deleted
 ij> connect 'wombat;createFrom=extinout/mybackup/wombat';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XBM0Q: File extinout<ps>mybackup<ps>wombat<ps>service.properties not found. Please make sure that backup copy is the correct one and it is not corrupted.
 ij> call RENAME_FILE('extinout/mybackup/wombat/','service.properties.old','service.properties');
 0 rows inserted/updated/deleted
 ij> call RENAME_FILE('extinout/mybackup/wombat/','log','log.old');
 0 rows inserted/updated/deleted
 ij> connect 'wombat;createFrom=extinout/mybackup/wombat';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XSLAS: Log directory extinout<ps>mybackup<ps>wombat<ps>log not found in backup during restore. Please make sure that backup copy is the correct one and it is not corrupted.
 ij> call RENAME_FILE('extinout/mybackup/wombat/','log.old','log');
 0 rows inserted/updated/deleted
 ij> call RENAME_FILE('extinout/mybackup/wombat/','seg0','data.old');
 0 rows inserted/updated/deleted
 ij> connect 'wombat;createFrom=extinout/mybackup/wombat';
-ERROR XJ040: Failed to start database 'wombat', see the next exception for details.
+ERROR XJ040: Failed to start database 'wombat' with class loader XXXX,  see the next exception for details.
 ERROR XSDG6: Data segment directory not found in extinout<ps>mybackup<ps>wombat backup during restore. Please make sure that backup copy is the right one and it is not corrupted.
 ij> call RENAME_FILE('extinout/mybackup/wombat/','data.old','seg0');
 0 rows inserted/updated/deleted
