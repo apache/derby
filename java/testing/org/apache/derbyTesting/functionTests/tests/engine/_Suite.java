@@ -47,6 +47,7 @@ public class _Suite extends BaseTestCase  {
         TestSuite suite = new TestSuite("engine");
 
         suite.addTest(ErrorStreamTest.suite());
+        suite.addTest(LockInterruptTest.suite());
         suite.addTest(ModuleLoadingTest.suite());
 
         return suite;
