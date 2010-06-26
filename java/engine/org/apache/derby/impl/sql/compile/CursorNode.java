@@ -30,6 +30,7 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.impl.sql.CursorInfo;
@@ -263,6 +264,28 @@ public class CursorNode extends DMLStatementNode
 							+ fromList.size()
 							+ " on return from RS.bindExpressions()");
 			}
+			
+			//DERBY-4191 Make sure that we have minimum select privilege on 
+			//each of the tables in the query.
+			getCompilerContext().pushCurrentPrivType(Authorizer.MIN_SELECT_PRIV);
+			FromList resultSetFromList = resultSet.getFromList();
+			for (int index = 0; index < resultSetFromList.size(); index++) {
+				FromTable fromTable = (FromTable) resultSetFromList.elementAt(index);
+				if (fromTable.isPrivilegeCollectionRequired() && fromTable instanceof FromBaseTable)
+					//We ask for MIN_SELECT_PRIV requirement of the first
+					//column in the table. The first column is just a 
+					//place holder. What we really do at execution time when 
+					//we see we are looking for MIN_SELECT_PRIV privilege is
+					//as follows
+					//1)we will look for SELECT privilege at table level
+					//2)If not found, we will look for SELECT privilege on 
+					//ANY column, not necessarily the first column. But since
+					//the constructor for column privilege requires us to pass
+					//a column descriptor, we just choose the first column for
+					//MIN_SELECT_PRIV requirement.
+					getCompilerContext().addRequiredColumnPriv(fromTable.getTableDescriptor().getColumnDescriptor(1));
+			}
+			getCompilerContext().popCurrentPrivType();
 		}
 		finally
 		{

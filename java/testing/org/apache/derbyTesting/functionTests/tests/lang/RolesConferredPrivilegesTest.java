@@ -63,7 +63,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
     private final static String TRIGGERDROPPED       = "01502";
     private final static String UNRELIABLE           = "42Y39";
 
-    private final static String[] users = {"test_dbo", "DonaldDuck"};
+    private final static String[] users = {"test_dbo", "DonaldDuck", "MickeyMouse"};
 
     /**
      * Create a new instance of RolesConferredPrivilegesTest.
@@ -255,7 +255,7 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
      *
      * @throws SQLException
      */
-    public void testConferredPrivileges() throws SQLException
+    public void atestConferredPrivileges() throws SQLException
     {
         Connection dboConn = getConnection();
         Statement s = dboConn.createStatement();
@@ -1086,6 +1086,104 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
         dboConn.close();
     }
 
+    /**
+     * DERBY-4191
+     * There are times when no column is selected from a table in the from
+     * list. At such a time, we should make sure that we make sure there
+     * is atleast some kind of select privilege available on that table for
+     * the query to succeed. eg of such queries
+     * select count(*) from t1
+     * select count(1) from t1
+     * select 1 from t1
+     * select t1.c1 from t1, t2
+     * 
+     * In addition, the subquery inside of a NON-select query should require
+     * select privilege on the tables involved in the subquery eg
+     * update dbo.t set a = ( select max(a1) + 2 from dbo.t1 )
+     * update dbo.t set a = ( select max(b1) + 2 from dbo.t2 )
+     * For both the queries above, in addition to update privilege requirement
+     * on dbo.t(a), we need to require select privileges on columns/tables
+     * within the select list. So for first query, the user should have select
+     * privilege on dbo.t1 or dbo.t1(a1). Similarly, for 2nd query, the user
+     * should have select privilege on dbo.t2 or dbo.t2(b1) 
+     * @throws SQLException
+     */
+    public void testMinimumSelectPrivilege() throws SQLException {
+        Connection dboConn = getConnection();
+        Statement stmtDBO = dboConn.createStatement();
+
+        Connection cDD = openUserConnection("DonaldDuck");
+        Statement stmtDD = cDD.createStatement();
+
+        Connection cMM = openUserConnection("MickeyMouse");
+        Statement stmtMM = cMM.createStatement();
+
+        stmtDBO.executeUpdate("create role role1");
+        stmtDBO.executeUpdate("grant role1 to MickeyMouse");
+
+        stmtDD.executeUpdate("create table DDtable1(c11 int, c12 int)");
+        stmtDD.executeUpdate("insert into DDtable1 values(1, 2)");
+        stmtDD.executeUpdate("create table DDtable2(c21 int, c22 int)");
+        stmtDD.executeUpdate("insert into DDtable2 values(3, 4)");
+        
+        stmtMM.executeUpdate("set role role1");
+        try {
+        	stmtMM.executeQuery("select c11 from DonaldDuck.DDtable1");
+        	fail("select should have failed");
+        } catch (SQLException e) {
+            assertSQLState("42502", e);
+        }
+        try {
+        	stmtMM.executeUpdate("update DonaldDuck.DDtable1 set c11 = " +
+        			" (select c21 from DonaldDuck.DDtable2)");
+        	fail("select should have failed");
+        } catch (SQLException e) {
+            assertSQLState("42502", e);
+        }
+
+        stmtDD.executeUpdate("grant select(c12) on DDtable1 to role1");
+        stmtDD.executeUpdate("grant update on DDtable1 to role1");
+    	stmtMM.executeQuery("select c12 from DonaldDuck.DDtable1");
+        try {
+        	stmtMM.executeQuery("select c11 from DonaldDuck.DDtable1");
+        	fail("select should have failed");
+        } catch (SQLException e) {
+            assertSQLState("42502", e);
+        }
+        try {
+        	stmtMM.executeUpdate("update DonaldDuck.DDtable1 set c11 = " +
+        			" (select c21 from DonaldDuck.DDtable2)");
+        	fail("select should have failed");
+        } catch (SQLException e) {
+            assertSQLState("42502", e);
+        }
+
+        stmtDD.executeUpdate("grant select(c11) on DDtable1 to role1");
+    	stmtMM.executeQuery("select c12 from DonaldDuck.DDtable1");
+    	stmtMM.executeQuery("select c11 from DonaldDuck.DDtable1");
+        try {
+        	stmtMM.executeQuery("select c11 from DonaldDuck.DDtable1, " +
+        			"DonaldDuck.DDtable2");
+        	fail("select should have failed");
+        } catch (SQLException e) {
+            assertSQLState("42500", e);
+        }
+        try {
+        	stmtMM.executeQuery("update DonaldDuck.DDtable1 set c11 = " +
+        			" (select c21 from DonaldDuck.DDtable2)");
+        	fail("select should have failed");
+        } catch (SQLException e) {
+            assertSQLState("42502", e);
+        }
+
+        stmtDD.executeUpdate("grant select(c21) on DDtable2 to role1");
+    	stmtMM.executeQuery("select c12 from DonaldDuck.DDtable1");
+    	stmtMM.executeQuery("select c11 from DonaldDuck.DDtable1");
+    	stmtMM.executeQuery("select c11 from DonaldDuck.DDtable1, " +
+    			"DonaldDuck.DDtable2");
+    	stmtMM.executeUpdate("update DonaldDuck.DDtable1 set c11 = " +
+    			" (select c21 from DonaldDuck.DDtable2)");
+    }
 
     /**
      * Test that a prepared statement can no longer execute after its required
@@ -2040,8 +2138,108 @@ public class RolesConferredPrivilegesTest extends BaseJDBCTestCase
                                        String schema,
                                        String table,
                                        String[] columns) throws SQLException {
-        assertSelectPrivilege
-            (hasPrivilege, c, schema, table, columns, NOCOLUMNPERMISSION);
+      assertSelectPrivilege(hasPrivilege, c, schema, 
+        		table, columns, NOCOLUMNPERMISSION);
+      assertSelectConstantPrivilege(hasPrivilege, c, schema, 
+        		table, NOTABLEPERMISSION);
+      assertSelectCountPrivilege(hasPrivilege, c, schema, 
+        		table, columns, NOTABLEPERMISSION);
+    }
+
+    /**
+     * Assert that a user has select privilege at the table(s) level  or 
+     * atleast on one column from each of the tables involved in the 
+     * query when running a select query which selects count(*) or
+     * count(constant) from the tables.
+     *
+     * @param hasPrivilege whether or not the user has the privilege
+     * @param c connection to use
+     * @param schema the schema to check
+     * @param table the table to check
+     * @param columns used for error handling if ran into exception
+     * @param sqlState expected state if hasPrivilege == NOPRIV
+     * @throws SQLException throws all exceptions
+     */
+    private void assertSelectCountPrivilege(int hasPrivilege,
+                                       Connection c,
+                                       String schema,
+                                       String table,
+                                       String[] columns,
+                                       String sqlState) throws SQLException {
+        Statement s = c.createStatement();
+
+        try {
+            s.execute("select count(*) from " + schema + "." + table);
+
+            if (hasPrivilege == NOPRIV) {
+                fail("expected no SELECT privilege on table " +
+                     formatArgs(c, schema, table, columns));
+            }
+        } catch (SQLException e) {
+            if (hasPrivilege == NOPRIV) {
+                assertSQLState(sqlState, e);
+            } else {
+                fail("Unexpected lack of select privilege. " +
+                     formatArgs(c, schema, table, columns), e);
+            }
+        }
+
+        try {
+            s.execute("select count('a') from " + schema + "." + table);
+
+            if (hasPrivilege == NOPRIV) {
+                fail("expected no SELECT privilege on table " +
+                     formatArgs(c, schema, table, columns));
+            }
+        } catch (SQLException e) {
+            if (hasPrivilege == NOPRIV) {
+                assertSQLState(sqlState, e);
+            } else {
+                fail("Unexpected lack of select privilege. " +
+                     formatArgs(c, schema, table, columns), e);
+            }
+        }
+
+        s.close();
+    }
+
+    /**
+     * Assert that a user has select privilege at the table(s) level  or 
+     * atleast on one column from each of the tables involved in the 
+     * query when running a select query which only selects constants from 
+     * the tables.
+     *
+     * @param hasPrivilege whether or not the user has the privilege
+     * @param c connection to use
+     * @param schema the schema to check
+     * @param table the table to check
+     * @param sqlState expected state if hasPrivilege == NOPRIV
+     * @throws SQLException throws all exceptions
+     */
+    private void assertSelectConstantPrivilege(int hasPrivilege,
+                                       Connection c,
+                                       String schema,
+                                       String table,
+                                       String sqlState) throws SQLException {
+        Statement s = c.createStatement();
+
+        try {
+            s.execute("select 1 from " + schema + "." + table);
+
+            if (hasPrivilege == NOPRIV) {
+                fail("expected no SELECT privilege on table " +
+                     formatArgs(c, schema, table));
+            }
+        } catch (SQLException e) {
+            if (hasPrivilege == NOPRIV) {
+                assertSQLState(sqlState, e);
+            } else {
+                fail("Unexpected lack of select privilege. " +
+                     formatArgs(c, schema, table), e);
+            }
+        }
+
+        s.close();
     }
 
 
