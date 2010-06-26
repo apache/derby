@@ -281,6 +281,10 @@ forever:	for (;;) {
                     try {
                         wakeupReason = waitingLock.waitForGrant(actualTimeout);
                     } catch(StandardException e) {
+                        // DERBY-4711: If waitForGrant() fails, we need to
+                        // remove ourselves from the queue so that those
+                        // behind us in the queue don't get stuck waiting for
+                        // us.
                         nextWaitingLock = control.getNextWaiter(waitingLock, true, this);
                         throw e;
                     }
