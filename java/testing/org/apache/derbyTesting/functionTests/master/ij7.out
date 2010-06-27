@@ -241,4 +241,21 @@ APP                 |T1                  |TEST                |VARCHAR  |NULL|NU
 ij> -- Observe behavior with empty string:
 describe '';
 IJ ERROR: No table exists with the name (missing)
+ij> --DERBY-2785:ij "describe" built in command cannot describe a table named "run"
+create table run(c1 int, c2 varchar(20));
+0 rows inserted/updated/deleted
+ij> --should work
+describe run;
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+C1                  |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
+C2                  |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
+ij> create table "run"(c1 int, c2 varchar(20));
+0 rows inserted/updated/deleted
+ij> --should work
+describe 'run';
+COLUMN_NAME         |TYPE_NAME|DEC&|NUM&|COLUM&|COLUMN_DEF|CHAR_OCTE&|IS_NULL&
+------------------------------------------------------------------------------
+C1                  |INTEGER  |0   |10  |10    |NULL      |NULL      |YES     
+C2                  |VARCHAR  |NULL|NULL|20    |NULL      |40        |YES     
 ij> 

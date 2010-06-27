@@ -3111,15 +3111,18 @@ qualifiedIdentifier() :
 String
 caIdentifier() throws SQLException :
 {
-    Token t;
+    Token t = null;
+    String i = null;
 }
 {
-    t=<IDENTIFIER>
+    ( i=keyword()|t=<IDENTIFIER> )
     {
         haveConnection();
         DatabaseMetaData dbmd = theConnection.getMetaData();
+        String identifier = i;
 
-        String identifier = t.image;
+        if(t!=null)
+            identifier = t.image;
         if (dbmd.storesLowerCaseIdentifiers())
             identifier = identifier.toLowerCase(Locale.ENGLISH);
         else if (dbmd.storesUpperCaseIdentifiers())

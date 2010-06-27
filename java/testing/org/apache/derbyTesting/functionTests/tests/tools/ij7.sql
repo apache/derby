@@ -88,3 +88,11 @@ describe '*';
 describe 'APP.*';
 -- Observe behavior with empty string:
 describe '';
+
+--DERBY-2785:ij "describe" built in command cannot describe a table named "run"
+create table run(c1 int, c2 varchar(20));
+--should work
+describe run;
+create table "run"(c1 int, c2 varchar(20));
+--should work
+describe 'run';
