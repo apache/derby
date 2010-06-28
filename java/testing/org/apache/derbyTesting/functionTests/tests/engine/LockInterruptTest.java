@@ -81,8 +81,9 @@ public class LockInterruptTest extends BaseJDBCTestCase {
         Thread.sleep(2000); // give t2 time to enter the wait queue
 
         // Now that the queue of waiters has been set up, interrupt the
-        // first thread.
+        // first thread and give the interrupt a little time to do its work.
         t1.interrupt();
+        Thread.sleep(1000);
 
         // Release the table lock to allow the waiters to proceed.
         commit();
