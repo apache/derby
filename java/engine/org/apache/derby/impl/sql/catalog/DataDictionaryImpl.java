@@ -11211,6 +11211,8 @@ public final class	DataDictionaryImpl
     static {
         colPrivTypeMap = new String[ Authorizer.PRIV_TYPE_COUNT];
         colPrivTypeMapForGrant = new String[ Authorizer.PRIV_TYPE_COUNT];
+        colPrivTypeMap[ Authorizer.MIN_SELECT_PRIV] = "s";
+        colPrivTypeMapForGrant[ Authorizer.MIN_SELECT_PRIV] = "S";
         colPrivTypeMap[ Authorizer.SELECT_PRIV] = "s";
         colPrivTypeMapForGrant[ Authorizer.SELECT_PRIV] = "S";
         colPrivTypeMap[ Authorizer.UPDATE_PRIV] = "u";
