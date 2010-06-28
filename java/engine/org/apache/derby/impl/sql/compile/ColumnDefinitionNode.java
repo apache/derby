@@ -769,6 +769,9 @@ public class ColumnDefinitionNode extends TableElementNode
 
 		switch (colType) {
 
+			case StoredFormatIds.BOOLEAN_TYPE_ID:
+                return ( defaultNode instanceof BooleanConstantNode );
+                
 			case StoredFormatIds.INT_TYPE_ID:
 			// DB2 doesn't allow floating point values to be used
 			// as defaults for integer columns (they ARE allowed

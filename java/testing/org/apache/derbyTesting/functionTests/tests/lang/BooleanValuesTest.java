@@ -55,6 +55,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     private static final String NOT_UNION_COMPATIBLE = "42X61";
     private static final String BAD_CONVERSION = "42846";
     private static final String ILLEGAL_INSERT = "42821";
+    private static final String BAD_DEFAULT = "42894";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -1076,6 +1077,49 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         goodStatement( conn, "drop table booleanIndexed" );
     }
 
+    /**
+     * <p>
+     * Verify that you can declare literal defaults for boolean columns.
+     * </p>
+     */
+    public void test_14_defaults() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create table booleanDefaults( a int, b boolean default true, c boolean default false, d boolean default null )" );
+        goodStatement( conn, "insert into booleanDefaults( a ) values ( 0 )" );
+        assertResults
+            (
+             conn,
+             "select * from booleanDefaults order by a",
+             new String[][]
+             {
+                 { "0", "true", "false", null }
+             },
+             false
+             );
+        
+        goodStatement( conn, "alter table booleanDefaults add column e boolean default true" );
+        assertResults
+            (
+             conn,
+             "select * from booleanDefaults order by a",
+             new String[][]
+             {
+                 { "0", "true", "false", null, "true" }
+             },
+             false
+             );
+
+        goodStatement( conn, "drop table booleanDefaults" );
+
+        expectCompilationError( BAD_DEFAULT, "create table badDefault( a int, b boolean default 0 )" );
+        expectCompilationError( BAD_DEFAULT, "create table badDefault( a int, b boolean default 9.99 )" );
+        expectCompilationError( BAD_DEFAULT, "create table badDefault( a int, b boolean default 5e1 )" );
+        expectCompilationError( BAD_DEFAULT, "create table badDefault( a int, b boolean default 'false' )" );
+        expectCompilationError( BAD_DEFAULT, "create table badDefault( a int, b boolean default X'DE' )" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
