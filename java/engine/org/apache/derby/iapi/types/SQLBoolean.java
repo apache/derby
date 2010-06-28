@@ -272,8 +272,8 @@ public final class SQLBoolean
 		/*
 		 * thisNull otherNull thisValue thatValue return
 		 *	T		T			X		X			0	(this == other)
-		 *	F		T			X		X			1 	(this > other)
-		 *	T		F			X		X			-1	(this < other)
+		 *	F		T			X		X			-1 	(this > other)
+		 *	T		F			X		X			1	(this < other)
 		 *
 		 *	F		F			T		T			0	(this == other)
 		 *	F		F			T		F			1	(this > other)
@@ -283,9 +283,9 @@ public final class SQLBoolean
 		if (thisNull || otherNull)
 		{
 			if (!thisNull)		// otherNull must be true
-				return 1;
-			if (!otherNull)		// thisNull must be true
 				return -1;
+			if (!otherNull)		// thisNull must be true
+				return 1;
 			return 0;
 		}
 

@@ -1033,6 +1033,49 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         goodStatement( conn, "delete from boolean_table" );
     }
     
+    /**
+     * <p>
+     * Verify that boolean nulls sort at the end with or without an index,
+     * the behavior of other datatypes.
+     * </p>
+     */
+    public void test_13_sortOrder() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create table booleanUnindexed( a boolean )" );
+        goodStatement( conn, "create table booleanIndexed( a boolean )" );
+        goodStatement( conn, "create index bi on booleanIndexed( a )" );
+
+        goodStatement( conn, "insert into booleanUnindexed( a ) values ( true ), ( null ), ( false )" );
+        goodStatement( conn, "insert into booleanIndexed( a ) values ( true ), ( null ), ( false )" );
+
+        String[][] expectedResults = new String[][]
+        {
+            { "false" },
+            { "true" },
+            { null },
+        };
+        
+        assertResults
+            (
+             conn,
+             "select * from booleanUnindexed order by a",
+             expectedResults,
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from booleanIndexed order by a",
+             expectedResults,
+             false
+             );
+        
+        goodStatement( conn, "drop table booleanUnindexed" );
+        goodStatement( conn, "drop table booleanIndexed" );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
