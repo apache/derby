@@ -54,6 +54,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     private static final String BAD_CAST = "22018";
     private static final String NOT_UNION_COMPATIBLE = "42X61";
     private static final String BAD_CONVERSION = "42846";
+    private static final String ILLEGAL_INSERT = "42821";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -403,6 +404,22 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  "create function booleanValue( b boolean )\n" +
                  "returns varchar( 100 ) language java parameter style java no sql\n" +
                  "external name 'org.apache.derbyTesting.functionTests.tests.lang.BooleanValuesTest.booleanValue'\n"
+                 );
+        }
+        
+        if ( !tableExists( conn, "BOOLEAN_TABLE" ) )
+        {
+            //
+            // create table
+            //
+            goodStatement
+                (
+                 conn,
+                 "create table boolean_table\n" +
+                 "(\n" +
+                 "    key_col int,\n" +
+                 "    boolean_col  boolean\n" +
+                 ")\n"
                  );
         }
     }
@@ -925,7 +942,97 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         rs.close();        
     }
                                                                                 
+    /**
+     * <p>
+     * Verify that tables with boolean columns behave well.
+     * </p>
+     */
+    public void test_12_booleanColumns() throws Exception
+    {
+        Connection conn = getConnection();
 
+        goodStatement( conn, "insert into boolean_table( key_col, boolean_col ) values ( 0, true ), ( 1, false ), ( 2, null )" );
+        assertResults
+            (
+             conn,
+             "select * from boolean_table order by boolean_col",
+             new String[][]
+             {
+                 { "1", "false" },
+                 { "0", "true" },
+                 { "2", null },
+             },
+             false
+             );
+        goodStatement( conn, "delete from boolean_table" );
+
+        vetBadInsert( "bigint_col" );
+        vetBadInsert( "blob_col" );
+        vetBadInsert( "char_for_bit_data_col" );
+        vetBadInsert( "date_col" );
+        vetBadInsert( "decimal_col" );
+        vetBadInsert( "real_col" );
+        vetBadInsert( "double_col" );
+        vetBadInsert( "int_col" );
+        vetBadInsert( "long_varchar_for_bit_data_col" );
+        vetBadInsert( "numeric_col" );
+        vetBadInsert( "smallint_col" );
+        vetBadInsert( "time_col" );
+        vetBadInsert( "timestamp_col" );
+        vetBadInsert( "varchar_for_bit_data_col" );
+
+        vetStringInsert( conn, "char_col" );
+        vetStringInsert( conn, "clob_col" );
+        vetStringInsert( conn, "long_varchar_col" );
+        vetStringInsert( conn, "varchar_col" );
+        
+    }
+    private void vetBadInsert( String columnName ) throws Exception
+    {
+        expectCompilationError
+            (
+             ILLEGAL_INSERT,
+             "insert into boolean_table( key_col, boolean_col ) select key_col, " + columnName + " from all_types"
+             );
+    }
+    private void vetStringInsert( Connection conn, String columnName ) throws Exception
+    {
+        goodStatement( conn, "insert into boolean_table( key_col, boolean_col ) select key_col, " + columnName + " from string_types where key_col < 18" );
+        assertResults
+            (
+             conn,
+             "select * from boolean_table order by key_col",
+             new String[][]
+             {
+                 { "0", "false" },
+                 { "1", "true" },
+                 { "2", null },
+                 { "3", null },
+                 { "4", "false" },
+                 { "5", "true" },
+                 { "6", null },
+                 { "7", null },
+                 { "10", "false" },
+                 { "11", "true" },
+                 { "12", null },
+                 { "13", null },
+                 { "14", "false" },
+                 { "15", "true" },
+                 { "16", null },
+                 { "17", null },
+             },
+             false
+             );
+        
+        for ( int i = 20; i < 24; i++ )
+        {
+            expectExecutionError
+                ( conn, BAD_CAST, "insert into boolean_table( key_col, boolean_col ) select key_col, " + columnName + " from string_types where key_col = " + i );
+        }
+
+        goodStatement( conn, "delete from boolean_table" );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES

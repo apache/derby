@@ -263,7 +263,15 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
              "returns varchar( 100 ) language java parameter style java no sql\n" +
              "external name 'org.apache.derbyTesting.functionTests.tests.lang.BooleanValuesTest.booleanValue'\n"
              );
+        stmt.executeUpdate
+            (
+             "create table t_boolean( b boolean )"
+             );
         stmt.close();
+
+        //
+        // Test metadata for parameters to boolean-valued functions.
+        //
         PreparedStatement ps = prepareStatement("values( booleanValue( ? ) )");
 
         ParameterMetaData paramMetaData = ps.getParameterMetaData();
@@ -279,6 +287,23 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
         testParameterMetaData(paramMetaData, parameterMetaDataArray0);
 
 		ps.close();
+
+        //
+        // Test metadata for boolean-valued columns.
+        //
+        ps = prepareStatement("insert into t_boolean values(?)");
+        ps.setBoolean(1, true);
+
+        paramMetaData = ps.getParameterMetaData();
+		assertEquals("Unexpected parameter count", 1, paramMetaData.getParameterCount());
+        parameterMetaDataArray0 = new String[][]
+            {
+                //isNullable, isSigned, getPrecision, getScale, getParameterType, getParameterTypeName, getParameterClassName, getParameterMode
+                {"PARAMETER_NULLABLE", "false", "1", "0", "16", "BOOLEAN", "java.lang.Boolean", "PARAMETER_MODE_IN"},
+            };
+        testParameterMetaData(paramMetaData, parameterMetaDataArray0);
+
+        ps.close();
 	}
 
     /**

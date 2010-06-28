@@ -173,10 +173,7 @@ ij> drop schema "sysok" restrict;
 0 rows inserted/updated/deleted
 ij> -- data types not supported
 create table NOTYPE(i int, b BOOLEAN);
-ERROR 42X01: Syntax error: BOOLEAN.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+0 rows inserted/updated/deleted
 ij> create table NOTYPE(i int, b TINYINT);
 ERROR 42X94: TYPE 'TINYINT' does not exist.
 ij> create table NOTYPE(i int, b java.lang.String);
@@ -579,10 +576,7 @@ ij> DROP TABLE tb2;
 ij> -- INSTANCEOF in where clause of select, delete, update,
 -- beetle 5224
 create table t1 (i int, s smallint, c10 char(10), vc30 varchar(30), b boolean);
-ERROR 42X01: Syntax error: BOOLEAN.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+0 rows inserted/updated/deleted
 ij> create table mm (x org.apache.derbyTesting.functionTests.util.ManyMethods);
 ERROR 42X01: Syntax error: Encountered "." at line 1, column 30.
 Issue the 'help' command for general information on IJ command syntax.
@@ -668,7 +662,7 @@ Any unrecognized commands are treated as potential SQL commands and executed dir
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- clean up
 drop table t1;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'T1' because it does not exist.
+0 rows inserted/updated/deleted
 ij> drop table mm;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'MM' because it does not exist.
 ij> drop table sc;
@@ -687,10 +681,7 @@ Any unrecognized commands are treated as potential SQL commands and executed dir
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> --- boolean datatype already disabled
 create table testtype3(col1 boolean);
-ERROR 42X01: Syntax error: BOOLEAN.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+0 rows inserted/updated/deleted
 ij> create table testtype4(col1 LONG NVARCHAR);
 ERROR 0A000: Feature not implemented: LONG NVARCHAR.
 ij> create table testtype5(col1 LONG VARBINARY);
@@ -736,7 +727,7 @@ ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE1' because it does not
 ij> drop table testtype2;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE2' because it does not exist.
 ij> drop table testtype3;
-ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE3' because it does not exist.
+0 rows inserted/updated/deleted
 ij> drop table testtype4;
 ERROR 42Y55: 'DROP TABLE' cannot be performed on 'TESTTYPE4' because it does not exist.
 ij> drop table testtype5;
