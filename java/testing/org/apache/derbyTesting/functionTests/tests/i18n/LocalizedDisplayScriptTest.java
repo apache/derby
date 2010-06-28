@@ -53,7 +53,7 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
      * java org.apache.derbyTesting.functionTests.tests.i18n.LocalizedSuite
      * </code>
      */
-    public static void main()
+    public static void main(String[] args)
     {
         junit.textui.TestRunner.run(getSuite());
     }
