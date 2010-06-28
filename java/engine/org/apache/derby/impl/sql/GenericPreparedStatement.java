@@ -223,14 +223,14 @@ public class GenericPreparedStatement
         return isValid && (activationClass != null) && !compilingStatement;
     }
 
-	public PreparedStatement rePrepare(LanguageConnectionContext lcc)
+	public void rePrepare(LanguageConnectionContext lcc) 
 		throws StandardException {
 		if (!upToDate()) {
 			PreparedStatement ps = statement.prepare(lcc);
-			return ps;
-		}
 
-		return this;
+			if (SanityManager.DEBUG)
+				SanityManager.ASSERT(ps == this, "ps != this");
+		}
 	}
 
 	/**
@@ -247,10 +247,7 @@ public class GenericPreparedStatement
 			GeneratedClass gc = getActivationClass();
 
 			if (gc == null) {
-				PreparedStatement ps = rePrepare(lcc);
-
-				if (SanityManager.DEBUG)
-					SanityManager.ASSERT(ps == this, "ps != this");
+				rePrepare(lcc);
 				gc = getActivationClass();
 			}
 

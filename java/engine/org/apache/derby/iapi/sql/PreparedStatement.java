@@ -70,10 +70,10 @@ public interface PreparedStatement
 	 * then we will not be able to recompile the statement.
 	 *
 	 * @param lcc			The LanguageConnectionContext.
-	 * @return the re-prepared statement (may be a new PreparedStatement)
+	 *
 	 * @exception StandardException thrown if unable to perform
 	 */
-	PreparedStatement rePrepare(LanguageConnectionContext lcc)
+	void rePrepare(LanguageConnectionContext lcc) 
 		throws StandardException;
 
 	/**
