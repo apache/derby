@@ -154,6 +154,7 @@ public class StatementTablePermission extends StatementPermission
 		switch( privType)
 		{
 		case Authorizer.SELECT_PRIV:
+		case Authorizer.MIN_SELECT_PRIV:
 			priv = perms.getSelectPriv();
 			break;
 		case Authorizer.UPDATE_PRIV:
@@ -199,6 +200,7 @@ public class StatementTablePermission extends StatementPermission
 		switch( privType)
 		{
 		case Authorizer.SELECT_PRIV:
+		case Authorizer.MIN_SELECT_PRIV:
 			return "select";
 		case Authorizer.UPDATE_PRIV:
 			return "update";

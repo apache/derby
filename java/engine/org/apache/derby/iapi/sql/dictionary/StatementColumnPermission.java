@@ -114,6 +114,17 @@ public class StatementColumnPermission extends StatementTablePermission
 												authorizationId,
 												permittedColumns);
 												
+		//DERBY-4191
+		//If we are looking for select privilege on ANY column,
+		//then we can quit as soon as we find some column with select
+		//privilege. This is needed for queries like
+		//select count(*) from t1
+		//select count(1) from t1
+		//select 1 from t1
+		//select t1.c1 from t1, t2
+		if (privType == Authorizer.MIN_SELECT_PRIV && permittedColumns != null)
+			return;
+
 		for( int i = columns.anySetBit(); i >= 0; i = columns.anySetBit( i))
 		{
 			if( permittedColumns != null && permittedColumns.get(i))
