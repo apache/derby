@@ -495,8 +495,18 @@ final class TemporaryClob implements InternalClob {
     private void copyClobContent(InternalClob clob)
             throws IOException, SQLException {
         try {
-            // Specify LONG.MAX_VALUE to copy data until EOF.
-            this.bytes.copyData(clob.getRawByteStream(), Long.MAX_VALUE);
+            long knownLength = clob.getCharLengthIfKnown();
+            if (knownLength == -1) {
+                // Decode UTF-8 data and copy until EOF, obtain char length.
+                this.cachedCharLength = this.bytes.copyUtf8Data(
+                        clob.getRawByteStream(), Long.MAX_VALUE);
+            } else {
+                // We already know the character length, and can copy raw bytes
+                // without decoding the UTF-8 data.
+                // Specify LONG.MAX_VALUE to copy data until EOF.
+                this.cachedCharLength = knownLength;
+                this.bytes.copyData(clob.getRawByteStream(), Long.MAX_VALUE);
+            }
         } catch (StandardException se) {
             throw Util.generateCsSQLException(se);
         }
@@ -515,13 +525,20 @@ final class TemporaryClob implements InternalClob {
     private void copyClobContent(InternalClob clob, long charLength)
             throws IOException, SQLException {
         try {
-            long byteLength = UTF8Util.skipFully(
-                    new BufferedInputStream(clob.getRawByteStream()),
-                    charLength);
-            this.bytes.copyData(
-                    new BufferedInputStream(clob.getRawByteStream()),
-                    byteLength);
-            this.cachedCharLength = charLength;
+            long knownLength = clob.getCharLengthIfKnown();
+            if (knownLength > charLength || knownLength == -1) {
+                // Decode and copy the requested number of chars.
+                this.cachedCharLength = this.bytes.copyUtf8Data(
+                    clob.getRawByteStream(), charLength);
+            } else if (knownLength == charLength) {
+                this.cachedCharLength = knownLength;
+                // Copy raw bytes until EOF.
+                // Special case optimization, avoids UTF-8 decoding.
+                this.bytes.copyData(clob.getRawByteStream(), Long.MAX_VALUE);
+            } else {
+                // The known length must be smaller than the requested length.
+                throw new EOFException();
+            }
         } catch (StandardException se) {
             throw Util.generateCsSQLException(se);
         }

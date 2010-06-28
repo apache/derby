@@ -198,6 +198,8 @@ public interface MessageId {
      * user stream, which it is in the process of sending to the server.
      */
     String STREAM_DRDA_CLIENTSIDE_EXTDTA_READ_ERROR         = "I028";
+    /** The stream ended before it was supposed to. */
+    String STREAM_PREMATURE_EOF                             = "I029";
 
     /*
      * Monitor

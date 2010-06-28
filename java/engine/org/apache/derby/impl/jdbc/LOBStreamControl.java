@@ -26,16 +26,19 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UTFDataFormatException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.store.raw.data.DataFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.shared.common.error.ExceptionUtil;
+import org.apache.derby.shared.common.reference.MessageId;
 
 /**
  * This class acts as a layer of blob/clob repository (in memory or file).
@@ -381,8 +384,9 @@ class LOBStreamControl {
             if (len == -1) {
                 if (length != Long.MAX_VALUE) {
                     // We reached EOF before all the requested bytes are read.
-                    throw new EOFException("Reached end-of-stream " +
-                        "prematurely at " + sz + ", expected " + length);
+                    throw new EOFException(MessageService.getTextMessage(
+                            MessageId.STREAM_PREMATURE_EOF,
+                            new Long(length), new Long(sz)));
                 } else {
                     // End of data, but no length checking.
                     break;
@@ -391,9 +395,10 @@ class LOBStreamControl {
             write(data, 0, len, sz);
             sz += len;
         }
-        // If we copied until EOF, see if we have a Derby end-of-stream marker.
-        if (length == Long.MAX_VALUE) {
-            long curLength = getLength();
+        // If we copied until EOF, and we read more data than the length of the
+        // marker, see if we have a Derby end-of-stream marker.
+        long curLength = getLength();
+        if (length == Long.MAX_VALUE && curLength > 2) {
             byte[] eos = new byte[3];
             // Read the three last bytes, marker is 0xE0 0x00 0x00.
             read(eos, 0, 3, curLength -3);
@@ -403,6 +408,83 @@ class LOBStreamControl {
                 truncate(curLength -3);
             }
         }
+    }
+
+    /**
+     * Copies UTF-8 encoded chars from a stream to local storage.
+     * <p>
+     * Note that specifying the length as {@code Long.MAX_VALUE} results in
+     * reading data from the stream until EOF is reached, but no length checking
+     * will be performed.
+     *
+     * @param utf8Stream the stream to copy from
+     * @param charLength number of chars to be copied, or {@code Long.MAX_VALUE}
+     *      to copy everything until EOF is reached
+     * @return The number of characters copied.
+     * @throws EOFException if EOF is reached prematurely
+     * @throws IOException thrown on a number of error conditions
+     * @throws StandardException if reading, writing or truncating the
+     *      {@code LOBStreamControl}-object fails
+     * @throws UTFDataFormatException if an invalid UTF-8 encoding is detected
+     */
+    synchronized long copyUtf8Data(final InputStream utf8Stream,
+                                   final long charLength)
+            throws IOException, StandardException {
+        long charCount = 0; // Number of chars read
+        int offset = 0;     // Where to start looking for the start of a char
+        int read = 0;       // Number of bytes read
+        final byte[] buf = new byte[bufferSize];
+        while (charCount < charLength) {
+            int readNow = utf8Stream.read(buf, 0,
+                            (int)Math.min(buf.length, charLength - charCount));
+            if (readNow == -1) {
+                break;
+            }
+            // Count the characters.
+            while (offset < readNow) {
+                int c = buf[offset] & 0xFF;
+                if ((c & 0x80) == 0x00) { // 8th bit not set (top bit)
+                    offset++;
+                } else if ((c & 0x60) == 0x40) { // 7th bit set, 6th bit unset
+                    // Found char of two byte width.
+                    offset += 2;
+                } else if ((c & 0x70) == 0x60) { // 7th & 6th bit set, 5th unset
+                    // Found char of three byte width.
+                    offset += 3;
+                } else {
+                    // This shouldn't happen, as the data is coming from the
+                    // store and is supposed to be well-formed.
+                    // If it happens, fail and print some internal information.
+                    throw new UTFDataFormatException("Invalid UTF-8 encoding: "
+                            + Integer.toHexString(c) + ", charCount=" +
+                            charCount + ", offset=" + offset);
+                }
+                charCount++;
+            }
+            offset -= readNow; // Starting offset for next iteration
+            write(buf, 0, readNow, read);
+            read += readNow;
+        }
+        // See if an EOF-marker ended the stream. Don't check if we have fewer
+        // bytes than the marker length.
+        long curLength = getLength();
+        if (curLength > 2) {
+            byte[] eos = new byte[3];
+            // Read the three last bytes, marker is 0xE0 0x00 0x00.
+            read(eos, 0, 3, curLength -3);
+            if ((eos[0] & 0xFF) == 0xE0 && (eos[1] & 0xFF) == 0x00 &&
+                    (eos[2] & 0xFF) == 0x00) {
+                // Remove Derby end-of-stream-marker.
+                truncate(curLength -3);
+                charCount--;
+            }
+        }
+        if (charLength != Long.MAX_VALUE && charCount != charLength) {
+            throw new EOFException(MessageService.getTextMessage(
+                    MessageId.STREAM_PREMATURE_EOF,
+                    new Long(charLength), new Long(charCount)));
+        }
+        return charCount;
     }
 
     protected void finalize() throws Throwable {
