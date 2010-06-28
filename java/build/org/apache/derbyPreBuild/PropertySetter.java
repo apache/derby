@@ -23,7 +23,6 @@ package org.apache.derbyPreBuild;
 
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -125,6 +124,12 @@ public class PropertySetter extends Task
     private static  final   String  JDK_SUN = "Sun Microsystems Inc.";
 
     private static  final   String  APPLE_JAVA_ROOT = "/System/Library/Frameworks/JavaVM.framework/Versions";
+    private static  final   String  APPLE_CLASSES_DIR = "Classes";
+    private static  final   String  APPLE_COMMANDS_DIR = "Commands";
+    private static  final   String  APPLE_HEADERS_DIR = "Headers";
+    private static  final   String  APPLE_HOME_DIR = "Home";
+    private static  final   String  APPLE_LIB_DIR = "Libraries";
+    private static  final   String  APPLE_RESOURCES_DIR = "Resources";
 
     private static  final   String  JAVA_5 = "1.5";
 
@@ -350,9 +355,27 @@ public class PropertySetter extends Task
      * </p>
      */
     private void    setForAppleJDKs()
-        throws BuildException
+        throws Exception
     {
-        defaultSetter( APPLE_JAVA_ROOT + "/1.4/Classes", APPLE_JAVA_ROOT + "/1.5/Classes", APPLE_JAVA_ROOT + "/1.6/Classes" );
+        String  default_j14lib = getProperty( J14LIB );
+        String  default_j15lib = getProperty( J15LIB );
+        String  default_j16lib = getProperty( J16LIB );
+
+        // Obtain a list of all JDKs available to us, then specify which one to
+        // use for the different versions we require.
+        List<JDKInfo> jdks = locateAppleJDKs(getJdkSearchPath());
+        debug("\nSelecting JDK candidates:");
+        if (default_j14lib == null) {
+            default_j14lib = getJreLib(jdks, "1.4", jdkVendor);
+        }
+        if (default_j15lib == null) {
+            default_j15lib = getJreLib(jdks, "1.5", jdkVendor);
+        }
+        if (default_j16lib == null) {
+            default_j16lib = getJreLib(jdks, "1.6", jdkVendor);
+        }
+
+        defaultSetter(default_j14lib, default_j15lib, default_j16lib);
     }
     
     /////////////////////////////////////////////////////////////////////////
@@ -413,7 +436,7 @@ public class PropertySetter extends Task
 
         // Obtain a list of all JDKs available to us, then specify which one to
         // use for the different versions we require.
-        List<JDKInfo> jdks = locateJDKs(getJdkSearchPath());
+        List<JDKInfo> jdks = locateMostJDKs(getJdkSearchPath());
         debug("\nSelecting JDK candidates:");
         if (default_j14lib == null) {
             default_j14lib = getJreLib(jdks, seed14, jdkVendor);
@@ -574,6 +597,74 @@ public class PropertySetter extends Task
     }
 
     // JDK heuristics based on inspecting JARs.
+    //
+    private List<JDKInfo> locateAppleJDKs(List<File> jdkParentDirectories) {
+        ArrayList<JDKInfo> jdks = new ArrayList<JDKInfo>();
+        if (jdkParentDirectories == null) {
+            return jdks;
+        }
+
+        debug("\nLocating JDKs:");
+
+        final FileFilter jdkFilter = new JDKRootFileFilter();
+        for (File jdkParentDirectory : jdkParentDirectories) {
+            // Limit the search to the directories in the parent directory.
+            // Don't descend into sub directories.
+            File[] possibleJdkRoots = jdkParentDirectory.listFiles(jdkFilter);
+            for (File f : possibleJdkRoots) {
+
+                File[] requiredDirs = new File[] {
+                    new File(f, APPLE_CLASSES_DIR),
+                    new File(f, APPLE_COMMANDS_DIR),
+                    new File(f, APPLE_HEADERS_DIR),
+                    new File(f, APPLE_HOME_DIR),
+                    new File(f, APPLE_LIB_DIR),
+                    new File(f, APPLE_RESOURCES_DIR)
+                };
+                
+                boolean dirsOK = true;
+                for (File reqDir : requiredDirs) {
+                    if (!reqDir.exists()) {
+                        debug("Missing JDK directory: " +
+                                reqDir.getAbsolutePath());
+                        dirsOK = false;
+                        break;
+                    }
+                }
+                if (!dirsOK) {
+                    continue;
+                }
+
+                File rtArchive = new File(f,
+                        new File(APPLE_CLASSES_DIR, "classes.jar").getPath());
+                if (!rtArchive.exists()) {
+                    debug("Missing JAR: " + rtArchive);
+                    // Bail out, we only understand JDKs that have a
+                    // "Classes/classes.jar".
+                    continue;
+                }
+                // Get implementation version from the manifest.
+                Manifest mf;
+                try {
+                    JarFile rtJar = new JarFile(rtArchive);
+                    mf = rtJar.getManifest();
+                } catch (IOException ioeIgnored) {
+                    // Obtaining the manifest failed for some reason.
+                    // If in debug mode, let the user know.
+                    debug("Failed to obtain manifest for " +
+                                rtArchive.getAbsolutePath() + ": " +
+                                ioeIgnored.getMessage());
+                    continue;
+                }
+                JDKInfo jdk = inspectJarManifest(mf, f);
+                if (jdk != null) {
+                    jdks.add(jdk);
+                    continue;
+                }
+            }
+        }
+        return jdks;
+     }
 
     /**
      * Searches for JDKs in the specified directories.
@@ -582,7 +673,7 @@ public class PropertySetter extends Task
      * @return A list containing information objects for JDKs found on the
      *      system. If no JDKs were found, the list will be empty.
      */
-    private List<JDKInfo> locateJDKs(List<File> jdkParentDirectories) {
+    private List<JDKInfo> locateMostJDKs(List<File> jdkParentDirectories) {
         ArrayList<JDKInfo> jdks = new ArrayList<JDKInfo>();
         if (jdkParentDirectories == null) {
             return jdks;
@@ -597,17 +688,11 @@ public class PropertySetter extends Task
                 // Default JAR file to look for, used be most JDKs.
                 new File(jreLibRel, "rt.jar").getPath(),
             };
+        final FileFilter jdkFilter = new JDKRootFileFilter();
         for (File jdkParentDirectory : jdkParentDirectories) {
             // Limit the search to the directories in the parent directory.
             // Don't descend into sub directories.
-            File[] possibleJdkRoots = jdkParentDirectory.listFiles(
-                    new FileFilter() {
-
-                        /** Accepts only directories. */
-                        public boolean accept(File pathname) {
-                            return pathname.isDirectory();
-                        }
-                    });
+            File[] possibleJdkRoots = jdkParentDirectory.listFiles(jdkFilter);
             for (File f : possibleJdkRoots) {
                 File rtArchive = new File(f, jreLibRel.getPath());
                 if (!rtArchive.exists()) {
@@ -669,23 +754,8 @@ public class PropertySetter extends Task
             mf.getMainAttributes().getValue("Specification-Version"),
             mf.getMainAttributes().getValue("Implementation-Version"),
             jdkHome.getAbsolutePath());
-        if (!info.implementationVersion.equals(JDKInfo.UNKNOWN)) {
-            // Make sure we have javac
-            File jdkBin = new File(jdkHome, "bin");
-            File[] javac = jdkBin.listFiles(new FilenameFilter() {
-
-                public boolean accept(File dir, String name) {
-                    return name.toLowerCase().startsWith("javac");
-                }
-            });
-            if (javac == null || javac.length == 0) {
-                return null;
-            }
-            //javac located, we're good to go.
-            debug("found JDK: " + info);
-            return info;
-        }
-        return null;
+        debug("found JDK: " + info);
+        return info;
     }
 
     /**
@@ -704,10 +774,9 @@ public class PropertySetter extends Task
     private String getJreLib(List<JDKInfo> jdks,
             String specificationVersion, String vendor) {
         // If we have no candidate JDKs, just return null at once.
-        if (jdks == null || jdks.size() == 0) {
+        if (jdks == null || jdks.isEmpty()) {
             return null;
         }
-        final String jreLib = new File("jre", "lib").getPath();
         ArrayList<JDKInfo> candidates = new ArrayList<JDKInfo>();
         ArrayList<String> versions = new ArrayList<String>();
         // Get the JDKs with the requested specification version.
@@ -723,7 +792,7 @@ public class PropertySetter extends Task
             }
         }
         // See if we found any suitable JDKs.
-        if (candidates.size() == 0) {
+        if (candidates.isEmpty()) {
             debug("INFO: No valid JDK with specification " +
                         "version '" + specificationVersion + "' found");
             return null;
@@ -749,12 +818,28 @@ public class PropertySetter extends Task
                                 (targetVendor == null ? "ignored"
                                                       : jdkVendor) +
                                 "): " + jdk);
-                        return new File(jdk.path, jreLib).getAbsolutePath();
+                        return constructJreLibPath(jdk).getAbsolutePath();
                     }
                 }
             }
         }
         return null;
+    }
+
+    /**
+     * Constructs the path to the JRE library directory for the given JDK.
+     *
+     * @param jdk the target JDK
+     * @return A <tt>File</tt> object pointing to the JRE library directory.
+     */
+    private static File constructJreLibPath(JDKInfo jdk) {
+        String relLib;
+        if (jdk.vendor.startsWith(JDK_APPLE)) {
+            relLib = new File(APPLE_CLASSES_DIR).getPath();
+        } else {
+            relLib = new File("jre", "lib").getPath();
+        }
+        return new File(jdk.path, relLib);
     }
 
     /**
@@ -765,15 +850,18 @@ public class PropertySetter extends Task
      * @param specVersion the specification version to satisfy
      * @return {@code true} if a valid version, {@code false} if not.
      */
-    private static boolean isValidVersion(String implVersion,
+    private boolean isValidVersion(String implVersion,
                                           String specVersion) {
         // Don't allow null as a version.
         if (implVersion == null) {
+            debug("JDK ignored, no impl version found");
             return false;
         }
         // Don't allow early access versions.
         // This rule should at least match Sun EA versions.
         if (implVersion.contains("ea")) {
+            debug("JDK with version '" + implVersion + "' ignored: " +
+                    "early access");
             return false;
         }
 
@@ -820,10 +908,14 @@ public class PropertySetter extends Task
      * @return A normalized vendor name suitable for vendor name matching.
      */
     private static String normalizeVendorName(String vendorName) {
-        // Currently we only replace commas with the empty string. The reason
-        // for doing this is that the vendor name specified in the jar file
-        // manifest differes from the one return by the JVM itself for the Sun
-        // JDKs. For instance:
+        // Normalize the vendore names returned by Apple JDKs.
+        if (vendorName.equals("Apple Inc.")) {
+            // The running VM says "Apple Inc.", the JAR manifest says
+            // "Apple Computer, Inc.".
+            vendorName = "Apple Computer, Inc.";
+        }
+        // The vendor name specified in the jar file manifest differes from the
+        // one return by the JVM itself for the Sun JDKs. For instance:
         //  - from JAR:        Sun Microsystems, Inc.
         //  - from running VM: Sun Microsystems Inc.
         // (http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6851869)
@@ -1221,5 +1313,34 @@ public class PropertySetter extends Task
             System.out.println(msg);
         }
     }
-}
 
+    /**
+     * A custom filter that accepts only directories and which in addition tries
+     * to ignore duplicates (i.e. symbolic links pointing into the same
+     * directory).
+     */
+    private static class JDKRootFileFilter
+            implements FileFilter {
+
+        private List<String> canonicalRoots = new ArrayList<String>();
+
+        /** Accepts only directories. */
+        public boolean accept(File pathname) {
+            if (pathname.isDirectory()) {
+                // Avoid processing the same JDK multiple times if possible.
+                try {
+                    String canonicalRoot = pathname.getCanonicalPath();
+                    boolean accept = !canonicalRoots.contains(canonicalRoot);
+                    if (accept) {
+                        canonicalRoots.add(canonicalRoot);
+                    }
+                    return accept;
+                } catch (IOException ioe) {
+                    // Ignore exception, just accept the directory.
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+}
