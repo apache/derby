@@ -325,7 +325,7 @@ public class ResultColumnList extends QueryTreeNodeVector
      * {@code columnName} is used to assert that we find the right column.
      * If we found a match on (tn, cn) but columnName is wrong, return null.
      * Once we trust table numbers and column numbers to always be correct,
-     * cf. DERBY-4695, we can remove this parameter.
+     * cf. DERBY-4695, we could remove this parameter.
      *
      * @param tableNumber the table number to look for
      * @param columnNumber the column number to look for
@@ -352,30 +352,63 @@ public class ResultColumnList extends QueryTreeNodeVector
                     if (rsn instanceof FromTable) {
                         FromTable ft = (FromTable)rsn;
 
-                        if (ft.getTableNumber() == tableNumber &&
-                                rc.getColumnPosition() == columnNumber) {
+                        if (ft.getTableNumber() == tableNumber) {
+                            // We have the right table, now try to match the
+                            // column number. Looking at a join, for a base
+                            // table participant, we will find the correct
+                            // column position in the
+                            // JOIN's ColumnDescriptor. Normally, we could just
+                            // call rc.getColumnPosition, but this doesn't work
+                            // if we have a join with a subquery participant
+                            // (it would give us the virtualColumnId one level
+                            // too high up, since the column descriptor is null
+                            // in that case inside a JOIN's RC.
+                            //
+                            // If FromTable is a FromSubquery we need to look
+                            // at the JOIN RC's source column to match the
+                            // table column number. However, at that level, the
+                            // table number would be that of the underlying
+                            // SELECT (for example), rather than the
+                            // FromSubquery's, so we need to match the table
+                            // number one level above, cf the test cases in
+                            // JoinTest#testDerby_4679 which have subqueries.
 
-                            // Found matching (t,c) within this top
-                            // resultColumn. Now do sanity check that column
-                            // name is correct. Remove when DERBY-4695 is
-                            // fixed.
-                            if (columnName.equals(
-                                        vcn.getSourceColumn().getName())) {
-                                resultColumn.setReferenced();
-                                return resultColumn;
-                            } else {
-                                if (SanityManager.DEBUG) {
-                                    SanityManager.ASSERT(
-                                        false,
-                                        "wrong (tn,cn) for column " +
-                                        columnName +
-                                        " found: this pair points to " +
-                                        vcn.getSourceColumn().getName());
+                            ColumnDescriptor cd = rc.getTableColumnDescriptor();
+
+                            if (SanityManager.DEBUG) {
+                                SanityManager.ASSERT(
+                                    cd != null || ft instanceof FromSubquery);
+                            }
+
+                            if ( (cd != null && cd.getPosition() ==
+                                      columnNumber) ||
+                                 (vcn.getSourceColumn().getColumnPosition() ==
+                                     columnNumber) ) {
+
+                                // Found matching (t,c) within this top
+                                // resultColumn. Now do sanity check that column
+                                // name is correct. Remove when DERBY-4695 is
+                                // fixed.
+                                if (columnName.equals(
+                                            vcn.getSourceColumn().getName())) {
+                                    resultColumn.setReferenced();
+                                    return resultColumn;
+                                } else {
+                                    if (SanityManager.DEBUG) {
+                                        SanityManager.ASSERT(
+                                            false,
+                                            "wrong (tn,cn) for column " +
+                                            columnName +
+                                            " found: this pair points to " +
+                                            vcn.getSourceColumn().getName());
+                                    }
+                                    // Fall back on column name based lookup,
+                                    // cf. DERBY-4679. See ColumnReference#
+                                    // remapColumnReferencesToExpressions
+                                    return null;
                                 }
-                                // Fall back on column name based lookup,
-                                // cf. DERBY-4679. See ColumnReference#
-                                // remapColumnReferencesToExpressions
-                                return null;
+                            } else {
+                                rc = vcn.getSourceColumn();
                             }
                         } else {
                             rc = vcn.getSourceColumn();
@@ -389,8 +422,8 @@ public class ResultColumnList extends QueryTreeNodeVector
                     if (cr.getTableNumber() == tableNumber &&
                             cr.getColumnNumber() == columnNumber) {
                         // Found matching (t,c) within this top resultColumn
-                            resultColumn.setReferenced();
-                            return resultColumn;
+                        resultColumn.setReferenced();
+                        return resultColumn;
                     } else {
                         rc = null;
                     }

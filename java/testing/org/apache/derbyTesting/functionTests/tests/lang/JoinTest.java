@@ -1890,23 +1890,112 @@ public class JoinTest extends BaseJDBCTestCase {
                   "values ('dddd', '_5ZDlwWTeEd-Q8aOqWJPEIQ')," +
                   "       ('bbbb', '_5nN9mmTeEd-Q8aOqWJPEIQ')");
 
-        ResultSet rs =
-            s.executeQuery(
-                "select distinct t1.ITEM_ID, t1.state_id, t1.JZ_DISCRIMINATOR from " +
-                "((((((select * from ABSTRACT_INSTANCE z1 where z1.JZ_DISCRIMINATOR = 238) t1 " +
-                "      left outer join LAB_RESOURCE_OPERATINGSYSTEM j1 on (t1.ITEM_ID = j1.JZ_PARENT_ID)) " +
-                "     left outer join ABSTRACT_INSTANCE t2 on (j1.ITEM_ID = t2.ITEM_ID)) " +
-                "    left outer join OPERATING_SYSTEM_SOFTWARE_INSTALL j2 on (t2.ITEM_ID = j2.JZ_PARENT_ID))" +
-                "   left outer join ABSTRACT_INSTANCE t3 on (j2.ITEM_ID = t3.ITEM_ID) " +
-                "  inner join FAMILY t5 on (t2.FAMILY_ITEM_ID = t5.ITEM_ID)) " +
-                " inner join FAMILY t7 on (t1.FAMILY_ITEM_ID = t7.ITEM_ID)) " +
-                "where (t3.FAMILY_ITEM_ID IN('_5VetVWTeEd-Q8aOqWJPEIQ') and " +
-                "      (t5.ROOT_ITEM_ID = '_5ZDlwWTeEd-Q8aOqWJPEIQ') and " +
-                "      (t7.ROOT_ITEM_ID ='_5nN9mmTeEd-Q8aOqWJPEIQ') and " +
-                "      (t1.VISIBILITY = 0))");
+        ResultSet rs = s.executeQuery(
+            "select distinct t1.ITEM_ID, t1.state_id, t1.JZ_DISCRIMINATOR" +
+            "    from " +
+            "((((((select * from ABSTRACT_INSTANCE z1 " +
+            "      where z1.JZ_DISCRIMINATOR = 238) t1 " +
+            "      left outer join LAB_RESOURCE_OPERATINGSYSTEM j1 " +
+            "          on (t1.ITEM_ID = j1.JZ_PARENT_ID)) " +
+            "     left outer join ABSTRACT_INSTANCE t2" +
+            "         on (j1.ITEM_ID = t2.ITEM_ID)) " +
+            "    left outer join OPERATING_SYSTEM_SOFTWARE_INSTALL j2" +
+            "        on (t2.ITEM_ID = j2.JZ_PARENT_ID))" +
+            "   left outer join ABSTRACT_INSTANCE t3 on " +
+            "       (j2.ITEM_ID = t3.ITEM_ID) " +
+            "  inner join FAMILY t5 on (t2.FAMILY_ITEM_ID = t5.ITEM_ID)) " +
+            " inner join FAMILY t7 on (t1.FAMILY_ITEM_ID = t7.ITEM_ID)) " +
+            "where (t3.FAMILY_ITEM_ID IN('_5VetVWTeEd-Q8aOqWJPEIQ') and " +
+            "      (t5.ROOT_ITEM_ID = '_5ZDlwWTeEd-Q8aOqWJPEIQ') and " +
+            "      (t7.ROOT_ITEM_ID ='_5nN9mmTeEd-Q8aOqWJPEIQ') and " +
+            "      (t1.VISIBILITY = 0))");
+
         JDBC.assertFullResultSet(
             rs,
             new String[][]{{"aaaa", null, "238"}});
+
+        // Now, some subqueries instead of a base table t3, since our
+        // difficulty lay in binding t3.FAMILY_ITEM_ID in the where clause
+        // correctly. Subqueries still broke in the first patch for DERBY-4679.
+
+        // Select subquery variant, cf tCorr
+        rs = s.executeQuery(
+            "select distinct t1.ITEM_ID, t1.state_id, t1.JZ_DISCRIMINATOR " +
+            "    from " +
+            "((((((select * from ABSTRACT_INSTANCE z1 " +
+            "      where z1.JZ_DISCRIMINATOR = 238) t1 " +
+            "      left outer join LAB_RESOURCE_OPERATINGSYSTEM j1 " +
+            "          on (t1.ITEM_ID = j1.JZ_PARENT_ID)) " +
+            "     left outer join ABSTRACT_INSTANCE t2 " +
+            "         on (j1.ITEM_ID = t2.ITEM_ID)) " +
+            "    left outer join OPERATING_SYSTEM_SOFTWARE_INSTALL j2" +
+            "        on (t2.ITEM_ID = j2.JZ_PARENT_ID))" +
+            "   left outer join (select * from ABSTRACT_INSTANCE) tCorr " +
+            "       on (j2.ITEM_ID = tCorr.ITEM_ID) " +
+            "  inner join FAMILY t5 on (t2.FAMILY_ITEM_ID = t5.ITEM_ID)) " +
+            " inner join FAMILY t7 on (t1.FAMILY_ITEM_ID = t7.ITEM_ID)) " +
+            "where (tCorr.FAMILY_ITEM_ID IN('_5VetVWTeEd-Q8aOqWJPEIQ') and " +
+            "      (t5.ROOT_ITEM_ID = '_5ZDlwWTeEd-Q8aOqWJPEIQ') and " +
+            "      (t7.ROOT_ITEM_ID ='_5nN9mmTeEd-Q8aOqWJPEIQ') and " +
+            "      (t1.VISIBILITY = 0))");
+        JDBC.assertFullResultSet(
+            rs,
+            new String[][]{{"aaaa", null, "238"}});
+
+        // values subquery variant, cf tCorr
+        rs = s.executeQuery(
+            "select distinct t1.ITEM_ID, t1.state_id, t1.JZ_DISCRIMINATOR " +
+            "    from " +
+            "((((((select * from ABSTRACT_INSTANCE z1 " +
+            "      where z1.JZ_DISCRIMINATOR = 238) t1 " +
+            "      left outer join LAB_RESOURCE_OPERATINGSYSTEM j1 " +
+            "          on (t1.ITEM_ID = j1.JZ_PARENT_ID)) " +
+            "     left outer join ABSTRACT_INSTANCE t2 " +
+            "         on (j1.ITEM_ID = t2.ITEM_ID)) " +
+            "    left outer join OPERATING_SYSTEM_SOFTWARE_INSTALL j2 " +
+            "        on (t2.ITEM_ID = j2.JZ_PARENT_ID))" +
+            "   left outer join " +
+            "       (values (238, 'aaaa', 'bbbb', 0)," +
+            "       (0, 'cccc', 'dddd', 0)," +
+            "       (1, 'eeee', '_5VetVWTeEd-Q8aOqWJPEIQ', 0)) " +
+            "       tCorr(jz_discriminator,item_id,family_item_id,visibility)" +
+            "       on (j2.ITEM_ID = tCorr.ITEM_ID) " +
+            "  inner join FAMILY t5 on (t2.FAMILY_ITEM_ID = t5.ITEM_ID)) " +
+            " inner join FAMILY t7 on (t1.FAMILY_ITEM_ID = t7.ITEM_ID)) " +
+            "where (tCorr.FAMILY_ITEM_ID IN('_5VetVWTeEd-Q8aOqWJPEIQ') and " +
+            "      (t5.ROOT_ITEM_ID = '_5ZDlwWTeEd-Q8aOqWJPEIQ') and " +
+            "      (t7.ROOT_ITEM_ID ='_5nN9mmTeEd-Q8aOqWJPEIQ') and " +
+            "      (t1.VISIBILITY = 0))");
+        JDBC.assertFullResultSet(
+            rs,
+            new String[][]{{"aaaa", null, "238"}});
+
+
+        s.executeUpdate("create view tView as select * from ABSTRACT_INSTANCE");
+
+        // view subquery variant, cf tCorr
+        rs = s.executeQuery(
+            "select distinct t1.ITEM_ID, t1.state_id, t1.JZ_DISCRIMINATOR " +
+            "    from " +
+            "((((((select * from ABSTRACT_INSTANCE z1 " +
+            "      where z1.JZ_DISCRIMINATOR = 238) t1 " +
+            "      left outer join LAB_RESOURCE_OPERATINGSYSTEM j1 " +
+            "          on (t1.ITEM_ID = j1.JZ_PARENT_ID)) " +
+            "     left outer join ABSTRACT_INSTANCE t2 " +
+            "         on (j1.ITEM_ID = t2.ITEM_ID)) " +
+            "    left outer join OPERATING_SYSTEM_SOFTWARE_INSTALL j2 " +
+            "        on (t2.ITEM_ID = j2.JZ_PARENT_ID))" +
+            "   left outer join tView on (j2.ITEM_ID = tView.ITEM_ID) " +
+            "  inner join FAMILY t5 on (t2.FAMILY_ITEM_ID = t5.ITEM_ID)) " +
+            " inner join FAMILY t7 on (t1.FAMILY_ITEM_ID = t7.ITEM_ID)) " +
+            "where (tView.FAMILY_ITEM_ID IN('_5VetVWTeEd-Q8aOqWJPEIQ') and " +
+            "      (t5.ROOT_ITEM_ID = '_5ZDlwWTeEd-Q8aOqWJPEIQ') and " +
+            "      (t7.ROOT_ITEM_ID ='_5nN9mmTeEd-Q8aOqWJPEIQ') and " +
+            "      (t1.VISIBILITY = 0))");
+        JDBC.assertFullResultSet(
+            rs,
+            new String[][]{{"aaaa", null, "238"}});
+
         rollback();
     }
 
