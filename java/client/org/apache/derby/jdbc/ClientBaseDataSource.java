@@ -33,6 +33,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import java.sql.SQLException;
 import javax.naming.Referenceable;
 import javax.naming.Reference;
 import javax.naming.NamingException;
@@ -46,6 +47,7 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.net.NetConfiguration;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.ClientDataSourceFactory;
+import org.apache.derby.shared.common.error.ExceptionUtil;
 import org.apache.derby.shared.common.reference.Attribute;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -1154,5 +1156,55 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         if (prop.containsKey(Attribute.SSL_ATTR)) {
             sslMode = getClientSSLMode(prop);
         }
+    }
+
+    /**
+     * Handles common error situations that can happen when trying to
+     * obtain a physical connection to the server, and which require special
+     * handling.
+     * <p>
+     * If this method returns normally, the exception wasn't handled and should
+     * be handled elsewhere or be re-thrown.
+     *
+     * @param logWriter log writer, may be {@code null}
+     * @param sqle exception to handle
+     * @throws SQLException handled exception (if any)
+     */
+    protected final void handleConnectionException(LogWriter logWriter,
+                                                   SqlException sqle)
+            throws SQLException {
+        // See DERBY-4070
+        if (sqle.getSQLState().equals(
+                ExceptionUtil.getSQLStateFromIdentifier(
+                    SQLState.INVALID_ATTRIBUTE_SYNTAX))) {
+            // Wrap this in SQLState.MALFORMED_URL exception to be
+            // consistent with the embedded driver.
+            throw new SqlException(logWriter,
+                    new ClientMessageId(SQLState.MALFORMED_URL),
+                    constructUrl(), sqle).getSQLException();
+
+        }
+    }
+
+    /**
+     * Constructs the JDBC connection URL from the state of the data source.
+     *
+     * @return The JDBC connection URL.
+     */
+    private String constructUrl() {
+        StringBuffer sb = new StringBuffer(64);
+        // To support subSubProtocols, the protocol addition below must be
+        // changed.
+        sb.append(Attribute.DNC_PROTOCOL);
+        sb.append(serverName);
+        sb.append(':');
+        sb.append(portNumber);
+        sb.append('/');
+        sb.append(databaseName);
+        if (connectionAttributes != null) {
+            sb.append(';');
+            sb.append(connectionAttributes);
+        }
+        return sb.toString();
     }
 }

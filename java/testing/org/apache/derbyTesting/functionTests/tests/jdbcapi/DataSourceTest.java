@@ -247,10 +247,7 @@ public class DataSourceTest extends BaseJDBCTestCase {
             ds.getConnection();
             fail ("should have seen an error");
         } catch (SQLException e) {
-            if (usingEmbedded())
-                assertSQLState("XJ028", e);
-            else if (usingDerbyNetClient())
-                assertSQLState("XJ212", e);
+            assertSQLState("XJ028", e);
         } 
     } // End testBadConnectionAttributeSyntax
         
