@@ -21,18 +21,19 @@
 package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.DateTime;
+import org.apache.derby.client.am.DateTimeValue;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.iapi.reference.DRDAConstants;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 
-import java.io.IOException;
-import org.apache.derby.client.am.DateTimeValue;
 
 public class Request {
 
@@ -245,11 +246,11 @@ public class Request {
 	final void writeScalarStream(boolean chained,
                                  boolean chainedWithSameCorrelator,
                                  int codePoint,
-                                 int length,
+                                 long length,
                                  java.io.InputStream in,
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, SqlException {
-		
+
 		if (netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRIDDTA ||
 			netAgent_.netConnection_.getSecurityMechanism() == NetConfiguration.SECMEC_EUSRPWDDTA) {
             // DERBY-4706
@@ -297,7 +298,7 @@ public class Request {
 	final private void writePlainScalarStream(boolean chained,
                                               boolean chainedWithSameCorrelator,
                                               int codePoint,
-                                              int length,
+                                              long length,
                                               java.io.InputStream in,
                                               boolean writeNullByte,
                                               int parameterIndex) throws DisconnectException, SqlException {
@@ -309,19 +310,16 @@ public class Request {
 
         // If the Derby specific status byte is sent, the number of bytes to
         // send differs from the number of bytes to read (off by one byte).
-		int leftToRead = length;
-        int bytesToSend = writeEXTDTAStatusByte ? leftToRead + 1 : leftToRead;
+        long leftToRead = length;
+        long bytesToSend = writeEXTDTAStatusByte ? leftToRead + 1 : leftToRead;
 		int extendedLengthByteCount = prepScalarStream(chained,
 													   chainedWithSameCorrelator,
 													   writeNullByte,
                                                        bytesToSend);
-		int bytesToRead;
-				
-		if (writeNullByte) {
-            bytesToRead = Math.min(bytesToSend, DssConstants.MAX_DSS_LEN - 6 - 4 - 1 - extendedLengthByteCount);
-		} else {
-            bytesToRead = Math.min(bytesToSend, DssConstants.MAX_DSS_LEN - 6 - 4 - extendedLengthByteCount);
-		}
+        int nullIndicatorSize = writeNullByte ? 1 : 0;
+        int dssMaxDataLength = DssConstants.MAX_DSS_LEN - 6 - 4 -
+                nullIndicatorSize - extendedLengthByteCount;
+        int bytesToRead = (int)Math.min(bytesToSend, dssMaxDataLength);
 
         // If we are sending the status byte and we can send the user value as
         // one DSS, correct for the status byte (otherwise we read one byte too
@@ -519,11 +517,11 @@ public class Request {
                                  boolean writeNullByte,
                                  int parameterIndex) throws DisconnectException, 
                                                             SqlException{
-        
+
         writeScalarStream(chained,
                           chainedWithSameCorrelator,
                           codePoint,
-                          length * 2,
+                          length * 2L,
                           EncodedInputStream.createUTF16BEStream(r),
                           writeNullByte,
                           parameterIndex);
@@ -553,21 +551,15 @@ public class Request {
     protected final int prepScalarStream(boolean chained,
                                          boolean chainedWithSameCorrelator,
                                          boolean writeNullByte,
-                                         int leftToRead) throws DisconnectException {
-        int extendedLengthByteCount;
-
-        int nullIndicatorSize = 0;
-        if (writeNullByte) {
-            // leftToRead is cast to (long) on the off chance that +4+1 pushes it outside the range of int
-            extendedLengthByteCount = calculateExtendedLengthByteCount((long) leftToRead + 4 + 1);
-            nullIndicatorSize = 1;
-        } else {
-            extendedLengthByteCount = calculateExtendedLengthByteCount(leftToRead + 4);
-        }
+                                         long leftToRead)
+            throws DisconnectException {
+        int nullIndicatorSize = writeNullByte ? 1 : 0;
+        int extendedLengthByteCount = calculateExtendedLengthByteCount(
+                    leftToRead + 4 + nullIndicatorSize);
 
         // flush the existing DSS segment if this stream will not fit in the send buffer
-        // leftToRead is cast to (long) on the off chance that +4+1 pushes it outside the range of int
-        if (10 + extendedLengthByteCount + nullIndicatorSize + (long) leftToRead + offset_ > DssConstants.MAX_DSS_LEN) {
+        if ((10 + extendedLengthByteCount + nullIndicatorSize +
+                leftToRead + offset_) > DssConstants.MAX_DSS_LEN) {
             try {
                 if (simpleDssFinalize) {
                     finalizeDssLength();
@@ -621,7 +613,7 @@ public class Request {
 
     // Writes out a scalar stream DSS segment, along with DSS continuation headers,
     // if necessary.
-    protected final int flushScalarStreamSegment(int leftToRead,
+    protected final int flushScalarStreamSegment(long leftToRead,
                                                  int bytesToRead) throws DisconnectException {
         int newBytesToRead = bytesToRead;
 
@@ -638,7 +630,7 @@ public class Request {
             dssLengthLocation_ = offset_;
             bytes_[offset_++] = (byte) (0xff);
             bytes_[offset_++] = (byte) (0xff);
-            newBytesToRead = Math.min(leftToRead, 32765);
+            newBytesToRead = (int)Math.min(leftToRead, 32765L);
         }
 
         return newBytesToRead;
@@ -675,7 +667,7 @@ public class Request {
      *      {@code writeStatus} is {@code false}
      * @throws DisconnectException if flushing the buffer fails
      */
-    protected final void padScalarStreamForError(int leftToRead,
+    protected final void padScalarStreamForError(long leftToRead,
                                                  int bytesToRead,
                                                  boolean writeStatus,
                                                  byte status)
@@ -1577,24 +1569,22 @@ public class Request {
     }
 
     private void buildLengthAndCodePointForLob(int codePoint,
-                                               int leftToRead,
+                                               long leftToRead,
                                                boolean writeNullByte,
                                                int extendedLengthByteCount) throws DisconnectException {
+        int nullIndicatorSize = writeNullByte ? 1 : 0;
         if (extendedLengthByteCount > 0) {
             // method should never ensure length
             writeLengthCodePoint(0x8004 + extendedLengthByteCount, codePoint);
-
-            if (writeNullByte) {
-                writeExtendedLengthBytes(extendedLengthByteCount, leftToRead + 1);
-            } else {
-                writeExtendedLengthBytes(extendedLengthByteCount, leftToRead);
-            }
+            writeExtendedLengthBytes(
+                    extendedLengthByteCount, leftToRead + nullIndicatorSize);
         } else {
-            if (writeNullByte) {
-                writeLengthCodePoint(leftToRead + 4 + 1, codePoint);
-            } else {
-                writeLengthCodePoint(leftToRead + 4, codePoint);
+            if (SanityManager.DEBUG) {
+                SanityManager.ASSERT(leftToRead +4 + nullIndicatorSize <=
+                        DssConstants.MAX_DSS_LEN);
             }
+            writeLengthCodePoint((int)(leftToRead + 4 + nullIndicatorSize),
+                    codePoint);
         }
 
         // write the null byte, if necessary
