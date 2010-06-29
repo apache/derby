@@ -85,6 +85,22 @@ public final class StoredRecordHeader
     private static final byte RECORD_HAS_FIRST_FIELD = 0x04;
     private static final byte RECORD_VALID_MASK = 0x0f;
 
+    /**
+     * maximum length for row containing just an overflow pointer.
+     * <p>
+     * The maximum stored length of a row that just contains an overflow pointer
+     * is 17 bytes:
+     *   stored sizeof(status byte)       :  1 +
+     *   stored sizeof(record id)         :  4 +
+     *   max stored size overflow page ptr:  8 +
+     *   max stored size overflow record id: 4  
+     **/
+    public static final int MAX_OVERFLOW_ONLY_REC_SIZE = 
+            1 +                                     // stored status byte
+            CompressedNumber.MAX_INT_STORED_SIZE  + // max stored record id size
+            CompressedNumber.MAX_LONG_STORED_SIZE + // max stored overflow page 
+            CompressedNumber.MAX_INT_STORED_SIZE;   // max stored overflow id
+
 
     /**************************************************************************
      * Fields of the class
@@ -760,6 +776,7 @@ public final class StoredRecordHeader
 			str += "\n  firstField    = " + getFirstField();
 			str += "\n  overflowPage  = " + getOverflowPage();
 			str += "\n  overflowId    = " + getOverflowId();
+			str += "\n  header length = " + size();
 
 			return str;
 		}

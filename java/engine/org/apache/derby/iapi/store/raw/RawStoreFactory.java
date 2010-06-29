@@ -215,11 +215,18 @@ public interface RawStoreFactory extends Corruptable {
 	/**
 		Default value for MINIMUM_RECORD_SIZE_PARAMETER	for heap tables that 
         allow overflow.  By setting minimumRecordSize to 12 bytes, we 
-        guarantee there is enough space to update the row even there is not
-        enough space on the page.  The 12 bytes will guarantee there is room
-        for an overflow pointer (page + id).
+        guarantee there is enough space to update the a head row even if there 
+        is not enough space on the page.  The 12 bytes of user data along with
+        the existing space in the record header will guarantee there is room
+        to write an overflow row header which will use the same initial portion
+        of the record header and at most 12 additional bytes for an overflow 
+        pointer (page + id).  Note that this is the "user"
+        portion of the record.  The record also will contain space for the
+        "non-user" portion which includes the offset table and the record
+        header.
 	*/
 	public static final int MINIMUM_RECORD_SIZE_DEFAULT = 12;
+
 
 	/**
 		Minimum value for MINIMUM_RECORD_SIZE_PARAMETER (1).

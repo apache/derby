@@ -289,7 +289,7 @@ public class StoredPage extends CachedPage
     /**
      * OVERFLOW_PTR_FIELD_SIZE - Number of bytes of an overflow field
      * 
-     * This is the length to reserve for either an column or row overflow
+     * This is the length to reserve for either a column or row overflow
      * pointer field.  It includes the size of the field header plus the 
      * maxium length of the overflow pointer (it could be shorter due to
      * compressed storage).
@@ -397,7 +397,7 @@ public class StoredPage extends CachedPage
      * Minimum space to reserve for record portion length of row.
      * <p>
      * minimumRecordSize is stored in the container handle.  It is used to 
-     * reserved minimum space for recordPortionLength.  Default is 1.  To
+     * reserve minimum space for recordPortionLength.  Default is 1.  To
      * get the value from the container handle: 
      * myContainer.getMinimumRecordSize();
      *
@@ -969,7 +969,9 @@ public class StoredPage extends CachedPage
                 // make sure free space is not negative and does not overlap
                 // used space.
 
-				SanityManager.THROWASSERT("slotsInUse = " + slotsInUse
+				SanityManager.THROWASSERT(
+                      "writePage detected problem in freespace and used space."
+                    + "slotsInUse = " + slotsInUse
 					+ ", firstFreeByte = " + firstFreeByte
 					+ ", freeSpace = " + freeSpace 
 					+ ", slotOffset = " + (getSlotOffset(slotsInUse - 1))
@@ -1296,8 +1298,11 @@ public class StoredPage extends CachedPage
 
 		spaceAvailable -= slotEntrySize;	// need to account new slot entry
 
-		if (spaceAvailable < minimumRecordSize)
+		if ((spaceAvailable < minimumRecordSize) ||
+            (spaceAvailable < StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE))
+        {
 			return false;
+        }
 
 		// see that we reserve enough space for existing rows to grow on page
 		if (((spaceAvailable * 100) / totalSpace) < spareSpace)
@@ -2192,16 +2197,28 @@ public class StoredPage extends CachedPage
             {
 				if (SanityManager.DEBUG) 
                 {
-					if (!isOverflowPage() && 
-                        minimumRecordSize > getTotalSpace(slot))
+                    int total_space    = getTotalSpace(slot);
+
+					if ((!isOverflowPage() && 
+                         (minimumRecordSize > total_space)) ||
+                        (isOverflowPage() &&
+                         (StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE >
+                         total_space)))
                     {
+                        // head rows including reserved space must be larger 
+                        // than minimumRecordSize.  
+                        //
+                        // Overflow rows including reserved space must be 
+                        // larger than MAX_OVERFLOW_ONLY_REC_SIZE.
+
 						SanityManager.THROWASSERT(
+                            "initSlotTable consistency check failed: " +
 							" slot " + slot +
 							" minimumRecordSize = " + minimumRecordSize + 
-							" totalSpace = " + getTotalSpace(slot) + 
-							"recordPortionLength = " + 
-                                getRecordPortionLength(slot) 
-							+ " reservedCount = " + getReservedCount(slot));
+							" totalSpace = " + total_space +
+							" recordPortionLength = " + 
+                                getRecordPortionLength(slot) + 
+                            " reservedCount = " + getReservedCount(slot));
                     }
 				}
 
@@ -2237,9 +2254,10 @@ public class StoredPage extends CachedPage
 
 			if (SanityManager.DEBUG) 
             {
-				if ((freeSpace < 0) || 
+				if ((freeSpace < 0)                                   || 
+                    (firstFreeByte > getSlotOffset(slotsInUse - 1))   ||
                     ((firstFreeByte + freeSpace) != 
-                         (getSlotOffset(slotsInUse - 1)))) 
+                         getSlotOffset(slotsInUse - 1))) 
                 {
 					SanityManager.THROWASSERT(
                         "firstFreeByte = " + firstFreeByte
@@ -3551,15 +3569,6 @@ public class StoredPage extends CachedPage
 		return getHeaderAtSlot(slot).hasOverflow();
 	}
 
-	/**
-		Log a row into the StoreOuput stream.
-
-		<P>
-
-		@exception StandardException	Standard Derby error policy
-		@exception IOException			RESOLVE
-
-	*/
     /**
      * Log a row into the StoreOuput stream.
      * <p>
@@ -4103,6 +4112,46 @@ public class StoredPage extends CachedPage
 							// not enough room for the overflow recordheader,
                             // and this is the first column on this page so 
                             // need to try another page.
+                            //
+
+                            if (SanityManager.DEBUG)
+                            {
+                                if (!forInsert)
+                                {
+                                    // should not get into this path on an 
+                                    // update, only on an insert.  Update should
+                                    // reserve space on page so you can always
+                                    // at least update the row with a single
+                                    // overflow pointer.
+                                    SanityManager.THROWASSERT(
+                                        "no space to update a field on page. " +
+                                        "i = " + i +
+                                        "; startColumn = " + startColumn + 
+                                        "; lastColumnPositionAllowOverflow = " +
+                                            lastColumnPositionAllowOverflow +
+                                        "; spaceAvailable = " + 
+                                            spaceAvailable +
+                                        "; isOverflowPage() = " + 
+                                            isOverflowPage() +
+                                        "; OVERFLOW_POINTER_SIZE = " + 
+                                            OVERFLOW_POINTER_SIZE +
+                                        "\npage = \n" + this);
+                                }
+                            }
+
+                            // DERBY-4577, on an update this bug may cause
+                            // the following to be thrown on an update.  Update
+                            // code never expects this error to be thrown, and
+                            // does not handle it.  The fix to DERBY-4577 was
+                            // to fix insert code to make sure enough space is
+                            // always reserved on overflow pages such that 
+                            // updates will never fail.  But the fix does not
+                            // affect existing problem overflow pages.  If 
+                            // this error is encountered in a table created 
+                            // by software before the fix, run compress to 
+                            // upgrade all data in table so that error will
+                            // not be encountered in future.
+
 							throw new NoSpaceOnPage(isOverflowPage());
 						} 
                         else 
@@ -4200,7 +4249,6 @@ public class StoredPage extends CachedPage
             {
 				throw new NoSpaceOnPage(isOverflowPage()); 
             }
-
 		} 
         finally 
         {
@@ -7157,7 +7205,7 @@ public class StoredPage extends CachedPage
 
 		int dataWritten = offset - firstFreeByte;
 
-		freeSpace -= dataWritten;
+		freeSpace     -= dataWritten;
 		firstFreeByte += dataWritten;
 
 		int reservedSpace = 0;
@@ -7167,28 +7215,52 @@ public class StoredPage extends CachedPage
 			// portion of the record excluding the space we took on recordHeader 
 			// and fieldHeaders.
 			if (userData < minimumRecordSize) {
-				reservedSpace = minimumRecordSize - userData;
-				freeSpace -= reservedSpace;
+				reservedSpace =  minimumRecordSize - userData;
+				freeSpace     -= reservedSpace;
 				firstFreeByte += reservedSpace;
 			}
 		}
+
+        if (isOverflowPage())
+        {
+            // The total length of the row including the row header, field
+            // headers, user data, and unused reserve space must be at least
+            // as big as the worst case overflow row pointer.  This is so that
+            // it always possible to do an expanding update on a row piece that
+            // in the worst case results in just using the existing space to
+            // put in an overflow pointer to another row segment on some other
+            // page.
+            int additional_space_needed = 
+                StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE - 
+                    (dataWritten + reservedSpace);
+
+            if (additional_space_needed > 0)
+            {
+                // need to reserve more space for the row to handle worst case
+                // update of the row to an overflow row piece.
+                freeSpace     -= additional_space_needed;
+                firstFreeByte += additional_space_needed;
+                reservedSpace += additional_space_needed;
+            }
+        }
 
 		// update the slot table
 		addSlotEntry(slot, recordOffset, dataWritten, reservedSpace);
 
         if (SanityManager.DEBUG)
         {
-            if ((firstFreeByte > getSlotOffset(slot)) ||
-                (freeSpace < 0))
+            if ((freeSpace < 0)                         || 
+                (firstFreeByte > getSlotOffset(slotsInUse - 1))   ||
+                ((firstFreeByte + freeSpace) != getSlotOffset(slotsInUse - 1)))
             {
                 SanityManager.THROWASSERT(
-                        " firstFreeByte = " + firstFreeByte + 
-                        " dataWritten = "        + dataWritten        +
-                        " getSlotOffset(slot) = "   + getSlotOffset(slot)   + 
-						" slot = " + slot +
-                        " firstFreeByte = "      + firstFreeByte + 
-                        " freeSpace = "          + freeSpace  + 
-                        " page = "               + this);
+                        " inconsistency in space management during insert: " +
+                        " slot = "                + slot                     +
+                        " getSlotOffset(slot) = " + getSlotOffset(slot)      + 
+                        " dataWritten = "         + dataWritten              +
+                        " freeSpace = "           + freeSpace                + 
+                        " firstFreeByte = "       + firstFreeByte            + 
+                        " page = "                + this);
             }
         }
 
@@ -8051,7 +8123,9 @@ public class StoredPage extends CachedPage
                          "," + getReservedCount(slot) + ")"+
                          recordHeader.toString();
 
-				rawDataIn.setPosition(offset + recordHeader.size());
+                // move offset past record header to begin of first field.
+                offset += recordHeader.size();
+				rawDataIn.setPosition(offset);
 
 				for (int i = 0; i < numberFields; i++)
 				{
@@ -8727,8 +8801,8 @@ slotScan:
 					// After the update is done, see if this row piece has
 					// shrunk in curPage if no other row pieces have shrunk so
 					// far.  In head page, need to respect minimumRecordSize.
-					// In overflow page, only need to respect
-					// RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT
+					// In overflow page entire row needs to respect
+                    // StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE.
 					// Don't bother with temp container.
 					if (!rowHasReservedSpace && headRowHandle != null &&
 						curPage != null && !owner.isTemporaryContainer())
@@ -8866,41 +8940,69 @@ slotScan:
 	}
 
 	/**
-		See if the row on this page has reserved space that can be shrunk once
-		the update commits.
 	 */
+
+    /**
+     * See if reserved space should be reclaimed for the input row.
+     * <p>
+     * See if the row on this page has reserved space that should be shrunk 
+     * once the update commits.  Will only indicate space should be reclaimed
+     * if at least RawTransaction.MINIMUM_RECORD_SIZE_DEFAULT bytes can be
+     * reclaimed.  
+     * <p>
+     *
+     * @return true if space should be reclaimed from this row post commit.
+     **/
 	private boolean checkRowReservedSpace(int slot) throws StandardException
 	{
 		boolean rowHasReservedSpace = false;
-		try {
+
+		try 
+        {
 			int shrinkage = getReservedCount(slot);
 
-			// Only reclaim reserved space if it is
-			// "reasonably" sized, i.e., we can reclaim at
-			// least MININUM_RECORD_SIZE_DEFAULT
+			// Only reclaim reserved space if it is "reasonably" sized, i.e., 
+            // we can reclaim at least MINIMUM_RECORD_SIZE_DEFAULT.  Note
+            // any number could be used for "reasonable", not sure why
+            // MINIMUM_RECORD_SIZE_DEFAULT was chosen.
 			int reclaimThreshold = RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT;
 			
-			if (shrinkage > reclaimThreshold) {
+			if (shrinkage > reclaimThreshold) 
+            {
+                // reserved space for row exceeds the threshold.
+
 				int totalSpace = getRecordPortionLength(slot) + shrinkage; 
 
-				if (isOverflowPage()) {
+				if (isOverflowPage()) 
+                {
+                    // For overflow pages the total row size, including 
+                    // reserved space must be at least 
+                    // StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE
+
 					if (totalSpace >
-						RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT+reclaimThreshold)
+                        (StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE +
+                         reclaimThreshold))
+                    {
+                        // row can reclaim at least the threshold space
 						rowHasReservedSpace = true;
+                    }
+				} 
+                else 
+                {
+					// this is a head page.  The total space of the row 
+                    // including reserved space must total at least
+                    // minimumRecordSize.
 
-					// Otherwise, I can at most reclaim less than
-					// MINIMUM_RECORD_SIZE_DEFAULT, forget about that.
-				} else {
-					// this is a head page
-					if (totalSpace > (minimumRecordSize +
-									  RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT)) 
+					if (totalSpace > (minimumRecordSize + reclaimThreshold))
+                    {
+                        // row can reclaim at least the threshold space
 						rowHasReservedSpace = true;
-
-					// Otherwise, I can at most reclaim less than
-					// MINIMUM_RECORD_SIZE_DEFAULT, forget about that.
+                    }
 				}
 			}
-		} catch (IOException ioe) {
+		} 
+        catch (IOException ioe) 
+        {
 			throw StandardException.newException(
                 SQLState.DATA_UNEXPECTED_EXCEPTION, ioe);
 		}
@@ -8915,28 +9017,37 @@ slotScan:
 	protected void compactRecord(RawTransaction t, int slot, int id) 
 		 throws StandardException 
 	{
-		// If this is a head row piece, first take care of the entire overflow
-		// row chain.  Don't need to worry about long column because they are
-		// not in place updatable.
-		if (isOverflowPage() == false) {
+		if (!isOverflowPage()) 
+        {
+            // If this is a head row piece, first take care of the entire 
+            // overflow row chain.  Don't need to worry about long column 
+            // because they are not in place updatable.
+
 			StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
 
-			while (recordHeader.hasOverflow()) {
+			while (recordHeader.hasOverflow()) 
+            {
+                // loop calling compact on each piece of the overflow chain.
+
 				StoredPage nextPageInRowChain =
 					getOverflowPage(recordHeader.getOverflowPage());
 
 				if (SanityManager.DEBUG)
 					SanityManager.ASSERT(nextPageInRowChain != null);
 
-				try {
-					int nextId = recordHeader.getOverflowId();
-					int nextSlot = getOverflowSlot(nextPageInRowChain, recordHeader);
+				try 
+                {
+					int nextId   = recordHeader.getOverflowId();
+					int nextSlot = 
+                        getOverflowSlot(nextPageInRowChain, recordHeader);
 
 					nextPageInRowChain.compactRecord(t, nextSlot, nextId);
 
 					// Follow the next long row pointer.
 					recordHeader = nextPageInRowChain.getHeaderAtSlot(nextSlot);
-				} finally {
+				} 
+                finally 
+                {
 					nextPageInRowChain.unlatch();
 				}
 			}
@@ -8946,33 +9057,64 @@ slotScan:
 		// Try to only reclaim space larger than MINIMUM_RECORD_SIZE_DEFAULT
 		// because otherwise it is probably not worth the effort.
 		int reclaimThreshold = RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT;
+
 		try
 		{
 			int reserve = getReservedCount(slot);
-			if (reserve > reclaimThreshold) {
-				int recordLength = getRecordPortionLength(slot);
-				int correctReservedSpace = reserve;
 
-				if (isOverflowPage()) {
-					if ((reserve + recordLength) > 
-						(RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT+reclaimThreshold))
-					{ 
+			if (reserve > reclaimThreshold) 
+            {
+                // unused space exceeds the reclaim threshold.
+
+				int recordLength         = getRecordPortionLength(slot);
+				int correctReservedSpace = reserve;
+                int totalSpace           = recordLength + reserve;
+
+				if (isOverflowPage()) 
+                {
+                    // On an overflow page the total space of a record must
+                    // be at least MAX_OVERFLOW_ONLY_REC_SIZE.
+
+                    if (totalSpace > 
+                        (StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE +
+                         reclaimThreshold))
+                    {
+                        // possible to reclaim more than threshold.
+
 						// calculate what the correct reserved space is
-						if (recordLength >= RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT)
+						if (recordLength >= 
+                            StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE)
+                        {
 							correctReservedSpace = 0;
-						else	// make sure record takes up minimum_record_size 
-							correctReservedSpace = 
-								RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT - recordLength; 
-					}
-				} else {
-					// this is a head page
-					if ((reserve + recordLength) > 
-						(minimumRecordSize+reclaimThreshold)) {
-						// calculate what the correct reserved space is
-						if (recordLength >= minimumRecordSize)
-							correctReservedSpace = 0;
+                        }
 						else
-							correctReservedSpace = minimumRecordSize - recordLength;
+                        {
+                            // make sure record takes up max overflow rec size 
+							correctReservedSpace = 
+                                StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE -
+                                recordLength;
+                        }
+					}
+				} 
+                else 
+                {
+					// this is a head page.  The total space of the row 
+                    // including reserved space must total at least
+                    // minimumRecordSize.
+
+					if (totalSpace > (minimumRecordSize + reclaimThreshold))
+                    {
+						// calculate what the correct reserved space is
+
+						if (recordLength >= minimumRecordSize)
+                        {
+							correctReservedSpace = 0;
+                        }
+						else
+                        {
+							correctReservedSpace = 
+                                minimumRecordSize - recordLength;
+                        }
 					}
 				}
 
@@ -8983,16 +9125,18 @@ slotScan:
 				}
 
 				// A shrinkage has occured.
-				if (correctReservedSpace < reserve) {
+				if (correctReservedSpace < reserve) 
+                {
 					owner.getActionSet().
-						actionShrinkReservedSpace(t, this, slot, id,
-										correctReservedSpace, reserve);
+						actionShrinkReservedSpace(
+                            t, this, slot, id, correctReservedSpace, reserve);
 				}
 			}
-		} catch (IOException ioe) {
+		} 
+        catch (IOException ioe) 
+        {
 			throw StandardException.newException(
                 SQLState.DATA_UNEXPECTED_EXCEPTION, ioe);
 		}
 	}
 }
-
