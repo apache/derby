@@ -49,7 +49,9 @@ public class Utf8CcsidManager extends CcsidManager {
         try {
             return sourceString.getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
-            SanityManager.THROWASSERT("Could not convert UCS2 (String) to UTF-8 (byte[])", e);
+            if (SanityManager.DEBUG) {
+                SanityManager.THROWASSERT("Could not convert Java String to byte[] in UTF-8", e);
+            }
         }
         return null;
     }
@@ -58,7 +60,9 @@ public class Utf8CcsidManager extends CcsidManager {
        try {
            return new String(sourceBytes,"UTF-8");
         } catch (UnsupportedEncodingException e) {
-            SanityManager.THROWASSERT("Could not convert UCS2 (byte[]) to UTF-8 (String)", e);
+            if (SanityManager.DEBUG) {
+                SanityManager.THROWASSERT("Could not convert byte[] to Java String using UTF-8 encoding", e);
+            }
         }
         return null;
     }
@@ -67,7 +71,9 @@ public class Utf8CcsidManager extends CcsidManager {
         try {
             return new String(sourceBytes,"UTF-8").substring(offset, offset+numToConvert);
         } catch (UnsupportedEncodingException e) {
-            SanityManager.THROWASSERT("Could not convert UCS2 (byte[]) to UTF-8 (String) with offset",e);
+            if (SanityManager.DEBUG) {
+                SanityManager.THROWASSERT("Could not convert byte[] to Java String using UTF-8 encoding with offset",e);
+            }
         }
         return null;
     }
