@@ -64,11 +64,11 @@ import org.apache.derby.iapi.util.ByteArray;
 
 
 /**
-	StoredPage is a sub class of CachedPage that stores page data in a
-	fixed size byte array and is designed to be written out to a file
-	through a DataInput/DataOutput interface. A StoredPage can exist
-	in its clean or dirty state without the FileContainer it was created
-	from being in memory.
+    StoredPage is a sub class of CachedPage that stores page data in a
+    fixed size byte array and is designed to be written out to a file
+    through a DataInput/DataOutput interface. A StoredPage can exist
+    in its clean or dirty state without the FileContainer it was created
+    from being in memory.
 
   <P><B>Page Format</B><BR>
   The page is broken into five sections
@@ -82,21 +82,21 @@ import org.apache.derby.iapi.util.ByteArray;
   <BR><B>Page Header</B><BR>
   The page header is a fixed size, 56 bytes 
   <PRE>
-  1 byte  boolean			is page an overflow page
-  1 byte  byte				page status (a field maintained in base page)
-  8 bytes long				pageVersion (a field maintained in base page)
-  2 bytes unsigned short	number of slots in slot offset table
-  4 bytes integer			next record identifier
-  4 bytes integer			generation number of this page (Future Use)
-  4 bytes integer			previous generation of this page (Future Use)
-  8 bytes bipLocation		the location of the beforeimage page (Future Use)
-  2 bytes unsigned short	number of deleted rows on page. (new release 2.0)
+  1 byte  boolean           is page an overflow page
+  1 byte  byte              page status (a field maintained in base page)
+  8 bytes long              pageVersion (a field maintained in base page)
+  2 bytes unsigned short    number of slots in slot offset table
+  4 bytes integer           next record identifier
+  4 bytes integer           generation number of this page (Future Use)
+  4 bytes integer           previous generation of this page (Future Use)
+  8 bytes bipLocation       the location of the beforeimage page (Future Use)
+  2 bytes unsigned short    number of deleted rows on page. (new release 2.0)
   2 bytes unsigned short    % of the page to keep free for updates
-  2 bytes short				spare for future use
-  4 bytes long				spare for future use (encryption uses to write 
+  2 bytes short             spare for future use
+  4 bytes long              spare for future use (encryption uses to write 
                                                   random bytes here).
-  8 bytes long				spare for future use
-  8 bytes long				spare for future use
+  8 bytes long              spare for future use
+  8 bytes long              spare for future use
 
   </PRE>
 
@@ -112,17 +112,17 @@ import org.apache.derby.iapi.util.ByteArray;
   use for the record header and field headers.  When a record is inserted, it
   is stored in a space at least as large as the sum of the minimumRecordSize
   and total header size.
-		For example,
-			If minimumRecordSize is 10 bytes,
-			the user record is 7 bytes,
-			we used 5 bytes for record and field headers,
-			this record will take (10 + 5) bytes of space, extra 3 bytes is 
+        For example,
+            If minimumRecordSize is 10 bytes,
+            the user record is 7 bytes,
+            we used 5 bytes for record and field headers,
+            this record will take (10 + 5) bytes of space, extra 3 bytes is 
             put into reserve.
 
-			If minimumRecordSize is 10 bytes,
-			user record is 17 bytes,
-			we used 5 bytes for record and field headers,
-			this record will take (17 + 5) bytes of space, no reserve space 
+            If minimumRecordSize is 10 bytes,
+            user record is 17 bytes,
+            we used 5 bytes for record and field headers,
+            this record will take (17 + 5) bytes of space, no reserve space 
             here.
 
   minimumRecordSize is defined by user on per container basis.
@@ -137,10 +137,10 @@ import org.apache.derby.iapi.util.ByteArray;
 
   Record Header format is defined in the StoredRecordHeader class.
   
-<PRE>	
+<PRE>   
   <BR><B>Fields</B>
 
-  1 byte	Boolean	- is null, if true no more data follows.
+  1 byte    Boolean - is null, if true no more data follows.
   4 bytes   Integer - length of field that follows (excludes these four bytes).
 
   StoredPage will use the static method provided by StoredFieldHeader
@@ -150,37 +150,37 @@ import org.apache.derby.iapi.util.ByteArray;
   <data>
 
   </PRE>
-	<BR><B>Slot Offset Table</B><BR>
-	The slot offset table is a table of 6 or 12 bytes per record, depending on
+    <BR><B>Slot Offset Table</B><BR>
+    The slot offset table is a table of 6 or 12 bytes per record, depending on
     the pageSize being less or greater than 64K:
-	2 bytes (unsigned short) or 4 bytes (int) page offset for the record that
+    2 bytes (unsigned short) or 4 bytes (int) page offset for the record that
     is assigned to the slot, and 2 bytes (unsigned short) or 4 bytes (int) 
     for the length of the record on this page.
-	2 bytes (unsigned short) or 4 bytes (int) for the length of the reserved 
+    2 bytes (unsigned short) or 4 bytes (int) for the length of the reserved 
     number of bytes for this record on this page.
-	First slot is slot 0.  The slot table grows backwards. Slots are never
+    First slot is slot 0.  The slot table grows backwards. Slots are never
     left empty.
-	<BR><B>Checksum</B><BR>
-	8 bytes of a java.util.zip.CRC32 checksum of the entire's page contents 
+    <BR><B>Checksum</B><BR>
+    8 bytes of a java.util.zip.CRC32 checksum of the entire's page contents 
     without the 8 bytes representing the checksum.
 
-	<P><B>Page Access</B>
-	The page data is accessed in this class by one of three methods.
-	<OL>
-	<LI>As a byte array using pageData (field in cachedPage). This is the 
+    <P><B>Page Access</B>
+    The page data is accessed in this class by one of three methods.
+    <OL>
+    <LI>As a byte array using pageData (field in cachedPage). This is the 
     fastest.
-	<LI>As an ArrayInputStream (rawDataIn) and ArrayOutputStream (rawDataOut),
-	this is used to set limits on any one reading the page logically.
-	<LI>Logically through rawDataIn (ArrayInputStream) and 
+    <LI>As an ArrayInputStream (rawDataIn) and ArrayOutputStream (rawDataOut),
+    this is used to set limits on any one reading the page logically.
+    <LI>Logically through rawDataIn (ArrayInputStream) and 
     logicalDataOut (FormatIdOutputStream), this provides the methods to write
     logical data (e.g. booleans and integers etc.) and the ObjectInput
-	and ObjectOutput interfaces for DataValueDescriptor's. These logical
+    and ObjectOutput interfaces for DataValueDescriptor's. These logical
     streams are constructed using the array streams.
-	</OL>
+    </OL>
 
-	@see java.util.zip.CRC32
-	@see ArrayInputStream
-	@see ArrayOutputStream
+    @see java.util.zip.CRC32
+    @see ArrayInputStream
+    @see ArrayOutputStream
  **/
 
 public class StoredPage extends CachedPage
@@ -190,20 +190,20 @@ public class StoredPage extends CachedPage
      **************************************************************************
      */
 
-	/*
-	 * typed format
-	 */
+    /*
+     * typed format
+     */
 
-	public static final int FORMAT_NUMBER = 
+    public static final int FORMAT_NUMBER = 
         StoredFormatIds.RAW_STORE_STORED_PAGE;
 
     /**
      * Return my format identifier.
      **/
-	public int getTypeFormatId()
-	{
-		return StoredFormatIds.RAW_STORE_STORED_PAGE;
-	}
+    public int getTypeFormatId()
+    {
+        return StoredFormatIds.RAW_STORE_STORED_PAGE;
+    }
 
 
     /**
@@ -226,40 +226,40 @@ public class StoredPage extends CachedPage
     /**
      * Start of page, formatId must fit in 4 bytes.
      * <p>
-	 * where the page header starts - page format is mandated by cached page
+     * where the page header starts - page format is mandated by cached page
      **/
-	protected static final int PAGE_HEADER_OFFSET   = PAGE_FORMAT_ID_SIZE;
+    protected static final int PAGE_HEADER_OFFSET   = PAGE_FORMAT_ID_SIZE;
 
 
     /**
      * Fixed size of the page header
      **/
-	protected static final int PAGE_HEADER_SIZE     = 56;
+    protected static final int PAGE_HEADER_SIZE     = 56;
 
 
-	/** 
-		Start of the record storage area
-	*/
+    /** 
+        Start of the record storage area
+    */
     /**
      * Start of the record storage area.
      * <p>
      * Note: a subclass may change the start of the record storage area.  
      * Don't always count on this number.
      **/
-	protected static final int RECORD_SPACE_OFFSET = 
+    protected static final int RECORD_SPACE_OFFSET = 
         PAGE_HEADER_OFFSET + PAGE_HEADER_SIZE;
 
     /**
      * offset of the page version number
      **/
-	protected static final int PAGE_VERSION_OFFSET = PAGE_HEADER_OFFSET + 2;
+    protected static final int PAGE_VERSION_OFFSET = PAGE_HEADER_OFFSET + 2;
 
     /**
      * SMALL_SLOT_SIZE are for pages smaller than 64K,
      * LARGE_SLOT_SIZE is for pages bigger than 64K.
      **/
-	protected static final int SMALL_SLOT_SIZE  = 2;
-	protected static final int LARGE_SLOT_SIZE  = 4;
+    protected static final int SMALL_SLOT_SIZE  = 2;
+    protected static final int LARGE_SLOT_SIZE  = 4;
 
     /**
      * Size of the checksum stored on the page.
@@ -268,7 +268,7 @@ public class StoredPage extends CachedPage
      * grows backward up the page starting at the end of the page just before
      * the checksum.
      **/
-	protected static final int CHECKSUM_SIZE    = 8;
+    protected static final int CHECKSUM_SIZE    = 8;
 
     /**
      * OVERFLOW_POINTER_SIZE - Number of bytes to reserve for overflow pointer
@@ -284,7 +284,7 @@ public class StoredPage extends CachedPage
      * write the over flow pointer.
      *
      **/
-	protected static final int OVERFLOW_POINTER_SIZE = 12;
+    protected static final int OVERFLOW_POINTER_SIZE = 12;
 
     /**
      * OVERFLOW_PTR_FIELD_SIZE - Number of bytes of an overflow field
@@ -296,20 +296,20 @@ public class StoredPage extends CachedPage
      *
      * The calcualtion is:
      *
-	 * OVERFLOW_PTR_FIELD_SIZE = 
+     * OVERFLOW_PTR_FIELD_SIZE = 
      *     OVERFLOW_POINTER_SIZE + 
      *     sizeof(status byte) + 
      *     sizeof(field length field for a field which is just an overflow ptr)
      *     
      *
      **/
-	protected static final int OVERFLOW_PTR_FIELD_SIZE = 
+    protected static final int OVERFLOW_PTR_FIELD_SIZE = 
         OVERFLOW_POINTER_SIZE + 1 + 1;
 
     /**
      * In memory buffer used as scratch space for streaming columns.
      **/
-	ByteHolder bh = null;
+    ByteHolder bh = null;
 
     /**************************************************************************
      * Fields of the class
@@ -322,15 +322,15 @@ public class StoredPage extends CachedPage
      * <p>
      * Action taken in this routine is determined by the kind of column as
      * specified in the columnFlag:
-     *     COLUMN_NONE	 - the column is insignificant
+     *     COLUMN_NONE   - the column is insignificant
      *     COLUMN_FIRST  - this is the first column in a logRow() call
      *     COLUMN_LONG   - this is a known long column, therefore we will 
      *                     store part of the column on the current page and 
      *                     overflow the rest if necessary.
      **/
-	protected static final int COLUMN_NONE  = 0;
-	protected static final int COLUMN_FIRST = 1;
-	protected static final int COLUMN_LONG  = 2;
+    protected static final int COLUMN_NONE  = 0;
+    protected static final int COLUMN_FIRST = 1;
+    protected static final int COLUMN_LONG  = 2;
 
 
     /**
@@ -352,18 +352,18 @@ public class StoredPage extends CachedPage
      * to access the fields in the header:
      * <p>
      *  1 byte  boolean isOverflowPage  is page an overflow page
-     *  1 byte  byte	pageStatus      page status (field in base page)
-     *  8 bytes long	pageVersion     page version (field in base page)
-     *  2 bytes ushort	slotsInUse      number of slots in slot offset table
-     *  4 bytes integer	nextId          next record identifier
-     *  4 bytes integer	generation      generation number of this page(FUTURE USE)
-     *  4 bytes integer	prevGeneration  previous generation of page (FUTURE USE)
+     *  1 byte  byte    pageStatus      page status (field in base page)
+     *  8 bytes long    pageVersion     page version (field in base page)
+     *  2 bytes ushort  slotsInUse      number of slots in slot offset table
+     *  4 bytes integer nextId          next record identifier
+     *  4 bytes integer generation      generation number of this page(FUTURE USE)
+     *  4 bytes integer prevGeneration  previous generation of page (FUTURE USE)
      *  8 bytes long    bipLocation     the location of the BI page (FUTURE USE)
      *  2 bytes ushort  deletedRowCount number of deleted rows on page.(rel 2.0)
-     *  2 bytes long		            spare for future use
-     *  4 bytes long		            spare (encryption writes random bytes)
-     *  8 bytes long		            spare for future use
-     *  8 bytes long		            spare for future use
+     *  2 bytes long                    spare for future use
+     *  4 bytes long                    spare (encryption writes random bytes)
+     *  8 bytes long                    spare for future use
+     *  8 bytes long                    spare for future use
      *
      *  Note that spare space has been guaranteed to be writen with "0", so
      *  that future use of field should not either not use "0" as a valid data 
@@ -371,13 +371,13 @@ public class StoredPage extends CachedPage
      *  assume that 0 means field was never assigned.
      *
      **/
-	private boolean	isOverflowPage;     // is page an overflow page?
-	private int		slotsInUse;         // number of slots in slot offset table.
-	private int		nextId;             // next record identifier
-	private int		generation;         // (Future Use) generation number of this page
-	private int		prevGeneration;     // (Future Use) previous generation of page
-	private long	bipLocation;        // (Future Use) the location of the BI page
-	private int		deletedRowCount;    // number of deleted rows on page.
+    private boolean isOverflowPage;     // is page an overflow page?
+    private int     slotsInUse;         // number of slots in slot offset table.
+    private int     nextId;             // next record identifier
+    private int     generation;         // (Future Use) generation number of this page
+    private int     prevGeneration;     // (Future Use) previous generation of page
+    private long    bipLocation;        // (Future Use) the location of the BI page
+    private int     deletedRowCount;    // number of deleted rows on page.
 
     /**
      * Is the header in the byte array out of date wrt the fields.
@@ -386,12 +386,12 @@ public class StoredPage extends CachedPage
      * is modified.  Ie any of (isOverflowPage, slotsInUse, nextId, generation,
      * prevGeneration, bipLocation, deletedRowCount)
      **/
-	private boolean headerOutOfDate;
+    private boolean headerOutOfDate;
 
     /**
      * holder for the checksum.
      **/
-	private	CRC32		checksum;
+    private CRC32       checksum;
 
     /**
      * Minimum space to reserve for record portion length of row.
@@ -423,7 +423,7 @@ public class StoredPage extends CachedPage
      * The default for minimumRecordSize is set to 1.
      *
      **/
-	protected int minimumRecordSize;
+    protected int minimumRecordSize;
 
     /**
      * scratch variable used to keep track of the total user size for the row.
@@ -431,8 +431,8 @@ public class StoredPage extends CachedPage
      * on Page.  minimumRecordSize is only considered for main data pages,
      * therefore, the page must be latched during an insert operation.
      **/
-	private int userRowSize;
-	
+    private int userRowSize;
+    
     /**
      * slot field and slot entry size.
      * <p>
@@ -445,8 +445,8 @@ public class StoredPage extends CachedPage
      * slotFieldSize is the size for each of the slot field.
      * slotEntrySize is the total space used for a single slot entry.
      **/
-	private int	slotFieldSize;
-	private int	slotEntrySize;
+    private int slotFieldSize;
+    private int slotEntrySize;
 
     /**
      * Offset of the first entry in the slot table.
@@ -461,7 +461,7 @@ public class StoredPage extends CachedPage
      *
      *     offset of slot[N] = slotTableOffsetToFirstEntry + (N * slotEntrySize)
      **/
-	private int slotTableOffsetToFirstEntry;
+    private int slotTableOffsetToFirstEntry;
 
     /**
      * Offset of the record length entry in the 1st slot table entry.
@@ -479,7 +479,7 @@ public class StoredPage extends CachedPage
      *     offset of record length of slot[N] slot entry = 
      *         slotTableOffsetToFirstRecordLengthField + (N * slotEntrySize)
      **/
-	private int slotTableOffsetToFirstRecordLengthField;
+    private int slotTableOffsetToFirstRecordLengthField;
 
 
     /**
@@ -498,7 +498,7 @@ public class StoredPage extends CachedPage
      *     offset of reserved space of slot[N] slot entry = 
      *         slotTableOffsetToFirstReservedSpaceField + (N * slotEntrySize)
      **/
-	private int slotTableOffsetToFirstReservedSpaceField;
+    private int slotTableOffsetToFirstReservedSpaceField;
 
     /**
      * total usable space on a page.
@@ -506,11 +506,11 @@ public class StoredPage extends CachedPage
      * This is the space not taken by page hdr, page table, and existing
      * slot entries/rows.
      **/
-	protected int	totalSpace;			// total usable space on a page
+    protected int   totalSpace;         // total usable space on a page
 
-	// freeSpace and firstFreeByte are initliazed to a minimum value.
-	protected int freeSpace		= Integer.MIN_VALUE; // free space on the page
-	private   int firstFreeByte	= Integer.MIN_VALUE; // 1st free byte on page
+    // freeSpace and firstFreeByte are initliazed to a minimum value.
+    protected int freeSpace     = Integer.MIN_VALUE; // free space on the page
+    private   int firstFreeByte = Integer.MIN_VALUE; // 1st free byte on page
 
 
     /**
@@ -520,20 +520,20 @@ public class StoredPage extends CachedPage
      * can be used by update which expands the row without needing to overflow
      * it.  1 means save 1% of the free space for expansion.
      **/
-	protected int	spareSpace;
+    protected int   spareSpace;
 
     /**
      * Scratch variable used when you need a overflowRecordHeader.  Declared
      * globally so that object is only allocated once per page.
      **/
-	private StoredRecordHeader  overflowRecordHeader;
+    private StoredRecordHeader  overflowRecordHeader;
 
     /**
      * Input streams used to read/write bytes to/from the page byte array.
      **/
-	protected ArrayInputStream		rawDataIn;
-	protected ArrayOutputStream     rawDataOut;
-	protected FormatIdOutputStream  logicalDataOut;
+    protected ArrayInputStream      rawDataIn;
+    protected ArrayOutputStream     rawDataOut;
+    protected FormatIdOutputStream  logicalDataOut;
 
 
     /**************************************************************************
@@ -545,10 +545,10 @@ public class StoredPage extends CachedPage
     /**
      * Simple no-arg constructor for StoredPage.
      **/
-	public StoredPage()
-	{
-		super();
-	}
+    public StoredPage()
+    {
+        super();
+    }
 
     /**************************************************************************
      * Private/Protected methods of This class:
@@ -559,11 +559,11 @@ public class StoredPage extends CachedPage
      * get scratch space for over flow record header.
      * <p>
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
     
-	private StoredRecordHeader getOverFlowRecordHeader()
-		throws StandardException
+    private StoredRecordHeader getOverFlowRecordHeader()
+        throws StandardException
     {
         return(
             overflowRecordHeader != null ? 
@@ -578,19 +578,19 @@ public class StoredPage extends CachedPage
      * Called by setIdentity() and createIdentity() - the Cacheable interfaces
      * which are used to move a page in/out of cache.
      **/
-	protected void initialize()
-	{
-		super.initialize();
+    protected void initialize()
+    {
+        super.initialize();
 
-		if (rawDataIn == null) 
+        if (rawDataIn == null) 
         {
-			rawDataIn            = new ArrayInputStream();
-			checksum             = new CRC32();
-		}
+            rawDataIn            = new ArrayInputStream();
+            checksum             = new CRC32();
+        }
 
-		if (pageData != null)
-			rawDataIn.setData(pageData);
-	}
+        if (pageData != null)
+            rawDataIn.setData(pageData);
+    }
 
 
     /**
@@ -601,15 +601,15 @@ public class StoredPage extends CachedPage
      * never modified during their lifetime in the cache.
      * <p>
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private void createOutStreams()
-	{
-		rawDataOut = new ArrayOutputStream();
-		rawDataOut.setData(pageData);
+    private void createOutStreams()
+    {
+        rawDataOut = new ArrayOutputStream();
+        rawDataOut.setData(pageData);
 
-		logicalDataOut = new FormatIdOutputStream(rawDataOut);
-	}
+        logicalDataOut = new FormatIdOutputStream(rawDataOut);
+    }
 
     /**
      * Tie the logical output stream to a passed in OutputStream.
@@ -617,13 +617,13 @@ public class StoredPage extends CachedPage
      * Tie the logical output stream to a passed in OutputStream with
      * no limit as to the number of bytes that can be written.
      **/
-	private void setOutputStream(OutputStream out)
-	{
-		if (rawDataOut == null)
-			createOutStreams();
+    private void setOutputStream(OutputStream out)
+    {
+        if (rawDataOut == null)
+            createOutStreams();
 
-		logicalDataOut.setOutput(out);
-	}
+        logicalDataOut.setOutput(out);
+    }
 
     /**
      * Reset the logical output stream.
@@ -633,11 +633,11 @@ public class StoredPage extends CachedPage
      * on any writes.
      *
      **/
-	private void resetOutputStream()
-	{
+    private void resetOutputStream()
+    {
 
-		logicalDataOut.setOutput(rawDataOut);
-	}
+        logicalDataOut.setOutput(rawDataOut);
+    }
 
     /**************************************************************************
      * Protected Methods of CachedPage class: (create, read and write a page.)
@@ -645,28 +645,28 @@ public class StoredPage extends CachedPage
      */
 
     /**
-	 * use this passed in page buffer as this object's page data.
+     * use this passed in page buffer as this object's page data.
      * <p>
-	 * The page content may not have been read in from disk yet.
-	 * For pagesize smaller than 64K:
-	 *		Size of the record offset stored in a slot (unsigned short)
-	 *		Size of the record portion length stored in a slot (unsigned short)
-	 *		Size of the record portion length stored in a slot (unsigned short)
-	 *	For pagesize greater than 64K, but less than 2gig:
-	 *		Size of the record offset stored in a slot (int)
-	 *		Size of the record portion length stored in a slot (int)
-	 *		Size of the record portion length stored in a slot (int)
+     * The page content may not have been read in from disk yet.
+     * For pagesize smaller than 64K:
+     *      Size of the record offset stored in a slot (unsigned short)
+     *      Size of the record portion length stored in a slot (unsigned short)
+     *      Size of the record portion length stored in a slot (unsigned short)
+     *  For pagesize greater than 64K, but less than 2gig:
+     *      Size of the record offset stored in a slot (int)
+     *      Size of the record portion length stored in a slot (int)
+     *      Size of the record portion length stored in a slot (int)
      * <p>
      *
      * @param pageBuffer    The array of bytes to use as the page buffer.
      **/
-	protected void usePageBuffer(byte[] pageBuffer)
-	{
-		pageData = pageBuffer;
+    protected void usePageBuffer(byte[] pageBuffer)
+    {
+        pageData = pageBuffer;
 
-		int pageSize = pageData.length;
-		if (rawDataIn != null)
-			rawDataIn.setData(pageData);
+        int pageSize = pageData.length;
+        if (rawDataIn != null)
+            rawDataIn.setData(pageData);
 
         // Note that the slotFieldSize and slotEntrySize need to be
         // calculated BEFORE initSpace() is called, because the
@@ -682,16 +682,16 @@ public class StoredPage extends CachedPage
             (pageSize - CHECKSUM_SIZE - slotEntrySize);
 
         // offset of record length field in slot table entry[0]
-	    slotTableOffsetToFirstRecordLengthField = 
+        slotTableOffsetToFirstRecordLengthField = 
             slotTableOffsetToFirstEntry + slotFieldSize;
 
         // offset of reserved space field in slot table entry[0]
-	    slotTableOffsetToFirstReservedSpaceField =
+        slotTableOffsetToFirstReservedSpaceField =
             slotTableOffsetToFirstEntry + (2 * slotFieldSize);
 
-		if (rawDataOut != null)
-			rawDataOut.setData(pageData);
-	}
+        if (rawDataOut != null)
+            rawDataOut.setData(pageData);
+    }
 
     /**
      * Calculate the slot field size from the page size.
@@ -720,28 +720,28 @@ public class StoredPage extends CachedPage
      * @param args          information stored about the page, once in the 
      *                      container header and passed in through the object.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	protected void createPage(PageKey newIdentity, PageCreationArgs args)
-		 throws StandardException
-	{
+    protected void createPage(PageKey newIdentity, PageCreationArgs args)
+         throws StandardException
+    {
 
-		spareSpace          = args.spareSpace;
-		minimumRecordSize   = args.minimumRecordSize;
+        spareSpace          = args.spareSpace;
+        minimumRecordSize   = args.minimumRecordSize;
 
         setPageArray(args.pageSize);
 
-		cleanPage();			// clean up the page array
+        cleanPage();            // clean up the page array
 
-		setPageVersion(0);		// page is being created for the first time
+        setPageVersion(0);      // page is being created for the first time
 
-		nextId          = RecordHandle.FIRST_RECORD_ID; // first record Id
-		generation      = 0;
-		prevGeneration  = 0;		// there is no previous generation
-		bipLocation     = 0L;
+        nextId          = RecordHandle.FIRST_RECORD_ID; // first record Id
+        generation      = 0;
+        prevGeneration  = 0;        // there is no previous generation
+        bipLocation     = 0L;
 
-		createOutStreams();
-	}
+        createOutStreams();
+    }
 
     /**
      * Initialize the page from values in the page buffer.
@@ -755,103 +755,103 @@ public class StoredPage extends CachedPage
      * @param newIdentity   The key representing page being read in (segment,
      *                      container, page number)
      *
-	 * @exception StandardException If the page cannot be read correctly, 
+     * @exception StandardException If the page cannot be read correctly, 
      *                              or is inconsistent.
      **/
-	protected void initFromData(
+    protected void initFromData(
     FileContainer   myContainer, 
     PageKey         newIdentity)
-		 throws StandardException 
-	{
-		if (myContainer != null)
-		{
+         throws StandardException 
+    {
+        if (myContainer != null)
+        {
             // read in info about page stored once in the container header.
 
-			spareSpace          = myContainer.getSpareSpace();
-			minimumRecordSize   = myContainer.getMinimumRecordSize();
-		}
+            spareSpace          = myContainer.getSpareSpace();
+            minimumRecordSize   = myContainer.getMinimumRecordSize();
+        }
 
-		// if it is null, assume spareSpace and minimumRecordSize is the
-		// same.  We would only call initFromData after a restore then.
+        // if it is null, assume spareSpace and minimumRecordSize is the
+        // same.  We would only call initFromData after a restore then.
 
-		try 
+        try 
         {
-			readPageHeader();
-			initSlotTable(newIdentity);
-		}
+            readPageHeader();
+            initSlotTable(newIdentity);
+        }
         catch (IOException ioe) 
         {
-			// i/o methods on the byte array have thrown an IOException
-			throw dataFactory.markCorrupt(
+            // i/o methods on the byte array have thrown an IOException
+            throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, ioe, newIdentity));
-		}
+        }
 
-		try
-		{
-			validateChecksum(newIdentity);
-		}
-		catch (StandardException se)
-		{
-			if (se.getMessageId().equals(SQLState.FILE_BAD_CHECKSUM))
-			{
-				// it is remotely possible that the disk transfer got garbled, 
-				// i.e., the page is actually fine on disk but the version we
-				// got has some rubbish on it.  Double check.
-				int pagesize        = getPageSize();
-				byte[] corruptPage  = pageData;
-				pageData            = null;	// clear this
+        try
+        {
+            validateChecksum(newIdentity);
+        }
+        catch (StandardException se)
+        {
+            if (se.getMessageId().equals(SQLState.FILE_BAD_CHECKSUM))
+            {
+                // it is remotely possible that the disk transfer got garbled, 
+                // i.e., the page is actually fine on disk but the version we
+                // got has some rubbish on it.  Double check.
+                int pagesize        = getPageSize();
+                byte[] corruptPage  = pageData;
+                pageData            = null; // clear this
 
-				// set up the new page array
-				setPageArray(pagesize);
+                // set up the new page array
+                setPageArray(pagesize);
 
-				try 
+                try 
                 {
-					myContainer.readPage(newIdentity.getPageNumber(), pageData);
-				} 
+                    myContainer.readPage(newIdentity.getPageNumber(), pageData);
+                } 
                 catch (IOException ioe) 
                 {
-					throw dataFactory.markCorrupt(
+                    throw dataFactory.markCorrupt(
                         StandardException.newException(
                             SQLState.DATA_CORRUPT_PAGE, ioe, newIdentity));
-				}
+                }
 
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.DEBUG_CLEAR("TEST_BAD_CHECKSUM");
-				}
-				
-				// see if this read confirms the checksum error
-				try
-				{
-					validateChecksum(newIdentity);
-				}
-				catch (StandardException sse)
-				{
-					// really bad
-					throw dataFactory.markCorrupt(se);
-				}
+                if (SanityManager.DEBUG)
+                {
+                    SanityManager.DEBUG_CLEAR("TEST_BAD_CHECKSUM");
+                }
+                
+                // see if this read confirms the checksum error
+                try
+                {
+                    validateChecksum(newIdentity);
+                }
+                catch (StandardException sse)
+                {
+                    // really bad
+                    throw dataFactory.markCorrupt(se);
+                }
 
-				// If we got here, this means the first read is bad but the
-				// second read is good.  This could be due to disk I/O error or
-				// a bug in the way the file pointer is mis-managed.
-				String firstImage   = pagedataToHexDump(corruptPage);
-				String secondImage  = 
+                // If we got here, this means the first read is bad but the
+                // second read is good.  This could be due to disk I/O error or
+                // a bug in the way the file pointer is mis-managed.
+                String firstImage   = pagedataToHexDump(corruptPage);
+                String secondImage  = 
                     (SanityManager.DEBUG) ? 
                         toString() : pagedataToHexDump(corruptPage);
 
-				throw StandardException.newException(
+                throw StandardException.newException(
                         SQLState.FILE_IO_GARBLED, se,
                         newIdentity, firstImage, secondImage);
-			}
-			else
-			{
-				throw se;
-			}
-		}
-	
+            }
+            else
+            {
+                throw se;
+            }
+        }
+    
 
-	}
+    }
 
     /**
      * Validate the check sum on the page.
@@ -862,69 +862,69 @@ public class StoredPage extends CachedPage
      *
      * @param id     The key that describes the page.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	protected void validateChecksum(PageKey id) 
+    protected void validateChecksum(PageKey id) 
         throws StandardException
-	{
-		long onDiskChecksum;
+    {
+        long onDiskChecksum;
 
-		try 
+        try 
         {
-	        // read the checksum stored on the page on disk.  It is stored
+            // read the checksum stored on the page on disk.  It is stored
             // in the last "CHECKSUM_SIZE" bytes of the page, and is a long.
 
-			rawDataIn.setPosition(getPageSize() - CHECKSUM_SIZE);
-			onDiskChecksum = rawDataIn.readLong();
-		} 
+            rawDataIn.setPosition(getPageSize() - CHECKSUM_SIZE);
+            onDiskChecksum = rawDataIn.readLong();
+        } 
         catch (IOException ioe) 
         {
 
-			// i/o methods on the byte array have thrown an IOException
-			throw dataFactory.markCorrupt(
+            // i/o methods on the byte array have thrown an IOException
+            throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, ioe, id));
-		}
+        }
 
-		// Force the checksum to be recalculated based on the current page.
-		checksum.reset();
-		checksum.update(pageData, 0, getPageSize() - CHECKSUM_SIZE);
-		
-		// force a bad checksum error
-		if (SanityManager.DEBUG)
-		{
-			if (SanityManager.DEBUG_ON("TEST_BAD_CHECKSUM"))
+        // Force the checksum to be recalculated based on the current page.
+        checksum.reset();
+        checksum.update(pageData, 0, getPageSize() - CHECKSUM_SIZE);
+        
+        // force a bad checksum error
+        if (SanityManager.DEBUG)
+        {
+            if (SanityManager.DEBUG_ON("TEST_BAD_CHECKSUM"))
             {
                 // set on disk checksum to wrong value
-				onDiskChecksum = 123456789;	
+                onDiskChecksum = 123456789; 
             }
-		}
+        }
 
-		if (onDiskChecksum != checksum.getValue())
-		{
-			// try again using new checksum object to be doubly sure
-			CRC32 newChecksum = new CRC32();
-			newChecksum.reset();
-			newChecksum.update(pageData, 0, getPageSize()-CHECKSUM_SIZE);
-			if (onDiskChecksum != newChecksum.getValue())
-			{
-				throw StandardException.newException(
+        if (onDiskChecksum != checksum.getValue())
+        {
+            // try again using new checksum object to be doubly sure
+            CRC32 newChecksum = new CRC32();
+            newChecksum.reset();
+            newChecksum.update(pageData, 0, getPageSize()-CHECKSUM_SIZE);
+            if (onDiskChecksum != newChecksum.getValue())
+            {
+                throw StandardException.newException(
                     SQLState.FILE_BAD_CHECKSUM,
                     id, 
                     new Long(checksum.getValue()), 
                     new Long(onDiskChecksum), 
                     pagedataToHexDump(pageData));
-			}
-			else
-			{
-				// old one is bad, get rid of it
-				if (SanityManager.DEBUG)
-					SanityManager.THROWASSERT("old checksum gets wrong value");
+            }
+            else
+            {
+                // old one is bad, get rid of it
+                if (SanityManager.DEBUG)
+                    SanityManager.THROWASSERT("old checksum gets wrong value");
 
-				checksum = newChecksum;
-			}
-		}
-	}
+                checksum = newChecksum;
+            }
+        }
+    }
 
     /**
      * Recalculate checksum and write it to the page array.
@@ -932,16 +932,16 @@ public class StoredPage extends CachedPage
      * Recalculate the checksum of the page, and write the result back into
      * the last bytes of the page.
      *
-	 * @exception  IOException  if writing to end of array fails.
+     * @exception  IOException  if writing to end of array fails.
      **/
-	protected void updateChecksum() throws IOException
-	{
-		checksum.reset();
-		checksum.update(pageData, 0, getPageSize() - CHECKSUM_SIZE);
+    protected void updateChecksum() throws IOException
+    {
+        checksum.reset();
+        checksum.update(pageData, 0, getPageSize() - CHECKSUM_SIZE);
 
-		rawDataOut.setPosition(getPageSize() - CHECKSUM_SIZE);
-		logicalDataOut.writeLong(checksum.getValue());
-	}
+        rawDataOut.setPosition(getPageSize() - CHECKSUM_SIZE);
+        logicalDataOut.writeLong(checksum.getValue());
+    }
 
     /**
      * Write information about page from variables into page byte array.
@@ -953,97 +953,97 @@ public class StoredPage extends CachedPage
      *
      * @param identity  The key of this page.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	protected void writePage(PageKey identity) 
+    protected void writePage(PageKey identity) 
         throws StandardException 
-	{
-		if (SanityManager.DEBUG) 
+    {
+        if (SanityManager.DEBUG) 
         {
             // some consistency checks on fields of the page, good to check
             // before we write them into the page.
 
-			if ((freeSpace < 0) || 
+            if ((freeSpace < 0) || 
                 (firstFreeByte + freeSpace) != (getSlotOffset(slotsInUse - 1))) 
             {
                 // make sure free space is not negative and does not overlap
                 // used space.
 
-				SanityManager.THROWASSERT(
+                SanityManager.THROWASSERT(
                       "writePage detected problem in freespace and used space."
                     + "slotsInUse = " + slotsInUse
-					+ ", firstFreeByte = " + firstFreeByte
-					+ ", freeSpace = " + freeSpace 
-					+ ", slotOffset = " + (getSlotOffset(slotsInUse - 1))
-					+ ", page = " + this);
-			}
-
-			if ((slotsInUse == 0) &&
-				(firstFreeByte != (getPageSize() - totalSpace - CHECKSUM_SIZE))) 
-            {
-				SanityManager.THROWASSERT("slotsInUse = " + slotsInUse
-					+ ", firstFreeByte = " + firstFreeByte
-					+ ", freeSpace = " + freeSpace 
-					+ ", slotOffset = " + (getSlotOffset(slotsInUse - 1))
-					+ ", page = " + this);
+                    + ", firstFreeByte = " + firstFreeByte
+                    + ", freeSpace = " + freeSpace 
+                    + ", slotOffset = " + (getSlotOffset(slotsInUse - 1))
+                    + ", page = " + this);
             }
 
-		}
+            if ((slotsInUse == 0) &&
+                (firstFreeByte != (getPageSize() - totalSpace - CHECKSUM_SIZE))) 
+            {
+                SanityManager.THROWASSERT("slotsInUse = " + slotsInUse
+                    + ", firstFreeByte = " + firstFreeByte
+                    + ", freeSpace = " + freeSpace 
+                    + ", slotOffset = " + (getSlotOffset(slotsInUse - 1))
+                    + ", page = " + this);
+            }
 
-		try 
+        }
+
+        try 
         {
-			if (headerOutOfDate)
+            if (headerOutOfDate)
             {
-				updatePageHeader();
+                updatePageHeader();
             }
-			else
+            else
             {
-				// page version always need to be updated if page is dirty,
-				// either do it in updatePageHeader or by itself
-				updatePageVersion();
+                // page version always need to be updated if page is dirty,
+                // either do it in updatePageHeader or by itself
+                updatePageVersion();
             }
 
-			updateChecksum();
+            updateChecksum();
 
-		} 
+        } 
         catch (IOException ioe) 
         {
-			// i/o methods on the byte array have thrown an IOException
-			throw dataFactory.markCorrupt(
+            // i/o methods on the byte array have thrown an IOException
+            throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, ioe, identity));
-		}
+        }
 
-	}
+    }
 
     /**
      * Write out the format id of this page
      *
      * @param identity  The key of this page.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	protected void writeFormatId(PageKey identity) throws StandardException
-	{
-		try
-		{
-			if (rawDataOut == null)
-				createOutStreams();
+    protected void writeFormatId(PageKey identity) throws StandardException
+    {
+        try
+        {
+            if (rawDataOut == null)
+                createOutStreams();
 
-			rawDataOut.setPosition(0);
+            rawDataOut.setPosition(0);
 
-			FormatIdUtil.writeFormatIdInteger(
+            FormatIdUtil.writeFormatIdInteger(
                 logicalDataOut, getTypeFormatId());
 
-		} 
+        } 
         catch (IOException ioe) 
         {
-			// i/o methods on the byte array have thrown an IOException
-			throw dataFactory.markCorrupt(
+            // i/o methods on the byte array have thrown an IOException
+            throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, ioe, identity));
-		}
-	}
+        }
+    }
 
 
     /**************************************************************************
@@ -1062,12 +1062,12 @@ public class StoredPage extends CachedPage
      * @see org.apache.derby.impl.store.raw.data.BasePage#releaseExclusive
      *
      **/
-	protected void releaseExclusive()
-	{
-		super.releaseExclusive();
+    protected void releaseExclusive()
+    {
+        super.releaseExclusive();
 
-		pageCache.release(this);
-	}
+        pageCache.release(this);
+    }
 
 
     /**
@@ -1081,16 +1081,16 @@ public class StoredPage extends CachedPage
      * Do NOT count the slot entry size
      * <p>
      *
-	 * @return The number of bytes used by the row at slot "slot".
+     * @return The number of bytes used by the row at slot "slot".
      *
      * @param slot  look at row at this slot.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	public int getTotalSpace(int slot) 
+    public int getTotalSpace(int slot) 
         throws StandardException
-	{
-		try 
+    {
+        try 
         {
             // A slot entry looks like the following:
             //     1st field:   offset of the record on the page
@@ -1098,26 +1098,26 @@ public class StoredPage extends CachedPage
             //     3rd field:   amount of space reserved for the record to grow.
 
             // position the read at the beginning of the 2nd field.
-			rawDataIn.setPosition(getSlotOffset(slot) + slotFieldSize);
+            rawDataIn.setPosition(getSlotOffset(slot) + slotFieldSize);
 
             // return the size of the record + size of the reserved space. 
             // the size of the fields to read is determined by slotFieldSize.
 
             return(
-			    ((slotFieldSize == SMALL_SLOT_SIZE) ?
-				    (rawDataIn.readUnsignedShort() + 
+                ((slotFieldSize == SMALL_SLOT_SIZE) ?
+                    (rawDataIn.readUnsignedShort() + 
                      rawDataIn.readUnsignedShort())     :
-				    (rawDataIn.readInt() + 
+                    (rawDataIn.readInt() + 
                      rawDataIn.readInt())));
                 
-		} 
+        } 
         catch (IOException ioe) 
         {
-			throw dataFactory.markCorrupt(
+            throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, ioe, getPageId()));
-		}
-	}
+        }
+    }
 
     /**
      * Is there minimal space for insert?
@@ -1130,25 +1130,25 @@ public class StoredPage extends CachedPage
      * copy of the row directly onto the page.
      * <p>
      *
-	 * @return true if we think the page will allow an insert, false otherwise.
+     * @return true if we think the page will allow an insert, false otherwise.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	public boolean spaceForInsert() 
+    public boolean spaceForInsert() 
         throws StandardException
-	{
-		// is this an empty page
-		if (slotsInUse == 0)
-			return(true);
+    {
+        // is this an empty page
+        if (slotsInUse == 0)
+            return(true);
 
-		if (!allowInsert())
-			return(false);
+        if (!allowInsert())
+            return(false);
 
-		int usedSpace   = totalSpace - freeSpace;
-		int bytesPerRow = usedSpace / slotsInUse;
+        int usedSpace   = totalSpace - freeSpace;
+        int bytesPerRow = usedSpace / slotsInUse;
 
-		return(bytesPerRow <= freeSpace);
-	}
+        return(bytesPerRow <= freeSpace);
+    }
 
     /**
      * Is row guaranteed to be inserted successfully on this page?
@@ -1158,7 +1158,7 @@ public class StoredPage extends CachedPage
      * the row remains unchanged and the page latch is held.
      * <p>
      *
-	 * @return bolean indicating if row can be inserted on this page.
+     * @return bolean indicating if row can be inserted on this page.
      *
      * @param row                   The row to check for insert.
      * @param validColumns          bit map to interpret valid columns in row.
@@ -1167,47 +1167,47 @@ public class StoredPage extends CachedPage
      *                              50 means use 50% of page (ie. make sure
      *                              2 rows fit per page).
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	public boolean spaceForInsert(
+    public boolean spaceForInsert(
     Object[]   row, 
     FormatableBitSet                 validColumns, 
     int                     overflowThreshold)
-		throws StandardException
-	{
+        throws StandardException
+    {
 
-		// is this an empty page
-		if (slotsInUse == 0)
-			return true;
-		
+        // is this an empty page
+        if (slotsInUse == 0)
+            return true;
+        
         // does the estimate think it won't fit, if not return false to avoid
         // cost of calling logRow() just to figure out if the row will fit.
-		if (!allowInsert())
-			return false;
+        if (!allowInsert())
+            return false;
 
-		DynamicByteArrayOutputStream out = new DynamicByteArrayOutputStream();
+        DynamicByteArrayOutputStream out = new DynamicByteArrayOutputStream();
 
-		try 
+        try 
         {
-			// This is a public call, start column is rawstore only.  
-			// set the starting Column for the row to be 0.
-			logRow(
+            // This is a public call, start column is rawstore only.  
+            // set the starting Column for the row to be 0.
+            logRow(
                 0, true, nextId, row, validColumns, out, 
                 0, Page.INSERT_DEFAULT, -1, -1, overflowThreshold);
 
-		} 
+        } 
         catch (NoSpaceOnPage nsop) 
         {
-			return false;
-		} 
+            return false;
+        } 
         catch (IOException ioe) 
         {
-			throw StandardException.newException(
+            throw StandardException.newException(
                 SQLState.DATA_UNEXPECTED_EXCEPTION, ioe);
-		}
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     /**
      * Is row guaranteed to be inserted successfully on this page?
@@ -1219,7 +1219,7 @@ public class StoredPage extends CachedPage
      * This is a private call only used when calculating whether an overflow
      * page can be used to insert part of an overflow row/column.
      *
-	 * @return bolean indicating if row can be inserted on this page.
+     * @return bolean indicating if row can be inserted on this page.
      *
      * @param row                   The row to check for insert.
      * @param validColumns          bit map to interpret valid columns in row.
@@ -1228,40 +1228,40 @@ public class StoredPage extends CachedPage
      *                              50 means use 50% of page (ie. make sure
      *                              2 rows fit per page).
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private boolean spaceForInsert(
+    private boolean spaceForInsert(
     Object[]   row, 
     FormatableBitSet                 validColumns,
     int                     spaceNeeded,
     int                     startColumn, 
     int                     overflowThreshold)
-		throws StandardException 
-	{
-		if (!(spaceForInsert() && (freeSpace >= spaceNeeded)))
-			return false;
+        throws StandardException 
+    {
+        if (!(spaceForInsert() && (freeSpace >= spaceNeeded)))
+            return false;
 
-		DynamicByteArrayOutputStream out = new DynamicByteArrayOutputStream();
+        DynamicByteArrayOutputStream out = new DynamicByteArrayOutputStream();
 
-		try 
+        try 
         {
-			logRow(
+            logRow(
                 0, true, nextId, row, validColumns, out, startColumn, 
                 Page.INSERT_DEFAULT, -1, -1, overflowThreshold);
 
-		} 
+        } 
         catch (NoSpaceOnPage nsop) 
         {
-			return false;
-		} 
+            return false;
+        } 
         catch (IOException ioe) 
         {
-			throw StandardException.newException(
+            throw StandardException.newException(
                 SQLState.DATA_UNEXPECTED_EXCEPTION, ioe);
-		}
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     /**
      * Is this page unfilled?
@@ -1271,12 +1271,12 @@ public class StoredPage extends CachedPage
      * "average" sized row onto the page.
      * <p>
      *
-	 * @return true if page is relatively unfilled.
+     * @return true if page is relatively unfilled.
      **/
-	public boolean unfilled()
-	{
-		return (allowInsert() && (freeSpace > (getPageSize() / 2)));
-	}
+    public boolean unfilled()
+    {
+        return (allowInsert() && (freeSpace > (getPageSize() / 2)));
+    }
 
     /**
      * Is there enough space on the page to insert a minimum size row?
@@ -1286,30 +1286,30 @@ public class StoredPage extends CachedPage
      * reserved space on the page for existing rows to grow on the page.
      * <p>
      *
-	 * @return boolean indicating if a minimum sized row can be inserted.
+     * @return boolean indicating if a minimum sized row can be inserted.
      **/
-	public boolean allowInsert()
-	{
-		// is this an empty page
-		if (slotsInUse == 0)
-			return true;
+    public boolean allowInsert()
+    {
+        // is this an empty page
+        if (slotsInUse == 0)
+            return true;
 
-		int spaceAvailable = freeSpace;
+        int spaceAvailable = freeSpace;
 
-		spaceAvailable -= slotEntrySize;	// need to account new slot entry
+        spaceAvailable -= slotEntrySize;    // need to account new slot entry
 
-		if ((spaceAvailable < minimumRecordSize) ||
+        if ((spaceAvailable < minimumRecordSize) ||
             (spaceAvailable < StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE))
         {
-			return false;
+            return false;
         }
 
-		// see that we reserve enough space for existing rows to grow on page
-		if (((spaceAvailable * 100) / totalSpace) < spareSpace)
-			return false;
+        // see that we reserve enough space for existing rows to grow on page
+        if (((spaceAvailable * 100) / totalSpace) < spareSpace)
+            return false;
 
-		return true;
-	}
+        return true;
+    }
 
     /**
      * Does this page have enough space to insert the input rows?
@@ -1318,31 +1318,31 @@ public class StoredPage extends CachedPage
      * this page?
      * <p>
      *
-	 * @return true if the sum of the lengths will fit on the page.
+     * @return true if the sum of the lengths will fit on the page.
      *
      * @param num_rows      number of rows to check for.
      * @param spaceNeeded   array of lengths of the rows to insert.
      **/
-	public boolean spaceForCopy(int num_rows, int[] spaceNeeded)
-	{
-		// determine how many more bytes are needed for the slot entries
-		int bytesNeeded = slotEntrySize * num_rows;
+    public boolean spaceForCopy(int num_rows, int[] spaceNeeded)
+    {
+        // determine how many more bytes are needed for the slot entries
+        int bytesNeeded = slotEntrySize * num_rows;
 
-		for (int i = 0; i < num_rows; i++) 
+        for (int i = 0; i < num_rows; i++) 
         {
-			if (spaceNeeded[i] > 0) 
+            if (spaceNeeded[i] > 0) 
             {
                 // add up the space needed by the rows, add in minimumRecordSize
                 // if length of actual row is less than minimumRecordSize.
 
-				bytesNeeded += 
+                bytesNeeded += 
                     (spaceNeeded[i] >= minimumRecordSize ? 
                          spaceNeeded[i] : minimumRecordSize);
-			}
-		}
+            }
+        }
 
-		return((freeSpace - bytesNeeded) >= 0);
-	}
+        return((freeSpace - bytesNeeded) >= 0);
+    }
 
     /**
      * Does this page have enough space to move the row to it.
@@ -1353,15 +1353,15 @@ public class StoredPage extends CachedPage
      * @param spaceNeeded   length of the row encoded with source_id record id.
      * @param source_id     record id of the row being moved. 
      *
-	 * @return true if the record will fit on this page, after being given a
+     * @return true if the record will fit on this page, after being given a
      *         new record id as the next id on this page.
      *
      * @exception  StandardException  Standard exception policy.
      **/
-	protected boolean spaceForCopy(
+    protected boolean spaceForCopy(
     int spaceNeeded, 
     int source_id)
-	{
+    {
         spaceNeeded = 
             spaceNeeded 
             - StoredRecordHeader.getStoredSizeRecordId(source_id) 
@@ -1373,8 +1373,8 @@ public class StoredPage extends CachedPage
             (spaceNeeded >= minimumRecordSize ? 
                  spaceNeeded : minimumRecordSize);
 
-		return((freeSpace - bytesNeeded) >= 0);
-	}
+        return((freeSpace - bytesNeeded) >= 0);
+    }
 
     /**
      * Read the record at the given slot into the given row.
@@ -1415,28 +1415,28 @@ public class StoredPage extends CachedPage
      * @return  false if a qualifier_list is provided and the row does not 
      *          qualifier (no row read in that case), else true.
      *
-     * @exception StandardException	Standard Derby error policy
+     * @exception StandardException Standard Derby error policy
      **/
-	protected boolean restoreRecordFromSlot(
+    protected boolean restoreRecordFromSlot(
     int                     slot, 
     Object[]                row, 
     FetchDescriptor         fetchDesc,
     RecordHandle            recordToLock,
     StoredRecordHeader      recordHeader,
     boolean                 isHeadRow)
-		throws StandardException
-	{
-		try 
+        throws StandardException
+    {
+        try 
         {
-			int offset_to_row_data = 
+            int offset_to_row_data = 
                 getRecordOffset(slot) + recordHeader.size();
 
-			if (SanityManager.DEBUG) 
+            if (SanityManager.DEBUG) 
             {
-				if (getRecordOffset(slot) < 
+                if (getRecordOffset(slot) < 
                         (PAGE_HEADER_OFFSET + PAGE_HEADER_SIZE)) 
                 {
-					SanityManager.THROWASSERT(
+                    SanityManager.THROWASSERT(
                         "Incorrect offset.  offset = " + 
                             getRecordOffset(slot) + 
                         ", offset should be < " + 
@@ -1444,21 +1444,21 @@ public class StoredPage extends CachedPage
                             (PAGE_HEADER_OFFSET + PAGE_HEADER_SIZE) + 
                         ", current slot = " + slot + 
                         ", total slotsInUse = " + slotsInUse);
-				}
+                }
 
                 SanityManager.ASSERT(
                     isHeadRow, "restoreRecordFromSlot called on a non-headrow");
                 SanityManager.ASSERT(
                     !isOverflowPage(), 
                     "restoreRecordFromSlot called on an overflow page.");
-			}
+            }
 
             // position the array reading stream at beginning of row data just
             // past the record header.
-			ArrayInputStream lrdi = rawDataIn;
-			lrdi.setPosition(offset_to_row_data);
+            ArrayInputStream lrdi = rawDataIn;
+            lrdi.setPosition(offset_to_row_data);
 
-			if (!recordHeader.hasOverflow())
+            if (!recordHeader.hasOverflow())
             {
                 if (isHeadRow)
                 {
@@ -1594,51 +1594,51 @@ public class StoredPage extends CachedPage
                 }
 
                 return(true);
-			}
-		} 
+            }
+        } 
         catch (IOException ioe) 
         {
 
-			if (SanityManager.DEBUG)
-			{
-				if (pageData == null)
-				{
-					SanityManager.DEBUG_PRINT("DEBUG_TRACE",
-						"caught an IOException in restoreRecordFromSlot " +
-						(PageKey)getIdentity() + " slot " + slot + 
-						", pageData is null");
-				}
-				else
-				{
-					SanityManager.DEBUG_PRINT("DEBUG_TRACE",
-						"caught an IOException in reestoreRecordFromSlot, " + 
-						(PageKey)getIdentity() + " slot " + slot + 
-						", pageData.length = " + 
-						pageData.length + " pageSize = " + getPageSize());
-					SanityManager.DEBUG_PRINT("DEBUG_TRACE",
-						"Hex dump of pageData \n " +
-						"--------------------------------------------------\n" +
-						pagedataToHexDump(pageData) + 
-						"--------------------------------------------------\n");
-					SanityManager.DEBUG_PRINT("DEBUG_TRACE",
-						"Attempt to dump page " + this.toString());
-				}
-			}
+            if (SanityManager.DEBUG)
+            {
+                if (pageData == null)
+                {
+                    SanityManager.DEBUG_PRINT("DEBUG_TRACE",
+                        "caught an IOException in restoreRecordFromSlot " +
+                        (PageKey)getIdentity() + " slot " + slot + 
+                        ", pageData is null");
+                }
+                else
+                {
+                    SanityManager.DEBUG_PRINT("DEBUG_TRACE",
+                        "caught an IOException in reestoreRecordFromSlot, " + 
+                        (PageKey)getIdentity() + " slot " + slot + 
+                        ", pageData.length = " + 
+                        pageData.length + " pageSize = " + getPageSize());
+                    SanityManager.DEBUG_PRINT("DEBUG_TRACE",
+                        "Hex dump of pageData \n " +
+                        "--------------------------------------------------\n" +
+                        pagedataToHexDump(pageData) + 
+                        "--------------------------------------------------\n");
+                    SanityManager.DEBUG_PRINT("DEBUG_TRACE",
+                        "Attempt to dump page " + this.toString());
+                }
+            }
 
-			// i/o methods on the byte array have thrown an IOException
-			throw dataFactory.markCorrupt(
+            // i/o methods on the byte array have thrown an IOException
+            throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, ioe, getPageId()));
-		}
-	}
+        }
+    }
 
-	private StoredRecordHeader restoreLongRecordFromSlot(
+    private StoredRecordHeader restoreLongRecordFromSlot(
     Object[]                row, 
     FetchDescriptor         fetchDesc,
     RecordHandle            recordToLock,
     StoredRecordHeader      parent_recordHeader)
-		throws StandardException
-	{
+        throws StandardException
+    {
 
         int slot = 
             findRecordById(
@@ -1736,7 +1736,7 @@ public class StoredPage extends CachedPage
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, ioe, getPageId()));
         }
-	}
+    }
 
     /**
      * Create a new record handle.
@@ -1746,12 +1746,12 @@ public class StoredPage extends CachedPage
      * storeRecordForInsert().
      * <p>
      *
-	 * @return The next id to assing to a row.
+     * @return The next id to assing to a row.
      **/
-	public int newRecordId()
-	{
-		return nextId;
-	}
+    public int newRecordId()
+    {
+        return nextId;
+    }
 
     /**
      * Create a new record handle, and bump the id.
@@ -1762,16 +1762,16 @@ public class StoredPage extends CachedPage
      * is not enough space on the page.
      * <p>
      *
-	 * @return The next id to assing to a row.
+     * @return The next id to assing to a row.
      **/
-	public int newRecordIdAndBump()
-	{
+    public int newRecordIdAndBump()
+    {
         // headerOutOfDate must be bumped as nextId is changing, and must
         // eventually be updated in the page array.
-		headerOutOfDate = true;	
-							
-		return nextId++;
-	}
+        headerOutOfDate = true; 
+                            
+        return nextId++;
+    }
 
 
     /**
@@ -1784,27 +1784,27 @@ public class StoredPage extends CachedPage
      * the end of the operation.
      * <p>
      *
-	 * @return the next id based on the input id.
+     * @return the next id based on the input id.
      *
      * @param recordId  The id caller just used, return the next one.
      *
      **/
-	protected int newRecordId(int recordId)
-	{
-		if (SanityManager.DEBUG) 
+    protected int newRecordId(int recordId)
+    {
+        if (SanityManager.DEBUG) 
         {
-			SanityManager.ASSERT(
+            SanityManager.ASSERT(
                 recordId >= nextId, 
                 "should not create a record Id that is already given out");
-		}
+        }
 
-		return recordId + 1;
-	}
+        return recordId + 1;
+    }
 
-	public boolean isOverflowPage()
-	{
-		return isOverflowPage;
-	}
+    public boolean isOverflowPage()
+    {
+        return isOverflowPage;
+    }
 
 
 
@@ -1816,10 +1816,10 @@ public class StoredPage extends CachedPage
     /**
      * Get the full size of the page.
      **/
-	public final int getPageSize()
-	{
-		return pageData.length;
-	}
+    public final int getPageSize()
+    {
+        return pageData.length;
+    }
 
 
     /**
@@ -1828,10 +1828,10 @@ public class StoredPage extends CachedPage
      * @param offset position of first byte to clear
      * @param length how many bytes to clear
      **/
-	protected final void clearSection(int offset, int length)
-	{
+    protected final void clearSection(int offset, int length)
+    {
         Arrays.fill(pageData, offset, offset + length, (byte) 0);
-	}
+    }
 
     /**
      * The maximum free space on this page possible.
@@ -1840,21 +1840,21 @@ public class StoredPage extends CachedPage
      * for the records and the slot offset table.
      * NOTE: subclass may have overwitten it to report less freeSpace
      *
-	 * @return the maximum free space on this page possible.
+     * @return the maximum free space on this page possible.
      *
      **/
-	protected int getMaxFreeSpace()
-	{
-		return getPageSize() - RECORD_SPACE_OFFSET - CHECKSUM_SIZE;
-	}
+    protected int getMaxFreeSpace()
+    {
+        return getPageSize() - RECORD_SPACE_OFFSET - CHECKSUM_SIZE;
+    }
 
     /**
      * The current free space on the page.
      **/
-	protected int getCurrentFreeSpace()
-	{
-		return freeSpace;
-	}
+    protected int getCurrentFreeSpace()
+    {
+        return freeSpace;
+    }
 
     /**************************************************************************
      * Page header routines
@@ -1867,34 +1867,34 @@ public class StoredPage extends CachedPage
      * Read the page header from byte form in the page array into in memory
      * variables.
      **/
-	private void readPageHeader() 
+    private void readPageHeader() 
         throws IOException
-	{
-		// these reads are always against the page array
-		ArrayInputStream lrdi = rawDataIn;
+    {
+        // these reads are always against the page array
+        ArrayInputStream lrdi = rawDataIn;
 
-		lrdi.setPosition(PAGE_HEADER_OFFSET);
-		long spare;
+        lrdi.setPosition(PAGE_HEADER_OFFSET);
+        long spare;
 
-		isOverflowPage  =	lrdi.readBoolean();
-		setPageStatus		(lrdi.readByte());
-		setPageVersion		(lrdi.readLong());
-		slotsInUse      =	lrdi.readUnsignedShort();
-		nextId          =	lrdi.readInt();
-		generation      =	lrdi.readInt();     // page generation (Future Use)
-		prevGeneration  =	lrdi.readInt();     // previous generation (Future Use)
-		bipLocation     =	lrdi.readLong();	// BIPage location (Future Use)
+        isOverflowPage  =   lrdi.readBoolean();
+        setPageStatus       (lrdi.readByte());
+        setPageVersion      (lrdi.readLong());
+        slotsInUse      =   lrdi.readUnsignedShort();
+        nextId          =   lrdi.readInt();
+        generation      =   lrdi.readInt();     // page generation (Future Use)
+        prevGeneration  =   lrdi.readInt();     // previous generation (Future Use)
+        bipLocation     =   lrdi.readLong();    // BIPage location (Future Use)
 
-		// number of deleted rows on page, we start to store this release 2.0.
-		// for upgrade reasons, a 0 on disk means -1, so, we subtract one here.
-		deletedRowCount =	lrdi.readUnsignedShort() - 1;
+        // number of deleted rows on page, we start to store this release 2.0.
+        // for upgrade reasons, a 0 on disk means -1, so, we subtract one here.
+        deletedRowCount =   lrdi.readUnsignedShort() - 1;
 
         // the next 4 (total 22 bytes) are reserved for future
-		spare           =   lrdi.readUnsignedShort();	
-		spare           =   lrdi.readInt();     // used by encryption
-		spare           =   lrdi.readLong();
-		spare           =   lrdi.readLong();
-	}
+        spare           =   lrdi.readUnsignedShort();   
+        spare           =   lrdi.readInt();     // used by encryption
+        spare           =   lrdi.readLong();
+        spare           =   lrdi.readLong();
+    }
 
 
     /**
@@ -1903,51 +1903,51 @@ public class StoredPage extends CachedPage
      * Write the bytes of the page header, taking the values from those 
      * in the in memory variables.
      **/
-	private void updatePageHeader() 
+    private void updatePageHeader() 
         throws IOException
-	{
-		rawDataOut.setPosition(PAGE_HEADER_OFFSET);
+    {
+        rawDataOut.setPosition(PAGE_HEADER_OFFSET);
 
-		logicalDataOut.writeBoolean(isOverflowPage);
-		logicalDataOut.writeByte(getPageStatus());
-		logicalDataOut.writeLong(getPageVersion());
-		logicalDataOut.writeShort(slotsInUse);
-		logicalDataOut.writeInt(nextId);
-		logicalDataOut.writeInt(generation);     // page generation (Future Use)
-		logicalDataOut.writeInt(prevGeneration); // previous generation (Future Use)
-		logicalDataOut.writeLong(bipLocation);	 // BIPage location (Future Use)
+        logicalDataOut.writeBoolean(isOverflowPage);
+        logicalDataOut.writeByte(getPageStatus());
+        logicalDataOut.writeLong(getPageVersion());
+        logicalDataOut.writeShort(slotsInUse);
+        logicalDataOut.writeInt(nextId);
+        logicalDataOut.writeInt(generation);     // page generation (Future Use)
+        logicalDataOut.writeInt(prevGeneration); // previous generation (Future Use)
+        logicalDataOut.writeLong(bipLocation);   // BIPage location (Future Use)
 
-		// number of deleted rows on page, we start to store this release 2.0.
-		// for upgrade reasons, a 0 on disk means -1, so, we add one when we 
+        // number of deleted rows on page, we start to store this release 2.0.
+        // for upgrade reasons, a 0 on disk means -1, so, we add one when we 
         // write it to disk.
-		logicalDataOut.writeShort(deletedRowCount + 1);
+        logicalDataOut.writeShort(deletedRowCount + 1);
 
-		logicalDataOut.writeShort(0);	         // reserved for future
-		logicalDataOut.writeInt(
-                dataFactory.random());	         // random bytes for encryption  
-		logicalDataOut.writeLong(0);             // reserved for future
-		logicalDataOut.writeLong(0);             // reserved for future
+        logicalDataOut.writeShort(0);            // reserved for future
+        logicalDataOut.writeInt(
+                dataFactory.random());           // random bytes for encryption  
+        logicalDataOut.writeLong(0);             // reserved for future
+        logicalDataOut.writeLong(0);             // reserved for future
 
-		// we put a random value int into the page if the database is encrypted
-		// so that the checksum will be very different even with the same
-		// page image, when we encrypt or decrypt the page, we move the
-		// checksum to the front so that the encrypted page will look very
-		// different even with just the one int difference.  We never look at
-		// the value of the random number and we could have put it anywhere in
-		// the page as long as it doesn't obscure real data.
-		
-		headerOutOfDate = false;
-	}
+        // we put a random value int into the page if the database is encrypted
+        // so that the checksum will be very different even with the same
+        // page image, when we encrypt or decrypt the page, we move the
+        // checksum to the front so that the encrypted page will look very
+        // different even with just the one int difference.  We never look at
+        // the value of the random number and we could have put it anywhere in
+        // the page as long as it doesn't obscure real data.
+        
+        headerOutOfDate = false;
+    }
 
     /**
      * Update the page version number in the byte array
      **/
-	private void updatePageVersion() 
+    private void updatePageVersion() 
         throws IOException 
-	{
-		rawDataOut.setPosition(PAGE_VERSION_OFFSET);
-		logicalDataOut.writeLong(getPageVersion());
-	}
+    {
+        rawDataOut.setPosition(PAGE_VERSION_OFFSET);
+        logicalDataOut.writeLong(getPageVersion());
+    }
 
     /**************************************************************************
      * Slot Offset & Length table manipulation
@@ -1960,29 +1960,29 @@ public class StoredPage extends CachedPage
      * Get the page offset of a slot entry, this is not the offset of
      * the record stored in the slot, but the offset of the actual slot.
      *
-	 * @return The page offset of a given slot entry.
+     * @return The page offset of a given slot entry.
      *
      * @param slot  The array entry of the slot to find.
      **/
-	private int getSlotOffset(int slot)
-	{
+    private int getSlotOffset(int slot)
+    {
         // slot table grows backward from the spot at the end of the page just
         // before the checksum which is located in the last 8 bytes of the page.
 
         return(slotTableOffsetToFirstEntry - (slot * slotEntrySize));
-	}
+    }
 
     /**
      * Get the page offset of the record associated with the input slot.
      * <p>
      * This is the actual offset on the page of the beginning of the record.
      *
-	 * @return The page offset of the record associated with the input slot.
+     * @return The page offset of the record associated with the input slot.
      *
      * @param slot  The array entry of the slot to find.
      **/
-	private int getRecordOffset(int slot) 
-	{
+    private int getRecordOffset(int slot) 
+    {
         byte[] data   = pageData;
         int    offset = slotTableOffsetToFirstEntry - (slot * slotEntrySize);
 
@@ -2004,7 +2004,7 @@ public class StoredPage extends CachedPage
               ((data[offset++] & 0xff) << 16) |
               ((data[offset++] & 0xff) <<  8) |
               ((data[offset]   & 0xff)      )));
-	}
+    }
 
     /**
      * Set the page offset of the record associated with the input slot.
@@ -2014,16 +2014,16 @@ public class StoredPage extends CachedPage
      * @param slot          The array entry of the slot to set.
      * @param recordOffset  the new offset to set.
      **/
-	private void setRecordOffset(int slot, int recordOffset) 
+    private void setRecordOffset(int slot, int recordOffset) 
         throws IOException
-	{
-		rawDataOut.setPosition(getSlotOffset(slot));
+    {
+        rawDataOut.setPosition(getSlotOffset(slot));
 
-		if (slotFieldSize == SMALL_SLOT_SIZE)
-			logicalDataOut.writeShort(recordOffset);
-		else
-			logicalDataOut.writeInt(recordOffset);
-	}
+        if (slotFieldSize == SMALL_SLOT_SIZE)
+            logicalDataOut.writeShort(recordOffset);
+        else
+            logicalDataOut.writeInt(recordOffset);
+    }
 
     /**
      * Return length of row on this page.
@@ -2032,29 +2032,29 @@ public class StoredPage extends CachedPage
      * this record.  This length is stored as the second "field" of the
      * slot table entry.
      *
-	 * @return The length of the row on this page.
+     * @return The length of the row on this page.
      *
      * @param slot   the slot of the row to look up the length of.
      *
      **/
-	protected int getRecordPortionLength(int slot) 
+    protected int getRecordPortionLength(int slot) 
         throws IOException
-	{
-		if (SanityManager.DEBUG) 
+    {
+        if (SanityManager.DEBUG) 
         {
-			SanityManager.ASSERT(getRecordOffset(slot) != 0);
-		}
+            SanityManager.ASSERT(getRecordOffset(slot) != 0);
+        }
 
-		// these reads are always against the page array
-		ArrayInputStream lrdi = rawDataIn;
+        // these reads are always against the page array
+        ArrayInputStream lrdi = rawDataIn;
 
-		lrdi.setPosition(
+        lrdi.setPosition(
             slotTableOffsetToFirstRecordLengthField - (slot * slotEntrySize));
 
         return( 
             (slotFieldSize == SMALL_SLOT_SIZE) ?
                 lrdi.readUnsignedShort() : lrdi.readInt());
-	}
+    }
 
     /**
      * Return reserved length of row on this page.
@@ -2062,33 +2062,33 @@ public class StoredPage extends CachedPage
      * Return the reserved length of this record.  
      * This length is stored as the third "field" of the slot table entry.
      *
-	 * @return The reserved length of the row on this page.
+     * @return The reserved length of the row on this page.
      *
      * @param slot   the slot of the row to look up the length of.
      *
      **/
-	public int getReservedCount(int slot) throws IOException
-	{
-		if (SanityManager.DEBUG) 
+    public int getReservedCount(int slot) throws IOException
+    {
+        if (SanityManager.DEBUG) 
         {
-			SanityManager.ASSERT(getRecordOffset(slot) != 0);
-		}
+            SanityManager.ASSERT(getRecordOffset(slot) != 0);
+        }
 
-		// these reads are always against the page array
-		ArrayInputStream lrdi = rawDataIn;
+        // these reads are always against the page array
+        ArrayInputStream lrdi = rawDataIn;
 
-		lrdi.setPosition(
+        lrdi.setPosition(
             slotTableOffsetToFirstReservedSpaceField - (slot * slotEntrySize));
 
         return( 
             (slotFieldSize == SMALL_SLOT_SIZE) ?
                 lrdi.readUnsignedShort() : lrdi.readInt());
-	}
+    }
 
 
-	/**
-		Update the length of data stored on this page for this record
-	*/
+    /**
+        Update the length of data stored on this page for this record
+    */
     /**
      * Update the length of data stored on this page for this record
      * <p>
@@ -2103,61 +2103,61 @@ public class StoredPage extends CachedPage
      * @param delta             The amount the record length changed.
      * @param reservedDelta     The amount the reserved length changed.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private void updateRecordPortionLength(
+    private void updateRecordPortionLength(
     int slot, 
     int delta, 
     int reservedDelta)
-		throws IOException
-	{
-		if (SanityManager.DEBUG) 
+        throws IOException
+    {
+        if (SanityManager.DEBUG) 
         {
-			SanityManager.ASSERT(getRecordOffset(slot) != 0);
+            SanityManager.ASSERT(getRecordOffset(slot) != 0);
 
-			if ((delta + reservedDelta) < 0)
-				SanityManager.THROWASSERT(
-					"total space of record is not allowed to shrink, delta == "
-					+ delta + " reservedDelta = " + reservedDelta);
+            if ((delta + reservedDelta) < 0)
+                SanityManager.THROWASSERT(
+                    "total space of record is not allowed to shrink, delta == "
+                    + delta + " reservedDelta = " + reservedDelta);
 
-			if ((getRecordPortionLength(slot) + delta) < 0)
-				SanityManager.THROWASSERT(
-					"record portion length cannot be < 0.recordPortionLength = "
-					+ getRecordPortionLength(slot) + " delta = " + delta);
+            if ((getRecordPortionLength(slot) + delta) < 0)
+                SanityManager.THROWASSERT(
+                    "record portion length cannot be < 0.recordPortionLength = "
+                    + getRecordPortionLength(slot) + " delta = " + delta);
 
-			if ((getReservedCount(slot) + reservedDelta) < 0)
-				SanityManager.THROWASSERT(
-					"reserved space for record cannot be < 0.  reservedCount = "
-					+ getReservedCount(slot) + " reservedDelta = "
-					+ reservedDelta);
-		}
+            if ((getReservedCount(slot) + reservedDelta) < 0)
+                SanityManager.THROWASSERT(
+                    "reserved space for record cannot be < 0.  reservedCount = "
+                    + getReservedCount(slot) + " reservedDelta = "
+                    + reservedDelta);
+        }
 
         // position the stream to beginning of 2nd field of slot entry.
-		rawDataOut.setPosition(
+        rawDataOut.setPosition(
             slotTableOffsetToFirstRecordLengthField - (slot * slotEntrySize));
 
         // write the new record length to 2nd field
-		if (slotFieldSize == SMALL_SLOT_SIZE)
-			logicalDataOut.writeShort(getRecordPortionLength(slot) + delta);
-		else
-			logicalDataOut.writeInt(getRecordPortionLength(slot) + delta);
+        if (slotFieldSize == SMALL_SLOT_SIZE)
+            logicalDataOut.writeShort(getRecordPortionLength(slot) + delta);
+        else
+            logicalDataOut.writeInt(getRecordPortionLength(slot) + delta);
 
         // if necessary, write the 3rd field - above write has positioned the
         // stream to the 3rd field.
-		if (reservedDelta != 0) 
+        if (reservedDelta != 0) 
         {
-			if (slotFieldSize == SMALL_SLOT_SIZE)
+            if (slotFieldSize == SMALL_SLOT_SIZE)
             {
-				logicalDataOut.writeShort(
+                logicalDataOut.writeShort(
                     getReservedCount(slot) + reservedDelta);
             }
-			else
+            else
             {
-				logicalDataOut.writeInt(
+                logicalDataOut.writeInt(
                     getReservedCount(slot) + reservedDelta);
             }
-		}
-	}
+        }
+    }
 
     /**
      * Initialize the in-memory slot table.
@@ -2171,35 +2171,35 @@ public class StoredPage extends CachedPage
      *                      to build the page existing info in the class is
      *                      not set up yet (like getIdentity()). 
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private void initSlotTable(
+    private void initSlotTable(
     PageKey newIdentity)
         throws StandardException
-	{
-		int localSlotsInUse = slotsInUse;
+    {
+        int localSlotsInUse = slotsInUse;
 
-		// must initialize the header now
-		initializeHeaders(localSlotsInUse);
+        // must initialize the header now
+        initializeHeaders(localSlotsInUse);
 
-		// mark all the space on the page as free
-		clearAllSpace();
-		
-		// first count the space occupied by the slot table
-		freeSpace -= localSlotsInUse * slotEntrySize;
+        // mark all the space on the page as free
+        clearAllSpace();
+        
+        // first count the space occupied by the slot table
+        freeSpace -= localSlotsInUse * slotEntrySize;
 
-		int lastSlotOnPage      = -1;
-		int lastRecordOffset    = -1;
-		
-		try 
+        int lastSlotOnPage      = -1;
+        int lastRecordOffset    = -1;
+        
+        try 
         {
-			for (int slot = 0; slot < localSlotsInUse; slot++) 
+            for (int slot = 0; slot < localSlotsInUse; slot++) 
             {
-				if (SanityManager.DEBUG) 
+                if (SanityManager.DEBUG) 
                 {
                     int total_space    = getTotalSpace(slot);
 
-					if ((!isOverflowPage() && 
+                    if ((!isOverflowPage() && 
                          (minimumRecordSize > total_space)) ||
                         (isOverflowPage() &&
                          (StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE >
@@ -2211,93 +2211,93 @@ public class StoredPage extends CachedPage
                         // Overflow rows including reserved space must be 
                         // larger than MAX_OVERFLOW_ONLY_REC_SIZE.
 
-						SanityManager.THROWASSERT(
+                        SanityManager.THROWASSERT(
                             "initSlotTable consistency check failed: " +
-							" slot " + slot +
-							" minimumRecordSize = " + minimumRecordSize + 
-							" totalSpace = " + total_space +
-							" recordPortionLength = " + 
+                            " slot " + slot +
+                            " minimumRecordSize = " + minimumRecordSize + 
+                            " totalSpace = " + total_space +
+                            " recordPortionLength = " + 
                                 getRecordPortionLength(slot) + 
                             " reservedCount = " + getReservedCount(slot));
                     }
-				}
+                }
 
-				int recordOffset = getRecordOffset(slot);
+                int recordOffset = getRecordOffset(slot);
 
-				// check that offset points into the record space area.
-				if ((recordOffset < RECORD_SPACE_OFFSET) || 
+                // check that offset points into the record space area.
+                if ((recordOffset < RECORD_SPACE_OFFSET) || 
                     (recordOffset >= (getPageSize() - CHECKSUM_SIZE))) 
                 {
                     throw dataFactory.markCorrupt(
                         StandardException.newException(
                             SQLState.DATA_CORRUPT_PAGE, newIdentity));
-				}
+                }
 
-				if (recordOffset > lastRecordOffset) 
+                if (recordOffset > lastRecordOffset) 
                 {
-					lastRecordOffset = recordOffset;
-					lastSlotOnPage = slot;
-				}
-			}
+                    lastRecordOffset = recordOffset;
+                    lastSlotOnPage = slot;
+                }
+            }
 
-			bumpRecordCount(localSlotsInUse);
+            bumpRecordCount(localSlotsInUse);
 
-			if (lastSlotOnPage != -1) 
+            if (lastSlotOnPage != -1) 
             {
-				// Calculate the firstFreeByte for the page, 
+                // Calculate the firstFreeByte for the page, 
                 // and the freeSpace on Page
 
-				firstFreeByte = 
+                firstFreeByte = 
                     lastRecordOffset + getTotalSpace(lastSlotOnPage);
-				freeSpace    -= firstFreeByte - RECORD_SPACE_OFFSET;
-			}
+                freeSpace    -= firstFreeByte - RECORD_SPACE_OFFSET;
+            }
 
-			if (SanityManager.DEBUG) 
+            if (SanityManager.DEBUG) 
             {
-				if ((freeSpace < 0)                                   || 
+                if ((freeSpace < 0)                                   || 
                     (firstFreeByte > getSlotOffset(slotsInUse - 1))   ||
                     ((firstFreeByte + freeSpace) != 
                          getSlotOffset(slotsInUse - 1))) 
                 {
-					SanityManager.THROWASSERT(
+                    SanityManager.THROWASSERT(
                         "firstFreeByte = " + firstFreeByte
-						+ ", freeSpace = " + freeSpace
-						+ ", slotOffset = " + (getSlotOffset(slotsInUse - 1))
-						+ ", slotsInUse = " + localSlotsInUse);
-				}
+                        + ", freeSpace = " + freeSpace
+                        + ", slotOffset = " + (getSlotOffset(slotsInUse - 1))
+                        + ", slotsInUse = " + localSlotsInUse);
+                }
 
-				if (localSlotsInUse == 0)
+                if (localSlotsInUse == 0)
                 {
-					SanityManager.ASSERT(
+                    SanityManager.ASSERT(
                         firstFreeByte == 
                             (getPageSize() - totalSpace - CHECKSUM_SIZE));
                 }
-			}
+            }
 
-			// upgrade issue. Pre 1.5 release, we do not store deletedRowCount
-			// therefore, if we are accessing an older database,
-			// we need to calculate the deletedRowCount here.
-			if (deletedRowCount == -1) 
+            // upgrade issue. Pre 1.5 release, we do not store deletedRowCount
+            // therefore, if we are accessing an older database,
+            // we need to calculate the deletedRowCount here.
+            if (deletedRowCount == -1) 
             {
-				int count = 0;
-				int	maxSlot = slotsInUse;
-				for (int slot = FIRST_SLOT_NUMBER ; slot < maxSlot; slot++) 
+                int count = 0;
+                int maxSlot = slotsInUse;
+                for (int slot = FIRST_SLOT_NUMBER ; slot < maxSlot; slot++) 
                 {
-					if (isDeletedOnPage(slot))
-						count++;
-				}
-				deletedRowCount = count;
-			}
+                    if (isDeletedOnPage(slot))
+                        count++;
+                }
+                deletedRowCount = count;
+            }
 
-		} 
+        } 
         catch (IOException ioe) 
         {
-			// i/o methods on the byte array have thrown an IOException
+            // i/o methods on the byte array have thrown an IOException
             throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, ioe, newIdentity));
-		}
-	}
+        }
+    }
 
     
     /**
@@ -2309,59 +2309,59 @@ public class StoredPage extends CachedPage
      * @param recordPortionLength   the actual length of record+hdr on page.
      * @param reservedSpace         the reserved length associated with record.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private void setSlotEntry(
+    private void setSlotEntry(
     int slot, 
     int recordOffset, 
     int recordPortionLength, 
     int reservedSpace) 
-		throws IOException
-	{
-		rawDataOut.setPosition(getSlotOffset(slot));
+        throws IOException
+    {
+        rawDataOut.setPosition(getSlotOffset(slot));
 
-		if (SanityManager.DEBUG) 
+        if (SanityManager.DEBUG) 
         {
-			if ((recordPortionLength < 0)               || 
+            if ((recordPortionLength < 0)               || 
                 (reservedSpace < 0)                     || 
                 (recordPortionLength >= getPageSize())  || 
                 (reservedSpace >= getPageSize())) 
             {
-				SanityManager.THROWASSERT(
-					"recordPortionLength and reservedSpace must " + 
+                SanityManager.THROWASSERT(
+                    "recordPortionLength and reservedSpace must " + 
                     "be > 0, and < page size."
-					+ "  slot = " + slot
-					+ ", in use = " + slotsInUse
-					+ ", recordOffset = " + recordOffset
-					+ ", recordPortionLength = " + recordPortionLength
-					+ ", reservedSpace = " + reservedSpace);
-			}
+                    + "  slot = " + slot
+                    + ", in use = " + slotsInUse
+                    + ", recordOffset = " + recordOffset
+                    + ", recordPortionLength = " + recordPortionLength
+                    + ", reservedSpace = " + reservedSpace);
+            }
 
-			if (recordOffset < (PAGE_HEADER_OFFSET + PAGE_HEADER_SIZE)) 
+            if (recordOffset < (PAGE_HEADER_OFFSET + PAGE_HEADER_SIZE)) 
             {
-				SanityManager.THROWASSERT(
+                SanityManager.THROWASSERT(
                     "Record offset must be after the page header."
-					+ "  slot = " + slot
-					+ ", in use = " + slotsInUse
-					+ ", recordOffset = " + recordOffset
-					+ ", recordPortionLength = " + recordPortionLength
-					+ ", reservedSpace = " + reservedSpace);
-			}
-		}
+                    + "  slot = " + slot
+                    + ", in use = " + slotsInUse
+                    + ", recordOffset = " + recordOffset
+                    + ", recordPortionLength = " + recordPortionLength
+                    + ", reservedSpace = " + reservedSpace);
+            }
+        }
 
-		if (slotFieldSize == SMALL_SLOT_SIZE) 
+        if (slotFieldSize == SMALL_SLOT_SIZE) 
         {
-			logicalDataOut.writeShort(recordOffset);
-			logicalDataOut.writeShort(recordPortionLength);
-			logicalDataOut.writeShort(reservedSpace);
-		} 
+            logicalDataOut.writeShort(recordOffset);
+            logicalDataOut.writeShort(recordPortionLength);
+            logicalDataOut.writeShort(reservedSpace);
+        } 
         else 
         {
-			logicalDataOut.writeInt(recordOffset);
-			logicalDataOut.writeInt(recordPortionLength);
-			logicalDataOut.writeInt(reservedSpace);
-		}
-	}
+            logicalDataOut.writeInt(recordOffset);
+            logicalDataOut.writeInt(recordPortionLength);
+            logicalDataOut.writeInt(reservedSpace);
+        }
+    }
 
     /**
      * Insert a new slot entry into the current slot array.
@@ -2376,70 +2376,70 @@ public class StoredPage extends CachedPage
      * @param reservedSpace         Length of reserved space of record in slot
      *
      **/
-	private void addSlotEntry(
+    private void addSlotEntry(
     int slot, 
     int recordOffset, 
     int recordPortionLength, 
     int reservedSpace)
-		throws IOException
-	{
-		if (SanityManager.DEBUG) 
+        throws IOException
+    {
+        if (SanityManager.DEBUG) 
         {
-			if ((slot < 0) || (slot > slotsInUse))
-				SanityManager.THROWASSERT("invalid slot " + slot);
-			
-			if ((recordPortionLength < 0) || (reservedSpace < 0))
-				SanityManager.THROWASSERT(
-					"recordPortionLength and reservedSpace must be > 0." +
+            if ((slot < 0) || (slot > slotsInUse))
+                SanityManager.THROWASSERT("invalid slot " + slot);
+            
+            if ((recordPortionLength < 0) || (reservedSpace < 0))
+                SanityManager.THROWASSERT(
+                    "recordPortionLength and reservedSpace must be > 0." +
                     "recordPortionLength = " + recordPortionLength + 
                     " reservedSpace = " + reservedSpace);
 
-			if (recordOffset < (PAGE_HEADER_OFFSET + PAGE_HEADER_SIZE)) 
+            if (recordOffset < (PAGE_HEADER_OFFSET + PAGE_HEADER_SIZE)) 
             {
                 SanityManager.THROWASSERT(
                     "Record offset must be after the page header."
-						+ "  slot = " + slot
-						+ ", in use = " + slotsInUse
-						+ ", recordOffset = " + recordOffset
-						+ ", recordPortionLength = " + recordPortionLength
-						+ ", reservedSpace = " + reservedSpace);
-			}
-		}
+                        + "  slot = " + slot
+                        + ", in use = " + slotsInUse
+                        + ", recordOffset = " + recordOffset
+                        + ", recordPortionLength = " + recordPortionLength
+                        + ", reservedSpace = " + reservedSpace);
+            }
+        }
 
-		int newSlotOffset;
+        int newSlotOffset;
 
         // TODO - (mikem) - I think the math below could be slightly optimized.
 
-		if (slot < slotsInUse) 
+        if (slot < slotsInUse) 
         {
             // inserting a slot into the middle of array so shift all the 
             // slots from "slot" logically up by one
 
-			int startOffset = 
+            int startOffset = 
                 getSlotOffset(slotsInUse - 1);
 
-			int length      = 
+            int length      = 
                 (getSlotOffset(slot) + slotEntrySize) - startOffset;
 
-			newSlotOffset = getSlotOffset(slotsInUse);
+            newSlotOffset = getSlotOffset(slotsInUse);
 
-			System.arraycopy(
+            System.arraycopy(
                 pageData, startOffset, pageData, newSlotOffset, length);
-		} 
+        } 
         else 
         {
             // We are adding at end of slot table, so no moving necessary.
-			newSlotOffset = getSlotOffset(slot); 
-		}
+            newSlotOffset = getSlotOffset(slot); 
+        }
 
-		freeSpace -= slotEntrySize;
+        freeSpace -= slotEntrySize;
 
-		slotsInUse++;
-		headerOutOfDate = true;	// headerOutOfDate must be set after setDirty
-								// because isDirty may be called unlatched
+        slotsInUse++;
+        headerOutOfDate = true; // headerOutOfDate must be set after setDirty
+                                // because isDirty may be called unlatched
 
-		setSlotEntry(slot, recordOffset, recordPortionLength, reservedSpace);
-	}
+        setSlotEntry(slot, recordOffset, recordPortionLength, reservedSpace);
+    }
 
     /**
      * Remove slot entry from slot array.
@@ -2451,43 +2451,43 @@ public class StoredPage extends CachedPage
      * @param slot                  The slot to delete.
      *
      **/
-	private void removeSlotEntry(int slot) 
+    private void removeSlotEntry(int slot) 
         throws IOException 
-	{
-		if (SanityManager.DEBUG) 
+    {
+        if (SanityManager.DEBUG) 
         {
-			if ((slot < 0) || (slot >= slotsInUse))
-				SanityManager.THROWASSERT("invalid slot " + slot);
-		}
+            if ((slot < 0) || (slot >= slotsInUse))
+                SanityManager.THROWASSERT("invalid slot " + slot);
+        }
 
-		int oldEndOffset = getSlotOffset(slotsInUse - 1);
-		int newEndOffset = getSlotOffset(slotsInUse - 2);
+        int oldEndOffset = getSlotOffset(slotsInUse - 1);
+        int newEndOffset = getSlotOffset(slotsInUse - 2);
 
-		if (slot != slotsInUse - 1) 
-		{
+        if (slot != slotsInUse - 1) 
+        {
             // if not removing the last slot, need to shift 
 
-			// now shift all the slots logically down by one
-			// from (slot+1 to slotsInUse-1) to (slot and slotsInUse-2)
-			int length = getSlotOffset(slot) - oldEndOffset;
+            // now shift all the slots logically down by one
+            // from (slot+1 to slotsInUse-1) to (slot and slotsInUse-2)
+            int length = getSlotOffset(slot) - oldEndOffset;
 
-			System.arraycopy(
+            System.arraycopy(
                 pageData, oldEndOffset, pageData, newEndOffset, length);
-		}
+        }
 
-		// clear out the last slot
-		clearSection(oldEndOffset, slotEntrySize);
+        // clear out the last slot
+        clearSection(oldEndOffset, slotEntrySize);
 
-		// mark the space as free after we have removed the slot 
-		// no need to keep the space reserved for rollback as this is only
-		// called for purge.
-		freeSpace += slotEntrySize;
+        // mark the space as free after we have removed the slot 
+        // no need to keep the space reserved for rollback as this is only
+        // called for purge.
+        freeSpace += slotEntrySize;
 
-		slotsInUse--;
+        slotsInUse--;
 
-		headerOutOfDate = true;	// headerOutOfDate must be set after setDirty
-								// because isDirty maybe called unlatched
-	}
+        headerOutOfDate = true; // headerOutOfDate must be set after setDirty
+                                // because isDirty maybe called unlatched
+    }
 
     /**
      * create the record header for the specific slot.
@@ -2496,21 +2496,21 @@ public class StoredPage extends CachedPage
      * to the array of cache'd record headers on this page.  Finally return
      * reference to the initialized record header.
      *
-	 * @return The record header for the specific slot.
+     * @return The record header for the specific slot.
      *
      * @param slot   return record header of this slot.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	public StoredRecordHeader recordHeaderOnDemand(int slot)
-	{
-		StoredRecordHeader recordHeader = 
+    public StoredRecordHeader recordHeaderOnDemand(int slot)
+    {
+        StoredRecordHeader recordHeader = 
             new StoredRecordHeader(pageData, getRecordOffset(slot));
 
-		setHeaderAtSlot(slot, recordHeader);
+        setHeaderAtSlot(slot, recordHeader);
 
-		return recordHeader;
-	}
+        return recordHeader;
+    }
 
     /**************************************************************************
      * Record based routines.
@@ -2521,83 +2521,83 @@ public class StoredPage extends CachedPage
      * Is entire record on the page?
      * <p>
      *
-	 * @return true if the entire record at slot is on this page, 
+     * @return true if the entire record at slot is on this page, 
      *         i.e, no overflow row or long columns.
      *
      * @param slot   Check record at this slot.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	public boolean entireRecordOnPage(int slot)
-		 throws StandardException
-	{
-		if (SanityManager.DEBUG) 
+    public boolean entireRecordOnPage(int slot)
+         throws StandardException
+    {
+        if (SanityManager.DEBUG) 
         {
-			SanityManager.ASSERT(isLatched());
-		}
+            SanityManager.ASSERT(isLatched());
+        }
 
-		StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+        StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
 
-		if (recordHeader.hasOverflow())
-			return false;
+        if (recordHeader.hasOverflow())
+            return false;
 
-		// the row chain does not overflow, we need to walk all the fields to
-		// make sure they are not long columns.
+        // the row chain does not overflow, we need to walk all the fields to
+        // make sure they are not long columns.
 
-		try 
+        try 
         {
 
-			int offset = getRecordOffset(slot);
-		
-			if (SanityManager.DEBUG) 
+            int offset = getRecordOffset(slot);
+        
+            if (SanityManager.DEBUG) 
             {
-				if (offset < (PAGE_HEADER_OFFSET + PAGE_HEADER_SIZE)) 
+                if (offset < (PAGE_HEADER_OFFSET + PAGE_HEADER_SIZE)) 
                 {
-					SanityManager.THROWASSERT(
+                    SanityManager.THROWASSERT(
                         "Incorrect offset.  offset = " + offset + 
                         ", offset should be < " +
                         "(PAGE_HEADER_OFFSET + PAGE_HEADER_SIZE) = " + 
                              (PAGE_HEADER_OFFSET + PAGE_HEADER_SIZE) + 
                         ", current slot = " + slot + 
                         ", total slotsInUse = " + slotsInUse);
-				}
+                }
 
-				SanityManager.ASSERT(recordHeader.getFirstField() == 0,
+                SanityManager.ASSERT(recordHeader.getFirstField() == 0,
                      "Head row piece should start at field 0 but is not");
-			}
+            }
 
-			int numberFields = recordHeader.getNumberFields();
+            int numberFields = recordHeader.getNumberFields();
 
-			// these reads are always against the page array
-			ArrayInputStream lrdi = rawDataIn;
+            // these reads are always against the page array
+            ArrayInputStream lrdi = rawDataIn;
 
             // position after the record header, at 1st column.
-			lrdi.setPosition(offset + recordHeader.size());
-		
-			for (int i = 0; i < numberFields; i++) 
+            lrdi.setPosition(offset + recordHeader.size());
+        
+            for (int i = 0; i < numberFields; i++) 
             {
-				int fieldStatus = StoredFieldHeader.readStatus(lrdi);
-				if (StoredFieldHeader.isOverflow(fieldStatus))
-					return false;
+                int fieldStatus = StoredFieldHeader.readStatus(lrdi);
+                if (StoredFieldHeader.isOverflow(fieldStatus))
+                    return false;
 
-				int fieldLength = 
+                int fieldLength = 
                     StoredFieldHeader.readFieldDataLength(
                         lrdi, fieldStatus, slotFieldSize);
 
-				if (fieldLength != 0)
-					lrdi.setPosition(lrdi.getPosition() + fieldLength);
-			}
-		} 
+                if (fieldLength != 0)
+                    lrdi.setPosition(lrdi.getPosition() + fieldLength);
+            }
+        } 
         catch (IOException ioe) 
         {
-			throw dataFactory.markCorrupt(
+            throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, ioe, getPageId()));
-		}
+        }
 
-		// we have examined all the fields on this page and none overflows
-		return true;
-	}
+        // we have examined all the fields on this page and none overflows
+        return true;
+    }
 
     /**
      * Purge one row on an overflow page.  
@@ -2607,40 +2607,40 @@ public class StoredPage extends CachedPage
      *
      * @param slot              slot number of row to purge.
      * @param headRowHandle     recordHandle of the head row piece.
-	 * @param needDataLogged    when true data is logged for purges otherwise just headers.
+     * @param needDataLogged    when true data is logged for purges otherwise just headers.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	protected void purgeOverflowAtSlot(
+    protected void purgeOverflowAtSlot(
     int             slot, 
     RecordHandle    headRowHandle,
-	boolean         needDataLogged)
-		 throws StandardException
-	{
-		if (SanityManager.DEBUG) 
+    boolean         needDataLogged)
+         throws StandardException
+    {
+        if (SanityManager.DEBUG) 
         {
-			SanityManager.ASSERT(isLatched());
-			SanityManager.ASSERT(isOverflowPage());
-		}
+            SanityManager.ASSERT(isLatched());
+            SanityManager.ASSERT(isOverflowPage());
+        }
 
-		if ((slot < 0) || (slot >= slotsInUse))
+        if ((slot < 0) || (slot >= slotsInUse))
         {
-			throw StandardException.newException(
+            throw StandardException.newException(
                     SQLState.DATA_SLOT_NOT_ON_PAGE);
         }
 
         // TODO (mikem) - should a global scratch variable be used?
 
-		// this is an overflow page purge, no need to lock the head row (it
-		// has already been locked, hopefully).  No need to check for long rows
-		// (they have already been deleted, hopefully).
-		RawTransaction  t           = owner.getTransaction();
-		int[]           recordId    = new int[1];
+        // this is an overflow page purge, no need to lock the head row (it
+        // has already been locked, hopefully).  No need to check for long rows
+        // (they have already been deleted, hopefully).
+        RawTransaction  t           = owner.getTransaction();
+        int[]           recordId    = new int[1];
 
-		recordId[0]                 = getHeaderAtSlot(slot).getId();
+        recordId[0]                 = getHeaderAtSlot(slot).getId();
 
-		owner.getActionSet().actionPurge(t, this, slot, 1, recordId, needDataLogged);
-	}
+        owner.getActionSet().actionPurge(t, this, slot, 1, recordId, needDataLogged);
+    }
 
     /**
      * Purge the column chain that starts at overflowPageId, overflowRecordId
@@ -2656,41 +2656,41 @@ public class StoredPage extends CachedPage
      * @param overflowPageId    The page where the long column chain starts.
      * @param overflowRecordId  The record id where long column chain starts.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private void purgeOneColumnChain(
+    private void purgeOneColumnChain(
     long    overflowPageId, 
     int     overflowRecordId)
-		 throws StandardException
-	{
-		StoredPage pageOnColumnChain = null;
-		boolean removePageHappened = false;
+         throws StandardException
+    {
+        StoredPage pageOnColumnChain = null;
+        boolean removePageHappened = false;
 
-		try
-		{
-			while (overflowPageId != ContainerHandle.INVALID_PAGE_NUMBER) 
+        try
+        {
+            while (overflowPageId != ContainerHandle.INVALID_PAGE_NUMBER) 
             {
 
-				// Now loop over the column chain and get all the column pieces.
-				pageOnColumnChain   = getOverflowPage(overflowPageId);
-				removePageHappened  = false;
+                // Now loop over the column chain and get all the column pieces.
+                pageOnColumnChain   = getOverflowPage(overflowPageId);
+                removePageHappened  = false;
 
-				if (pageOnColumnChain == null) 
+                if (pageOnColumnChain == null) 
                 {
-					if (SanityManager.DEBUG)
-						SanityManager.THROWASSERT(
-							  "got null page following long column chain.  " +
-								"Head column piece at " + getIdentity() + 
-								" null page at " + overflowPageId);
+                    if (SanityManager.DEBUG)
+                        SanityManager.THROWASSERT(
+                              "got null page following long column chain.  " +
+                                "Head column piece at " + getIdentity() + 
+                                " null page at " + overflowPageId);
 
-					break;	// Don't know what to do here, the column chain
-							// is broken.  Don't bomb, go to the next field.
-				}
-					
-				int overflowSlotId = FIRST_SLOT_NUMBER;
-				if (SanityManager.DEBUG) 
+                    break;  // Don't know what to do here, the column chain
+                            // is broken.  Don't bomb, go to the next field.
+                }
+                    
+                int overflowSlotId = FIRST_SLOT_NUMBER;
+                if (SanityManager.DEBUG) 
                 {
-					int checkSlot = 
+                    int checkSlot = 
                         pageOnColumnChain.findRecordById(
                                 overflowRecordId, FIRST_SLOT_NUMBER);
 
@@ -2698,60 +2698,60 @@ public class StoredPage extends CachedPage
                     {
                         SanityManager.THROWASSERT(
                             "Long column is not at the expected " +
-						    FIRST_SLOT_NUMBER + " slot, instead at slot " + 
-						    checkSlot);
+                            FIRST_SLOT_NUMBER + " slot, instead at slot " + 
+                            checkSlot);
                     }
 
-					SanityManager.ASSERT(pageOnColumnChain.recordCount() == 1,
-						 "long column page has > 1 record");
-				}
+                    SanityManager.ASSERT(pageOnColumnChain.recordCount() == 1,
+                         "long column page has > 1 record");
+                }
 
-				// Hold on to the pointer to next page on the chain before
-				// we remove the long column page.
-				RecordHandle nextColumnPiece =
-					pageOnColumnChain.getNextColumnPiece(overflowSlotId); 
+                // Hold on to the pointer to next page on the chain before
+                // we remove the long column page.
+                RecordHandle nextColumnPiece =
+                    pageOnColumnChain.getNextColumnPiece(overflowSlotId); 
 
-				if (pageOnColumnChain.recordCount() == 1)
-				{
-					removePageHappened = true;
-					owner.removePage(pageOnColumnChain);
-				}
-				else
-				{
-					if (SanityManager.DEBUG)
-						SanityManager.THROWASSERT(
-						  "page on column chain has more then one record" +
-						  pageOnColumnChain.toString()); 
-
-					pageOnColumnChain.unlatch();
-					pageOnColumnChain = null;
-				}
-
-				// Chase the column chain pointer.
-				if (nextColumnPiece != null) 
+                if (pageOnColumnChain.recordCount() == 1)
                 {
-					overflowPageId      = nextColumnPiece.getPageNumber();
-					overflowRecordId    = nextColumnPiece.getId();
-				} 
+                    removePageHappened = true;
+                    owner.removePage(pageOnColumnChain);
+                }
                 else
                 {
-					// terminate the loop
-					overflowPageId      = ContainerHandle.INVALID_PAGE_NUMBER;
+                    if (SanityManager.DEBUG)
+                        SanityManager.THROWASSERT(
+                          "page on column chain has more then one record" +
+                          pageOnColumnChain.toString()); 
+
+                    pageOnColumnChain.unlatch();
+                    pageOnColumnChain = null;
                 }
-			}
-		} 
+
+                // Chase the column chain pointer.
+                if (nextColumnPiece != null) 
+                {
+                    overflowPageId      = nextColumnPiece.getPageNumber();
+                    overflowRecordId    = nextColumnPiece.getId();
+                } 
+                else
+                {
+                    // terminate the loop
+                    overflowPageId      = ContainerHandle.INVALID_PAGE_NUMBER;
+                }
+            }
+        } 
         finally 
         {
-			// if we raised an exception before the page is removed, make sure
-			// we unlatch the page 
+            // if we raised an exception before the page is removed, make sure
+            // we unlatch the page 
             
-			if (!removePageHappened && pageOnColumnChain != null) 
+            if (!removePageHappened && pageOnColumnChain != null) 
             {
-				pageOnColumnChain.unlatch();
-				pageOnColumnChain = null;
-			}
-		}
-	}
+                pageOnColumnChain.unlatch();
+                pageOnColumnChain = null;
+            }
+        }
+    }
 
     /**
      * purge long columns chains which eminate from this page.
@@ -2768,41 +2768,41 @@ public class StoredPage extends CachedPage
      * @param headRowHandle The RecordHandle of the head row.
      *
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private void purgeColumnChains(
+    private void purgeColumnChains(
     RawTransaction  t, 
     int             slot, 
     RecordHandle    headRowHandle)
-		 throws StandardException
-	{
-		try
-		{
-			StoredRecordHeader recordHeader = getHeaderAtSlot(slot); 
+         throws StandardException
+    {
+        try
+        {
+            StoredRecordHeader recordHeader = getHeaderAtSlot(slot); 
 
-			int numberFields    = recordHeader.getNumberFields();
+            int numberFields    = recordHeader.getNumberFields();
 
-			// these reads are always against the page array
-			ArrayInputStream lrdi = rawDataIn;
+            // these reads are always against the page array
+            ArrayInputStream lrdi = rawDataIn;
 
             // position the stream to just after record header.
-			int offset          = getRecordOffset(slot) + recordHeader.size();
-			lrdi.setPosition(offset);
+            int offset          = getRecordOffset(slot) + recordHeader.size();
+            lrdi.setPosition(offset);
 
-			for (int i = 0; i < numberFields; i++) 
+            for (int i = 0; i < numberFields; i++) 
             {
-				int fieldStatus = StoredFieldHeader.readStatus(lrdi);
-				int fieldLength = 
+                int fieldStatus = StoredFieldHeader.readStatus(lrdi);
+                int fieldLength = 
                     StoredFieldHeader.readFieldDataLength(
                         lrdi, fieldStatus, slotFieldSize);
 
-				if (!StoredFieldHeader.isOverflow(fieldStatus)) 
+                if (!StoredFieldHeader.isOverflow(fieldStatus)) 
                 {
-					// skip this field, it is not an long column
-					if (fieldLength != 0)
+                    // skip this field, it is not an long column
+                    if (fieldLength != 0)
                         lrdi.setPosition(lrdi.getPosition() + fieldLength);
-					continue;
-				}
+                    continue;
+                }
                 else
                 {
 
@@ -2817,15 +2817,15 @@ public class StoredPage extends CachedPage
 
                     purgeOneColumnChain(overflowPageId, overflowRecordId);
                 }
-			}
-		} 
+            }
+        } 
         catch (IOException ioe) 
         {
-			throw dataFactory.markCorrupt(
+            throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, ioe, getPageId()));
-		}
-	}
+        }
+    }
 
     /**
      * Purge all the overflow columns and overflow rows of the record at slot.
@@ -2838,114 +2838,114 @@ public class StoredPage extends CachedPage
      * @param t             The raw transaction doing the purging.
      * @param slot          The slot of the row to purge.
      * @param headRowHandle The RecordHandle of the head row.
-	 * @param needDataLogged    when true data is logged for purges otherwise just headers.
+     * @param needDataLogged    when true data is logged for purges otherwise just headers.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	protected void purgeRowPieces(
+    protected void purgeRowPieces(
     RawTransaction  t, 
     int             slot, 
     RecordHandle    headRowHandle,
-	boolean         needDataLogged) 
-		 throws StandardException
-	{
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(isOverflowPage() == false,
-				 "not expected to call purgeRowPieces on a overflow page");
+    boolean         needDataLogged) 
+         throws StandardException
+    {
+        if (SanityManager.DEBUG)
+            SanityManager.ASSERT(isOverflowPage() == false,
+                 "not expected to call purgeRowPieces on a overflow page");
 
-		// purge the long columns which start on this page.
-		purgeColumnChains(t, slot, headRowHandle);
+        // purge the long columns which start on this page.
+        purgeColumnChains(t, slot, headRowHandle);
 
-		// drive this loop from the head page. Walk each "long" row piece in 
+        // drive this loop from the head page. Walk each "long" row piece in 
         // the row chain.
-		StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+        StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
 
-		while (recordHeader.hasOverflow()) 
+        while (recordHeader.hasOverflow()) 
         {
 
-			// nextPageInRowChain, is the page with the next row piece
-			StoredPage nextPageInRowChain = 
+            // nextPageInRowChain, is the page with the next row piece
+            StoredPage nextPageInRowChain = 
                 getOverflowPage(recordHeader.getOverflowPage());
 
-			if (nextPageInRowChain == null) 
+            if (nextPageInRowChain == null) 
             {
-				if (SanityManager.DEBUG)
+                if (SanityManager.DEBUG)
                 {
-					SanityManager.THROWASSERT(
-							"got null page following long row chain.  " +
-							"Head row piece at " + getIdentity() + " slot " +
-							slot + " headRecord " + headRowHandle + 
-							".  Broken row chain at " +
-							recordHeader.getOverflowPage() + ", " +
-							recordHeader.getOverflowId());
+                    SanityManager.THROWASSERT(
+                            "got null page following long row chain.  " +
+                            "Head row piece at " + getIdentity() + " slot " +
+                            slot + " headRecord " + headRowHandle + 
+                            ".  Broken row chain at " +
+                            recordHeader.getOverflowPage() + ", " +
+                            recordHeader.getOverflowId());
 
                 }
 
-                break;	// Don't know what to do here, the row chain is
-						// broken.  Don't bomb, just return.
-			}
+                break;  // Don't know what to do here, the row chain is
+                        // broken.  Don't bomb, just return.
+            }
 
-			try 
+            try 
             {
 
-				int nextPageSlot = 
+                int nextPageSlot = 
                     getOverflowSlot(nextPageInRowChain, recordHeader);
 
-				// First get rid of all long columns from the next row piece.
-				nextPageInRowChain.purgeColumnChains(
+                // First get rid of all long columns from the next row piece.
+                nextPageInRowChain.purgeColumnChains(
                     t, nextPageSlot, headRowHandle);
 
-				// Before we purge the next row piece, get the row header to
-				// see if we need to continue the loop.
-				recordHeader = nextPageInRowChain.getHeaderAtSlot(nextPageSlot);
+                // Before we purge the next row piece, get the row header to
+                // see if we need to continue the loop.
+                recordHeader = nextPageInRowChain.getHeaderAtSlot(nextPageSlot);
 
-				// Lastly, purge the next row piece.  If the next row piece is
-				// the only thing in the entire page, just deallocate the page.
-				// We can do this because the page is deallocated in this
-				// transaction.  If we defer this to post commit processing,
-				// then we have to first purge the row piece and also remember
-				// the page time stamp.
+                // Lastly, purge the next row piece.  If the next row piece is
+                // the only thing in the entire page, just deallocate the page.
+                // We can do this because the page is deallocated in this
+                // transaction.  If we defer this to post commit processing,
+                // then we have to first purge the row piece and also remember
+                // the page time stamp.
 
-				if (nextPageSlot == 0 && nextPageInRowChain.recordCount() == 1)
-				{
-					// This is an overflow page and we just purged the last row.
-					// Free the page.  Cannot do it in post commit because the
-					// head row is gone and cannot be locked at post commit to
-					// stablelize the row chain.
+                if (nextPageSlot == 0 && nextPageInRowChain.recordCount() == 1)
+                {
+                    // This is an overflow page and we just purged the last row.
+                    // Free the page.  Cannot do it in post commit because the
+                    // head row is gone and cannot be locked at post commit to
+                    // stablelize the row chain.
 
-					try 
+                    try 
                     {
-						owner.removePage(nextPageInRowChain);
-					}
-					finally 
+                        owner.removePage(nextPageInRowChain);
+                    }
+                    finally 
                     {
-						// Remove Page guarantees to unlatch the page even
-						// if an exception is thrown, need not unlatch it
-						// again. 
-						nextPageInRowChain = null;
-					}
-				}
-				else
-				{
-					nextPageInRowChain.purgeOverflowAtSlot(
+                        // Remove Page guarantees to unlatch the page even
+                        // if an exception is thrown, need not unlatch it
+                        // again. 
+                        nextPageInRowChain = null;
+                    }
+                }
+                else
+                {
+                    nextPageInRowChain.purgeOverflowAtSlot(
                         nextPageSlot, headRowHandle, needDataLogged);
 
-					nextPageInRowChain.unlatch();
-					nextPageInRowChain = null;
-				}
-			} 
+                    nextPageInRowChain.unlatch();
+                    nextPageInRowChain = null;
+                }
+            } 
             finally 
             {
-				// Unlatch the next row piece before getting the next page in
-				// the row chain.
-				if (nextPageInRowChain != null) 
+                // Unlatch the next row piece before getting the next page in
+                // the row chain.
+                if (nextPageInRowChain != null) 
                 {
-					nextPageInRowChain.unlatch();
-					nextPageInRowChain = null;
-				}
-			}
-		}
-	}
+                    nextPageInRowChain.unlatch();
+                    nextPageInRowChain = null;
+                }
+            }
+        }
+    }
 
 
     /**
@@ -2963,70 +2963,70 @@ public class StoredPage extends CachedPage
      * @param work          object describing the chain to remove.
      * @param containerHdl  open container handle to use to remove chain.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	/* package */ 
-	void removeOrphanedColumnChain(
+    /* package */ 
+    void removeOrphanedColumnChain(
     ReclaimSpace    work, 
     ContainerHandle containerHdl)
-		 throws StandardException
-	{
-		// First we need to make sure that this is the first and only time
-		// this long column is begin reclaimed, to do this we get the first
-		// page on the long column chain and compare its page time stamp.
-		// If it is different, don't do anything.
-		//
-		// Next we need to make sure the update operation commits - we do
-		// this by finding the row headed by headRecord, go to the column
-		// in question and see if it points to the first page of the long
-		// column chain we want to reclaim.  If it does then the update
-		// operation has rolled back and we don't want to reclaim it.
-		//
-		// After we do the above 2 checks, we can reclaim the column
-		// chain.
-		StoredPage headOfChain =
-			(StoredPage)containerHdl.getPageNoWait(work.getColumnPageId());
+         throws StandardException
+    {
+        // First we need to make sure that this is the first and only time
+        // this long column is begin reclaimed, to do this we get the first
+        // page on the long column chain and compare its page time stamp.
+        // If it is different, don't do anything.
+        //
+        // Next we need to make sure the update operation commits - we do
+        // this by finding the row headed by headRecord, go to the column
+        // in question and see if it points to the first page of the long
+        // column chain we want to reclaim.  If it does then the update
+        // operation has rolled back and we don't want to reclaim it.
+        //
+        // After we do the above 2 checks, we can reclaim the column
+        // chain.
+        StoredPage headOfChain =
+            (StoredPage)containerHdl.getPageNoWait(work.getColumnPageId());
 
-		// If someone has it latched, not reclaimable
-		if (headOfChain == null) 
-			return;
+        // If someone has it latched, not reclaimable
+        if (headOfChain == null) 
+            return;
 
-		// If the column has been touched, it is not orphaned.  Not reclaimable.
-		boolean pageUnchanged = 
+        // If the column has been touched, it is not orphaned.  Not reclaimable.
+        boolean pageUnchanged = 
             headOfChain.equalTimeStamp(work.getPageTimeStamp());
 
-		headOfChain.unlatch();	// unlatch it for now.
+        headOfChain.unlatch();  // unlatch it for now.
 
-		if (pageUnchanged == false)
-			return;
+        if (pageUnchanged == false)
+            return;
 
-		// Now get to the column in question and make sure it is no longer
-		// pointing to the column chain.
+        // Now get to the column in question and make sure it is no longer
+        // pointing to the column chain.
 
-		RecordHandle headRowHandle = work.getHeadRowHandle();
+        RecordHandle headRowHandle = work.getHeadRowHandle();
 
-		if (SanityManager.DEBUG) 
+        if (SanityManager.DEBUG) 
         {
             // System.out.println("Executing in removeOrphanedColumnChain.");
             // System.out.println("work =  " + work);
             // System.out.println("head = " + headOfChain);
             // System.out.println("this = " + this);
 
-			SanityManager.ASSERT(isLatched());
-			SanityManager.ASSERT(
+            SanityManager.ASSERT(isLatched());
+            SanityManager.ASSERT(
                 headRowHandle.getPageNumber() == getPageNumber(), 
                 "got wrong head page");
-		}	
+        }   
 
-		// First get the row.
-		int slot = 
+        // First get the row.
+        int slot = 
             findRecordById(
                 headRowHandle.getId(), headRowHandle.getSlotNumberHint());
 
-		// If slot < 0, it means the whole record is gone, the column chain is
-		// definitely orphaned.
+        // If slot < 0, it means the whole record is gone, the column chain is
+        // definitely orphaned.
 
-		if (slot >= 0) 
+        if (slot >= 0) 
         {
             if (SanityManager.DEBUG) 
             {
@@ -3038,95 +3038,95 @@ public class StoredPage extends CachedPage
                         "\nhead = " + headOfChain +
                         "\nthis = " + this);
                 }
-            }	
+            }   
 
-			// Find the page with the column in question on it.
-			StoredPage pageInRowChain = this; // Start with the head page.
+            // Find the page with the column in question on it.
+            StoredPage pageInRowChain = this; // Start with the head page.
 
-			try 
+            try 
             {
 
-				int columnId = work.getColumnId();
-				StoredRecordHeader recordHeader = getHeaderAtSlot(slot); 
+                int columnId = work.getColumnId();
+                StoredRecordHeader recordHeader = getHeaderAtSlot(slot); 
 
-				if (SanityManager.DEBUG)
-					SanityManager.ASSERT(recordHeader.getFirstField() == 0,
-						"Head row piece should start at field 0 but is not");
+                if (SanityManager.DEBUG)
+                    SanityManager.ASSERT(recordHeader.getFirstField() == 0,
+                        "Head row piece should start at field 0 but is not");
 
-				// See if columnId is on pageInRowChain.
-				while ((recordHeader.getNumberFields() +
-						recordHeader.getFirstField()) <= columnId) 
+                // See if columnId is on pageInRowChain.
+                while ((recordHeader.getNumberFields() +
+                        recordHeader.getFirstField()) <= columnId) 
                 {
-					// The column in question is not on pageInRowChain.
+                    // The column in question is not on pageInRowChain.
 
-					if (pageInRowChain != this) 
+                    if (pageInRowChain != this) 
                     {
-						// Keep the head page latched.
-						pageInRowChain.unlatch();
-						pageInRowChain = null;
-					}
+                        // Keep the head page latched.
+                        pageInRowChain.unlatch();
+                        pageInRowChain = null;
+                    }
 
-					if (recordHeader.hasOverflow())	
+                    if (recordHeader.hasOverflow()) 
                     {
-						// Go to the next row piece
-						pageInRowChain = 
+                        // Go to the next row piece
+                        pageInRowChain = 
                             getOverflowPage(recordHeader.getOverflowPage());
-						recordHeader = 
+                        recordHeader = 
                             pageInRowChain.getHeaderAtSlot(
                                 getOverflowSlot(pageInRowChain, recordHeader));
-					} 
+                    } 
                     else 
                     {
-						//  Don't know why, but this is the last column.
-						//  Anyway, the column chain is definite orphaned.
-						//  This can happen if the update, or subsequent
-						//  updates, shrink the number of columns in the row. 
-						break;
-					}
-				}
+                        //  Don't know why, but this is the last column.
+                        //  Anyway, the column chain is definite orphaned.
+                        //  This can happen if the update, or subsequent
+                        //  updates, shrink the number of columns in the row. 
+                        break;
+                    }
+                }
 
-				if ((recordHeader.getNumberFields() + 
+                if ((recordHeader.getNumberFields() + 
                             recordHeader.getFirstField()) > columnId) 
                 {
-					// RecordHeader is the record header of the row piece on
-					// pageInRowChain.  The column in question exists and is in
-					// that row piece.
-					if (!pageInRowChain.isColumnOrphaned(
+                    // RecordHeader is the record header of the row piece on
+                    // pageInRowChain.  The column in question exists and is in
+                    // that row piece.
+                    if (!pageInRowChain.isColumnOrphaned(
                             recordHeader, columnId, 
                             work.getColumnPageId(), work.getColumnRecordId()))
-					{
-						// The column is not orphaned, row still points to it.
-						if (pageInRowChain != this) 
+                    {
+                        // The column is not orphaned, row still points to it.
+                        if (pageInRowChain != this) 
                         {
-							// Keep the head page latched.
-							pageInRowChain.unlatch();
-							pageInRowChain = null;
-						}
-						return;
-					}
-				}
+                            // Keep the head page latched.
+                            pageInRowChain.unlatch();
+                            pageInRowChain = null;
+                        }
+                        return;
+                    }
+                }
 
-			} 
+            } 
             catch (IOException ioe) 
             {
-				throw StandardException.newException(
+                throw StandardException.newException(
                         SQLState.DATA_UNEXPECTED_EXCEPTION, ioe);
-			} 
+            } 
             finally 
             {
-				if (pageInRowChain != this && pageInRowChain != null)
-					pageInRowChain.unlatch();
-			}
-		}
+                if (pageInRowChain != this && pageInRowChain != null)
+                    pageInRowChain.unlatch();
+            }
+        }
 
-		// If we get this far, we have verified that the column chain is indeed
-		// orphaned. Get rid of the column chain.
+        // If we get this far, we have verified that the column chain is indeed
+        // orphaned. Get rid of the column chain.
 
-		long nextPageId     = work.getColumnPageId();
-		int  nextRecordId   = work.getColumnRecordId();
+        long nextPageId     = work.getColumnPageId();
+        int  nextRecordId   = work.getColumnRecordId();
 
-		purgeOneColumnChain(nextPageId, nextRecordId);
-	}
+        purgeOneColumnChain(nextPageId, nextRecordId);
+    }
 
     /**
      * See if there is a orphaned long colum chain or not.  
@@ -3138,79 +3138,79 @@ public class StoredPage extends CachedPage
      * if it no longer points to that long column chain.
      * <p>
      *
-	 * @return true if page no longer points to the long column chain.
+     * @return true if page no longer points to the long column chain.
      *
      * @param recordHeader  record header which used to point at the long column
      * @param columnId      column id of the long column in head.
      * @param oldPageId     the page id where the long column used to be.
      * @param oldRecordId   the record id where the long column used to be.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private boolean isColumnOrphaned(
+    private boolean isColumnOrphaned(
     StoredRecordHeader  recordHeader, 
     int                 columnId,
     long                oldPageId, 
     long                oldRecordId)
-		 throws StandardException, IOException
-	{
-		int slot = findRecordById(recordHeader.getId(), Page.FIRST_SLOT_NUMBER);
+         throws StandardException, IOException
+    {
+        int slot = findRecordById(recordHeader.getId(), Page.FIRST_SLOT_NUMBER);
 
-		if (SanityManager.DEBUG) 
+        if (SanityManager.DEBUG) 
         {
-			SanityManager.ASSERT(slot >= 0, "overflow row chain truncated");
+            SanityManager.ASSERT(slot >= 0, "overflow row chain truncated");
 
-			SanityManager.ASSERT(
+            SanityManager.ASSERT(
                 columnId >= recordHeader.getFirstField(),
                 "first column on page > expected");
-		}
+        }
 
-		// these reads are always against the page array
-		ArrayInputStream lrdi = rawDataIn;
+        // these reads are always against the page array
+        ArrayInputStream lrdi = rawDataIn;
 
         // set read position to data portion of record to check.
-		int offset = getRecordOffset(slot);
-		lrdi.setPosition(offset + recordHeader.size());
+        int offset = getRecordOffset(slot);
+        lrdi.setPosition(offset + recordHeader.size());
 
         // skip until you get to the record in question.
-		for (int i = recordHeader.getFirstField(); i < columnId; i++)
-			skipField(lrdi);
+        for (int i = recordHeader.getFirstField(); i < columnId; i++)
+            skipField(lrdi);
 
         // read in the info of the column we are interested in.
-		int fieldStatus = StoredFieldHeader.readStatus(lrdi);
-		int fieldLength = StoredFieldHeader.readFieldDataLength
-				(lrdi, fieldStatus, slotFieldSize);
+        int fieldStatus = StoredFieldHeader.readStatus(lrdi);
+        int fieldLength = StoredFieldHeader.readFieldDataLength
+                (lrdi, fieldStatus, slotFieldSize);
 
-		if (StoredFieldHeader.isOverflow(fieldStatus)) 
+        if (StoredFieldHeader.isOverflow(fieldStatus)) 
         {
             // it is still an overflow field, check if it still points to 
             // overflow column in question.
 
-			long ovflowPage = CompressedNumber.readLong((InputStream) lrdi);
-			int  ovflowRid  = CompressedNumber.readInt((InputStream) lrdi);
+            long ovflowPage = CompressedNumber.readLong((InputStream) lrdi);
+            int  ovflowRid  = CompressedNumber.readInt((InputStream) lrdi);
 
-			if (ovflowPage == oldPageId && ovflowRid == oldRecordId) 
+            if (ovflowPage == oldPageId && ovflowRid == oldRecordId) 
             { 
-				// This field still points to the column chain, the
-				// update must have rolled back.
-				return false;
-			}
-		}
+                // This field still points to the column chain, the
+                // update must have rolled back.
+                return false;
+            }
+        }
 
-		// Else, either the field is no longer a long column, or it doesn't
-		// point to oldPageId, oldRecordId.  The column chain is orphaned. 
-		return true;
-	}
+        // Else, either the field is no longer a long column, or it doesn't
+        // point to oldPageId, oldRecordId.  The column chain is orphaned. 
+        return true;
+    }
 
-	/**
-	    @return a recordHandle pointing to the next piece of the column chain.
-		This page must be an overflow page that is in a column chain.  If this
-		is the last piece of the overflow colum, return null.
+    /**
+        @return a recordHandle pointing to the next piece of the column chain.
+        This page must be an overflow page that is in a column chain.  If this
+        is the last piece of the overflow colum, return null.
 
-		@param slot the slot number where the current piece of overflow column
-		is at.
-		@exception StandardException Derby Standard Error Policy
-	 */
+        @param slot the slot number where the current piece of overflow column
+        is at.
+        @exception StandardException Derby Standard Error Policy
+     */
     /**
      * Return the next recordHandle in a long column chain.
      * <p>
@@ -3219,20 +3219,20 @@ public class StoredPage extends CachedPage
      * is the last piece of the overflow colum, return null.
      * <p>
      *
-	 * @return The next record handle in a long column chain.
+     * @return The next record handle in a long column chain.
      *
      * @param slot   The slot of the current long column piece.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private RecordHandle getNextColumnPiece(int slot) 
+    private RecordHandle getNextColumnPiece(int slot) 
         throws StandardException
-	{
-		if (SanityManager.DEBUG) 
+    {
+        if (SanityManager.DEBUG) 
         {
-			SanityManager.ASSERT(isLatched());
-			SanityManager.ASSERT(isOverflowPage(), 
-				"not expected to call getNextColumnPiece on non-overflow page");
+            SanityManager.ASSERT(isLatched());
+            SanityManager.ASSERT(isOverflowPage(), 
+                "not expected to call getNextColumnPiece on non-overflow page");
 
             if (recordCount() != 1)
             {
@@ -3240,80 +3240,80 @@ public class StoredPage extends CachedPage
                     "getNextColumnPiece called on a page with " +
                     recordCount() + " rows");
             }
-		}
+        }
 
-		try 
+        try 
         {
-			StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
-			int numberFields = 
+            StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+            int numberFields = 
                 recordHeader.getNumberFields();
 
-			if (SanityManager.DEBUG) 
+            if (SanityManager.DEBUG) 
             {
-				if ((numberFields > 2) || (numberFields < 1))
+                if ((numberFields > 2) || (numberFields < 1))
                 {
-					SanityManager.THROWASSERT(
-						"longColumn record header must have 1 or 2 fields." +
+                    SanityManager.THROWASSERT(
+                        "longColumn record header must have 1 or 2 fields." +
                         " numberFields = " + numberFields);
                 }
-			}
+            }
 
-			if (numberFields != 2) // End of column chain.
-				return null;
+            if (numberFields != 2) // End of column chain.
+                return null;
 
-			// these reads are always against the page array
-			ArrayInputStream lrdi = rawDataIn;
+            // these reads are always against the page array
+            ArrayInputStream lrdi = rawDataIn;
 
-			// The 2nd field is the pointer to the next page in column chain.
+            // The 2nd field is the pointer to the next page in column chain.
 
-			int offset = getRecordOffset(slot) + recordHeader.size();
-			lrdi.setPosition(offset);
+            int offset = getRecordOffset(slot) + recordHeader.size();
+            lrdi.setPosition(offset);
 
-			// skip the first field
-			skipField(lrdi);
+            // skip the first field
+            skipField(lrdi);
 
-			// the 2nd field should be <pageId, recordId> pair, return the
-			// pageId part and skip over the length.
-			int fieldStatus = StoredFieldHeader.readStatus(lrdi);
-			int fieldLength = StoredFieldHeader.readFieldDataLength
-				(lrdi, fieldStatus, slotFieldSize);
+            // the 2nd field should be <pageId, recordId> pair, return the
+            // pageId part and skip over the length.
+            int fieldStatus = StoredFieldHeader.readStatus(lrdi);
+            int fieldLength = StoredFieldHeader.readFieldDataLength
+                (lrdi, fieldStatus, slotFieldSize);
 
-			long ovflowPage = CompressedNumber.readLong((InputStream) lrdi);
-			int  ovflowRid  = CompressedNumber.readInt((InputStream) lrdi);
+            long ovflowPage = CompressedNumber.readLong((InputStream) lrdi);
+            int  ovflowRid  = CompressedNumber.readInt((InputStream) lrdi);
 
-			if (SanityManager.DEBUG) 
+            if (SanityManager.DEBUG) 
             {
-				if (!StoredFieldHeader.isOverflow(fieldStatus)) 
+                if (!StoredFieldHeader.isOverflow(fieldStatus)) 
                 {
-					// In version 1.5, the first field is overflow and the
-					// second is not. In version 2.0 onwards, the first field
-					// is not overflow and the second is overflow (the overflow
-					// bit goes with the overflow pointer).  Check first field
-					// to make sure its overflow bit is set on.  
-					// Offset still points to the first column.
-					lrdi.setPosition(offset);
-					fieldStatus = StoredFieldHeader.readStatus(lrdi);
-					SanityManager.ASSERT(
+                    // In version 1.5, the first field is overflow and the
+                    // second is not. In version 2.0 onwards, the first field
+                    // is not overflow and the second is overflow (the overflow
+                    // bit goes with the overflow pointer).  Check first field
+                    // to make sure its overflow bit is set on.  
+                    // Offset still points to the first column.
+                    lrdi.setPosition(offset);
+                    fieldStatus = StoredFieldHeader.readStatus(lrdi);
+                    SanityManager.ASSERT(
                             StoredFieldHeader.isOverflow(fieldStatus));
-				}
-			}
+                }
+            }
 
-			// RESOLVE : this new can get expensive if the column chain is very
-			// long.  The reason we do this is because we need to return the
-			// page number and the rid, if we assume that the long column is
-			// always at slot 0, we can return only the page.
+            // RESOLVE : this new can get expensive if the column chain is very
+            // long.  The reason we do this is because we need to return the
+            // page number and the rid, if we assume that the long column is
+            // always at slot 0, we can return only the page.
 
-			return owner.makeRecordHandle(ovflowPage, ovflowRid);
+            return owner.makeRecordHandle(ovflowPage, ovflowRid);
 
-		} 
+        } 
         catch (IOException ioe) 
         {
-			throw dataFactory.markCorrupt(
+            throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, ioe, getPageId()));
-		}
-	}
-	 
+        }
+    }
+     
 
     /**************************************************************************
      * Page space usage
@@ -3326,14 +3326,14 @@ public class StoredPage extends CachedPage
      * Get the total available space on an empty page.
      * initSlotTable() must be called after the page has been read in.
      **/
-	private void initSpace()
-	{
-		// NOTE: subclass may have overwitten it to report less freeSpace,
-		// always call getMaxFreeSpace() to get total space.
-		totalSpace = getMaxFreeSpace();
+    private void initSpace()
+    {
+        // NOTE: subclass may have overwitten it to report less freeSpace,
+        // always call getMaxFreeSpace() to get total space.
+        totalSpace = getMaxFreeSpace();
 
-		// estimate RH will be about 16 bytes:
-		// (1 - status, 1 - id, 1 - #fields, 1 - 1stField, 12 - overflow ptr)
+        // estimate RH will be about 16 bytes:
+        // (1 - status, 1 - id, 1 - #fields, 1 - 1stField, 12 - overflow ptr)
 
         // RESOLVED: track# 3370, 3368
         // In the old code below, spareSpace/100 is integer division. This means
@@ -3352,11 +3352,11 @@ public class StoredPage extends CachedPage
         // pointer, so backs up and removes the column from page, and tries
         // again on next overflow page - looping forever.
         //
-		// maxFieldSize = 
+        // maxFieldSize = 
         //     totalSpace * (1 - spareSpace/100) - slotEntrySize 
         //     - 16 - OVERFLOW_POINTER_SIZE;
 
-		maxFieldSize = totalSpace - slotEntrySize - 16 - OVERFLOW_POINTER_SIZE;
+        maxFieldSize = totalSpace - slotEntrySize - 16 - OVERFLOW_POINTER_SIZE;
 
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(maxFieldSize >= 0);
@@ -3368,16 +3368,16 @@ public class StoredPage extends CachedPage
             SanityManager.ASSERT(slotEntrySize == 3 * expectedFieldSize,
                                  "slotEntrySize uninitialized");
         }
-	}
+    }
 
     /**
      * Initialize the freeSpace count and set the firstFreeByte on page
      **/
-	private void clearAllSpace()
-	{
-		freeSpace     = totalSpace;
-		firstFreeByte = getPageSize() - totalSpace - CHECKSUM_SIZE;
-	}
+    private void clearAllSpace()
+    {
+        freeSpace     = totalSpace;
+        firstFreeByte = getPageSize() - totalSpace - CHECKSUM_SIZE;
+    }
 
     /**
      * Compress out the space specified by startByte and endByte.
@@ -3390,50 +3390,50 @@ public class StoredPage extends CachedPage
      * @param endByte   compress out space ending   at endByte   offset
      *
      **/
-	private void compressPage(
+    private void compressPage(
     int startByte, 
     int endByte) 
         throws IOException
-	{
-		if (SanityManager.DEBUG) 
+    {
+        if (SanityManager.DEBUG) 
         {
-			if (((endByte + 1) > firstFreeByte) || (startByte > firstFreeByte))
+            if (((endByte + 1) > firstFreeByte) || (startByte > firstFreeByte))
             {
-				SanityManager.THROWASSERT(
-					"startByte = " + startByte + " endByte = " + endByte +
-					" firstFreeByte = " + firstFreeByte);
+                SanityManager.THROWASSERT(
+                    "startByte = " + startByte + " endByte = " + endByte +
+                    " firstFreeByte = " + firstFreeByte);
             }
-		}
+        }
 
-		int lengthToClear = endByte + 1 - startByte;
+        int lengthToClear = endByte + 1 - startByte;
 
-		// see if these were not the last occupied record space on the page
-		if ((endByte + 1) != firstFreeByte) 
+        // see if these were not the last occupied record space on the page
+        if ((endByte + 1) != firstFreeByte) 
         {
-			// Shift everything down the page.
-			int moveLength = (firstFreeByte - endByte - 1);
+            // Shift everything down the page.
+            int moveLength = (firstFreeByte - endByte - 1);
 
-			System.arraycopy(
+            System.arraycopy(
                 pageData, (endByte + 1), pageData, startByte, moveLength);
 
-			// fix the page offsets of the rows further down the page
-			for (int slot = 0; slot < slotsInUse; slot++) 
+            // fix the page offsets of the rows further down the page
+            for (int slot = 0; slot < slotsInUse; slot++) 
             {
-				int offset = getRecordOffset(slot);
+                int offset = getRecordOffset(slot);
 
-				if (offset >= (endByte + 1)) 
+                if (offset >= (endByte + 1)) 
                 {
-					offset -= lengthToClear;
-					setRecordOffset(slot, offset);
-				}
-			}
-		}
-		
-		freeSpace     += lengthToClear;
-		firstFreeByte -= lengthToClear;
+                    offset -= lengthToClear;
+                    setRecordOffset(slot, offset);
+                }
+            }
+        }
+        
+        freeSpace     += lengthToClear;
+        firstFreeByte -= lengthToClear;
 
-		clearSection(firstFreeByte, lengthToClear);
-	}
+        clearSection(firstFreeByte, lengthToClear);
+    }
 
     /**
      * Free up required bytes by shifting rows "down" the page.
@@ -3444,42 +3444,42 @@ public class StoredPage extends CachedPage
      * @param startOffset   offset on page to begin the shift
      * @param requiredBytes the number of bytes that must be freed.
      *
-     * @exception IOException	If IOException is raised during the page mod.
+     * @exception IOException   If IOException is raised during the page mod.
      **/
-	protected void expandPage(
+    protected void expandPage(
     int startOffset, 
     int requiredBytes) 
         throws IOException
-	{
-		if (SanityManager.DEBUG) 
+    {
+        if (SanityManager.DEBUG) 
         {
-			SanityManager.ASSERT(requiredBytes <= freeSpace);
-			SanityManager.ASSERT(startOffset <= firstFreeByte);
-		}
+            SanityManager.ASSERT(requiredBytes <= freeSpace);
+            SanityManager.ASSERT(startOffset <= firstFreeByte);
+        }
 
-		int totalLength = firstFreeByte - startOffset;
+        int totalLength = firstFreeByte - startOffset;
 
-		if (totalLength > 0)
-		{
-			System.arraycopy(
+        if (totalLength > 0)
+        {
+            System.arraycopy(
                 pageData, startOffset, 
                 pageData, startOffset + requiredBytes, totalLength);
 
-			// fix the page offsets of the rows further down the page
-			for (int slot = 0; slot < slotsInUse; slot++) 
+            // fix the page offsets of the rows further down the page
+            for (int slot = 0; slot < slotsInUse; slot++) 
             {
-				int offset = getRecordOffset(slot);
-				if (offset >= startOffset) 
+                int offset = getRecordOffset(slot);
+                if (offset >= startOffset) 
                 {
-					offset += requiredBytes;
-					setRecordOffset(slot, offset);
-				}
-			}
-		}
+                    offset += requiredBytes;
+                    setRecordOffset(slot, offset);
+                }
+            }
+        }
 
-		freeSpace     -= requiredBytes;
-		firstFreeByte += requiredBytes;
-	}
+        freeSpace     -= requiredBytes;
+        firstFreeByte += requiredBytes;
+    }
 
     /**
      * Shrink page. 
@@ -3490,18 +3490,18 @@ public class StoredPage extends CachedPage
      * @param startOffset   offset on page to begin the shift
      * @param shrinkBytes   the number of bytes that must be moved.
      *
-     * @exception IOException	some IOException is raised during the page mod,
+     * @exception IOException   some IOException is raised during the page mod,
      *                          (unlikely as this is just writing to array).
      **/
-	private void shrinkPage(int startOffset, int shrinkBytes) 
-		 throws IOException 
-	{
-		// the number of bytes that needs to be moved up.
-		int totalLength = firstFreeByte - startOffset;
+    private void shrinkPage(int startOffset, int shrinkBytes) 
+         throws IOException 
+    {
+        // the number of bytes that needs to be moved up.
+        int totalLength = firstFreeByte - startOffset;
 
-		if (SanityManager.DEBUG) 
+        if (SanityManager.DEBUG) 
         {
-			SanityManager.DEBUG(
+            SanityManager.DEBUG(
                 "shrinkPage", "page " + getIdentity() + 
                 " shrinking " + shrinkBytes + 
                 " from offset " + startOffset +
@@ -3509,25 +3509,25 @@ public class StoredPage extends CachedPage
                 " moving " + totalLength + 
                 " bytes.  FirstFreeByte at " + firstFreeByte);
 
-			SanityManager.ASSERT(
+            SanityManager.ASSERT(
                 totalLength >= 0, "firstFreeByte - startOffset <= 0");
 
-			SanityManager.ASSERT(
+            SanityManager.ASSERT(
                 (startOffset-shrinkBytes) > RECORD_SPACE_OFFSET ,
                 "shrinking too much ");
 
-			if (startOffset != firstFreeByte)
-			{
-				// make sure startOffset is at the beginning of a record
-				boolean foundslot = false;
-				for (int slot = 0; slot < slotsInUse; slot++) 
+            if (startOffset != firstFreeByte)
+            {
+                // make sure startOffset is at the beginning of a record
+                boolean foundslot = false;
+                for (int slot = 0; slot < slotsInUse; slot++) 
                 {
-					if (getRecordOffset(slot) == startOffset) 
+                    if (getRecordOffset(slot) == startOffset) 
                     {
-						foundslot = true;
-						break;
-					}
-				}
+                        foundslot = true;
+                        break;
+                    }
+                }
 
                 if (!foundslot)
                 {
@@ -3535,39 +3535,39 @@ public class StoredPage extends CachedPage
                         "startOffset " + startOffset + 
                         " not at the beginning of a record");
                 }
-			}
-		}
+            }
+        }
 
-		if (totalLength > 0) 
+        if (totalLength > 0) 
         {
-			System.arraycopy(
+            System.arraycopy(
                 pageData, startOffset,
                 pageData, startOffset-shrinkBytes , totalLength);
 
-			// fix the page offsets of the rows further down the page
-			for (int slot = 0; slot < slotsInUse; slot++) 
+            // fix the page offsets of the rows further down the page
+            for (int slot = 0; slot < slotsInUse; slot++) 
             {
-				int offset = getRecordOffset(slot);
-				if (offset >= startOffset) 
+                int offset = getRecordOffset(slot);
+                if (offset >= startOffset) 
                 {
-					offset -= shrinkBytes;
-					setRecordOffset(slot, offset);
-				}
-			}
-		}
+                    offset -= shrinkBytes;
+                    setRecordOffset(slot, offset);
+                }
+            }
+        }
 
-		freeSpace     += shrinkBytes;
-		firstFreeByte -= shrinkBytes;
-	}
+        freeSpace     += shrinkBytes;
+        firstFreeByte -= shrinkBytes;
+    }
 
-	public int getRecordLength(int slot) throws IOException
-	{
-		return getRecordPortionLength(slot);
-	}
-	protected  boolean getIsOverflow(int slot) throws IOException
-	{
-		return getHeaderAtSlot(slot).hasOverflow();
-	}
+    public int getRecordLength(int slot) throws IOException
+    {
+        return getRecordPortionLength(slot);
+    }
+    protected  boolean getIsOverflow(int slot) throws IOException
+    {
+        return getHeaderAtSlot(slot).hasOverflow();
+    }
 
     /**
      * Log a row into the StoreOuput stream.
@@ -3594,7 +3594,7 @@ public class StoredPage extends CachedPage
      * logRow expects row to be a sparse row.
      * <p>
      *
-	 * @return the "realStartColumn" value, -1 if not a long row.
+     * @return the "realStartColumn" value, -1 if not a long row.
      *
      * @param slot              the slot of the row being logged.
      * @param forInsert         this is logging an insert (not update/delete).
@@ -3616,12 +3616,12 @@ public class StoredPage extends CachedPage
      * @param overflowThreshold How much of the page to use before deciding
      *                          to overflow a row.
      *
-     * @exception  IOException		  RESOLVE
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  IOException        RESOLVE
+     * @exception  StandardException  Standard exception policy.
      *
      * @see BasePage#logRow
      **/
-	public int logRow(
+    public int logRow(
     int                     slot, 
     boolean                 forInsert, 
     int                     recordId,
@@ -3633,349 +3633,349 @@ public class StoredPage extends CachedPage
     int                     realStartColumn, 
     int                     realSpaceOnPage,
     int                     overflowThreshold)
-		throws StandardException, IOException
-	{
-		// Is this an update that just went through handleIncompleteLogRow
-		// and handleIncompleteLogRow threw an excepiton. In this case the
-		// buffer is already finished.
-		if (!forInsert) 
+        throws StandardException, IOException
+    {
+        // Is this an update that just went through handleIncompleteLogRow
+        // and handleIncompleteLogRow threw an excepiton. In this case the
+        // buffer is already finished.
+        if (!forInsert) 
         {
-			if ((realStartColumn != -1) && (realSpaceOnPage == -1)) 
+            if ((realStartColumn != -1) && (realSpaceOnPage == -1)) 
             {
-				return realStartColumn;
-			}
-		}
+                return realStartColumn;
+            }
+        }
 
-		int spaceAvailable = freeSpace;
-		setOutputStream(out);
-		int beginPosition = out.getPosition();
+        int spaceAvailable = freeSpace;
+        setOutputStream(out);
+        int beginPosition = out.getPosition();
 
-		// if we are inserting in the headPage,
-		// we need to make sure that there is enough room
-		// on the page for the reserve space.
-		userRowSize = 0;
-		boolean calcMinimumRecordSize = false;
+        // if we are inserting in the headPage,
+        // we need to make sure that there is enough room
+        // on the page for the reserve space.
+        userRowSize = 0;
+        boolean calcMinimumRecordSize = false;
 
-		if (realStartColumn != (-1)) 
+        if (realStartColumn != (-1)) 
         {
             // in the middle of logging a long row/column.
 
-			spaceAvailable  = realSpaceOnPage;
-			beginPosition   = out.getBeginPosition();
-		} 
+            spaceAvailable  = realSpaceOnPage;
+            beginPosition   = out.getBeginPosition();
+        } 
         else 
         {
             // logging row part that is on head page.
 
-			if (!forInsert) 
+            if (!forInsert) 
             {
-				// an update can use the total space of the record,
-				// even if not all of the fields are being updated.
-				// If the updated columns will not fit then some
-				// columns will move off the page to a new chunk.
-				spaceAvailable += getTotalSpace(slot);
+                // an update can use the total space of the record,
+                // even if not all of the fields are being updated.
+                // If the updated columns will not fit then some
+                // columns will move off the page to a new chunk.
+                spaceAvailable += getTotalSpace(slot);
 
-			} 
+            } 
             else 
             {
-				// need to account for the slot table using extra space...
-				spaceAvailable -= slotEntrySize;
+                // need to account for the slot table using extra space...
+                spaceAvailable -= slotEntrySize;
 
-				if (startColumn == 0)
-					calcMinimumRecordSize = true;
-			}
+                if (startColumn == 0)
+                    calcMinimumRecordSize = true;
+            }
 
-			// <= is ok here as we know we want to write at least one more byte
-			if (spaceAvailable <= 0)
-				throw new NoSpaceOnPage(isOverflowPage());
-		}
+            // <= is ok here as we know we want to write at least one more byte
+            if (spaceAvailable <= 0)
+                throw new NoSpaceOnPage(isOverflowPage());
+        }
 
-		try 
+        try 
         {
-			if (row == null) 
+            if (row == null) 
             {
-				// if the row is null, we must be writing an overflow pointer.
+                // if the row is null, we must be writing an overflow pointer.
 
-				return(logOverflowRecord(slot, spaceAvailable, out));
-			}    
+                return(logOverflowRecord(slot, spaceAvailable, out));
+            }    
 
             int                numberFields = 0;
             StoredRecordHeader recordHeader;
 
-			if (forInsert) 
+            if (forInsert) 
             {
-				recordHeader = new StoredRecordHeader();
-			} 
+                recordHeader = new StoredRecordHeader();
+            } 
             else 
             {
-				// Get a full copy of the record header since we might change 
+                // Get a full copy of the record header since we might change 
                 // it,  and we can't modify the one on the page
-				recordHeader = 
+                recordHeader = 
                     new StoredRecordHeader(getHeaderAtSlot(slot));
 
-				// an update always starts at the first column on this page
-				startColumn = recordHeader.getFirstField();
-			}
+                // an update always starts at the first column on this page
+                startColumn = recordHeader.getFirstField();
+            }
 
-			if (validColumns == null)
+            if (validColumns == null)
             {
                 // all columns in row[] are valid, we will be logging them all.
 
-				numberFields = row.length - startColumn;
+                numberFields = row.length - startColumn;
             }
-			else 
+            else 
             {
                 // RESOLVE (mikem) - counting on validColumns.length may be bad
                 // for performance.
 
-				for (int i = validColumns.getLength() - 1; 
+                for (int i = validColumns.getLength() - 1; 
                      i >= startColumn; 
                      i--) 
                 {
-					if (validColumns.isSet(i)) 
+                    if (validColumns.isSet(i)) 
                     {
-						numberFields = i + 1 - startColumn;
-						break;
-					}
-				}
-			}
+                        numberFields = i + 1 - startColumn;
+                        break;
+                    }
+                }
+            }
 
-			int onPageNumberFields = -1; // only valid for update
+            int onPageNumberFields = -1; // only valid for update
 
-			if (forInsert) 
+            if (forInsert) 
             {
-				recordHeader.setId(recordId);
-				recordHeader.setNumberFields(numberFields);
-			} 
+                recordHeader.setId(recordId);
+                recordHeader.setNumberFields(numberFields);
+            } 
             else 
             {
-				// an update
+                // an update
 
-				onPageNumberFields = recordHeader.getNumberFields();
+                onPageNumberFields = recordHeader.getNumberFields();
 
-				if (numberFields > onPageNumberFields) 
+                if (numberFields > onPageNumberFields) 
                 {
-					// number of fields *might* be increasing
-					if (recordHeader.hasOverflow()) 
+                    // number of fields *might* be increasing
+                    if (recordHeader.hasOverflow()) 
                     {
-						// other fields will be handled in next portion update
+                        // other fields will be handled in next portion update
                         
-						numberFields = onPageNumberFields;
-					} 
+                        numberFields = onPageNumberFields;
+                    } 
                     else 
                     {
-						// number of fields is increasing
+                        // number of fields is increasing
 
-						recordHeader.setNumberFields(numberFields);
-					}
-				} 
+                        recordHeader.setNumberFields(numberFields);
+                    }
+                } 
                 else if (numberFields < onPageNumberFields) 
                 {
-					if (validColumns == null) 
+                    if (validColumns == null) 
                     {
-						// number of fields is decreasing,
-						// but only allowed when the complete
-						// row is being updated.
-						recordHeader.setNumberFields(numberFields);
+                        // number of fields is decreasing,
+                        // but only allowed when the complete
+                        // row is being updated.
+                        recordHeader.setNumberFields(numberFields);
 
-						// RESOLVE - 
+                        // RESOLVE - 
                         // need some post commit work if row has overflow
 
-						// if (recordHeader.hasOverflow()) {
-						// remove overflow portion after commit.
-						// }
+                        // if (recordHeader.hasOverflow()) {
+                        // remove overflow portion after commit.
+                        // }
 
-					} 
+                    } 
                     else 
                     {
-						// we process all the fields, the unchanged ones
-						// at the end will have a single byte written out
-						// indicating they are unchanged (nonexistent)
-						numberFields = onPageNumberFields;
-					}
-				}
-			}
+                        // we process all the fields, the unchanged ones
+                        // at the end will have a single byte written out
+                        // indicating they are unchanged (nonexistent)
+                        numberFields = onPageNumberFields;
+                    }
+                }
+            }
 
-			int endFieldExclusive = startColumn + numberFields;
+            int endFieldExclusive = startColumn + numberFields;
 
-			if (realStartColumn >= endFieldExclusive) 
+            if (realStartColumn >= endFieldExclusive) 
             {
-				// The realStartColumn is greater than the last column we need
+                // The realStartColumn is greater than the last column we need
                 // to log, so we are done.
-				return (-1);
-			}
+                return (-1);
+            }
 
-			if ((insertFlag & Page.INSERT_DEFAULT) != Page.INSERT_DEFAULT) 
+            if ((insertFlag & Page.INSERT_DEFAULT) != Page.INSERT_DEFAULT) 
             {
                 // if this is not logging the part of the row being inserted
                 // on the main page, then use startColumn as first field.
-				recordHeader.setFirstField(startColumn);
-			} 
+                recordHeader.setFirstField(startColumn);
+            } 
 
             // what column to start with?
 
-			int firstColumn = realStartColumn;
-			if (realStartColumn == (-1)) 
+            int firstColumn = realStartColumn;
+            if (realStartColumn == (-1)) 
             {
                 // logging on the head page.
 
-				int recordHeaderLength = recordHeader.write(logicalDataOut);
+                int recordHeaderLength = recordHeader.write(logicalDataOut);
 
-				spaceAvailable -= recordHeaderLength;
-				if (spaceAvailable < 0)
+                spaceAvailable -= recordHeaderLength;
+                if (spaceAvailable < 0)
                 {
                     // ran out of space just writing the record header.
                     throw new NoSpaceOnPage(isOverflowPage());
                 }
 
-				firstColumn = startColumn;
-			}
+                firstColumn = startColumn;
+            }
 
 
-			boolean monitoringOldFields = false;
+            boolean monitoringOldFields = false;
             int validColumnsSize = 
                 (validColumns == null) ? 0 : validColumns.getLength();
             
-			if (validColumns != null) 
+            if (validColumns != null) 
             {
-				if (!forInsert) 
+                if (!forInsert) 
                 {
-					// we monitor the length of the old fields by skipping them
-					// but only on a partial update.
-					if ((validColumns != null) && 
+                    // we monitor the length of the old fields by skipping them
+                    // but only on a partial update.
+                    if ((validColumns != null) && 
                         (firstColumn < (startColumn + onPageNumberFields)))
                     {
-						rawDataIn.setPosition(
+                        rawDataIn.setPosition(
                             getFieldOffset(slot, firstColumn));
 
-						monitoringOldFields = true;
-					}
-				}
-			}
+                        monitoringOldFields = true;
+                    }
+                }
+            }
 
-			int lastSpaceAvailable              = spaceAvailable;
-			int recordSize                      = 0;
-			int lastColumnPositionAllowOverflow = out.getPosition();
-			int lastColumnAllowOverflow         = startColumn;
+            int lastSpaceAvailable              = spaceAvailable;
+            int recordSize                      = 0;
+            int lastColumnPositionAllowOverflow = out.getPosition();
+            int lastColumnAllowOverflow         = startColumn;
 
-			if (spaceAvailable > OVERFLOW_POINTER_SIZE)
-				lastColumnPositionAllowOverflow = -1;
-			int columnFlag = COLUMN_FIRST;
+            if (spaceAvailable > OVERFLOW_POINTER_SIZE)
+                lastColumnPositionAllowOverflow = -1;
+            int columnFlag = COLUMN_FIRST;
 
-			for (int i = firstColumn; i < endFieldExclusive; i++) 
+            for (int i = firstColumn; i < endFieldExclusive; i++) 
             {
                 Object              ref          = null;
-				boolean             ignoreColumn = false;
+                boolean             ignoreColumn = false;
 
 
                 // should we log this column or not?
-				if ((validColumns == null) || 
+                if ((validColumns == null) || 
                     (validColumnsSize > i && validColumns.isSet(i))) 
                 {
-					if (i < row.length)
-						ref = row[i];
-				} 
+                    if (i < row.length)
+                        ref = row[i];
+                } 
                 else if (!forInsert) 
                 {
-					// field is not supplied, log as non-existent
-					ignoreColumn = true;
-				}
+                    // field is not supplied, log as non-existent
+                    ignoreColumn = true;
+                }
 
-				if (spaceAvailable > OVERFLOW_POINTER_SIZE) 
+                if (spaceAvailable > OVERFLOW_POINTER_SIZE) 
                 {
-					lastColumnPositionAllowOverflow = out.getPosition();
-					lastColumnAllowOverflow         = i;
-				}
+                    lastColumnPositionAllowOverflow = out.getPosition();
+                    lastColumnAllowOverflow         = i;
+                }
 
-				lastSpaceAvailable = spaceAvailable;
+                lastSpaceAvailable = spaceAvailable;
 
-				if (ignoreColumn) 
+                if (ignoreColumn) 
                 {
-					if (SanityManager.DEBUG) 
+                    if (SanityManager.DEBUG) 
                     {
-						SanityManager.ASSERT(
+                        SanityManager.ASSERT(
                             ref == null, 
                             "ref should be null for an ignored column");
 
-						SanityManager.ASSERT(
+                        SanityManager.ASSERT(
                             validColumns != null, 
                             "validColumns should be non-null for ignored col");
-					}
+                    }
 
-					if (i < (startColumn + onPageNumberFields)) 
+                    if (i < (startColumn + onPageNumberFields)) 
                     {
-						if (SanityManager.DEBUG) 
+                        if (SanityManager.DEBUG) 
                         {
-							SanityManager.ASSERT(
+                            SanityManager.ASSERT(
                                 monitoringOldFields, 
                                 "monitoringOldFields must be true");
-						}
+                        }
 
-						// need to keep track of the old field lengths
-						// as they are remaining in the row.
-						int oldOffset = rawDataIn.getPosition();
-						skipField(rawDataIn);
-						int oldFieldLength = 
+                        // need to keep track of the old field lengths
+                        // as they are remaining in the row.
+                        int oldOffset = rawDataIn.getPosition();
+                        skipField(rawDataIn);
+                        int oldFieldLength = 
                             rawDataIn.getPosition() - oldOffset;
 
-						if (oldFieldLength <= spaceAvailable) 
+                        if (oldFieldLength <= spaceAvailable) 
                         {
                             //  if field doesn't fit, 
                             //      spaceAvailable must be left unchanged.
 
-							logColumn(
+                            logColumn(
                                 null, 0, out, Integer.MAX_VALUE, 
                                 COLUMN_NONE, overflowThreshold);
 
-							spaceAvailable -= oldFieldLength;
-						}
+                            spaceAvailable -= oldFieldLength;
+                        }
 
-					} 
+                    } 
                     else 
                     {
-						// this is an update that is increasing the number of 
+                        // this is an update that is increasing the number of 
                         // columns but not providing any value, strange ...
 
-						spaceAvailable = 
+                        spaceAvailable = 
                             logColumn(
                                 null, 0, out, spaceAvailable, 
                                 columnFlag, overflowThreshold);
-					}
+                    }
 
-				} 
+                } 
                 else 
                 {
                     // ignoreColumn is false, we are logging this column.
 
-					if (monitoringOldFields && 
+                    if (monitoringOldFields && 
                         (i < (startColumn + onPageNumberFields))) 
                     {
-						// skip the old version of the field so that
-						// rawDataIn is correctly positioned.
-						skipField(rawDataIn);
-					}
+                        // skip the old version of the field so that
+                        // rawDataIn is correctly positioned.
+                        skipField(rawDataIn);
+                    }
 
 
-					try 
+                    try 
                     {
-						if (ref == null)
+                        if (ref == null)
                         {
                             // no new value to provide, use the on page value.
-							spaceAvailable = 
+                            spaceAvailable = 
                                 logColumn(
                                     null, 0, out, spaceAvailable, 
                                     columnFlag, overflowThreshold);
                         }
-						else
+                        else
                         {
                             // log the value provided in the row[i]
-							spaceAvailable = 
+                            spaceAvailable = 
                                 logColumn(
                                     row, i, out, spaceAvailable, 
                                     columnFlag, overflowThreshold);
                         }
 
-					} 
+                    } 
                     catch (LongColumnException lce) 
                     {
                         // logColumn determined that the column would not fit
@@ -3983,33 +3983,33 @@ public class StoredPage extends CachedPage
                         // threshold so turn this column into a long column.
                         
 
-						if ((insertFlag & Page.INSERT_DEFAULT) == 
+                        if ((insertFlag & Page.INSERT_DEFAULT) == 
                                 Page.INSERT_DEFAULT) 
                         {
                             // if default insert, just throw no space exception.
 
-							// if the lce has throw the column as an InputStream,
-							// in the following 2 situations
-							//    1. If column came in 'row[i]' as InputStream
-							//	  2. If the object stream of 'row[i]' is not 
-                            //	     null, which means that the object state of
-                            //	     the column is null.
+                            // if the lce has throw the column as an InputStream,
+                            // in the following 2 situations
+                            //    1. If column came in 'row[i]' as InputStream
+                            //    2. If the object stream of 'row[i]' is not 
+                            //       null, which means that the object state of
+                            //       the column is null.
                             //
-							// we need to set the original InputStream column to
+                            // we need to set the original InputStream column to
                             // the column that has been thrown by lce.  It is a
                             // store formated InputStream which remembers all 
                             // the bytes that has been read, but not yet stored.
                             // Therefore, we will not lose any bytes.
-							//
-							// In any other situation, we should not change the
+                            //
+                            // In any other situation, we should not change the
                             // state of the column,
-							// i.e. if 'row[i]' has an object state, it should
+                            // i.e. if 'row[i]' has an object state, it should
                             // not be turned into an InputStream.
 
-							if ((lce.getColumn() instanceof InputStream)
-									&& (row[i] instanceof StreamStorable) ) 
+                            if ((lce.getColumn() instanceof InputStream)
+                                    && (row[i] instanceof StreamStorable) ) 
                             {
-								if ((row[i] instanceof InputStream) || 
+                                if ((row[i] instanceof InputStream) || 
                                     (((StreamStorable) row[i]).returnStream() 
                                          != null) ) 
                                 {
@@ -4020,96 +4020,96 @@ public class StoredPage extends CachedPage
                                     // log as there was not enough room on 
                                     // current page.
 
-									((StreamStorable) row[i]).setStream(
+                                    ((StreamStorable) row[i]).setStream(
                                                 (InputStream) lce.getColumn());
-								}
-							}
+                                }
+                            }
 
-							throw new NoSpaceOnPage(isOverflowPage());
-						}
+                            throw new NoSpaceOnPage(isOverflowPage());
+                        }
 
-						// When one of the following two conditions is true,
-						// we will allow the insert of the long column:
+                        // When one of the following two conditions is true,
+                        // we will allow the insert of the long column:
                         //
-						// 1.	if this is the last field,
+                        // 1.   if this is the last field,
                         //      and overflow field header fits on page.
-						// 2.	if it is not the last field,
+                        // 2.   if it is not the last field,
                         //      and overflow field header fits on page (for col)
                         //      and another overflow ptr fits (for row).
                         //      
                         // 
 
-						if (((spaceAvailable >= OVERFLOW_PTR_FIELD_SIZE) && 
+                        if (((spaceAvailable >= OVERFLOW_PTR_FIELD_SIZE) && 
                              (i == (endFieldExclusive - 1))) || 
                             ((spaceAvailable >= (OVERFLOW_PTR_FIELD_SIZE * 2))&&
                              (i < (endFieldExclusive - 1)))) 
                         {
-							// If the column is a long column, it must be a 
+                            // If the column is a long column, it must be a 
                             // InputStream.  We have made the input stream into
                             // a RememberBytesInputStream, have to set the 
                             // column to that, in order to preserve the bytes
-							// we already read off the stream.
+                            // we already read off the stream.
 
-							// caught a long column exception, 
+                            // caught a long column exception, 
                             // set the variables, and rethrow the error
-							out.setBeginPosition(beginPosition);
-							lce.setExceptionInfo(out, i, spaceAvailable);
-							throw (lce);
-						}
-					}
-				}
+                            out.setBeginPosition(beginPosition);
+                            lce.setExceptionInfo(out, i, spaceAvailable);
+                            throw (lce);
+                        }
+                    }
+                }
 
-				int nextColumn;
+                int nextColumn;
 
-				recordSize += (lastSpaceAvailable - spaceAvailable);
-				boolean recordIsLong = 
+                recordSize += (lastSpaceAvailable - spaceAvailable);
+                boolean recordIsLong = 
                     (overflowThreshold == 100) ? 
                         false : isLong(recordSize, overflowThreshold);
 
-				// get the no overflow case out of the way asap
-				if ((lastSpaceAvailable == spaceAvailable) || recordIsLong) 
+                // get the no overflow case out of the way asap
+                if ((lastSpaceAvailable == spaceAvailable) || recordIsLong) 
                 {
-					if ((insertFlag & Page.INSERT_DEFAULT) == 
+                    if ((insertFlag & Page.INSERT_DEFAULT) == 
                             Page.INSERT_DEFAULT) 
                     {
-						throw new NoSpaceOnPage(isOverflowPage());
-					}
+                        throw new NoSpaceOnPage(isOverflowPage());
+                    }
 
-					if (recordIsLong) 
+                    if (recordIsLong) 
                     {
                         // if the record is long because of threshold, 
                         // then, we need to reset the logicalOut.
                         // set position to the end of the previous field
 
-						out.setPosition(out.getPosition() - recordSize);
-					}
+                        out.setPosition(out.getPosition() - recordSize);
+                    }
 
-					// did not write this column
-					nextColumn = i;
-				} 
+                    // did not write this column
+                    nextColumn = i;
+                } 
                 else 
                 {
-					// assume that all fields will be written to this page.
-					nextColumn = endFieldExclusive;
-				}
+                    // assume that all fields will be written to this page.
+                    nextColumn = endFieldExclusive;
+                }
 
-				// See if we have enough room to write an overflow field if the
+                // See if we have enough room to write an overflow field if the
                 // row needs to overflow.  We need overflow if we need to 
                 // write another portion or another portion already exists and 
                 // we will need to point to it.
 
-				if ((lastSpaceAvailable == spaceAvailable) ||
-					((insertFlag & Page.INSERT_FOR_SPLIT) == 
+                if ((lastSpaceAvailable == spaceAvailable) ||
+                    ((insertFlag & Page.INSERT_FOR_SPLIT) == 
                          Page.INSERT_FOR_SPLIT)) 
                 {
-					// The current row has filled the page.
+                    // The current row has filled the page.
 
-					if (spaceAvailable <= OVERFLOW_POINTER_SIZE) 
+                    if (spaceAvailable <= OVERFLOW_POINTER_SIZE) 
                     {
-						if ((i == startColumn) || 
+                        if ((i == startColumn) || 
                             (lastColumnPositionAllowOverflow < 0))  
                         {
-							// not enough room for the overflow recordheader,
+                            // not enough room for the overflow recordheader,
                             // and this is the first column on this page so 
                             // need to try another page.
                             //
@@ -4152,111 +4152,111 @@ public class StoredPage extends CachedPage
                             // upgrade all data in table so that error will
                             // not be encountered in future.
 
-							throw new NoSpaceOnPage(isOverflowPage());
-						} 
+                            throw new NoSpaceOnPage(isOverflowPage());
+                        } 
                         else 
                         {
-							// we need to go back to the last column
-							// that left enough room for an overflow pointer.
+                            // we need to go back to the last column
+                            // that left enough room for an overflow pointer.
 
-							out.setPosition(lastColumnPositionAllowOverflow);
-							nextColumn = lastColumnAllowOverflow;
-						}
-					}
-				}
+                            out.setPosition(lastColumnPositionAllowOverflow);
+                            nextColumn = lastColumnAllowOverflow;
+                        }
+                    }
+                }
 
-				if (nextColumn < endFieldExclusive) 
+                if (nextColumn < endFieldExclusive) 
                 {
                     // If the number of cols has been reduced.
 
-					int actualNumberFields = nextColumn - startColumn;
+                    int actualNumberFields = nextColumn - startColumn;
 
-					// go back and update that numberFields in recordHeader.
-					// no need to update spaceAvailable here, because if we are
+                    // go back and update that numberFields in recordHeader.
+                    // no need to update spaceAvailable here, because if we are
                     // here, we will be returning any way, and spaceAvailable 
                     // will be thrown away.
 
-					int oldSize = recordHeader.size();
-					recordHeader.setNumberFields(actualNumberFields);
+                    int oldSize = recordHeader.size();
+                    recordHeader.setNumberFields(actualNumberFields);
 
-					int newSize = recordHeader.size();
-					
-					// now we are ready to write the new record header.
-					int endPosition = out.getPosition();
+                    int newSize = recordHeader.size();
+                    
+                    // now we are ready to write the new record header.
+                    int endPosition = out.getPosition();
 
-					if (oldSize > newSize) 
+                    if (oldSize > newSize) 
                     {
-						// if the old size is bigger than the new size, then 
+                        // if the old size is bigger than the new size, then 
                         // leave extra bytes at the beginning of byte stream.
 
-						int delta = oldSize - newSize;
-						out.setBeginPosition(beginPosition + delta);
-						out.setPosition(beginPosition + delta);
-					} 
+                        int delta = oldSize - newSize;
+                        out.setBeginPosition(beginPosition + delta);
+                        out.setPosition(beginPosition + delta);
+                    } 
                     else if (newSize > oldSize) 
                     {
-						out.setPosition(beginPosition);
+                        out.setPosition(beginPosition);
 
-					} 
+                    } 
                     else 
                     {
-						out.setBeginPosition(beginPosition);
-						out.setPosition(beginPosition);
-					}
+                        out.setBeginPosition(beginPosition);
+                        out.setPosition(beginPosition);
+                    }
 
-					int realLen = recordHeader.write(logicalDataOut);
-					if (SanityManager.DEBUG) 
+                    int realLen = recordHeader.write(logicalDataOut);
+                    if (SanityManager.DEBUG) 
                     {
-						if ((realLen + (oldSize - newSize)) != oldSize)
+                        if ((realLen + (oldSize - newSize)) != oldSize)
                         {
-							SanityManager.THROWASSERT(
+                            SanityManager.THROWASSERT(
                                 "recordHeader size incorrect.  realLen = " + 
                                 realLen + ", delta = " + 
                                 (oldSize - newSize) + ", oldSize = " + oldSize);
                         }
-					}
+                    }
 
-					out.setPosition(endPosition);
+                    out.setPosition(endPosition);
 
-					if (!forInsert) 
+                    if (!forInsert) 
                     {
-						// The update is incomplete, fields beyond this
-						// point will have to move off the page. For any fields
-						// that are not being updated we have to save their
-						// values from this page to insert into an overflow 
+                        // The update is incomplete, fields beyond this
+                        // point will have to move off the page. For any fields
+                        // that are not being updated we have to save their
+                        // values from this page to insert into an overflow 
                         // portion.
-						// 
-						// When the complete row is being updated there is no
-						// need to save any fields so just return.
-						if (validColumns != null) 
+                        // 
+                        // When the complete row is being updated there is no
+                        // need to save any fields so just return.
+                        if (validColumns != null) 
                         {
-							handleIncompleteLogRow(
+                            handleIncompleteLogRow(
                                 slot, nextColumn, validColumns, out);
-						}
-					}
+                        }
+                    }
 
-					return (nextColumn);
-				}
-				
-				columnFlag = COLUMN_NONE;
-			}
+                    return (nextColumn);
+                }
+                
+                columnFlag = COLUMN_NONE;
+            }
 
-			out.setBeginPosition(beginPosition);
-			startColumn = -1;
+            out.setBeginPosition(beginPosition);
+            startColumn = -1;
 
-			if ((calcMinimumRecordSize) && 
+            if ((calcMinimumRecordSize) && 
                 (spaceAvailable < (minimumRecordSize - userRowSize)))
             {
-				throw new NoSpaceOnPage(isOverflowPage()); 
+                throw new NoSpaceOnPage(isOverflowPage()); 
             }
-		} 
+        } 
         finally 
         {
-			resetOutputStream();
-		}
+            resetOutputStream();
+        }
 
-		return (startColumn);
-	}
+        return (startColumn);
+    }
 
     /**
      * Handle an update of a record portion that is incomplete.
@@ -4280,94 +4280,94 @@ public class StoredPage extends CachedPage
      * @param columnList    bit map indicating which columns are being updated.
      * @param out           place to lot to.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private void handleIncompleteLogRow(
+    private void handleIncompleteLogRow(
     int                     slot, 
     int                     startColumn, 
     FormatableBitSet                 columnList, 
     DynamicByteArrayOutputStream  out)
-		throws StandardException 
+        throws StandardException 
     {
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(columnList != null);
+        if (SanityManager.DEBUG)
+            SanityManager.ASSERT(columnList != null);
 
-		StoredRecordHeader rh = getHeaderAtSlot(slot);
+        StoredRecordHeader rh = getHeaderAtSlot(slot);
 
-		int endFieldExclusive = rh.getFirstField() + rh.getNumberFields();
+        int endFieldExclusive = rh.getFirstField() + rh.getNumberFields();
 
-		// first see if any fields are not being modified
-		boolean needSave = false;
-		int columnListSize = columnList.size();
-		for (int i = startColumn; i < endFieldExclusive; i++) 
+        // first see if any fields are not being modified
+        boolean needSave = false;
+        int columnListSize = columnList.size();
+        for (int i = startColumn; i < endFieldExclusive; i++) 
         {
-			if (!(columnListSize > i && columnList.get(i))) 
+            if (!(columnListSize > i && columnList.get(i))) 
             {
-				needSave = true;
-				break;
-			}
-		}
-		if (!needSave)
-			return;
+                needSave = true;
+                break;
+            }
+        }
+        if (!needSave)
+            return;
 
-		Object[] savedFields = 
+        Object[] savedFields = 
             new Object[endFieldExclusive - startColumn];
 
-		ByteArrayOutputStream fieldStream = null;
+        ByteArrayOutputStream fieldStream = null;
 
-		for (int i = startColumn; i < endFieldExclusive; i++) 
+        for (int i = startColumn; i < endFieldExclusive; i++) 
         {
-			// row is being updated - ignore
-			if (columnListSize > i && columnList.get(i))
-				continue;
+            // row is being updated - ignore
+            if (columnListSize > i && columnList.get(i))
+                continue;
 
-			// save the data
+            // save the data
 
-			try 
+            try 
             {
-				// use the old value - we use logField to ensure that we
-				// get the raw contents of the field and don't follow
-				// any long columns. In addition we save this as a RawField
-				// so that we preserve the state of the field header.
-				if (fieldStream == null)
-					fieldStream = new ByteArrayOutputStream();
-				else
-					fieldStream.reset();
+                // use the old value - we use logField to ensure that we
+                // get the raw contents of the field and don't follow
+                // any long columns. In addition we save this as a RawField
+                // so that we preserve the state of the field header.
+                if (fieldStream == null)
+                    fieldStream = new ByteArrayOutputStream();
+                else
+                    fieldStream.reset();
 
-				logField(slot, i, fieldStream);
+                logField(slot, i, fieldStream);
 
-				savedFields[i - startColumn] = 
+                savedFields[i - startColumn] = 
                     new RawField(fieldStream.toByteArray());
 
-			} 
+            } 
             catch (IOException ioe) 
             {
                 throw dataFactory.markCorrupt(
                     StandardException.newException(
                         SQLState.DATA_CORRUPT_PAGE, ioe, getPageId()));
-			}
-		}
+            }
+        }
 
-		// Use a long column exception to notify the caller of the need
-		// to perform an insert of the columns that need to move
+        // Use a long column exception to notify the caller of the need
+        // to perform an insert of the columns that need to move
 
-		LongColumnException lce = new LongColumnException();
-		lce.setExceptionInfo(
+        LongColumnException lce = new LongColumnException();
+        lce.setExceptionInfo(
             out, startColumn, -1 /* indicates not actual long column */);
-		lce.setColumn(savedFields);
+        lce.setColumn(savedFields);
 
-		throw lce; 
-	}
+        throw lce; 
+    }
 
-	/**
+    /**
 
-		@param row (IN/OUT) the row that is to be restored (sparse representation)
-		@param limitInput the limit input stream
-		@param objectInput the object input stream
+        @param row (IN/OUT) the row that is to be restored (sparse representation)
+        @param limitInput the limit input stream
+        @param objectInput the object input stream
 
-		@exception StandardException	Standard Derby error policy
-		@exception IOException  I/O exception in reading meta data.
-	*/
+        @exception StandardException    Standard Derby error policy
+        @exception IOException  I/O exception in reading meta data.
+    */
 
     /**
      * Restore a storable row from a LimitInputStream.
@@ -4381,17 +4381,17 @@ public class StoredPage extends CachedPage
      * @param row          (IN/OUT) row that is to be restored 
      *                     (sparse representation)
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	public void restoreRecordFromStream(
+    public void restoreRecordFromStream(
     LimitObjectInput    in, 
     Object[]            row) 
-		throws StandardException, IOException
-	{
+        throws StandardException, IOException
+    {
 
-		StoredRecordHeader recordHeader = new StoredRecordHeader();
-		recordHeader.read(in);
-		readRecordFromStream(
+        StoredRecordHeader recordHeader = new StoredRecordHeader();
+        recordHeader.read(in);
+        readRecordFromStream(
             row, 
             row.length - 1, 
             (int[]) null,
@@ -4399,7 +4399,7 @@ public class StoredPage extends CachedPage
             in, 
             recordHeader,
             null);
-	}
+    }
 
     /**
      * Process the qualifier list on the row, return true if it qualifies.
@@ -4424,19 +4424,19 @@ public class StoredPage extends CachedPage
      * (qual[qual.length - 1][0] or  qual[1][1] ... or  qual[1][2])
      *
      * 
-	 * @return true if the row qualifies.
+     * @return true if the row qualifies.
      *
      * @param row               The row being qualified.
      * @param qual_list         2 dimensional array representing conjunctive
      *                          normal form of simple qualifiers.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private boolean qualifyRecordFromRow(
+    private boolean qualifyRecordFromRow(
     Object[]        row, 
     Qualifier[][]   qual_list)
-		 throws StandardException
-	{
+         throws StandardException
+    {
         boolean     row_qualifies = true;
 
         if (SanityManager.DEBUG)
@@ -4583,24 +4583,24 @@ public class StoredPage extends CachedPage
      * @param recordToLock          record handle to lock, 
      *                              used by overflow column code.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private final void readOneColumnFromPage(
+    private final void readOneColumnFromPage(
     Object[]                row, 
     int                     colid,
     int                     offset_to_field_data,
     StoredRecordHeader      recordHeader,
     RecordHandle            recordToLock)
-		 throws StandardException, IOException
-	{
+         throws StandardException, IOException
+    {
         ErrorObjectInput    inUserCode = null;
 
         // Reads in this routine are always against the raw data in the 
         // pageData array, thus it can assume array access to page data array.
         ArrayInputStream lrdi = rawDataIn;
 
-		try
-		{
+        try
+        {
             if (SanityManager.DEBUG)
             {
                 if (colid >= row.length)
@@ -4634,15 +4634,15 @@ public class StoredPage extends CachedPage
 
 
 
-				// read the field header
+                // read the field header
 
                 // read the status byte.
-				int fieldStatus     = 
+                int fieldStatus     = 
                     StoredFieldHeader.readStatus(
                         pageData, offset_to_field_data);
 
                 // read the field data length, and position on 1st byte of data.
-				int fieldDataLength = 
+                int fieldDataLength = 
                     StoredFieldHeader.readFieldLengthAndSetStreamPosition(
                         pageData, 
                         offset_to_field_data + 
@@ -4651,14 +4651,14 @@ public class StoredPage extends CachedPage
                         slotFieldSize,
                         lrdi);
 
-				if (SanityManager.DEBUG) 
+                if (SanityManager.DEBUG) 
                 {
-					SanityManager.ASSERT(
+                    SanityManager.ASSERT(
                         !StoredFieldHeader.isExtensible(fieldStatus), 
                         "extensible fields not supported yet");
-				}
+                }
 
-				// SRW-DJD code assumes non-extensible case ...
+                // SRW-DJD code assumes non-extensible case ...
 
                 if (!StoredFieldHeader.isNonexistent(fieldStatus))
                 {
@@ -4802,17 +4802,17 @@ public class StoredPage extends CachedPage
                     row[colid] = null;
                 }
             }
-		} 
+        } 
         catch (IOException ioe) 
         {
-			// an exception during the restore of a user column, this doesn't
-			// make the database corrupt, just that this field is inaccessable
+            // an exception during the restore of a user column, this doesn't
+            // make the database corrupt, just that this field is inaccessable
 
-			if (inUserCode != null) 
+            if (inUserCode != null) 
             {
-				lrdi.clearLimit();
+                lrdi.clearLimit();
 
-				if (ioe instanceof EOFException) 
+                if (ioe instanceof EOFException) 
                 {
                     if (SanityManager.DEBUG)
                     {
@@ -4823,12 +4823,12 @@ public class StoredPage extends CachedPage
                         SanityManager.showTrace(ioe);
                     }
 
-					// going beyond the limit in a DataInput class results in
+                    // going beyond the limit in a DataInput class results in
                     // an EOFException when it sees the -1 from a read
-					throw StandardException.newException(
+                    throw StandardException.newException(
                             SQLState.DATA_STORABLE_READ_MISMATCH,
                             ioe, inUserCode.getErrorInfo());
-				}
+                }
 
                 // some SQLData error reporting
                 Exception ne = inUserCode.getNestedException();
@@ -4854,41 +4854,41 @@ public class StoredPage extends CachedPage
                     }
                 }
 
-				throw StandardException.newException(
+                throw StandardException.newException(
                         SQLState.DATA_STORABLE_READ_EXCEPTION,
                         ioe, inUserCode.getErrorInfo());
-			}
+            }
 
-			// re-throw to higher levels so they can put it in correct context.
-			throw ioe;
+            // re-throw to higher levels so they can put it in correct context.
+            throw ioe;
 
-		} 
+        } 
         catch (ClassNotFoundException cnfe) 
         {
-			lrdi.clearLimit();
+            lrdi.clearLimit();
 
-			// an exception during the restore of a user column, this doesn't
-			// make the database corrupt, just that this field is inaccessable
-			throw StandardException.newException(
+            // an exception during the restore of a user column, this doesn't
+            // make the database corrupt, just that this field is inaccessable
+            throw StandardException.newException(
                     SQLState.DATA_STORABLE_READ_MISSING_CLASS,
                     cnfe, inUserCode.getErrorInfo());
 
-		} 
+        } 
         catch (LinkageError le)
         {
-			// Some error during the link of a user class
-			if (inUserCode != null)
+            // Some error during the link of a user class
+            if (inUserCode != null)
             {
-				lrdi.clearLimit();
+                lrdi.clearLimit();
 
                 throw StandardException.newException(
                         SQLState.DATA_STORABLE_READ_EXCEPTION,
                         le, inUserCode.getErrorInfo());
-			}
-			throw le;
-		}
+            }
+            throw le;
+        }
 
-	}
+    }
 
 
 
@@ -4929,7 +4929,7 @@ public class StoredPage extends CachedPage
      * and
      * (qual[qual.length - 1][0] or  qual[1][1] ... or  qual[1][2])
      *
-	 * @return Whether or not the row input qualifies.
+     * @return Whether or not the row input qualifies.
      *
      * @param row                   restore row into this object array.
      * @param offset_to_row_data    offset in bytes from top of page to row
@@ -4941,16 +4941,16 @@ public class StoredPage extends CachedPage
      * @param recordToLock          The head row to use for locking, used to 
      *                              lock head row of overflow columns/rows.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private final boolean qualifyRecordFromSlot(
+    private final boolean qualifyRecordFromSlot(
     Object[]                row, 
     int                     offset_to_row_data,
     FetchDescriptor         fetchDesc,
     StoredRecordHeader      recordHeader,
     RecordHandle            recordToLock)
-		 throws StandardException, IOException
-	{
+         throws StandardException, IOException
+    {
         boolean         row_qualifies    = true;
         Qualifier[][]   qual_list        = fetchDesc.getQualifierList();
         int[]           materializedCols = fetchDesc.getMaterializedColumns();
@@ -5125,7 +5125,7 @@ public class StoredPage extends CachedPage
      * The rawDataIn stream is expected to be positioned after the record 
      * header.
      *
-	 * @return The identifier to be used to open the conglomerate later.
+     * @return The identifier to be used to open the conglomerate later.
      *
      * @param row               restore row into this object array.
      * @param max_colid         The maximum numbered column id that will be 
@@ -5143,47 +5143,47 @@ public class StoredPage extends CachedPage
      * @param recordToLock      The head row to use for locking, used to lock 
      *                          head row of overflow columns/rows.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private final boolean readRecordFromStream(
+    private final boolean readRecordFromStream(
     Object[]   row, 
     int                     max_colid,
     int[]                   vCols,
     int[]                   mCols,
-	LimitObjectInput        dataIn, 
+    LimitObjectInput        dataIn, 
     StoredRecordHeader      recordHeader,
     RecordHandle            recordToLock)
-		 throws StandardException, IOException
-	{
-		ErrorObjectInput inUserCode = null;
-		try
-		{
-			// Get the number of columns in the row.
-			int numberFields = recordHeader.getNumberFields();
+         throws StandardException, IOException
+    {
+        ErrorObjectInput inUserCode = null;
+        try
+        {
+            // Get the number of columns in the row.
+            int numberFields = recordHeader.getNumberFields();
 
-			int startColumn = recordHeader.getFirstField();
+            int startColumn = recordHeader.getFirstField();
 
-			if (startColumn > max_colid)
+            if (startColumn > max_colid)
             {
                 // done if the startColumn is higher than highest column.
-				return true;
+                return true;
             }
 
-			// For each column in the row, restore the column from
-			// the corresponding field in the record.  If the field
-			// is missing or not set, set the column to null.
+            // For each column in the row, restore the column from
+            // the corresponding field in the record.  If the field
+            // is missing or not set, set the column to null.
 
-			int highestColumnOnPage = numberFields + startColumn;
+            int highestColumnOnPage = numberFields + startColumn;
 
-			int vColsSize           = (vCols == null ) ? 0 : vCols.length;
+            int vColsSize           = (vCols == null ) ? 0 : vCols.length;
 
- 			for (int columnId = startColumn; columnId <= max_colid; columnId++) 
+            for (int columnId = startColumn; columnId <= max_colid; columnId++) 
             {
-				// skip any "existing" columns not requested, or requested cols
+                // skip any "existing" columns not requested, or requested cols
                 // that have already been read.
-				if (((vCols != null) && 
+                if (((vCols != null) && 
                      (!(vColsSize > columnId && (vCols[columnId] != 0)))) ||
-				    ((mCols != null) && (mCols[columnId] != 0)))
+                    ((mCols != null) && (mCols[columnId] != 0)))
                 {
                     if (columnId < highestColumnOnPage)
                     {
@@ -5194,156 +5194,156 @@ public class StoredPage extends CachedPage
                         skipField(dataIn);
                     }
 
-					continue;
-				}
+                    continue;
+                }
 
-				// See if the column identifier is beyond the number of fields
+                // See if the column identifier is beyond the number of fields
                 // that this record has
-				if (columnId >= highestColumnOnPage) 
+                if (columnId >= highestColumnOnPage) 
                 {
-					// field is non-existent
-					Object column = row[columnId];
+                    // field is non-existent
+                    Object column = row[columnId];
 
                     if (column instanceof DataValueDescriptor) 
                     {
-						// RESOLVE - This is in place for 1.2. In the future
-						// we may want to return this column as non-existent
-						// even if it is a storable column, or maybe use a
+                        // RESOLVE - This is in place for 1.2. In the future
+                        // we may want to return this column as non-existent
+                        // even if it is a storable column, or maybe use a
                         // supplied default.
 
-						((DataValueDescriptor) column).restoreToNull();
-					} 
+                        ((DataValueDescriptor) column).restoreToNull();
+                    } 
                     else 
                     {
-						row[columnId] = null;
-					}
-					continue;
-				}
+                        row[columnId] = null;
+                    }
+                    continue;
+                }
 
-				// read the field header
-				int fieldStatus     = 
+                // read the field header
+                int fieldStatus     = 
                     StoredFieldHeader.readStatus(dataIn);
 
-				int fieldDataLength = 
+                int fieldDataLength = 
                     StoredFieldHeader.readFieldDataLength(
                         dataIn, fieldStatus, slotFieldSize);
 
-				if (SanityManager.DEBUG) 
+                if (SanityManager.DEBUG) 
                 {
-					SanityManager.ASSERT(
+                    SanityManager.ASSERT(
                         !StoredFieldHeader.isExtensible(fieldStatus), 
                         "extensible fields not supported yet");
-				}
+                }
 
                 Object column     = row[columnId];
 
-				OverflowInputStream overflowIn = null;
+                OverflowInputStream overflowIn = null;
 
-				// SRW-DJD code assumes non-extensible case ...
+                // SRW-DJD code assumes non-extensible case ...
 
-				// field is non-existent, return null
-				if (StoredFieldHeader.isNonexistent(fieldStatus)) 
+                // field is non-existent, return null
+                if (StoredFieldHeader.isNonexistent(fieldStatus)) 
                 {
 
-					if (column instanceof DataValueDescriptor) 
+                    if (column instanceof DataValueDescriptor) 
                     {
-						// RESOLVE - This is in place for 1.2. In the future
-						// we may want to return this column as non-existent
-						// even if it is a storable column, or maybe use a 
+                        // RESOLVE - This is in place for 1.2. In the future
+                        // we may want to return this column as non-existent
+                        // even if it is a storable column, or maybe use a 
                         // supplied default.
-						((DataValueDescriptor) column).restoreToNull();
-					} 
+                        ((DataValueDescriptor) column).restoreToNull();
+                    } 
                     else 
                     {
-						row[columnId] = null;
-					}
-					continue;
-				}
+                        row[columnId] = null;
+                    }
+                    continue;
+                }
 
-				boolean isOverflow = StoredFieldHeader.isOverflow(fieldStatus);
+                boolean isOverflow = StoredFieldHeader.isOverflow(fieldStatus);
 
-				if (isOverflow) 
+                if (isOverflow) 
                 {
 
-					// A fetched long column needs to be returned as a stream
+                    // A fetched long column needs to be returned as a stream
                     //
-					long overflowPage   = 
+                    long overflowPage   = 
                         CompressedNumber.readLong((InputStream) dataIn);
 
-					int overflowId      = 
+                    int overflowId      = 
                         CompressedNumber.readInt((InputStream) dataIn);
 
-					// Prepare the stream for results...
-					// create the byteHolder the size of a page, so, that it 
+                    // Prepare the stream for results...
+                    // create the byteHolder the size of a page, so, that it 
                     // will fit the field Data that would fit on a page.
-					MemByteHolder byteHolder = 
+                    MemByteHolder byteHolder = 
                         new MemByteHolder(pageData.length);
 
-					overflowIn = new OverflowInputStream(
+                    overflowIn = new OverflowInputStream(
                         byteHolder, owner, overflowPage, 
                         overflowId, recordToLock);
-				}
+                }
 
-				// Deal with Object columns
+                // Deal with Object columns
                 if (column instanceof DataValueDescriptor) 
                 {
-					DataValueDescriptor sColumn = (DataValueDescriptor) column;
+                    DataValueDescriptor sColumn = (DataValueDescriptor) column;
 
-					// is the column null ?
-					if (StoredFieldHeader.isNull(fieldStatus)) 
+                    // is the column null ?
+                    if (StoredFieldHeader.isNull(fieldStatus)) 
                     {
-						sColumn.restoreToNull();
-						continue;
-					}
+                        sColumn.restoreToNull();
+                        continue;
+                    }
 
-					// set the limit for the user read
-					if (!isOverflow) 
+                    // set the limit for the user read
+                    if (!isOverflow) 
                     {
                         // normal, non-overflow column case.
 
-						dataIn.setLimit(fieldDataLength);
-						inUserCode = dataIn;
-						sColumn.readExternal(dataIn);
-						inUserCode = null;
-						int unread = dataIn.clearLimit();
-						if (unread != 0)
-							DataInputUtil.skipFully(dataIn, unread);
-					}
+                        dataIn.setLimit(fieldDataLength);
+                        inUserCode = dataIn;
+                        sColumn.readExternal(dataIn);
+                        inUserCode = null;
+                        int unread = dataIn.clearLimit();
+                        if (unread != 0)
+                            DataInputUtil.skipFully(dataIn, unread);
+                    }
                     else
                     {
                         // column being fetched is a Object long column.
 
-						FormatIdInputStream newIn = 
+                        FormatIdInputStream newIn = 
                             new FormatIdInputStream(overflowIn);
 
-						// if a column is a long column, store recommends user 
+                        // if a column is a long column, store recommends user 
                         // fetch it as a stream.
-						boolean fetchStream = true;
+                        boolean fetchStream = true;
 
-						if (!(sColumn instanceof StreamStorable)) 
+                        if (!(sColumn instanceof StreamStorable)) 
                         {
-							fetchStream = false;
-						}
+                            fetchStream = false;
+                        }
 
-						if (fetchStream) 
+                        if (fetchStream) 
                         {
-							((StreamStorable)sColumn).setStream(newIn);
-						} 
+                            ((StreamStorable)sColumn).setStream(newIn);
+                        } 
                         else 
                         {
-							inUserCode = newIn;
-							sColumn.readExternal(newIn);
-							inUserCode = null;
-						}
+                            inUserCode = newIn;
+                            sColumn.readExternal(newIn);
+                            inUserCode = null;
+                        }
 
-					} 
+                    } 
 
-					continue;
-				}
+                    continue;
+                }
 
                 // At this point only non-Storable columns.
 
-				if (StoredFieldHeader.isNull(fieldStatus))
+                if (StoredFieldHeader.isNull(fieldStatus))
                 {
                     // Only Storables can be null ...
 
@@ -5352,42 +5352,42 @@ public class StoredPage extends CachedPage
                             Integer.toString(columnId));
                 }
 
-				// This is a non-extensible field, which means the caller must 
+                // This is a non-extensible field, which means the caller must 
                 // know the correct type and thus the element in row is the 
                 // correct type or null. It must be Serializable.
                 //
                 // We do not support Externalizable here.
 
-				dataIn.setLimit(fieldDataLength);
-				inUserCode = dataIn;
-				row[columnId] = (Object) dataIn.readObject();
-				inUserCode = null;
-				int unread = dataIn.clearLimit();
-				if (unread != 0)
-					DataInputUtil.skipFully(dataIn, unread);
+                dataIn.setLimit(fieldDataLength);
+                inUserCode = dataIn;
+                row[columnId] = (Object) dataIn.readObject();
+                inUserCode = null;
+                int unread = dataIn.clearLimit();
+                if (unread != 0)
+                    DataInputUtil.skipFully(dataIn, unread);
 
-				continue;
-			}
+                continue;
+            }
 
-			// if the last column on this page is bigger than the highest 
+            // if the last column on this page is bigger than the highest 
             // column we are looking for, then we are done restoring the record.
 
-			if ((numberFields + startColumn) > max_colid)
-				return true;
-			else
-				return false;
+            if ((numberFields + startColumn) > max_colid)
+                return true;
+            else
+                return false;
 
-		} 
+        } 
         catch (IOException ioe) 
         {
-			// an exception during the restore of a user column, this doesn't
-			// make the database corrupt, just that this field is inaccessable
+            // an exception during the restore of a user column, this doesn't
+            // make the database corrupt, just that this field is inaccessable
 
-			if (inUserCode != null) 
+            if (inUserCode != null) 
             {
-				dataIn.clearLimit();
+                dataIn.clearLimit();
 
-				if (ioe instanceof EOFException) 
+                if (ioe instanceof EOFException) 
                 {
                     if (SanityManager.DEBUG)
                     {
@@ -5397,12 +5397,12 @@ public class StoredPage extends CachedPage
                             "Page dump = " + this);
                     }
 
-					// going beyond the limit in a DataInput class results in
+                    // going beyond the limit in a DataInput class results in
                     // an EOFException when it sees the -1 from a read
-					throw StandardException.newException(
+                    throw StandardException.newException(
                             SQLState.DATA_STORABLE_READ_MISMATCH,
                             ioe, inUserCode.getErrorInfo());
-				}
+                }
 
                 // some SQLData error reporting
                 Exception ne = inUserCode.getNestedException();
@@ -5428,83 +5428,83 @@ public class StoredPage extends CachedPage
                     }
                 }
 
-				throw StandardException.newException(
+                throw StandardException.newException(
                         SQLState.DATA_STORABLE_READ_EXCEPTION,
                         ioe, inUserCode.getErrorInfo());
-			}
+            }
 
-			// re-throw to higher levels so they can put it in correct context.
-			throw ioe;
+            // re-throw to higher levels so they can put it in correct context.
+            throw ioe;
 
-		} 
+        } 
         catch (ClassNotFoundException cnfe) 
         {
-			dataIn.clearLimit();
+            dataIn.clearLimit();
 
-			// an exception during the restore of a user column, this doesn't
-			// make the database corrupt, just that this field is inaccessable
-			throw StandardException.newException(
+            // an exception during the restore of a user column, this doesn't
+            // make the database corrupt, just that this field is inaccessable
+            throw StandardException.newException(
                     SQLState.DATA_STORABLE_READ_MISSING_CLASS,
                     cnfe, inUserCode.getErrorInfo());
 
-		} 
+        } 
         catch (LinkageError le)
         {
-			// Some error during the link of a user class
-			if (inUserCode != null)
+            // Some error during the link of a user class
+            if (inUserCode != null)
             {
-				dataIn.clearLimit();
+                dataIn.clearLimit();
 
                 throw StandardException.newException(
                         SQLState.DATA_STORABLE_READ_EXCEPTION,
                         le, inUserCode.getErrorInfo());
-			}
-			throw le;
-		}
+            }
+            throw le;
+        }
 
-	}
+    }
 
-	private final boolean readRecordFromArray(
+    private final boolean readRecordFromArray(
     Object[]   row, 
     int                     max_colid,
     int[]                   vCols,
     int[]                   mCols,
-	ArrayInputStream        dataIn, 
+    ArrayInputStream        dataIn, 
     StoredRecordHeader      recordHeader,
     RecordHandle            recordToLock)
-		 throws StandardException, IOException
-	{
-		ErrorObjectInput inUserCode = null;
-		try
-		{
-			// Get the number of columns in the row.
-			int numberFields = recordHeader.getNumberFields();
+         throws StandardException, IOException
+    {
+        ErrorObjectInput inUserCode = null;
+        try
+        {
+            // Get the number of columns in the row.
+            int numberFields = recordHeader.getNumberFields();
 
-			int startColumn = recordHeader.getFirstField();
+            int startColumn = recordHeader.getFirstField();
 
-			if (startColumn > max_colid)
+            if (startColumn > max_colid)
             {
                 // done if the startColumn is higher than highest column.
-				return true;
+                return true;
             }
 
-			// For each column in the row, restore the column from
-			// the corresponding field in the record.  If the field
-			// is missing or not set, set the column to null.
+            // For each column in the row, restore the column from
+            // the corresponding field in the record.  If the field
+            // is missing or not set, set the column to null.
 
-			int highestColumnOnPage = numberFields + startColumn;
+            int highestColumnOnPage = numberFields + startColumn;
 
-			int vColsSize           = (vCols == null ) ? 0 : vCols.length;
+            int vColsSize           = (vCols == null ) ? 0 : vCols.length;
 
             int offset_to_field_data = dataIn.getPosition();
 
- 			for (int columnId = startColumn; columnId <= max_colid; columnId++) 
+            for (int columnId = startColumn; columnId <= max_colid; columnId++) 
             {
-				// skip any "existing" columns not requested, or requested cols
+                // skip any "existing" columns not requested, or requested cols
                 // that have already been read.
-				if (((vCols != null) && 
+                if (((vCols != null) && 
                      (!(vColsSize > columnId && (vCols[columnId] != 0)))) ||
-				    ((mCols != null) && (mCols[columnId] != 0)))
+                    ((mCols != null) && (mCols[columnId] != 0)))
                 {
                     if (columnId < highestColumnOnPage)
                     {
@@ -5517,8 +5517,8 @@ public class StoredPage extends CachedPage
                                 pageData, offset_to_field_data);
                     }
 
-					continue;
-				}
+                    continue;
+                }
                 else if (columnId < highestColumnOnPage) 
                 {
                     // the column is on this page.
@@ -5701,44 +5701,44 @@ public class StoredPage extends CachedPage
                 }
                 else
                 {
-					// field is non-existent
-					Object column = row[columnId];
+                    // field is non-existent
+                    Object column = row[columnId];
 
                     if (column instanceof DataValueDescriptor) 
                     {
-						// RESOLVE - This is in place for 1.2. In the future
-						// we may want to return this column as non-existent
-						// even if it is a storable column, or maybe use a
+                        // RESOLVE - This is in place for 1.2. In the future
+                        // we may want to return this column as non-existent
+                        // even if it is a storable column, or maybe use a
                         // supplied default.
 
-						((DataValueDescriptor) column).restoreToNull();
-					} 
+                        ((DataValueDescriptor) column).restoreToNull();
+                    } 
                     else 
                     {
-						row[columnId] = null;
-					}
-				}
-			}
+                        row[columnId] = null;
+                    }
+                }
+            }
 
-			// if the last column on this page is bigger than the highest 
+            // if the last column on this page is bigger than the highest 
             // column we are looking for, then we are done restoring the record.
 
-			if ((numberFields + startColumn) > max_colid)
-				return true;
-			else
-				return false;
+            if ((numberFields + startColumn) > max_colid)
+                return true;
+            else
+                return false;
 
-		} 
+        } 
         catch (IOException ioe) 
         {
-			// an exception during the restore of a user column, this doesn't
-			// make the database corrupt, just that this field is inaccessable
+            // an exception during the restore of a user column, this doesn't
+            // make the database corrupt, just that this field is inaccessable
 
-			if (inUserCode != null) 
+            if (inUserCode != null) 
             {
-				dataIn.clearLimit();
+                dataIn.clearLimit();
 
-				if (ioe instanceof EOFException) 
+                if (ioe instanceof EOFException) 
                 {
                     if (SanityManager.DEBUG)
                     {
@@ -5748,12 +5748,12 @@ public class StoredPage extends CachedPage
                             "Page dump = " + this);
                     }
 
-					// going beyond the limit in a DataInput class results in
+                    // going beyond the limit in a DataInput class results in
                     // an EOFException when it sees the -1 from a read
-					throw StandardException.newException(
+                    throw StandardException.newException(
                             SQLState.DATA_STORABLE_READ_MISMATCH,
                             ioe, inUserCode.getErrorInfo());
-				}
+                }
 
                 // some SQLData error reporting
                 Exception ne = inUserCode.getNestedException();
@@ -5779,41 +5779,41 @@ public class StoredPage extends CachedPage
                     }
                 }
 
-				throw StandardException.newException(
+                throw StandardException.newException(
                         SQLState.DATA_STORABLE_READ_EXCEPTION,
                         ioe, inUserCode.getErrorInfo());
-			}
+            }
 
-			// re-throw to higher levels so they can put it in correct context.
-			throw ioe;
+            // re-throw to higher levels so they can put it in correct context.
+            throw ioe;
 
-		} 
+        } 
         catch (ClassNotFoundException cnfe) 
         {
-			dataIn.clearLimit();
+            dataIn.clearLimit();
 
-			// an exception during the restore of a user column, this doesn't
-			// make the database corrupt, just that this field is inaccessable
-			throw StandardException.newException(
+            // an exception during the restore of a user column, this doesn't
+            // make the database corrupt, just that this field is inaccessable
+            throw StandardException.newException(
                     SQLState.DATA_STORABLE_READ_MISSING_CLASS,
                     cnfe, inUserCode.getErrorInfo());
 
-		} 
+        } 
         catch (LinkageError le)
         {
-			// Some error during the link of a user class
-			if (inUserCode != null)
+            // Some error during the link of a user class
+            if (inUserCode != null)
             {
-				dataIn.clearLimit();
+                dataIn.clearLimit();
 
                 throw StandardException.newException(
                         SQLState.DATA_STORABLE_READ_EXCEPTION,
                         le, inUserCode.getErrorInfo());
-			}
-			throw le;
-		}
+            }
+            throw le;
+        }
 
-	}
+    }
 
     /**
      * Restore a portion of a long column.
@@ -5824,87 +5824,87 @@ public class StoredPage extends CachedPage
      *
      * @param fetchStream  the stream to read the next portion of long col from
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	public void restorePortionLongColumn(
+    public void restorePortionLongColumn(
     OverflowInputStream fetchStream)
-		throws StandardException, IOException
-	{
-		int                 slot       = 
+        throws StandardException, IOException
+    {
+        int                 slot       = 
             findRecordById(fetchStream.getOverflowId(), FIRST_SLOT_NUMBER);
 
-		StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+        StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
 
-		int offset       = getRecordOffset(slot);
-		int numberFields = recordHeader.getNumberFields();
+        int offset       = getRecordOffset(slot);
+        int numberFields = recordHeader.getNumberFields();
 
-		if (SanityManager.DEBUG) 
+        if (SanityManager.DEBUG) 
         {
-			if ((numberFields > 2) || (numberFields < 1))
+            if ((numberFields > 2) || (numberFields < 1))
             {
-				SanityManager.THROWASSERT(
-					"longColumn record header must have 1 or 2 fields." +
+                SanityManager.THROWASSERT(
+                    "longColumn record header must have 1 or 2 fields." +
                     "numberFields = " + numberFields);
             }
-		}
+        }
 
-		rawDataIn.setPosition(offset + recordHeader.size());
+        rawDataIn.setPosition(offset + recordHeader.size());
 
-		int fieldStatus     = 
+        int fieldStatus     = 
             StoredFieldHeader.readStatus(rawDataIn);
-		int fieldDataLength = 
+        int fieldDataLength = 
             StoredFieldHeader.readFieldDataLength(
                 rawDataIn, fieldStatus, slotFieldSize);
 
         // read the data portion of this segment from the stream.
 
-		ByteHolder bh = fetchStream.getByteHolder();
-		bh.write(rawDataIn, fieldDataLength);
-		fetchStream.setByteHolder(bh);
+        ByteHolder bh = fetchStream.getByteHolder();
+        bh.write(rawDataIn, fieldDataLength);
+        fetchStream.setByteHolder(bh);
 
-		// set the next overflow pointer in the stream...
-		if (numberFields == 1) 
+        // set the next overflow pointer in the stream...
+        if (numberFields == 1) 
         {
-			// this is the last bit of the long column
-			fetchStream.setOverflowPage(-1);
-			fetchStream.setOverflowId(-1);
-		} 
+            // this is the last bit of the long column
+            fetchStream.setOverflowPage(-1);
+            fetchStream.setOverflowId(-1);
+        } 
         else 
         {
-			int firstFieldStatus = fieldStatus;	// for DEBUG check
+            int firstFieldStatus = fieldStatus; // for DEBUG check
 
             // get the field status and data length of the overflow pointer.
-			fieldStatus     = 
+            fieldStatus     = 
                 StoredFieldHeader.readStatus(rawDataIn);
-			fieldDataLength = 
+            fieldDataLength = 
                 StoredFieldHeader.readFieldDataLength(
                     rawDataIn, fieldStatus, slotFieldSize);
 
-			if (SanityManager.DEBUG)
-			{
-				if (!StoredFieldHeader.isOverflow(fieldStatus))
-				{
-					// In version 1.5, the first field is overflow and the
-					// second is not.   In version 2.0 onwards, the first
-					// field is not overflow and the second is overflow
-					// (the overflow bit goes with the overflow pointer).
-					// Check first field to make sure its overflow bit is
-					// set on.
+            if (SanityManager.DEBUG)
+            {
+                if (!StoredFieldHeader.isOverflow(fieldStatus))
+                {
+                    // In version 1.5, the first field is overflow and the
+                    // second is not.   In version 2.0 onwards, the first
+                    // field is not overflow and the second is overflow
+                    // (the overflow bit goes with the overflow pointer).
+                    // Check first field to make sure its overflow bit is
+                    // set on.
                     SanityManager.ASSERT(
                         StoredFieldHeader.isOverflow(firstFieldStatus));
-				}
-			}
+                }
+            }
 
-			long overflowPage = 
+            long overflowPage = 
                 CompressedNumber.readLong((InputStream) rawDataIn);
-			int  overflowId   = 
+            int  overflowId   = 
                 CompressedNumber.readInt((InputStream) rawDataIn);
 
-			// there is more after this chunk.
-			fetchStream.setOverflowPage(overflowPage);
-			fetchStream.setOverflowId(overflowId);
-		}
-	}
+            // there is more after this chunk.
+            fetchStream.setOverflowPage(overflowPage);
+            fetchStream.setOverflowId(overflowId);
+        }
+    }
 
 
     /**
@@ -5916,63 +5916,63 @@ public class StoredPage extends CachedPage
      * field header followed the data of the column as defined by the data 
      * itself.  See this class's description for the specifics of the header.
      *
-     * @exception StandardException	    Standard Derby error policy
-     * @exception IOException			RESOLVE
+     * @exception StandardException     Standard Derby error policy
+     * @exception IOException           RESOLVE
      **/
-	public void logColumn(
+    public void logColumn(
     int                     slot, 
     int                     fieldId, 
     Object                  column, 
     DynamicByteArrayOutputStream  out, 
     int                     overflowThreshold)
-		throws StandardException, IOException
-	{
-		// calculate the space available on the page, it includes
-		//	the free space
-		//  the space the record has reserved but not used
-		//  the length of the old field itself
+        throws StandardException, IOException
+    {
+        // calculate the space available on the page, it includes
+        //  the free space
+        //  the space the record has reserved but not used
+        //  the length of the old field itself
 
-		// free space
-		int bytesAvailable  = freeSpace;
-		int beginPosition   = -1;
+        // free space
+        int bytesAvailable  = freeSpace;
+        int beginPosition   = -1;
 
-		// space reserved, but not used by the record
-		bytesAvailable      += getReservedCount(slot);
+        // space reserved, but not used by the record
+        bytesAvailable      += getReservedCount(slot);
 
-		// The size of the old field is also available for the new field
-		rawDataIn.setPosition(getFieldOffset(slot, fieldId));
+        // The size of the old field is also available for the new field
+        rawDataIn.setPosition(getFieldOffset(slot, fieldId));
 
-		int fieldStatus     = 
+        int fieldStatus     = 
             StoredFieldHeader.readStatus(rawDataIn);
-		int fieldDataLength = 
+        int fieldDataLength = 
             StoredFieldHeader.readFieldDataLength(
                 rawDataIn, fieldStatus, slotFieldSize);
 
-		bytesAvailable += 
+        bytesAvailable += 
             StoredFieldHeader.size(fieldStatus, fieldDataLength, slotFieldSize) 
                 + fieldDataLength;
 
-		try 
+        try 
         {
-			setOutputStream(out);
-			beginPosition = rawDataOut.getPosition();
+            setOutputStream(out);
+            beginPosition = rawDataOut.getPosition();
 
-			Object[] row = new Object[1];
-			row[0]       = column;
-			if (bytesAvailable == logColumn(
+            Object[] row = new Object[1];
+            row[0]       = column;
+            if (bytesAvailable == logColumn(
                                         row, 0, out, bytesAvailable, 
                                         COLUMN_NONE, overflowThreshold)) 
             {
-				throw new NoSpaceOnPage(isOverflowPage());
-			}
+                throw new NoSpaceOnPage(isOverflowPage());
+            }
 
-		} 
+        } 
         finally 
         {
-			rawDataOut.setPosition(beginPosition);
-			resetOutputStream();
-		}
-	}
+            rawDataOut.setPosition(beginPosition);
+            resetOutputStream();
+        }
+    }
 
     /**
      * Log a long column into a DataOuput.
@@ -5988,52 +5988,52 @@ public class StoredPage extends CachedPage
      * @param column    the object form of the column to log 
      * @param out       where to log to the column to.
      *
-     * @exception StandardException	Standard Derby error policy
-     * @exception IOException	    I/O exception from writing to an array.
+     * @exception StandardException Standard Derby error policy
+     * @exception IOException       I/O exception from writing to an array.
      *
      * @see BasePage#logColumn
      **/
-	public int logLongColumn(
+    public int logLongColumn(
     int                     slot, 
     int                     recordId, 
     Object                  column, 
     DynamicByteArrayOutputStream  out)
-		throws StandardException, IOException
-	{
-		int spaceAvailable = freeSpace;
+        throws StandardException, IOException
+    {
+        int spaceAvailable = freeSpace;
 
-		// need to account for the slot table using extra space...
-		spaceAvailable -= slotEntrySize;
+        // need to account for the slot table using extra space...
+        spaceAvailable -= slotEntrySize;
 
-		// <= is ok here as we know we want to write at least one more byte
-		if (spaceAvailable <= 0)
-			throw new NoSpaceOnPage(isOverflowPage());
+        // <= is ok here as we know we want to write at least one more byte
+        if (spaceAvailable <= 0)
+            throw new NoSpaceOnPage(isOverflowPage());
 
-		setOutputStream(out);
-		int beginPosition = out.getPosition();
+        setOutputStream(out);
+        int beginPosition = out.getPosition();
 
-		try 
+        try 
         {
-			// in the long column portion on the new page there will be 1 field
+            // in the long column portion on the new page there will be 1 field
             // if the portion fits on the page (2 if it needs another pointer
             // to continue to yet another page).
-			int numberFields = 1;
+            int numberFields = 1;
 
-			StoredRecordHeader recordHeader = 
+            StoredRecordHeader recordHeader = 
                 new StoredRecordHeader(recordId, numberFields);
 
-			int recordHeaderLength = recordHeader.write(logicalDataOut);
+            int recordHeaderLength = recordHeader.write(logicalDataOut);
 
-			spaceAvailable -= recordHeaderLength;
+            spaceAvailable -= recordHeaderLength;
 
-			if (spaceAvailable < 0)
+            if (spaceAvailable < 0)
             {
                 // this part of long column won't totally fit on page, it
                 // needs to be linked to another page.  Throw exception and
                 // caller will handle logging an overflow column portion 
                 // with a forward pointer.
 
-				throw new NoSpaceOnPage(isOverflowPage());
+                throw new NoSpaceOnPage(isOverflowPage());
             }
             else
             {
@@ -6044,12 +6044,12 @@ public class StoredPage extends CachedPage
                 return logColumn(row, 0, out, spaceAvailable, COLUMN_LONG, 100);
             }
 
-		} 
+        } 
         finally 
         {
-			resetOutputStream();
-		}
-	}
+            resetOutputStream();
+        }
+    }
 
     /**
      * Log column from input row to the given output stream.
@@ -6060,7 +6060,7 @@ public class StoredPage extends CachedPage
      * <p>
      * Action taken in this routine is determined by the kind of column as
      * specified in the columnFlag:
-     *     COLUMN_NONE	 - the column is insignificant
+     *     COLUMN_NONE   - the column is insignificant
      *     COLUMN_FIRST  - this is the first column in a logRow() call
      *     COLUMN_LONG   - this is a known long column, therefore we will 
      *                     store part of the column on the current page and 
@@ -6075,7 +6075,7 @@ public class StoredPage extends CachedPage
      * callers can take correct action.  The column will now be set a as a
      * stream.
      *
-	 * @return The spaceAvailable after accounting for space for this column.
+     * @return The spaceAvailable after accounting for space for this column.
      *
      * @param row           array of column from which to read the column from.
      * @param arrayPosition The array position of column to be reading from row.
@@ -6087,93 +6087,93 @@ public class StoredPage extends CachedPage
      *                          columns.
      * @param columnFlag    one of: COLUMN_NONE, COLUMN_FIRST, or COLUMN_LONG.
      *
-	 * @exception  StandardException    Standard exception policy.
+     * @exception  StandardException    Standard exception policy.
      * @exception  LongColumnException  Thrown if column will not fit on a 
      *                                  single page. See notes above
      **/
-	private int logColumn(
+    private int logColumn(
     Object[]                row, 
     int                     arrayPosition,
     DynamicByteArrayOutputStream  out, 
     int                     spaceAvailable,
     int                     columnFlag, 
     int                     overflowThreshold)
-		throws StandardException, IOException
-	{
+        throws StandardException, IOException
+    {
         // RESOLVE (mikem) - why will row be null?
-		Object column = (row != null ? row[arrayPosition] : null);
+        Object column = (row != null ? row[arrayPosition] : null);
 
-		// Check to see if the data comes from a page, if it is, then the field
-		// header is already formatted.
-		if (column instanceof RawField)
+        // Check to see if the data comes from a page, if it is, then the field
+        // header is already formatted.
+        if (column instanceof RawField)
         {
-			// field data is raw, no need to set up a field header etc.
+            // field data is raw, no need to set up a field header etc.
 
-			byte[] data = ((RawField) column).getData();
+            byte[] data = ((RawField) column).getData();
 
-			if (data.length <= spaceAvailable) 
+            if (data.length <= spaceAvailable) 
             {
-				out.write(data);
-				spaceAvailable -= data.length;
-			}
-			return spaceAvailable;
-		}
+                out.write(data);
+                spaceAvailable -= data.length;
+            }
+            return spaceAvailable;
+        }
 
         // If this is a long column, it may fit in this page or it may not.
-		boolean longColumnDone = true;
+        boolean longColumnDone = true;
 
 
         // default field status.
-		int fieldStatus =
+        int fieldStatus =
             StoredFieldHeader.setFixed(StoredFieldHeader.setInitial(), true);
 
-		int beginPosition       = out.getPosition();
-		int columnBeginPosition = 0;
-		int headerLength;
-		int fieldDataLength     = 0;
+        int beginPosition       = out.getPosition();
+        int columnBeginPosition = 0;
+        int headerLength;
+        int fieldDataLength     = 0;
 
-		if (column instanceof StreamStorable)
+        if (column instanceof StreamStorable)
         {
             StreamStorable  stream_storable_column = (StreamStorable) column;
 
             if (stream_storable_column.returnStream() != null)
             {
-				column = 
+                column = 
                     (Object) stream_storable_column.returnStream();
             }
-		}
+        }
 
-		if (column == null)
+        if (column == null)
         {
-			fieldStatus  = StoredFieldHeader.setNonexistent(fieldStatus);
-			headerLength =
+            fieldStatus  = StoredFieldHeader.setNonexistent(fieldStatus);
+            headerLength =
                 StoredFieldHeader.write(
                     logicalDataOut, fieldStatus, 
                     fieldDataLength, slotFieldSize);
-		}
-		else if (column instanceof InputStream)
+        }
+        else if (column instanceof InputStream)
         {
-			RememberBytesInputStream bufferedIn = null;
-			int                      bufferLen = 0;
+            RememberBytesInputStream bufferedIn = null;
+            int                      bufferLen = 0;
 
-			int estimatedMaxDataSize =
+            int estimatedMaxDataSize =
                 getMaxDataLength(spaceAvailable, overflowThreshold);
 
-			// if column is already instanceof RememberBytesInputStream, then we
+            // if column is already instanceof RememberBytesInputStream, then we
             // need to find out how many bytes have already been stored in the 
             // buffer.
-			if (column instanceof RememberBytesInputStream)
+            if (column instanceof RememberBytesInputStream)
             {
-				// data is already RememberBytesInputStream
+                // data is already RememberBytesInputStream
 
-				bufferedIn = (RememberBytesInputStream) column;
-				bufferLen  = bufferedIn.numBytesSaved();
+                bufferedIn = (RememberBytesInputStream) column;
+                bufferLen  = bufferedIn.numBytesSaved();
 
-			} 
+            } 
             else 
             {
-				// data comes in as an inputstream
-				bufferedIn = new RememberBytesInputStream(
+                // data comes in as an inputstream
+                bufferedIn = new RememberBytesInputStream(
                     (InputStream) column, new MemByteHolder(maxFieldSize + 1));
 
                 // always set stream of InputStream to RememberBytesInputStream
@@ -6189,107 +6189,107 @@ public class StoredPage extends CachedPage
                 // is needed to ensure that if long column exception is 
                 // thrown, the column is set correctly
                 column = bufferedIn;
-			}
+            }
 
-			// read the buffer by reading the max we can read.
-			if (bufferLen < (estimatedMaxDataSize + 1))
+            // read the buffer by reading the max we can read.
+            if (bufferLen < (estimatedMaxDataSize + 1))
             {
-				bufferLen +=
+                bufferLen +=
                     bufferedIn.fillBuf(estimatedMaxDataSize + 1 - bufferLen);
             }
 
-			if ((bufferLen <= estimatedMaxDataSize))
+            if ((bufferLen <= estimatedMaxDataSize))
             {
-				// we will be able to fit this into the page
+                // we will be able to fit this into the page
                 
-				fieldDataLength = bufferLen;
-				fieldStatus     = StoredFieldHeader.setFixed(fieldStatus, true);
-				headerLength    = StoredFieldHeader.write(
+                fieldDataLength = bufferLen;
+                fieldStatus     = StoredFieldHeader.setFixed(fieldStatus, true);
+                headerLength    = StoredFieldHeader.write(
                                         logicalDataOut, fieldStatus, 
                                         fieldDataLength, slotFieldSize);
-	
-				// if the field is extensible, then we write the serializable 
+    
+                // if the field is extensible, then we write the serializable 
                 // formatId.  if the field is non-extensible, we don't need to 
                 // write the formatId.  but at this point, how do we know 
                 // whether the field is extensible or not???  For Plato release,
                 // we do not support InputStream on extensible types, 
-				// therefore, we ignore the formatId for now.
-				bufferedIn.putBuf(logicalDataOut, fieldDataLength);
-			} 
+                // therefore, we ignore the formatId for now.
+                bufferedIn.putBuf(logicalDataOut, fieldDataLength);
+            } 
             else
             {
                 // current column will not fit into the current page.
 
-				if (columnFlag == COLUMN_LONG)
+                if (columnFlag == COLUMN_LONG)
                 {
                     // column is a long column and the remaining portion does
                     // not fit on the current page.
-					longColumnDone = false;
+                    longColumnDone = false;
                    
-					// it's a portion of a long column, and there is more to 
+                    // it's a portion of a long column, and there is more to 
                     // write reserve enough room for overflow pointer, then 
                     // write as much data as we can leaving an extra 2 bytes
                     // for overflow field header.
-					fieldDataLength =
+                    fieldDataLength =
                         estimatedMaxDataSize - OVERFLOW_POINTER_SIZE - 2;
-					fieldStatus     =
+                    fieldStatus     =
                         StoredFieldHeader.setFixed(fieldStatus, true);
 
-					headerLength    =
+                    headerLength    =
                         StoredFieldHeader.write(
                             logicalDataOut, fieldStatus, 
                             fieldDataLength, slotFieldSize);
-					bufferedIn.putBuf(logicalDataOut, fieldDataLength);
+                    bufferedIn.putBuf(logicalDataOut, fieldDataLength);
 
-					// now, we need to adjust the buffer, move the unread 
+                    // now, we need to adjust the buffer, move the unread 
                     // bytes to the beginning position the cursor correctly,
-					// so, next time around, we can read more into the buffer.
-					int remainingBytes = bufferedIn.available();
+                    // so, next time around, we can read more into the buffer.
+                    int remainingBytes = bufferedIn.available();
 
-					// move the unread bytes to the beginning of the byteHolder.
-					int bytesShifted = bufferedIn.shiftToFront();
+                    // move the unread bytes to the beginning of the byteHolder.
+                    int bytesShifted = bufferedIn.shiftToFront();
 
-				} 
+                } 
                 else
                 {
                     // column not a long column and does not fit on page.
-					int delta = maxFieldSize - bufferLen + 1;
+                    int delta = maxFieldSize - bufferLen + 1;
 
-					if (delta > 0)
-						bufferLen += bufferedIn.fillBuf(delta);
-					fieldDataLength = bufferLen;
+                    if (delta > 0)
+                        bufferLen += bufferedIn.fillBuf(delta);
+                    fieldDataLength = bufferLen;
 
-					// the data will not fit on this page make sure the new 
+                    // the data will not fit on this page make sure the new 
                     // input stream is passed back to the upper layer...
-					column = (Object) bufferedIn;
-				}
-			}
-		
-		} 
+                    column = (Object) bufferedIn;
+                }
+            }
+        
+        } 
         else if (column instanceof DataValueDescriptor)
         {
-			DataValueDescriptor sColumn = (DataValueDescriptor) column;
+            DataValueDescriptor sColumn = (DataValueDescriptor) column;
 
-			boolean isNull = sColumn.isNull();
-			if (isNull) 
+            boolean isNull = sColumn.isNull();
+            if (isNull) 
             {
-				fieldStatus = StoredFieldHeader.setNull(fieldStatus, true);
-			}
+                fieldStatus = StoredFieldHeader.setNull(fieldStatus, true);
+            }
 
-			// header is written with 0 length here.
-			headerLength = 
+            // header is written with 0 length here.
+            headerLength = 
                 StoredFieldHeader.write(
                     logicalDataOut, fieldStatus, 
                     fieldDataLength, slotFieldSize);
 
-			if (!isNull) 
+            if (!isNull) 
             {
-				// write the field data to the log 
-				try 
+                // write the field data to the log 
+                try 
                 {
-					columnBeginPosition = out.getPosition();
-					sColumn.writeExternal(logicalDataOut);
-				}
+                    columnBeginPosition = out.getPosition();
+                    sColumn.writeExternal(logicalDataOut);
+                }
                 catch (IOException ioe)
                 {
                     // SQLData error reporting
@@ -6306,146 +6306,146 @@ public class StoredPage extends CachedPage
                     }
 
 
-					throw StandardException.newException(
+                    throw StandardException.newException(
                             SQLState.DATA_STORABLE_WRITE_EXCEPTION, ioe);
-				}
+                }
 
-				fieldDataLength =
+                fieldDataLength =
                     (out.getPosition() - beginPosition) - headerLength;
-			}
-		}
+            }
+        }
         else if (column instanceof RecordHandle)
         {
-			// we are inserting an overflow pointer for a long column
+            // we are inserting an overflow pointer for a long column
 
             // casted reference to column to avoid repeated casting.
-			RecordHandle overflowHandle = (RecordHandle) column;
+            RecordHandle overflowHandle = (RecordHandle) column;
 
-			fieldStatus     = StoredFieldHeader.setOverflow(fieldStatus, true);
-			headerLength    = 
+            fieldStatus     = StoredFieldHeader.setOverflow(fieldStatus, true);
+            headerLength    = 
                 StoredFieldHeader.write(
                     logicalDataOut, fieldStatus, 
                     fieldDataLength, slotFieldSize);
 
-			fieldDataLength += 
+            fieldDataLength += 
                 CompressedNumber.writeLong(out, overflowHandle.getPageNumber());
-			fieldDataLength += 
+            fieldDataLength += 
                 CompressedNumber.writeInt(out, overflowHandle.getId());
 
-		} 
+        } 
         else
         {
-			// Serializable/Externalizable/Formattable
-			// all look the same at this point.
+            // Serializable/Externalizable/Formattable
+            // all look the same at this point.
 
-			// header is written with 0 length here.
-			headerLength = 
+            // header is written with 0 length here.
+            headerLength = 
                 StoredFieldHeader.write(
                     logicalDataOut, fieldStatus, 
                     fieldDataLength, slotFieldSize);
 
-			logicalDataOut.writeObject(column);
-			fieldDataLength = 
+            logicalDataOut.writeObject(column);
+            fieldDataLength = 
                 (out.getPosition() - beginPosition) - headerLength;
-		}
+        }
 
-		// calculate the size of the field on page with compresed field header
+        // calculate the size of the field on page with compresed field header
 
-		fieldStatus = StoredFieldHeader.setFixed(fieldStatus, false);
-		int fieldSizeOnPage =
+        fieldStatus = StoredFieldHeader.setFixed(fieldStatus, false);
+        int fieldSizeOnPage =
             StoredFieldHeader.size(fieldStatus, fieldDataLength, slotFieldSize)
             + fieldDataLength;
 
-		userRowSize += fieldDataLength;
+        userRowSize += fieldDataLength;
 
-		boolean fieldIsLong = isLong(fieldSizeOnPage, overflowThreshold);
+        boolean fieldIsLong = isLong(fieldSizeOnPage, overflowThreshold);
        
-		// Do we have enough space on the page for this field?
-		if (((spaceAvailable < fieldSizeOnPage) || (fieldIsLong)) &&
+        // Do we have enough space on the page for this field?
+        if (((spaceAvailable < fieldSizeOnPage) || (fieldIsLong)) &&
             (columnFlag != COLUMN_LONG)) 
         {
             // Column was not long before getting here and does not fit.
 
-			if (fieldIsLong) 
+            if (fieldIsLong) 
             {
-				// long column, and this first time we have figured out this
+                // long column, and this first time we have figured out this
                 // column is long.
 
-				if (!(column instanceof InputStream)) 
+                if (!(column instanceof InputStream)) 
                 {
-					// Convert already written object to an InputStream.
-					ByteArray fieldData =
-						new ByteArray(
+                    // Convert already written object to an InputStream.
+                    ByteArray fieldData =
+                        new ByteArray(
                             ((DynamicByteArrayOutputStream)out).getByteArray(),
-							(columnBeginPosition), fieldDataLength);
+                            (columnBeginPosition), fieldDataLength);
 
-					ByteArrayInputStream columnIn =
-						new ByteArrayInputStream(
+                    ByteArrayInputStream columnIn =
+                        new ByteArrayInputStream(
                             fieldData.getArray(), columnBeginPosition, 
                             fieldDataLength);
 
-					MemByteHolder byteHolder = 
+                    MemByteHolder byteHolder = 
                         new MemByteHolder(fieldDataLength + 1);
 
-					RememberBytesInputStream bufferedIn = 
+                    RememberBytesInputStream bufferedIn = 
                         new RememberBytesInputStream(columnIn, byteHolder);
  
-					// the data will not fit on this page make sure the new 
+                    // the data will not fit on this page make sure the new 
                     // input stream is passed back to the upper layer...
-					column = bufferedIn;
-				}
+                    column = bufferedIn;
+                }
 
-				out.setPosition(beginPosition);
+                out.setPosition(beginPosition);
 
                 // This exception carries the information for the client
                 // routine to continue inserting the long row on multiple
                 // pages.
-				LongColumnException lce = new LongColumnException();
-				lce.setColumn(column);
-				throw lce;
+                LongColumnException lce = new LongColumnException();
+                lce.setColumn(column);
+                throw lce;
 
-			} 
+            } 
             else 
             {
-				// Column does not fit on this page, but it isn't a long column.
+                // Column does not fit on this page, but it isn't a long column.
 
-				out.setPosition(beginPosition);
-				return(spaceAvailable);
-			}
-		}
+                out.setPosition(beginPosition);
+                return(spaceAvailable);
+            }
+        }
  
-		// Now we go back to update the fieldDataLength in the field header
-		out.setPosition(beginPosition);
+        // Now we go back to update the fieldDataLength in the field header
+        out.setPosition(beginPosition);
 
-		// slotFieldSize is set based on the pageSize.
-		// We are borrowing this to set the size of our fieldDataLength.
-		fieldStatus  = StoredFieldHeader.setFixed(fieldStatus, true);
-		headerLength = StoredFieldHeader.write(
+        // slotFieldSize is set based on the pageSize.
+        // We are borrowing this to set the size of our fieldDataLength.
+        fieldStatus  = StoredFieldHeader.setFixed(fieldStatus, true);
+        headerLength = StoredFieldHeader.write(
                             out, fieldStatus, fieldDataLength, slotFieldSize);
 
-		// set position to the end of the field
-		out.setPosition(beginPosition + fieldDataLength + headerLength);
+        // set position to the end of the field
+        out.setPosition(beginPosition + fieldDataLength + headerLength);
 
-		spaceAvailable -= fieldSizeOnPage;
+        spaceAvailable -= fieldSizeOnPage;
 
-		// YYZ: revisit
-		if (columnFlag == COLUMN_LONG)
+        // YYZ: revisit
+        if (columnFlag == COLUMN_LONG)
         {
-			// if we are logging a long column, we don't care how much space 
+            // if we are logging a long column, we don't care how much space 
             // is left on the page, instead, we care whether we are done with 
             // the column or not.  So, here, we want to return 1. if we are 
             // not done, and return -1 if we are done.
-			// If logColumn returns -1, that flag is returned all the way to
-			// BasePage.insertLongColumn to signal end of loop.
-			if (longColumnDone)
-				return -1;
-			else
-				return 1;
-		} else
+            // If logColumn returns -1, that flag is returned all the way to
+            // BasePage.insertLongColumn to signal end of loop.
+            if (longColumnDone)
+                return -1;
+            else
+                return 1;
+        } else
         {
-			return (spaceAvailable);
+            return (spaceAvailable);
         }
-	}
+    }
 
     /**
      * Create and write a long row header to the log stream.
@@ -6454,118 +6454,118 @@ public class StoredPage extends CachedPage
      * and throw an exception if the record header will not fit on the page.
      * <p>
      *
-	 * @return -1
+     * @return -1
      *
      * @param slot           slot of record to log.
      * @param spaceAvailable spaceAvaliable on page.
      * @param out            stream to log the record to.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	private int logOverflowRecord(
+    private int logOverflowRecord(
     int                     slot, 
     int                     spaceAvailable, 
     DynamicByteArrayOutputStream  out)
-		throws StandardException, IOException
-	{
-		setOutputStream(out);
-		
-		StoredRecordHeader pageRecordHeader = getHeaderAtSlot(slot);
-				
+        throws StandardException, IOException
+    {
+        setOutputStream(out);
+        
+        StoredRecordHeader pageRecordHeader = getHeaderAtSlot(slot);
+                
         StoredRecordHeader  overflow_rh = getOverFlowRecordHeader();
         overflow_rh.setOverflowFields(pageRecordHeader);
 
-		if (SanityManager.DEBUG) 
+        if (SanityManager.DEBUG) 
         {
-			SanityManager.ASSERT(overflow_rh.getOverflowPage() != 0);
-		}
+            SanityManager.ASSERT(overflow_rh.getOverflowPage() != 0);
+        }
 
-		/*
-		// #1 situation,
-		// we want to update the header to just an overflow pointer with no data
-		// so, update the recordHeader, and we are done...
-		if (!overflow_rh.isPartialOverflow()) {
-			// this recordHeader becomes just a overflow pointer,
-			// we need to make sure that the number of fields is set to 0.
-			overflow_rh.setNumberFields(0);
-			
-			spaceAvailable -= overflow_rh.write(logicalDataOut);
+        /*
+        // #1 situation,
+        // we want to update the header to just an overflow pointer with no data
+        // so, update the recordHeader, and we are done...
+        if (!overflow_rh.isPartialOverflow()) {
+            // this recordHeader becomes just a overflow pointer,
+            // we need to make sure that the number of fields is set to 0.
+            overflow_rh.setNumberFields(0);
+            
+            spaceAvailable -= overflow_rh.write(logicalDataOut);
 
-			if (spaceAvailable < 0) {
-				throw new NoSpaceOnPage(isOverflowPage());
-			}
+            if (spaceAvailable < 0) {
+                throw new NoSpaceOnPage(isOverflowPage());
+            }
 
-			resetOutputStream();
+            resetOutputStream();
 
-			return (-1);
-		}
-		*/
+            return (-1);
+        }
+        */
 
-		// #2 situation,
-		// we want to only update the recordheader of the page, while leaving
+        // #2 situation,
+        // we want to only update the recordheader of the page, while leaving
         // the data of the record on the page.  Just update the header part and
         // then arrange for the data part to move to after the new header.
 
-		int oldSize = pageRecordHeader.size();
-		int newSize = overflow_rh.size();
+        int oldSize = pageRecordHeader.size();
+        int newSize = overflow_rh.size();
 
-		if (oldSize < newSize) 
+        if (oldSize < newSize) 
         {
-			// need extra room...
-			int delta = newSize - oldSize;
-			if (spaceAvailable < delta) 
+            // need extra room...
+            int delta = newSize - oldSize;
+            if (spaceAvailable < delta) 
             {
-				throw new NoSpaceOnPage(isOverflowPage());
-			}
-		}
+                throw new NoSpaceOnPage(isOverflowPage());
+            }
+        }
 
-		// write the new overflow_rh for the record.
-		overflow_rh.write(logicalDataOut);
+        // write the new overflow_rh for the record.
+        overflow_rh.write(logicalDataOut);
 
-		// now, log the data
-		logRecordDataPortion(
+        // now, log the data
+        logRecordDataPortion(
             slot, LOG_RECORD_DEFAULT, pageRecordHeader, 
             (FormatableBitSet) null, logicalDataOut, (RecordHandle)null);
 
-		return (-1);
-	}
+        return (-1);
+    }
 
-	private int logOverflowField(
+    private int logOverflowField(
     DynamicByteArrayOutputStream  out, 
     int                     spaceAvailable,
     long                    overflowPage, 
     int                     overflowId)
-		throws StandardException, IOException
-	{
-		int fieldStatus = 
+        throws StandardException, IOException
+    {
+        int fieldStatus = 
             StoredFieldHeader.setOverflow(
                 StoredFieldHeader.setInitial(), true);
 
-		int fieldSizeOnPage = 
+        int fieldSizeOnPage = 
             CompressedNumber.sizeLong(overflowPage) + 
             CompressedNumber.sizeInt(overflowId);
 
-		int fieldDataLength = fieldSizeOnPage;
+        int fieldDataLength = fieldSizeOnPage;
 
-		fieldSizeOnPage += 
+        fieldSizeOnPage += 
             StoredFieldHeader.size(fieldStatus, fieldDataLength, slotFieldSize);
 
-		// need to check that we have room on the page for this.
-		spaceAvailable -= fieldSizeOnPage;
+        // need to check that we have room on the page for this.
+        spaceAvailable -= fieldSizeOnPage;
 
-		// what if there is not enough room for the overflow pointer?
-		if (spaceAvailable < 0)
-			throw new NoSpaceOnPage(isOverflowPage());
+        // what if there is not enough room for the overflow pointer?
+        if (spaceAvailable < 0)
+            throw new NoSpaceOnPage(isOverflowPage());
 
-		// write the field to the page:
-		StoredFieldHeader.write(
+        // write the field to the page:
+        StoredFieldHeader.write(
             logicalDataOut, fieldStatus, fieldDataLength, slotFieldSize);
-		CompressedNumber.writeLong(out, overflowPage);
-		CompressedNumber.writeInt(out, overflowId);
+        CompressedNumber.writeLong(out, overflowPage);
+        CompressedNumber.writeInt(out, overflowId);
 
-		// return the available bytes
-		return(spaceAvailable);
-	}
+        // return the available bytes
+        return(spaceAvailable);
+    }
 
     /**
      * Log a record to the ObjectOutput stream.
@@ -6574,271 +6574,271 @@ public class StoredPage extends CachedPage
      * preceeded by a  compressed int that gives the length of the following 
      * data.
      *
-     * @exception StandardException	Standard Derby error policy
-     * @exception IOException	    on error writing to log stream.
+     * @exception StandardException Standard Derby error policy
+     * @exception IOException       on error writing to log stream.
      *
      * @see BasePage#logRecord
      **/
-	public void logRecord(
+    public void logRecord(
     int             slot, 
     int             flag, 
     int             recordId, 
     FormatableBitSet         validColumns, 
     OutputStream    out, 
     RecordHandle    headRowHandle) 
-		throws StandardException, IOException
-	{
-		StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+        throws StandardException, IOException
+    {
+        StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
 
-		if (recordId != recordHeader.getId()) 
+        if (recordId != recordHeader.getId()) 
         {
-			// the record is being logged under a different identifier,
-			// write it out with the correct identifier
-			StoredRecordHeader newRecordHeader = 
+            // the record is being logged under a different identifier,
+            // write it out with the correct identifier
+            StoredRecordHeader newRecordHeader = 
                 new StoredRecordHeader(recordHeader);
 
-			newRecordHeader.setId(recordId);
+            newRecordHeader.setId(recordId);
 
-			newRecordHeader.write(out);
-			newRecordHeader = null;
-		} 
+            newRecordHeader.write(out);
+            newRecordHeader = null;
+        } 
         else 
         {
-			// write the original record header
-			recordHeader.write(out);
-		}
+            // write the original record header
+            recordHeader.write(out);
+        }
 
-		logRecordDataPortion(
+        logRecordDataPortion(
             slot, flag, recordHeader, validColumns, out, headRowHandle);
 
-	}
+    }
 
-	private void logRecordDataPortion(
+    private void logRecordDataPortion(
     int                 slot, 
     int                 flag,
     StoredRecordHeader  recordHeader,
     FormatableBitSet             validColumns, 
     OutputStream        out,
     RecordHandle        headRowHandle) 
-		throws StandardException, IOException
-	{
-		int offset = getRecordOffset(slot);
+        throws StandardException, IOException
+    {
+        int offset = getRecordOffset(slot);
 
-		// now skip over the original header before writing the data
-		int oldHeaderLength = recordHeader.size();
-		offset += oldHeaderLength;
+        // now skip over the original header before writing the data
+        int oldHeaderLength = recordHeader.size();
+        offset += oldHeaderLength;
 
-		// write out the record data (FH+data+...) from the page data
-		int startField = recordHeader.getFirstField();
-		int endField = startField + recordHeader.getNumberFields();
-		int validColumnsSize = (validColumns == null) ? 0 : validColumns.getLength();
+        // write out the record data (FH+data+...) from the page data
+        int startField = recordHeader.getFirstField();
+        int endField = startField + recordHeader.getNumberFields();
+        int validColumnsSize = (validColumns == null) ? 0 : validColumns.getLength();
 
-		for (int fieldId = startField; fieldId < endField; fieldId++) {
+        for (int fieldId = startField; fieldId < endField; fieldId++) {
 
-			rawDataIn.setPosition(offset);
+            rawDataIn.setPosition(offset);
 
-			// get the field header information from the page
-			int fieldStatus = StoredFieldHeader.readStatus(rawDataIn);
-			int fieldDataLength = StoredFieldHeader.readFieldDataLength(rawDataIn, fieldStatus, slotFieldSize);
+            // get the field header information from the page
+            int fieldStatus = StoredFieldHeader.readStatus(rawDataIn);
+            int fieldDataLength = StoredFieldHeader.readFieldDataLength(rawDataIn, fieldStatus, slotFieldSize);
 
-			// see if this field needs to be logged
-			// no need to write the data portion if the log is getting written
-			// for purges unless the field is  overflow pointer for a long column.
-			if (((validColumns != null) && !(validColumnsSize > fieldId && validColumns.isSet(fieldId))) || 
-				((flag & BasePage.LOG_RECORD_FOR_PURGE)!=0 && !StoredFieldHeader.isOverflow(fieldStatus)))
-			{
-				// nope, move page offset along
-				offset += StoredFieldHeader.size(fieldStatus, fieldDataLength, slotFieldSize);
-				offset += fieldDataLength;
+            // see if this field needs to be logged
+            // no need to write the data portion if the log is getting written
+            // for purges unless the field is  overflow pointer for a long column.
+            if (((validColumns != null) && !(validColumnsSize > fieldId && validColumns.isSet(fieldId))) || 
+                ((flag & BasePage.LOG_RECORD_FOR_PURGE)!=0 && !StoredFieldHeader.isOverflow(fieldStatus)))
+            {
+                // nope, move page offset along
+                offset += StoredFieldHeader.size(fieldStatus, fieldDataLength, slotFieldSize);
+                offset += fieldDataLength;
 
-				// write a non-existent field
-				fieldStatus = StoredFieldHeader.setInitial();
-				fieldStatus = StoredFieldHeader.setNonexistent(fieldStatus);
-				StoredFieldHeader.write(out, fieldStatus, 0, slotFieldSize);
-				continue;
-			}
+                // write a non-existent field
+                fieldStatus = StoredFieldHeader.setInitial();
+                fieldStatus = StoredFieldHeader.setNonexistent(fieldStatus);
+                StoredFieldHeader.write(out, fieldStatus, 0, slotFieldSize);
+                continue;
+            }
 
-			// If this field is to be updated, and it points to a long column
-			// chain, the entire long column chain will be orphaned after the
-			// update operation.  Therefore, need to queue up a post commit
-			// work to reclaim the long column chain.  We cannot do any clean
-			// up in this transaction now because we are underneath a log
-			// action and cannot interrupt the transaction log buffer.
-			// HeadRowHandle may be null if updateAtSlot is called to update a
-			// non-head row piece.  In that case, don't do anything.
-			// If temp container, don't do anything.
-			if (((flag & BasePage.LOG_RECORD_FOR_UPDATE) != 0) && 
-				headRowHandle != null &&
-				StoredFieldHeader.isOverflow(fieldStatus) &&
-				owner.isTemporaryContainer() == false)
-			{
+            // If this field is to be updated, and it points to a long column
+            // chain, the entire long column chain will be orphaned after the
+            // update operation.  Therefore, need to queue up a post commit
+            // work to reclaim the long column chain.  We cannot do any clean
+            // up in this transaction now because we are underneath a log
+            // action and cannot interrupt the transaction log buffer.
+            // HeadRowHandle may be null if updateAtSlot is called to update a
+            // non-head row piece.  In that case, don't do anything.
+            // If temp container, don't do anything.
+            if (((flag & BasePage.LOG_RECORD_FOR_UPDATE) != 0) && 
+                headRowHandle != null &&
+                StoredFieldHeader.isOverflow(fieldStatus) &&
+                owner.isTemporaryContainer() == false)
+            {
 
-				int saveOffset = rawDataIn.getPosition(); // remember the page offset
-				long overflowPage = CompressedNumber.readLong((InputStream) rawDataIn);
-				int overflowId = CompressedNumber.readInt((InputStream) rawDataIn);
+                int saveOffset = rawDataIn.getPosition(); // remember the page offset
+                long overflowPage = CompressedNumber.readLong((InputStream) rawDataIn);
+                int overflowId = CompressedNumber.readInt((InputStream) rawDataIn);
 
-				// Remember the time stamp on the first page of the column
-				// chain.  This is to prevent the case where the post commit
-				// work gets fired twice, in that case, the second time it is
-				// fired, this overflow page may not part of this row chain
-				// that is being updated.
-				Page firstPageOnColumnChain = getOverflowPage(overflowPage);
-				PageTimeStamp ts = firstPageOnColumnChain.currentTimeStamp();
-				firstPageOnColumnChain.unlatch();
+                // Remember the time stamp on the first page of the column
+                // chain.  This is to prevent the case where the post commit
+                // work gets fired twice, in that case, the second time it is
+                // fired, this overflow page may not part of this row chain
+                // that is being updated.
+                Page firstPageOnColumnChain = getOverflowPage(overflowPage);
+                PageTimeStamp ts = firstPageOnColumnChain.currentTimeStamp();
+                firstPageOnColumnChain.unlatch();
 
-				RawTransaction rxact = (RawTransaction)owner.getTransaction();
+                RawTransaction rxact = (RawTransaction)owner.getTransaction();
 
-				ReclaimSpace work = 
-					new ReclaimSpace(ReclaimSpace.COLUMN_CHAIN,
-								headRowHandle,
-								fieldId, // long column about to be orphaned by update 
-								overflowPage, // page where the long column starts
-								overflowId, // record Id of the beginning of the long column
-								ts,
-								rxact.getDataFactory(), true);
+                ReclaimSpace work = 
+                    new ReclaimSpace(ReclaimSpace.COLUMN_CHAIN,
+                                headRowHandle,
+                                fieldId, // long column about to be orphaned by update 
+                                overflowPage, // page where the long column starts
+                                overflowId, // record Id of the beginning of the long column
+                                ts,
+                                rxact.getDataFactory(), true);
 
-				rxact.addPostCommitWork(work);
+                rxact.addPostCommitWork(work);
 
-				rawDataIn.setPosition(saveOffset); // Just to be safe, reset data stream
-			}
+                rawDataIn.setPosition(saveOffset); // Just to be safe, reset data stream
+            }
 
 
-			// write the field header for the log
-			offset += StoredFieldHeader.write(out, fieldStatus, fieldDataLength, slotFieldSize);
+            // write the field header for the log
+            offset += StoredFieldHeader.write(out, fieldStatus, fieldDataLength, slotFieldSize);
 
-			if (fieldDataLength != 0) {
+            if (fieldDataLength != 0) {
 
-				// write the actual data
-				out.write(pageData, offset, fieldDataLength);
+                // write the actual data
+                out.write(pageData, offset, fieldDataLength);
 
-				offset += fieldDataLength;
-			}
-		}
-	}
+                offset += fieldDataLength;
+            }
+        }
+    }
 
-	/**
-		Log a field to the ObjectOutput stream.
-		<P>
-		Find the field in the record and then write out the complete
-		field, i.e. header and data.
+    /**
+        Log a field to the ObjectOutput stream.
+        <P>
+        Find the field in the record and then write out the complete
+        field, i.e. header and data.
 
-		@exception StandardException	Standard Derby error policy
-		@exception IOException			RESOLVE
+        @exception StandardException    Standard Derby error policy
+        @exception IOException          RESOLVE
 
-		@see BasePage#logField
-	*/
+        @see BasePage#logField
+    */
 
-	public void logField(int slot, int fieldNumber, OutputStream out)
-		throws StandardException, IOException
-	{
-		int offset = getFieldOffset(slot, fieldNumber);
+    public void logField(int slot, int fieldNumber, OutputStream out)
+        throws StandardException, IOException
+    {
+        int offset = getFieldOffset(slot, fieldNumber);
 
-		// these reads are always against the page array
-		ArrayInputStream lrdi = rawDataIn;
+        // these reads are always against the page array
+        ArrayInputStream lrdi = rawDataIn;
 
-		// now write out the field we are interested in ...
-		lrdi.setPosition(offset);
-		int fieldStatus = StoredFieldHeader.readStatus(lrdi);
-		int fieldDataLength = StoredFieldHeader.readFieldDataLength(lrdi, fieldStatus, slotFieldSize);
+        // now write out the field we are interested in ...
+        lrdi.setPosition(offset);
+        int fieldStatus = StoredFieldHeader.readStatus(lrdi);
+        int fieldDataLength = StoredFieldHeader.readFieldDataLength(lrdi, fieldStatus, slotFieldSize);
 
-		StoredFieldHeader.write(out, fieldStatus, fieldDataLength, slotFieldSize);
-		
-		if (fieldDataLength != 0) {
-			// and then the data
-			out.write(pageData, lrdi.getPosition(), fieldDataLength);
-		}
-	}
+        StoredFieldHeader.write(out, fieldStatus, fieldDataLength, slotFieldSize);
+        
+        if (fieldDataLength != 0) {
+            // and then the data
+            out.write(pageData, lrdi.getPosition(), fieldDataLength);
+        }
+    }
 
-	/*
-	** Overidden methods of BasePage
-	*/
+    /*
+    ** Overidden methods of BasePage
+    */
 
-	/**
-		Override insertAtSlot to provide long row support.
-		@exception StandardException Standard Derby error policy
-	*/
-	public RecordHandle insertAtSlot(
+    /**
+        Override insertAtSlot to provide long row support.
+        @exception StandardException Standard Derby error policy
+    */
+    public RecordHandle insertAtSlot(
     int                   slot, 
     Object[] row, 
     FormatableBitSet               validColumns,
     LogicalUndo           undo, 
     byte                  insertFlag, 
     int                   overflowThreshold)
-		throws StandardException
-	{
-		try {
+        throws StandardException
+    {
+        try {
 
-			return super.insertAtSlot(slot, row, validColumns, undo, insertFlag, overflowThreshold);
+            return super.insertAtSlot(slot, row, validColumns, undo, insertFlag, overflowThreshold);
 
-		} catch (NoSpaceOnPage nsop) {
+        } catch (NoSpaceOnPage nsop) {
 
-			// Super class already handle the case of insert that allows overflow.
-			// If we get here, we know that the insert should not allow overflow.
-			// Possibles causes:
-			// 1.	insert to an empty page, row will never fit (ie long row)
-			// 2.	insert to original page
-			// we will do:
-			// return a null to indicate the insert cannot be accepted ..
-			return null;
+            // Super class already handle the case of insert that allows overflow.
+            // If we get here, we know that the insert should not allow overflow.
+            // Possibles causes:
+            // 1.   insert to an empty page, row will never fit (ie long row)
+            // 2.   insert to original page
+            // we will do:
+            // return a null to indicate the insert cannot be accepted ..
+            return null;
 
-		}
-	}
-	
+        }
+    }
+    
 
-	/**
-		Update field at specified slot
-		@exception StandardException Standard Derby error policy
-	*/
-	public RecordHandle updateFieldAtSlot(
+    /**
+        Update field at specified slot
+        @exception StandardException Standard Derby error policy
+    */
+    public RecordHandle updateFieldAtSlot(
     int                 slot, 
     int                 fieldId, 
     Object newValue, 
     LogicalUndo         undo)
-		throws StandardException
-	{
-		try {
+        throws StandardException
+    {
+        try {
 
-			return super.updateFieldAtSlot(slot, fieldId, newValue, undo);
+            return super.updateFieldAtSlot(slot, fieldId, newValue, undo);
 
-		} catch (NoSpaceOnPage nsop) {
+        } catch (NoSpaceOnPage nsop) {
 
 
-			// empty page apart from the record
-			if (slotsInUse == 1) 
+            // empty page apart from the record
+            if (slotsInUse == 1) 
             {
-				throw StandardException.newException(
+                throw StandardException.newException(
                     SQLState.DATA_NO_SPACE_FOR_RECORD);
-			}
+            }
             throw StandardException.newException(
                     SQLState.DATA_NO_SPACE_FOR_RECORD);
 
 /*
-// djd			if (isOverflowPage()) {
-			}
+// djd          if (isOverflowPage()) {
+            }
 
-			return XXX;
+            return XXX;
 */
-		}
+        }
 
-	}
+    }
 
-	/**
-		Get the number of fields on the row at slot
-		@exception StandardException Standard Derby error policy
-	*/
-	public int fetchNumFieldsAtSlot(int slot) throws StandardException
-	{
+    /**
+        Get the number of fields on the row at slot
+        @exception StandardException Standard Derby error policy
+    */
+    public int fetchNumFieldsAtSlot(int slot) throws StandardException
+    {
 
-		StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+        StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
 
-		if (!recordHeader.hasOverflow())
-			return super.fetchNumFieldsAtSlot(slot);
+        if (!recordHeader.hasOverflow())
+            return super.fetchNumFieldsAtSlot(slot);
 
-		BasePage overflowPage = getOverflowPage(recordHeader.getOverflowPage());
-		int count = overflowPage.fetchNumFieldsAtSlot(getOverflowSlot(overflowPage, recordHeader));
-		overflowPage.unlatch();
-		return count;
-	}
+        BasePage overflowPage = getOverflowPage(recordHeader.getOverflowPage());
+        int count = overflowPage.fetchNumFieldsAtSlot(getOverflowSlot(overflowPage, recordHeader));
+        overflowPage.unlatch();
+        return count;
+    }
 
     /**
      * Move record to a page toward the beginning of the file.
@@ -6878,15 +6878,15 @@ public class StoredPage extends CachedPage
      *
      * @return the number of rows processed.
      *
-     * @exception StandardException	Standard Derby error policy
+     * @exception StandardException Standard Derby error policy
      *
      **/
-	public int moveRecordForCompressAtSlot(
+    public int moveRecordForCompressAtSlot(
     int             slot,
     Object[]        row,
     RecordHandle[]  old_handle,
     RecordHandle[]  new_handle)
-		throws StandardException
+        throws StandardException
     {
         long src_pageno = getPageNumber();
 
@@ -6990,236 +6990,236 @@ public class StoredPage extends CachedPage
         }
     }
 
-	/*
-	 * methods that is called underneath a page action
-	 */
+    /*
+     * methods that is called underneath a page action
+     */
 
-	/*
-	 * update page version and instance due to actions by a log record
-	 */
-	public void logAction(LogInstant instant) throws StandardException
-	{
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(isLatched());
-		}
+    /*
+     * update page version and instance due to actions by a log record
+     */
+    public void logAction(LogInstant instant) throws StandardException
+    {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(isLatched());
+        }
 
-		if (rawDataOut == null)
-			createOutStreams();
+        if (rawDataOut == null)
+            createOutStreams();
 
-		if (!isActuallyDirty()) {
-			// if this is not an overflow page and the page is valid, set the
-			// initial row count.
-			if (!isOverflowPage() && ((getPageStatus() & VALID_PAGE) != 0)) {
-				initialRowCount = internalNonDeletedRecordCount();
-			} else
-				initialRowCount = 0;
-		}
+        if (!isActuallyDirty()) {
+            // if this is not an overflow page and the page is valid, set the
+            // initial row count.
+            if (!isOverflowPage() && ((getPageStatus() & VALID_PAGE) != 0)) {
+                initialRowCount = internalNonDeletedRecordCount();
+            } else
+                initialRowCount = 0;
+        }
 
-		setDirty();
+        setDirty();
 
-		bumpPageVersion();
-		updateLastLogInstant(instant);
-	}
+        bumpPageVersion();
+        updateLastLogInstant(instant);
+    }
 
 
-	/* clean the page for first use or reuse */
-	private void cleanPage()
-	{
-		setDirty();
+    /* clean the page for first use or reuse */
+    private void cleanPage()
+    {
+        setDirty();
 
-		// set pageData to all nulls
-		clearSection(0, getPageSize());
+        // set pageData to all nulls
+        clearSection(0, getPageSize());
 
-		slotsInUse = 0;
-		deletedRowCount = 0;
-		headerOutOfDate = true;	// headerOutOfDate must be set after setDirty
-								// because isDirty maybe called unlatched
+        slotsInUse = 0;
+        deletedRowCount = 0;
+        headerOutOfDate = true; // headerOutOfDate must be set after setDirty
+                                // because isDirty maybe called unlatched
 
-		clearAllSpace();
+        clearAllSpace();
 
-	}
+    }
 
-	/**
-		Initialize the page.  
+    /**
+        Initialize the page.  
 
-		If reuse, then 
-		Clean up any in memory or on disk structure to ready the page for reuse.
-		This is not only reusing the page buffer, but reusing a free page 
-		which may or may not be cleaned up the the client of raw store when it 
+        If reuse, then 
+        Clean up any in memory or on disk structure to ready the page for reuse.
+        This is not only reusing the page buffer, but reusing a free page 
+        which may or may not be cleaned up the the client of raw store when it 
         was deallocated.
 
-		@exception StandardException Derby Standard Error Policy
-	 */
-	public void initPage(LogInstant instant, byte status, int recordId, 
-						 boolean overflow, boolean reuse)
-		 throws StandardException
-	{
-		// log action at the end after the page is updated with all the
-		// pertinent information
-		logAction(instant);
+        @exception StandardException Derby Standard Error Policy
+     */
+    public void initPage(LogInstant instant, byte status, int recordId, 
+                         boolean overflow, boolean reuse)
+         throws StandardException
+    {
+        // log action at the end after the page is updated with all the
+        // pertinent information
+        logAction(instant);
 
-		if (reuse)
-		{
-			cleanPage();
-			super.cleanPageForReuse();
-		}
-		// if not reuse, createPage already called cleanpage
+        if (reuse)
+        {
+            cleanPage();
+            super.cleanPageForReuse();
+        }
+        // if not reuse, createPage already called cleanpage
 
-		headerOutOfDate = true;	// headerOutOfDate must be set after setDirty
-								// because isDirty maybe called unlatched
-		setPageStatus(status);
-		isOverflowPage = overflow;
-		nextId = recordId;
+        headerOutOfDate = true; // headerOutOfDate must be set after setDirty
+                                // because isDirty maybe called unlatched
+        setPageStatus(status);
+        isOverflowPage = overflow;
+        nextId = recordId;
 
-	}
+    }
 
-	/**
-		Set page status
-		@exception StandardException Derby Standard Error Policy
-	*/
-	public void setPageStatus(LogInstant instant, byte status)
-		 throws StandardException
-	{
-		logAction(instant);
-		headerOutOfDate = true;	// headerOutOfDate must be set after setDirty
-								// because isDirty maybe called unlatched
+    /**
+        Set page status
+        @exception StandardException Derby Standard Error Policy
+    */
+    public void setPageStatus(LogInstant instant, byte status)
+         throws StandardException
+    {
+        logAction(instant);
+        headerOutOfDate = true; // headerOutOfDate must be set after setDirty
+                                // because isDirty maybe called unlatched
 
-		setPageStatus(status);
-	}
+        setPageStatus(status);
+    }
 
-	/**
-		Set the row reserved space.
-		@exception StandardException Derby Standard Error Policy
-	 */
-	public void setReservedSpace(LogInstant instant, int slot, int value)
-		 throws StandardException, IOException
-	{
-		logAction(instant);
-		headerOutOfDate = true;	// headerOutOfDate must be set after setDirty
-								// because isDirty maybe called unlatched
+    /**
+        Set the row reserved space.
+        @exception StandardException Derby Standard Error Policy
+     */
+    public void setReservedSpace(LogInstant instant, int slot, int value)
+         throws StandardException, IOException
+    {
+        logAction(instant);
+        headerOutOfDate = true; // headerOutOfDate must be set after setDirty
+                                // because isDirty maybe called unlatched
 
-		int delta = value - getReservedCount(slot);
+        int delta = value - getReservedCount(slot);
 
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(delta <= freeSpace, 
-				"Cannot grow reserved space because there is not enough free space on the page");
-			SanityManager.ASSERT(delta != 0,
-				"Set Reserved Space called to set identical value");
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(delta <= freeSpace, 
+                "Cannot grow reserved space because there is not enough free space on the page");
+            SanityManager.ASSERT(delta != 0,
+                "Set Reserved Space called to set identical value");
 
             if (value < 0)
                 SanityManager.THROWASSERT(
                     "Cannot set reserved space to value " + value);
-		}
+        }
 
-		// Find the end of the record that we are about to add or subtract from
-		// the reserved space.
-		int nextRecordOffset = getRecordOffset(slot) + getTotalSpace(slot);
+        // Find the end of the record that we are about to add or subtract from
+        // the reserved space.
+        int nextRecordOffset = getRecordOffset(slot) + getTotalSpace(slot);
 
-		if (delta > 0) {
-			// Growing - hopefully during a RRR restore
-			expandPage(nextRecordOffset, delta);
-		} else	{
-			// shrinking, delta is < 0
-			shrinkPage(nextRecordOffset, -delta);
-		}
+        if (delta > 0) {
+            // Growing - hopefully during a RRR restore
+            expandPage(nextRecordOffset, delta);
+        } else  {
+            // shrinking, delta is < 0
+            shrinkPage(nextRecordOffset, -delta);
+        }
 
-		// Lastly, update the reserved space count in the slot.
-		rawDataOut.setPosition(getSlotOffset(slot) + (2*slotFieldSize));
-		if (slotFieldSize == SMALL_SLOT_SIZE)
-			logicalDataOut.writeShort(value);
-		else
-			logicalDataOut.writeInt(value);
+        // Lastly, update the reserved space count in the slot.
+        rawDataOut.setPosition(getSlotOffset(slot) + (2*slotFieldSize));
+        if (slotFieldSize == SMALL_SLOT_SIZE)
+            logicalDataOut.writeShort(value);
+        else
+            logicalDataOut.writeInt(value);
 
-	}
+    }
 
 
-	/**
-		Store a record at the given slot.
+    /**
+        Store a record at the given slot.
 
-		@exception StandardException	Standard Derby error policy
-		@exception IOException			RESOLVE
-	*/
-	public void storeRecord(LogInstant instant, int slot, boolean insert, ObjectInput in)
-		throws StandardException, IOException
-	{
-		logAction(instant);
+        @exception StandardException    Standard Derby error policy
+        @exception IOException          RESOLVE
+    */
+    public void storeRecord(LogInstant instant, int slot, boolean insert, ObjectInput in)
+        throws StandardException, IOException
+    {
+        logAction(instant);
 
-		if (insert)
-			storeRecordForInsert(slot, in);
-		else
-			storeRecordForUpdate(slot, in);
-	}
+        if (insert)
+            storeRecordForInsert(slot, in);
+        else
+            storeRecordForUpdate(slot, in);
+    }
 
-	private void storeRecordForInsert(int slot, ObjectInput in)
-		throws StandardException, IOException
-	{
+    private void storeRecordForInsert(int slot, ObjectInput in)
+        throws StandardException, IOException
+    {
 
-		StoredRecordHeader recordHeader = shiftUp(slot);
-		if (recordHeader == null) {
-			recordHeader = new StoredRecordHeader();
-			setHeaderAtSlot(slot, recordHeader);
-		}
+        StoredRecordHeader recordHeader = shiftUp(slot);
+        if (recordHeader == null) {
+            recordHeader = new StoredRecordHeader();
+            setHeaderAtSlot(slot, recordHeader);
+        }
 
-		bumpRecordCount(1);
+        bumpRecordCount(1);
 
-		// recordHeader represents the new version of the record header.
-		recordHeader.read(in);
+        // recordHeader represents the new version of the record header.
+        recordHeader.read(in);
 
-		// the record is already marked delete, we need to bump the deletedRowCount
-		if (recordHeader.isDeleted()) {
-			deletedRowCount++;
-			headerOutOfDate = true;
-		}
+        // the record is already marked delete, we need to bump the deletedRowCount
+        if (recordHeader.isDeleted()) {
+            deletedRowCount++;
+            headerOutOfDate = true;
+        }
 
-		// during a rollforward insert, recordId == nextId
-		// during a rollback of purge, recordId < nextId
-		if (nextId <= recordHeader.getId())
-			nextId = recordHeader.getId()+1;
+        // during a rollforward insert, recordId == nextId
+        // during a rollback of purge, recordId < nextId
+        if (nextId <= recordHeader.getId())
+            nextId = recordHeader.getId()+1;
 
-		int recordOffset = firstFreeByte;
-		int offset = recordOffset;
+        int recordOffset = firstFreeByte;
+        int offset = recordOffset;
 
-		// write each field out to the page
-		int numberFields = recordHeader.getNumberFields();
+        // write each field out to the page
+        int numberFields = recordHeader.getNumberFields();
 
-		rawDataOut.setPosition(offset);
-		offset += recordHeader.write(rawDataOut);
+        rawDataOut.setPosition(offset);
+        offset += recordHeader.write(rawDataOut);
 
-		int userData = 0;
-		for (int i = 0; i < numberFields; i++) {
+        int userData = 0;
+        for (int i = 0; i < numberFields; i++) {
 
-			// get the field header information, the input stream came from the log 
-			int newFieldStatus = StoredFieldHeader.readStatus(in);
-			int newFieldDataLength = StoredFieldHeader.readFieldDataLength(in, newFieldStatus, slotFieldSize);
-			newFieldStatus = StoredFieldHeader.setFixed(newFieldStatus, false);
+            // get the field header information, the input stream came from the log 
+            int newFieldStatus = StoredFieldHeader.readStatus(in);
+            int newFieldDataLength = StoredFieldHeader.readFieldDataLength(in, newFieldStatus, slotFieldSize);
+            newFieldStatus = StoredFieldHeader.setFixed(newFieldStatus, false);
 
-			rawDataOut.setPosition(offset);
-			offset += StoredFieldHeader.write(rawDataOut, newFieldStatus, newFieldDataLength, slotFieldSize);
+            rawDataOut.setPosition(offset);
+            offset += StoredFieldHeader.write(rawDataOut, newFieldStatus, newFieldDataLength, slotFieldSize);
 
-			if (newFieldDataLength != 0) {
-				in.readFully(pageData, offset, newFieldDataLength);
-				offset += newFieldDataLength;
-				userData += newFieldDataLength;
-			}
-		}
+            if (newFieldDataLength != 0) {
+                in.readFully(pageData, offset, newFieldDataLength);
+                offset += newFieldDataLength;
+                userData += newFieldDataLength;
+            }
+        }
 
-		int dataWritten = offset - firstFreeByte;
+        int dataWritten = offset - firstFreeByte;
 
-		freeSpace     -= dataWritten;
-		firstFreeByte += dataWritten;
+        freeSpace     -= dataWritten;
+        firstFreeByte += dataWritten;
 
-		int reservedSpace = 0;
-		if (minimumRecordSize > 0) {
+        int reservedSpace = 0;
+        if (minimumRecordSize > 0) {
 
-			// make sure we reserve the minimumRecordSize for the user data 
-			// portion of the record excluding the space we took on recordHeader 
-			// and fieldHeaders.
-			if (userData < minimumRecordSize) {
-				reservedSpace =  minimumRecordSize - userData;
-				freeSpace     -= reservedSpace;
-				firstFreeByte += reservedSpace;
-			}
-		}
+            // make sure we reserve the minimumRecordSize for the user data 
+            // portion of the record excluding the space we took on recordHeader 
+            // and fieldHeaders.
+            if (userData < minimumRecordSize) {
+                reservedSpace =  minimumRecordSize - userData;
+                freeSpace     -= reservedSpace;
+                firstFreeByte += reservedSpace;
+            }
+        }
 
         if (isOverflowPage())
         {
@@ -7244,8 +7244,8 @@ public class StoredPage extends CachedPage
             }
         }
 
-		// update the slot table
-		addSlotEntry(slot, recordOffset, dataWritten, reservedSpace);
+        // update the slot table
+        addSlotEntry(slot, recordOffset, dataWritten, reservedSpace);
 
         if (SanityManager.DEBUG)
         {
@@ -7264,375 +7264,375 @@ public class StoredPage extends CachedPage
             }
         }
 
-		if ((firstFreeByte > getSlotOffset(slot)) || (freeSpace < 0))
+        if ((firstFreeByte > getSlotOffset(slot)) || (freeSpace < 0))
         {
-			throw dataFactory.markCorrupt(
+            throw dataFactory.markCorrupt(
                 StandardException.newException(
                     SQLState.DATA_CORRUPT_PAGE, getPageId()));
         }
 
-	}
+    }
 
 
-	private void storeRecordForUpdate(int slot, ObjectInput in)
-		throws StandardException, IOException
-	{
-		// set up to read the in-memory record header back from the record
-		StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
-		StoredRecordHeader newRecorderHeader = new StoredRecordHeader();
-
-		// recordHeader represents the new version of the record header.
-		newRecorderHeader.read(in);
-
-		int oldFieldCount = recordHeader.getNumberFields();
-		int newFieldCount = newRecorderHeader.getNumberFields();
-
-		int startField = recordHeader.getFirstField();
-		if (SanityManager.DEBUG) {
-			if (startField != newRecorderHeader.getFirstField())
-				SanityManager.THROWASSERT("First field changed from " + startField + " to " + newRecorderHeader.getFirstField());
-		}
-
-		// See if the number of fields shrunk, if so clear out the old data
-		// we do this first to stop shuffling about the fields that are going to
-		// be deleted during the update of the earlier fields. This case occurs
-		// on an update that changes the row to be overflowed.
-		if (newFieldCount < oldFieldCount) {
-
-			int oldDataStartingOffset = getFieldOffset(slot, startField + newFieldCount);
-
-			// calculate the length of the to be deleted fields
-			int deleteLength = getRecordOffset(slot) + getRecordPortionLength(slot) - oldDataStartingOffset;
-
-			// we are updateing to zero bytes!
-			updateRecordPortionLength(slot, -(deleteLength), deleteLength);
-		}
-
-		// write each field out to the page
-
-		int startingOffset = getRecordOffset(slot);
-		int newOffset = startingOffset;
-		int oldOffset = startingOffset;
-
-		// see which field we get to use the reserve space
-		int reservedSpaceFieldId = newFieldCount < oldFieldCount ?
-			newFieldCount - 1 : oldFieldCount - 1;
-		reservedSpaceFieldId += startField;
-
-
-		// the new data the needs to be written at newOffset but can't until
-		// unsedSpace >= newDataToWrite.length (allowing for the header)
-		DynamicByteArrayOutputStream newDataToWrite = null;
-
-		rawDataOut.setPosition(newOffset);
-
-		// write the record header, which may change in size
-		int oldLength = recordHeader.size();
-		int newLength = newRecorderHeader.size();
-
-		int unusedSpace = oldLength; // the unused space at newOffset
-
-		// no fields, so we can eat into the reserve space
-		if (reservedSpaceFieldId < startField) // no fields
-			unusedSpace += getReservedCount(slot);
-
-		if (unusedSpace >= newLength) {
-			newRecorderHeader.write(rawDataOut);
-			newOffset += newLength;
-			unusedSpace -= newLength;
-			
-		} else {			
-
-			newDataToWrite = new DynamicByteArrayOutputStream(getPageSize());
-			newRecorderHeader.write(newDataToWrite);
-		}
-		oldOffset += oldLength;
-		int recordDelta = (newLength - oldLength);
-
-		int oldFieldStatus = 0;
-		int oldFieldDataLength = 0;
-		int newFieldStatus = 0;
-		int newFieldDataLength = 0;
-
-		int oldEndFieldExclusive = startField + oldFieldCount;
-		int newEndFieldExclusive = startField + newFieldCount;
-
-		for (int fieldId = startField; fieldId < newEndFieldExclusive; fieldId++) {
-
-			int oldFieldLength = 0;
-			if (fieldId < oldEndFieldExclusive) {
-				rawDataIn.setPosition(oldOffset);
-				oldFieldStatus = StoredFieldHeader.readStatus(rawDataIn);
-				oldFieldDataLength = StoredFieldHeader.readFieldDataLength(rawDataIn, oldFieldStatus, slotFieldSize);
-				oldFieldLength = StoredFieldHeader.size(oldFieldStatus, oldFieldDataLength, slotFieldSize)
-					+ oldFieldDataLength;
-			}
-
-			newFieldStatus = StoredFieldHeader.readStatus(in);
-			newFieldDataLength = StoredFieldHeader.readFieldDataLength(in, newFieldStatus, slotFieldSize);
-
-			// if no value was provided on an update of a field then use the old value,
-			// unless the old field didn't exist.
-			if (StoredFieldHeader.isNonexistent(newFieldStatus) && (fieldId < oldEndFieldExclusive)) {
-
-				// may need to move this old field ...
-				if ((newDataToWrite == null) || (newDataToWrite.getUsed() == 0)) {
-					// the is no old data to catch up on, is the data at
-					// the correct position already?
-					if (newOffset == oldOffset) {
-						// yes, nothing to do!!
-						if (SanityManager.DEBUG) {
-							if (unusedSpace != 0)
-							SanityManager.THROWASSERT("Unused space is out of sync, expect 0 got " + unusedSpace);
-						}
-					} else {
-						// need to shift the field left
-						if (SanityManager.DEBUG) {
-							if (unusedSpace != (oldOffset - newOffset))
-							SanityManager.THROWASSERT(
-								"Unused space is out of sync expected " + (oldOffset - newOffset) + " got " + unusedSpace);
-						}
-
-						System.arraycopy(pageData, oldOffset, pageData, newOffset, oldFieldLength);
-					}
-					newOffset += oldFieldLength;
-
-					// last field to be updated can eat into the reserve space
-					if (fieldId == reservedSpaceFieldId)
-						unusedSpace += getReservedCount(slot);
-
-				} else {
-					// there is data still to be written, just append this field to the
-					// saved data
-					int position = newDataToWrite.getPosition();
-					newDataToWrite.setPosition(position + oldFieldLength);
-					System.arraycopy(pageData, oldOffset,
-						newDataToWrite.getByteArray(), position, oldFieldLength);
-
-					unusedSpace += oldFieldLength;
-
-					// last field to be updated can eat into the reserve space
-					if (fieldId == reservedSpaceFieldId)
-						unusedSpace += getReservedCount(slot);
-
-					// attempt to write out some of what we have in the side buffer now.
-					int copyLength = moveSavedDataToPage(newDataToWrite, unusedSpace, newOffset);
-					newOffset += copyLength;
-					unusedSpace -= copyLength;
-
-				}
-				oldOffset += oldFieldLength;
-				continue;
-			}
-
-			newFieldStatus = StoredFieldHeader.setFixed(newFieldStatus, false);
-
-			int newFieldHeaderLength = StoredFieldHeader.size(newFieldStatus, newFieldDataLength, slotFieldSize);
-			int newFieldLength = newFieldHeaderLength + newFieldDataLength;
-
-			recordDelta += (newFieldLength - oldFieldLength);
-
-			// See if we can write this field now
-
-			// space available increases by the amount of the old field
-			unusedSpace += oldFieldLength;
-			oldOffset += oldFieldLength;
-
-			// last field to be updated can eat into the reserve space
-			if (fieldId == reservedSpaceFieldId)
-				unusedSpace += getReservedCount(slot);
-
-			if ((newDataToWrite != null) && (newDataToWrite.getUsed() != 0)) {
-
-				// catch up on the old data if possible
-				int copyLength = moveSavedDataToPage(newDataToWrite, unusedSpace, newOffset);
-				newOffset += copyLength;
-				unusedSpace -= copyLength;
-			}
-
-			if (((newDataToWrite == null) || (newDataToWrite.getUsed() == 0))
-				&& (unusedSpace >= newFieldHeaderLength)) {
-
-				// can fit the header in
-				rawDataOut.setPosition(newOffset);
-				newOffset += StoredFieldHeader.write(rawDataOut, newFieldStatus, newFieldDataLength, slotFieldSize);
-				unusedSpace -= newFieldHeaderLength;
-
-				if (newFieldDataLength != 0) {
-
-					// read as much as the field as possible
-					int fieldCopy = unusedSpace >= newFieldDataLength ?
-							newFieldDataLength : unusedSpace;
-
-					if (fieldCopy != 0) {
-						in.readFully(pageData, newOffset, fieldCopy);
-
-						newOffset += fieldCopy;
-						unusedSpace -= fieldCopy;
-					}
-
-
-					fieldCopy = newFieldDataLength - fieldCopy;
-					if (fieldCopy != 0) {
-						if (newDataToWrite == null)
-							newDataToWrite = new DynamicByteArrayOutputStream(newFieldLength * 2);
-
-						// append the remaining portion of the field to the saved data
-						int position = newDataToWrite.getPosition();
-						newDataToWrite.setPosition(position + fieldCopy);
-						in.readFully(newDataToWrite.getByteArray(),
-								position, fieldCopy);
-
-					}
-				}
-			} else {
-				// can't fit these header, or therefore the field, append it
-				// to the buffer.
-
-				if (newDataToWrite == null)
-					newDataToWrite = new DynamicByteArrayOutputStream(newFieldLength * 2);
-
-				StoredFieldHeader.write(newDataToWrite, newFieldStatus, newFieldDataLength, slotFieldSize);
-
-				// save the new field data
-				if (newFieldDataLength != 0) {
-					int position = newDataToWrite.getPosition();
-					newDataToWrite.setPosition(position + newFieldDataLength);
-					in.readFully(newDataToWrite.getByteArray(),
-								position, newFieldDataLength);
-				}
-			}
-		}
-
-		// at this point there may still be data left in the saved buffer
-		// but presumably we can't fit it in
-
-		int reservedDelta;
-
-		if ((newDataToWrite != null) && (newDataToWrite.getUsed() != 0)) {
-
-			// need to shift the later records down ...
-			int nextRecordOffset = startingOffset + getTotalSpace(slot);
-
-			int spaceRequiredFromFreeSpace = newDataToWrite.getUsed() - (nextRecordOffset - newOffset);
-
-			if (SanityManager.DEBUG) {
-				if (newOffset > nextRecordOffset)
-					SanityManager.THROWASSERT("data has overwritten next record - offset " + newOffset
-							+ " next record " + nextRecordOffset);
-
-				if ((spaceRequiredFromFreeSpace <= 0) || (spaceRequiredFromFreeSpace > freeSpace))
-					SanityManager.THROWASSERT("invalid space required " + spaceRequiredFromFreeSpace
-					+ " newDataToWrite.getUsed() " + newDataToWrite.getUsed()
-					+ " nextRecordOffset " + nextRecordOffset
-					+ " newOffset " + newOffset
-					+ " reservedSpaceFieldId " + reservedSpaceFieldId
-					+ " startField " + startField
-					+ " newEndFieldExclusive " + newEndFieldExclusive
-					+ " newFieldCount " + newFieldCount
-					+ " oldFieldCount " + oldFieldCount
-					+ " slot " + slot
-					+ " freeSpace " + freeSpace
-					+ " unusedSpace " + unusedSpace
-					+ " page " + getPageId());
-
-
-				if ((getReservedCount(slot) + spaceRequiredFromFreeSpace) != recordDelta)
-					SanityManager.THROWASSERT("mismatch on count: reserved " + getReservedCount(slot) +
-						"free space take " + spaceRequiredFromFreeSpace +
-						"record delta " + recordDelta);
-
-			}
-
-			if (spaceRequiredFromFreeSpace > freeSpace) {
-				throw dataFactory.markCorrupt(
+    private void storeRecordForUpdate(int slot, ObjectInput in)
+        throws StandardException, IOException
+    {
+        // set up to read the in-memory record header back from the record
+        StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+        StoredRecordHeader newRecorderHeader = new StoredRecordHeader();
+
+        // recordHeader represents the new version of the record header.
+        newRecorderHeader.read(in);
+
+        int oldFieldCount = recordHeader.getNumberFields();
+        int newFieldCount = newRecorderHeader.getNumberFields();
+
+        int startField = recordHeader.getFirstField();
+        if (SanityManager.DEBUG) {
+            if (startField != newRecorderHeader.getFirstField())
+                SanityManager.THROWASSERT("First field changed from " + startField + " to " + newRecorderHeader.getFirstField());
+        }
+
+        // See if the number of fields shrunk, if so clear out the old data
+        // we do this first to stop shuffling about the fields that are going to
+        // be deleted during the update of the earlier fields. This case occurs
+        // on an update that changes the row to be overflowed.
+        if (newFieldCount < oldFieldCount) {
+
+            int oldDataStartingOffset = getFieldOffset(slot, startField + newFieldCount);
+
+            // calculate the length of the to be deleted fields
+            int deleteLength = getRecordOffset(slot) + getRecordPortionLength(slot) - oldDataStartingOffset;
+
+            // we are updateing to zero bytes!
+            updateRecordPortionLength(slot, -(deleteLength), deleteLength);
+        }
+
+        // write each field out to the page
+
+        int startingOffset = getRecordOffset(slot);
+        int newOffset = startingOffset;
+        int oldOffset = startingOffset;
+
+        // see which field we get to use the reserve space
+        int reservedSpaceFieldId = newFieldCount < oldFieldCount ?
+            newFieldCount - 1 : oldFieldCount - 1;
+        reservedSpaceFieldId += startField;
+
+
+        // the new data the needs to be written at newOffset but can't until
+        // unsedSpace >= newDataToWrite.length (allowing for the header)
+        DynamicByteArrayOutputStream newDataToWrite = null;
+
+        rawDataOut.setPosition(newOffset);
+
+        // write the record header, which may change in size
+        int oldLength = recordHeader.size();
+        int newLength = newRecorderHeader.size();
+
+        int unusedSpace = oldLength; // the unused space at newOffset
+
+        // no fields, so we can eat into the reserve space
+        if (reservedSpaceFieldId < startField) // no fields
+            unusedSpace += getReservedCount(slot);
+
+        if (unusedSpace >= newLength) {
+            newRecorderHeader.write(rawDataOut);
+            newOffset += newLength;
+            unusedSpace -= newLength;
+            
+        } else {            
+
+            newDataToWrite = new DynamicByteArrayOutputStream(getPageSize());
+            newRecorderHeader.write(newDataToWrite);
+        }
+        oldOffset += oldLength;
+        int recordDelta = (newLength - oldLength);
+
+        int oldFieldStatus = 0;
+        int oldFieldDataLength = 0;
+        int newFieldStatus = 0;
+        int newFieldDataLength = 0;
+
+        int oldEndFieldExclusive = startField + oldFieldCount;
+        int newEndFieldExclusive = startField + newFieldCount;
+
+        for (int fieldId = startField; fieldId < newEndFieldExclusive; fieldId++) {
+
+            int oldFieldLength = 0;
+            if (fieldId < oldEndFieldExclusive) {
+                rawDataIn.setPosition(oldOffset);
+                oldFieldStatus = StoredFieldHeader.readStatus(rawDataIn);
+                oldFieldDataLength = StoredFieldHeader.readFieldDataLength(rawDataIn, oldFieldStatus, slotFieldSize);
+                oldFieldLength = StoredFieldHeader.size(oldFieldStatus, oldFieldDataLength, slotFieldSize)
+                    + oldFieldDataLength;
+            }
+
+            newFieldStatus = StoredFieldHeader.readStatus(in);
+            newFieldDataLength = StoredFieldHeader.readFieldDataLength(in, newFieldStatus, slotFieldSize);
+
+            // if no value was provided on an update of a field then use the old value,
+            // unless the old field didn't exist.
+            if (StoredFieldHeader.isNonexistent(newFieldStatus) && (fieldId < oldEndFieldExclusive)) {
+
+                // may need to move this old field ...
+                if ((newDataToWrite == null) || (newDataToWrite.getUsed() == 0)) {
+                    // the is no old data to catch up on, is the data at
+                    // the correct position already?
+                    if (newOffset == oldOffset) {
+                        // yes, nothing to do!!
+                        if (SanityManager.DEBUG) {
+                            if (unusedSpace != 0)
+                            SanityManager.THROWASSERT("Unused space is out of sync, expect 0 got " + unusedSpace);
+                        }
+                    } else {
+                        // need to shift the field left
+                        if (SanityManager.DEBUG) {
+                            if (unusedSpace != (oldOffset - newOffset))
+                            SanityManager.THROWASSERT(
+                                "Unused space is out of sync expected " + (oldOffset - newOffset) + " got " + unusedSpace);
+                        }
+
+                        System.arraycopy(pageData, oldOffset, pageData, newOffset, oldFieldLength);
+                    }
+                    newOffset += oldFieldLength;
+
+                    // last field to be updated can eat into the reserve space
+                    if (fieldId == reservedSpaceFieldId)
+                        unusedSpace += getReservedCount(slot);
+
+                } else {
+                    // there is data still to be written, just append this field to the
+                    // saved data
+                    int position = newDataToWrite.getPosition();
+                    newDataToWrite.setPosition(position + oldFieldLength);
+                    System.arraycopy(pageData, oldOffset,
+                        newDataToWrite.getByteArray(), position, oldFieldLength);
+
+                    unusedSpace += oldFieldLength;
+
+                    // last field to be updated can eat into the reserve space
+                    if (fieldId == reservedSpaceFieldId)
+                        unusedSpace += getReservedCount(slot);
+
+                    // attempt to write out some of what we have in the side buffer now.
+                    int copyLength = moveSavedDataToPage(newDataToWrite, unusedSpace, newOffset);
+                    newOffset += copyLength;
+                    unusedSpace -= copyLength;
+
+                }
+                oldOffset += oldFieldLength;
+                continue;
+            }
+
+            newFieldStatus = StoredFieldHeader.setFixed(newFieldStatus, false);
+
+            int newFieldHeaderLength = StoredFieldHeader.size(newFieldStatus, newFieldDataLength, slotFieldSize);
+            int newFieldLength = newFieldHeaderLength + newFieldDataLength;
+
+            recordDelta += (newFieldLength - oldFieldLength);
+
+            // See if we can write this field now
+
+            // space available increases by the amount of the old field
+            unusedSpace += oldFieldLength;
+            oldOffset += oldFieldLength;
+
+            // last field to be updated can eat into the reserve space
+            if (fieldId == reservedSpaceFieldId)
+                unusedSpace += getReservedCount(slot);
+
+            if ((newDataToWrite != null) && (newDataToWrite.getUsed() != 0)) {
+
+                // catch up on the old data if possible
+                int copyLength = moveSavedDataToPage(newDataToWrite, unusedSpace, newOffset);
+                newOffset += copyLength;
+                unusedSpace -= copyLength;
+            }
+
+            if (((newDataToWrite == null) || (newDataToWrite.getUsed() == 0))
+                && (unusedSpace >= newFieldHeaderLength)) {
+
+                // can fit the header in
+                rawDataOut.setPosition(newOffset);
+                newOffset += StoredFieldHeader.write(rawDataOut, newFieldStatus, newFieldDataLength, slotFieldSize);
+                unusedSpace -= newFieldHeaderLength;
+
+                if (newFieldDataLength != 0) {
+
+                    // read as much as the field as possible
+                    int fieldCopy = unusedSpace >= newFieldDataLength ?
+                            newFieldDataLength : unusedSpace;
+
+                    if (fieldCopy != 0) {
+                        in.readFully(pageData, newOffset, fieldCopy);
+
+                        newOffset += fieldCopy;
+                        unusedSpace -= fieldCopy;
+                    }
+
+
+                    fieldCopy = newFieldDataLength - fieldCopy;
+                    if (fieldCopy != 0) {
+                        if (newDataToWrite == null)
+                            newDataToWrite = new DynamicByteArrayOutputStream(newFieldLength * 2);
+
+                        // append the remaining portion of the field to the saved data
+                        int position = newDataToWrite.getPosition();
+                        newDataToWrite.setPosition(position + fieldCopy);
+                        in.readFully(newDataToWrite.getByteArray(),
+                                position, fieldCopy);
+
+                    }
+                }
+            } else {
+                // can't fit these header, or therefore the field, append it
+                // to the buffer.
+
+                if (newDataToWrite == null)
+                    newDataToWrite = new DynamicByteArrayOutputStream(newFieldLength * 2);
+
+                StoredFieldHeader.write(newDataToWrite, newFieldStatus, newFieldDataLength, slotFieldSize);
+
+                // save the new field data
+                if (newFieldDataLength != 0) {
+                    int position = newDataToWrite.getPosition();
+                    newDataToWrite.setPosition(position + newFieldDataLength);
+                    in.readFully(newDataToWrite.getByteArray(),
+                                position, newFieldDataLength);
+                }
+            }
+        }
+
+        // at this point there may still be data left in the saved buffer
+        // but presumably we can't fit it in
+
+        int reservedDelta;
+
+        if ((newDataToWrite != null) && (newDataToWrite.getUsed() != 0)) {
+
+            // need to shift the later records down ...
+            int nextRecordOffset = startingOffset + getTotalSpace(slot);
+
+            int spaceRequiredFromFreeSpace = newDataToWrite.getUsed() - (nextRecordOffset - newOffset);
+
+            if (SanityManager.DEBUG) {
+                if (newOffset > nextRecordOffset)
+                    SanityManager.THROWASSERT("data has overwritten next record - offset " + newOffset
+                            + " next record " + nextRecordOffset);
+
+                if ((spaceRequiredFromFreeSpace <= 0) || (spaceRequiredFromFreeSpace > freeSpace))
+                    SanityManager.THROWASSERT("invalid space required " + spaceRequiredFromFreeSpace
+                    + " newDataToWrite.getUsed() " + newDataToWrite.getUsed()
+                    + " nextRecordOffset " + nextRecordOffset
+                    + " newOffset " + newOffset
+                    + " reservedSpaceFieldId " + reservedSpaceFieldId
+                    + " startField " + startField
+                    + " newEndFieldExclusive " + newEndFieldExclusive
+                    + " newFieldCount " + newFieldCount
+                    + " oldFieldCount " + oldFieldCount
+                    + " slot " + slot
+                    + " freeSpace " + freeSpace
+                    + " unusedSpace " + unusedSpace
+                    + " page " + getPageId());
+
+
+                if ((getReservedCount(slot) + spaceRequiredFromFreeSpace) != recordDelta)
+                    SanityManager.THROWASSERT("mismatch on count: reserved " + getReservedCount(slot) +
+                        "free space take " + spaceRequiredFromFreeSpace +
+                        "record delta " + recordDelta);
+
+            }
+
+            if (spaceRequiredFromFreeSpace > freeSpace) {
+                throw dataFactory.markCorrupt(
                     StandardException.newException(
                         SQLState.DATA_CORRUPT_PAGE, getPageId()));
-			}
+            }
 
-			// see if this is the last record on the page, if so a simple
-			// shift of the remaining fields will sufice...
-			expandPage(nextRecordOffset, spaceRequiredFromFreeSpace);
+            // see if this is the last record on the page, if so a simple
+            // shift of the remaining fields will sufice...
+            expandPage(nextRecordOffset, spaceRequiredFromFreeSpace);
 
-			unusedSpace += spaceRequiredFromFreeSpace;
+            unusedSpace += spaceRequiredFromFreeSpace;
 
-			moveSavedDataToPage(newDataToWrite, unusedSpace, newOffset);
+            moveSavedDataToPage(newDataToWrite, unusedSpace, newOffset);
 
-			reservedDelta = -1 * getReservedCount(slot);
+            reservedDelta = -1 * getReservedCount(slot);
 
-			if (SanityManager.DEBUG) {
-				if (newDataToWrite.getUsed() != 0)
-					SanityManager.THROWASSERT("data is left in save buffer ... " + newDataToWrite.getUsed());
-			}
-		} else {
-			reservedDelta = -1 * recordDelta;
-		}
+            if (SanityManager.DEBUG) {
+                if (newDataToWrite.getUsed() != 0)
+                    SanityManager.THROWASSERT("data is left in save buffer ... " + newDataToWrite.getUsed());
+            }
+        } else {
+            reservedDelta = -1 * recordDelta;
+        }
 
-		// now reset the length in the slot entry
-		updateRecordPortionLength(slot, recordDelta, reservedDelta);
+        // now reset the length in the slot entry
+        updateRecordPortionLength(slot, recordDelta, reservedDelta);
 
-		setHeaderAtSlot(slot, newRecorderHeader);
-	}
+        setHeaderAtSlot(slot, newRecorderHeader);
+    }
 
-	private int moveSavedDataToPage(DynamicByteArrayOutputStream savedData, int unusedSpace, int pageOffset) {
-		// catch up on the old data if possible
-		if (unusedSpace > (savedData.getUsed() / 2)) {
-			// copy onto the page
-			int copyLength = unusedSpace <= savedData.getUsed() ?
-							unusedSpace : savedData.getUsed();
-			System.arraycopy(savedData.getByteArray(), 0,
-				pageData, pageOffset, copyLength);
+    private int moveSavedDataToPage(DynamicByteArrayOutputStream savedData, int unusedSpace, int pageOffset) {
+        // catch up on the old data if possible
+        if (unusedSpace > (savedData.getUsed() / 2)) {
+            // copy onto the page
+            int copyLength = unusedSpace <= savedData.getUsed() ?
+                            unusedSpace : savedData.getUsed();
+            System.arraycopy(savedData.getByteArray(), 0,
+                pageData, pageOffset, copyLength);
 
-			// fix up the saved buffer
-			savedData.discardLeft(copyLength);
+            // fix up the saved buffer
+            savedData.discardLeft(copyLength);
 
-			return copyLength;
-		}
+            return copyLength;
+        }
 
-		return 0;
-	}
+        return 0;
+    }
 
 
-	/**
-		Create the space to update a portion of a record.
-		This method ensures there is enough room to replace the
-		old data of length oldLength at the given offset, with the new data of length
-		newLength. This method does put any new data on the page, it moves old data around
-		and zeros out any old data when newLength < oldLength. This method does
-		update the information in the slot table.
+    /**
+        Create the space to update a portion of a record.
+        This method ensures there is enough room to replace the
+        old data of length oldLength at the given offset, with the new data of length
+        newLength. This method does put any new data on the page, it moves old data around
+        and zeros out any old data when newLength < oldLength. This method does
+        update the information in the slot table.
 
-		The passed in offset is the correct place to put the data
-		when this method returns, ie. it only moves data that
-		has an offset greater then this.
+        The passed in offset is the correct place to put the data
+        when this method returns, ie. it only moves data that
+        has an offset greater then this.
 
-		@exception StandardException	Standard Derby error policy
-		@exception IOException			RESOLVE
-	*/
-	private void createSpaceForUpdate(int slot, int offset, int oldLength, int newLength)
-		throws StandardException, IOException
-	{
+        @exception StandardException    Standard Derby error policy
+        @exception IOException          RESOLVE
+    */
+    private void createSpaceForUpdate(int slot, int offset, int oldLength, int newLength)
+        throws StandardException, IOException
+    {
 
-		// now replace the old data with the new data
-		if (newLength <= oldLength) {
+        // now replace the old data with the new data
+        if (newLength <= oldLength) {
 
-			// now shift the remaining data down ...
-			int diffLength = oldLength - newLength;
+            // now shift the remaining data down ...
+            int diffLength = oldLength - newLength;
 
-			// real easy
-			if (diffLength == 0)
-				return;
+            // real easy
+            if (diffLength == 0)
+                return;
 
-			// shift the remaing fields down
-			int remainingLength = 
+            // shift the remaing fields down
+            int remainingLength = 
                 shiftRemainingData(slot, offset, oldLength, newLength);
 
-			// clear the now unused data on the page
-			clearSection(offset + newLength + remainingLength, diffLength);
+            // clear the now unused data on the page
+            clearSection(offset + newLength + remainingLength, diffLength);
 
-			if (SanityManager.DEBUG) {
+            if (SanityManager.DEBUG) {
 
                 if ((getRecordPortionLength(slot) - diffLength) != 
-					((offset - getRecordOffset(slot)) + newLength + 
+                    ((offset - getRecordOffset(slot)) + newLength + 
                       remainingLength))
                 {
                     SanityManager.THROWASSERT(
@@ -7640,184 +7640,184 @@ public class StoredPage extends CachedPage
                         (getRecordPortionLength(slot) - diffLength) +
                         " that is not the same as what it actully is");
                 }
-			}
+            }
 
-			// now reset the length in the slot entry, increase the reserved space
-			updateRecordPortionLength(slot, -(diffLength), diffLength);
-			return;
-		}
+            // now reset the length in the slot entry, increase the reserved space
+            updateRecordPortionLength(slot, -(diffLength), diffLength);
+            return;
+        }
 
-		// tough case, the new field is bigger than the old field ... 
-		// first attempt, see how much space is in row private reserved space
+        // tough case, the new field is bigger than the old field ... 
+        // first attempt, see how much space is in row private reserved space
 
-		int extraLength = newLength - oldLength; 
+        int extraLength = newLength - oldLength; 
 
         // extraLength is always greater than 0.
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(extraLength > 0);
+        if (SanityManager.DEBUG)
+            SanityManager.ASSERT(extraLength > 0);
 
-		int recordReservedSpace = getReservedCount(slot);
-		int reservedDelta = 0;
+        int recordReservedSpace = getReservedCount(slot);
+        int reservedDelta = 0;
 
-		int spaceRequiredFromFreeSpace = extraLength - recordReservedSpace;
+        int spaceRequiredFromFreeSpace = extraLength - recordReservedSpace;
 
-		if (SanityManager.DEBUG) {
-			if (spaceRequiredFromFreeSpace > freeSpace)
-				SanityManager.THROWASSERT(
-                	"spaceRequiredFromFreeSpace = " +
-						spaceRequiredFromFreeSpace +
-                	";freeSpace = "                 + freeSpace     +
-                	";newLength = "                 + newLength     +
-                	";oldLength = "                 + oldLength     +
-                	";\npage= "                     + this);
-		}
+        if (SanityManager.DEBUG) {
+            if (spaceRequiredFromFreeSpace > freeSpace)
+                SanityManager.THROWASSERT(
+                    "spaceRequiredFromFreeSpace = " +
+                        spaceRequiredFromFreeSpace +
+                    ";freeSpace = "                 + freeSpace     +
+                    ";newLength = "                 + newLength     +
+                    ";oldLength = "                 + oldLength     +
+                    ";\npage= "                     + this);
+        }
 
-		if (spaceRequiredFromFreeSpace > 0) {
+        if (spaceRequiredFromFreeSpace > 0) {
             // The update requires all the reserved space + some from free space
             
-			int nextRecordOffset = getRecordOffset(slot) + getTotalSpace(slot);
+            int nextRecordOffset = getRecordOffset(slot) + getTotalSpace(slot);
 
-			// see if this is the last record on the page, if so a simple
-			// shift of the remaining fields will sufice...
-			expandPage(nextRecordOffset, spaceRequiredFromFreeSpace);
+            // see if this is the last record on the page, if so a simple
+            // shift of the remaining fields will sufice...
+            expandPage(nextRecordOffset, spaceRequiredFromFreeSpace);
 
-			// we used all the reserved space we have, set it to 0
-			reservedDelta = -(recordReservedSpace);
-		} else {
+            // we used all the reserved space we have, set it to 0
+            reservedDelta = -(recordReservedSpace);
+        } else {
             // the update uses some amount of space from the rows reserved space
 
-			// set reserved Delta to account for amount of reserved space used.
-			reservedDelta = -(extraLength);
-		}
-		
-		// just shift all remaining fields up
-		int remainingLength = shiftRemainingData(slot, offset, oldLength, newLength);
-	
-		if (SanityManager.DEBUG) {
-			if ((extraLength + reservedDelta) < 0)
-				SanityManager.THROWASSERT(
-					"total space the record occupies cannot shrink, extraLength = "
-					+ extraLength + " reservedDelta = " + reservedDelta
-					+ " spacerequired = " + spaceRequiredFromFreeSpace
-					+ " recordReservedSpace = " + recordReservedSpace);
-		}
+            // set reserved Delta to account for amount of reserved space used.
+            reservedDelta = -(extraLength);
+        }
+        
+        // just shift all remaining fields up
+        int remainingLength = shiftRemainingData(slot, offset, oldLength, newLength);
+    
+        if (SanityManager.DEBUG) {
+            if ((extraLength + reservedDelta) < 0)
+                SanityManager.THROWASSERT(
+                    "total space the record occupies cannot shrink, extraLength = "
+                    + extraLength + " reservedDelta = " + reservedDelta
+                    + " spacerequired = " + spaceRequiredFromFreeSpace
+                    + " recordReservedSpace = " + recordReservedSpace);
+        }
 
-		// now reset the length in the slot entry
-		updateRecordPortionLength(slot, extraLength, reservedDelta);
-	}
+        // now reset the length in the slot entry
+        updateRecordPortionLength(slot, extraLength, reservedDelta);
+    }
 
-	/**
-		storeField
+    /**
+        storeField
 
-		@exception StandardException	Standard Derby error policy
-		@exception IOException			RESOLVE
-	*/
-	public void storeField(LogInstant instant, int slot, int fieldNumber, ObjectInput in)
-		throws StandardException, IOException
-	{
-		logAction(instant);
+        @exception StandardException    Standard Derby error policy
+        @exception IOException          RESOLVE
+    */
+    public void storeField(LogInstant instant, int slot, int fieldNumber, ObjectInput in)
+        throws StandardException, IOException
+    {
+        logAction(instant);
 
-		int offset = getFieldOffset(slot, fieldNumber);
+        int offset = getFieldOffset(slot, fieldNumber);
 
-		// get the field header information, the input stream came from the log
-		ArrayInputStream lrdi = rawDataIn;
-		lrdi.setPosition(offset);
-		int oldFieldStatus = StoredFieldHeader.readStatus(lrdi);
-		int oldFieldDataLength = StoredFieldHeader.readFieldDataLength(lrdi, oldFieldStatus, slotFieldSize);
+        // get the field header information, the input stream came from the log
+        ArrayInputStream lrdi = rawDataIn;
+        lrdi.setPosition(offset);
+        int oldFieldStatus = StoredFieldHeader.readStatus(lrdi);
+        int oldFieldDataLength = StoredFieldHeader.readFieldDataLength(lrdi, oldFieldStatus, slotFieldSize);
 
-		int newFieldStatus = StoredFieldHeader.readStatus(in);
-		int newFieldDataLength = StoredFieldHeader.readFieldDataLength(in, newFieldStatus, slotFieldSize);
-		newFieldStatus = StoredFieldHeader.setFixed(newFieldStatus, false);
+        int newFieldStatus = StoredFieldHeader.readStatus(in);
+        int newFieldDataLength = StoredFieldHeader.readFieldDataLength(in, newFieldStatus, slotFieldSize);
+        newFieldStatus = StoredFieldHeader.setFixed(newFieldStatus, false);
 
-		int oldFieldLength = StoredFieldHeader.size(oldFieldStatus, oldFieldDataLength, slotFieldSize) + oldFieldDataLength;
-		int newFieldLength = StoredFieldHeader.size(newFieldStatus, newFieldDataLength, slotFieldSize) + newFieldDataLength;
+        int oldFieldLength = StoredFieldHeader.size(oldFieldStatus, oldFieldDataLength, slotFieldSize) + oldFieldDataLength;
+        int newFieldLength = StoredFieldHeader.size(newFieldStatus, newFieldDataLength, slotFieldSize) + newFieldDataLength;
 
-		createSpaceForUpdate(slot, offset, oldFieldLength, newFieldLength);
-		
-		rawDataOut.setPosition(offset);
-		offset += StoredFieldHeader.write(rawDataOut, newFieldStatus, newFieldDataLength, slotFieldSize);
+        createSpaceForUpdate(slot, offset, oldFieldLength, newFieldLength);
+        
+        rawDataOut.setPosition(offset);
+        offset += StoredFieldHeader.write(rawDataOut, newFieldStatus, newFieldDataLength, slotFieldSize);
 
-		if (newFieldDataLength != 0)
-			in.readFully(pageData, offset, newFieldDataLength);
-	}
+        if (newFieldDataLength != 0)
+            in.readFully(pageData, offset, newFieldDataLength);
+    }
 
-	/**
-		reserveSpaceForSlot
-		This method will reserve at least specified "spaceToReserve" bytes for the record
-		in the slot.
+    /**
+        reserveSpaceForSlot
+        This method will reserve at least specified "spaceToReserve" bytes for the record
+        in the slot.
 
-		@exception StandardException	Standard Derby error policy
-		@exception IOException			RESOLVE
-	*/
-	public void reserveSpaceForSlot(LogInstant instant, int slot, int spaceToReserve)
-		throws StandardException, IOException
-	{
-		logAction(instant);
+        @exception StandardException    Standard Derby error policy
+        @exception IOException          RESOLVE
+    */
+    public void reserveSpaceForSlot(LogInstant instant, int slot, int spaceToReserve)
+        throws StandardException, IOException
+    {
+        logAction(instant);
 
-		int extraSpace = spaceToReserve - getReservedCount(slot);
-		if (extraSpace <= 0)
-			return;
+        int extraSpace = spaceToReserve - getReservedCount(slot);
+        if (extraSpace <= 0)
+            return;
 
-		if (freeSpace < extraSpace)
-			throw new NoSpaceOnPage(isOverflowPage());
+        if (freeSpace < extraSpace)
+            throw new NoSpaceOnPage(isOverflowPage());
 
-		// need to shift the later records down ...
-		int startingOffset = getRecordOffset(slot);
-		int nextRecordOffset = startingOffset + getTotalSpace(slot);
+        // need to shift the later records down ...
+        int startingOffset = getRecordOffset(slot);
+        int nextRecordOffset = startingOffset + getTotalSpace(slot);
 
-		// see if this is the last record on the page, if so a simple
-		// shift of the remaining fields will sufice...
-		expandPage(nextRecordOffset, extraSpace);
+        // see if this is the last record on the page, if so a simple
+        // shift of the remaining fields will sufice...
+        expandPage(nextRecordOffset, extraSpace);
 
-		setSlotEntry(slot, startingOffset, getRecordPortionLength(slot), spaceToReserve);
-	}
+        setSlotEntry(slot, startingOffset, getRecordPortionLength(slot), spaceToReserve);
+    }
 
-	/**
-		Skip a field header and its data on the given stream.
-		
-		@exception IOException corrupt stream
-	*/
-	public void skipField(ObjectInput in) throws IOException {
+    /**
+        Skip a field header and its data on the given stream.
+        
+        @exception IOException corrupt stream
+    */
+    public void skipField(ObjectInput in) throws IOException {
 
 
-		int fieldStatus = StoredFieldHeader.readStatus(in);
-		int fieldDataLength = StoredFieldHeader.readFieldDataLength(in, fieldStatus, slotFieldSize);
+        int fieldStatus = StoredFieldHeader.readStatus(in);
+        int fieldDataLength = StoredFieldHeader.readFieldDataLength(in, fieldStatus, slotFieldSize);
 
-		if (fieldDataLength != 0) {
-			DataInputUtil.skipFully(in, fieldDataLength);
-		}
-	}
+        if (fieldDataLength != 0) {
+            DataInputUtil.skipFully(in, fieldDataLength);
+        }
+    }
 
-	public void skipRecord(ObjectInput in) throws IOException
-	{
+    public void skipRecord(ObjectInput in) throws IOException
+    {
 
-		StoredRecordHeader recordHeader = new StoredRecordHeader();
-		recordHeader.read(in);
+        StoredRecordHeader recordHeader = new StoredRecordHeader();
+        recordHeader.read(in);
 
-		for (int i = recordHeader.getNumberFields(); i > 0; i--) {
-			skipField(in);		
-		}
-	}
+        for (int i = recordHeader.getNumberFields(); i > 0; i--) {
+            skipField(in);      
+        }
+    }
 
-	/**
-		Shift data within a record to account for an update.
+    /**
+        Shift data within a record to account for an update.
 
-		@param offset  Offset where the update starts, need not be on a field boundry.
-		@param oldLength length of the data being replaced
-		@param newLength length of the data replacing the old data
+        @param offset  Offset where the update starts, need not be on a field boundry.
+        @param oldLength length of the data being replaced
+        @param newLength length of the data replacing the old data
 
-		@return the length of the data in the record after the replaced data.
-	*/
-	private int shiftRemainingData(int slot, int offset, int oldLength, int newLength) 
-		throws IOException
-	{
+        @return the length of the data in the record after the replaced data.
+    */
+    private int shiftRemainingData(int slot, int offset, int oldLength, int newLength) 
+        throws IOException
+    {
 
-		// length of valid data remaining in the record after the portion that
-		// is being replaced.
-		int remainingLength = (getRecordOffset(slot) + getRecordPortionLength(slot)) - 
-											(offset + oldLength);
+        // length of valid data remaining in the record after the portion that
+        // is being replaced.
+        int remainingLength = (getRecordOffset(slot) + getRecordPortionLength(slot)) - 
+                                            (offset + oldLength);
 
-		if (SanityManager.DEBUG) {
+        if (SanityManager.DEBUG) {
 
             if (!(((remainingLength >= 0) && 
                    (getRecordPortionLength(slot) >= oldLength))))
@@ -7830,219 +7830,219 @@ public class StoredPage extends CachedPage
                     " getRecordPortionLength(" + slot + ") = " + 
                         getRecordPortionLength(slot));
             }
-		}
-
-		if (remainingLength != 0) {
-			System.arraycopy(pageData, offset + oldLength,
-							 pageData, offset + newLength, remainingLength);
-		}
-
-		return remainingLength;
-
-	}
-
-	/**
-		Set the deleted status
-
-		@exception StandardException	Standard Derby error policy
-		@exception IOException			RESOLVE
-		@see BasePage#setDeleteStatus
-	*/
-	public void setDeleteStatus(LogInstant instant, int slot, boolean delete)
-		throws StandardException, IOException 
-	{
-
-		logAction(instant);
-
-		deletedRowCount += super.setDeleteStatus(slot, delete);
-		headerOutOfDate = true;
-
-		int offset = getRecordOffset(slot);
-		StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
-
-		rawDataOut.setPosition(offset);
-		recordHeader.write(logicalDataOut);
-	}
-
-	/**
-		get record count without checking for latch
-	*/
-	protected int internalDeletedRecordCount()
-	{
-		return deletedRowCount;
-	}
-
-	/**
-		purgeRecord from page.  Move following slots up by one.
-
-		@exception StandardException	Standard Derby error policy
-		@exception IOException			RESOLVE
-	*/
-	public void purgeRecord(LogInstant instant, int slot, int recordId)
-		throws StandardException, IOException 
-	{
-
-		logAction(instant);
-
-		// if record is marked deleted, reduce deletedRowCount
-		if (getHeaderAtSlot(slot).isDeleted())
-			deletedRowCount--;
-
-		int startByte = getRecordOffset(slot);
-		int endByte = startByte + getTotalSpace(slot) - 1;
-
-		compressPage(startByte, endByte);
-		
-		// fix up the on-page slot table
-		removeSlotEntry(slot);
-
-		// fix up the in-memory version
-		removeAndShiftDown(slot);
-	}
-
-	/*
-	**
-	*/
-
-	/**
-		Get the offset of the field header of the given field for
-		the record in the given slot.
-
-		Field number is the absolute number for the complete record, not just this portion.
-		E.g. if this is a record portion that starts at field 3 and has 6 fields
-		then the second field on this *page* has field number 4.
-	*/
-	private int getFieldOffset(int slot, int fieldNumber) throws IOException
-	{
-		// RESOLVE - overflow, needs to be changed
-		int offset = getRecordOffset(slot);
-
-		StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
-
-		// get the number of fields
-		int startField = recordHeader.getFirstField();
-
-		if (SanityManager.DEBUG) {
-			int numberFields = recordHeader.getNumberFields();
-
-			if ((fieldNumber < startField) || (fieldNumber >= (startField + numberFields)))
-				SanityManager.THROWASSERT(
-					"fieldNumber: " + fieldNumber +
-					" start field: " + startField +
-					" number of fields " + numberFields);
-		}
-
-		ArrayInputStream lrdi = rawDataIn;
-
-		// skip the record header
-		lrdi.setPosition(offset + recordHeader.size());
-
-		// skip any earlier fields ...
-		for (int i = startField; i < fieldNumber; i++) {
-			skipField(lrdi);
-		}
-
-		return rawDataIn.getPosition();
-	}
-
-
-	/*
-	 * Time stamp support - this page supports time stamp
-	 */
-
-	/**
-		Get a time stamp for this page
-		@return page time stamp
-	*/		
-	public PageTimeStamp currentTimeStamp()
-	{
-		// saving the whole key would be an overkill
-		return new PageVersion(getPageNumber(), getPageVersion());
-	}
-
-	/**
-		Set given pageVersion to be the as what is on this page
-	  
-		@exception StandardException given time stamp is null or is not a time
-		stamp implementation this page knows how to deal with
-	*/
-	public void setTimeStamp(PageTimeStamp ts) throws StandardException
-	{
-		if (ts == null)
-        {
-			throw StandardException.newException(SQLState.DATA_TIME_STAMP_NULL);
         }
 
-		if (!(ts instanceof PageVersion))
+        if (remainingLength != 0) {
+            System.arraycopy(pageData, offset + oldLength,
+                             pageData, offset + newLength, remainingLength);
+        }
+
+        return remainingLength;
+
+    }
+
+    /**
+        Set the deleted status
+
+        @exception StandardException    Standard Derby error policy
+        @exception IOException          RESOLVE
+        @see BasePage#setDeleteStatus
+    */
+    public void setDeleteStatus(LogInstant instant, int slot, boolean delete)
+        throws StandardException, IOException 
+    {
+
+        logAction(instant);
+
+        deletedRowCount += super.setDeleteStatus(slot, delete);
+        headerOutOfDate = true;
+
+        int offset = getRecordOffset(slot);
+        StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+
+        rawDataOut.setPosition(offset);
+        recordHeader.write(logicalDataOut);
+    }
+
+    /**
+        get record count without checking for latch
+    */
+    protected int internalDeletedRecordCount()
+    {
+        return deletedRowCount;
+    }
+
+    /**
+        purgeRecord from page.  Move following slots up by one.
+
+        @exception StandardException    Standard Derby error policy
+        @exception IOException          RESOLVE
+    */
+    public void purgeRecord(LogInstant instant, int slot, int recordId)
+        throws StandardException, IOException 
+    {
+
+        logAction(instant);
+
+        // if record is marked deleted, reduce deletedRowCount
+        if (getHeaderAtSlot(slot).isDeleted())
+            deletedRowCount--;
+
+        int startByte = getRecordOffset(slot);
+        int endByte = startByte + getTotalSpace(slot) - 1;
+
+        compressPage(startByte, endByte);
+        
+        // fix up the on-page slot table
+        removeSlotEntry(slot);
+
+        // fix up the in-memory version
+        removeAndShiftDown(slot);
+    }
+
+    /*
+    **
+    */
+
+    /**
+        Get the offset of the field header of the given field for
+        the record in the given slot.
+
+        Field number is the absolute number for the complete record, not just this portion.
+        E.g. if this is a record portion that starts at field 3 and has 6 fields
+        then the second field on this *page* has field number 4.
+    */
+    private int getFieldOffset(int slot, int fieldNumber) throws IOException
+    {
+        // RESOLVE - overflow, needs to be changed
+        int offset = getRecordOffset(slot);
+
+        StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+
+        // get the number of fields
+        int startField = recordHeader.getFirstField();
+
+        if (SanityManager.DEBUG) {
+            int numberFields = recordHeader.getNumberFields();
+
+            if ((fieldNumber < startField) || (fieldNumber >= (startField + numberFields)))
+                SanityManager.THROWASSERT(
+                    "fieldNumber: " + fieldNumber +
+                    " start field: " + startField +
+                    " number of fields " + numberFields);
+        }
+
+        ArrayInputStream lrdi = rawDataIn;
+
+        // skip the record header
+        lrdi.setPosition(offset + recordHeader.size());
+
+        // skip any earlier fields ...
+        for (int i = startField; i < fieldNumber; i++) {
+            skipField(lrdi);
+        }
+
+        return rawDataIn.getPosition();
+    }
+
+
+    /*
+     * Time stamp support - this page supports time stamp
+     */
+
+    /**
+        Get a time stamp for this page
+        @return page time stamp
+    */      
+    public PageTimeStamp currentTimeStamp()
+    {
+        // saving the whole key would be an overkill
+        return new PageVersion(getPageNumber(), getPageVersion());
+    }
+
+    /**
+        Set given pageVersion to be the as what is on this page
+      
+        @exception StandardException given time stamp is null or is not a time
+        stamp implementation this page knows how to deal with
+    */
+    public void setTimeStamp(PageTimeStamp ts) throws StandardException
+    {
+        if (ts == null)
         {
-			throw StandardException.newException(
+            throw StandardException.newException(SQLState.DATA_TIME_STAMP_NULL);
+        }
+
+        if (!(ts instanceof PageVersion))
+        {
+            throw StandardException.newException(
                 SQLState.DATA_TIME_STAMP_ILLEGAL, ts);
         }
 
-		PageVersion pv = (PageVersion)ts;
+        PageVersion pv = (PageVersion)ts;
 
-		pv.setPageNumber(getPageNumber());
-		pv.setPageVersion(getPageVersion());
-	}
+        pv.setPageNumber(getPageNumber());
+        pv.setPageVersion(getPageVersion());
+    }
 
-	/**
-		compare given PageVersion with pageVersion on page
+    /**
+        compare given PageVersion with pageVersion on page
 
-		@param ts the page version gotton from this page via a currentTimeStamp
-				or setTimeStamp call earlier
+        @param ts the page version gotton from this page via a currentTimeStamp
+                or setTimeStamp call earlier
 
-		@return true if the same
-		@exception StandardException given time stamp not gotton from this page
-	*/
-	public boolean equalTimeStamp(PageTimeStamp ts) throws StandardException
-	{
-		if (ts == null)
-			return false;
+        @return true if the same
+        @exception StandardException given time stamp not gotton from this page
+    */
+    public boolean equalTimeStamp(PageTimeStamp ts) throws StandardException
+    {
+        if (ts == null)
+            return false;
 
-		if (!(ts instanceof PageVersion))
+        if (!(ts instanceof PageVersion))
         {
-			throw StandardException.newException(
+            throw StandardException.newException(
                 SQLState.DATA_TIME_STAMP_ILLEGAL, ts);
         }
 
-		PageVersion pv = (PageVersion)ts;
+        PageVersion pv = (PageVersion)ts;
 
-		if (pv.getPageNumber() != getPageNumber())
+        if (pv.getPageNumber() != getPageNumber())
         {
-			throw StandardException.newException(
+            throw StandardException.newException(
                 SQLState.DATA_TIME_STAMP_ILLEGAL, ts);
         }
 
-		return (pv.getPageVersion() == getPageVersion());
-	}
+        return (pv.getPageVersion() == getPageVersion());
+    }
 
-	/** debugging, print this page */
-	public String toString()
-	{
-		if (SanityManager.DEBUG)
-		{
-			if (SanityManager.DEBUG_ON("DeadlockTrace") || SanityManager.DEBUG_ON("userLockStackTrace"))
-				return "page = " + getIdentity();
+    /** debugging, print this page */
+    public String toString()
+    {
+        if (SanityManager.DEBUG)
+        {
+            if (SanityManager.DEBUG_ON("DeadlockTrace") || SanityManager.DEBUG_ON("userLockStackTrace"))
+                return "page = " + getIdentity();
 
-			String str = "---------------------------------------------------\n";
-			str += pageHeaderToString();
-			// str += slotTableToString();	// print in memory slot table
+            String str = "---------------------------------------------------\n";
+            str += pageHeaderToString();
+            // str += slotTableToString();  // print in memory slot table
 
-			// now print each row
-			for (int s = 0; s < slotsInUse; s++)
-				str += recordToString(s);
-		
-			//if (SanityManager.DEBUG_ON("dumpPageImage"))
-			{
-				str += "---------------------------------------------------\n";
-				str += pagedataToHexDump(pageData);
-				str += "---------------------------------------------------\n";
-			}
-			return str;
-		}
-		else
-			return null;
-	}
+            // now print each row
+            for (int s = 0; s < slotsInUse; s++)
+                str += recordToString(s);
+        
+            //if (SanityManager.DEBUG_ON("dumpPageImage"))
+            {
+                str += "---------------------------------------------------\n";
+                str += pagedataToHexDump(pageData);
+                str += "---------------------------------------------------\n";
+            }
+            return str;
+        }
+        else
+            return null;
+    }
 
     /**
      * Provide a hex dump of the data in the in memory version of the page.
@@ -8072,13 +8072,13 @@ public class StoredPage extends CachedPage
      *
      * <p>
      *
-	 * @return The string with the hex dump in it.
+     * @return The string with the hex dump in it.
      *
      * @param data   array of bytes to dump.
      **/
     private static String pagedataToHexDump(byte[] data)
     {
-		return org.apache.derby.iapi.util.StringUtil.hexDump(data);
+        return org.apache.derby.iapi.util.StringUtil.hexDump(data);
     }
 
     private String pageHeaderToString()
@@ -8107,17 +8107,17 @@ public class StoredPage extends CachedPage
         }
     }
 
-	private String recordToString(int slot)
-	{
-		if (SanityManager.DEBUG)
-		{
-			String str = new String();
-			try 
-			{
-				StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
-				int offset = getRecordOffset(slot);
-				int numberFields = recordHeader.getNumberFields();
-				str = "\nslot " + slot + " offset " + offset + " " +
+    private String recordToString(int slot)
+    {
+        if (SanityManager.DEBUG)
+        {
+            String str = new String();
+            try 
+            {
+                StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+                int offset = getRecordOffset(slot);
+                int numberFields = recordHeader.getNumberFields();
+                str = "\nslot " + slot + " offset " + offset + " " +
                          " recordlen " + getTotalSpace(slot) +
                          " (" + getRecordPortionLength(slot) +
                          "," + getReservedCount(slot) + ")"+
@@ -8125,354 +8125,354 @@ public class StoredPage extends CachedPage
 
                 // move offset past record header to begin of first field.
                 offset += recordHeader.size();
-				rawDataIn.setPosition(offset);
+                rawDataIn.setPosition(offset);
 
-				for (int i = 0; i < numberFields; i++)
-				{
-					int fieldStatus = StoredFieldHeader.readStatus(rawDataIn);
-					int fieldDataLength = StoredFieldHeader.readFieldDataLength(rawDataIn, fieldStatus, slotFieldSize);
-					if (fieldDataLength < 0)
-					{
-						str += "\n\tField " + i + ": offset=" + offset + " null " + 
-							StoredFieldHeader.toDebugString(fieldStatus);
-					}
-					else 
-					{
-						str += "\n\tField " + i + ": offset=" + offset + 
-							" len=" + fieldDataLength + " " + 
+                for (int i = 0; i < numberFields; i++)
+                {
+                    int fieldStatus = StoredFieldHeader.readStatus(rawDataIn);
+                    int fieldDataLength = StoredFieldHeader.readFieldDataLength(rawDataIn, fieldStatus, slotFieldSize);
+                    if (fieldDataLength < 0)
+                    {
+                        str += "\n\tField " + i + ": offset=" + offset + " null " + 
+                            StoredFieldHeader.toDebugString(fieldStatus);
+                    }
+                    else 
+                    {
+                        str += "\n\tField " + i + ": offset=" + offset + 
+                            " len=" + fieldDataLength + " " + 
                             StoredFieldHeader.toDebugString(fieldStatus);
 
-						if (StoredFieldHeader.isOverflow(fieldStatus))
-						{
-							// not likely to be a real pointer, this is most
-							// likely an old column chain where the first field
-							// is set to overflow even though the second field
-							// is the overflow pointer
-							if (i == 0 && fieldDataLength != 3) 
-							{
-								// figure out where we should go next
-								offset = rawDataIn.getPosition() + fieldDataLength;
-								long overflowPage = CompressedNumber.readLong((InputStream) rawDataIn);
-								int overflowId = CompressedNumber.readInt((InputStream) rawDataIn);
+                        if (StoredFieldHeader.isOverflow(fieldStatus))
+                        {
+                            // not likely to be a real pointer, this is most
+                            // likely an old column chain where the first field
+                            // is set to overflow even though the second field
+                            // is the overflow pointer
+                            if (i == 0 && fieldDataLength != 3) 
+                            {
+                                // figure out where we should go next
+                                offset = rawDataIn.getPosition() + fieldDataLength;
+                                long overflowPage = CompressedNumber.readLong((InputStream) rawDataIn);
+                                int overflowId = CompressedNumber.readInt((InputStream) rawDataIn);
 
-								str += "Questionable long column at (" +
-									overflowPage + "," + overflowId + ")";
-								rawDataIn.setPosition(offset);
-							}
-							else
-							{
-								// print the overflow pointer
-								long overflowPage = CompressedNumber.readLong((InputStream) rawDataIn);
-								int overflowId = CompressedNumber.readInt((InputStream) rawDataIn);
-								str += "long column at (" + overflowPage + "," + overflowId + ")";
-							}
-						}
-						else
-						{
-							// go to next field
-							offset = rawDataIn.getPosition() + fieldDataLength;
-							rawDataIn.setPosition(offset);
-						}
-					}
-				}
-				str += "\n";
+                                str += "Questionable long column at (" +
+                                    overflowPage + "," + overflowId + ")";
+                                rawDataIn.setPosition(offset);
+                            }
+                            else
+                            {
+                                // print the overflow pointer
+                                long overflowPage = CompressedNumber.readLong((InputStream) rawDataIn);
+                                int overflowId = CompressedNumber.readInt((InputStream) rawDataIn);
+                                str += "long column at (" + overflowPage + "," + overflowId + ")";
+                            }
+                        }
+                        else
+                        {
+                            // go to next field
+                            offset = rawDataIn.getPosition() + fieldDataLength;
+                            rawDataIn.setPosition(offset);
+                        }
+                    }
+                }
+                str += "\n";
 
-			}
-			catch (IOException ioe)
-			{
-				str += "\n =======      ERROR IOException  =============\n";
-				str += ioe.toString();
-			}
-			catch (StandardException se)
-			{
-				str += "\n =======      ERROR StandardException  =============\n";
-				str += se.toString();
-			}
+            }
+            catch (IOException ioe)
+            {
+                str += "\n =======      ERROR IOException  =============\n";
+                str += ioe.toString();
+            }
+            catch (StandardException se)
+            {
+                str += "\n =======      ERROR StandardException  =============\n";
+                str += se.toString();
+            }
 
-			return str;
-		}
-		else
-			return null;
-	}
+            return str;
+        }
+        else
+            return null;
+    }
 
-	/*
-	**	Overflow related methods
-	*/
+    /*
+    **  Overflow related methods
+    */
 
-	/**
-		Get the overflow page for a record that has already overflowed.
-		@exception StandardException Standard Derby error policy
-	*/
-	protected StoredPage getOverflowPage(long pageNumber) throws StandardException
-	{
+    /**
+        Get the overflow page for a record that has already overflowed.
+        @exception StandardException Standard Derby error policy
+    */
+    protected StoredPage getOverflowPage(long pageNumber) throws StandardException
+    {
 
-		StoredPage overflowPage = (StoredPage) owner.getPage(pageNumber);
-		if (overflowPage == null) {
-		}
+        StoredPage overflowPage = (StoredPage) owner.getPage(pageNumber);
+        if (overflowPage == null) {
+        }
 
-		// RESOLVE-LR
-		//if (!overflowPage.isOverflow()) {
-		//	overflowPage.unlatch();
-		//}
+        // RESOLVE-LR
+        //if (!overflowPage.isOverflow()) {
+        //  overflowPage.unlatch();
+        //}
 
-		return overflowPage;
-	}
+        return overflowPage;
+    }
 
-	/**
-		Get an empty overflow page.
-		@exception StandardException Standard Derby error policy
-	*/
-	protected BasePage getNewOverflowPage() throws StandardException
-	{
+    /**
+        Get an empty overflow page.
+        @exception StandardException Standard Derby error policy
+    */
+    protected BasePage getNewOverflowPage() throws StandardException
+    {
 
-		FileContainer myContainer = (FileContainer) containerCache.find(identity.getContainerId());
+        FileContainer myContainer = (FileContainer) containerCache.find(identity.getContainerId());
 
-		try {
-			// add an overflow page
-			return (BasePage) myContainer.addPage(owner, true);
-		} finally {
-			containerCache.release(myContainer);
-		}
-	}
+        try {
+            // add an overflow page
+            return (BasePage) myContainer.addPage(owner, true);
+        } finally {
+            containerCache.release(myContainer);
+        }
+    }
 
-	/**
-		Get the overflow slot for a record that has already overflowed.
-		@exception StandardException Standard Derby error policy
-	*/
-	protected static int getOverflowSlot(BasePage overflowPage, StoredRecordHeader recordHeader)
-		throws StandardException
-	{
+    /**
+        Get the overflow slot for a record that has already overflowed.
+        @exception StandardException Standard Derby error policy
+    */
+    protected static int getOverflowSlot(BasePage overflowPage, StoredRecordHeader recordHeader)
+        throws StandardException
+    {
 
-		int slot = overflowPage.findRecordById(
+        int slot = overflowPage.findRecordById(
                         recordHeader.getOverflowId(), Page.FIRST_SLOT_NUMBER);
 
-		if (slot < 0)
+        if (slot < 0)
         {
-			throw StandardException.newException(
+            throw StandardException.newException(
                     SQLState.DATA_SLOT_NOT_ON_PAGE);
         }
 
-		return slot;
-	}
+        return slot;
+    }
 
-	/**
-		Get a overflow page that potentially can handle a new overflowed record.
-		@exception StandardException Standard Derby error policy
-	*/
-	public BasePage getOverflowPageForInsert(
+    /**
+        Get a overflow page that potentially can handle a new overflowed record.
+        @exception StandardException Standard Derby error policy
+    */
+    public BasePage getOverflowPageForInsert(
     int                     currentSlot, 
     Object[]   row, 
     FormatableBitSet                 validColumns)
-		throws StandardException
-	{
-		return getOverflowPageForInsert(currentSlot, row, validColumns, 0);
-	}
+        throws StandardException
+    {
+        return getOverflowPageForInsert(currentSlot, row, validColumns, 0);
+    }
 
-	/**
-		@exception StandardException Standard Derby error policy
-	*/
-	public BasePage getOverflowPageForInsert(
+    /**
+        @exception StandardException Standard Derby error policy
+    */
+    public BasePage getOverflowPageForInsert(
     int                     currentSlot, 
     Object[]   row, 
     FormatableBitSet                 validColumns, 
     int                     startColumn)
-		throws StandardException
-	{
+        throws StandardException
+    {
         // System.out.println("Top of getOverflowPageForInsert");
 
-		// look at all the overflow pages that are in use on this page, up
-		// to a maximum of 5.
-		long[] pageList = new long[5];
-		int    pageCount = 0;
+        // look at all the overflow pages that are in use on this page, up
+        // to a maximum of 5.
+        long[] pageList = new long[5];
+        int    pageCount = 0;
 
-		long   currentOverflowPageNumber = 0;
+        long   currentOverflowPageNumber = 0;
 
 slotScan:
-		for (int slot = 0; (slot < slotsInUse) && (pageCount < pageList.length); slot++) {
+        for (int slot = 0; (slot < slotsInUse) && (pageCount < pageList.length); slot++) {
 
-			StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
-			if (!recordHeader.hasOverflow())
-				continue;
+            StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+            if (!recordHeader.hasOverflow())
+                continue;
 
-			long overflowPageNumber = recordHeader.getOverflowPage();
+            long overflowPageNumber = recordHeader.getOverflowPage();
 
-			if (slot == currentSlot) {
-				currentOverflowPageNumber = overflowPageNumber;
-				continue;
-			}
+            if (slot == currentSlot) {
+                currentOverflowPageNumber = overflowPageNumber;
+                continue;
+            }
 
-			for (int i = 0; i < pageCount; i++) {
-				if (pageList[i] == overflowPageNumber)
-					continue slotScan;
-			}
+            for (int i = 0; i < pageCount; i++) {
+                if (pageList[i] == overflowPageNumber)
+                    continue slotScan;
+            }
 
-			pageList[pageCount++] = overflowPageNumber;	
-		}
+            pageList[pageCount++] = overflowPageNumber; 
+        }
 
 
-		for (int i = 0; i < pageCount; i++) {
+        for (int i = 0; i < pageCount; i++) {
 
-			long pageNumber = pageList[i];
+            long pageNumber = pageList[i];
 
-			// don't look at the current overflow page
-			// used by this slot, because it the record is already
-			// overflowed then we reached here because the overflow
-			// page is full.
-			if (pageNumber == currentOverflowPageNumber)
-				continue;
-			StoredPage overflowPage = null;
-			int spaceNeeded = 0;
-			try {
-				overflowPage = getOverflowPage(pageNumber);
-				if ( overflowPage.spaceForInsert(row, validColumns,
-					spaceNeeded, startColumn, 100))
+            // don't look at the current overflow page
+            // used by this slot, because it the record is already
+            // overflowed then we reached here because the overflow
+            // page is full.
+            if (pageNumber == currentOverflowPageNumber)
+                continue;
+            StoredPage overflowPage = null;
+            int spaceNeeded = 0;
+            try {
+                overflowPage = getOverflowPage(pageNumber);
+                if ( overflowPage.spaceForInsert(row, validColumns,
+                    spaceNeeded, startColumn, 100))
                 {
                     // System.out.println("returning used page: " + pageNumber);
-					return overflowPage;
+                    return overflowPage;
                 }
 
-				spaceNeeded = ((StoredPage) overflowPage).getCurrentFreeSpace();
-				overflowPage.unlatch();
-				overflowPage = null;
-				
-			} catch (StandardException se) {
-				if (overflowPage != null) {
-					overflowPage.unlatch();
-					overflowPage = null;
-				}
+                spaceNeeded = ((StoredPage) overflowPage).getCurrentFreeSpace();
+                overflowPage.unlatch();
+                overflowPage = null;
+                
+            } catch (StandardException se) {
+                if (overflowPage != null) {
+                    overflowPage.unlatch();
+                    overflowPage = null;
+                }
 
-			}
-		}
+            }
+        }
 
-		// if we get here then we have to allocate a new overflow page
+        // if we get here then we have to allocate a new overflow page
         // System.out.println("returning new page: ");
-		return getNewOverflowPage();
-	}
-	
-	/**
-		Update an already overflowed record.
+        return getNewOverflowPage();
+    }
+    
+    /**
+        Update an already overflowed record.
 
-		@param slot Slot of the original record on its original page
-		@param row new version of the data
+        @param slot Slot of the original record on its original page
+        @param row new version of the data
 
-		@exception StandardException Standard Derby error policy
-	*/
-	protected void updateOverflowed(
+        @exception StandardException Standard Derby error policy
+    */
+    protected void updateOverflowed(
     RawTransaction          t, 
     int                     slot,
     Object[]   row, 
     FormatableBitSet                 validColumns,
     StoredRecordHeader      recordHeader)
-		throws StandardException
-	{
+        throws StandardException
+    {
 
-		BasePage overflowPage = getOverflowPage(recordHeader.getOverflowPage());
+        BasePage overflowPage = getOverflowPage(recordHeader.getOverflowPage());
 
-		try {
+        try {
 
-			int overflowSlot = getOverflowSlot(overflowPage, recordHeader);
+            int overflowSlot = getOverflowSlot(overflowPage, recordHeader);
 
-			overflowPage.doUpdateAtSlot(t, overflowSlot, recordHeader.getOverflowId(), row, validColumns);
-			overflowPage.unlatch();
-			overflowPage = null;
+            overflowPage.doUpdateAtSlot(t, overflowSlot, recordHeader.getOverflowId(), row, validColumns);
+            overflowPage.unlatch();
+            overflowPage = null;
 
-			return;
+            return;
 
-		} finally {
-			if (overflowPage != null) {
-				overflowPage.unlatch();
-				overflowPage = null;
-			}
-		}
-	}
+        } finally {
+            if (overflowPage != null) {
+                overflowPage.unlatch();
+                overflowPage = null;
+            }
+        }
+    }
 
 
-	/**
-		Update a record handle to point to an overflowed record portion.
-		Note that the record handle need not be the current page.
-		@exception StandardException Standard Derby error policy
-	*/
-	public void updateOverflowDetails(RecordHandle handle, RecordHandle overflowHandle)
-		throws StandardException
-	{
-		long handlePageNumber = handle.getPageNumber();
-		if (handlePageNumber == getPageNumber()) {
-			updateOverflowDetails(this, handle, overflowHandle);
-			return;
-		}
-		
-		StoredPage handlePage = (StoredPage) owner.getPage(handlePageNumber);
+    /**
+        Update a record handle to point to an overflowed record portion.
+        Note that the record handle need not be the current page.
+        @exception StandardException Standard Derby error policy
+    */
+    public void updateOverflowDetails(RecordHandle handle, RecordHandle overflowHandle)
+        throws StandardException
+    {
+        long handlePageNumber = handle.getPageNumber();
+        if (handlePageNumber == getPageNumber()) {
+            updateOverflowDetails(this, handle, overflowHandle);
+            return;
+        }
+        
+        StoredPage handlePage = (StoredPage) owner.getPage(handlePageNumber);
 
-		updateOverflowDetails(handlePage, handle, overflowHandle);		
-		handlePage.unlatch();
-	}
+        updateOverflowDetails(handlePage, handle, overflowHandle);      
+        handlePage.unlatch();
+    }
 
-	private void updateOverflowDetails(StoredPage handlePage, RecordHandle handle, RecordHandle overflowHandle)
-		throws StandardException {
-		// update the temp record header, this will be used in the log row ..
-		handlePage.getOverFlowRecordHeader().setOverflowDetails(overflowHandle);
+    private void updateOverflowDetails(StoredPage handlePage, RecordHandle handle, RecordHandle overflowHandle)
+        throws StandardException {
+        // update the temp record header, this will be used in the log row ..
+        handlePage.getOverFlowRecordHeader().setOverflowDetails(overflowHandle);
 
-		// Use the slot interface as we don't need a lock since
-		// the initial insert/update holds the lock on the first
-		// portion of the record.
-		int slot = handlePage.getSlotNumber(handle);
+        // Use the slot interface as we don't need a lock since
+        // the initial insert/update holds the lock on the first
+        // portion of the record.
+        int slot = handlePage.getSlotNumber(handle);
 
-		// use doUpdateAtSlot as it avoids unnecessary work in updateAtSlot the
+        // use doUpdateAtSlot as it avoids unnecessary work in updateAtSlot the
         // null indicates to this page that the record should become an 
         // overflow record
-		handlePage.doUpdateAtSlot(
+        handlePage.doUpdateAtSlot(
             owner.getTransaction(), slot, handle.getId(), 
             (Object[]) null, (FormatableBitSet) null);
-	}
+    }
 
-	/**
-		@exception StandardException Standard Derby error policy
-	*/
-	public void updateFieldOverflowDetails(RecordHandle handle, RecordHandle overflowHandle)
-		throws StandardException
-	{
-		// add an overflow field at the end of the previous record
+    /**
+        @exception StandardException Standard Derby error policy
+    */
+    public void updateFieldOverflowDetails(RecordHandle handle, RecordHandle overflowHandle)
+        throws StandardException
+    {
+        // add an overflow field at the end of the previous record
         // uses sparse rows
-		Object[] row = new Object[2];
-		row[1] = overflowHandle;
+        Object[] row = new Object[2];
+        row[1] = overflowHandle;
 
-		// we are expanding the record to have 2 fields, the second field is the overflow pointer.
-		FormatableBitSet validColumns = new FormatableBitSet(2);
-		validColumns.set(1);
+        // we are expanding the record to have 2 fields, the second field is the overflow pointer.
+        FormatableBitSet validColumns = new FormatableBitSet(2);
+        validColumns.set(1);
 
-		// Use the slot interface as we don't need a lock since
-		// the initial insert/update holds the lock on the first
-		// portion of the record.
-		int slot = getSlotNumber(handle);
+        // Use the slot interface as we don't need a lock since
+        // the initial insert/update holds the lock on the first
+        // portion of the record.
+        int slot = getSlotNumber(handle);
 
-		// use doUpdateAtSlot as it avoids unnecessary work in updateAtSlot
-		doUpdateAtSlot(owner.getTransaction(), slot, handle.getId(), row, validColumns);
-	}
+        // use doUpdateAtSlot as it avoids unnecessary work in updateAtSlot
+        doUpdateAtSlot(owner.getTransaction(), slot, handle.getId(), row, validColumns);
+    }
 
-	/**
-		@exception StandardException Standard Derby error policy
-	*/
-	public int appendOverflowFieldHeader(DynamicByteArrayOutputStream logBuffer, RecordHandle overflowHandle)
-		throws StandardException, IOException
-	{
-		int fieldStatus = StoredFieldHeader.setInitial();
-		fieldStatus = StoredFieldHeader.setOverflow(fieldStatus, true);
+    /**
+        @exception StandardException Standard Derby error policy
+    */
+    public int appendOverflowFieldHeader(DynamicByteArrayOutputStream logBuffer, RecordHandle overflowHandle)
+        throws StandardException, IOException
+    {
+        int fieldStatus = StoredFieldHeader.setInitial();
+        fieldStatus = StoredFieldHeader.setOverflow(fieldStatus, true);
 
-		long overflowPage = overflowHandle.getPageNumber();
-		int overflowId = overflowHandle.getId();
-		int fieldDataLength = CompressedNumber.sizeLong(overflowPage)
-			+ CompressedNumber.sizeInt(overflowId);
+        long overflowPage = overflowHandle.getPageNumber();
+        int overflowId = overflowHandle.getId();
+        int fieldDataLength = CompressedNumber.sizeLong(overflowPage)
+            + CompressedNumber.sizeInt(overflowId);
 
-		// write the field header to the log buffer
-		int lenWritten = StoredFieldHeader.write(logBuffer, fieldStatus, fieldDataLength, slotFieldSize);
+        // write the field header to the log buffer
+        int lenWritten = StoredFieldHeader.write(logBuffer, fieldStatus, fieldDataLength, slotFieldSize);
 
-		// write the overflow details to the log buffer
-		lenWritten += CompressedNumber.writeLong(logBuffer, overflowPage);
-		lenWritten += CompressedNumber.writeInt(logBuffer, overflowId);
+        // write the overflow details to the log buffer
+        lenWritten += CompressedNumber.writeLong(logBuffer, overflowPage);
+        lenWritten += CompressedNumber.writeInt(logBuffer, overflowId);
 
-		// this length is the same on page as in the log
-		return (lenWritten);
-	}
+        // this length is the same on page as in the log
+        return (lenWritten);
+    }
 
     protected int getSlotsInUse()
     {
@@ -8480,343 +8480,343 @@ slotScan:
     }
 
 
-	/**
-		return the max datalength allowed with the space available
-	*/
-	private int getMaxDataLength(int spaceAvailable, int overflowThreshold) {
+    /**
+        return the max datalength allowed with the space available
+    */
+    private int getMaxDataLength(int spaceAvailable, int overflowThreshold) {
 
-		if (SanityManager.DEBUG) {
-			if (overflowThreshold == 0) 
-				SanityManager.THROWASSERT("overflowThreshold cannot be 0");
-		}
+        if (SanityManager.DEBUG) {
+            if (overflowThreshold == 0) 
+                SanityManager.THROWASSERT("overflowThreshold cannot be 0");
+        }
 
-		// we need to take into considering of the overflowThreshold
-		// the overflowThreshold limits the max data length,
-		// whatever space we have left, we will not allow max data length
-		// to exceed the overflow threshold.
-		int maxThresholdSpace = totalSpace * overflowThreshold / 100;
-		int maxAvailable = 0;
+        // we need to take into considering of the overflowThreshold
+        // the overflowThreshold limits the max data length,
+        // whatever space we have left, we will not allow max data length
+        // to exceed the overflow threshold.
+        int maxThresholdSpace = totalSpace * overflowThreshold / 100;
+        int maxAvailable = 0;
 
-		if (spaceAvailable < (64 - 2))
-			maxAvailable = spaceAvailable - 2;
-		else if (spaceAvailable < (16383 - 3))
-			maxAvailable = spaceAvailable - 3;
-		else
-			maxAvailable = spaceAvailable - 5;
+        if (spaceAvailable < (64 - 2))
+            maxAvailable = spaceAvailable - 2;
+        else if (spaceAvailable < (16383 - 3))
+            maxAvailable = spaceAvailable - 3;
+        else
+            maxAvailable = spaceAvailable - 5;
 
-		return (maxAvailable > maxThresholdSpace ? maxThresholdSpace : maxAvailable);
+        return (maxAvailable > maxThresholdSpace ? maxThresholdSpace : maxAvailable);
 
-	}
+    }
 
-	/**
-		return whether the field has exceeded the max threshold for this page
-		it compares the fieldSize with the largest possible field for this page
-	*/
-	private boolean isLong(int fieldSize, int overflowThreshold) {
+    /**
+        return whether the field has exceeded the max threshold for this page
+        it compares the fieldSize with the largest possible field for this page
+    */
+    private boolean isLong(int fieldSize, int overflowThreshold) {
 
-		if (SanityManager.DEBUG) {
-			if (overflowThreshold == 0) 
-				SanityManager.THROWASSERT("overflowThreshold cannot be 0");
-		}
+        if (SanityManager.DEBUG) {
+            if (overflowThreshold == 0) 
+                SanityManager.THROWASSERT("overflowThreshold cannot be 0");
+        }
 
-		// if a field size is over the threshold, then it becomes a long column
-		int maxThresholdSize = maxFieldSize * overflowThreshold / 100;
-		return (fieldSize > maxThresholdSize);
-	}
+        // if a field size is over the threshold, then it becomes a long column
+        int maxThresholdSize = maxFieldSize * overflowThreshold / 100;
+        return (fieldSize > maxThresholdSize);
+    }
 
-	/**
-		Perform an update.
+    /**
+        Perform an update.
 
-		@exception StandardException Standard Derby policy
-	*/
-	public void doUpdateAtSlot(
+        @exception StandardException Standard Derby policy
+    */
+    public void doUpdateAtSlot(
     RawTransaction          t, 
     int                     slot, 
     int                     id, 
     Object[]                row, 
     FormatableBitSet                 validColumns)
-		throws StandardException
-	{
-		// If this is a head page, the recordHandle is the head row handle.
-		// If this is not a head page, we are calling updateAtSlot inside some
-		// convoluted loop that updates an overflow chain.  There is nothing we
-		// can doing about it anyway.
-		RecordHandle headRowHandle = 
+        throws StandardException
+    {
+        // If this is a head page, the recordHandle is the head row handle.
+        // If this is not a head page, we are calling updateAtSlot inside some
+        // convoluted loop that updates an overflow chain.  There is nothing we
+        // can doing about it anyway.
+        RecordHandle headRowHandle = 
             isOverflowPage() ? null : getRecordHandleAtSlot(slot); 
-		
-		// RESOLVE: djd/yyz what does a null row means? (sku)
-		if (row == null) 
+        
+        // RESOLVE: djd/yyz what does a null row means? (sku)
+        if (row == null) 
         {
-			owner.getActionSet().actionUpdate(
+            owner.getActionSet().actionUpdate(
                 t, this, slot, id, row, validColumns, -1, 
                 (DynamicByteArrayOutputStream) null, -1, headRowHandle);
 
-			return;
-		}
+            return;
+        }
 
-		// startColumn is the first column to be updated.
-		int startColumn = RowUtil.nextColumn(row, validColumns, 0);
-		if (startColumn == -1)
-			return;
+        // startColumn is the first column to be updated.
+        int startColumn = RowUtil.nextColumn(row, validColumns, 0);
+        if (startColumn == -1)
+            return;
 
-		if (SanityManager.DEBUG)
-		{
-			// make sure that if N bits are set in the validColumns that
-			// exactly N columns are passed in via the row array.
-			if (!isOverflowPage() && validColumns != null)
-			{
-				if (RowUtil.getNumberOfColumns(-1, validColumns) > row.length)
-					SanityManager.THROWASSERT("updating slot " + slot + 
-						 " on page " + getIdentity() + " " +
-						  RowUtil.getNumberOfColumns(-1, validColumns) + 
-						  " bits are set in validColumns but only " +
-						  row.length + " columns in row[]");
-			}
-		}
-
-
-		// Keep track of row shrinkage in the head row piece.  If any row piece
-		// shrinks, file a post commit work to clear all reserved space for the
-		// entire row chain.
-		boolean rowHasReservedSpace = false; 
-
-		StoredPage curPage = this;
-		for (;;) 
+        if (SanityManager.DEBUG)
         {
-			StoredRecordHeader rh = curPage.getHeaderAtSlot(slot);
+            // make sure that if N bits are set in the validColumns that
+            // exactly N columns are passed in via the row array.
+            if (!isOverflowPage() && validColumns != null)
+            {
+                if (RowUtil.getNumberOfColumns(-1, validColumns) > row.length)
+                    SanityManager.THROWASSERT("updating slot " + slot + 
+                         " on page " + getIdentity() + " " +
+                          RowUtil.getNumberOfColumns(-1, validColumns) + 
+                          " bits are set in validColumns but only " +
+                          row.length + " columns in row[]");
+            }
+        }
 
-			int startField          = rh.getFirstField(); 
-			int endFieldExclusive   = startField + rh.getNumberFields();
 
-			// curPage contains column[startField] to column[endFieldExclusive-1]
+        // Keep track of row shrinkage in the head row piece.  If any row piece
+        // shrinks, file a post commit work to clear all reserved space for the
+        // entire row chain.
+        boolean rowHasReservedSpace = false; 
 
-			// Need to cope with an update that is increasing the number of 
+        StoredPage curPage = this;
+        for (;;) 
+        {
+            StoredRecordHeader rh = curPage.getHeaderAtSlot(slot);
+
+            int startField          = rh.getFirstField(); 
+            int endFieldExclusive   = startField + rh.getNumberFields();
+
+            // curPage contains column[startField] to column[endFieldExclusive-1]
+
+            // Need to cope with an update that is increasing the number of 
             // columns.  If this occurs we want to make sure that we perform a 
             // single update to the last portion of a record, and not an update
             // of the current columns and then an update to append a column.
 
-			long nextPage        = -1;
-			int  realStartColumn = -1;
-			int  realSpaceOnPage = -1;
+            long nextPage        = -1;
+            int  realStartColumn = -1;
+            int  realSpaceOnPage = -1;
 
-			if (!rh.hasOverflow() || 
+            if (!rh.hasOverflow() || 
                 ((startColumn >= startField) && 
                  (startColumn <  endFieldExclusive))) 
-			{
-				boolean                 hitLongColumn;
-				int                     nextColumn      = -1;
-				Object[]   savedFields     = null;
-				DynamicByteArrayOutputStream  logBuffer       = null;
+            {
+                boolean                 hitLongColumn;
+                int                     nextColumn      = -1;
+                Object[]   savedFields     = null;
+                DynamicByteArrayOutputStream  logBuffer       = null;
 
-				do 
+                do 
                 {
-					try 
+                    try 
                     {
-						// Update this portion of the record.
-						// Pass in headRowHandle in case we are to update any
-						// long column and they need to be cleaned up by post
-						// commit processing.  We don't want to purge the
-						// columns right now because in order to reclaim the
-						// page, we need to remove them.  But it would be bad
-						// to remove them now because the transaction may not
-						// commit for a long time.  We can do both purging of
-						// the long column and page removal together in the
-						// post commit.
-						nextColumn = 
+                        // Update this portion of the record.
+                        // Pass in headRowHandle in case we are to update any
+                        // long column and they need to be cleaned up by post
+                        // commit processing.  We don't want to purge the
+                        // columns right now because in order to reclaim the
+                        // page, we need to remove them.  But it would be bad
+                        // to remove them now because the transaction may not
+                        // commit for a long time.  We can do both purging of
+                        // the long column and page removal together in the
+                        // post commit.
+                        nextColumn = 
                             owner.getActionSet().actionUpdate(
                                 t, curPage, slot, id, row, validColumns, 
-							    realStartColumn, logBuffer, 
+                                realStartColumn, logBuffer, 
                                 realSpaceOnPage, headRowHandle);
 
-						hitLongColumn = false;
+                        hitLongColumn = false;
 
-					} 
+                    } 
                     catch (LongColumnException lce) 
                     {
-	
-						if (lce.getRealSpaceOnPage() == -1) 
+    
+                        if (lce.getRealSpaceOnPage() == -1) 
                         {
-							// an update that has caused the row to increase 
+                            // an update that has caused the row to increase 
                             // in size *and* push some fields off the page 
                             // that need to be inserted in an overflow page
 
-							// no need to make a copy as we are going to use 
+                            // no need to make a copy as we are going to use 
                             // this buffer right away
-							logBuffer = lce.getLogBuffer();
+                            logBuffer = lce.getLogBuffer();
 
-							savedFields     = 
+                            savedFields     = 
                                 (Object[]) lce.getColumn();
                             
-							realStartColumn = lce.getNextColumn();
-							realSpaceOnPage = -1;
+                            realStartColumn = lce.getNextColumn();
+                            realSpaceOnPage = -1;
 
-							hitLongColumn   = true;
+                            hitLongColumn   = true;
 
-							continue;
-						}
+                            continue;
+                        }
 
-						
-						// we caught a real long column exception
-						// three things should happen here:
-						// 1. insert the long column into overflow pages.
-						// 2. append the overflow field header in the main chain.
-						// 3. continue the update in the main data chain.
-						logBuffer = 
+                        
+                        // we caught a real long column exception
+                        // three things should happen here:
+                        // 1. insert the long column into overflow pages.
+                        // 2. append the overflow field header in the main chain.
+                        // 3. continue the update in the main data chain.
+                        logBuffer = 
                             new DynamicByteArrayOutputStream(lce.getLogBuffer());
 
-						// step 1: insert the long column ... if this update 
+                        // step 1: insert the long column ... if this update 
                         // operation rolls back, purge the after image column 
                         // chain and reclaim the overflow page because the 
                         // whole chain will be orphaned anyway. 
-						RecordHandle longColumnHandle =
-							insertLongColumn(
+                        RecordHandle longColumnHandle =
+                            insertLongColumn(
                                 curPage, lce, Page.INSERT_UNDO_WITH_PURGE);
 
-						// step 2: append overflow field header to log buffer
-						int overflowFieldLen = 0;
-						try 
+                        // step 2: append overflow field header to log buffer
+                        int overflowFieldLen = 0;
+                        try 
                         {
-							overflowFieldLen +=
-								appendOverflowFieldHeader(
+                            overflowFieldLen +=
+                                appendOverflowFieldHeader(
                                     logBuffer, longColumnHandle);
 
-						} 
+                        } 
                         catch (IOException ioe) 
                         {
-							throw StandardException.newException(
+                            throw StandardException.newException(
                                 SQLState.DATA_UNEXPECTED_EXCEPTION, ioe);
-						}
+                        }
 
-						// step 3: continue the insert in the main data chain
-						// need to pass the log buffer, and start column to the
+                        // step 3: continue the insert in the main data chain
+                        // need to pass the log buffer, and start column to the
                         // next insert.
-						realStartColumn = lce.getNextColumn() + 1;
-						realSpaceOnPage = lce.getRealSpaceOnPage() - overflowFieldLen;
-						hitLongColumn = true;
+                        realStartColumn = lce.getNextColumn() + 1;
+                        realSpaceOnPage = lce.getRealSpaceOnPage() - overflowFieldLen;
+                        hitLongColumn = true;
 
-					}
+                    }
 
-				} while (hitLongColumn);
+                } while (hitLongColumn);
 
 
-				// See if we completed all the columns that are on this page.
-				int validColumnsSize = 
+                // See if we completed all the columns that are on this page.
+                int validColumnsSize = 
                     (validColumns == null) ? 0 : validColumns.getLength();
 
-				if (nextColumn != -1) 
+                if (nextColumn != -1) 
                 {
 
-					if (SanityManager.DEBUG) 
+                    if (SanityManager.DEBUG) 
                     {
-						// note nextColumn might be less than the the first 
+                        // note nextColumn might be less than the the first 
                         // column we started updating. This is because the 
                         // update might force the record header to grow and 
                         // push fields before the one we are updating off the 
                         // page and into this insert.
 
-						if ((nextColumn < startField) || 
+                        if ((nextColumn < startField) || 
                             (rh.hasOverflow() && (nextColumn >= endFieldExclusive)))
                         {
-							SanityManager.THROWASSERT(
+                            SanityManager.THROWASSERT(
                                 "nextColumn out of range = " + nextColumn +
-								" expected between " + 
+                                " expected between " + 
                                 startField + " and " + endFieldExclusive);
                         }
-					}
+                    }
 
-					// Need to insert rows from nextColumn to endFieldExclusive 
+                    // Need to insert rows from nextColumn to endFieldExclusive 
                     // onto a new overflow page.
-					// If the column is not being updated we
-					// pick it up from the current page. If it is being updated
-					// we take it from the new value.
-					int possibleLastFieldExclusive = endFieldExclusive;
+                    // If the column is not being updated we
+                    // pick it up from the current page. If it is being updated
+                    // we take it from the new value.
+                    int possibleLastFieldExclusive = endFieldExclusive;
                     
-					if (!rh.hasOverflow()) 
+                    if (!rh.hasOverflow()) 
                     {
-						// we might be adding a field here
-						if (validColumns == null) 
+                        // we might be adding a field here
+                        if (validColumns == null) 
                         {
-							if (row.length > possibleLastFieldExclusive)
-								possibleLastFieldExclusive = row.length;
-						} 
+                            if (row.length > possibleLastFieldExclusive)
+                                possibleLastFieldExclusive = row.length;
+                        } 
                         else 
                         {
-							if (validColumnsSize > possibleLastFieldExclusive)
-								possibleLastFieldExclusive = validColumnsSize;
-						}
-					}
+                            if (validColumnsSize > possibleLastFieldExclusive)
+                                possibleLastFieldExclusive = validColumnsSize;
+                        }
+                    }
 
 
                     // use a sparse row
-					Object[] newRow = 
+                    Object[] newRow = 
                         new Object[possibleLastFieldExclusive];
 
-					FormatableBitSet  newColumnList = 
+                    FormatableBitSet  newColumnList = 
                         new FormatableBitSet(possibleLastFieldExclusive);
 
-					ByteArrayOutputStream fieldStream = null;
+                    ByteArrayOutputStream fieldStream = null;
 
-					for (int i = nextColumn; i < possibleLastFieldExclusive; i++) 
+                    for (int i = nextColumn; i < possibleLastFieldExclusive; i++) 
                     {
-						if ((validColumns == null) || 
+                        if ((validColumns == null) || 
                             (validColumnsSize > i && validColumns.isSet(i))) 
                         {
-							newColumnList.set(i);
-							// use the new value
-							newRow[i] = RowUtil.getColumn(row, validColumns, i);
+                            newColumnList.set(i);
+                            // use the new value
+                            newRow[i] = RowUtil.getColumn(row, validColumns, i);
 
-						}
+                        }
                         else if (i < endFieldExclusive) 
                         {
-							newColumnList.set(i);
+                            newColumnList.set(i);
 
-							// use the old value
-							newRow[i] = savedFields[i - nextColumn];
-						}
-					}
+                            // use the old value
+                            newRow[i] = savedFields[i - nextColumn];
+                        }
+                    }
 
-					RecordHandle handle = curPage.getRecordHandleAtSlot(slot);
+                    RecordHandle handle = curPage.getRecordHandleAtSlot(slot);
 
-					// If the portion we just updated is the last portion then 
+                    // If the portion we just updated is the last portion then 
                     // there cannot be any updates to do.
-					if (rh.hasOverflow()) 
+                    if (rh.hasOverflow()) 
                     {
-						// We have to carry across the overflow information
-						// from the current record, if any.
-						nextPage = rh.getOverflowPage();
-						id = rh.getOverflowId();
+                        // We have to carry across the overflow information
+                        // from the current record, if any.
+                        nextPage = rh.getOverflowPage();
+                        id = rh.getOverflowId();
 
-						// find the next starting column before unlatching page
-						startColumn = 
+                        // find the next starting column before unlatching page
+                        startColumn = 
                             RowUtil.nextColumn(
                                 row, validColumns, endFieldExclusive);
-					} 
+                    } 
                     else 
                     {
-						startColumn = -1;
-						nextPage = 0;
-					}
+                        startColumn = -1;
+                        nextPage = 0;
+                    }
 
 
-					// After the update is done, see if this row piece has
-					// shrunk in curPage if no other row pieces have shrunk so
-					// far.  In head page, need to respect minimumRecordSize.
-					// In overflow page entire row needs to respect
+                    // After the update is done, see if this row piece has
+                    // shrunk in curPage if no other row pieces have shrunk so
+                    // far.  In head page, need to respect minimumRecordSize.
+                    // In overflow page entire row needs to respect
                     // StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE.
-					// Don't bother with temp container.
-					if (!rowHasReservedSpace && headRowHandle != null &&
-						curPage != null && !owner.isTemporaryContainer())
-					{
-						rowHasReservedSpace = 
+                    // Don't bother with temp container.
+                    if (!rowHasReservedSpace && headRowHandle != null &&
+                        curPage != null && !owner.isTemporaryContainer())
+                    {
+                        rowHasReservedSpace = 
                             curPage.checkRowReservedSpace(slot);
-					}
+                    }
 
 
-					// insert the record portion on a new overflow page at slot
+                    // insert the record portion on a new overflow page at slot
                     // 0 this will automatically handle any overflows in
-					// this new portion
+                    // this new portion
 
-					// BasePage op = getNewOverflowPage();
+                    // BasePage op = getNewOverflowPage();
 
                     BasePage op = 
                         curPage.getOverflowPageForInsert(
@@ -8825,122 +8825,122 @@ slotScan:
                             newColumnList,
                             nextColumn);
 
-					// We have all the information from this page so unlatch it
-					if (curPage != this) 
+                    // We have all the information from this page so unlatch it
+                    if (curPage != this) 
                     {
-						curPage.unlatch();
-						curPage = null;
-					}
+                        curPage.unlatch();
+                        curPage = null;
+                    }
 
-					byte mode = Page.INSERT_OVERFLOW;
-					if (nextPage != 0)
-						mode |= Page.INSERT_FOR_SPLIT;
+                    byte mode = Page.INSERT_OVERFLOW;
+                    if (nextPage != 0)
+                        mode |= Page.INSERT_FOR_SPLIT;
 
-					RecordHandle nextPortionHandle =
-						nextPage == 0 ? null :
-						owner.makeRecordHandle(nextPage, id);
+                    RecordHandle nextPortionHandle =
+                        nextPage == 0 ? null :
+                        owner.makeRecordHandle(nextPage, id);
 
-					// RESOLVED (sku):  even though we would like to roll back 
+                    // RESOLVED (sku):  even though we would like to roll back 
                     // these inserts with PURGE rather than with delete, 
                     // we have to delete because if we purge the last row
-					// from an overflow page, the purge will queue a post 
+                    // from an overflow page, the purge will queue a post 
                     // commit to remove the page.
-					// While this is OK with long columns, we cannot do this 
+                    // While this is OK with long columns, we cannot do this 
                     // for long rows because long row overflow pages can be 
                     // shared by more than one long rows, and thus it is unsafe
-					// to remove the page without first latching the head page.
+                    // to remove the page without first latching the head page.
                     // However, the insert log record do not have the head 
                     // row's page number so the rollback cannot put that
-					// information into the post commit work.
-					RecordHandle portionHandle =
-						op.insertAllowOverflow(
+                    // information into the post commit work.
+                    RecordHandle portionHandle =
+                        op.insertAllowOverflow(
                             0, newRow, newColumnList, nextColumn, mode, 100, 
                             nextPortionHandle);
 
-					// Update the previous record header to point to new portion
-					if (curPage == this)
-						updateOverflowDetails(this, handle, portionHandle);
-					else
-						updateOverflowDetails(handle, portionHandle);
-					op.unlatch();
-				} 
+                    // Update the previous record header to point to new portion
+                    if (curPage == this)
+                        updateOverflowDetails(this, handle, portionHandle);
+                    else
+                        updateOverflowDetails(handle, portionHandle);
+                    op.unlatch();
+                } 
                 else 
                 {
 
-					// See earlier comments on checking row reserved space.
-					if (!rowHasReservedSpace    && 
+                    // See earlier comments on checking row reserved space.
+                    if (!rowHasReservedSpace    && 
                         headRowHandle != null   &&
-						curPage != null         && 
+                        curPage != null         && 
                         !owner.isTemporaryContainer()) 
                     {
-						rowHasReservedSpace = 
+                        rowHasReservedSpace = 
                             curPage.checkRowReservedSpace(slot);
-					}
+                    }
 
 
-					// find the next starting column before we unlatch the page
-					startColumn = 
+                    // find the next starting column before we unlatch the page
+                    startColumn = 
                         rh.hasOverflow() ? 
                             RowUtil.nextColumn(
                                 row, validColumns, endFieldExclusive) : -1;
-				}
+                }
 
-				// have we completed this update?
-				if (startColumn == -1) {
+                // have we completed this update?
+                if (startColumn == -1) {
 
-					if ((curPage != this) && (curPage != null))
-						curPage.unlatch();
-					break;		// break out of the for loop
-				}
-			}
+                    if ((curPage != this) && (curPage != null))
+                        curPage.unlatch();
+                    break;      // break out of the for loop
+                }
+            }
 
-			if (nextPage == -1) 
+            if (nextPage == -1) 
             {
-				if (SanityManager.DEBUG) 
+                if (SanityManager.DEBUG) 
                 {
-					SanityManager.ASSERT(
+                    SanityManager.ASSERT(
                         curPage != null, 
                         "Current page is null be no overflow information has been obtained");
-				}
+                }
 
-				// Get the next page info while we still have the page
-				// latched.
-				nextPage = rh.getOverflowPage();
-				id = rh.getOverflowId();
-			}
-			
-			if ((curPage != this) && (curPage != null))
-				curPage.unlatch();
+                // Get the next page info while we still have the page
+                // latched.
+                nextPage = rh.getOverflowPage();
+                id = rh.getOverflowId();
+            }
+            
+            if ((curPage != this) && (curPage != null))
+                curPage.unlatch();
 
-			// get the next portion page and find the correct slot
-			curPage = (StoredPage) owner.getPage(nextPage);
+            // get the next portion page and find the correct slot
+            curPage = (StoredPage) owner.getPage(nextPage);
 
-			if (SanityManager.DEBUG)
+            if (SanityManager.DEBUG)
             {
-				SanityManager.ASSERT(
+                SanityManager.ASSERT(
                     curPage.isOverflowPage(), 
                     "following row chain gets a non-overflow page");
             }
 
-			slot = curPage.findRecordById(id, FIRST_SLOT_NUMBER);
-		}
+            slot = curPage.findRecordById(id, FIRST_SLOT_NUMBER);
+        }
 
-		// Back to the head page.  Get rid of all reserved space in the entire
-		// row post commit.
-		if (rowHasReservedSpace)
-		{
-			RawTransaction rxact = (RawTransaction)owner.getTransaction();
+        // Back to the head page.  Get rid of all reserved space in the entire
+        // row post commit.
+        if (rowHasReservedSpace)
+        {
+            RawTransaction rxact = (RawTransaction)owner.getTransaction();
 
-			ReclaimSpace work = 
-				new ReclaimSpace(ReclaimSpace.ROW_RESERVE,
-								 headRowHandle, 
-								 rxact.getDataFactory(), true);
-			rxact.addPostCommitWork(work);
-		}
-	}
+            ReclaimSpace work = 
+                new ReclaimSpace(ReclaimSpace.ROW_RESERVE,
+                                 headRowHandle, 
+                                 rxact.getDataFactory(), true);
+            rxact.addPostCommitWork(work);
+        }
+    }
 
-	/**
-	 */
+    /**
+     */
 
     /**
      * See if reserved space should be reclaimed for the input row.
@@ -8953,124 +8953,124 @@ slotScan:
      *
      * @return true if space should be reclaimed from this row post commit.
      **/
-	private boolean checkRowReservedSpace(int slot) throws StandardException
-	{
-		boolean rowHasReservedSpace = false;
+    private boolean checkRowReservedSpace(int slot) throws StandardException
+    {
+        boolean rowHasReservedSpace = false;
 
-		try 
+        try 
         {
-			int shrinkage = getReservedCount(slot);
+            int shrinkage = getReservedCount(slot);
 
-			// Only reclaim reserved space if it is "reasonably" sized, i.e., 
+            // Only reclaim reserved space if it is "reasonably" sized, i.e., 
             // we can reclaim at least MINIMUM_RECORD_SIZE_DEFAULT.  Note
             // any number could be used for "reasonable", not sure why
             // MINIMUM_RECORD_SIZE_DEFAULT was chosen.
-			int reclaimThreshold = RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT;
-			
-			if (shrinkage > reclaimThreshold) 
+            int reclaimThreshold = RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT;
+            
+            if (shrinkage > reclaimThreshold) 
             {
                 // reserved space for row exceeds the threshold.
 
-				int totalSpace = getRecordPortionLength(slot) + shrinkage; 
+                int totalSpace = getRecordPortionLength(slot) + shrinkage; 
 
-				if (isOverflowPage()) 
+                if (isOverflowPage()) 
                 {
                     // For overflow pages the total row size, including 
                     // reserved space must be at least 
                     // StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE
 
-					if (totalSpace >
+                    if (totalSpace >
                         (StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE +
                          reclaimThreshold))
                     {
                         // row can reclaim at least the threshold space
-						rowHasReservedSpace = true;
+                        rowHasReservedSpace = true;
                     }
-				} 
+                } 
                 else 
                 {
-					// this is a head page.  The total space of the row 
+                    // this is a head page.  The total space of the row 
                     // including reserved space must total at least
                     // minimumRecordSize.
 
-					if (totalSpace > (minimumRecordSize + reclaimThreshold))
+                    if (totalSpace > (minimumRecordSize + reclaimThreshold))
                     {
                         // row can reclaim at least the threshold space
-						rowHasReservedSpace = true;
+                        rowHasReservedSpace = true;
                     }
-				}
-			}
-		} 
+                }
+            }
+        } 
         catch (IOException ioe) 
         {
-			throw StandardException.newException(
+            throw StandardException.newException(
                 SQLState.DATA_UNEXPECTED_EXCEPTION, ioe);
-		}
+        }
 
-		return rowHasReservedSpace;
-	}
+        return rowHasReservedSpace;
+    }
 
-	/**
-		@see BasePage#compactRecord
-		@exception StandardException Standard Derby error policy
-	 */
-	protected void compactRecord(RawTransaction t, int slot, int id) 
-		 throws StandardException 
-	{
-		if (!isOverflowPage()) 
+    /**
+        @see BasePage#compactRecord
+        @exception StandardException Standard Derby error policy
+     */
+    protected void compactRecord(RawTransaction t, int slot, int id) 
+         throws StandardException 
+    {
+        if (!isOverflowPage()) 
         {
             // If this is a head row piece, first take care of the entire 
             // overflow row chain.  Don't need to worry about long column 
             // because they are not in place updatable.
 
-			StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
+            StoredRecordHeader recordHeader = getHeaderAtSlot(slot);
 
-			while (recordHeader.hasOverflow()) 
+            while (recordHeader.hasOverflow()) 
             {
                 // loop calling compact on each piece of the overflow chain.
 
-				StoredPage nextPageInRowChain =
-					getOverflowPage(recordHeader.getOverflowPage());
+                StoredPage nextPageInRowChain =
+                    getOverflowPage(recordHeader.getOverflowPage());
 
-				if (SanityManager.DEBUG)
-					SanityManager.ASSERT(nextPageInRowChain != null);
+                if (SanityManager.DEBUG)
+                    SanityManager.ASSERT(nextPageInRowChain != null);
 
-				try 
+                try 
                 {
-					int nextId   = recordHeader.getOverflowId();
-					int nextSlot = 
+                    int nextId   = recordHeader.getOverflowId();
+                    int nextSlot = 
                         getOverflowSlot(nextPageInRowChain, recordHeader);
 
-					nextPageInRowChain.compactRecord(t, nextSlot, nextId);
+                    nextPageInRowChain.compactRecord(t, nextSlot, nextId);
 
-					// Follow the next long row pointer.
-					recordHeader = nextPageInRowChain.getHeaderAtSlot(nextSlot);
-				} 
+                    // Follow the next long row pointer.
+                    recordHeader = nextPageInRowChain.getHeaderAtSlot(nextSlot);
+                } 
                 finally 
                 {
-					nextPageInRowChain.unlatch();
-				}
-			}
-		}
+                    nextPageInRowChain.unlatch();
+                }
+            }
+        }
 
-		// Lastly, see if this row has anything sizable that can be freed.
-		// Try to only reclaim space larger than MINIMUM_RECORD_SIZE_DEFAULT
-		// because otherwise it is probably not worth the effort.
-		int reclaimThreshold = RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT;
+        // Lastly, see if this row has anything sizable that can be freed.
+        // Try to only reclaim space larger than MINIMUM_RECORD_SIZE_DEFAULT
+        // because otherwise it is probably not worth the effort.
+        int reclaimThreshold = RawStoreFactory.MINIMUM_RECORD_SIZE_DEFAULT;
 
-		try
-		{
-			int reserve = getReservedCount(slot);
+        try
+        {
+            int reserve = getReservedCount(slot);
 
-			if (reserve > reclaimThreshold) 
+            if (reserve > reclaimThreshold) 
             {
                 // unused space exceeds the reclaim threshold.
 
-				int recordLength         = getRecordPortionLength(slot);
-				int correctReservedSpace = reserve;
+                int recordLength         = getRecordPortionLength(slot);
+                int correctReservedSpace = reserve;
                 int totalSpace           = recordLength + reserve;
 
-				if (isOverflowPage()) 
+                if (isOverflowPage()) 
                 {
                     // On an overflow page the total space of a record must
                     // be at least MAX_OVERFLOW_ONLY_REC_SIZE.
@@ -9081,62 +9081,62 @@ slotScan:
                     {
                         // possible to reclaim more than threshold.
 
-						// calculate what the correct reserved space is
-						if (recordLength >= 
+                        // calculate what the correct reserved space is
+                        if (recordLength >= 
                             StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE)
                         {
-							correctReservedSpace = 0;
+                            correctReservedSpace = 0;
                         }
-						else
+                        else
                         {
                             // make sure record takes up max overflow rec size 
-							correctReservedSpace = 
+                            correctReservedSpace = 
                                 StoredRecordHeader.MAX_OVERFLOW_ONLY_REC_SIZE -
                                 recordLength;
                         }
-					}
-				} 
+                    }
+                } 
                 else 
                 {
-					// this is a head page.  The total space of the row 
+                    // this is a head page.  The total space of the row 
                     // including reserved space must total at least
                     // minimumRecordSize.
 
-					if (totalSpace > (minimumRecordSize + reclaimThreshold))
+                    if (totalSpace > (minimumRecordSize + reclaimThreshold))
                     {
-						// calculate what the correct reserved space is
+                        // calculate what the correct reserved space is
 
-						if (recordLength >= minimumRecordSize)
+                        if (recordLength >= minimumRecordSize)
                         {
-							correctReservedSpace = 0;
+                            correctReservedSpace = 0;
                         }
-						else
+                        else
                         {
-							correctReservedSpace = 
+                            correctReservedSpace = 
                                 minimumRecordSize - recordLength;
                         }
-					}
-				}
+                    }
+                }
 
-				if (SanityManager.DEBUG)
-				{
-					SanityManager.ASSERT(correctReservedSpace <= reserve,
-										 "correct reserve > reserve");
-				}
-
-				// A shrinkage has occured.
-				if (correctReservedSpace < reserve) 
+                if (SanityManager.DEBUG)
                 {
-					owner.getActionSet().
-						actionShrinkReservedSpace(
+                    SanityManager.ASSERT(correctReservedSpace <= reserve,
+                                         "correct reserve > reserve");
+                }
+
+                // A shrinkage has occured.
+                if (correctReservedSpace < reserve) 
+                {
+                    owner.getActionSet().
+                        actionShrinkReservedSpace(
                             t, this, slot, id, correctReservedSpace, reserve);
-				}
-			}
-		} 
+                }
+            }
+        } 
         catch (IOException ioe) 
         {
-			throw StandardException.newException(
+            throw StandardException.newException(
                 SQLState.DATA_UNEXPECTED_EXCEPTION, ioe);
-		}
-	}
+        }
+    }
 }

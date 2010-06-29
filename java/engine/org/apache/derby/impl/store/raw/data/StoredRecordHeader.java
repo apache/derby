@@ -33,24 +33,24 @@ import java.io.OutputStream;
 import org.apache.derby.iapi.services.io.CompressedNumber;
 
 /**
-	A class StoredPage uses to cache record headers by passing instances
-	to BasePage, and to write stored versions of record headers.
+    A class StoredPage uses to cache record headers by passing instances
+    to BasePage, and to write stored versions of record headers.
 
-	Format
+    Format
 
-	<PRE>
+    <PRE>
 
-	1 byte          - status
-	compressed int  - record identifier
+    1 byte          - status
+    compressed int  - record identifier
 
-	compressed long - overflow page } only if hasOverflow() is true
-	compressed int  - overflow id   }     "        "           "
+    compressed long - overflow page } only if hasOverflow() is true
+    compressed int  - overflow id   }     "        "           "
 
-	compressed int  - first field   } only if hasFirstField set - otherwise 0
+    compressed int  - first field   } only if hasFirstField set - otherwise 0
 
-	compressed int  - number of fields in this portion - only if hasOverflow()
-								is false OR hasFirstField is true - otherwise 0
-	</PRE>
+    compressed int  - number of fields in this portion - only if hasOverflow()
+                                is false OR hasFirstField is true - otherwise 0
+    </PRE>
 
 */
 
@@ -65,11 +65,11 @@ public final class StoredRecordHeader
     /**
      * Status bits for the record header:
      *
-     * RECORD_DELETED			- used to indicate the record has been deleted
-     * RECORD_OVERFLOW			- used to indicate the record has been 
+     * RECORD_DELETED           - used to indicate the record has been deleted
+     * RECORD_OVERFLOW          - used to indicate the record has been 
      *                            overflowed, it will point to the overflow 
      *                            page and ID
-     * RECORD_HAS_FIRST_FIELD	- used to indicate that firstField is stored. 
+     * RECORD_HAS_FIRST_FIELD   - used to indicate that firstField is stored. 
      *                            When RECORD_OVERFLOW and 
      *                            RECORD_HAS_FIRST_FIELD both are set, part of 
      *                            record is on the page, the record header 
@@ -112,7 +112,7 @@ public final class StoredRecordHeader
      *
      * <BR> MT - Mutable
      **/
-	protected int   id;
+    protected int   id;
 
     /**
      * Status of the record.
@@ -130,12 +130,12 @@ public final class StoredRecordHeader
     /**
      * number of fields in the row.
      **/
-	protected int numberFields;
+    protected int numberFields;
 
     /**
      * A record handle that can represent the record, may be null.
      **/
-	protected RecordHandle	handle;
+    protected RecordHandle  handle;
 
     /**
      * Class which holds the fields {@code overflowId}, {@code overflowPage}
@@ -191,34 +191,34 @@ public final class StoredRecordHeader
      * Constructors for This class:
      **************************************************************************
      */
-	public StoredRecordHeader() 
+    public StoredRecordHeader() 
     {
-	}
+    }
 
-	public StoredRecordHeader(int id, int numberFields) 
+    public StoredRecordHeader(int id, int numberFields) 
     {
-		setId(id);
-		setNumberFields(numberFields);
-	}
+        setId(id);
+        setNumberFields(numberFields);
+    }
 
-	public StoredRecordHeader(
+    public StoredRecordHeader(
     byte    data[],
     int     offset)
     {
         read(data, offset);
-	}
+    }
 
-	public StoredRecordHeader(StoredRecordHeader loadTargetFrom) 
+    public StoredRecordHeader(StoredRecordHeader loadTargetFrom) 
     {
-		this.status         = loadTargetFrom.status;
-		this.id             = loadTargetFrom.id;
-		this.numberFields   = loadTargetFrom.numberFields;
-		handle              = null;
+        this.status         = loadTargetFrom.status;
+        this.id             = loadTargetFrom.id;
+        this.numberFields   = loadTargetFrom.numberFields;
+        handle              = null;
 
         if (loadTargetFrom.overflow != null) {
             overflow = new OverflowInfo(loadTargetFrom.overflow);
         }
-	}
+    }
 
     /**************************************************************************
      * Public Accessor "Get" Methods of This class:
@@ -231,55 +231,55 @@ public final class StoredRecordHeader
      *
      * <BR> MT - single thread required
      **/
-	protected RecordHandle getHandle(
+    protected RecordHandle getHandle(
     PageKey pageId, 
     int current_slot) 
     {
-		if (handle == null)
-			handle = new RecordId(pageId, id, current_slot);
+        if (handle == null)
+            handle = new RecordId(pageId, id, current_slot);
 
-		return handle;
-	}
+        return handle;
+    }
 
     /**
      * Get the record identifier
      *
      * <BR> MT - thread safe
      **/
-	public final int getId() 
+    public final int getId() 
     {
-		return id;
-	}
+        return id;
+    }
 
-	public int getNumberFields() 
+    public int getNumberFields() 
     {
-		return numberFields;
-	}
+        return numberFields;
+    }
 
-	public long getOverflowPage() 
+    public long getOverflowPage() 
     {
-		return overflow == null ? 0 : overflow.overflowPage;
-	}
+        return overflow == null ? 0 : overflow.overflowPage;
+    }
 
-	public int getOverflowId() 
+    public int getOverflowId() 
     {
-		return overflow == null ? 0 : overflow.overflowId;
-	}
+        return overflow == null ? 0 : overflow.overflowId;
+    }
 
-	public int getFirstField() 
+    public int getFirstField() 
     {
-		return overflow == null ? 0 : overflow.firstField;
-	}
+        return overflow == null ? 0 : overflow.firstField;
+    }
 
-	public final boolean hasOverflow() 
+    public final boolean hasOverflow() 
     {
-		return ((status & RECORD_OVERFLOW) == RECORD_OVERFLOW);
-	}
+        return ((status & RECORD_OVERFLOW) == RECORD_OVERFLOW);
+    }
 
-	protected final boolean hasFirstField() 
+    protected final boolean hasFirstField() 
     {
-		return ((status & RECORD_HAS_FIRST_FIELD) == RECORD_HAS_FIRST_FIELD);
-	}
+        return ((status & RECORD_HAS_FIRST_FIELD) == RECORD_HAS_FIRST_FIELD);
+    }
 
     /**
      * Get the deleted state of the record.
@@ -287,10 +287,10 @@ public final class StoredRecordHeader
      *
      * <BR> MT - single thread required
      **/
-	public final boolean isDeleted() 
+    public final boolean isDeleted() 
     {
-		return ((status & RECORD_DELETED) == RECORD_DELETED);
-	}
+        return ((status & RECORD_DELETED) == RECORD_DELETED);
+    }
 
 
     /**
@@ -303,11 +303,11 @@ public final class StoredRecordHeader
      * This low level routine is performance critical to processing lots of
      * rows, so calls to CompressNumber have been hand inlined.
      *
-	 * @return The length of the record header.
+     * @return The length of the record header.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
-	public int size() 
+    public int size() 
     {
         // account for length of fieldDataLength field stored as a compressed
         // int plus one byte for status.  
@@ -338,18 +338,18 @@ public final class StoredRecordHeader
         {
             // is an overflow field
 
-			len += CompressedNumber.sizeLong(overflow.overflowPage);
-			len += CompressedNumber.sizeInt(overflow.overflowId);
+            len += CompressedNumber.sizeLong(overflow.overflowPage);
+            len += CompressedNumber.sizeInt(overflow.overflowId);
 
             if (hasFirstField())
             {
                 len += CompressedNumber.sizeInt(overflow.firstField);
                 len += CompressedNumber.sizeInt(numberFields);
             }
-		}
+        }
 
-		return len;
-	}
+        return len;
+    }
 
     /**************************************************************************
      * Public Accessor "Set" Methods of This class:
@@ -359,61 +359,61 @@ public final class StoredRecordHeader
     /**
      * Set the deleted state of the record.
      * <p>
-     * return	1, if delete status from not deleted to deleted
+     * return   1, if delete status from not deleted to deleted
      * return  -1, if delete status from deleted to not deleted
      * return   0, if status unchanged.
      *
      * <BR> MT - single thread required
      **/
-	public int setDeleted(boolean deleteTrue) 
+    public int setDeleted(boolean deleteTrue) 
     {
 
-		int retCode = 0;
+        int retCode = 0;
 
-		if (deleteTrue) 
+        if (deleteTrue) 
         {
-			if (!isDeleted()) 
+            if (!isDeleted()) 
             {
-				// setting the bit from not deleted to deleted
-				retCode = 1;
-				status |= RECORD_DELETED;
-			}
-		} 
+                // setting the bit from not deleted to deleted
+                retCode = 1;
+                status |= RECORD_DELETED;
+            }
+        } 
         else 
         {
-			if (isDeleted()) 
+            if (isDeleted()) 
             {
-				// setting the bit from deleted to not deleted
-				retCode = -1;
-				status &= ~RECORD_DELETED;
-			}
-		}
+                // setting the bit from deleted to not deleted
+                retCode = -1;
+                status &= ~RECORD_DELETED;
+            }
+        }
 
-		return(retCode);
-	}
+        return(retCode);
+    }
 
-	public void setFirstField(int firstField) 
+    public void setFirstField(int firstField) 
     {
         if (overflow == null) {
             overflow = new OverflowInfo();
         }
         overflow.firstField = firstField;
         status |= RECORD_HAS_FIRST_FIELD;
-	}
+    }
 
-	public final void setId(int id) 
+    public final void setId(int id) 
     {
-		this.id = id;
-	}
+        this.id = id;
+    }
 
-	public void setOverflowDetails(RecordHandle overflowHandle) 
+    public void setOverflowDetails(RecordHandle overflowHandle) 
     {
         if (overflow == null) {
             overflow = new OverflowInfo();
         }
         overflow.overflowPage = overflowHandle.getPageNumber();
         overflow.overflowId = overflowHandle.getId();
-	}
+    }
 
     public void setOverflowFields(StoredRecordHeader loadFromTarget)
     {
@@ -421,23 +421,23 @@ public final class StoredRecordHeader
             overflow = new OverflowInfo();
         }
         this.status = (byte) (loadFromTarget.status | RECORD_OVERFLOW);
-		this.id             = loadFromTarget.id;
-		this.numberFields   = loadFromTarget.numberFields;
+        this.id             = loadFromTarget.id;
+        this.numberFields   = loadFromTarget.numberFields;
         overflow.firstField = loadFromTarget.overflow.firstField;
-		handle              = null;
+        handle              = null;
     }
 
 
-	public final void setNumberFields(int numberFields) 
+    public final void setNumberFields(int numberFields) 
     {
-		this.numberFields = numberFields;
-	}
+        this.numberFields = numberFields;
+    }
 
     /**************************************************************************
      * Public Methods implmenting read/write of Storable Interface:
      **************************************************************************
      */
-	public int write(OutputStream out) 
+    public int write(OutputStream out) 
         throws IOException 
     {
         // check consistency of the status field - this has caught
@@ -445,50 +445,50 @@ public final class StoredRecordHeader
         if (SanityManager.DEBUG)
         {
             if ((status & ~RECORD_VALID_MASK) != 0)
-            	SanityManager.THROWASSERT(
-                	"Invalid status in StoredRecordHeaader = " + status);
+                SanityManager.THROWASSERT(
+                    "Invalid status in StoredRecordHeaader = " + status);
         }
 
         // write status
-		int len = 1;
-		out.write(status);
+        int len = 1;
+        out.write(status);
 
         // write id
-		len += CompressedNumber.writeInt(out, id);
-		
+        len += CompressedNumber.writeInt(out, id);
+        
 
         // write overflow information for overflow record headers
-		if (hasOverflow()) 
+        if (hasOverflow()) 
         {
-			// if overflow bit is set, then write the overflow pointer info.
-			len += CompressedNumber.writeLong(out, overflow.overflowPage);
-			len += CompressedNumber.writeInt(out, overflow.overflowId);
-		}
+            // if overflow bit is set, then write the overflow pointer info.
+            len += CompressedNumber.writeLong(out, overflow.overflowPage);
+            len += CompressedNumber.writeInt(out, overflow.overflowId);
+        }
 
         // write first field info for long row parts
-		if (hasFirstField()) 
+        if (hasFirstField()) 
         {
-			len += CompressedNumber.writeInt(out, overflow.firstField);
-		}
+            len += CompressedNumber.writeInt(out, overflow.firstField);
+        }
 
         // write number of fields, except in the case of a record header
         // which is solely a pointer to another row portion.
         //
-		// see read
-		if (!hasOverflow() || hasFirstField())
-			len += CompressedNumber.writeInt(out, numberFields);
+        // see read
+        if (!hasOverflow() || hasFirstField())
+            len += CompressedNumber.writeInt(out, numberFields);
 
-		return len;
-	}
+        return len;
+    }
 
-	public void read(java.io.ObjectInput in) 
+    public void read(java.io.ObjectInput in) 
         throws IOException 
     {
 
         // read status
         int s = in.read();
         if (s < 0) {
-			throw new EOFException();
+            throw new EOFException();
         }
 
         status = (byte) s;
@@ -498,12 +498,12 @@ public final class StoredRecordHeader
         if (SanityManager.DEBUG)
         {
             if ((s & ~RECORD_VALID_MASK) != 0)
-            	SanityManager.THROWASSERT(
-                	"Invalid status in StoredRecordHeader = " + s);
+                SanityManager.THROWASSERT(
+                    "Invalid status in StoredRecordHeader = " + s);
         }
 
         // read the record id
-		id = CompressedNumber.readInt(in);
+        id = CompressedNumber.readInt(in);
 
         if (hasOverflow() || hasFirstField()) {
             overflow = new OverflowInfo();
@@ -512,38 +512,38 @@ public final class StoredRecordHeader
         }
 
         // initialize the overflow pointer based on status.
-		if (hasOverflow()) 
+        if (hasOverflow()) 
         {
-			overflow.overflowPage = CompressedNumber.readLong(in);
-			overflow.overflowId   = CompressedNumber.readInt(in);
+            overflow.overflowPage = CompressedNumber.readLong(in);
+            overflow.overflowId   = CompressedNumber.readInt(in);
 
-		} 
+        } 
 
         // initialize the 1st field overflow pointer based on status.
-		if (hasFirstField()) 
+        if (hasFirstField()) 
         {
-			overflow.firstField = CompressedNumber.readInt(in);
-		} 
-	
-		// In releases prior to 1.3 an overflow record was handled
-		// by an overflow header pointing to a complete record on
-		// another page. This header had the overflow bit set but not
-		// the has first field bit. This header also did not have the
-		// number of fields written out, but it can be seen as
-		// a header with 0 fields and a first field of 0.
-		if (!hasOverflow() || hasFirstField())
-			numberFields = CompressedNumber.readInt(in);
-		else
-			numberFields = 0;
+            overflow.firstField = CompressedNumber.readInt(in);
+        } 
+    
+        // In releases prior to 1.3 an overflow record was handled
+        // by an overflow header pointing to a complete record on
+        // another page. This header had the overflow bit set but not
+        // the has first field bit. This header also did not have the
+        // number of fields written out, but it can be seen as
+        // a header with 0 fields and a first field of 0.
+        if (!hasOverflow() || hasFirstField())
+            numberFields = CompressedNumber.readInt(in);
+        else
+            numberFields = 0;
 
-		handle = null;
-	}
+        handle = null;
+    }
 
     private int readOverFlowPage(
     byte[]  data,
     int     offset)
     {
-		int int_value = data[offset++];
+        int int_value = data[offset++];
 
         if ((int_value & ~0x3f) == 0)
         {
@@ -553,9 +553,9 @@ public final class StoredRecordHeader
             overflow.overflowPage = ((int_value << 8) | (data[offset] & 0xff));
 
             return(2);
-		}
-		else if ((int_value & 0x80) == 0)
-		{
+        }
+        else if ((int_value & 0x80) == 0)
+        {
             // value is stored in 4 bytes.  only use low 6 bits from 1st byte.
 
             overflow.overflowPage =
@@ -566,9 +566,9 @@ public final class StoredRecordHeader
 
             return(4);
 
-		} 
+        } 
         else
-		{
+        {
             // value is stored in 8 bytes.  only use low 6 bits from 1st byte.
             overflow.overflowPage =
                 (((long) (int_value      & 0x7f)) << 56) |
@@ -581,13 +581,13 @@ public final class StoredRecordHeader
                 (((long) (data[offset]   & 0xff))      );
 
             return(8);
-		}
+        }
     }
     private int readOverFlowId(
     byte[]  data,
     int     offset)
     {
-		int value = data[offset++];
+        int value = data[offset++];
 
         if ((value & ~0x3f) == 0)
         {
@@ -596,15 +596,15 @@ public final class StoredRecordHeader
 
             return(1);
         }
-		else if ((value & 0x80) == 0)
-		{
+        else if ((value & 0x80) == 0)
+        {
             // length is stored in 2 bytes.  only use low 6 bits from 1st byte.
 
             overflow.overflowId =
                 (((value & 0x3f) << 8) | (data[offset] & 0xff));
 
             return(2);
-		}
+        }
         else
         {
             // length is stored in 4 bytes.  only use low 7 bits from 1st byte.
@@ -621,7 +621,7 @@ public final class StoredRecordHeader
     byte[]  data,
     int     offset)
     {
-		int value = data[offset++];
+        int value = data[offset++];
 
         if ((value & ~0x3f) == 0)
         {
@@ -630,15 +630,15 @@ public final class StoredRecordHeader
 
             return(1);
         }
-		else if ((value & 0x80) == 0)
-		{
+        else if ((value & 0x80) == 0)
+        {
             // length is stored in 2 bytes.  only use low 6 bits from 1st byte.
 
             overflow.firstField =
                 (((value & 0x3f) << 8) | (data[offset] & 0xff));
 
             return(2);
-		}
+        }
         else
         {
             // length is stored in 4 bytes.  only use low 7 bits from 1st byte.
@@ -655,19 +655,19 @@ public final class StoredRecordHeader
     byte[]  data,
     int     offset)
     {
-		int value = data[offset++];
+        int value = data[offset++];
 
         if ((value & ~0x3f) == 0)
         {
             // length stored in this byte.
             numberFields = value;
         }
-		else if ((value & 0x80) == 0)
-		{
+        else if ((value & 0x80) == 0)
+        {
             // length is stored in 2 bytes.  only use low 6 bits from 1st byte.
 
             numberFields = (((value & 0x3f) << 8) | (data[offset] & 0xff));
-		}
+        }
         else
         {
             // length is stored in 4 bytes.  only use low 7 bits from 1st byte.
@@ -680,25 +680,25 @@ public final class StoredRecordHeader
     }
 
 
-	private void read(
+    private void read(
     byte[]  data,
     int     offset)
     {
         status = data[offset++];
 
-		int value = data[offset++];
+        int value = data[offset++];
 
         if ((value & ~0x3f) == 0)
         {
             // value stored in this byte.
             id = value;
         }
-		else if ((value & 0x80) == 0)
-		{
+        else if ((value & 0x80) == 0)
+        {
             // value is stored in 2 bytes.  only use low 6 bits from 1st byte.
 
             id = (((value & 0x3f) << 8) | (data[offset++] & 0xff));
-		}
+        }
         else
         {
             // value is stored in 4 bytes.  only use low 7 bits from 1st byte.
@@ -742,12 +742,12 @@ public final class StoredRecordHeader
             {
                 numberFields = 0;
             }
-		}
+        }
 
         handle = null;
 
         return;
-	}
+    }
 
     /**
      * Return length on disk of the record id portion of the record header
@@ -763,26 +763,26 @@ public final class StoredRecordHeader
         return(CompressedNumber.sizeInt(record_id));
     }
 
-	public String toString()
-	{
-		if (SanityManager.DEBUG)
-		{
-			String str = "recordHeader: Id=" + getId();
-			
-			str += "\n  isDeleted     = " + isDeleted();
-			str += "\n  hasOverflow   = " + hasOverflow();
-			str += "\n  hasFirstField = " + hasFirstField();
-			str += "\n  numberFields  = " + getNumberFields();
-			str += "\n  firstField    = " + getFirstField();
-			str += "\n  overflowPage  = " + getOverflowPage();
-			str += "\n  overflowId    = " + getOverflowId();
-			str += "\n  header length = " + size();
-
-			return str;
-		}
-		else
+    public String toString()
+    {
+        if (SanityManager.DEBUG)
         {
-			return null;
+            String str = "recordHeader: Id=" + getId();
+            
+            str += "\n  isDeleted     = " + isDeleted();
+            str += "\n  hasOverflow   = " + hasOverflow();
+            str += "\n  hasFirstField = " + hasFirstField();
+            str += "\n  numberFields  = " + getNumberFields();
+            str += "\n  firstField    = " + getFirstField();
+            str += "\n  overflowPage  = " + getOverflowPage();
+            str += "\n  overflowId    = " + getOverflowId();
+            str += "\n  header length = " + size();
+
+            return str;
         }
-	}
+        else
+        {
+            return null;
+        }
+    }
 }
