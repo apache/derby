@@ -202,6 +202,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XSDB9","Stream container {0} is corrupt.","45000"},
         		{"XSDBA","Attempt to allocate object {0} failed.","45000"},
         		{"XSDBB", "Unknown page format at page {0}, page dump follows: {1} ", "45000"},
+        		{"XSDBC", "Write of container information to page 0 of container {0} failed.  See nested error for more information. ", "45000"},
         		{"XSDG0","Page {0} could not be read from disk.","45000"},
         		{"XSDG1","Page {0} could not be written to disk, please check if the disk is full, or if a file system limit, such as a quota or a maximum file size, has been reached.","45000"},
         		{"XSDG2","Invalid checksum on Page {0}, expected={1}, on-disk version={2}, page dump follows: {3}","45000"},

@@ -5603,6 +5603,12 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <arg>value</arg>
             </msg>
 
+            <msg>
+                <name>XSDBC.D</name>
+                <text>Write of container information to page 0 of container {0} failed.  See nested error for more information.  </text>
+                <arg>container</arg>
+            </msg>
+
         </family>
 
 

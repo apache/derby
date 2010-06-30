@@ -841,14 +841,24 @@ abstract class FileContainer
 		@exception StandardException Derby Standard error policy
 		@exception IOException error in writing the header to file
 	*/
-	protected void writeHeader(byte[] pageData)
+	protected void writeHeader(
+    Object          identity, 
+    byte[]          pageData)
 		 throws StandardException, IOException
 	{
 		// write out the current containerInfo in the borrowed space to byte
 		// array containerInfo
 		writeHeaderToArray(containerInfo);
 
+        try
+        {
 		AllocPage.WriteContainerInfo(containerInfo, pageData, false);
+	}
+        catch (StandardException  se)
+        {
+			throw StandardException.newException(
+                SQLState.DATA_BAD_CONTAINERINFO_WRITE, se, identity);
+        }
 	}
 
 	/**
@@ -862,8 +872,11 @@ abstract class FileContainer
 		@exception StandardException Derby Standard error policy
 		@exception IOException error in writing the header to file
 	 */
-	protected void writeHeader(StorageRandomAccessFile file,
-                               boolean create, byte[] epage)
+	protected void writeHeader(
+    Object                  identity,
+    StorageRandomAccessFile file,
+    boolean                 create, 
+    byte[]                  epage)
 		 throws IOException, StandardException
 	{
 		// write out the current containerInfo in the borrowed space to byte
@@ -873,8 +886,16 @@ abstract class FileContainer
 		// RESOLVE: get no wait on the page cache to see if allocation page is
 		// there, if so, use that instead of making a new array and a static
 		// function.
+        try
+        {
+            AllocPage.WriteContainerInfo(containerInfo, epage, create);
+        }
+        catch (StandardException  se)
+        {
+			throw StandardException.newException(
+                SQLState.DATA_BAD_CONTAINERINFO_WRITE, se, identity);
+        }
 
-		AllocPage.WriteContainerInfo(containerInfo, epage, create);
 		// now epage has the containerInfo written inside it
 
 		// force WAL - and check to see if database is corrupt or is frozen.

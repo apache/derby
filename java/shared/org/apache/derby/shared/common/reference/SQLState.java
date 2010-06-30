@@ -499,6 +499,7 @@ public interface SQLState {
 	String DATA_CORRUPT_STREAM_CONTAINER                        = "XSDB9.D";
 	String DATA_OBJECT_ALLOCATION_FAILED                        = "XSDBA.D";
 	String DATA_UNKNOWN_PAGE_FORMAT_2                           = "XSDBB.D";
+	String DATA_BAD_CONTAINERINFO_WRITE                         = "XSDBC.D";
 
 	/*
 	** RawStore - Data.Filesystem statement exceptions

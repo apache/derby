@@ -386,7 +386,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
             // write header into the alloc page array regardless of dirty
             // bit because the alloc page have zero'ed out the borrowed
             // space
-            writeHeader(pageData);
+            writeHeader(getIdentity(), pageData);
 
             if (SanityManager.DEBUG) 
             {
@@ -531,7 +531,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 					// Instead, just clobber the container info, which is 
 					// checksum'ed seperately from the alloc page
 					//
-					writeRAFHeader(fileData,
+                    writeRAFHeader(
+                        getIdentity(),
+                        fileData,
 								   false,  // don't create, container exists 
 								   true);  // syncfile
 
@@ -667,7 +669,10 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 				if false, the container already exist
 		@param syncFile if true, sync the file
 	*/
-	private void writeRAFHeader(StorageRandomAccessFile file, boolean create, 
+    private void writeRAFHeader(
+    Object                  identity,
+    StorageRandomAccessFile file, 
+    boolean                 create, 
 								boolean syncFile) 
 		 throws IOException, StandardException
 	{
@@ -695,7 +700,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 		// need to check for frozen state
 
-		writeHeader(file, create, epage);
+        writeHeader(identity, file, create, epage);
 
 		if (syncFile)
 		{
@@ -1091,9 +1096,12 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                         // with container header and encrypt it if the database 
                         // is encrypted. 
                         
-                        byte[] dataToWrite = updatePageArray(pageNumber, 
+                        byte[] dataToWrite = 
+                            updatePageArray(
+                                pageNumber, 
                                                              page.getPageArray(), 
-                                                             encryptionBuf, false);
+                                encryptionBuf, 
+                                false);
                         backupRaf.write(dataToWrite, 0, pageSize);
 
                         // unlatch releases page from cache, see 
@@ -1316,26 +1324,30 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                  }
 
                  // This container format specifies that the first page is an
-                 // allocation page and the container information is stored within
-                 // it.  The allocation page needs to be somewhat formatted
-                 // because if the system crashed after the create container log
-                 // operation is written, it needs to be well formed enough to get
-                 // the container information back out of it.
+                 // allocation page and the container information is stored 
+                 // within it.  The allocation page needs to be somewhat 
+                 // formatted because if the system crashed after the create 
+                 // container log operation is written, it needs to be well 
+                 // formed enough to get the container information back out of
+                 // it.
                  //
-                 // Don't try to go thru the page cache here because the container
-                 // object cannot be found in the container cache at this point
-                 // yet.  However, if we use the page cache to store the first
-                 // allocation page, then in order to write itself out, it needs to
-                 // ask the container to do so, which is going to create a
-                 // deadlock.  The allocation page cannot write itself out without
-                 // going thru the container because it doesn't know where its
-                 // offset is.  Here we effectively hardwired page 0 at offset 0 of
-                 // the container file to be the first allocation page.
+                 // Don't try to go thru the page cache here because the 
+                 // container object cannot be found in the container cache at
+                 // this point yet.  However, if we use the page cache to store
+                 // the first allocation page, then in order to write itself 
+                 // out, it needs to ask the container to do so, which is going
+                 // to create a deadlock.  The allocation page cannot write 
+                 // itself out without going thru the container because it 
+                 // doesn't know where its offset is.  Here we effectively 
+                 // hardwire page 0 at offset 0 of the container file to be 
+                 // the first allocation page.
 
-                 // create an embryonic page - if this is not a temporary container,
-                 // synchronously write out the file header.
-                 writeRAFHeader(fileData, true,
-                                (actionIdentity.getSegmentId() != ContainerHandle.TEMPORARY_SEGMENT));
+                 // create an embryonic page - if this is not a temporary 
+                 // container, synchronously write out the file header.
+                 writeRAFHeader(
+                     actionIdentity, fileData, true, 
+                     (actionIdentity.getSegmentId() != 
+                          ContainerHandle.TEMPORARY_SEGMENT));
 
              } catch (SecurityException se) {
 
@@ -1495,7 +1507,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                      // write the header to the stub
                      stubData = stub.getRandomAccessFile( "rw");
 
-                     writeRAFHeader(stubData,
+                     writeRAFHeader(
+                        actionIdentity,
+                        stubData,
                                     true, /* create */
                                     true); /* sync */
 
