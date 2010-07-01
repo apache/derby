@@ -701,13 +701,15 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 	 * @param predicateList		The PredicateList from the outer query
 	 * @param sql				The SubqueryList from the outer query
 	 * @param gbl				The group by list, if any
+     * @param havingClause      The HAVING clause, if any
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
 	public void flattenFromTables(ResultColumnList rcl,
 								  PredicateList predicateList,
 								  SubqueryList sql,
-								  GroupByList gbl)
+                                  GroupByList gbl,
+                                  ValueNode havingClause)
 									throws StandardException
 	{
 		boolean			flattened = true;
@@ -750,7 +752,8 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 														rcl,
 														predicateList,
 														sql,
-														gbl);
+                                                        gbl,
+                                                        havingClause);
 					if (SanityManager.DEBUG)
 					{
 						SanityManager.ASSERT(flatteningFL == null ||

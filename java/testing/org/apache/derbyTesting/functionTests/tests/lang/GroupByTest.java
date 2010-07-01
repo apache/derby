@@ -2270,4 +2270,85 @@ public class GroupByTest extends BaseJDBCTestCase {
                 {"50"},{"45"},{"46"},{"90"}});
         rollback();
     }
+
+
+    /**
+     * HAVING with an aggregate function in presence of join flattening
+     * DERBY-4698. See also DERBY-3880.
+     * @throws SQLException
+     */
+    public void testDerby4698() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        ResultSet rs;
+
+        s.executeUpdate(
+            "create table usr ( user_id  bigint primary key," +
+            "                  deleted  char(1) not null)");
+        s.executeUpdate(
+            "create table  user_account ( user_account_id bigint primary key," +
+            "                             user_id  bigint not null," +
+            "                             account_id  bigint not null)");
+
+        s.executeUpdate(
+            "CREATE TABLE  ACCOUNT  (ACCOUNT_ID  BIGINT PRIMARY KEY," +
+            "                        ACCOUNT_TYPE  VARCHAR(10) NOT NULL," +
+            "                        BALANCE  DOUBLE NOT NULL)");
+
+        s.executeUpdate(
+            "insert into usr values " +
+            "   (3003, 'Y'), (3004, 'N'), (1001, 'N'), (1002, 'Y')," +
+            "   (1003, 'N'), (1004, 'N'), (1005, 'N'), (1006, 'N')," +
+            "   (1007, 'N'), (1008, 'N'), (2002, 'N')");
+
+        s.executeUpdate(
+            "insert into user_account values " +
+            "  (4004, 3003, 9009), (4005, 3004, 9010), (5005, 1001, 10010)," +
+            "  (5006, 3004, 10011), (5007, 2002, 10012), (5008, 1003, 10013)," +
+            "  (5009, 1004, 10014), (5010, 1005, 10015), (5011, 1006, 10016)," +
+            "  (5012, 1007, 10017), (5013, 1008, 10018), (6006, 1001, 11011)," +
+            "  (6007, 3004, 11012), (6008, 2002, 11013), (6009, 1003, 11014)," +
+            "  (6010, 1004, 11015), (6011, 1005, 11016), (6012, 1006, 11017)," +
+            "  (6013, 1007, 11018), (6014, 1008, 11019), (1001, 1001, 1002)," +
+            "  (1002, 1002, 1003), (1003, 1003, 1004), (1004, 1004, 1005)," +
+            "  (1005, 1005, 1006), (1006, 1006, 1007), (1007, 1007, 1008)," +
+            "  (1008, 1008, 1009), (1009, 1004, 1010), (2002, 1004, 6006)," +
+            "  (3003, 2002, 7007)");
+
+        s.executeUpdate(
+            "insert into account values " +
+            " (9009, 'USER', 12.5), (9010, 'USER', 12.5)," +
+            " (10010, 'USER-01', 0.0), (10011, 'USER-01', 0.0)," +
+            " (10012, 'USER-01', 0.0), (10013, 'USER-01', 0.0)," +
+            " (10014, 'USER-01', 99.0), (10015, 'USER-01', 0.0)," +
+            " (10016, 'USER-01', 0.0), (10017, 'USER-01', 0.0)," +
+            " (10018, 'USER-01', 0.0), (11011, 'USER-02', 0.0)," +
+            " (11012, 'USER-02', 0.0), (11013, 'USER-02', 0.0)," +
+            " (11014, 'USER-02', 0.0), (11015, 'USER-02', 0.0)," +
+            " (11016, 'USER-02', 0.0), (11017, 'USER-02', 0.0)," +
+            " (11018, 'USER-02', 0.0), (11019, 'USER-02', 0.0)," +
+            " (1002, 'USER', 10.0), (1003, 'USER', 80.31)," +
+            " (1004, 'USER', 10.0), (1005, 'USER', 161.7)," +
+            " (1006, 'USER', 10.0), (1007, 'USER', 10.0)," +
+            " (1008, 'USER', 10.0), (1009, 'USER', 10.0)," +
+            " (7007, 'USER', 11.0)");
+
+        rs = s.executeQuery(
+            "SELECT user0_.user_id AS col_0_0_," +
+            "   SUM(account2_.balance) AS col_1_0_ " +
+            "   FROM usr user0_ " +
+            "   INNER JOIN user_account accountlin1_ " +
+            "   ON user0_.user_id = accountlin1_.user_id " +
+            "   INNER JOIN account account2_ " +
+            "   ON accountlin1_.account_id = account2_.account_id " +
+            "WHERE user0_.deleted = 'N' " +
+            "      AND ( account2_.account_type IN ( 'USER-01', 'USER' ) )" +
+            "GROUP BY user0_.user_id " +
+            "HAVING SUM(account2_.balance) >= 100.0 ");
+
+        JDBC.assertFullResultSet(rs, new String[][] {
+                {"1004", "260.7"} });
+
+            rollback();
+    }
 }
