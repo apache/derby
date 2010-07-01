@@ -171,8 +171,9 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         suite.addTest(new J2EEDataSourceTest("testClientDSConnectionAttributes"));
         suite.addTest(new J2EEDataSourceTest(
                 "testClientTraceFileDSConnectionAttribute"));
-        suite.addTest(new J2EEDataSourceTest(
-                "testClientMessageTextConnectionAttribute"));
+        //DISABLED until DERBY-4067 is fixed.
+        //suite.addTest(new J2EEDataSourceTest(
+        //        "testClientMessageTextConnectionAttribute"));
         suite.addTest(new J2EEDataSourceTest("testConnectionFlowCommit"));
         return suite;
     }
@@ -2633,14 +2634,13 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * the tracefile.
      *
      * Note also that this test cannot run against a remote server.
+     * <p>
+     * This is also a regression test for DERBY-4717.
      *  
      * @throws SQLException
      */
     public void testClientTraceFileDSConnectionAttribute() throws SQLException
     {
-        if (usingEmbedded())
-            return;
-
         String traceFile;
 
         // with ConnectionPoolDataSource
@@ -2650,12 +2650,12 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         JDBCDataSource.setBeanProperty(cpds, "connectionAttributes",
         		"traceFile="+traceFile);
         // DERBY-2468 - trace3.out does not get created
-        ((ClientConnectionPoolDataSource) cpds).getConnection();
+        ((PooledConnection)getPhysicalConnection(cpds)).close();
         JDBCDataSource.clearStringBeanProperty(cpds, "connectionAttributes");
 
         traceFile = "trace4.out";
         JDBCDataSource.setBeanProperty(cpds, "traceFile", traceFile);
-        ((ClientConnectionPoolDataSource) cpds).getConnection();
+        ((PooledConnection)getPhysicalConnection(cpds)).close();
         cpds = null;
 
         // now with XADataSource
@@ -2664,15 +2664,15 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         traceFile = "trace5.out";
         JDBCDataSource.setBeanProperty(xads, "connectionAttributes",
         		"traceFile="+traceFile);
-        ((ClientXADataSource) xads).getConnection();
+        ((XAConnection)getPhysicalConnection(xads)).close();
         // DERBY-2468 - trace5.out does not get created
         JDBCDataSource.clearStringBeanProperty(xads, "connectionAttributes");
 
         traceFile = "trace6.out";
         JDBCDataSource.setBeanProperty(xads, "traceFile", traceFile);
-        ((ClientXADataSource) xads).getConnection();
+        ((XAConnection)getPhysicalConnection(xads)).close();
 
-        assertTraceFilesExist();
+        assertTraceFilesExistAndCanBeDeleted();
     }
         
     /* -- Helper Methods for testClientTraceFileDSConnectionAttribute -- */
@@ -2680,19 +2680,19 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     /**
      * Check that trace file exists in <framework> directory
      */
-    private static void assertTraceFilesExist() 
+    private static void assertTraceFilesExistAndCanBeDeleted()
     {
         AccessController.doPrivileged(new java.security.PrivilegedAction() {
             public Object run() {
-                for (int i=3 ; i < 6 ; i++)
-                {   
-                    String traceFileName = "trace" + (i+1) + ".out";
-                    File traceFile = new File(traceFileName);
-                    if (i == 4)
+                for (int i=3 ; i <= 6 ; i++) {
+                    File traceFile = new File("trace" + i + ".out");
+                    // Skip trace 3 and 5 until DERBY-2468/DERBY-4067 is fixed.
+                    if (i == 3 || i == 5)
                         continue;
                     else
                     {
-                        assertTrue(traceFile.exists());
+                        assertTrue("Doesn't exist", traceFile.exists());
+                        assertTrue("Delete failed", traceFile.delete());
                     }
                 } 
                 return null;
@@ -2710,14 +2710,11 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * There is a corresponding fixture for clientDataSource in DataSourceTest
      *  
      * @throws SQLException
+     * NOTE: DISABLED until DERBY-4067 is fixed.
      */
     public void testClientMessageTextConnectionAttribute() throws SQLException
     {
-        if (usingEmbedded())
-            return;
-        
         String retrieveMessageTextProperty = "retrieveMessageText";
-        Connection conn;
         // with ConnectionPoolDataSource
         // ConnectionPoolDataSource - retrieveMessageTextProperty
         ClientConnectionPoolDataSource cpds = new ClientConnectionPoolDataSource();
@@ -2726,15 +2723,15 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         cpds.setDatabaseName(dbName);
         cpds.setConnectionAttributes(
                 retrieveMessageTextProperty + "=false");
-        conn = cpds.getConnection();
-        assertMessageText(conn,"false");
-        conn.close();
+        PooledConnection cpConn = cpds.getPooledConnection();
+        assertMessageText(cpConn.getConnection(), "false");
+        cpConn.close();
         cpds.setConnectionAttributes(
                 retrieveMessageTextProperty + "=true");
-        conn = cpds.getConnection();
-        assertMessageText(conn,"true");
+        cpConn = cpds.getPooledConnection();
+        assertMessageText(cpConn.getConnection(), "true");
         cpds.setConnectionAttributes(null);
-        conn.close();
+        cpConn.close();
 
         // now with XADataSource
         ClientXADataSource xads = new ClientXADataSource();
@@ -2743,19 +2740,26 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         xads.setDatabaseName(dbName);
         xads.setConnectionAttributes(
                 retrieveMessageTextProperty + "=false");
-        conn = xads.getConnection();
-        assertMessageText(conn,"false");
-        conn.close();
+        XAConnection xaConn = xads.getXAConnection();
+        assertMessageText(xaConn.getConnection(), "false");
+        xaConn.close();
         xads.setConnectionAttributes(
                 retrieveMessageTextProperty + "=true");
-        conn = xads.getConnection();
-        assertMessageText(conn,"true");
-        conn.close();
+        xaConn = xads.getXAConnection();
+        assertMessageText(xaConn.getConnection(), "true");
+        xaConn.close();
         xads.setConnectionAttributes(null);
     }
 
     /* -- Helper Method for testClientMessageTextDSConnectionAttribute -- */
 
+    /**
+     * Checks if <tt>retrieveMessageText</tt> takes effect.
+     *
+     * @param conn the connection to use, will be closed
+     * @param retrieveMessageTextValue the current value
+     * @throws SQLException if something goes wrong
+     */
     private static void assertMessageText(
             Connection conn, String retrieveMessageTextValue) 
     throws SQLException
@@ -2775,6 +2779,13 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             {
                 // retrieveMessageTextValue is false
                 assertTrue(e.getMessage().indexOf("does not exist") == -1);
+            }
+        } finally {
+            try {
+                conn.close();
+            } catch (SQLException ignore) {
+                // Ignore error on close
+                println("Ignored error on close: " + ignore.getMessage());
             }
         }
     }
@@ -2813,7 +2824,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             "Everything you ever wanted to know about this datasource";
         
         JDBCDataSource.setBeanProperty(ds, "description", setDescription);
-        ds.getConnection();
+        getPhysicalConnection(ds);
         assertEquals(setDescription, JDBCDataSource.getBeanProperty(ds, "description"));
         JDBCDataSource.clearStringBeanProperty(ds, "description");
         assertNull(JDBCDataSource.getBeanProperty(ds, "description"));    	
@@ -4198,6 +4209,34 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
 
         new J2EEDataSourceTest("J2EEDataSourceTest").assertConnectionOK(
             expectedValues, dsName, conn);
+    }
+
+    /**
+     * Creates a physical connection from the given data source.
+     * <p>
+     * For a XADataSource, <tt>getXAConnection</tt> is invoked, for a
+     * ConnectionPoolDataSource <tt>getPooledConnection</tt> is invoked, and
+     * for a DataSource <tt>getConnection</tt> is invoked.
+     *
+     * @param ds the data source to get the physical connection from
+     * @return A pysical connection, which can be an instance of
+     *      <tt>XAConnection</tt>, <tt>PooledConnection</tt>, or
+     *      <tt>Connection</tt>
+     * @throws SQLException if getting a connection fails
+     * @throws IllegalArgumentException if the object isn't a data source
+     */
+    public static Object getPhysicalConnection(Object ds)
+            throws SQLException {
+        if (ds instanceof XADataSource) {
+            return ((XADataSource)ds).getXAConnection();
+        } else if (ds instanceof ConnectionPoolDataSource) {
+            return ((ConnectionPoolDataSource)ds).getPooledConnection();
+        } else if (ds instanceof DataSource) {
+            return ((DataSource)ds).getConnection();
+        } else {
+            throw new IllegalArgumentException(
+                    "Not a data source: " + ds.getClass());
+        }
     }
 }
 

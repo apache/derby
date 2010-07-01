@@ -621,7 +621,8 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         }
 
         LogWriter dncLogWriter = new NetLogWriter(printWriter, traceLevel);
-        if (printWriter != logWriter && traceDirectory != null)
+        if (printWriter != logWriter &&
+                (traceDirectory != null || traceFile != null))
         // When printWriter is an internal trace file and
         // traceDirectory is not null, each connection has
         // its own trace file and the trace file is not cached,
@@ -646,7 +647,8 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         }
 
         LogWriter dncLogWriter = connection.agent_.newLogWriter_(printWriter, traceLevel);
-        if (printWriter != logWriter && traceDirectory != null)
+        if (printWriter != logWriter &&
+                (traceDirectory != null || traceFile != null))
         // When printWriter is an internal trace file and
         // traceDirectory is not null, each connection has
         // its own trace file and the trace file is not cached,
