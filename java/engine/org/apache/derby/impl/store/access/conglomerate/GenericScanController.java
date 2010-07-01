@@ -165,7 +165,7 @@ public abstract class GenericScanController
      * provided by the calling code when doing a scan.
      * These are just saved values from what was initially input.
      **/
-	private FormatableBitSet                 init_scanColumnList;
+    private FormatableBitSet                 init_scanColumnList;
     private DataValueDescriptor[]   init_startKeyValue;
     private int                     init_startSearchOperator;
     private Qualifier[][]           init_qualifier;
@@ -235,7 +235,7 @@ public abstract class GenericScanController
      */
 
     private final void repositionScanForUpateOper()
-		throws StandardException
+        throws StandardException
     {
         if (scan_state != SCAN_INPROGRESS)
             throw StandardException.newException(
@@ -247,6 +247,7 @@ public abstract class GenericScanController
             throw StandardException.newException(
                     SQLState.AM_RECORD_NOT_FOUND, 
                     open_conglom.getContainer().getId(),
+                    new Long(scan_position.current_rh.getPageNumber()),
                     new Long(scan_position.current_rh.getId()));
         }
 
@@ -282,7 +283,7 @@ public abstract class GenericScanController
      * It is used both for initialization of the ScanController and
      * by reopenScan().
      **/
-	protected void positionAtInitScan(
+    protected void positionAtInitScan(
     DataValueDescriptor[]   startKeyValue,
     int                     startSearchOperator,
     Qualifier               qualifier[][],
@@ -292,12 +293,12 @@ public abstract class GenericScanController
         throws StandardException
     {
         // startKeyValue init.
-	    this.init_startKeyValue         = startKeyValue;
-		if (RowUtil.isRowEmpty(this.init_startKeyValue))
-			this.init_startKeyValue = null;
+        this.init_startKeyValue         = startKeyValue;
+        if (RowUtil.isRowEmpty(this.init_startKeyValue))
+            this.init_startKeyValue = null;
 
         // startSearchOperator init.
-	    this.init_startSearchOperator   = startSearchOperator;
+        this.init_startSearchOperator   = startSearchOperator;
 
         // qualifier init.
         if ((qualifier != null) && (qualifier .length == 0))
@@ -315,12 +316,12 @@ public abstract class GenericScanController
               init_qualifier);
 
         // stopKeyValue init.
-	    this.init_stopKeyValue          = stopKeyValue;
+        this.init_stopKeyValue          = stopKeyValue;
         if (RowUtil.isRowEmpty(this.init_stopKeyValue))
             this.init_stopKeyValue = null;
 
         // stopSearchOperator init.
-	    this.init_stopSearchOperator    = stopSearchOperator;
+        this.init_stopSearchOperator    = stopSearchOperator;
 
         // reset the "current" position to starting condition.
         pos.init();
@@ -346,14 +347,14 @@ public abstract class GenericScanController
                 // add in start columns
                 if (this.init_startKeyValue != null)
                 {
-					required_cols.grow(this.init_startKeyValue.length);
+                    required_cols.grow(this.init_startKeyValue.length);
                     for (int i = 0; i < this.init_startKeyValue.length; i++)
                         required_cols.set(i);
                 }
 
                 if (this.init_stopKeyValue != null)
                 {
-					required_cols.grow(this.init_stopKeyValue.length);
+                    required_cols.grow(this.init_stopKeyValue.length);
                     for (int i = 0; i < this.init_stopKeyValue.length; i++)
                         required_cols.set(i);
                 }
@@ -363,9 +364,9 @@ public abstract class GenericScanController
 
                 required_cols_and_scan_list.and(init_scanColumnList);
 
-				// FormatableBitSet equals requires the two FormatableBitSets to be of same
-				// length.
-				required_cols.grow(init_scanColumnList.size());
+                // FormatableBitSet equals requires the two FormatableBitSets to be of same
+                // length.
+                required_cols.grow(init_scanColumnList.size());
 
                 if (!required_cols_and_scan_list.equals(required_cols))
                 {
@@ -379,7 +380,7 @@ public abstract class GenericScanController
                         "\n;init_scanColumnList = " + init_scanColumnList);
                 }
             }
-		} 
+        } 
 
         // Scan is fully initialized and ready to go.
         scan_state = SCAN_INIT;
@@ -396,11 +397,11 @@ public abstract class GenericScanController
      * position.  It will get the latch again on the current
      * scan position and set the slot to the current record handle.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
     protected void positionAtResumeScan(
     RowPosition pos)
-		throws StandardException
+        throws StandardException
     {
         if (SanityManager.DEBUG)
         {
@@ -426,7 +427,7 @@ public abstract class GenericScanController
      * row to be returned.
      * <p>
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
     protected void positionAtStartForForwardScan(
     RowPosition pos)
@@ -476,7 +477,7 @@ public abstract class GenericScanController
     /**
      * Position scan to slot before first slot on next page.
      * <p>
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
     protected void positionAtNextPage(
     RowPosition pos)
@@ -507,7 +508,7 @@ public abstract class GenericScanController
     /**
      * Do any necessary work to complete the scan.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
     protected void positionAtDoneScan(
     RowPosition pos)
@@ -526,7 +527,7 @@ public abstract class GenericScanController
         this.scan_state = SCAN_DONE;
     }
 
-	public void reopenScanByRowLocation(
+    public void reopenScanByRowLocation(
     RowLocation startRowLocation,
     Qualifier qualifier[][])
         throws StandardException
@@ -546,7 +547,7 @@ public abstract class GenericScanController
      * Designed so that extending classes can override and allocate 
      * implementation specific row position's.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
     protected RowPosition allocateScanPosition()
         throws StandardException
@@ -559,7 +560,7 @@ public abstract class GenericScanController
      * <p>
      * Utility routine used by both fetchSet() and fetchNextGroup().
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
     protected int fetchRows(
     DataValueDescriptor[][] row_array,
@@ -568,7 +569,7 @@ public abstract class GenericScanController
     long                    max_rowcnt,
     int[]                   key_column_numbers)
         throws StandardException
-	{
+    {
         int                     ret_row_count           = 0;
         DataValueDescriptor[]   fetch_row               = null;
 
@@ -642,11 +643,11 @@ public abstract class GenericScanController
         // (scan_position.current_page will be null).  
         // Along the way apply qualifiers to skip rows which don't qualify.
 
-		while (scan_position.current_page != null)
-		{
-			while ((scan_position.current_slot + 1) < 
+        while (scan_position.current_page != null)
+        {
+            while ((scan_position.current_slot + 1) < 
                     scan_position.current_page.recordCount())
-			{
+            {
                 // unlock the previous row.
                 if (scan_position.current_rh != null)
                 {
@@ -822,12 +823,12 @@ public abstract class GenericScanController
                         return(ret_row_count);
                     }
                 }
-			}
+            }
 
             positionAtNextPage(scan_position);
 
             this.stat_numpages_visited++;
-		}
+        }
 
         // Reached last page of scan.
         positionAtDoneScan(scan_position);
@@ -835,7 +836,7 @@ public abstract class GenericScanController
         // we need to decrement when we stop scan at the end of the table.
         this.stat_numpages_visited--;
 
-		return(ret_row_count);
+        return(ret_row_count);
     }
 
     /**
@@ -854,19 +855,19 @@ public abstract class GenericScanController
     inserting more data, then continuing the scan is not guaranteed to see
     the new rows - they may be put in the "beginning" of the heap.
 
-	@param startRecordHandle  An existing RecordHandle within the conglomerate,
+    @param startRecordHandle  An existing RecordHandle within the conglomerate,
     at which to position the start of the scan.  The scan will begin at this
     location and continue forward until the end of the conglomerate.  
     Positioning at a non-existent RowLocation (ie. an invalid one or one that
     had been deleted), will result in an exception being thrown when the 
     first next operation is attempted.
 
-	@param qualifier An array of qualifiers which, applied
-	to each key, restrict the rows returned by the scan.  Rows
-	for which any one of the qualifiers returns false are not
-	returned by the scan. If null, all rows are returned.
+    @param qualifier An array of qualifiers which, applied
+    to each key, restrict the rows returned by the scan.  Rows
+    for which any one of the qualifiers returns false are not
+    returned by the scan. If null, all rows are returned.
 
-	@exception StandardException Standard exception policy.
+    @exception StandardException Standard exception policy.
     **/
     protected void reopenScanByRecordHandle(
     RecordHandle    startRecordHandle,
@@ -898,13 +899,13 @@ public abstract class GenericScanController
      * Public Methods of This class:
      **************************************************************************
      */
-	public void init(
+    public void init(
     OpenConglomerate                open_conglom,
-	FormatableBitSet				scanColumnList,
-    DataValueDescriptor[]	        startKeyValue,
+    FormatableBitSet                scanColumnList,
+    DataValueDescriptor[]           startKeyValue,
     int                             startSearchOperator,
     Qualifier                       qualifier[][],
-    DataValueDescriptor[]	        stopKeyValue,
+    DataValueDescriptor[]           stopKeyValue,
     int                             stopSearchOperator)
         throws StandardException
     {
@@ -992,10 +993,10 @@ public abstract class GenericScanController
     {
         super.close();
 
-		// If we are closed due to catching an error in the middle of init,
-		// xact_manager may not be set yet. 
-		if (open_conglom.getXactMgr() != null)
-			open_conglom.getXactMgr().closeMe(this);
+        // If we are closed due to catching an error in the middle of init,
+        // xact_manager may not be set yet. 
+        if (open_conglom.getXactMgr() != null)
+            open_conglom.getXactMgr().closeMe(this);
 
         // help the garbage collector.
         this.init_qualifier         = null;
@@ -1006,14 +1007,14 @@ public abstract class GenericScanController
 
     public void close()
         throws StandardException
-	{
+    {
         // Finish the scan - this may release locks if read committed and scan
         // still holds some locks, and close comes before scan.next() returned
         // that scan was done.
         positionAtDoneScan(scan_position);
 
         closeScan();
-	}
+    }
 
     /**
      * Reopens the scan after it has been closed as part of a commit.
@@ -1057,7 +1058,7 @@ public abstract class GenericScanController
     public boolean closeForEndTransaction(
     boolean closeHeldScan)
         throws StandardException
-	{
+    {
         if ((!open_conglom.getHold()) || closeHeldScan) 
         {
             // close the scan as part of the commit/abort
@@ -1084,15 +1085,15 @@ public abstract class GenericScanController
 
             return(false);
         }
-	}
+    }
 
 
     /**
-	@see org.apache.derby.iapi.store.access.ScanController#delete
-	**/
+    @see org.apache.derby.iapi.store.access.ScanController#delete
+    **/
     public boolean delete()
-		throws StandardException
-	{
+        throws StandardException
+    {
         repositionScanForUpateOper();
 
         boolean ret_val = true;
@@ -1122,7 +1123,7 @@ public abstract class GenericScanController
         scan_position.unlatch();
 
         return(ret_val);
-	}
+    }
 
 
     /**
@@ -1142,7 +1143,7 @@ public abstract class GenericScanController
      * RESOLVE (mikem-05/29/98) - Implement this when we support levels of
      * concurrency less than serializable.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
     public void didNotQualify()
         throws StandardException
@@ -1257,14 +1258,14 @@ public abstract class GenericScanController
      *                          column in the row in the table of the scan).
      * @param hash_table        The java HashTable to load into.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
     public void fetchSet(
     long                    max_rowcnt,
     int[]                   key_column_numbers,
     BackingStoreHashtable   hash_table)
         throws StandardException
-	{
+    {
         fetchRows(
             (DataValueDescriptor[][]) null,
             (RowLocation[]) null,
@@ -1282,44 +1283,44 @@ public abstract class GenericScanController
     is reopened with the same "hold" and "forUpdate" parameters passed in
     the original openScan.  The previous template row continues to be used.
 
-	@param startKeyValue  An indexable row which holds a 
-	(partial) key value which, in combination with the
-	startSearchOperator, defines the starting position of
-	the scan.  If null, the starting position of the scan
-	is the first row of the conglomerate.
-	
-	@param startSearchOperator an operator which defines
-	how the startKeyValue is to be searched for.  If 
+    @param startKeyValue  An indexable row which holds a 
+    (partial) key value which, in combination with the
+    startSearchOperator, defines the starting position of
+    the scan.  If null, the starting position of the scan
+    is the first row of the conglomerate.
+    
+    @param startSearchOperator an operator which defines
+    how the startKeyValue is to be searched for.  If 
     startSearchOperator is ScanController.GE, the scan starts on
-	the first row which is greater than or equal to the 
-	startKeyValue.  If startSearchOperation is ScanController.GT,
-	the scan starts on the first row whose key is greater than
-	startKeyValue.  The startSearchOperation parameter is 
-	ignored if the startKeyValue parameter is null.
+    the first row which is greater than or equal to the 
+    startKeyValue.  If startSearchOperation is ScanController.GT,
+    the scan starts on the first row whose key is greater than
+    startKeyValue.  The startSearchOperation parameter is 
+    ignored if the startKeyValue parameter is null.
 
-	@param qualifier An array of qualifiers which, applied
-	to each key, restrict the rows returned by the scan.  Rows
-	for which any one of the qualifiers returns false are not
-	returned by the scan. If null, all rows are returned.
+    @param qualifier An array of qualifiers which, applied
+    to each key, restrict the rows returned by the scan.  Rows
+    for which any one of the qualifiers returns false are not
+    returned by the scan. If null, all rows are returned.
 
-	@param stopKeyValue  An indexable row which holds a 
-	(partial) key value which, in combination with the
-	stopSearchOperator, defines the ending position of
-	the scan.  If null, the ending position of the scan
-	is the last row of the conglomerate.
-	
-	@param stopSearchOperator an operator which defines
-	how the stopKeyValue is used to determine the scan stopping
-	position. If stopSearchOperation is ScanController.GE, the scan 
-	stops just before the first row which is greater than or
-	equal to the stopKeyValue.  If stopSearchOperation is
-	ScanController.GT, the scan stops just before the first row whose
-	key is greater than	startKeyValue.  The stopSearchOperation
-	parameter is ignored if the stopKeyValue parameter is null.
+    @param stopKeyValue  An indexable row which holds a 
+    (partial) key value which, in combination with the
+    stopSearchOperator, defines the ending position of
+    the scan.  If null, the ending position of the scan
+    is the last row of the conglomerate.
+    
+    @param stopSearchOperator an operator which defines
+    how the stopKeyValue is used to determine the scan stopping
+    position. If stopSearchOperation is ScanController.GE, the scan 
+    stops just before the first row which is greater than or
+    equal to the stopKeyValue.  If stopSearchOperation is
+    ScanController.GT, the scan stops just before the first row whose
+    key is greater than startKeyValue.  The stopSearchOperation
+    parameter is ignored if the stopKeyValue parameter is null.
 
-	@exception StandardException Standard exception policy.
+    @exception StandardException Standard exception policy.
     **/
-	public void reopenScan(
+    public void reopenScan(
     DataValueDescriptor[]   startKeyValue,
     int                     startSearchOperator,
     Qualifier               qualifier[][],
@@ -1345,13 +1346,13 @@ public abstract class GenericScanController
     }
 
     /**
-	@see org.apache.derby.iapi.store.access.ScanController#replace
-	**/
+    @see org.apache.derby.iapi.store.access.ScanController#replace
+    **/
     public boolean replace(
     DataValueDescriptor[]   row, 
     FormatableBitSet                 validColumns)
-		throws StandardException
-	{
+        throws StandardException
+    {
         repositionScanForUpateOper();
 
         Page page = scan_position.current_page;
@@ -1388,7 +1389,7 @@ public abstract class GenericScanController
         scan_position.unlatch();
 
         return(ret_val);
-	}
+    }
 
     /**
     Returns true if the current position of the scan still qualifies
@@ -1409,10 +1410,10 @@ public abstract class GenericScanController
     The results of a fetch() performed on a scan positioned on 
     a deleted row are undefined.
 
-	@exception StandardException Standard exception policy.
+    @exception StandardException Standard exception policy.
     **/
     public boolean doesCurrentPositionQualify()
-		throws StandardException
+        throws StandardException
     {
         if (scan_state != SCAN_INPROGRESS)
             throw StandardException.newException(
@@ -1446,14 +1447,14 @@ public abstract class GenericScanController
     /**
     Fetch the row at the current position of the Scan without applying the 
     qualifiers.
-	
+    
     @see org.apache.derby.iapi.store.access.ScanController#fetchWithoutQualify
-	**/
-	public void fetchWithoutQualify(DataValueDescriptor[] row)
-		throws StandardException
-	{
-		fetch(row, false);
-	}
+    **/
+    public void fetchWithoutQualify(DataValueDescriptor[] row)
+        throws StandardException
+    {
+        fetch(row, false);
+    }
 
     /**
      * @see org.apache.derby.iapi.store.access.ScanController#isHeldAfterCommit
@@ -1465,19 +1466,19 @@ public abstract class GenericScanController
     }
 
 
-	
-	/**
+    
+    /**
     Fetch the row at the current position of the Scan.
 
     @see org.apache.derby.iapi.store.access.ScanController#fetch
-	**/
-	public void fetch(DataValueDescriptor[] row)
-		throws StandardException
-	{
-		fetch(row, true);
-	}
+    **/
+    public void fetch(DataValueDescriptor[] row)
+        throws StandardException
+    {
+        fetch(row, true);
+    }
 
-	/**
+    /**
     Fetch the row at the current position of the Scan.
 
     @param row The row into which the value of the current 
@@ -1486,10 +1487,10 @@ public abstract class GenericScanController
     @param qualify Indicates whether the qualifiers should be applied.
 
     @exception StandardException Standard exception policy.
-	**/
-	private void fetch(DataValueDescriptor[] row, boolean qualify)
-		throws StandardException
-	{
+    **/
+    private void fetch(DataValueDescriptor[] row, boolean qualify)
+        throws StandardException
+    {
         if (scan_state != SCAN_INPROGRESS)
             throw StandardException.newException(
                     SQLState.AM_SCAN_NOT_POSITIONED);
@@ -1499,6 +1500,7 @@ public abstract class GenericScanController
             throw StandardException.newException(
                     SQLState.AM_RECORD_NOT_FOUND, 
                     open_conglom.getContainer().getId(),
+                    new Long(scan_position.current_rh.getPageNumber()),
                     new Long(scan_position.current_rh.getId()));
         }
 
@@ -1532,24 +1534,25 @@ public abstract class GenericScanController
             throw StandardException.newException(
                     SQLState.AM_RECORD_NOT_FOUND, 
                     open_conglom.getContainer().getId(),
+                    new Long(scan_position.current_rh.getPageNumber()),
                     new Long(scan_position.current_rh.getId()));
         }
 
         return;
-	}
+    }
 
-	/**
-	Fetch the location of the current position in the scan.
-	@see org.apache.derby.iapi.store.access.ScanController#fetchLocation
+    /**
+    Fetch the location of the current position in the scan.
+    @see org.apache.derby.iapi.store.access.ScanController#fetchLocation
 
-	@exception  StandardException  Standard exception policy.
-	**/
-	public void fetchLocation(RowLocation templateLocation)
-		throws StandardException
-	{
+    @exception  StandardException  Standard exception policy.
+    **/
+    public void fetchLocation(RowLocation templateLocation)
+        throws StandardException
+    {
         throw StandardException.newException(
                 SQLState.BTREE_UNIMPLEMENTED_FEATURE);
-	}
+    }
 
     /**
      * Return ScanInfo object which describes performance of scan.
@@ -1560,12 +1563,12 @@ public abstract class GenericScanController
      *
      * @see ScanInfo
      *
-	 * @return The ScanInfo object which contains info about current scan.
+     * @return The ScanInfo object which contains info about current scan.
      *
-	 * @exception  StandardException  Standard exception policy.
+     * @exception  StandardException  Standard exception policy.
      **/
     public ScanInfo getScanInfo()
-		throws StandardException
+        throws StandardException
     {
         throw StandardException.newException(
                 SQLState.BTREE_UNIMPLEMENTED_FEATURE);
@@ -1583,10 +1586,10 @@ public abstract class GenericScanController
     The results of a fetch() performed on a scan positioned on 
     a deleted row are undefined.
 
-	@exception StandardException Standard exception policy.
+    @exception StandardException Standard exception policy.
     **/
     public boolean isCurrentPositionDeleted()
-		throws StandardException
+        throws StandardException
     {
         if (scan_state != SCAN_INPROGRESS)
             throw StandardException.newException(
