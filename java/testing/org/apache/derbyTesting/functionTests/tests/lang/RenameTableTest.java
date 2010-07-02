@@ -230,4 +230,26 @@ public class RenameTableTest extends BaseJDBCTestCase {
         // select * from tcheck1;
         s.executeUpdate("drop table tcheck1");
     }
+
+    /**
+     * Tests that rename table invalidates stored statement plans (DERBY-4479).
+     *
+     * By issuing the *identical* create table statement after the rename,
+     * we check to see whether the compiled statements from the first
+     * create table statement were properly invalidated by the rename.
+     * 
+     * @exception SQLException
+     */
+    public void testRenameInvalidation_derby_4479()
+        throws SQLException
+    {
+        getConnection().setAutoCommit(true);
+        Statement s = createStatement();
+        s.executeUpdate("create table a (x int not null primary key)");
+        s.executeUpdate("rename table a to b");
+        s.executeUpdate("create table a (x int not null primary key)");
+        s.executeUpdate("drop table a");
+        s.executeUpdate("drop table b");
+    }
+
 }
