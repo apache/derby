@@ -1152,6 +1152,350 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
              );
     }
 
+    /**
+     * <p>
+     * Verify that you can alter a table and add boolean columns.
+     * </p>
+     */
+    public void test_16_alterTable() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "create table booleanAlter( a int )" );
+        goodStatement( conn, "insert into booleanAlter( a ) values ( 0 ), ( 1 ), ( 2 )" );
+        goodStatement( conn, "alter table booleanAlter add column b boolean" );
+        goodStatement( conn, "alter table booleanAlter add column c boolean default true" );
+        goodStatement( conn, "alter table booleanAlter add column d boolean default false" );
+        goodStatement( conn, "alter table booleanAlter add column e boolean default null" );        
+        assertResults
+            (
+             conn,
+             "select * from booleanAlter order by a",
+             new String[][]
+             {
+                 { "0", null, "true", "false", null },
+                 { "1", null, "true", "false", null },
+                 { "2", null, "true", "false", null },
+             },
+             false
+             );
+        
+        goodStatement( conn, "alter table booleanAlter drop column b" );        
+        assertResults
+            (
+             conn,
+             "select * from booleanAlter order by a",
+             new String[][]
+             {
+                 { "0", "true", "false", null },
+                 { "1", "true", "false", null },
+                 { "2", "true", "false", null },
+             },
+             false
+             );
+
+        goodStatement( conn, "drop table booleanAlter" );
+    }
+
+    /**
+     * <p>
+     * Verify that you can create boolean-valued generated columns.
+     * </p>
+     */
+    public void test_17_generatedColumns() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create table tree\n" +
+             "(\n" +
+             "    treeID int primary key generated always as identity,\n" +
+             "    latinName varchar( 100 ),\n" +
+             "    commonName varchar( 100 ),\n" +
+             "    waterPerWeek int,\n" +
+             "    minimumSunNeeded int,\n" +
+             "    maximumSunTolerated int,\n" +
+             "    windTolerated int,\n" +
+             "    isHardy boolean generated always as( (waterPerWeek < 10) and (minimumSunNeeded < 5) and (maximumSunTolerated > 90) and (windTolerated > 100) )\n" +
+             ")\n"
+             );
+        generatedMinion( conn );
+
+        // repeat the experiment with an implicitly typed generated column
+        goodStatement
+            (
+             conn,
+             "create table tree\n" +
+             "(\n" +
+             "    treeID int primary key generated always as identity,\n" +
+             "    latinName varchar( 100 ),\n" +
+             "    commonName varchar( 100 ),\n" +
+             "    waterPerWeek int,\n" +
+             "    minimumSunNeeded int,\n" +
+             "    maximumSunTolerated int,\n" +
+             "    windTolerated int,\n" +
+             "    isHardy generated always as( (waterPerWeek < 10) and (minimumSunNeeded < 5) and (maximumSunTolerated > 90) and (windTolerated > 100) )\n" +
+             ")\n"
+             );
+        generatedMinion( conn );
+    }
+    private void generatedMinion( Connection conn ) throws Exception
+    {
+        goodStatement( conn, "create index hardyTrees on tree( treeID, isHardy )" );
+        goodStatement
+            (
+             conn,
+             "insert into tree( latinName, commonName, waterPerWeek, minimumSunNeeded, maximumSunTolerated, windTolerated )\n" +
+             "values\n" +
+             "( 'tristania conferta', 'brisbane boxwood', 7, 4, 95, 120 ),\n" +
+             "( 'acer rubrum', 'red maple', 20, 20, 95, 120 )\n"
+             );
+        
+        assertResults
+            (
+             conn,
+             "select * from tree order by treeID",
+             new String[][]
+             {
+                 { "1", "tristania conferta", "brisbane boxwood", "7", "4", "95", "120", "true" },
+                 { "2", "acer rubrum", "red maple", "20", "20", "95", "120", "false" },
+             },
+             false
+             );
+        assertResults
+            (
+             conn,
+             "select * from tree where isHardy order by treeID",
+             new String[][]
+             {
+                 { "1", "tristania conferta", "brisbane boxwood", "7", "4", "95", "120", "true" },
+             },
+             false
+             );
+        
+        goodStatement( conn, "drop table tree" );
+    }
+
+    /**
+     * <p>
+     * Verify views with boolean columns.
+     * </p>
+     */
+    public void test_18_views() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create table item\n" +
+             "(\n" +
+             "    itemID int primary key generated always as identity,\n" +
+             "    itemName varchar( 100 ),\n" +
+             "    quantityOnHand int,\n" +
+             "    quantityOrdered int\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "create view orderView( itemID, needsRestocking )\n" +
+             "    as select itemID, quantityOrdered > quantityOnHand from item\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into item( itemName, quantityOnHand, quantityOrdered )\n" +
+             "values\n" +
+             "( 'Bracelet', 100, 200 ),\n" +
+             "( 'Glasses', 200, 100 )\n"
+             );
+
+        assertResults
+            (
+             conn,
+             "select * from orderView order by itemID",
+             new String[][]
+             {
+                 { "1", "true" },
+                 { "2", "false" },
+             },
+             false
+             );
+        
+        goodStatement( conn, "drop view orderView" );
+        goodStatement( conn, "drop table item" );
+    }
+    
+    /**
+     * <p>
+     * Verify booleans in foreign keys.
+     * </p>
+     */
+    public void test_19_foreignKeys() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create table keys\n" +
+             "(\n" +
+             "    userName varchar( 100 ),\n" +
+             "    publicVersion boolean,\n" +
+             "    keyValue varchar( 1000 ),\n" +
+             "    primary key( publicVersion, userName )\n" +
+             ")\n"
+            );
+        goodStatement
+            (
+             conn,
+             "insert into keys( userName, publicVersion, keyValue )\n" +
+             "values\n" +
+             "( 'Robert', true, 'abcdefghij' ),\n" +
+             "( 'Robert', false, 'mnopqrstuv' )\n"
+            );
+        goodStatement
+            (
+             conn,
+             "create table messages\n" +
+             "(\n" +
+             "    messageID int primary key generated always as identity,\n" +
+             "    userName varchar( 100 ),\n" +
+             "    publicVersion boolean,\n" +
+             "    messageText clob,\n" +
+             "    foreign key ( publicVersion, userName ) references keys( publicVersion, userName )\n" +
+             ")\n"
+             );
+        goodStatement
+            (
+             conn,
+             "insert into messages( userName, publicVersion, messageText )\n" +
+             "values\n" +
+             "( 'Robert', false, 'Twas brillig' )\n"
+             );
+
+        assertResults
+            (
+             conn,
+             "select * from messages order by messageID",
+             new String[][]
+             {
+                 { "1", "Robert", "false", "Twas brillig" },
+             },
+             false
+             );
+        
+        goodStatement( conn, "drop table messages" );
+        goodStatement( conn, "drop table keys" );
+    }
+    
+    /**
+     * <p>
+     * Verify booleans in check constraints.
+     * </p>
+     */
+    public void test_20_checkConstraints() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create table remes\n" +
+             "(\n" +
+             "    remesID int primary key generated always as identity,\n" +
+             "    name varchar( 100 ),\n" +
+             "    isInsect boolean,\n" +
+             "    isArachnid boolean,\n" +
+             "    check ( isInsect or isArachnid )\n" +
+             ")\n"
+            );
+        goodStatement
+            (
+             conn,
+             "insert into remes( name, isInsect, isArachnid )\n" +
+             "values\n" +
+             "( 'black widow', false, true ),\n" +
+             "( 'house fly', true, false )\n"
+            );
+        
+        assertResults
+            (
+             conn,
+             "select * from remes order by remesID",
+             new String[][]
+             {
+                 { "1", "black widow", "false", "true" },
+                 { "2", "house fly", "true", "false" },
+             },
+             false
+             );
+        
+        goodStatement( conn, "drop table remes" );
+    }
+
+    /**
+     * <p>
+     * Verify triggers on boolean columns.
+     * </p>
+     */
+    public void test_21_triggers() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement
+            (
+             conn,
+             "create table alumnus\n" +
+             "(\n" +
+             "    alumnusID int primary key generated always as identity,\n" +
+             "    name varchar( 100 ),\n" +
+             "    living boolean\n" +
+             ")\n"
+            );
+        goodStatement
+            (
+             conn,
+             "create table livenessChange\n" +
+             "(\n" +
+             "    eventID int primary key generated always as identity,\n" +
+             "    alumnusID int, \n" +
+             "    living boolean\n" +
+             ")\n"
+            );
+        goodStatement
+            (
+             conn,
+             "create trigger trig_after_update_row_trigger\n" +
+             "after update of living\n" +
+             "on alumnus\n" +
+             "referencing new as newRow\n" +
+             "for each row\n" +
+             "insert into livenessChange( alumnusID, living ) values ( newRow.alumnusID, newRow.living )\n"
+            );
+        goodStatement( conn, "insert into alumnus( name, living ) values ( 'Fred', true ), ( 'Monica', true )" );
+        goodStatement( conn, "update alumnus set living = false where name = 'Fred'" );
+
+        
+        assertResults
+            (
+             conn,
+             "select * from livenessChange order by eventID",
+             new String[][]
+             {
+                 { "1", "1", "false" },
+             },
+             false
+             );
+
+        goodStatement( conn, "drop table alumnus" );
+        goodStatement( conn, "drop table livenessChange" );
+    }
+    
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
