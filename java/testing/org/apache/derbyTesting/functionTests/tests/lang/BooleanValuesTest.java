@@ -1120,6 +1120,38 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         expectCompilationError( BAD_DEFAULT, "create table badDefault( a int, b boolean default X'DE' )" );
     }
     
+    /**
+     * <p>
+     * Verify that you can have boolean expressions in the SELECT list.
+     * </p>
+     */
+    public void test_15_selectList() throws Exception
+    {
+        Connection conn = getConnection();
+
+        assertResults
+            (
+             conn,
+             "select columnnumber > 0 from sys.syscolumns where columnname = 'TABLENAME'",
+             new String[][]
+             {
+                 { "true" }
+             },
+             false
+             );
+        
+        assertResults
+            (
+             conn,
+             "values 3 > 10",
+             new String[][]
+             {
+                 { "false" }
+             },
+             false
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES

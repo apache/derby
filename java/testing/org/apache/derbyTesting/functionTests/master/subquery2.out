@@ -989,13 +989,9 @@ I          |S     |C                             |VC                            
 NULL       |NULL  |NULL                          |NULL                          |NULL                
 0          |0     |0                             |0                             |0                   
 1          |1     |1                             |1                             |1                   
-ij> -- exists returns a boolean value and hence it can not be used to set a value. Exists can only be used in where clause
-update u set b = exists (select * from t)
+ij> update u set b = exists (select * from t)
 where vc < ANY (select vc from s);
-ERROR 42X01: Syntax error: Encountered "exists" at line 2, column 18.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ERROR 42821: Columns of type 'BIGINT' cannot hold values of type 'BOOLEAN'. 
 ij> select * from u;
 I          |S     |C                             |VC                            |B                   
 -----------------------------------------------------------------------------------------------------

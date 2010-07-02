@@ -233,16 +233,13 @@ drop table sub;
 drop table target;
 
 
--- negative tests
-create table t1 (c1 int);
-insert into t1 values 1;
+create table t1 (c1 int, c11 boolean);
+insert into t1( c1, c11 ) values ( 1, true );
 
--- boolean expression IS disallowed in values or select clause
 select nullif(c1, 1) is null from t1;
 -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values 1 is null;
 
--- boolean expression =, >, >=, <, <= disallowed in values or select clause
 values 1 = 1;
 -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select 1 = 1 from t1;
@@ -277,7 +274,6 @@ values (1 between 2 and 5);
 -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select (c1 between 1 and 3) from t1;
 
--- boolean expression LIKE disallowed in values and select clause
 prepare ll1 as 'values ''asdf'' like ?';
 prepare ll1 as 'select ''asdf'' like ? from t1';
 prepare ll15 as 'values ''%foobar'' like ''Z%foobar'' escape ?';
@@ -293,11 +289,9 @@ values 1 instanceof int;
 -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values 1 instanceof java.lang.Integer between false and true;
 
--- boolean expression EXISTS disallowed in values and select clause
 select exists (values 1) from t1;
 values exists (values 2);
 
--- boolean expression EXISTS diallowed in update set clause too
 update t1 set c11 = exists(values 1);
 
 -- ?: not supported anymore

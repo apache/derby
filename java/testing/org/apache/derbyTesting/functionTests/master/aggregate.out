@@ -232,10 +232,14 @@ WARNING 01003: Null values were eliminated from the argument of a column functio
 WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> -- binary list operator
 select (1 in (1,2)), count(c1) from t1 group by c1;
-ERROR 42X01: Syntax error: Encountered "in" at line 2, column 11.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    |2          
+-----------------
+true |1          
+true |1          
+true |1          
+true |1          
+true |0          
+WARNING 01003: Null values were eliminated from the argument of a column function.
 ij> select count((1 in (1,2))) from t1 group by c1;
 1          
 -----------

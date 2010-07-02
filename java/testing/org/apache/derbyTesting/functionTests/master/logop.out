@@ -272,30 +272,25 @@ ij> select x from s where not ( (1 = 2) and ( (3 = 3) or (4 = 4) ) );
 X          
 -----------
 1          
-ij> -- following NOTs in select clause won't work because it results in a transient boolean datatype
-select ( not ( (1 = 1) or (2 = 2) ) and (3 = 4) ) from s;
-ERROR 42X01: Syntax error: Encountered "not" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ij> select ( not ( (1 = 1) or (2 = 2) ) and (3 = 4) ) from s;
+1    
+-----
+false
 ij> --
 select ( not ( ( (1 = 1) or (2 = 2) ) and (3 = 4) ) ) from s;
-ERROR 42X01: Syntax error: Encountered "not" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> --
 select ( (1 = 2) and not ( (3 = 3) or (4 = 4) ) ) from s;
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 13.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+false
 ij> --
 select ( not ( (1 = 2) and ( (3 = 3) or (4 = 4) ) ) ) from s;
-ERROR 42X01: Syntax error: Encountered "not" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- Ands under ands under ands ...
 select * from s where not (	( ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) and
 						      ( ((1=1) and (1=1)) and ((1=1) and (1=1)) ) ) and
@@ -395,12 +390,10 @@ ij> -- nots on nots
 select * from s where not ( not ( not ((1=2) or (1=1))) or (not ((1=2) or (1=2)) ) );
 X          
 -----------
-ij> -- following nots on nots won't work because they result in transient boolean datatype in the select clause
-select not ( not ( not ((1=2) or (1=1))) or (not ((1=2) or (1=2)) ) ) from s;
-ERROR 42X01: Syntax error: Encountered "not" at line 2, column 8.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ij> select not ( not ( not ((1=2) or (1=1))) or (not ((1=2) or (1=2)) ) ) from s;
+1    
+-----
+false
 ij> -- negative testing
 -- non boolean where clauses
 select * from s where 1;

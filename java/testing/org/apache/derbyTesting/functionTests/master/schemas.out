@@ -767,16 +767,16 @@ I          |S     |C                             |VC
 --------------------------------------------------------------------------------
 ij> -- correlated subqueries
 
--- exists disallowed in select clause
 select (exists (select * from test.ttt 
 				where iii = (select 11 from test.tt where ii = i and ii <> 1)) )
 a
 from test.s
 order by a;
-ERROR 42X01: Syntax error: Encountered "exists" at line 4, column 9.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+A    
+-----
+true 
+NULL 
+NULL 
 ij> -- negative tests
 
 -- multiple matches at parent level

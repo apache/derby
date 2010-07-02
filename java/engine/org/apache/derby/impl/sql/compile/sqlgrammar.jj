@@ -3578,7 +3578,7 @@ bareCallStatement() throws StandardException :
 	ResultSetNode		resultSetNode;
 }
 {
-	<CALL> value = primaryExpression( true )
+	<CALL> value = primaryExpression()
 	{
 		if (! (value instanceof JavaToSQLValueNode) ||
 			! (((JavaToSQLValueNode) value).getJavaValueNode() instanceof MethodCallNode))
@@ -3646,11 +3646,8 @@ bareCallStatement() throws StandardException :
 
 /*
  * <A NAME="primaryExpression">primaryExpression</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
-ValueNode primaryExpression( boolean inSelectClause ) throws StandardException :
+ValueNode primaryExpression() throws StandardException :
 {
 	ValueNode			value = null;
 }
@@ -3666,7 +3663,7 @@ ValueNode primaryExpression( boolean inSelectClause ) throws StandardException :
 		return value;
 	}
 |
-	value = primaryExpressionXX( inSelectClause )
+	value = primaryExpressionXX()
 	{
 		return value;
 	}
@@ -5256,9 +5253,7 @@ derivedColumn(ResultColumnList resultColumns) throws StandardException :
 	String		columnName = null;
 }
 {
-	//true to additiveExpression ensures that for the derived columns, we will not allow boolean values inside (), 
-	//eg (2 > 1) should be disallowed in the select clause
-	columnExpression = additiveExpression(null, 0, true) 
+	columnExpression = orExpression( null )
 			[ columnName = asClause() ]
 	{ 
 		/*
@@ -5297,18 +5292,15 @@ asClause() throws StandardException :
 
 /*
  * <A NAME="valueExpression">valueExpression</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-valueExpression( boolean inSelectClause ) throws StandardException :
+valueExpression() throws StandardException :
 {
 	ValueNode	leftOperand;
 }
 {
-	leftOperand = orExpression(null, inSelectClause)
-		(<OR> leftOperand = orExpression(leftOperand, inSelectClause) ) *
+	leftOperand = orExpression(null)
+		(<OR> leftOperand = orExpression(leftOperand) ) *
 	{
 
 		return leftOperand;
@@ -5317,18 +5309,15 @@ valueExpression( boolean inSelectClause ) throws StandardException :
 	
 /*
  * <A NAME="orExpression">orExpression</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-orExpression(ValueNode farLeftOperand, boolean inSelectClause) throws StandardException :
+orExpression(ValueNode farLeftOperand) throws StandardException :
 {
 	ValueNode	leftOperand;
 }
 {
-	leftOperand = andExpression(null, inSelectClause)
-		(<AND> leftOperand = andExpression(leftOperand, inSelectClause)) *
+	leftOperand = andExpression(null)
+		(<AND> leftOperand = andExpression(leftOperand)) *
 	{
 		if (farLeftOperand == null)
 		{
@@ -5347,12 +5336,9 @@ orExpression(ValueNode farLeftOperand, boolean inSelectClause) throws StandardEx
 
 /*
  * <A NAME="andExpression">andExpression</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-andExpression(ValueNode farLeftOperand, boolean inSelectClause) throws StandardException :
+andExpression(ValueNode farLeftOperand) throws StandardException :
 {
 	Token		tok = null;
 	ValueNode	test;
@@ -5360,7 +5346,7 @@ andExpression(ValueNode farLeftOperand, boolean inSelectClause) throws StandardE
 {
 	//LOOKAHEAD required to tell that NOT is not part of a class name
 	[ LOOKAHEAD({getToken(1).kind == NOT && !(getToken(2).kind == PERIOD ||
-			getToken(2).kind == DOUBLE_COLON)}) tok = <NOT> ] test = isSearchCondition(inSelectClause) 
+			getToken(2).kind == DOUBLE_COLON)}) tok = <NOT> ] test = isSearchCondition() 
 	{
 		/* Put the NOT on top of test */
 		if (tok != null)
@@ -5385,12 +5371,9 @@ andExpression(ValueNode farLeftOperand, boolean inSelectClause) throws StandardE
 
 /*
  * <A NAME="isSearchCondition">isSearchCondition</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-isSearchCondition( boolean inSelectClause ) throws StandardException :
+isSearchCondition() throws StandardException :
 {
 	ValueNode	result;
 	ValueNode	booleanPrimary;
@@ -5399,7 +5382,7 @@ isSearchCondition( boolean inSelectClause ) throws StandardException :
 	Token		truthValue = null;
 }
 {
-	booleanPrimary = booleanPrimary(inSelectClause)
+	booleanPrimary = booleanPrimary()
 	[
 		isToken = <IS> [ notToken = <NOT> ] <NULL>
 	]
@@ -5428,18 +5411,15 @@ isSearchCondition( boolean inSelectClause ) throws StandardException :
 
 /*
  * <A NAME="booleanPrimary">booleanPrimary</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-booleanPrimary(boolean inSelectClause) throws StandardException :
+booleanPrimary() throws StandardException :
 {
 	ValueNode	primary;
 	ValueNode	searchCondition;
 }
 {
-	primary = predicate(inSelectClause)
+	primary = predicate()
 	{
 		return	primary;
 	}
@@ -5447,18 +5427,15 @@ booleanPrimary(boolean inSelectClause) throws StandardException :
 
 /*
  * <A NAME="predicate">predicate</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-predicate( boolean inSelectClause ) throws StandardException :
+predicate() throws StandardException :
 {
 	ValueNode	value;
 }
 {
 	(
-		value = additiveExpression(null, 0, inSelectClause) |
+		value = additiveExpression(null, 0) |
 		value = existsExpression()
 	)
 	(
@@ -5466,7 +5443,7 @@ predicate( boolean inSelectClause ) throws StandardException :
 		// start with NOT, and what follows a predicate() can also start
 		// with NOT
 		LOOKAHEAD( { remainingPredicateFollows() } )
-		value = remainingPredicate(value, inSelectClause)
+		value = remainingPredicate(value)
 	)*
 	{
 		return value;
@@ -5488,22 +5465,19 @@ predicate( boolean inSelectClause ) throws StandardException :
 
 /*
  * <A NAME="remainingPredicates">remainingPredicates</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-remainingPredicate(ValueNode value, boolean inSelectClause) throws StandardException :
+remainingPredicate(ValueNode value) throws StandardException :
 {
 	Token tok = null;
 }
 {
-	value = remainingNonNegatablePredicate(value, inSelectClause)
+	value = remainingNonNegatablePredicate(value)
 	{
 		return value;
 	}
 |
-	[ tok = <NOT> ] value = remainingNegatablePredicate(value, inSelectClause)
+	[ tok = <NOT> ] value = remainingNegatablePredicate(value)
 	{
 		/* Put the NOT on top of the tree */
 		if (tok != null)
@@ -5520,12 +5494,9 @@ remainingPredicate(ValueNode value, boolean inSelectClause) throws StandardExcep
 
 /*
  * <A NAME="remainingNonNegatablePredicate">remainingNonNegatablePredicate</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode 
-remainingNonNegatablePredicate(ValueNode leftOperand, boolean inSelectClause) throws StandardException :
+remainingNonNegatablePredicate(ValueNode leftOperand) throws StandardException :
 {
 	int			operator;
 	String		javaClassName;
@@ -5550,7 +5521,7 @@ remainingNonNegatablePredicate(ValueNode leftOperand, boolean inSelectClause) th
 		)
 		|
 		(
-			leftOperand = additiveExpression(leftOperand, operator, inSelectClause)
+			leftOperand = additiveExpression(leftOperand, operator)
 		)
 	)
 	{
@@ -5560,12 +5531,9 @@ remainingNonNegatablePredicate(ValueNode leftOperand, boolean inSelectClause) th
 
 /*
  * <A NAME="remainingNegatablePredicate">remainingNegatablePredicate</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode 
-remainingNegatablePredicate(ValueNode leftOperand, boolean inSelectClause) throws StandardException :
+remainingNegatablePredicate(ValueNode leftOperand) throws StandardException :
 {
 	ValueNode	tree = null;
 	ValueNode	likePattern;
@@ -5579,10 +5547,10 @@ remainingNegatablePredicate(ValueNode leftOperand, boolean inSelectClause) throw
 		return tree;
 	}
 |
-	<LIKE> likePattern = additiveExpression(null, 0, inSelectClause)
+	<LIKE> likePattern = additiveExpression(null, 0)
             [
-                <ESCAPE> escapeValue = additiveExpression(null, 0, inSelectClause) |
-                <LEFT_BRACE> <ESCAPE> escapeValue = additiveExpression(null, 0, inSelectClause) <RIGHT_BRACE>
+                <ESCAPE> escapeValue = additiveExpression(null, 0) |
+                <LEFT_BRACE> <ESCAPE> escapeValue = additiveExpression(null, 0) <RIGHT_BRACE>
             ]
 	{
 		tree = (ValueNode) nodeFactory.getNode(
@@ -5595,8 +5563,8 @@ remainingNegatablePredicate(ValueNode leftOperand, boolean inSelectClause) throw
 		return tree;
 	}
 |
-	<BETWEEN> betweenLeft = additiveExpression(null, 0, inSelectClause) <AND>
-			betweenRight = additiveExpression(null, 0, inSelectClause)
+	<BETWEEN> betweenLeft = additiveExpression(null, 0) <AND>
+			betweenRight = additiveExpression(null, 0)
 	{
 		ValueNodeList betweenList = (ValueNodeList) nodeFactory.getNode(
 													C_NodeTypes.VALUE_NODE_LIST,
@@ -5658,21 +5626,18 @@ compOp() throws StandardException :
 
 /*
  * <A NAME="additiveExpression">additiveExpression</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-additiveExpression(ValueNode farLeftOperand, int compOp, boolean inSelectClause) throws StandardException :
+additiveExpression(ValueNode farLeftOperand, int compOp) throws StandardException :
 {
 	ValueNode	leftOperand;
 	int			operator;
 	int			nodeType;
 }
 {
-	leftOperand = multiplicativeExpression(null, 0, inSelectClause)  			
+	leftOperand = multiplicativeExpression(null, 0)  			
 			(operator = additiveOperator() 			 
-				leftOperand = multiplicativeExpression(leftOperand, operator, inSelectClause) )*
+				leftOperand = multiplicativeExpression(leftOperand, operator) )*
 	{
 		if (farLeftOperand == null)
 			return leftOperand;
@@ -5739,20 +5704,17 @@ additiveOperator() throws StandardException :
 
 /*
  * <A NAME="multiplicativeExpression">multiplicativeExpression</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-multiplicativeExpression(ValueNode farLeftOperand, int additiveOperator, boolean inSelectClause) throws StandardException :
+multiplicativeExpression(ValueNode farLeftOperand, int additiveOperator) throws StandardException :
 {
 	ValueNode	leftOperand;
 	int			multOp;
 }
 {
-	leftOperand = unaryExpression(null, 0, inSelectClause) 
+	leftOperand = unaryExpression(null, 0) 
 				(multOp = multiplicativeOperator() 
-				 leftOperand = unaryExpression(leftOperand, multOp, inSelectClause) )*
+				 leftOperand = unaryExpression(leftOperand, multOp) )*
 	{
 		if (farLeftOperand == null)
 			return leftOperand;
@@ -5808,12 +5770,9 @@ multiplicativeOperator() throws StandardException :
 
 /*
  * <A NAME="unaryExpression">unaryExpression</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-unaryExpression(ValueNode farLeftOperand, int multiplicativeOperator, boolean inSelectClause) throws StandardException :
+unaryExpression(ValueNode farLeftOperand, int multiplicativeOperator) throws StandardException :
 {
 	ValueNode	value;
 	String		sign = null;
@@ -5836,7 +5795,7 @@ unaryExpression(ValueNode farLeftOperand, int multiplicativeOperator, boolean in
 				   } )
 		sign = sign()
 	]
-	value = primaryExpression(inSelectClause)
+	value = primaryExpression()
 	{
 		if ("-".equals(sign))
 		{
@@ -5889,17 +5848,14 @@ sign() :
 
 /*
  * <A NAME="primaryExpressionXX">primaryExpressionXX</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-primaryExpressionXX( boolean inSelectClause ) throws StandardException :
+primaryExpressionXX() throws StandardException :
 {
 	ValueNode	value;
 }
 {
-	value = primary(inSelectClause)
+	value = primary()
 	  ( value = nonStaticMethodCallOrFieldAccess(value)) *	
 	{
 		return value;
@@ -6052,7 +6008,7 @@ methodParameter(Vector parameterList) throws StandardException :
 	ValueNode	parameter;
 }
 {
-	parameter = additiveExpression(null,0, false)
+	parameter = orExpression(null)
 	{
 		parameterList.addElement(parameter);
 	}
@@ -6066,12 +6022,9 @@ methodParameter(Vector parameterList) throws StandardException :
 
 /*
  * <A NAME="primary">primary</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-primary(boolean inSelectClause) throws StandardException :
+primary() throws StandardException :
 {
 	String		javaClassName;
 	ValueNode	value;
@@ -6085,7 +6038,7 @@ primary(boolean inSelectClause) throws StandardException :
 		return value;
 	}
 |
-	value = valueExpressionPrimary(inSelectClause)
+	value = valueExpressionPrimary()
 	{
 		return value;
 	}
@@ -6202,7 +6155,7 @@ escapedValueFunction() throws StandardException :
 	}
 |
 	/* Escaped function substring() */
-    <SUBSTRING> <LEFT_PAREN> value = additiveExpression(null, 0, false) <COMMA> startPosition = additiveExpression(null, 0, false) [ <COMMA> length = additiveExpression(null, 0, false) ] <RIGHT_PAREN>
+    <SUBSTRING> <LEFT_PAREN> value = additiveExpression(null, 0) <COMMA> startPosition = additiveExpression(null, 0) [ <COMMA> length = additiveExpression(null, 0) ] <RIGHT_PAREN>
 	{
         return getSubstringNode(value, startPosition, length, Boolean.FALSE);
 	}
@@ -6230,8 +6183,8 @@ escapedValueFunction() throws StandardException :
     /* CONCAT( string1, string2 )
      * CONCAT is not a reserved word.
      */
-    <CONCAT> <LEFT_PAREN> str1 = additiveExpression(null,0, false) <COMMA> 
-            str2 = additiveExpression(null,0, false) <RIGHT_PAREN>
+    <CONCAT> <LEFT_PAREN> str1 = additiveExpression(null,0) <COMMA> 
+            str2 = additiveExpression(null,0) <RIGHT_PAREN>
     {
         return (ValueNode) nodeFactory.getNode(
                             C_NodeTypes.CONCATENATION_OPERATOR_NODE,
@@ -6320,8 +6273,8 @@ timestampArithmeticFuncion() throws StandardException :
 }
 {
     <TIMESTAMPADD> <LEFT_PAREN> intervalType = jdbcIntervalType() <COMMA>
-       count = additiveExpression(null,0,false) <COMMA>
-       tstamp1 = additiveExpression(null,0,false) <RIGHT_PAREN>
+       count = additiveExpression(null,0) <COMMA>
+       tstamp1 = additiveExpression(null,0) <RIGHT_PAREN>
     {
         return (ValueNode) nodeFactory.getNode( C_NodeTypes.TIMESTAMP_ADD_FN_NODE,
                                                 tstamp1,
@@ -6333,8 +6286,8 @@ timestampArithmeticFuncion() throws StandardException :
     }
 |
     <TIMESTAMPDIFF> <LEFT_PAREN> intervalType = jdbcIntervalType() <COMMA>
-       tstamp1 = additiveExpression(null,0,false) <COMMA>
-       tstamp2 = additiveExpression(null,0,false) <RIGHT_PAREN>
+       tstamp1 = additiveExpression(null,0) <COMMA>
+       tstamp2 = additiveExpression(null,0) <RIGHT_PAREN>
     {
         return (ValueNode) nodeFactory.getNode( C_NodeTypes.TIMESTAMP_DIFF_FN_NODE,
                                                 tstamp2,
@@ -6424,7 +6377,7 @@ numericValueFunction() throws StandardException :
 		return value;
     }
 |
-    <SQRT> <LEFT_PAREN> value = additiveExpression(null,0,false) <RIGHT_PAREN>
+    <SQRT> <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
     {
         return (ValueNode)nodeFactory.getNode(
                 C_NodeTypes.SQRT_OPERATOR_NODE,
@@ -6480,7 +6433,7 @@ coalesceExpression(ValueNodeList expressionList) throws StandardException :
 	ValueNode	expression;
 }
 {
-	expression = additiveExpression(null,0,false)
+	expression = additiveExpression(null,0)
 	{
 		expressionList.addElement(expression);
 	}
@@ -6495,7 +6448,7 @@ absFunction() throws StandardException :
     ValueNode value;
 }
 {
-    <LEFT_PAREN> value = additiveExpression(null,0, false) <RIGHT_PAREN>
+    <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
     {
         return (ValueNode)nodeFactory.getNode(
                 C_NodeTypes.ABSOLUTE_OPERATOR_NODE,
@@ -6513,8 +6466,8 @@ modFunction() throws StandardException :
 	ValueNode int2;
 }
 {
-    <LEFT_PAREN> int1 = additiveExpression(null,0,false) <COMMA> 
-            int2 = additiveExpression(null,0,false) <RIGHT_PAREN>
+    <LEFT_PAREN> int1 = additiveExpression(null,0) <COMMA> 
+            int2 = additiveExpression(null,0) <RIGHT_PAREN>
     {
         return (ValueNode)nodeFactory.getNode(
                 C_NodeTypes.MOD_OPERATOR_NODE,
@@ -6556,12 +6509,12 @@ characterValueFunction() throws StandardException :
     ValueNode	length = null;
 }
 {
-	<SUBSTR> <LEFT_PAREN> value = additiveExpression(null,0,false) <COMMA> startPosition = additiveExpression(null,0,false) [ <COMMA> length = additiveExpression(null,0,false) ] <RIGHT_PAREN>
+	<SUBSTR> <LEFT_PAREN> value = additiveExpression(null,0) <COMMA> startPosition = additiveExpression(null,0) [ <COMMA> length = additiveExpression(null,0) ] <RIGHT_PAREN>
 	{
         return getSubstringNode( value, startPosition, length, Boolean.FALSE );
 	}
 |
-	( upperTok = <UPPER> | lowerTok = <LOWER> ) <LEFT_PAREN> value = additiveExpression(null,0,false) <RIGHT_PAREN>
+	( upperTok = <UPPER> | lowerTok = <LOWER> ) <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
 		return (ValueNode) nodeFactory.getNode(
 					C_NodeTypes.SIMPLE_STRING_OPERATOR_NODE,
@@ -6570,7 +6523,7 @@ characterValueFunction() throws StandardException :
 					getContextManager());
 	}
 |
-	( upperTok = <UCASE> | lowerTok = <LCASE> ) <LEFT_PAREN> value = additiveExpression(null,0,false) <RIGHT_PAREN>
+	( upperTok = <UCASE> | lowerTok = <LCASE> ) <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
 		return (ValueNode) nodeFactory.getNode(
 					C_NodeTypes.SIMPLE_STRING_OPERATOR_NODE,
@@ -6587,9 +6540,9 @@ characterValueFunction() throws StandardException :
     /* LOCATE( string1, string2[, start] )
      * LOCATE is a SQLJ reserved word.
      */
-    <LOCATE> <LEFT_PAREN> str1 = additiveExpression(null,0,false) <COMMA>
-            str2 = additiveExpression(null,0,false)
-            [ <COMMA> value = additiveExpression(null,0,false) ]
+    <LOCATE> <LEFT_PAREN> str1 = additiveExpression(null,0) <COMMA>
+            str2 = additiveExpression(null,0)
+            [ <COMMA> value = additiveExpression(null,0) ]
             <RIGHT_PAREN>
     {
 		// if start is missing, start is equal to 1
@@ -6617,7 +6570,7 @@ trimFunction() throws StandardException :
 	ValueNode	ansiTrimNode;
 }
 {
-	trimType = trimType() <LEFT_PAREN> source = additiveExpression(null,0,false) <RIGHT_PAREN>
+	trimType = trimType() <LEFT_PAREN> source = additiveExpression(null,0) <RIGHT_PAREN>
 	{
 		return getTrimOperatorNode(trimType, null, source, null);
 	}
@@ -6643,22 +6596,22 @@ ansiTrim() throws StandardException  :
     (
          // LEADING FROM <source>
          LOOKAHEAD(<FROM>)
-         <FROM> trimSource = additiveExpression(null,0,false) <RIGHT_PAREN>
+         <FROM> trimSource = additiveExpression(null,0) <RIGHT_PAREN>
          {
              return getTrimOperatorNode(trimSpec, trimChar, trimSource, null);
          }
      |
          // LEADING <char> FROM <source>
-         trimChar = additiveExpression(null,0,false) <FROM> trimSource = additiveExpression(null,0,false) <RIGHT_PAREN>
+         trimChar = additiveExpression(null,0) <FROM> trimSource = additiveExpression(null,0) <RIGHT_PAREN>
          {
              return getTrimOperatorNode(trimSpec, trimChar, trimSource, null);
          }
     )
 |
     LOOKAHEAD ({!ansiTrimSpecFollows()})
-    <LEFT_PAREN> trimChar = additiveExpression(null,0,false)
+    <LEFT_PAREN> trimChar = additiveExpression(null,0)
     (
-        <FROM> trimSource = additiveExpression(null,0,false) <RIGHT_PAREN>
+        <FROM> trimSource = additiveExpression(null,0) <RIGHT_PAREN>
         {
             return getTrimOperatorNode(trimSpec, trimChar, trimSource, null);
         }
@@ -6711,12 +6664,9 @@ trimType() :
 
 /*
  * <A NAME="valueExpressionPrimary">valueExpressionPrimary</A>
- * 
- * @param inSelectClause will be true if this method got called while parsing the select or values clause
- * If in select or values clause, we do not want to allow boolean values.
  */
 ValueNode
-valueExpressionPrimary(boolean inSelectClause) throws StandardException :
+valueExpressionPrimary() throws StandardException :
 {
 	ValueNode	value;
 	int			tokKind;
@@ -6804,11 +6754,7 @@ valueExpressionPrimary(boolean inSelectClause) throws StandardException :
 		** valueExpression() here is a MINUS operator if the intervalQualifier
 		** is supplied.
 		*/
-		// without the following check, select/values (c1>c2) will not be caught
-		LOOKAHEAD({inSelectClause})
-		value = additiveExpression(null,0, inSelectClause)
-		| //following will happen if we are not coming here for select/values clause
-		value = valueExpression(inSelectClause)
+		value = valueExpression()
 	)
 	<RIGHT_PAREN>
 	{
@@ -6960,7 +6906,7 @@ miscBuiltinsCore( boolean isJDBCEscape) throws StandardException :
 		return value;
 	}
 |
-	<LENGTH> <LEFT_PAREN> value = additiveExpression(null,0, false) <RIGHT_PAREN>
+	<LENGTH> <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
 		ContextManager	localCM = getContextManager();
                 if( isJDBCEscape)
@@ -7005,7 +6951,7 @@ ValueNode
 		return value;
 	}
 	|
-	 dts = numericFunctionType() <LEFT_PAREN> operand = additiveExpression(null,0, false) <RIGHT_PAREN>
+	 dts = numericFunctionType() <LEFT_PAREN> operand = additiveExpression(null,0) <RIGHT_PAREN>
 	  {
 			value = (ValueNode) nodeFactory.getNode(
 									C_NodeTypes.CAST_NODE,
@@ -7017,7 +6963,7 @@ ValueNode
 
 			return value;
 	  }
-	 | charType = charOrVarchar() <LEFT_PAREN> operand = additiveExpression(null,0, false) [ <COMMA> length = length() ] <RIGHT_PAREN>
+	 | charType = charOrVarchar() <LEFT_PAREN> operand = additiveExpression(null,0) [ <COMMA> length = length() ] <RIGHT_PAREN>
 	{
 		// Always check db2 limits for this function. It's new
 		checkTypeLimits(charType,length);
@@ -7108,7 +7054,7 @@ ValueNode
 	boolean wsOption;
 }
 {
-	value = additiveExpression(null,0,false) wsOption = xmlPreserveWhitespace() {
+	value = additiveExpression(null,0) wsOption = xmlPreserveWhitespace() {
 		return (ValueNode) nodeFactory.getNode(
 					C_NodeTypes.XML_PARSE_OPERATOR_NODE,
 					value,
@@ -7173,7 +7119,7 @@ ValueNode
 	DataTypeDescriptor targetType;
 }
 {
-	value = additiveExpression(null,0,false)
+	value = additiveExpression(null,0)
 		targetType = xmlSerializeTargetType()
 	{
 		return (ValueNode) nodeFactory.getNode(
@@ -7271,7 +7217,7 @@ ValueNode
 	short defaultPassingMech = -1;
 }
 {
-	xqueryExpr = additiveExpression(null, 0, false)
+	xqueryExpr = additiveExpression(null, 0)
 	<PASSING> defaultPassingMech = xmlPassingMechanism()
 		xmlValue = xqVarList()
 	(
@@ -7356,7 +7302,7 @@ void xqVariable(ValueNode [] xmlVal) throws StandardException :
 	short passingMech = -1;
 }
 {
-	curVal = additiveExpression(null,0, false)
+	curVal = additiveExpression(null,0)
 	[
 		LOOKAHEAD( { getToken(1).kind == AS } )
 		<AS> varName = identifier(Limits.MAX_IDENTIFIER_LENGTH, true)
@@ -7576,7 +7522,7 @@ dateTimeScalarFunction() throws StandardException :
      * NOTE: If you add a new rule here, you must add the appropriate
      *    LOOKAHEAD rule to miscBuiltins().
      */
-        <TIME> <LEFT_PAREN> value = additiveExpression(null,0, false) <RIGHT_PAREN>
+        <TIME> <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
 		ValueNode castValue = (ValueNode) nodeFactory.getNode(
 							C_NodeTypes.CAST_NODE,
@@ -7587,7 +7533,7 @@ dateTimeScalarFunction() throws StandardException :
 		return castValue;
         }
 |
-        <DATE> <LEFT_PAREN> value = additiveExpression(null,0, false) <RIGHT_PAREN>
+        <DATE> <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
 		return (ValueNode) nodeFactory.getNode(
 							C_NodeTypes.UNARY_DATE_TIMESTAMP_OPERATOR_NODE,
@@ -7596,12 +7542,12 @@ dateTimeScalarFunction() throws StandardException :
                                                         getContextManager());
         }
 |
-        <TIMESTAMP> <LEFT_PAREN> value = additiveExpression(null,0, false) timestampNode = timestampFunctionCompletion( value)
+        <TIMESTAMP> <LEFT_PAREN> value = additiveExpression(null,0) timestampNode = timestampFunctionCompletion( value)
 	{
                 return timestampNode;
         }
 |
-        field = datetimeField() <LEFT_PAREN> value = additiveExpression(null,0, false) <RIGHT_PAREN>
+        field = datetimeField() <LEFT_PAREN> value = additiveExpression(null,0) <RIGHT_PAREN>
 	{
 		return (ValueNode) nodeFactory.getNode(
 								C_NodeTypes.EXTRACT_OPERATOR_NODE,
@@ -7630,7 +7576,7 @@ timestampFunctionCompletion( ValueNode firstArg) throws StandardException :
                                                         getContextManager());
         }
 |
-        <COMMA> timeValue = additiveExpression(null,0, false) <RIGHT_PAREN>
+        <COMMA> timeValue = additiveExpression(null,0) <RIGHT_PAREN>
 	{
 		return (ValueNode) nodeFactory.getNode(
 							C_NodeTypes.TIMESTAMP_OPERATOR_NODE,
@@ -8219,7 +8165,7 @@ sortKey() throws StandardException :
 	ValueNode columnExpression;
 } 
 {
-	columnExpression = additiveExpression(null,0,true)
+	columnExpression = additiveExpression(null,0)
 	{
 		return (OrderByColumn) nodeFactory.getNode(
 								C_NodeTypes.ORDER_BY_COLUMN,
@@ -8425,7 +8371,7 @@ updateSource(String columnName) throws StandardException :
 	ValueNode	valueNode;
 }
 {
-	valueNode = additiveExpression(null,0, false) 
+	valueNode = orExpression(null) 
 	{
 		return valueNode;
 	}
@@ -8676,7 +8622,7 @@ rowValueConstructorElement(ResultColumnList resultColumns) throws StandardExcept
 	ValueNode	value;
 }
 {
-	value = additiveExpression(null, 0, true)
+	value = orExpression(null)
 	{
 		resultColumns.addResultColumn(
 			(ResultColumn) nodeFactory.getNode(
@@ -8834,7 +8780,7 @@ inElement(ValueNodeList inList) throws StandardException :
 	ValueNode valueNode;
 }
 {
-	valueNode = additiveExpression(null, 0, false)
+	valueNode = additiveExpression(null, 0)
 	{
 		inList.addElement(valueNode);
 	}
@@ -9528,7 +9474,7 @@ joinCondition() throws StandardException :
 }
 {
 	/* valueExpression() was searchCondition() */
-	<ON> joinClause = valueExpression(false)
+	<ON> joinClause = valueExpression()
 	{
 		return joinClause;
 	}
@@ -9750,7 +9696,7 @@ aggregateExpression(String aggName, Class aggClass) throws StandardException :
 	ValueNode	value;
 }
 {
-	[ distinct = setQuantifier() ] value = additiveExpression(null, 0, false)
+	[ distinct = setQuantifier() ] value = additiveExpression(null, 0)
 	{
 		return (ValueNode) nodeFactory.getNode(
 								C_NodeTypes.AGGREGATE_NODE,
@@ -9890,7 +9836,7 @@ castOperand() throws StandardException :
 	ValueNode value;
 }
 {
-	value = additiveExpression(null, 0, false)
+	value = additiveExpression(null, 0)
 	{
 		return value;
 	}
@@ -9928,7 +9874,7 @@ whereClause(Token beginToken) throws StandardException :
 }
 {
 	/* valueExpression() was searchCondition() */
-	value = valueExpression(false)
+	value = valueExpression()
 	{
 		endToken = getToken(0);
 
@@ -9982,7 +9928,7 @@ groupingColumnReference(GroupByList groupingCols) throws StandardException :
         ValueNode columnExpression;
 }
 {
-	columnExpression = additiveExpression(null, 0, false)
+	columnExpression = additiveExpression(null, 0)
 	{
 		/* Aggregates not allowed in group by */
 		HasNodeVisitor visitor =
@@ -10011,7 +9957,7 @@ havingClause() throws StandardException :
 }
 {
 	/* valueExpression() was searchCondition() */
-	<HAVING> value = valueExpression(false)
+	<HAVING> value = valueExpression()
 	{
 		return value;
 	}
@@ -11386,7 +11332,7 @@ generationClause() throws StandardException :
 	Token endToken = null;
 }
 {
-	<AS> beginToken = <LEFT_PAREN> value = valueExpression( false ) endToken = <RIGHT_PAREN>
+	<AS> beginToken = <LEFT_PAREN> value = valueExpression() endToken = <RIGHT_PAREN>
     {
 		checkVersion(DataDictionary.DD_VERSION_DERBY_10_5, "GENERATED COLUMN");
 
@@ -11930,7 +11876,7 @@ checkConstraintDefinition(TableName constraintName, String columnName)
 {
 	/* valueExpression() was searchCondition() */
 	<CHECK>  beginToken = 
-		<LEFT_PAREN> value = valueExpression(false) endToken = <RIGHT_PAREN>
+		<LEFT_PAREN> value = valueExpression() endToken = <RIGHT_PAREN>
 	{
 		if (columnName != null)
 		{
@@ -12468,7 +12414,7 @@ valueSpecification() throws StandardException :
 		return value;
 	}
 |
-	<NULLIF> <LEFT_PAREN> leftExpression = additiveExpression(null, 0, false) <COMMA> rightExpression = additiveExpression(null, 0, false) <RIGHT_PAREN>
+	<NULLIF> <LEFT_PAREN> leftExpression = additiveExpression(null, 0) <COMMA> rightExpression = additiveExpression(null, 0) <RIGHT_PAREN>
 	{
 		// "NULLIF(L, R)" is the same as "L=R ? untyped NULL : L"
 		// An impl assumption here is that Derby can promote CHAR to any comparable datatypes such as numeric
@@ -12543,8 +12489,8 @@ whenThenExpression() throws StandardException :
 	ValueNode	   elseExpr;
 }
 {
-	<WHEN> expr = orExpression(null, false) 
-		   (<OR> expr = orExpression(expr, false) )*
+	<WHEN> expr = orExpression(null) 
+		   (<OR> expr = orExpression(expr) )*
 	<THEN> thenExpr = thenElseExpression()
 	elseExpr = caseExpression()
 	{
@@ -12583,7 +12529,7 @@ thenElseExpression() throws StandardException :
 		return value;
 	}
 |
-	expr = additiveExpression(null, 0, false)
+	expr = additiveExpression(null, 0)
 	{
 		return expr;
 	}

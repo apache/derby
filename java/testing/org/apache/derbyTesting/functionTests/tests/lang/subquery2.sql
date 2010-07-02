@@ -323,7 +323,6 @@ create table u (i int, s smallint, c char(30), vc char(30), b bigint);
 insert into u select * from s;
 select * from u;
 
--- exists returns a boolean value and hence it can not be used to set a value. Exists can only be used in where clause
 update u set b = exists (select * from t)
 where vc < ANY (select vc from s);
 select * from u;

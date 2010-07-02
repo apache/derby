@@ -185,40 +185,34 @@ NULL                  |0          |def
 ij> remove v2;
 ij> -- type precedence tests. tinyint not supported by DB2 Cloudscape
 values (1 = 1.2);
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 11.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+false
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (1.2 = 1);
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 13.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+false
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (1 = cast(1 as bigint));
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 11.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (1 = cast(1 as smallint));
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 11.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (cast(1 as bigint) = 1);
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 27.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (cast(1 as smallint) = 1);
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 29.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- inserts
 create table insert_test1 (c1 int);
 0 rows inserted/updated/deleted
@@ -454,163 +448,120 @@ ij> drop table sub;
 0 rows inserted/updated/deleted
 ij> drop table target;
 0 rows inserted/updated/deleted
-ij> -- negative tests
-create table t1 (c1 int);
+ij> create table t1 (c1 int, c11 boolean);
 0 rows inserted/updated/deleted
-ij> insert into t1 values 1;
+ij> insert into t1( c1, c11 ) values ( 1, true );
 1 row inserted/updated/deleted
-ij> -- boolean expression IS disallowed in values or select clause
-select nullif(c1, 1) is null from t1;
-ERROR 42X01: Syntax error: Encountered "is" at line 2, column 22.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ij> select nullif(c1, 1) is null from t1;
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values 1 is null;
-ERROR 42X01: Syntax error: Encountered "is" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
-ij> -- boolean expression =, >, >=, <, <= disallowed in values or select clause
-values 1 = 1;
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+false
+ij> values 1 = 1;
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select 1 = 1 from t1;
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (nullif('abc','a') = 'abc');
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 27.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select (nullif('abc','a') = 'abc') from t1;
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 27.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select c11 = any (select c11 from t1) from t1;
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 12.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values 2 > 1;
-ERROR 42X01: Syntax error: Encountered ">" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select 2 > 1 from t1;
-ERROR 42X01: Syntax error: Encountered ">" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values 2 >= 1;
-ERROR 42X01: Syntax error: Encountered ">=" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select 2 >= 1 from t1;
-ERROR 42X01: Syntax error: Encountered ">=" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values 1 < 2;
-ERROR 42X01: Syntax error: Encountered "<" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select 1 < 2 from t1;
-ERROR 42X01: Syntax error: Encountered "<" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values 1 <= 2;
-ERROR 42X01: Syntax error: Encountered "<=" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select 1 <= 2 from t1;
-ERROR 42X01: Syntax error: Encountered "<=" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (1>1);
-ERROR 42X01: Syntax error: Encountered ">" at line 2, column 10.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+false
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select (c1 < 2) from t1;
-ERROR 42X01: Syntax error: Encountered "<" at line 2, column 12.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values (1 between 2 and 5);
-ERROR 42X01: Syntax error: Encountered "between" at line 2, column 11.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+false
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select (c1 between 1 and 3) from t1;
-ERROR 42X01: Syntax error: Encountered "between" at line 2, column 12.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
-ij> -- boolean expression LIKE disallowed in values and select clause
-prepare ll1 as 'values ''asdf'' like ?';
-ERROR 42X01: Syntax error: Encountered "like" at line 1, column 15.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
+ij> prepare ll1 as 'values ''asdf'' like ?';
 ij> prepare ll1 as 'select ''asdf'' like ? from t1';
-ERROR 42X01: Syntax error: Encountered "like" at line 1, column 15.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> prepare ll15 as 'values ''%foobar'' like ''Z%foobar'' escape ?';
-ERROR 42X01: Syntax error: Encountered "like" at line 1, column 18.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> prepare ll15 as 'select ''%foobar'' like ''Z%foobar'' escape ? from t1';
-ERROR 42X01: Syntax error: Encountered "like" at line 1, column 18.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 values '%foobar' like '%%foobar' escape '%';
-ERROR 42X01: Syntax error: Encountered "like" at line 2, column 18.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select '_foobar' like '__foobar' escape '_' from t1;
-ERROR 42X01: Syntax error: Encountered "like" at line 2, column 18.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
 ij> prepare ll4 as 'values org.apache.derbyTesting.functionTests.tests.lang.CharUTF8::getMaxDefinedCharAsString() like ?';
-ERROR 42X01: Syntax error: Encountered "like" at line 1, column 95.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ERROR 42X51: The class 'org.apache.derbyTesting.functionTests.tests.lang.CharUTF8' does not exist or is inaccessible. This can happen if the class is not public.
+ERROR XJ001: Java exception: 'org.apache.derbyTesting.functionTests.tests.lang.CharUTF8: java.lang.ClassNotFoundException'.
 ij> -- boolean expression INSTANCEOF disallowed in values and select clause
 values 1 instanceof int;
 ERROR 42X01: Syntax error: Encountered "instanceof" at line 2, column 10.
@@ -623,26 +574,25 @@ ERROR 42X01: Syntax error: Encountered "instanceof" at line 2, column 10.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
-ij> -- boolean expression EXISTS disallowed in values and select clause
-select exists (values 1) from t1;
-ERROR 42X01: Syntax error: Encountered "exists" at line 2, column 8.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+ij> select exists (values 1) from t1;
+1    
+-----
+true 
 ij> values exists (values 2);
-ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
-ij> -- boolean expression EXISTS diallowed in update set clause too
-update t1 set c11 = exists(values 1);
-ERROR 42X01: Syntax error: Encountered "exists" at line 2, column 21.
-Issue the 'help' command for general information on IJ command syntax.
-Any unrecognized commands are treated as potential SQL commands and executed directly.
-Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
+1    
+-----
+true 
+ij> update t1 set c11 = exists(values 1);
+1 row inserted/updated/deleted
 ij> -- ?: not supported anymore
 values not true ? false : true;
-ERROR 42X80: VALUES clause must contain at least one element. Empty elements are not allowed. 
+ERROR 42X01: Syntax error: Encountered "?" at line 2, column 17.
+Issue the 'help' command for general information on IJ command syntax.
+Any unrecognized commands are treated as potential SQL commands and executed directly.
+Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select not true ? false : true from t1;
-ERROR 42X01: Syntax error: Encountered "not" at line 2, column 8.
+ERROR 42X01: Syntax error: Encountered "?" at line 2, column 17.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
@@ -654,19 +604,19 @@ Any unrecognized commands are treated as potential SQL commands and executed dir
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select c1 is null ? true : false from t1;
-ERROR 42X01: Syntax error: Encountered "is" at line 2, column 11.
+ERROR 42X01: Syntax error: Encountered "?" at line 2, column 19.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select new java.lang.Integer(c1 is null ? 0 : c1) from t1;
-ERROR 42X01: Syntax error: Encountered "is" at line 2, column 33.
+ERROR 42X01: Syntax error: Encountered "?" at line 2, column 41.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
 ij> -- this test runs in SPS mode too, hence adding a comment line before the sql, so we get correct column number in error message in both SPS and non-SPS mode
 select c1, (c1=1? cast(null as int) : c1) is null from t1;
-ERROR 42X01: Syntax error: Encountered "=" at line 2, column 15.
+ERROR 42X01: Syntax error: Encountered "?" at line 2, column 17.
 Issue the 'help' command for general information on IJ command syntax.
 Any unrecognized commands are treated as potential SQL commands and executed directly.
 Consult your DBMS server reference documentation for details of the SQL syntax supported by your server.
