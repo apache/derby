@@ -5370,8 +5370,54 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
              );
 
     }
-    
 
+
+   /**
+    * Test INSERT INTO .. select distinct in presence of generated column.
+    * Cf DERBY-4413.
+    */
+    public  void    test_031_derby_4413()
+            throws Exception
+    {
+        Connection  conn = getConnection();
+
+        //
+        // Schema
+        //
+        goodStatement
+            (
+                conn,
+                "create table t_4413 (" +
+                "     i integer, " +
+                "     j integer not null generated always as (i*2))"
+            );
+        goodStatement
+            (
+                conn,
+                "insert into t_4413(i) values 1,2,1"
+            );
+
+        goodStatement
+            (
+                conn,
+                "insert into t_4413(i) select distinct i from t_4413"
+            );
+        assertResults
+            (
+                conn,
+                "select * from t_4413",
+                new String[][]
+                {
+                    { "1", "2", },
+                    { "2", "4", },
+                    { "1", "2", },
+                    { "1", "2", },
+                    { "2", "4", },
+                },
+                false
+            );
+
+    }
 
 
     ///////////////////////////////////////////////////////////////////////////////////

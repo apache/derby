@@ -126,6 +126,12 @@ class MergeSort implements Sort
 	**/
 	protected boolean columnOrderingNullsLowMap[];
 
+
+	/**
+    Determine whether a column is used for ordering or not.
+	**/
+	private boolean isOrderingColumn[];
+
 	/**
 	The sort observer.  May be null.  Used as a callback.
 	**/
@@ -455,8 +461,18 @@ class MergeSort implements Sort
                 Object col2 = template[colid];
                 if (col1 == null)
 				{
-					SanityManager.THROWASSERT(
-						"col[" + colid + "]  is null");
+					if (!isOrderingColumn[colid]) {
+
+						// DERBY-4413 shows that the value for a generated
+						// column will be null as the result set is computed as
+						// part of an INSERT INTO, so accept a null also.
+						// This column would not be part of the sort key.
+
+						continue;
+
+					} else {
+						SanityManager.THROWASSERT("col[" + colid + "] is null");
+					}
 				}
 						
                 if (!(col1 instanceof CloneableObject))
@@ -546,12 +562,26 @@ class MergeSort implements Sort
         columnOrderingMap          = new int[columnOrdering.length];
         columnOrderingAscendingMap = new boolean[columnOrdering.length];
         columnOrderingNullsLowMap  = new boolean[columnOrdering.length];
-        for (int i = 0; i < columnOrdering.length; i++)
+
+		if (SanityManager.DEBUG) {
+			isOrderingColumn = new boolean[template.length];
+
+			for (int i = 0; i < isOrderingColumn.length; i++) {
+				isOrderingColumn[i] = false;
+			}
+		}
+
+		for (int i = 0; i < columnOrdering.length; i++)
         {
             columnOrderingMap[i] = columnOrdering[i].getColumnId();
             columnOrderingAscendingMap[i] = columnOrdering[i].getIsAscending();
             columnOrderingNullsLowMap[i] = columnOrdering[i].getIsNullsOrderedLow();
+
+			if (SanityManager.DEBUG) {
+				isOrderingColumn[columnOrderingMap[i]] = true;
+			}
         }
+
 
 		// No inserter or scan yet.
 		this.inserter = null;
