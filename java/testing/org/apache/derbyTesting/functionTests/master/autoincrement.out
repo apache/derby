@@ -2112,4 +2112,17 @@ alter table d4006_a alter column z default null;
 ij(CONN2)> -- should fail DERBY-4011
 drop table d4006_a;
 0 rows inserted/updated/deleted
+ij(CONN2)> -- DERBY-4419 is a variant on DERBY-1644:
+create table d4419_t1(x int);
+0 rows inserted/updated/deleted
+ij(CONN2)> insert into d4419_t1 values 1,2;
+2 rows inserted/updated/deleted
+ij(CONN2)> create table d4419_t2(x int);
+0 rows inserted/updated/deleted
+ij(CONN2)> insert into d4419_t2 values 2,3;
+2 rows inserted/updated/deleted
+ij(CONN2)> create table d4419_t3(x int, y int generated always as identity);
+0 rows inserted/updated/deleted
+ij(CONN2)> insert into d4419_t3(x) select * from d4419_t1 union select * from d4419_t2;
+3 rows inserted/updated/deleted
 ij(CONN2)> 
