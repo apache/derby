@@ -184,6 +184,40 @@ public class UnionNode extends SetOperatorNode
 		}
 	}
 
+	/**
+	 * Make the RCL of this node match the target node for the insert. If this
+	 * node represents a table constructor (a VALUES clause), we replace the
+	 * RCL with an enhanced one if necessary, and recursively enhance the RCL
+	 * of each child node. For table constructors, we also need to check that
+	 * we don't attempt to override auto-increment columns in each child node
+	 * (checking the top-level RCL isn't sufficient since a table constructor
+	 * may contain the DEFAULT keyword, which makes it possible to specify a
+	 * column without overriding its value).
+	 *
+	 * If this node represents a regular UNION, put a ProjectRestrictNode on
+	 * top of this node and enhance the RCL in that node.
+	 */
+	ResultSetNode enhanceRCLForInsert(
+			InsertNode target, boolean inOrder, int[] colMap)
+		throws StandardException
+	{
+		if (tableConstructor()) {
+			leftResultSet = target.enhanceAndCheckForAutoincrement(
+					leftResultSet, inOrder, colMap);
+			rightResultSet = target.enhanceAndCheckForAutoincrement(
+					rightResultSet, inOrder, colMap);
+			if (!inOrder ||
+					resultColumns.size() < target.resultColumnList.size()) {
+				resultColumns = getRCLForInsert(target, colMap);
+			}
+			return this;
+		} else {
+			// This is a regular UNION, so fall back to the default
+			// implementation that adds a ProjectRestrictNode on top.
+			return super.enhanceRCLForInsert(target, inOrder, colMap);
+		}
+	}
+
 	/*
 	 *  Optimizable interface
 	 */

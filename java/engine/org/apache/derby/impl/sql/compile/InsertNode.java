@@ -411,9 +411,7 @@ public final class InsertNode extends DMLModStatementNode
 			}
 		}
 
-		enhanceAndCheckForAutoincrement(resultSet, inOrder,
-				numTableColumns, colMap, dataDictionary,
-                targetTableDescriptor, targetVTI );
+		resultSet = enhanceAndCheckForAutoincrement(resultSet, inOrder, colMap);
 
 		resultColumnList.checkStorableExpressions(resultSet.getResultColumns());
 		/* Insert a NormalizeResultSetNode above the source if the source
@@ -529,19 +527,13 @@ public final class InsertNode extends DMLModStatementNode
 	 *
 	 * @param resultSet			current node in the result set tree
 	 * @param inOrder			FALSE if the column list needs reordering
-	 * @param numTableColumns   # of columns in target RCL
 	 * @param colMap            correspondence between RCLs
-	 * @param dataDictionary    DataDictionary to use
-	 * @param targetTableDescriptor    Table Descriptor for target
-	 * @param targetVTI         Target description if it is a VTI
+	 * @return a node representing the source for the insert
 	 *
 	 * @exception StandardException Thrown on error
 	 */
-	private void enhanceAndCheckForAutoincrement(ResultSetNode resultSet, 
-			boolean inOrder, int numTableColumns, int []colMap, 
-			DataDictionary dataDictionary,
-			TableDescriptor targetTableDescriptor,
-            FromVTI targetVTI)
+	ResultSetNode enhanceAndCheckForAutoincrement(
+			ResultSetNode resultSet, boolean inOrder, int[] colMap)
 		throws StandardException
 	{
 		/*
@@ -565,40 +557,24 @@ public final class InsertNode extends DMLModStatementNode
 		 * value expressions.
 		 */
 
-		if (resultSet instanceof SingleChildResultSetNode)
-		{
-			enhanceAndCheckForAutoincrement(
-				((SingleChildResultSetNode)resultSet).getChildResult(),
-				inOrder, numTableColumns, colMap, dataDictionary,
-				targetTableDescriptor, targetVTI);
-			if (! inOrder || resultSet.resultColumns.size() < numTableColumns)
-				resultSet.enhanceRCLForInsert(
-						numTableColumns, colMap, dataDictionary,
-						targetTableDescriptor, targetVTI);
-		}
-		else if (resultSet instanceof UnionNode)
-		{
-			enhanceAndCheckForAutoincrement(
-				((TableOperatorNode)resultSet).getLeftResultSet(),
-				inOrder, numTableColumns, colMap, dataDictionary,
-				targetTableDescriptor, targetVTI);
-			enhanceAndCheckForAutoincrement(
-				((TableOperatorNode)resultSet).getRightResultSet(),
-				inOrder, numTableColumns, colMap, dataDictionary,
-				targetTableDescriptor, targetVTI);
-			if (! inOrder || resultSet.resultColumns.size() < numTableColumns)
-				resultSet.enhanceRCLForInsert(
-						numTableColumns, colMap, dataDictionary,
-						targetTableDescriptor,targetVTI);
-		}
-		else
-		{
-			if (! inOrder || resultSet.resultColumns.size() < numTableColumns)
-				resultSet.enhanceRCLForInsert(
-						numTableColumns, colMap, dataDictionary,
-						targetTableDescriptor, targetVTI);
+		resultSet = resultSet.enhanceRCLForInsert(this, inOrder, colMap);
+
+		// Forbid overrides for generated columns and identity columns that
+		// are defined as GENERATED ALWAYS.
+		if ((resultSet instanceof UnionNode) &&
+				((UnionNode) resultSet).tableConstructor()) {
+			// If this is a multi-row table constructor, we are not really
+			// interested in the result column list of the top-level UnionNode.
+			// The interesting RCLs are those of the RowResultSetNode children
+			// of the UnionNode, and they have already been checked from
+			// UnionNode.enhanceRCLForInsert(). Since the RCL of the UnionNode
+			// doesn't tell whether or not DEFAULT is specified at the leaf
+			// level, we need to skip it here to avoid false positives.
+		} else {
 			resultColumnList.forbidOverrides(resultSet.getResultColumns());
 		}
+
+		return resultSet;
 	}
 
 	int getPrivType()

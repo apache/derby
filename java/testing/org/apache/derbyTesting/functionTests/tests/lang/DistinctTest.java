@@ -434,10 +434,8 @@ public class DistinctTest extends BaseJDBCTestCase {
 	
 	/**
 	 * This test demonstrates that using distinct in a query for insert
-	 * generates gaps in numbering in autoincremented columns.
-	 * 
-	 * See DERBY-3. If that bug is fixed, the first query after the comment
-	 * below will fail.
+	 * does not cause gaps in numbering in autoincremented columns. Before
+	 * DERBY-3 was fixed, there could be gaps.
 	 * 
 	 * @throws SQLException
 	 */
@@ -458,9 +456,9 @@ public class DistinctTest extends BaseJDBCTestCase {
 		assertRowCount(2, s.executeQuery("select distinct(c31) from source"));
 		assertEquals(2, s.executeUpdate("insert into destWithAI(c12) select distinct(c31) from source"));
 		
-		//we will see gaps in the autoincrement column for all the duplicate rows from source
+		// we should not see gaps in the autoincrement column
 		String [][] expected = { {"1", "1"}, 
-				                 {"3", "2"} };
+				                 {"2", "2"} };
 		JDBC.assertFullResultSet(s.executeQuery("select * from destWithAI"), expected);
 		
 		assertEquals(2, s.executeUpdate("insert into destWithNoAI(c22) select distinct(c31) from source"));
