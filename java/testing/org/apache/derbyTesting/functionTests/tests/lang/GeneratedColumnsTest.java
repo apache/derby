@@ -5419,6 +5419,21 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
 
     }
 
+    public void test_derby_4425()
+        throws Exception
+    {
+        Connection conn = getConnection();
+        goodStatement(conn, "create table t4425_1(x int)");
+        goodStatement(conn, "create table t4425_2(x int)");
+        goodStatement(conn, "insert into t4425_1 values 1,2");
+        goodStatement(conn, "insert into t4425_2 values 2,3");
+        goodStatement(conn, "create table t4425_3 (x int, " +
+                "y generated always as (2*x))");
+        goodStatement(conn, "insert into t4425_3(x) " +
+                "select * from t4425_1 union select * from t4425_2");
+        assertResults(conn, "select * from t4425_3",
+                new String[][] { {"1","2"},{"2","4"},{"3","6"}}, false);
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
