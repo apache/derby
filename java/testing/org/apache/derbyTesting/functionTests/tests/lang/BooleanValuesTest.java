@@ -454,7 +454,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         while ( rs.next() ) { actualTypeCount++; }
         rs.close();
 
-        assertEquals( 21, actualTypeCount );
+        assertEquals( 22, actualTypeCount );
     }
 
     /**
@@ -807,6 +807,17 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  { "15", "true", "true", "true", "true", },
                  { "16", null, null, null, null, },
                  { "17", null, null, null, null, },
+             },
+             false
+             );
+
+        assertResults
+            (
+             conn,
+             "values ( cast( true as boolean) )\n",
+             new String[][]
+             {
+                 { "true" },
              },
              false
              );

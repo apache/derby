@@ -294,6 +294,7 @@ public static String[][]SQLData =
         new TypedColumn( "varcharCol", "varchar( 5 )", true ),
         new TypedColumn( "longVarcharCol", "long varchar", false ),
         new TypedColumn( "clobCol", "clob", false ),
+        new TypedColumn( "booleanCol", "boolean", true ),
     };
     
     private static final TypedColumn[] ILLEGAL_BOOLEAN_CASTS = new TypedColumn[]
@@ -633,13 +634,6 @@ public static String[][]SQLData =
              false,
              1
              );
-
-        //
-        // The following assertion will fail after the BOOLEAN data type is
-        // re-enabled. At that time, the assertion should be removed and
-        // replaced with tests to verify the explicit casting of legal types to BOOLEAN.
-        //
-        assertNoBoolean();
     }
     private void makeTableForCasts( String tableName, TypedColumn[] columns )
         throws Exception
@@ -739,22 +733,6 @@ public static String[][]SQLData =
         rs.close();
         ps.close();
     }
-    // assert that the BOOLEAN type has not been re-enabled
-    private void assertNoBoolean() throws Exception
-    {
-        println( "Testing whether the BOOLEAN data type has been re-enabled." );
-        
-        Connection conn = getConnection();
-        DatabaseMetaData dbmd = conn.getMetaData();
-        ResultSet rs = dbmd.getTypeInfo();
-
-        while ( rs.next() )
-        {
-            assertFalse( rs.getString( 1 ), java.sql.Types.BOOLEAN == rs.getInt( 2 ) );
-        }
-
-        rs.close();
-    }
     // assert that we are testing the casting behavior of BOOLEANs to and from
     // all Derby data types
     private void assertAllTypesCovered() throws Exception
@@ -846,13 +824,6 @@ public static String[][]SQLData =
                  "select " + makeCastedColumnList( "c.isIndex", castedColumnList ) + " from sys.sysconglomerates c\n"
                  );
         }
-        
-        //
-        // The following assertion will fail after the BOOLEAN data type is
-        // re-enabled. At that time, the assertion should be removed and
-        // replaced with tests to verify the explicit casting of illegal types to BOOLEAN.
-        //
-        assertNoBoolean();
     }
 
     protected void tearDown() throws SQLException, Exception {

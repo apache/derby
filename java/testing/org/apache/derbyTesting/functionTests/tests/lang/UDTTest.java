@@ -946,7 +946,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         // If a new system type is added, then we need to add it to the following block
         // of compilation errors.
         //
-        assertEquals( 20, vetDatatypeCount( conn ) );
+        assertEquals( 21, vetDatatypeCount( conn ) );
         
         expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'byte[]' language java\n" );
         expectCompilationError( ILLEGAL_UDT_CLASS, "create type java_string external name 'java.lang.Boolean' language java\n" );
@@ -975,7 +975,6 @@ public class UDTTest  extends GeneratedColumnsHelper
         expectedTypeCount--; // eliminate JAVA_OBJECT
 
         int actualTypeCount = org.apache.derby.iapi.types.TypeId.getAllBuiltinTypeIds().length;
-        actualTypeCount--;  // eliminate BOOLEAN
         actualTypeCount--;  // eliminate TINYINT
         actualTypeCount--;  // eliminate REF
         actualTypeCount++;  // add FLOAT (synonym of REAL)
@@ -1072,9 +1071,10 @@ public class UDTTest  extends GeneratedColumnsHelper
         // If this fails, it means that we need to add another system type to the
         // cast checks below.
         //
-        assertEquals( 20, vetDatatypeCount( conn ) );
+        assertEquals( 21, vetDatatypeCount( conn ) );
         
         // casts to system types not allowed
+        expectCompilationError( BAD_CAST, "select cast (b as boolean) from t_16\n" );
         expectCompilationError( BAD_CAST, "select cast (b as bigint) from t_16\n" );
         expectCompilationError( BAD_CAST, "select cast (b as blob) from t_16\n" );
         expectCompilationError( BAD_CAST, "select cast (b as char( 1 ) ) from t_16\n" );
@@ -1101,7 +1101,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         // If this fails, it means that we need to add another system type to the
         // t_16_all_types table and add a corresponding cast check below.
         //
-        assertEquals( 20, vetDatatypeCount( conn ) );
+        assertEquals( 21, vetDatatypeCount( conn ) );
         
         goodStatement
             (
@@ -1127,7 +1127,8 @@ public class UDTTest  extends GeneratedColumnsHelper
              "    a17 timestamp,\n" +
              "    a18 varchar(10),\n" +
              "    a19 varchar(10) for bit data,\n" +
-             "    a20 xml\n" +
+             "    a20 xml,\n" +
+             "    a21 boolean\n" +
              ")"
              );
 
@@ -1151,13 +1152,14 @@ public class UDTTest  extends GeneratedColumnsHelper
         expectCompilationError( BAD_CAST, "select cast( a18 as javaSerializable ) from t_16_all_types\n" );
         expectCompilationError( BAD_CAST, "select cast( a19 as javaSerializable ) from t_16_all_types\n" );
         expectCompilationError( BAD_CAST, "select cast( a20 as javaSerializable ) from t_16_all_types\n" );
+        expectCompilationError( BAD_CAST, "select cast( a21 as javaSerializable ) from t_16_all_types\n" );
 
 
         //
         // If this fails, it means that we need to add another system type to the
         // implicit casts which follow.
         //
-        assertEquals( 20, vetDatatypeCount( conn ) );
+        assertEquals( 21, vetDatatypeCount( conn ) );
         
         expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a01 ) select b from t_16\n" );
         expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a02 ) select b from t_16\n" );
@@ -1179,6 +1181,7 @@ public class UDTTest  extends GeneratedColumnsHelper
         expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a18 ) select b from t_16\n" );
         expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a19 ) select b from t_16\n" );
         expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a20 ) select b from t_16\n" );
+        expectCompilationError( ILLEGAL_STORAGE, "insert into t_16_all_types( a21 ) select b from t_16\n" );
         
         // test cast from the half-supported boolean type
         expectCompilationError( BAD_CAST, "select cast (isindex as javaNumber) from sys.sysconglomerates\n" );

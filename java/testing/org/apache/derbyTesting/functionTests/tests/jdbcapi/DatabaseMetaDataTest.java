@@ -1243,7 +1243,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * @throws SQLException
      * @throws IOException 
      */
-    public void testGetTablesModify() throws SQLException, IOException {
+    public void testGetTablesModify() throws Exception {
                 
         int totalTables = createTablesForTest(false);
         
@@ -1413,13 +1413,23 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
      * be created.
      * @throws SQLException
      */
-    private int createTablesForTest(boolean skipXML) throws SQLException
+    private int createTablesForTest(boolean skipXML) throws Exception
     {
         getConnection().setAutoCommit(false);
         List types = getSQLTypes(getConnection());
         if (skipXML)
             types.remove("XML");
             
+        //
+        // The BOOLEAN datatype is only allowed in databases
+        // at level 10.7 or higher.
+        //
+        Version dataVersion = getDataVersion( getConnection() );
+        if ( dataVersion.compareTo( new Version( 10, 7, 0, 0 ) ) < 0 )
+        {
+            types.remove("BOOLEAN");
+        }
+        
         int typeCount = types.size();
                
         createSchemasForTests();
@@ -2087,7 +2097,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 	 and added XML data type which is supported by Derby
 	*/
         int[] supportedTypes = new int[] {
-          Types.BIGINT, Types.BINARY, Types.BLOB,
+          Types.BIGINT, Types.BINARY, Types.BLOB, Types.BOOLEAN,
           Types.CHAR, Types.CLOB, Types.DATE,
           Types.DECIMAL, Types.DOUBLE, Types.FLOAT,
           Types.INTEGER, Types.LONGVARBINARY, Types.LONGVARCHAR,
@@ -2122,6 +2132,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             int precision = -1;
             switch (type)
             {
+            case Types.BOOLEAN:
+                precision = 1;
+                break;
             case Types.BINARY:
             case Types.CHAR:
                 precision = 254;
@@ -2822,6 +2835,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 
         if ("XML".equals(type))
             return JDBC.SQLXML;
+        
+        if (type.equals("BOOLEAN"))
+            return Types.BOOLEAN;
         
         fail("Unexpected SQL type: " + type);
         return Types.NULL;
