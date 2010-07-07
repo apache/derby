@@ -52,6 +52,8 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
 permission java.util.PropertyPermission "derby.storage.jvmInstanceId", 
       "write"; 
   permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
+  permission java.util.PropertyPermission "java.runtime.version", "read";//sysinfo
+  permission java.util.PropertyPermission "java.fullversion", "read";//sysinfo
   
   // unit tests (e.g. store/T_RecoverFullLog) set this property 
   // (called from derbyTesting.jar through code in derby.jar)
@@ -124,6 +126,8 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
 //
 grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   permission java.util.PropertyPermission "java.class.path", "read";//sysinfo
+  permission java.util.PropertyPermission "java.runtime.version", "read";//sysinfo
+  permission java.util.PropertyPermission "java.fullversion", "read";//sysinfo
   
   // accept is needed for the server accepting connections
   // connect is needed for ping command (which is in the server jar)

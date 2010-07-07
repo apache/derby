@@ -260,8 +260,10 @@ public class SysinfoTest extends BaseJDBCTestCase {
         /**
          * Lines containing these strings will be deleted from the output before
          * asserting that output is correct.
+         * ibm jvm prints extra line for java.fullversion
          */
-        String[] sed = {"Version", "version", "Java", "OS", 
+        String[] sed = {"Version", "version", "Java", "OS",
+        		"J9VM", "JIT", "GC",
                 "[0-9*]\\.[0-9*]\\.[0-9*]","JRE - JDBC","derby.drda.traceDirectory",
                 "Unable to access Protection Domain","listing properties",
                 "Current Locale",           //Remove these because locale info is

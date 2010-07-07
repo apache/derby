@@ -54,8 +54,12 @@ grant codeBase "${derby.install.url}derby.jar"
   permission java.util.PropertyPermission "user.*", "read";
   permission java.util.PropertyPermission "java.home", "read";
   permission java.util.PropertyPermission "java.class.path", "read";
+  permission java.util.PropertyPermission "java.runtime.version", "read";
+  permission java.util.PropertyPermission "java.fullversion", "read";
   permission java.lang.RuntimePermission "getProtectionDomain";
   permission java.io.FilePermission "<<ALL FILES>>", "read";
+  permission java.io.FilePermission "java.runtime.version", "read";
+  permission java.io.FilePermission "java.fullversion", "read";
 
 //
 // Permissions needed for JMX based management and monitoring, which is only
@@ -123,8 +127,12 @@ grant codeBase "${derby.install.url}derbynet.jar"
   permission java.util.PropertyPermission "user.*", "read";
   permission java.util.PropertyPermission "java.home", "read";
   permission java.util.PropertyPermission "java.class.path", "read";
+  permission java.util.PropertyPermission "java.runtime.version", "read";
+  permission java.util.PropertyPermission "java.fullversion", "read";
   permission java.lang.RuntimePermission "getProtectionDomain";
   permission java.io.FilePermission "<<ALL FILES>>", "read";
+  permission java.io.FilePermission "java.runtime.version", "read";
+  permission java.io.FilePermission "java.fullversion", "read";
 };
 
 
@@ -142,8 +150,12 @@ grant codeBase "${derby.install.url}derbytools.jar"
   permission java.util.PropertyPermission "user.*", "read";
   permission java.util.PropertyPermission "java.home", "read";
   permission java.util.PropertyPermission "java.class.path", "read";
+  permission java.util.PropertyPermission "java.runtime.version", "read";
+  permission java.util.PropertyPermission "java.fullversion", "read";
   permission java.lang.RuntimePermission "getProtectionDomain";
   permission java.io.FilePermission "<<ALL FILES>>", "read";
+  permission java.io.FilePermission "java.runtime.version", "read";
+  permission java.io.FilePermission "java.fullversion", "read";
 };
 
 grant codeBase "${derby.install.url}derbyclient.jar"
@@ -160,8 +172,12 @@ grant codeBase "${derby.install.url}derbyclient.jar"
   permission java.util.PropertyPermission "user.*", "read";
   permission java.util.PropertyPermission "java.home", "read";
   permission java.util.PropertyPermission "java.class.path", "read";
+  permission java.util.PropertyPermission "java.runtime.version", "read";
+  permission java.util.PropertyPermission "java.fullversion", "read";
   permission java.lang.RuntimePermission "getProtectionDomain";
   permission java.io.FilePermission "<<ALL FILES>>", "read";
+  permission java.io.FilePermission "java.runtime.version", "read";
+  permission java.io.FilePermission "java.fullversion", "read";
 };
 
 
