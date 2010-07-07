@@ -239,6 +239,8 @@ PASSED
 Test closing an already closed statement
 Removing second close until JCC issue with sending double close is resolve
 PASSED
+Execute VALUES 1 without reading final QRYDTA
+PASSED
 Test for too large value for OUTEXP in EXCSQLSTT
 PASSED
 Test for invalid OUTEXP in EXCSQLSTT

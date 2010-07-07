@@ -220,6 +220,8 @@ class DDMReader
 		prevCorrelationID = DssConstants.CORRELATION_ID_UNKNOWN;
 		dssCorrelationID = DssConstants.CORRELATION_ID_UNKNOWN;
 		this.dssTrace = dssTrace;
+		dssIsChainedWithDiffID = false;
+		dssIsChainedWithSameID = false;
 	}
 
 	// Switch the ccsidManager to the UTF-8 instance
