@@ -2359,6 +2359,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
         try {
             ds.getConnection();
+            fail("shutdown should raise exception");
         } catch (SQLException sqle) {
             assertSQLState("XJ015", sqle);
         }
