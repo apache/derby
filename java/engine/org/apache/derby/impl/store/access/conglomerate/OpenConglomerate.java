@@ -276,11 +276,25 @@ public abstract class OpenConglomerate
     }
 
     /**
+     * <p>
      * Latch the page containing the current RowPosition.
+     * </p>
+     *
      * <p>
      * This implementation also automatically updates the RowPosition to
      * point at the slot containing the current RowPosition.  This slot 
      * value is only valid while the latch is held.
+     * </p>
+     *
+     * <p>
+     * If the row pointed to by {@code pos} does not exist (including the
+     * case where the page itself does not exist), the page will not be
+     * latched, and {@code pos.current_page} will be set to {@code null}.
+     * </p>
+     *
+     * @param pos the position to a row on the page that should be latched
+     * @return {@code true} if the page was successfully latched, or
+     * {@code false} otherwise
      *
 	 * @exception  StandardException  Standard exception policy.
      **/
@@ -329,13 +343,18 @@ public abstract class OpenConglomerate
 
 
     /**
+     * <p>
      * Lock row at given row position for read.
+     * </p>
+     *
      * <p>
      * This routine requests a row lock NOWAIT on the row located at the given
      * RowPosition.  If the lock is granted NOWAIT the 
      * routine will return true.  If the lock cannot be granted NOWAIT, then 
      * the routine will release the latch on "page" and then it will request 
      * a WAIT lock on the row.  
+     * </p>
+     *
      * <p>
      * This implementation:
      * Assumes latch held on current_page.
@@ -344,11 +363,22 @@ public abstract class OpenConglomerate
      * If the current_rh field of RowPosition is null, it is assumed the we
      * want to lock the indicated current_slot.  Upon return current_rh will
      * point to the record handle associated with current_slot.
+     * </p>
+     *
      * <p>
      * After waiting and getting the lock on the row, this routine will fix up
      * RowPosition to point at the row locked.  This means it will get the
      * page latch again, and it will fix the current_slot to point at the 
      * waited for record handle - it may have moved while waiting on the lock.
+     * </p>
+     *
+     * <p>
+     * When this method returns, the page holding the row pointed to by the
+     * {@code RowLocation} is latched. This is however not the case if
+     * {@code moveForwardIfRowDisappears} is {@code false} and the row has
+     * disappeared. Then the latch will be released before the method returns,
+     * and {@code pos.current_page} will be set to {@code null}.
+     * </p>
      *
      * @param pos       Position to lock.
      * @param aux_pos   If you have to give up latch to get lock, then also 
@@ -356,8 +386,8 @@ public abstract class OpenConglomerate
      * @param moveForwardIfRowDisappears
      *                  If true, then this routine must handle the case where
      *                  the row id we are waiting on disappears when the latch
-     *                  is released.  If false an exception will be thrown if
-     *                  the row disappears.
+     *                  is released.  If false, and the row disappears, the
+     *                  latch will be released again and false is returned.
      * @param waitForLock
      *                  if true wait for lock, if lock can't be granted NOWAIT,
      *                  else if false, throw a lock timeout exception if the
@@ -470,6 +500,25 @@ public abstract class OpenConglomerate
         return(lock_granted_with_latch_held);
     }
 
+    /**
+     * <p>
+     * Lock the row at the given position for write.
+     * </p>
+     *
+     * <p>
+     * The page pointed to by the {@code RowPosition} is assumed to be latched
+     * when this method is called. If the lock cannot be obtained without
+     * waiting, the latch will be released and re-obtained when the lock has
+     * been acquired.
+     * </p>
+     *
+     * <p>
+     * If the latch was released while waiting for the lock, and the row does
+     * not exist after the lock is obtained, the latch will be released again
+     * before the method returns, and {@code pos.current_page} will be set to
+     * {@code null}.
+     * </p>
+     */
     public boolean lockPositionForWrite(
     RowPosition pos,
     boolean     forInsert,
