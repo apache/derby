@@ -1080,45 +1080,57 @@ public class XATest extends BaseJDBCTestCase {
 
     /**
      * DERBY-4731
-     * test using a GLOBAL TEMPORARY TABLE  table in an
-     * XA transaction adn leaving it active during two phase commit 
+     * Test using a GLOBAL TEMPORARY TABLE  table in an
+     * XA transaction and leaving it active during two phase commit.
+     * Before the fix this test would throw the following at commit
+     * time:
+     * ERROR 40XT0: An internal error was identified by RawStore module. 
+     *
+     *
      * @throws XAException 
      * @throws SQLException 
      * 
      */
-    public void xtestXATempTableD4731_RawStore() throws SQLException, XAException {
-        doXATempTableD4731Work(true);
+    public void testXATempTableD4731_RawStore() 
+        throws SQLException, XAException {
+        doXATempTableD4731Work(true, XATestUtil.getXid(997, 9, 49));
     }
     
 
     /**
-     * DERBY-4731 Temp tables with XA transactions
+     * DERBY-XXXX Temp tables with XA transactions
      * an Assert will occur on prepare if only
      * temp table work is done in the xact.
+     *
      * @throws XAException 
      * @throws SQLException 
      * 
      */
-    public void xtestXATempTableD4731_Assert() throws SQLException, XAException {
-        doXATempTableD4731Work(false);
+    public void xtestXATempTableDXXXX_Assert() 
+        throws SQLException, XAException {
+
+          doXATempTableD4731Work(false, XATestUtil.getXid(998, 10, 50));
     }
  
     
     /**
      * The two cases for DERBY-4371 do essentially the same thing. Except doing
-     * logged work causes the RawStore error and doing only temp table operations
-     * causes the assert.
+     * logged work causes the RawStore error and doing only temp table 
+     * operations causes the assert.
      *  
      * @param doLoggedWorkInXact
      * @throws SQLException
      * @throws XAException
      */
-    private void doXATempTableD4731Work(boolean doLoggedWorkInXact) throws SQLException, XAException{
+    private void doXATempTableD4731Work(
+    boolean doLoggedWorkInXact,
+    Xid     xid)
+        throws SQLException, XAException{
+
         XADataSource xads = J2EEDataSource.getXADataSource();
         XAConnection xaconn = xads.getXAConnection();
         XAResource xar = xaconn.getXAResource();
 
-        Xid xid = XATestUtil.getXid(996, 9, 48);
         xar.start(xid, XAResource.TMNOFLAGS);
         Connection conn = xaconn.getConnection();
         Statement s = conn.createStatement(); 
@@ -1130,8 +1142,10 @@ public class XATest extends BaseJDBCTestCase {
         
         // make the temp table
         s.executeUpdate("DECLARE GLOBAL TEMPORARY TABLE SESSION.T1 ( XWSID INT, XCTID INT, XIID CHAR(26), XVID SMALLINT, XLID CHAR(8) FOR BIT DATA) ON COMMIT DELETE ROWS NOT LOGGED ON ROLLBACK DELETE ROWS");
+
         // insert a row
-        PreparedStatement ps = conn.prepareStatement("INSERT INTO SESSION.T1 VALUES (?,?,?,?,?)");
+        PreparedStatement ps = 
+            conn.prepareStatement("INSERT INTO SESSION.T1 VALUES (?,?,?,?,?)");
         ps.setInt(1,1);
         ps.setInt(2,1);
         ps.setString(3,"hello");
@@ -1140,10 +1154,14 @@ public class XATest extends BaseJDBCTestCase {
         ps.executeUpdate();
         ResultSet rs = s.executeQuery("SELECT count(*) FROM SESSION.t1");
         JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
-        // You could work arond the issue by dropping the TEMP table
+        // You could work around the issue by dropping the TEMP table
         //s.executeUpdate("DROP TABLE SESSION.T1");
         xar.end(xid, XAResource.TMSUCCESS);
-        assertEquals(XAResource.XA_OK,xar.prepare(xid));
+
+        assertEquals(
+            (doLoggedWorkInXact ? XAResource.XA_OK : XAResource.XA_RDONLY),
+            xar.prepare(xid));
+
         xar.commit(xid,false); 
         s.close();
         conn.close();
@@ -1159,8 +1177,6 @@ public class XATest extends BaseJDBCTestCase {
             }
         }
     }
-    
-
     
     /**
      * Check the held state of a ResultSet by fetching one row, executing a

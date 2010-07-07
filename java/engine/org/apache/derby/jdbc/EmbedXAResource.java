@@ -290,10 +290,16 @@ class EmbedXAResource implements XAResource {
                 } else {
                     
                     returnConnectionToResource(tranState, xid_im);
+
 					if (SanityManager.DEBUG) {
-						if (con.realConnection != null)
-							SanityManager.ASSERT(con.realConnection.transactionIsIdle(),
-									"real connection should have been idle at this point"); 			
+						if (con.realConnection != null) {
+							SanityManager.ASSERT(
+                                con.realConnection.transactionIsIdle(),
+                                "real connection should have been idle." +
+                                "tranState = " + tranState +
+                                "ret = " + ret +
+                                "con.realConnection = " + con.realConnection);
+                        }
 					}
                     return XAResource.XA_RDONLY;
                 }
