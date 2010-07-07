@@ -24,12 +24,18 @@ package org.apache.derby.impl.store.raw.data;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.store.raw.RecordHandle;
+import org.apache.derby.iapi.services.i18n.MessageService;
 
 import org.apache.derby.iapi.types.Resetable;
-import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.access.TransactionController;
 
+import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.iapi.store.raw.LockingPolicy;
+import org.apache.derby.iapi.store.raw.RecordHandle;
+
+import org.apache.derby.shared.common.reference.MessageId;
+
+import java.io.EOFException;
+import java.io.InputStream;
 import java.io.IOException;
 
 /**
@@ -151,6 +157,11 @@ implements Resetable
                     columnOverflowPage.restorePortionLongColumn(this);
                     columnOverflowPage.unlatch();
                     columnOverflowPage = null;
+                } else {
+                    // An overflow page was specified, but we failed to get it.
+                    // Probably the value got deleted under our feet.
+                    throw new EOFException(MessageService.getTextMessage(
+                            MessageId.STORE_STREAM_OVERFLOW_PAGE_NOT_FOUND));
                 }
 
             }
