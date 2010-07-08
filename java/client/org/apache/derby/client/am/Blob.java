@@ -466,7 +466,7 @@ public class Blob extends Lob implements java.sql.Blob {
         if ( len < 0 ) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId(SQLState.BLOB_NONPOSITIVE_LENGTH),
-                new Integer(length));
+                new Integer(len));
         }
         if (len == 0) {
             return 0;
