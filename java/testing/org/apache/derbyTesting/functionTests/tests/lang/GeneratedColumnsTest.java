@@ -5405,13 +5405,13 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
         assertResults
             (
                 conn,
-                "select * from t_4413",
+                "select * from t_4413 order by i, j",
                 new String[][]
                 {
                     { "1", "2", },
+                    { "1", "2", },
+                    { "1", "2", },
                     { "2", "4", },
-                    { "1", "2", },
-                    { "1", "2", },
                     { "2", "4", },
                 },
                 false
