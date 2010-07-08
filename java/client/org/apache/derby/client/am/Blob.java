@@ -428,8 +428,6 @@ public class Blob extends Lob implements java.sql.Blob {
     }
 
     public int setBytesX(long pos, byte[] bytes, int offset, int len) throws SqlException {
-        int length = 0;
-        
         /*
             Check if position is less than 0 and if true
             raise an exception
@@ -472,7 +470,8 @@ public class Blob extends Lob implements java.sql.Blob {
             return 0;
         }
         
-        length = Math.min((bytes.length - offset), len);
+        final int length = Math.min((bytes.length - offset), len);
+
         if (isLocator()) {  
             byte[] ba = bytes;
             if ((offset > 0) || (length < bytes.length)) { 
