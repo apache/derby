@@ -3020,7 +3020,7 @@ readingLoop:
         this.cKey = other.cKey;
         this.stream = other.stream;
         this._clobValue = other._clobValue;
-        this.localeFinder = localeFinder;
+        this.localeFinder = other.localeFinder;
     }
 
     /**
