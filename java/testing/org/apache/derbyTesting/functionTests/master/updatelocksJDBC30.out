@@ -1142,6 +1142,12 @@ APP     |UserTran|ROW     |2   |X   |A           |(1,10)    |GRANT|ACTIVE
 APP     |UserTran|ROW     |2   |X   |A           |(1,12)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,8)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -2034,6 +2040,12 @@ APP     |UserTran|ROW     |2   |X   |A           |(1,10)    |GRANT|ACTIVE
 APP     |UserTran|ROW     |2   |X   |A           |(1,12)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,8)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -3615,6 +3627,12 @@ APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(6,6)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -4501,6 +4519,12 @@ APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(6,6)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -6290,6 +6314,12 @@ APP     |UserTran|ROW     |2   |X   |A           |(1,10)    |GRANT|ACTIVE
 APP     |UserTran|ROW     |2   |X   |A           |(1,12)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,8)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -7307,6 +7337,12 @@ APP     |UserTran|ROW     |2   |X   |A           |(1,10)    |GRANT|ACTIVE
 APP     |UserTran|ROW     |2   |X   |A           |(1,12)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(1,8)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -9129,6 +9165,12 @@ APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(6,6)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -10148,6 +10190,12 @@ APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(6,6)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -11715,6 +11763,12 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 APP     |UserTran|TABLE   |6   |IX  |A           |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -12588,6 +12642,12 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 APP     |UserTran|TABLE   |6   |IX  |A           |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -14250,6 +14310,12 @@ APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(6,6)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -15381,6 +15447,12 @@ APP     |UserTran|ROW     |2   |X   |A           |(2,6)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |2   |X   |A           |(4,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |2   |X   |A           |(6,6)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
