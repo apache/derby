@@ -35,6 +35,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class InsertTest extends BaseJDBCTestCase {
 
     private static final String PARAMETER_IN_SELECT_LIST = "42X34";
+    private static final String TOO_MANY_RESULT_COLUMNS = "42X06";
 
     public InsertTest(String name) {
         super(name);
@@ -186,5 +187,24 @@ public class InsertTest extends BaseJDBCTestCase {
                 PARAMETER_IN_SELECT_LIST,
                 "insert into derby4671 select ? from derby4671 "
                 + "intersect select ? from derby4671");
+    }
+
+    /**
+     * Regression test case for DERBY-4449. INSERT statements with an explicit
+     * target column list used to fail with ArrayIndexOutOfBoundsException if
+     * the table constructor had more columns than the target column list and
+     * one of the extra columns was specified as DEFAULT.
+     */
+    public void testInsertTooManyDefaultColumns() throws SQLException {
+        createStatement().execute("create table derby4449(x int)");
+        // This statement has always failed gracefully (no explicit target
+        // column list)
+        assertCompileError(
+                TOO_MANY_RESULT_COLUMNS,
+                "insert into derby4449 values (default, default)");
+        // This statement used to fail with ArrayIndexOutOfBoundsException
+        assertCompileError(
+                TOO_MANY_RESULT_COLUMNS,
+                "insert into derby4449 (x) values (default, default)");
     }
 }
