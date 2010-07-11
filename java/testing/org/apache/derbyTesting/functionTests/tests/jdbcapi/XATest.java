@@ -1079,6 +1079,106 @@ public class XATest extends BaseJDBCTestCase {
     }
 
     /**
+     * DERBY-4731
+     * Test using a GLOBAL TEMPORARY TABLE  table in an
+     * XA transaction and leaving it active during two phase commit.
+     * Before the fix this test would throw the following at commit
+     * time:
+     * ERROR 40XT0: An internal error was identified by RawStore module. 
+     *
+     *
+     * @throws XAException 
+     * @throws SQLException 
+     * 
+     */
+    public void testXATempTableD4731_RawStore() 
+        throws SQLException, XAException {
+        doXATempTableD4731Work(true, XATestUtil.getXid(997, 9, 49));
+    }
+    
+
+    /**
+     * DERBY-XXXX Temp tables with XA transactions
+     * an Assert will occur on prepare if only
+     * temp table work is done in the xact.
+     *
+     * @throws XAException 
+     * @throws SQLException 
+     * 
+     */
+    public void xtestXATempTableDXXXX_Assert() 
+        throws SQLException, XAException {
+
+          doXATempTableD4731Work(false, XATestUtil.getXid(998, 10, 50));
+    }
+ 
+    
+    /**
+     * The two cases for DERBY-4371 do essentially the same thing. Except doing
+     * logged work causes the RawStore error and doing only temp table 
+     * operations causes the assert.
+     *  
+     * @param doLoggedWorkInXact
+     * @throws SQLException
+     * @throws XAException
+     */
+    private void doXATempTableD4731Work(
+    boolean doLoggedWorkInXact,
+    Xid     xid)
+        throws SQLException, XAException{
+
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        XAConnection xaconn = xads.getXAConnection();
+        XAResource xar = xaconn.getXAResource();
+
+        xar.start(xid, XAResource.TMNOFLAGS);
+        Connection conn = xaconn.getConnection();
+        Statement s = conn.createStatement(); 
+        if (doLoggedWorkInXact){
+            // need to do some real work in our transaction
+            // so make a table
+            makeARealTable(s);
+        }
+        
+        // make the temp table
+        s.executeUpdate("DECLARE GLOBAL TEMPORARY TABLE SESSION.T1 ( XWSID INT, XCTID INT, XIID CHAR(26), XVID SMALLINT, XLID CHAR(8) FOR BIT DATA) ON COMMIT DELETE ROWS NOT LOGGED ON ROLLBACK DELETE ROWS");
+
+        // insert a row
+        PreparedStatement ps = 
+            conn.prepareStatement("INSERT INTO SESSION.T1 VALUES (?,?,?,?,?)");
+        ps.setInt(1,1);
+        ps.setInt(2,1);
+        ps.setString(3,"hello");
+        ps.setShort(4, (short) 1);
+        ps.setBytes(5, new byte[] {0x0,0x1});
+        ps.executeUpdate();
+        ResultSet rs = s.executeQuery("SELECT count(*) FROM SESSION.t1");
+        JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
+        // You could work around the issue by dropping the TEMP table
+        //s.executeUpdate("DROP TABLE SESSION.T1");
+        xar.end(xid, XAResource.TMSUCCESS);
+
+        assertEquals(
+            (doLoggedWorkInXact ? XAResource.XA_OK : XAResource.XA_RDONLY),
+            xar.prepare(xid));
+
+        xar.commit(xid,false); 
+        s.close();
+        conn.close();
+        xaconn.close();
+    }
+
+    private void makeARealTable(Statement s) throws SQLException {
+        try {
+            s.executeUpdate("DROP TABLE REALTABLE1");
+        } catch (SQLException se) {
+            {
+            s.executeUpdate("CREATE TABLE REALTABLE1 (i int)");
+            }
+        }
+    }
+    
+    /**
      * Check the held state of a ResultSet by fetching one row, executing a
      * commit and then fetching the next. Checks the held state matches the
      * behaviour.

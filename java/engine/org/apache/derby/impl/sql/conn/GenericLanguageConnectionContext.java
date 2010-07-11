@@ -574,25 +574,112 @@ public class GenericLanguageConnectionContext
 		}
 	}
 
-	/**
-	 * do the necessary work at commit time for temporary tables
-	 * 1)If a temporary table was marked as dropped in this transaction, then remove it from the list of temp tables for this connection
-	 * 2)If a temporary table was not dropped in this transaction, then mark it's declared savepoint level and modified savepoint level as -1
-	 */
-	private void tempTablesAndCommit() {
-		for (int i = allDeclaredGlobalTempTables.size()-1; i >= 0; i--) {
-			TempTableInfo tempTableInfo = (TempTableInfo)allDeclaredGlobalTempTables.get(i);
-			if (tempTableInfo.getDroppedInSavepointLevel() != -1)
-			{
-				//this means table was dropped in this unit of work and hence should be removed from valid list of temp tables
-				allDeclaredGlobalTempTables.remove(i);
-			} else //this table was not dropped in this unit of work, hence set its declaredInSavepointLevel as -1 and also mark it as not modified 
-			{
-				tempTableInfo.setDeclaredInSavepointLevel(-1);
-				tempTableInfo.setModifiedInSavepointLevel(-1);
-			}
-		}
-	}
+    /**
+     * Do the necessary work at commit time for temporary tables
+     * <p>
+     * 1)If a temporary table was marked as dropped in this transaction, then 
+     *   remove it from the list of temp tables for this connection
+     * 2)If a temporary table was not dropped in this transaction, then mark 
+     *   it's declared savepoint level and modified savepoint level as -1
+     * 3)After savepoint fix up, then handle all ON COMMIT DELETE ROWS with
+     *   no open held cursor temp tables.
+     * <p>
+     *
+     * @param in_xa_transaction if true, then transaction is an XA transaction,
+     *                          and special nested transaction may be necessary
+     *                          to cleanup internal containers supporting the
+     *                          temp tables at commit time.
+     *
+     * @exception  StandardException  Standard exception policy.
+     **/
+    private void tempTablesAndCommit(boolean in_xa_transaction) 
+        throws StandardException
+    {
+        // loop through all declared global temporary tables and determine
+        // what to do at commit time based on if they were dropped during
+        // the current savepoint level.
+        for (int i = allDeclaredGlobalTempTables.size()-1; i >= 0; i--) 
+        {
+            TempTableInfo tempTableInfo = 
+                (TempTableInfo)allDeclaredGlobalTempTables.get(i);
+
+            if (tempTableInfo.getDroppedInSavepointLevel() != -1)
+            {
+                // this means table was dropped in this unit of work and hence 
+                // should be removed from valid list of temp tables
+
+                allDeclaredGlobalTempTables.remove(i);
+            } 
+            else 
+            {
+                //this table was not dropped in this unit of work, hence set 
+                //its declaredInSavepointLevel as -1 and also mark it as not 
+                //modified 
+
+                tempTableInfo.setDeclaredInSavepointLevel(-1);
+                tempTableInfo.setModifiedInSavepointLevel(-1);
+            }
+        }
+
+        // at commit time, for all the temp tables declared with 
+        // ON COMMIT DELETE ROWS, make sure there are no held cursor open
+        // on them.
+        // If there are no held cursors open on ON COMMIT DELETE ROWS, 
+        // drop those temp tables and redeclare them to get rid of all the 
+        // data in them
+
+        // in XA use nested user updatable transaction.  Delay creating
+        // the transaction until loop below finds one it needs to 
+        // process.
+        TransactionController xa_tran       = null; 
+        TransactionController tran_for_drop = 
+            (in_xa_transaction ? null : getTransactionExecute());
+
+        try
+        {
+            for (int i=0; i<allDeclaredGlobalTempTables.size(); i++)
+            {
+                TableDescriptor td = 
+                    ((TempTableInfo) (allDeclaredGlobalTempTables.
+                                          get(i))).getTableDescriptor();
+                if (td.isOnCommitDeleteRows() == false) 
+                {
+                    // do nothing for temp table with ON COMMIT PRESERVE ROWS
+                    continue;
+                }
+                else if (checkIfAnyActivationHasHoldCursor(td.getName()) == 
+                            false)
+                {
+                    // temp tables with ON COMMIT DELETE ROWS and 
+                    // no open held cursors
+                    getDataDictionary().getDependencyManager().invalidateFor(
+                        td, DependencyManager.DROP_TABLE, this);
+
+                    // handle delayed creation of nested xact for XA.
+                    if (in_xa_transaction)
+                    {
+                        if (xa_tran == null)
+                        {
+                            xa_tran = 
+                                getTransactionExecute().
+                                    startNestedUserTransaction(false);
+                            tran_for_drop = xa_tran;
+                        }
+                    }
+
+                    cleanupTempTableOnCommitOrRollback(tran_for_drop, td, true);
+                }
+            }
+        }
+        finally
+        {
+            // if we created a nested user transaction for XA get rid of it.
+            if (xa_tran != null)
+            {
+                xa_tran.destroy();
+            }
+        }
+    }
 
 	/**
 		Reset the connection before it is returned (indirectly) by
@@ -701,7 +788,8 @@ public class GenericLanguageConnectionContext
 			{
 				//restore the old definition of temp table because drop is being rolledback
 				TableDescriptor td = tempTableInfo.getTableDescriptor();
-				td = cleanupTempTableOnCommitOrRollback(td, false);
+				td = cleanupTempTableOnCommitOrRollback(
+                        getTransactionExecute(), td, false);
 				//In order to store the old conglomerate information for the temp table, we need to replace the
 				//existing table descriptor with the old table descriptor which has the old conglomerate information
 				tempTableInfo.setTableDescriptor(td);
@@ -715,7 +803,8 @@ public class GenericLanguageConnectionContext
 				tempTableInfo.setModifiedInSavepointLevel(-1);
 				TableDescriptor td = tempTableInfo.getTableDescriptor();
 				getDataDictionary().getDependencyManager().invalidateFor(td, DependencyManager.DROP_TABLE, this);
-				cleanupTempTableOnCommitOrRollback(td, true);
+				cleanupTempTableOnCommitOrRollback(
+                        getTransactionExecute(), td, true);
 			} // there is no else here because there is no special processing required for temp tables declares in earlier work of unit/transaction and not modified
 		}
     
@@ -1174,31 +1263,11 @@ public class GenericLanguageConnectionContext
 
 		endTransactionActivationHandling(false);
 
-		//do the clean up work required for temporary tables at the commit time. This cleanup work
-		//can possibly remove entries from allDeclaredGlobalTempTables and that's why we need to check
-		//again later to see if we there are still any entries in allDeclaredGlobalTempTables
-		if (allDeclaredGlobalTempTables != null)
-		{
-			tempTablesAndCommit();
-			//at commit time, for all the temp tables declared with ON COMMIT DELETE ROWS, make sure there are no held cursor open on them.
-			//If there are no held cursors open on ON COMMIT DELETE ROWS, drop those temp tables and redeclare them to get rid of all the data in them
-			if (allDeclaredGlobalTempTables != null) {
-				for (int i=0; i<allDeclaredGlobalTempTables.size(); i++)
-				{
-					TableDescriptor td = ((TempTableInfo)(allDeclaredGlobalTempTables.get(i))).getTableDescriptor();
-					if (td.isOnCommitDeleteRows() == false) //do nothing for temp table with ON COMMIT PRESERVE ROWS
-					{
-						continue;
-					}
-					if (checkIfAnyActivationHasHoldCursor(td.getName()) == false)//temp tables with ON COMMIT DELETE ROWS and no open held cursors
-					{
-						getDataDictionary().getDependencyManager().invalidateFor(td, DependencyManager.DROP_TABLE, this);
-						cleanupTempTableOnCommitOrRollback(td, true);
-					}
-				}
-			}
-		}
-
+        // Do clean up work required for temporary tables at commit time.  
+        if (allDeclaredGlobalTempTables != null)
+        {
+            tempTablesAndCommit(commitflag != NON_XA);
+        }
 
 		currentSavepointLevel = 0; //reset the current savepoint level for the connection to 0 at the end of commit work for temp tables
 
@@ -1269,14 +1338,15 @@ public class GenericLanguageConnectionContext
      * temp table (because the drop on it is being rolled back).
 	 */
 	private TableDescriptor cleanupTempTableOnCommitOrRollback(
-    TableDescriptor td, 
-    boolean         dropAndRedeclare)
+    TransactionController   tc,
+    TableDescriptor         td, 
+    boolean                 dropAndRedeclare)
 		 throws StandardException
 	{
 		//create new conglomerate with same properties as the old conglomerate 
         //and same row template as the old conglomerate
 		long conglomId = 
-            tran.createConglomerate(
+            tc.createConglomerate(
                 "heap", // we're requesting a heap conglomerate
                 td.getEmptyExecRow().getRowArray(), // row template
                 null, //column sort order - not required for heap
@@ -1301,7 +1371,7 @@ public class GenericLanguageConnectionContext
 
 		if(dropAndRedeclare)
 		{
-			tran.dropConglomerate(cid); //remove the old conglomerate from the system
+			tc.dropConglomerate(cid); //remove the old conglomerate from the system
 			replaceDeclaredGlobalTempTable(td.getName(), td);
 		}
 
