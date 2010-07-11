@@ -152,6 +152,13 @@ close scan_cursor;
 select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 
 commit;
+
+-- in order to get consistent locking results, wait for the post commit
+-- thread to finish processing the committed deleted rows.  Otherwise
+-- the subsequent scans get timing dependent lock results dependent on 
+-- if the background post commit gets to the deleted rows first or not.
+CALL WAIT_FOR_POST_COMMIT();
+
 select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 commit;
 select a from a;
