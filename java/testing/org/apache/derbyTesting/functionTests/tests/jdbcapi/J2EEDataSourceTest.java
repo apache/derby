@@ -21,7 +21,9 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.security.AccessController;
 import java.sql.CallableStatement;
@@ -51,9 +53,11 @@ import javax.transaction.xa.Xid;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derby.jdbc.ClientBaseDataSource;
 import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
 import org.apache.derby.jdbc.ClientXADataSource;
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -62,6 +66,7 @@ import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCClient;
 import org.apache.derbyTesting.junit.JDBCDataSource;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -175,6 +180,10 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         //suite.addTest(new J2EEDataSourceTest(
         //        "testClientMessageTextConnectionAttribute"));
         suite.addTest(new J2EEDataSourceTest("testConnectionFlowCommit"));
+        suite.addTest(new J2EEDataSourceTest("testConnectionFlowCommitAlt"));
+        // Disabled because rollback flow optimization hasn't been implemented.
+        // See DERBY-4687
+        //suite.addTest(new J2EEDataSourceTest("testConnectionFlowRollbackAlt"));
         return suite;
     }
     
@@ -213,8 +222,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             suite.addTest(TestConfiguration.clientServerDecorator(
                     baseSuite(":client")));
             // Add the tests that only run with client
-            suite.addTest(TestConfiguration.clientServerDecorator(
-                    getClientSuite()));
+            suite.addTest(new SupportFilesSetup(
+                    TestConfiguration.clientServerDecorator(getClientSuite())));
             // Add the tests that only run with embedded
             suite.addTest(getEmbeddedSuite("embedded"));
             // Add the tests relying on getting timeouts.
@@ -2126,7 +2135,201 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         
         s.close();
     }
-    
+
+    /**
+     * Alternative test for making sure "redundant" rollbacks, i.e. rollbacks
+     * invoked when no transaction is in progress, don't result in a rollback
+     * command being flowed to the server.
+     *
+     * @throws IOException if reading/parsing the trace file fails
+     * @throws SQLException if something goes wrong
+     */
+    public void testConnectionFlowRollbackAlt()
+            throws IOException, SQLException {
+        Object[] dataSources = new Object[] {
+            JDBCDataSource.getDataSource(),
+            J2EEDataSource.getConnectionPoolDataSource(),
+            J2EEDataSource.getXADataSource()
+        };
+        for (int i=0; i < dataSources.length; i++) {
+            Object ds = dataSources[i];
+            // Run test sequence without invoking extra rollbacks.
+            int flowsBase = testConnectionFlowCommitRollback(ds, false, false);
+            // Run test sequence with extra rollbacks - these should not result
+            // in a rollback command being flowed to the server.
+            int flowsExtra = testConnectionFlowCommitRollback(ds, true, false);
+            assertEquals("Rollback optimization not working for connections " +
+                    "originating from " + ds.getClass().getName(),
+                    flowsBase, flowsExtra);
+        }
+    }
+
+    /**
+     * Alternative test for making sure "redundant" commits, i.e. commits
+     * invoked when no transaction is in progress, don't result in a commit
+     * command being flowed to the server.
+     *
+     * @throws IOException if reading/parsing the trace file fails
+     * @throws SQLException if something goes wrong
+     */
+    public void testConnectionFlowCommitAlt()
+            throws IOException, SQLException {
+        Object[] dataSources = new Object[] {
+            JDBCDataSource.getDataSource(),
+            J2EEDataSource.getConnectionPoolDataSource(),
+            J2EEDataSource.getXADataSource()
+        };
+        for (int i=0; i < dataSources.length; i++) {
+            Object ds = dataSources[i];
+            // Run test sequence without invoking extra commits.
+            int flowsBase = testConnectionFlowCommitRollback(ds, false, true);
+            // Run test sequence with extra commits - these should not result in
+            // a commit command being flowed to the server.
+            int flowsExtra = testConnectionFlowCommitRollback(ds, true, true);
+            assertEquals("Commit optimization not working for connections " +
+                    "originating from " + ds.getClass().getName(),
+                    flowsBase, flowsExtra);
+        }
+    }
+
+    /**
+     * Performs a test sequence accessing the server, then parses the client
+     * connection trace file to obtain the number of commit or rollback
+     * commands flowed from the client to the server.
+     *
+     * @param ds data source used to obtain a connection to the database
+     *      (must be using the test framework defaults)
+     * @param invokeExtra if {@code true} extra invocations of either commit or
+     *      rollback are performed (depending on value of {@code isCommit})
+     * @param isCommit if {@code true}, commits are invoked, otherwise
+     *      rollbacks are invoked
+     * @return The number of wire flows detected (depending on value of
+     *      {@code isCommit}).
+     * @throws IOException if reading/parsing the trace file fails
+     * @throws SQLException if something goes wrong
+     */
+    private int testConnectionFlowCommitRollback(
+                            Object ds, boolean invokeExtra, boolean isCommit)
+            throws IOException, SQLException {
+        final int extraInvokations = invokeExtra ? 25 : 0;
+        final int rowCount = 10;
+        final boolean isXA = ds instanceof ClientXADataSource;
+        final boolean isCP = ds instanceof ClientConnectionPoolDataSource;
+        // Generate trace file name and define trace behavior.
+        String dsType = (isXA ? "xa_" : (isCP ? "cp_" : ""));
+        String tbl = "ds_" + dsType +
+                (invokeExtra ? "base_" : "extra_") +
+                (isCommit ? "commit" : "rollback");
+        File traceFile = SupportFilesSetup.getReadWrite(tbl + ".trace");
+        J2EEDataSource.setBeanProperty(ds, "traceFile",
+                PrivilegedFileOpsForTests.getAbsolutePath(traceFile));
+        J2EEDataSource.setBeanProperty(ds, "traceFileAppend", Boolean.FALSE);
+        J2EEDataSource.setBeanProperty( ds, "traceLevel",
+                new Integer(ClientBaseDataSource.TRACE_ALL));
+
+        // Obtain connection.
+        PooledConnection physicalCon = null;
+        Connection con;
+        if (isXA) {
+            physicalCon = ((XADataSource)ds).getXAConnection();
+            con = physicalCon.getConnection();
+        } else if (isCP) {
+            physicalCon = ((ClientConnectionPoolDataSource)ds).
+                    getPooledConnection();
+            con = physicalCon.getConnection();
+        } else {
+            con = ((DataSource)ds).getConnection();
+        }
+        con.setAutoCommit(false);
+
+        // Run test sequence.
+        // step 0: create table
+        Statement stmt = con.createStatement();
+        stmt.executeUpdate("create table " + tbl + " (id int)");
+        con.commit(); // Unconditional commit to persist table
+        endTranscation(con, isCommit, extraInvokations);
+        // step 1: insert data
+        PreparedStatement ps =
+                con.prepareStatement("insert into " + tbl + " values (?)");
+        for (int i=0; i < rowCount; i++) {
+            ps.setInt(1, i);
+            ps.executeUpdate();
+            endTranscation(con, isCommit, extraInvokations);
+        }
+        ps.close();
+        // Unconditional commit, should catch "missed" rollbacks above when we
+        // do a select with another connection at the end.
+        con.commit();
+        // step 2: select data
+        ResultSet rs = stmt.executeQuery("select count(*) from " + tbl);
+        rs.next();
+        rs.getInt(1);
+        rs.close();
+        endTranscation(con, isCommit, extraInvokations);
+        // step 3: values clause
+        rs = stmt.executeQuery("values 7");
+        assertTrue(rs.next());
+        assertEquals(7, rs.getInt(1));
+        rs.close();
+        stmt.close();
+        endTranscation(con, isCommit, extraInvokations);
+        con.close();
+        if (physicalCon != null) {
+            physicalCon.close();
+        }
+
+        // step 4: table content validation
+        stmt = createStatement();
+        rs = stmt.executeQuery("select count(*) from " + tbl);
+        rs.next();
+        assertEquals("Potential COMMIT/ROLLBACK protocol error",
+                isCommit ? rowCount : 0, rs.getInt(1));
+
+        // Parse the trace file for commits or rollbacks.
+        String token = "SEND BUFFER: " + (isXA ? "SYNCCTL" :
+            (isCommit ? "RDBCMM" : "RDBRLLBCK"));
+        int tokenCount = 0;
+        BufferedReader r = new BufferedReader(
+                PrivilegedFileOpsForTests.getFileReader(traceFile));
+        String line;
+        while ((line = r.readLine()) != null) {
+            if (line.startsWith("[derby]") && line.indexOf(token) != -1) {
+                println((isCommit ? "COMMIT: " : "ROLLBACK: ") + line);
+                tokenCount++;
+            }
+        }
+        r.close();
+        assertTrue("Parsing failed, no COMMITS/ROLLBACKS detected",
+                tokenCount > 0);
+        println(ds.getClass().getName() + ", invokeExtra=" + invokeExtra +
+                ", isCommit=" + isCommit + ", tokenCount=" + tokenCount);
+        return tokenCount;
+    }
+
+    /**
+     * Ends a transaction by invoking at least one commit or rollback.
+     *
+     * @param con the connection to work on
+     * @param isCommit if {@code true} commit is invoked, otherwise rollback
+     *      is invoked
+     * @param count the number of extra commits or rollbacks to invoke
+     * @throws SQLException if a commit/rollback fails
+     */
+    private void endTranscation(Connection con, boolean isCommit, int count)
+            throws SQLException {
+        if (isCommit) {
+            con.commit();
+            for (int i=0; i < count; i++) {
+                con.commit();
+            }
+        } else {
+            con.rollback();
+            for (int i=0; i < count; i++) {
+                con.rollback();
+            }
+        }
+    }
+
     /**
      * Check setTransactioIsolation and with four connection in connection pool
      * for DERBY-4343 case
