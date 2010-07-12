@@ -422,12 +422,13 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
             assertTrue("statement trigger produced less rows " +
                     count, trigBRS.next());
 
-            if (origRS.getClob(1) != null) {
+            Clob origClob = origRS.getClob(1);
+            if (origClob != null) {
                 assertEquals("FAIL - Invalid checksum for row trigger",
-                        getStreamCheckSum(origRS.getClob(1).getAsciiStream()),
+                        getStreamCheckSum(origClob.getAsciiStream()),
                         getStreamCheckSum(trigARS.getClob(1).getAsciiStream()));
                 assertEquals("FAIL - Invalid checksum for statement trigger",
-                        getStreamCheckSum(origRS.getClob(1).getAsciiStream()),
+                        getStreamCheckSum(origClob.getAsciiStream()),
                         getStreamCheckSum(trigBRS.getClob(1).getAsciiStream()));
             }
 

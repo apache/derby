@@ -33,10 +33,6 @@ import java.math.*;
 import java.sql.*;
 import java.util.*;
 
-import junit.framework.*;
-
-import org.apache.derbyTesting.functionTests.util.DerbyJUnitTest;
-
 public	class	JDBCDriverTest	extends	CompatibilitySuite
 {
 	/////////////////////////////////////////////////////////////
@@ -434,9 +430,10 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		ResultSet			rs = ps.executeQuery();
 
 		checkRSMD( rs );
-		checkRows( rs, types, rows, casts );
-		
 		close( rs );
+        // Execute the statement again for each cast / coercion we check.
+        checkRows( ps, types, rows, casts );
+
 		close( ps );
 	}
 
@@ -515,93 +512,129 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 
 	}
 
-	//
-	// Verify that we select the values we
-	// originally inserted into a table.
-	//
-	private	void	checkRows( ResultSet rs, TypeDescriptor[] types, Object[][] rows, List casts )
-		throws Exception
-	{
-		int					rowCount = rows.length;
+    /**
+     * Verify that we select the values we originally inserted into a table,
+     * and that the valid coercions succeeds.
+     *
+     *
+     * @param ps the query used to obtain the results
+     * @param types the type descriptions of the columns
+     * @param rows the values expected to be returned
+     * @param casts a list to which objects retrieved from the result rows
+     *      are added, specify {@code null} if you don't need this
+     * @throws Exception
+     */
+    private void checkRows(PreparedStatement ps, TypeDescriptor[] types,
+                           Object[][] rows, List casts)
+            throws Exception {
+        int typeCount = types.length;
 
-		for ( int i = 0; i < rowCount; i++ )
-		{
-			rs.next();
-			checkRow( rs, types, rows[ i ], casts );
-		}
-	}
+        // Iterate over all the types we have defined.
+        // Note that we don't iterate over the rows, as restrictions in
+        // Derby stop us from getting the values of certain column types more
+        // than once (see comments / patch for DERBY-3844).
+        //We execute the query to obtain the rows many times.
+        for (int colIndex=0; colIndex < typeCount; colIndex++ ) {
+            TypeDescriptor type = types[colIndex];
 
-	//
-	// Verify that we select the values we
-	// originally inserted into a row.
-	//
-	private	void	checkRow( ResultSet rs, TypeDescriptor[] types, Object[] row, List casts )
-		throws Exception
-	{
-		int				typeCount = types.length;
+            if (getServerVersion().atLeast(type.getDerbyVersion())) {
+                // Make sure we're using the correct type descriptor.
+                assertEquals(types[colIndex], type);
+                checkPlainGet(ps, colIndex, type, rows);
+                checkCoercions(ps, type, casts);
+            }
+        }
+    }
 
-		for ( int i = 0; i < typeCount; i++ )
-		{
-			TypeDescriptor	type = types[ i ];
-			
-			if ( getServerVersion().atLeast( type.getDerbyVersion() ) )
-			{
-				String	columnName = type.getDerbyTypeName();
-				Object	expectedValue = row[ i ];
-				Object	actualValue = getColumn( rs, columnName, type );
+    /**
+     * Checks that fetching the specified column as the declared data type
+     * works, i.e doing rs.getString() on a VARCHAR column or rs.getInt() on
+     * a SMALLINT column.
+     *
+     * @param ps the query used to obtain the results
+     * @param columnIndex the index of the column to check
+     * @param type the type description of the column
+     * @param rows the values expected to be returned
+     * @throws Exception
+     */
+    private void checkPlainGet(PreparedStatement ps, int columnIndex,
+                               TypeDescriptor type, Object[][] rows)
+            throws Exception {
+        String columnName = type.getDerbyTypeName();
+        ResultSet rs = ps.executeQuery();
+        for (int rowId=0; rowId < rows.length; rowId++) {
+            assertTrue("Not enough rows in the result", rs.next());
+            Object expectedValue = rows[rowId][columnIndex];
+            Object actualValue = getColumn(rs, columnName, type);
 
-				println( "Comparing column " + columnName + ": " + expectedValue + " to " + actualValue );
-				compareObjects( columnName, expectedValue, actualValue );
+            println("Comparing column " + columnName + ": " + expectedValue +
+                    " to " + actualValue );
+            compareObjects(columnName, expectedValue, actualValue);
+        }
+        // Make sure we drained the result set.
+        assertFalse("Remaining rows in result", rs.next());
+        rs.close();
+    }
 
-				checkCoercions( rs, columnName, type, casts );
-			}
-		}
-	}
+    /**
+     * Verify all legal JDBC coercions of a data value.
+     *
+     * @param ps the query used to obtain the rows
+     * @param type the type description of the column
+     * @param casts
+     */
+    private void checkCoercions(PreparedStatement ps, TypeDescriptor type,
+                                List casts)
+            throws Exception {
+        String columnName = type.getDerbyTypeName();
+        T_CN coercionDesc = COERCIONS[ getCoercionIndex(type.getJdbcType()) ];
+        boolean[] coercions = coercionDesc.getCoercions();
+        int count = coercions.length;
+        int legalCoercions = 0;
 
-	//
-	// Verify all legal jdbc coercions of a data value.
-	//
-	private	void	checkCoercions( ResultSet rs, String columnName, TypeDescriptor type, List casts )
-		throws Exception
-	{
-		T_CN		coercionDesc = COERCIONS[ getCoercionIndex( type.getJdbcType() ) ];
-		boolean[]	coercions = coercionDesc.getCoercions();
-		int			count = coercions.length;
-		int			legalCoercions = 0;
+        println( "Checking coercions for " + columnName );
 
-		println( "Checking coercions for " + columnName );
-		
-		for ( int i = 0; i < count; i++ )
-		{
-			if ( coercions[ i ] )
-			{
-				legalCoercions++;
+        for ( int i=0; i < count; i++ ) {
+            if (coercions[i]) {
+                legalCoercions++;
+                ResultSet rs = ps.executeQuery();
 
-				int		jdbcType = COERCIONS[ i ].getJdbcType();
-				Object	retval = getColumn( rs, columnName, jdbcType );
+                while (rs.next()) {
+                    int jdbcType = COERCIONS[i].getJdbcType();
+                    Object retval = getColumn( rs, columnName, jdbcType );
 
-				if ( casts != null ) { casts.add( retval ); }
+                    if (casts != null) {
+                        casts.add(retval);
+                    }
 
-				println( "\t" + jdbcType + ":\t" + retval );
-			}
+                    println( "\t" + jdbcType + ":\t" + retval );
+                }
+                rs.close();
+            }
+        }
+        println(legalCoercions + " legal coercions for " + columnName + " (" +
+                "type=" + type.getDerbyTypeName() + ")");
 
-		}
-		// finally, try getObject()
+        // finally, try getObject()
+        ResultSet rs = ps.executeQuery();
 
-		Object	objval = rs.getObject( columnName );
-		if ( objval == null ) { println( "\tgetObject() = null" ); }
-		else
-		{
-			StringBuffer	buffer = new StringBuffer();
-			buffer.append( "\tgetObject() = " );
-			buffer.append( objval.getClass().getName() );
-			buffer.append( "( " );
-			buffer.append( objval );
-			buffer.append( " )" );
-			println( buffer.toString() );
-		}
-	}
-	
+        while (rs.next()) {
+            Object objval = rs.getObject( columnName );
+            if (objval == null) {
+                println("\tgetObject() = null");
+            } else {
+                StringBuffer buffer = new StringBuffer();
+                buffer.append("\tgetObject() = ");
+                buffer.append(objval.getClass().getName());
+                buffer.append("( ");
+                buffer.append(objval);
+                buffer.append(" )");
+                println(buffer.toString());
+            }
+        }
+        rs.close();
+    }
+
 	//
 	// This kludge compensates for the fact that the DRDA clients report
 	// that NUMERIC columns are DECIMAL. See bug 584.
@@ -667,26 +700,6 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		ps.execute();
 	}
 
-	//
-	// Add a row of null columns.
-	//
-	private	Object[][]	makeRows( Object[][] rows )
-	{
-		int			count = rows.length;
-		int			columns = rows[0].length;
-		Object[][]	result = new Object[ count + 1 ][];
-		int			idx = 0;
-
-		result[ idx++ ] = makeNullRow( columns );
-		
-		for ( int i = 0; i < count; i++ )
-		{
-			result[ idx++ ] = rows[ i ];
-		}
-
-		return result;
-	}
-
 	private	Object[]	makeNullRow( int rowLength )
 	{
 		return new Object[ rowLength ];
@@ -714,23 +727,6 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		if ( _types.size() == 0 ) { buildTypeMap(); }
 		
 		return (TypeDescriptor) _types.get( typeName );
-	}
-
-	//
-	// Lookup TypeDescriptors by jdbc type
-	//
-	private	TypeDescriptor	getType( int jdbcType )
-	{
-		int			count = ALL_TYPES.length;
-
-		for ( int i = 0; i < count; i++ )
-		{
-			TypeDescriptor	type = ALL_TYPES[ i ];
-
-			if ( type.getJdbcType() == jdbcType ) { return type; }
-		}
-
-		return null;
 	}
 
 	//
@@ -891,39 +887,6 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		fail( "Unsupported Derby type: " + type.getDerbyTypeName() );
 	}
 
-	//
-	// Logic for verifying that a value was stuffed correctly.
-	//
-	private	void	checkParameter( ResultSet rs, int param, Object value )
-		throws Exception
-	{
-		Object	   	actualValue;
-
-		if ( value == null )
-		{
-			return;
-		}
-
-		println( "Checking " + value.getClass().getName() );
-
-		if ( value instanceof Boolean ) {  actualValue = new Boolean( rs.getBoolean( param ) ); }
-		else if ( value instanceof Byte ) { actualValue = new Byte( rs.getByte( param ) ); }
-		else if ( value instanceof Short ) { actualValue = new Short( rs.getShort( param ) ); }
-		else if ( value instanceof Integer ) { actualValue = new Integer( rs.getInt( param ) ); }
-		else if ( value instanceof Long ) { actualValue = new Long( rs.getLong( param ) ); }
-		else if ( value instanceof Float ) { actualValue = new Float( rs.getFloat( param ) ); }
-		else if ( value instanceof Double ) { actualValue = new Double( rs.getDouble( param ) ); }
-		else if ( value instanceof String ) { actualValue = rs.getString( param ); }
-		else if ( value instanceof BigDecimal ) { actualValue = rs.getBigDecimal( param ); }
-		else
-		{
-			actualValue = rs.getObject( param );
-		}
-
-		assertTrue( value.equals( actualValue ) );
-	}
-
-
 	// return true if the client supports this datatype
 	private	boolean	clientSupports( TypeDescriptor type )
 	{
@@ -946,16 +909,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 
 		return getColumn( rs, columnName, jdbcType );
 	}
-	//
-	// Get a data value from a procedure's output arg, given its type.
-	//
-	private	Object	getOutArg( CallableStatement cs, int arg, TypeDescriptor type )
-		throws Exception
-	{
-		int			jdbcType = type.getJdbcType();
 
-		return getOutArg( cs, arg, jdbcType );
-	}
 	//
 	// SQL code generation minions 
 	//

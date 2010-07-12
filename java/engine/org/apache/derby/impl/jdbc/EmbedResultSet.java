@@ -202,10 +202,11 @@ public abstract class EmbedResultSet extends ConnectionChild
     private int fetchSize;
     
     /**
-     * Indicates which columns have already been fetched
-     * as a stream for a row. Created on-demand by a getXXXStream call.
+     * Indicates which columns have been fetched as a stream or as a LOB for a
+     * row. Created on-demand by a getXXXStream or a get[BC]lob call. Note that
+     * we only track columns that can be accessed as a stream or a LOB object.
      */
-    private boolean[] streamUsedFlags;
+    private boolean[] columnUsedFlags;
     
 	/**
 	 * This class provides the glue between the Derby
@@ -507,9 +508,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 		     }
 		    }
 
-			// Clear the indication of which columns were fetched as streams.
-			if (streamUsedFlags != null)
-			    Arrays.fill(streamUsedFlags, false);
+            // Clear the indication of which columns were fetched as streams.
+            if (columnUsedFlags != null)
+                Arrays.fill(columnUsedFlags, false);
 			if (columnGotUpdated != null && currentRowHasBeenUpdated) {
 				initializeUpdateRowModifiers();
 			}
@@ -1124,7 +1125,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		boolean pushStack = false;
 		try {
 
-		    useStream(columnIndex);
+            useStreamOrLOB(columnIndex);
 
             StringDataValue dvd = (StringDataValue)getColumn(columnIndex);
 
@@ -1237,7 +1238,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 		boolean pushStack = false;
 		try {
 		    
-		    useStream(columnIndex);
+            useStreamOrLOB(columnIndex);
 
 			DataValueDescriptor dvd = getColumn(columnIndex);
 
@@ -3969,6 +3970,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 		// on the underlying connection. Do this
 		// outside of the connection synchronization.
 
+        useStreamOrLOB(columnIndex);
+
 		synchronized (getConnectionSynchronization()) {
 			int colType = getColumnType(columnIndex);
 
@@ -4019,6 +4022,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 		checkIfClosed("getClob"); // checking result set closure does not depend
 		// on the underlying connection. Do this
 		// outside of the connection synchronization.
+
+        useStreamOrLOB(columnIndex);
 
 		synchronized (getConnectionSynchronization()) {
 			int colType = getColumnType(columnIndex);
@@ -4560,20 +4565,19 @@ public abstract class EmbedResultSet extends ConnectionChild
 	}
     
     /**
-     * Mark a column as already having a stream accessed from it.
-     * If the stream was already accessed, then throw an exception.
-     * @param columnIndex
-     * @throws SQLException
+     * Mark a column as already having a stream or LOB accessed from it.
+     * If the column was already accessed, throw an exception.
+     *
+     * @param columnIndex 1-based column index
+     * @throws SQLException if the column has already been accessed
      */
-    final void useStream(int columnIndex) throws SQLException {
-    	
-    	if (streamUsedFlags == null)
-    		streamUsedFlags = new boolean[getMetaData().getColumnCount()];
-    	
-    	else if (streamUsedFlags[columnIndex - 1])
-	        throw newSQLException(SQLState.LANG_STREAM_RETRIEVED_ALREADY);
-    	
-    	streamUsedFlags[columnIndex - 1] = true;
+    final void useStreamOrLOB(int columnIndex) throws SQLException {
+        if (columnUsedFlags == null) {
+            columnUsedFlags = new boolean[getMetaData().getColumnCount()];
+        } else if (columnUsedFlags[columnIndex - 1]) {
+            throw newSQLException(SQLState.LANG_STREAM_RETRIEVED_ALREADY);
+        }
+        columnUsedFlags[columnIndex - 1] = true;
     }
 
     /**
