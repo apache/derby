@@ -24,6 +24,7 @@ package org.apache.derby.impl.sql.execute;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.io.StreamStorable;
 
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.stream.InfoStreams;
@@ -69,6 +70,13 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 	public boolean doesProjection;
     private GeneratedMethod projection;
 	private int[]			projectMapping;
+
+    /**
+     * Holds columns present more than once in the result set and which may be
+     * represented by a stream, since such columns need to be cloned.
+     */
+    private boolean[] cloneMap;
+
 	private boolean runTimeStatsOn;
 	private ExecRow			mappedResultRow;
 	public boolean reuseResult;
@@ -87,6 +95,7 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 					int resultSetNumber,
 					GeneratedMethod cr,
 					int mapRefItem,
+                    int cloneMapItem,
 					boolean reuseResult,
 					boolean doesProjection,
 				    double optimizerEstimatedRowCount,
@@ -114,6 +123,9 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 		{
 			mappedResultRow = activation.getExecutionFactory().getValueRow(projectMapping.length);
 		}
+
+        cloneMap =
+            ((boolean[])a.getPreparedStatement().getSavedObject(cloneMapItem));
 
 		/* Remember whether or not RunTimeStatistics is on */
 		runTimeStatsOn = getLanguageConnectionContext().getRunTimeStatisticsMode();
@@ -507,7 +519,28 @@ class ProjectRestrictResultSet extends NoPutResultSetImpl
 		{
 			if (projectMapping[index] != -1)
 			{
-				result.setColumn(index + 1, sourceRow.getColumn(projectMapping[index]));
+                DataValueDescriptor dvd =
+                        sourceRow.getColumn(projectMapping[index]);
+
+                // See if the column has been marked for cloning.
+                // If the value isn't a stream, don't bother cloning it.
+                if (cloneMap[index] && dvd.getStream() != null) {
+
+                    // Enable this code after DERBY-3650 is in: FIXME
+                    //
+                    // long length = dvd.getLengthIfKnown();
+                    //
+                    // If the stream isn't clonable, we have to load the stream.
+                    // if ((length > 32*1024 || length == -1) &&
+                    //     dvd.getStream() instanceof CloneableStream) {
+                    //     // Copy the stream, the value may be large.
+                    //     dvd = dvd.copyForRead();
+                    // } else {
+                    //     // Load the stream, then we don't have to clone.
+                    ((StreamStorable)dvd).loadStream();
+                    // }
+                }
+                result.setColumn(index + 1, dvd);
 			}
 		}
 

@@ -212,6 +212,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		GeneratedMethod projection, int resultSetNumber,
 		GeneratedMethod constantRestriction,
 		int mapRefItem,
+        int cloneMapItem,
 		boolean reuseResult,
 		boolean doesProjection,
 		double optimizerEstimatedRowCount,
@@ -220,7 +221,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 	{
 		return new ProjectRestrictResultSet(source, source.getActivation(), 
 			restriction, projection, resultSetNumber, 
-			constantRestriction, mapRefItem, 
+            constantRestriction, mapRefItem, cloneMapItem,
 			reuseResult,
 			doesProjection,
 		    optimizerEstimatedRowCount,

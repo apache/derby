@@ -40,8 +40,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Random;
 
-import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
-
 /**
  * Tests reading and updating binary large objects (BLOBs).
  */
@@ -388,11 +386,14 @@ final public class BLOBTest extends BaseJDBCTestCase
         rs.close();
     }
 
+
     /**
      * Tests that a lob can be safely occur multiple times in a SQL select.
      * <p/>
      * See DERBY-4477.
      * <p/>
+     * @see org.apache.derbyTesting.functionTests.tests.memory.BlobMemTest#testDerby4477_3645_3646_Repro_lowmem
+     * @see org.apache.derbyTesting.functionTests.tests.memory.ClobMemTest#testDerby4477_3645_3646_Repro_lowmem_clob
      */
     public void testDerby4477_3645_3646_Repro() throws SQLException, IOException {
         setAutoCommit(false);
@@ -693,34 +694,35 @@ final public class BLOBTest extends BaseJDBCTestCase
         throws IOException, SQLException
     {
         println("Verify new value in table: " + newVal);
-        
-        final Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY, 
+
+        final Statement stmt = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                                    ResultSet.CONCUR_READ_ONLY);
-        
-        final ResultSet rs = 
-            stmt.executeQuery("SELECT * FROM " +  
+
+        final ResultSet rs =
+            stmt.executeQuery("SELECT * FROM " +
                               BLOBDataModelSetup.getBlobTableName() +
                               " WHERE val = " + newVal);
-        
+
         println("Query executed, calling next");
-        
+
         boolean foundVal = false;
-        
+
         while (rs.next()) {
             println("Next called, verifying row");
-            
-            assertEquals("Unexpected value in val column", 
+
+            assertEquals("Unexpected value in val column",
                          newVal, rs.getInt(1));
-            
+
             verifyBlob(newVal, newSize, rs.getBlob(3));
             foundVal = true;
         }
         assertTrue("No column with value= " + newVal + " found ", foundVal);
-        
+
         rs.close();
         stmt.close();
     }
-                          
+
+
     /**
      * Verifies that the blob is consistent
      * @param expectedVal the InputStream for the Blob should return this value
@@ -730,19 +732,19 @@ final public class BLOBTest extends BaseJDBCTestCase
      * @exception SQLException causes test to fail with error
      * @exception IOException causes test to fail with error
      */
-    private void verifyBlob(final int expectedVal, 
-                            final int expectedSize, 
-                            final Blob blob) 
+    private void verifyBlob(final int expectedVal,
+                            final int expectedSize,
+                            final Blob blob)
         throws IOException, SQLException
     {
         final InputStream stream = blob.getBinaryStream();
         int blobSize = 0;
         for (int val = stream.read(); val!=-1; val = stream.read()) {
             blobSize++;
-            
+
             // avoid doing a string-concat for every byte in blob
             if (expectedVal!=val) {
-                assertEquals("Unexpected value in stream at position " + 
+                assertEquals("Unexpected value in stream at position " +
                              blobSize,
                              expectedVal, val);
             }
@@ -768,7 +770,6 @@ final public class BLOBTest extends BaseJDBCTestCase
     public final void setUp() 
         throws Exception
     {
-        println("Setup of: " + getName());
         getConnection().setAutoCommit(false);
     }
 }

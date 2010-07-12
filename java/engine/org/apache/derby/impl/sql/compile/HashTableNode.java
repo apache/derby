@@ -256,7 +256,11 @@ public class HashTableNode extends SingleChildResultSetNode
 
 
 		// Map the result columns to the source columns
-		int[] mapArray = resultColumns.mapSourceColumns();
+        ResultColumnList.ColumnMapping  mappingArrays =
+            resultColumns.mapSourceColumns();
+
+        int[] mapArray = mappingArrays.mapArray;
+
 		int mapArrayItem = acb.addItem(new ReferencedColumnsDescriptorImpl(mapArray));
 
 		// Save the hash key columns 
