@@ -123,10 +123,8 @@ public class PropertySetter extends Task
     private static  final   String  JDK_IBM = "IBM Corporation";
     private static  final   String  JDK_SUN = "Sun Microsystems Inc.";
 
-    private static  final   String  APPLE_JAVA_ROOT = "/System/Library/Frameworks/JavaVM.framework/Versions";
     private static  final   String  APPLE_CLASSES_DIR = "Classes";
     private static  final   String  APPLE_COMMANDS_DIR = "Commands";
-    private static  final   String  APPLE_HEADERS_DIR = "Headers";
     private static  final   String  APPLE_HOME_DIR = "Home";
     private static  final   String  APPLE_LIB_DIR = "Libraries";
     private static  final   String  APPLE_RESOURCES_DIR = "Resources";
@@ -134,6 +132,10 @@ public class PropertySetter extends Task
     private static  final   String  JAVA_5 = "1.5";
 
     private static  final   String  PROPERTY_SETTER_DEBUG_FLAG = "printCompilerProperties";
+    /** Property controlling extra verbose debugging information. */
+    private static  final   String  PROPERTY_SETTER_VERBOSE_DEBUG_FLAG =
+            "printCompilerPropertiesVerbose";
+    private static boolean VERBOSE_DEBUG_ENABLED;
 
     /////////////////////////////////////////////////////////////////////////
     //
@@ -539,7 +541,8 @@ public class PropertySetter extends Task
         {
             echo( "JAVA_HOME directory '" + javaHome + "' does not have a grandparent directory sitting above all of the JDKs." );
         }
-        
+        verbose("jdkParent derived from '" + javaHome + "': '" +
+                ancestor.getPath() + "'");
         return ancestor;
     }
     
@@ -601,22 +604,24 @@ public class PropertySetter extends Task
     private List<JDKInfo> locateAppleJDKs(List<File> jdkParentDirectories) {
         ArrayList<JDKInfo> jdks = new ArrayList<JDKInfo>();
         if (jdkParentDirectories == null) {
+            debug("WARNING: No JDK parent directories specified.");
             return jdks;
         }
 
-        debug("\nLocating JDKs:");
+        debug("\nLocating Apple JDKs:");
 
         final FileFilter jdkFilter = new JDKRootFileFilter();
         for (File jdkParentDirectory : jdkParentDirectories) {
+            verbose("locating JDKs in '" + jdkParentDirectory + "'");
             // Limit the search to the directories in the parent directory.
             // Don't descend into sub directories.
             File[] possibleJdkRoots = jdkParentDirectory.listFiles(jdkFilter);
             for (File f : possibleJdkRoots) {
+                verbose("checking root '" + f + "'");
 
                 File[] requiredDirs = new File[] {
                     new File(f, APPLE_CLASSES_DIR),
                     new File(f, APPLE_COMMANDS_DIR),
-                    new File(f, APPLE_HEADERS_DIR),
                     new File(f, APPLE_HOME_DIR),
                     new File(f, APPLE_LIB_DIR),
                     new File(f, APPLE_RESOURCES_DIR)
@@ -663,6 +668,7 @@ public class PropertySetter extends Task
                 }
             }
         }
+        verbose("located " + jdks.size() + " JDKs in total");
         return jdks;
      }
 
@@ -747,6 +753,7 @@ public class PropertySetter extends Task
     private JDKInfo inspectJarManifest(Manifest mf, File jdkHome) {
         // The manifest may be null, as it is optional.
         if (mf == null) {
+            verbose("no manifest found for JDK in '" + jdkHome + "'");
             return null;
         }
         JDKInfo info = new JDKInfo(
@@ -775,6 +782,7 @@ public class PropertySetter extends Task
             String specificationVersion, String vendor) {
         // If we have no candidate JDKs, just return null at once.
         if (jdks == null || jdks.isEmpty()) {
+            debug("No candidate JDKs (version '" + specificationVersion + "')");
             return null;
         }
         ArrayList<JDKInfo> candidates = new ArrayList<JDKInfo>();
@@ -1085,6 +1093,11 @@ public class PropertySetter extends Task
         PropertyHelper  helper = PropertyHelper.getPropertyHelper( getProject() );
         
         _propertiesSnapshot = helper.getProperties();
+
+        // Set the verbose debugging flag, it is used by static methods.
+        VERBOSE_DEBUG_ENABLED = Boolean.valueOf((String)
+                    _propertiesSnapshot.get(PROPERTY_SETTER_VERBOSE_DEBUG_FLAG)
+                ).booleanValue();
     }
     
     /**
@@ -1309,8 +1322,23 @@ public class PropertySetter extends Task
      * @param msg the message to print
      */
     private void debug(CharSequence msg) {
-        if (isSet(PROPERTY_SETTER_DEBUG_FLAG)) {
+        if (isSet(PROPERTY_SETTER_DEBUG_FLAG) ||
+                VERBOSE_DEBUG_ENABLED) {
             System.out.println(msg);
+        }
+    }
+
+    /**
+     * Emits a debug message to the console if verbose debugging is enabled.
+     * <p>
+     * Verbose debugging is controlled by
+     * {@linkplain #PROPERTY_SETTER_VERBOSE_DEBUG_FLAG}.
+     *
+     * @param msg the message to print
+     */
+    private static void verbose(CharSequence msg) {
+        if (VERBOSE_DEBUG_ENABLED) {
+            System.out.println("[verbose] " + msg);
         }
     }
 
@@ -1334,9 +1362,12 @@ public class PropertySetter extends Task
                     if (accept) {
                         canonicalRoots.add(canonicalRoot);
                     }
+                    verbose((accept ? "candidate" : "duplicate") + " '" +
+                            pathname + "' -> '" + canonicalRoot + "'");
                     return accept;
                 } catch (IOException ioe) {
                     // Ignore exception, just accept the directory.
+                    verbose("file operation failed: " + ioe.getMessage());
                     return true;
                 }
             }
