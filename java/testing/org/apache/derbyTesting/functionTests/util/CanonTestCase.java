@@ -73,6 +73,9 @@ abstract class CanonTestCase extends BaseJDBCTestCase {
         rawBytes.close();
 
         byte[] testRawBytes = rawBytes.toByteArray();
+        rawBytes = null;
+        BufferedReader cannonReader = null;
+        BufferedReader testOutput = null;
 
         try {
             URL canonURL = getTestResource(canon);
@@ -80,10 +83,10 @@ abstract class CanonTestCase extends BaseJDBCTestCase {
 
             InputStream canonStream = openTestResource(canonURL);
 
-            BufferedReader cannonReader = new BufferedReader(
+            cannonReader = new BufferedReader(
                     new InputStreamReader(canonStream, outputEncoding));
 
-            BufferedReader testOutput = new BufferedReader(
+            testOutput = new BufferedReader(
                     new InputStreamReader(
                             new ByteArrayInputStream(testRawBytes),
                             outputEncoding));
@@ -106,12 +109,23 @@ abstract class CanonTestCase extends BaseJDBCTestCase {
                 assertEquals("Output at line " + lineNumber, canonLine,
                         testLine);
             }
-
-            cannonReader.close();
-            testOutput.close();
         } catch (Throwable t) {
             dumpForFail(testRawBytes);
             throw t;
+        } finally {
+            if (cannonReader != null) {
+                try {
+                    cannonReader.close();
+                } catch (IOException e) {
+                }
+            }
+            
+            if (testOutput != null) {
+                try {
+                    testOutput.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 
@@ -140,10 +154,5 @@ abstract class CanonTestCase extends BaseJDBCTestCase {
         outStream.write(rawOutput);
         outStream.flush();
         outStream.close();
-    }
-
-    protected void tearDown() throws Exception {
-        rawBytes = null;
-        super.tearDown();
     }
 }
