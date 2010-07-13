@@ -26,6 +26,8 @@ import java.sql.Time;
 import java.sql.Timestamp;
 
 import java.util.Arrays;   // Used by testUpdateLongBinaryProc
+import java.util.Calendar;
+import java.util.TimeZone;
 
 import java.sql.BatchUpdateException;
 import java.sql.CallableStatement;
@@ -35,10 +37,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -381,6 +383,151 @@ public class CallableTest extends BaseJDBCTestCase {
             Timestamp.valueOf("2002-05-12 10:05:02.000000000"), 
             cs.getTimestamp(7));
         assertTrue(Arrays.equals(ba, cs.getBytes(8)));
+    }
+
+    /**
+     * Test that the getters and setters for Date, Time and Timestamp work as
+     * expected when given a Calendar argument. Test case for DERBY-4615.
+     */
+    public void testTimeAndDateWithCalendar() throws SQLException {
+        // Create calendars for some time zones to use when testing the
+        // setter methods.
+        Calendar[] cal1 = {
+            Calendar.getInstance(), // local calendar
+            Calendar.getInstance(TimeZone.getTimeZone("GMT")),
+            Calendar.getInstance(TimeZone.getTimeZone("Europe/Oslo")),
+            Calendar.getInstance(TimeZone.getTimeZone("Asia/Hong_Kong")),
+        };
+
+        // Use calendars for the same time zones in the getters, but create
+        // clones so that we don't get interference between the calendars.
+        Calendar[] cal2 = (Calendar[]) cal1.clone();
+        for (int i = 0; i < cal2.length; i++) {
+            cal2[i] = (Calendar) cal2[i].clone();
+        }
+
+        // Now test all the combinations.
+        for (int i = 0; i < cal1.length; i++) {
+            for (int j = 0; j < cal2.length; j++) {
+                testTimeAndDateWithCalendar(cal1[i], cal2[j]);
+            }
+        }
+    }
+
+    /**
+     * Private helper for {@link #testTimeAndDateWithCalendar()}. This method
+     * calls a procedure that takes Date, Time and Timestamp arguments and
+     * returns the exact same values. Call the setters with one calendar and
+     * the getters with another calendar, and verify that the expected
+     * conversion between time zones has happened.
+     *
+     * @param cal1 the calendar to use for the setter methods
+     * @param cal2 the calendar to use for the getter methods
+     */
+    private void testTimeAndDateWithCalendar(Calendar cal1, Calendar cal2)
+            throws SQLException
+    {
+        println("Running " + getName() + "() with " +
+                cal1.getTimeZone().getDisplayName() + " and " +
+                cal2.getTimeZone().getDisplayName());
+
+        CallableStatement cs = prepareCall(
+                "call NON_NUMERIC_TYPES_IN_AND_OUT_PROC(?,?,?,?,?,?,?,?)");
+
+        Date d = Date.valueOf("2010-04-14");
+        Time t = Time.valueOf("12:23:24");
+        Timestamp ts = new Timestamp(System.currentTimeMillis());
+        //The following call to set nanosecs is different in 10.5 release
+        //compared to 10.6 and higher. The reason for this is that the
+        //jira DERBY-2602 can't be backported to 10.5 release. Backport
+        //of DERBY-2602 to 10.5 will cause the network server to break
+        //since different releases of 10.5 will have different behavior.
+        //Because of the absence of the fix for DERBY-2602 in 10.5
+        //codeline, we can't handle the nanosec values.
+//        ts.setNanos(123456789);
+        ts.setNanos(123456000);
+
+        cs.setDate(1, d, cal1);
+        cs.setTime(2, t, cal1);
+        cs.setTimestamp(3, ts, cal1);
+        cs.setNull(4, Types.VARBINARY); // we don't care about VARBINARY here
+
+        cs.registerOutParameter (5, java.sql.Types.DATE);
+        cs.registerOutParameter (6, java.sql.Types.TIME);
+        cs.registerOutParameter (7, java.sql.Types.TIMESTAMP);
+        cs.registerOutParameter (8, java.sql.Types.VARBINARY);
+
+        cs.execute();
+
+        assertSameDate(d, cal1, cs.getDate(5, cal2), cal2);
+        assertSameTime(t, cal1, cs.getTime(6, cal2), cal2);
+        assertSameTimestamp(ts, cal1, cs.getTimestamp(7, cal2), cal2);
+    }
+
+    /**
+     * Assert that two {@code java.util.Date} values have the same
+     * representation of their date components (year, month and day) in their
+     * respective time zones.
+     *
+     * @param expected the expected date
+     * @param cal1 a calendar representing the time zone of the expected date
+     * @param actual the actual date
+     * @param cal2 a calendar representing the time zone of the actual date
+     */
+    private void assertSameDate(java.util.Date expected, Calendar cal1,
+                                java.util.Date actual, Calendar cal2) {
+        cal1.clear();
+        cal1.setTime(expected);
+        int expectedYear = cal1.get(Calendar.YEAR);
+        int expectedMonth = cal1.get(Calendar.MONTH);
+        int expectedDay = cal1.get(Calendar.DAY_OF_MONTH);
+
+        cal2.clear();
+        cal2.setTime(actual);
+        assertEquals("year", expectedYear, cal2.get(Calendar.YEAR));
+        assertEquals("month", expectedMonth, cal2.get(Calendar.MONTH));
+        assertEquals("day", expectedDay, cal2.get(Calendar.DAY_OF_MONTH));
+    }
+
+    /**
+     * Assert that two {@code java.util.Date} values have the same
+     * representation of their time components (hour, minute, second) in their
+     * respective time zones.
+     *
+     * @param expected the expected time
+     * @param cal1 a calendar representing the time zone of the expected time
+     * @param actual the actual time
+     * @param cal2 a calendar representing the time zone of the actual time
+     */
+    private void assertSameTime(java.util.Date expected, Calendar cal1,
+                                java.util.Date actual, Calendar cal2) {
+        cal1.clear();
+        cal1.setTime(expected);
+        int expectedHour = cal1.get(Calendar.HOUR_OF_DAY);
+        int expectedMinute = cal1.get(Calendar.MINUTE);
+        int expectedSecond = cal1.get(Calendar.SECOND);
+
+        cal2.clear();
+        cal2.setTime(actual);
+        assertEquals("hour", expectedHour, cal2.get(Calendar.HOUR_OF_DAY));
+        assertEquals("minute", expectedMinute, cal2.get(Calendar.MINUTE));
+        assertEquals("second", expectedSecond, cal2.get(Calendar.SECOND));
+    }
+
+    /**
+     * Assert that two Timestamp values have the same representation in their
+     * respective time zones.
+     *
+     * @param expected the expected time
+     * @param cal1 a calendar representing the time zone of the expected time
+     * @param actual the actual time
+     * @param cal2 a calendar representing the time zone of the actual time
+     */
+    private void assertSameTimestamp(Timestamp expected, Calendar cal1,
+                                     Timestamp actual, Calendar cal2) {
+        assertSameDate(expected, cal1, actual, cal2);
+        assertSameTime(expected, cal1, actual, cal2);
+        assertEquals("nanos", expected.getNanos(), actual.getNanos());
     }
 
     /**
