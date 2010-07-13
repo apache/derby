@@ -61,7 +61,6 @@ public class BitTypeCompiler extends BaseTypeCompiler
 
 			return (otherType.isBitTypeId() ||
 					otherType.isBlobTypeId() ||
-					otherType.isBooleanTypeId() ||
 					otherType.userType());
 		}
 

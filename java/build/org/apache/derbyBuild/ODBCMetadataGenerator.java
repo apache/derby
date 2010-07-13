@@ -112,6 +112,16 @@ public class ODBCMetadataGenerator {
 	private final short FOLLOWING = 1;
 	private final short PRECEDING = -1;
 
+	// Used for casting BOOLEANS to INTEGERS
+	private	static	final	String	BOOLEAN_COLUMNS[] =
+	{
+		"CASE_SENSITIVE",
+		"FIXED_PREC_SCALE",
+		"UNSIGNED_ATTRIBUTE",
+		"AUTO_UNIQUE_VAL",
+        "NON_UNIQUE",
+	};
+    
 	// List of what types of changes are required for a given
 	// metadata procedure.
 	private HashMap changeMap;
@@ -561,7 +571,6 @@ public class ODBCMetadataGenerator {
 	private void generateSELECTClause(String queryName,
 		ArrayList selectColDefs, StringBuffer newQueryText)
 	{
-
 		if (!stmtNeedsChange(queryName, TYPE_VALUE_CHANGE) &&
 			!stmtNeedsChange(queryName, ADD_COLUMN_CHANGE))
 		{ // then we don't need to generate a SELECT, because we
@@ -585,9 +594,29 @@ public class ODBCMetadataGenerator {
 			castInfo = getCastInfoForCol(queryName, colName);
 			if (castInfo != null)
 				newQueryText.append("CAST (");
+            //
+            // Special logic to turn booleans into integers. This is necessary
+            // because you cannot cast a boolean to an integer, according to the
+            // sql standard.
+            //
+			if ( isBoolean( colName ) ) { newQueryText.append( " ( CASE WHEN " ); }
 			newQueryText.append(SUBQUERY_NAME);
 			newQueryText.append(".");
 			newQueryText.append(colName);
+            //
+            // Really special logic to force the AUTO_UNIQUE_VAL and
+            // UNSIGNED_ATTRIBUTE columns to
+            // be nullable. This appears to be something that the ODBC spec
+            // requires.
+            //
+            if ( "AUTO_UNIQUE_VAL".equals( colName )  || "UNSIGNED_ATTRIBUTE".equals( colName ) )
+            {
+                newQueryText.append( " IS NULL THEN CAST( NULL AS INTEGER ) WHEN " );
+                newQueryText.append(SUBQUERY_NAME);
+                newQueryText.append(".");
+                newQueryText.append(colName);
+            }
+			if ( isBoolean( colName ) ) { newQueryText.append( " THEN 1 ELSE 0 END ) " ); }
 			if (castInfo != null) {
 				newQueryText.append(" AS ");
 				newQueryText.append(castInfo);
@@ -1216,6 +1245,22 @@ public class ODBCMetadataGenerator {
 
 	}
 
+	/* ****
+	 * Return true if the column is a BOOLEAN column which should
+	 * be coerced to an INTEGER.
+	 */
+	private	boolean	isBoolean( String colName )
+	{
+		int		count = BOOLEAN_COLUMNS.length;
+
+		for ( int i = 0; i < count; i++ )
+		{
+			if ( BOOLEAN_COLUMNS[ i ].equals( colName ) ) { return true; }
+		}
+
+		return false;
+	}
+    
 	/* ****
 	 * stmtNeedsChange
 	 * Returns whether or not a specific metadata statement

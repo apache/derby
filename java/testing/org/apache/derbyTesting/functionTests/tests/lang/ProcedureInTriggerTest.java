@@ -435,7 +435,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          rs = s.executeQuery("select * from t2");
          JDBC.assertFullResultSet(rs,new String[][] {{"1","2"}, {"2","4"}});
          // -- check index is not created
-         rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CAST(CONGLOMERATENAME AS VARCHAR(128))='IX' and ISINDEX=1");
+         rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CAST(CONGLOMERATENAME AS VARCHAR(128))='IX' and ISINDEX");
          JDBC.assertFullResultSet(rs, new String [][] {{"0"}});
          s.execute("drop trigger create_index_trig");
          //--- create an index to test we cannot drop it from a procedure called by a trigger
@@ -447,7 +447,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          expectedRows = new String[][] { {"5","two"},{"6","four"},{"8","eight"}};
          JDBC.assertFullResultSet(rs, expectedRows);
          // -- check index is not dropped
-         rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CAST(CONGLOMERATENAME AS VARCHAR(128))='IX' and ISINDEX=1");
+         rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CAST(CONGLOMERATENAME AS VARCHAR(128))='IX' and ISINDEX");
          JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
          s.close();
     }

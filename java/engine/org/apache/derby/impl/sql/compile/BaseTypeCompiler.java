@@ -283,7 +283,6 @@ abstract class BaseTypeCompiler implements TypeCompiler
 		// and CHAR, (not VARCHARS or LONGVARCHAR). 
 		// Only with the CHAR() or VARCHAR()function can they be converted.
 		boolean retval =((otherType.isNumericTypeId()) ||
-						 (otherType.isBooleanTypeId()) ||
 						 (otherType.userType()));
 
 		// For CHAR  Conversions, function can convert 
@@ -317,9 +316,7 @@ abstract class BaseTypeCompiler implements TypeCompiler
 		** Numbers can be stored into from other number types.
 		** Also, user types with compatible classes can be stored into numbers.
 		*/
-		if ((otherType.isNumericTypeId())	||
-			(otherType.isBooleanTypeId()))
-			return true;
+		if (otherType.isNumericTypeId()) { return true; }
 
 		/*
 		** If the other type is user-defined, use the java types to determine

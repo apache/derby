@@ -21,10 +21,14 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 
 import junit.framework.Test;
 
@@ -37,6 +41,20 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  *
  */
 public class CastingTest extends BaseJDBCTestCase {
+
+    public static final class TypedColumn
+    {
+        public String columnName;
+        public String typeName;
+        public boolean comparable; // true except for long, non-indexable data types
+
+            public TypedColumn( String columnName, String typeName, boolean comparable )
+        {
+            this.columnName = columnName;
+            this.typeName = typeName;
+            this.comparable = comparable;
+        }
+    }
 
     public CastingTest(String name) {
         super(name);
@@ -269,6 +287,34 @@ public static String[][]SQLData =
     /*TIMESTAMP*/ {"Exception","Exception","Exception","Exception","Exception","Exception","2000-01-01 15:30:20.0                                       ","2000-01-01 15:30:20.0","Exception","Exception","Exception","Exception","Exception","2000-01-01","15:30:20","2000-01-01 15:30:20.0","Exception"},
     /*BLOB(1k)*/ {"Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","Exception","01dd"}
     };
+
+    private static final TypedColumn[] LEGAL_BOOLEAN_CASTS = new TypedColumn[]
+    {
+        new TypedColumn( "charCol", "char( 5 )", true ),
+        new TypedColumn( "varcharCol", "varchar( 5 )", true ),
+        new TypedColumn( "longVarcharCol", "long varchar", false ),
+        new TypedColumn( "clobCol", "clob", false ),
+    };
+    
+    private static final TypedColumn[] ILLEGAL_BOOLEAN_CASTS = new TypedColumn[]
+    {
+        new TypedColumn( "bigintCol", "bigint", true ),
+        new TypedColumn( "blobCol", "blob", false ),
+        new TypedColumn( "charForBitDataCol", "char( 5 ) for bit data", true ),
+        new TypedColumn( "dateCol", "date", true ),
+        new TypedColumn( "decimalCol", "decimal", true ),
+        new TypedColumn( "doubleCol", "double", true ),
+        new TypedColumn( "floatCol", "float", true ),
+        new TypedColumn( "integerCol", "integer", true ),
+        new TypedColumn( "longVarcharForBitDataCol", "long varchar for bit data", false ),
+        new TypedColumn( "numericCol", "numeric", true ),
+        new TypedColumn( "realCol", "real", true ),
+        new TypedColumn( "smallintCol", "smallint", true ),
+        new TypedColumn( "timeCol", "time", true ),
+        new TypedColumn( "timestampCol", "timestamp", true ),
+        new TypedColumn( "varcharForBitDataCol", "varchar( 5 ) for bit data", true ),
+        new TypedColumn( "xmlCol", "xml", false ),
+    };
     
     protected void setUp() throws SQLException {
         Statement scb = createStatement();
@@ -476,6 +522,335 @@ public static String[][]SQLData =
 
     }
 
+    /**
+     * Verify that DERBY-887 is fixed.
+     */
+    public void test_derby887() throws Exception
+    {
+        goodStatement
+            (
+             "create table t_887 (a int)\n"
+             );
+
+        expectError
+            (
+             LANG_NOT_COMPARABLE_SQLSTATE,
+             "select * from t_887 where a=0<3\n"
+             );
+    }
+
+    /**
+     * <p>
+     * Verify that the legal boolean casts work as expected. This
+     * test helps verify that DERBY-887 is fixed. Verifies the following:
+     * </p>
+     *
+     * <ul>
+     * <li>Implicit casts of BOOLEAN to legal types.</li>
+     * <li>Implicit casts of legal types to BOOLEAN.</li>
+     * <li>Explicit casts of BOOLEAN to legal types.</li>
+     * </ul>
+     *
+     * <p>
+     * The following can't be tested until the BOOLEAN type is re-enabled:
+     * </p>
+     *
+     * <ul>
+     * <li>Explicit casts of legal types to BOOLEAN.</li>
+     * </ul>
+     */
+    public void test_legalBooleanCasts() throws Exception
+    {
+        //
+        // This assertion will fail if a new Derby data type is added. To
+        // silence this assertion, you must add the new data type
+        // to LEGAL_BOOLEAN_CASTS or ILLEGAL_BOOLEAN_CASTS.
+        //
+        assertAllTypesCovered();
+
+        int  legalTypeCount = LEGAL_BOOLEAN_CASTS.length;
+        String  tableName = "t_legal_boolean_casts";
+        // create a table whose columns are all the legal datatypes
+        makeTableForCasts( tableName, LEGAL_BOOLEAN_CASTS );
+
+        // now test the implicit casting of boolean to all of the legal
+        // types by inserting a boolean value into all of the columns
+        // of the table
+        goodStatement
+            (
+             "insert into " + tableName + "\n" +
+             "( " + makeColumnList( LEGAL_BOOLEAN_CASTS ) + " )\n" +
+             "select " + makeRepeatedColumnList( "c.isIndex", LEGAL_BOOLEAN_CASTS.length ) + "\n" +
+             "from\n" +
+             "  sys.sysconglomerates c,\n" +
+             "  sys.systables t\n" +
+             "where t.tablename='SYSTABLES'\n" +
+             "and t.tableid = c.tableid\n" +
+             "and not c.isIndex\n"
+             );
+        // test that all of the inserted values are false
+        assertBooleanResults
+            (
+             "select * from " + tableName + "\n",
+             false,
+             1
+             );
+
+        // now try implicitly casting the legal types to boolean by
+        // trying to compare the values in the table to a boolean value.
+        // we only expect this to succeed for short, indexable data types.
+        // the long data types cannot be compared
+        for ( int i = 0; i < legalTypeCount; i++ )
+        {
+            TypedColumn tc = LEGAL_BOOLEAN_CASTS[ i ];
+
+            String queryText =
+                "select count(*)\n" +
+                "from\n" +
+                "  sys.sysconglomerates c,\n" +
+                "  sys.systables t,\n" +
+                "  " + tableName + " tt\n" +
+                "where t.tablename='SYSTABLES'\n" +
+                "and t.tableid = c.tableid\n" +
+                "and not c.isIndex\n" +
+                "and tt." + tc.columnName + " = c.isIndex\n";
+
+            if ( tc.comparable ) { assertScalarResult( queryText, 1 ); }
+            else { expectError( LANG_NOT_COMPARABLE_SQLSTATE, queryText ); }
+        }
+
+        // now try explicitly casting a boolean value to all of the legal types
+        assertBooleanResults
+            (
+             "select\n" +
+             makeCastedColumnList( "c.isIndex", LEGAL_BOOLEAN_CASTS ) +
+             "\nfrom\n" +
+             "  sys.sysconglomerates c,\n" +
+             "  sys.systables t\n" +
+             "where t.tablename='SYSTABLES'\n" +
+             "and t.tableid = c.tableid\n" +
+             "and not c.isIndex\n",
+             false,
+             1
+             );
+
+        //
+        // The following assertion will fail after the BOOLEAN data type is
+        // re-enabled. At that time, the assertion should be removed and
+        // replaced with tests to verify the explicit casting of legal types to BOOLEAN.
+        //
+        assertNoBoolean();
+    }
+    private void makeTableForCasts( String tableName, TypedColumn[] columns )
+        throws Exception
+    {
+        StringBuffer buffer = new StringBuffer();
+        int  count = columns.length;
+
+        buffer.append( "create table " + tableName + "\n(\n" );
+        for ( int i = 0; i < count; i++ )
+        {
+            buffer.append( "\t" );
+            if ( i > 0 ) { buffer.append( ", " ); }
+
+            TypedColumn tc = columns[ i ];
+
+            buffer.append( tc.columnName + "\t" + tc.typeName + "\n"  );
+        }
+        buffer.append( ")\n" );
+        
+        goodStatement( buffer.toString() );
+    }
+    // make a comma-separated list of column names
+    private String makeColumnList( TypedColumn[] columns )
+    {
+        StringBuffer buffer = new StringBuffer();
+        int  count = columns.length;
+
+        for ( int i = 0; i < count; i++ )
+        {
+            if ( i > 0 ) { buffer.append( ", " ); }
+            buffer.append( columns[ i ].columnName  );
+        }
+
+        return buffer.toString();
+    }
+    // make a comma-separated list of a column casted to various target types
+    private String makeCastedColumnList( String columnName, TypedColumn[] targetTypes )
+    {
+        StringBuffer buffer = new StringBuffer();
+        int  count = targetTypes.length;
+
+        for ( int i = 0; i < count; i++ )
+        {
+            if ( i > 0 ) { buffer.append( ", " ); }
+            buffer.append( "cast ( " + columnName + " as " + targetTypes[ i ].typeName + " )" );
+        }
+
+        return buffer.toString();
+    }
+    // make a comma-separated list of N copies of a column
+    private String makeRepeatedColumnList( String columnName, int N )
+    {
+        StringBuffer buffer = new StringBuffer();
+
+        for ( int i = 0; i < N; i++ )
+        {
+            if ( i > 0 ) { buffer.append( ", " ); }
+            buffer.append( columnName  );
+        }
+
+        return buffer.toString();
+    }
+    // assert that all result columns have the given boolean value
+    private void assertBooleanResults( String queryText, boolean expectedValue, int expectedRowCount )
+        throws Exception
+    {
+        PreparedStatement ps = chattyPrepare( queryText );
+        ResultSet rs = ps.executeQuery();
+        int actualRowCount = 0;
+        int columnCount = rs.getMetaData().getColumnCount();
+        String expectedStringValue = Boolean.toString( expectedValue );
+
+        while ( rs.next() )
+        {
+            actualRowCount++;
+
+            for ( int i = 0; i < columnCount; i++ )
+            {
+                assertEquals( "Column " + i, expectedStringValue, rs.getString( i + 1 ).trim() );
+            }
+        }
+
+        rs.close();
+        ps.close();
+
+        assertEquals( expectedRowCount, actualRowCount );
+    }
+    // assert a scalar result
+    private void assertScalarResult( String queryText, int expectedValue ) throws Exception
+    {
+        PreparedStatement ps = chattyPrepare( queryText );
+        ResultSet rs = ps.executeQuery();
+
+        rs.next();
+        assertEquals( expectedValue, rs.getInt( 1 ) );
+
+        rs.close();
+        ps.close();
+    }
+    // assert that the BOOLEAN type has not been re-enabled
+    private void assertNoBoolean() throws Exception
+    {
+        println( "Testing whether the BOOLEAN data type has been re-enabled." );
+        
+        Connection conn = getConnection();
+        DatabaseMetaData dbmd = conn.getMetaData();
+        ResultSet rs = dbmd.getTypeInfo();
+
+        while ( rs.next() )
+        {
+            assertFalse( rs.getString( 1 ), java.sql.Types.BOOLEAN == rs.getInt( 2 ) );
+        }
+
+        rs.close();
+    }
+    // assert that we are testing the casting behavior of BOOLEANs to and from
+    // all Derby data types
+    private void assertAllTypesCovered() throws Exception
+    {
+        println( "Verify that we are testing the casting behavior of BOOLEAN to/from all Derby data types." );
+        
+        Connection conn = getConnection();
+        DatabaseMetaData dbmd = conn.getMetaData();
+        ResultSet rs = dbmd.getTypeInfo();
+        int count = 0;
+
+        while ( rs.next() ) { count++; }
+
+        assertEquals( "You must add your new data type to LEGAL_BOOLEAN_CASTS or ILLEGAL_BOOLEAN_CASTS",
+                      LEGAL_BOOLEAN_CASTS.length + ILLEGAL_BOOLEAN_CASTS.length,
+                      count );
+        
+        rs.close();
+    }
+    
+    /**
+     * <p>
+     * Verify that the illegal boolean casts work as expected. This
+     * test helps verify that DERBY-887 is fixed. Verifies the
+     * following:
+     * </p>
+     *
+     * <ul>
+     * <li>Implicit casts of BOOLEAN to illegal types.</li>
+     * <li>Implicit casts of illegal types to BOOLEAN.</li>
+     * <li>Explicit casts of BOOLEAN to illegal types.</li>
+     * </ul>
+     *
+     * <p>
+     * The following can't be tested until the BOOLEAN type is re-enabled:
+     * </p>
+     *
+     * <ul>
+     * <li>Explicit casts of illegal types to BOOLEAN.</li>
+     * </ul>
+     */
+    public void test_illegalBooleanCasts() throws Exception
+    {
+        //
+        // This assertion will fail if a new Derby data type is added. To
+        // silence this assertion, you must add the new data type
+        // to LEGAL_BOOLEAN_CASTS or ILLEGAL_BOOLEAN_CASTS.
+        //
+        assertAllTypesCovered();
+        
+        int  illegalTypeCount = ILLEGAL_BOOLEAN_CASTS.length;
+        String  tableName = "t_illegal_boolean_casts";
+        // create a table whose columns are all the illegal datatypes
+        makeTableForCasts( tableName, ILLEGAL_BOOLEAN_CASTS );
+
+        // use inserts to test implicit casts of boolean to the illegal types
+        for ( int i = 0; i < illegalTypeCount; i++ )
+        {
+            TypedColumn tc = ILLEGAL_BOOLEAN_CASTS[ i ];
+            expectError
+                (
+                 LANG_NOT_STORABLE_SQLSTATE,
+                 "insert into " + tableName + "( " + tc.columnName + " ) select c.isIndex from sys.sysconglomerates c\n"
+                 );
+        }
+
+        // test implicit casts of illegal types to boolean
+        for ( int i = 0; i < illegalTypeCount; i++ )
+        {
+            TypedColumn tc = ILLEGAL_BOOLEAN_CASTS[ i ];
+            expectError
+                (
+                 LANG_NOT_COMPARABLE_SQLSTATE,
+                 "select * from " + tableName + " t, sys.sysconglomerates c where t." + tc.columnName + " = c.isIndex\n"
+                 );
+        }
+        
+        // test explicit casts of boolean to illegal types
+        for ( int i = 0; i < illegalTypeCount; i++ )
+        {
+            TypedColumn[] castedColumnList = new TypedColumn[] { ILLEGAL_BOOLEAN_CASTS[ i ] };
+            expectError
+                (
+                 ILLEGAL_CAST_EXCEPTION_SQLSTATE,
+                 "select " + makeCastedColumnList( "c.isIndex", castedColumnList ) + " from sys.sysconglomerates c\n"
+                 );
+        }
+        
+        //
+        // The following assertion will fail after the BOOLEAN data type is
+        // re-enabled. At that time, the assertion should be removed and
+        // replaced with tests to verify the explicit casting of illegal types to BOOLEAN.
+        //
+        assertNoBoolean();
+    }
+
     protected void tearDown() throws SQLException, Exception {
         Statement scb = createStatement();
 
@@ -649,6 +1024,39 @@ public static String[][]SQLData =
             return str;
         else
             return "'" + str + "'";
+    }
+
+    /**
+     * Run good DDL.
+     * @throws SQLException 
+     */
+    private void    goodStatement( String ddl ) throws SQLException
+    {
+            PreparedStatement    ps = chattyPrepare( ddl );
+
+            ps.execute();
+            ps.close();
+    }
+    
+    /**
+     * Assert that the statement text, when compiled, raises an exception
+     */
+    private void    expectError( String sqlState, String query )
+    {
+        println( "\nExpecting " + sqlState + " when preparing:\n\t" + query );
+
+        assertCompileError( sqlState, query );
+    }
+    
+    /**
+     * Prepare a statement and report its sql text.
+     */
+    private PreparedStatement   chattyPrepare( String text )
+        throws SQLException
+    {
+        println( "Preparing statement:\n\t" + text );
+        
+        return prepareStatement( text );
     }
 
     /**

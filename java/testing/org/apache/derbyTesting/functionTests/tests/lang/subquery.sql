@@ -220,7 +220,6 @@ select * from s where c in (select '1' from t);
 select * from s where b in (select 0 from t);
 
 -- constants on both sides
-select * from s where 1=1 in (select 0 from t);
 select * from s where 0 in (select 0 from t);
 
 -- compatable types
