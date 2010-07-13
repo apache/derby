@@ -49,7 +49,8 @@ public class NetworkServerControlClientCommandTest extends BaseJDBCTestCase {
     public void testPing() throws Exception {
         String currentHost = TestConfiguration.getCurrent().getHostName();
         String currentPort = Integer.toString(TestConfiguration.getCurrent().getPort());
-        String bogusPort = Integer.toString(TestConfiguration.getCurrent().getPort()-1);
+        String bogusPort = Integer.toString(
+                TestConfiguration.getCurrent().getBogusPort());
         
         String[] pingCmd1 = new String[] {
                 "org.apache.derby.drda.NetworkServerControl", "ping" };

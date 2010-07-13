@@ -56,7 +56,7 @@ import junit.framework.TestSuite;
  * removed by <code>DropDatabaseSetup</code>.
  *
  */
-public class TestConfiguration {
+public final class TestConfiguration {
     /**
      * Default values for configurations
      */
@@ -1018,6 +1018,9 @@ public class TestConfiguration {
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
         this.ssl = null;
         this.jmxPort = getNextAvailablePort();
+        this.bogusPort = getNextAvailablePort();
+        println("basePort=" + basePort + ", jmxPort=" + jmxPort +
+                ", bogusPort=" + bogusPort);
         url = createJDBCUrlWithDatabaseName(defaultDbName);
         initConnector(null);
  
@@ -1038,6 +1041,7 @@ public class TestConfiguration {
         this.doTrace = copy.doTrace;
         this.port = copy.port;
         this.jmxPort = copy.jmxPort;
+        this.bogusPort = copy.bogusPort;
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
@@ -1061,6 +1065,11 @@ public class TestConfiguration {
         this.doTrace = copy.doTrace;
         this.port = port;
         this.jmxPort = copy.jmxPort;
+        this.bogusPort = copy.bogusPort;
+        if (bogusPort == port) {
+            throw new IllegalStateException(
+                    "port cannot equal bogusPort: " + bogusPort);
+        }
         
         this.jdbcClient = client;
         this.hostName = hostName;
@@ -1084,6 +1093,11 @@ public class TestConfiguration {
         this.doTrace = copy.doTrace;
         this.port = port;
         this.jmxPort = copy.jmxPort;
+        this.bogusPort = copy.bogusPort;
+        if (bogusPort == port) {
+            throw new IllegalStateException(
+                    "port cannot equal bogusPort: " + bogusPort);
+        }
         
         this.jdbcClient = client;
         this.hostName = hostName;
@@ -1116,6 +1130,7 @@ public class TestConfiguration {
         this.doTrace = copy.doTrace;
         this.port = copy.port;
         this.jmxPort = copy.jmxPort;
+        this.bogusPort = copy.bogusPort;
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
@@ -1179,6 +1194,7 @@ public class TestConfiguration {
         this.doTrace = copy.doTrace;
         this.port = copy.port;
         this.jmxPort = copy.jmxPort;
+        this.bogusPort = copy.bogusPort;
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
@@ -1208,6 +1224,9 @@ public class TestConfiguration {
         doTrace =  Boolean.valueOf(props.getProperty(KEY_TRACE)).booleanValue();
         port = basePort;
         jmxPort = getNextAvailablePort();
+        bogusPort = getNextAvailablePort();
+        println("basePort=" + basePort + ", jmxPort=" + jmxPort +
+                ", bogusPort=" + bogusPort);
 
         ssl = props.getProperty(KEY_SSL);
         
@@ -1416,6 +1435,16 @@ public class TestConfiguration {
     }
 
     /**
+     * Returns a port number where no Derby network servers are supposed to
+     * be running.
+     *
+     * @return A port number where no Derby network servers are started.
+     */
+    public int getBogusPort() {
+        return bogusPort;
+    }
+
+    /**
      * Get ssl mode for network server
      * 
      * @return ssl mode
@@ -1597,6 +1626,20 @@ public class TestConfiguration {
     public boolean isVerbose() {
         return isVerbose;
     }
+
+    /**
+     * Private method printing debug information to standard out if debugging
+     * is enabled.
+     * <p>
+     * <em>Note:</em> This method may direct output to a different location
+     * than the println method in <tt>BaseJDBCTestCase</tt>.
+     */
+    private void println(CharSequence msg) {
+        if (isVerbose) {
+            System.out.println("DEBUG: {TC@" + hashCode() + "} " + msg);
+        }
+    }
+
     /**
      * Return JUnit test method trace flag.
      *
@@ -1702,6 +1745,7 @@ public class TestConfiguration {
     private final String hostName;
     private final JDBCClient jdbcClient;
     private final int jmxPort;
+    private final int bogusPort;
     private boolean isVerbose;
     private boolean doTrace;
     private String ssl;
