@@ -45,6 +45,8 @@ import org.apache.derbyTesting.junit.JDBC;
  */
 public class RoutineTest extends BaseJDBCTestCase {
 
+    private static final String CANNOT_STUFF_NULL_INTO_PRIMITIVE = "39004";
+    
     public RoutineTest(String name)
     {
         super(name);
@@ -616,6 +618,29 @@ public class RoutineTest extends BaseJDBCTestCase {
     	
     }
     
+    /**
+     * Test that we don't get verification errors trying to cram nulls
+     * into primitive args. See DERBY-4459.
+     */
+    public void test_4459() throws Exception
+    {
+    	Statement s = createStatement();
+
+    	s.executeUpdate
+            (
+             "create function getNullInt() returns int language java parameter style java\n" +
+             "external name '" + RoutineTest.class.getName() + ".getNullInt'"
+             );
+    	s.executeUpdate
+            (
+             "create function negateInt( a int ) returns int language java parameter style java\n" +
+             "external name '" + RoutineTest.class.getName() + ".negateInt'"
+             );
+
+        assertStatementError( CANNOT_STUFF_NULL_INTO_PRIMITIVE, s, "values( negateInt( cast( null as int) ) )" );
+        assertStatementError( CANNOT_STUFF_NULL_INTO_PRIMITIVE, s, "values( negateInt( getNullInt() ) )" );
+    }
+    
     /*
     ** Routine implementations called from the tests but do
     *  not use DriverManager so that this test can be used on
@@ -661,5 +686,8 @@ public class RoutineTest extends BaseJDBCTestCase {
            return count;
        }
 
+    public static int negateInt( int arg ) { return -arg; }
+    public static Integer getNullInt() { return null; }
+    
 }
 
