@@ -75,13 +75,14 @@ public final class TestConfiguration {
      * page at  http://wiki.apache.org/db-derby/DerbyJUnitTesting
      * need to be updated. 
      */
-    private final static int MAX_PORTS_USED = 10;
+    private final static int MAX_PORTS_USED = 20;
     
     /** This is the base port. This does NOT change EVER during the run of a suite.
      *	It is set using the property derby.tests.basePort and it is set to default when
      *	a property isn't used. */
     private final static int basePort;
     private static int lastAssignedPort;
+    private static final int bogusPort;
     static {
     	String port = BaseTestCase.getSystemProperty("derby.tests.basePort");
         if (port == null) {
@@ -90,8 +91,9 @@ public final class TestConfiguration {
         	lastAssignedPort = Integer.parseInt(port);
         }
         basePort = lastAssignedPort;
+        bogusPort = ++lastAssignedPort;
     }
-    private static int assignedPortCount = 1;
+    private static int assignedPortCount = 2;
 
     private FileOutputStream serverOutput;
 		
@@ -1018,9 +1020,8 @@ public final class TestConfiguration {
         this.jdbcClient = JDBCClient.getDefaultEmbedded();
         this.ssl = null;
         this.jmxPort = getNextAvailablePort();
-        this.bogusPort = getNextAvailablePort();
-        println("basePort=" + basePort + ", jmxPort=" + jmxPort +
-                ", bogusPort=" + bogusPort);
+        println("basePort=" + basePort + ", bogusPort=" + bogusPort +
+                ", jmxPort=" + jmxPort);
         url = createJDBCUrlWithDatabaseName(defaultDbName);
         initConnector(null);
  
@@ -1041,7 +1042,6 @@ public final class TestConfiguration {
         this.doTrace = copy.doTrace;
         this.port = copy.port;
         this.jmxPort = copy.jmxPort;
-        this.bogusPort = copy.bogusPort;
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
@@ -1065,7 +1065,6 @@ public final class TestConfiguration {
         this.doTrace = copy.doTrace;
         this.port = port;
         this.jmxPort = copy.jmxPort;
-        this.bogusPort = copy.bogusPort;
         if (bogusPort == port) {
             throw new IllegalStateException(
                     "port cannot equal bogusPort: " + bogusPort);
@@ -1093,7 +1092,6 @@ public final class TestConfiguration {
         this.doTrace = copy.doTrace;
         this.port = port;
         this.jmxPort = copy.jmxPort;
-        this.bogusPort = copy.bogusPort;
         if (bogusPort == port) {
             throw new IllegalStateException(
                     "port cannot equal bogusPort: " + bogusPort);
@@ -1130,7 +1128,6 @@ public final class TestConfiguration {
         this.doTrace = copy.doTrace;
         this.port = copy.port;
         this.jmxPort = copy.jmxPort;
-        this.bogusPort = copy.bogusPort;
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
@@ -1194,7 +1191,6 @@ public final class TestConfiguration {
         this.doTrace = copy.doTrace;
         this.port = copy.port;
         this.jmxPort = copy.jmxPort;
-        this.bogusPort = copy.bogusPort;
         
         this.jdbcClient = copy.jdbcClient;
         this.hostName = copy.hostName;
@@ -1224,9 +1220,8 @@ public final class TestConfiguration {
         doTrace =  Boolean.valueOf(props.getProperty(KEY_TRACE)).booleanValue();
         port = basePort;
         jmxPort = getNextAvailablePort();
-        bogusPort = getNextAvailablePort();
-        println("basePort=" + basePort + ", jmxPort=" + jmxPort +
-                ", bogusPort=" + bogusPort);
+        println("basePort=" + basePort + ", bogusPort=" + bogusPort +
+                ", jmxPort=" + jmxPort);
 
         ssl = props.getProperty(KEY_SSL);
         
@@ -1745,7 +1740,6 @@ public final class TestConfiguration {
     private final String hostName;
     private final JDBCClient jdbcClient;
     private final int jmxPort;
-    private final int bogusPort;
     private boolean isVerbose;
     private boolean doTrace;
     private String ssl;
