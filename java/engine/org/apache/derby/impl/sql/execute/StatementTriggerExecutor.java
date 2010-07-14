@@ -33,7 +33,7 @@ import org.apache.derby.iapi.sql.Activation;
  * a statement trigger.  It is instantiated at execution
  * time.  There is one per statement trigger.
  */
-class StatementTriggerExecutor extends GenericTriggerExecutor
+public class StatementTriggerExecutor extends GenericTriggerExecutor
 {
 	/**
 	 * Constructor

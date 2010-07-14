@@ -128,6 +128,14 @@ abstract class NoRowsResultSetImpl implements ResultSet
 	 * Returns zero.
 	 */
 	public int	modifiedRowCount() { return 0; }
+
+	/**
+	 * Returns null.
+	 */
+	public ResultDescription	getResultDescription()
+	{
+	    return (ResultDescription)null;
+	}
 	
 	public final Activation getActivation()
 	{

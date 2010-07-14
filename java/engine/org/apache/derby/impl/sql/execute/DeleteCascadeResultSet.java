@@ -53,12 +53,15 @@ import java.util.Enumeration;
  * it should be done based on whether the resultset has dependent resultsets or not.
  *
  */
-class DeleteCascadeResultSet extends DeleteResultSet
+public class DeleteCascadeResultSet extends DeleteResultSet
 {
 
 
 	public ResultSet[] dependentResultSets;
 	private int noDependents =0;
+	private CursorResultSet parentSource;
+	private FKInfo parentFKInfo;
+	private long fkIndexConglomNumber;
 	private String resultSetId;
 	private boolean mainNodeForTable = true;
 	private boolean affectedRows = false;
@@ -68,7 +71,7 @@ class DeleteCascadeResultSet extends DeleteResultSet
      * class interface
 	 * @exception StandardException		Thrown on error
      */
-    DeleteCascadeResultSet
+    public DeleteCascadeResultSet
 	(
 		NoPutResultSet		source,
 		Activation			activation,
@@ -84,8 +87,13 @@ class DeleteCascadeResultSet extends DeleteResultSet
 			  (ConstantAction)activation.getPreparedStatement().getSavedObject(constantActionItem)),
 			  activation);
 
-		if(constantActionItem != -1)
+		ConstantAction passedInConstantAction;
+		if(constantActionItem == -1)
+			passedInConstantAction = activation.getConstantAction(); //root table
+		else
 		{
+			passedInConstantAction = 
+				(ConstantAction) activation.getPreparedStatement().getSavedObject(constantActionItem);
 			resultDescription = constants.resultDescription;
 		}
 		cascadeDelete = true;

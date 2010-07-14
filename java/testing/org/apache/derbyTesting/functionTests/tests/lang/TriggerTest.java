@@ -1418,6 +1418,41 @@ public class TriggerTest extends BaseJDBCTestCase {
         s.executeUpdate("DROP TABLE APP.LOG");
         s.executeUpdate("DROP TABLE APP.NAMES");
     }
-    
-    
+
+    /**
+     * Regression test case for DERBY-4610, where a DELETE statement failed
+     * because a trigger used the wrong meta-data and mixed up the data types.
+     */
+    public void testDerby4610WrongDataType() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create table testtable " +
+                  "(id integer, name varchar(20), primary key(id))");
+        s.execute("create table testchild (" +
+                  "id integer constraint fk_id " +
+                  "references testtable on delete cascade, " +
+                  "ordernum int, primary key(id))");
+        s.execute("create procedure testproc (str varchar(20)) " +
+                  "PARAMETER STYLE JAVA LANGUAGE JAVA EXTERNAL NAME '" +
+                  getClass().getName() + ".derby4610proc'");
+        s.execute("create trigger testtabletrigger after delete on testtable " +
+                  "referencing old as old " +
+                  "for each row mode db2sql call testproc(char(old.id))");
+        s.execute("create trigger testchildtrigger after delete on testchild " +
+                  "referencing old as old " +
+                  "for each row mode db2sql call testproc(char(old.ordernum))");
+        s.execute("insert into testtable values (1, 'test1')");
+        s.execute("insert into testchild values (1, 10)");
+
+        // Used to fail with ERROR XCL12: An attempt was made to put a data
+        // value of type 'java.lang.String' into a data value of type 'INTEGER'.
+        assertUpdateCount(s, 1, "delete from testtable where id = 1");
+    }
+
+    /**
+     * Procedure that does nothing. Called as a stored procedure in the
+     * regression test case for DERBY-4610.
+     */
+    public static void derby4610proc(String str) {
+        // do nothing
+    }
 }

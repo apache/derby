@@ -21,26 +21,34 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import java.util.Vector;
-
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.jdbc.ConnectionContext;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+import org.apache.derby.iapi.error.StandardException;
+
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
+import org.apache.derby.iapi.sql.execute.ExecRow; 
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+
+import org.apache.derby.iapi.sql.Activation;
+
 import org.apache.derby.iapi.store.access.TransactionController;
+import org.apache.derby.impl.sql.execute.AutoincrementCounter;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.jdbc.ConnectionContext;
+import org.apache.derby.catalog.UUID;
+
+import java.util.Vector;
+import java.sql.SQLException;
 
 /**
  * Responsible for firing a trigger or set of triggers
  * based on an event.
  */
-class TriggerEventActivator
+public class TriggerEventActivator
 {
 	private LanguageConnectionContext		lcc; 
+	private TransactionController 			tc; 
 	private TriggerInfo 					triggerInfo; 
 	private InternalTriggerExecutionContext	tec;
 	private	GenericTriggerExecutor[][]		executors;
@@ -64,7 +72,7 @@ class TriggerEventActivator
 	 *
 	 * @exception StandardException on error
 	 */
-	TriggerEventActivator
+	public TriggerEventActivator
 	(
 		LanguageConnectionContext	lcc, 
 		TransactionController 		tc, 
@@ -84,6 +92,7 @@ class TriggerEventActivator
 		tableName = triggerInfo.triggerArray[0].getTableDescriptor().getQualifiedName();
 	
 		this.lcc = lcc;
+		this.tc = tc;
 		this.activation = activation;
 		this.tableId = tableId;
 		this.dmlType = dmlType;
@@ -218,7 +227,7 @@ class TriggerEventActivator
 	 *
  	 * @exception StandardException on error
 	 */
-	void notifyEvent
+	public void notifyEvent
 	(
 		TriggerEvent 		event,
 		CursorResultSet		brs,
@@ -281,7 +290,7 @@ class TriggerEventActivator
 	 *
 	 * @exception StandardException on unexpected error
 	 */
-	void cleanup() throws StandardException
+	public void cleanup() throws StandardException
 	{
 		if (tec != null)
 		{
