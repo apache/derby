@@ -720,54 +720,66 @@ public class GenericLanguageConnectionContext
         // in XA use nested user updatable transaction.  Delay creating
         // the transaction until loop below finds one it needs to 
         // process.
-        TransactionController xa_tran       = null; 
-        TransactionController tran_for_drop = 
-            (in_xa_transaction ? null : getTransactionExecute());
-
-        try
+        
+        for (int i=0; i<allDeclaredGlobalTempTables.size(); i++)
         {
-            for (int i=0; i<allDeclaredGlobalTempTables.size(); i++)
+            TableDescriptor td = 
+                ((TempTableInfo) (allDeclaredGlobalTempTables.
+                                      get(i))).getTableDescriptor();
+            if (td.isOnCommitDeleteRows() == false) 
             {
-                TableDescriptor td = 
-                    ((TempTableInfo) (allDeclaredGlobalTempTables.
-                                          get(i))).getTableDescriptor();
-                if (td.isOnCommitDeleteRows() == false) 
-                {
-                    // do nothing for temp table with ON COMMIT PRESERVE ROWS
-                    continue;
-                }
-                else if (checkIfAnyActivationHasHoldCursor(td.getName()) == 
-                            false)
-                {
-                    // temp tables with ON COMMIT DELETE ROWS and 
-                    // no open held cursors
-                    getDataDictionary().getDependencyManager().invalidateFor(
-                        td, DependencyManager.DROP_TABLE, this);
+                // do nothing for temp table with ON COMMIT PRESERVE ROWS
+                continue;
+            }
+            else if (checkIfAnyActivationHasHoldCursor(td.getName()) == 
+                        false)
+            {
+                // temp tables with ON COMMIT DELETE ROWS and 
+                // no open held cursors
+                getDataDictionary().getDependencyManager().invalidateFor(
+                    td, DependencyManager.DROP_TABLE, this);
 
-                    // handle delayed creation of nested xact for XA.
-                    if (in_xa_transaction)
-                    {
-                        if (xa_tran == null)
-                        {
-                            xa_tran = 
-                                getTransactionExecute().
-                                    startNestedUserTransaction(false);
-                            tran_for_drop = xa_tran;
-                        }
-                    }
-
-                    cleanupTempTableOnCommitOrRollback(tran_for_drop, td, true);
+                if (!in_xa_transaction)
+                {
+                    // delay physical cleanup to after the commit for XA
+                    // transactions.   In XA the transaction is likely in
+                    // prepare state at this point and physical changes to
+                    // store are not allowed until after the commit.
+                    // Do the work here for non-XA so that fast path does
+                    // have to do the 2 commits that the XA path will.
+                    cleanupTempTableOnCommitOrRollback(td, true);
                 }
             }
         }
-        finally
+    }
+
+    private void tempTablesXApostCommit() 
+        throws StandardException
+    {
+        TransactionController tc = getTransactionExecute();
+
+        // at commit time for an XA transaction drop all temporary tables.
+        // A transaction context may not be maintained from one
+        // XAResource.xa_commit to the next in the case of XA with
+        // network server and thus there is no way to get at the temp
+        // tables again.  To provide consistent behavior in embedded vs
+        // network server, consistently remove temp tables at XA commit
+        // transaction boundary.
+        for (int i=0; i < allDeclaredGlobalTempTables.size(); i++)
         {
-            // if we created a nested user transaction for XA get rid of it.
-            if (xa_tran != null)
-            {
-                xa_tran.destroy();
-            }
+            // remove all temp tables from this context.
+            TableDescriptor td = 
+                ((TempTableInfo) 
+                 (allDeclaredGlobalTempTables.get(i))).getTableDescriptor();
+
+            //remove the conglomerate created for this temp table
+            tc.dropConglomerate(td.getHeapConglomerateId()); 
+
+            //remove it from the list of temp tables
+            allDeclaredGlobalTempTables.remove(i); 
         }
+
+        tc.commit();
     }
 
     /**
@@ -944,8 +956,7 @@ public class GenericLanguageConnectionContext
                 // restore the old definition of temp table because drop is 
                 // being rolledback
                 TableDescriptor td = tempTableInfo.getTableDescriptor();
-                td = cleanupTempTableOnCommitOrRollback(
-                        getTransactionExecute(), td, false);
+                td = cleanupTempTableOnCommitOrRollback(td, false);
 
                 // In order to store the old conglomerate information for the 
                 // temp table, we need to replace the existing table descriptor
@@ -976,8 +987,7 @@ public class GenericLanguageConnectionContext
                 getDataDictionary().getDependencyManager().invalidateFor(
                         td, DependencyManager.DROP_TABLE, this);
 
-                cleanupTempTableOnCommitOrRollback(
-                    getTransactionExecute(), td, true);
+                cleanupTempTableOnCommitOrRollback(td, true);
             } 
             // there is no else here because there is no special processing 
             // required for temp tables declares in earlier work of 
@@ -1530,6 +1540,13 @@ public class GenericLanguageConnectionContext
             // location, since any outer nesting
             // levels expect there to be a savepoint
             resetSavepoints();
+
+            // Do post commit XA temp table cleanup if necessary.
+            if ((allDeclaredGlobalTempTables != null) &&
+                (commitflag != NON_XA))
+            {
+                tempTablesXApostCommit();
+            }
         }
     }
 
@@ -1545,11 +1562,12 @@ public class GenericLanguageConnectionContext
      * temp table (because the drop on it is being rolled back).
      */
     private TableDescriptor cleanupTempTableOnCommitOrRollback(
-    TransactionController   tc,
     TableDescriptor         td, 
     boolean                 dropAndRedeclare)
          throws StandardException
     {
+        TransactionController tc = getTransactionExecute();
+
         //create new conglomerate with same properties as the old conglomerate 
         //and same row template as the old conglomerate
         long conglomId = 
@@ -1580,7 +1598,7 @@ public class GenericLanguageConnectionContext
         //will be refetched next time with the new value
         td.resetHeapConglomNumber();
 
-        if(dropAndRedeclare)
+        if (dropAndRedeclare)
         {
             //remove the old conglomerate from the system
             tc.dropConglomerate(cid); 

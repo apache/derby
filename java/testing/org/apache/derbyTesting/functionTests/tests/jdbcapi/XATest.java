@@ -1172,6 +1172,7 @@ public class XATest extends BaseJDBCTestCase {
         ps.executeUpdate();
         ResultSet rs = s.executeQuery("SELECT count(*) FROM SESSION.t1");
         JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
+        rs.close();
         // You could work around the issue by dropping the TEMP table
         //s.executeUpdate("DROP TABLE SESSION.T1");
         xar.end(xid, XAResource.TMSUCCESS);
@@ -1187,7 +1188,10 @@ public class XATest extends BaseJDBCTestCase {
             // is temp table empty after the commit?
             rs = s.executeQuery("SELECT count(*) FROM SESSION.t1");
             JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
+            rs.close();
+            conn.commit();
         }
+
 
         s.close();
         conn.close();
