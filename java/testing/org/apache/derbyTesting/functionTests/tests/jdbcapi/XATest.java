@@ -1093,12 +1093,12 @@ public class XATest extends BaseJDBCTestCase {
      */
     public void testXATempTableD4731_RawStore() 
         throws SQLException, XAException {
-        doXATempTableD4731Work(true, XATestUtil.getXid(997, 9, 49));
+        doXATempTableD4731Work(true, false, XATestUtil.getXid(997, 9, 49));
     }
     
 
     /**
-     * DERBY-XXXX Temp tables with XA transactions
+     * DERBY-4735 Temp tables with XA transactions
      * an Assert will occur on prepare if only
      * temp table work is done in the xact.
      *
@@ -1106,10 +1106,27 @@ public class XATest extends BaseJDBCTestCase {
      * @throws SQLException 
      * 
      */
-    public void xtestXATempTableDXXXX_Assert() 
+    public void xtestXATempTableD4735_Assert() 
         throws SQLException, XAException {
 
-          doXATempTableD4731Work(false, XATestUtil.getXid(998, 10, 50));
+          doXATempTableD4731Work(false, false, XATestUtil.getXid(999,  11, 51));
+          doXATempTableD4731Work(false, true,  XATestUtil.getXid(1000, 12, 52));
+    }
+
+    /**
+     * DERBY-4743 Temp tables with XA transactions
+     *
+     * Will throw an error in network server when attempt is made to 
+     * access the global temporary table after the end and commit.
+     *
+     * @throws XAException 
+     * @throws SQLException 
+     * 
+     */
+    public void xtestXATempTableD4743() 
+        throws SQLException, XAException {
+
+          doXATempTableD4731Work(true, true, XATestUtil.getXid(998, 10, 50));
     }
  
     
@@ -1124,6 +1141,7 @@ public class XATest extends BaseJDBCTestCase {
      */
     private void doXATempTableD4731Work(
     boolean doLoggedWorkInXact,
+    boolean access_temp_table_after_xaendandcommit,
     Xid     xid)
         throws SQLException, XAException{
 
@@ -1154,6 +1172,7 @@ public class XATest extends BaseJDBCTestCase {
         ps.executeUpdate();
         ResultSet rs = s.executeQuery("SELECT count(*) FROM SESSION.t1");
         JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
+        rs.close();
         // You could work around the issue by dropping the TEMP table
         //s.executeUpdate("DROP TABLE SESSION.T1");
         xar.end(xid, XAResource.TMSUCCESS);
@@ -1163,10 +1182,22 @@ public class XATest extends BaseJDBCTestCase {
             xar.prepare(xid));
 
         xar.commit(xid,false); 
+
+        if (access_temp_table_after_xaendandcommit)
+        {
+            // is temp table empty after the commit?
+            rs = s.executeQuery("SELECT count(*) FROM SESSION.t1");
+            JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
+            rs.close();
+            conn.commit();
+        }
+
+
         s.close();
         conn.close();
         xaconn.close();
     }
+
 
     private void makeARealTable(Statement s) throws SQLException {
         try {
