@@ -76,6 +76,10 @@ grant codeBase "${derby.install.url}derby.jar"
 //
   permission javax.management.MBeanTrustPermission "register";
 
+  // getProtectionDomain is an optional permission needed for printing classpath
+  // information to derby.log
+  permission java.lang.RuntimePermission "getProtectionDomain";
+
 };
 
 grant codeBase "${derby.install.url}derbynet.jar"

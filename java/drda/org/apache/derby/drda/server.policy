@@ -89,6 +89,9 @@ grant codeBase "${derby.install.url}derby.jar"
   permission org.apache.derby.security.SystemPermission "engine", "monitor";
   permission org.apache.derby.security.SystemPermission "server", "monitor";
 
+  // getProtectionDomain is an optional permission needed for printing classpath
+  // information to derby.log
+  permission java.lang.RuntimePermission "getProtectionDomain";
 };
 
 grant codeBase "${derby.install.url}derbynet.jar"
