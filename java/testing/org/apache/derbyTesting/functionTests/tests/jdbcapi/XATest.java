@@ -1181,7 +1181,15 @@ public class XATest extends BaseJDBCTestCase {
             (doLoggedWorkInXact ? XAResource.XA_OK : XAResource.XA_RDONLY),
             xar.prepare(xid));
 
-        xar.commit(xid,false); 
+        if (doLoggedWorkInXact)
+        {
+            // if you don't do logged work in the transaction, then the 
+            // prepare with be done with XAResource.XA_RDONLY.  If you
+            // try to commit a prepared read only transaction you will get 
+            // an error, so only commit prepared transactions here that did
+            // some "real" logged work.
+            xar.commit(xid,false); 
+        }
 
         if (access_temp_table_after_xaendandcommit)
         {
