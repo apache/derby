@@ -38,6 +38,34 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class DRDAProtocolTest extends BaseJDBCTestCase {
     
+    private String threadName;
+
+    public void setUp() {
+        /* Save the thread name as it gets changed in one of the fixtures */
+        threadName = Thread.currentThread().getName();
+    }
+
+    public void tearDown() throws Exception {
+        /* Restore the original thread name */
+
+        super.tearDown();
+
+        Thread.currentThread().setName(threadName);
+    }
+
+    /**
+     * Tests the support for threads with characters not supported by EBCDIC
+     *
+     * @throws SQLException
+     */
+    public void testNonEBCDICCharacters() throws SQLException {
+        Thread.currentThread().setName("\u4e10");
+
+        /* Open a connection while the thread name has Japanese characters */
+        Connection conn2 = openConnection("FIRSTDB1");
+        conn2.close();
+    }
+
     /** 
      * Tests whether multiple connections to different databases
      * on the same Derby instance are working without exceptions.
