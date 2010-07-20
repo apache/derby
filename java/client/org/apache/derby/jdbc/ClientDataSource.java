@@ -25,12 +25,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 
-import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.client.net.NetConnection;
 import org.apache.derby.client.net.NetLogWriter;
-import org.apache.derby.shared.common.error.ExceptionUtil;
 
 /**
  * ClientDataSource is a simple data source implementation
@@ -162,7 +159,18 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
      * @throws java.sql.SQLException if a database-access error occurs.
      */
     public Connection getConnection() throws SQLException {
-        return getConnection(getUser(), getPassword());
+        LogWriter dncLogWriter = null;
+        try {
+            updateDataSourceValues(
+                    tokenizeAttributes(getConnectionAttributes(), null));
+            dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
+            return getConnectionX(dncLogWriter, getUser(), getPassword());
+        } catch (SqlException se) {
+            // The method below may throw an exception.
+            handleConnectionException(dncLogWriter, se);
+            // If the exception wasn't handled so far, re-throw it.
+            throw se.getSQLException();
+        }
     }
 
     /**
@@ -184,11 +192,10 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
         LogWriter dncLogWriter = null;
         try
         {
+            updateDataSourceValues(
+                    tokenizeAttributes(getConnectionAttributes(), null));
             dncLogWriter = super.computeDncLogWriterForNewConnection("_sds");
-            updateDataSourceValues(tokenizeAttributes(getConnectionAttributes(), null));
-            return ClientDriver.getFactory().newNetConnection
-                    ((NetLogWriter) dncLogWriter, user,
-                    password, this, -1, false);
+            return getConnectionX(dncLogWriter, user, password);
         }
         catch(SqlException se)
         {
@@ -200,5 +207,12 @@ public class ClientDataSource extends ClientBaseDataSource implements DataSource
         
     }
 
+    private Connection getConnectionX(LogWriter dncLogWriter,
+                                      String user, String password)
+            throws SqlException {
+        return ClientDriver.getFactory().newNetConnection(
+                (NetLogWriter)dncLogWriter, user, password, this, -1, false);
+
+    }
 }
 

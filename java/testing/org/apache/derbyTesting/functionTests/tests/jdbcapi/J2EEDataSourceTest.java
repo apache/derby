@@ -176,9 +176,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         suite.addTest(new J2EEDataSourceTest("testClientDSConnectionAttributes"));
         suite.addTest(new J2EEDataSourceTest(
                 "testClientTraceFileDSConnectionAttribute"));
-        //DISABLED until DERBY-4067 is fixed.
-        //suite.addTest(new J2EEDataSourceTest(
-        //        "testClientMessageTextConnectionAttribute"));
+        suite.addTest(new J2EEDataSourceTest(
+                "testClientMessageTextConnectionAttribute"));
         suite.addTest(new J2EEDataSourceTest("testConnectionFlowCommit"));
         suite.addTest(new J2EEDataSourceTest("testConnectionFlowCommitAlt"));
         // Disabled because rollback flow optimization hasn't been implemented.
@@ -2889,14 +2888,8 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
             public Object run() {
                 for (int i=3 ; i <= 6 ; i++) {
                     File traceFile = new File("trace" + i + ".out");
-                    // Skip trace 3 and 5 until DERBY-2468/DERBY-4067 is fixed.
-                    if (i == 3 || i == 5)
-                        continue;
-                    else
-                    {
-                        assertTrue("Doesn't exist", traceFile.exists());
-                        assertTrue("Delete failed", traceFile.delete());
-                    }
+                    assertTrue("Doesn't exist", traceFile.exists());
+                    assertTrue("Delete failed", traceFile.delete());
                 } 
                 return null;
             }
@@ -2913,7 +2906,6 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * There is a corresponding fixture for clientDataSource in DataSourceTest
      *  
      * @throws SQLException
-     * NOTE: DISABLED until DERBY-4067 is fixed.
      */
     public void testClientMessageTextConnectionAttribute() throws SQLException
     {

@@ -22,11 +22,9 @@
 package org.apache.derby.jdbc;
 
 import java.sql.SQLException;
-import javax.sql.DataSource;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 
-import org.apache.derby.client.ClientXAConnection;
 import org.apache.derby.client.net.NetLogWriter;
 import org.apache.derby.client.am.LogWriter;
 import org.apache.derby.client.am.SqlException;
@@ -62,13 +60,28 @@ public class ClientXADataSource extends ClientDataSource implements XADataSource
     }
 
     public XAConnection getXAConnection() throws SQLException {
-        return getXAConnection(getUser(), getPassword());
+        NetLogWriter dncLogWriter = null;
+        try {
+            updateDataSourceValues(
+                    tokenizeAttributes(getConnectionAttributes(), null));
+            dncLogWriter = (NetLogWriter)
+                    super.computeDncLogWriterForNewConnection("_xads");
+            return getXAConnectionX(
+                    dncLogWriter, this, getUser(), getPassword());
+        } catch (SqlException se) {
+            // The method below may throw an exception.
+            handleConnectionException(dncLogWriter, se);
+            // If the exception wasn't handled so far, re-throw it.
+            throw se.getSQLException();
+        }
     }
 
     public XAConnection getXAConnection(String user, String password) throws SQLException {
         NetLogWriter dncLogWriter = null;
         try
         {
+            updateDataSourceValues(
+                    tokenizeAttributes(getConnectionAttributes(), null));
             dncLogWriter = (NetLogWriter)
                     super.computeDncLogWriterForNewConnection("_xads");
             return getXAConnectionX(dncLogWriter, this, user, password);
