@@ -1116,14 +1116,14 @@ public class XATest extends BaseJDBCTestCase {
     /**
      * DERBY-4743 Temp tables with XA transactions
      *
-     * Will throw an error in network server when attempt is made to 
-     * access the global temporary table after the end and commit.
+     * Verifies that global temporary table can not be accessed after the
+     * commit of the XA transaction.
      *
      * @throws XAException 
      * @throws SQLException 
      * 
      */
-    public void xtestXATempTableD4743() 
+    public void testXATempTableD4743() 
         throws SQLException, XAException {
 
           doXATempTableD4731Work(true, true, XATestUtil.getXid(998, 10, 50));
@@ -1185,10 +1185,10 @@ public class XATest extends BaseJDBCTestCase {
 
         if (access_temp_table_after_xaendandcommit)
         {
-            // is temp table empty after the commit?
-            rs = s.executeQuery("SELECT count(*) FROM SESSION.t1");
-            JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
-            rs.close();
+            // temp table should not be available after commit of an XA
+            // transaction.
+            assertStatementError(
+                "42X05", s, "SELECT count(*) FROM SESSION.t1");
             conn.commit();
         }
 
