@@ -67,9 +67,12 @@ public class Utf8CcsidManager extends CcsidManager {
         return null;
     }
 
+    /**
+     * Offset and numToConvert are given in terms of bytes! Not characters!
+     */
     public String convertToJavaString(byte[] sourceBytes, int offset, int numToConvert) {
         try {
-            return new String(sourceBytes,"UTF-8").substring(offset, offset+numToConvert);
+            return new String(sourceBytes, offset, numToConvert, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             if (SanityManager.DEBUG) {
                 SanityManager.THROWASSERT("Could not convert byte[] to Java String using UTF-8 encoding with offset",e);
@@ -88,6 +91,17 @@ public class Utf8CcsidManager extends CcsidManager {
 
     public void convertFromJavaString(String sourceString, ByteBuffer buffer) {
         buffer.put(convertFromJavaString(sourceString));
+    }
+
+    int getByteLength(String str) {
+        try {
+            return str.getBytes("UTF-8").length;
+        } catch (UnsupportedEncodingException e) {
+            if (SanityManager.DEBUG) {
+                SanityManager.THROWASSERT("Could not obtain byte length of Java String in Utf8CcsidManager",e);
+            }
+        }
+        return -1;
     }
 
 }

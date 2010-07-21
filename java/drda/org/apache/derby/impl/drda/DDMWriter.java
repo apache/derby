@@ -902,7 +902,7 @@ class DDMWriter
 	 */
 	void writeScalarString (int codePoint, String string)
 	{
-		int stringLength = string.length();
+		int stringLength = ccsidManager.getByteLength(string);
 		ensureLength ((stringLength * 2)  + 4);
 		buffer.putShort((short) (stringLength + 4));
 		buffer.putShort((short) codePoint);

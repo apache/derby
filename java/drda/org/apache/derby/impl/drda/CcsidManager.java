@@ -32,6 +32,10 @@ abstract class CcsidManager
   // bytes containing the character representation "value" for the particular ccsid.
   byte[] numToCharRepresentation;
 
+  /* DRDA CCSID levels for UTF8 and EBCDIC */
+  public static final int UTF8_CCSID = 1208;
+  public static final int EBCDIC_CCSID = 500;
+  
   CcsidManager (byte space, byte dot, byte[] numToCharRepresentation)
   {
     this.space = space;
@@ -39,7 +43,13 @@ abstract class CcsidManager
     this.numToCharRepresentation = numToCharRepresentation;
   }
 
-
+  /**
+   * Returns the length in bytes for the String str using a particular ccsid.
+   * @param str The Java String from which to obtain the length.
+   * @return The length in bytes of the String str.
+   */
+  abstract int getByteLength (String str);
+  
   // Convert a Java String into bytes for a particular ccsid.
   //
   // @param sourceString A Java String to convert.

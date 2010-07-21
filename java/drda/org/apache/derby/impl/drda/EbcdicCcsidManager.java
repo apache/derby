@@ -170,4 +170,8 @@ class EbcdicCcsidManager extends CcsidManager
 		return new String (theChars);
 	}
 
+    int getByteLength(String str) {
+        return str.length();
+    }
+
 }
