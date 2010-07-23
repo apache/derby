@@ -47,6 +47,7 @@ public class _Suite extends BaseTestCase {
         TestSuite suite = new TestSuite("JUnit unit tests");
 
         suite.addTest(ArrayInputStreamTest.suite());
+        suite.addTest(CheapDateFormatterTest.suite());
         suite.addTest(FormatableBitSetTest.suite());
         suite.addTest(SystemPrivilegesPermissionTest.suite());
         suite.addTest(UTF8UtilTest.suite());
