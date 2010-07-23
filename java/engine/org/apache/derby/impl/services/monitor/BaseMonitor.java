@@ -181,7 +181,7 @@ abstract class BaseMonitor
 		}
 		long shutdownTime = System.currentTimeMillis();
 		//Make a note of Engine shutdown in the log file
-		Monitor.getStream().printlnWithHeader("\n" + CheapDateFormatter.formatDate(shutdownTime) +
+		Monitor.getStream().printlnWithHeader("\n" +
 				COLON +
                 MessageService.getTextMessage(
                     MessageId.CONN_SHUT_DOWN_ENGINE));
