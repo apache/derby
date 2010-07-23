@@ -374,10 +374,12 @@ public class BaseDataFileFactory
                                              jbmsVersion,
                                              identifier,
                                              // cast to Object so we get object hash code
+                                             dataDirectory + " " + readOnlyMsg,
                                              (Object) this.getClass().getClassLoader(),
-                                             dataDirectory + " " + readOnlyMsg 
-                                             +"\nLoaded from " + jarCPath + "\n" +jvmVersion
+                                             jarCPath
                                              ));
+		//Log the JVM version info
+		logMsg(jvmVersion);
 
         if (logBootTrace)
            Monitor.logThrowable(new Throwable("boot trace"));
