@@ -64,13 +64,6 @@ import javax.sql.ConnectionEvent;
  */
 class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConnectionControl
 {
-
-    /** Static counter for connection ids */
-    private static int idCounter = 0;
-    
-    /** The id for this connection.  */
-    private int connectionId;
-    
     /** the connection string */
     private String connString;
 
@@ -105,15 +98,8 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 
 	protected boolean isActive;
     
-    private synchronized int nextId()
-    {
-        return idCounter++;
-    }
-
 	EmbedPooledConnection(ReferenceableDataSource ds, String u, String p, boolean requestPassword) throws SQLException
 	{
-        connectionId = nextId();
-
 		dataSource = ds;
 		username = u;
 		password = p;
@@ -560,7 +546,6 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
             
             connString = 
               this.getClass().getName() + "@" + this.hashCode() + " " +
-                "(ID = " + connectionId + "), " +
                 "Physical Connection = " + physicalConnString;
         }    
         
