@@ -22,13 +22,20 @@ public  class   Time    extends java.util.Date
     public  Time(int hour, int minute, int second)  {}
     public  Time(long time) {}
 
+    @Deprecated
     public  int 	getDate() { return 0; }
+    @Deprecated
     public  int 	getDay() { return 0; }
+    @Deprecated
     public  int 	getMonth() { return 0; }
+    @Deprecated
     public  int 	getYear() { return 0; }
+    @Deprecated
     public  void 	setDate(int i) {  }
+    @Deprecated
     public  void 	setMonth(int i) {  }
     public  void 	setTime(long time) {  }
+    @Deprecated
     public  void 	setYear(int i) {  }
     public  String 	toString() { return null; }
     public  static Time 	valueOf(String s) { return null; }

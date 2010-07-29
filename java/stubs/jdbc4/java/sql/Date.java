@@ -22,11 +22,17 @@ public  class   Date    extends java.util.Date
     public  Date(int year, int month, int day) {}
     public  Date(long date) {}
 
+    @Deprecated
     public  int 	getHours()  { return 0; }
+    @Deprecated
     public  int 	getMinutes()    { return 0; }
+    @Deprecated
     public  int 	getSeconds()    { return 0; }
+    @Deprecated
     public  void 	setHours(int i) {  }
+    @Deprecated
     public  void 	setMinutes(int i)   { }
+    @Deprecated
     public  void 	setSeconds(int i)   { }
     public  void 	setTime(long date)  {  }
     public  String 	toString()  { return null; }
