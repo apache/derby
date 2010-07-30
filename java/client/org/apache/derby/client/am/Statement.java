@@ -2357,27 +2357,16 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
      * @return identifier or unmodified string
      */
     private String isolateAnyInitialIdentifier (String sql) {
-        int idx = 0;
-        int length = sql.length();
-
-        if (length == 0) {
-            return sql;
-        }
-
-        char next = sql.charAt(idx);
-
-        if (!Character.isLetter(next)) {
-            return sql;
-        }
-
-        while (idx < length) {
-            if (!Character.isLetter(next)) {
+        int idx;
+        for (idx = 0; idx < sql.length(); idx++) {
+            char ch = sql.charAt(idx);
+            if (!Character.isLetter(ch)) {
+                // first non-token char found
                 break;
             }
-            next = sql.charAt(++idx);
         }
-
-        return sql.substring(0, idx);
+        // return initial token if one is found, or the entire string otherwise
+        return (idx > 0) ? sql.substring(0, idx) : sql;
     }
 
     /**
