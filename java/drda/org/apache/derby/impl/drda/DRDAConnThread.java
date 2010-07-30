@@ -953,6 +953,15 @@ class DRDAConnThread extends Thread {
 				case CodePoint.ACCSEC:
 					int securityCheckCode = parseACCSEC();
 					writeACCSECRD(securityCheckCode); 
+					
+					/* ACCSECRD is the last reply that is mandatorily in EBCDIC */
+					if (appRequester.supportsUtf8Ccsid()) {
+					    switchToUtf8();
+					} else {
+					    /* This thread might serve several requests.
+					     * Revert if not supported by current client. */
+					    switchToEbcdic();
+					}
 					checkSecurityCodepoint = true;
 					break;
 				case CodePoint.SECCHK:
@@ -1205,6 +1214,22 @@ class DRDAConnThread extends Thread {
 		return sessionOK;
 	}
 
+	/**
+	 * Switch the DDMWriter and DDMReader to UTF8 IF supported
+	 */
+	private void switchToUtf8() {
+        writer.setUtf8Ccsid();
+        reader.setUtf8Ccsid();
+	}
+	
+	/**
+	 * Switch the DDMWriter and DDMReader to EBCDIC
+	 */
+	private void switchToEbcdic() {
+        writer.setEbcdicCcsid();
+        reader.setEbcdicCcsid();
+	}
+	
 	/**
 	 * Write RDB Failure
 	 *

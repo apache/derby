@@ -204,6 +204,7 @@ public final class NetworkServerControlImpl {
 												 7, // SQLAM
 												 0, // SUPERVISOR
 												 0, // SYNCPTMGR
+												 1208, // UNICODE Manager
 												 7  // XAMGR
 												};
 											

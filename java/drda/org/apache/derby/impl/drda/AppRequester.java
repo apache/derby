@@ -52,6 +52,7 @@ class AppRequester
 											6, // SQLAM
 											1, // SUPERVISOR	
 											5, // SYNCPTMGR
+											1208, // UNICODEMGR
 											0  // XAMGR
 											};
 	
@@ -303,6 +304,14 @@ class AppRequester
      */
     protected boolean supportsEXTDTAAbort() {
         return (clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 6, 0));
+    }
+    
+    /**
+     * Returns whether our AppRequester's UNICODEMGR supports UTF8 (CCSID 1208)
+     * @return {@code true} if the AppRequester supports CCSID 1208, {@code false} if not
+     */
+    protected boolean supportsUtf8Ccsid() {
+        return (getManagerLevel(CodePoint.UNICODEMGR) == CcsidManager.UTF8_CCSID);
     }
 
 	protected boolean supportsSessionDataCaching() {

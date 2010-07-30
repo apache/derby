@@ -32,9 +32,8 @@ abstract class CcsidManager
   // bytes containing the character representation "value" for the particular ccsid.
   byte[] numToCharRepresentation;
 
-  /* DRDA CCSID levels for UTF8 and EBCDIC */
+  /* DRDA CCSID level for UTF8 */
   public static final int UTF8_CCSID = 1208;
-  public static final int EBCDIC_CCSID = 500;
   
   CcsidManager (byte space, byte dot, byte[] numToCharRepresentation)
   {

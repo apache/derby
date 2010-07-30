@@ -39,6 +39,7 @@ import java.nio.charset.Charset;
 
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
+import java.sql.DriverManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -85,6 +86,10 @@ public class ProtocolTest
     private static final String MULTIVAL_SEP = "SEP";
     private static final String MULTIVAL_END = "MULTIVALEND";
 
+    // Replaces %UTF8TestString% in protocol.tests
+    private static final String UTF8_TEST_MATCH = "%UTF8TestString%";
+    private static final String UTF8_TEST_STRING = "\u4f60\u597d\u4e16\u754cABCDEFGHIJKLMNOPQ";
+    
     static {
         // Create a mapping from code point value to name.
         Iterator cpnIter = codePointNameTable.keySet().iterator();
@@ -409,6 +414,13 @@ public class ProtocolTest
             case SKIP_BYTES:
                 reader.skipBytes();
                 break;
+            case SWITCH_TO_UTF8_CCSID_MANAGER:
+                writer.setUtf8Ccsid();
+                reader.setUtf8Ccsid();
+                break;
+            case DELETE_DATABASE:
+                deleteDatabase(getString(tkn));
+                break;
             default:
                 fail("Command in line " + ln(tkn) + " not implemented: " +
                         cmd.toString());
@@ -585,6 +597,12 @@ public class ProtocolTest
         int val = tkn.nextToken();
         assertTrue("Expected string, got number '" + tkn.nval + "' on line " +
                 ln(tkn), val != StreamTokenizer.TT_NUMBER);
+        
+        /* Check whether '%UTF8TestString%' is in the string and replace
+         * it with Chinese characters for the UTF8 protocol tests */
+        if (tkn.sval.contains(UTF8_TEST_MATCH))
+            return tkn.sval.replace(UTF8_TEST_MATCH, UTF8_TEST_STRING);
+        
         return tkn.sval;
     }
 
@@ -848,6 +866,21 @@ public class ProtocolTest
         return (this.startLine + st.lineno() -1);
     }
 
+    /**
+     * Delete the database with the name 'name'
+     * @param name Name of the database to delete
+     */
+    private void deleteDatabase(String name) {
+        String shutdownUrl = "jdbc:derby:"+name+";shutdown=true";
+        try {
+            DriverManager.getConnection(shutdownUrl);
+        } catch (Exception se) {
+            // ignore shutdown exception
+        }
+        removeDirectory(getSystemProperty("derby.system.home") +  File.separator + 
+                name);
+    }
+    
     /**
      * Creates a suite of tests dynamically from a file describing protocol
      * tests.

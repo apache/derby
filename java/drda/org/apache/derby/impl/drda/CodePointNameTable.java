@@ -160,6 +160,7 @@ class CodePointNameTable extends java.util.Hashtable
     put (new Integer (CodePoint.PBSD), "PBSD");
     put (new Integer (CodePoint.PBSD_ISO), "PBSD_ISO");
     put (new Integer (CodePoint.PBSD_SCHEMA), "PBSD_SCHEMA");
+    put (new Integer (CodePoint.UNICODEMGR), "UNICODEMGR");
   }
 
   String lookup (int codePoint)

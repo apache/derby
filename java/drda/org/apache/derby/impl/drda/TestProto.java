@@ -110,10 +110,17 @@ public class TestProto {
 	private static final int MORE_DATA = 55;
 	private static final int COMPLETE_TEST = 56;
     private static final int READ_SECMEC_SECCHKCD = 57;
+    private static final int SWITCH_TO_UTF8_CCSID_MANAGER = 58;
+    private static final int DELETE_DATABASE = 59;
 
 	private static final String MULTIVAL_START = "MULTIVALSTART";
 	private static final String MULTIVAL_SEP = "SEP";
 	private static final String MULTIVAL_END = "MULTIVALEND";
+	
+	// Replaces %UTF8TestString% in protocol.tests
+    private static final String UTF8_TEST_MATCH = "%UTF8TestString%";
+    private static final String UTF8_TEST_STRING = "\u4f60\u597d\u4e16\u754cABCDEFGHIJKLMNOPQ";
+    
 	// initialize hash tables
 	static {
 			init();
@@ -326,7 +333,9 @@ public class TestProto {
 		commandTable.put("moredata", new Integer(MORE_DATA));
 		commandTable.put("completetest", new Integer(COMPLETE_TEST));
         commandTable.put("readsecmecandsecchkcd", new Integer(READ_SECMEC_SECCHKCD));
-		
+        commandTable.put("switchtoutf8ccsidmanager", new Integer(SWITCH_TO_UTF8_CCSID_MANAGER));
+		commandTable.put("deletedatabase", new Integer(DELETE_DATABASE));
+        
 		Integer key;
 		for (Enumeration e = codePointNameTable.keys(); e.hasMoreElements(); )
 		{
@@ -516,6 +525,13 @@ public class TestProto {
 			case SKIP_BYTES:
 				reader.skipBytes();
 				break;
+			case SWITCH_TO_UTF8_CCSID_MANAGER:
+			    writer.setUtf8Ccsid();
+			    reader.setUtf8Ccsid();
+			    break;
+			case DELETE_DATABASE:
+			    getString(); //NO-OP - automatic cleanup for TestProto
+			    break;
 			default:
 				System.out.println("unknown command in line " + tkn.lineno());
 				// skip remainder of line
@@ -715,6 +731,12 @@ public class TestProto {
 			System.err.println("Expecting word, got " + tkn.nval + " on line " + tkn.lineno());
 			System.exit(1);
 		}
+		
+		/* Check whether '%UTF8TestString%' is in the string and replace
+         * it with Chinese characters for the UTF8 protocol tests */
+        if (tkn.sval.lastIndexOf(UTF8_TEST_MATCH) != -1)
+            return tkn.sval.replaceAll(UTF8_TEST_MATCH, UTF8_TEST_STRING);
+        
 		return tkn.sval;
 	}
 	/**

@@ -306,3 +306,9 @@ Test with 65535 query block size QRYBLKSZ  - DERBY-959
 PASSED
 Test 2 with 65535 query block size QRYBLKSZ  - DERBY-959
 PASSED
+Test UNICODEMGR at level 1208 while sending UTF8 characters in RDBNAM
+PASSED
+Test UNICODEMGR at level 1208 while sending UTF8 characters in USRID and PASSWORD
+PASSED
+Test setting RDBNAM at ACCSEC **and** at SECCHK
+PASSED

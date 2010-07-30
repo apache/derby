@@ -87,7 +87,9 @@ public enum ProtocolTestGrammar {
     WRITE_ENCODED_LDSTRING,
     CHECK_SQLCARD,
     MORE_DATA,
-    READ_SECMEC_AND_SECCHKCD;
+    READ_SECMEC_AND_SECCHKCD,
+    SWITCH_TO_UTF8_CCSID_MANAGER,
+    DELETE_DATABASE;
 
     /** String associated with the command. */
     private final String cmdString;

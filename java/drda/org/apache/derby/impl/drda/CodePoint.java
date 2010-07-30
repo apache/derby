@@ -163,6 +163,10 @@ class CodePoint
 	// containing character data.
 	static final int CCSIDMGR = 0x14CC;
 
+	// UNICODE Manager. Min. level 0.
+	// Provides character encoding of the DDM objects and parameters
+	static final int UNICODEMGR = 0x1C08;
+	
 	// CCSID for Single-Byte Characters codepoint constant.
 	static final int CCSIDSBC = 0x119C;
 
@@ -873,6 +877,7 @@ class CodePoint
 											SQLAM,
 											SUPERVISOR,	
 											SYNCPTMGR,
+											UNICODEMGR,
 											XAMGR
 											};
 	protected static final int UNKNOWN_MANAGER = -1;

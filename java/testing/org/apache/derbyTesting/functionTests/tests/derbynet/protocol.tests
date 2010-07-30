@@ -3531,6 +3531,150 @@ flush
 // but JCC expects SQLCARD and we're nice guys...
 checkSQLCard 0 "     "
 endTest
+// --
+DISPLAY "Test UNICODEMGR at level 1208 while sending UTF8 characters in RDBNAM"
+// this include file has all the protocol needed to make a connection
+// to the wombat database at sqlam 7
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+startDdm MGRLVLLS
+writeCodePoint4Bytes SQLAM 7
+writeCodePoint4Bytes UNICODEMGR 1208
+endDdm
+endDdm
+endDss
+flush
+switchToUtf8CcsidManager // tell ProtocolTest.java to switch DDMReader/Writer to UTF8
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 4 //  userid password
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+skipDss		// don't care about the ACCSECRD so just skip
+createDssRequest
+startDdm  SECCHK
+writeScalar2Bytes SECMEC 4 // userid password
+// %UTF8TestString% will be replaced on runtime by ProtocolTest.java/getString() and TestProto.java
+writeScalarString RDBNAM "%UTF8TestString%;create=true" 
+writeScalarString USRID test
+endDdm
+endDss
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM "QTDSQLASC"
+startDdm TYPDEFOVR
+writeScalar2Bytes CCSIDSBC	1208
+writeScalar2Bytes CCSIDMBC	1208
+endDdm
+endDdm
+endDss
+flush
+skipDss // don't care about SECCHKRM so just skip
+skipDss // don't care about ACCRDBRM so just skip
+deleteDatabase "%UTF8TestString%" // clean up the UTF8 database
+endTest
+// --
+DISPLAY "Test UNICODEMGR at level 1208 while sending UTF8 characters in USRID and PASSWORD"
+// this include file has all the protocol needed to make a connection
+// to the wombat database at sqlam 7
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+startDdm MGRLVLLS
+writeCodePoint4Bytes SQLAM 7
+writeCodePoint4Bytes UNICODEMGR 1208
+endDdm
+endDdm
+endDss
+flush
+switchToUtf8CcsidManager // tell ProtocolTest.java to switch DDMReader/Writer to UTF8
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 3 //  userid password
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+skipDss		// don't care about the ACCSECRD so just skip
+createDssRequest
+startDdm  SECCHK
+writeScalar2Bytes SECMEC 3 // userid password
+// %UTF8TestString% will be replaced on runtime by ProtocolTest.java/getString()
+writeScalarString RDBNAM "%UTF8TestString%;create=true" 
+writeScalarString USRID "%UTF8TestString%"
+writeScalarString PASSWORD "%UTF8TestString%"
+endDdm
+endDss
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM "QTDSQLASC"
+startDdm TYPDEFOVR
+writeScalar2Bytes CCSIDSBC	1208
+writeScalar2Bytes CCSIDMBC	1208
+endDdm
+endDdm
+endDss
+flush
+skipDss // don't care about SECCHKRM so just skip
+skipDss // don't care about ACCRDBRM so just skip
+deleteDatabase "%UTF8TestString%" // clean up the UTF8 database
+endTest
+// --
+DISPLAY "Test setting RDBNAM at ACCSEC **and** at SECCHK"
+// this include file has all the protocol needed to make a connection
+// to the wombat database at sqlam 7
+createDssRequest
+startDdm EXCSAT
+writeScalarString EXTNAM "test"
+startDdm MGRLVLLS
+writeCodePoint4Bytes SQLAM 7
+endDdm
+endDdm
+endDss
+flush
+createDssRequest
+startDdm ACCSEC
+writeScalar2Bytes SECMEC 4 //  userid password
+// the string below will be replaced on runtime by ProtocolTest.java/getString()
+writeScalarString RDBNAM "newname;create=true"
+endDdm
+endDss
+flush
+skipDss		// don't care about the EXCSATRM so just skip
+skipDss		// don't care about the ACCSECRD so just skip
+createDssRequest
+startDdm  SECCHK
+writeScalar2Bytes SECMEC 4 // userid password
+writeScalarString RDBNAM "newname;create=true" 
+writeScalarString USRID test
+endDdm
+endDss
+createDssRequest
+startDdm ACCRDB
+writeScalar2Bytes RDBACCCL SQLAM
+writeScalarBytes CRRTKN "0xd5c6f0f0f0f0f0f14bc7c3c2f600ec774aa60e"
+writeScalarString PRDID "TST01000"
+writeScalarString TYPDEFNAM "QTDSQLASC"
+startDdm TYPDEFOVR
+writeScalar2Bytes CCSIDSBC	1208
+writeScalar2Bytes CCSIDMBC	1208
+endDdm
+endDdm
+endDss
+flush
+skipDss // don't care about SECCHKRM so just skip
+skipDss // don't care about ACCRDBRM so just skip
+deleteDatabase "newname" // delete database created outside ProtocolTest.java
+endTest
 //
 //
 //
