@@ -32,6 +32,10 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
 
 permission java.lang.RuntimePermission "createClassLoader";
 
+// getProectionDomain is an optional permission needed to printing classpath 
+// information to derby.log
+permission java.lang.RuntimePermission "getProtectionDomain";
+
 // These permissions are needed to load the JCE for encryption with JDK131.
 // JDK14 has the JCE  preloaded
 permission java.security.SecurityPermission "createAccessControlContext";

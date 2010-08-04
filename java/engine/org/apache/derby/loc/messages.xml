@@ -7295,13 +7295,14 @@ MessageId.java.
             <msg>
                 <name>D001</name>
                 <text>:
- Booting Derby version {0}: instance {1} 
-on database directory {2}  with class loader {3}
-</text>
+Booting Derby version {0}: instance {1} 
+on database directory {2} with class loader {3} 
+Loaded from {4}</text>
                 <arg>derbyVersion</arg>
                 <arg>id</arg>
                 <arg>directoryName</arg>
                 <arg>classloader</arg>
+                <arg>JarClassPath</arg>
             </msg>
 
             <msg>

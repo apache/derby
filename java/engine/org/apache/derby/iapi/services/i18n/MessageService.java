@@ -81,6 +81,9 @@ public final class MessageService {
 	public static String getTextMessage(String messageID, Object a1, Object a2, Object a3, Object a4) {
 		return getCompleteMessage(messageID, new Object[]{a1, a2, a3, a4});
 	}
+    public static String getTextMessage(String messageID, Object a1, Object a2, Object a3, Object a4, Object a5) {
+        return getCompleteMessage(messageID, new Object[]{a1, a2, a3, a4, a5});
+    }
 
 	/**
 	  Transform the message from messageID to the actual error, warning, or

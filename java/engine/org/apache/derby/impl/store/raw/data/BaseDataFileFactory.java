@@ -91,8 +91,13 @@ import java.util.Enumeration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import java.net.URL;
+import java.net.URLDecoder;
 
 import java.security.AccessController;
+import java.security.CodeSource;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
@@ -137,6 +142,10 @@ public class BaseDataFileFactory
 	private     LogFactory	    logFactory;
 
 	private     ProductVersionHolder jbmsVersion;
+	
+	private     String          jvmVersion;
+	
+	private     String          jarCPath;
 
 	private     RawStoreFactory	rawStoreFactory; // associated raw store factory
 
@@ -261,6 +270,10 @@ public class BaseDataFileFactory
     {
 
 		jbmsVersion = Monitor.getMonitor().getEngineVersion();
+		
+		jvmVersion = buildJvmVersion();
+		
+		jarCPath = jarClassPath(getClass());
 
 		dataDirectory = startParams.getProperty(PersistentService.ROOT);
 
@@ -360,10 +373,13 @@ public class BaseDataFileFactory
 			   MessageService.getTextMessage(MessageId.STORE_BOOT_MSG,
                                              jbmsVersion,
                                              identifier,
-                                             dataDirectory + " " + readOnlyMsg,
                                              // cast to Object so we get object hash code
-                                             (Object) this.getClass().getClassLoader()
+                                             dataDirectory + " " + readOnlyMsg,
+                                             (Object) this.getClass().getClassLoader(),
+                                             jarCPath
                                              ));
+		//Log the JVM version info
+		logMsg(jvmVersion);
 
         if (logBootTrace)
            Monitor.logThrowable(new Throwable("boot trace"));
@@ -2144,8 +2160,70 @@ public class BaseDataFileFactory
         containerEncrypter.removeOldVersionOfContainers(inRecovery);
         containerEncrypter = null;
     }
-
-
+ 
+    
+    /**
+     * Return a jar file by asking the class's 
+     * class loader for the location where the class was loaded from. 
+     * If no value, it returns null
+     * @param cls the Class to ask to print the class name of an object
+     *
+     * @return the ClassPath of a jar file
+     **/
+    private static String jarClassPath(final Class cls)
+    {
+        return (String)AccessController.doPrivileged( new PrivilegedAction()
+        {
+          public Object run()
+          {
+              CodeSource cs = null;
+              try {
+                  cs = cls.getProtectionDomain().getCodeSource();
+              }
+              catch (SecurityException se) {
+                  return se.getMessage();
+              }
+  
+              if ( cs == null )
+                  return null;        
+      
+              URL result = cs.getLocation ();
+      
+              return result.toString();
+          }
+        });
+    }
+    
+    
+    /**
+     * Return values of system properties that identify the JVM. 
+     * Will catch SecurityExceptions and note them for displaying information.
+     * @return the Java system property value from the JVM or a string capturing a
+     * security exception.
+     */
+    private static String buildJvmVersion () {
+        return (String)AccessController.doPrivileged( new PrivilegedAction()
+        {
+           public Object run()
+           {      
+             String jvmversion = "";
+             try {
+                 String currentProp  = PropertyUtil.getSystemProperty("java.vendor");
+                 if ( currentProp != null)
+                     jvmversion = "java.vendor=" + currentProp;
+                 if ((currentProp = PropertyUtil.getSystemProperty("java.runtime.version")) != null)
+                     jvmversion += "\njava.runtime.version=" + currentProp;
+                 if ((currentProp = PropertyUtil.getSystemProperty("java.fullversion")) != null)
+                     jvmversion += "\njava.fullversion=" + currentProp ;         
+              }
+              catch (SecurityException se) {
+                   return se.getMessage();
+              }
+              return jvmversion;
+            }
+        });
+    } // end of buildjvmVersion
+        
 	/**
 		Returns the encryption block size used by the algorithm at time of
 		creation of an encrypted database

@@ -30,6 +30,9 @@ grant codeBase "${derbyTesting.codejar}derby.jar"
   permission java.io.FilePermission "${derby.system.home}","read";
   permission java.io.FilePermission "${derby.system.home}${/}-", "read,write,delete";
 
+// getProtectionDomain is an optional permission needed for printing classpath information
+// to derby.log
+  permission java.lang.RuntimePermission "getProtectionDomain";
 //
 // This permission lets a DBA reload this policy file while the server
 // is still running.

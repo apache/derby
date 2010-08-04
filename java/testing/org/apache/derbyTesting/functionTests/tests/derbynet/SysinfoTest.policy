@@ -61,6 +61,10 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
 
   permission java.lang.RuntimePermission "createClassLoader";
 
+  // getProtectionDomain is an optional permission needed for printing classpath
+  // information to derby.log
+  permission java.lang.RuntimePermission "getProtectionDomain";
+
   // permissions so that we can set the context class loader to
   // null for daemon threads to avoid class loader leak.
   // DERBY-3745

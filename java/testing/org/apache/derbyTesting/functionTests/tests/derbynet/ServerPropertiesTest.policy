@@ -58,6 +58,10 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
 
   permission java.lang.RuntimePermission "createClassLoader";
   permission java.security.SecurityPermission "getPolicy";
+
+  // getProectionDomain is an optional permission needed for printing classpath
+  // information to derby.log
+  permission java.lang.RuntimePermission "getProtectionDomain";
   
   permission java.io.FilePermission "${derby.system.home}${/}derby.properties", "read";
   permission java.io.FilePermission "${derby.system.home}${/}derby.log", "read, write, delete";
