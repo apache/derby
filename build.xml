@@ -1462,6 +1462,7 @@
          includesfile="${derby.jar.dir}/lists/derbytools.list"
          compress="true"
          filesonly="true"/>
+	
     <jar destfile="${derby.jar.dir}/derbytools.jar"
          manifest="${derby.jar.dir}/lists/smftools.mf"
          compress="true"
@@ -1471,10 +1472,11 @@
                includes="org/apache/derby/loc/sysinfoMessages.properties,
                          org/apache/derby/loc/toolsmessages.properties,
                          org/apache/derby/info/tools.properties"/>
+	  <fileset dir="${derby.tools.src.dir}"
+               includes="org/apache/derby/impl/tools/planexporter/resources/*.xsl"/>
       <fileset dir="${derby.jar.dir}/lists"
                includes="META-INF/**"/>
     </jar>
-
   </target>
 
 <!-- - - - - - - - - - - - - - derbynet.jar target - - - - - - - - - - - -->

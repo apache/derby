@@ -21,34 +21,43 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 
+import javax.xml.parsers.DocumentBuilder; 
+import javax.xml.parsers.DocumentBuilderFactory; 
+
+import org.xml.sax.InputSource;
+
+import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.shared.common.sanity.SanityManager;
-
+import org.apache.derby.impl.tools.planexporter.AccessDatabase;
+import org.apache.derby.impl.tools.planexporter.CreateXMLFile;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
-import org.apache.derbyTesting.junit.SQLUtilities;
+import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.XML;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.NodeList;
 
 /**
  * This suite contains a set of tests for the new XPLAIN style of
- * runtime statistics capturing which was added as part of DERBY-2487.
+ * runtime statistics capturing which was added as part of DERBY-2487
+ * and also a set of tests within tests generated under DERBY-2487
+ * are added as part of DERBY-4587-PlanExporter tool.
  *
  * There are a large number of tests which follow the pattern of:
  * - enable capture
@@ -64,7 +73,7 @@ import org.apache.derbyTesting.junit.SQLUtilities;
  *   all tested at least once
  */
 public class XplainStatisticsTest extends BaseJDBCTestCase {
-
+	
 	public XplainStatisticsTest(String name) {
 		super(name);
 	}
@@ -73,7 +82,11 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             timeSuiteStarted = (new Date()).getTime();
             TestSuite allTests = new TestSuite(XplainStatisticsTest.class,
                                     "XplainStatisticsTest");
-		return new CleanDatabaseTestSetup(allTests) {
+            
+            Test test = allTests;
+            test = new SupportFilesSetup(test); //added by DERBY-4587
+            
+		return new CleanDatabaseTestSetup(test) {
 			protected void decorateSQL(Statement s)
 				throws SQLException
 			{
@@ -452,6 +465,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 		st.executeUpdate(
 "delete from t where x = 3");
 	}
+	
     private boolean hasTable(String schemaName, String tableName)
         throws SQLException
     {
@@ -461,6 +475,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         rs.close();
         return tableFound;
     }
+    
     private String []tableNames = {
         "SYSXPLAIN_STATEMENTS",
         "SYSXPLAIN_STATEMENT_TIMINGS",
@@ -469,6 +484,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         "SYSXPLAIN_SORT_PROPS",
         "SYSXPLAIN_SCAN_PROPS",
     };
+    
     private void enableXplainStyle(Statement s)
             throws SQLException
     {
@@ -480,17 +496,59 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         s.execute("call syscs_util.syscs_set_xplain_schema('XPLTEST')");
         s.execute("call syscs_util.syscs_set_xplain_mode(0)");
     }
+    
     private void enableXplainStyleWithTiming(Statement s)
             throws SQLException
     {
         enableXplainStyle(s);
         s.execute("call syscs_util.syscs_set_statistics_timing(1)");
     }
+    
+    /**
+     * 
+     * @param s
+     * @throws Exception
+     */
     private void disableXplainStyle(Statement s)
-        throws SQLException
+    throws Exception
     {
-        s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)");
+    	s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)");
+
+    	if(XML.classpathMeetsXMLReqs()){
+    		/*
+    		 * Added by DERBY-4587 to test the generation of XML files
+    		 * from PlanExporter tool.
+    		 */
+    		String stmt_id="";
+    		ResultSet rs;
+    		AccessDatabase access;
+
+    		rs = s.executeQuery( 
+    		"select stmt_id from XPLTEST.sysxplain_statements"); 
+    		while (rs.next()) 
+    		{ 
+    			stmt_id = rs.getString(1); 
+    			access = 
+    				new AccessDatabase(getConnection(), "XPLTEST", stmt_id); 
+    			if(access.initializeDataArray()){ 
+    				access.createXMLFragment();
+    				access.markTheDepth();
+
+    				CreateXMLFile xml_file = new CreateXMLFile(access); 
+    				xml_file.writeTheXMLFile(
+    						access.statement(),
+    						access.getData(), 
+    						SupportFilesSetup.getReadWriteURL(stmt_id + ".xml")
+    						.getPath(),
+    						null);
+    			}
+    		} 
+    	}
+    	else{
+    		//skips the tests
+    	}
     }
+
     private void verifyXplainUnset(Statement s)
         throws SQLException
     {
@@ -501,6 +559,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             s.executeQuery("values SYSCS_UTIL.syscs_get_xplain_mode()"),
             new String[][]{{"0"}});
     }
+    
     private void verifyNonNullDRDA_ID(Statement s)
         throws SQLException
     {
@@ -552,17 +611,134 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         }
         rs.close();
     }
-        /**
-          * Verify that XPLAIN style captures basic statistics and timings.
-          *
-          * This test runs
-          *
-          *   SELECT Country FROM Countries WHERE Region = 'Central America'
-          *
-          * and verifies that there are some reasonable values captured
-          * into the XPLAIN system tables.
-          */
-    public void testSimpleQuery() throws SQLException
+    
+    /**
+     * Added by DERBY-4587
+     * Returns the stmt_id for this particular statement
+     * @param s: Statement
+     * @return stmt_id
+     * */
+    private String getStmtID(Statement s) throws SQLException{
+    	ResultSet rs;
+        String stmt_id;
+        rs = s.executeQuery( 
+    		"select stmt_id from XPLTEST.sysxplain_statements"); 
+        rs.next();
+        stmt_id = rs.getString(1); 
+        rs.close();
+        return stmt_id;
+    }
+    
+    /**
+     * Added by DERBY-4587
+     * @param file name of the XML file - without extension
+     * @return a Document object
+     * @throws Exception
+     */
+    private Document getADocument(final String file) throws Exception{
+    	Document document;
+    	DocumentBuilderFactory factory =
+    		DocumentBuilderFactory.newInstance();
+    	DocumentBuilder builder = factory.newDocumentBuilder();
+
+    	InputSource xml = new InputSource(
+    			(InputStream)AccessController.doPrivileged
+    			(new java.security.PrivilegedExceptionAction(){
+    				public Object run()throws Exception{
+    					return new FileInputStream(
+    							SupportFilesSetup.getReadWriteURL(file+".xml").getPath()
+    					);}})
+    	);
+
+    	document = builder.parse(xml);
+    	document.getDocumentElement().normalize();
+
+    	return document;
+    }
+
+    /**
+     * Added by DERBY-4587
+     * gets the <statement> element from the XML
+     * @param file XML file
+     * @return statement mentioned in the XML
+     * @throws Exception
+     */
+    private String readStatement(final String file)//, short type) 
+    throws Exception
+    {
+    	Document document;
+    	document = getADocument(file);
+
+    	return document.getElementsByTagName("statement").item(0).getChildNodes().item(0).getNodeValue();
+
+    }
+
+    /**
+     * Added by DERBY-4587
+     * count the # of <node> elements
+     * @param file XML file
+     * @return node count
+     * @throws Exception
+     */
+    private int countNode(final String file) throws Exception{
+    	Document document;
+    	document = getADocument(file);
+
+    	return document.getElementsByTagName("node").getLength();
+    }
+
+    /**
+     * Added by DERBY-4587
+     * gets the "name" attributes of all nodes separated by a "|"
+     * @param file XML file 
+     * @return "name" attribute's value of all nodes
+     * 			eg: "PROJECTION|TABLESCAN|"
+     * @throws Exception
+     */
+    private String getNodeName(final String file) throws Exception{
+    	Document document;
+    	document = getADocument(file);
+    	NodeList lst=document.getElementsByTagName("node");
+    	String name= "";
+    	for(int i=0;i<lst.getLength();i++)
+    		name+=lst.item(i).getAttributes().getNamedItem("name").getNodeValue()+"|";
+    	return name;
+    }
+
+    /**
+     * Added by DERBY-4587
+     * gets attributes other than "name"
+     * @param file XML file
+     * @param attribute name of the attribute
+     * @param node node which this attribute belongs to
+     * @return if attribute doesn't exist ""
+     * 			else value of the attribute
+     * @throws Exception
+     */
+    private String getNodeAttribute(final String file, String attribute, int node) throws Exception{
+    	Document document;
+    	document = getADocument(file);
+    	NodeList lst=document.getElementsByTagName("node");
+    	if(lst.item(node).getAttributes().getNamedItem(attribute)==null)
+    		return "";
+    	return lst.item(node).getAttributes().getNamedItem(attribute).getNodeValue();
+    }
+
+    
+    /**
+     * Verify that XPLAIN style captures basic statistics and timings.
+     *
+     * This test runs
+     *
+     *   SELECT Country FROM Countries WHERE Region = 'Central America'
+     *
+     * and verifies that there are some reasonable values captured
+     * into the XPLAIN system tables.
+     * @throws IOException 
+     * @throws PrivilegedActionException 
+     * @throws MalformedURLException 
+     */
+    public void testSimpleQuery() throws Exception
     {
         Statement s = createStatement();
 
@@ -576,7 +752,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                 {"Guatemala"}, {"Honduras"}, {"Nicaragua"} } );
 
         disableXplainStyle(s);
-
+        
         // The statement should have been executed as a PROJECTION
         // wrapped around a TABLESCAN. The TABLESCAN should have had
         // scan properties. The TABLESCAN should have filtered 114 rows
@@ -660,8 +836,44 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         
         verifySensibleStatementTimings(s);
         verifySensibleResultSetTimings(s);
-    }
+        
+        /*
+         * This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         * */
+        
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
 
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			selectStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(2,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals("PROJECTION|TABLESCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for TABLESCAN node test whether the scan related entries
+        	//are exist and verify their values.
+        	Assert.assertEquals("COUNTRIES", 
+        			getNodeAttribute(stmt_id,"scanned_object",1));
+        	Assert.assertEquals("HEAP", 
+        			getNodeAttribute(stmt_id,"scan_type",1));
+        	Assert.assertEquals("2", 
+        			getNodeAttribute(stmt_id,"visited_pages",1));
+        	
+        }
+    }
+    
+    
+    
     /**
       * Make some basic first-order checks on the STATEMENT_TIMINGS rows.
       *
@@ -844,7 +1056,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
           * This test runs a query against FLIGHTS using the dest_airport
           * index, and verifies the captured query plan statistics.
           */
-    public void testIndexScan() throws SQLException
+    public void testIndexScan() throws Exception
     {
         Statement s = createStatement();
 
@@ -900,6 +1112,38 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     "4", "3", "1", "-1", "16", "2", "ALL"} } );
         verifySensibleStatementTimings(s);
         verifySensibleResultSetTimings(s);
+        
+        
+        /* This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         */
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			selectStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(3,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals("PROJECTION|ROWIDSCAN|INDEXSCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for INDEXSCAN node test whether the scan related entries
+        	//are exist and verify their values.
+        	Assert.assertEquals("DESTINDEX", 
+        			getNodeAttribute(stmt_id,"scanned_object",2));
+        	Assert.assertEquals("BTREE", 
+        			getNodeAttribute(stmt_id,"scan_type",2));
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"visited_pages",2));
+        }
     }
 
         /**
@@ -909,7 +1153,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
           * COUNTRY_ISO_CODE constraint,
           * and verifies the captured query plan statistics.
           */
-    public void testConstraintScan() throws SQLException
+    public void testConstraintScan() throws Exception
     {
         Statement s = createStatement();
 
@@ -936,6 +1180,38 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     "where rs.op_identifier='CONSTRAINTSCAN'"),
                 new String[][] { {"COUNTRIES_UNQ_NM", "C", "BTREE",
                     "RC", "1", "1", "1", "SH", "R", "2", "ALL"} } );
+        
+        /*
+         * This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         * */
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+        	
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			selectStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(3,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals("PROJECTION|ROWIDSCAN|CONSTRAINTSCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for CONSTRAINTSCAN node test whether the scan related entries
+        	//are exist and verify their values.
+        	Assert.assertEquals("COUNTRIES_UNQ_NM", 
+        			getNodeAttribute(stmt_id,"scanned_object",2));
+        	Assert.assertEquals("BTREE", 
+        			getNodeAttribute(stmt_id,"scan_type",2));
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"visited_pages",2));
+        }
     }
 
     /**
@@ -945,7 +1221,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
       * verifies that reasonable values are captured for the sort properties.
       */
     public void testGroupBySortProps()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
 
@@ -1010,16 +1286,46 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     {"IN","114","12",null, null, null,"N","N"} } );
         verifySensibleStatementTimings(s);
         verifySensibleResultSetTimings(s);
+        
+        
+        /* * This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         * */
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			selectStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(4,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals("PROJECTION|GROUPBY|PROJECTION|TABLESCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for GROUPBY node test whether the sort related entries
+        	//are exist and verify their values.
+        	Assert.assertEquals("IN", 
+        			getNodeAttribute(stmt_id,"sort_type",1));
+        	Assert.assertEquals("12", 
+        			getNodeAttribute(stmt_id,"sorter_output",1));
+        }
     }
 
     /**
-      * Verify XPLAIN style handling of DISINCT_AGGREGATE sort properties.
+      * Verify XPLAIN style handling of DISTINCT_AGGREGATE sort properties.
       *
       * This test runs a query which involves a distinct aggreagte and
       * verifies that the DISTINCT_AGGREGATE field in SORT_PROPS gets set.
       */
     public void testDistinctAggregateSortProps()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
 
@@ -1048,12 +1354,46 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     {"IN","10","10",null, null, null,"N","Y"} } );
         verifySensibleStatementTimings(s);
         verifySensibleResultSetTimings(s);
+        
+        
+         /** This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         *  
+         * */
+        if(XML.classpathMeetsXMLReqs()){
+        	// This statement is executed as a PROJECTION with a child GROUPBY
+        	// with a child PROJECTION with a child TABLESCAN. 
+
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			selectStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(4,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals("PROJECTION|GROUPBY|PROJECTION|TABLESCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for GROUPBY node test whether the sort related entries
+        	//are exist and verify their values.
+        	Assert.assertEquals("IN", 
+        			getNodeAttribute(stmt_id,"sort_type",1));
+        	Assert.assertEquals("10", 
+        			getNodeAttribute(stmt_id,"sorter_output",1));
+        }
     }
     /**
       * A simple test of an AGGREGATION result set.
       */
     public void testAggregationResultSet()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
         enableXplainStyle(s);
@@ -1075,14 +1415,44 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                 new String[][] { {"AGGREGATION", "DISTINCT", "1"} } );
         //
         // FIXME -- why are INPUT_ROWS, SEEN_ROWS, FILTERED_ROWS, and
-        // RETURNED_ROWS apparently meaninglyess for an AGGREGATION RS?
+        // RETURNED_ROWS apparently meaningless for an AGGREGATION RS?
+        
+        
+         /** This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         *  
+         * */
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			selectStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(4,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals("PROJECTION|AGGREGATION|PROJECTION|TABLESCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for AGGREGATION node test no_opens entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"no_opens",1));
+        }
+        
     }
 
     /**
       * A simple test of an INSERT result set.
       */
     public void testInsertResultSet()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
         // Make sure we don't have the tuple to be inserted already:
@@ -1130,13 +1500,47 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     "where op_identifier = 'ROW'"),
                 new String[][] {
                     {"ROW",null,"1","0","0","1"} } );
+        
+        
+        /* * This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         *  
+         * */
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			insertStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(3,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals("INSERT|NORMALIZE|ROW|", 
+        			getNodeName(stmt_id));
+
+        	//for ROW node, test no_opens entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"no_opens",1));
+        	
+        	//for NORMALIZE node, test returned_rows entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"returned_rows",1));
+        }
     }
 
     /**
       * A simple test of an UPDATE result set.
       */
     public void testUpdateResultSet()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
         s.executeUpdate("delete from AIRLINES");
@@ -1229,13 +1633,73 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             "select count(*) from xpltest.sysxplain_scan_props " +
             "  where start_position is not null " +
             "    and stop_position is not null"), "1");
+        
+        
+        
+         /** This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         *  
+         * */
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			updateStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(4,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals("UPDATE|PROJECTION|ROWIDSCAN|CONSTRAINTSCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for UPDATE node, test no_opens entry.
+        	//Since it's null, there should be no such entry.
+        	Assert.assertEquals("", 
+        			getNodeAttribute(stmt_id,"no_opens",0));
+        	
+        	//for PROJECTION node, test returned_rows entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"returned_rows",1));
+        	
+        	//for PROJECTION node, test no_opens entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"no_opens",1));
+        	
+        	//for ROWIDSCAN node, test returned_rows entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"returned_rows",2));
+        	
+        	//for ROWIDSCAN node, test no_opens entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"no_opens",2));
+        	
+        	//for CONSTRAINTSCAN node, test scan_qualifiers entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("None", 
+        			getNodeAttribute(stmt_id,"scan_qualifiers",3));
+        	
+        	//for CONSTRAINTSCAN node, test visited_pages entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"visited_pages",3));
+        }
     }
 
     /**
       * A simple test of an DELETE result set.
       */
     public void testDeleteResultSet()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
         s.executeUpdate("delete from AIRLINES");
@@ -1278,13 +1742,42 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     "where op_identifier = 'DELETE'"),
                 new String[][] {
                     {"DELETE",null,null,"1",null,"R",null,"1","N"} } );
+        
+        
+         /** This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         *  
+         * */
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			deleteStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(4,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals("DELETE|PROJECTION|PROJECTION|CONSTRAINTSCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for DELETE node, test no_opens entry.
+        	//Since it's null, there should be no such entry.
+        	Assert.assertEquals("", 
+        			getNodeAttribute(stmt_id,"no_opens",0));
+        }
     }
 
     /**
       * A simple test of a SORT result set.
       */
     public void testSortResultSet()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
         enableXplainStyle(s);
@@ -1324,13 +1817,47 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             new String[][] {
                 {selectStatement, "SORT", "114", "114", "IN", "N", "N", null}
             } );
+        
+        
+        
+         /** This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         *  
+         **/ 
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			selectStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(4,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals("PROJECTION|SORT|PROJECTION|TABLESCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for SORT node test whether the sort related entries
+        	//are exist and verify their values.
+        	Assert.assertEquals("IN", 
+        			getNodeAttribute(stmt_id,"sort_type",1));
+        	Assert.assertEquals("114", 
+        			getNodeAttribute(stmt_id,"sorter_output",1));
+        	Assert.assertEquals("114", 
+        			getNodeAttribute(stmt_id,"input_rows",1));
+        }
     }
 
     /**
       * A simple test of a UNION query.
       */
     public void testUnionQuery()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
         enableXplainStyle(s);
@@ -1389,13 +1916,54 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             new String[][] {
                 {selectStatement, "SORT", "25", "25", "IN", "Y", "N", null}
             } );
+        
+        
+         /** This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         *  
+         * */
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			selectStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(6,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals(
+        			"SORT|UNION|PROJECTION|TABLESCAN|PROJECTION|TABLESCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for SORT node test whether the sort related entries
+        	//are exist and verify their values.
+        	Assert.assertEquals("IN", 
+        			getNodeAttribute(stmt_id,"sort_type",0));
+        	Assert.assertEquals("25", 
+        			getNodeAttribute(stmt_id,"sorter_output",0));
+        	Assert.assertEquals("25", 
+        			getNodeAttribute(stmt_id,"input_rows",0));
+        	
+        	//for UNION node test whether the related entries
+        	//are exist and verify their values.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"no_opens",1));
+        	Assert.assertEquals("25", 
+        			getNodeAttribute(stmt_id,"returned_rows",1));
+        }
     }
 
     /**
       * A simple test of capturing statistics for a DDL statement.
       */
     public void testDDLCreateTable()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
         enableXplainStyle(s);
@@ -1416,7 +1984,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
       * A simple test of the INDEX_KEY_OPT special situation.
       */
     public void testMaxFromIndex()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
         enableXplainStyle(s);
@@ -1468,13 +2036,63 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     {"COUNTRIES_PK", "I",
                         // null,
                         "RC", null, null, null, null, null, null, null} } );
+        
+        
+         /** This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         *  
+         * */
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+        	
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			selectStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(4,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals(
+        			"PROJECTION|AGGREGATION|PROJECTION|LASTINDEXKEYSCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for LASTINDEXKEYSCAN node, test no_opens entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"no_opens",3));
+        	
+        	//for LASTINDEXKEYSCAN node, test returned_rows entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"returned_rows",3));
+        	
+        	//for LASTINDEXKEYSCAN node, test scanned_object entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("COUNTRIES_PK", 
+        			getNodeAttribute(stmt_id,"scanned_object",3));
+        	
+        	//for LASTINDEXKEYSCAN node, test visited_pages entry.
+        	//Since it's null, there should be no entry in xml.
+        	Assert.assertEquals("", 
+        			getNodeAttribute(stmt_id,"visited_pages",3));
+        	
+        	//for LASTINDEXKEYSCAN node, test scan_qualifiers entry.
+        	//Since it's null, there should be no entry in xml.
+        	Assert.assertEquals("", 
+        			getNodeAttribute(stmt_id,"scan_qualifiers",3));
+        }
     }
 
     /**
       * A simple test of a LEFT OUTER JOIN and EMPTY_RIGHT_ROWS values.
       */
     public void testOuterJoin()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
         enableXplainStyle(s);
@@ -1514,13 +2132,48 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                 new String[][] {
                     {"LONLJOIN", "(1), Nested Loop Left Outer Join ResultSet",
                      "1", "10", "0", "0", "10", "0"} } );
+        
+        
+         /** This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         *  
+         * */
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			selectStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(5,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals(
+        			"PROJECTION|LONLJOIN|INDEXSCAN|ROWIDSCAN|CONSTRAINTSCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for LONLJOIN node, test no_opens entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"no_opens",1));
+        	
+        	//for LONLJOIN node, test returned_rows entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("10", 
+        			getNodeAttribute(stmt_id,"returned_rows",1));
+        }
     }
 
     /**
       * A simple test to verify that startPosition and stopPosition work.
       */
     public void testScanPositions()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
         // Try several different syntaxes of index scans, to see what we get:
@@ -1593,7 +2246,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
       * A simple test of a non-zero value for numDeletedRowsVisited.
       */
     public void testScanDeletedRows()
-        throws SQLException
+        throws Exception
     {
         Statement s = createStatement();
         enableXplainStyle(s);
@@ -1601,7 +2254,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         JDBC.assertUnorderedResultSet(s.executeQuery(selectStatement),
                 new String[][] { {"1"},{"2"},{"4"} });
         disableXplainStyle(s);
-
+        
         // There should be a CONSTRAINTSCAN result set with a SCAN PROPS
         // which indicates that we visited 1 deleted row while scanning
         // the index.
@@ -1618,6 +2271,47 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
                     "where rs.op_identifier='CONSTRAINTSCAN'"),
                 new String[][] {
                     {"C","BTREE","RC","4","3","1","1","1","{0}","None"}});
+        
+        
+        
+        /* * This test is added by DERBY-4587, to verify the content
+         * of the XML file generated by the new tool, PlanExporter.
+         *  
+         * */
+        if(XML.classpathMeetsXMLReqs()){
+        	//getting the stmt_id, because files are generated using
+        	//stmt_id as their name.
+        	String stmt_id = getStmtID(s);
+
+        	//testing the <statement> element
+        	Assert.assertEquals(
+        			selectStatement, 
+        			readStatement(stmt_id));
+
+        	//testing the count of <node> elements
+        	Assert.assertEquals(1,
+        			countNode(stmt_id));
+
+        	//testing the root <node> element's name attributes
+        	Assert.assertEquals(
+        			"CONSTRAINTSCAN|", 
+        			getNodeName(stmt_id));
+
+        	//for CONSTRAINTSCAN node, test scan_type entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("BTREE", 
+        			getNodeAttribute(stmt_id,"scan_type",0));
+        	
+        	//for CONSTRAINTSCAN node, test visited_pages entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("1", 
+        			getNodeAttribute(stmt_id,"visited_pages",0));
+       
+        	//for CONSTRAINTSCAN node, test visited_pages entry
+        	//is exist and verify its value.
+        	Assert.assertEquals("None", 
+        			getNodeAttribute(stmt_id,"scan_qualifiers",0));
+        }
     }
 
     /**
