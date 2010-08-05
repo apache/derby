@@ -559,8 +559,7 @@ public class SQLChar
      */
     public Object   getObject() throws StandardException
     {
-        if ( _clobValue != null ) { return _clobValue; }
-        else { return getString(); }
+        return getString();
     }
 
     /**

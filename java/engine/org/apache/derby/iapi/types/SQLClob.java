@@ -333,6 +333,21 @@ public class SQLClob
 	}
 
     /**
+     * @exception StandardException     Thrown on error
+     */
+    public Object   getObject() throws StandardException
+    {
+        if ( _clobValue != null ) { return _clobValue; }
+        else
+        {
+            String stringValue = getString();
+
+            if ( stringValue == null ) { return null; }
+            else { return new HarmonySerialClob( stringValue.toCharArray() ); }
+        }
+    }
+
+    /**
      * Returns a descriptor for the input stream for this CLOB value.
      * <p>
      * The descriptor contains information about header data, current positions,

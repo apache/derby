@@ -152,6 +152,32 @@ public class SQLBlob extends SQLBinary
 			return new SQLBlob();
         }
 
+     /**
+      * Return a JDBC Blob. Originally implemented to support DERBY-2201.
+      */
+    public Object getObject()
+        throws StandardException
+    {
+        // the generated code for the DERBY-2201 codepath expects to get a Blob
+        // back.
+        if ( _blobValue != null ) { return _blobValue; }
+        else
+        {
+            byte[] bytes = getBytes();
+
+            if ( bytes == null ) { return null; }
+            else
+            {
+                try {
+                    return new HarmonySerialBlob( bytes );
+                } catch (SQLException se)
+                {
+                    throw StandardException.plainWrapException( se );
+                }
+            }
+        }
+    }
+    
 	/**
 	 * Normalization method - this method may be called when putting
 	 * a value into a SQLBit, for example, when inserting into a SQLBit

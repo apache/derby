@@ -265,19 +265,6 @@ abstract class SQLBinary
 		return dataValue;
 	}
 	
-     /**
-      * Return a JDBC Blob. Only implemented to support DERBY-2201.
-      */
-    public Object getObject()
-        throws StandardException
-    {
-        // the generated code for the DERBY-2201 codepath expects to get a Blob
-        // back.
-
-        if ( _blobValue != null ) { return _blobValue; }
-        else { return super.getObject(); }
-    }
-    
 	/**
 	 * length in bytes
 	 *
