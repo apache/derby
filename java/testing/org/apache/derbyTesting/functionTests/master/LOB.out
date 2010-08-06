@@ -17,11 +17,8 @@ ij> --
 -- This test lang/LOB.sql still includes tests for 
 -- DB2 UDB incompatible datatype NCLOB.
 -- Still waiting for DB2 UDB compatible functionality for NCLOB to be implemented
-
 -- Also note that in DB2 UDB, to create BLOB and CLOB strings greater than 1 gigabyte,
 -- the NOT LOGGED option must be specified (SQLSTATE 42993).
-
-
 -- test that BLOB/CLOB are not reserved words
 create table blob(a int);
 0 rows inserted/updated/deleted
@@ -497,21 +494,6 @@ ij> values (cast('1' as clob(1M)))->toString();
 ERROR XJ082: BLOB/CLOB values are not allowed as method parameters or receiver.
 ij> values (cast('1' as nclob(1M)))->toString();
 ERROR 0A000: Feature not implemented: NCLOB.
-ij> -- LOB column as parameter not allowed
-select b->equals('3') from b;
-ERROR XJ082: BLOB/CLOB values are not allowed as method parameters or receiver.
-ij> select c->equals('3') from c;
-ERROR XJ082: BLOB/CLOB values are not allowed as method parameters or receiver.
-ij> -- explicit LOB as parameter not allowed
-values '3'->equals(cast('3' as blob(7)));
-ERROR 42846: Cannot convert types 'CHAR' to 'BLOB'.
-ij> values '3'->equals(cast('3' as clob(7)));
-ERROR XJ082: BLOB/CLOB values are not allowed as method parameters or receiver.
-ij> -- LOB column as parameter not allowed
-select '3'->equals(b) from b;
-ERROR XJ082: BLOB/CLOB values are not allowed as method parameters or receiver.
-ij> select '3'->equals(c) from c;
-ERROR XJ082: BLOB/CLOB values are not allowed as method parameters or receiver.
 ij> drop table b;
 0 rows inserted/updated/deleted
 ij> drop table c;

@@ -17,11 +17,8 @@
 -- This test lang/LOB.sql still includes tests for 
 -- DB2 UDB incompatible datatype NCLOB.
 -- Still waiting for DB2 UDB compatible functionality for NCLOB to be implemented
-
 -- Also note that in DB2 UDB, to create BLOB and CLOB strings greater than 1 gigabyte,
 -- the NOT LOGGED option must be specified (SQLSTATE 42993).
-
-
 -- test that BLOB/CLOB are not reserved words
 create table blob(a int);
 insert into blob values(3);
@@ -298,18 +295,6 @@ insert into c values(cast('33' as clob(77)));
 values (cast('1' as blob(1M)))->toString();
 values (cast('1' as clob(1M)))->toString();
 values (cast('1' as nclob(1M)))->toString();
-
--- LOB column as parameter not allowed
-select b->equals('3') from b;
-select c->equals('3') from c;
-
--- explicit LOB as parameter not allowed
-values '3'->equals(cast('3' as blob(7)));
-values '3'->equals(cast('3' as clob(7)));
-
--- LOB column as parameter not allowed
-select '3'->equals(b) from b;
-select '3'->equals(c) from c;
 
 drop table b;
 drop table c;

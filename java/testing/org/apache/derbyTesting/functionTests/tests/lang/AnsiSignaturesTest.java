@@ -23,6 +23,8 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -391,15 +393,45 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     public  void    test_clob_Clob_String()
         throws Exception
     {
+        Connection  conn = getConnection();
+
         declareAndRunFunction
             ( "clob_Clob_String", "clob", new String[] { "varchar( 10 )" }, "'3'", "3" );
+
+        // now test clob arguments
+        declareFunction( conn, "varchar_Clob_Clob", "varchar( 10 )", new String[] { "clob" } );
+
+        runFunction( conn, "varchar_Clob_Clob", " \"clob_Clob_String\"( 'abc' )", "abc", null );
+
+        // make sure that you can set lob-typed ? parameters
+        PreparedStatement ps = chattyPrepare( conn, "values ( \"varchar_Clob_Clob\"( ? ) )" );
+        String expectedValue = "abcdef";
+        Clob clob = AnsiSignatures.clob_Clob_String( expectedValue );
+        ps.setClob( 1, clob );
+        String actualValue = (String) getScalarString( ps );
+        assertTrue( expectedValue.equals( actualValue ) );
     }
 
     public  void    test_blob_Blob_String()
         throws Exception
     {
+        Connection  conn = getConnection();
+
         declareAndRunFunction
             ( "blob_Blob_String", "blob", new String[] { "varchar( 10 )" }, "'3'", "33" );
+
+        // now test blob arguments
+        declareFunction( conn, "varchar_Blob_Blob", "varchar( 10 )", new String[] { "blob" } );
+
+        runFunction( conn, "varchar_Blob_Blob", " \"blob_Blob_String\"( 'abc' )", "abc", null );
+
+        // make sure that you can set lob-typed ? parameters
+        PreparedStatement ps = chattyPrepare( conn, "values ( \"varchar_Blob_Blob\"( ? ) )" );
+        String expectedValue = "34";
+        Blob blob = AnsiSignatures.blob_Blob_String( expectedValue );
+        ps.setBlob( 1, blob );
+        String actualValue = getScalarString( ps );
+        assertTrue( expectedValue.equals( actualValue ) );
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -610,7 +642,7 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
             ( "double_amb_byte_double", "double", new String[] { "double" }, "3.0", "3.0", AMBIGUOUS );
     }
     
-
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // UNRESOLVABLE METHODS
@@ -813,4 +845,28 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
         return '"' + raw + '"';
     }
     
+    /**
+     * Prepare a statement and report its sql text.
+     */
+    protected PreparedStatement   chattyPrepare( Connection conn, String text )
+        throws SQLException
+    {
+        println( "Preparing statement:\n\t" + text );
+        
+        return conn.prepareStatement( text );
+    }
+
+    /** Get a scalar result from a query */
+    private String getScalarString( PreparedStatement ps ) throws Exception
+    {
+        ResultSet rs = ps.executeQuery();
+        rs.next();
+        String retval = rs.getString( 1 );
+
+        rs.close();
+        ps.close();
+
+        return retval;
+    }
+  
 }

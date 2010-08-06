@@ -1329,4 +1329,48 @@ public  class   AnsiSignatures
     public  static  Blob  blob_Blob_String( Blob a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
     public  static  Blob  blob_Blob_String( Object a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
 
+    //
+    // BLOB arguments
+    //
+    public  static  String  varchar_Blob_Blob( Blob a ) throws Exception { return new String( a.getBytes( 1L, (int) a.length() ), "UTF-8"  ); }
+    public  static  String  varchar_Blob_Blob( byte a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( int a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( long a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( float a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( double a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( Byte a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( Short a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( Long a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( Float a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( Double a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( BigDecimal a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( Date a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( Time a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( Timestamp a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( Clob a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( String a ) { return "-1"; }
+    public  static  String  varchar_Blob_Blob( Object a ) { return "-1"; }
+
+    //
+    // CLOB arguments
+    //
+    public  static  String  varchar_Clob_Clob( Clob a ) throws Exception { return a.getSubString( 1L, (int) a.length() ); }
+    public  static  String  varchar_Clob_Clob( byte a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( int a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( long a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( float a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( double a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( Byte a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( Short a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( Long a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( Float a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( Double a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( BigDecimal a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( Date a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( Time a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( Timestamp a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( Blob a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( String a ) { return "-1"; }
+    public  static  String  varchar_Clob_Clob( Object a ) { return "-1"; }
+
 }

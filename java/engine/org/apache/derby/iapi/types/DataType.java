@@ -34,6 +34,8 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 
 import java.io.InputStream;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -387,6 +389,28 @@ public abstract class DataType
 	public void setValue(String theValue) throws StandardException
 	{
 		throwLangSetMismatch("java.lang.String");
+	}
+
+	/**
+	 * Set the value of this DataValueDescriptor.
+	 * At DataType level just throws an error lower classes will override
+	 *
+	 * @param theValue	The Blob value to set this DataValueDescriptor to
+	 */
+	public void setValue(Blob theValue) throws StandardException
+	{
+		throwLangSetMismatch("java.sql.Blob");
+	}
+ 
+	/**
+	 * Set the value of this DataValueDescriptor.
+	 * At DataType level just throws an error lower classes will override
+	 *
+	 * @param theValue	The Clob value to set this DataValueDescriptor to
+	 */
+	public void setValue(Clob theValue) throws StandardException
+	{
+		throwLangSetMismatch("java.sql.Clob");
 	}
 
 

@@ -47,12 +47,16 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.Utilities;
+import org.apache.derbyTesting.functionTests.tests.lang.StringColumnVTI;
 
 /**
  * 
  */
 public class ParameterMappingTest extends BaseJDBCTestCase {
     private static boolean HAVE_BIG_DECIMAL;
+
+    private static final String BAD_TYPE = "42962";
+    private static final String UTF8 = "UTF-8";
 
     static {
         if (JDBC.vmSupportsJSR169())
@@ -543,7 +547,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 s.execute(procSQL);
             } catch (SQLException sqle) {
                 // may get error that column is not allowed
-                if ("42962".equals(sqle.getSQLState()))
+                if (BAD_TYPE.equals(sqle.getSQLState()))
                     continue;
                 else
                     fail(sqle.getSQLState() + ":" + sqle.getMessage());
@@ -587,11 +591,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                             // set the IN value with an accepted value according to its type
                             // set the INOUT value with an accepted value according to its registered type
                             if (setValidValue(csp, 1, jdbcTypes[type]) && setValidValue(csp, 2, jopt)) {
-                                
+
                                 csp.execute();
                                 
-                                // now get the INOUT, OUT parameters according to their registered type.
+                               // now get the INOUT, OUT parameters according to their registered type.
                                 getOutValue(csp, 2, jopt,type); 
+                                
                                 getOutValue(csp, 3, jopt,type);
                         }
 
@@ -599,6 +604,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                             boolean expectedConversionError = ("22018".equals(sqle.getSQLState())|| 
                                                                "22007".equals(sqle.getSQLState()) ||
                                                                "22005".equals(sqle.getSQLState()));
+                            if ( !expectedConversionError)
+                            {
+                                printStackTrace( sqle );
+                            }
                             assertTrue("FAIL: Unexpected exception" + sqle.getSQLState() + ":" + sqle.getMessage(),
                                     expectedConversionError);
                         }
@@ -613,7 +622,135 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 s.close();
                 conn.commit();
          }      
-}
+    }
+
+    /**
+     * Verify correct mapping of clobs.
+     */
+    public void testClobMapping() throws Exception
+    {
+        Connection conn = getConnection();
+        PreparedStatement ps;
+        CallableStatement cs;
+
+        //
+        // Clob input parameter
+        //
+        ps = chattyPrepare
+            (
+             conn,
+             "create procedure clobIn\n" +
+             "( in c clob, out result varchar( 100 ) )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name '" + getClass().getName() + ".clobIn'\n"
+             );
+        ps.execute();
+        ps.close();
+
+        cs = chattyPrepareCall( conn, "call clobIn( cast( 'def' as clob ), ? )" );
+        cs.registerOutParameter( 1, Types.VARCHAR );
+        cs.execute();
+        assertEquals( "def", cs.getString( 1 ) );
+        cs.close();
+
+        cs = chattyPrepareCall( conn, "call clobIn( ?, ? )" );
+        cs.setClob( 1, new StringColumnVTI.SimpleClob( "ghi" ) );
+        cs.registerOutParameter( 2, Types.VARCHAR );
+        cs.execute();
+        assertEquals( "ghi", cs.getString( 2 ) );
+        cs.close();
+
+        //
+        // Clob output parameter
+        //
+        expectCompilationError
+            (
+             BAD_TYPE,
+             "create procedure clobOut\n" +
+             "( out c clob )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name '" + getClass().getName() + ".clobOut'\n"
+             );
+        
+        //
+        // Clob inout parameter
+        //
+        expectCompilationError
+            (
+             BAD_TYPE,
+             "create procedure clobInOut\n" +
+             "( inout c clob )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name '" + getClass().getName() + ".clobInOut'\n"
+             );
+    }
+
+    /**
+     * Verify correct mapping of blobs.
+     */
+    public void testBlobMapping() throws Exception
+    {
+        Connection conn = getConnection();
+        PreparedStatement ps;
+        CallableStatement cs;
+
+        //
+        // Blob input parameter
+        //
+        ps = chattyPrepare
+            (
+             conn,
+             "create procedure blobIn\n" +
+             "( in c blob, out result varchar( 100 ) )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name '" + getClass().getName() + ".blobIn'\n"
+             );
+        ps.execute();
+        ps.close();
+
+        cs = chattyPrepareCall( conn, "call blobIn( ?, ? )" );
+        cs.setBlob( 1, new StringColumnVTI.SimpleBlob( "ghi".getBytes( UTF8 ) ) );
+        cs.registerOutParameter( 2, Types.VARCHAR );
+        cs.execute();
+        assertEquals( "ghi", cs.getString( 2 ) );
+        cs.close();
+
+        //
+        // Blob output parameter
+        //
+        expectCompilationError
+            (
+             BAD_TYPE,
+             "create procedure blobOut\n" +
+             "( out c blob )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name '" + getClass().getName() + ".blobOut'\n"
+             );
+        
+        //
+        // Blob inout parameter
+        //
+        expectCompilationError
+            (
+             BAD_TYPE,
+             "create procedure blobInOut\n" +
+             "( inout c blob )\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name '" + getClass().getName() + ".blobInOut'\n"
+             );
+    }
 
     /*
      * (non-Javadoc)
@@ -3776,6 +3913,127 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 out[0] = new BigDecimal(84.1);
         }
 
+    /*
+    ** Procedures which use LOBs - for parameter mapping testing.
+    */
+
+    public static void pmap(Blob in, Blob[] inout, Blob[] out) throws SQLException {
+        int    leftLength = (int) in.length();
+        int    rightLength = (int) inout[0].length();
+        byte[] left = in.getBytes( 1L, leftLength );
+        byte[] right = inout[0].getBytes( 1L, rightLength );
+        byte[] retval = new byte[ leftLength + rightLength ];
+        System.arraycopy( left, 0, retval, 0, leftLength );
+        System.arraycopy( right, 0, retval, leftLength, rightLength );
+        inout[0] = new StringColumnVTI.SimpleBlob( retval );
+        
+        out[0] = new StringColumnVTI.SimpleBlob( new byte[] { (byte) 1, (byte) 2, (byte) 3 } );
+    }
+
+    public static void pmap(Clob in, Clob[] inout, Clob[] out) throws SQLException {
+        inout[0] = new StringColumnVTI.SimpleClob( in.getSubString( 1L, (int) in.length() ) + inout[0].getSubString( 1L, (int) inout[0].length() ) );
+        out[0] = new StringColumnVTI.SimpleClob( "abc" );
+    }
+
+    //
+    // Clob procs
+    //
+    
+    public static void clobIn( Clob c, String[] result ) throws SQLException
+    {
+        result[ 0 ] = getClobValue( c );
+    }
+    public static void clobOut( Clob[] c ) throws SQLException
+    {
+        c[ 0 ] = new StringColumnVTI.SimpleClob( "abc" );
+    }
+    public static void clobInOut( Clob[] c ) throws SQLException
+    {
+        String value = getClobValue( c[ 0 ] );
+        
+        char[] inValue = value.toCharArray();
+        char[] outValue = reverse( inValue );
+
+        c[ 0 ] = new StringColumnVTI.SimpleClob( new String( outValue ) );
+    }
+
+    private static String getClobValue( Clob c ) throws SQLException
+    {
+        return c.getSubString( 1L, (int) c.length() );
+    }
+    private static char[] reverse( char[] in )
+    {
+        int count = in.length;
+
+        char[] retval = new char[ count ];
+        for ( int i = 0; i < count; i++ ) { retval[ i ] = in[ (count - i) - 1 ]; }
+
+        return retval;
+    }
+    
+    //
+    // Blob procs
+    //
+    
+    public static void blobIn( Blob c, String[] result ) throws Exception
+    {
+        result[ 0 ] = getBlobValue( c );
+    }
+    public static void blobOut( Blob[] c ) throws Exception
+    {
+        c[ 0 ] = new StringColumnVTI.SimpleBlob( "abc".getBytes( UTF8 ) );
+    }
+    public static void blobInOut( Blob[] c ) throws Exception
+    {
+        String value = getBlobValue( c[ 0 ] );
+        
+        char[] inValue = value.toCharArray();
+        char[] outValue = reverse( inValue );
+
+        c[ 0 ] = new StringColumnVTI.SimpleBlob( (new String( outValue )).getBytes( UTF8 ) );
+    }
+
+    private static String getBlobValue( Blob c ) throws Exception
+    {
+        byte[] bytes = c.getBytes( 1L, (int) c.length() );
+
+        return new String( bytes, UTF8 );
+    }
+    
+    //
+    // Debug helpers
+    //
+    
+    /**
+     * Prepare a statement and report its sql text.
+     */
+    protected PreparedStatement   chattyPrepare( Connection conn, String text )
+        throws SQLException
+    {
+        println( "Preparing statement:\n\t" + text );
+        
+        return conn.prepareStatement( text );
+    }
+    /**
+     * Prepare a call statement and report its sql text.
+     */
+    protected CallableStatement   chattyPrepareCall( Connection conn, String text )
+        throws SQLException
+    {
+        println( "Preparing statement:\n\t" + text );
+        
+        return conn.prepareCall( text );
+    }
+
+    /**
+     * Assert that the statement text, when compiled, raises an exception
+     */
+    protected void    expectCompilationError( String sqlState, String query )
+    {
+        println( "\nExpecting " + sqlState + " when preparing:\n\t" + query );
+
+        assertCompileError( sqlState, query );
+    }
 }
 
 

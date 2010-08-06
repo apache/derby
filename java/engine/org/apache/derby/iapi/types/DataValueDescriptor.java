@@ -29,6 +29,8 @@ import org.apache.derby.iapi.services.io.Storable;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.PreparedStatement;
@@ -502,6 +504,22 @@ public interface DataValueDescriptor extends Storable, Orderable
 	 *
 	 */
 	public void setValue(String theValue) throws StandardException;
+
+ 	/**
+	 * Set the value of this DataValueDescriptor from a Blob.
+	 *
+	 * @param theValue	The Blob value to set this DataValueDescriptor to
+	 *
+	 */
+	public void setValue(Blob theValue) throws StandardException;
+    
+	/**
+	 * Set the value of this DataValueDescriptor from a Clob.
+	 *
+	 * @param theValue	The Clob value to set this DataValueDescriptor to
+	 *
+	 */
+	public void setValue(Clob theValue) throws StandardException;
 
 	/**
 	 * Set the value of this DataValueDescriptor.
