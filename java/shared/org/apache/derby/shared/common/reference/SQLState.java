@@ -697,6 +697,7 @@ public interface SQLState {
     String NET_UNRECOGNIZED_JDBC_TYPE                                  = "22005.S.4";
     String NET_INVALID_JDBC_TYPE_FOR_PARAM                             = "22005.S.5";
     String UNRECOGNIZED_JAVA_SQL_TYPE                                  = "22005.S.6";
+    String CANT_CONVERT_UNICODE_TO_UTF8                                = "22005.S.7";
 
 	String LANG_DATE_RANGE_EXCEPTION                                   = "22007.S.180";
 	String LANG_DATE_SYNTAX_EXCEPTION                                  = "22007.S.181";

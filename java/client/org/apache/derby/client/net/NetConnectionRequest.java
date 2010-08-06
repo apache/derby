@@ -485,7 +485,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         // see if we can optimize
         if (dontSendOnConversionError) {
             try {
-                ccsidManager_.convertFromUCS2(rdbnam, netAgent_);
+                ccsidManager_.convertFromJavaString(rdbnam, netAgent_);
             } catch (SqlException se)  {
                 netAgent_.exceptionConvertingRdbnam = se;
                 return;

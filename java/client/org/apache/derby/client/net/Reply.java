@@ -73,7 +73,7 @@ public class Reply {
     Reply(NetAgent netAgent, int bufferSize) {
         buffer_ = new byte[bufferSize];
         agent_ = netAgent_ = netAgent;
-        ccsidManager_ = netAgent.targetCcsidManager_;
+        ccsidManager_ = netAgent.getCurrentCcsidManager();
         ddmCollectionLenStack_ = new int[Reply.MAX_MARKS_NESTING];
         initialize();
     }
@@ -668,7 +668,7 @@ public class Reply {
         ensureBLayerDataInBuffer(length);
         adjustLengths(length);
 
-        String result = ccsidManager_.convertToUCS2(buffer_, pos_, length);
+        String result = ccsidManager_.convertToJavaString(buffer_, pos_, length);
         pos_ += length;
         return result;
     }
@@ -695,7 +695,7 @@ public class Reply {
         int len = ddmScalarLen_;
         ensureBLayerDataInBuffer(len);
         adjustLengths(len);
-        String result = ccsidManager_.convertToUCS2(buffer_, pos_, len);
+        String result = ccsidManager_.convertToJavaString(buffer_, pos_, len);
         pos_ += len;
         return result;
     }
@@ -1253,7 +1253,7 @@ public class Reply {
     }
 
     final String readFastString(int length) throws DisconnectException {
-        String result = ccsidManager_.convertToUCS2(buffer_, pos_, length);
+        String result = ccsidManager_.convertToJavaString(buffer_, pos_, length);
         pos_ += length;
         return result;
     }

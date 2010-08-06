@@ -1257,17 +1257,17 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
             // the characters 'G' thro 'P'(in order to use the crrtkn as the LUWID when using
             // SNA in a hop site). For example, 0 is mapped to G, 1 is mapped H,etc.
             if (i == 0) {
-                crrtkn_[j] = netAgent_.sourceCcsidManager_.numToSnaRequiredCrrtknChar_[halfByte];
+                crrtkn_[j] = netAgent_.getCurrentCcsidManager().numToSnaRequiredCrrtknChar_[halfByte];
             } else {
-                crrtkn_[j] = netAgent_.sourceCcsidManager_.numToCharRepresentation_[halfByte];
+                crrtkn_[j] = netAgent_.getCurrentCcsidManager().numToCharRepresentation_[halfByte];
             }
 
             halfByte = (num) & 0x0f;
-            crrtkn_[j + 1] = netAgent_.sourceCcsidManager_.numToCharRepresentation_[halfByte];
+            crrtkn_[j + 1] = netAgent_.getCurrentCcsidManager().numToCharRepresentation_[halfByte];
         }
 
         // fill the '.' in between the IP address and the port number
-        crrtkn_[8] = netAgent_.sourceCcsidManager_.dot_;
+        crrtkn_[8] = netAgent_.getCurrentCcsidManager().dot_;
 
         // Port numbers have values which fit in 2 unsigned bytes.
         // Java returns port numbers in an int so the value is not negative.
@@ -1276,13 +1276,13 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         num = netAgent_.socket_.getLocalPort();
 
         halfByte = (num >> 12) & 0x0f;
-        crrtkn_[9] = netAgent_.sourceCcsidManager_.numToSnaRequiredCrrtknChar_[halfByte];
+        crrtkn_[9] = netAgent_.getCurrentCcsidManager().numToSnaRequiredCrrtknChar_[halfByte];
         halfByte = (num >> 8) & 0x0f;
-        crrtkn_[10] = netAgent_.sourceCcsidManager_.numToCharRepresentation_[halfByte];
+        crrtkn_[10] = netAgent_.getCurrentCcsidManager().numToCharRepresentation_[halfByte];
         halfByte = (num >> 4) & 0x0f;
-        crrtkn_[11] = netAgent_.sourceCcsidManager_.numToCharRepresentation_[halfByte];
+        crrtkn_[11] = netAgent_.getCurrentCcsidManager().numToCharRepresentation_[halfByte];
         halfByte = (num) & 0x0f;
-        crrtkn_[12] = netAgent_.sourceCcsidManager_.numToCharRepresentation_[halfByte];
+        crrtkn_[12] = netAgent_.getCurrentCcsidManager().numToCharRepresentation_[halfByte];
 
         // The final part of CRRTKN is a 6 byte binary number that makes the
         // crrtkn unique, which is usually the time stamp/process id.
@@ -1318,21 +1318,21 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         }
 
         for (int i = 0; i < NetConfiguration.PRDDTA_ACCT_SUFFIX_LEN_BYTE; i++) {
-            prddta_[i] = netAgent_.sourceCcsidManager_.space_;
+            prddta_[i] = netAgent_.getCurrentCcsidManager().space_;
         }
 
-        prddtaLen = netAgent_.sourceCcsidManager_.convertFromUCS2(NetConfiguration.PRDID,
+        prddtaLen = netAgent_.getCurrentCcsidManager().convertFromJavaString(NetConfiguration.PRDID,
                 prddta_,
                 prddtaLen,
                 netAgent_);
 
-        prddtaLen = netAgent_.sourceCcsidManager_.convertFromUCS2(NetConfiguration.PRDDTA_PLATFORM_ID,
+        prddtaLen = netAgent_.getCurrentCcsidManager().convertFromJavaString(NetConfiguration.PRDDTA_PLATFORM_ID,
                 prddta_,
                 prddtaLen,
                 netAgent_);
 
         int extnamTruncateLength = Math.min(extnam_.length(), NetConfiguration.PRDDTA_APPL_ID_FIXED_LEN);
-        netAgent_.sourceCcsidManager_.convertFromUCS2(extnam_.substring(0, extnamTruncateLength),
+        netAgent_.getCurrentCcsidManager().convertFromJavaString(extnam_.substring(0, extnamTruncateLength),
                 prddta_,
                 prddtaLen,
                 netAgent_);
@@ -1340,7 +1340,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
 
         if (user_ != null) {
             int userTruncateLength = Math.min(user_.length(), NetConfiguration.PRDDTA_USER_ID_FIXED_LEN);
-            netAgent_.sourceCcsidManager_.convertFromUCS2(user_.substring(0, userTruncateLength),
+            netAgent_.getCurrentCcsidManager().convertFromJavaString(user_.substring(0, userTruncateLength),
                     prddta_,
                     prddtaLen,
                     netAgent_);
@@ -1373,21 +1373,21 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     private byte[] encryptedPasswordForUSRENCPWD(String password) throws SqlException {
-        return encryptionManager_.encryptData(netAgent_.sourceCcsidManager_.convertFromUCS2(password, netAgent_),
+        return encryptionManager_.encryptData(netAgent_.getCurrentCcsidManager().convertFromJavaString(password, netAgent_),
                 NetConfiguration.SECMEC_USRENCPWD,
-                netAgent_.sourceCcsidManager_.convertFromUCS2(user_, netAgent_),
+                netAgent_.getCurrentCcsidManager().convertFromJavaString(user_, netAgent_),
                 targetPublicKey_);
     }
 
     private byte[] encryptedUseridForEUSRIDPWD() throws SqlException {
-        return encryptionManager_.encryptData(netAgent_.sourceCcsidManager_.convertFromUCS2(user_, netAgent_),
+        return encryptionManager_.encryptData(netAgent_.getCurrentCcsidManager().convertFromJavaString(user_, netAgent_),
                 NetConfiguration.SECMEC_EUSRIDPWD,
                 targetPublicKey_,
                 targetPublicKey_);
     }
 
     private byte[] encryptedPasswordForEUSRIDPWD(String password) throws SqlException {
-        return encryptionManager_.encryptData(netAgent_.sourceCcsidManager_.convertFromUCS2(password, netAgent_),
+        return encryptionManager_.encryptData(netAgent_.getCurrentCcsidManager().convertFromJavaString(password, netAgent_),
                 NetConfiguration.SECMEC_EUSRIDPWD,
                 targetPublicKey_,
                 targetPublicKey_);

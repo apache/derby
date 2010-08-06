@@ -126,16 +126,16 @@ public class EbcdicCcsidManager extends CcsidManager {
         );
     }
 
-    public byte[] convertFromUCS2(String sourceString, org.apache.derby.client.am.Agent agent) throws SqlException {
+    public byte[] convertFromJavaString(String sourceString, org.apache.derby.client.am.Agent agent) throws SqlException {
         byte[] bytes = new byte[sourceString.length()];
-        convertFromUCS2(sourceString, bytes, 0, agent);
+        convertFromJavaString(sourceString, bytes, 0, agent);
         return bytes;
     }
 
-    public int convertFromUCS2(String sourceString,
-                               byte[] buffer,
-                               int offset,
-                               org.apache.derby.client.am.Agent agent) throws SqlException {
+    public int convertFromJavaString(String sourceString,
+                                     byte[] buffer,
+                                     int offset,
+                                     org.apache.derby.client.am.Agent agent) throws SqlException {
         for (int i = 0; i < sourceString.length(); i++) {
             char c = sourceString.charAt(i);
             if (c > 0xff)
@@ -151,7 +151,7 @@ public class EbcdicCcsidManager extends CcsidManager {
         return offset;
     }
 
-    String convertToUCS2(byte[] sourceBytes) {
+    String convertToJavaString(byte[] sourceBytes) {
         int i = 0;
         char[] theChars = new char[sourceBytes.length];
         int num = 0;
@@ -164,7 +164,7 @@ public class EbcdicCcsidManager extends CcsidManager {
         return new String(theChars);
     }
 
-    String convertToUCS2(byte[] sourceBytes, int offset, int numToConvert) {
+    String convertToJavaString(byte[] sourceBytes, int offset, int numToConvert) {
         int i = 0, j = 0;
         char[] theChars = new char[numToConvert];
         int num = 0;
@@ -178,7 +178,7 @@ public class EbcdicCcsidManager extends CcsidManager {
     }
 
 
-    char convertToUCS2Char(byte sourceByte) {
+    char convertToJavaChar(byte sourceByte) {
         return (char) conversionArrayToUCS2[(sourceByte < 0) ? (sourceByte + 256) : sourceByte];
     }
 
@@ -188,6 +188,10 @@ public class EbcdicCcsidManager extends CcsidManager {
      */
     int maxBytesPerChar() {
         return 1;
+    }
+
+    public int getByteLength(String s) {
+        return s.length();
     }
 
 }

@@ -642,6 +642,11 @@ Guide.
                 <text>Unrecognized Java SQL type {0}.</text>
                 <arg>datatypeName</arg>
             </msg>
+            
+            <msg>
+                <name>22005.S.7</name>
+                <text>Unicode string cannot convert to UTF-8 string</text>
+            </msg>
 
             <msg>
                 <name>22005</name>

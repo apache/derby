@@ -84,8 +84,12 @@ public class NetAgent extends Agent {
     int port_;
     int clientSSLMode_;
 
-    public CcsidManager sourceCcsidManager_;
-    public CcsidManager targetCcsidManager_;
+    private EbcdicCcsidManager ebcdicCcsidManager_;
+    private Utf8CcsidManager utf8CcsidManager_;
+    private CcsidManager currentCcsidManager_;
+    
+    // TODO: Remove target? Keep just one CcsidManager?
+    //public CcsidManager targetCcsidManager_;
     public Typdef typdef_;
     public Typdef targetTypdef_;
     public Typdef originalTargetTypdef_; // added to support typdef overrides
@@ -166,8 +170,12 @@ public class NetAgent extends Agent {
                 e.getMessage(), e);
         }
 
-        sourceCcsidManager_ = new EbcdicCcsidManager(); // delete these
-        targetCcsidManager_ = sourceCcsidManager_; // delete these
+        ebcdicCcsidManager_ = new EbcdicCcsidManager();
+        utf8CcsidManager_ = new Utf8CcsidManager();
+        currentCcsidManager_ = ebcdicCcsidManager_;
+        
+        // TODO: Remove target? Keep just one ccsidManager?
+        //targetCcsidManager_ = sourceCcsidManager_; // delete these
 
         if (netConnection_.isXAConnection()) {
             NetXAConnectionReply netXAConnectionReply_ = new NetXAConnectionReply(this, netConnection_.commBufferSize_);
@@ -184,7 +192,7 @@ public class NetAgent extends Agent {
             statementReply_ = (StatementReply) resultSetReply_;
             packageReply_ = (ConnectionReply) statementReply_;
             connectionReply_ = (ConnectionReply) packageReply_;
-            NetXAConnectionRequest netXAConnectionRequest_ = new NetXAConnectionRequest(this, sourceCcsidManager_, netConnection_.commBufferSize_);
+            NetXAConnectionRequest netXAConnectionRequest_ = new NetXAConnectionRequest(this, currentCcsidManager_, netConnection_.commBufferSize_);
             netResultSetRequest_ = (NetResultSetRequest) netXAConnectionRequest_;
             netStatementRequest_ = (NetStatementRequest) netResultSetRequest_;
             netPackageRequest_ = (NetPackageRequest) netStatementRequest_;
@@ -209,7 +217,7 @@ public class NetAgent extends Agent {
             statementReply_ = (StatementReply) resultSetReply_;
             packageReply_ = (ConnectionReply) statementReply_;
             connectionReply_ = (ConnectionReply) packageReply_;
-            netResultSetRequest_ = new NetResultSetRequest(this, sourceCcsidManager_, netConnection_.commBufferSize_);
+            netResultSetRequest_ = new NetResultSetRequest(this, currentCcsidManager_, netConnection_.commBufferSize_);
             netStatementRequest_ = (NetStatementRequest) netResultSetRequest_;
             netPackageRequest_ = (NetPackageRequest) netStatementRequest_;
             netConnectionRequest_ = (NetConnectionRequest) netPackageRequest_;
@@ -394,6 +402,10 @@ public class NetAgent extends Agent {
         return rawSocketInputStream_;
     }
 
+    public CcsidManager getCurrentCcsidManager() {
+        return currentCcsidManager_;
+    }
+    
     public java.io.OutputStream getOutputStream() {
         return rawSocketOutputStream_;
     }

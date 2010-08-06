@@ -52,7 +52,7 @@ public abstract class CcsidManager {
     //
     // @param sourceString A Java String to convert.
     // @return A new byte array representing the String in a particular ccsid.
-    public abstract byte[] convertFromUCS2(String sourceString, org.apache.derby.client.am.Agent agent) throws org.apache.derby.client.am.SqlException;
+    public abstract byte[] convertFromJavaString(String sourceString, org.apache.derby.client.am.Agent agent) throws org.apache.derby.client.am.SqlException;
 
 
     // Convert a Java String into bytes for a particular ccsid.
@@ -62,16 +62,16 @@ public abstract class CcsidManager {
     // @param buffer        The buffer to convert the String into.
     // @param offset        Offset in buffer to start putting output.
     // @return An int containing the buffer offset after conversion.
-    public abstract int convertFromUCS2(String sourceString,
-                                        byte[] buffer,
-                                        int offset,
-                                        org.apache.derby.client.am.Agent agent) throws org.apache.derby.client.am.SqlException;
+    public abstract int convertFromJavaString(String sourceString,
+                                              byte[] buffer,
+                                              int offset,
+                                              org.apache.derby.client.am.Agent agent) throws org.apache.derby.client.am.SqlException;
 
     // Convert a byte array representing characters in a particular ccsid into a Java String.
     //
     // @param sourceBytes An array of bytes to be converted.
     // @return String A new Java String Object created after conversion.
-    abstract String convertToUCS2(byte[] sourceBytes);
+    abstract String convertToJavaString(byte[] sourceBytes);
 
 
     // Convert a byte array representing characters in a particular ccsid into a Java String.
@@ -80,14 +80,14 @@ public abstract class CcsidManager {
     // @param offset  An offset indicating first byte to convert.
     // @param numToConvert The number of bytes to be converted.
     // @return A new Java String Object created after conversion.
-    abstract String convertToUCS2(byte[] sourceBytes, int offset, int numToConvert);
+    abstract String convertToJavaString(byte[] sourceBytes, int offset, int numToConvert);
 
 
     // Convert a byte representing a char in a particular ccsid into a Java char.
     //
     // @param sourceByte The byte to be converted
     // @return The converted Java char.
-    abstract char convertToUCS2Char(byte sourceByte);
+    abstract char convertToJavaChar(byte sourceByte);
 
 
     
@@ -97,5 +97,11 @@ public abstract class CcsidManager {
      */
     abstract int maxBytesPerChar();
 
+    /**
+     * Get length in bytes for string s
+     * @param s The string from which to obtain the length
+     * @return The length of s in bytes
+     */
+    abstract int getByteLength(String s);
 }
 

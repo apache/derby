@@ -1171,7 +1171,7 @@ public class Request {
         bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
         bytes_[offset_++] = (byte) (codePoint & 0xff);
         
-        offset_ = ccsidManager_.convertFromUCS2(string, bytes_, offset_, netAgent_);
+        offset_ = ccsidManager_.convertFromJavaString(string, bytes_, offset_, netAgent_);
        
         int stringByteLength = offset_ - lengthOffset - 4;
         // reset the buffer and throw an SQLException if the length is too long
@@ -1209,7 +1209,7 @@ public class Request {
     final void writeScalarPaddedString(String string, int paddedLength) throws SqlException {
         int stringLength = string.length();
         ensureLength(offset_ + paddedLength);
-        offset_ = ccsidManager_.convertFromUCS2(string, bytes_, offset_, netAgent_);
+        offset_ = ccsidManager_.convertFromJavaString(string, bytes_, offset_, netAgent_);
         for (int i = 0; i < paddedLength - stringLength; i++) {
             bytes_[offset_++] = ccsidManager_.space_;
         }
@@ -1327,7 +1327,7 @@ public class Request {
                 mask.append(maskChar);
             }
             // try to write mask over password.
-            ccsidManager_.convertFromUCS2(mask.toString(), bytes_, passwordStart_, netAgent_);
+            ccsidManager_.convertFromJavaString(mask.toString(), bytes_, passwordStart_, netAgent_);
         } catch (SqlException sqle) {
             // failed to convert mask,
             // them simply replace with 0xFF.
@@ -1565,7 +1565,7 @@ public class Request {
     // data or fodca data right now it is coded for ddm char data only
     final void writeDDMString(String s) throws SqlException {
         ensureLength(offset_ + s.length());
-        offset_ = ccsidManager_.convertFromUCS2(s, bytes_, offset_, netAgent_);
+        offset_ = ccsidManager_.convertFromJavaString(s, bytes_, offset_, netAgent_);
     }
 
     private void buildLengthAndCodePointForLob(int codePoint,
