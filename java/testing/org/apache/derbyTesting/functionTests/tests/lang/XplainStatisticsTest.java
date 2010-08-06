@@ -615,7 +615,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     /**
      * Added by DERBY-4587
      * Returns the stmt_id for this particular statement
-     * @param s: Statement
+     * @param s Statement
      * @return stmt_id
      * */
     private String getStmtID(Statement s) throws SQLException{

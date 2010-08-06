@@ -38,3 +38,4 @@
 **/*.rej
 **/*.orig
 **/*.policy
+**/*.xsl
