@@ -22,8 +22,6 @@
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
@@ -31,15 +29,13 @@ import java.sql.Types;
 
 import junit.framework.Assert;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * Test for comments.
+ * Test for comments, and a few tests related to parsing non-comment SQL.
  */
 public final class CommentTest extends BaseJDBCTestCase {
 
@@ -216,6 +212,10 @@ public final class CommentTest extends BaseJDBCTestCase {
             s.executeQuery("select'a' from sys.systables"));
         JDBC.assertDrainResults(
             s.executeQuery("select\"TABLEID\" from sys.systables"));
+
+        // Added for DERBY-4748.
+        assertCompileError("42X01", "commit");
+        assertCompileError("42X01", "commit;");
     }
 
     /**
