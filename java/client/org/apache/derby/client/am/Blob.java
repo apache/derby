@@ -469,6 +469,11 @@ public class Blob extends Lob implements java.sql.Blob {
         if (len == 0) {
             return 0;
         }
+        if (len + offset > bytes.length) {
+            throw new SqlException(agent_.logWriter_,
+                    new ClientMessageId(SQLState.BLOB_LENGTH_TOO_LONG),
+                    new Integer(len));
+        }   
         
         final int length = Math.min((bytes.length - offset), len);
 

@@ -879,31 +879,46 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             int offset,
             int len) throws SQLException {
         checkValidity();
+
+        if (pos - 1 > length())
+            throw Util.generateCsSQLException(SQLState.BLOB_POSITION_TOO_LARGE,
+                    new Long(pos));
+        if (pos < 1)
+            throw Util.generateCsSQLException(SQLState.BLOB_BAD_POSITION,
+                    new Long(pos));
+        
+        if ((offset < 0) || offset > bytes.length) {
+            throw Util.generateCsSQLException(SQLState.BLOB_INVALID_OFFSET,
+                    new Long(offset));
+        }
+        if (len < 0) {
+            throw Util.generateCsSQLException(SQLState.BLOB_NONPOSITIVE_LENGTH,
+                    new Long(len));
+        }
+        if (len == 0) {
+            return 0;
+        }
+        if (len + offset > bytes.length) {
+            throw Util.generateCsSQLException(SQLState.BLOB_LENGTH_TOO_LONG,
+                    new Long(len));
+        }
+
         try {
             if (materialized) {
-                if (pos - 1 > length())
-                    throw Util.generateCsSQLException(
-                            SQLState.BLOB_POSITION_TOO_LARGE, new Long(pos));
-                if (pos < 1)
-                    throw Util.generateCsSQLException(
-                        SQLState.BLOB_BAD_POSITION, new Long(pos));
-                control.write (bytes, offset, len, pos - 1);
-            }
-            else {
-                control = new LOBStreamControl (getEmbedConnection());
-                control.copyData (myStream, length());
+                control.write(bytes, offset, len, pos - 1);
+            } else {
+                control = new LOBStreamControl(getEmbedConnection());
+                control.copyData(myStream, length());
                 control.write(bytes, offset, len, pos - 1);
                 myStream.close();
                 streamLength = -1;
                 materialized = true;
             }
             return len;
-        }
-        catch (IOException e) {
-            throw Util.setStreamFailure (e);
-        }
-        catch (StandardException se) {
-            throw Util.generateCsSQLException (se);
+        } catch (IOException e) {
+            throw Util.setStreamFailure(e);
+        } catch (StandardException se) {
+            throw Util.generateCsSQLException(se);
         }
     }
 
