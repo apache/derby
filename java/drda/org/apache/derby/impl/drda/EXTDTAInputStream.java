@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
 import java.io.Reader;
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.Blob;
 import java.sql.Clob;
@@ -48,13 +49,24 @@ class EXTDTAInputStream extends InputStream {
 
     private InputStream binaryInputStream = null;
  
+    /** DRDA Type of column/parameter */
+    int ndrdaType;
+
+    //
+    // Used when this class wraps a ResultSet
+    //
     
     /** ResultSet that contains the stream*/
     EngineResultSet rs;
     /** Column index starting with 1 */
     int columnNumber;
-    /** DRDA Type of column */
-    int ndrdaType;
+
+    //
+    // Used when this class wraps a CallableStatement
+    //
+    private Clob _clob;
+    private Blob _blob;
+    
       
 	
 	private EXTDTAInputStream(ResultSet rs,
@@ -64,6 +76,18 @@ class EXTDTAInputStream extends InputStream {
 	
         this.rs = (EngineResultSet) rs;
         this.columnNumber = columnNumber;
+        this.ndrdaType = ndrdaType;
+    }
+
+	private EXTDTAInputStream(Clob clob, int ndrdaType ) 
+    {
+        _clob = clob;
+        this.ndrdaType = ndrdaType;
+    }
+
+	private EXTDTAInputStream(Blob blob, int ndrdaType ) 
+    {
+        _blob = blob;
         this.ndrdaType = ndrdaType;
     }
 
@@ -100,6 +124,39 @@ class EXTDTAInputStream extends InputStream {
 					     column,
 					     ndrdaType);
 		
+	}
+
+	/**
+	 * Create a new EXTDTAInputStream from a CallableStatement.
+	 * 
+	 * 
+	 * @param cs
+	 *            CallableStatement from which to retrieve the lob
+	 * @param column
+	 *            column number
+	 * @param drdaType
+	 *            FD:OCA type of object one of
+	 * 			   DRDAConstants.DRDA_TYPE_NLOBBYTES
+	 * 			   DRDAConstants.DRDA_TYPE_LOBBYTES
+	 * 			   DRDAConstants.DRDA_TYPE_NLOBCMIXED
+	 *  		   DRDAConstants.DRDA_TYPE_LOBCMIXED
+	 */
+	public static EXTDTAInputStream getEXTDTAStream(CallableStatement cs, int column, int drdaType)
+        throws SQLException
+    {
+ 	    
+		int ndrdaType = drdaType | 1; //nullable drdaType
+
+        switch ( ndrdaType )
+        {
+        case DRDAConstants.DRDA_TYPE_NLOBBYTES:
+            return new EXTDTAInputStream( cs.getBlob( column ), ndrdaType );
+        case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
+            return new EXTDTAInputStream( cs.getClob( column ), ndrdaType );
+        default:
+            badDRDAType( ndrdaType );
+			return null;
+        }
 	}
 
 	
@@ -212,10 +269,16 @@ class EXTDTAInputStream extends InputStream {
 	}
 
 
-    protected boolean isEmptyStream() throws SQLException{
-            return (rs.getLength(columnNumber) == 0);
-        
-        }
+    protected boolean isEmptyStream() throws SQLException
+    {
+        return (length() == 0);
+    }
+    private long length() throws SQLException
+    {
+        if ( rs != null ) { return rs.getLength(columnNumber); }
+        else if ( _clob != null ) { return _clob.length(); }
+        else { return _blob.length(); }
+    }
     
     
     /**
@@ -235,16 +298,15 @@ class EXTDTAInputStream extends InputStream {
 	// BLOBS
 	if (ndrdaType == DRDAConstants.DRDA_TYPE_NLOBBYTES) 
 	{ 	    	
-	    is = this.rs.getBinaryStream(this.columnNumber);
-	    if (is == null) 
-              return;
+	    is = getBinaryStream();
+	    if (is == null) { return; }
 	}
 	    // CLOBS
 	else if (ndrdaType ==  DRDAConstants.DRDA_TYPE_NLOBCMIXED)
 	{	
 	    try {
 	        
-	        r = this.rs.getCharacterStream(this.columnNumber);
+	        r = getCharacterStream();
 		    	
 	        if(r == null){	            
                     return;
@@ -261,19 +323,30 @@ class EXTDTAInputStream extends InputStream {
 		    }
 		    
 		}
-	    else
-		{
-		    if (SanityManager.DEBUG)
-			{
-			    SanityManager.THROWASSERT("NDRDAType: " + ndrdaType +
-						      " not valid EXTDTA object type");
-			}
-		}
+        else { badDRDAType( ndrdaType ); }
 	if (! is.markSupported()) {
 	    is = new BufferedInputStream(is);
 	    }
 	    
  	this.binaryInputStream=is;
+    }
+    private InputStream getBinaryStream() throws SQLException
+    {
+        if ( rs != null ) { return rs.getBinaryStream(this.columnNumber); }
+        else { return _blob.getBinaryStream(); }
+    }
+    private Reader getCharacterStream() throws SQLException
+    {
+        if ( rs != null ) { return rs.getCharacterStream(this.columnNumber); }
+        else { return _clob.getCharacterStream(); }
+    }
+    private static void badDRDAType( int drdaType )
+    {
+        if (SanityManager.DEBUG)
+        {
+            SanityManager.THROWASSERT("NDRDAType: " + drdaType +
+                                      " not valid EXTDTA object type");
+        }
     }
     
         
@@ -283,7 +356,7 @@ class EXTDTAInputStream extends InputStream {
 
     /**
      * Is the value null?  Null status is obtained from the underlying 
-     * EngineResultSet, so that it can be determined before the stream
+     * EngineResultSet or LOB, so that it can be determined before the stream
      * is retrieved.
      * 
      * @return true if this value is null
@@ -291,7 +364,7 @@ class EXTDTAInputStream extends InputStream {
      */
     public boolean isNull() throws SQLException
     {
-        return this.rs.isNull(columnNumber);
-     
+        if ( rs != null ) { return rs.isNull(columnNumber); }
+        else { return (_clob == null) && (_blob == null); }
     }
 }

@@ -559,7 +559,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     int jopt = jdbcTypes[opt];
                     if (jopt == Types.NULL)
                         continue;
-                    
+
                     CallableStatement csp = conn.prepareCall("CALL PMP.TYPE_AS(?, ?, ?)");
                     
                     boolean bothRegistered = true;
@@ -632,6 +632,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
         PreparedStatement ps;
         CallableStatement cs;
+        Clob outVal;
 
         //
         // Clob input parameter
@@ -665,9 +666,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         //
         // Clob output parameter
         //
-        expectCompilationError
+        ps = chattyPrepare
             (
-             BAD_TYPE,
+             conn,
              "create procedure clobOut\n" +
              "( out c clob )\n" +
              "language java\n" +
@@ -675,13 +676,22 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
              "no sql\n" +
              "external name '" + getClass().getName() + ".clobOut'\n"
              );
+        ps.execute();
+        ps.close();
         
+        cs = chattyPrepareCall( conn, "call clobOut( ? )" );
+        cs.registerOutParameter( 1, Types.CLOB );
+        cs.execute();
+        outVal = cs.getClob( 1 );
+        assertEquals( "abc", outVal.getSubString( 1L, (int) outVal.length() ) );
+        cs.close();
+
         //
         // Clob inout parameter
         //
-        expectCompilationError
+        ps = chattyPrepare
             (
-             BAD_TYPE,
+             conn,
              "create procedure clobInOut\n" +
              "( inout c clob )\n" +
              "language java\n" +
@@ -689,6 +699,17 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
              "no sql\n" +
              "external name '" + getClass().getName() + ".clobInOut'\n"
              );
+        ps.execute();
+        ps.close();
+        
+        cs = chattyPrepareCall( conn, "call clobInOut( ? )" );
+        cs.setClob( 1, new StringColumnVTI.SimpleClob( "ghi" ) );
+        cs.registerOutParameter( 1, Types.CLOB );
+        cs.execute();
+        outVal = cs.getClob( 1 );
+        assertEquals( "ihg", outVal.getSubString( 1L, (int) outVal.length() ) );
+        cs.close();
+
     }
 
     /**
@@ -699,6 +720,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         Connection conn = getConnection();
         PreparedStatement ps;
         CallableStatement cs;
+        Blob outVal;
 
         //
         // Blob input parameter
@@ -726,9 +748,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         //
         // Blob output parameter
         //
-        expectCompilationError
+        ps = chattyPrepare
             (
-             BAD_TYPE,
+             conn,
              "create procedure blobOut\n" +
              "( out c blob )\n" +
              "language java\n" +
@@ -736,13 +758,22 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
              "no sql\n" +
              "external name '" + getClass().getName() + ".blobOut'\n"
              );
+        ps.execute();
+        ps.close();
+
+        cs = chattyPrepareCall( conn, "call blobOut( ? )" );
+        cs.registerOutParameter( 1, Types.BLOB );
+        cs.execute();
+        outVal = cs.getBlob( 1 );
+        assertEquals( "abc", getBlobValue( outVal ) );
+        cs.close();
         
         //
         // Blob inout parameter
         //
-        expectCompilationError
+        ps = chattyPrepare
             (
-             BAD_TYPE,
+             conn,
              "create procedure blobInOut\n" +
              "( inout c blob )\n" +
              "language java\n" +
@@ -750,6 +781,16 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
              "no sql\n" +
              "external name '" + getClass().getName() + ".blobInOut'\n"
              );
+        ps.execute();
+        ps.close();
+
+        cs = chattyPrepareCall( conn, "call blobInOut( ? )" );
+        cs.setBlob( 1, new StringColumnVTI.SimpleBlob( "ghi".getBytes( UTF8 ) ) );
+        cs.registerOutParameter( 1, Types.BLOB );
+        cs.execute();
+        outVal = cs.getBlob( 1 );
+        assertEquals( "ihg", getBlobValue( outVal ) );
+        cs.close();
     }
 
     /*
@@ -3693,10 +3734,29 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     }
 
     private static void checkProcedureOutput(int param, int paramType, byte[] val) {
+        boolean isBlob =  ( jdbcTypes[ paramType ] == Types.BLOB );
         if (param == 2)
-            assertEquals("0x4,0x3",showFirstTwo(val));
+        {
+            if ( isBlob )
+            {
+                assertEquals("0x82,0x43",showFirstTwo(val));
+            }
+            else
+            {
+                assertEquals("0x4,0x3",showFirstTwo(val));
+            }
+        }
         else if (param == 3)
-            assertEquals("0x9,0xfe",showFirstTwo(val));
+        {
+            if ( isBlob )
+            {
+                assertEquals("0x1,0x2",showFirstTwo(val));
+            }
+            else
+            {
+                assertEquals("0x9,0xfe",showFirstTwo(val));
+            }
+        }
     }
     
     private static void checkProcedureOutput(int param, int paramType, Date val) {

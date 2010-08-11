@@ -564,31 +564,50 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 			throw Util.notImplemented();
 		}
 
-		/**
-	     * JDBC 2.0
-	     *
-	     * Get a BLOB OUT parameter.
-	     *
-	     * @param i the first parameter is 1, the second is 2, ...
-	     * @return an object representing a BLOB
-	     * @exception SQLException if a database-access error occurs.
-	     */
-	    public Blob getBlob (int i) throws SQLException {
-			throw Util.notImplemented();
+    /**
+     * JDBC 2.0
+     *
+     * Get a BLOB OUT parameter.
+     *
+     * @param i the first parameter is 1, the second is 2, ...
+     * @return an object representing a BLOB
+     * @exception SQLException if a database-access error occurs.
+     */
+    public Blob getBlob (int parameterIndex) throws SQLException {
+		checkStatus();
+		try {
+			DataValueDescriptor param = getParms().getParameterForGet(parameterIndex-1);
+			Blob v = (Blob) param.getObject();
+			wasNull = (v == null);
+			return v;
+		} catch (StandardException e)
+		{
+			throw EmbedResultSet.noStateChangeException(e);
 		}
+    }
 
-	    /**
-	     * JDBC 2.0
-	     *
-	     * Get a CLOB OUT parameter.
-	     *
-	     * @param i the first parameter is 1, the second is 2, ...
-	     * @return an object representing a CLOB
-	     * @exception SQLException if a database-access error occurs.
-	     */
-	    public Clob getClob (int i) throws SQLException {
-			throw Util.notImplemented();
+    /**
+     * JDBC 2.0
+     *
+     * Get a CLOB OUT parameter.
+     *
+     * @param i the first parameter is 1, the second is 2, ...
+     * @return an object representing a CLOB
+     * @exception SQLException if a database-access error occurs.
+     */
+    public Clob getClob (int parameterIndex) throws SQLException {
+		checkStatus();
+		try {
+			DataValueDescriptor param = getParms().getParameterForGet(parameterIndex-1);
+			Clob v = (Clob) param.getObject();
+			wasNull = (v == null);
+			return v;
+		} catch (StandardException e)
+		{
+			throw EmbedResultSet.noStateChangeException(e);
 		}
+    }
+    
 	public void addBatch() throws SQLException {
 
 		checkStatus();

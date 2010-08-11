@@ -296,8 +296,11 @@ class DRDAResultSet
 
 		// Column number is starting on 1
 		int colnum = ((Integer) rsExtPositions.get(index)).intValue() + 1;
-		
-		if (FdocaConstants.isNullable(getRsDRDAType(colnum)))
+
+        // if there is no type information, then we represent a CallableStatement
+        // and all parameters are nullable
+        if ( rsDRDATypes == null ) { return true; }
+		else if (FdocaConstants.isNullable(getRsDRDAType(colnum)))
 			return true;
 		else 
 			return false;

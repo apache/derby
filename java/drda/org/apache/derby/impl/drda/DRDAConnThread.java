@@ -4179,8 +4179,14 @@ class DRDAConnThread extends Thread {
 				writer.endDdm();
 				writer.startDdm(CodePoint.FDODTA);
 				writeFDODTA(stmt);
-				writer.endDdm();
-				writer.endDdmAndDss();
+                writer.endDdm();
+                writer.endDdmAndDss();
+
+                if (stmt.getExtDtaObjects() != null)
+                {
+                    // writeScalarStream() ends the dss
+                    writeEXTDTA(stmt);
+                }
 			}
 			else if (hasResultSet)
 			// DRDA spec says that we MUST return either an
@@ -4195,7 +4201,7 @@ class DRDAConnThread extends Thread {
 			// SQLCARD for us.
 				writeNullSQLCARDobject();
 		}
-		
+
 		//We need to marke that params are finished so that we know we 
 		// are ready to send resultset info.
 		stmt.finishParams();
@@ -4238,7 +4244,7 @@ class DRDAConnThread extends Thread {
 		}
 
 		} while(hasResultSet && (++rsNum < numResults));
-		
+		        
 		return;			// we are done
 	}
 
@@ -6897,7 +6903,7 @@ class DRDAConnThread extends Thread {
 			}
 			return;
 		}
-		
+
 		while(getMoreData)
 		{			
 			sentExtData = false;
@@ -7304,6 +7310,9 @@ class DRDAConnThread extends Thread {
                 return cs.getTime(index, getGMTCalendar());
             case DRDAConstants.DRDA_TYPE_NTIMESTAMP:
                 return cs.getTimestamp(index, getGMTCalendar());
+            case DRDAConstants.DRDA_TYPE_NLOBBYTES:
+            case  DRDAConstants.DRDA_TYPE_NLOBCMIXED:
+                return EXTDTAInputStream.getEXTDTAStream(cs, index, drdaType);
             default:
                 return cs.getObject(index);
         }
@@ -7922,7 +7931,7 @@ class DRDAConnThread extends Thread {
 					break;
 				case DRDAConstants.DRDA_TYPE_NLOBBYTES:
 				case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
-				    
+
 					// do not send EXTDTA for lob of length 0, beetle 5967
 				    if( ! ((EXTDTAInputStream) val).isEmptyStream() ){
 						stmt.addExtDtaObject(val, index);
@@ -8624,7 +8633,6 @@ class DRDAConnThread extends Thread {
 
   void writeEXTDTA (DRDAStatement stmt) throws SQLException, DRDAProtocolException
   {
-
 	  ArrayList extdtaValues = stmt.getExtDtaObjects();
     // build the EXTDTA data, if necessary
     if (extdtaValues == null) 

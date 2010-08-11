@@ -176,25 +176,14 @@ public class CreateAliasNode extends DDLStatementNode
                         int currentMode =  ((Integer) (((Vector) parameters[2]).elementAt(i))).intValue();
                         modes[i] = currentMode;
   
-                        boolean isOutputParameter =
-                            ( (currentMode == JDBC30Translation.PARAMETER_MODE_OUT) || (currentMode == JDBC30Translation.PARAMETER_MODE_IN_OUT) );
-                        
                         //
-                        // We used to forbid LOBs as method parameters. DERBY-4066 lifted this
-                        // restriction except for the output parameters of
-                        // procedures. In that case, we are not able to send the
-                        // output LOB across the network to a client today. In addition, we still don't support XML values as parameters.
+                        // We still don't support XML values as parameters.
                         // Presumably, the XML datatype would map to a JDBC java.sql.SQLXML type.
                         // We have no support for that type today.
                         //
                         if ( !types[ i ].isUserDefinedType() )
                         {
-                            if
-                                (
-                                 ( TypeId.getBuiltInTypeId(types[i].getJDBCTypeId()).isLongConcatableTypeId() && isOutputParameter )
-                                 ||
-                                 (TypeId.getBuiltInTypeId(types[i].getJDBCTypeId()).isXMLTypeId())
-                                 )
+                            if (TypeId.getBuiltInTypeId(types[i].getJDBCTypeId()).isXMLTypeId())
                             { throw StandardException.newException(SQLState.LANG_LONG_DATA_TYPE_NOT_ALLOWED, names[i]); }
                         }
                     }
