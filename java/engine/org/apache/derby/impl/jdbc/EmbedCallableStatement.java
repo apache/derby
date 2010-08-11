@@ -569,7 +569,7 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
      *
      * Get a BLOB OUT parameter.
      *
-     * @param i the first parameter is 1, the second is 2, ...
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
      * @return an object representing a BLOB
      * @exception SQLException if a database-access error occurs.
      */
@@ -591,7 +591,7 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
      *
      * Get a CLOB OUT parameter.
      *
-     * @param i the first parameter is 1, the second is 2, ...
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
      * @return an object representing a CLOB
      * @exception SQLException if a database-access error occurs.
      */
