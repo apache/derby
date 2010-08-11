@@ -1,0 +1,22 @@
+# This file contains the extra list of the files to be included
+# with Derby's public JDBC4 api but not with the public JDBC3 api.
+# This list supplements the common list found in
+# publishedapi.ant.
+# 
+# IMPORTANT: all names should be like package names, but with slashes
+#            instead of dots.
+#
+# Add new files to the appropriate package section; add new sections
+# for new packages.
+#
+# IMPORTANT: if you are adding a new package, be sure to add it to
+#            the list of packages in the publishedapi target in
+#            the toplevel build.xml file.
+#
+# Please do not add whitespace in front of class names.
+# Blank lines and comments are allowed.
+
+# package: org.apache.derby
+
+**/*40.java
+org/apache/derby/impl/services/locks/ConcurrentLockSet.java

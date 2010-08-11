@@ -805,8 +805,49 @@
       <link href="."/>
     </javadoc>
 
+    <antcall target="dojavadoc16"/>
+
     <delete dir="${javadoc.temp.dir}"/>
 
+  </target>
+
+  <target name="dojavadoc16" if="jdk16">
+    <javadoc
+        executable="${javadoc.tool}"
+        additionalparam="-J-mx320M"
+        packagenames="org.*"
+        access="private"
+        breakiterator="yes"
+        useexternalfile="yes"
+        classpath="${out.dir};${java14compile.classpath};${jars.extras};${osgi}"
+        destdir="${out.javadoc.dir}/engine"
+        windowtitle="Apache Derby V${major}.${minor} Internals"
+        doctitle="Apache Derby V${major}.${minor} Internals"
+        Footer="${javadoc.Footer}"
+        bottom="Apache Derby V${major}.${minor} Internals - &lt;i&gt;Copyright &amp;copy; 2004,2008 The Apache Software Foundation. All Rights Reserved.&lt;/i&gt;"
+        source="1.5">
+        <taglet name="org.apache.derbyBuild.javadoc.FormatIdTaglet" 
+                path="${basedir}/classes"/>
+        <taglet name="org.apache.derbyBuild.javadoc.PurposeTaglet" 
+                path="${basedir}/classes"/>
+        <taglet name="org.apache.derbyBuild.javadoc.UpgradeTaglet" 
+                path="${basedir}/classes"/>
+        <taglet name="org.apache.derbyBuild.javadoc.DiskLayoutTaglet" 
+                path="${basedir}/classes"/>
+        <taglet name="org.apache.derbyBuild.javadoc.EndFormatTaglet" 
+                path="${basedir}/classes"/>
+      <fileset dir="${derby.engine.src.dir}"
+               includes="**/*40.java,org/apache/derby/impl/services/locks/ConcurrentLockSet.java"
+               />
+      <fileset dir="${derby.client.src.dir}"
+               includes="**/*40.java"
+               />
+      <fileset dir="${derby.engine.src.dir}"
+               excludesfile="${javadoc.exclusions}"/>
+      <fileset dir="${derby.client.src.dir}"
+               excludesfile="${javadoc.exclusions}"/>
+      <link href="."/>
+    </javadoc>
   </target>
 
   <!--
@@ -862,6 +903,9 @@
     <concat destfile="${javadoc.exclusions}" append="yes">
        <filelist dir="${javadoctools.dir}" 
          files="${more_exclusions}"
+       />
+       <filelist dir="${javadoctools.dir}" 
+         files="jdbc4list"
        />
     </concat>
   </target>
