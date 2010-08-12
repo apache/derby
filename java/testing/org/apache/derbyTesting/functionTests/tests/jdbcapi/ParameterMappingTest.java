@@ -708,7 +708,59 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         cs.execute();
         outVal = cs.getClob( 1 );
         assertEquals( "ihg", outVal.getSubString( 1L, (int) outVal.length() ) );
+
+        Clob inValue = makeBigClob();
+        cs.setClob( 1, inValue );
+        cs.execute();
+        Clob outValue = cs.getClob( 1 );
+        compareClobs( inValue, outValue );
+        
         cs.close();
+    }
+    private Clob makeBigClob() throws Exception
+    {
+        char[] template = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+        int templateLength = template.length;
+        int multiplier = 50000;
+        char[] value = new char[ templateLength * multiplier ];
+        int idx = 0;
+        for ( int i = 0; i < multiplier; i++ )
+        {
+            for ( int j = 0; j < templateLength; j++ )
+            {
+                value[ idx++ ] = template[ j ];
+            }
+                          
+        }
+        
+        return new StringColumnVTI.SimpleClob( new String( value ) );
+    }
+    private void compareClobs( Clob left, Clob right ) throws Exception
+    {
+        long leftLength = left.length();
+        long rightLength = right.length();
+
+        println( "Left clob has " + leftLength + " characters and right clob has " + rightLength + " characters." );
+
+        if ( leftLength == rightLength );
+        {
+            String leftString = left.getSubString( 1L, (int) leftLength );
+            String rightString = right.getSubString( 1L, (int) rightLength );
+
+            for ( int i = 0; i < leftLength; i++ )
+            {
+                int leftIdx = (int) i;
+                int rightIdx = (int) ((leftLength - leftIdx) - 1);
+                char leftC = leftString.charAt( leftIdx );
+                char rightC = rightString.charAt( rightIdx );
+
+                if ( leftC != rightC )
+                {
+                    println( "left[ " + leftIdx+ " ] = " + leftC + " but right[ " + rightIdx + " ] = " + rightC );
+                    return;
+                }
+            }
+        }
 
     }
 
@@ -790,7 +842,59 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         cs.execute();
         outVal = cs.getBlob( 1 );
         assertEquals( "ihg", getBlobValue( outVal ) );
+        
+        Blob inValue = makeBigBlob();
+        cs.setBlob( 1, inValue );
+        cs.execute();
+        Blob outValue = cs.getBlob( 1 );
+        compareBlobs( inValue, outValue );
+
         cs.close();
+    }
+    private Blob makeBigBlob() throws Exception
+    {
+        byte[] template = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        int templateLength = template.length;
+        int multiplier = 110000;
+        byte[] value = new byte[ templateLength * multiplier ];
+        int idx = 0;
+        for ( int i = 0; i < multiplier; i++ )
+        {
+            for ( int j = 0; j < templateLength; j++ )
+            {
+                value[ idx++ ] = template[ j ];
+            }
+                          
+        }
+        
+        return new StringColumnVTI.SimpleBlob( value );
+    }
+    private void compareBlobs( Blob left, Blob right ) throws Exception
+    {
+        long leftLength = left.length();
+        long rightLength = right.length();
+
+        println( "Left blob has " + leftLength + " bytes and right blob has " + rightLength + " bytes." );
+
+        if ( leftLength == rightLength );
+        {
+            byte[] leftBytes = left.getBytes( 1L, (int) leftLength );
+            byte[] rightBytes = right.getBytes( 1L, (int) rightLength );
+
+            for ( int i = 0; i < leftLength; i++ )
+            {
+                int leftIdx = (int) i;
+                int rightIdx = (int) ((leftLength - leftIdx) - 1);
+                byte leftC = leftBytes[ leftIdx ];
+                byte rightC = rightBytes[ rightIdx ];
+
+                if ( leftC != rightC )
+                {
+                    println( "left[ " + leftIdx+ " ] = " + leftC + " but right[ " + rightIdx + " ] = " + rightC );
+                    return;
+                }
+            }
+        }
     }
 
     /*
