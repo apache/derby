@@ -5,48 +5,48 @@
   <xsl:output method="html" indent="yes"
     doctype-public="-//W3C//DTD HTML 4.01//EN"
     doctype-system="http://www.w3.org/TR/html4/strict.dtd"/>
-    
+
   <xsl:strip-space elements="*"/>
- 
+
   <xsl:template match="/">
     <html>
       <head>
         <title>Derby Graphical Query Explainer</title>
         <style type="text/css">
-		H1,H2{text-align:center;}
-		ul{list-style-type: none;}
+        H1,H2{text-align:center;}
+        ul{list-style-type: none;}
         table.hide { display: none; }
-		table,td,th
-		{
-			border:2px solid black;
-			font-size:18px;
-			position:relative;
-			left:160px;
-		}
-		th
-		{
-			text-align:left;
-			background-color:#999933;
-			color:white;
-		}
-		td{text-align:center;}
-		span.expand, span.collapse
-		{
-			color:#3B5998;
-			font-size:20px;
-			position:relative;
-			left:150px;
-		}
-		span.plus, span.minus
-		{
-			color:#000000;
-			font-size:20px;
-		}
+        table,td,th
+        {
+            border:2px solid black;
+            font-size:18px;
+            position:relative;
+            left:160px;
+        }
+        th
+        {
+            text-align:left;
+            background-color:#999933;
+            color:white;
+        }
+        td{text-align:center;}
+        span.expand, span.collapse
+        {
+            color:#3B5998;
+            font-size:20px;
+            position:relative;
+            left:150px;
+        }
+        span.plus, span.minus
+        {
+            color:#000000;
+            font-size:20px;
+        }
         span.expand, span.collapse { cursor: pointer; }
         span.expand span.minus { display: none; }
         span.collapse span.plus { display: none }
         </style>
-		<script type="text/javascript">
+        <script type="text/javascript">
         <!--[CDATA[-->
         window.onload = function()
         {
@@ -57,7 +57,7 @@
             childUls[i].className = 'hide';
           }
         }
-        
+
         function toggle(el)
         {
           do
@@ -72,99 +72,99 @@
         </script>
       </head>
       <body>
-		<H1>Apache Derby</H1>
-		<H1>Graphical Query Explainer</H1>
-		<H2>Executed Date &amp; Time: <font color="#4E9258"> <xsl:value-of select="//time"/> </font></H2>
-		<H2>Query: <font color="#4E9258"> <xsl:value-of select="//statement"/> </font></H2>
-		<H2>STMT_ID: <font color="#4E9258"> <xsl:value-of select="//stmt_id"/> </font></H2>
-		<br></br>
-		<br></br>
+        <H1>Apache Derby</H1>
+        <H1>Graphical Query Explainer</H1>
+        <H2>Executed Date &amp; Time: <font color="#4E9258"> <xsl:value-of select="//time"/> </font></H2>
+        <H2>Query: <font color="#4E9258"> <xsl:value-of select="//statement"/> </font></H2>
+        <H2>STMT_ID: <font color="#4E9258"> <xsl:value-of select="//stmt_id"/> </font></H2>
+        <br></br>
+        <br></br>
         <xsl:apply-templates/>
       </body>
     </html>
   </xsl:template>
-  
+
   <xsl:template match="plan">
     <ul id="main-ul">
       <xsl:apply-templates select="details/node"/>
     </ul>
   </xsl:template>
-  
+
   <xsl:template match="node">
     <li>
       <span class="expand" onclick="toggle(this);">
         <span class="plus">+ </span>
         <span class="minus">- </span>
         <xsl:value-of select="@name"/>
-		<br></br>
+        <br></br>
       </span>
       <table frame="border" rules="all">
-		<xsl:if test="count(@input_rows)!=0">
-			<tr>
-			<xsl:apply-templates select="@input_rows"/>
-			</tr>
-		</xsl:if>
-		<xsl:if test="count(@returned_rows)!=0">
-			<tr>
-			<xsl:apply-templates select="@returned_rows"/>
-			</tr>
-		</xsl:if>
-		<xsl:if test="count(@no_opens)!=0">
-			<tr>
-			<xsl:apply-templates select="@no_opens"/>
-			</tr>
-		</xsl:if>
-		<xsl:if test="count(@visited_pages)!=0">
-			<tr>
-			<xsl:apply-templates select="@visited_pages"/>
-			</tr>
-		</xsl:if>
-		<xsl:if test="count(@scan_qualifiers)!=0">
-			<tr>
-			<xsl:apply-templates select="@scan_qualifiers"/>
-			</tr>
-		</xsl:if>
-		<xsl:if test="count(@next_qualifiers)!=0">
-			<tr>
-			<xsl:apply-templates select="@next_qualifiers"/>
-			</tr>
-		</xsl:if>
-		<xsl:if test="count(@scanned_object)!=0">
-			<tr>
-			<xsl:apply-templates select="@scanned_object"/>
-			</tr>
-		</xsl:if>
-		<xsl:if test="count(@scan_type)!=0">
-			<tr>
-			<xsl:apply-templates select="@scan_type"/>
-			</tr>
-		</xsl:if>
-		<xsl:if test="count(@sort_type)!=0">
-			<tr>
-			<xsl:apply-templates select="@sort_type"/>
-			</tr>
-		</xsl:if>
-		<xsl:if test="count(@sorter_output)!=0">
-			<tr>
-			<xsl:apply-templates select="@sorter_output"/>
-			</tr>
-		</xsl:if>
-		</table>
-		<br></br>
+        <xsl:if test="count(@input_rows)!=0">
+            <tr>
+            <xsl:apply-templates select="@input_rows"/>
+            </tr>
+        </xsl:if>
+        <xsl:if test="count(@returned_rows)!=0">
+            <tr>
+            <xsl:apply-templates select="@returned_rows"/>
+            </tr>
+        </xsl:if>
+        <xsl:if test="count(@no_opens)!=0">
+            <tr>
+            <xsl:apply-templates select="@no_opens"/>
+            </tr>
+        </xsl:if>
+        <xsl:if test="count(@visited_pages)!=0">
+            <tr>
+            <xsl:apply-templates select="@visited_pages"/>
+            </tr>
+        </xsl:if>
+        <xsl:if test="count(@scan_qualifiers)!=0">
+            <tr>
+            <xsl:apply-templates select="@scan_qualifiers"/>
+            </tr>
+        </xsl:if>
+        <xsl:if test="count(@next_qualifiers)!=0">
+            <tr>
+            <xsl:apply-templates select="@next_qualifiers"/>
+            </tr>
+        </xsl:if>
+        <xsl:if test="count(@scanned_object)!=0">
+            <tr>
+            <xsl:apply-templates select="@scanned_object"/>
+            </tr>
+        </xsl:if>
+        <xsl:if test="count(@scan_type)!=0">
+            <tr>
+            <xsl:apply-templates select="@scan_type"/>
+            </tr>
+        </xsl:if>
+        <xsl:if test="count(@sort_type)!=0">
+            <tr>
+            <xsl:apply-templates select="@sort_type"/>
+            </tr>
+        </xsl:if>
+        <xsl:if test="count(@sorter_output)!=0">
+            <tr>
+            <xsl:apply-templates select="@sorter_output"/>
+            </tr>
+        </xsl:if>
+        </table>
+        <br></br>
         <ul>
           <xsl:apply-templates select="node"/>
         </ul>
-      
+
     </li>
   </xsl:template>
-  
+
   <xsl:template match="node/@*">
-	<th align="left">
-		<xsl:value-of select="name()"/>
-	</th>		
-	<td>
-	<xsl:value-of select="."/>
-	</td>
+    <th align="left">
+        <xsl:value-of select="name()"/>
+    </th>
+    <td>
+    <xsl:value-of select="."/>
+    </td>
   </xsl:template>
 
 </xsl:stylesheet>

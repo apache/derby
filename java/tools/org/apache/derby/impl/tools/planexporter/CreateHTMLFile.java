@@ -17,33 +17,33 @@ import java.net.URL;
  */
 public class CreateHTMLFile {
 
-	public void getHTML(String XMLFileName, String XSLSheetName, 
-			String HTMLFile, boolean def) throws Exception{
+    public void getHTML(String XMLFileName, String XSLSheetName,
+            String HTMLFile, boolean def) throws Exception{
 
-		if(!(HTMLFile.toUpperCase()).endsWith(".HTML"))
-			HTMLFile +=".html";
+        if(!(HTMLFile.toUpperCase()).endsWith(".HTML"))
+            HTMLFile +=".html";
 
-		TransformerFactory transFactory = TransformerFactory.newInstance();
-		Transformer transformer;
+        TransformerFactory transFactory = TransformerFactory.newInstance();
+        Transformer transformer;
 
-		if(def){
-			URL url=getClass().getResource(XSLSheetName); 
-			transformer = 
-				transFactory.newTransformer(new StreamSource(url.openStream()));
-		}
-		else{
-			File style=new File(XSLSheetName);
-			if(style.exists())
-				transformer = 
-					transFactory.newTransformer(new StreamSource(XSLSheetName));
-			else{
-				URL url=getClass().getResource("resources/vanilla_html.xsl"); 
-				transformer = 
-					transFactory.newTransformer(new StreamSource(url.openStream()));
-			}
-		}
+        if(def){
+            URL url=getClass().getResource(XSLSheetName);
+            transformer =
+                transFactory.newTransformer(new StreamSource(url.openStream()));
+        }
+        else{
+            File style=new File(XSLSheetName);
+            if(style.exists())
+                transformer =
+                    transFactory.newTransformer(new StreamSource(XSLSheetName));
+            else{
+                URL url=getClass().getResource("resources/vanilla_html.xsl");
+                transformer =
+                    transFactory.newTransformer(new StreamSource(url.openStream()));
+            }
+        }
 
-		transformer.transform(new StreamSource(XMLFileName),
-				new StreamResult(new FileOutputStream(HTMLFile)));
-	}
+        transformer.transform(new StreamSource(XMLFileName),
+                new StreamResult(new FileOutputStream(HTMLFile)));
+    }
 }
