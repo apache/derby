@@ -514,39 +514,35 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     {
     	s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)");
 
-    	if(XML.classpathMeetsXMLReqs()){
-    		/*
-    		 * Added by DERBY-4587 to test the generation of XML files
-    		 * from PlanExporter tool.
-    		 */
-    		String stmt_id="";
-    		ResultSet rs;
-    		AccessDatabase access;
+    	/*
+    	 * Added by DERBY-4587 to test the generation of XML files
+    	 * from PlanExporter tool.
+    	 */
+    	String stmt_id="";
+    	ResultSet rs;
+    	AccessDatabase access;
 
-    		rs = s.executeQuery( 
-    		"select stmt_id from XPLTEST.sysxplain_statements"); 
-    		while (rs.next()) 
-    		{ 
-    			stmt_id = rs.getString(1); 
-    			access = 
-    				new AccessDatabase(getConnection(), "XPLTEST", stmt_id); 
-    			if(access.initializeDataArray()){ 
-    				access.createXMLFragment();
-    				access.markTheDepth();
+    	rs = s.executeQuery( 
+    			"select stmt_id from XPLTEST.sysxplain_statements"); 
+    	while (rs.next()) 
+    	{ 
+    		stmt_id = rs.getString(1); 
+    		access = 
+    			new AccessDatabase(getConnection(), "XPLTEST", stmt_id); 
+    		if(access.initializeDataArray()){ 
+    			access.createXMLFragment();
+    			access.markTheDepth();
 
-    				CreateXMLFile xml_file = new CreateXMLFile(access); 
-    				xml_file.writeTheXMLFile(
-    						access.statement(),
-    						access.getData(), 
-    						SupportFilesSetup.getReadWriteURL(stmt_id + ".xml")
-    						.getPath(),
-    						null);
-    			}
-    		} 
-    	}
-    	else{
-    		//skips the tests
-    	}
+    			CreateXMLFile xml_file = new CreateXMLFile(access); 
+    			xml_file.writeTheXMLFile(
+    					access.statement(),
+    					access.time(),
+    					access.getData(), 
+    					SupportFilesSetup.getReadWriteURL(stmt_id + ".xml")
+    					.getPath(),
+    					null);
+    		}
+    	} 
     }
 
     private void verifyXplainUnset(Statement s)
@@ -658,12 +654,12 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 
     /**
      * Added by DERBY-4587
-     * gets the <statement> element from the XML
+     * gets the &lt;statement&gt; element from the XML
      * @param file XML file
      * @return statement mentioned in the XML
      * @throws Exception
      */
-    private String readStatement(final String file)//, short type) 
+    private String readStatement(final String file)
     throws Exception
     {
     	Document document;
@@ -675,7 +671,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 
     /**
      * Added by DERBY-4587
-     * count the # of <node> elements
+     * count the # of &lt;node&gt; elements
      * @param file XML file
      * @return node count
      * @throws Exception

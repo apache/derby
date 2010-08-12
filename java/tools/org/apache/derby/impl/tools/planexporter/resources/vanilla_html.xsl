@@ -17,7 +17,9 @@
 		<IMG SRC="derby-logo.png" ALIGN="left"/> 
 		<center><H1>Apache Derby</H1></center>
 		<center><H1>Graphical Query Explainer</H1></center>
+		<center><H2>Executed Date &amp; Time: <font color="#4E9258"> <xsl:value-of select="//time"/> </font></H2></center>
 		<center><H2>Query: <font color="#4E9258"> <xsl:value-of select="//statement"/> </font></H2></center>
+		<center><H2>STMT_ID: <font color="#4E9258"> <xsl:value-of select="//stmt_id"/> </font></H2></center>
         <xsl:apply-templates select="plan/details/node"/>
       </body>
     </html>

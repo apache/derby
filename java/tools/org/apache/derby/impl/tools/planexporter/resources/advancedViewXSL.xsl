@@ -74,7 +74,9 @@
       <body>
 		<H1>Apache Derby</H1>
 		<H1>Graphical Query Explainer</H1>
+		<H2>Executed Date &amp; Time: <font color="#4E9258"> <xsl:value-of select="//time"/> </font></H2>
 		<H2>Query: <font color="#4E9258"> <xsl:value-of select="//statement"/> </font></H2>
+		<H2>STMT_ID: <font color="#4E9258"> <xsl:value-of select="//stmt_id"/> </font></H2>
 		<br></br>
 		<br></br>
         <xsl:apply-templates/>

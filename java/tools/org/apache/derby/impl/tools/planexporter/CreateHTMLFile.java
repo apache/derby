@@ -9,12 +9,18 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.net.URL;
 
+/**
+ * This class is used by PlanExporter tool (DERBY-4587)
+ * in order to create HTML output of a query plan
+ * using a plain XSL style sheet and a XML data of
+ * a query plan.
+ */
 public class CreateHTMLFile {
 
 	public void getHTML(String XMLFileName, String XSLSheetName, 
 			String HTMLFile, boolean def) throws Exception{
 
-		if(!HTMLFile.endsWith(".html") && !HTMLFile.endsWith(".HTML"))
+		if(!(HTMLFile.toUpperCase()).endsWith(".HTML"))
 			HTMLFile +=".html";
 
 		TransformerFactory transFactory = TransformerFactory.newInstance();
@@ -31,7 +37,7 @@ public class CreateHTMLFile {
 				transformer = 
 					transFactory.newTransformer(new StreamSource(XSLSheetName));
 			else{
-				URL url=getClass().getResource("resources/"+XSLSheetName); 
+				URL url=getClass().getResource("resources/vanilla_html.xsl"); 
 				transformer = 
 					transFactory.newTransformer(new StreamSource(url.openStream()));
 			}

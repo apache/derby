@@ -1,6 +1,12 @@
+/**
+ * This class is used by PlanExporter tool (DERBY-4587)
+ * as a data structure to keep the values retrieved
+ * after querying XPLAIN tables and few other properties
+ * of a plan node in a query plan.
+ */
 package org.apache.derby.impl.tools.planexporter;
 
-public class TreeNode extends Object{
+class TreeNode{
 
 	private String parentId = "";//PARENT_RS_ID
 	private String id = "";//RS_ID
@@ -15,7 +21,7 @@ public class TreeNode extends Object{
 	private String scanType = "";//SCAN_TYPE
 	private String sortType = "";//SORT_TYPE
 	private String sorterOutput = "";//NO_OUTPUT_ROWS
-	private String depth ;
+	private int depth ;
 
 
 	/**
@@ -105,13 +111,13 @@ public class TreeNode extends Object{
 	/**
 	 * @param depth the depth to set
 	 */
-	public void setDepth(String depth) {
+	public void setDepth(int depth) {
 		this.depth = depth;
 	}
 	/**
 	 * @return the depth
 	 */
-	public String getDepth() {
+	public int getDepth() {
 		return depth;
 	}
 	/**
@@ -191,7 +197,7 @@ public class TreeNode extends Object{
 	 * @return XML fragment for this TreeNode object
 	 */
 	public String toString(){
-		String details = new String("<node ");
+		String details = "<node ";
 		details += getNodeType();
 		details += getInputRows();
 		details += getReturnedRows();
@@ -205,7 +211,5 @@ public class TreeNode extends Object{
 		details += getSorterOutput();
 
 		return details+">\n";
-
 	}
-
 }

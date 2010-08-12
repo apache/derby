@@ -12,11 +12,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-
-/**
- * @author Nirmal
- *
- */
 public class AccessDatabase {
 
 	private Connection conn = null;
@@ -25,6 +20,19 @@ public class AccessDatabase {
 	private String dbURL = null;
 	private String schema = null;
 	private String query = null;
+	/**
+	 * @param query the stmt_id to set
+	 */
+	public void setQuery(String query) {
+		this.query = query;
+	}
+
+	/**
+	 * @return the stmt_id
+	 */
+	public String getQuery() {
+		return query;
+	}
 	private int depth = 0;	
 	public int getDepth() {
 		return depth;
@@ -32,19 +40,19 @@ public class AccessDatabase {
 	private String xmlDetails="";
 
 	//set of variables to identify values of XPlain tables
-	private final int id =0 ;
-	private final int p_id =1;
-	private final int nodeType=2;
-	private final int noOfOpens=3;
-	private final int inputRows=4;
-	private final int returnedRows=5;
-	private final int visitedPages=6;
-	private final int scanQualifiers=7;
-	private final int nextQualifiers=8;
-	private final int scannedObject=9;
-	private final int scanType=10;
-	private final int sortType=11;
-	private final int noOfOutputRowsBySorter=12;
+	private static final int ID =0 ;
+	private static final int P_ID =1;
+	private static final int NODE_TYPE=2;
+	private static final int NO_OF_OPENS=3;
+	private static final int INPUT_ROWS=4;
+	private static final int RETURNED_ROWS=5;
+	private static final int VISITED_PAGES=6;
+	private static final int SCAN_QUALIFIERS=7;
+	private static final int NEXT_QUALIFIERS=8;
+	private static final int SCANNED_OBJECT=9;
+	private static final int SCAN_TYPE=10;
+	private static final int SORT_TYPE=11;
+	private static final int NO_OF_OUTPUT_ROWS_BY_SORTER=12;
 
 
 	/**
@@ -57,7 +65,7 @@ public class AccessDatabase {
 
 		dbURL = dburl;
 		schema = aSchema;
-		query = aQuery;
+		setQuery(aQuery);
 
 	}
 
@@ -66,12 +74,13 @@ public class AccessDatabase {
 	 * @param aConn
 	 * @param aSchema
 	 * @param aQuery
+	 *
 	 */
 	public AccessDatabase(Connection aConn, String aSchema, String aQuery) {
 
 		conn = aConn;
 		schema = aSchema;
-		query = aQuery;
+		setQuery(aQuery);
 
 	}
 
@@ -85,7 +94,7 @@ public class AccessDatabase {
 	public void createConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
 	{
 
-		if(dbURL.indexOf("//") != -1)
+		if(dbURL.indexOf("://") != -1)
 			Class.forName("org.apache.derby.jdbc.ClientDriver").newInstance();
 
 		else
@@ -107,96 +116,96 @@ public class AccessDatabase {
 		createXMLData(
 				"select 'id=\"' ||RS_ID|| '\"' " +
 				"from "+schema+".SYSXPLAIN_RESULTSETS " +
-				"where STMT_ID = '"+query+"'", id);
+				"where STMT_ID = '"+getQuery()+"'", ID);
 
 		createXMLData(
 				"select PARENT_RS_ID "+
 				"from "+schema+".SYSXPLAIN_RESULTSETS " +
-				"where STMT_ID = '"+query+"'", p_id);
+				"where STMT_ID = '"+getQuery()+"'", P_ID);
 
 		createXMLData(
 				"select 'name=\"' ||OP_IDENTIFIER|| '\"' " +
 				"from "+schema+".SYSXPLAIN_RESULTSETS " +
-				"where STMT_ID = '"+query+"'", nodeType);
+				"where STMT_ID = '"+getQuery()+"'", NODE_TYPE);
 
 		createXMLData(
 				"select 'no_opens=\"' " +
 				"|| TRIM(CHAR(NO_OPENS))|| '\"' " +
 				"from "+schema+".SYSXPLAIN_RESULTSETS " +
-				"where STMT_ID = '"+query+"'", noOfOpens);
+				"where STMT_ID = '"+getQuery()+"'", NO_OF_OPENS);
 
 		createXMLData(
 				"select 'input_rows=\"' " +
 				"|| TRIM(CHAR(INPUT_ROWS))|| '\"' " +
 				"from "+schema+".SYSXPLAIN_RESULTSETS " +
-				"where STMT_ID = '"+query+"'", inputRows);
+				"where STMT_ID = '"+getQuery()+"'", INPUT_ROWS);
 
 		createXMLData(
 				"select 'returned_rows=\"' " +
 				"|| TRIM(CHAR(RETURNED_ROWS))|| '\"' " +
 				"from "+schema+".SYSXPLAIN_RESULTSETS " +
-				"where STMT_ID = '"+query+"'", returnedRows);
+				"where STMT_ID = '"+getQuery()+"'", RETURNED_ROWS);
 
 		createXMLData(
 				"select 'visited_pages=\"'" +
 				"|| TRIM(CHAR(NO_VISITED_PAGES))|| '\"' " +
 				"from ("+schema+".SYSXPLAIN_SCAN_PROPS " +
 				"NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-				"where STMT_ID = '"+query+"'", visitedPages);
+				"where STMT_ID = '"+getQuery()+"'", VISITED_PAGES);
 
 		createXMLData(
 				"select 'scan_qualifiers=\"'"+ 
 				"||SCAN_QUALIFIERS|| '\"' " +
 				"from ("+schema+".SYSXPLAIN_SCAN_PROPS " +
 				"NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-				"where STMT_ID = '"+query+"'", scanQualifiers);
+				"where STMT_ID = '"+getQuery()+"'", SCAN_QUALIFIERS);
 
 		createXMLData(
 				"select 'next_qualifiers=\"'"+
 				"||NEXT_QUALIFIERS|| '\"' " +
 				"from ("+schema+".SYSXPLAIN_SCAN_PROPS " +
 				"NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-				"where STMT_ID = '"+query+"'", nextQualifiers);
+				"where STMT_ID = '"+getQuery()+"'", NEXT_QUALIFIERS);
 
 		createXMLData(
 				"select 'scanned_object=\"'"+
 				"||SCAN_OBJECT_NAME|| '\"' " +
 				"from ("+schema+".SYSXPLAIN_SCAN_PROPS " +
 				"NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-				"where STMT_ID = '"+query+"'", scannedObject);
+				"where STMT_ID = '"+getQuery()+"'", SCANNED_OBJECT);
 
 		createXMLData(
 				"select 'scan_type=\"'"+
 				"||TRIM(SCAN_TYPE)|| '\"' " +
 				"from ("+schema+".SYSXPLAIN_SCAN_PROPS " +
 				"NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-				"where STMT_ID = '"+query+"'", scanType);
+				"where STMT_ID = '"+getQuery()+"'", SCAN_TYPE);
 
 		createXMLData(
 				"select 'sort_type=\"'"+
 				"||TRIM(SORT_TYPE)|| '\"' " +
 				"from ("+schema+".SYSXPLAIN_SORT_PROPS " +
 				"NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-				"where STMT_ID = '"+query+"'", sortType);
+				"where STMT_ID = '"+getQuery()+"'", SORT_TYPE);
 
 		createXMLData(
 				"select 'sorter_output=\"'"+
 				"||TRIM(CHAR(NO_OUTPUT_ROWS))|| '\"' " +
 				"from ("+schema+".SYSXPLAIN_SORT_PROPS " +
 				"NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-				"where STMT_ID = '"+query+"'", noOfOutputRowsBySorter);
+				"where STMT_ID = '"+getQuery()+"'", NO_OF_OUTPUT_ROWS_BY_SORTER);
 
 	}
 
 	/**
-	 * 
+	 * Generating the XML tree
 	 * @return all xml elements as a String
 	 */
 	public String getXmlString(){
 
 		for(int i=0;i<data.length;i++){
 			//assume only one root element for any query
-			if(Integer.parseInt(data[i].getDepth())==0){//root element
+			if(data[i].getDepth()==0){//root element
 				xmlDetails += indent(1);
 				xmlDetails += data[i].toString();
 				getChildren(1, data[i].getId());
@@ -212,10 +221,10 @@ public class AccessDatabase {
 	 * @param currentLevel level of the XML tree (0 based) of current node
 	 * @param id current node's stmt_id
 	 */
-	public void getChildren(int currentLevel,String id ){
+	private void getChildren(int currentLevel,String id ){
 		if(currentLevel <= depth){
 			for(int i=0;i<data.length;i++){
-				if(Integer.parseInt(data[i].getDepth())== currentLevel &&
+				if(data[i].getDepth()== currentLevel &&
 						(id.indexOf(data[i].getParent()) != -1))
 				{
 					xmlDetails += indent(currentLevel+1);
@@ -247,7 +256,7 @@ public class AccessDatabase {
 		int i=0;
 		while(data[i].getParent().indexOf("null")== -1)
 			i++;
-		data[i].setDepth(""+depth); //root
+		data[i].setDepth(depth); //root
 		findChildren(i,depth);
 	}
 
@@ -256,7 +265,7 @@ public class AccessDatabase {
 	 * @param idx current element's index
 	 * @param dep current examining depth
 	 */
-	public void findChildren(int idx, int dep) {
+	private void findChildren(int idx, int dep) {
 		if(dep>depth)
 			depth =dep;
 
@@ -266,7 +275,7 @@ public class AccessDatabase {
 				if((data[idx].getId()).indexOf(data[i].getParent()) != -1
 						&& i != idx)
 				{
-					data[i].setDepth(""+(dep +1));
+					data[i].setDepth(dep +1);
 					findChildren(i,dep+1);	 
 				}		
 			}
@@ -308,43 +317,43 @@ public class AccessDatabase {
 			String text= results.getString(1);
 			if(text != null){
 				switch(x){
-				case id: 
+				case ID: 
 					data[i].setId(text+" ");
 					break;
-				case p_id:
+				case P_ID:
 					data[i].setParent(text);
 					break;
-				case nodeType:
+				case NODE_TYPE:
 					data[i].setNodeType(text+" ");
 					break;
-				case noOfOpens:
+				case NO_OF_OPENS:
 					data[i].setNoOfOpens(text+" ");
 					break;
-				case inputRows:
+				case INPUT_ROWS:
 					data[i].setInputRows(text+" ");
 					break;
-				case returnedRows:
+				case RETURNED_ROWS:
 					data[i].setReturnedRows(text+" ");
 					break;
-				case visitedPages:
+				case VISITED_PAGES:
 					data[i].setVisitedPages(text+" ");
 					break;	
-				case scanQualifiers:
+				case SCAN_QUALIFIERS:
 					data[i].setScanQualifiers(text+" ");
 					break;
-				case nextQualifiers:
+				case NEXT_QUALIFIERS:
 					data[i].setNextQualifiers(text+" ");
 					break;
-				case scannedObject:
+				case SCANNED_OBJECT:
 					data[i].setScannedObject(text+" ");
 					break;
-				case scanType:
+				case SCAN_TYPE:
 					data[i].setScanType(text+" ");
 					break;
-				case sortType:
+				case SORT_TYPE:
 					data[i].setSortType(text+" ");
 					break;
-				case noOfOutputRowsBySorter:
+				case NO_OF_OUTPUT_ROWS_BY_SORTER:
 					data[i].setSorterOutput(text+" ");
 					break;
 				}
@@ -352,10 +361,10 @@ public class AccessDatabase {
 			else{
 				/*Other attributes are omitted from the xml document 
 				 * if they're null.
-				 * p_id can be null at the root.
+				 * P_ID can be null at the root.
 				 * */
 				switch(x){
-				case p_id:
+				case P_ID:
 					data[i].setParent(text+"");
 					break;
 				}
@@ -371,13 +380,13 @@ public class AccessDatabase {
 	 * @return total # of nodes
 	 * @throws SQLException 
 	 */
-	public int noOfNodes() throws SQLException{
+	private int noOfNodes() throws SQLException{
 
 		stmt = conn.createStatement();
 		ResultSet results = stmt.executeQuery(
 				"select count(*) from " +
 				""+schema+".SYSXPLAIN_RESULTSETS " +
-				"where STMT_ID = '"+query+"'");
+				"where STMT_ID = '"+getQuery()+"'");
 		results.next();
 		int no = results.getInt(1);
 		results.close();
@@ -388,7 +397,7 @@ public class AccessDatabase {
 
 	/**
 	 * 
-	 * @return the <statement> element
+	 * @return the &lt;statement&gt; element
 	 * @throws SQLException 
 	 */
 	public String statement() throws SQLException{
@@ -396,7 +405,7 @@ public class AccessDatabase {
 		ResultSet results = stmt.executeQuery(
 				"select STMT_TEXT "+
 				"from "+schema+".SYSXPLAIN_STATEMENTS " +
-				"where STMT_ID = '"+query+"'");
+				"where STMT_ID = '"+getQuery()+"'");
 		results.next();
 		String statement = results.getString(1);
 		results.close();
@@ -419,7 +428,7 @@ public class AccessDatabase {
 	 * @param replace string to be added
 	 * @return modified string
 	 */
-	public String replace(String stmt, String expr, String replace){
+	private String replace(String stmt, String expr, String replace){
 		String[] part=stmt.split(expr);
 		String newStmt= part[0];
 		for(int i=1;i<part.length;i++){
@@ -428,11 +437,38 @@ public class AccessDatabase {
 
 		return newStmt;
 	}
+	
+	/**
+	 * 
+	 * @return XPLAIN_TIME of SYSXPLAIN_STATEMENTS
+	 * @throws SQLException
+	 */
+	public String time() throws SQLException{
+		stmt = conn.createStatement();
+		ResultSet results = stmt.executeQuery(
+				"select '<time>'||TRIM(CHAR(XPLAIN_TIME))||" +
+				"'</time>' from "+schema+".SYSXPLAIN_STATEMENTS " +
+				"where STMT_ID = '"+getQuery()+"'");
+		results.next();
+		String time = results.getString(1);
+		results.close();
+		stmt.close();
+		
+		return time;
+	}
+	
+	/**
+	 * 
+	 * @return stmt_id as a XML element
+	 */
+	public String stmtID(){
+		return "<stmt_id>"+getQuery()+"</stmt_id>";
+	}
 
 	/**
-	 * shut downing the connection to the database
+	 * closing the connection to the database
 	 */
-	public void shutdown()
+	public void closeConnection()
 	{
 		try
 		{
@@ -442,7 +478,6 @@ public class AccessDatabase {
 			}
 			if (conn != null)
 			{
-				DriverManager.getConnection(dbURL + ";shutdown=true");
 				conn.close();
 			}           
 		}

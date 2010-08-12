@@ -10,77 +10,69 @@ import org.apache.derby.impl.tools.planexporter.AccessDatabase;
 import org.apache.derby.impl.tools.planexporter.CreateHTMLFile;
 import org.apache.derby.impl.tools.planexporter.CreateXMLFile;
 
-/**
- * @author Nirmal
- *
- */
 public class PlanExporter {
 
 	private static String dbURL = null; //connection URL
 	private static String xslStyleSheetName ="resources/vanilla_html.xsl";//default xsl
-	private static final int xml=1;
-	private static final int html=2;
-	private static final int xsl=3;
+	private static final int XML=1;
+	private static final int HTML=2;
+	private static final int XSL=3;
 
 	/**
 	 * @param args 
-	 * 1) database string eg: jdbc:derby:myDB --------- 
-	 * 2) username ------------------------------------
-	 * 3) password ------------------------------------
-	 * 4) database schema -----------------------------
-	 * 5) statement ID (36 characters) ----------------
+	 * 1) database URL eg: jdbc:derby:myDB ---------
+	 * 2) database schema -----------------------------
+	 * 3) statement ID (36 characters) ----------------
 	 * and user specified arguments.
 	 */
 	public static void main(String[] args) {
 
 		try{
-			if(args.length>6 && args.length<12 ){
-				dbURL = args[0]+";create=false"+
-				";user="+args[1]+";password="+args[2];
+			if(args.length>4 && args.length<10 ){
+				dbURL = args[0];
 
-				AccessDatabase access = new AccessDatabase(dbURL, args[3], args[4]);
+				AccessDatabase access = new AccessDatabase(dbURL, args[1], args[2]);
 				access.createConnection();
 				if(access.initializeDataArray()){
 					access.createXMLFragment();
 					access.markTheDepth();
 					String stmt=access.statement();
-					access.shutdown();
+					String time=access.time();
+					access.closeConnection();
 					
 					//advanced XSL feature
 					//possible occurrences are
 					//-adv -xml {path} -xsl {path} or
 					//-adv -xsl {path} -xml {path}
-					if(args.length==10 && 
-						args[5].equalsIgnoreCase("-adv")){
-						int opt1=selectArg(args[6]);
-						int opt2=selectArg(args[8]);
+					if(args.length==8 && 
+						args[3].equalsIgnoreCase("-adv")){
+						int opt1=selectArg(args[4]);
+						int opt2=selectArg(args[6]);
 						if(opt1==1 && opt2==3){
-							if(args[9].endsWith(".xsl")||
-									args[9].endsWith(".XSL"))
-								generateXML(access,args[7],stmt,args[9]);
+							if(args[7].toUpperCase().endsWith(".XSL"))
+								generateXML(access,args[5],stmt,time,args[7]);
 							else
-								generateXML(access,args[7],stmt,args[9]+".xsl");
+								generateXML(access,args[5],stmt,time,args[7]+".xsl");
 						}
 						else if(opt1==3 && opt2==1){
-							if(args[7].endsWith(".xsl")||
-									args[7].endsWith(".XSL"))
-								generateXML(access,args[9],stmt,args[7]);
+							if(args[5].toUpperCase().endsWith(".XSL"))
+								generateXML(access,args[7],stmt,time,args[5]);
 							else
-								generateXML(access,args[9],stmt,args[7]+".xsl");
+								generateXML(access,args[7],stmt,time,args[5]+".xsl");
 						}
 						else
 							printHelp();
 					}
 					//possible occurrences are -xml {path} or -html {path} 
-					else if(args.length==7){
-						int opt=selectArg(args[5]);
+					else if(args.length==5){
+						int opt=selectArg(args[3]);
 						if(opt==0 || opt==3)
 							printHelp();
 						else if(opt==1)
-							generateXML(access,args[6],stmt,null);
+							generateXML(access,args[4],stmt,time,null);
 						else{
-							generateXML(access,"temp.xml",stmt,null);
-							generateHTML("temp.xml",args[6],xslStyleSheetName,true);
+							generateXML(access,"temp.xml",stmt,time,null);
+							generateHTML("temp.xml",args[4],xslStyleSheetName,true);
 							deleteFile("temp.xml");
 						}
 					}
@@ -89,27 +81,27 @@ public class PlanExporter {
 					//-html {path} and -xml {path}
 					//-html {path} and -xsl {path}
 					//-xsl {path} and -html {path}
-					else if(args.length==9){
-						int opt1=selectArg(args[5]);
-						int opt2=selectArg(args[7]);
+					else if(args.length==7){
+						int opt1=selectArg(args[3]);
+						int opt2=selectArg(args[5]);
 						if(opt1==0 || opt2==0)
 							printHelp();
 						else if(opt1==1 && opt2==2){
-							generateXML(access,args[6],stmt,null);
-							generateHTML(args[6],args[8],xslStyleSheetName,true);
+							generateXML(access,args[4],stmt,time,null);
+							generateHTML(args[4],args[6],xslStyleSheetName,true);
 						}
 						else if(opt1==2 && opt2==1){
-							generateXML(access,args[8],stmt,null);
-							generateHTML(args[8],args[6],xslStyleSheetName,true);
+							generateXML(access,args[6],stmt,time,null);
+							generateHTML(args[6],args[4],xslStyleSheetName,true);
 						}
 						else if(opt1==2 && opt2==3){
-							generateXML(access,"temp.xml",stmt,null);
-							generateHTML("temp.xml",args[6],args[8],false);
+							generateXML(access,"temp.xml",stmt,time,null);
+							generateHTML("temp.xml",args[4],args[6],false);
 							deleteFile("temp.xml");
 						}
 						else if(opt1==3 && opt2==2){
-							generateXML(access,"temp.xml",stmt,null);
-							generateHTML("temp.xml",args[8],args[6],false);
+							generateXML(access,"temp.xml",stmt,time,null);
+							generateHTML("temp.xml",args[6],args[4],false);
 							deleteFile("temp.xml");
 						}
 						else
@@ -122,39 +114,41 @@ public class PlanExporter {
 					//-xml {path} and -xsl {path} and -html {path}
 					//-html {path} and -xml {path} and -xsl {path}
 					//-xsl {path} and -html {path} and -xml {path}
-					else{
-						int opt1=selectArg(args[5]);
-						int opt2=selectArg(args[7]);
-						int opt3=selectArg(args[9]);
+					else if(args.length==9){
+						int opt1=selectArg(args[3]);
+						int opt2=selectArg(args[5]);
+						int opt3=selectArg(args[7]);
 						if(opt1==0 || opt2==0 || opt3==0)
 							printHelp();
 						else if(opt1==1 && opt2==2 && opt3==3){
-							generateXML(access,args[6],stmt,null);
-							generateHTML(args[6],args[8],args[10],false);
+							generateXML(access,args[4],stmt,time,null);
+							generateHTML(args[4],args[6],args[8],false);
 						}
 						else if(opt1==2 && opt2==3 && opt3==1){
-							generateXML(access,args[10],stmt,null);
-							generateHTML(args[10],args[6],args[8],false);
+							generateXML(access,args[8],stmt,time,null);
+							generateHTML(args[8],args[4],args[6],false);
 						}
 						else if(opt1==3 && opt2==1 && opt3==2){
-							generateXML(access,args[8],stmt,null);
-							generateHTML(args[8],args[10],args[6],false);
+							generateXML(access,args[6],stmt,time,null);
+							generateHTML(args[6],args[8],args[4],false);
 						}
 						else if(opt1==1 && opt2==3 && opt3==2){
-							generateXML(access,args[6],stmt,null);
-							generateHTML(args[6],args[10],args[8],false);
+							generateXML(access,args[4],stmt,time,null);
+							generateHTML(args[4],args[8],args[6],false);
 						}
 						else if(opt1==2 && opt2==1 && opt3==3){
-							generateXML(access,args[8],stmt,null);
-							generateHTML(args[8],args[6],args[10],false);
+							generateXML(access,args[6],stmt,time,null);
+							generateHTML(args[6],args[4],args[8],false);
 						}
 						else if(opt1==3 && opt2==2 && opt3==1){
-							generateXML(access,args[10],stmt,null);
-							generateHTML(args[10],args[8],args[6],false);
+							generateXML(access,args[8],stmt,time,null);
+							generateHTML(args[8],args[6],args[4],false);
 						}
 						else
 							printHelp();
-					}					
+					}	
+					else
+						printHelp();
 				}
 				else{
 					System.out.println(
@@ -169,9 +163,9 @@ public class PlanExporter {
 					);
 				}
 			}
-			else{
+			else
 				printHelp();
-			}
+			
 		}catch(Exception ex){
 			ex.printStackTrace();
 		}
@@ -184,11 +178,11 @@ public class PlanExporter {
 	 */
 	private static int selectArg(String arg){
 		if(arg.equalsIgnoreCase("-xml"))
-			return xml;
+			return XML;
 		else if(arg.equalsIgnoreCase("-html"))
-			return html;
+			return HTML;
 		else if(arg.equalsIgnoreCase("-xsl"))
-			return xsl;
+			return XSL;
 		else
 			return 0;
 	}
@@ -198,20 +192,21 @@ public class PlanExporter {
 	 * @param access instance of AccessDatabase class
 	 * @param arg path of XML
 	 * @param stmt statement executed
+	 * @param time time which the statement was executed
 	 * @param xsl name of the style sheet
 	 * @throws Exception
 	 */
 	private static void generateXML(AccessDatabase access, 
-			String arg, String stmt,String xsl) throws Exception{
+			String arg, String stmt, String time, String xsl) throws Exception{
 		CreateXMLFile xmlFile = new CreateXMLFile(access);
 
-		if(arg.endsWith(".xml") || arg.endsWith(".XML")){
-			xmlFile.writeTheXMLFile(stmt,
+		if(arg.toUpperCase().endsWith(".XML")){
+			xmlFile.writeTheXMLFile(stmt, time,
 					access.getData(),  
 					arg, xsl);
 		}
 		else{
-			xmlFile.writeTheXMLFile(stmt,
+			xmlFile.writeTheXMLFile(stmt, time,
 					access.getData(),  
 					arg.concat(".xml"),
 					xsl);
@@ -230,7 +225,7 @@ public class PlanExporter {
 			String style, boolean def) throws Exception{
 		CreateHTMLFile htmlFile = new CreateHTMLFile();
 
-		if(arg.endsWith(".xml") || arg.endsWith(".XML")){
+		if(arg.toUpperCase().endsWith(".XML")){
 			htmlFile.getHTML(arg, style, path, def);
 		}
 		else{
@@ -243,29 +238,27 @@ public class PlanExporter {
 		(
 				"================================================\n" +
 				"-------------- PlanExporter Tool ---------------\n" +
-				"--   You can pass 7 arguments (minimum), or   --\n" +
-				"--       9 arguments or 10 arguments or       --\n" +
-				"-----------  11 arguments (maximum)  -----------\n" +
+				"--   You can pass 5 arguments (minimum), or   --\n" +
+				"--       7 arguments or 8 arguments or        --\n" +
+				"-----------  9 arguments (maximum)  ------------\n" +
 				"--         separated by a space.              --\n" +
 				"---------------Mandatory Arguments--------------\n" +
-				"1) database string eg: jdbc:derby:myDB ---------\n" +
-				"2) username ------------------------------------\n" +
-				"3) password ------------------------------------\n" +
-				"4) database schema -----------------------------\n" +
-				"5) statement ID (36 characters) ----------------\n" +
+				"1) database URL --------------------------------\n" +
+				"2) database schema -----------------------------\n" +
+				"3) statement ID (36 characters) ----------------\n" +
 				"---------------Optional Arguments---------------\n" +
 				"-----------Choose at least one option-----------\n" +
-				"6) -xml {pathToXML} or -html {pathToHTML} ------\n" +
-				"7) -xml {pathToXML} -html {pathToHTML} ---------\n" +
-				"8) -xsl {pathToXSL} -html {pathToHTML} ---------\n" +
-				"9) -xml {pathToXML} -xsl {pathToXSL} -----------\n" +
+				"a) -xml {pathToXML} or -html {pathToHTML} ------\n" +
+				"b) -xml {pathToXML} -html {pathToHTML} ---------\n" +
+				"c) -xsl {pathToXSL} -html {pathToHTML} ---------\n" +
+				"d) -xml {pathToXML} -xsl {pathToXSL} -----------\n" +
 				"      -html {pathToHTML} -----------------------\n" +
-				"10) -adv -xml {pathToXML} -xsl {pathToXSL} -----\n" +
+				"e) -adv -xml {pathToXML} -xsl {pathToXSL} ------\n" +
 				"================================================\n"
 		);
 	}
 
-	public static void deleteFile(final String fileName) 
+	private static void deleteFile(final String fileName) 
 	{
 		AccessController.doPrivileged
 		(new java.security.PrivilegedAction() {
