@@ -86,12 +86,6 @@ public class NetHarnessJavaTest extends HarnessJavaTest {
         //		         SecurityManagerSetup.noSecurityManager(
         //		             decorate(new NetHarnessJavaTest("testProtocol")))));
 
-        // Server does not run on J2ME
-        if (JDBC.vmSupportsJDBC3()) {
-            suite.addTest(SecurityManagerSetup.noSecurityManager(
-        		         decorate(new NetHarnessJavaTest("DerbyNetNewServer"))));
-        }
-        
         return new SupportFilesSetup(suite,
         	           new String[] {
 	                       "functionTests/tests/derbynet/protocol.tests",

@@ -72,11 +72,14 @@ public class _Suite extends BaseTestCase  {
         //  in the nightly tests with JDK 1.6 and jar files.
         //suite.addTest(CheckSecurityManager.suite());
 
-        // this test refers to ConnectionPooledDataSource class
-        // thus causing class not found exceptions with JSR169
+ 
         if (JDBC.vmSupportsJDBC3())
         {
+            // this test refers to ConnectionPooledDataSource class
+            // thus causing class not found exceptions with JSR169
             suite.addTest(NSSecurityMechanismTest.suite());
+            // Test does not run on J2ME    
+            suite.addTest(DerbyNetNewServerTest.suite());
         }
 
         // These tests references a client class directly
