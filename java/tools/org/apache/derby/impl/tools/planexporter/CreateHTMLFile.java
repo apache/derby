@@ -37,7 +37,17 @@ import java.net.URL;
  * a query plan.
  */
 public class CreateHTMLFile {
+	
+	private static String xslStyleSheetName ="resources/vanilla_html.xsl";//default xsl
 
+	/**
+	 * 
+	 * @param XMLFileName name of the XML file
+	 * @param XSLSheetName name of the XSL file
+	 * @param HTMLFile name of the HTML file
+	 * @param def whether to use the default XSL or not
+	 * @throws Exception
+	 */
     public void getHTML(String XMLFileName, String XSLSheetName,
             String HTMLFile, boolean def) throws Exception{
 
@@ -58,7 +68,7 @@ public class CreateHTMLFile {
                 transformer =
                     transFactory.newTransformer(new StreamSource(XSLSheetName));
             else{
-                URL url=getClass().getResource("resources/vanilla_html.xsl");
+                URL url=getClass().getResource(xslStyleSheetName);
                 transformer =
                     transFactory.newTransformer(new StreamSource(url.openStream()));
             }
