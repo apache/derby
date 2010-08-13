@@ -742,6 +742,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         println( "Left clob has " + leftLength + " characters and right clob has " + rightLength + " characters." );
 
+        assertEquals( leftLength, rightLength );
+
         if ( leftLength == rightLength );
         {
             String leftString = left.getSubString( 1L, (int) leftLength );
@@ -759,6 +761,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     println( "left[ " + leftIdx+ " ] = " + leftC + " but right[ " + rightIdx + " ] = " + rightC );
                     return;
                 }
+
+                assertEquals( leftC, rightC );
             }
         }
 
@@ -876,6 +880,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         println( "Left blob has " + leftLength + " bytes and right blob has " + rightLength + " bytes." );
 
+        assertEquals( leftLength, rightLength );
+
         if ( leftLength == rightLength );
         {
             byte[] leftBytes = left.getBytes( 1L, (int) leftLength );
@@ -893,6 +899,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     println( "left[ " + leftIdx+ " ] = " + leftC + " but right[ " + rightIdx + " ] = " + rightC );
                     return;
                 }
+
+                assertEquals( leftC, rightC );
             }
         }
     }
