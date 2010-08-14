@@ -634,6 +634,8 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
             fail("FAIL Error should have occured with rs.next() on a closed ResultSet");
         } catch (SQLException se) {
             assertEquals("XCL16", se.getSQLState());
+            // DERBY-4767, sample verification test for operation in XCL16 message.
+            assertTrue(se.getMessage().indexOf("next") > 0);
         }
     }
 

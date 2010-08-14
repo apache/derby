@@ -99,7 +99,7 @@ public class splitmessages {
         clientMessageIds.add(SQLState.LANG_INVALID_CALL_STATEMENT);
         clientMessageIds.add(SQLState.LOSS_OF_PRECISION_EXCEPTION);
         clientMessageIds.add(SQLState.LANG_INVALID_SQL_IN_BATCH);
-        clientMessageIds.add(SQLState.CLIENT_RESULT_SET_NOT_OPEN);
+        clientMessageIds.add(SQLState.LANG_RESULT_SET_NOT_OPEN);
         clientMessageIds.add(SQLState.CANT_CONVERT_UNICODE_TO_EBCDIC);
         clientMessageIds.add(SQLState.SECMECH_NOT_SUPPORTED);
         clientMessageIds.add(SQLState.DRDA_COMMAND_NOT_IMPLEMENTED);

@@ -1487,6 +1487,8 @@ public class ResultSetTest
             fail("getHoldability() should fail when closed");
         } catch (SQLException sqle) {
             assertSQLState("XCL16", sqle);
+            // DERBY-4767, sample verification test for operation in XCL16 message.
+            assertTrue(sqle.getMessage().indexOf("getHoldability") > 0);
         }
         
         // test explicitly set holdability

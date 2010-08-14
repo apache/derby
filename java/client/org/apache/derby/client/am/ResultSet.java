@@ -293,7 +293,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     // used by DBMD
     boolean nextX() throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("next");
         clearWarningsX();
 
         moveToCurrentRowX();
@@ -543,7 +543,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "wasNull");
             }
-            checkForClosedResultSet();
+            checkForClosedResultSet("wasNull");
 
             if (wasNull_ == ResultSet.WAS_NULL_UNSET) {
                 throw new SqlException(agent_.logWriter_, 
@@ -572,7 +572,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBoolean", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getBoolean");
             boolean result = false;
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
@@ -606,7 +606,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getByte", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getByte");
             byte result = 0;
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if ((isOnInsertRow_) && (updatedColumns_[column - 1] == null)) {
@@ -640,7 +640,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getShort", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getShort");
             short result = 0;
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
@@ -674,7 +674,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getInt", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getInt");
             int result = 0;
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
@@ -708,7 +708,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getLong", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getLong");
             long result = 0;
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
@@ -742,7 +742,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getFloat", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getFloat");
             float result = 0;
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if ((isOnInsertRow_ && updatedColumns_[column - 1] == null)) {
@@ -776,7 +776,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDouble", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getDouble");
             double result = 0;
             if (wasNonNullSensitiveUpdate(column) || isOnInsertRow_) {
                 if (isOnInsertRow_ && updatedColumns_[column - 1] == null) {
@@ -811,7 +811,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceDeprecatedEntry(this, "getBigDecimal", column, scale);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getBigDecimal");
             java.math.BigDecimal result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result =
@@ -843,7 +843,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBigDecimal", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getBigDecimal");
             java.math.BigDecimal result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result =
@@ -873,7 +873,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDate", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getDate");
 
             if (cal == null) {
                 throw new SqlException(agent_.logWriter_,
@@ -916,7 +916,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTime", column, cal);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getTime");
 
             if (cal == null) {
                 throw new SqlException(agent_.logWriter_,
@@ -961,7 +961,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(
                         this, "getTimestamp", column, calendar);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getTimestamp");
 
             if (calendar == null) {
                 throw new SqlException(agent_.logWriter_,
@@ -1052,7 +1052,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getString", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getString");
             String result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (String) agent_.crossConverters_.setObject(java.sql.Types.CHAR, updatedColumns_[column - 1]);
@@ -1080,7 +1080,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBytes", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getBytes");
             byte[] result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = (byte[]) agent_.crossConverters_.setObject(java.sql.Types.BINARY, updatedColumns_[column - 1]);
@@ -1109,7 +1109,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "getBinaryStream", column);
             }
 
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getBinaryStream");
             useStreamOrLOB(column);
 
             java.io.InputStream result = null;
@@ -1140,7 +1140,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "getAsciiStream", column);
             }
 
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getAsciiStream");
             useStreamOrLOB(column);
 
             java.io.InputStream result = null;
@@ -1191,7 +1191,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "getCharacterStream", column);
             }
 
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getCharacterStream");
             useStreamOrLOB(column);
 
             java.io.Reader result = null;
@@ -1222,7 +1222,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBlob", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getBlob");
             useStreamOrLOB(column);
             java.sql.Blob result = null;
             if (wasNonNullSensitiveUpdate(column)) {
@@ -1252,7 +1252,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getClob", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getClob");
             useStreamOrLOB(column);
             java.sql.Clob result = null;
             if (wasNonNullSensitiveUpdate(column)) {
@@ -1282,7 +1282,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getRef", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getRef");
             java.sql.Ref result = isNull(column) ? null : cursor_.getRef(column);
             if (true) {
                 throw new SqlException(agent_.logWriter_,
@@ -1309,7 +1309,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getArray", column);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getArray");
             java.sql.Array result = isNull(column) ? null : cursor_.getArray(column);
             if (true) {
                 throw new SqlException(agent_.logWriter_,
@@ -1350,7 +1350,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     // used by DBMD
     Object getObjectX(int column) throws SqlException {
-        checkGetterPreconditions(column);
+        checkGetterPreconditions(column, "getObject");
         Object result = null;
         if (wasNonNullSensitiveUpdate(column)) {
             result = updatedColumns_[column - 1];
@@ -1370,7 +1370,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getObject", column, map);
             }
-            checkGetterPreconditions(column);
+            checkGetterPreconditions(column, "getObject");
             Object result = null;
             if (wasNonNullSensitiveUpdate(column)) {
                 result = updatedColumns_[column - 1];
@@ -1829,7 +1829,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      */
     public final java.sql.SQLWarning getWarnings() throws SQLException {
         try {
-            checkForClosedResultSet();
+            checkForClosedResultSet("getWarnings");
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -1853,7 +1853,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceEntry(this, "clearWarnings");
             }
             try {
-                checkForClosedResultSet();
+                checkForClosedResultSet("clearWarnings");
             } catch (SqlException se) {
                 throw se.getSQLException();
             }
@@ -1873,7 +1873,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "getCursorName");
                 }
-                checkForClosedResultSet();
+                checkForClosedResultSet("getCursorName");
                 if (generatedSection_ != null) {
                     return "stored procedure generated cursor:" + generatedSection_.getServerCursorName();
                 }
@@ -1912,7 +1912,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     // used by DBMD
     ColumnMetaData getMetaDataX() throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("getMetaData");
         return resultSetMetaData_;
     }
 
@@ -1939,7 +1939,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     // An untraced version of findColumn()
     private final int findColumnX(String columnName) throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("findColumn");
         return resultSetMetaData_.findColumnX(columnName);
     }
 
@@ -1951,7 +1951,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "isBeforeFirst");
             }
-            checkForClosedResultSet();
+            checkForClosedResultSet("isBeforeFirst");
             checkThatResultSetTypeIsScrollable();
             // Returns false if the ResultSet contains no rows.
             boolean isBeforeFirst = isBeforeFirstX();
@@ -1982,7 +1982,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "isAfterLast");
             }
-            checkForClosedResultSet();
+            checkForClosedResultSet("isAfterLast");
             checkThatResultSetTypeIsScrollable();
             // Returns false if the ResultSet contains no rows.
             boolean isAfterLast = isAfterLastX();
@@ -2015,7 +2015,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "isFirst");
             }
-            checkForClosedResultSet();
+            checkForClosedResultSet("isFirst");
             checkThatResultSetTypeIsScrollable();
             // Not necessary to get the rowCount_ since currentRowInRowset_ is initialized to -1,
             // and it will not be changed if there is no rows in the ResultSet.
@@ -2044,7 +2044,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "isLast");
             }
-            checkForClosedResultSet();
+            checkForClosedResultSet("isLast");
             checkThatResultSetTypeIsScrollable();
             // Returns false if the ResultSet contains no rows.
             boolean isLast = isLastX();
@@ -2075,7 +2075,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "beforeFirst");
                 }
-                checkForClosedResultSet();
+                checkForClosedResultSet("beforeFirst");
                 checkThatResultSetTypeIsScrollable();
                 clearWarningsX();
                 beforeFirstX();
@@ -2116,7 +2116,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "afterLast");
                 }
-                checkForClosedResultSet();
+                checkForClosedResultSet("afterLast");
                 checkThatResultSetTypeIsScrollable();
                 clearWarningsX();
                 afterLastX();
@@ -2170,7 +2170,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private boolean firstX() throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("first");
         checkThatResultSetTypeIsScrollable();
         clearWarningsX();
         
@@ -2225,7 +2225,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private boolean lastX() throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("last");
         checkThatResultSetTypeIsScrollable();
         clearWarningsX();
         
@@ -2290,7 +2290,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private int getRowX() throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("getRow");
         long row;
         checkThatResultSetIsNotDynamic();
         if (resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY)
@@ -2342,7 +2342,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     public boolean absoluteX(int row) throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("absolute");
         checkThatResultSetTypeIsScrollable();
         clearWarningsX();
 
@@ -2427,7 +2427,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private boolean relativeX(int rows) throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("relative");
         checkThatResultSetTypeIsScrollable();
         clearWarningsX();
         
@@ -2553,7 +2553,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private boolean previousX() throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("previous");
         checkThatResultSetTypeIsScrollable();
         clearWarningsX();
         
@@ -2603,7 +2603,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setFetchDirection", direction);
                 }
-                checkForClosedResultSet();
+                checkForClosedResultSet("setFetchDirection");
                 checkThatResultSetTypeIsScrollable();
 
                 switch (direction) {
@@ -2628,7 +2628,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public int getFetchDirection() throws SQLException {
         try
         {
-            checkForClosedResultSet();
+            checkForClosedResultSet("getFetchDirection");
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getFetchDirection", fetchDirection_);
             }
@@ -2647,7 +2647,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "setFetchSize", rows);
                 }
-                checkForClosedResultSet();
+                checkForClosedResultSet("setFetchSize");
                 if (rows < 0 || (maxRows_ != 0 && rows > maxRows_)) {
                     throw new SqlException(agent_.logWriter_, 
                         new ClientMessageId(SQLState.INVALID_FETCH_SIZE),
@@ -2668,7 +2668,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getFetchSize", fetchSize_);
             }
-            checkForClosedResultSet();
+            checkForClosedResultSet("getFetchSize");
             return suggestedFetchSize_;
         }
         catch ( SqlException se )
@@ -2683,7 +2683,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getType", resultSetType_);
             }
-            checkForClosedResultSet();
+            checkForClosedResultSet("getType");
             return resultSetType_;
         }
         catch ( SqlException se )
@@ -2698,7 +2698,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getConcurrency", resultSetConcurrency_);
             }
-            checkForClosedResultSet();
+            checkForClosedResultSet("getConcurrency");
             return resultSetConcurrency_;
         }
         catch ( SqlException se )
@@ -2712,7 +2712,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public boolean rowUpdated() throws SQLException {
         try
         {
-            checkForClosedResultSet();
+            checkForClosedResultSet("rowUpdated");
             checkPositionedOnPlainRow();
 
             boolean rowUpdated = cursor_.getIsRowUpdated();
@@ -2731,7 +2731,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public boolean rowInserted() throws SQLException {
         try
         {
-            checkForClosedResultSet();
+            checkForClosedResultSet("rowInserted");
             checkPositionedOnPlainRow();
 
             boolean rowInserted = false;
@@ -2753,7 +2753,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public boolean rowDeleted() throws SQLException {
         try
         {
-            checkForClosedResultSet();
+            checkForClosedResultSet("rowDeleted");
             checkPositionedOnPlainRow();
 
             boolean rowDeleted = 
@@ -3420,8 +3420,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private void insertRowX() throws SqlException {
-        checkForClosedResultSet();
-	checkForUpdatableResultSet("insertRow");
+        checkForClosedResultSet("insertRow");
+        checkForUpdatableResultSet("insertRow");
         if (isOnCurrentRow_) {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId(SQLState.CURSOR_NOT_POSITIONED_ON_INSERT_ROW));
@@ -3491,7 +3491,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     //if no updateXXX were issued before this updateRow, then return false
     private boolean updateRowX() throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("updateRow");
         
         checkForUpdatableResultSet("updateRow");
         
@@ -3611,7 +3611,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private void deleteRowX() throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("deleteRow");
         
         checkForUpdatableResultSet("deleteRow");
 
@@ -3666,7 +3666,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     private void refreshRowX() throws SqlException {
-        checkForClosedResultSet();
+        checkForClosedResultSet("refreshRow");
         checkThatResultSetTypeIsScrollable();
 	checkForUpdatableResultSet("refreshRow");
         if (isBeforeFirstX() || isAfterLastX() || isOnInsertRow_) {
@@ -3695,7 +3695,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "cancelRowUpdates");
                 }
-                checkForClosedResultSet();
+                checkForClosedResultSet("cancelRowUpdates");
                 checkForUpdatableResultSet("cancelRowUpdates");
                 if (isOnInsertRow_) {
                     throw new SqlException(agent_.logWriter_, 
@@ -3723,7 +3723,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "moveToInsertRow");
                 }
-                checkForClosedResultSet();
+                checkForClosedResultSet("moveToInsertRow");
                 checkForUpdatableResultSet("moveToInsertRow");
 
                 resetUpdatedColumnsForInsert();
@@ -3746,7 +3746,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "moveToCurrentRow");
                 }
-                checkForClosedResultSet();
+                checkForClosedResultSet("moveToCurrentRow");
                 checkForUpdatableResultSet("moveToCurrentRow");
 
                 moveToCurrentRowX();
@@ -3796,7 +3796,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      */
     public java.sql.Statement getStatement() throws SQLException {
         try {
-            checkForClosedResultSet();
+            checkForClosedResultSet("getStatement");
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -4715,8 +4715,9 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return firstRowInRowset_ + currentRowInRowset_;
     }
 
-    private final void checkGetterPreconditions(int column) throws SqlException {
-        checkForClosedResultSet();
+    private final void checkGetterPreconditions(int column, String operation)
+            throws SqlException {
+        checkForClosedResultSet(operation);
         checkForValidColumnIndex(column);
         checkForValidCursorPosition();
     }
@@ -4725,7 +4726,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 						String operation)
 	throws SqlException {
 
-        checkForClosedResultSet();
+        checkForClosedResultSet(operation);
         checkForValidColumnIndex(column);
 	checkForUpdatableResultSet(operation);
 
@@ -4753,11 +4754,12 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    protected final void checkForClosedResultSet() throws SqlException {
+    protected final void checkForClosedResultSet(String operation)
+            throws SqlException {
         if (!openOnClient_) {
             agent_.checkForDeferredExceptions();
-            throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.CLIENT_RESULT_SET_NOT_OPEN));
+            throw new SqlException(agent_.logWriter_, new ClientMessageId(
+                    SQLState.LANG_RESULT_SET_NOT_OPEN), operation);
         } else {
             agent_.checkForDeferredExceptions();
         }
@@ -5529,7 +5531,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             agent_.logWriter_.traceEntry(this, "getHoldability");
         }
         try {
-            checkForClosedResultSet();
+            checkForClosedResultSet("getHoldability");
         } catch (SqlException se) {
             throw se.getSQLException();
         }

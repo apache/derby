@@ -160,7 +160,7 @@ public class NetResultSet40 extends NetResultSet{
      */
     public boolean isWrapperFor(Class<?> interfaces) throws SQLException {
         try {
-            checkForClosedResultSet();
+            checkForClosedResultSet("isWrapperFor");
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -178,7 +178,7 @@ public class NetResultSet40 extends NetResultSet{
     public <T> T unwrap(java.lang.Class<T> interfaces)
                                    throws SQLException {
         try { 
-            checkForClosedResultSet();
+            checkForClosedResultSet("unwrap");
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
             throw new SqlException(null,

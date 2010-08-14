@@ -3889,14 +3889,9 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
             </msg>
 
             <msg>
-                <name>XCL16.S.0</name>
+                <name>XCL16.S</name>
                 <text>ResultSet not open. Operation '{0}' not permitted. Verify that autocommit is OFF.</text>
                 <arg>operation</arg>
-            </msg>
-
-            <msg>
-                <name>XCL16.S.1</name>
-                <text>ResultSet not open.  Verify that autocommit is OFF.</text>
             </msg>
 
             <msg>

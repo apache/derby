@@ -531,6 +531,8 @@ public class TestDbMetaData extends BaseJDBCTestCase {
                 // OK, didn't fail, ResultSet wasn't closed
             } catch (SQLException sqle) {
                 assertSQLState("XCL16", sqle);
+                // DERBY-4767, sample verification test for operation in XCL16 message.
+                assertTrue(sqle.getMessage().indexOf("next") > 0);
                 // OK, ResultSet is closed, increase counter
                 closedResultSets++;
             }

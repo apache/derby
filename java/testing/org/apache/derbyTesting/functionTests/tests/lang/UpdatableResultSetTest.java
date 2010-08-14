@@ -567,6 +567,8 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     "result set is closed");
         } catch (SQLException e) {
             assertSQLState("XCL16", e);
+            // DERBY-4767, sample verification test for operation in XCL16 message.
+            assertTrue(e.getMessage().indexOf("deleteRow") > 0);
         }
         
         // attempt to send a deleteRow on a closed result set
@@ -576,6 +578,8 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     "result set is closed");
         } catch (SQLException e) {
             assertSQLState("XCL16", e);
+            // DERBY-4767, sample verification test for operation in XCL16 message.
+            assertTrue(e.getMessage().indexOf("updateRow") > 0);
         }
         rs.close();
         
@@ -3845,6 +3849,8 @@ public class UpdatableResultSetTest  extends BaseJDBCTestCase {
                     "after commit");
         } catch (SQLException se) {
             assertSQLState("XCL16", se);
+            // DERBY-4767, sample verification test for operation in XCL16 message.
+            assertTrue(se.getMessage().indexOf("insertRow") > 0);
         }
         rs.close();
         
