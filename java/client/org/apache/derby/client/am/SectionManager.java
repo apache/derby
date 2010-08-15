@@ -193,7 +193,7 @@ public class SectionManager {
         ResultSet rs = (ResultSet) ((WeakReference) (positionedUpdateCursorNameToResultSet_.get(cursorName))).get();
         if (rs == null) {
             throw new SqlException(agent_.logWriter_, 
-                new ClientMessageId(SQLState.LANG_RESULT_SET_NOT_OPEN), "next");
+                new ClientMessageId(SQLState.LANG_RESULT_SET_NOT_OPEN), "update");
         }
         return (rs.resultSetType_ == java.sql.ResultSet.TYPE_FORWARD_ONLY) ? null : rs;
     }
