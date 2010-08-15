@@ -720,6 +720,37 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     	return lst.item(node).getAttributes().getNamedItem(attribute).getNodeValue();
     }
 
+    public void testPlanExporterSchemaExistence()
+	throws Exception
+    {
+	AccessDatabase access = 
+    		new AccessDatabase(getConnection(), "NoSuchSchema", "nostmt"); 
+	assertTrue( "Unexpectedly thought schema exists",
+		! access.verifySchemaExistance() );
+    }
+
+    public void testPlanExporterIllegalFileAccess()
+	throws Exception
+    {
+	AccessDatabase access = 
+    		new AccessDatabase(getConnection(), "NoSuchSchema", "nostmt"); 
+    	CreateXMLFile xml_file = new CreateXMLFile(access); 
+	try
+	{
+    		xml_file.writeTheXMLFile("nostmt", "notime", null,
+			"/illegal.xml", null);
+		fail("Expected exception for illegal file access");
+	}
+	catch (java.security.AccessControlException ace)
+	{
+		// Expected this exception to be thrown
+	}
+	catch (Exception e)
+	{
+		e.printStackTrace();
+		fail(e.getMessage());
+	}
+    }
     
     /**
      * Verify that XPLAIN style captures basic statistics and timings.

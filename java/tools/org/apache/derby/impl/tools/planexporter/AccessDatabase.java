@@ -125,6 +125,17 @@ public class AccessDatabase {
 
     }
 
+    public boolean verifySchemaExistance() throws SQLException{
+    	boolean found=false;
+    	ResultSet result = conn.getMetaData().getSchemas();
+    	while(result.next()){
+    		if(result.getString(1).equals(schema)){
+    			found=true;
+    			break;
+    		}
+    	}	
+    	return found;
+    }
     /**
      * <p>
      * This method creates the queries such that after execution
@@ -474,7 +485,7 @@ public class AccessDatabase {
         results.close();
         stmt.close();
 
-        return time;
+        return time+"\n";
     }
 
     /**
@@ -482,7 +493,7 @@ public class AccessDatabase {
      * @return stmt_id as a XML element
      */
     public String stmtID(){
-        return "<stmt_id>"+getQuery()+"</stmt_id>";
+        return "<stmt_id>"+getQuery()+"</stmt_id>\n";
     }
 
     /**

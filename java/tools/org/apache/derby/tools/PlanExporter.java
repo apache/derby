@@ -53,134 +53,146 @@ public class PlanExporter {
 
                 AccessDatabase access = new AccessDatabase(dbURL, args[1], args[2]);
                 access.createConnection();
-                if(access.initializeDataArray()){
-                    access.createXMLFragment();
-                    access.markTheDepth();
-                    String stmt=access.statement();
-                    String time=access.time();
-                    access.closeConnection();
+                
+                if(access.verifySchemaExistance()){
+                
+                	if(access.initializeDataArray()){
+                		access.createXMLFragment();
+                		access.markTheDepth();
+                		String stmt=access.statement();
+                		String time=access.time();
+                		access.closeConnection();
 
-                    //advanced XSL feature
-                    //possible occurrences are
-                    //-adv -xml {path} -xsl {path} or
-                    //-adv -xsl {path} -xml {path}
-                    if(args.length==8 &&
-                        args[3].equalsIgnoreCase("-adv")){
-                        int opt1=selectArg(args[4]);
-                        int opt2=selectArg(args[6]);
-                        if(opt1==1 && opt2==3){
-                            if(args[7].toUpperCase().endsWith(".XSL"))
-                                generateXML(access,args[5],stmt,time,args[7]);
-                            else
-                                generateXML(access,args[5],stmt,time,args[7]+".xsl");
-                        }
-                        else if(opt1==3 && opt2==1){
-                            if(args[5].toUpperCase().endsWith(".XSL"))
-                                generateXML(access,args[7],stmt,time,args[5]);
-                            else
-                                generateXML(access,args[7],stmt,time,args[5]+".xsl");
-                        }
-                        else
-                            printHelp();
-                    }
-                    //possible occurrences are -xml {path} or -html {path}
-                    else if(args.length==5){
-                        int opt=selectArg(args[3]);
-                        if(opt==0 || opt==3)
-                            printHelp();
-                        else if(opt==1)
-                            generateXML(access,args[4],stmt,time,null);
-                        else{
-                            generateXML(access,"temp.xml",stmt,time,null);
-                            generateHTML("temp.xml",args[4],xslStyleSheetName,true);
-                            deleteFile("temp.xml");
-                        }
-                    }
-                    //possible occurrences are
-                    //-xml {path} and -html {path}
-                    //-html {path} and -xml {path}
-                    //-html {path} and -xsl {path}
-                    //-xsl {path} and -html {path}
-                    else if(args.length==7){
-                        int opt1=selectArg(args[3]);
-                        int opt2=selectArg(args[5]);
-                        if(opt1==0 || opt2==0)
-                            printHelp();
-                        else if(opt1==1 && opt2==2){
-                            generateXML(access,args[4],stmt,time,null);
-                            generateHTML(args[4],args[6],xslStyleSheetName,true);
-                        }
-                        else if(opt1==2 && opt2==1){
-                            generateXML(access,args[6],stmt,time,null);
-                            generateHTML(args[6],args[4],xslStyleSheetName,true);
-                        }
-                        else if(opt1==2 && opt2==3){
-                            generateXML(access,"temp.xml",stmt,time,null);
-                            generateHTML("temp.xml",args[4],args[6],false);
-                            deleteFile("temp.xml");
-                        }
-                        else if(opt1==3 && opt2==2){
-                            generateXML(access,"temp.xml",stmt,time,null);
-                            generateHTML("temp.xml",args[6],args[4],false);
-                            deleteFile("temp.xml");
-                        }
-                        else
-                            printHelp();
-                    }
-                    //possible occurrences are
-                    //-xml {path} and -html {path} and -xsl {path}
-                    //-html {path} and -xsl {path} and -xml {path}
-                    //-xsl {path} and -xml {path} and -html {path}
-                    //-xml {path} and -xsl {path} and -html {path}
-                    //-html {path} and -xml {path} and -xsl {path}
-                    //-xsl {path} and -html {path} and -xml {path}
-                    else if(args.length==9){
-                        int opt1=selectArg(args[3]);
-                        int opt2=selectArg(args[5]);
-                        int opt3=selectArg(args[7]);
-                        if(opt1==0 || opt2==0 || opt3==0)
-                            printHelp();
-                        else if(opt1==1 && opt2==2 && opt3==3){
-                            generateXML(access,args[4],stmt,time,null);
-                            generateHTML(args[4],args[6],args[8],false);
-                        }
-                        else if(opt1==2 && opt2==3 && opt3==1){
-                            generateXML(access,args[8],stmt,time,null);
-                            generateHTML(args[8],args[4],args[6],false);
-                        }
-                        else if(opt1==3 && opt2==1 && opt3==2){
-                            generateXML(access,args[6],stmt,time,null);
-                            generateHTML(args[6],args[8],args[4],false);
-                        }
-                        else if(opt1==1 && opt2==3 && opt3==2){
-                            generateXML(access,args[4],stmt,time,null);
-                            generateHTML(args[4],args[8],args[6],false);
-                        }
-                        else if(opt1==2 && opt2==1 && opt3==3){
-                            generateXML(access,args[6],stmt,time,null);
-                            generateHTML(args[6],args[4],args[8],false);
-                        }
-                        else if(opt1==3 && opt2==2 && opt3==1){
-                            generateXML(access,args[8],stmt,time,null);
-                            generateHTML(args[8],args[6],args[4],false);
-                        }
-                        else
-                            printHelp();
-                    }
-                    else
-                        printHelp();
+                		//advanced XSL feature
+                		//possible occurrences are
+                		//-adv -xml {path} -xsl {path} or
+                		//-adv -xsl {path} -xml {path}
+                		if(args.length==8 &&
+                				args[3].equalsIgnoreCase("-adv")){
+                			int opt1=selectArg(args[4]);
+                			int opt2=selectArg(args[6]);
+                			if(opt1==1 && opt2==3){
+                				if(args[7].toUpperCase().endsWith(".XSL"))
+                					generateXML(access,args[5],stmt,time,args[7]);
+                				else
+                					generateXML(access,args[5],stmt,time,args[7]+".xsl");
+                			}
+                			else if(opt1==3 && opt2==1){
+                				if(args[5].toUpperCase().endsWith(".XSL"))
+                					generateXML(access,args[7],stmt,time,args[5]);
+                				else
+                					generateXML(access,args[7],stmt,time,args[5]+".xsl");
+                			}
+                			else
+                				printHelp();
+                		}
+                		//possible occurrences are -xml {path} or -html {path}
+                		else if(args.length==5){
+                			int opt=selectArg(args[3]);
+                			if(opt==0 || opt==3)
+                				printHelp();
+                			else if(opt==1)
+                				generateXML(access,args[4],stmt,time,null);
+                			else{
+                				generateXML(access,"temp.xml",stmt,time,null);
+                				generateHTML("temp.xml",args[4],xslStyleSheetName,true);
+                				deleteFile("temp.xml");
+                			}
+                		}
+                		//possible occurrences are
+                		//-xml {path} and -html {path}
+                		//-html {path} and -xml {path}
+                		//-html {path} and -xsl {path}
+                		//-xsl {path} and -html {path}
+                		else if(args.length==7){
+                			int opt1=selectArg(args[3]);
+                			int opt2=selectArg(args[5]);
+                			if(opt1==0 || opt2==0)
+                				printHelp();
+                			else if(opt1==1 && opt2==2){
+                				generateXML(access,args[4],stmt,time,null);
+                				generateHTML(args[4],args[6],xslStyleSheetName,true);
+                			}
+                			else if(opt1==2 && opt2==1){
+                				generateXML(access,args[6],stmt,time,null);
+                				generateHTML(args[6],args[4],xslStyleSheetName,true);
+                			}
+                			else if(opt1==2 && opt2==3){
+                				generateXML(access,"temp.xml",stmt,time,null);
+                				generateHTML("temp.xml",args[4],args[6],false);
+                				deleteFile("temp.xml");
+                			}
+                			else if(opt1==3 && opt2==2){
+                				generateXML(access,"temp.xml",stmt,time,null);
+                				generateHTML("temp.xml",args[6],args[4],false);
+                				deleteFile("temp.xml");
+                			}
+                			else
+                				printHelp();
+                		}
+                		//possible occurrences are
+                		//-xml {path} and -html {path} and -xsl {path}
+                		//-html {path} and -xsl {path} and -xml {path}
+                		//-xsl {path} and -xml {path} and -html {path}
+                		//-xml {path} and -xsl {path} and -html {path}
+                		//-html {path} and -xml {path} and -xsl {path}
+                		//-xsl {path} and -html {path} and -xml {path}
+                		else if(args.length==9){
+                			int opt1=selectArg(args[3]);
+                			int opt2=selectArg(args[5]);
+                			int opt3=selectArg(args[7]);
+                			if(opt1==0 || opt2==0 || opt3==0)
+                				printHelp();
+                			else if(opt1==1 && opt2==2 && opt3==3){
+                				generateXML(access,args[4],stmt,time,null);
+                				generateHTML(args[4],args[6],args[8],false);
+                			}
+                			else if(opt1==2 && opt2==3 && opt3==1){
+                				generateXML(access,args[8],stmt,time,null);
+                				generateHTML(args[8],args[4],args[6],false);
+                			}
+                			else if(opt1==3 && opt2==1 && opt3==2){
+                				generateXML(access,args[6],stmt,time,null);
+                				generateHTML(args[6],args[8],args[4],false);
+                			}
+                			else if(opt1==1 && opt2==3 && opt3==2){
+                				generateXML(access,args[4],stmt,time,null);
+                				generateHTML(args[4],args[8],args[6],false);
+                			}
+                			else if(opt1==2 && opt2==1 && opt3==3){
+                				generateXML(access,args[6],stmt,time,null);
+                				generateHTML(args[6],args[4],args[8],false);
+                			}
+                			else if(opt1==3 && opt2==2 && opt3==1){
+                				generateXML(access,args[8],stmt,time,null);
+                				generateHTML(args[8],args[6],args[4],false);
+                			}
+                			else
+                				printHelp();
+                		}
+                		else
+                			printHelp();
+                	}
+                	else{
+                		System.out.println(
+                				"====================================================\n" +
+                				"--- An Error Occured: No Statistics has Captured ---\n" +
+                				"-- Possible reasons:                              --\n" +
+                				"-- 1) The statement executed is a DDL statement.  --\n" +
+                				"-- Statistics will not capture for DDL statements --\n" +
+                				"-- by the Derby.                                  --\n" +
+                				"-- 2) The statement ID entered is incorrect.      --\n" +
+                				"-- 3) Schema specified does not exist.            --\n" +
+                				"====================================================\n"
+                		);
+                	}
                 }
                 else{
-                    System.out.println(
-                            "====================================================\n" +
-                            "--- An Error Occured: No Statistics has Captured ---\n" +
-                            "-- Possible reasons:                                --\n" +
-                            "-- 1) The statement executed is a DDL statement.  --\n" +
-                            "-- Statistics will not capture for DDL statements --\n" +
-                            "-- by the Derby.                                  --\n" +
-                            "-- 2) The statement ID entered is incorrect.       --\n" +
-                            "====================================================\n"
-                    );
+                	System.out.println(
+            				"====================================================\n" +
+            				"---              An Error Occured:               ---\n" +
+            				"-------   Specified Schema does not exist.   -------\n" +
+            				"======================================================");
                 }
             }
             else

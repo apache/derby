@@ -55,7 +55,7 @@ public class CreateXMLFile {
      */
     public void writeTheXMLFile(String stmt, String time,
             TreeNode[] data, final String file_name, String xsl_sheet_name)
-    throws IOException, PrivilegedActionException {
+    throws IOException {
 
         String defaultXML = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n";
         String embedXSL="";
@@ -68,8 +68,9 @@ public class CreateXMLFile {
         String childTagStart = "<details>\n";
         String childTagEnd = "</details>\n";
 
-        DataOutputStream dos =
-            new DataOutputStream(
+        DataOutputStream dos;
+		try {
+			dos = new DataOutputStream(
                     new BufferedOutputStream(
                             (OutputStream)AccessController.doPrivileged
                             (new java.security.PrivilegedExceptionAction(){
@@ -90,5 +91,8 @@ public class CreateXMLFile {
         dos.write((access.indent(0)+childTagEnd).getBytes());
         dos.write(parentTagEnd.getBytes());
         dos.close();
+		} catch (PrivilegedActionException pae) {
+			throw (IOException)pae.getCause(); 
+		}
     }
 }
