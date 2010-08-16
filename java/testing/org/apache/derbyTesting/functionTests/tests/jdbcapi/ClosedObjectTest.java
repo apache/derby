@@ -459,6 +459,11 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
             throws SQLException
         {
             if (sqle.getSQLState().equals("XCL16")) {
+                // DERBY-4767 - verification test for operation in XCL16 message.
+                String methodString=method.getName();
+                if (methodString.indexOf("(") > 1 )
+                    methodString=methodString.substring(0, (methodString.length() -2));
+                assertTrue("method: " + methodString + ", but message: " + sqle.getMessage(), sqle.getMessage().indexOf(methodString) > 0); 
                 // everything is OK, do nothing
             } else {
                 // unexpected exception

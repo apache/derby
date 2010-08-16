@@ -2198,7 +2198,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 	 * @see EmbedDatabaseMetaData#deletesAreDetected
 	 */
 	public boolean rowDeleted() throws SQLException {
-		checkIfClosed("rowUpdated");
+		checkIfClosed("rowDeleted");
 		checkNotOnInsertRow();
 		checkOnRow();
 

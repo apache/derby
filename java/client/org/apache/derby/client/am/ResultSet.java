@@ -1440,7 +1440,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBoolean", columnName);
             }
-            return getBoolean(findColumnX(columnName));
+            return getBoolean(findColumnX(columnName, "getBoolean"));
         }
         catch ( SqlException se )
         {
@@ -1454,7 +1454,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getByte", columnName);
             }
-            return getByte(findColumnX(columnName));
+            return getByte(findColumnX(columnName, "getByte"));
         }
         catch ( SqlException se )
         {
@@ -1468,7 +1468,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getShort", columnName);
             }
-            return getShort(findColumnX(columnName));
+            return getShort(findColumnX(columnName, "getShort"));
         }
         catch ( SqlException se )
         {
@@ -1482,7 +1482,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getInt", columnName);
             }
-            return getInt(findColumnX(columnName));
+            return getInt(findColumnX(columnName, "getInt"));
         }
         catch ( SqlException se )
         {
@@ -1496,7 +1496,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getLong", columnName);
             }
-            return getLong(findColumnX(columnName));
+            return getLong(findColumnX(columnName, "getLong"));
         }
         catch ( SqlException se )
         {
@@ -1510,7 +1510,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getFloat", columnName);
             }
-            return getFloat(findColumnX(columnName));
+            return getFloat(findColumnX(columnName, "getFloat"));
         }
         catch ( SqlException se )
         {
@@ -1524,7 +1524,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDouble", columnName);
             }
-            return getDouble(findColumnX(columnName));
+            return getDouble(findColumnX(columnName, "getDouble"));
         }
         catch ( SqlException se )
         {
@@ -1539,7 +1539,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceDeprecatedEntry(this, "getBigDecimal", columnName, scale);
             }
-            return getBigDecimal(findColumnX(columnName), scale);
+            return getBigDecimal(findColumnX(columnName, "getBigDecimal"), scale);
         }
         catch ( SqlException se )
         {
@@ -1553,7 +1553,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBigDecimal", columnName);
             }
-            return getBigDecimal(findColumnX(columnName));
+            return getBigDecimal(findColumnX(columnName, "getBigDecimal"));
         }
         catch ( SqlException se )
         {
@@ -1567,7 +1567,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDate", columnName);
             }
-            return getDate(findColumnX(columnName));
+            return getDate(findColumnX(columnName, "getDate"));
         }
         catch ( SqlException se )
         {
@@ -1581,7 +1581,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDate", columnName, cal);
             }
-            return getDate(findColumnX(columnName), cal);
+            return getDate(findColumnX(columnName, "getDate"), cal);
         }
         catch ( SqlException se )
         {
@@ -1595,7 +1595,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTime", columnName);
             }
-            return getTime(findColumnX(columnName));
+            return getTime(findColumnX(columnName, "getTime"));
         }
         catch ( SqlException se )
         {
@@ -1609,7 +1609,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTime", columnName, cal);
             }
-            return getTime(findColumnX(columnName), cal);
+            return getTime(findColumnX(columnName, "getTime"), cal);
         }
         catch ( SqlException se )
         {
@@ -1623,7 +1623,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTimestamp", columnName);
             }
-            return getTimestamp(findColumnX(columnName));
+            return getTimestamp(findColumnX(columnName, "getTimestamp"));
         }
         catch ( SqlException se )
         {
@@ -1637,7 +1637,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTimestamp", columnName, cal);
             }
-            return getTimestamp(findColumnX(columnName), cal);
+            return getTimestamp(findColumnX(columnName, "getTimestamp"), cal);
         }
         catch ( SqlException se )
         {
@@ -1651,7 +1651,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getString", columnName);
             }
-            return getString(findColumnX(columnName));
+            return getString(findColumnX(columnName, "getString"));
         }
         catch ( SqlException se )
         {
@@ -1665,7 +1665,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBytes", columnName);
             }
-            return getBytes(findColumnX(columnName));
+            return getBytes(findColumnX(columnName, "getBytes"));
         }
         catch ( SqlException se )
         {
@@ -1679,7 +1679,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBinaryStream", columnName);
             }
-            return getBinaryStream(findColumnX(columnName));
+            return getBinaryStream(findColumnX(columnName, "getBinaryStream"));
         }
         catch ( SqlException se )
         {
@@ -1693,7 +1693,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getAsciiStream", columnName);
             }
-            return getAsciiStream(findColumnX(columnName));
+            return getAsciiStream(findColumnX(columnName, "getAsciiStream"));
         }
         catch ( SqlException se )
         {
@@ -1708,7 +1708,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceDeprecatedEntry(this, "getUnicodeStream", columnName);
             }
-            return getUnicodeStream(findColumnX(columnName));
+            return getUnicodeStream(findColumnX(columnName, "getUnicodeStream"));
         }
         catch ( SqlException se )
         {
@@ -1722,7 +1722,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getCharacterStream", columnName);
             }
-            return getCharacterStream(findColumnX(columnName));
+            return getCharacterStream(findColumnX(columnName, "getCharacterStream"));
         }
         catch ( SqlException se )
         {
@@ -1736,7 +1736,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBlob", columnName);
             }
-            return getBlob(findColumnX(columnName));
+            return getBlob(findColumnX(columnName, "getBlob"));
         }
         catch ( SqlException se )
         {
@@ -1750,7 +1750,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getClob", columnName);
             }
-            return getClob(findColumnX(columnName));
+            return getClob(findColumnX(columnName, "getClob"));
         }
         catch ( SqlException se )
         {
@@ -1764,7 +1764,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getArray", columnName);
             }
-            return getArray(findColumnX(columnName));
+            return getArray(findColumnX(columnName, "getArray"));
         }
         catch ( SqlException se )
         {
@@ -1778,7 +1778,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getRef", columnName);
             }
-            return getRef(findColumnX(columnName));
+            return getRef(findColumnX(columnName, "getRef"));
         }
         catch ( SqlException se )
         {
@@ -1792,7 +1792,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getObject", columnName);
             }
-            return getObject(findColumnX(columnName));
+            return getObject(findColumnX(columnName, "getObject"));
         }
         catch ( SqlException se )
         {
@@ -1806,7 +1806,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getObject", columnName, map);
             }
-            return getObject(findColumnX(columnName), map);
+            return getObject(findColumnX(columnName, "getObject"), map);
         }
         catch ( SqlException se )
         {
@@ -1924,7 +1924,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceEntry(this, "findColumn", columnName);
                 }
-                int column = findColumnX(columnName);
+                int column = findColumnX(columnName, "findColumn");
                 if (agent_.loggingEnabled()) {
                     agent_.logWriter_.traceExit(this, "findColumn", column);
                 }
@@ -1938,8 +1938,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // An untraced version of findColumn()
-    private final int findColumnX(String columnName) throws SqlException {
-        checkForClosedResultSet("findColumn");
+    private final int findColumnX(String columnName, String operation) throws SqlException {
+        checkForClosedResultSet(operation);
         return resultSetMetaData_.findColumnX(columnName);
     }
 
@@ -3125,7 +3125,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateNull", columnName);
             }
-            updateNull(findColumnX(columnName));
+            updateNull(findColumnX(columnName, "updateNull"));
         }
         catch ( SqlException se )
         {
@@ -3139,7 +3139,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateBoolean", columnName, x);
             }
-            updateBoolean(findColumnX(columnName), x);
+            updateBoolean(findColumnX(columnName, "updateBoolean"), x);
         }
         catch ( SqlException se )
         {
@@ -3153,7 +3153,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateByte", columnName, x);
             }
-            updateByte(findColumnX(columnName), x);
+            updateByte(findColumnX(columnName, "updateByte"), x);
         }
         catch ( SqlException se )
         {
@@ -3167,7 +3167,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateShort", columnName, x);
             }
-            updateShort(findColumnX(columnName), x);
+            updateShort(findColumnX(columnName, "updateShort"), x);
         }
         catch ( SqlException se )
         {
@@ -3181,7 +3181,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateInt", columnName, x);
             }
-            updateInt(findColumnX(columnName), x);
+            updateInt(findColumnX(columnName, "updateInt"), x);
         }
         catch ( SqlException se )
         {
@@ -3195,7 +3195,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateLong", columnName, x);
             }
-            updateLong(findColumnX(columnName), x);
+            updateLong(findColumnX(columnName, "updateLong"), x);
         }
         catch ( SqlException se )
         {
@@ -3209,7 +3209,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateFloat", columnName, x);
             }
-            updateFloat(findColumnX(columnName), x);
+            updateFloat(findColumnX(columnName, "updateFloat"), x);
         }
         catch ( SqlException se )
         {
@@ -3223,7 +3223,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateDouble", columnName, x);
             }
-            updateDouble(findColumnX(columnName), x);
+            updateDouble(findColumnX(columnName, "updateDouble"), x);
         }
         catch ( SqlException se )
         {
@@ -3237,7 +3237,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateBigDecimal", columnName, x);
             }
-            updateBigDecimal(findColumnX(columnName), x);
+            updateBigDecimal(findColumnX(columnName, "updateBigDecimal"), x);
         }
         catch ( SqlException se )
         {
@@ -3251,7 +3251,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateDate", columnName, x);
             }
-            updateDate(findColumnX(columnName), x);
+            updateDate(findColumnX(columnName, "updateDate"), x);
         }
         catch ( SqlException se )
         {
@@ -3265,7 +3265,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateTime", columnName, x);
             }
-            updateTime(findColumnX(columnName), x);
+            updateTime(findColumnX(columnName, "updateTime"), x);
         }
         catch ( SqlException se )
         {
@@ -3279,7 +3279,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateTimestamp", columnName, x);
             }
-            updateTimestamp(findColumnX(columnName), x);
+            updateTimestamp(findColumnX(columnName, "updateTimestamp"), x);
         }
         catch ( SqlException se )
         {
@@ -3293,7 +3293,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateString", columnName, x);
             }
-            updateString(findColumnX(columnName), x);
+            updateString(findColumnX(columnName, "updateString"), x);
         }
         catch ( SqlException se )
         {
@@ -3307,7 +3307,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateBytes", columnName, x);
             }
-            updateBytes(findColumnX(columnName), x);
+            updateBytes(findColumnX(columnName, "updateBytes"), x);
         }
         catch ( SqlException se )
         {
@@ -3323,7 +3323,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateBinaryStream", columnName, x, length);
             }
-            updateBinaryStream(findColumnX(columnName), x, length);
+            updateBinaryStream(findColumnX(columnName, "updateBinaryStream"), x, length);
         }
         catch ( SqlException se )
         {
@@ -3339,7 +3339,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateAsciiStream", columnName, x, length);
             }
-            updateAsciiStream(findColumnX(columnName), x, length);
+            updateAsciiStream(findColumnX(columnName, "updateAsciiStream"), x, length);
         }
         catch ( SqlException se )
         {
@@ -3355,7 +3355,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateCharacterStream", columnName, x, length);
             }
-            updateCharacterStream(findColumnX(columnName), x, length);
+            updateCharacterStream(findColumnX(columnName, "updateCharacterStream"), x, length);
         }
         catch ( SqlException se )
         {
@@ -3369,7 +3369,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateObject", columnName, x, scale);
             }
-            updateObject(findColumnX(columnName), x, scale);
+            updateObject(findColumnX(columnName, "updateObject"), x, scale);
         }
         catch ( SqlException se )
         {
@@ -3383,7 +3383,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "updateObject", columnName, x);
             }
-            updateObject(findColumnX(columnName), x);
+            updateObject(findColumnX(columnName, "updateObject"), x);
         }
         catch ( SqlException se )
         {
@@ -3879,7 +3879,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
      */
     public void updateBlob(String columnName, java.sql.Blob x) throws SQLException {
         try {
-            updateBlob(findColumnX(columnName), x);
+            updateBlob(findColumnX(columnName, "updateBlob"), x);
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -3943,7 +3943,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void updateBlob(String columnName, InputStream x, long length)
                            throws SQLException {
         try {
-            updateBlob(findColumnX(columnName), x, length);
+            updateBlob(findColumnX(columnName, "updateBlob"), x, length);
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -5853,7 +5853,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void updateAsciiStream(String columnName, InputStream x)
             throws SQLException {
         try {
-            updateAsciiStream(findColumnX(columnName), x);
+            updateAsciiStream(findColumnX(columnName, "updateAsciiStream"), x);
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -5879,7 +5879,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void updateAsciiStream(String columnName, InputStream x,
                     long length) throws SQLException {
         try {
-            updateAsciiStream(findColumnX(columnName), x, length);
+            updateAsciiStream(findColumnX(columnName, "updateAsciiStream"), x, length);
         }
         catch(SqlException sqle) {
             throw sqle.getSQLException();
@@ -5908,7 +5908,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void updateBinaryStream(String columnLabel, InputStream x)
             throws SQLException {
         try {
-            updateBinaryStream(findColumnX(columnLabel), x);
+            updateBinaryStream(findColumnX(columnLabel, "updateBinaryStream"), x);
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -5934,7 +5934,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void updateBinaryStream(String columnName, InputStream x,
                     long length) throws SQLException {
         try {
-            updateBinaryStream(findColumnX(columnName), x, length);
+            updateBinaryStream(findColumnX(columnName, "updateBinaryStream"), x, length);
         }
         catch(SqlException sqle) {
             throw sqle.getSQLException();
@@ -5963,7 +5963,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void updateBlob(String columnLabel, InputStream x)
             throws SQLException {
         try {
-            updateBlob(findColumnX(columnLabel), x);
+            updateBlob(findColumnX(columnLabel, "updateBlob"), x);
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -5991,7 +5991,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void updateCharacterStream(String columnLabel, Reader reader)
             throws SQLException {
         try {
-            updateCharacterStream(findColumnX(columnLabel), reader);
+            updateCharacterStream(findColumnX(columnLabel, "updateCharacterStream"), reader);
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -6017,7 +6017,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void updateCharacterStream(String columnName, Reader reader,
         long length) throws SQLException {
          try {
-             updateCharacterStream(findColumnX(columnName), reader, length);
+             updateCharacterStream(findColumnX(columnName, "updateCharacterStream"), reader, length);
          }
          catch(SqlException sqle) {
              throw sqle.getSQLException();
@@ -6049,7 +6049,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void updateClob(String columnLabel, Reader reader)
             throws SQLException {
         try {
-            updateClob(findColumnX(columnLabel), reader);
+            updateClob(findColumnX(columnLabel, "updateClob"), reader);
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -6128,7 +6128,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void updateClob(String columnName, Reader x, long length)
                            throws SQLException {
         try {
-            updateClob(findColumnX(columnName), x);
+            updateClob(findColumnX(columnName, "updateClob"), x);
         } catch (SqlException se) {
             throw se.getSQLException();
         }
@@ -6188,7 +6188,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public void updateClob(String columnLabel, java.sql.Clob x)
             throws SQLException {
         try {
-            updateClob(findColumnX(columnLabel), x);
+            updateClob(findColumnX(columnLabel, "updateClob"), x);
         } catch (SqlException se) {
             throw se.getSQLException();
         }
