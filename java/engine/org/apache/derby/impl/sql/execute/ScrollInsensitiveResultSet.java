@@ -560,7 +560,7 @@ public class ScrollInsensitiveResultSet extends NoPutResultSetImpl
 	{
 	    if ( ! isOpen ) 
 		{
-			throw StandardException.newException(SQLState.LANG_RESULT_SET_NOT_OPEN, "next");
+			throw StandardException.newException(SQLState.LANG_RESULT_SET_NOT_OPEN, "previous");
 		}
 
 		if (SanityManager.DEBUG)
