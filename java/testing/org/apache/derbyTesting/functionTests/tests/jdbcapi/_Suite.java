@@ -45,6 +45,7 @@ public class _Suite extends BaseTestCase  {
 
 		TestSuite suite = new TestSuite("jdbcapi");
 
+        suite.addTest(BlobSetBytesBoundaryTest.suite());
 		suite.addTest(ConcurrencyTest.suite());
         suite.addTest(DaylightSavingTest.suite());
 		suite.addTest(HoldabilityTest.suite());
@@ -163,7 +164,6 @@ public class _Suite extends BaseTestCase  {
             // XA and ConnectionPool Datasource are not available with
             // JSR169 so can't run InternationalConnectTest. 
             suite.addTest(InternationalConnectTest.suite());
-            suite.addTest(BlobSetBytesBoundaryTest.suite());
         }
 
         return suite;
