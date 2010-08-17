@@ -898,7 +898,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         if (len == 0) {
             return 0;
         }
-        if (len + offset > bytes.length) {
+        if (len > bytes.length - offset) {
             throw Util.generateCsSQLException(SQLState.BLOB_LENGTH_TOO_LONG,
                     new Long(len));
         }

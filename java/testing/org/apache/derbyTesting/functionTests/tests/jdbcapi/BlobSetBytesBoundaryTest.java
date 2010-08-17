@@ -90,7 +90,16 @@ public class BlobSetBytesBoundaryTest extends BaseJDBCTestCase {
         } catch (SQLException sqle) {
             assertSQLState("XJ079", sqle);
         }
-        
+
+        // Also check that we fail with the expected error if the sum of
+        // offset and length is greater than Integer.MAX_VALUE.
+        try {
+            blob.setBytes(1, new byte[100], 10, Integer.MAX_VALUE);
+            fail("setBytes() should fail when offset+length > bytes.length");
+        } catch (SQLException sqle) {
+            assertSQLState("XJ079", sqle);
+        }
+
         stmt.close();
     }
     
