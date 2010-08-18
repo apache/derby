@@ -218,6 +218,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         flowConnect(password, securityMechanism_);
         if(!isConnectionNull())
         	completeConnect();
+        //DERBY-2026. reset timeout after connection is made
+        netAgent_.setTimeout(0);
     }
 
     // For JDBC 2 Connections
@@ -304,14 +306,19 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         // (which the InternalDriver assumes means there's a subsubprotocol)  
         // and it's not a subsubprotocol recognized by our drivers.
         // If so, bail out here.
-        if(!isConnectionNull())
+        if(!isConnectionNull()) {
             completeConnect();
+        }
         else
         {
             agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
                     new ClientMessageId(SQLState.PROPERTY_INVALID_VALUE),
                     Attribute.DBNAME_ATTR,databaseName_));
         }
+        // DERBY-2026
+        //reset timeout if previously set for login timeout
+        netAgent_.setTimeout(0);
+        
     }
 
     // preferably without password in the method signature.
@@ -339,6 +346,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         boolean isDeferredReset = flowReconnect(getDeferredResetPassword(),
                                                 securityMechanism_);
         completeReset(isDeferredReset);
+        //DERBY-2026. Make sure soTimeout is set back to
+        // infinite after connection is made.
+        netAgent_.setTimeout(0);
     }
 
 

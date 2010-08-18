@@ -59,6 +59,7 @@ import org.apache.derby.jdbc.ClientXADataSource;
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
+import org.apache.derbyTesting.functionTests.util.TestRoutines;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -180,6 +181,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                 "testClientMessageTextConnectionAttribute"));
         suite.addTest(new J2EEDataSourceTest("testConnectionFlowCommit"));
         suite.addTest(new J2EEDataSourceTest("testConnectionFlowCommitAlt"));
+        suite.addTest(new J2EEDataSourceTest("testDerby2026LoginTimeout"));
         // Disabled because rollback flow optimization hasn't been implemented.
         // See DERBY-4687
         //suite.addTest(new J2EEDataSourceTest("testConnectionFlowRollbackAlt"));
@@ -239,6 +241,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                  * @see org.apache.derbyTesting.junit.CleanDatabaseTestSetup#decorateSQL(java.sql.Statement)
                  */
                 protected void decorateSQL(Statement s) throws SQLException {
+                    TestRoutines.installRoutines(getConnection());
                     s.executeUpdate("create table autocommitxastart(i int)");
                     s.executeUpdate("insert into autocommitxastart values 1,2,3,4,5");
                     s.executeUpdate("create schema SCHEMA_Patricio");
@@ -2108,6 +2111,58 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         conn.close();       
     }
 
+    /**
+     * DERBY-2026 - Make sure login timeout does not impact 
+     * queries.
+     */
+    public void testDerby2026LoginTimeout() throws SQLException {
+        DataSource jds = JDBCDataSource.getDataSource();
+        jds.setLoginTimeout(10);
+        Connection conn = jds.getConnection();
+        CallableStatement cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+        cs.execute();
+        //rollback to make sure our connection is ok.
+        conn.rollback();
+        
+        ConnectionPoolDataSource cpds = J2EEDataSource.getConnectionPoolDataSource();        
+        cpds.setLoginTimeout(10);
+        PooledConnection pc = cpds.getPooledConnection();
+        conn = pc.getConnection();
+        cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+        cs.execute();
+        //rollback to make sure our connection is ok.
+        conn.rollback();
+        
+        // Close the logical connection and get a new one.
+        // This will invoke reset which also needs its timeout reset
+        conn.close();
+        conn = pc.getConnection();
+        cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+        cs.execute();
+        //rollback to make sure our connection is ok.
+        conn.rollback();
+        
+        
+        XADataSource xads = J2EEDataSource.getXADataSource();        
+        xads.setLoginTimeout(10);
+        XAConnection xac = xads.getXAConnection();
+        conn = pc.getConnection();
+        cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+        cs.execute();
+        //rollback to make sure our connection is ok.
+        conn.rollback();
+        
+        // Close the logical connection and get a new one.
+        // This will invoke reset which also needs its timeout reset
+        conn.close();
+        conn = pc.getConnection();
+        cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+        cs.execute();
+        //rollback to make sure our connection is ok.
+        conn.rollback();
+        
+    }
+    
     /**
      * Doing the work for test Connection.flowcommit() and Connection.flowrollback()
      * @param conn
