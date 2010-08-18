@@ -120,6 +120,7 @@ public class splitmessages {
         clientMessageIds.add(SQLState.INVALID_COLUMN_ARRAY_LENGTH);
         clientMessageIds.add(SQLState.PROPERTY_INVALID_VALUE);
         clientMessageIds.add(SQLState.LANG_SUBSTR_START_ADDING_LEN_OUT_OF_RANGE);
+        clientMessageIds.add(SQLState.LANG_CURSOR_NOT_FOUND);
     }
 
 	public static void main(String[] args) throws Exception {

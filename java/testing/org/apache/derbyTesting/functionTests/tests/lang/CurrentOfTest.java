@@ -202,10 +202,7 @@ public class CurrentOfTest extends BaseJDBCTestCase {
 		
 		// TEST: no cursor with that name exists
 		delete2 = createStatement();
-		if (usingEmbedded())
-			assertStatementError("42X30", delete2,"delete from t where current of myCursor" );
-		else
-			assertStatementError("XJ202", delete2,"delete from t where current of myCursor" );
+		assertStatementError("42X30", delete2,"delete from t where current of myCursor" );
 		expectedRows = new Object[][]{{new String("456"),new String("hi yourself")},                                       
 				   					  {new String("3"),new String("you are the one")}}; 
 		JDBC.assertFullResultSet(delete1.executeQuery(tableRows), expectedRows, true);

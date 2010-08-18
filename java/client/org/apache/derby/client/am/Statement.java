@@ -2020,7 +2020,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                     newSection = agent_.sectionManager_.getPositionedUpdateSection(cursorName, true); // true means get an execute immediate section
                     if (newSection == null) {
                         throw new SqlException(agent_.logWriter_, 
-                            new ClientMessageId(SQLState.CURSOR_INVALID_NAME),
+                            new ClientMessageId(SQLState.LANG_CURSOR_NOT_FOUND),
                             cursorName);
                     }
                     scrollableRS = agent_.sectionManager_.getPositionedUpdateResultSet(cursorName);
