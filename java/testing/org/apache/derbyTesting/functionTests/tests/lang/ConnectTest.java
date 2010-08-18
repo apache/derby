@@ -156,19 +156,23 @@ public class ConnectTest extends BaseJDBCTestCase{
     public void clientTestDerby2026LoginTimeout() throws SQLException  {
         String url = "jdbc:derby://" + TestConfiguration.getCurrent().getHostName() +":" +
         TestConfiguration.getCurrent().getPort() + "/" + TestConfiguration.getCurrent().getDefaultDatabaseName();
-        DriverManager.setLoginTimeout(10);
-        //System.out.println(url);
         try {
-            Class.forName("org.apache.derby.jdbc.ClientDriver");
-        } catch (ClassNotFoundException e) {
-            fail(e.getMessage());
+            DriverManager.setLoginTimeout(10);
+            //System.out.println(url);
+            try {
+                Class.forName("org.apache.derby.jdbc.ClientDriver");
+            } catch (ClassNotFoundException e) {
+                fail(e.getMessage());
+            }
+            Connection conn = DriverManager.getConnection(url);
+            TestRoutines.installRoutines(conn);
+            CallableStatement cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+        } finally {
+            DriverManager.setLoginTimeout(0);
         }
-        Connection conn = DriverManager.getConnection(url);
-        TestRoutines.installRoutines(conn);
-        CallableStatement cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
-        cs.execute();
-        //rollback to make sure our connection is ok.
-        conn.rollback();
-    }
+    }   
     
 }

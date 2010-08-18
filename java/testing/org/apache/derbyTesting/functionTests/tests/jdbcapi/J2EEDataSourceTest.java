@@ -2116,51 +2116,67 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
      * queries.
      */
     public void testDerby2026LoginTimeout() throws SQLException {
-        DataSource jds = JDBCDataSource.getDataSource();
-        jds.setLoginTimeout(10);
-        Connection conn = jds.getConnection();
-        CallableStatement cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
-        cs.execute();
-        //rollback to make sure our connection is ok.
-        conn.rollback();
-        
-        ConnectionPoolDataSource cpds = J2EEDataSource.getConnectionPoolDataSource();        
-        cpds.setLoginTimeout(10);
-        PooledConnection pc = cpds.getPooledConnection();
-        conn = pc.getConnection();
-        cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
-        cs.execute();
-        //rollback to make sure our connection is ok.
-        conn.rollback();
-        
-        // Close the logical connection and get a new one.
-        // This will invoke reset which also needs its timeout reset
-        conn.close();
-        conn = pc.getConnection();
-        cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
-        cs.execute();
-        //rollback to make sure our connection is ok.
-        conn.rollback();
-        
-        
-        XADataSource xads = J2EEDataSource.getXADataSource();        
-        xads.setLoginTimeout(10);
-        XAConnection xac = xads.getXAConnection();
-        conn = pc.getConnection();
-        cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
-        cs.execute();
-        //rollback to make sure our connection is ok.
-        conn.rollback();
-        
-        // Close the logical connection and get a new one.
-        // This will invoke reset which also needs its timeout reset
-        conn.close();
-        conn = pc.getConnection();
-        cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
-        cs.execute();
-        //rollback to make sure our connection is ok.
-        conn.rollback();
-        
+        DataSource jds = null;
+        try {
+            jds = JDBCDataSource.getDataSource();
+            jds.setLoginTimeout(10);
+            Connection conn = jds.getConnection();
+            CallableStatement cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+        } finally {
+            if (jds != null)
+                jds.setLoginTimeout(0);
+        }
+
+        ConnectionPoolDataSource cpds = null;
+        try {
+            cpds = J2EEDataSource.getConnectionPoolDataSource();        
+            cpds.setLoginTimeout(10);
+            PooledConnection pc = cpds.getPooledConnection();
+            Connection conn = pc.getConnection();
+            CallableStatement cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+
+            // Close the logical connection and get a new one.
+            // This will invoke reset which also needs its timeout reset
+            conn.close();
+            conn = pc.getConnection();
+            cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+        } finally {
+            if (cpds != null)
+                cpds.setLoginTimeout(0);
+        }
+
+        XADataSource xads = null;
+        try {
+            xads = J2EEDataSource.getXADataSource();        
+            xads.setLoginTimeout(10);
+            XAConnection xac = xads.getXAConnection();
+            Connection conn = xac.getConnection();
+            CallableStatement cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+
+            // Close the logical connection and get a new one.
+            // This will invoke reset which also needs its timeout reset
+            conn.close();
+            conn = xac.getConnection();
+            cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+        } finally {
+            if (xads != null)
+                xads.setLoginTimeout(0);
+        }
     }
     
     /**
