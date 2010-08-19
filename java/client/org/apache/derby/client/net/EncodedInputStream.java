@@ -212,11 +212,6 @@ public final class EncodedInputStream extends InputStream {
     }
     
     
-    protected void finalize() throws IOException {
-		close();
-    }
-    
-    
     static class PublicBufferOutputStream extends ByteArrayOutputStream{
 	
 		PublicBufferOutputStream(int size){

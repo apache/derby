@@ -167,4 +167,62 @@ public class StreamTest extends BaseJDBCTestCase {
     
     private static final String LANG_STREAM_RETRIEVED_ALREADY = "XCL18";
 
+    private boolean didclose = false;
+
+    /**
+     * DERBY-4531: Test that JDBC driver doesn't close a stream handed in to
+     * PreparedStatement.setCharacterStream when the prepared statement is
+     * garbage collected. Prior to thus fix, the client driver did call close
+     * on the stream in its finalizer. After fix to DERBY-4531, both embedded
+     * and client driver leaves the stream open after having read the number of
+     * characters specified.
+     */
+    public void testDerby4531() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.executeUpdate("create table tDerby4531(c clob(200))");
+        s.close();
+
+        // Don't use plain prepareStatement, we want ps to be gc'ed below and
+        // BaseJDBCTestCase#prepareStatement saves away a reference to it
+        // thwarting that.
+        PreparedStatement ps = getConnection().
+            prepareStatement("insert into tDerby4531 values (?)");
+        Reader r = new MyLoopingAlphabetReader(200);
+        ps.setCharacterStream(1, r, 200);
+        ps.execute();
+        ps.close();
+        ps = null;
+
+        // Prior to fix for this issue, with client driver, gc of ps causes
+        // close to be called on reader, cf. code in
+        // org.apache.derby.client.net.EncodedInputStream#finalize.
+        System.gc();
+
+        // Sleep so gc thread can do its thing
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        synchronized(r) {
+            assertFalse(didclose);
+        }
+
+        rollback();
+    }
+
+    private class MyLoopingAlphabetReader extends LoopingAlphabetReader {
+        public MyLoopingAlphabetReader(int i) {
+            super(i);
+        }
+
+        // Override this so we can detect that it happened.
+        public void close() {
+            synchronized(this) {
+                didclose = true;
+            }
+        }
+    }
 }
