@@ -54,11 +54,6 @@ public class Request {
     private int[] markStack_ = new int[MAX_MARKS_NESTING];
     private int top_ = 0;
 
-    // the ccsid manager for the connection is stored in this object.  it will
-    // be used when constructing character ddm data.  it will NOT be used for
-    // building any FDOCA data.
-    protected CcsidManager ccsidManager_;
-
     //  This Object tracks the location of the current
     //  Dss header length bytes.  This is done so
     //  the length bytes can be automatically
@@ -82,19 +77,10 @@ public class Request {
     // construct a request object specifying the minimum buffer size
     // to be used to buffer up the built requests.  also specify the ccsid manager
     // instance to be used when building ddm character data.
-    Request(NetAgent netAgent, int minSize, CcsidManager ccsidManager) {
+    Request(NetAgent netAgent, int minSize) {
         netAgent_ = netAgent;
         bytes_ = new byte[minSize];
-        ccsidManager_ = ccsidManager;
         clearBuffer();
-    }
-
-    // construct a request object specifying the ccsid manager instance
-    // to be used when building ddm character data.  This will also create
-    // a buffer using the default size (see final static DEFAULT_BUFFER_SIZE value).
-    Request(NetAgent netAgent, CcsidManager ccsidManager, int bufferSize) {
-        //this (netAgent, Request.DEFAULT_BUFFER_SIZE, ccsidManager);
-        this(netAgent, bufferSize, ccsidManager);
     }
 
     protected final void clearBuffer() {
@@ -113,13 +99,6 @@ public class Request {
     final void initialize() {
         clearBuffer();
         correlationID_ = 0;
-    }
-
-    // set the ccsid manager value.  this method allows the ccsid manager to be
-    // changed so a request object can be reused by different connections with
-    // different ccsid managers.
-    final void setCcsidMgr(CcsidManager ccsidManager) {
-        ccsidManager_ = ccsidManager;
     }
 
     // ensure length at the end of the buffer for a certain amount of data.
@@ -1161,8 +1140,13 @@ public class Request {
      * @throws SqlException if string exceeds byteLengthLimit
      */
     final void writeScalarString(int codePoint, String string, int byteMinLength,
-            int byteLengthLimit, String sqlState) throws SqlException {        
-        int maxByteLength = ccsidManager_.maxBytesPerChar() * string.length();
+            int byteLengthLimit, String sqlState) throws SqlException {
+        
+        /* Grab the current CCSID MGR from the NetAgent */ 
+        CcsidManager currentCcsidMgr = netAgent_.getCurrentCcsidManager();
+        
+        int maxByteLength = currentCcsidMgr.getByteLength(string);
+
         ensureLength(offset_ + maxByteLength + 4);
         // Skip length for now until we know actual length
         int lengthOffset = offset_;
@@ -1171,7 +1155,7 @@ public class Request {
         bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
         bytes_[offset_++] = (byte) (codePoint & 0xff);
         
-        offset_ = ccsidManager_.convertFromJavaString(string, bytes_, offset_, netAgent_);
+        offset_ = currentCcsidMgr.convertFromJavaString(string, bytes_, offset_, netAgent_);
        
         int stringByteLength = offset_ - lengthOffset - 4;
         // reset the buffer and throw an SQLException if the length is too long
@@ -1183,7 +1167,7 @@ public class Request {
         // pad if we don't reach the byteMinLength limit
         if (stringByteLength < byteMinLength) {
             for (int i = stringByteLength ; i < byteMinLength; i++) {
-                bytes_[offset_++] = ccsidManager_.space_;
+                bytes_[offset_++] = currentCcsidMgr.space_;
             }
             stringByteLength = byteMinLength;
         }
@@ -1207,11 +1191,16 @@ public class Request {
     // character data. This method also assumes that the string.length() will
     // be the number of bytes following the conversion.
     final void writeScalarPaddedString(String string, int paddedLength) throws SqlException {
-        int stringLength = string.length();
         ensureLength(offset_ + paddedLength);
-        offset_ = ccsidManager_.convertFromJavaString(string, bytes_, offset_, netAgent_);
+        
+        /* Grab the current CCSID MGR from the NetAgent */ 
+        CcsidManager currentCcsidMgr = netAgent_.getCurrentCcsidManager();
+        
+        int stringLength = currentCcsidMgr.getByteLength(string);
+        
+        offset_ = currentCcsidMgr.convertFromJavaString(string, bytes_, offset_, netAgent_);
         for (int i = 0; i < paddedLength - stringLength; i++) {
-            bytes_[offset_++] = ccsidManager_.space_;
+            bytes_[offset_++] = currentCcsidMgr.space_;
         }
     }
 
@@ -1327,7 +1316,8 @@ public class Request {
                 mask.append(maskChar);
             }
             // try to write mask over password.
-            ccsidManager_.convertFromJavaString(mask.toString(), bytes_, passwordStart_, netAgent_);
+            netAgent_.getCurrentCcsidManager()
+                    .convertFromJavaString(mask.toString(), bytes_, passwordStart_, netAgent_);
         } catch (SqlException sqle) {
             // failed to convert mask,
             // them simply replace with 0xFF.
@@ -1564,8 +1554,11 @@ public class Request {
     // ccsid manager or typdef rules.  should this method write ddm character
     // data or fodca data right now it is coded for ddm char data only
     final void writeDDMString(String s) throws SqlException {
-        ensureLength(offset_ + s.length());
-        offset_ = ccsidManager_.convertFromJavaString(s, bytes_, offset_, netAgent_);
+        CcsidManager currentCcsidManager = netAgent_.getCurrentCcsidManager();
+        
+        ensureLength(offset_ + currentCcsidManager.getByteLength(s));
+        
+        offset_ = currentCcsidManager.convertFromJavaString(s, bytes_, offset_, netAgent_);
     }
 
     private void buildLengthAndCodePointForLob(int codePoint,

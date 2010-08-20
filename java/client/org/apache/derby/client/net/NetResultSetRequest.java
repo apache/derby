@@ -31,8 +31,8 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 public class NetResultSetRequest extends NetStatementRequest
         implements ResultSetRequestInterface {
-    public NetResultSetRequest(NetAgent netAgent, CcsidManager ccsidManager, int bufferSize) {
-        super(netAgent, ccsidManager, bufferSize);
+    public NetResultSetRequest(NetAgent netAgent, int bufferSize) {
+        super(netAgent, bufferSize);
     }
 
     //----------------------------- entry points ---------------------------------

@@ -52,8 +52,8 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
     // is still needed for non-promototed LOBs
     java.util.HashMap promototedParameters_ = new java.util.HashMap();
 
-    NetStatementRequest(NetAgent netAgent, CcsidManager ccsidManager, int bufferSize) {
-        super(netAgent, ccsidManager, bufferSize);
+    NetStatementRequest(NetAgent netAgent, int bufferSize) {
+        super(netAgent, bufferSize);
     }
 
     //----------------------------- entry points ---------------------------------

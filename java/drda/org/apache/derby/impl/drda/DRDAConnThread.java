@@ -608,10 +608,10 @@ class DRDAConnThread extends Thread {
 		
 		/* At this stage we can initialize the strings as we have
 		 * the CcsidManager for the DDMWriter. */
-		rdbnam = new DRDAString(writer.getCurrentCcsidManager());
-	    rdbcolid = new DRDAString(writer.getCurrentCcsidManager());
-	    pkgid = new DRDAString(writer.getCurrentCcsidManager());
-	    pkgcnstkn = new DRDAString(writer.getCurrentCcsidManager());
+		rdbnam = new DRDAString(writer);
+	    rdbcolid = new DRDAString(writer);
+	    pkgid = new DRDAString(writer);
+	    pkgcnstkn = new DRDAString(writer);
 	}
 
 	/**

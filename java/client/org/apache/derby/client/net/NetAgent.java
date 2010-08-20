@@ -192,7 +192,7 @@ public class NetAgent extends Agent {
             statementReply_ = (StatementReply) resultSetReply_;
             packageReply_ = (ConnectionReply) statementReply_;
             connectionReply_ = (ConnectionReply) packageReply_;
-            NetXAConnectionRequest netXAConnectionRequest_ = new NetXAConnectionRequest(this, currentCcsidManager_, netConnection_.commBufferSize_);
+            NetXAConnectionRequest netXAConnectionRequest_ = new NetXAConnectionRequest(this, netConnection_.commBufferSize_);
             netResultSetRequest_ = (NetResultSetRequest) netXAConnectionRequest_;
             netStatementRequest_ = (NetStatementRequest) netResultSetRequest_;
             netPackageRequest_ = (NetPackageRequest) netStatementRequest_;
@@ -217,7 +217,7 @@ public class NetAgent extends Agent {
             statementReply_ = (StatementReply) resultSetReply_;
             packageReply_ = (ConnectionReply) statementReply_;
             connectionReply_ = (ConnectionReply) packageReply_;
-            netResultSetRequest_ = new NetResultSetRequest(this, currentCcsidManager_, netConnection_.commBufferSize_);
+            netResultSetRequest_ = new NetResultSetRequest(this, netConnection_.commBufferSize_);
             netStatementRequest_ = (NetStatementRequest) netResultSetRequest_;
             netPackageRequest_ = (NetPackageRequest) netStatementRequest_;
             netConnectionRequest_ = (NetConnectionRequest) netPackageRequest_;

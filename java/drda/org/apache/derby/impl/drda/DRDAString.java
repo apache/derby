@@ -31,8 +31,9 @@ package org.apache.derby.impl.drda;
 final class DRDAString {
     /** Buffer representing the string. */
     private byte[] buffer;
-    /** Object used to convert byte buffer to string. */
-    private final CcsidManager ccsidManager;
+    
+    /** Keep the DDMWriter as it contains the current CCSID manager being used */
+    private final DDMWriter writer;
 
     /** True if the contents were modified in the previous call to
      * <code>setBytes</code>. */
@@ -47,9 +48,9 @@ final class DRDAString {
      * @param m a <code>CcsidManager</code> value specifying
      * which encoding is used
      */
-    DRDAString(CcsidManager m) {
+    DRDAString(DDMWriter w) {
         this.buffer = new byte[0];
-        this.ccsidManager = m;
+        this.writer = w;
         this.cachedString = null;
     }
 
@@ -112,7 +113,7 @@ final class DRDAString {
     public String toString() {
         if (cachedString == null) {
             cachedString =
-                ccsidManager.convertToJavaString(buffer);
+                writer.getCurrentCcsidManager().convertToJavaString(buffer);
         }
         return cachedString;
     }

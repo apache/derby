@@ -37,6 +37,9 @@ public abstract class CcsidManager {
     // This was specifically added to help build the CRRTKNs.
     byte[] numToSnaRequiredCrrtknChar_;
 
+    /* DRDA CCSID levels for UTF8 and EBCDIC */
+    public static final int UTF8_CCSID = 1208;
+    
     CcsidManager(byte space,
                  byte dot,
                  byte[] numToCharRepresentation,

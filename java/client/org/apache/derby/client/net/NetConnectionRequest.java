@@ -29,8 +29,8 @@ import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class NetConnectionRequest extends Request implements ConnectionRequestInterface {
-    NetConnectionRequest(NetAgent netAgent, CcsidManager ccsidManager, int bufferSize) {
-        super(netAgent, ccsidManager, bufferSize);
+    NetConnectionRequest(NetAgent netAgent, int bufferSize) {
+        super(netAgent, bufferSize);
     }
     //----------------------------- entry points ---------------------------------
 
@@ -485,7 +485,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         // see if we can optimize
         if (dontSendOnConversionError) {
             try {
-                ccsidManager_.convertFromJavaString(rdbnam, netAgent_);
+                netAgent_.getCurrentCcsidManager().convertFromJavaString(rdbnam, netAgent_);
             } catch (SqlException se)  {
                 netAgent_.exceptionConvertingRdbnam = se;
                 return;

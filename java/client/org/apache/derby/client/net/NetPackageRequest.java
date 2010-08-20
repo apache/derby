@@ -30,8 +30,8 @@ import org.apache.derby.shared.common.reference.SQLState;
 public class NetPackageRequest extends NetConnectionRequest {
     static final String COLLECTIONNAME = "NULLID";
 
-    NetPackageRequest(NetAgent netAgent, CcsidManager ccsidManager, int bufferSize) {
-        super(netAgent, ccsidManager, bufferSize);
+    NetPackageRequest(NetAgent netAgent, int bufferSize) {
+        super(netAgent, bufferSize);
     }
 
     // RDB Package Name, Consistency Token
