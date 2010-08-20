@@ -461,5 +461,45 @@ public class RuntimeStatisticsParser {
             return null;
     }
 
+    /**
+     * Assert that a sequence of string exists in the statistics.
+     * <p>/
+     * The strings in the argument are each assumed to start a line. Leading
+     * underscores are converted to tab characters before comparing.
+     *
+     * @param strings The sequence of string expected to be found.
+     */
+    public void assertSequence(String[] strings) {
+
+        // Make strings ready for comparison:
+        for (int i=0; i < strings.length; i++) {
+            StringBuffer sb = new StringBuffer();
+
+            sb.append('\n');
+            
+            for (int j=0; j < strings[i].length(); j++) {
+                if (strings[i].charAt(j) == '_') {
+                    sb.append('\t');
+                } else {
+                    sb.append(strings[i].substring(j));
+                    break;
+                }
+            }
+            strings[i] = sb.toString();
+        }
+
+        int matchIdx = 0; // which string to match next
+        String window = statistics;
+        for (int i = 0; i < strings.length; i++) {
+            int pos = window.indexOf(strings[i]);
+
+            if (pos == -1) {
+                throw new AssertionError(
+                    "Sequence not found in statistics");
+            }
+
+            window = window.substring(pos + 1);
+        }
+    }
 }
     

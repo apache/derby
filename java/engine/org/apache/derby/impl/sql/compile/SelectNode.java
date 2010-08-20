@@ -1000,6 +1000,7 @@ public class SelectNode extends ResultSetNode
 																	 getNodeFactory().doJoinOrderOptimization(),
 																	 getContextManager());
 			bindExpressions(afromList);
+            bindResultColumns(afromList);
 		}
 
 		/* Preprocess the fromList.  For each FromTable, if it is a FromSubquery

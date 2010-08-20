@@ -2390,4 +2390,159 @@ public final class OuterJoinTest extends BaseJDBCTestCase
        expRS=new String[][]{};
        JDBC.assertFullResultSet(rs, expRS,true);
     }
+
+
+   /**
+    * This fixture would give:
+    * <pre>
+    *   ASSERT FAILED sourceResultSetNumber expected to be >= 0 for T2.X
+    * </pre>
+    * error in sane mode prior to DERBY-4736 due to a missing rebinding
+    * operation as a result a the LOJ reordering.  Schema and query originally
+    * stems from DERBY-4712 (parent issue of DERBY-4736).
+    */
+    public void testDerby_4736() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.executeUpdate("create table t0(x int)");
+        s.executeUpdate("create table t1(x int)");
+        s.executeUpdate("create table t2(x int)");
+        s.executeUpdate("create table t3(x int)");
+        s.executeUpdate("create table t4(x int)");
+        s.executeUpdate("insert into t4 values(0)");
+        s.executeUpdate("insert into t4 values(1)");
+        s.executeUpdate("insert into t4 values(2)");
+        s.executeUpdate("insert into t4 values(3)");
+        s.executeUpdate("create table t5(x int)");
+        s.executeUpdate("insert into t5 values(0)");
+        s.executeUpdate("insert into t5 values(1)");
+        s.executeUpdate("insert into t5 values(2)");
+        s.executeUpdate("insert into t5 values(3)");
+        s.executeUpdate("insert into t5 values(4)");
+        s.executeUpdate("create table t6(x int)");
+        s.executeUpdate("insert into t6 values(0)");
+        s.executeUpdate("insert into t6 values(1)");
+        s.executeUpdate("insert into t6 values(2)");
+        s.executeUpdate("insert into t6 values(3)");
+        s.executeUpdate("insert into t6 values(4)");
+        s.executeUpdate("insert into t6 values(5)");
+        s.executeUpdate("create table t7(x int)");
+        s.executeUpdate("insert into t7 values(0)");
+        s.executeUpdate("insert into t7 values(1)");
+        s.executeUpdate("insert into t7 values(2)");
+        s.executeUpdate("insert into t7 values(3)");
+        s.executeUpdate("insert into t7 values(4)");
+        s.executeUpdate("insert into t7 values(5)");
+        s.executeUpdate("insert into t7 values(6)");
+        s.executeUpdate("create table t8(x int)");
+        s.executeUpdate("insert into t8 values(0)");
+        s.executeUpdate("insert into t8 values(1)");
+        s.executeUpdate("insert into t8 values(2)");
+        s.executeUpdate("insert into t8 values(3)");
+        s.executeUpdate("insert into t8 values(4)");
+        s.executeUpdate("insert into t8 values(5)");
+        s.executeUpdate("insert into t8 values(6)");
+        s.executeUpdate("insert into t8 values(7)");
+        s.executeUpdate("create table t9(x int)");
+        s.executeUpdate("insert into t9 values(0)");
+        s.executeUpdate("insert into t9 values(1)");
+        s.executeUpdate("insert into t9 values(2)");
+        s.executeUpdate("insert into t9 values(3)");
+        s.executeUpdate("insert into t9 values(4)");
+        s.executeUpdate("insert into t9 values(5)");
+        s.executeUpdate("insert into t9 values(6)");
+        s.executeUpdate("insert into t9 values(7)");
+        s.executeUpdate("insert into t9 values(8)");
+        s.executeUpdate("insert into t0 values(1)");
+        s.executeUpdate("insert into t1 values(2)");
+        s.executeUpdate("insert into t0 values(3)");
+        s.executeUpdate("insert into t1 values(3)");
+        s.executeUpdate("insert into t2 values(4)");
+        s.executeUpdate("insert into t0 values(5)");
+        s.executeUpdate("insert into t2 values(5)");
+        s.executeUpdate("insert into t1 values(6)");
+        s.executeUpdate("insert into t2 values(6)");
+        s.executeUpdate("insert into t0 values(7)");
+        s.executeUpdate("insert into t1 values(7)");
+        s.executeUpdate("insert into t2 values(7)");
+        s.executeUpdate("insert into t3 values(8)");
+        s.executeUpdate("insert into t0 values(9)");
+        s.executeUpdate("insert into t3 values(9)");
+        s.executeUpdate("insert into t1 values(10)");
+        s.executeUpdate("insert into t3 values(10)");
+        s.executeUpdate("insert into t0 values(11)");
+        s.executeUpdate("insert into t1 values(11)");
+        s.executeUpdate("insert into t3 values(11)");
+        s.executeUpdate("insert into t2 values(12)");
+        s.executeUpdate("insert into t3 values(12)");
+        s.executeUpdate("insert into t0 values(13)");
+        s.executeUpdate("insert into t2 values(13)");
+        s.executeUpdate("insert into t3 values(13)");
+        s.executeUpdate("insert into t1 values(14)");
+        s.executeUpdate("insert into t2 values(14)");
+        s.executeUpdate("insert into t3 values(14)");
+        s.executeUpdate("insert into t0 values(15)");
+        s.executeUpdate("insert into t1 values(15)");
+        s.executeUpdate("insert into t2 values(15)");
+        s.executeUpdate("insert into t3 values(15)");
+
+        s.execute("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+
+        ResultSet rs = s.executeQuery(
+            "select t0.x , t1.x , t2.x , t3.x , t4.x , t5.x , t6.x from " +
+            "    ((t0 right outer join " +
+            "         (t1 right outer join " +
+            //            t2 LOJ (t3 LOJ t4) will be reordered
+            "             (t2 left outer join " +
+            "                 (t3 left outer join t4 on t3.x = t4.x ) " +
+            "              on t2.x = t3.x ) " +
+            "          on t1.x = t3.x ) " +
+            "      on t0.x = t1.x ) " +
+            "     left outer join " +
+            "      (t5 inner join t6 on t5.x = t6.x ) " +
+            "     on t2.x = t5.x)" );
+
+        // The expected result below has been verified to the one we get if we
+        // don't reorder LOJ.
+        JDBC.assertUnorderedResultSet(
+            rs,
+            new String[][] {
+                {null, null, "4", null, null, "4", "4"},
+                {null, null, "5", null, null, null, null},
+                {null, null, "6", null, null, null, null},
+                {null, null, "7", null, null, null, null},
+                {null, null, "12", "12", null, null, null},
+                {null, null, "13", "13", null, null, null},
+                {null, "14", "14", "14", null, null, null},
+                {"15", "15", "15", "15", null, null, null}});
+
+        rs = s.executeQuery("values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()");
+        rs.next();
+        String rts = rs.getString(1);
+
+        // Now verify that we actually *did* reorder
+        RuntimeStatisticsParser rtsp = new RuntimeStatisticsParser(rts);
+        rtsp.assertSequence(
+            new String[] {
+                "_Nested Loop Left Outer Join ResultSet:",
+                "_Left result set:",
+                "__Hash Left Outer Join ResultSet:",
+                "__Left result set:",
+                "___Hash Left Outer Join ResultSet:",
+                "___Left result set:",
+                "____Hash Left Outer Join ResultSet:",
+                "____Left result set:",
+                "_____Hash Left Outer Join ResultSet:",
+                // Note: T2 and T3 are in innermost LOJ as expected
+                // whereas originally it was T3 and T4
+                "_____Left result set:",
+                "______Table Scan ResultSet for T2 ",
+                "_____Right result set:",
+                "______Hash Scan ResultSet for T3 ",
+                "____Right result set:",
+                "_____Hash Scan ResultSet for T4"});
+
+        rs.close();
+    }
 }
