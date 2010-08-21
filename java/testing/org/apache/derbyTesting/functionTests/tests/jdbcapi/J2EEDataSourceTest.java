@@ -55,6 +55,7 @@ import org.apache.derby.jdbc.ClientConnectionPoolDataSource;
 import org.apache.derby.jdbc.ClientXADataSource;
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
 import org.apache.derbyTesting.functionTests.util.SecurityCheck;
+import org.apache.derbyTesting.functionTests.util.TestRoutines;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
@@ -170,6 +171,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         suite.addTest(new J2EEDataSourceTest("testClientDSConnectionAttributes"));
         suite.addTest(new J2EEDataSourceTest(
                 "testClientTraceFileDSConnectionAttribute"));
+        suite.addTest(new J2EEDataSourceTest("testDerby2026LoginTimeout"));
         //DISABLED until DERBY-4067 is fixed.
         //suite.addTest(new J2EEDataSourceTest(
         //        "testClientMessageTextConnectionAttribute"));
@@ -229,6 +231,7 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
                  * @see org.apache.derbyTesting.junit.CleanDatabaseTestSetup#decorateSQL(java.sql.Statement)
                  */
                 protected void decorateSQL(Statement s) throws SQLException {
+                    TestRoutines.installRoutines(getConnection());
                     s.executeUpdate("create table autocommitxastart(i int)");
                     s.executeUpdate("insert into autocommitxastart values 1,2,3,4,5");
                     s.executeUpdate("create schema SCHEMA_Patricio");
@@ -2030,6 +2033,75 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
         JDBC.assertCurrentSchema(con, userSchema);
         con.close();
         pc.close();
+    }
+
+
+    /**
+     * DERBY-2026 - Make sure login timeout does not impact 
+     * queries.
+     */
+    public void testDerby2026LoginTimeout() throws SQLException {
+        DataSource jds = null;
+        try {
+            jds = JDBCDataSource.getDataSource();
+            jds.setLoginTimeout(10);
+            Connection conn = jds.getConnection();
+            CallableStatement cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+        } finally {
+            if (jds != null)
+                jds.setLoginTimeout(0);
+        }
+
+        ConnectionPoolDataSource cpds = null;
+        try {
+            cpds = J2EEDataSource.getConnectionPoolDataSource();        
+            cpds.setLoginTimeout(10);
+            PooledConnection pc = cpds.getPooledConnection();
+            Connection conn = pc.getConnection();
+            CallableStatement cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+
+            // Close the logical connection and get a new one.
+            // This will invoke reset which also needs its timeout reset
+            conn.close();
+            conn = pc.getConnection();
+            cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+        } finally {
+            if (cpds != null)
+                cpds.setLoginTimeout(0);
+        }
+
+        XADataSource xads = null;
+        try {
+            xads = J2EEDataSource.getXADataSource();        
+            xads.setLoginTimeout(10);
+            XAConnection xac = xads.getXAConnection();
+            Connection conn = xac.getConnection();
+            CallableStatement cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+
+            // Close the logical connection and get a new one.
+            // This will invoke reset which also needs its timeout reset
+            conn.close();
+            conn = xac.getConnection();
+            cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+        } finally {
+            if (xads != null)
+                xads.setLoginTimeout(0);
+        }
     }
 
     // test that an xastart in auto commit mode commits the existing work.

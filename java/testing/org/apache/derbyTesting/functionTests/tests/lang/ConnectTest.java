@@ -21,6 +21,7 @@
 */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -29,7 +30,9 @@ import java.sql.Statement;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.util.TestRoutines;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -48,8 +51,15 @@ public class ConnectTest extends BaseJDBCTestCase{
             // is not supported with JSR169
             return 
             new TestSuite("empty ConnectTest:DriverManager not supported");
-        else
-            return TestConfiguration.defaultSuite(ConnectTest.class);
+        else  {
+                TestSuite suite = new TestSuite("ConnectTest suite");  
+                suite.addTest(TestConfiguration.defaultSuite(ConnectTest.class));
+                // Derby2026 test uses explicit client connection so not relevant to embedded
+                suite.addTest(TestConfiguration.
+                            clientServerDecorator(new ConnectTest("clientTestDerby2026LoginTimeout")));
+                return new CleanDatabaseTestSetup(suite);
+        }
+                  
     }
 
     /**
@@ -137,4 +147,32 @@ public class ConnectTest extends BaseJDBCTestCase{
         st.close();
         con.close();
     }
+
+    /**
+     * DERBY-2026 make sure loginTimeout does not
+     * affect queries
+     * @throws SQLException
+     */
+    public void clientTestDerby2026LoginTimeout() throws SQLException  {
+        String url = "jdbc:derby://" + TestConfiguration.getCurrent().getHostName() +":" +
+        TestConfiguration.getCurrent().getPort() + "/" + TestConfiguration.getCurrent().getDefaultDatabaseName();
+        try {
+            DriverManager.setLoginTimeout(10);
+            //System.out.println(url);
+            try {
+                Class.forName("org.apache.derby.jdbc.ClientDriver");
+            } catch (ClassNotFoundException e) {
+                fail(e.getMessage());
+            }
+            Connection conn = DriverManager.getConnection(url);
+            TestRoutines.installRoutines(conn);
+            CallableStatement cs = conn.prepareCall("CALL TESTROUTINE.SLEEP(20000)");
+            cs.execute();
+            //rollback to make sure our connection is ok.
+            conn.rollback();
+        } finally {
+            DriverManager.setLoginTimeout(0);
+        }
+    }   
+    
 }
