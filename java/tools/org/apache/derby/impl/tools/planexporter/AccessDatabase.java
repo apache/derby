@@ -460,15 +460,17 @@ public class AccessDatabase {
      * @return modified string
      */
     private String replace(String stmt, String expr, String replace){
-        String[] part=stmt.split(expr);
-        String newStmt= part[0];
-        for(int i=1;i<part.length;i++){
-            newStmt += " "+replace+" "+part[i];
-        }
-
-        return newStmt;
+    	if(stmt.indexOf(expr)!=-1){
+    		stmt=stmt.substring(0, stmt.indexOf(expr))
+    		+replace+stmt.substring(stmt.indexOf(expr)+1);
+    		replace(stmt,expr,replace);
+    		return "";
+    	}
+    	else{
+    		return stmt;
+    	}
     }
-
+   
     /**
      *
      * @return XPLAIN_TIME of SYSXPLAIN_STATEMENTS
