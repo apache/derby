@@ -45,8 +45,8 @@ final class DRDAString {
     /**
      * Create a new <code>DRDAString</code> instance.
      *
-     * @param m a <code>CcsidManager</code> value specifying
-     * which encoding is used
+     * @param w a <code>DDMWriter</code> which holds current CCSidManager
+     * and which encoding is used
      */
     DRDAString(DDMWriter w) {
         this.buffer = new byte[0];
