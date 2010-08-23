@@ -2562,6 +2562,9 @@ public class FromBaseTable extends FromTable
 			if (resultColumn != null)
 			{
 				columnReference.setTableNumber(tableNumber);
+                columnReference.setColumnNumber(
+                    resultColumn.getColumnPosition());
+
 				if (tableDescriptor != null)
 				{
 					FormatableBitSet referencedColumnMap = tableDescriptor.getReferencedColumnMap();

@@ -591,12 +591,12 @@ public class FromList extends QueryTreeNodeVector implements OptimizableList
 			{
 				if (! columnNameMatch)
 				{
-					/* TableNumbers are set in the CR in the underlying
-					 * FromTable.  This ensures that they get the table
-					 * number from the underlying table, not the join node.
-					 * This is important for beging able to push predicates 
-					 * down through join nodes.
-					 */
+                    /* TableNumbers and column numbers are set in the CR in the
+                     * underlying FromTable.  This ensures that they get the
+                     * table number/column number from the underlying table,
+                     * not the join node.  This is important for beging able to
+                     * push predicates down through join nodes.
+                     */
 					matchingRC = resultColumn;
 					columnReference.setSource(resultColumn);
 					/* Set the nesting level at which the CR appears and the nesting level

@@ -1055,6 +1055,8 @@ public class FromVTI extends FromTable implements VTIEnvironment
 			if (resultColumn != null)
 			{
 				columnReference.setTableNumber(tableNumber);
+                columnReference.setColumnNumber(
+                    resultColumn.getColumnPosition());
 			}
 		}
 

@@ -333,6 +333,7 @@ public class FromSubquery extends FromTable
 		if (resultColumn != null)
 		{
 			columnReference.setTableNumber(tableNumber);
+            columnReference.setColumnNumber(resultColumn.getColumnPosition());
 		}
 
 		return resultColumn;

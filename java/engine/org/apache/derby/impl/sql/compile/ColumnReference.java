@@ -58,12 +58,30 @@ public class ColumnReference extends ValueNode
 	** when the column is bound as it is only used in binding.
 	*/
 	TableName	tableName;
-	/* The table this column reference is bound to */
-	private int			tableNumber;	
-	/* The column number in the underlying base table */
-	private int			columnNumber;	
-	/* This is where the value for this column reference will be coming from */
-	private ResultColumn	source;
+
+    /**
+     * The FromTable this column reference is bound to.
+     */
+    private int tableNumber;
+
+    /**
+     * The column number in the underlying FromTable. But note {@code source}.
+     * @see #source
+     */
+    private int columnNumber;
+
+    /**
+     * This is where the value for this column reference will be coming from.
+     * Note that for join nodes, {@code tableNumber}/{@code columnNumber} will
+     * point to the column in the left or right join participant {@code
+     * FromTable}, whereas {@code source} will be bound to the RC in the result
+     * column list of the join node. See also the comment at the end of
+     * JoinNode#getMatchingColumn.
+     * @see JoinNode#getMatchingColumn
+     * @see #columnNumber
+     * @see #tableNumber
+     */
+    private ResultColumn source;
 
 	/* For unRemapping */
 	ResultColumn	origSource;
@@ -386,11 +404,6 @@ public class ColumnReference extends ValueNode
 		{
 			throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND, getSQLColumnName());
 		}
-
-		/* Set the columnNumber from the base table.
- 		 * Useful for optimizer and generation.
-		 */
-		columnNumber = matchingRC.getColumnPosition();
 
 		return this;
 	}

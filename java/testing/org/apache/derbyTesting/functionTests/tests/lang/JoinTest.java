@@ -1999,4 +1999,56 @@ public class JoinTest extends BaseJDBCTestCase {
         rollback();
     }
 
+    /**
+     * This test works prior to applying the patch for DERBY-4695, but the
+     * corrected (internal, intermediate) behavior can be observed by applying
+     * the patch {@code trace-remapping.diff} attached to this issue in JIRA and
+     * copmparing the results before and after the rest of the patch is
+     * applied.
+     * 
+     */
+    public void testDerby_4695() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        // Test case reused from DERBY-2526
+
+        s.executeUpdate("create table b2 (c1 int, c2 int, c3 char(1), " +
+                        "                 c4 int, c5 int, c6 int)");
+        s.executeUpdate("create table b4 (c7 int, c4 int, c6 int)");
+        s.executeUpdate("create table b3 (c1 int, c9 int, c5 int, c6 int)");
+        s.executeUpdate("create table b (c1 int, c2 int, c3 char(1), " +
+                        "                c4 int, c5 int, c6 int)");
+        s.executeUpdate("create view bvw (c5, c1 ,c2 ,c3 ,c4) as " +
+                        "select c5, c1 ,c2 ,c3 ,c4 from b2 union " +
+                        "select c5, c1 ,c2 ,c3 ,c4 from b");
+        s.executeUpdate("insert into b4 (c7,c4,c6) values (4, 42, 31)");
+        s.executeUpdate("insert into b2 (c5,c1,c3,c4,c6) " +
+                        "    values (3,4, 'F',43,23)");
+        s.executeUpdate("insert into b3 (c5,c1,c9,c6) values (2,3,19,28)");
+        s.executeUpdate("insert into b values (4, 10, 'x', 10, 10, 10)");
+
+        ResultSet rs = s.executeQuery(
+            "select b3.* from b3 join bvw on (b3.c1 = bvw.c5) " +
+            "                    join b4 on (bvw.c1 = b4.c7) " +
+            "    where b4.c4 = 42");
+
+        JDBC.assertFullResultSet(
+            rs,
+            new String[][]{{"3", "19", "2", "28"}});
+
+        rs = s.executeQuery(
+            "select b3.*, bvw.c1 from b3 inner join bvw on (b3.c1 = bvw.c5) " +
+            "                            inner join b4  on (bvw.c1 = b4.c7) " +
+            "                            inner join b  on  (bvw.c1 = b.c1)" +
+            "                            inner join b bcorr on " +
+            "                                               bvw.c1 = bcorr.c1" +
+            "    where b4.c4 = 42");
+
+        JDBC.assertFullResultSet(
+            rs,
+            new String[][]{{"3", "19", "2", "28", "4"}});
+
+        rollback();
+    }
 }

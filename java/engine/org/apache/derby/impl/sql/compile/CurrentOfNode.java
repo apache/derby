@@ -349,6 +349,8 @@ public final class CurrentOfNode extends FromTable {
 				// suggests that we should always set the table number
 				// if we've found the ResultColumn.  So we do that here.
 				columnReference.setTableNumber( tableNumber );
+                columnReference.setColumnNumber(
+                   resultColumn.getColumnPosition());
 
 				// If there is a result column, are we really updating it?
 				// If so, verify that the column is updatable as well
