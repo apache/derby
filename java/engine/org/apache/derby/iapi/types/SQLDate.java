@@ -86,14 +86,11 @@ public final class SQLDate extends DataType
 
 	private int	encodedDate;	//year << 16 + month << 8 + day
 
-	// The cached value.toString()
-	private String	valueString;
-
     private static final int BASE_MEMORY_USAGE = ClassSize.estimateBaseFromCatalog( SQLDate.class);
 
     public int estimateMemoryUsage()
     {
-        return BASE_MEMORY_USAGE + ClassSize.estimateMemoryUsage( valueString);
+        return BASE_MEMORY_USAGE;
     } // end of estimateMemoryUsage
 
     int getEncodedDate()
@@ -111,23 +108,10 @@ public final class SQLDate extends DataType
 		//format is [yyy]y-mm-dd e.g. 1-01-01, 9999-99-99
 		if (!isNull())
 		{
-			if (valueString == null)
-			{
-				valueString = encodedDateToString(encodedDate);
-			}
-			return valueString;
+			return encodedDateToString(encodedDate);
 		}
 		else
 		{
-			if (SanityManager.DEBUG)
-			{
-				if (valueString != null)
-				{
-					SanityManager.THROWASSERT(
-						"valueString expected to be null, not " +
-						valueString);
-				}
-			}
 			return null;
 		}
 	}
@@ -229,15 +213,11 @@ public final class SQLDate extends DataType
 	{
 		encodedDate = in.readInt();
 
-		// reset cached string values
-		valueString = null;
 	}
 	public void readExternalFromArray(ArrayInputStream in) throws IOException
 	{
 		encodedDate = in.readInt();
 
-		// reset cached string values
-		valueString = null;
 	}
 
 	/*
@@ -268,8 +248,6 @@ public final class SQLDate extends DataType
 		// clear encodedDate
 		encodedDate = 0;
 
-		// clear cached valueString
-		valueString = null;
 	}
 
 	/*
