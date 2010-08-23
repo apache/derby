@@ -631,7 +631,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      * @return a Document object
      * @throws Exception
      */
-    private Document getADocument(final String file) throws Exception{
+    private Object getADocument(final String file) throws Exception {
     	Document document;
     	DocumentBuilderFactory factory =
     		DocumentBuilderFactory.newInstance();
@@ -662,8 +662,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     private String readStatement(final String file)
     throws Exception
     {
-    	Document document;
-    	document = getADocument(file);
+        Document document = (Document) getADocument(file);
 
     	return document.getElementsByTagName("statement").item(0).getChildNodes().item(0).getNodeValue();
 
@@ -677,8 +676,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     private int countNode(final String file) throws Exception{
-    	Document document;
-    	document = getADocument(file);
+        Document document = (Document) getADocument(file);
 
     	return document.getElementsByTagName("node").getLength();
     }
@@ -692,8 +690,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     private String getNodeName(final String file) throws Exception{
-    	Document document;
-    	document = getADocument(file);
+        Document document = (Document) getADocument(file);
     	NodeList lst=document.getElementsByTagName("node");
     	String name= "";
     	for(int i=0;i<lst.getLength();i++)
@@ -712,8 +709,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     private String getNodeAttribute(final String file, String attribute, int node) throws Exception{
-    	Document document;
-    	document = getADocument(file);
+    	Document document = (Document) getADocument(file);
     	NodeList lst=document.getElementsByTagName("node");
     	if(lst.item(node).getAttributes().getNamedItem(attribute)==null)
     		return "";
