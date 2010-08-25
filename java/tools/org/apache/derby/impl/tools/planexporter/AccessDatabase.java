@@ -460,15 +460,13 @@ public class AccessDatabase {
      * @return modified string
      */
     private String replace(String stmt, String expr, String replace){
-    	if(stmt.indexOf(expr)!=-1){
-    		stmt=stmt.substring(0, stmt.indexOf(expr))
-    		+replace+stmt.substring(stmt.indexOf(expr)+1);
-    		replace(stmt,expr,replace);
-    		return "";
-    	}
-    	else{
-    		return stmt;
-    	}
+    	 int idx = stmt.indexOf(expr);
+    	 while (idx >= 0)
+    	 {
+    	   stmt = stmt.substring(0, idx) + replace + stmt.substring(idx+1);
+    	   idx = stmt.indexOf(expr);
+    	 }
+    	 return stmt;
     }
    
     /**
