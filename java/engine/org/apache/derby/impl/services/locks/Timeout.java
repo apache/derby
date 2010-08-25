@@ -21,8 +21,6 @@
 
 package org.apache.derby.impl.services.locks;
 
-import org.apache.derby.impl.services.locks.TableNameInfo;
-
 import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.iapi.reference.SQLState;
@@ -36,8 +34,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 
-import org.apache.derby.iapi.util.CheapDateFormatter;
-
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
@@ -176,7 +173,7 @@ public final class Timeout
         }
 
         sb.append( newline );
-        sb.append(CheapDateFormatter.formatDate(currentTime));
+        sb.append(new Date(currentTime));
         sb.append( newline );
         for( i = 0; i < column.length; i++ )
         {

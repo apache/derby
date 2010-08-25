@@ -58,22 +58,14 @@ import org.apache.derby.iapi.services.loader.InstanceGetter;
 import org.apache.derby.iapi.services.io.FormatableInstanceGetter;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 
-
 import  org.apache.derby.io.StorageFactory;
-
 
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.i18n.BundleFinder;
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.services.jmx.ManagementService;
-
-import org.apache.derby.impl.services.monitor.StorageFactoryService;
-
-import org.apache.derby.iapi.util.CheapDateFormatter;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.io.BufferedInputStream;
 import java.io.PrintWriter;
 import java.io.BufferedReader;
@@ -82,10 +74,8 @@ import java.io.ByteArrayInputStream;
 import java.io.PrintStream;
 
 import java.util.Collections;
-import java.util.Hashtable;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
@@ -94,14 +84,10 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.NoSuchElementException;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.InvocationTargetException;
 
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.security.PrivilegedExceptionAction;
-import java.security.PrivilegedActionException;
 
 import java.net.URL;
 

@@ -21,8 +21,8 @@
 
 package org.apache.derby.impl.services.stream;
 
+import java.util.Date;
 import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
-import org.apache.derby.iapi.util.CheapDateFormatter;
 
 /**
  * Get a header to prepend to a line of output. *
@@ -74,12 +74,10 @@ class BasicGetLogHeader implements PrintWriterGetHeader
 		}
 
 		if (doTimeStamp) {
-			long currentTime = System.currentTimeMillis();
-
-			header.append(CheapDateFormatter.formatDate(currentTime));
+			header.append(new Date());
 			header.append(' ');
-
 		}
+
 		if (doThreadId) {
 			header.append(Thread.currentThread().toString());
 			header.append(' ');

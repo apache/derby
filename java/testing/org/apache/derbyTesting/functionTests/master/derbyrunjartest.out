@@ -26,7 +26,6 @@ dblook:
  	 will be written.
  		If not specified, default is the console. 
 server:
-xxxxxxFILTERED-TIMESTAMPxxxxxGMT : No command given.
 Usage: NetworkServerControl <commands> 
 Commands:
 start [-h <host>] [-p <portnumber>] [-noSecurityManager] [-ssl <sslmode>]

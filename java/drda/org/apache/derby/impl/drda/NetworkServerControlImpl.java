@@ -53,6 +53,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -78,13 +79,11 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.tools.i18n.LocalizedOutput;
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
-import org.apache.derby.iapi.util.CheapDateFormatter;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
 import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.reference.MessageId;
-import org.apache.derby.iapi.security.SecurityUtil;
 import org.apache.derby.mbeans.VersionMBean;
 import org.apache.derby.mbeans.drda.NetworkServerMBean;
 
@@ -604,7 +603,7 @@ public final class NetworkServerControlImpl {
 		{
 			synchronized(lw) {
                 if (printTimeStamp) {
-                    lw.println(getFormattedTimestamp() + " : " + msg);
+                    lw.println(new Date() + " : " + msg);
                 } else {
                     lw.println(msg);                    
                 }
@@ -616,7 +615,7 @@ public final class NetworkServerControlImpl {
 			synchronized(lw)
 			{
 				if (printTimeStamp) {
-                    Monitor.logMessage(getFormattedTimestamp() + " : " + msg);
+                    Monitor.logMessage(new Date() + " : " + msg);
                 } else {
                     Monitor.logMessage(msg);
                 }
@@ -4061,23 +4060,4 @@ public final class NetworkServerControlImpl {
 		}
 		return myPVH;
 	}
-
-	/**
-	 * This method returns a timestamp to be used in the messages. 
-	 * CheapDateFormatter class, which uses GMT, is used to format timestamps. 
-	 * This is to keep the formatting consistent with Derby boot message since
-	 * network server messages and the boot message get written to derby.log.   
-	 * 
-	 * @return current timestamp formatted in GMT
-	 */
-	private String getFormattedTimestamp(){
-		long currentTime = System.currentTimeMillis();
-		return CheapDateFormatter.formatDate(currentTime);
-	}
 }
-
-
-
-
-
-

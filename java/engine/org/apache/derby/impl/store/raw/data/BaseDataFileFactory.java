@@ -24,15 +24,6 @@ package org.apache.derby.impl.store.raw.data;
 
 import org.apache.derby.iapi.reference.MessageId;
 
-import org.apache.derby.impl.store.raw.data.AllocationActions;
-import org.apache.derby.impl.store.raw.data.BaseContainerHandle;
-import org.apache.derby.impl.store.raw.data.BasePage;
-import org.apache.derby.impl.store.raw.data.DirectActions;
-import org.apache.derby.impl.store.raw.data.LoggableActions;
-import org.apache.derby.impl.store.raw.data.PageActions;
-import org.apache.derby.impl.store.raw.data.RecordId;
-import org.apache.derby.impl.store.raw.data.ReclaimSpace;
-
 import org.apache.derby.iapi.services.info.ProductVersionHolder;
 
 import org.apache.derby.iapi.services.cache.CacheFactory;
@@ -81,20 +72,18 @@ import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.ByteArray;
 import org.apache.derby.iapi.services.io.FileUtil;
-import org.apache.derby.iapi.util.CheapDateFormatter;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
+import java.util.Date;
 import java.util.Properties;
 import java.util.Hashtable;
 import java.util.Enumeration;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 
 import java.net.URL;
-import java.net.URLDecoder;
 
 import java.security.AccessController;
 import java.security.CodeSource;
@@ -363,13 +352,12 @@ public class BaseDataFileFactory
 		}
 
 		logMsg(LINE);
-		long bootTime = System.currentTimeMillis();
         String readOnlyMsg = (isReadOnly()) 
             ? MessageService.getTextMessage(MessageId.STORE_BOOT_READONLY_MSG)
             : "";
         boolean logBootTrace = Boolean.valueOf(startParams.getProperty(Property.LOG_BOOT_TRACE,
                PropertyUtil.getSystemProperty(Property.LOG_BOOT_TRACE))).booleanValue();
-		logMsg(CheapDateFormatter.formatDate(bootTime) +
+        logMsg(new Date() +
 			   MessageService.getTextMessage(MessageId.STORE_BOOT_MSG,
                                              jbmsVersion,
                                              identifier,
@@ -479,9 +467,8 @@ public class BaseDataFileFactory
 				rawStoreDaemon.stop();
 		}
 
-		long shutdownTime = System.currentTimeMillis();
 		boolean logBootTrace = PropertyUtil.getSystemBoolean(Property.LOG_BOOT_TRACE);
-		logMsg("\n" + CheapDateFormatter.formatDate(shutdownTime) +
+		logMsg("\n" + new Date() +
                 MessageService.getTextMessage(
                     MessageId.STORE_SHUTDOWN_MSG,
                     getIdentifier(),
