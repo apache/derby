@@ -2545,4 +2545,67 @@ public final class OuterJoinTest extends BaseJDBCTestCase
 
         rs.close();
     }
-}
+
+
+    /**
+     * Test for a follow-up patch for DERBY-4736: verify that nullability in
+     * result set metadata is correct also for columns for the null-producing
+     * side of the LOJ.
+     */
+    public void testDerby_4736_nullability() throws Exception
+    {
+        setAutoCommit(false);
+
+        Statement st = createStatement();
+        ResultSet rs = null;
+        String [][] expRS;
+        String [] expColNames;
+
+        st.executeUpdate(
+            "CREATE TABLE T (A INT NOT NULL, B DECIMAL(10,3) NOT "
+            + "NULL, C VARCHAR(5) NOT NULL)");
+
+        st.executeUpdate(
+            " INSERT INTO T VALUES (1, 1.0, '1'), (2, 2.0, '2'), "
+            + "(3, 3.0, '3')");
+
+        st.executeUpdate(
+            " CREATE TABLE S (D INT NOT NULL, E DECIMAL(10,3) "
+            + "NOT NULL, F VARCHAR(5) NOT NULL)");
+
+        st.executeUpdate(
+            " INSERT INTO S VALUES (2, 2.0, '2'), (3, 3.0, '3'), "
+            + "(4, 4.0, '4')");
+
+        st.executeUpdate(
+            "create view v1 (fv, ev, dv, cv, bv, av) as (select "
+            + "f, e, d, c, b, a from t left outer join s on b = e)");
+
+        rs = st.executeQuery(
+            " select * from t left outer join (s left outer join "
+            + "v1 on (f = cv)) on (d=a)");
+
+        expColNames = new String [] {"A", "B", "C", "D", "E", "F",
+                                     "FV", "EV", "DV", "CV", "BV", "AV"};
+        JDBC.assertColumnNames(rs, expColNames);
+
+        expRS = new String [][]
+        {
+            // Before the follow-up patch, the three first NULL column values
+            // below would get NOT NULL metadata before the follow-up patch
+            // (caught by JDBC.assertResultColumnNullable called from
+            // JDBC.assertRowInResultSet if a null value is seen).
+            //
+            {"1", "1.000", "1", null, null, null,
+             "1", "1.000", "1", null, null, null},
+
+            {"2", "2.000", "2", "2", "2.000", "2",
+             "2", "2.000", "2", "2", "2.000", "2"},
+
+            {"3", "3.000", "3", "3", "3.000", "3",
+             "3", "3.000", "3", "3", "3.000", "3"}
+        };
+
+        JDBC.assertFullResultSet(rs, expRS);
+    }
+ }
