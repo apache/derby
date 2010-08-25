@@ -21,18 +21,12 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.types.TypeId;
+import java.util.Iterator;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
-
-import org.apache.derby.iapi.util.ReuseFactory;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 
 /**
@@ -239,16 +233,90 @@ public class OrderByColumn extends OrderedColumn {
 			}
 
 		}else{
-            if( SanityManager.DEBUG)
-                SanityManager.ASSERT( addedColumnOffset >= 0,
-                                      "Order by expression was not pulled into the result column list");
-            resolveAddedColumn(target);
-		if (resultCol == null)
-			throw StandardException.newException(SQLState.LANG_UNION_ORDER_BY);
+			/*checks for the conditions when using distinct*/
+			if (addedColumnOffset >= 0 &&
+					target instanceof SelectNode &&
+					((SelectNode)target).hasDistinct() &&
+					!expressionMatch(target))
+			{
+				String col=null;
+				boolean match=false;
+
+				CollectNodesVisitor collectNodesVisitor =
+					new CollectNodesVisitor(ColumnReference.class);
+				expression.accept(collectNodesVisitor);
+
+				for (Iterator it = collectNodesVisitor.getList().iterator();
+				it.hasNext(); )
+				{//visits through the columns in this OrderByColumn
+					ColumnReference cr1=(ColumnReference)it.next();
+					col=cr1.getColumnName();
+					match = columnMatchFound(target,cr1);
+					/* breaks if a match not found, this is needed
+					 * because all column references in this
+					 * OrderByColumn should be there in the select
+					 * clause.*/
+					if(!match)
+						throw StandardException.newException(
+								SQLState.LANG_DISTINCT_ORDER_BY,
+								col);
+				}
+			}
+
+			if( SanityManager.DEBUG)
+				SanityManager.ASSERT( addedColumnOffset >= 0,
+				"Order by expression was not pulled into the result column list");
+			resolveAddedColumn(target);
+			if (resultCol == null)
+				throw StandardException.newException(SQLState.LANG_UNION_ORDER_BY);
 		}
 
 		// Verify that the column is orderable
 		resultCol.verifyOrderable();
+	}
+
+	/**
+	 * Checks whether the whole expression (OrderByColumn) itself
+	 * found in the select clause.
+	 * @param target Result set
+	 * @return boolean: whether any expression match found
+	 * @throws StandardException
+	 */
+	private boolean expressionMatch(ResultSetNode target)
+										throws StandardException{
+		ResultColumnList rcl=target.getResultColumns();
+		for (int i=1; i<=rcl.visibleSize();i++){
+			//since RCs are 1 based
+			if((rcl.getResultColumn(i)).isEquivalent(
+					resultCol))
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * This method checks a ColumnReference of this OrderByColumn
+	 * against the ColumnReferences of the select clause of the query.
+	 * @param target result set
+	 * @param crOfExpression the CR to be checked
+	 * @return whether a match found or not
+	 * @throws StandardException
+	 */
+	private boolean columnMatchFound(ResultSetNode target,
+			ColumnReference crOfExpression) throws StandardException{
+		ResultColumnList rcl=target.getResultColumns();
+		for (int i=1; i<=rcl.visibleSize();
+		i++){//grab the RCs related to select clause
+			ValueNode exp=rcl.getResultColumn(i).getExpression();
+			if(exp instanceof ColumnReference)
+			{//visits through the columns in the select clause
+				ColumnReference cr2 =
+					(ColumnReference) (exp);
+				if(crOfExpression.isEquivalent(cr2))
+					return true;
+			}
+		}
+		return false;
 	}
 
     /**

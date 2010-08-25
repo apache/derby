@@ -669,6 +669,46 @@ select distinct t1.* from t1, t2 where t1.c1=t2.t2c1 order by t2c1;
 select t1.* from t1, t2 where t1.c1=t2.t2c1 order by t2c1;
 drop table t1;
 
+-- some test cases for DERBY-4371: This issue addresses the situations where
+-- the order by clause contains an expression such as j*2, i/j etc. when the distict
+-- is specified in the select clause. The rule is, a query will be a valid one if,
+-- 1) the exact expression can be found in the select clause OR
+-- 2) all the ColumnReferences of the expression can be found in the select clause
+create table t1 (c1 int, c2 int);
+insert into t1 values (3, 1), (4, 2), (2, 1), (1, 3);
+-- Following query should be failed since neither C1*2 nor C1 is there 
+-- in the select clause
+select distinct C2 from t1 order by C1*2;
+-- Following query should be failed since neither C1*2 nor C1 is there 
+-- in the select clause
+select distinct C2,C1*3 from t1 order by C1*2;
+ -- Following query should be failed since neither C1*3 nor C1 is there 
+-- in the select clause
+select distinct C2 from t1 order by C2, C1*3;
+-- Following query should be failed since C1/C2 or (C1 & C2) is not there 
+-- in the select clause
+select distinct C1*C2 from t1 order by C1/C2;
+-- Following query should be failed since neither -C2 nor C2 is there 
+-- in the select clause
+select distinct C1 from t1 order by -C2;
+-- Following query should be failed since neither C1/C2 nor C2 is there 
+-- in the select clause
+select distinct C1 from t1 order by C1/C2;
+-- This query is valid since C2 is there in the select clause though
+-- C2*2 itself not.
+select distinct C1,C2 from t1 order by C2*2;
+-- This query is valid since C2*2 is there in the select clause.
+select distinct C1,C2*2 from t1 order by C2*2;
+-- This query is valid since both C1 & C2 is there in the select clause though
+-- neither C1*2 nor C2*3 is there.
+select distinct C1,C2 from t1 order by C1*2,C2*3;
+-- This query is valid since the select all is there though
+-- neither C2*2 nor C1*3 is there.
+select distinct * from t1 order by C2*2, C1*3;
+-- This query is valid since order by column not involve any columns
+select distinct C1 from t1 order by 1+1;
+drop table t1;
+
 create table person (name varchar(10), age int);
 insert into person values ('John', 10);
 insert into person values ('John', 30);
@@ -689,6 +729,7 @@ select distinct name from person order by upper(name);
 -- 'age' column into the 'distinct' processing due to its presence in the
 -- ORDER BY clause. DERBY-2351 and DERBY-3373 discuss this situation in
 -- more detail.
+-- The above issue is corrected under DERBY-4371
 select distinct name from person order by age*2;
 -- Some test cases involving column aliasing:
 select distinct name as first_name from person order by name;
