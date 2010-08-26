@@ -95,7 +95,10 @@ final class InputStreamContainer extends FileContainer  {
 
         } catch (IOException ioe) {
             throw StandardException.
-                newException(SQLState.FILE_CONTAINER_EXCEPTION, ioe, this);
+                newException(SQLState.FILE_CONTAINER_EXCEPTION, 
+                             ioe,
+                             new Object[] {getIdentity().toString(),
+                                           "open", newIdentity.toString()});
         } finally {
 			if (dis != null) {
 				try {

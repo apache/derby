@@ -5724,8 +5724,10 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XSDG3.D</name>
-                <text>Meta-data for Container {0} could not be accessed</text>
+                <text>Meta-data for {0} could not be accessed to {1} {2}</text>
                 <arg>containerName</arg>
+                <arg>type</arg>
+                <arg>file</arg>
             </msg>
 
             <msg>

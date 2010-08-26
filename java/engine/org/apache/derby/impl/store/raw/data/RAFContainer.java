@@ -94,6 +94,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 	private boolean inBackup = false;
 	private boolean inRemove = false;
+        private String fileName;
 
 
 	/*
@@ -543,7 +544,10 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 					throw dataFactory.markCorrupt(
                         StandardException.newException(
-                            SQLState.FILE_CONTAINER_EXCEPTION, ioe, this));
+                            SQLState.FILE_CONTAINER_EXCEPTION, ioe,
+                            getIdentity() != null ?
+                               getIdentity().toString() : "unknown",
+                            "clean", fileName));
 				}
 			}
 		}
@@ -1242,9 +1246,10 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
             
         }catch (IOException ioe) {
             throw StandardException.newException(
-                                    SQLState.FILE_CONTAINER_EXCEPTION, 
-                                    ioe, 
-                                    newFile);
+                                    SQLState.FILE_CONTAINER_EXCEPTION, ioe,
+                                    getIdentity() != null ?
+                                        getIdentity().toString() : "unknown",
+                                    "encrypt", newFilePath);
         } finally {
 
             if (page != null) {
@@ -1259,9 +1264,10 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                 {
                     newRaf = null;
                     throw StandardException.newException(
-                                    SQLState.FILE_CONTAINER_EXCEPTION, 
-                                    ioe, 
-                                    newFile);
+                                    SQLState.FILE_CONTAINER_EXCEPTION, ioe,
+                                    getIdentity() != null ?
+                                        getIdentity().toString() : "unknown",
+                                    "encrypt-close", newFilePath);
                     
                 }
             }
@@ -1407,6 +1413,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
              } catch (SecurityException se) {
                  // just means we can't write to it.
              }
+             fileName = file.toString();
 
              try {
 
@@ -1428,8 +1435,11 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                      throw dataFactory.
                          markCorrupt(StandardException.
                                      newException(SQLState.
-                                                  FILE_CONTAINER_EXCEPTION, 
-                                                  ioe, this));
+                                             FILE_CONTAINER_EXCEPTION, ioe,
+                                             getIdentity() != null ?
+                                                 getIdentity().toString() :
+                                                 "unknown",
+                                             "read", fileName));
                  }
 
                  // maybe it is being stubbified... try that
@@ -1462,7 +1472,11 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                              markCorrupt(StandardException.
                                          newException(SQLState.
                                                       FILE_CONTAINER_EXCEPTION,
-                                                      ioe2, this));
+                                             ioe2,
+                                             getIdentity() != null ?
+                                                 getIdentity().toString() :
+                                                 "unknown",
+                                             "delete-stub", fileName));
                      }
 
                      // RESOLVE: this is a temporary hack
@@ -1472,8 +1486,11 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                      throw dataFactory.
                          markCorrupt(StandardException.
                                      newException(SQLState.
-                                                  FILE_CONTAINER_EXCEPTION,
-                                                  ioe, this));
+                                                  FILE_CONTAINER_EXCEPTION, ioe,
+                                             getIdentity() != null ?
+                                                 getIdentity().toString() :
+                                                 "unknown",
+                                             "read", fileName));
              }
 
              return this;
