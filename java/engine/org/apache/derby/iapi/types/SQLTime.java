@@ -93,9 +93,6 @@ public final class SQLTime extends DataType
 	private int		encodedTimeFraction; //currently always 0 since we don't
 											 //support time precision
 
-	// The cached value.toString()
-	private String	valueString;
-
 	/*
 	** DataValueDescriptor interface
 	** (mostly implemented in DataType)
@@ -105,30 +102,17 @@ public final class SQLTime extends DataType
 
     public int estimateMemoryUsage()
     {
-        return BASE_MEMORY_USAGE + ClassSize.estimateMemoryUsage( valueString);
+        return BASE_MEMORY_USAGE;
     } // end of estimateMemoryUsage
 
 	public String getString()
 	{
 		if (!isNull())
 		{
-			if (valueString == null)
-			{
-				valueString = encodedTimeToString(encodedTime);
-			}
-			return valueString;
+			return encodedTimeToString(encodedTime);
 		}
 		else
 		{
-			if (SanityManager.DEBUG)
-			{
-				if (valueString != null)
-				{
-					SanityManager.THROWASSERT(
-						"valueString expected to be null, not " +
-						valueString);
-				}
-			}
 			return null;
 		}
 	}
@@ -231,15 +215,11 @@ public final class SQLTime extends DataType
 	{
 		encodedTime = in.readInt();
 		encodedTimeFraction = in.readInt();
-		// reset cached values
-		valueString = null;
 	}
 	public void readExternalFromArray(ArrayInputStream in) throws IOException
 	{
 		encodedTime = in.readInt();
 		encodedTimeFraction = in.readInt();
-		// reset cached values
-		valueString = null;
 	}
 
 	/*
@@ -269,9 +249,6 @@ public final class SQLTime extends DataType
 	{
 		encodedTime = -1;
 		encodedTimeFraction = 0;
-
-		// clear cached valueString
-		valueString = null;
 	}
 
 	/*
@@ -470,7 +447,6 @@ public final class SQLTime extends DataType
             if( parser.nextSeparator() == SQLTimestamp.DATE_SEPARATOR)
             {
                     encodedTime = SQLTimestamp.parseDateOrTimestamp( parser, true)[1];
-                    valueString = parser.getTrimmedString();
                     return;
             }
             hour = parser.parseInt( 2, true, ANY_SEPARATOR, false);
@@ -551,7 +527,7 @@ public final class SQLTime extends DataType
                 else if( hour > 12)
                     throw StandardException.newException( SQLState.LANG_DATE_RANGE_EXCEPTION);
             }
-            valueString = parser.checkEnd();
+            parser.checkEnd();
             encodedTime = computeEncodedTime( hour, minute, second);
         }
         else
@@ -585,7 +561,6 @@ public final class SQLTime extends DataType
                     throw StandardException.newException( SQLState.LANG_DATE_SYNTAX_EXCEPTION);
                 }
             }
-            valueString = timeStr;
         }
     } // end of parseTime
 

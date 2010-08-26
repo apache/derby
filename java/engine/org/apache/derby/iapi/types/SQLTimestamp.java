@@ -93,10 +93,6 @@ public final class SQLTimestamp extends DataType
 	private int	encodedDate;
 	private int	encodedTime;
 	private int	nanos;
-
-	// The cached value.toString()
-	private String	valueString;
-
 	/*
 	** DataValueDescriptor interface
 	** (mostly implemented in DataType)
@@ -106,7 +102,7 @@ public final class SQLTimestamp extends DataType
 
     public int estimateMemoryUsage()
     {
-        int sz = BASE_MEMORY_USAGE + ClassSize.estimateMemoryUsage( valueString);
+        int sz = BASE_MEMORY_USAGE;
         return sz;
     } // end of estimateMemoryUsage
 
@@ -114,37 +110,25 @@ public final class SQLTimestamp extends DataType
 	{
 		if (!isNull())
 		{
-			if (valueString == null)
-			{
-				valueString = getTimestamp((Calendar) null).toString();
-                /* The java.sql.Timestamp.toString() method is supposed to return a string in
-                 * the JDBC escape format. However the JDK 1.3 libraries truncate leading zeros from
-                 * the year. This is not acceptable to DB2. So add leading zeros if necessary.
-                 */
-                int separatorIdx = valueString.indexOf( '-');
-                if( separatorIdx >= 0 && separatorIdx < 4)
-                {
-                    StringBuffer sb = new StringBuffer();
-                    for( ; separatorIdx < 4; separatorIdx++)
-                        sb.append('0');
-                    sb.append( valueString);
-                    valueString = sb.toString();
-                }
-			}
+            String valueString = getTimestamp((Calendar) null).toString();
+            /* The java.sql.Timestamp.toString() method is supposed to return a string in
+             * the JDBC escape format. However the JDK 1.3 libraries truncate leading zeros from
+             * the year. This is not acceptable to DB2. So add leading zeros if necessary.
+             */
+            int separatorIdx = valueString.indexOf('-');
+            if (separatorIdx >= 0 && separatorIdx < 4)
+            {
+                StringBuffer sb = new StringBuffer();
+                for( ; separatorIdx < 4; separatorIdx++)
+                    sb.append('0');
+                sb.append(valueString);
+                valueString = sb.toString();
+            }
 
 			return valueString;
 		}
 		else
 		{
-			if (SanityManager.DEBUG)
-			{
-				if (valueString != null)
-				{
-					SanityManager.THROWASSERT(
-						"valueString expected to be null, not " +
-						valueString);
-				}
-			}
 			return null;
 		}
 	}
@@ -253,16 +237,12 @@ public final class SQLTimestamp extends DataType
 		encodedDate = in.readInt();
 		encodedTime = in.readInt();
 		nanos = in.readInt();
-		// reset cached values
-		valueString = null;
 	}
 	public void readExternalFromArray(ArrayInputStream in) throws IOException
 	{
 		encodedDate = in.readInt();
 		encodedTime = in.readInt();
 		nanos = in.readInt();
-		// reset cached values
-		valueString = null;
 	}
 
 	/*
@@ -294,8 +274,6 @@ public final class SQLTimestamp extends DataType
 		encodedTime = 0;
 		nanos = 0;
 
-		// clear cached valueString
-		valueString = null;
 	}
 
 	/*

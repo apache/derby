@@ -31,7 +31,6 @@ class DateTimeParser
 {
 
     private String str;
-    private String trimmedString;
     private int len;
     private int fieldStart;
     private char currentSeparator;
@@ -189,31 +188,15 @@ class DateTimeParser
      * @return the original string with trailing blanks trimmed off.
      * @exception StandardException if there are more non-blank characters.
      */
-    String checkEnd() throws StandardException
+    void checkEnd() throws StandardException
     {
-        int end = fieldStart;
         for( ; fieldStart < len; fieldStart++)
         {
             if( str.charAt( fieldStart) != ' ')
                 throw StandardException.newException( SQLState.LANG_DATE_SYNTAX_EXCEPTION);
         }
         currentSeparator = 0;
-        while( end > 0 && str.charAt( end - 1) == ' ')
-            end--;
-        trimmedString = (end == len) ? str : str.substring( 0, end);
-        return trimmedString;
     } // end of checkEnd
-
-    /**
-     * Get the parsed string with trailing blanks removed. <b>This method is only valid after checkEnd
-     * has been called.</b>
-     *
-     * @return The string with trailing blanks removed.
-     */
-    String getTrimmedString()
-    {
-        return trimmedString;
-    }
 
     /**
      * @return the next separator, 0 if there are none
