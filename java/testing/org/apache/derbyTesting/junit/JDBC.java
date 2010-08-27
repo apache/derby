@@ -907,6 +907,45 @@ public class JDBC {
         Object [][] expectedRows, boolean allAsTrimmedStrings, boolean closeResultSet)
         throws SQLException
     {
+        assertFullResultSetMinion(rs, expectedRows, allAsTrimmedStrings,
+                                  closeResultSet, null);
+    }
+
+
+    /**
+     * assertFullResultSet() using trimmed string comparisions.
+     * Equal to
+     * <code>
+     * assertFullResultSet(rs, expectedRows, true)
+     * </code>
+     *
+     * As a side effect, this method closes the result set.
+     * <p/>
+     * Additionally, also assert that the given warnings are seen.  The array
+     * {@code warnings} should contain null or a warning (SQLState string). The
+     * array entry is asserted against the result set after having read the
+     * corresponding row in the result set. <b>NOTE: only asserted for embedded
+     * result sets, cf DERBY-159</b>
+     * <p/>
+     * For now, we only look at the first warning if there is a chain
+     * of warnings.
+     */
+    public static void assertFullResultSet(ResultSet rs,
+        Object [][] expectedRows, String[] warnings)
+        throws SQLException
+    {
+        assertFullResultSetMinion(rs, expectedRows, true, true, warnings);
+    }
+
+
+    private static void assertFullResultSetMinion(
+        ResultSet rs,
+        Object [][] expectedRows,
+        boolean allAsTrimmedStrings,
+        boolean closeResultSet,
+        String[] warnings)
+        throws SQLException
+    {
         int rows;
         ResultSetMetaData rsmd = rs.getMetaData();
 
@@ -920,6 +959,25 @@ public class JDBC {
 
         for (rows = 0; rs.next(); rows++)
         {
+
+            // Assert warnings on result set, but only for embedded, cf
+            // DERBY-159.
+            if (TestConfiguration.getCurrent().getJDBCClient().isEmbedded() &&
+                warnings != null) {
+
+                SQLWarning w = rs.getWarnings();
+                String wstr = null;
+
+                if (w != null) {
+                    wstr = w.getSQLState();
+                }
+
+                Assert.assertEquals(
+                    "Warning assertion error on row " + (rows+1),
+                    warnings[rows],
+                    wstr);
+            }
+
             /* If we have more actual rows than expected rows, don't
              * try to assert the row.  Instead just keep iterating
              * to see exactly how many rows the actual result set has.
@@ -936,6 +994,7 @@ public class JDBC {
         // And finally, assert the row count.
         Assert.assertEquals("Unexpected row count:", expectedRows.length, rows);
     }
+
 
     /**
      * Similar to assertFullResultSet(...) above, except that this
@@ -1453,5 +1512,32 @@ public class JDBC {
                 }
         }
 
-       
+    /**
+     * Get run-time statistics and check that a sequence of string exist in the
+     * statistics, using the given statement.
+     * <p/>
+     * For the format of the strings, see RuntimeStatisticsParser#assertSequence
+     *
+     * @see RuntimeStatisticsParser#assertSequence
+     *
+     * @param s the statement presumed to just have been executed, and for
+     *        which we want to check the run-time statistics
+     * @param sequence the sequnce of strings we expect to see in the run-time
+     *        statistics
+     * @throws SQLException standard
+     */
+    public static void checkPlan(Statement s, String[] sequence)
+            throws SQLException {
+
+        ResultSet rs = s.executeQuery(
+                "values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()");
+        rs.next();
+
+        String rts = rs.getString(1);
+        rs.close();
+
+        RuntimeStatisticsParser rtsp = new RuntimeStatisticsParser(rts);
+        rtsp.assertSequence(sequence);
+    }
+
 }

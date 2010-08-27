@@ -257,12 +257,48 @@ public class HalfOuterJoinNode extends JoinNode
 		rightFromTable.pushExpressions(noPredicates);
 	}
 
-	/**
-	 * This method determines if (1) the query is a LOJ, and (2) if the LOJ is a candidate for
-	 * reordering (i.e., linearization).  The condition for LOJ linearization is:
-	 * 1. only LOJ in the fromList, i.e., no INNER, no FULL JOINs, no ROJs
-	 * 2. ON clause must be equality join between left and right operands and in CNF (i.e., AND is allowed)
-	 */
+    /**
+     * This method recursively:
+     * <ul>
+     *    <li>determines if this part of the query tree is a compound OJ of
+     *            the shape required for reordering and if so,</li>
+     *    <li>does a reordering.</li>
+     * </ul>
+     * <pre>
+     *
+     *    OJ1  pT1T2                      OJ1  pT2T3
+     *   /  \                             / \
+     *  /    \                 can       /   t3
+     * t1    OJ2 pT2T3       reorder    /
+     *       /  \              to      OJ2  pT1T2
+     *      /    \                    /   \
+     *     t2    t3                  /     \
+     *                             t1     t2
+     *
+     * where pR1R2 is a null-rejecting predicate which references the schema
+     * of joinee R1 and R2, cf. terminology explanation in #isNullRejecting.
+     * <p/>
+     * OJ1 represents <em>this</em> before and after the reordering.
+     * </pre>
+     * <p/>
+     * The join predicates are assumed to be in CNF form.
+     * <p/>
+     * <em>Note:</em> Present implementation limitations
+     * <ul>
+     *   <li>Only left outer joins are considered, i.e. both OJs in diagram
+     *       above must be LOJ.</li>
+     *   <li>Top left side must be a base table (t1 above). The bottow right
+     *       side
+*       (t3 above) may be another OJ, so reordering can happen
+     *       recursively.</li>
+     * </ul>
+     *
+     * @param numTables number of tables involved (needed to right size the
+     *                  bitmaps)
+     * @return boolean true if any reordering took place at this level or deeper
+     *                 so caller can know whether rebinding may be necessary
+     * @throws StandardException standard error policy
+     */
 	public boolean LOJ_reorderable(int numTables)
 		throws StandardException
 	{
@@ -287,12 +323,12 @@ public class HalfOuterJoinNode extends JoinNode
 		// Redundantly normalize the ON predicate (it will also be called in preprocess()).
 		super.normExpressions();
 
-		// This is a very simple LOJ of base tables. Do nothing.
+        // This is a very simple OJ of base tables. Do nothing.
 		if (logicalLeftResultSet instanceof FromBaseTable &&
 			logicalRightResultSet instanceof FromBaseTable)
 			return anyChange;
 
-		// Recursively check if we can reordering LOJ, and build the table
+        // Recursively check if we can reordering OJ, and build the table
 		// references. Note that joins may have been reordered and therefore the
 		// table references need to be recomputed.
 		if (logicalLeftResultSet instanceof HalfOuterJoinNode)
@@ -300,7 +336,7 @@ public class HalfOuterJoinNode extends JoinNode
 			anyChange =	((HalfOuterJoinNode)logicalLeftResultSet).LOJ_reorderable(numTables) || anyChange;
 		}
 		else if (!(logicalLeftResultSet instanceof FromBaseTable))
-		{// left operand must be either a base table or another LOJ
+        {// left operand must be either a base table or another OJ
 			// In principle, we don't care about the left operand.  However, we
 			// need to re-bind the resultColumns.  If the left operand is a
 			// view, we may have to re-bind the where clause etc...
@@ -315,11 +351,11 @@ public class HalfOuterJoinNode extends JoinNode
 			anyChange = ((HalfOuterJoinNode)logicalRightResultSet).LOJ_reorderable(numTables) || anyChange;
 		}
 		else if (!(logicalRightResultSet instanceof FromBaseTable))
-		{// right operand must be either a base table or another LOJ
+        {// right operand must be either a base table or another OJ
 			return anyChange;
 		}
 
-		// It is much easier to do LOJ reordering if there is no ROJ.
+        // It is much easier to do OJ reordering if there is no ROJ.
 		// However, we ran into some problem downstream when we transform an ROJ
 		// into LOJ -- transformOuterJoin() didn't expect ROJ to be transformed
 		// into LOJ alread.  So, we skip optimizing ROJ at the moment.
@@ -329,11 +365,12 @@ public class HalfOuterJoinNode extends JoinNode
 			return LOJ_bindResultColumns(anyChange);
 		}
 
-		// Build the data structure for testing/doing LOJ reordering.
-		// Fill in the table references on row-preserving and null-producing sides.
-		// It may be possible that either operand is a complex view.
-		JBitSet				NPReferencedTableMap; // Null-producing
-		JBitSet				RPReferencedTableMap; // Row-preserving
+        // Build the data structure for testing/doing OJ reordering.  Fill in
+        // the table references on row-preserving and null-producing sides.  It
+        // may be possible that either operand is a complex view.
+
+        JBitSet RPReferencedTableMap; // Row-preserving
+        JBitSet NPReferencedTableMap; // Null-producing
 
 		RPReferencedTableMap = logicalLeftResultSet.LOJgetReferencedTables(numTables);
 		NPReferencedTableMap = logicalRightResultSet.LOJgetReferencedTables(numTables);
@@ -343,183 +380,256 @@ public class HalfOuterJoinNode extends JoinNode
 		{
 			return LOJ_bindResultColumns(anyChange);
 		}
-			
-		// Check if the predicate is equality predicate in CNF (i.e., AND only)
-		// and left/right column references must come from either operand.
-		// That is, we don't allow:
-		// 1. A=A
-		// 2. 1=1
-		// 3. B=C where both B and C are either from left or right operand.
 
-		// we probably need to make the joinClause "left-deep" so that we can
-		// walk it easier.
-		BinaryRelationalOperatorNode equals;
-		ValueNode leftCol;
-		ValueNode rightCol;
-		AndNode   and;
-		ValueNode left;
-		ValueNode vn = joinClause;
-		while (vn instanceof AndNode)
+
+        // Check if logical right operand is another OJ... so we may be able
+        // to push the join.
+        if (logicalRightResultSet instanceof HalfOuterJoinNode)
 		{
-			and = (AndNode) vn;
-			left = and.getLeftOperand();
+            // Get the row-preserving map of the  child OJ
+            JBitSet  nestedChildOJRPRefTableMap =
+                ((HalfOuterJoinNode)logicalRightResultSet).
+                LOJgetRPReferencedTables(numTables);
 
-			// Make sure that this is an equijoin of the form "C = D" where C
-			// and D references tables from both left and right operands.
-			if (left instanceof RelationalOperator &&
-				((ValueNode)left).isBinaryEqualsOperatorNode())
-			{
-				equals = (BinaryRelationalOperatorNode) left;
-				leftCol = equals.getLeftOperand();
-				rightCol = equals.getRightOperand();
+            // Checks that top has p(t1,t2)
+            if ( ! isNullRejecting(
+                         joinClause,
+                         RPReferencedTableMap,
+                         nestedChildOJRPRefTableMap)) {
+                // No, give up.
+                return LOJ_bindResultColumns(anyChange);
+            }
 
-				if (!( leftCol instanceof ColumnReference && rightCol instanceof ColumnReference))
-					return LOJ_bindResultColumns(anyChange);
+            // Get the null-producing map of the child OJ
+            JBitSet  nestedChildOJNPRefTableMap =
+                ((HalfOuterJoinNode)logicalRightResultSet).
+                LOJgetNPReferencedTables(numTables);
 
-				boolean refCheck = false;
-				boolean leftOperandCheck = false;
+            // Checks that right child has p(t2,t3)
+            if ( isNullRejecting(
+                         ((HalfOuterJoinNode)logicalRightResultSet).joinClause,
+                         nestedChildOJRPRefTableMap,
+                         nestedChildOJNPRefTableMap)) {
+                // Push the current OJ into the next level For safety, check
+                // the JoinNode data members: they should null or empty list
+                // before we proceed.
+                if (super.subqueryList.size() != 0 ||
+                    ((JoinNode)logicalRightResultSet).
+                        subqueryList.size() != 0 ||
+                    super.joinPredicates.size() != 0 ||
+                    ((JoinNode)logicalRightResultSet).
+                        joinPredicates.size() != 0 ||
+                    super.usingClause != null ||
+                    ((JoinNode)logicalRightResultSet).
+                        usingClause != null) {
 
-				if (RPReferencedTableMap.get(((ColumnReference)leftCol).getTableNumber()))
-				{
-					refCheck = true;
-					leftOperandCheck = true;
-				}
-				else if (NPReferencedTableMap.get(((ColumnReference)leftCol).getTableNumber()))
-				{
-					refCheck = true;
-				}
+                    return LOJ_bindResultColumns(anyChange); //  get out of here
+                }
+                anyChange = true; // we are reordering the OJs.
 
-				if (refCheck == false)
-					return LOJ_bindResultColumns(anyChange);
+                ResultSetNode tmp = logicalLeftResultSet;
+                ResultSetNode LChild, RChild;
 
-				refCheck = false;
-				if (leftOperandCheck == false && RPReferencedTableMap.get(((ColumnReference)rightCol).getTableNumber()))
-				{
-					refCheck = true;
-				}
-				else if (leftOperandCheck == true && NPReferencedTableMap.get(((ColumnReference)rightCol).getTableNumber()))
-				{
-					refCheck = true;
-				}
+                //            this OJ
+                //            /      \
+                //  logicalLeftRS   LogicalRightRS
+                //                   /     \
+                //                LChild  RChild
+                // becomes
+                //
+                //               this OJ
+                //               /      \
+                //     LogicalRightRS   RChild
+                //           /     \
+                // logicalLeftRS LChild <<< we need to be careful about this
+                //                          order as the "LogicalRightRS
+                //                          may be a ROJ
+                //
 
-				if (refCheck == false)
-					return LOJ_bindResultColumns(anyChange);
-			}
-			else return LOJ_bindResultColumns(anyChange); //  get out of here
+                // handle the lower level OJ node
+                LChild = ((HalfOuterJoinNode)logicalRightResultSet).
+                    leftResultSet;
+                RChild = ((HalfOuterJoinNode)logicalRightResultSet).
+                    rightResultSet;
 
-			vn = and.getRightOperand();
-		}
+                ((HalfOuterJoinNode)logicalRightResultSet).
+                    rightResultSet = LChild;
+                ((HalfOuterJoinNode)logicalRightResultSet).
+                    leftResultSet  = tmp;
 
-		// Check if the logical right resultset is a composite inner and as such
-		// that this current LOJ can be pushed through it.
-		boolean       push = false;
-		// logical right operand is another LOJ... so we may be able to push the
-		// join
-		if (logicalRightResultSet instanceof HalfOuterJoinNode)
-		{
-			// get the Null-producing operand of the child
-			JBitSet  logicalNPRefTableMap = ((HalfOuterJoinNode)logicalRightResultSet).LOJgetNPReferencedTables(numTables);
+                // switch the ON clause
+                {
+                    ValueNode vn = joinClause;
+                    joinClause =
+                        ((HalfOuterJoinNode)logicalRightResultSet).joinClause;
+                    ((HalfOuterJoinNode)logicalRightResultSet).joinClause = vn;
+                }
 
-			// does the current LOJ join predicate reference
-			// logicalNPRefTableMap?  If not, we can push the current
-			// join.
-			vn = joinClause;
-			push = true;
-			while (vn instanceof AndNode)
-			{
-				and = (AndNode) vn;
-				left = and.getLeftOperand();
-				equals = (BinaryRelationalOperatorNode) left;
-				leftCol = equals.getLeftOperand();
-				rightCol = equals.getRightOperand();
+                // No need to switch HalfOuterJoinNode data members for now
+                // because we are handling only OJ.
+                // boolean local_rightOuterJoin = rightOuterJoin;
+                // boolean local_transformed    = transformed;
+                // rightOuterJoin = ((HalfOuterJoinNode)logicalRightResultSet).
+                //     rightOuterJoin;
+                // transformed = ((HalfOuterJoinNode)logicalRightResultSet).
+                //     transformed;
+                // ((HalfOuterJoinNode)logicalRightResultSet).rightOuterJoin =
+                //     local_rightOuterJoin;
+                // ((HalfOuterJoinNode)logicalRightResultSet).transformed =
+                //     local_transformed;
 
-				if (logicalNPRefTableMap.get(((ColumnReference)leftCol).getTableNumber()) ||
-					logicalNPRefTableMap.get(((ColumnReference)rightCol).getTableNumber()))
-				{
-					push = false;
-					break;
-				}
+                FromList localFromList = (FromList) getNodeFactory().getNode(
+                    C_NodeTypes.FROM_LIST,
+                    getNodeFactory().doJoinOrderOptimization(),
+                    getContextManager());
 
-				vn = and.getRightOperand();
-			}
-		}
+                // switch OJ nodes: by handling the current OJ node
+                leftResultSet  = logicalRightResultSet;
+                rightResultSet = RChild;
 
-		// Push the current LOJ into the next level
-		if (push)
-		{
-			// For safety, check the JoinNode data members: they should null or
-			// empty list before we proceed.
-			if (super.subqueryList.size() != 0 ||
-				((JoinNode)logicalRightResultSet).subqueryList.size() != 0 ||
-				super.joinPredicates.size() != 0 ||
-				((JoinNode)logicalRightResultSet).joinPredicates.size() != 0 ||
-				super.usingClause != null ||
-				((JoinNode)logicalRightResultSet).usingClause != null)
-				return LOJ_bindResultColumns(anyChange); //  get out of here
+                // rebuild the result columns and re-bind column references
+                ((HalfOuterJoinNode)leftResultSet).resultColumns = null;
+                 // localFromList is empty:
+                ((JoinNode)leftResultSet).bindResultColumns(localFromList);
 
-			anyChange = true; // we are reordering the LOJs.
+                // left operand must be another OJ, so recurse.
+                boolean localChange = ((HalfOuterJoinNode)leftResultSet).
+                    LOJ_reorderable(numTables);
+            }
+        }
 
-			ResultSetNode tmp = logicalLeftResultSet;
-			ResultSetNode LChild, RChild;
+        return LOJ_bindResultColumns(anyChange);
+    }
 
-			//            this LOJ
-			//            /      \
-			//  logicalLeftRS   LogicalRightRS
-			//                   /     \
-			//                LChild  RChild
-			// becomes
-			//
-			//               this LOJ
-			//               /      \
-			//     LogicalRightRS   RChild
-			//           /     \
-			// logicalLeftRS   LChild  <<<  we need to be careful about this order
-			//                              as the "LogicalRightRS may be a ROJ
-			//
 
-			// handle the lower level LOJ node
-			LChild = ((HalfOuterJoinNode)logicalRightResultSet).leftResultSet;
-			RChild = ((HalfOuterJoinNode)logicalRightResultSet).rightResultSet;
 
-			((HalfOuterJoinNode)logicalRightResultSet).rightResultSet = LChild;
-			((HalfOuterJoinNode)logicalRightResultSet).leftResultSet  = tmp;
+    /**
+     * Tests pRiRj in the sense of Galindo-Legaria et al: <em>Outerjoin
+     * Simplification and Reordering for Query Optimization</em>, ACM
+     * Transactions on Database Systems, Vol. 22, No. 1, March 1997, Pages
+     * 43-74:
+     * <quote>
+     *  "The set of attributes referenced by a predicate p is called the schema
+     *  of p, and denoted sch(p). As a notational convention, we annotate
+     *  predicates to reflect their schema. If sch(p) includes attributes of
+     *  both Ri, Rj and only those relations, we can write the predicate as
+     *  pRiRj.
+     * </quote>
+     *
+     * If a null-valued column is compared in a predicate that
+     * contains no OR connectives, the predicate evaluates to undefined, and
+     * the tuple is rejected. The relops satisfy this criterion.
+     * <p/>
+     * To simplify analysis, we only accept predicates of the form:
+     * <pre>
+     * X relop Y [and .. and X-n relop Y-n]
+     * </pre>
+     *
+     * At least one of the relops should reference both {@code leftTableMap}
+     * and {@code rightTableMap}, so that we know that sch(p) includes
+     * attributes of both Ri, Rj. I.e.
+     *
+     * <p/>
+     * {@code X} should be a table in {@code leftTableMap}, and
+     * {@code Y} should be a table in {@code rightTableMap}.
+     * <p/>
+     * <b>or</b>
+     * {@code X} should be a table in {@code rightTableMap}, and
+     * {@code Y} should be a table in {@code leftTableMap}.
+     *
+     * @param joinClause The join clause (i.e. predicate) we want to check
+     * @param leftTableMap a bit map representing the tables expected for the
+     *                     predicate (logical left)
+     * @param rightTableMap a bit map representing the tables expected for the
+     *                      predicate (logical right)
+     * @return true if the {@code joinClause} has at least one relop that
+     *              references both {@code leftTableMap} and {@code
+     *              rightTableMap}
+     * @throws StandardException standard exception policy
+     */
 
-			// switch the ON clause
-			vn = joinClause;
-			joinClause   = ((HalfOuterJoinNode)logicalRightResultSet).joinClause;
-			((HalfOuterJoinNode)logicalRightResultSet).joinClause = vn;
+private boolean isNullRejecting (
+        ValueNode joinClause,
+        JBitSet leftTableMap,
+        JBitSet rightTableMap)
+        throws StandardException {
 
-			// No need to switch HalfOuterJoinNode data members for now because
-			// we are handling only LOJ.
-			// boolean local_rightOuterJoin = rightOuterJoin;
-			// boolean local_transformed    = transformed;
-			// rightOuterJoin = ((HalfOuterJoinNode)logicalRightResultSet).rightOuterJoin;
-			// transformed    = ((HalfOuterJoinNode)logicalRightResultSet).transformed;
-			// ((HalfOuterJoinNode)logicalRightResultSet).rightOuterJoin = local_rightOuterJoin;
-			// ((HalfOuterJoinNode)logicalRightResultSet).transformed    = local_transformed;
+        ValueNode vn = joinClause;
+        boolean foundPred = false;
 
-			FromList localFromList = (FromList) getNodeFactory().getNode(
-																		 C_NodeTypes.FROM_LIST,
-																		 getNodeFactory().doJoinOrderOptimization(),
-																		 getContextManager());
+        while (vn != null) {
+            AndNode andNode = null;
 
-			// switch LOJ nodes: by handling the current LOJ node
-			leftResultSet  = logicalRightResultSet;
-			rightResultSet = RChild;
+            if (vn instanceof AndNode) {
+                andNode = (AndNode)vn;
+                vn = andNode.getLeftOperand();
+            }
 
-			// rebuild the result columns and re-bind column references
-			((HalfOuterJoinNode)leftResultSet).resultColumns = null;
-			((JoinNode)leftResultSet).bindResultColumns(localFromList); // localFromList is empty
+            if (vn instanceof BinaryRelationalOperatorNode) {
 
-			// left operand must be another LOJ, try again until a fixpoint
-			boolean localChange = ((HalfOuterJoinNode)leftResultSet).LOJ_reorderable(numTables);
+                BinaryRelationalOperatorNode relop =
+                    (BinaryRelationalOperatorNode)vn;
+                ValueNode leftCol = relop.getLeftOperand();
+                ValueNode rightCol = relop.getRightOperand();
 
-			// rebuild the result columns and re-bind column references for 'this'
-			return LOJ_bindResultColumns(anyChange);
-		}
+                boolean leftFound = false;
+                boolean rightFound = false;
 
-		return LOJ_bindResultColumns(anyChange);
-	}
+                if (leftCol instanceof ColumnReference) {
+                    if (leftTableMap.get(
+                                ((ColumnReference)leftCol).getTableNumber())) {
+
+                        leftFound = true;
+
+                    } else if (
+                        rightTableMap.get(
+                            ((ColumnReference)leftCol).getTableNumber())) {
+
+                        rightFound = true;
+                    } else {
+                        // references unexpected table
+                        return false;
+                    }
+
+                }
+
+                if (rightCol instanceof ColumnReference) {
+                    if (leftTableMap.get(
+                                ((ColumnReference)rightCol).getTableNumber())) {
+                        leftFound = true;
+
+                    } else if (rightTableMap.get(
+                                       ((ColumnReference)rightCol).
+                                       getTableNumber())) {
+                        rightFound = true;
+                    } else {
+                        // references unexpected table, sch(p) is wrong
+                        return false;
+                    }
+                }
+
+
+                if (leftFound && rightFound) {
+                    foundPred = true; // sch(p) covers both R1 and R2
+                }
+            } else if ((vn instanceof BooleanConstantNode) && foundPred) {
+                // OK, simple predicate which covers both R1 and R2 found
+            } else {
+                // reject other operators, e.g. OR
+                return false;
+            }
+
+            if (andNode != null) {
+                vn = andNode.getRightOperand();
+            } else {
+                vn = null;
+            }
+        }
+
+        return foundPred;
+    }
+
+
 
 	// This method re-binds the result columns which may be referenced in the ON
 	// clause in this node.
@@ -792,4 +902,14 @@ public class HalfOuterJoinNode extends JoinNode
 		else
 			return (JBitSet) rightResultSet.LOJgetReferencedTables(numTables);
 	}
+
+    // return the row-preserving table references
+    public JBitSet LOJgetRPReferencedTables(int numTables)
+                throws StandardException
+    {
+        if (rightOuterJoin && !transformed)
+            return (JBitSet) rightResultSet.LOJgetReferencedTables(numTables);
+        else
+            return (JBitSet) leftResultSet.LOJgetReferencedTables(numTables);
+    }
 }

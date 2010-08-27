@@ -1,4 +1,3 @@
-
 /*
 Derby - Class org.apache.derbyTesting.functionTests.tests.lang.OuterJoinTest
 
@@ -36,6 +35,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 public final class OuterJoinTest extends BaseJDBCTestCase
 {
@@ -52,7 +52,6 @@ public final class OuterJoinTest extends BaseJDBCTestCase
     {
         //Add the test case into the test suite
         TestSuite suite = new TestSuite("OuterJoinTest Test");
-        suite.addTest(TestConfiguration.defaultSuite(OuterJoinTest.class));
         return TestConfiguration.defaultSuite(OuterJoinTest.class);
     }
 
@@ -2174,7 +2173,7 @@ public final class OuterJoinTest extends BaseJDBCTestCase
         rs.close();
     }
 
-    public void TestdDerby5659() throws SQLException
+    public void testdDerby5659() throws SQLException
     {
         // Test fix for bug 5659
 
@@ -2389,6 +2388,532 @@ public final class OuterJoinTest extends BaseJDBCTestCase
 
        expRS=new String[][]{};
        JDBC.assertFullResultSet(rs, expRS,true);
+    }
+
+
+    /**
+     * Test that left outer join reordering works as expected.  This fixture is
+     * the first repro mentioned for this issue, DERBY-4471. It checks for
+     * correct results, and should fail prior to applying issue patch due to
+     * erroneous reordering.
+     * <p/>
+     * The results asserted in these tests for DERBY-4471 are the same as Derby
+     * gives without the reordering enabled and the same as Postgres yields.
+     * <p/>
+     * Note that the patch also opens up for correct reorderings of some
+     * queries in the seen in the original lojreorder.sql test (converted to
+     * JUnit as LojReorderTest in this patch) that did <em>not</em> happen
+     * earlier, in addition to denying the wrong ones documented in DERBY-4471
+     * and tested below. These new reorderings are tested, cf the comments in
+     * LojReorderTest. Look for the string 4471.
+
+     */
+    public void testDerby_4471a() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.executeUpdate("create table r(c1 char(1))");
+        s.executeUpdate("create table s(c1 char(1), c2 char(1))");
+        s.executeUpdate("create table t(c1 char(1))");
+
+        s.executeUpdate("insert into r values 'a'");
+        s.executeUpdate("insert into s values ('b', default)");
+        s.executeUpdate("insert into t values ('c')");
+
+        ResultSet rs = s.executeQuery(
+            "select * from r left outer join (s left outer join t " +
+            "                                 on s.c2=t.c1 or s.c2 is null)" +
+            "                on r.c1=s.c1");
+        JDBC.assertFullResultSet(rs, new String[][]{{"a", null, null, null}});
+    }
+
+    /**
+     * Test that left outer join reordering works as expected.  The schema here
+     * is taken from the another issue which also saw this error;
+     * DERBY-4712/DERBY-4736. This fixture checks for correct results. The
+     * first query should fail prior to applying issue patch due to erroneous
+     * reordering, the second is OK to reorder (and would be reordered also
+     * prior to the patch).
+     */
+    public void testDerby_4471b() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.executeUpdate("create table t0(x int)");
+        s.executeUpdate("create table t1(x int)");
+        s.executeUpdate("create table t2(x int)");
+        s.executeUpdate("create table t3(x int)");
+        s.executeUpdate("create table t4(x int)");
+        s.executeUpdate("insert into t4 values(0)");
+        s.executeUpdate("insert into t4 values(1)");
+        s.executeUpdate("insert into t4 values(2)");
+        s.executeUpdate("insert into t4 values(3)");
+        s.executeUpdate("create table t5(x int)");
+        s.executeUpdate("insert into t5 values(0)");
+        s.executeUpdate("insert into t5 values(1)");
+        s.executeUpdate("insert into t5 values(2)");
+        s.executeUpdate("insert into t5 values(3)");
+        s.executeUpdate("insert into t5 values(4)");
+        s.executeUpdate("create table t6(x int)");
+        s.executeUpdate("insert into t6 values(0)");
+        s.executeUpdate("insert into t6 values(1)");
+        s.executeUpdate("insert into t6 values(2)");
+        s.executeUpdate("insert into t6 values(3)");
+        s.executeUpdate("insert into t6 values(4)");
+        s.executeUpdate("insert into t6 values(5)");
+        s.executeUpdate("create table t7(x int)");
+        s.executeUpdate("insert into t7 values(0)");
+        s.executeUpdate("insert into t7 values(1)");
+        s.executeUpdate("insert into t7 values(2)");
+        s.executeUpdate("insert into t7 values(3)");
+        s.executeUpdate("insert into t7 values(4)");
+        s.executeUpdate("insert into t7 values(5)");
+        s.executeUpdate("insert into t7 values(6)");
+        s.executeUpdate("create table t8(x int)");
+        s.executeUpdate("insert into t8 values(0)");
+        s.executeUpdate("insert into t8 values(1)");
+        s.executeUpdate("insert into t8 values(2)");
+        s.executeUpdate("insert into t8 values(3)");
+        s.executeUpdate("insert into t8 values(4)");
+        s.executeUpdate("insert into t8 values(5)");
+        s.executeUpdate("insert into t8 values(6)");
+        s.executeUpdate("insert into t8 values(7)");
+        s.executeUpdate("create table t9(x int)");
+        s.executeUpdate("insert into t9 values(0)");
+        s.executeUpdate("insert into t9 values(1)");
+        s.executeUpdate("insert into t9 values(2)");
+        s.executeUpdate("insert into t9 values(3)");
+        s.executeUpdate("insert into t9 values(4)");
+        s.executeUpdate("insert into t9 values(5)");
+        s.executeUpdate("insert into t9 values(6)");
+        s.executeUpdate("insert into t9 values(7)");
+        s.executeUpdate("insert into t9 values(8)");
+        s.executeUpdate("insert into t0 values(1)");
+        s.executeUpdate("insert into t1 values(2)");
+        s.executeUpdate("insert into t0 values(3)");
+        s.executeUpdate("insert into t1 values(3)");
+        s.executeUpdate("insert into t2 values(4)");
+        s.executeUpdate("insert into t0 values(5)");
+        s.executeUpdate("insert into t2 values(5)");
+        s.executeUpdate("insert into t1 values(6)");
+        s.executeUpdate("insert into t2 values(6)");
+        s.executeUpdate("insert into t0 values(7)");
+        s.executeUpdate("insert into t1 values(7)");
+        s.executeUpdate("insert into t2 values(7)");
+        s.executeUpdate("insert into t3 values(8)");
+        s.executeUpdate("insert into t0 values(9)");
+        s.executeUpdate("insert into t3 values(9)");
+        s.executeUpdate("insert into t1 values(10)");
+        s.executeUpdate("insert into t3 values(10)");
+        s.executeUpdate("insert into t0 values(11)");
+        s.executeUpdate("insert into t1 values(11)");
+        s.executeUpdate("insert into t3 values(11)");
+        s.executeUpdate("insert into t2 values(12)");
+        s.executeUpdate("insert into t3 values(12)");
+        s.executeUpdate("insert into t0 values(13)");
+        s.executeUpdate("insert into t2 values(13)");
+        s.executeUpdate("insert into t3 values(13)");
+        s.executeUpdate("insert into t1 values(14)");
+        s.executeUpdate("insert into t2 values(14)");
+        s.executeUpdate("insert into t3 values(14)");
+        s.executeUpdate("insert into t0 values(15)");
+        s.executeUpdate("insert into t1 values(15)");
+        s.executeUpdate("insert into t2 values(15)");
+        s.executeUpdate("insert into t3 values(15)");
+
+        // The theory exposed in Galindo-Legaria, C. & Rosenthal, A.:
+        // "Outerjoin simplification and reordering for query optimization",
+        // ACM Transactions on Database Systems, Vol 22, No 1, March 1997 uses
+        // two assumption for its general case which involves full outer joins
+        // as well: no duplicate rows and no rows consisting of only nulls. We
+        // cannot make that assumption, this being SQL, but for our restricted
+        // OJ rewrites, this should work ok, so we throw in both into the test
+        // mix:
+
+        // Make duplicates
+        s.executeUpdate("insert into t2 select * from t2");
+        s.executeUpdate("insert into t3 select * from t3");
+        s.executeUpdate("insert into t4 select * from t4");
+
+        // Insert full NULL tuples
+        s.executeUpdate("insert into t2 values cast(null as int)");
+        s.executeUpdate("insert into t3 values cast(null as int)");
+        s.executeUpdate("insert into t4 values cast(null as int)");
+
+        // This query was wrong prior to DERBY-4471: 1=1 is not allowed, since
+        // the inner join predicate does not reference T3 and T4 as required.
+        ResultSet rs = s.executeQuery(
+            "SELECT * FROM (T2 LEFT JOIN (T3 left outer JOIN T4 " +
+            "                                    ON 1=1) " +
+            "                      ON T2.X = T3.X)");
+
+        JDBC.assertUnorderedResultSet(
+            rs,
+            new String[][] {
+                {"4", null, null},
+                {"5", null, null},
+                {"6", null, null},
+                {"7", null, null},
+                {"12", "12", "0"},
+                {"12", "12", "1"},
+                {"12", "12", "2"},
+                {"12", "12", "3"},
+                {"12", "12", "0"},
+                {"12", "12", "1"},
+                {"12", "12", "2"},
+                {"12", "12", "3"},
+                {"12", "12", null},
+                {"12", "12", "0"},
+                {"12", "12", "1"},
+                {"12", "12", "2"},
+                {"12", "12", "3"},
+                {"12", "12", "0"},
+                {"12", "12", "1"},
+                {"12", "12", "2"},
+                {"12", "12", "3"},
+                {"12", "12", null},
+                {"13", "13", "0"},
+                {"13", "13", "1"},
+                {"13", "13", "2"},
+                {"13", "13", "3"},
+                {"13", "13", "0"},
+                {"13", "13", "1"},
+                {"13", "13", "2"},
+                {"13", "13", "3"},
+                {"13", "13", null},
+                {"13", "13", "0"},
+                {"13", "13", "1"},
+                {"13", "13", "2"},
+                {"13", "13", "3"},
+                {"13", "13", "0"},
+                {"13", "13", "1"},
+                {"13", "13", "2"},
+                {"13", "13", "3"},
+                {"13", "13", null},
+                {"14", "14", "0"},
+                {"14", "14", "1"},
+                {"14", "14", "2"},
+                {"14", "14", "3"},
+                {"14", "14", "0"},
+                {"14", "14", "1"},
+                {"14", "14", "2"},
+                {"14", "14", "3"},
+                {"14", "14", null},
+                {"14", "14", "0"},
+                {"14", "14", "1"},
+                {"14", "14", "2"},
+                {"14", "14", "3"},
+                {"14", "14", "0"},
+                {"14", "14", "1"},
+                {"14", "14", "2"},
+                {"14", "14", "3"},
+                {"14", "14", null},
+                {"15", "15", "0"},
+                {"15", "15", "1"},
+                {"15", "15", "2"},
+                {"15", "15", "3"},
+                {"15", "15", "0"},
+                {"15", "15", "1"},
+                {"15", "15", "2"},
+                {"15", "15", "3"},
+                {"15", "15", null},
+                {"15", "15", "0"},
+                {"15", "15", "1"},
+                {"15", "15", "2"},
+                {"15", "15", "3"},
+                {"15", "15", "0"},
+                {"15", "15", "1"},
+                {"15", "15", "2"},
+                {"15", "15", "3"},
+                {"15", "15", null},
+                {"4", null, null},
+                {"5", null, null},
+                {"6", null, null},
+                {"7", null, null},
+                {"12", "12", "0"},
+                {"12", "12", "1"},
+                {"12", "12", "2"},
+                {"12", "12", "3"},
+                {"12", "12", "0"},
+                {"12", "12", "1"},
+                {"12", "12", "2"},
+                {"12", "12", "3"},
+                {"12", "12", null},
+                {"12", "12", "0"},
+                {"12", "12", "1"},
+                {"12", "12", "2"},
+                {"12", "12", "3"},
+                {"12", "12", "0"},
+                {"12", "12", "1"},
+                {"12", "12", "2"},
+                {"12", "12", "3"},
+                {"12", "12", null},
+                {"13", "13", "0"},
+                {"13", "13", "1"},
+                {"13", "13", "2"},
+                {"13", "13", "3"},
+                {"13", "13", "0"},
+                {"13", "13", "1"},
+                {"13", "13", "2"},
+                {"13", "13", "3"},
+                {"13", "13", null},
+                {"13", "13", "0"},
+                {"13", "13", "1"},
+                {"13", "13", "2"},
+                {"13", "13", "3"},
+                {"13", "13", "0"},
+                {"13", "13", "1"},
+                {"13", "13", "2"},
+                {"13", "13", "3"},
+                {"13", "13", null},
+                {"14", "14", "0"},
+                {"14", "14", "1"},
+                {"14", "14", "2"},
+                {"14", "14", "3"},
+                {"14", "14", "0"},
+                {"14", "14", "1"},
+                {"14", "14", "2"},
+                {"14", "14", "3"},
+                {"14", "14", null},
+                {"14", "14", "0"},
+                {"14", "14", "1"},
+                {"14", "14", "2"},
+                {"14", "14", "3"},
+                {"14", "14", "0"},
+                {"14", "14", "1"},
+                {"14", "14", "2"},
+                {"14", "14", "3"},
+                {"14", "14", null},
+                {"15", "15", "0"},
+                {"15", "15", "1"},
+                {"15", "15", "2"},
+                {"15", "15", "3"},
+                {"15", "15", "0"},
+                {"15", "15", "1"},
+                {"15", "15", "2"},
+                {"15", "15", "3"},
+                {"15", "15", null},
+                {"15", "15", "0"},
+                {"15", "15", "1"},
+                {"15", "15", "2"},
+                {"15", "15", "3"},
+                {"15", "15", "0"},
+                {"15", "15", "1"},
+                {"15", "15", "2"},
+                {"15", "15", "3"},
+                {"15", "15", null},
+                {null, null, null}});
+
+        s.execute("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+
+        // This one *can* be reordered
+        rs = s.executeQuery(
+            "SELECT * FROM (T2 LEFT JOIN (T3 left outer JOIN T4 " +
+            "                                    ON t3.x=t4.x) " +
+            "                      ON T2.X = T3.X)");
+
+        JDBC.assertUnorderedResultSet(
+            rs,
+            new String[][] {
+                {"4", null, null},
+                {"4", null, null},
+                {"5", null, null},
+                {"5", null, null},
+                {"6", null, null},
+                {"6", null, null},
+                {"7", null, null},
+                {"7", null, null},
+                {"12", "12", null},
+                {"12", "12", null},
+                {"12", "12", null},
+                {"12", "12", null},
+                {"13", "13", null},
+                {"13", "13", null},
+                {"13", "13", null},
+                {"13", "13", null},
+                {"14", "14", null},
+                {"14", "14", null},
+                {"14", "14", null},
+                {"14", "14", null},
+                {"15", "15", null},
+                {"15", "15", null},
+                {"15", "15", null},
+                {"15", "15", null},
+                {null, null, null}});
+
+        JDBC.checkPlan(s,
+                  new String[] {
+                      "Hash Left Outer Join ResultSet:",
+                      "Left result set:",
+                      "_Hash Left Outer Join ResultSet:"});
+    }
+
+    /**
+     * Check that ordering actually takes place as well as checking that the
+     * results are correct.
+     */
+    public void testDerby_4471c() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.execute("create table t1(c1 int)");
+        s.execute("create table t2(c1 int)");
+        s.execute("create table t3(c1 int)");
+
+        s.execute("insert into t1 values 1, 2, 2, 3, 4");
+        s.execute("insert into t2 values 1, 3, 3, 5, 6");
+        s.execute("insert into t3 values 2, 3, 5, 5, 7");
+
+        s.execute("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+
+        PreparedStatement ps = prepareStatement(
+            "select * from t1 left outer join " +
+            "     (t2 left outer join t3 on t2.c1 = t3.c1)" +
+            "   on t1.c1 = t2.c1");
+
+        ResultSet rs = ps.executeQuery();
+
+        JDBC.assertUnorderedResultSet(
+            rs,
+            new String[][] {
+                {"1", "1", null},
+                {"2", null, null},
+                {"2", null, null},
+                {"3", "3", "3"},
+                {"3", "3", "3"},
+                {"4", null, null}});
+
+        JDBC.checkPlan(s,
+                  new String[] {
+                      "Hash Left Outer Join ResultSet:",
+                      "Left result set:",
+                      "_Hash Left Outer Join ResultSet:"});
+    }
+
+    /**
+     * Check that ordering actually takes place (more complex: nested
+     * reordering) as well as checking that the results are correct.
+     */
+    public void testDerby_4471d() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.execute("create table t1(c1 int)");
+        s.execute("create table t2(c2 int)");
+        s.execute("create table t3(c3 int)");
+
+        s.execute("insert into t1 values 1, 2, 2, 3, 4");
+        s.execute("insert into t2 values 1, 3, 3, 5, 6");
+        s.execute("insert into t3 values 2, 3, 5, 5, 7");
+
+        s.execute("CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
+
+
+
+        PreparedStatement ps = prepareStatement(
+            "select * from t1 t1_o left outer join " +
+            "     ((t1 left outer join t2 on t1.c1 = t2.c2) left outer join " +
+            "      t3 on t2.c2 = t3.c3)" +
+            "   on t1_o.c1 = t2.c2");
+
+        // Expect one reordering, cf. rtsp.assertSequence below:
+        //
+        //     LOJ1 [t1_o.c1 = t2.c2]               LOJ1 [t2.c2=t3.c3]
+        //     /  \                                  /   \
+        //    /    \                                /    t3
+        //   /      \                             LOJ2 [t1_o.c1 = t2.c2]
+        //  t1_o   LOJ2 [t2.c2=t3.c3]            /    \
+        //          /   \                       /     LOJ3 [t2.c2=t3.c3]
+        //         /     \             =>    t1_o     /  \
+        //        /       t3                         /    \
+        //       /                                  t1    t2
+        //      LOJ3 [t1.c1=t2.c2]
+        //      /  \
+        //     /    \
+        //   t1     t2
+        //
+        // The reason we don't get two reorderings here is that the predicate
+        // on LOJ1, "t1_o.c1 = t2.c2" refrences LOJ3's null producing side,
+        // t2. Contrast with next example below.
+
+        ResultSet rs = ps.executeQuery();
+
+        JDBC.assertUnorderedResultSet(
+            rs,
+            new String[][] {
+                {"1", "1", "1", null},
+                {"2", null, null, null},
+                {"2", null, null, null},
+                {"3", "3", "3", "3"},
+                {"3", "3", "3", "3"},
+                {"4", null, null, null}});
+
+        JDBC.checkPlan(s,
+                  new String[] {
+                      "Hash Left Outer Join ResultSet:",
+                      "Left result set:",
+                      "_Nested Loop Left Outer Join ResultSet:",
+                      "_Left result set:",
+                      "_Right result set:",
+                      "__Source result set:",
+                      "___Hash Left Outer Join ResultSet:"});
+
+        ps = prepareStatement(
+            "select * from " +
+            "    t1 t1_o left outer join " +
+            "        ((t1 t1_i left outer join t2 " +
+            "          on t1_i.c1 = t2.c2) left outer join t3 " +
+            "         on t1_i.c1 = t3.c3)" +
+            "    on t1_o.c1 = t1_i.c1");
+
+        // Expect two reorderings, cf. rtsp.assertSequence below:
+        //
+        //      LOJ1 [t1_o.c1 = t1_i.c1]               LOJ1 [t2.c2=t3.c3]
+        //      /  \                                  /   \
+        //     /    \                                /    t3
+        //    /      \                             LOJ2 [t1_o.c1 = t1_i.c1]
+        //   t1_o   LOJ2 [t1_i.c1=t3.c3]          /    \
+        //           /   \                       /     LOJ3 [t1.c1=t2.c2]
+        //          /     \             =>    t1_o     /  \
+        //         /       t3                         /    \
+        //       LOJ3 [t1_i.c1=t2.c2]               t1_i   t2
+        //       /  \
+        //      /    \
+        //    t1_i    t2                =>
+        //                                          LOJ1 [t2.c2=t3.c3]
+        //                                           /   \
+        //                                          /    t3
+        //                                       LOJ2 [t2.c2=t3.c3]
+        //                                        /  \
+        //                                       /    t2
+        //                                     LOJ3  [t1_o.c1 = t1_i.c1]
+        //                                     /   \
+        //                                   t1_o  t1_i
+        //
+        // In this example, LOJ1's predicate references LOJ3's row preserving
+        // side (t1_i), so we get two reorderings.
+
+        rs = ps.executeQuery();
+
+        JDBC.assertUnorderedResultSet(
+            rs,
+            new String[][] {
+                {"1", "1", "1", null},
+                {"2", "2", null, "2"},
+                {"2", "2", null, "2"},
+                {"2", "2", null, "2"},
+                {"2", "2", null, "2"},
+                {"3", "3", "3", "3"},
+                {"3", "3", "3", "3"},
+                {"4", "4", null, null}});
+
+        JDBC.checkPlan(s,
+                  new String[] {
+                      "Hash Left Outer Join ResultSet:",
+                      "Left result set:",
+                      "_Hash Left Outer Join ResultSet:",
+                      "_Left result set:",
+                      "__Hash Left Outer Join ResultSet:"});
     }
 
 
@@ -2608,4 +3133,4 @@ public final class OuterJoinTest extends BaseJDBCTestCase
 
         JDBC.assertFullResultSet(rs, expRS);
     }
- }
+}

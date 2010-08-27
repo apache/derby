@@ -16,7 +16,6 @@ lang/isolationLevels.sql
 lang/joinDeadlock.sql
 lang/langUnitTests.sql
 lang/lockTable.sql
-lang/lojreorder.sql
 lang/maxMemPerTab.java
 lang/nestedCommit.sql
 lang/openScans.sql
