@@ -131,8 +131,7 @@ public final class NetworkServerControlImpl {
 
 	// command protocol version - you need to increase this number each time
 	// the command protocol changes 
-    // DERBY-2109: shutdown command now transmits user credentials
-	private final static int PROTOCOL_VERSION = 2;
+	private final static int PROTOCOL_VERSION = 1;
 	private final static String COMMAND_HEADER = "CMD:";
 	private final static String REPLY_HEADER = "RPY:";
 	private final static int REPLY_HEADER_LENGTH = REPLY_HEADER.length();
