@@ -185,7 +185,6 @@ class DateTimeParser
     /**
      * Check that we are at the end of the string: that the rest of the characters, if any, are blanks.
      *
-     * @return the original string with trailing blanks trimmed off.
      * @exception StandardException if there are more non-blank characters.
      */
     void checkEnd() throws StandardException
