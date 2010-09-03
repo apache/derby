@@ -81,29 +81,7 @@ close jdk1;
 close jdk2;
 close jdk4;
 
--- third test - Define a hold cursor on a table. Shouldn't be able to drop that
--- table before & after commit. Have to close the cursor before table can be dropped.
-
-get with nohold cursor jdk1 as 'SELECT * FROM t1';
-get with hold cursor jdk4 as 'SELECT * FROM t1';
-next jdk1;
-next jdk4;
--- wont' be able to drop table because of cursors jdk1 and jdk4
--- in DerbyNetClient, cursor is closed on server and DROP TABLE succeeds
 drop table t1;
-commit;
-
--- drop table still won't work because jdk4 is still open after commit
--- in DerbyNetClient, the table is already dropped
-drop table t1;
-
--- close cursor jdk4 and try then deleting the table
--- in DerbyNetClient, the table is already dropped
-close jdk4;
-drop table t1;
-
--- clean up.
-close jdk1;
 
 -- recreate and populate the table for next test
 create table t1(c11 int, c12 int);
@@ -117,16 +95,9 @@ get with hold cursor jdk4 as 'SELECT * FROM t1';
 next jdk1;
 next jdk4;
 
--- try to change the isolation level. will give error because of jdk1 and jdk4
--- no error in DerbyNetClient because cursor is closed on server
-set current isolation RR;
-
-commit;
-
--- attempt to change isolation level should give error because of jdk4 hold cursor
--- no error in DerbyNetClient because cursor is closed on server
-set isolation = REPEATABLE READ;
-
+-- changing isolation while cursor is open would fail; 
+-- but for client/server, with small data set, the server would already be
+-- closed. See discussion re DERBY-3801.
 -- close jdk4 and then should be able to change isolation
 close jdk4;
 set isolation to serializable;
@@ -140,12 +111,6 @@ get with hold cursor jdk4 as 'SELECT * FROM t1';
 get with nohold cursor jdk1 as 'SELECT * FROM t1 WITH CS';
 next jdk4;
 next jdk1;
--- following should fail because of cursor jdk4
--- no error in DerbyNetClient because cursor is closed on server
-set isolation RS;
--- following should fail because of cursor jdk4
--- no error in DerbyNetClient because cursor is closed on server
-set isolation UR;
 close jdk4;
 -- should be able to change the isolation now
 set isolation READ UNCOMMITTED;
@@ -225,7 +190,8 @@ close jdk4;
 autocommit on;
 get with hold cursor scrollCursor as 'select * from t1 for update of c12';
 next scrollCursor;
-update t1 set c12=c12+1 where current of scrollCursor;
+-- commented out for DERBY-4778
+-- update t1 set c12=c12+1 where current of scrollCursor;
 
 -- clean up.
 close scrollCursor;

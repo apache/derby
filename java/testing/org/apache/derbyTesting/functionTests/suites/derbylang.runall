@@ -10,7 +10,6 @@ lang/ddlTableLockMode.sql
 lang/desc_index.sql
 lang/emptyStatistics.sql
 lang/fk_nonSPS.sql
-lang/holdCursorIJ.sql
 lang/infostreams.sql
 lang/isolationLevels.sql
 lang/joinDeadlock.sql

@@ -53,6 +53,7 @@ public final class LangScripts extends ScriptTestCase {
         "bit",
         "bit2",
         "stringtypes",
+        "holdCursorIJ"
         };
     
     /**
