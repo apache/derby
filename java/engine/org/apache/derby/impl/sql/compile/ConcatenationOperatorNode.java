@@ -65,6 +65,34 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 				ClassName.ConcatableDataValue, ClassName.ConcatableDataValue);
 	}
 
+    /**
+     * Check if this node always evaluates to the same value. If so, return
+     * a constant node representing the known result.
+     *
+     * @return a constant node representing the result of this concatenation
+     * operation, or {@code this} if the result is not known up front
+     */
+    ValueNode evaluateConstantExpressions() throws StandardException {
+        if (leftOperand instanceof CharConstantNode &&
+                rightOperand instanceof CharConstantNode) {
+            CharConstantNode leftOp = (CharConstantNode) leftOperand;
+            CharConstantNode rightOp = (CharConstantNode) rightOperand;
+            StringDataValue leftValue = (StringDataValue) leftOp.getValue();
+            StringDataValue rightValue = (StringDataValue) rightOp.getValue();
+
+            StringDataValue resultValue =
+                    (StringDataValue) getTypeServices().getNull();
+            resultValue.concatenate(leftValue, rightValue, resultValue);
+
+            return (ValueNode) getNodeFactory().getNode(
+                    C_NodeTypes.CHAR_CONSTANT_NODE,
+                    resultValue.getString(),
+                    getContextManager());
+        }
+
+        return this;
+    }
+
 	/**
 	 * overrides BindOperatorNode.bindExpression because concatenation has
 	 * special requirements for parameter binding.
@@ -263,7 +291,9 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
 		 */
 		this.setLeftRightInterfaceType(tc.interfaceName());
 
-		return this;
+        // Finally, fold constants so that for example LIKE optimization is
+        // able to take advantage of concatenated literals like 'ab' || '%'.
+        return this.evaluateConstantExpressions();
 	}
 
 	/**
