@@ -21,16 +21,19 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
- * Tests for TRUNCATE TABLE. Currently, Derby only supports TRUNCATE TABLE in
- * debug builds.
+ * Tests for TRUNCATE TABLE.
+ * 
  */
 public class TruncateTableTest extends BaseJDBCTestCase {
 
@@ -39,34 +42,47 @@ public class TruncateTableTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        if (!SanityManager.DEBUG) {
-            // Since Derby doesn't support TRUNCATE TABLE in non-debug builds,
-            // only test that a "not implemented" exception is thrown.
-            return new TruncateTableTest("unsupportedInInsaneBuilds");
-        }
-        return TestConfiguration.defaultSuite(TruncateTableTest.class);
-    }
-
-    /**
-     * Test that a "not implemented" exception is thrown if TRUNCATE TABLE
-     * is used in insane builds.
-     */
-    public void unsupportedInInsaneBuilds() throws SQLException {
-        assertFalse("Not to be tested in sane builds", SanityManager.DEBUG);
-        assertStatementError("0A000", createStatement(),
-                             "truncate table table_that_does_not_exist");
+        TestSuite suite = new TestSuite("TruncateTableTest Test");
+        suite.addTest(TestConfiguration.defaultSuite(TruncateTableTest.class));
+        return TestConfiguration.sqlAuthorizationDecorator(suite);
     }
 
     /**
      * Test that TRUNCATE TABLE works when there is an index on one of the
-     * columns. (This code would throw a {@code NullPointerException} before
-     * DERBY-3352 was fixed).
+     * columns. Verify that default "CONTINUE IDENTITY" semantics are enforced.
      */
     public void testTruncateWithIndex() throws SQLException {
-        Statement s = createStatement();
-        s.execute("create table t_with_index (x varchar(128) unique, y int)");
-        s.execute("insert into t_with_index values ('one', 1), ('two', 2)");
-        s.execute("truncate table t_with_index");
-        assertTableRowCount("T_WITH_INDEX", 0);
+        Statement st = createStatement();
+        ResultSet rs;
+        String[][] expRS;
+        //creating a table with one column auto filled with a unique value
+        st.executeUpdate("create table t1(a int not null generated always as identity primary key, b varchar(100))");
+        //populate the table
+        st.executeUpdate("insert into t1(b) values('one'),('two'),('three'),('four'),('five')");
+        //varify the inserted values
+        rs = st.executeQuery("select * from t1 order by a");
+        expRS = new String[][]{
+                        {"1","one"},
+                        {"2","two"},
+                        {"3","three"},
+                        {"4","four"},
+                        {"5","five"}
+                };
+        JDBC.assertFullResultSet(rs, expRS);
+        //executing the truncate table
+        st.executeUpdate("truncate table t1");
+        //confirm whether the truncation worked
+        assertTableRowCount("T1", 0);
+
+        //testing whether the truncation work as "CONTINUE IDENTITY"
+        //semantics are enforced
+        st.executeUpdate("insert into t1(b) values('six'),('seven')");
+        rs = st.executeQuery("select * from t1 order by a");
+        expRS = new String[][]{
+                        {"6","six"},
+                        {"7","seven"}
+                };
+        JDBC.assertFullResultSet(rs, expRS);
+
     }
 }

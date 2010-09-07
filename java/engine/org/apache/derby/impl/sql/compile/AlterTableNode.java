@@ -110,22 +110,11 @@ public class AlterTableNode extends DDLStatementNode
 
 	public void init(Object objectName)
 		throws StandardException
-	{
-
-		//truncate table is not suppotted in this release
-		//semantics are not yet clearly defined by SQL Council yet
-		//truncate will be allowed only in DEBUG builds for testing purposes.
-		if (SanityManager.DEBUG)
-		{
-			initAndCheck(objectName);
-			/* For now, this init() only called for truncate table */
-			truncateTable = true;
-			schemaDescriptor = getSchemaDescriptor();
-		}else
-		{
-			throw StandardException.newException(SQLState.NOT_IMPLEMENTED,
-												 "truncate table");
-		}
+	{		
+		initAndCheck(objectName);
+		/* For now, this init() only called for truncate table */
+		truncateTable = true;
+		schemaDescriptor = getSchemaDescriptor();
 	}
 
 	/**
