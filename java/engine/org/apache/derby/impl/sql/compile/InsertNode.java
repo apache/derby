@@ -853,7 +853,33 @@ public final class InsertNode extends DMLModStatementNode
         resultSet.pushOffsetFetchFirst(offset, fetchFirst);
 
 		super.optimizeStatement();
+        
+        //
+        // If the insert stream involves a table function, attempt the bulk-insert
+        // optimization. See https://issues.apache.org/jira/browse/DERBY-4789
+        // We perform this check after optimization because the table function may be
+        // wrapped in a view, which is only expanded at optimization time.
+        //
+        HasTableFunctionVisitor tableFunctionVisitor = new HasTableFunctionVisitor();
+        this.accept( tableFunctionVisitor );
+        if ( tableFunctionVisitor.hasNode() ) { requestBulkInsert(); }
 	}
+
+    /**
+     * Request bulk insert optimization at run time.
+     */
+    private void requestBulkInsert()
+    {
+        if ( targetProperties == null ) { targetProperties = new Properties(); }
+
+        // Set bulkInsert if insertMode not already set. For the import procedures,
+        // the insertMode property may be set already
+        String key = "insertMode";
+        String value = "bulkInsert";
+
+        if ( targetProperties.getProperty( key ) == null )
+        { targetProperties.put( key, value ); }
+    }
 
 	/**
 	 * Code generation for insert

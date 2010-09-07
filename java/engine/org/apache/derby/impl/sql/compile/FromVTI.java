@@ -325,6 +325,12 @@ public class FromVTI extends FromTable implements VTIEnvironment
 		return supportsMultipleInstantiations;
 	}
 
+    /** Return true if this is a user-defined table function */
+    public boolean isDerbyStyleTableFunction()
+    {
+        return isDerbyStyleTableFunction;
+    }
+
 	/**
 	 * @see ResultSetNode#adjustForSortElimination()
 	 */

@@ -38,7 +38,7 @@ import org.apache.derby.iapi.error.StandardException;
  */
 public class HasNodeVisitor implements Visitor
 {
-	private boolean hasNode;
+	protected boolean hasNode;
 	private Class 	nodeClass;
 	private Class	skipOverClass;
 	/**
