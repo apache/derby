@@ -1208,11 +1208,18 @@ public abstract class EmbedPreparedStatement
 		// overview, that passing a untyped null into setObject() is not allowed.
 		// JCC disallows this, basically SQL can not handle a untyped NULL.
 		// Section 25.1.6 (Third edition), 24.1.5 (Second Edition)
+        //
+        // However, the following update was made to the JDBC API:
+        // "Note: Not all databases allow for a non-typed Null to be sent to
+        // the backend. For maximum portability, the setNull or the
+        // setObject(int parameterIndex, Object x, int sqlType) method should
+        // be used instead of setObject(int parameterIndex, Object x)."
+        // Based on the above sentence, passing null is now allowed by Derby.
+        // See DERBY-1938 for details.
 
 		if (x == null) {
-			//setNull(parameterIndex, colType);
-			//return;
-			throw dataTypeConversion(parameterIndex, "null");
+            setNull(parameterIndex, colType);
+            return;
 		}
 		
 		if (colType == Types.JAVA_OBJECT) {

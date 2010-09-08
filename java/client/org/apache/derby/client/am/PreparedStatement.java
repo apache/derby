@@ -1358,8 +1358,12 @@ public class PreparedStatement extends Statement
                 if ( paramType == java.sql.Types.JAVA_OBJECT )
                 {
                     setUDTX( parameterIndex, x );
-                }
-                else if (x instanceof String) {
+                } else if (x == null) {
+                    // DERBY-1938: Allow setting Java null also when the
+                    //      column type isn't specified explicitly by the
+                    //      user. Maps Java null to SQL NULL.
+                    setNull(parameterIndex, paramType);
+                } else if (x instanceof String) {
                     setString(parameterIndex, (String) x);
                 } else if (x instanceof Integer) {
                     setInt(parameterIndex, ((Integer) x).intValue());

@@ -3052,51 +3052,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 judge_setXXX(worked, sqleResult, 14, type);
         }
 
-        // setObject(null)
-        {
-            s.execute("DELETE FROM PM.TYPE_AS");
-
-            SQLException sqleResult = null;
-            boolean worked;
-            try {
-                // should never work!
-                // setObject(null)
-                psi.setObject(1, null);
-                psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type], "setObject");
-
-                worked = true;
-
-            } catch (SQLException sqle) {
-                sqleResult = sqle;
-                worked = false;
-            }
-            if (worked)
-                fail("FAIL: setObject(null) not valid");
-
-        }
-        {
-            s.execute("DELETE FROM PM.TYPE_AS");
-
-            SQLException sqleResult = null;
-            boolean worked;
-            try {
-                // should never work!
-                // setObject(null) as batch
-                psi.setObject(1, null);
-                psi.addBatch();
-                psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type], "setObject");
-
-                worked = true;
-
-            } catch (SQLException sqle) {
-                sqleResult = sqle;
-                worked = false;
-            }
-            if (worked)
-                fail("FAIL: setObject(1,null) did not throw exception");
-        }
+        // DERBY-1938: Test setObject with null and no type specification.
+        setXXX_setObjectNullNoTypeSpec(s, psi, psq, type);
 
         setXXX_setObject(s, psi, psq, type, validString[type], "java.lang.String", 0);
         
@@ -3200,6 +3157,37 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             }
             judge_setObject(worked, sqleResult, b5o, type);
         }
+    }
+
+    /**
+     * Passes Java null to the setObject-call, expecting the driver to set the
+     * column value to SQL NULL.
+     * <p>
+     * This behavior was allowed/introduced by DERBY-1938.
+     *
+     * @param s statement used for auxiliary tasks
+     * @param psi statement used for insert
+     * @param psq statement used for query (retrieving inserted value)
+     * @param type the type of the column
+     */
+    private static void setXXX_setObjectNullNoTypeSpec(
+            Statement s, PreparedStatement psi, PreparedStatement psq,
+            int type) throws SQLException, IOException {
+        // setObject(null) - see DERBY-1938
+        s.execute("DELETE FROM PM.TYPE_AS");
+
+        // setObject(null)
+        psi.setObject(1, null);
+        psi.executeUpdate();
+        getValidValue(psq, jdbcTypes[type], "setObject");
+
+        s.execute("DELETE FROM PM.TYPE_AS");
+
+        // setObject(null) as batch
+        psi.setObject(1, null);
+        psi.addBatch();
+        psi.executeBatch();
+        getValidValue(psq, jdbcTypes[type], "setObject");
     }
 
     private static void unexpectedException(SQLException sqle) {
