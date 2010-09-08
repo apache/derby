@@ -26,8 +26,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
-import junit.framework.TestSuite;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -43,9 +41,7 @@ public class TruncateTableTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        TestSuite suite = new TestSuite("TruncateTableTest Test");
-        suite.addTest(TestConfiguration.defaultSuite(TruncateTableTest.class));
-        return TestConfiguration.sqlAuthorizationDecorator(suite);
+        return TestConfiguration.defaultSuite(TruncateTableTest.class);
     }
 
     /**
