@@ -1512,6 +1512,13 @@ public class JoinNode extends TableOperatorNode
 		/* Can't flatten if no predicates in where clause. */
 		if (predicateTree == null)
 		{
+            // DERBY-4712. Make sure any nested outer joins know we are non
+            // flattenable, too, since they inform their left and right sides
+            // which, is they are inner joins, a priori think they are
+            // flattenable. If left/right result sets are not outer joins,
+            // these next two calls are no-ops.
+            ((FromTable) leftResultSet).transformOuterJoins(null, numTables);
+            ((FromTable) rightResultSet).transformOuterJoins(null, numTables);
 			return this;
 		}
 

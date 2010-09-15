@@ -3133,4 +3133,250 @@ public final class OuterJoinTest extends BaseJDBCTestCase
 
         JDBC.assertFullResultSet(rs, expRS);
     }
+
+
+    /**
+     * Test the queries reported in DERBY-4712 as giving null pointer
+     * exceptions. Should fail with NPE before the fix went in.  For bug
+     * explanation, see the JIRA issue and {@code JoinNode#transformOuterJoins}.
+     */
+    public void testDerby_4712_NPEs() throws Exception
+    {
+        setAutoCommit(false);
+
+        Statement st = createStatement();
+        ResultSet rs = null;
+        String [][] expRS;
+
+        st.executeUpdate("create table t0(x0 int)");
+        st.executeUpdate("create table t1(x1 int)");
+        st.executeUpdate("create table t2(x2 int)");
+        st.executeUpdate("create table t3(x3 int)");
+        st.executeUpdate("create table t4(x4 int)");
+        st.executeUpdate("insert into t4 values(0)");
+        st.executeUpdate("insert into t4 values(1)");
+        st.executeUpdate("insert into t4 values(2)");
+        st.executeUpdate("insert into t4 values(3)");
+        st.executeUpdate("create table t5(x5 int)");
+        st.executeUpdate("insert into t5 values(0)");
+        st.executeUpdate("insert into t5 values(1)");
+        st.executeUpdate("insert into t5 values(2)");
+        st.executeUpdate("insert into t5 values(3)");
+        st.executeUpdate("insert into t5 values(4)");
+        st.executeUpdate("create table t6(x6 int)");
+        st.executeUpdate("insert into t6 values(0)");
+        st.executeUpdate("insert into t6 values(1)");
+        st.executeUpdate("insert into t6 values(2)");
+        st.executeUpdate("insert into t6 values(3)");
+        st.executeUpdate("insert into t6 values(4)");
+        st.executeUpdate("insert into t6 values(5)");
+        st.executeUpdate("create table t7(x7 int)");
+        st.executeUpdate("insert into t7 values(0)");
+        st.executeUpdate("insert into t7 values(1)");
+        st.executeUpdate("insert into t7 values(2)");
+        st.executeUpdate("insert into t7 values(3)");
+        st.executeUpdate("insert into t7 values(4)");
+        st.executeUpdate("insert into t7 values(5)");
+        st.executeUpdate("insert into t7 values(6)");
+        st.executeUpdate("create table t8(x8 int)");
+        st.executeUpdate("insert into t8 values(0)");
+        st.executeUpdate("insert into t8 values(1)");
+        st.executeUpdate("insert into t8 values(2)");
+        st.executeUpdate("insert into t8 values(3)");
+        st.executeUpdate("insert into t8 values(4)");
+        st.executeUpdate("insert into t8 values(5)");
+        st.executeUpdate("insert into t8 values(6)");
+        st.executeUpdate("insert into t8 values(7)");
+        st.executeUpdate("create table t9(x9 int)");
+        st.executeUpdate("insert into t9 values(0)");
+        st.executeUpdate("insert into t9 values(1)");
+        st.executeUpdate("insert into t9 values(2)");
+        st.executeUpdate("insert into t9 values(3)");
+        st.executeUpdate("insert into t9 values(4)");
+        st.executeUpdate("insert into t9 values(5)");
+        st.executeUpdate("insert into t9 values(6)");
+        st.executeUpdate("insert into t9 values(7)");
+        st.executeUpdate("insert into t9 values(8)");
+        st.executeUpdate("insert into t0 values(1)");
+        st.executeUpdate("insert into t1 values(2)");
+        st.executeUpdate("insert into t0 values(3)");
+        st.executeUpdate("insert into t1 values(3)");
+        st.executeUpdate("insert into t2 values(4)");
+        st.executeUpdate("insert into t0 values(5)");
+        st.executeUpdate("insert into t2 values(5)");
+        st.executeUpdate("insert into t1 values(6)");
+        st.executeUpdate("insert into t2 values(6)");
+        st.executeUpdate("insert into t0 values(7)");
+        st.executeUpdate("insert into t1 values(7)");
+        st.executeUpdate("insert into t2 values(7)");
+        st.executeUpdate("insert into t3 values(8)");
+        st.executeUpdate("insert into t0 values(9)");
+        st.executeUpdate("insert into t3 values(9)");
+        st.executeUpdate("insert into t1 values(10)");
+        st.executeUpdate("insert into t3 values(10)");
+        st.executeUpdate("insert into t0 values(11)");
+        st.executeUpdate("insert into t1 values(11)");
+        st.executeUpdate("insert into t3 values(11)");
+        st.executeUpdate("insert into t2 values(12)");
+        st.executeUpdate("insert into t3 values(12)");
+        st.executeUpdate("insert into t0 values(13)");
+        st.executeUpdate("insert into t2 values(13)");
+        st.executeUpdate("insert into t3 values(13)");
+        st.executeUpdate("insert into t1 values(14)");
+        st.executeUpdate("insert into t2 values(14)");
+        st.executeUpdate("insert into t3 values(14)");
+        st.executeUpdate("insert into t0 values(15)");
+        st.executeUpdate("insert into t1 values(15)");
+        st.executeUpdate("insert into t2 values(15)");
+        st.executeUpdate("insert into t3 values(15)");
+
+        rs = st.executeQuery(
+        "SELECT t0.x0,                                                  " +
+        "       t1.x1,                                                  " +
+        "       t2.x2,                                                  " +
+        "       t3.x3,                                                  " +
+        "       t4.x4,                                                  " +
+        "       t5.x5,                                                  " +
+        "       t6.x6,                                                  " +
+        "       t7.x7,                                                  " +
+        "       t8.x8                                                   " +
+        "FROM   (((t0                                                   " +
+        "          INNER JOIN ((t1                                      " +
+        "                       RIGHT OUTER JOIN (t2                    " +
+        "                                         INNER JOIN t3         " +
+        "                                           ON t2.x2 = t3.x3 )  " +
+        "                         ON t1.x1 = t2.x2 )                    " +
+        "                      LEFT OUTER JOIN (t4                      " +
+        "                                       INNER JOIN t5           " +
+        "                                         ON t4.x4 = t5.x5 )    " +
+        "                        ON t1.x1 = t4.x4 )                     " +
+        "            ON t0.x0 = t2.x2 )                                 " +
+        "         LEFT OUTER JOIN (t6                                   " +
+        "                          INNER JOIN t7                        " +
+        "                            ON t6.x6 = t7.x7 )                 " +
+        "           ON t1.x1 = t6.x6 )                                  " +
+        "        INNER JOIN t8                                          " +
+        "          ON t5.x5 = t8.x8 )                                   ");
+
+        JDBC.assertEmpty(rs);
+
+        rs = st.executeQuery(
+        "SELECT t0.x0,                                               " +
+        "       t1.x1,                                               " +
+        "       t2.x2,                                               " +
+        "       t3.x3,                                               " +
+        "       t4.x4,                                               " +
+        "       t5.x5,                                               " +
+        "       t6.x6,                                               " +
+        "       t7.x7                                                " +
+        "FROM   ((t0                                                 " +
+        "         RIGHT OUTER JOIN t1                                " +
+        "           ON t0.x0 = t1.x1 )                               " +
+        "        INNER JOIN (((t2                                    " +
+        "                      INNER JOIN (t3                        " +
+        "                                  LEFT OUTER JOIN t4        " +
+        "                                    ON t3.x3 = t4.x4 )      " +
+        "                        ON t2.x2 = t3.x3 )                  " +
+        "                     RIGHT OUTER JOIN t5                    " +
+        "                       ON t2.x2 = t5.x5 )                   " +
+        "                    LEFT OUTER JOIN (t6                     " +
+        "                                     INNER JOIN t7          " +
+        "                                       ON t6.x6 = t7.x7 )   " +
+        "                      ON t4.x4 = t6.x6 )                    " +
+        "          ON t0.x0 = t5.x5 )                                ");
+
+        expRS = new String [][]
+        {
+            {"3", "3", null, null, null, "3", null, null}
+        };
+
+        JDBC.assertFullResultSet(rs, expRS);
+
+        rs = st.executeQuery(
+        "SELECT t0.x0,                                                " +
+        "       t1.x1,                                                " +
+        "       t2.x2,                                                " +
+        "       t3.x3,                                                " +
+        "       t4.x4,                                                " +
+        "       t5.x5,                                                " +
+        "       t6.x6,                                                " +
+        "       t7.x7                                                 " +
+        "FROM   ((((t0                                                " +
+        "           LEFT OUTER JOIN t1                                " +
+        "             ON t0.x0 = t1.x1 )                              " +
+        "          RIGHT OUTER JOIN t2                                " +
+        "            ON t0.x0 = t2.x2 )                               " +
+        "         RIGHT OUTER JOIN t3                                 " +
+        "           ON t0.x0 = t3.x3 )                                " +
+        "        INNER JOIN ((t4                                      " +
+        "                     INNER JOIN t5                           " +
+        "                       ON t4.x4 = t5.x5 )                    " +
+        "                    RIGHT OUTER JOIN (t6                     " +
+        "                                      RIGHT OUTER JOIN t7    " +
+        "                                        ON t6.x6 = t7.x7 )   " +
+        "                      ON t4.x4 = t6.x6 )                     " +
+        "          ON t1.x1 = t4.x4 )                                 ");
+
+        JDBC.assertEmpty(rs);
+
+        rs = st.executeQuery(
+        "SELECT t0.x0,                                    " +
+        "       t1.x1,                                    " +
+        "       t2.x2,                                    " +
+        "       t3.x3,                                    " +
+        "       t4.x4,                                    " +
+        "       t5.x5                                     " +
+        "FROM   (((t0                                     " +
+        "          INNER JOIN t1                          " +
+        "            ON t0.x0 = t1.x1 )                   " +
+        "         RIGHT OUTER JOIN (t2                    " +
+        "                           RIGHT OUTER JOIN t3   " +
+        "                             ON t2.x2 = t3.x3 )  " +
+        "           ON t0.x0 = t2.x2 )                    " +
+        "        INNER JOIN (t4                           " +
+        "                    LEFT OUTER JOIN t5           " +
+        "                      ON t4.x4 = t5.x5 )         " +
+        "          ON t1.x1 = t4.x4 )                     ");
+
+        JDBC.assertEmpty(rs);
+
+        rs = st.executeQuery(
+        "SELECT t0.x0,                                                    " +
+        "       t1.x1,                                                    " +
+        "       t2.x2,                                                    " +
+        "       t3.x3,                                                    " +
+        "       t4.x4,                                                    " +
+        "       t5.x5,                                                    " +
+        "       t6.x6                                                     " +
+        "FROM   ((t0                                                      " +
+        "         RIGHT OUTER JOIN                                        " +
+        "                  (t1                                            " +
+        "                   RIGHT OUTER JOIN (t2                          " +
+        "                                     LEFT OUTER JOIN             " +
+        "                                           (t3                   " +
+        "                                            LEFT OUTER JOIN t4   " +
+        "                                               ON t3.x3 = t4.x4  " +
+        "                                            )                    " +
+        "                                               ON t2.x2 = t3.x3 )" +
+        "                      ON t1.x1 = t3.x3 )                         " +
+        "           ON t0.x0 = t1.x1 )                                    " +
+        "        LEFT OUTER JOIN (t5                                      " +
+        "                         INNER JOIN t6                           " +
+        "                           ON t5.x5 = t6.x6 )                    " +
+        "          ON t2.x2 = t5.x5 )                                     ");
+
+        expRS = new String [][]
+        {
+            {null, null, "4", null, null, "4", "4"},
+            {null, null, "5", null, null, null, null},
+            {null, null, "6", null, null, null, null},
+            {null, null, "7", null, null, null, null},
+            {null, null, "12", "12", null, null, null},
+            {null, null, "13", "13", null, null, null},
+            {null, "14", "14", "14", null, null, null},
+            {"15", "15", "15", "15", null, null, null},
+        };
+
+        JDBC.assertFullResultSet(rs, expRS);
+    }
 }
