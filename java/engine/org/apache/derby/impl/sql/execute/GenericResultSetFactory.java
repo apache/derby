@@ -679,6 +679,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									boolean tableLocked,
 									int isolationLevel,
 									int rowsPerRead,
+                                    boolean disableForHoldable,
 									boolean oneRowScan,
 									double optimizerEstimatedRowCount,
 									double optimizerEstimatedCost)
@@ -716,6 +717,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 								tableLocked,
 								isolationLevel,
 								rowsPerRead,
+                                disableForHoldable,
 								oneRowScan,
 								optimizerEstimatedRowCount,
 								optimizerEstimatedCost);

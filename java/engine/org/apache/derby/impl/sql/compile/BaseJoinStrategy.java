@@ -176,6 +176,10 @@ abstract class BaseJoinStrategy implements JoinStrategy {
 
 		if (bulkFetch > 0) {
 			mb.push(bulkFetch);
+            // If the table references LOBs, we want to disable bulk fetching
+            // when the cursor is holdable. Otherwise, a commit could close
+            // LOBs before they have been returned to the user.
+            mb.push(innerTable.hasLargeObjectColumns());
 		}
 
 		/* 1 row scans (avoiding 2nd next()) are

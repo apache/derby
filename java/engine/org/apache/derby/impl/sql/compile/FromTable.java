@@ -742,6 +742,26 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 		return false;
 	}
 
+    /**
+     * Check if any columns containing large objects (BLOBs or CLOBs) are
+     * referenced in this table.
+     *
+     * @return {@code true} if at least one large object column is referenced,
+     * {@code false} otherwise
+     */
+    public boolean hasLargeObjectColumns() {
+        for (int i = 0; i < resultColumns.size(); i++) {
+            ResultColumn rc = (ResultColumn) resultColumns.elementAt(i);
+            if (rc.isReferenced()) {
+                DataTypeDescriptor type = rc.getType();
+                if (type != null && type.getTypeId().isLOBTypeId()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 	/** @see Optimizable#isMaterializable 
 	 *
 	 * @exception StandardException		Thrown on error

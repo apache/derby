@@ -680,6 +680,45 @@ final public class BLOBTest extends BaseJDBCTestCase
         s2.close();
     }
 
+    /**
+     * Regression test case for DERBY-1511. Scans of tables with large objects
+     * used to fail if commits were issued during the scans.
+     */
+    public void testDerby1511() throws Exception {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.executeUpdate("create table derby1511(b blob)");
+
+        PreparedStatement insert = prepareStatement(
+                "insert into derby1511(b) values (?)");
+
+        int rows = 20;
+        int length = 40000; // LOB size should be > 32 KB to expose the bug
+                            // (otherwise, materialization happens and a
+                            // different code path is taken)
+
+        for (int i = 0; i < rows; i++) {
+            insert.setBinaryStream(
+                    1, new LoopingAlphabetStream(length), length);
+            insert.executeUpdate();
+        }
+
+        commit();
+
+        ResultSet rs = s.executeQuery("select b from derby1511");
+        for (int i = 0; i < rows; i++) {
+            assertTrue("Too few rows", rs.next());
+            // Second time this was called we used to get an error saying
+            // container has been closed.
+            assertEquals(new LoopingAlphabetStream(length),
+                         rs.getBinaryStream(1));
+            commit();
+        }
+
+        assertFalse("Too many rows", rs.next());
+        rs.close();
+    }
 
     /**
      * Verifies that the table has row with column val=newVal

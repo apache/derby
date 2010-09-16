@@ -969,6 +969,8 @@ public interface ResultSetFactory {
 								(in sys.systables)
 		@param isolationLevel	Isolation level (specified or not) to use on scans
 		@param rowsPerRead		The number of rows to read per fetch.
+        @param disableForHoldable Whether or not bulk fetch should be disabled
+                                  at runtime if the cursor is holdable.
 		@param oneRowScan		Whether or not this is a 1 row scan.
 		@param optimizerEstimatedRowCount	Estimated total # of rows by
 											optimizer
@@ -1001,6 +1003,7 @@ public interface ResultSetFactory {
 								boolean tableLocked,
 								int isolationLevel,
 								int rowsPerRead,
+                                boolean disableForHoldable,
 								boolean oneRowScan,
 								double optimizerEstimatedRowCount,
 								double optimizerEstimatedCost)

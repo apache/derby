@@ -2933,6 +2933,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      * is thrown instead of an NPE.
      * Basically per the spec, getBlob is valid only for the duration of
      * the transaction it was created in
+     * Updated for DERBY-1511: The test case wasn't supposed to fail in the
+     * first place (neither with NPE nor with "proper user error") since none
+     * of the BLOBs are accessed after the transaction that created them was
+     * completed.
      * @throws Exception
      * @throws FileNotFoundException
      * @throws IOException
@@ -2967,18 +2971,14 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         rs1.next();
         Blob b1 = rs1.getBlob(2);
         rs1.close();
-        try {
-            rs2.next();
-            rs2.getBlob(2);
-            fail("FAIL - can not access blob after implicit commit");
-        } catch (SQLException sqle) {
-            checkException(BLOB_ACCESSED_AFTER_COMMIT, sqle);
-        } finally {
-            rs2.close();
-            s2.close();
-            s.close();
-            ps.close();
-        }
+
+        // DERBY-1511: Fetching the next BLOB here used to fail because it
+        // had been pre-fetched before the commit and was closed in the commit.
+        // Now, we don't pre-fetch BLOBs anymore, so expect to get a working
+        // object here.
+        assertTrue(rs2.next());
+        assertNotNull(rs2.getBlob(2));
+        rs2.close();
     }
 
     /**
@@ -2988,6 +2988,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      * is thrown instead of an NPE.
      * Basically per the spec, getClob is valid only for the duration of
      * the transaction in it was created in
+     * Updated for DERBY-1511: The test case wasn't supposed to fail in the
+     * first place (neither with NPE nor with "proper user error") since none
+     * of the CLOBs are accessed after the transaction that created them was
+     * completed.
      * @throws Exception
      */
     public void testNegativeTestDerby265Clob() throws Exception {
@@ -3021,18 +3025,14 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         rs1.next();
         Clob b1 = rs1.getClob(2);
         rs1.close();
-        try {
-            rs2.next();
-            rs2.getClob(2);
-            fail("FAIL - can not access blob after implicit commit");
-        } catch (SQLException sqle) {
-            checkException(BLOB_ACCESSED_AFTER_COMMIT, sqle);
-        } finally {
-            rs2.close();
-            s2.close();
-            s.close();
-            ps.close();
-        }
+
+        // DERBY-1511: Fetching the next CLOB here used to fail because it
+        // had been pre-fetched before the commit and was closed in the commit.
+        // Now, we don't pre-fetch CLOBs anymore, so expect to get a working
+        // object here.
+        assertTrue(rs2.next());
+        assertNotNull(rs2.getClob(2));
+        rs2.close();
     }
 
     public static Test suite() {
@@ -3518,9 +3518,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     private static final String LANG_DATA_TYPE_GET_MISMATCH = "22005";
     private static final String BLOB_NULL_PATTERN_OR_SEARCH_STR = "XJ072";
     private static final String LOCK_TIMEOUT = "40XL1";
-    private static final String BLOB_ACCESSED_AFTER_COMMIT = "XJ073";
     private static final String NO_CURRENT_CONNECTION = "08003";
     private static final String INVALID_LOB = "XJ215";
-    private static final String INVALID_LOCATOR = "XJ217";
 
 }

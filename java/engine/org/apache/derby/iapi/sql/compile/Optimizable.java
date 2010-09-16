@@ -324,6 +324,9 @@ public interface Optimizable {
 	/** Tell whether this Optimizable can be instantiated multiple times */
 	boolean supportsMultipleInstantiations();
 
+    /** Tell whether this Optimizable has any large object (LOB) columns. */
+    boolean hasLargeObjectColumns();
+
 	/** Get this Optimizable's result set number */
 	int getResultSetNumber();
 

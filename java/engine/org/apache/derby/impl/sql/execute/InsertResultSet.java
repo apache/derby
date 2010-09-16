@@ -2426,6 +2426,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                     true,					// table locked
                     tc.ISOLATION_READ_COMMITTED,
                     LanguageProperties.BULK_FETCH_DEFAULT_INT,	// rows per read
+                    false,                  // never disable bulk fetch
                     false,					// not a 1 row per scan
                     0d,						// estimated rows
                     0d 					// estimated cost

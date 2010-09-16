@@ -102,6 +102,7 @@ class BulkTableScanResultSet extends TableScanResultSet
 		boolean tableLocked,
 		int isolationLevel,
 		int rowsPerRead,
+        boolean disableForHoldable,
 		boolean oneRowScan,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost)
@@ -128,7 +129,7 @@ class BulkTableScanResultSet extends TableScanResultSet
 			lockMode,
 			tableLocked,
 			isolationLevel,
-			rowsPerRead,
+            adjustBulkFetchSize(activation, rowsPerRead, disableForHoldable),
 			oneRowScan,
 			optimizerEstimatedRowCount,
 			optimizerEstimatedCost);
@@ -153,6 +154,31 @@ class BulkTableScanResultSet extends TableScanResultSet
 					"rowsPerRead = " + rowsPerRead);
 			}
 		}
+    }
+
+    /**
+     * Adjust the bulk fetch size according to the parameters. Bulk fetch may
+     * be disabled by returning 1 from this method. Disabling of bulk fetch
+     * may happen if the cursor is holdable and it contains LOB columns
+     * (DERBY-1511) because
+     *
+     * @param activation the activation for the executing statement
+     * @param rowsPerRead how many rows to read in each chunk if a bulk fetch
+     * is OK to use
+     * @param disableForHoldable whether or not bulk fetch should be disabled
+     * for holdable cursors
+     * @return the bulk fetch size to use
+     */
+    private static int adjustBulkFetchSize(
+            Activation activation, int rowsPerRead, boolean disableForHoldable)
+    {
+        if (disableForHoldable && activation.getResultSetHoldability()) {
+            // We have a holdable cursor, and we've been requested to disable
+            // bulk fetch if the cursor is holdable, so change bulk size to 1.
+            return 1;
+        } else {
+            return rowsPerRead;
+        }
     }
 
     /**
