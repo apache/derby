@@ -35,7 +35,6 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 public final class OuterJoinTest extends BaseJDBCTestCase
 {
@@ -3375,6 +3374,123 @@ public final class OuterJoinTest extends BaseJDBCTestCase
             {null, null, "13", "13", null, null, null},
             {null, "14", "14", "14", null, null, null},
             {"15", "15", "15", "15", null, null, null},
+        };
+
+        JDBC.assertFullResultSet(rs, expRS);
+    }
+
+
+    /**
+     * Test the queries reported in DERBY-4798 as giving null pointer
+     * exceptions. Should fail with NPE before the fix went in.
+     */
+    public void testDerby_4798_NPE() throws Exception
+    {
+        setAutoCommit(false);
+
+        Statement st = createStatement();
+        ResultSet rs = null;
+        String [][] expRS;
+
+        st.executeUpdate("create table t0(x0 int)");
+        st.executeUpdate("create table t1(x1 int)");
+        st.executeUpdate("create table t2(x2 int)");
+        st.executeUpdate("create table t3(x3 int)");
+        st.executeUpdate("create table t4(x4 int)");
+        st.executeUpdate("insert into t4 values(0)");
+        st.executeUpdate("insert into t4 values(1)");
+        st.executeUpdate("insert into t4 values(2)");
+        st.executeUpdate("insert into t4 values(3)");
+        st.executeUpdate("create table t5(x5 int)");
+        st.executeUpdate("insert into t5 values(0)");
+        st.executeUpdate("insert into t5 values(1)");
+        st.executeUpdate("insert into t5 values(2)");
+        st.executeUpdate("insert into t5 values(3)");
+        st.executeUpdate("insert into t5 values(4)");
+        st.executeUpdate("create table t6(x6 int)");
+        st.executeUpdate("insert into t6 values(0)");
+        st.executeUpdate("insert into t6 values(1)");
+        st.executeUpdate("insert into t6 values(2)");
+        st.executeUpdate("insert into t6 values(3)");
+        st.executeUpdate("insert into t6 values(4)");
+        st.executeUpdate("insert into t6 values(5)");
+        st.executeUpdate("create table t7(x7 int)");
+        st.executeUpdate("insert into t7 values(0)");
+        st.executeUpdate("insert into t7 values(1)");
+        st.executeUpdate("insert into t7 values(2)");
+        st.executeUpdate("insert into t7 values(3)");
+        st.executeUpdate("insert into t7 values(4)");
+        st.executeUpdate("insert into t7 values(5)");
+        st.executeUpdate("insert into t7 values(6)");
+        st.executeUpdate("insert into t0 values(1)");
+        st.executeUpdate("insert into t1 values(2)");
+        st.executeUpdate("insert into t0 values(3)");
+        st.executeUpdate("insert into t1 values(3)");
+        st.executeUpdate("insert into t2 values(4)");
+        st.executeUpdate("insert into t0 values(5)");
+        st.executeUpdate("insert into t2 values(5)");
+        st.executeUpdate("insert into t1 values(6)");
+        st.executeUpdate("insert into t2 values(6)");
+        st.executeUpdate("insert into t0 values(7)");
+        st.executeUpdate("insert into t1 values(7)");
+        st.executeUpdate("insert into t2 values(7)");
+        st.executeUpdate("insert into t3 values(8)");
+        st.executeUpdate("insert into t0 values(9)");
+        st.executeUpdate("insert into t3 values(9)");
+        st.executeUpdate("insert into t1 values(10)");
+        st.executeUpdate("insert into t3 values(10)");
+        st.executeUpdate("insert into t0 values(11)");
+        st.executeUpdate("insert into t1 values(11)");
+        st.executeUpdate("insert into t3 values(11)");
+        st.executeUpdate("insert into t2 values(12)");
+        st.executeUpdate("insert into t3 values(12)");
+        st.executeUpdate("insert into t0 values(13)");
+        st.executeUpdate("insert into t2 values(13)");
+        st.executeUpdate("insert into t3 values(13)");
+        st.executeUpdate("insert into t1 values(14)");
+        st.executeUpdate("insert into t2 values(14)");
+        st.executeUpdate("insert into t3 values(14)");
+        st.executeUpdate("insert into t0 values(15)");
+        st.executeUpdate("insert into t1 values(15)");
+        st.executeUpdate("insert into t2 values(15)");
+        st.executeUpdate("insert into t3 values(15)");
+
+        rs = st.executeQuery(
+        "SELECT t0.x0, " +
+        "       t1.x1," +
+        "       t2.x2," +
+        "       t3.x3," +
+        "       t4.x4," +
+        "       t5.x5," +
+        "       t6.x6," +
+        "       t7.x7 " +
+        "FROM         " +
+        " ((t0                                                               " +
+        "   LEFT OUTER JOIN ((t1                                             " +
+        "                     LEFT OUTER JOIN (t2                            " +
+        "                                      LEFT OUTER JOIN t3            " +
+        "                                        ON t2.x2 = t3.x3 )          " +
+        "                       ON t1.x1 = t2.x2 )                           " +
+        "                    LEFT OUTER JOIN (t4                             " +
+        "                                     INNER JOIN (t5                 " +
+        "                                                 LEFT OUTER JOIN t6 " +
+        "                                                   ON t5.x5 = t6.x6)" +
+        "                                       ON t4.x4 = t5.x5 )           " +
+        "                      ON t1.x1 = t5.x5 )                            " +
+        "     ON t0.x0 = t5.x5 )                                             " +
+        "  LEFT OUTER JOIN t7                                                " +
+        "    ON t3.x3 = t7.x7 )                                              ");
+
+        expRS = new String [][]
+        {
+            {"1", "1", null, null, null, null, null, null},
+            {"3", "3", "3", null, "3", "3", "3", null},
+            {"5", "5", null, null, null, null, null, null},
+            {"7", "7", null, null, null, null, null, null},
+            {"9", "9", null, null, null, null, null, null},
+            {"11", "11", null, null, null, null, null, null},
+            {"13", "13", null, null, null, null, null, null},
+            {"15", "15", null, null, null, null, null, null}
         };
 
         JDBC.assertFullResultSet(rs, expRS);

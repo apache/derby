@@ -1474,7 +1474,23 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	protected final DataValueDescriptor getColumnFromRow(int rsNumber, int colId)
 		throws StandardException {
 
-		return row[rsNumber].getColumn(colId);
+        if (row[rsNumber] == null) {
+            /* This actually happens. NoPutResultSetImpl.clearOrderableCache
+             * attempts to prefetch invariant values into a cache. This fails
+             * in some deeply nested joins. See Beetle 4736 and 4880.*/
+
+            /*
+             * Update: DERBY-4798 shows a query for which we get an NPE unless
+             * this escape is in place (once removed by DERBY-3097, but
+             * reintroduced by DERBY-4798 until we understand how we can get
+             * rid of this anomaly). Thus, for now,
+             * OuterJoinTest#testDerby_4798_NPE will provoke an NPE if this
+             * code is removed.
+             */
+            return null;
+        }
+
+        return row[rsNumber].getColumn(colId);
 	}
 
     /**
