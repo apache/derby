@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -41,6 +42,11 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
+/**
+ * Simulates running Derby on a read-only media, and makes sure Derby gives a
+ * reasonable error message when the user tries to insert data into the
+ * read-only database.
+ */
 public class OSReadOnlyTest extends BaseJDBCTestCase{
 
     public OSReadOnlyTest(String name) {
@@ -131,6 +137,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         copyDatabaseOnOS(phDbName, "readOnly");
         // change filePermissions on readOnly, to readonly.
         changeFilePermissions("readOnly");
+        createDummyLockFile("readOnly");
         
         DataSource ds = JDBCDataSource.getDataSource();
         JDBCDataSource.setBeanProperty(ds, 
@@ -153,6 +160,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         copyDatabaseOnOS("readWrite", "readOnly2");
         // change filePermissions on readOnly, to readonly.
         changeFilePermissions("readOnly2");
+        createDummyLockFile("readOnly2");
         
         ds = JDBCDataSource.getDataSource();
         JDBCDataSource.setBeanProperty(ds, 
@@ -260,7 +268,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
                     insertIntValue + ", '" + insertStringValue + "')");
                 fail("expected an error indicating the db is readonly");
             } catch (SQLException sqle) {
-                assertSQLState("40XD1", sqle);
+                assertSQLState("25502", sqle);
             }
         }
         stmt.close();
@@ -268,42 +276,62 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
     }
     
     private void copyDatabaseOnOS(String fromwhere, String todir) {
-        String from_dir;
-        String to_dir;
+        File from_dir = constructDbPath(fromwhere);
+        File to_dir = constructDbPath(todir);
         
-        String filesep=getSystemProperty("file.separator");
-
-        String testpath=new String( getSystemProperty("user.dir") + filesep +
-            "system" + filesep + "singleUse" + filesep);
-
-        from_dir = testpath + fromwhere;
-        to_dir = testpath + todir;
-
         assertTrue("Failed to copy directory from " + from_dir + " to " + to_dir,
             (copyDirectory(from_dir, to_dir)));
         assertTrue("Failed to remove directory: " + from_dir,
             (removeTemporaryDirectory(from_dir)));
     }
 
+    /**
+     * Creates a dummy database lock file if one doesn't exist, and sets the
+     * lock file to read-only.
+     * <p>
+     * This method is a work-around for the problem that Java cannot make a file
+     * writable before Java 6.
+     *
+     * @param dbDir the database directory where the lock file belongs
+     */
+    private void createDummyLockFile(String dbDir) {
+        final File f = new File(constructDbPath(dbDir), "db.lck");
+        AccessController.doPrivileged(new PrivilegedAction() {
+
+            public Object run() {
+                if (!f.exists()) {
+                    try {
+                        FileOutputStream fos = new FileOutputStream(f);
+                        // Just write a dummy byte.
+                        fos.write(12);
+                        fos.close();
+                    } catch (IOException fnfe) {
+                        // Ignore
+                    }
+                }
+                f.setReadOnly();
+                return null;
+            }
+        });
+    }
+
     public void changeFilePermissions(String dir) {
-        String filesep=getSystemProperty("file.separator");
-        String dir_to_change = new String(getSystemProperty("user.dir") + filesep 
-            + "system" + filesep + "singleUse" + filesep + dir);
+        File dir_to_change = constructDbPath(dir);
         assertTrue("Failed to change files in " + dir_to_change + " to ReadOnly",
             changeDirectoryToReadOnly(dir_to_change));
     }
-    
+
     /**
-     * Change all of the files in a directory and its subdirectories
-     * to read only (atleast not writeable, depending on system for execute
-     * permission). 
-     * @param directory the string representation of the directory
-     * to start recursing from.
-     * @return <code>true</code> for success, <code>false</code> otherwise
+     * Constructs the path to the database base directory.
+     *
+     * @param relDbDirName the database name (relative)
+     * @return The path to the database.
      */
-    public static boolean changeDirectoryToReadOnly( String directory )
-    {
-        return changeDirectoryToReadOnly( new File(directory) );
+    private File constructDbPath(String relDbDirName) {
+        // Example: "readOnly" -> "<user.dir>/system/singleUse/readOnly"
+        File f = new File(getSystemProperty("user.dir"), "system");
+        f = new File(f, "singleUse");
+        return new File(f, relDbDirName);
     }
 
     /**
@@ -344,6 +372,10 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
                             }
                         }
                     }
+                    // Before Java 6 we cannot make the directory writable
+                    // again, which means we cannot delete the directory and
+                    // its content...
+                    //success &= sdirectory.setReadOnly();
                     return new Boolean(success);
                 }
             });        
@@ -405,11 +437,6 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
             return true;
         }
         else return false;
-    }
-
-    public static boolean removeTemporaryDirectory(String directory)
-    {
-        return removeTemporaryDirectory(new File(directory));
     }
 
     /**
