@@ -1565,19 +1565,17 @@ readingLoop:
                 formatJDBCTime( cal, sb);
                 sb.append('.');
 
-                int micros = 
-                    (theValue.getNanos() + SQLTimestamp.FRACTION_TO_NANO/2) / 
-                        SQLTimestamp.FRACTION_TO_NANO;
+                int nanos = theValue.getNanos();
 
-                if (micros == 0)
+                if (nanos == 0)
                 {
                     // Add a single zero after the decimal point to match
                     // the format from Timestamp.toString().
                     sb.append('0');
                 }
-                else if (micros > 0)
+                else if (nanos > 0)
                 {
-                    String microsStr = Integer.toString( micros);
+                    String microsStr = Integer.toString( nanos);
                     if(microsStr.length() > SQLTimestamp.MAX_FRACTION_DIGITS)
                     {
                         sb.append(

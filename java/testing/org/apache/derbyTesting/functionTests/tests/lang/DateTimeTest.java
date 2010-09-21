@@ -1236,16 +1236,16 @@ public final class DateTimeTest extends BaseJDBCTestCase {
     }
     
     /**
-     *  Don't allow more than microseconds in ISO format: cloudscape rejects.
+     * Don't allow more than nanoseconds in ISO format.
      */
-    public void testISOFormat_MoreThanMicroseconds() throws SQLException{
+    public void testISOFormat_MoreThanNanoseconds() throws SQLException{
         Statement st = createStatement();
         
         assertStatementError("22007", st, "insert into ts (ts1) values "
-                + "('2003-03-05-17.05.43.999999999')");
+                + "('2003-03-05-17.05.43.999999999999')");
 
         assertStatementError("22007", st, " insert into ts (ts1) values "
-                + "('2003-03-05-17.05.43.999999000')");
+                + "('2003-03-05-17.05.43.999999999000')");
 
         st.close();
     }
@@ -1782,6 +1782,15 @@ public final class DateTimeTest extends BaseJDBCTestCase {
         assertSingleValue(
                 "values time(cast('10.00.00' as varchar(10)))",
                 "10:00:00");
+    }
+
+    /**
+     * Test case to show that timestamp function accepts nanoseconds
+     * resolution (DERBY-4625).
+     */
+    public void testNanosecondResolution() throws SQLException{
+    	assertSingleValue("values timestamp('2010-04-21 12:00:00.123456789')",
+    			"2010-04-21 12:00:00.123456789");
     }
 
     /**
