@@ -21,12 +21,14 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -36,12 +38,24 @@ import org.apache.derbyTesting.junit.TestConfiguration;
  */
 public class TruncateTableTest extends BaseJDBCTestCase {
 
+    private static  final   String      TEST_DBO = "TEST_DBO";
+    private static  final   String      RUTH = "RUTH";
+    private static  final   String      ALICE = "ALICE";
+    private static  final   String[]    LEGAL_USERS = { TEST_DBO, RUTH, ALICE };
+
+    private static  final   String      UNAUTHORIZED_OPERATION = "42507";
+
     public TruncateTableTest(String name) {
         super(name);
     }
 
     public static Test suite() {
-        return TestConfiguration.defaultSuite(TruncateTableTest.class);
+        Test cleanTest = TestConfiguration.defaultSuite(TruncateTableTest.class);
+        Test        authenticatedTest = DatabasePropertyTestSetup.builtinAuthentication
+            ( cleanTest, LEGAL_USERS, "" );
+        Test        authorizedTest = TestConfiguration.sqlAuthorizationDecorator( authenticatedTest );
+
+        return authorizedTest;
     }
 
     /**
@@ -49,7 +63,8 @@ public class TruncateTableTest extends BaseJDBCTestCase {
      * columns. Verify that default "CONTINUE IDENTITY" semantics are enforced.
      */
     public void testTruncateWithIndex() throws SQLException {
-        Statement st = createStatement();
+        Connection aliceConnection = openUserConnection( ALICE );
+        Statement st = aliceConnection.createStatement();
         ResultSet rs;
         String[][] expRS;
         //creating a table with one column auto filled with a unique value
@@ -69,7 +84,7 @@ public class TruncateTableTest extends BaseJDBCTestCase {
         //executing the truncate table
         st.executeUpdate("truncate table t1");
         //confirm whether the truncation worked
-        assertTableRowCount("T1", 0);
+        JDBC.assertEmpty( st.executeQuery( "select * from t1" ) );
 
         //testing whether the truncation work as "CONTINUE IDENTITY"
         //semantics are enforced
@@ -81,6 +96,8 @@ public class TruncateTableTest extends BaseJDBCTestCase {
                 };
         JDBC.assertFullResultSet(rs, expRS);
 
+        st.close();
+        aliceConnection.close();
     }
 
     /**
@@ -88,7 +105,8 @@ public class TruncateTableTest extends BaseJDBCTestCase {
      * delete trigger.
      */
     public void testTruncateWithDeleteTrigger() throws Exception {
-        Statement s = createStatement();
+        Connection aliceConnection = openUserConnection( ALICE );
+        Statement s = aliceConnection.createStatement();
 
         // Create two tables, t1 and t2, where deletes from t1 cause inserts
         // into t2.
@@ -100,7 +118,7 @@ public class TruncateTableTest extends BaseJDBCTestCase {
 
         // Prepare a statement that checks the number of rows in the
         // destination table (t2).
-        PreparedStatement checkDest = prepareStatement(
+        PreparedStatement checkDest = aliceConnection.prepareStatement(
                 "select count(*) from deltriggertest_t2");
 
         // Insert rows into t1, delete them, and verify that t2 has grown.
@@ -121,7 +139,8 @@ public class TruncateTableTest extends BaseJDBCTestCase {
      * foreign key constraint on another table.
      */
     public void testTruncateWithForeignKey() throws SQLException {
-        Statement s = createStatement();
+        Connection aliceConnection = openUserConnection( ALICE );
+        Statement s = aliceConnection.createStatement();
 
         // Create two tables with a foreign key relationship.
         s.execute("create table foreignkey_t1(x int primary key)");
@@ -135,7 +154,7 @@ public class TruncateTableTest extends BaseJDBCTestCase {
 
         // Truncating the referencing table is OK.
         s.execute("truncate table foreignkey_t2");
-        assertTableRowCount("FOREIGNKEY_T2", 0);
+        JDBC.assertEmpty( s.executeQuery( "select * from foreignkey_t2" ) );
     }
 
     /**
@@ -143,11 +162,67 @@ public class TruncateTableTest extends BaseJDBCTestCase {
      * referenced by itself.
      */
     public void testSelfReferencing() throws SQLException {
-        Statement s = createStatement();
+        Connection aliceConnection = openUserConnection( ALICE );
+        Statement s = aliceConnection.createStatement();
         s.execute("create table self_referencing_t1(x int primary key, "
                 + "y int references self_referencing_t1)");
         s.execute("insert into self_referencing_t1 values (1, null), (2, 1)");
         s.execute("truncate table self_referencing_t1");
-        assertTableRowCount("SELF_REFERENCING_T1", 0);
+        JDBC.assertEmpty( s.executeQuery( "select * from self_referencing_t1" ) );
     }
+
+    /**
+     * Test that dbo and owner can truncate table but no-one else can.
+     */
+    public void testPerms() throws Exception
+    {
+        Connection dboConnection = openUserConnection( TEST_DBO );
+        Connection aliceConnection = openUserConnection( ALICE );
+        Connection ruthConnection = openUserConnection( RUTH );
+
+        Statement dboStatement = dboConnection.createStatement();
+        Statement aliceStatement = aliceConnection.createStatement();
+        Statement ruthStatement = ruthConnection.createStatement();
+
+        // user can truncate her own table
+        aliceStatement.execute( "create table t_perm( a int )" );
+        aliceStatement.execute( "grant delete on t_perm to public" );
+        aliceStatement.execute( "grant select on t_perm to public" );
+        aliceStatement.execute( "insert into t_perm( a ) values ( 1 )" );
+        aliceStatement.execute( "truncate table t_perm" );
+        JDBC.assertEmpty( aliceStatement.executeQuery( "select * from t_perm" ) );
+        
+        // ordinary other user can't truncate table
+        aliceStatement.execute( "insert into t_perm( a ) values ( 2 )" );
+        assertStatementError( UNAUTHORIZED_OPERATION, ruthStatement, "truncate table alice.t_perm" );
+        JDBC.assertFullResultSet
+            (
+             ruthStatement.executeQuery( "select * from alice.t_perm" ),
+             new String[][] { { "2" } }
+             );
+
+        // even though they are authorized to delete from the table
+        ruthStatement.execute( "delete from alice.t_perm" );
+        JDBC.assertEmpty( ruthStatement.executeQuery( "select * from alice.t_perm" ) );
+        
+        // the dbo, however, can truncate the table
+        aliceStatement.execute( "insert into t_perm( a ) values ( 3 )" );
+        JDBC.assertFullResultSet
+            (
+             aliceStatement.executeQuery( "select * from alice.t_perm" ),
+             new String[][] { { "3" } }
+             );
+        dboStatement.execute( "truncate table alice.t_perm" );
+        JDBC.assertEmpty( dboStatement.executeQuery( "select * from alice.t_perm" ) );
+
+        // tidy up
+        dboStatement.close();
+        aliceStatement.close();
+        ruthStatement.close();
+
+        dboConnection.close();
+        aliceConnection.close();
+        ruthConnection.close();
+    }
+    
 }
