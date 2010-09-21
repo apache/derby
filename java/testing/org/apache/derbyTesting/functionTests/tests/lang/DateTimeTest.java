@@ -30,6 +30,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -912,6 +913,35 @@ public final class DateTimeTest extends BaseJDBCTestCase {
         dropTable("convstrtest");
         
         st.close();
+    }
+
+    /**
+     * Test that conversion from timestamp to string is correct when a
+     * calendar is specified. Specifically, verify that the full nanosecond
+     * resolution is used and that the converted timestamp is not rounded to
+     * microsecond resolution. Regression test case for DERBY-4626.
+     */
+    public void testConvertToStringWithCalendar() throws SQLException {
+        PreparedStatement ps =
+                prepareStatement("values cast(? as varchar(29))");
+
+        // Generate a timestamp representing 2010-09-01 20:31:40.123456789 GMT
+        Timestamp ts = new Timestamp(1283373100000L);
+        ts.setNanos(123456789);
+
+        // Array of (timezone, timestamp string) pairs representing a timezone
+        // with which to test and the expected timestamp string produced.
+        String[][] testData = {
+            { "GMT", "2010-09-01 20:31:40.123456789" },
+            { "Europe/Oslo", "2010-09-01 22:31:40.123456789" },
+        };
+
+        for (int i = 0; i < testData.length; i++) {
+            Calendar cal = Calendar.getInstance(
+                    TimeZone.getTimeZone(testData[i][0]));
+            ps.setTimestamp(1, ts, cal);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), testData[i][1]);
+        }
     }
 
     /**
