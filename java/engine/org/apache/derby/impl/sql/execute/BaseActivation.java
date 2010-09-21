@@ -1410,6 +1410,9 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	 * Return the current SQL session context for all immediately
 	 * nested connections stemming from the call or function
 	 * invocation of the statement corresponding to this activation.
+     * <p/>
+     * Substatements (e.g. used in rs.updateRow), inherit the SQL session
+     * context via its parent activation.
 	 * @see org.apache.derby.iapi.sql.Activation#getSQLSessionContextForChildren
 	 */
 	public SQLSessionContext getSQLSessionContextForChildren() {

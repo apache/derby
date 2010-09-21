@@ -3611,6 +3611,13 @@ public abstract class EmbedResultSet extends ConnectionChild
                 valuesSQL.append(") ");
                 insertSQL.append(valuesSQL);
 
+                StatementContext currSC = lcc.getStatementContext();
+                Activation parentAct = null;
+
+                if (currSC != null) {
+                    parentAct = currSC.getActivation();
+                }
+
                 // Context used for preparing, don't set any timeout (use 0)
                 statementContext = lcc.pushStatementContext(
                         isAtomic, 
@@ -3619,6 +3626,14 @@ public abstract class EmbedResultSet extends ConnectionChild
                         null, 
                         false, 
                         0L);
+
+                // A priori, the new statement context inherits the activation
+                // of the existing statementContext, so that that activation
+                // ends up as parent of the new activation 'act' created below,
+                // which will be the activation of the pushed statement
+                // context.
+                statementContext.setActivation(parentAct);
+
                 org.apache.derby.iapi.sql.PreparedStatement ps = 
                         lcc.prepareInternalStatement(insertSQL.toString());
                 Activation act = ps.getActivation(lcc, false);
@@ -3700,8 +3715,22 @@ public abstract class EmbedResultSet extends ConnectionChild
             updateWhereCurrentOfSQL.append(" WHERE CURRENT OF " + 
                     IdUtil.normalToDelimited(getCursorName()));
 
+            StatementContext currSC = lcc.getStatementContext();
+            Activation parentAct = null;
+
+            if (currSC != null) {
+                parentAct = currSC.getActivation();
+            }
+
             // Context used for preparing, don't set any timeout (use 0)
             statementContext = lcc.pushStatementContext(isAtomic, false, updateWhereCurrentOfSQL.toString(), null, false, 0L);
+
+            // A priori, the new statement context inherits the activation of
+            // the existing statementContext, so that that activation ends up
+            // as parent of the new activation 'act' created below, which will
+            // be the activation of the pushed statement context.
+            statementContext.setActivation(parentAct);
+
             org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(updateWhereCurrentOfSQL.toString());
             Activation act = ps.getActivation(lcc, false);
 
@@ -3768,9 +3797,24 @@ public abstract class EmbedResultSet extends ConnectionChild
                 //using quotes around the cursor name to preserve case sensitivity
                 deleteWhereCurrentOfSQL.append(" WHERE CURRENT OF " + 
                         IdUtil.normalToDelimited(getCursorName()));
-                
+
+                StatementContext currSC = lcc.getStatementContext();
+                Activation parentAct = null;
+
+                if (currSC != null) {
+                    parentAct = currSC.getActivation();
+                }
+
                 // Context used for preparing, don't set any timeout (use 0)
                 statementContext = lcc.pushStatementContext(isAtomic, false, deleteWhereCurrentOfSQL.toString(), null, false, 0L);
+
+                // A priori, the new statement context inherits the activation
+                // of the existing statementContext, so that that activation
+                // ends up as parent of the new activation 'act' created below,
+                // which will be the activation of the pushed statement
+                // context.
+                statementContext.setActivation(parentAct);
+
                 org.apache.derby.iapi.sql.PreparedStatement ps = lcc.prepareInternalStatement(deleteWhereCurrentOfSQL.toString());
                 // Get activation, so that we can get the warning from it
                 Activation act = ps.getActivation(lcc, false);

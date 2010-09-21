@@ -88,8 +88,8 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
             // DriverManager is not supported with JSR169.
             suite.addTest(makeSuite());
 
-            // suite.addTest(
-            //     TestConfiguration.clientServerDecorator(makeSuite()));
+            suite.addTest(
+                TestConfiguration.clientServerDecorator(makeSuite()));
         }
 
 
@@ -140,7 +140,20 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
                          "reads sql data called on null input");
 
                     s.execute
+                        ("create procedure s1.updateWage() " +
+                         "language java parameter style java " +
+                         "modifies sql data " +
+                         "external name " +
+                         "'org.apache.derbyTesting.functionTests.tests.lang." +
+                         "RoutinesDefinersRightsTest.updateWage' " +
+                         "EXTERNAL SECURITY DEFINER ");
+
+                    s.execute
                         ("grant execute on function s1.lookupWageFootSoldier " +
+                         "   to phb");
+
+                    s.execute
+                        ("grant execute on procedure s1.updateWage " +
                          "   to phb");
 
                     s.execute
@@ -272,6 +285,10 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
         stm = c.createStatement();
         rs = stm.executeQuery("values s1.lookupWageFootSoldier(1002)");
         JDBC.assertSingleValueResultSet(rs, "100.0");
+
+        // Try as PHB to update, delete and insert on a result set
+        stm.executeUpdate("call s1.updateWage()");
+
         stm.close();
         c.close();
 
@@ -429,6 +446,63 @@ public class RoutinesDefinersRightsTest extends BaseJDBCTestCase
             return -1.0;
         }
     }
+
+
+    /**
+     * Test that PHB can actually update using {@code ResultSet.insertRow},
+     * {@code ResultSet.updateRow} and {@code ResultSet.deleteRow}.
+     * <p/>
+     * Aside: This test is somewhat artificial here, since the middle manager
+     * would not be allowed to do this, presumably; just added here to test
+     * this functionality (which was initially broken by the first patch for
+     * DERBY-4551).
+     * <p/>
+     * The problem was that the nested statement contexts used for SQL
+     * substatements generated for these ResultSet operations were not
+     * correctly set up, so the effective user id would not be the DEFINER
+     * (DBO), and authorization would fail. Cf DERBY-4551 and DERBY-3327
+     * for more detail.
+     */
+    public static void updateWage()
+            throws SQLException
+    {
+        Connection c = null;
+
+        c = DriverManager.getConnection("jdbc:default:connection");
+        Statement cStmt = c.createStatement(
+            ResultSet.TYPE_SCROLL_INSENSITIVE,
+            ResultSet.CONCUR_UPDATABLE);
+
+        // Try nested statements by inserting, updating and deleting a bogus
+        // row
+        ResultSet rs = cStmt.executeQuery(
+            "select * from s1.wages");
+        assertTrue(rs.isBeforeFirst());
+        rs.moveToInsertRow();
+        rs.updateInt("EMPLOYEEID", 666);
+        rs.updateInt("CATEGORY", 667);
+        rs.updateDouble("SALARY", 666.0);
+        rs.updateString("NAME", "N.N.");
+        rs.insertRow();
+        rs.close();
+
+        rs = cStmt.executeQuery(
+            "select * from s1.wages where name = 'N.N.'");
+        rs.next();
+        rs.updateDouble("SALARY", 666.1);
+        rs.updateRow();
+        rs.close();
+
+        rs = cStmt.executeQuery(
+            "select * from s1.wages where name = 'N.N.'");
+        rs.next();
+        rs.deleteRow();
+        rs.close();
+
+        cStmt.close();
+        c.close();
+    }
+
 
     public static ResultSet selectFootSoldiers()
             throws SQLException
