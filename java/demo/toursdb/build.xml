@@ -59,56 +59,56 @@
   <target name="buildschema">
     <echo level="info" message="Begin building toursdb"/>
     <java classname="org.apache.derby.tools.ij"
-          output="toursdb.out"
+          output="${generated.toursdb.dir}/toursdb.out"
           failonerror="true"
-          dir="${derby.demo.src.dir}/toursdb" fork="true">
+          dir="${generated.toursdb.dir}" fork="true">
       <classpath>
         <pathelement path="${out.dir}"/>
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
       <sysproperty key="ij.database" value="jdbc:derby:toursdb;create=true"/>
-      <arg value="ToursDB_schema.sql"/>
+      <arg value="${derby.demo.src.dir}/toursdb/ToursDB_schema.sql"/>
     </java>
   </target>
 
   <target name="loadtables">
     <java classname="org.apache.derby.tools.ij"
-          output="toursdb.out" append="true"
+          output="${generated.toursdb.dir}/toursdb.out" append="true"
           failonerror="true"
-          dir="${derby.demo.src.dir}/toursdb" fork="true">
+          dir="${generated.toursdb.dir}" fork="true">
       <classpath>
         <pathelement path="${out.dir}"/>
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
       <sysproperty key="ij.database" value="jdbc:derby:toursdb;create=true"/>
-      <arg value="loadTables.sql"/>
+      <arg value="${derby.demo.src.dir}/toursdb/loadTables.sql"/>
     </java>
     <java classname="toursdb.insertMaps"
-          output="toursdb.out" append="true"
+          output="${generated.toursdb.dir}/toursdb.out" append="true"
           failonerror="true"
-          dir="${derby.demo.src.dir}/toursdb" fork="true">
+          dir="${generated.toursdb.dir}" fork="true">
       <classpath>
         <pathelement path="${out.dir}"/>
         <pathelement path="${compile.classpath}"/>
       </classpath>
     </java>
     <java classname="org.apache.derby.tools.ij"
-          output="toursdb.out" append="true"
+          output="${generated.toursdb.dir}/toursdb.out" append="true"
           failonerror="true"
-          dir="${derby.demo.src.dir}/toursdb" fork="true">
+          dir="${generated.toursdb.dir}" fork="true">
       <classpath>
         <pathelement path="${out.dir}"/>
         <pathelement path="${compile.classpath}"/>
       </classpath>
-      <arg value="disconnect.sql"/>
+      <arg value="${derby.demo.src.dir}/toursdb/disconnect.sql"/>
     </java>
   </target>
 
   <target name="jarup"> 
-    <zip destfile="${derby.demo.src.dir}/toursdb/toursdb.jar"
-         basedir="${derby.demo.src.dir}/toursdb"
+    <zip destfile="${generated.toursdb.dir}/toursdb.jar"
+         basedir="${generated.toursdb.dir}"
          includes="toursdb/**"/>
     <echo level="info" message="Finished building toursdb"/>
   </target>

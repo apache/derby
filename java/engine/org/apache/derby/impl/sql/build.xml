@@ -38,12 +38,42 @@
   <target name="parser">
     <ant antfile="${src.dir}/build.xml" target="genParser">
       <property name="msg" value="Generating SQL parser..."/>
-      <property name="directory" value="${derby.engine.dir}/impl/sql/compile"/>
+      <property name="srcroot" value="engine"/>
+      <property name="directory" value="${derby.dir}/impl/sql/compile"/>
       <property name="rmfiles" value="implparser_rm.files"/>
       <property name="jjfile" value="sqlgrammar.jj"/>
       <property name="chkfile" value="SQLParser.java"/>
       <property name="constantsfile" value="SQLParserConstants"/>
     </ant>
+
+    <!--
+      The following files were generated:
+
+      CharStream.java
+      ParseException.java
+      SQLParser.java
+      SQLParserConstants.java
+      SQLParserTokenManager.java
+      Token.java
+      TokenMgrError.java
+
+      3 of those files are checked into the codeline:
+
+      CharStream.java
+      ParseException.java
+      Token.java
+
+      We don't want generated code to clash with the checked-in versions. So
+      we delete the conflicting classes here.
+    -->
+    <delete>
+      <fileset dir="${generated.src.dir}/${derby.dir}/impl/sql/compile">
+        <include name="CharStream.java"/>
+        <include name="ParseException.java"/>
+        <include name="Token.java"/>
+      </fileset>
+    </delete>
+
   </target>
 
   <target name="compile" depends="parser">
@@ -58,7 +88,7 @@
       optimize="${optimize}"
       proceed="${proceed}"
       verbose="${verbose}"
-      srcdir="${derby.engine.src.dir}"
+      srcdir="${derby.engine.src.dir}:${generated.src.dir}"
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${compile.classpath}"/>

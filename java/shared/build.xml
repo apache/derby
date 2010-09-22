@@ -50,7 +50,26 @@
 <!-- Targets -->
 
 <!-- compile classes  -->
+  <echo message="building generated sanity info"/>
   <target name="compile">
+  	<javac
+      source="1.4"
+      target="1.4"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${generated.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+          <pathelement path="${java14compile.classpath}"/>
+      </classpath>
+    </javac>
+
   	<javac
       source="1.4"
       target="1.4"

@@ -117,8 +117,8 @@
   <target name="checktoursdb">
     <condition property="toursdb.available">
       <and>
-        <available file="${derby.demo.src.dir}/toursdb/toursdb.jar"/>
-        <available file="${derby.demo.src.dir}/toursdb/toursdb"/>
+        <available file="${generated.toursdb.dir}/toursdb.jar"/>
+        <available file="${generated.toursdb.dir}/toursdb"/>
       </and>
     </condition>
   </target>

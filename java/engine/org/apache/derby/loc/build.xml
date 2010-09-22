@@ -35,7 +35,7 @@
     classpath="${out.dir}"
   />
   <property name="messageDescriptors" value="${derby.locales.dir}/messages.xml"/>
-  <property name="englishMessages" value="${derby.locales.dir}/messages_en.properties"/>
+  <property name="englishMessages" value="${generated.engine.locale.dir}/messages_en.properties"/>
   <property name="docDirectory" value="${out.dir}/doc"/>
   <property name="sqlstateTables" value="${docDirectory}/rrefexcept71493.dita"/>
 
@@ -70,7 +70,7 @@
   <target name="split" depends="verifysplit">
 
     <antcall target="doSplit">
-      <param name="msgdir" value="${derby.locales.dir}"/>
+      <param name="msgdir" value="${generated.engine.locale.dir}"/>
       <param name="msgfile" value="messages_en"/>
     </antcall>
     <antcall target="doSplit">
