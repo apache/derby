@@ -783,7 +783,7 @@
     <fileset file="bin/templates/derby_common.sh"/>
     <fileset file="bin/templates/${script}"/>
   </concat>
-  <chmod perm="+x" file="bin/${script}"/>
+  <chmod perm="+x" file="${generated.bin.dir}/${script}"/>
 </target>
 
 <!-- =================================================================== -->
