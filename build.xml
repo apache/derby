@@ -890,13 +890,13 @@
 <!--                     Generate sanity.properties                      -->
 <!-- =================================================================== -->
 
-  <target name="sane">
+  <target name="sane" depends="make-generated-dirs">
     <propertyfile file="${state.file}" comment="${header}">
       <entry key="sanity" value="true" type="string"/>
     </propertyfile>
     <delete dir="${sanity.out.dir}"/>
   </target>
-  <target name="insane">
+  <target name="insane" depends="make-generated-dirs">
     <propertyfile file="${state.file}" comment="${header}">
       <entry key="sanity" value="false" type="string"/>
     </propertyfile>
