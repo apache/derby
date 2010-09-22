@@ -22,7 +22,6 @@
 package org.apache.derbyTesting.functionTests.tests.store;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.AccessController;
@@ -36,6 +35,7 @@ import javax.sql.DataSource;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -134,7 +134,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         // so far, we were just playing. Now for the test.
         String phDbName = getPhysicalDbName();
         // copy the database to one called 'readOnly'
-        copyDatabaseOnOS(phDbName, "readOnly");
+        moveDatabaseOnOS(phDbName, "readOnly");
         // change filePermissions on readOnly, to readonly.
         changeFilePermissions("readOnly");
         createDummyLockFile("readOnly");
@@ -149,7 +149,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         // copy the database to one called 'readWrite' 
         // this will have the default read/write permissions upon
         // copying
-        copyDatabaseOnOS("readOnly", "readWrite");
+        moveDatabaseOnOS("readOnly", "readWrite");
         ds = JDBCDataSource.getDataSource();
         JDBCDataSource.setBeanProperty(ds, "databaseName", "singleUse/readWrite");
         assertReadDB(ds);
@@ -157,7 +157,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         shutdownDB(ds);
         
         // do it again...
-        copyDatabaseOnOS("readWrite", "readOnly2");
+        moveDatabaseOnOS("readWrite", "readOnly2");
         // change filePermissions on readOnly, to readonly.
         changeFilePermissions("readOnly2");
         createDummyLockFile("readOnly2");
@@ -170,7 +170,7 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         shutdownDB(ds);
         
         // testharness will try to remove the original db; put it back
-        copyDatabaseOnOS("readOnly2", phDbName);
+        moveDatabaseOnOS("readOnly2", phDbName);
     }
     
     /*
@@ -274,15 +274,21 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         stmt.close();
         con.close();
     }
-    
-    private void copyDatabaseOnOS(String fromwhere, String todir) {
+
+    /**
+     * Moves the database from one location to another location.
+     *
+     * @param fromwhere source directory
+     * @param todir destination directory
+     * @throws IOException if the copy fails
+     */
+    private void moveDatabaseOnOS(String fromwhere, String todir)
+            throws IOException {
         File from_dir = constructDbPath(fromwhere);
         File to_dir = constructDbPath(todir);
-        
-        assertTrue("Failed to copy directory from " + from_dir + " to " + to_dir,
-            (copyDirectory(from_dir, to_dir)));
-        assertTrue("Failed to remove directory: " + from_dir,
-            (removeTemporaryDirectory(from_dir)));
+
+        PrivilegedFileOpsForTests.copy(from_dir, to_dir);
+        assertDirectoryDeleted(from_dir);
     }
 
     /**
@@ -385,169 +391,4 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
         }
         else return false;
     }
-
-    /**
-        Remove a directory and all of its contents.
-
-        The results of executing File.delete() on a File object
-        that represents a directory seems to be platform
-        dependent. This method removes the directory
-        and all of its contents.
-
-        @return true if the complete directory was removed, false if it could not be.
-        If false is returned then some of the files in the directory may have been removed.
-    */
-    final private static boolean removeTemporaryDirectory(File directory) {
-        //System.out.println("removeDirectory " + directory);
-
-        if (directory == null)
-            return false;
-        final File sdirectory = directory;
-
-        Boolean b = (Boolean)AccessController.doPrivileged(
-            new java.security.PrivilegedAction() {
-                public Object run() {
-                    if (!sdirectory.exists())
-                        return new Boolean(true);
-                    if (!sdirectory.isDirectory())
-                        return new Boolean(false);
-                    String[] list = sdirectory.list();
-                    // Some JVMs return null for File.list() when the
-                    // directory is empty.
-                    if (list != null) {
-                        for (int i = 0; i < list.length; i++) {
-                            File entry = new File(sdirectory, list[i]);
-                            if (entry.isDirectory())
-                            {
-                                if (!removeTemporaryDirectory(entry))
-                                    return new Boolean(false);
-                            }
-                            else
-                            {
-                                if (!entry.delete())
-                                    return new Boolean(false);
-                            }
-                        }
-                    }
-                    return new Boolean(sdirectory.delete());
-                }
-            });
-        if (b.booleanValue())
-        {
-            return true;
-        }
-        else return false;
-    }
-
-    /**
-      Copy a directory and all of its contents.
-      */
-    private static boolean copyDirectory(File from, File to)
-    {
-        return copyDirectory(from, to, (byte[])null);
-    }
-
-    private static boolean copyDirectory(String from, String to)
-    {
-        return copyDirectory(new File(from), new File(to));
-    }
-
-    private static boolean copyDirectory(File from, File to, byte[] buffer)
-    {
-        if (from == null)
-            return false;
-        final File sfrom = from;
-        final File sto = to;
-        if (buffer == null)
-            buffer = new byte[4*4096];
-        final byte[] sbuffer = buffer;
-        
-        Boolean b = (Boolean)AccessController.doPrivileged(
-            new java.security.PrivilegedAction() {
-                public Object run() {
-                    if (!sfrom.exists() || !sfrom.isDirectory() || sto.exists() || !sto.mkdirs())  
-                    {
-                        //can't do basic stuff, returning fail from copydir method
-                        return new Boolean(false);
-                    }
-                    else {
-                        //basic stuff succeeded, incl. makind dirs, going on...
-                        boolean success=true;
-                        String[] list = sfrom.list();
-
-                        // Some JVMs return null for File.list() when the
-                        // directory is empty.
-                        if (list != null) {
-                            for (int i = 0; i < list.length; i++) {
-                                File entry = new File(sfrom, list[i]);
-                                if (entry.isDirectory())
-                                {
-                                    success = copyDirectory(entry,new File(sto,list[i]),sbuffer);
-                                }
-                                else
-                                {
-                                    success = copyFile(entry,new File(sto,list[i]),sbuffer);
-                                }
-                            }
-                        }
-                        return new Boolean(success);
-                    }
-                }
-            });
-        if (b.booleanValue())
-        {
-            return true;
-        }
-        else return false;
-    }       
-
-    public static boolean copyFile(File from, File to)
-    {
-        return copyFile(from, to, (byte[])null);
-    }
-
-    public static boolean copyFile(File from, File to, byte[] buf)
-    {
-        if (buf == null)
-            buf = new byte[4096*4];
-        //
-        //      System.out.println("Copy file ("+from+","+to+")");
-        FileInputStream from_s = null;
-        FileOutputStream to_s = null;
-
-        try {
-            from_s = new FileInputStream(from);
-            to_s = new FileOutputStream(to);
-
-            for (int bytesRead = from_s.read(buf);
-                 bytesRead != -1;
-                 bytesRead = from_s.read(buf))
-                to_s.write(buf,0,bytesRead);
-
-            from_s.close();
-            from_s = null;
-
-            to_s.getFD().sync();
-            to_s.close();
-            to_s = null;
-        }
-        catch (IOException ioe)
-        {
-            return false;
-        }
-        finally
-        {
-            if (from_s != null)
-            {
-                try { from_s.close(); }
-                catch (IOException ioe) {}
-            }
-            if (to_s != null)
-            {
-                try { to_s.close(); }
-                catch (IOException ioe) {}
-            }
-        }
-        return true;
-    }    
 }

@@ -32,7 +32,8 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A set of operations on {@link java.io.File} that wraps the
@@ -133,7 +134,7 @@ public class PrivilegedFileOpsForTests {
         return ((Boolean)AccessController.doPrivileged(
                     new PrivilegedAction() {
                         public Object run() {
-                            return new Boolean(file.exists());
+                            return Boolean.valueOf(file.exists());
                         }
                     })).booleanValue();
     }
@@ -201,10 +202,13 @@ public class PrivilegedFileOpsForTests {
      * @throws IOException
      * @throws FileNotFoundException
      */
-    private static void  recursiveCopy(File source, File target) throws IOException, FileNotFoundException{
+    private static void  recursiveCopy(File source, File target)
+            throws IOException {
     
+        // Share the copy buffer between all copy operations.
+        byte[] buf = new byte[32*1024];
         if (source.isFile()) {
-            copySingleFile(source,target);
+            copySingleFile(source, target, buf);
             return;
         }
             
@@ -219,10 +223,9 @@ public class PrivilegedFileOpsForTests {
                 if (entry.isDirectory()) {
                     copy(entry,targetEntry);
                 } else {
-                    copySingleFile(entry, targetEntry);
+                    copySingleFile(entry, targetEntry, buf);
                 }
             }
-
         }
     }
 
@@ -232,11 +235,17 @@ public class PrivilegedFileOpsForTests {
      * 
      * @param source  Source file to copy
      * @param target  Destination file for copy
-     * @throws IOException
-     * @throws FileNotFoundException
+     * @param buf buffer used for copy (may be {@code null})
+     * @throws IOException if accessing the specified files fail
+     * @throws FileNotFoundException if a specified file doesn't exist
      */
-    private static void copySingleFile (File source, File target) throws IOException, FileNotFoundException {
+    private static void copySingleFile (File source, File target, byte[] buf)
+            throws IOException {
 
+        // Create a default buffer if necessary.
+        if (buf == null) {
+            buf = new byte[32 * 1024];
+        }
         File targetParent = target.getParentFile();
         if (targetParent != null && ! targetParent.exists())
             target.getParentFile().mkdirs();
@@ -244,16 +253,18 @@ public class PrivilegedFileOpsForTests {
                 
         InputStream in = new FileInputStream(source);
         OutputStream out = new FileOutputStream(target);
-        byte[] buf = new byte[32 * 1024];
-        
-        for (;;) {
-            int read = in.read(buf);
-            if (read == -1)
-                break;
-            out.write(buf, 0, read);
+
+        try {
+            for (;;) {
+                int read = in.read(buf);
+                if (read == -1)
+                    break;
+                out.write(buf, 0, read);
+            }
+        } finally {
+            in.close();
+            out.close();
         }
-        in.close();
-        out.close();
     }
     
 
@@ -300,5 +311,104 @@ public class PrivilegedFileOpsForTests {
         } catch (PrivilegedActionException pae) {
             throw (FileNotFoundException)pae.getCause();
         }
+    }
+
+    /**
+     * Tries to delete all the files, including the specified directory, in the
+     * directory tree with the specified root.
+     * <p>
+     * If deleting one of the files fail, it will be recorded and the method
+     * will move on to the remaining files and try to delete them.
+     *
+     * @param dir the directory to delete (including subdirectories)
+     * @return A list of files which couldn't be deleted (may be empty).
+     * @see org.apache.derbyTesting.junit.BaseJDBCTestCase#assertDirectoryDeleted
+     */
+    public static File[] persistentRecursiveDelete(final File dir)
+            throws FileNotFoundException {
+        // Fail if the directory doesn't exist.
+        if (!exists(dir)) {
+            throw new FileNotFoundException(getAbsolutePath(dir));
+        }
+        final ArrayList notDeleted = new ArrayList();
+        AccessController.doPrivileged(new PrivilegedAction() {
+
+            public Object run() {
+                return Boolean.valueOf(deleteRecursively(dir, notDeleted));
+            }
+        });
+
+        File[] failedDeletes = new File[notDeleted.size()];
+        notDeleted.toArray(failedDeletes);
+        return failedDeletes;
+    }
+
+    /**
+     * Deletes the specified directory and all its files and subdirectories.
+     * <p>
+     * An attempt is made to delete all files, even if one of the delete
+     * operations fail.
+     *
+     * @param dir the root directory to start deleting from
+     * @param failedDeletes a list of failed deletes (if any)
+     * @return {@code true} is all delete operations succeeded, {@code false}
+     *      otherwise.
+     */
+    private static boolean deleteRecursively(File dir, List failedDeletes) {
+        boolean allDeleted = true;
+        if (dir.isDirectory()) {
+            File[] files = dir.listFiles();
+            if (files != null) {
+                for (int i=0; i < files.length; i++) {
+                    File f = files[i];
+                    if (f.isDirectory()) {
+                        allDeleted &= deleteRecursively(f, failedDeletes);
+                    } else {
+                        allDeleted &= internalDelete(f, failedDeletes);
+                    }
+                }
+            }
+        }
+        allDeleted &= internalDelete(dir, failedDeletes);
+        return allDeleted;
+    }
+
+    /**
+     * Attempts to delete the specified file, will add it to the passed in list
+     * if the delete fails.
+     *
+     * @param f file to delete
+     * @param failedDeletes list keeping track of failed deletes
+     * @return {@code true} if the delete succeeded, {@code false} otherwise.
+     */
+    private static boolean internalDelete(File f, List failedDeletes) {
+        boolean deleted = f.delete();
+        if (!deleted) {
+            failedDeletes.add(f);
+        }
+        return deleted;
+    }
+
+    /**
+     * Obtains information about the specified file.
+     *
+     * @param f the file
+     * @return A string with file information (human-readable).
+     */
+    public static String getFileInfo(final File f) {
+        return (String)AccessController.doPrivileged(new PrivilegedAction() {
+
+            public Object run() {
+                if (!f.exists()) {
+                    return "(non-existant)";
+                }
+                StringBuffer sb = new StringBuffer();
+                sb.append("(isDir=").append(f.isDirectory()).
+                        append(", canRead=").append(f.canRead()).
+                        append(", canWrite=").append(f.canWrite()).
+                        append(", size=").append(f.length()).append(')');
+                return sb.toString();
+            }
+        });
     }
 }

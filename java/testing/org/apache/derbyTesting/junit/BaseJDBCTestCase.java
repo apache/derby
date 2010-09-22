@@ -25,6 +25,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -41,6 +43,7 @@ import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.tools.ij;
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 
 
 /**
@@ -1384,7 +1387,41 @@ public abstract class BaseJDBCTestCase
 
         conn.commit();
     }
-    
+
+    /**
+     * Deletes the specified directory and all its files and subdirectories.
+     * <p>
+     * This method will attempt to delete all the files inside the root
+     * directory, even if one of the delete operations fails.
+     *
+     * @param dir the root to start deleting from (root will also be deleted)
+     */
+    public static void assertDirectoryDeleted(File dir) {
+        File[] fl = null;
+        try {
+            fl = PrivilegedFileOpsForTests.persistentRecursiveDelete(dir);
+        } catch (FileNotFoundException fnfe) {
+            fail("directory doesn't exist: " +
+                    PrivilegedFileOpsForTests.getAbsolutePath(dir));
+        }
+        if (fl.length == 0) {
+            return;
+        }
+
+        // If we failed to delete some of the files, list them and obtain some
+        // information about each file.
+        StringBuffer sb = new StringBuffer();
+        for (int i=0; i < fl.length; i++) {
+            File f = fl[i];
+            sb.append(PrivilegedFileOpsForTests.getAbsolutePath(f)).append(' ').
+                    append(PrivilegedFileOpsForTests.getFileInfo(f)).
+                    append(", ");
+        }
+        sb.deleteCharAt(sb.length() -1).deleteCharAt(sb.length() -1);
+        fail("Failed to delete " + fl.length + " files (root=" +
+                PrivilegedFileOpsForTests.getAbsolutePath(dir) + ": " +
+                sb.toString());
+    }
 } // End class BaseJDBCTestCase
 
 
