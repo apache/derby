@@ -518,5 +518,31 @@ public class SequenceTest extends GeneratedColumnsHelper {
 
     }
 
+    /**
+     * Verify that you can use sequences in insert statements driven
+     * by selects. See DERBY-4803.
+     */
+    public void test_14_insertSelect() throws Exception
+    {
+        Connection conn = openUserConnection(ALPHA);
 
+        goodStatement( conn, "create sequence sequence_is" );
+        goodStatement( conn, "create table tis_1( a int )" );
+        goodStatement( conn, "create table tis_2( a int, b int )" );
+        goodStatement( conn, "insert into tis_1( a ) values ( 1 ), ( 2 )" );
+        goodStatement( conn, "insert into tis_2 select next value for sequence_is, a from tis_1" );
+
+        assertResults
+            (
+             conn,
+             "select * from tis_2 order by b",
+             new String[][]
+             {
+                 { "-2147483648", "1" },
+                 { "-2147483647", "2" },
+             },
+             true
+             );
+    }
+    
 }

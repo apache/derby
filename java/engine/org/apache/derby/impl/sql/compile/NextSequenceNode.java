@@ -69,6 +69,14 @@ public class NextSequenceNode extends ValueNode {
             Vector aggregateVector, boolean forQueryRewrite)
             throws StandardException
     {
+        //
+        // Higher level bind() logic may try to redundantly re-bind this node. Unfortunately,
+        // that causes us to think that the sequence is being referenced more than once
+        // in the same statement. If the sequence generator is already filled in, then
+        // this node has already been bound and we can exit quickly. See DERBY-4803.
+        //
+        if ( sequenceDescriptor != null ) { return this; }
+        
         CompilerContext cc = getCompilerContext();
         
         if ( (cc.getReliability() & CompilerContext.NEXT_VALUE_FOR_ILLEGAL) != 0 )
