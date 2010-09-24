@@ -981,7 +981,41 @@ public final class DateTimeTest extends BaseJDBCTestCase {
         ps.setDate(1, d, Calendar.getInstance());
         JDBC.assertSingleValueResultSet(ps.executeQuery(), dateString);
     }
-    
+
+    /**
+     * Test that trailing zeros in the nanoseconds component of a timestamp
+     * are handled the same way by
+     * {@code PreparedStatement.setTimestamp(int,Timestamp)} and
+     * {@code PreparedStatement.setTimestamp(int,Timestamp, Calendar)}
+     * when converting the timestamp to a VARCHAR. (DERBY-4810)
+     */
+    public void testTrailingZeros() throws SQLException {
+        PreparedStatement ps =
+                prepareStatement("values cast(? as varchar(29))");
+
+        String[] tsStrings = {
+            "2010-09-22 14:40:33.000000000",
+            "2010-09-22 14:40:33.012000000",
+            "2010-09-22 14:40:33.123456000",
+            "2010-09-22 14:40:33.139990900",
+            "2010-09-22 14:40:33.139990983",
+        };
+
+        for (int i = 0; i < tsStrings.length; i++) {
+            Timestamp ts = Timestamp.valueOf(tsStrings[i]);
+
+            // We expect the converted value to have the same format as
+            // what Timestamp.toString() returns.
+            String expected = ts.toString();
+
+            ps.setTimestamp(1, ts);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), expected);
+
+            ps.setTimestamp(1, ts, Calendar.getInstance());
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), expected);
+        }
+    }
+
     public void testConversion_Aggregates() throws SQLException{
         Statement st = createStatement();
         

@@ -1575,23 +1575,24 @@ readingLoop:
                 }
                 else if (nanos > 0)
                 {
-                    String microsStr = Integer.toString( nanos);
-                    if(microsStr.length() > SQLTimestamp.MAX_FRACTION_DIGITS)
-                    {
-                        sb.append(
-                            microsStr.substring(
-                                0, SQLTimestamp.MAX_FRACTION_DIGITS));
-                    }
-                    else
-                    {
-                        for(int i = microsStr.length(); 
-                            i < SQLTimestamp.MAX_FRACTION_DIGITS ; i++)
-                        {
-                            sb.append( '0');
-                        }
+                    String nanoString = Integer.toString(nanos);
+                    int len = nanoString.length();
 
-                        sb.append( microsStr);
+                    // Add leading zeros if nanoString is shorter than
+                    // MAX_FRACTION_DIGITS.
+                    for (int i = len;
+                         i < SQLTimestamp.MAX_FRACTION_DIGITS; i++)
+                    {
+                        sb.append('0');
                     }
+
+                    // Remove trailing zeros to match the format from
+                    // Timestamp.toString().
+                    while (nanoString.charAt(len - 1) == '0') {
+                        len--;
+                    }
+
+                    sb.append(nanoString.substring(0, len));
                 }
                 strValue= sb.toString();
             }
