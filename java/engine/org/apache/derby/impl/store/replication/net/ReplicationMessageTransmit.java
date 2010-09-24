@@ -45,9 +45,6 @@ public class ReplicationMessageTransmit {
      */
     private final int DEFAULT_MESSAGE_RESPONSE_TIMEOUT = 30000;
 
-    /** The thread that listens for messages from the slave */
-    private Thread msgReceiver = null;
-
     /** Used to synchronize when waiting for a response message from the slave
      */
     private final Object receiveSemaphore = new Object();
@@ -160,7 +157,6 @@ public class ReplicationMessageTransmit {
      */
     public void tearDown() throws IOException {
         stopMessageReceiver = true;
-        msgReceiver = null;
         if(socketConn != null) {
             socketConn.tearDown();
             socketConn = null;
@@ -309,7 +305,7 @@ public class ReplicationMessageTransmit {
     }
 
     private void startMessageReceiverThread(String dbname) {
-        msgReceiver = new MasterReceiverThread(dbname);
+        MasterReceiverThread msgReceiver = new MasterReceiverThread(dbname);
         msgReceiver.setDaemon(true);
         msgReceiver.start();
     }
@@ -364,7 +360,6 @@ public class ReplicationMessageTransmit {
                     // If we get an exception for this socket, the log shipper
                     // will clean up. Stop this thread.
                     stopMessageReceiver = true;
-                    msgReceiver = null;
                 }
             }
         }
