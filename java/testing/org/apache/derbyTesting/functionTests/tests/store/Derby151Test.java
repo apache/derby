@@ -21,20 +21,14 @@ package org.apache.derbyTesting.functionTests.tests.store;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
 
-import org.apache.derby.shared.common.sanity.SanityManager;
-
-import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.DriverManager;
@@ -56,15 +50,14 @@ public class Derby151Test extends BaseJDBCTestCase
     {
         TestSuite suite = new TestSuite(name);
 
-        if (!JDBC.vmSupportsJSR169()) {
-            // JSR169 cannot run with tests with stored procedures
-            // that do database access - for they require a
-            // DriverManager connection to jdbc:default:connection;
+        if (JDBC.vmSupportsJDBC3()) {
+            // We need a JDBC level that supports DriverManager in order
+            // to run tests that access the database from a stored procedure
+            // using DriverManager and jdbc:default:connection.
             // DriverManager is not supported with JSR169.
 
             suite.addTestSuite(Derby151Test.class);
-                return new CleanDatabaseTestSetup(
-                    new TestSuite(Derby151Test.class, name));
+            return new CleanDatabaseTestSetup(suite);
         } else {
             return suite;
         }
@@ -129,7 +122,7 @@ public class Derby151Test extends BaseJDBCTestCase
             }
         } finally {
             // always clear flag
-            Thread.currentThread().interrupted();
+            Thread.interrupted();
 
             if (insert != null) {
                 try {
