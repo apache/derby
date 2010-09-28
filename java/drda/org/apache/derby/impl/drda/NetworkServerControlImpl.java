@@ -130,10 +130,16 @@ public final class NetworkServerControlImpl {
 	public final static int DASHARG_UNSECURE = 10;
 	private final static int DASHARG_SSL = 11;
 
-	// command protocol version - you need to increase this number each time
-	// the command protocol changes 
-    // DERBY-2109: shutdown command now transmits user credentials
-	private final static int PROTOCOL_VERSION = 2;
+	//All the commands except shutdown with username and password are at 
+	//protocol level 1. 
+	private final static int DEFAULT_PROTOCOL_VERSION = 1;
+	// DERBY-2109: shutdown command now transmits optional user credentials
+	//For shutdown with username/password, we have added a new protocol level
+	private final static int SHUTDOWN_WITH_CREDENTIAL_PROTOCOL_VERSION = 2;
+	//The highest protocol level is 2. The reason for it to be at 2 is 
+	//the shutdown command with username/password
+	private final static int MAX_ALLOWED_PROTOCOL_VERSION = 2;
+
 	private final static String COMMAND_HEADER = "CMD:";
 	private final static String REPLY_HEADER = "RPY:";
 	private final static int REPLY_HEADER_LENGTH = REPLY_HEADER.length();
@@ -1028,12 +1034,45 @@ public final class NetworkServerControlImpl {
 		int ntry;
         try {
             setUpSocket();
-            writeCommandHeader(COMMAND_SHUTDOWN);
-            // DERBY-2109: transmit user credentials for System Privileges check
-            writeLDString(userArg);
-            writeLDString(passwordArg);
-            send();
-            readResult();
+            try {
+                writeCommandHeader(COMMAND_SHUTDOWN, SHUTDOWN_WITH_CREDENTIAL_PROTOCOL_VERSION);
+                // DERBY-2109: transmit user credentials for System Privileges check
+                writeLDString(userArg);
+                writeLDString(passwordArg);
+                send();
+                readResult();
+            } catch (Exception e) {
+            	//The shutdown command with protocol level 2 failed. If 
+            	//the username or password were supplied then we can't 
+            	//try the shutdown with protocol level 1 because protocol
+            	//leve 1 does not support username/password. Because of
+            	//that, we should simply throw the caught exception to the
+            	//client
+            	if(userArg != null || passwordArg != null)
+            		throw e;
+                //If no username and password is specified then we can try
+            	//shutdown with the old protocol level of 1 which is the 
+            	//default protocol level. But this can be tried only if the
+            	//exception for attempt of shutdown with protocol level 2
+            	//was DRDA_InvalidReplyHead. This can happen if we are 
+            	//dealing with an older Network server product which do not
+            	//recognize shutdown at protocol level 2.
+            	if (e.getMessage().indexOf("DRDA_InvalidReplyHead") != -1)
+            	{
+                    try {
+                        closeSocket();
+                        setUpSocket();
+                        writeCommandHeader(COMMAND_SHUTDOWN);
+                        send();
+                        readResult();
+                    } catch (Exception e1) {
+                    	e1.initCause(e);
+                    	throw e1;
+                    }
+            	}
+            	else
+            		throw e;
+            }
             savWriter = logWriter;
             // DERBY-1571: If logWriter is null, stack traces are printed to
             // System.err. Set logWriter to a silent stream to suppress stack
@@ -1612,7 +1651,7 @@ public final class NetworkServerControlImpl {
 			String codeset = null;
 			// get the version
 			int version = reader.readNetworkShort();
-			if (version <= 0 || version > PROTOCOL_VERSION)
+			if (version <= 0 || version > MAX_ALLOWED_PROTOCOL_VERSION)
 				throw new Throwable(langUtil.getTextMessage("DRDA_UnknownProtocol.S",  new Integer(version).toString()));
 			int localeLen = reader.readByte();
 			if (localeLen > 0)
@@ -1645,10 +1684,18 @@ public final class NetworkServerControlImpl {
 			switch(command)
 			{
 				case COMMAND_SHUTDOWN:
-					// DERBY-2109: receive user credentials for shutdown
-					// System Privileges check
-					userArg = reader.readCmdString();
-					passwordArg = reader.readCmdString();
+					if (version == SHUTDOWN_WITH_CREDENTIAL_PROTOCOL_VERSION) {
+						//Protocol version of client is not at default protocol
+						//of 1 because this version of shutdown command has
+						//username and password supplied with it. When the
+						//protocol version of client is 
+						//SHUTDOWN_WITH_CREDENTIAL_PROTOCOL_VERSION, then we 
+						//know to expect username and password
+						// DERBY-2109: receive user credentials for shutdown
+						// System Privileges check
+						userArg = reader.readCmdString();
+						passwordArg = reader.readCmdString();
+					}
 					try {
 						checkShutdownPrivileges();
 						sendOK(writer);
@@ -2612,8 +2659,9 @@ public final class NetworkServerControlImpl {
 	 */
 
 	/**
-	 * Write command header consisting of command header string and protocol
-	 * version and command
+	 * Write command header consisting of command header string and default
+	 * protocol version and command. At this point, all the commands except
+	 * shutdown with username/passwrod use default protocol version.
 	 *
 	 * @param command	command to be written
 	 *
@@ -2621,10 +2669,26 @@ public final class NetworkServerControlImpl {
 	 */
 	private void writeCommandHeader(int command) throws Exception
 	{
+		writeCommandHeader(command, DEFAULT_PROTOCOL_VERSION);
+	}
+	
+	/**
+	 * Write command header consisting of command header string and passed
+	 * protocol version and command. At this point, all the commands except
+	 * shutdown with username/passwrod use default protocol version.
+	 *
+	 * @param command	command to be written
+	 * @param protocol_version_for_command protocol version to be used
+	 *   for the given command
+	 *
+	 * @exception Exception	throws an exception if an error occurs
+	 */
+	private void writeCommandHeader(int command, int protocol_version_for_command) throws Exception
+	{
 		try {
 			writeString(COMMAND_HEADER);
-			commandOs.writeByte((byte)((PROTOCOL_VERSION & 0xf0) >> 8 ));
-			commandOs.writeByte((byte)(PROTOCOL_VERSION & 0x0f));
+			commandOs.writeByte((byte)((protocol_version_for_command & 0xf0) >> 8 ));
+			commandOs.writeByte((byte)(protocol_version_for_command & 0x0f));
 
 			if (clientLocale != null && clientLocale != DEFAULT_LOCALE)
 			{
