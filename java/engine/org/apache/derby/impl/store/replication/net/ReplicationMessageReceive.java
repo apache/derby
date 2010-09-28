@@ -113,7 +113,7 @@ public class ReplicationMessageReceive {
      * @param timeout The amount of time, in milliseconds, this method
      * will wait for a connection to be established. If no connection
      * has been established before the timeout, a
-     * PrivilegedExceptionAction is raised with cause
+     * IOException is raised with cause
      * java.net.SocketTimeoutException
      * @param synchOnInstant the slave log instant, used to check that
      * the master and slave log files are in synch. If no chunks of log
@@ -123,11 +123,11 @@ public class ReplicationMessageReceive {
      * Note that there is a difference!
      * @param dbname the name of the replicated database
      *
-     * @throws PrivilegedActionException if an exception occurs while trying
-     *                                   to open a connection.
+     *
      *
      * @throws IOException if an exception occurs while trying to create the
-     *                     <code>SocketConnection</code> class.
+     *                     <code>SocketConnection</code> class or while
+     *                     trying to open a connection.
      *
      * @throws ClassNotFoundException Class of a serialized object cannot
      *                                be found.
@@ -136,7 +136,6 @@ public class ReplicationMessageReceive {
      */
     public void initConnection(int timeout, long synchOnInstant, String dbname)
         throws
-        PrivilegedActionException,
         IOException,
         StandardException,
         ClassNotFoundException {
@@ -148,16 +147,20 @@ public class ReplicationMessageReceive {
             serverSocket = createServerSocket();
         }
         serverSocket.setSoTimeout(timeout);
-        
-        //Start listening on the socket and accepting the connection
-        Socket client =
-            (Socket)
-            AccessController.doPrivileged(new PrivilegedExceptionAction() {
-            public Object run() throws IOException {
-                return serverSocket.accept();
-            }
-        });
-        
+        Socket client = null;
+        try {
+            //Start listening on the socket and accepting the connection
+            client =
+                (Socket)
+                AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                    public Object run() throws IOException {
+                        return serverSocket.accept();
+                    }
+                });
+        } catch(PrivilegedActionException pea) {
+            throw (IOException) pea.getException();
+        }
+
         //create the SocketConnection object using the client connection.
         socketConn = new SocketConnection(client);
         
@@ -180,20 +183,26 @@ public class ReplicationMessageReceive {
      *
      * @return an instance of the <code>ServerSocket</code> class.
      *
-     * @throws PrivilegedActionException if an exception occurs while trying
+     * @throws IOException if an exception occurs while trying
      *                                   to open a connection.
      */
-    private ServerSocket createServerSocket() throws PrivilegedActionException {
+    private ServerSocket createServerSocket() throws IOException {
         //create a ServerSocket at the specified host name and the
         //port number.
-        return   (ServerSocket) AccessController.doPrivileged
+        ServerSocket ss = null;
+        try { 
+            ss =   (ServerSocket) AccessController.doPrivileged
             (new PrivilegedExceptionAction() {
-            public Object run() throws IOException, StandardException {
-                ServerSocketFactory sf = ServerSocketFactory.getDefault();
-                return sf.createServerSocket(slaveAddress.getPortNumber(),
-                    0, slaveAddress.getHostAddress());
-            }
-        });
+                public Object run() throws IOException  {
+                    ServerSocketFactory sf = ServerSocketFactory.getDefault();
+                    return sf.createServerSocket(slaveAddress.getPortNumber(),
+                            0, slaveAddress.getHostAddress());
+                }
+            });
+            return ss;
+        } catch(PrivilegedActionException pea) {
+            throw (IOException) pea.getException();
+        }
     }
     
     /**
