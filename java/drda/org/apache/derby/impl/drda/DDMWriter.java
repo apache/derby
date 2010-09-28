@@ -919,7 +919,7 @@ class DDMWriter
 	 */
 	void writeScalarPaddedString (int codePoint, String string, int paddedLength)
 	{
-		int stringLength = string.length();
+		int stringLength = ccsidManager.getByteLength(string);
 		int fillLength = paddedLength - stringLength;
 		ensureLength (paddedLength + 4);
 		buffer.putShort((short) (paddedLength + 4));
@@ -937,7 +937,7 @@ class DDMWriter
 	 */
 	protected void writeScalarPaddedString (String string, int paddedLength)
 	{
-		int stringLength = string.length();
+		int stringLength = ccsidManager.getByteLength(string);
 
 		int fillLength = paddedLength -stringLength;
 		ensureLength (paddedLength);
@@ -954,6 +954,7 @@ class DDMWriter
 	 */
 	protected void writeScalarPaddedString (DRDAString drdaString, int paddedLength)
 	{
+	    /* This .length() call is valid as this is a DRDAString */
 		int stringLength = drdaString.length();
 		int fillLength = paddedLength - stringLength;
 		ensureLength(paddedLength);

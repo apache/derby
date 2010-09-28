@@ -224,7 +224,31 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
                 assertSQLState("22005",se);
         } 
     }
-    
+
+    /**
+     * Regression test case for DERBY-4799. Attempting to connect to a
+     * database that doesn't exist used to cause a protocol error between
+     * the network server and the client. This only happened if the
+     * database name was at least 18 characters and the name contained at
+     * least one non-ascii character.
+     */
+    public void testFailureOnNonExistentDatabase() throws SQLException {
+        String url = TestConfiguration.getCurrent().getJDBCUrl(
+                "abcdefghijklmnopq\u00E5");
+        try {
+            // This call used to fail with a protocol error with the
+            // client driver. Check that it fails gracefully now.
+            DriverManager.getConnection(url);
+            fail(url + " should not exist");
+        } catch (SQLException sqle) {
+            // Embedded responds with XJ004 - database not found.
+            // Client responds with 08004 - connection refused because
+            // the database was not found.
+            String expected = usingEmbedded() ? "XJ004" : "08004";
+            assertSQLState(expected, sqle);
+        }
+    }
+
     public void tearDown() throws SQLException {
         String shutdownUrl = TestConfiguration.getCurrent().getJDBCUrl("\u4e10;shutdown=true");
         try {

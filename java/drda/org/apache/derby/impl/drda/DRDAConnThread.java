@@ -575,19 +575,14 @@ class DRDAConnThread extends Thread {
 	protected void writeRDBNAM(String rdbnam)
 		throws DRDAProtocolException
 	{
-		int len = rdbnam.length();
-		if (len < CodePoint.RDBNAM_LEN)
-			len = CodePoint.RDBNAM_LEN;
-		writer.writeScalarHeader(CodePoint.RDBNAM, len);
-		try {
-			writer.writeScalarPaddedBytes(rdbnam.getBytes(server.DEFAULT_ENCODING),
-				len, server.SPACE_CHAR);
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			agentError("Unsupported coding exception for server encoding "
-				+ server.DEFAULT_ENCODING);
-		}
+        CcsidManager currentManager = writer.getCurrentCcsidManager();
+        
+        int len = currentManager.getByteLength(rdbnam);
+        if (len < CodePoint.RDBNAM_LEN)
+        	len = CodePoint.RDBNAM_LEN;
+
+        /* Write the string padded */
+        writer.writeScalarPaddedString(CodePoint.RDBNAM, rdbnam, len);
 	}
 	/***************************************************************************
 	 *                   Private methods
@@ -635,6 +630,9 @@ class DRDAConnThread extends Thread {
 		if (session.state == Session.ATTEXC)
 			sqlamLevel = appRequester.getManagerLevel(CodePoint.SQLAM);
 
+        /* All sessions MUST start as EBCDIC */
+        reader.setEbcdicCcsid();
+        writer.setEbcdicCcsid();
 	}
 	/**      
 	 * In initial state for a session, 
