@@ -224,5 +224,66 @@ public class TruncateTableTest extends BaseJDBCTestCase {
         aliceConnection.close();
         ruthConnection.close();
     }
+
+    /**
+     * Test that TRUNCATE TABLE and DROP TABLE do not cause held cursors
+     * to trip across an NPE. See DERBY-268.
+     */
+    public void testCursor() throws Exception
+    {
+        Connection cursorConnection = openUserConnection( ALICE );
+        Connection truncatorConnection = openUserConnection( ALICE );
+
+        cursorConnection.setAutoCommit( false );
+        truncatorConnection.setAutoCommit( false );
+
+        cursorMinion( cursorConnection, truncatorConnection, "truncateTab", "truncate table " );
+        cursorMinion( cursorConnection, truncatorConnection, "dropTab", "drop table " );
+
+        cursorConnection.close();
+    }
+    private void cursorMinion
+        ( Connection cursorConnection, Connection truncatorConnection, String tableName, String truncationStub )
+        throws Exception
+    {
+        Statement ddlStatement = cursorConnection.createStatement();
+        Statement truncatorStatement = truncatorConnection.createStatement();
+
+        ddlStatement.execute( "create table " + tableName + "( a int )" );
+        ddlStatement.execute( "insert into " + tableName + "( a ) values ( 1 ), ( 2 )" );
+        ddlStatement.close();
+        cursorConnection.commit();
+
+        Statement cursorStatement = cursorConnection.createStatement
+            (
+             ResultSet.TYPE_SCROLL_SENSITIVE,
+             ResultSet.CONCUR_READ_ONLY,
+             ResultSet.HOLD_CURSORS_OVER_COMMIT
+             );
+        ResultSet cursor = cursorStatement.executeQuery( "select * from " + tableName );
+
+        // read first row, then commit the holdable cursor
+        cursor.next();
+        assertEquals( 1, cursor.getInt( 1 ) );
+        cursorConnection.commit();
+
+        // now truncate the table and commit
+        truncatorStatement.execute( truncationStub + tableName );
+        truncatorConnection.commit();
+
+        // we expect to be able to finish draining the cursor
+        cursor.next();
+        assertEquals( 2, cursor.getInt( 1 ) );
+
+        // and we expect to be told that the cursor is drained. this is
+        // where the NPE was raised
+        assertFalse( cursor.next() );
+        
+        cursor.close();
+        cursorConnection.commit();
+        
+        cursorStatement.close();
+        truncatorStatement.close();
+    }
     
 }

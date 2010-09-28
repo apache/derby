@@ -221,8 +221,16 @@ abstract class GenericController
         if (container == null)
             open_conglom.reopen();
 
-        open_conglom.getContainer().setEstimatedRowCount(
+        // the container could still be null if a DROP TABLE or TRUNCATE TABLE
+        // has removed the old conglomerate
+
+        container = open_conglom.getContainer();
+
+        if ( container != null )
+        {
+            container.setEstimatedRowCount(
                 count, /* unused flag */ 0);
+        }
     }
 
     /**************************************************************************
