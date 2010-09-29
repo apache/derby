@@ -101,11 +101,9 @@ public class ReplicationMessageTransmit {
      * end position in the current log file. If a chunk of log has
      * been shipped, this is the instant of the log record shipped
      * last. Note that there is a difference!
-     * @throws PrivilegedActionException if an exception occurs while trying
-     *                                   to open a connection.
-     *
+     * 
      * @throws IOException if an exception occurs while trying to create the
-     *         <code>SocketConnection</code> class.
+     *         <code>SocketConnection</code> class or open a connection.
      *
      * @throws StandardException If an error message is received from the
      *         server indicating incompatible software versions of master
@@ -115,7 +113,6 @@ public class ReplicationMessageTransmit {
      *         be found.
      */
     public void initConnection(int timeout, long synchOnInstant) throws
-        PrivilegedActionException,
         IOException,
         StandardException,
         ClassNotFoundException {
@@ -123,20 +120,23 @@ public class ReplicationMessageTransmit {
         Socket s = null;
         
         final int timeout_ = timeout;
-        
-        //create a connection to the slave.
-        s = (Socket)
-        AccessController.doPrivileged(new PrivilegedExceptionAction() {
-            public Object run() throws IOException {
-                SocketFactory sf = SocketFactory.getDefault();
-                InetSocketAddress sockAddr = new InetSocketAddress(
-                        slaveAddress.getHostAddress(), 
-                        slaveAddress.getPortNumber());
-                Socket s_temp = sf.createSocket();
-                s_temp.connect(sockAddr, timeout_);
-                return s_temp;
-            }
-        });
+        try {
+            //create a connection to the slave.
+            s = (Socket)
+            AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                public Object run() throws IOException {
+                    SocketFactory sf = SocketFactory.getDefault();
+                    InetSocketAddress sockAddr = new InetSocketAddress(
+                            slaveAddress.getHostAddress(), 
+                            slaveAddress.getPortNumber());
+                    Socket s_temp = sf.createSocket();
+                    s_temp.connect(sockAddr, timeout_);
+                    return s_temp;
+                }
+            });
+        } catch(PrivilegedActionException pea) {
+            throw (IOException) pea.getException();
+        }
         
         // keep socket alive even if no log is shipped for a long time
         s.setKeepAlive(true);
