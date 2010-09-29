@@ -139,8 +139,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     reportJavaInfo (aw);
     aw.println (jbmsSep);
     reportDerby (aw);
-
     aw.println (sep);
+
 
     // Locales info
     try {
@@ -512,13 +512,14 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 	private static final String NET = "server";
 	private static final String CLIENT = "client";
-	private static final String DB2DRIVER = "db2driver";
 
 	/* you can add this if you like */
 
 	private static final String MAINUSAGESTRING = "java org.apache.derby.tools.sysinfo -cp";
 
-	private static final String USAGESTRINGPARTA = MAINUSAGESTRING + " [ [ " + EMBEDDED + " ][ " + NET + " ][ " + CLIENT + "] [ " + DB2DRIVER + " ] [ " + TOOLS + " ] [ ";
+    private static final String USAGESTRINGPARTA = MAINUSAGESTRING + " [ [ "
+            + EMBEDDED + " ][ " + NET + " ][ " + CLIENT + "] [ " + TOOLS
+            + " ] [";
     private static final String USAGESTRINGPARTB = ".class ] ]";
 
   static  void useMe(String[] args, java.io.PrintWriter pw) {
@@ -566,7 +567,6 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		  tryCoreClasspath(successes, failures);
 		  tryNetClasspath(successes, failures);
 		  tryClientClasspath(successes, failures);
-		  tryDB2DriverClasspath(successes, failures);
 		  tryUtilsClasspath(successes, failures);
 		  localPW.println(successes.toString());
 		  if (!failures.toString().equals(crLf() + Main.getTextMessage("SIF08.E") + crLf())) {
@@ -601,10 +601,6 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 		  tryClientClasspath(successes, failures);
 			seenArg =true;
 
-		}
-		if (argumentsContain(args,DB2DRIVER)) {
-			tryDB2DriverClasspath(successes, failures);
-			seenArg =true;
 		}
 
 		if (argumentsContain(args,TOOLS) || argumentsContain(args,"utils")) {
@@ -650,13 +646,6 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 	private static void tryClientClasspath(StringBuffer successes, StringBuffer failures) {
 		tryMyClasspath("org.apache.derby.jdbc.ClientDriver", Main.getTextMessage("SIF08.L", "derbyclient.jar"), successes, failures);
 	}
-    private static void tryDB2DriverClasspath(StringBuffer successes,
-            StringBuffer failures)
-    {
-        tryMyClasspath("com.ibm.db2.jcc.DB2Driver",
-                Main.getTextMessage("SIF08.L", "db2jcc.jar"),
-                successes, failures);
-    }
 
 	private static void tryUtilsClasspath(StringBuffer successes, StringBuffer failures) {
 		tryMyClasspath("org.apache.derby.tools.ij", Main.getTextMessage("SIF08.Q", "derbytools.jar"), successes, failures);
@@ -1021,14 +1010,12 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
     }
 
     /**
-     *  Check inside a jar file for the presence of a Derby info properties
-     *  file. There is a special case for db2jcc, which does not have a Derby
-     *  info propeties file. If db2jcc is in the filename, acquire DB2Driver
-     *  via reflection and get the version number from it.
-     *
-     *  @param filename the jar file to check
-     *  @return ZipInfoProperties with the jar file set as the location
-     *          or null if not found.
+     * Check inside a jar file for the presence of a Derby info properties file.
+     * 
+     * @param filename
+     *            the jar file to check
+     * @return ZipInfoProperties with the jar file set as the location or null
+     *         if not found.
      */
     private static ZipInfoProperties checkFile(String filename)
     {
@@ -1126,8 +1113,16 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                     return null;        
      
                 URL result = cs.getLocation ();
-     
-                return formatURL(result);
+
+                try {
+                    // DERBY-4806 Should use UTF-8 according to
+                    // http://www.w3.org/TR/html40/appendix/notes.html#non-ascii-chars
+                    // to get the string of the file name
+                    return URLDecoder.decode(result.toString(), "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    // All JVMs are required to support UTF-8.
+                    return e.getMessage();
+                }
             }
         });
     }
@@ -1228,7 +1223,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
         try {
             result = new File(filename).getCanonicalPath().replace('/', File.separatorChar);
         } catch (IOException e) {
-            result = "IOException";
+            result = e.getMessage();
         }
         return result;
     }
