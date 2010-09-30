@@ -579,7 +579,7 @@
 <!-- =================================================================== -->
 <!--                 Remove all built objects (except jars)              -->
 <!-- =================================================================== -->
-  <target name="clobber" depends="clean,cleangenerated,cleanstate,cleanparsers,cleancatalog,cleantoursdb"/>
+  <target name="clobber" depends="clean,cleangenerated,cleanstate"/>
 
 <!-- =================================================================== -->
 <!--                       Remove the tree of generated intermediate sources                            -->
@@ -631,14 +631,6 @@
               targetfile="${generated.src.dir}/${directory}/${chkfile}" >
       <srcfiles dir="${derbysrc.dir}/${srcroot}/${directory}" includes="${jjfile}" />
     </uptodate>
-  </target>
-
-<!-- =================================================================== -->
-<!--                     Remove parser-generated files                   -->
-<!-- =================================================================== -->
-  <target name="cleanparsers">
-    <delete dir="${generated.sql.dir}"/>
-    <delete dir="${generated.ij.dir}"/>
   </target>
 
 <!-- =================================================================== -->
@@ -805,7 +797,7 @@
   <!-- dependency tree. This does prevent recompilation in most cases,   -->
   <!-- and requires it in the most obvious. If there is concern that     -->
   <!-- the ClassSizeCatalog may have changed significantly since the     -->
-  <!-- last build, run cleancatalog and rebuild to regenerate it.        -->
+  <!-- last build, run clobber and rebuild to regenerate it.        -->
 
   <target name="class_size_catalog" depends="cscuptodate" unless="csc.uptodate"
           description="create the class size catalog -- a java file">
@@ -870,20 +862,6 @@
         <available file="${derby.engine.dir}/iapi/services/cache/ClassSizeCatalog.java"/>
       </and>
     </condition>
-  </target>
-
-  <target name="cleancatalog"
-          description="Remove the generated catalog java file.">
-    <delete dir="${generated.cache.dir}"/>
-  </target>
-
-<!-- =================================================================== -->
-<!--                          Remove toursdb.jar                         -->
-<!-- =================================================================== -->
-
-  <target name="cleantoursdb"
-          description="Remove the generated sample database.">
-    <delete dir="${generated.toursdb.dir}"/>
   </target>
 
 <!-- =================================================================== -->
