@@ -91,16 +91,16 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
                 {null, "0", "Testing for presence of all Derby-related " +
                     "libraries; typically, only some are needed.", null},
                 // incorrect syntax, or 'args' - should return usage
-                {"a", "0", "USAGE: java org.apache.derby.tools.sysinfo -cp [" +
-                    " [ embedded ][ server ][ client] [ db2driver ] [ tools ]" +
-                    " [  anyClass.class ] ]", null},
+                {
+                        "a",
+                        "0",
+                        "USAGE: java org.apache.derby.tools.sysinfo -cp ["
+                                + " [ embedded ][ server ][ client] [ tools ]"
+                                + " [ anyClass.class ] ]", null },
                 {"embedded", "6", Success, "derby.jar"}, 
                 {"server", "10", Success, "derbynet.jar"},
                 {"tools", "6", Success, "derbytools.jar"},
                 {"client", "6", Success, "derbyclient.jar"},
-                // let's not test the following valid value, it will 
-                // fail if db2jcc.jar is not on CLASSPATH
-                //{"db2driver", "6", Success, "db2jcc.jar"},
                 {thisclass, "6", Success, "SysinfoCPCheckTest"},
                 // neg tst, hope this doesn't exist
                 {"nonexist.class", "6", "    (nonexist not found.)", null}
