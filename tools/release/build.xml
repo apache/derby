@@ -211,7 +211,7 @@
       <tarfileset dir="${basedir}" includes="index.html" prefix="${derby.bin}/"/>
       <!-- bin -->
       <tarfileset dir="${basedir}/bin" prefix="${derby.bin}/bin" 
-                  mode="755" includes="*" excludes="templates"/>
+                  filemode="755" includes="*" excludes="templates"/>
       <tarfileset dir="${generated.bin.dir}" prefix="${derby.bin}/bin" 
                   filemode="755" includes="*"/>
       <!-- demo -->
