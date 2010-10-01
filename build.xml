@@ -48,6 +48,7 @@
     <tstamp/>
     <mkdir dir="${out.dir}"/>
     <antcall target="make-generated-dirs"/>
+    <antcall target="make-release-dirs"/>
 
     <!-- Create the emtpy dir that we put in the boot classpath to
          prevent the default Java runtime libraries from being loaded.
@@ -74,6 +75,14 @@
     <mkdir dir="${generated.engine.locale.dir}"/>
     <mkdir dir="${generated.cache.dir}"/>
     <mkdir dir="${generated.toursdb.dir}"/>
+
+   </target>
+
+   <target name="make-release-dirs">
+
+    <mkdir dir="${release.base}"/>
+    <mkdir dir="${release.dir}"/>
+    <mkdir dir="${snapshot.dir}"/>
 
    </target>
 
@@ -579,7 +588,7 @@
 <!-- =================================================================== -->
 <!--                 Remove all built objects (except jars)              -->
 <!-- =================================================================== -->
-  <target name="clobber" depends="clean,cleangenerated,cleanstate"/>
+  <target name="clobber" depends="clean,cleangenerated,cleanstate,cleanreleasefiles"/>
 
 <!-- =================================================================== -->
 <!--                       Remove the tree of generated intermediate sources                            -->
@@ -1860,36 +1869,35 @@
     <antcall target="plugin"/>
     <antcall target="publishedapi"/>
 
-    <mkdir dir="${basedir}/snapshot"/>
     <java classname="org.apache.derbyBuild.maintversion2props">
         <classpath path="${out.dir}"/>
         <arg value="${out.dir}/org/apache/derby/info/DBMS.properties"/>
-        <arg value="${basedir}/snapshot/maintversion.properties"/>
+        <arg value="${snapshot.dir}/maintversion.properties"/>
     </java>
-    <property file="${basedir}/snapshot/maintversion.properties"/>
-    <zip destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
+    <property file="${snapshot.dir}/maintversion.properties"/>
+    <zip destfile="${snapshot.dir}/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
       <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
       <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </zip>
-    <tar destfile="${basedir}/snapshot/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
+    <tar destfile="${snapshot.dir}/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
       <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
       <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </tar>
 
     <!-- debug archives - DERBY-178 --> 
-    <zip destfile="${basedir}/snapshot/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
+    <zip destfile="${snapshot.dir}/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
       <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
       <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,CHANGES,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </zip>
-    <tar destfile="${basedir}/snapshot/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
+    <tar destfile="${snapshot.dir}/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
       <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
       <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </tar>
 
     <copy file="${basedir}/jars/insane/derby_core_plugin_${major}.${minor}.${interim}.zip"
-          tofile="${basedir}/snapshot/derby_core_plugin_${major}.${minor}.${interim}.${changenumber}.zip"/>
+          tofile="${snapshot.dir}/derby_core_plugin_${major}.${minor}.${interim}.${changenumber}.zip"/>
   </target>
 
   <target name="snapshotError" if="is.sane">
@@ -2355,9 +2363,7 @@ you should not have to do this.
     </target>
 
     <!-- do most of the ant calls to prepare a release -->
-    <target name="prepareforrelease" depends="checkstateremoved,checksanenotset,checkforpackagingfile,cleanalljars,cleandocs,cleansnapshot,clobber,cleanreleasefiles">
-	<!-- check that tools/ant/properties/packaging.properties exists -->
-        <fail unless="packaging.present" message="Need to know what md5 and pgp tools you want to use and their settings, please create tools/ant/properties/packaging.properties from tools/ant/properties/packaging.tmpl"/>
+    <target name="prepareforrelease" depends="checkstateremoved,checksanenotset,cleanalljars,cleandocs,clobber,cleanreleasefiles">
         <!-- other possible checks? maybe no checked out files? -->
         <!-- maybe try to force a doc build? call to ant release will check for docs out -->
         <!-- assume svn update has been done to the desired level -->
@@ -2406,22 +2412,8 @@ you should not have to do this.
         </fail>     
     </target>
 
-    <target name="checkforpackagingfile">
-        <available file="${basedir}/tools/ant/properties/packaging.properties" property="packaging.present"/>
-    </target>
-
-    <target name="cleansnapshot">
-    	<delete dir="${basedir}/snapshot"/>
-    </target>
-
     <target name="cleanreleasefiles">
-    	<delete dir="${basedir}/tools/release/crlf"/>
-    	<delete dir="${basedir}/tools/release/lf"/>
-    	<delete file="${basedir}/tools/release/*.md5"/>
-    	<delete file="${basedir}/tools/release/*.asc"/>
-    	<delete file="${basedir}/tools/release/*.zip"/>
-    	<delete file="${basedir}/tools/release/*.tar.gz"/>
-    	<delete file="${basedir}/tools/release/maintversion.properties"/>
+        <delete dir="${release.base}"/>
     </target>
 
     <target name="cleanalljars">
