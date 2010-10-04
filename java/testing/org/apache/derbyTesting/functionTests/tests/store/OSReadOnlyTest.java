@@ -268,7 +268,11 @@ public class OSReadOnlyTest extends BaseJDBCTestCase{
                     insertIntValue + ", '" + insertStringValue + "')");
                 fail("expected an error indicating the db is readonly");
             } catch (SQLException sqle) {
-                assertSQLState("25502", sqle);
+                if (!(sqle.getSQLState().equals("25502") || 
+                        // on iseries / OS400 machines, when file/os 
+                        // permissions are off, we may get error 40XD1 instead
+                        sqle.getSQLState().equals("40XD1")))
+                    fail("unexpected sqlstate; expected 25502 or 40XD1, got: " + sqle.getSQLState());
             }
         }
         stmt.close();
