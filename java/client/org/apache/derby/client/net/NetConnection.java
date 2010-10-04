@@ -80,7 +80,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     protected int targetXamgr_ = NetConfiguration.MGRLVL_7;
     protected int targetSyncptmgr_ = NetConfiguration.MGRLVL_NA;
     protected int targetRsyncmgr_ = NetConfiguration.MGRLVL_NA;
-
+    protected int targetUnicodemgr_ = CcsidManager.UTF8_CCSID;
 
     // this is the external name of the target server.
     // it is set by the parseExcsatrd method but not really used for much at this
@@ -709,7 +709,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 targetCmnappc_,
                 targetXamgr_,
                 targetSyncptmgr_,
-                targetRsyncmgr_);
+                targetRsyncmgr_,
+                targetUnicodemgr_);
         agent_.flowOutsideUOW();
         netAgent_.netConnectionReply_.readExchangeServerAttributes(this);
         agent_.endReadChain();
@@ -797,7 +798,8 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 targetCmnappc_,
                 targetXamgr_,
                 targetSyncptmgr_,
-                targetRsyncmgr_);
+                targetRsyncmgr_,
+                targetUnicodemgr_);
         netAgent_.netConnectionRequest_.writeAccessSecurity(securityMechanism,
                 databaseName_,
                 publicKey);
@@ -1348,14 +1350,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 netAgent_);
         prddtaLen += NetConfiguration.PRDDTA_APPL_ID_FIXED_LEN;
 
-        if (user_ != null) {
-            int userTruncateLength = Math.min(user_.length(), NetConfiguration.PRDDTA_USER_ID_FIXED_LEN);
-            netAgent_.getCurrentCcsidManager().convertFromJavaString(user_.substring(0, userTruncateLength),
-                    prddta_,
-                    prddtaLen,
-                    netAgent_);
-        }
-
         prddtaLen += NetConfiguration.PRDDTA_USER_ID_FIXED_LEN;
 
         prddta_[NetConfiguration.PRDDTA_ACCT_SUFFIX_LEN_BYTE] = 0;
@@ -1751,6 +1745,14 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         return metadata.serverSupportsSessionDataCaching();
     }
 
+    /**
+     * Check whether the server supports the UTF-8 Ccsid Manager
+     * @return true if the server supports the UTF-8 Ccsid Manager
+     */
+    protected final boolean serverSupportsUtf8Ccsid() {
+        return targetUnicodemgr_ == CcsidManager.UTF8_CCSID;
+    }
+    
     /**
      * Check whether the server supports UDTs
      * @return true if UDTs are supported

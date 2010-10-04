@@ -21,6 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -31,11 +32,9 @@ import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class InternationalConnectTest extends BaseJDBCTestCase {
@@ -63,6 +62,52 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
     
     }
 
+    public void testBoundaries() throws SQLException, UnsupportedEncodingException {
+        if (usingEmbedded()) return; /* This test is only for Client/Server */
+        
+        /* Maximum length in bytes is 255. We subtract 12 for ;create=true  */
+        int maxNameLength = 255 - 12;
+        
+        /**
+         * \u0041 is the letter 'A' (1 byte)
+         * \u00e7 is the letter 'c' with a cedilla (2 bytes)
+         * \u4310 is a Chinese character (3 bytes)
+         * \u1f030 is a domino tile (4 bytes)
+         */
+        String[] testCharacters = {"\u0041", "\u00e7", "\u4e10", "\u1f030"}; 
+        
+        for (int ch=0; ch<testCharacters.length; ch++) {
+            StringBuffer dbName = new StringBuffer();
+            
+            /* max length in bytes divided by length of 1 chinese char */ 
+            int maxChars = maxNameLength / testCharacters[ch].getBytes("UTF-8").length;
+            for(int i=0; i<maxChars; i++) {
+                dbName.append(testCharacters[ch]);
+            }
+            
+            /* This time it should work as we're right at the limit */
+            String url = TestConfiguration
+                    .getCurrent().getJDBCUrl(dbName.toString()+ ";create=true");
+            
+            Connection conn = DriverManager.getConnection(url);
+            conn.close();
+            
+            /* Append one more character to make it fail */
+            dbName.append(testCharacters[ch]);
+
+            url = TestConfiguration
+                    .getCurrent().getJDBCUrl(dbName.toString()+ ";create=true");
+
+            try {
+                conn = DriverManager.getConnection(url);
+                assertTrue("Used more characters than possible in database name",
+                        false);
+            } catch (SQLException e) {
+                assertSQLState("08001", e); /* Check if it failed */
+            }
+        }
+    }
+    
     /**
      * Test Chinese character in database name, user and password, using 
      * DriverManager methods.
@@ -74,63 +119,32 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         getConnection();
         Connection conn = null;
         String url = null;
-        try {
-            //Test Chinese database name
-            url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10;create=true");
-            
-            conn = DriverManager.getConnection(url);
-            conn.close();
-        } catch (SQLException se) {
-            if (usingEmbedded())
-                throw se;
-            else
-                assertSQLState("22005",se);
-        }            
-        try {
-            // Test Chinese user name
-            url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10;user=\u4e10");
-            conn = DriverManager.getConnection(url);
-            conn.close();
-        } catch (SQLException se ){
-            if (usingEmbedded())
-                throw se;
-            else
-                assertSQLState("22005",se);
-        }
-        try {
-            // Test Chinese user name in parameter to getConnection
-            url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10");
-            conn = DriverManager.getConnection(url,"\u4e10","pass");
-            conn.close();
-        } catch (SQLException se ) {
-            if (usingEmbedded())
-                throw se;
-            else
-                assertSQLState("22005",se);
-        }
-        try {
-            // Test Chinese password in url
-            url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10;user=user;password=\u4e10");
-            conn = DriverManager.getConnection(url);
-            conn.close();
-        } catch (SQLException se ){
-            if (usingEmbedded())
-                throw se;
-            else
-                assertSQLState("22005",se);
-        }
-        try {
-            // Test Chinese password in parameter to getConnection()
-            url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10");
-            conn = DriverManager.getConnection(url,"\u4e10","\u4e10");
-            conn.close();
-        } catch (SQLException se ) {
-            if (usingEmbedded())
-                throw se;
-            else
-                assertSQLState("22005",se);
-        }
-       
+
+        //Test Chinese database name
+        url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10;create=true");
+        
+        conn = DriverManager.getConnection(url);
+        conn.close();           
+
+        // Test Chinese user name
+        url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10;user=\u4e10");
+        conn = DriverManager.getConnection(url);
+        conn.close();
+
+        // Test Chinese user name in parameter to getConnection
+        url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10");
+        conn = DriverManager.getConnection(url,"\u4e10","pass");
+        conn.close();
+
+        // Test Chinese password in url
+        url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10;user=user;password=\u4e10");
+        conn = DriverManager.getConnection(url);
+        conn.close();
+
+        // Test Chinese password in parameter to getConnection()
+        url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10");
+        conn = DriverManager.getConnection(url,"\u4e10","\u4e10");
+        conn.close();
     }
     
     
@@ -143,40 +157,22 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         XADataSource ds = J2EEDataSource.getXADataSource();
         J2EEDataSource.setBeanProperty(ds, "databaseName", "\u4e10");
         J2EEDataSource.setBeanProperty(ds, "createDatabase", "create");        
-        try {
-            XAConnection xaconn = ds.getXAConnection();
-            Connection conn = xaconn.getConnection();
-            conn.close();
-        } catch (SQLException se ) {
-            if (usingEmbedded())
-                throw se;
-            else
-                assertSQLState("22005",se);
-        }   
+
+        XAConnection xaconn = ds.getXAConnection();
+        Connection conn = xaconn.getConnection();
+        conn.close();
+  
         // Chinese user
-        try {
-            J2EEDataSource.setBeanProperty(ds, "user", "\u4e10");
-            XAConnection xaconn = ds.getXAConnection();
-            Connection conn = xaconn.getConnection();
-            conn.close();
-        } catch (SQLException se ) {
-            if (usingEmbedded())
-                throw se;
-            else
-                assertSQLState("22005",se);
-        } 
+        J2EEDataSource.setBeanProperty(ds, "user", "\u4e10");
+        xaconn = ds.getXAConnection();
+        conn = xaconn.getConnection();
+        conn.close();
+
         // Chinese password
-        try {
-            J2EEDataSource.setBeanProperty(ds, "password", "\u4e10");
-            XAConnection xaconn = ds.getXAConnection();
-            Connection conn = xaconn.getConnection();
-            conn.close();
-        } catch (SQLException se ) {
-            if (usingEmbedded())
-                throw se;
-            else
-                assertSQLState("22005",se);
-        } 
+        J2EEDataSource.setBeanProperty(ds, "password", "\u4e10");
+        xaconn = ds.getXAConnection();
+        conn = xaconn.getConnection();
+        conn.close();
     }
     
     
@@ -189,40 +185,22 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         ConnectionPoolDataSource ds = J2EEDataSource.getConnectionPoolDataSource();
         J2EEDataSource.setBeanProperty(ds, "databaseName", "\u4e10");
         J2EEDataSource.setBeanProperty(ds, "createDatabase", "create");        
-        try {
-            PooledConnection poolConn = ds.getPooledConnection();
-            Connection conn = poolConn.getConnection();
-            conn.close();
-        } catch (SQLException se ) {
-            if (usingEmbedded())
-                throw se;
-            else
-                assertSQLState("22005",se);
-        }   
+
+        PooledConnection poolConn = ds.getPooledConnection();
+        Connection conn = poolConn.getConnection();
+        conn.close();
+ 
         // Chinese user
-        try {
-            J2EEDataSource.setBeanProperty(ds, "user", "\u4e10");
-            PooledConnection poolConn = ds.getPooledConnection();
-            Connection conn = poolConn.getConnection();
-            conn.close();
-        } catch (SQLException se ) {
-            if (usingEmbedded())
-                throw se;
-            else
-                assertSQLState("22005",se);
-        } 
+        J2EEDataSource.setBeanProperty(ds, "user", "\u4e10");
+        poolConn = ds.getPooledConnection();
+        conn = poolConn.getConnection();
+        conn.close();
+
         // Chinese password
-        try {
-            J2EEDataSource.setBeanProperty(ds, "password", "\u4e10");
-            PooledConnection poolConn= ds.getPooledConnection();
-            Connection conn = poolConn.getConnection();
-            conn.close();
-        } catch (SQLException se ) {
-            if (usingEmbedded())
-                throw se;
-            else
-                assertSQLState("22005",se);
-        } 
+        J2EEDataSource.setBeanProperty(ds, "password", "\u4e10");
+        poolConn= ds.getPooledConnection();
+        conn = poolConn.getConnection();
+        conn.close();
     }
 
     /**

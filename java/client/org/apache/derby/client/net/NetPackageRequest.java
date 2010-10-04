@@ -91,12 +91,14 @@ public class NetPackageRequest extends NetConnectionRequest {
     }
 
     private void buildSCLDTA(String identifier, int minimumLength) throws SqlException {
-        if (identifier.length() <= minimumLength) {
+        int length = netAgent_.getCurrentCcsidManager().getByteLength(identifier);
+        
+        if (length <= minimumLength) {
             write2Bytes(minimumLength);
             writeScalarPaddedString(identifier, minimumLength);
         } else {
-            write2Bytes(identifier.length());
-            writeScalarPaddedString(identifier, identifier.length());
+            write2Bytes(length);
+            writeScalarPaddedString(identifier, length);
         }
     }
 
@@ -167,7 +169,7 @@ public class NetPackageRequest extends NetConnectionRequest {
     private boolean checkPKGNAMlengths(String identifier,
                                        int maxIdentifierLength,
                                        int lengthRequiringScldta) throws SqlException {
-        int length = identifier.length();
+        int length = netAgent_.getCurrentCcsidManager().getByteLength(identifier);;
         if (length > maxIdentifierLength) {
             throw new SqlException(netAgent_.logWriter_,
                 new ClientMessageId(SQLState.LANG_IDENTIFIER_TOO_LONG),

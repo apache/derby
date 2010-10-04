@@ -71,6 +71,9 @@ public class NetConfiguration {
     // Minimum sqlam manager level required by protocol.
     static final int MIN_RSYNCMGR_MGRLVL = 5;
 
+    // Minimum unicodemgr manager level required by protocol
+    static final int MIN_UNICODE_MGRLVL = 0;
+    
     // Maximun Password size.
     static final int PASSWORD_MAXSIZE = 255;
 

@@ -1000,39 +1000,31 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         conn1.commit();
         conn1.close();
         
-        // with network server / derbynet client, non-ascii isn't supported,
-        // (or not working) see also DERBY-728, and
-        // org.apache.derby.client.net.EbcdicCcsidManager
-        if (usingDerbyNetClient())
-        {
-            assertConnectionFail("22005", dbName, zeus, apollo);
-        }
-        else {
-            assertConnectionOK(dbName, zeus, apollo);
-            assertConnectionFail("08004", dbName, apollo, apollo);
-            // shutdown as non-dbo
-            assertShutdownOK(dbName, zeus, apollo);
-            assertConnectionOK(dbName, apollo, zeus);
-            // wrong credentials
-            assertShutdownFail("08004", dbName, zeus, zeus);
-             // shutdown as non-dbo
-            assertShutdownOK(dbName, apollo, zeus);
-            assertConnectionOK(dbName, apollo, zeus);
-            // shutdown as dbo
-            assertShutdownUsingSetShutdownOK(
-                dbName, "APP", ("APP" + PASSWORD_SUFFIX));
 
-            conn1 = openDefaultConnection(zeus, apollo);
-            Statement stmt = conn1.createStatement();
-            assertUpdateCount(stmt, 0, 
-            "create table APP.t1(c1 varchar(30))");
-            assertUpdateCount(stmt, 1, "insert into APP.t1 values USER");
-            conn1.commit();
-            assertUserValue(new String[] {zeus}, zeus, apollo,
-            "select * from APP.t1 where c1 like CURRENT_USER");
-            stmt.close();
-            conn1.close();
-        }
+        assertConnectionOK(dbName, zeus, apollo);
+        assertConnectionFail("08004", dbName, apollo, apollo);
+        // shutdown as non-dbo
+        assertShutdownOK(dbName, zeus, apollo);
+        assertConnectionOK(dbName, apollo, zeus);
+        // wrong credentials
+        assertShutdownFail("08004", dbName, zeus, zeus);
+         // shutdown as non-dbo
+        assertShutdownOK(dbName, apollo, zeus);
+        assertConnectionOK(dbName, apollo, zeus);
+        // shutdown as dbo
+        assertShutdownUsingSetShutdownOK(
+            dbName, "APP", ("APP" + PASSWORD_SUFFIX));
+
+        conn1 = openDefaultConnection(zeus, apollo);
+        Statement stmt = conn1.createStatement();
+        assertUpdateCount(stmt, 0, 
+        "create table APP.t1(c1 varchar(30))");
+        assertUpdateCount(stmt, 1, "insert into APP.t1 values USER");
+        conn1.commit();
+        assertUserValue(new String[] {zeus}, zeus, apollo,
+        "select * from APP.t1 where c1 like CURRENT_USER");
+        stmt.close();
+        conn1.close();
         
         // reset
         conn1 = openDefaultConnection("dan", ("dan" + PASSWORD_SUFFIX));
@@ -1040,7 +1032,7 @@ public class AuthenticationTest extends BaseJDBCTestCase {
             "derby.database.defaultConnectionMode","fullAccess", conn1);
         setDatabaseProperty(
             "derby.connection.requireAuthentication","false", conn1);
-        Statement stmt = conn1.createStatement();
+        stmt = conn1.createStatement();
         if (usingEmbedded())
             assertUpdateCount(stmt, 0, "drop table APP.t1");
         conn1.commit();

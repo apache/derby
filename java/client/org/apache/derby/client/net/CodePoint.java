@@ -252,6 +252,10 @@ public class CodePoint {
     // Agent codepoint constant.
     static final int AGENT = 0x1403;
 
+    // UNICODE Manager. Min. level 0.
+    // Provides character encoding of the DDM objects and parameters
+    static final int UNICODEMGR = 0x1C08;
+    
     // The codepoint for codepoint
     static final int CODPNT = 0x000C;
 

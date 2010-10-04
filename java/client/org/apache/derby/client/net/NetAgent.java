@@ -172,10 +172,8 @@ public class NetAgent extends Agent {
 
         ebcdicCcsidManager_ = new EbcdicCcsidManager();
         utf8CcsidManager_ = new Utf8CcsidManager();
-        currentCcsidManager_ = ebcdicCcsidManager_;
         
-        // TODO: Remove target? Keep just one ccsidManager?
-        //targetCcsidManager_ = sourceCcsidManager_; // delete these
+        currentCcsidManager_ = ebcdicCcsidManager_;
 
         if (netConnection_.isXAConnection()) {
             NetXAConnectionReply netXAConnectionReply_ = new NetXAConnectionReply(this, netConnection_.commBufferSize_);
@@ -509,6 +507,19 @@ public class NetAgent extends Agent {
         super.endReadChain();
     }
 
+    /**
+     * Switches the current CCSID manager to UTF-8
+     */
+    public void switchToUtf8CcsidMgr() {
+        currentCcsidManager_ = utf8CcsidManager_;
+    }
+    
+    /**
+     * Switches the current CCSID manager to EBCDIC
+     */
+    public void switchToEbcdicMgr() {
+        currentCcsidManager_ = ebcdicCcsidManager_;
+    }
 
     public String convertToStringTcpIpAddress(int tcpIpAddress) {
         StringBuffer ipAddrBytes = new StringBuffer();

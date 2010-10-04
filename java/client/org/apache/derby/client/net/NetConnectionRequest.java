@@ -43,7 +43,8 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
                                        int targetCmnappc,
                                        int targetXamgr,
                                        int targetSyncptmgr,
-                                       int targetRsyncmgr) throws SqlException {
+                                       int targetRsyncmgr,
+                                       int targetUnicodemgr) throws SqlException {
         // send the exchange server attributes command to the server.
         // no other commands will be chained to the excsat because
         // the manager levels are needed before anything else is attempted.
@@ -56,7 +57,8 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
                 targetCmnappc,
                 targetXamgr,
                 targetSyncptmgr,
-                targetRsyncmgr);
+                targetRsyncmgr,
+                targetUnicodemgr);
 
     }
 
@@ -210,7 +212,8 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
                      int targetCmnappc,
                      int targetXamgr,
                      int targetSyncptmgr,
-                     int targetRsyncmgr) throws SqlException {
+                     int targetRsyncmgr,
+                     int targetUnicodemgr) throws SqlException {
         createCommand();
 
         // begin excsat collection by placing the 4 byte llcp in the buffer.
@@ -247,7 +250,8 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
                 targetSecmgr,
                 targetXamgr,
                 targetSyncptmgr,
-                targetRsyncmgr);
+                targetRsyncmgr,
+                targetUnicodemgr);
 
 
         // place the server class name into the buffer.
@@ -355,7 +359,7 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         // support.  the size will have ben previously checked so at this point just
         // write the data and pad with the correct number of bytes as needed.
         // this instance variable is always required.
-        buildRDBNAM(rdbnam,false);
+        buildRDBNAM(rdbnam,true);
 
         // the rdb access manager class specifies an instance of the SQLAM
         // that accesses the RDB.  the sqlam manager class codepoint
@@ -583,7 +587,8 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
                                int secmgr,
                                int xamgr,
                                int syncptmgr,
-                               int rsyncmgr) throws SqlException {
+                               int rsyncmgr,
+                               int unicodemgr) throws SqlException {
         markLengthBytes(CodePoint.MGRLVLLS);
 
         // place the managers and their levels in the buffer
@@ -591,7 +596,8 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
         writeCodePoint4Bytes(CodePoint.SQLAM, sqlam);
         writeCodePoint4Bytes(CodePoint.RDB, rdb);
         writeCodePoint4Bytes(CodePoint.SECMGR, secmgr);
-
+        writeCodePoint4Bytes(CodePoint.UNICODEMGR, unicodemgr);
+        
         if (netAgent_.netConnection_.isXAConnection()) {
             if (xamgr != NetConfiguration.MGRLVL_NA) {
                 writeCodePoint4Bytes(CodePoint.XAMGR, xamgr);

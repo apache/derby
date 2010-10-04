@@ -2072,6 +2072,13 @@ public class NetConnectionReply extends Reply
                 secmecList,
                 sectknReceived,
                 sectkn);
+        
+        /* Switch to UTF-8 or EBCDIC managers depending on what's supported */
+        if (netConnection.serverSupportsUtf8Ccsid()) {
+            netConnection.netAgent_.switchToUtf8CcsidMgr();
+        } else {
+            netConnection.netAgent_.switchToEbcdicMgr();
+        }
     }
 
     // Called by all the NET*Reply classes.
@@ -2287,7 +2294,13 @@ public class NetConnectionReply extends Reply
                 }
                 netConnection.targetSyncptmgr_ = managerLevel;
                 break;
-
+            case CodePoint.UNICODEMGR:
+                if ((managerLevel < NetConfiguration.MIN_UNICODE_MGRLVL) ||
+                        (managerLevel > netConnection.targetUnicodemgr_)) {
+                    doMgrlvlrmSemantics(managerCodePoint, managerLevel);
+                }
+                netConnection.targetUnicodemgr_ = managerLevel;
+                break;
             case CodePoint.RSYNCMGR:
                 if ((managerLevel != 0) &&
                         (managerLevel < NetConfiguration.MIN_RSYNCMGR_MGRLVL) ||
