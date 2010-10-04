@@ -241,6 +241,44 @@ public class ImportExportTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test that we can successfully export from and import to tables that
+     * have columns with special characters in their names (single and double
+     * quotes, spaces, mixed case). Regression test case for DERBY-4828.
+     */
+    public void testQuotesInColumnNames() throws Exception {
+        Statement s = createStatement();
+
+        // Create a source table with column names that contain special
+        // characters.
+        s.execute("create table table_with_funny_cols_src ("
+                // simple column name
+                + "x int, "
+                // column name with single and double quotes, mixed case
+                // and spaces
+                + "\"Let's try this! \"\" :)\" int)");
+        s.execute("insert into table_with_funny_cols_src values (1,2), (3,4)");
+
+        // Export the table to a file.
+        doExport(null, "TABLE_WITH_FUNNY_COLS_SRC", null, null, null);
+
+        // Create an empty destination table with the same schema as the
+        // source table.
+        s.execute("create table table_with_funny_cols_dest as "
+                + "select * from table_with_funny_cols_src with no data");
+
+        // Import into the destination table.
+        doImport("TABLE_WITH_FUNNY_COLS_SRC",
+                 null, "TABLE_WITH_FUNNY_COLS_DEST",
+                 null, null, null, 0);
+
+        // Verify that the rows were successfully imported.
+        JDBC.assertFullResultSet(
+                s.executeQuery(
+                    "select * from table_with_funny_cols_dest order by x"),
+                new String[][] { {"1", "2"}, {"3", "4"} });
+    }
+
+    /**
      * Test that you can't import the wrong type of object into a UDT column.
      */
     public void testCastingProblem() throws Exception

@@ -387,11 +387,11 @@ class ColumnInfo {
 				sb.append(", ");
 			else
 				first = false;
-			// column names can be SQL reserved words, so it 
-			// is necessary delimit them using quotes for insert to work correctly. 
-			sb.append("\"");
-			sb.append(insertColumnNames.get(index));
-			sb.append("\"");
+            // Column names can be SQL reserved words, or they can contain
+            // spaces and special characters, so it is necessary delimit them
+            // for insert to work correctly.
+            String name = (String) insertColumnNames.get(index);
+            sb.append(IdUtil.normalToDelimited(name));
 		}
 	
 		//there is no column info available
