@@ -588,7 +588,9 @@
 <!-- =================================================================== -->
 <!--                 Remove all built objects (except jars)              -->
 <!-- =================================================================== -->
-  <target name="clobber" depends="clean,cleangenerated,cleanstate,cleanreleasefiles"/>
+  <target name="clobber" depends="clean,cleangenerated,cleanstate,cleanreleasefiles">
+    <delete file="${out.base}/changenumber.properties"/>
+  </target>
 
 <!-- =================================================================== -->
 <!--                       Remove the tree of generated intermediate sources                            -->
