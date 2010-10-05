@@ -105,15 +105,6 @@ public class Utf8CcsidManagerClientTest extends BaseTestCase {
         assertEquals(offsetUcs2String, convertedOffset);
     }
     
-    /**
-     * Use the Utf8CcsidManager to convert a byte to a character
-     */
-    public void testConvertToJavaChar() throws Exception {
-        byte b = 0x2a; // '*'
-        
-        assertEquals('*', ccsidManager.convertToJavaChar(b));
-    }
-    
     public static Test suite() {
         return TestConfiguration.clientServerSuite(Utf8CcsidManagerClientTest.class);
     }

@@ -81,18 +81,6 @@ public class Utf8CcsidManager extends CcsidManager {
         return null;
     }
 
-//    //Will this be needed in client?
-//    int getByteLength(String str) {
-//        try {
-//            return str.getBytes("UTF-8").length;
-//        } catch (UnsupportedEncodingException e) {
-//            if (SanityManager.DEBUG) {
-//                SanityManager.THROWASSERT("Could not obtain byte length of Java String in Utf8CcsidManager",e);
-//            }
-//        }
-//        return -1;
-//    }
-
     public int convertFromJavaString(String sourceString, byte[] buffer,
             int offset, Agent agent) throws SqlException {
         try {
@@ -106,11 +94,6 @@ public class Utf8CcsidManager extends CcsidManager {
                     new ClientMessageId(SQLState.CANT_CONVERT_UNICODE_TO_UTF8));
         }
         return offset;
-    }
-
-    public char convertToJavaChar(byte sourceByte) {
-        /* 1 byte = 0 to 255 which is the same in UTF-8 and ASCII */ 
-        return (char)sourceByte;
     }
 
     int maxBytesPerChar() {

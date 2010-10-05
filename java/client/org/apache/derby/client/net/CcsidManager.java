@@ -86,13 +86,6 @@ public abstract class CcsidManager {
     abstract String convertToJavaString(byte[] sourceBytes, int offset, int numToConvert);
 
 
-    // Convert a byte representing a char in a particular ccsid into a Java char.
-    //
-    // @param sourceByte The byte to be converted
-    // @return The converted Java char.
-    abstract char convertToJavaChar(byte sourceByte);
-
-
     
     /**
      * 
