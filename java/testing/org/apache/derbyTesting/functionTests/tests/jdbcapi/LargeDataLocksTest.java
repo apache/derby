@@ -27,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -69,7 +70,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
         }
         assertEquals(38000, numChars);
         rs.close();
-        assertEquals(0, countLocks());
+        assertLockCount(0);
         commit();
     }
 
@@ -87,7 +88,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
         byte[] value = rs.getBytes(1);
         assertEquals(38000, value.length);
         rs.close();
-        assertEquals(0, countLocks());
+        assertLockCount(0);
         commit();
 
     }
@@ -113,7 +114,7 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
         }
         assertEquals(38000, numBytes);
         rs.close();
-        assertEquals(0, countLocks());
+        assertLockCount(0);
         commit();
     }
 
@@ -133,30 +134,45 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
         String value = rs.getString(1);
         assertEquals(38000, value.length());
         rs.close();
-        assertEquals(0, countLocks());
+        assertLockCount(0);
         commit();
     }
 
     /**
-     * Create a new connection and count the number of locks held.
-     * 
-     * @return number of locks held
-     * 
-     * @throws SQLException
+     * Assert that the lock table contains a certain number of locks. Fail and
+     * dump the contents of the lock table if the lock table does not contain
+     * the expected number of locks.
+     *
+     * @param expected the expected number of locks
      */
-    public int countLocks() throws SQLException {
+    private void assertLockCount(int expected) throws SQLException {
+        // Count the locks in a new connection so that we don't accidentally
+        // make the default connection auto-commit and release locks.
         Connection conn = openDefaultConnection();
-        String sql;
         Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery("select * from syscs_diag.lock_table");
+        ResultSetMetaData meta = rs.getMetaData();
 
-        sql = "Select count(*) from new org.apache.derby.diag.LockTable() as LT";
-        ResultSet lockrs = stmt.executeQuery(sql);
-        lockrs.next();
-        int count = lockrs.getInt(1);
-        lockrs.close();
+        // Build an error message with the contents of the lock table as
+        // we walk through it.
+        StringBuffer msg = new StringBuffer(
+                "Unexpected lock count. Contents of lock table:\n");
+        int count;
+        for (count = 0; rs.next(); count++) {
+            msg.append(count + 1).append(": ");
+            for (int col = 1; col <= meta.getColumnCount(); col++) {
+                String name = meta.getColumnName(col);
+                Object val = rs.getObject(col);
+                msg.append(name).append('=').append(val).append(' ');
+            }
+            msg.append('\n');
+        }
+
+        rs.close();
         stmt.close();
         conn.close();
-        return count;
+
+        assertEquals(msg.toString(), expected, count);
     }
 
     public static Test baseSuite(String name) {
