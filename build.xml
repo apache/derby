@@ -322,6 +322,21 @@
     </propertyfile>
   </target>  
 
+    <!-- Create the release properties file -->
+  <target name="writeReleaseProperties" depends="init,prebuild">
+
+    <taskdef
+      name="writeReleaseProperties"
+      classname="org.apache.derbyPreBuild.ReleaseProperties"
+      classpath="${out.dir}"
+    />
+
+    <writeReleaseProperties
+      releaseID="${derby.release.id}"
+      releasePropertiesFileName="${properties.dir}/release.properties"
+    />
+
+  </target>  
 
 <!-- ==================================================================== -->
 <!--                   Locale info writer build target                    -->
