@@ -22,6 +22,7 @@
 package org.apache.derby.impl.tools.dblook;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -188,6 +189,14 @@ public class DB_GrantRevoke {
 	private static void generateColumnPrivs(ResultSet rs, Connection conn)
 		throws SQLException
 	{
+        // Statement that gets the names of the columns in a given table.
+        PreparedStatement columnStmt = conn.prepareStatement(
+            "SELECT COLUMNNUMBER, COLUMNNAME " +
+            "FROM SYS.SYSCOLUMNS C, SYS.SYSTABLES T, SYS.SYSSCHEMAS S " +
+            "WHERE T.TABLEID = C.REFERENCEID and S.SCHEMAID = T.SCHEMAID " +
+            "AND S.SCHEMANAME = ? AND T.TABLENAME = ? " +
+            "ORDER BY COLUMNNUMBER");
+
 		boolean firstTime = true;
 		while (rs.next()) {
 			if (firstTime) {
@@ -196,30 +205,43 @@ public class DB_GrantRevoke {
 				Logs.reportString("----------------------------------------------\n");
 			}
 
+            // Auth name will added directly to the generated DDL, so we need
+            // to quote it.
 			String authName = dblook.addQuotes
 				(dblook.expandDoubleQuotes(rs.getString(1)));
-			String schemaName = dblook.expandDoubleQuotes(rs.getString(2));
-			String tableName = dblook.expandDoubleQuotes(rs.getString(3));
 
-			if (dblook.isIgnorableSchema(schemaName))
+            // Schema name and table name are parameters to a prepared
+            // statement, so quoting is not needed.
+            String schemaName = rs.getString(2);
+            String tableName = rs.getString(3);
+
+            // isIgnorableSchema, on the other hand, expects the schema name
+            // to be quoted.
+            String schemaNameQuoted =
+                    dblook.addQuotes(dblook.expandDoubleQuotes(schemaName));
+            if (dblook.isIgnorableSchema(schemaNameQuoted)) {
 				continue;
+            }
 
 			// Create another resultSet to get column names
-			Statement stmtCols = conn.createStatement();
-			String queryCols = "SELECT COLUMNNUMBER, COLUMNNAME " +
-				"FROM SYS.SYSCOLUMNS C, SYS.SYSTABLES T, SYS.SYSSCHEMAS S " +
-				"WHERE T.TABLEID = C.REFERENCEID and S.SCHEMAID = T.SCHEMAID "+
-				"and T.TABLENAME = '"+tableName+"' AND SCHEMANAME = '"+schemaName +
-				"' ORDER BY COLUMNNUMBER";
+            columnStmt.setString(1, schemaName);
+            columnStmt.setString(2, tableName);
+            ResultSet rsCols = columnStmt.executeQuery();
 
-			ResultSet rsCols= stmtCols.executeQuery(queryCols);
-			String fullName = dblook.addQuotes(schemaName) + "." + dblook.addQuotes(tableName);
+            // The full name will be added directly to the generated GRANT
+            // statement, so it needs to be quoted.
+            String fullName = schemaNameQuoted + "." +
+                    dblook.addQuotes(dblook.expandDoubleQuotes(tableName));
 
 			Logs.writeToNewDDL(columnPrivStatement(rs, fullName, authName, rsCols));
 			Logs.writeStmtEndToNewDDL();
 			Logs.writeNewlineToNewDDL();
 			firstTime = false;
+
+            rsCols.close();
 		}
+
+        columnStmt.close();
 	}
 
 	private static String privTypeToString(String privType)
@@ -261,8 +283,11 @@ public class DB_GrantRevoke {
 				curColumn = rsCols.getInt(1);
 			}
 			colNames.append(separatorStr(addSeparator));
-			colNames.append(rsCols.getString(2));
 			addSeparator = true;
+
+            String colName = dblook.addQuotes(
+                    dblook.expandDoubleQuotes(rsCols.getString(2)));
+            colNames.append(colName);
 		}
 
 		return colNames.toString();
@@ -286,7 +311,8 @@ public class DB_GrantRevoke {
 		grantStmt.append(privTypeToString(privType));
 		grantStmt.append("(");
 		grantStmt.append(mapColumnsToNames(columns, rsCols));
-		grantStmt.append(")");
+        grantStmt.append(") ON ");
+        grantStmt.append(fullName);
 		grantStmt.append(" TO ");
 		grantStmt.append(authName);
 

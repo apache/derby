@@ -229,6 +229,16 @@ null
 null
 null
 -----
+'Single' and "double" quoted table name
+'Single' and "double" quoted column name
+1
+INTEGER
+null
+null
+<autoincval>
+null
+null
+-----
 MULTI WORD NAME
 C
 1
@@ -923,6 +933,15 @@ false
 tee""Hee
 <systemnumber>
 tee""Hee
+false
+null
+false
+<systemid>
+-----
+'Single' and "double" quoted schema name
+'Single' and "double" quoted table name
+<systemnumber>
+'Single' and "double" quoted table name
 false
 null
 false
@@ -1728,6 +1747,10 @@ unqkay1"
 "Quoted"Schema"
 APP
 -----
+'Single' and "double" quoted schema name
+'Single' and "double" quoted schema name
+APP
+-----
 APP
 APP
 APP
@@ -1810,6 +1833,12 @@ null
 "tquoteTwo
 T
 APP
+R
+-----
+'Single' and "double" quoted table name
+'Single' and "double" quoted table name
+T
+'Single' and "double" quoted schema name
 R
 -----
 MULTI WORD NAME

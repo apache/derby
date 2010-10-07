@@ -133,6 +133,7 @@ create table "tquote""One" ("i""q1" int not null constraint "pee""kay1" primary 
 create table """tquoteTwo" ("""iq1" int constraint """effkay1" references "tquote""One" ("i""q1"), """iq2" int constraint """ck2" check ("""iq2" > 0));
 create table "tquoteThree""" ("iq1""" int not null constraint "unqkay1""" unique, "iq2""" int constraint "ck2""" check ("iq2""" > 4));
 create table """Quoted""Schema"""."tee""""Hee" (n char not null primary key);
+create table "'Single' and ""double"" quoted schema name"."'Single' and ""double"" quoted table name" ("'Single' and ""double"" quoted column name" int);
 
 -- ----------------------------------------------
 -- Indexes.
@@ -196,3 +197,10 @@ grant a to b;
 grant """eve""" to b;
 grant b to whomever;
 
+-- ----------------------------------------------
+-- Column privileges
+-- ----------------------------------------------
+
+-- Test column privileges when table/schema contains special characters.
+-- (DERBY-4829)
+grant select ("'Single' and ""double"" quoted column name") on "'Single' and ""double"" quoted schema name"."'Single' and ""double"" quoted table name" to someone;

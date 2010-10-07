@@ -222,6 +222,16 @@ null
 null
 null
 ----
+'Single' and "double" quoted table name
+'Single' and "double" quoted column name
+1
+INTEGER
+null
+null
+<autoincval>
+null
+null
+----
 MULTI WORD NAME
 C
 1
@@ -916,6 +926,15 @@ false
 tee""Hee
 <systemnumber>
 tee""Hee
+false
+null
+false
+<systemid>
+----
+'Single' and "double" quoted schema name
+'Single' and "double" quoted table name
+<systemnumber>
+'Single' and "double" quoted table name
 false
 null
 false
@@ -1721,6 +1740,10 @@ unqkay1"
 "Quoted"Schema"
 APP
 ----
+'Single' and "double" quoted schema name
+'Single' and "double" quoted schema name
+APP
+----
 APP
 APP
 APP
@@ -1803,6 +1826,12 @@ null
 "tquoteTwo
 T
 APP
+R
+----
+'Single' and "double" quoted table name
+'Single' and "double" quoted table name
+T
+'Single' and "double" quoted schema name
 R
 ----
 MULTI WORD NAME
@@ -2397,6 +2426,16 @@ null
 "tquoteTwo
 "iq2
 2
+INTEGER
+null
+null
+<autoincval>
+null
+null
+----
+'Single' and "double" quoted table name
+'Single' and "double" quoted column name
+1
 INTEGER
 null
 null
@@ -3098,6 +3137,15 @@ false
 tee""Hee
 <systemnumber>
 tee""Hee
+false
+null
+false
+<systemid>
+----
+'Single' and "double" quoted schema name
+'Single' and "double" quoted table name
+<systemnumber>
+'Single' and "double" quoted table name
 false
 null
 false
@@ -3903,6 +3951,10 @@ unqkay1"
 "Quoted"Schema"
 APP
 ----
+'Single' and "double" quoted schema name
+'Single' and "double" quoted schema name
+APP
+----
 APP
 APP
 APP
@@ -3985,6 +4037,12 @@ null
 "tquoteTwo
 T
 APP
+R
+----
+'Single' and "double" quoted table name
+'Single' and "double" quoted table name
+T
+'Single' and "double" quoted schema name
 R
 ----
 MULTI WORD NAME
@@ -5272,6 +5330,9 @@ Creating database 'wombat_new' from ddl script 'wombat.sql'
 FAILED: to execute cmd from DDL script:
 create view v1 (dum, dee, dokie) as select a.d, a.c, b.p1 from t1 as a, bar.t3 as b
 Table/View 'BAR.T3' does not exist.
+FAILED: to execute cmd from DDL script:
+GRANT SELECT("'Single' and ""double"" quoted column name") ON "'Single' and ""double"" quoted schema name"."'Single' and ""double"" quoted table name" TO "SOMEONE"
+Schema ''Single' and "double" quoted schema name' does not exist
 Dumping system tables for 'wombat_new'
 ----------------=================---------------
 System Tables for: wombat_new
