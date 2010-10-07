@@ -25,9 +25,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.IndexStatsUtil;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
@@ -44,6 +44,13 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
+        // TODO: Disable automatic index statistics generation when the feature
+        //       is added. As currently planned, the generation will be
+        //       triggered when preparing a statement and this will interfere
+        //       with some of the asserts in testUpdateStatistics.
+        //       With automatic generation enabled, testUpdateStatistics may
+        //       fail intermittently due to timing, mostly (only?) when run
+        //       with the client driver.
         return TestConfiguration.defaultSuite(UpdateStatisticsTest.class);
     }
 
@@ -51,6 +58,8 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
      * Test for update statistics
      */
     public void testUpdateStatistics() throws SQLException {
+        // Helper object to obtain information about index statistics.
+        IndexStatsUtil stats = new IndexStatsUtil(openDefaultConnection());
         Statement s = createStatement();
         //following should fail because table APP.T1 does not exist
         assertStatementError("42Y55", s, 
@@ -75,23 +84,20 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         //So far the table t1 is empty and we have already created index I1 on 
         //it. Since three was no data in the table when index I1 was created,
         //there will be no row in sysstatistics table
-        ResultSet rs = s.executeQuery("SELECT * FROM SYS.SYSSTATISTICS");
-        JDBC.assertEmpty(rs);
+        stats.assertNoStats();
         //Now insert some data into t1 and then create a new index on the 
         //table. This will cause sysstatistics table to have one row for this
         //new index. Old index will still not have a row for it in
         //sysstatistics table
         s.executeUpdate("INSERT INTO T1 VALUES(1,'a'),(2,'b'),(3,'c'),(4,'d')");
         s.executeUpdate("CREATE INDEX i2 ON t1(c11)");
-        rs = s.executeQuery("SELECT * FROM SYS.SYSSTATISTICS");
-        JDBC.assertDrainResults(rs, 1);
+        stats.assertStats(1);
         //Now update the statistics for the old index I1 using the new stored
         //procedure. Doing this should add a row for it in sysstatistics table
         s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T1','I1')");
-        rs = s.executeQuery("SELECT * FROM SYS.SYSSTATISTICS");
-        JDBC.assertDrainResults(rs, 2);
+        stats.assertStats(2);
 
-        //calls to system procedure for update statisitcs is internally
+        //calls to system procedure for update statistics is internally
         //converted into ALTER TABLE ... sql but that generated sql format
         //is not available to end user to issue directly. Write a test case
         //for that sql syntax
@@ -134,8 +140,7 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         //empty
         s.executeUpdate("CREATE INDEX t2i1 ON t2(c21)");
         s.executeUpdate("CREATE INDEX t2i2 ON t2(c22)");
-        rs = s.executeQuery("SELECT * FROM SYS.SYSSTATISTICS");
-        JDBC.assertEmpty(rs);
+        stats.assertNoStats();
         
         PreparedStatement ps = prepareStatement("INSERT INTO T2 VALUES(?,?,?)");
         for (int i=0; i<1000; i++) {
@@ -160,9 +165,8 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
 
 		//Running the update statistics below will create statistics for T2I2
 		s.execute("CALL SYSCS_UTIL.SYSCS_UPDATE_STATISTICS('APP','T2','T2I2')");
-        rs = s.executeQuery("SELECT * FROM SYS.SYSSTATISTICS");
-        JDBC.assertDrainResults(rs, 1);
-		
+        stats.assertIndexStats("T2I2", 1);
+
         //Rerunning the query "SELECT * FROM t2 WHERE c21=? AND c22=?" and
         //looking at it's plan will show that this time it picked up more
         //efficient index which is T2I2. 
@@ -173,11 +177,16 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         s.executeUpdate("DROP TABLE t2");
         //End of test case for better index selection after statistics
         //availability
+        stats.release();
     }
 
     /**
      * Test that SYSCS_UPDATE_STATISTICS doesn't obtain exclusive locks on
      * the table or rows in the table (DERBY-4274).
+     * <p>
+     * TODO: Make sure this test is also run with automatic index statistics
+     * generation enabled, as it revealed a bug in the data dictionary access
+     * pattern (dd was left in write mode when it shouldn't have been).
      */
     public void testNoExclusiveLockOnTable() throws SQLException {
         Statement s = createStatement();
