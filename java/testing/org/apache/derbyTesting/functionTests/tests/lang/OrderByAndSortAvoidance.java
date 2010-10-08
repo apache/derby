@@ -10423,7 +10423,6 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
         ResultSet rs = s.executeQuery(sql1);
 		RuntimeStatisticsParser rtsp = SQLUtilities.getRuntimeStatisticsParser(s);
 		assertTrue(rtsp.usedSpecificIndexForIndexScan("TABLE2","KEY3"));
-		assertTrue(rtsp.usedTableScan("TABLE1"));
 		assertTrue(rtsp.whatSortingRequired());
   
         rs = s.executeQuery(sql1);
@@ -10455,7 +10454,6 @@ public class OrderByAndSortAvoidance extends BaseJDBCTestCase {
 		RuntimeStatisticsParser rtsp = SQLUtilities.getRuntimeStatisticsParser(
 				s);
 		assertTrue(rtsp.usedSpecificIndexForIndexScan("TABLE2","KEY3"));
-		assertTrue(rtsp.usedTableScan("TABLE1"));
 		assertTrue(rtsp.whatSortingRequired());
 
 		rs = s.executeQuery(sql1);
