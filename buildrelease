@@ -38,15 +38,10 @@ export docLib=$DOCS_ROOT/lib
 export CLASSPATH=$docLib/fop.jar:$docLib/avalon-framework-cvs-20020806.jar:$docLib/batik.jar
 export ANT_OPTS="-Xmx512m"
 
-
-read -p "Enter your Apache subversion username >  " subversionUserName
-read -p "Enter your Apache subversion password >  " subversionPassword
-read -p "Enter your pgp passphrase >  " pgpPassphrase
-
 ###############################################################
 #
 echo Building release distributions...
 #
 ###############################################################
 
-ant "-Ddocs.root=$DOCS_ROOT" "-Dpgp.passphrase=$pgpPassphrase" "-Dsvn.username=$subversionUserName" "-Dsvn.password=$subversionPassword" -quiet release
+ant "-Ddocs.root=$DOCS_ROOT" -quiet release

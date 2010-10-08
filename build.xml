@@ -524,6 +524,7 @@
   </target>
 
   <target name="prebuild">
+    <mkdir dir="${out.dir}"/>
     <ant dir="${derby.build.src.dir}/org/apache/derbyPreBuild"/>
   </target>
 
@@ -2456,7 +2457,8 @@ you should not have to do this.
     </target>
 
     <!-- do most of the ant calls to prepare a release -->
-    <target name="prepareforrelease" depends="checkdocsroot,checkpgppassphrase,checksvncredentials,checkstateremoved,checksanenotset,cleanalljars,cleandocs,clobber,cleanreleasefiles">
+    <target name="prepareforrelease" depends="checkdocsroot,promptforreleaseproperties,checkstateremoved,checksanenotset,cleanalljars,cleandocs,clobber,cleanreleasefiles">
+
         <!-- other possible checks? maybe no checked out files? -->
         <!-- maybe try to force a doc build? call to ant release will check for docs out -->
         <!-- assume svn update has been done to the desired level -->
@@ -2498,6 +2500,40 @@ you should not have to do this.
         <antcall target="cleanstate"/>
     </target>
 
+    <!--
+        Prompt for release-building inputs if they were not specified in properties already
+
+        This target must be called in a dependency list rather than via antcall. That is
+        because properties set in dependent targets percolate back up to the caller.
+        Properties set in antcalled targets are wiped out when you return to the caller.
+
+        Sneaky, very, very sneaky.
+    -->
+    <target name="promptforreleaseproperties" depends="prebuild">
+
+        <taskdef
+          name="promptForProperty"
+          classname="org.apache.derbyPreBuild.PropertyPrompt"
+          classpath="${out.dir}"
+        />
+
+        <promptForProperty
+          propertyName="svn.username"
+          prompt="Enter your Apache subversion username >  "
+        />
+
+        <promptForProperty
+          propertyName="svn.password"
+          prompt="Enter your Apache subversion password >  "
+        />
+
+        <promptForProperty
+          propertyName="pgp.passphrase"
+          prompt="Enter your pgp passphrase >  "
+        />
+
+    </target>
+
     <target name="checkstateremoved" depends="state.exists">
         <fail message="Cannot build a release; please remove java/engine/state.properties by running ant cleanstate (or run ant clobber)">
             <condition>
@@ -2521,31 +2557,6 @@ you should not have to do this.
         </fail>     
     </target>
 
-    <target name="checksvncredentials">
-        <!-- make sure that subversion credentials are set  -->
-        <fail message="Cannot build a release; svn.username and/or svn.password are not set. These are the credentials you use to commit work to the Apache repositories.">
-            <condition>
-              <not>
-                <and>
-                  <isset property="svn.username"/>
-                  <isset property="svn.password"/>
-                </and>
-              </not>
-            </condition>
-        </fail>     
-    </target>
-
-    <target name="checkpgppassphrase">
-        <!-- make sure that signature credentials are set  -->
-        <fail message="Cannot build a release; pgp.passphrase is not set. This is the passphrase needed to sign release artifacts.">
-            <condition>
-              <not>
-                <isset property="pgp.passphrase"/>
-              </not>
-            </condition>
-        </fail>
-    </target>
-
     <target name="checksanenotset">
         <!-- check that sane is *not* set elsewhere, e.g. $HOME/ant.properties -->
         <echo level="info" message="sane : ${sane}"/>
@@ -2563,4 +2574,6 @@ you should not have to do this.
     <target name="cleanalljars">
         <delete dir="${jarsdist.dir}"/>
     </target>
+
+
 </project>
