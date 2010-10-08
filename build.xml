@@ -1836,6 +1836,35 @@
      </exec>
    </target>
 
+   <!-- Verify that both the code and docs clients have no in-flight edits -->
+   <target name="checksvnclientsclean" unless="debug.release.build">
+
+      <antcall target="checksvnclean">
+         <param name="client.root" value="${docs.root}"/>
+      </antcall>
+
+      <antcall target="checksvnclean">
+         <param name="client.root" value="${basedir}"/>
+      </antcall>
+
+   </target>
+
+   <!-- Check that a subversion client has no files checked out -->
+   <target name="checksvnclean">
+     <exec executable="svn"
+           outputproperty="svnstatusoutput"
+     >
+       <arg value="status"/>
+       <arg value="${client.root}"/>
+     </exec>
+
+     <fail message="Cannot build a release. The ${client.root} subversion client is not clean: ${svnstatusoutput}">
+         <condition>
+             <not><equals arg1="${svnstatusoutput}" arg2="" trim="true"/></not>
+         </condition>
+     </fail>     
+   </target>
+
    <!-- Checkin the generated error documentation to the docs client -->
    <target name="copyerrordocs">
 
@@ -2457,11 +2486,8 @@ you should not have to do this.
     </target>
 
     <!-- do most of the ant calls to prepare a release -->
-    <target name="prepareforrelease" depends="checkdocsroot,promptforreleaseproperties,checkstateremoved,checksanenotset,cleanalljars,cleandocs,clobber,cleanreleasefiles">
+    <target name="prepareforrelease" depends="checkdocsroot,checksvnclientsclean,promptforreleaseproperties,checkstateremoved,checksanenotset,cleanalljars,cleandocs,clobber,cleanreleasefiles">
 
-        <!-- other possible checks? maybe no checked out files? -->
-        <!-- maybe try to force a doc build? call to ant release will check for docs out -->
-        <!-- assume svn update has been done to the desired level -->
         <!-- we should already be squeeky clean, depends removed jars, javadoc, snapshot, classes, and old release artifacts -->
         <antcall target="updatesvnclients"/>
 
