@@ -1241,6 +1241,9 @@
        <copy todir="${derby.jar.dir}/${plugin.tmp.dir}/${plugin.dir}/${plugin.core.dir}" file="LICENSE"/>
        <copy todir="${derby.jar.dir}/${plugin.tmp.dir}/${plugin.dir}/${plugin.core.dir}" file="NOTICE"/>
 
+       <!-- copy the plugin properties for use by the release target -->
+       <copy file="${derby.jar.dir}/${plugin.tmp.dir}/plugintmp.properties" todir="${release.base}"/>
+
        <delete file="${derby.jar.dir}/${plugin.tmp.dir}/plugintmp.properties"/>
        <delete file="${derby.jar.dir}/${plugin.tmp.dir}/plugin.xml"/>
 
@@ -1258,8 +1261,8 @@
   <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"/>
 
   <target name="initjars" depends="setsanityname,getsvnversion,setCompilerProperties">
-    <property name="derby.jar.dir" value="${out.base}/jars/${sanity.name}"/>
-    <property name="derby.jar.topdir" value="${out.base}/jars"/>
+    <property name="derby.jar.dir" value="${jarsdist.dir}/${sanity.name}"/>
+    <property name="derby.jar.topdir" value="${jarsdist.dir}"/>
     <mkdir dir="${derby.jar.dir}"/>
     <mkdir dir="${derby.jar.dir}/lists"/>
     <loadfile srcFile="${out.base}/changenumber.properties"
@@ -1811,8 +1814,58 @@
    </target>
 
   <target name="cleanjars" depends="setsanityname">
-    <delete dir="${basedir}/jars/${sanity.name}"/>
+    <delete dir="${jarsdist.dir}/${sanity.name}"/>
   </target>
+
+<!-- - - - - - - - - - - -  release build helper targets  - - - - - - - - - -->
+
+   <!-- Update both subversion clients for building release distributions -->
+   <target name="updatesvnclients" depends="updatesvncode,updatesvndoc"/>
+
+   <target name="updatesvncode">
+     <exec executable="svn">
+       <arg value="update"/>
+       <arg value="${basedir}"/>
+     </exec>
+   </target>
+   <target name="updatesvndoc">
+     <exec executable="svn">
+       <arg value="update"/>
+       <arg value="${docs.root}"/>
+     </exec>
+   </target>
+
+   <!-- Checkin the generated error documentation to the docs client -->
+   <target name="copyerrordocs">
+
+     <property name="checkinMessage" value="${release.base}/tmp.checkin.message"/>
+
+     <copy file="${sqlstateTables}" todir="${docs.root}/src/ref"/>
+
+     <echo file="${checkinMessage}" message="Check in SQLState tables as part of building a release."/>
+     <exec executable="svn">
+       <arg value="commit"/>
+       <arg value="--username"/>
+       <arg value="${svn.username}"/>
+       <arg value="--password"/>
+       <arg value="${svn.password}"/>
+       <arg value="-F"/>
+       <arg value="${checkinMessage}"/>
+       <arg value="${docs.root}"/>
+     </exec>
+
+     <!-- Bring the docs client up to date again -->
+     <antcall target="updatesvndoc"/>
+
+   </target>
+
+   <!-- Build the user documentation -->
+   <target name="builduserdocs">
+
+     <ant dir="${docs.root}" target="clobber"/>
+     <ant dir="${docs.root}" target="all"/>
+
+   </target>
 
 <!-- - - - - - - - - - - - - - targets for populating META-INF  - - - - - - - - - - - -->
 
@@ -1893,27 +1946,27 @@
     </java>
     <property file="${snapshot.dir}/maintversion.properties"/>
     <zip destfile="${snapshot.dir}/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
-      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
+      <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${jarsdist.dir}/insane" includes="*.jar,*.war"/>
       <zipfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </zip>
     <tar destfile="${snapshot.dir}/db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
-      <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/insane" includes="*.jar,*.war"/>
+      <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${jarsdist.dir}/insane" includes="*.jar,*.war"/>
       <tarfileset prefix="db-derby-snapshot-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </tar>
 
     <!-- debug archives - DERBY-178 --> 
     <zip destfile="${snapshot.dir}/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
-      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
+      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${jarsdist.dir}/sane" includes="*.jar,*.war"/>
       <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,CHANGES,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </zip>
     <tar destfile="${snapshot.dir}/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
-      <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${basedir}/jars/sane" includes="*.jar,*.war"/>
+      <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${jarsdist.dir}/sane" includes="*.jar,*.war"/>
       <tarfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </tar>
 
-    <copy file="${basedir}/jars/insane/derby_core_plugin_${major}.${minor}.${interim}.zip"
+    <copy file="${jarsdist.dir}/insane/derby_core_plugin_${major}.${minor}.${interim}.zip"
           tofile="${snapshot.dir}/derby_core_plugin_${major}.${minor}.${interim}.${changenumber}.zip"/>
   </target>
 
@@ -2274,7 +2327,7 @@
     </target>
 
 	<target name="junit-all-codeline-jars-set-properties" depends="setsanityname">
-		<property name="derby.jar.base" value="${basedir}/jars/${sanity.name}"/>
+		<property name="derby.jar.base" value="${jarsdist.dir}/${sanity.name}"/>
 	    <property name="derby.junit.classpath"
 	        value="${derby.jar.base}/derbyTesting.jar:${derby.jar.base}/derbynet.jar:${derby.jar.base}/derbytools.jar:${derby.jar.base}/derbyclient.jar"/>
 	</target>
@@ -2379,28 +2432,68 @@ you should not have to do this.
         </emma>
     </target>
 
+    <target
+        name="release"
+        depends="prepareforrelease"
+        description="Build the release distributions"
+    >
+      <ant antfile="${basedir}/tools/release/build.xml" target="release"/>
+
+      <!-- copy the eclipse plugin into the distribution directory -->
+      <property file="${release.base}/plugintmp.properties"/>
+      <property name="eclipse.plugin" value="${plugin.derby.core.zipfile}_${plugin.derby.version}.zip"/>
+      <copy file="${jarsdist.dir}/insane/${eclipse.plugin}" todir="${release.dir}"/>
+
+      <!-- sign all of the artifacts -->
+      <ant antfile="${basedir}/tools/release/build.xml" target="sign"/>
+      <ant antfile="${basedir}/tools/release/build.xml" target="sign.eclipse.plugin"/>
+
+      <!-- remove cruft -->
+      <delete dir="${crlf.dir}"/>
+      <delete dir="${lf.dir}"/>
+      <delete file="${release.dir}/maintversion.properties"/>
+
+    </target>
+
     <!-- do most of the ant calls to prepare a release -->
-    <target name="prepareforrelease" depends="checkstateremoved,checksanenotset,cleanalljars,cleandocs,clobber,cleanreleasefiles">
+    <target name="prepareforrelease" depends="checkdocsroot,checkpgppassphrase,checksvncredentials,checkstateremoved,checksanenotset,cleanalljars,cleandocs,clobber,cleanreleasefiles">
         <!-- other possible checks? maybe no checked out files? -->
         <!-- maybe try to force a doc build? call to ant release will check for docs out -->
         <!-- assume svn update has been done to the desired level -->
         <!-- we should already be squeeky clean, depends removed jars, javadoc, snapshot, classes, and old release artifacts -->
-        <echo level="info" message="  Sane = ${sane}"/>
+        <antcall target="updatesvnclients"/>
+
         <antcall target="clobber"/>
-        <antcall target="sane"/>
         <antcall target="all">
+           <param name="sane" value="true"/>
+           <param name="sanity" value="true"/>
+           <param name="sanity.name" value="sane"/>
            <param name="deprecation" value="off"/>
         </antcall>
-        <antcall target="buildjars"/>
-        <antcall target="clobber"/>
-        <antcall target="insane"/>
-        <antcall target="snapshot">
-            <param name="deprecation" value="off"/>
-            <param name="sane" value="false"/>
+        <antcall target="buildjars">
+           <param name="sane" value="true"/>
+           <param name="sanity" value="true"/>
+           <param name="sanity.name" value="sane"/>
         </antcall>
+
+        <antcall target="clobber"/>
+        <antcall target="snapshot">
+           <param name="sane" value="false"/>
+           <param name="sanity" value="false"/>
+           <param name="sanity.name" value="insane"/>
+            <param name="deprecation" value="off"/>
+        </antcall>
+
         <antcall target="publishedapi">
             <param name="deprecation" value="off"/>
         </antcall>
+
+        <!-- copy the generated sqlstate tables to the docs client and check it in -->
+        <antcall target="copyerrordocs"/>
+
+        <!-- build the docs now that the sqlstate tables are up to date -->
+        <antcall target="builduserdocs"/>
+
         <!-- finish by removing the state.properties file, so we can do it again -->
         <antcall target="cleanstate"/>
     </target>
@@ -2419,6 +2512,40 @@ you should not have to do this.
         <available file="${derby.engine.src.dir}/state.properties" property="state.prepare.available"/>
     </target>
 
+    <target name="checkdocsroot">
+        <!-- make sure that docs.root points into a docs tree  -->
+        <fail message="Cannot build a release; docs.root does not point at your documentation client: ${docs.root}">
+            <condition>
+              <not><available file="${docs.root}/src/conrefs.dita"/></not>
+            </condition>
+        </fail>     
+    </target>
+
+    <target name="checksvncredentials">
+        <!-- make sure that subversion credentials are set  -->
+        <fail message="Cannot build a release; svn.username and/or svn.password are not set. These are the credentials you use to commit work to the Apache repositories.">
+            <condition>
+              <not>
+                <and>
+                  <isset property="svn.username"/>
+                  <isset property="svn.password"/>
+                </and>
+              </not>
+            </condition>
+        </fail>     
+    </target>
+
+    <target name="checkpgppassphrase">
+        <!-- make sure that signature credentials are set  -->
+        <fail message="Cannot build a release; pgp.passphrase is not set. This is the passphrase needed to sign release artifacts.">
+            <condition>
+              <not>
+                <isset property="pgp.passphrase"/>
+              </not>
+            </condition>
+        </fail>
+    </target>
+
     <target name="checksanenotset">
         <!-- check that sane is *not* set elsewhere, e.g. $HOME/ant.properties -->
         <echo level="info" message="sane : ${sane}"/>
@@ -2434,6 +2561,6 @@ you should not have to do this.
     </target>
 
     <target name="cleanalljars">
-        <delete dir="${basedir}/jars"/>
+        <delete dir="${jarsdist.dir}"/>
     </target>
 </project>

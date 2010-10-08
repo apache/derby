@@ -79,7 +79,6 @@
   <target name="release" depends="clean,bin,lib,lib-debug,src"/>
 
   <target name="init">
-
     <mkdir dir="${release.dir}"/>
 
     <java classname="org.apache.derbyBuild.maintversion2props">
@@ -96,8 +95,6 @@
     <property name="derby.src" value="${derby.basename}-src"/> 
     <property name="derby.docssrc" value="${derby.basename}-doc-src"/> 
 
-    <property name="crlf.dir" value="${release.dir}/crlf"/>
-    <property name="lf.dir" value="${release.dir}/lf"/>
     <mkdir dir="${crlf.dir}"/>
     <mkdir dir="${lf.dir}"/>
     <fixcrlf srcdir="${basedir}" destdir="${crlf.dir}" eol="crlf"
@@ -187,9 +184,9 @@
                   prefix="${derby.bin}/demo/programs/workingwithderby"/>
 
       <!-- docs -->
-      <zipfileset dir="${docs.out}" includes="**/*.html,**/*.jpg,**/*.gif"
+      <zipfileset dir="${docs.root}/out" includes="**/*.html,**/*.jpg,**/*.gif"
                   prefix="${derby.bin}/docs/html"/>
-      <zipfileset dir="${docs.out}" includes="**/*.pdf"
+      <zipfileset dir="${docs.root}/out" includes="**/*.pdf"
                   prefix="${derby.bin}/docs/pdf"/>
       <!-- javadoc -->
       <zipfileset dir="${basedir}/javadoc/publishedapi" prefix="${derby.bin}/javadoc" includes="**"/>   
@@ -245,9 +242,9 @@
       <tarfileset dir="${basedir}/classes" includes="Wwd*.class"
                   prefix="${derby.bin}/demo/programs/workingwithderby"/>
       <!-- docs -->
-      <tarfileset dir="${docs.out}" includes="**/*.html,**/*.jpg,**/*.gif"
+      <tarfileset dir="${docs.root}/out" includes="**/*.html,**/*.jpg,**/*.gif"
 		          prefix="${derby.bin}/docs/html"/>
-      <tarfileset dir="${docs.out}" includes="**/*.pdf"
+      <tarfileset dir="${docs.root}/out" includes="**/*.pdf"
 	              prefix="${derby.bin}/docs/pdf"/>
       <!-- javadoc -->
       <tarfileset dir="${basedir}/javadoc/publishedapi" prefix="${derby.bin}/javadoc" includes="**"/>   
@@ -332,7 +329,7 @@
       <zipfileset dir="${basedir}" prefix="${derby.src}"
          includes="${src.includes}"
          excludes="${src.excludes}"/>
-      <zipfileset dir="${docs.out}/.." prefix="${derby.docssrc}" 
+      <zipfileset dir="${docs.root}" prefix="${derby.docssrc}" 
          includes="${src.docs.includes}"/>
     </zip>
   </target>
@@ -342,7 +339,7 @@
       <tarfileset dir="${basedir}" prefix="${derby.src}"
          includes="${src.includes}"
          excludes="${src.excludes}"/>
-      <tarfileset dir="${docs.out}/.." prefix="${derby.docssrc}" 
+      <tarfileset dir="${docs.root}" prefix="${derby.docssrc}" 
          includes="${src.docs.includes}"/>
     </tar>
   </target>
@@ -392,6 +389,22 @@
     </antcall>
   </target>
 
+
+  <!--
+    this target is only called by the release target in the top level build file.
+    this target relies on the fact that its caller has created plugintmp.properties.
+  -->
+  <target name="sign.eclipse.plugin" depends="init">
+    <property file="${release.base}/plugintmp.properties"/>
+    <property name="eclipse.plugin" value="${plugin.derby.core.zipfile}_${plugin.derby.version}.zip"/>
+    <antcall target="md5">
+      <param name="sign.archive" value="${release.dir}/${eclipse.plugin}"/>
+    </antcall>
+    <antcall target="pgp">
+      <param name="sign.archive" value="${release.dir}/${eclipse.plugin}"/>
+    </antcall>
+  </target>
+
   <target name="md5">
     <exec executable="${md5.exec}" output="${sign.archive}.md5">
       <arg line="${md5.options} ${sign.archive}"/>
@@ -400,7 +413,7 @@
 
   <target name="pgp">
     <exec executable="${pgp.exec}">
-      <arg line="${pgp.options} ${sign.archive}"/>
+      <arg line="${pgp.options} --passphrase &quot;${pgp.passphrase}&quot; ${sign.archive}"/>
     </exec>
   </target>
 

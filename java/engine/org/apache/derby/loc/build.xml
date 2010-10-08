@@ -36,8 +36,6 @@
   />
   <property name="messageDescriptors" value="${derby.locales.dir}/messages.xml"/>
   <property name="englishMessages" value="${generated.engine.locale.dir}/messages_en.properties"/>
-  <property name="docDirectory" value="${out.dir}/doc"/>
-  <property name="sqlstateTables" value="${docDirectory}/rrefexcept71493.dita"/>
 
 <!-- Targets -->
   <target name="locales" depends="init,buildMessages,split"/>
@@ -57,7 +55,7 @@
   <!-- Generate english messages from xml descriptors-->
   <target name="buildMessages" unless="messagesUpToDate">
 
-    <mkdir dir="${docDirectory}" />
+    <mkdir dir="${gen.doc.dir}" />
 
     <buildMessages
       xmlSourceFile="${messageDescriptors}"
