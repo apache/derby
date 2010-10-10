@@ -150,6 +150,11 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
         // make the default connection auto-commit and release locks.
         Connection conn = openDefaultConnection();
         Statement stmt = conn.createStatement();
+
+        // First wait for post-commit work to complete so that we don't count
+        // locks held by the background worker thread.
+        stmt.execute("call wait_for_post_commit()");
+
         ResultSet rs = stmt.executeQuery("select * from syscs_diag.lock_table");
         ResultSetMetaData meta = rs.getMetaData();
 
@@ -210,6 +215,16 @@ public class LargeDataLocksTest extends BaseJDBCTestCase {
                 ps.setInt(3, 38000);
                 ps.executeUpdate();
                 ps.close();
+
+                // Create a procedure for use by assertLockCount() to ensure
+                // that the background worker thread has completed all the
+                // post-commit work.
+                s.execute("CREATE PROCEDURE WAIT_FOR_POST_COMMIT() "
+                        + "LANGUAGE JAVA EXTERNAL NAME "
+                        + "'org.apache.derbyTesting.functionTests.util."
+                        + "T_Access.waitForPostCommitToFinish' "
+                        + "PARAMETER STYLE JAVA");
+
                 conn.commit();
             }
         };
