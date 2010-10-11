@@ -1936,10 +1936,15 @@
    </target>
 
    <!-- Build the user documentation -->
-   <target name="builduserdocs">
+   <target name="builduserdocs" depends="checkdocsroot">
 
      <ant dir="${docs.root}" target="clobber"/>
-     <ant dir="${docs.root}" target="all"/>
+
+     <exec executable="ant" dir="${docs.root}">
+       <env key="ANT_OPTS" value="-Xmx512m"/>
+       <env key="CLASSPATH" path="${docs.root}/lib/fop.jar"/>
+       <arg value="all"/>
+     </exec>
 
    </target>
 
@@ -2639,6 +2644,16 @@ you should not have to do this.
 
     </target>
 
+    <!-- Prompt for root of documentation client if it is missing -->
+    <target name="promptfordocsroot" depends="defineprompt">
+
+        <promptForProperty
+          propertyName="docs.root"
+          prompt="Enter the root of the subversion docs client (e.g., /Users/me/derby/docs/trunk) >  "
+        />
+
+    </target>
+
     <target name="checkstateremoved" depends="state.exists">
         <fail message="Cannot build a release; please remove java/engine/state.properties by running ant cleanstate (or run ant clobber)">
             <condition>
@@ -2653,11 +2668,18 @@ you should not have to do this.
         <available file="${derby.engine.src.dir}/state.properties" property="state.prepare.available"/>
     </target>
 
-    <target name="checkdocsroot">
+    <target name="checkdocsroot" depends="promptfordocsroot">
         <!-- make sure that docs.root points into a docs tree  -->
         <fail message="Cannot build a release; docs.root does not point at your documentation client: ${docs.root}">
             <condition>
               <not><available file="${docs.root}/src/conrefs.dita"/></not>
+            </condition>
+        </fail>
+
+        <!-- make sure that the doc-building classes are visible to ant  -->
+        <fail message="Cannot build a release; fop.jar is not visible in the docs client.">
+            <condition>
+              <not><available file="${docs.root}/lib/fop.jar"/></not>
             </condition>
         </fail>     
     </target>
