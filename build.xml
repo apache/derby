@@ -322,8 +322,14 @@
     </propertyfile>
   </target>  
 
-    <!-- Create the release properties file -->
-  <target name="writeReleaseProperties" depends="init,prebuild">
+    <!--
+        Create the release properties file and check it in
+
+        Args:
+
+            bumpID    true or false, depending on whether you want to increment the last digit of the release id (defaults to false)
+    -->
+  <target name="writeReleaseProperties" depends="init,prebuild,promptforsvncredentials,promptforreleaseid">
 
     <taskdef
       name="writeReleaseProperties"
@@ -331,11 +337,27 @@
       classpath="${out.dir}"
     />
 
+    <property name="releasePropertyFile" value="${properties.dir}/release.properties"/>
+    <property name="bumpID" value="false"/>
+
     <writeReleaseProperties
       releaseID="${derby.release.id}"
-      releasePropertiesFileName="${properties.dir}/release.properties"
+      releasePropertiesFileName="${releasePropertyFile}"
+      bump="${bumpID}"
     />
 
+    <!--
+        If we were asked to bump the release id, then the actual release id
+        will be different from the original id passed into this target.
+    -->
+    <echo message="Derby release ID set to: ${derby.release.id.new}"/>
+
+    <!-- Check in the new release id. -->
+    <antcall target="checkinfile">
+       <param name="checkinComment" value="Derby release ID set to: ${derby.release.id.new}"/>
+       <param name="fileName" value="${releasePropertyFile}"/>
+    </antcall>
+    
   </target>  
 
 <!-- ==================================================================== -->
@@ -1868,11 +1890,35 @@
    <!-- Checkin the generated error documentation to the docs client -->
    <target name="copyerrordocs">
 
+     <property name="refdir" value="${docs.root}/src/ref"/>
+
+     <copy file="${sqlstateTables}" todir="${refdir}"/>
+
+      <antcall target="checkinfile">
+         <param name="checkinComment" value="Check in SQLState tables as part of building a release."/>
+         <param name="fileName" value="${refdir}/${sqlstateTables}"/>
+      </antcall>
+
+     <!-- Bring the docs client up to date again -->
+     <antcall target="updatesvndoc"/>
+
+   </target>
+
+   <!--
+       Checkin in-flight edits
+
+       Args:
+           checkinComment   This is the subversion checkin comment.
+           fileName   This is the name of the file to checking (could be the root of the client).
+   -->
+   <target name="checkinfile">
+
      <property name="checkinMessage" value="${release.base}/tmp.checkin.message"/>
+     <property name="fullComment" value="[RELEASE CHECKIN] ${checkinComment}"/>
 
-     <copy file="${sqlstateTables}" todir="${docs.root}/src/ref"/>
+     <echo file="${checkinMessage}" message="${fullComment}"/>
+     <echo message="Checking in ${fileName} with this comment: ${fullComment}"/>
 
-     <echo file="${checkinMessage}" message="Check in SQLState tables as part of building a release."/>
      <exec executable="svn">
        <arg value="commit"/>
        <arg value="--username"/>
@@ -1881,7 +1927,7 @@
        <arg value="${svn.password}"/>
        <arg value="-F"/>
        <arg value="${checkinMessage}"/>
-       <arg value="${docs.root}"/>
+       <arg value="${fileName}"/>
      </exec>
 
      <!-- Bring the docs client up to date again -->
@@ -2483,10 +2529,20 @@ you should not have to do this.
       <delete dir="${lf.dir}"/>
       <delete file="${release.dir}/maintversion.properties"/>
 
+       <!-- the release candidate has been built. now we can bump the release id.  -->
+       <antcall target="writeReleaseProperties">
+          <param name="bumpID" value="true"/>
+       </antcall>
+
     </target>
 
     <!-- do most of the ant calls to prepare a release -->
     <target name="prepareforrelease" depends="checkdocsroot,checksvnclientsclean,promptforreleaseproperties,checkstateremoved,checksanenotset,cleanalljars,cleandocs,clobber,cleanreleasefiles">
+
+        <!-- set the release id -->
+        <antcall target="writeReleaseProperties">
+           <param name="bumpID" value="false"/>
+        </antcall>
 
         <!-- we should already be squeeky clean, depends removed jars, javadoc, snapshot, classes, and old release artifacts -->
         <antcall target="updatesvnclients"/>
@@ -2535,13 +2591,21 @@ you should not have to do this.
 
         Sneaky, very, very sneaky.
     -->
-    <target name="promptforreleaseproperties" depends="prebuild">
+    <target name="promptforreleaseproperties" depends="promptforsvncredentials,promptforpgpcredentials,promptforreleaseid"/>
+
+    <!-- Define the task which prompts for missing properties -->
+    <target name="defineprompt" depends="prebuild">
 
         <taskdef
           name="promptForProperty"
           classname="org.apache.derbyPreBuild.PropertyPrompt"
           classpath="${out.dir}"
         />
+
+    </target>
+
+    <!-- Prompt for subversion credentials if they are missing -->
+    <target name="promptforsvncredentials" depends="defineprompt">
 
         <promptForProperty
           propertyName="svn.username"
@@ -2553,9 +2617,24 @@ you should not have to do this.
           prompt="Enter your Apache subversion password >  "
         />
 
+    </target>
+
+    <!-- Prompt for key-signing credentials if they are missing -->
+    <target name="promptforpgpcredentials" depends="defineprompt">
+
         <promptForProperty
           propertyName="pgp.passphrase"
           prompt="Enter your pgp passphrase >  "
+        />
+
+    </target>
+
+    <!-- Prompt for release id if it is missing -->
+    <target name="promptforreleaseid" depends="defineprompt">
+
+        <promptForProperty
+          propertyName="derby.release.id"
+          prompt="Enter the id of this release (e.g., 10.7.1.0) >  "
         />
 
     </target>

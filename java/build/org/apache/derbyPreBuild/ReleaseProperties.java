@@ -29,6 +29,7 @@ import java.util.Calendar;
 import java.util.StringTokenizer;
 
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.taskdefs.Property;
 import org.apache.tools.ant.Task;
 
 /**
@@ -81,6 +82,9 @@ public class ReleaseProperties extends Task
     // set by caller. name of file where release properties will be written
     private String _releasePropertiesFileName;
     
+    // set by caller. true if the last digit of the release id should be bumped.
+    private boolean _bump;
+    
     /////////////////////////////////////////////////////////////////////////
     //
     //  CONSTRUCTORS
@@ -108,9 +112,13 @@ public class ReleaseProperties extends Task
     /** <p>Let Ant set the output file name.</p>*/
     public void setReleasePropertiesFileName( String fileName ) { _releasePropertiesFileName = fileName; }
 
+    /** <p>Let Ant set our bumping behavior to true or false.</p>*/
+    public void setBump( String bumpFlag ) { _bump = Boolean.parseBoolean( bumpFlag ); }
+
    /**
      * <p>
-     * Create the release properties file from the release id.
+     * Create the release properties file from the release id. Sets the
+     * property derby.release.id.new equal to the resulting release id.
      * </p>
      */
     public  void    execute()
@@ -122,6 +130,8 @@ public class ReleaseProperties extends Task
 
         try {
             VersionID versionID = new VersionID( _releaseID );
+            if ( _bump ) { versionID.bump(); }
+            
             int major = versionID.getMajor();
             int minor = versionID.getMinor();
 
@@ -138,6 +148,8 @@ public class ReleaseProperties extends Task
             propertiesPW.println( "beta=" + versionID.isBeta() );
             propertiesPW.println( "copyright.comment=Copyright 1997, " + getCurrentYear() + " The Apache Software Foundation or its licensors, as applicable." );
             propertiesPW.println( "vendor=The Apache Software Foundation" ) ;
+
+            setProperty( "derby.release.id.new", versionID.toString() );
         }
         catch (Exception e)
         {
@@ -244,16 +256,50 @@ public class ReleaseProperties extends Task
             catch (Exception e) { throw badID( text ); }
         }
 
+        /** Bump the last digit of the release id */
+        public void bump() { _point++; }
+
         public int getMajor() { return _major; }
         public int getMinor() { return _minor; }
         public int getFixpack() { return _fixpack; }
         public int getPoint() { return _point; }
         public boolean isBeta() { return _isBeta; }
 
+        public String toString()
+        {
+            StringBuffer buffer = new StringBuffer();
+
+            buffer.append( _major ); buffer.append( '.' );
+            buffer.append( _minor ); buffer.append( '.' );
+            buffer.append( _fixpack ); buffer.append( '.' );
+            buffer.append( _point );
+
+            if ( _isBeta ) { buffer.append( " beta" ); }
+
+            return buffer.toString();
+        }
+
         private BuildException badID( String text )
         {
             return new BuildException( "Version id \"" + text + "\" is not a string of the form \"N.N.N.N\" or \"N.N.N.N beta\"" );
         }
+    }
+
+    /**
+     * <p>
+     * Set an ant property.
+     * </p>
+     */
+    private void    setProperty( String name, String value )
+        throws BuildException
+    {
+        Property    property = new Property();
+
+        property.setName( name );
+        property.setValue( value );
+
+        property.setProject( getProject() );
+        property.execute();
     }
 
 }
