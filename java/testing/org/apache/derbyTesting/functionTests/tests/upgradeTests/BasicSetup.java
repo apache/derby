@@ -50,7 +50,46 @@ public class BasicSetup extends UpgradeChange {
     public BasicSetup(String name) {
         super(name);
     }
-      
+    
+    /**
+     * Simple test of the triggers. Added for DERBY-4835
+     */
+    public void testTriggerBasic() throws SQLException
+    {
+        Statement s = createStatement();
+        switch (getPhase())
+        {
+        case PH_CREATE:
+            s.executeUpdate("CREATE TABLE Trigger_t1 " +
+            		"(c1 INTEGER NOT NULL GENERATED ALWAYS " +
+            		"AS IDENTITY (START WITH 1, INCREMENT BY 1), " +
+            		"max_size INTEGER NOT NULL, "+
+            		"CONSTRAINT c1_pk PRIMARY KEY (c1))");
+            s.executeUpdate("CREATE TABLE Trigger_t2 "+
+            		"(c1 INTEGER DEFAULT 0 NOT NULL)");
+            s.executeUpdate("CREATE TRIGGER gls_blt_trg "+
+            		"AFTER INSERT ON Trigger_t1 FOR EACH ROW MODE DB2SQL "+
+            		"INSERT INTO Trigger_t2(c1) "+
+            		"VALUES ( (select max(c1) from Trigger_t1))");
+            s.executeUpdate("INSERT INTO Trigger_t1(max_size) "+
+            		"VALUES(20)");
+            break;
+        case PH_SOFT_UPGRADE:
+            s.executeUpdate("INSERT INTO Trigger_t1(max_size) "+
+    		"VALUES(20)");
+            break;
+        case PH_POST_SOFT_UPGRADE:
+            s.executeUpdate("INSERT INTO Trigger_t1(max_size) "+
+    		"VALUES(20)");
+            break;
+        case PH_HARD_UPGRADE:
+            s.executeUpdate("INSERT INTO Trigger_t1(max_size) "+
+    		"VALUES(20)");
+            break;
+        }
+        s.close();
+    }
+
     /**
      * Simple test of the old version from the meta data.
      */

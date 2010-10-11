@@ -518,8 +518,10 @@ public	class DD_Version implements	Formatable
 			// SPSes won't be restored.
 			if (fromVersion.majorVersionNumber >= DataDictionary.DD_VERSION_DERBY_10_5)
 				bootingDictionary.updateMetadataSPSes(tc);
-			else
-				bootingDictionary.clearSPSPlans();
+			//Following make sure that the stored plans (including the ones for
+			//triggers) will get cleared during upgrade and hence we will not
+			//hold on to stale plans.
+			bootingDictionary.clearSPSPlans();
 
 			DD_Version lastRun;
 			
