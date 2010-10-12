@@ -36,6 +36,17 @@ Short description of the required steps:
     with the property 'sanity' in the top-level POM.
     The jars are expected to be found in 'jars/[in]sane' relative to the
     checked out code repository.
+    
+    If generating artifacts for a release you have not built yourself, the
+    following steps are recommended:
+        1) update the source to the revision of the release. 
+        2) build the source using sane=false.
+        3) make sure the version reported by sysinfo is correct.
+        4) download the lib distribution for the release.
+        5) *IMPORTANT* verify the download (checksum and signature).
+        6) copy the JAR files and the WAR file from the unpacked distribution
+           file into 'jars/insane'.
+        7) follow the remaining instructions for generating Maven artifacts
 
  b) Specify required information for one or all of the following sub-steps.
     To successfully generate and deploy release artifacts, all of these
@@ -160,7 +171,7 @@ community.
 The dates are when the artifacts were written to the central Maven repository
 (repo1.maven.org/maven2 or repo2.maven.org/maven2).
 
-2010-05-18 10.6.1.0      OK
+2010-05-18 10.6.1.0     OK
 2009-10-07 10.5.3.0_1   OK
 2009-08-26 10.5.3.0     BROKEN
     An error in all the POMs made these artifacts unusable (DERBY-4390).
