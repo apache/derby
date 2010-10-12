@@ -36,8 +36,16 @@
 
 <!-- Targets -->
 
-  <target name="buildsource" depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,jdbc3stubs,jdbc4stubs,felixStubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo,binscripts"/>
-  <target name="all" depends="buildsource,demo,testing,pptesting,runmessagecheck"/>
+  <target
+      name="buildsource"
+      depends="checkCompilerLevel,init,prebuild,setCompilerProperties,jsr169stubs,jdbc3stubs,jdbc4stubs,felixStubs,engine,storeless,tools,drda,client,build,versioninfo,localeinfo,binscripts"
+      description="Compile the product source (does not build the tests)."
+  />
+  <target
+      name="all"
+      depends="buildsource,demo,testing,pptesting,runmessagecheck"
+      description="Compile all of the source, including tests as well as production code."
+  />
 
 <!-- ==================================================================== -->
 <!--                       Initialize targets                             -->
@@ -126,7 +134,8 @@
     <property name="showenv.done" value="true"/>
   </target>
 
-  <target name="checkCompilerLevel" description="Make sure compiler level is Java 5 level or higher.">
+  <!--  Make sure compiler level is Java 5 level or higher -->
+  <target name="checkCompilerLevel">
 
     <!--
        Allow compilation of JDBC4 classes at 1.6 level if compiler supports it.
@@ -213,9 +222,8 @@
     <delete file="${out.dir}/org/apache/derby/info/dnc.properties"/>
   </target>
 
-  <target name="setCompilerProperties" unless="compilerPropsAlreadySet"
-          description="Set the ant variables which identify the compiler classpaths. Remove the autosetProps logic when this target becomes mandatory."
-          depends="prebuild">
+  <!-- Set the ant variables which identify the compiler classpaths. -->
+  <target name="setCompilerProperties" unless="compilerPropsAlreadySet" depends="prebuild">
 
     <antcall target="printCompilerProperties"> <param name="checkEvent" value="Before setting properties: "/> </antcall>
 
@@ -274,9 +282,8 @@
 
   </target>
 
-  <target name="setInitialProperties" if="dontAutosetProps"
-          description="Set the initial properties for this build script. This duplicates the property setting block in setCompilerProperties. Once we make setCompilerProperties mandatory, this target should be removed."
-          >
+  <!-- Set the initial properties for this build script. This duplicates the property setting block in setCompilerProperties. Once we make setCompilerProperties mandatory, this target should be removed. -->
+  <target name="setInitialProperties" if="dontAutosetProps">
 
     <property file="${properties.dir}/defaultcompiler.properties"/>
     <property file="${properties.dir}/${build.compiler}.properties"/>
@@ -599,9 +606,9 @@
 
   <property name="state.file" value="${generated.sanity.dir}/state.properties"/>
   <property file="${state.file}"/>
-  <target name="state" if="needstate"
-          depends="showenv,getstate"
-          description="Build SanityState.java">
+
+  <!-- Build SanityState.java -->
+  <target name="state" if="needstate" depends="showenv,getstate">
     <echo level="info" message="  Generating SanityState.java..."/>
     <property name="sane" value="true"/>
     <filter token="SANE" value="${sane}"/>
@@ -626,7 +633,11 @@
 <!-- =================================================================== -->
 <!--                 Remove all built objects (except jars)              -->
 <!-- =================================================================== -->
-  <target name="clobber" depends="clean,cleangenerated,cleanstate,cleanreleasefiles">
+  <target
+      name="clobber"
+      depends="clean,cleangenerated,cleanstate,cleanreleasefiles"
+      description="Remove all build artifacts."
+  >
     <delete file="${out.base}/changenumber.properties"/>
   </target>
 
@@ -650,8 +661,9 @@
 <!-- ==================================================================== -->
 <!--                         Build parsers                                -->
 <!-- ==================================================================== -->
-  <target name="parsers"
-          description="Build the parsers">
+
+  <!-- Top level target for building both of the javacc parsers -->
+  <target name="parsers">
     <ant dir="${derby.tools.dir}/impl/tools"  target="parser"/>
     <ant dir="${derby.engine.dir}/impl/sql"  target="parser"/>
   </target>
@@ -840,16 +852,19 @@
 <!--                     Class Size Catalog build                        -->
 <!-- =================================================================== -->
 
-  <!-- Note that checking the up-to-date status of the files scanned by  -->
-  <!-- ClassSizeCrawler will not always result in the ClassSizeCatalog   -->
-  <!-- being updated properly. We would have to be able to scan the full -->
-  <!-- dependency tree. This does prevent recompilation in most cases,   -->
-  <!-- and requires it in the most obvious. If there is concern that     -->
-  <!-- the ClassSizeCatalog may have changed significantly since the     -->
-  <!-- last build, run clobber and rebuild to regenerate it.        -->
+  <!--
+      Create the class size catalog, a java file
 
-  <target name="class_size_catalog" depends="cscuptodate" unless="csc.uptodate"
-          description="create the class size catalog -- a java file">
+      Note that checking the up-to-date status of the files scanned by
+      ClassSizeCrawler will not always result in the ClassSizeCatalog
+      being updated properly. We would have to be able to scan the full
+      dependency tree. This does prevent recompilation in most cases,
+      and requires it in the most obvious. If there is concern that
+      the ClassSizeCatalog may have changed significantly since the
+      last build, run clobber and rebuild to regenerate it.
+  -->
+
+  <target name="class_size_catalog" depends="cscuptodate" unless="csc.uptodate">
     <java classname="org.apache.derbyBuild.ClassSizeCrawler"
           fork="yes"
           failonerror="yes">
@@ -942,8 +957,11 @@
   <property name="javadoc.exclusions" value="${javadoc.temp.dir}/javadoc_exclusions"/>
   <property name="javadoc.inclusions" value="${javadoc.temp.dir}/javadoc_inclusions"/>
 
-  <target name="javadoc"
-    depends="init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs,testingdocs"/>
+  <target
+      name="javadoc"
+      depends="init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs,testingdocs"
+      description="Build all of the javadoc, including the public api, the production javadoc, and the testing javadoc."
+  />
 
   <target name="publishedapi" depends="initjars">
  
@@ -1281,7 +1299,12 @@
 <!-- =================================================================== -->
 
   <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"/>
-  <target name="buildjars" depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"/>
+
+  <target
+      name="buildjars"
+      depends="initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"
+      description="Build all of the Derby jar files."
+  />
 
   <target name="initjars" depends="setsanityname,getsvnversion,setCompilerProperties">
     <property name="derby.jar.dir" value="${jarsdist.dir}/${sanity.name}"/>
@@ -2084,7 +2107,10 @@
     </java>
   </target>
 
-  <target name="junit-clean">
+  <target
+      name="junit-clean"
+      description="Remove the output produced by the JUnit tests."
+  >
     <delete includeEmptyDirs="true">
       <fileset dir="${basedir}" includes="junit*/**"/>
     </delete>
@@ -2342,8 +2368,11 @@
       
   </target>
    
-  <target name="junit-all" depends="junit-core,junit-jdbc4,junit-jmx,junit-lowmem">
-  </target>
+  <target
+      name="junit-all"
+      depends="junit-core,junit-jdbc4,junit-jmx,junit-lowmem"
+      description="Run the JUnit tests."
+  />
  
   <target name="junitreport" depends="junit-all,junit-html"/>
   
@@ -2520,7 +2549,7 @@ you should not have to do this.
     <target
         name="release"
         depends="prepareforrelease"
-        description="Build the release distributions"
+        description="Build the release distributions."
     >
       <ant antfile="${basedir}/tools/release/build.xml" target="release"/>
 
@@ -2738,7 +2767,7 @@ you should not have to do this.
     <target
         name="createBranch"
         depends="checkdocsroot,checksvnclientsclean"
-        description="Create a new branch (both docs and code)"
+        description="Create a new branch (both docs and code)."
     >
       <antcall target="updatesvnclients"/>
       <antcall target="getsvnversion"/>
