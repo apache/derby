@@ -2513,6 +2513,10 @@ you should not have to do this.
         </emma>
     </target>
 
+<!-- ==================================================================== -->
+<!--                         Release Management                    -->
+<!-- ==================================================================== -->
+
     <target
         name="release"
         depends="prepareforrelease"
@@ -2654,6 +2658,35 @@ you should not have to do this.
 
     </target>
 
+    <!--
+        Prompt for whether we should continue. The user is offered a Y/N choice.
+
+        Args:
+            prompt
+    -->
+    <target name="prompttocontinue" depends="defineprompt">
+
+        <fail message="Did not expect that property prompt.to.continue would be set. Make sure that this target is only invoked via antcall and not in a dependency list.">
+            <condition>
+                <isset property="prompt.to.continue"/>             
+            </condition>
+        </fail>     
+
+        <promptForProperty
+          propertyName="prompt.to.continue"
+          prompt="${prompt}  Continue? (Y/N) >  "
+        />
+
+        <fail message="Terminating.">
+            <condition>
+              <not>
+                <equals casesensitive="false" arg1="${prompt.to.continue}" arg2="Y"/>
+              </not>
+            </condition>
+        </fail>     
+
+    </target>
+
     <target name="checkstateremoved" depends="state.exists">
         <fail message="Cannot build a release; please remove java/engine/state.properties by running ant cleanstate (or run ant clobber)">
             <condition>
@@ -2702,5 +2735,65 @@ you should not have to do this.
         <delete dir="${jarsdist.dir}"/>
     </target>
 
+    <target
+        name="createBranch"
+        depends="checkdocsroot,checksvnclientsclean"
+        description="Create a new branch (both docs and code)"
+    >
+      <antcall target="updatesvnclients"/>
+      <antcall target="getsvnversion"/>
+
+      <loadfile srcFile="${out.base}/changenumber.properties"
+               failonerror="false"
+               property="changenumber">
+        <filterchain>
+          <striplinebreaks/>
+        </filterchain>
+      </loadfile>    
+
+      <property file="${properties.dir}/release.properties"/>
+
+      <antcall target="prompttocontinue">
+         <param name="prompt" value="Creating ${eversion} branch starting at revision ${changenumber}."/>
+      </antcall>
+
+      <antcall target="branchrepository">
+         <param name="startingRevision" value="${changenumber}"/>
+         <param name="sourceURL" value="https://svn.apache.org/repos/asf/db/derby/code/trunk/"/>
+         <param name="targetURL" value="https://svn.apache.org/repos/asf/db/derby/code/branches/${eversion}/"/>
+         <param name="checkinComment" value="Created the ${eversion} code branch."/>
+      </antcall>
+
+      <antcall target="branchrepository">
+         <param name="startingRevision" value="${changenumber}"/>
+         <param name="sourceURL" value="https://svn.apache.org/repos/asf/db/derby/docs/trunk/"/>
+         <param name="targetURL" value="https://svn.apache.org/repos/asf/db/derby/docs/branches/${eversion}/"/>
+         <param name="checkinComment" value="Created the ${eversion} docs branch."/>
+      </antcall>
+
+    </target>
+
+    <!--
+        Branch one of the repositories
+
+        Args:
+            startingRevision  subversion revision number of initial set of files
+            sourceURL  points at the source (trunk) repository
+            targetURL  location of the new (branch) repository
+            checkinComment   one line description of the new branch
+    -->
+    <target name="branchrepository">
+
+      <exec executable="svn">
+        <arg value="copy"/>
+        <arg value="-r"/>
+        <arg value="${startingRevision}"/>
+        <arg value="${sourceURL}"/>
+        <arg value="${targetURL}"/>
+        <arg value="-m"/>
+        <arg value="${checkinComment}"/>
+      </exec>
+
+    </target>
 
 </project>
