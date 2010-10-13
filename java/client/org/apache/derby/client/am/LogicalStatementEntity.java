@@ -165,8 +165,14 @@ abstract class LogicalStatementEntity
             this.owner = null;
             // Reset the owner of the physical statement.
             temporaryPsRef.setOwner(null);
+            // NOTE: Accessing ps state directly below only to avoid tracing.
             // If the underlying statement has become closed, don't cache it.
-            if (temporaryPsRef.isClosed()) {
+            if (!temporaryPsRef.openOnClient_) {
+                return;
+            }
+            // If the poolable hint is false, don't cache it.
+            if (!temporaryPsRef.isPoolable) {
+                temporaryPsRef.close();
                 return;
             }
 
