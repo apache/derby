@@ -30,6 +30,7 @@ import java.io.ObjectInput;
 import java.io.ObjectOutput;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
+import org.apache.derby.iapi.util.IdUtil;
 
 /**
  * Describe a routine (procedure or function) alias.
@@ -387,7 +388,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
 				sb.append(RoutineAliasInfo.parameterMode(parameterModes[i]));
 				sb.append(' ');
 			}
-			sb.append(parameterNames[i]);
+			sb.append(IdUtil.normalToDelimited(parameterNames[i]));
 			sb.append(' ');
 			sb.append(parameterTypes[i].getSQLstring());
 		}

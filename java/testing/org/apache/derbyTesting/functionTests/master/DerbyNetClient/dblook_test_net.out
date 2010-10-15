@@ -19,7 +19,7 @@ org.apache.derbyTesting.functionTests.util.ProcedureTest
 P
 P
 false
-inoutparams3(INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA DYNAMIC RESULT SETS 2
+inoutparams3(INOUT "A" CHAR(10),IN "B" INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA DYNAMIC RESULT SETS 2
 <systemname>
 -----
 <systemid>
@@ -59,7 +59,7 @@ org.apache.derbyTesting.functionTests.util.TestPropertyInfo
 F
 F
 false
-getAllTableProperties(SCH VARCHAR(128),TBL VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA RETURNS NULL ON NULL INPUT
+getAllTableProperties("SCH" VARCHAR(128),"TBL" VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA RETURNS NULL ON NULL INPUT
 <systemname>
 -----
 <systemid>
@@ -69,7 +69,7 @@ org.apache.derbyTesting.functionTests.util.TestPropertyInfo
 F
 F
 false
-getAllTableProperties(SCH VARCHAR(128),TBL VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL CALLED ON NULL INPUT
+getAllTableProperties("SCH" VARCHAR(128),"TBL" VARCHAR(128)) RETURNS VARCHAR(1000) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL CALLED ON NULL INPUT
 <systemname>
 -----
 <systemid>
@@ -79,7 +79,7 @@ org.apache.derbyTesting.functionTests.util.ProcedureTest
 P
 P
 false
-inoutparams4(OUT A DECIMAL(4,2),IN B VARCHAR(255)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+inoutparams4(OUT "A" DECIMAL(4,2),IN "B" VARCHAR(255)) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
 <systemname>
 -----
 <systemid>
@@ -89,7 +89,7 @@ org.apache.derbyTesting.functionTests.util.ProcedureTest
 P
 P
 false
-inoutparams3(INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL DYNAMIC RESULT SETS 4
+inoutparams3(INOUT "A" CHAR(10),IN "B" INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA CONTAINS SQL DYNAMIC RESULT SETS 4
 <systemname>
 -----
 <systemid>
@@ -99,7 +99,7 @@ org.apache.derbyTesting.functionTests.util.ProcedureTest
 P
 P
 false
-sqlControl(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA
+sqlControl(OUT "E1" VARCHAR(128),OUT "E2" VARCHAR(128),OUT "E3" VARCHAR(128),OUT "E4" VARCHAR(128),OUT "E5" VARCHAR(128),OUT "E6" VARCHAR(128),OUT "E7" VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA
 <systemname>
 -----
 <systemid>
@@ -139,7 +139,7 @@ org.apache.derbyTesting.functionTests.util.ProcedureTest
 P
 P
 false
-sqlControl(OUT E1 VARCHAR(128),OUT E2 VARCHAR(128),OUT E3 VARCHAR(128),OUT E4 VARCHAR(128),OUT E5 VARCHAR(128),OUT E6 VARCHAR(128),OUT E7 VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
+sqlControl(OUT "E1" VARCHAR(128),OUT "E2" VARCHAR(128),OUT "E3" VARCHAR(128),OUT "E4" VARCHAR(128),OUT "E5" VARCHAR(128),OUT "E6" VARCHAR(128),OUT "E7" VARCHAR(128)) LANGUAGE JAVA PARAMETER STYLE JAVA NO SQL
 <systemname>
 -----
 <systemid>
@@ -173,13 +173,33 @@ false
 <systemname>
 -----
 <systemid>
+func "'
+schema "'
+java.lang.Integer
+F
+F
+false
+toString("col with quotes ""'" INTEGER) RETURNS VARCHAR(20) LANGUAGE JAVA PARAMETER STYLE JAVA READS SQL DATA CALLED ON NULL INPUT
+<systemname>
+-----
+<systemid>
+proc "'
+schema "'
+java.lang.Thread
+P
+P
+false
+sleep(IN "col with quotes ""'" BIGINT) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA
+<systemname>
+-----
+<systemid>
 procTwo
 APP
 org.apache.derbyTesting.functionTests.util.ProcedureTest
 P
 P
 false
-inoutparams3(INOUT A CHAR(10),IN B INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA DYNAMIC RESULT SETS 2
+inoutparams3(INOUT "A" CHAR(10),IN "B" INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA DYNAMIC RESULT SETS 2
 <systemname>
 -----
 ========== SYSCHECKS ==========
@@ -1765,6 +1785,10 @@ APP
 -----
 Foo Bar
 Foo Bar
+APP
+-----
+schema "'
+schema "'
 APP
 -----
 ========== SYSSTATEMENTS ==========

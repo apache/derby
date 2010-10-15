@@ -1675,13 +1675,13 @@ ij> -- Java casts to character types excluding CLOB are supported using Object.t
 select cast (aliasinfo as CHAR(240)) from sys.sysaliases where CAST(alias AS VARCHAR(128)) = 'INSTALL_JAR';
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
-INSTALL_JAR(IN URL VARCHAR(256),IN JAR VARCHAR(128),IN DEPLOY INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA    &
+INSTALL_JAR(IN "URL" VARCHAR(256),IN "JAR" VARCHAR(128),IN "DEPLOY" INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DA&
 ij> select cast (aliasinfo as VARCHAR(240)) from sys.sysaliases where CAST(alias AS VARCHAR(128)) = 'INSTALL_JAR';
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
-INSTALL_JAR(IN URL VARCHAR(256),IN JAR VARCHAR(128),IN DEPLOY INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA     
+INSTALL_JAR(IN "URL" VARCHAR(256),IN "JAR" VARCHAR(128),IN "DEPLOY" INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DA&
 ij> select cast (aliasinfo as LONG VARCHAR) from sys.sysaliases where CAST(alias AS VARCHAR(128)) = 'INSTALL_JAR';
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------
-INSTALL_JAR(IN URL VARCHAR(256),IN JAR VARCHAR(128),IN DEPLOY INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DATA     
+INSTALL_JAR(IN "URL" VARCHAR(256),IN "JAR" VARCHAR(128),IN "DEPLOY" INTEGER) LANGUAGE JAVA PARAMETER STYLE JAVA MODIFIES SQL DA&
 ij> 
