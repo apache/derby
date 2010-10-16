@@ -51,7 +51,7 @@
       <classpath>
         <pathelement path="${compile.classpath}"/>
       </classpath>
-      <include name="${derby.engine.dir}/iapi/util/*.java"/>
+      <include name="${derby.dir}/iapi/util/*.java"/>
     </javac>
   </target>
 
