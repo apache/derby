@@ -1932,6 +1932,45 @@
 
    </target>
 
+   <!-- Build the NOTICE file and check it in -->
+   <target name="buildnotice">
+
+     <property file="${properties.dir}/release.properties"/>
+     <property name="noticefile" value="${basedir}/NOTICE"/>
+
+     <!-- plug in the current copyright year -->
+     <copy overwrite="true" file="${derby.notice.src.dir}/preamble.txt" tofile="${noticefile}">
+       <filterset>
+         <filter token="COPYRIGHT_YEAR" value="${copyright.year}"/>
+       </filterset>
+     </copy>
+
+     <antcall target="appendnotice"><param name="sourcefile" value="initialgrant.txt"/></antcall>
+     <antcall target="appendnotice"><param name="sourcefile" value="nisttestgrant.txt"/></antcall>
+     <antcall target="appendnotice"><param name="sourcefile" value="jdbcstubs.txt"/></antcall>
+     <antcall target="appendnotice"><param name="sourcefile" value="felix.txt"/></antcall>
+     <antcall target="appendnotice"><param name="sourcefile" value="xalan.txt"/></antcall>
+     
+      <antcall target="checkinfile">
+         <param name="checkinComment" value="Check in NOTICE as part of building a release."/>
+         <param name="fileName" value="${noticefile}"/>
+      </antcall>
+
+   </target>
+
+   <!--
+       Append a file to the notice file
+
+       Args:
+           noticefile   Destination NOTICE file
+           sourcefile  Source file to append.
+   -->
+   <target name="appendnotice">
+     <concat destfile="${noticefile}" append="true">
+        <filelist files="${derby.notice.src.dir}/separator.txt,${derby.notice.src.dir}/${sourcefile}"/>
+     </concat>
+   </target>
+
    <!--
        Checkin in-flight edits
 
@@ -2601,6 +2640,9 @@ you should not have to do this.
         <antcall target="writeReleaseProperties">
            <param name="bumpID" value="false"/>
         </antcall>
+
+        <!-- update the NOTICE file with the current copyright year and check NOTICE in -->
+        <antcall target="buildnotice"/>
 
         <!-- copy the generated sqlstate tables to the docs client and check it in -->
         <antcall target="copyerrordocs"/>
