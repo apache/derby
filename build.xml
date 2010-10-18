@@ -1913,6 +1913,14 @@
    <!-- Checkin the generated error documentation to the docs client -->
    <target name="copyerrordocs">
 
+     <!-- Build the SQLState tables -->
+     <antcall target="all">
+        <param name="sane" value="true"/>
+        <param name="sanity" value="true"/>
+        <param name="sanity.name" value="sane"/>
+        <param name="deprecation" value="off"/>
+     </antcall>
+
      <property name="refdir" value="${docs.root}/src/ref"/>
 
      <copy file="${sqlstateTables}" todir="${refdir}"/>
@@ -1921,9 +1929,6 @@
          <param name="checkinComment" value="Check in SQLState tables as part of building a release."/>
          <param name="fileName" value="${refdir}/rrefexcept71493.dita"/>
       </antcall>
-
-     <!-- Bring the docs client up to date again -->
-     <antcall target="updatesvndoc"/>
 
    </target>
 
@@ -2597,7 +2602,10 @@ you should not have to do this.
            <param name="bumpID" value="false"/>
         </antcall>
 
-        <!-- we should already be squeeky clean, depends removed jars, javadoc, snapshot, classes, and old release artifacts -->
+        <!-- copy the generated sqlstate tables to the docs client and check it in -->
+        <antcall target="copyerrordocs"/>
+
+        <!-- sync the clients to guarantee that we are up-to-date -->
         <antcall target="updatesvnclients"/>
 
         <antcall target="clobber"/>
@@ -2624,9 +2632,6 @@ you should not have to do this.
         <antcall target="publishedapi">
             <param name="deprecation" value="off"/>
         </antcall>
-
-        <!-- copy the generated sqlstate tables to the docs client and check it in -->
-        <antcall target="copyerrordocs"/>
 
         <!-- build the docs now that the sqlstate tables are up to date -->
         <antcall target="builduserdocs"/>
