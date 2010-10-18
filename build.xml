@@ -1919,7 +1919,7 @@
 
       <antcall target="checkinfile">
          <param name="checkinComment" value="Check in SQLState tables as part of building a release."/>
-         <param name="fileName" value="${refdir}/${sqlstateTables}"/>
+         <param name="fileName" value="${refdir}/rrefexcept71493.dita"/>
       </antcall>
 
      <!-- Bring the docs client up to date again -->
@@ -1961,11 +1961,26 @@
    <!-- Build the user documentation -->
    <target name="builduserdocs" depends="checkdocsroot">
 
+     <property file="${properties.dir}/release.properties"/>
+
+      <antcall target="getsvnversion"/>
+      <loadfile srcFile="${out.base}/changenumber.properties"
+               failonerror="false"
+               property="changenumber">
+        <filterchain>
+          <striplinebreaks/>
+        </filterchain>
+      </loadfile>    
+
      <ant dir="${docs.root}" target="clobber"/>
 
      <exec executable="ant" dir="${docs.root}">
        <env key="ANT_OPTS" value="-Xmx512m"/>
        <env key="CLASSPATH" path="${docs.root}/lib/fop.jar"/>
+       <arg value="-Drelease.id.short=${eversion}"/>
+       <arg value="-Drelease.id.long=${release.id.long}"/>
+       <arg value="-Dcopyright.year=${copyright.year}"/>
+       <arg value="-Dsubversion.revision=${changenumber}"/>
        <arg value="all"/>
      </exec>
 

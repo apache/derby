@@ -38,6 +38,15 @@ import org.apache.tools.ant.Task;
  * when building the Derby distributions. For a description of the Derby release id,
  * see http://db.apache.org/derby/papers/versionupgrade.html
  * </p>
+ *
+ * <p>
+ * This task also sets a property for use by downstream targets during
+ * the release-build:
+ * </p>
+ *
+ * <ul>
+ * <li><b>derby.release.id.new</b> - The new id for the branch, in case we were asked to bump the release id.</li>
+ * </ul>
  */
 
 public class ReleaseProperties extends Task
@@ -67,8 +76,9 @@ public class ReleaseProperties extends Task
     
 	public final static int	MAINT_ENCODING = 1000000;
     private final static int MAINT_LENGTH = 7;
-	
 
+    // properties to set on the way out
+    private static final String NEW_RELEASE_ID = "derby.release.id.new";
 
     /////////////////////////////////////////////////////////////////////////
     //
@@ -134,6 +144,7 @@ public class ReleaseProperties extends Task
             
             int major = versionID.getMajor();
             int minor = versionID.getMinor();
+            int currentYear = getCurrentYear();
 
             propertiesFW = new FileWriter( target );
             propertiesPW = new PrintWriter( propertiesFW );
@@ -144,12 +155,14 @@ public class ReleaseProperties extends Task
             propertiesPW.println( "maint=" + encodeFixpackAndPoint( versionID ) );
             propertiesPW.println( "major=" + major );
             propertiesPW.println( "minor=" + minor );
-            propertiesPW.println( "eversion=" + major + "." + minor );
+            propertiesPW.println( "eversion=" + versionID.getBranchName() );
             propertiesPW.println( "beta=" + versionID.isBeta() );
-            propertiesPW.println( "copyright.comment=Copyright 1997, " + getCurrentYear() + " The Apache Software Foundation or its licensors, as applicable." );
+            propertiesPW.println( "copyright.comment=Copyright 1997, " + currentYear + " The Apache Software Foundation or its licensors, as applicable." );
             propertiesPW.println( "vendor=The Apache Software Foundation" ) ;
+            propertiesPW.println( "copyright.year=" + currentYear ) ;
+            propertiesPW.println( "release.id.long=" + versionID.toString() ) ;
 
-            setProperty( "derby.release.id.new", versionID.toString() );
+            setProperty( NEW_RELEASE_ID, versionID.toString() );
         }
         catch (Exception e)
         {
@@ -264,6 +277,8 @@ public class ReleaseProperties extends Task
         public int getFixpack() { return _fixpack; }
         public int getPoint() { return _point; }
         public boolean isBeta() { return _isBeta; }
+
+        public String getBranchName() { return Integer.toString( _major ) + '.' + Integer.toString( _minor ); }
 
         public String toString()
         {
