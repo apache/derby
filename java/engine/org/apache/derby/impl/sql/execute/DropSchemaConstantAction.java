@@ -27,6 +27,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
+import org.apache.derby.iapi.store.access.TransactionController;
 
 /**
  *	This class  describes actions that are ALWAYS performed for a
@@ -82,6 +83,7 @@ class DropSchemaConstantAction extends DDLConstantAction
 	{
 		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		DataDictionary dd = lcc.getDataDictionary();
+		TransactionController tc = lcc.getTransactionExecute();
 
 		/*
 		** Inform the data dictionary that we are about to write to it.
@@ -94,7 +96,7 @@ class DropSchemaConstantAction extends DDLConstantAction
 		*/
 		dd.startWriting(lcc);
 
-        SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, null, true);
+        SchemaDescriptor sd = dd.getSchemaDescriptor(schemaName, tc, true);
 
         sd.drop(lcc, activation);
 
