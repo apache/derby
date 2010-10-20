@@ -1598,7 +1598,7 @@ clp.list(System.out);
             String apppropsjvmflags = ap.getProperty("jvmflags");
             if (apppropsjvmflags != null)
             {
-                if (jvmflags != null)
+                if (jvmflags != null && jvmflags.length() > 0)
                     jvmflags = apppropsjvmflags + "^" + jvmflags;
                 else
                     jvmflags = apppropsjvmflags;
