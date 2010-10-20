@@ -110,7 +110,6 @@ abstract class BaseMonitor
 	private HashMap serviceProviders = new HashMap();
 	private static final String LINE = 
         "----------------------------------------------------------------";
-    private final static char COLON = ':';
 
 	// Vector of class objects of implementations, found in the System, application
 	// and default (modules.properties) properties
@@ -170,9 +169,10 @@ abstract class BaseMonitor
  
 		Monitor.getStream().println(LINE);
 		//Make a note of Engine shutdown in the log file
-		Monitor.getStream().println(new Date() + 
+		Monitor.getStream().println(
                 MessageService.getTextMessage(
-                    MessageId.CONN_SHUT_DOWN_ENGINE));
+                    MessageId.CONN_SHUT_DOWN_ENGINE,
+                    new Date().toString()));
 
 		if (SanityManager.DEBUG && reportOn) {
 			report("Shutdown request");
