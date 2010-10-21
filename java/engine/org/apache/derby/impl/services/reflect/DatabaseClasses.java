@@ -57,6 +57,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.security.AccessController;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 
 /**
 
@@ -181,13 +184,23 @@ abstract class DatabaseClasses
 		Object env = Monitor.getMonitor().getEnvironment();
 		File dir = env instanceof File ? (File) env : null;
 
-		File classFile = FileUtil.newFile(dir,filename);
+		final File classFile = FileUtil.newFile(dir,filename);
 
 		// find the error stream
 		HeaderPrintWriter errorStream = Monitor.getStream();
 
 		try {
-			FileOutputStream fis = new FileOutputStream(classFile);
+            FileOutputStream fis;
+            try {
+                fis = (FileOutputStream) AccessController.doPrivileged(
+                        new PrivilegedExceptionAction() {
+                            public Object run() throws IOException {
+                                return new FileOutputStream(classFile);
+                            }
+                        });
+            } catch (PrivilegedActionException pae) {
+                throw (IOException) pae.getCause();
+            }
 			fis.write(bytecode.getArray(),
 				bytecode.getOffset(), bytecode.getLength());
 			fis.flush();
@@ -197,7 +210,7 @@ abstract class DatabaseClasses
 			fis.close();
 		} catch (IOException e) {
 			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("Unable to write .class file");
+				SanityManager.THROWASSERT("Unable to write .class file", e);
 		}
 	}
 
