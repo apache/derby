@@ -2121,7 +2121,7 @@
     <!-- debug archives - DERBY-178 --> 
     <zip destfile="${snapshot.dir}/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.zip">
       <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}/lib" dir="${jarsdist.dir}/sane" includes="*.jar,*.war"/>
-      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,CHANGES,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
+      <zipfileset prefix="db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}" dir="${basedir}" includes="bin/**,LICENSE,NOTICE,README,javadoc/publishedapi/**" excludes="bin/templates/**"/>
     </zip>
     <tar destfile="${snapshot.dir}/db-derby-snapshot-debug-${major}.${minor}.${interim}.${point}-${changenumber}.tar.gz"
          compression="gzip">
