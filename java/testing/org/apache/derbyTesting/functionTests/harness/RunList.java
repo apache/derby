@@ -861,9 +861,12 @@ public class RunList
         String totaljvmflags = jvmflags;
         String subjvmflags = p.getProperty("jvmflags");
         String parentjvmflags = parentProperties.getProperty("jvmflags");
+        
         if ((subjvmflags != null) && (parentjvmflags != null) && (!subjvmflags.equals(parentjvmflags)))
         {
-            totaljvmflags = subjvmflags + "^" + totaljvmflags;
+            //DERBY-4680 Make sure ^ does not get prepended to jvmflags
+            if (subjvmflags != null &&  subjvmflags.length() > 0)
+                totaljvmflags = subjvmflags + "^" + totaljvmflags;
         }
         if (totaljvmflags != null)
         {

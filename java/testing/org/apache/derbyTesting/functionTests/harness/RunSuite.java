@@ -392,22 +392,23 @@ public class RunSuite
 		// when the time comes to have this converted into actual jvm flags
 		// the ones given at the command line will overwrite whatever's in the suite
 		String jflags = sp.getProperty("jvmflags");
-		if (jvmflags != null)
+		if (jvmflags != null && jvmflags.length() > 0)
 		{
-			if (jflags != null)
+		  //DERBY-4680 Make sure ^ does not get appended to jvmflags
+		    if (jflags != null && jflags.length() > 0)
 		    		suiteProperties.put("jvmflags", (jvmflags + "^" + jflags));
 			else
 		    		suiteProperties.put("jvmflags", jvmflags);
 		}
 		else
 		{
-			if (jflags != null)
+			if (jflags != null && jflags.length() >0)
 		    		suiteProperties.put("jvmflags", jflags);
 		}
 		String testflags = sp.getProperty("testJavaFlags");
 		if (testflags != null)
 		{
-		    if (testJavaFlags == null)
+		    if (testJavaFlags == null || testJavaFlags.length() == 0)
 		        testJavaFlags = testflags;
 		    else // add to testJavaFlags
 		        testJavaFlags = testJavaFlags + "^" + testflags;
@@ -416,7 +417,7 @@ public class RunSuite
 		String testprops = sp.getProperty("testSpecialProps");
 		if (testprops != null)
 		{
-		    if (testSpecialProps == null)
+		    if (testSpecialProps == null || testSpecialProps.length() == 0)
 		        testSpecialProps = testprops;
 		    else // add to testSpecialProps
 		        testSpecialProps = testSpecialProps + "^" + testprops;
