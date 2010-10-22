@@ -33,7 +33,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.5.3.0</previousReleaseID>
+<previousReleaseID>10.6.2.1</previousReleaseID>
 
 <!--
     Identifier(s) of previously released versions. Any issue that was fixed in
@@ -43,12 +43,6 @@ with real information.
     E.g.: 10.3.1.4 and 10.3.2.1
     
 -->
-<excludeReleaseID>10.3.3.0</excludeReleaseID>
-<excludeReleaseID>10.4.1.3</excludeReleaseID>
-<excludeReleaseID>10.4.2.0</excludeReleaseID>
-<excludeReleaseID>10.5.1.1</excludeReleaseID>
-<excludeReleaseID>10.5.2.0</excludeReleaseID>
-<excludeReleaseID>10.5.3.0</excludeReleaseID>
 
 <buildInfo>
 
@@ -110,38 +104,16 @@ This is a feature release. The following new features were added:
 
 <ul>
 
-<li><b>Sequence Generators</b> - Named generators for allocating successive, evenly spaced numbers. See feature T176 of the SQL Standard.</li>
+<li><b>Definer's rights</b> - Procedures and functions can now run with their creators' privileges, rather than with the current user's permissions.</li>
 	
-<li><b>User-defined types</b> - Named types bound to serializable Java objects.</li>
+<li><b>BOOLEAN data type</b> - Boolean is now a legal data type for columns, routine arguments, and function return values.</li>
 	
-<li><b>Restricted table functions</b> - Limits on the columns and rows returned by table functions.</li>
+<li><b>Table truncation</b> - A new TRUNCATE TABLE command drops all rows in a table quickly.</li>
 	
-<li><b>XPLAIN statistics collection</b> - Query plan statistics stored in tables for later analysis.</li>
+<li><b>Query plan browsing</b> - A new PlanExporter tool helps developers visualize query plans better.</li>
 
-<li><b>GROUP BY ROLLUP</b> - A subset of the SQL Standard ROLLUP functionality on the GROUP BY clause. See feature T431 of the SQL Standard.</li>
-	
-<li><b>CROSS JOIN</b> - CROSS JOIN syntax. See feature F401-04 of the SQL Standard.</li>
-	
-<li><b>Named columns join</b> - USING clauses in joins.</li>
-	
-<li><b>SHOW FUNCTIONS</b> - IJ command that lists stored functions.</li>
-	
-<li><b>In-memory back end enhancements</b> - Numerous improvements, including the ability to delete in-memory databases.</li>
-	
-<li><b>ORDER BY in subqueries</b> - Syntax for explicitly ordering rows returned by subqueries. See features F851, F852, and F855 of the SQL Standard.</li>
-	
-<li><b>OFFSET, FETCH FIRST/NEXT in subqueries</b> - Generalized syntax for retrieving row subsets. See features F856, F857, F858, F859, F861, F862, F863, and F864 of the SQL Standard.</li>
-	
-<li><b>NATURAL JOIN</b> - Support for NATURAL JOIN. See feature T431 of the SQL Standard.</li>
-	
-<li><b>Qualified identifers in ij</b> - Ability to reference cursors and prepared statements in other connections.</li>
-	
-<li><b>Configurable hash algorithm</b> - Ability to customize the hash algorithm used by BUILTIN authentication.</li>
-	
-<li><b>Context-sniffing scripts</b> - Ability of shipped scripts to locate Derby jars when DERBY_HOME isn't set.</li>
-	
-<li><b>Case-insensitive strings</b> - Ability to ignore case in string comparisons and sorts.</li>
-	
+<li><b>Unicode database names</b> - Remote clients can now use database names which include unicode characters outside the ascii codeset.</li>
+
 </ul>
 
 </newFeatures>
