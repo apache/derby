@@ -563,6 +563,11 @@ public abstract class BaseTestCase
                 getSystemProperty("java.vendor")));
     }
     
+    public static final boolean isIBMJVM() {
+        return ("IBM Corporation".equals(
+                getSystemProperty("java.vendor")));
+    }
+    
    /**
     * Reads output from a process and returns it as a string.
     * This will block until the process terminates.

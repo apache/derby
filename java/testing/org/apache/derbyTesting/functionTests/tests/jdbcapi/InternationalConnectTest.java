@@ -25,14 +25,13 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
+import java.util.ArrayList;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
@@ -55,16 +54,34 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
      * 
      */
    
+    /* Keep track of the databases created in the fixtures to cleanup in tearDown() */
+    private ArrayList databasesForCleanup;
+    
     /**
      * @param name
      */
     public InternationalConnectTest(String name) {
         super(name);
-    
+        
+        databasesForCleanup = new ArrayList();
     }
 
     public void testBoundaries() throws SQLException, UnsupportedEncodingException {
         if (usingEmbedded()) return; /* This test is only for Client/Server */
+
+        /*
+         * Sun's 1.4.2 JVM and IBM's JVM (any version) fail on Windows for this test
+         * Thus, we skip it.
+         * 
+         * Read JIRA's DERBY-4836 for more information.
+         */
+        if (getSystemProperty("os.name").startsWith("Windows")) {
+            /* Skip with IBM */
+            if (isIBMJVM()) return;
+            
+            /* Skip with Sun 1.4.2 */
+            if (isSunJVM() && getSystemProperty("java.version").startsWith("1.4.2")) return;
+        }
         
         /* Maximum length in bytes is 255. We subtract 12 for ;create=true  */
         int maxNameLength = 255 - 12;
@@ -92,6 +109,9 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
             
             Connection conn = DriverManager.getConnection(url);
             conn.close();
+            
+            /* Add the database name for cleanup on tearDown() */
+            databasesForCleanup.add(dbName.toString());
             
             /* Append one more character to make it fail */
             dbName.append(testCharacters[ch]);
@@ -146,6 +166,9 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         url = TestConfiguration.getCurrent().getJDBCUrl("\u4e10");
         conn = DriverManager.getConnection(url,"\u4e10","\u4e10");
         conn.close();
+        
+        /* Add the created database for cleanup by tearDown() */
+        databasesForCleanup.add("\u4e10");
     }
     
     
@@ -174,6 +197,9 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         xaconn = ds.getXAConnection();
         conn = xaconn.getConnection();
         conn.close();
+        
+        /* Add the created database for cleanup by tearDown() */
+        databasesForCleanup.add("\u4e10");
     }
     
     
@@ -202,6 +228,9 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
         poolConn= ds.getPooledConnection();
         conn = poolConn.getConnection();
         conn.close();
+        
+        /* Add the created database for cleanup by tearDown() */
+        databasesForCleanup.add("\u4e10");
     }
 
     /**
@@ -226,29 +255,30 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
             String expected = usingEmbedded() ? "XJ004" : "08004";
             assertSQLState(expected, sqle);
         }
+        
+        /* Add the created database for cleanup by tearDown() */
+        databasesForCleanup.add("\u4e10");
     }
 
     public void tearDown() throws SQLException {
-        String shutdownUrl = TestConfiguration.getCurrent().getJDBCUrl("\u4e10;shutdown=true");
-        try {
-            DriverManager.getConnection(shutdownUrl);
-        } catch (SQLException se) {
-            // ignore shutdown exception
+        /* Iterate through the databases for cleanup and delete them */
+        for (int i=0; i<databasesForCleanup.size(); i++) {
+            String shutdownUrl = TestConfiguration.getCurrent()
+                                .getJDBCUrl(databasesForCleanup.get(i) + ";shutdown=true");
+            try {
+                DriverManager.getConnection(shutdownUrl);
+            } catch (SQLException se) {
+                // ignore shutdown exception
+            }
+            removeDirectory(getSystemProperty("derby.system.home") +  File.separator + 
+                    databasesForCleanup.get(i));
         }
-        removeDirectory(getSystemProperty("derby.system.home") +  File.separator + 
-                "\u4e10");
+        
+        /* Clear the array list as new fixtures will add other databases */
+        databasesForCleanup.clear();
     }
     
-    public static Test suite() {
-        
-        if (! isSunJVM()) {
-            TestSuite suite = new TestSuite("InternationalConnectTest with non-sun/oracle jvm");
-            // DERBY-4836 test fails on IBM VMs (on windows). 
-            // Skip while research is happening..
-            println("Test skipped for this VM, cf. DERBY-4836");
-            return suite;            
-        }
-        
+    public static Test suite() {        
         return TestConfiguration.defaultSuite(InternationalConnectTest.class);
     }
    
