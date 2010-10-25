@@ -2602,7 +2602,7 @@ you should not have to do this.
     </target>
 
 <!-- ==================================================================== -->
-<!--                         Release Management                    -->
+<!--                         Release Candidates  -->
 <!-- ==================================================================== -->
 
     <target
@@ -2885,6 +2885,75 @@ you should not have to do this.
         <arg value="${checkinComment}"/>
       </exec>
 
+    </target>
+
+<!-- ==================================================================== -->
+<!--                         Release Publication  -->
+<!-- ==================================================================== -->
+
+    <!-- Repackage the docs for publication on the website -->
+    <target name="repackagedocs" depends="defineprompt">
+
+        <promptForProperty
+          propertyName="derby.release.binzip"
+          prompt="Enter the location of the binary zip distribution for the release (e.g., /Users/me/release/db-derby-10.7.1.0-bin.zip) >  "
+        />
+        <fail message="Cannot repackage the docs. Cannot find ${derby.release.binzip}">
+            <condition>
+              <not>
+                <available file="${derby.release.binzip}"/>
+              </not>
+            </condition>
+        </fail>
+
+        <promptForProperty
+          propertyName="branch.id"
+          prompt="Enter the name of the branch (e.g., 10.7) >  "
+        />
+
+        <basename property="zipstub" file="${derby.release.binzip}" suffix=".zip"/>
+        <echo message="${zipstub}"/>
+
+        <property name="repackage.dir" value="${release.base}/repackagedocs"/>
+        <property name="unpacked.dir" value="${repackage.dir}/unpacked"/>
+        <property name="pruned.dir" value="${repackage.dir}/pruned"/>
+        <property name="pruned.docs.dir" value="${pruned.dir}/docs"/>
+        <property name="pruned.publicapi.dir" value="${pruned.dir}/publishedapi"/>
+
+        <delete dir="${repackage.dir}"/>
+        <mkdir dir="${unpacked.dir}"/>
+        <mkdir dir="${pruned.docs.dir}"/>
+        <mkdir dir="${pruned.publicapi.dir}"/>
+
+        <unzip src="${derby.release.binzip}" dest="${unpacked.dir}"/>
+
+        <move todir="${pruned.docs.dir}"><fileset dir="${unpacked.dir}/${zipstub}/docs"/></move>
+        <move todir="${pruned.publicapi.dir}"><fileset dir="${unpacked.dir}/${zipstub}/javadoc"/></move>
+        <delete dir="${unpacked.dir}"/>
+
+        <antcall target="movepdf"><param name="userguide" value="adminguide"/></antcall>
+        <antcall target="movepdf"><param name="userguide" value="devguide"/></antcall>
+        <antcall target="movepdf"><param name="userguide" value="getstart"/></antcall>
+        <antcall target="movepdf"><param name="userguide" value="ref"/></antcall>
+        <antcall target="movepdf"><param name="userguide" value="tools"/></antcall>
+        <antcall target="movepdf"><param name="userguide" value="tuning"/></antcall>
+
+        <move todir="${pruned.dir}"><fileset dir="${pruned.docs.dir}/html"/></move>
+        <delete dir="${pruned.docs.dir}"/>
+
+        <zip destfile="${repackage.dir}/${branch.id}.zip" compress="true">
+          <zipfileset prefix="${branch.id}" dir="${pruned.dir}"/>
+        </zip>
+        <delete dir="${pruned.dir}"/>
+
+    </target>
+
+    <!-- Move the pdf files into the html directory so that everything is in one place -->
+    <target name="movepdf">
+        <move todir="${pruned.docs.dir}/html/${userguide}">
+          <fileset dir="${pruned.docs.dir}/pdf/${userguide}"/>
+        </move>
+        <delete dir="${pruned.docs.dir}/pdf/${userguide}"/>
     </target>
 
 </project>
