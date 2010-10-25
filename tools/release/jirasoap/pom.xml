@@ -1,0 +1,179 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.apache.derbyBuild</groupId>
+  <artifactId>JiraSOAP</artifactId>
+  <packaging>jar</packaging>
+  <version>LATEST</version>
+  <name>Derby JiraSOAP</name>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>axistools-maven-plugin</artifactId>
+                <version>1.4</version>
+                <configuration>
+                    <wsdlFiles>
+                        <wsdlFile>jirasoapservice-v2.wsdl</wsdlFile>
+                    </wsdlFiles>
+                    <packageSpace>org.apache.derbyBuild.jirasoap</packageSpace>
+                </configuration>
+                <dependencies>
+            <!-- Required for attachment support; you can remove these
+                 dependencies if attachment support is not needed. Note that
+                 if you do want it, you have to specify the dependencies both
+                 here in the plugin and also in the POM dependencies. This
+                 means that in the current state, with the dependencies
+                 specified only here, the compile time warning will go away,
+                 but attachment can't be used during run-time.
+             -->
+                    <dependency>
+                        <groupId>javax.mail</groupId>
+                        <artifactId>mail</artifactId>
+                        <version>1.4.1</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>javax.activation</groupId>
+                        <artifactId>activation</artifactId>
+                        <version>1.1</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>wsdl2java-generation</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>wsdl2java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                    <configuration>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <archive>
+                            <manifest>
+                                <addClasspath>true</addClasspath>
+                                <mainClass>org.apache.derbyBuild.jirasoap.FilteredIssueLister</mainClass>
+                            </manifest>
+                        </archive>
+                    </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0.2</version>
+                <configuration>
+                    <source>1.4</source>
+                    <target>1.4</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>buildclient</id>
+            <build>
+                <defaultGoal>assembly:assembly</defaultGoal>
+            </build>
+        </profile>
+        <profile>
+            <id>fetch-wsdl</id>
+            <build>
+                <defaultGoal>generate-sources</defaultGoal>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <tasks>
+                                        <get src="${derby.soap.jiraurl}/rpc/soap/jirasoapservice-v2?wsdl"
+                                            dest="${basedir}/src/main/wsdl/jirasoapservice-v2.wsdl"/>
+                                    </tasks>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.axis</groupId>
+                                <artifactId>axis-ant</artifactId>
+                                <version>1.4</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+
+
+                </plugins>
+            </build>
+            <properties>
+                <derby.soap.jiraurl>https://issues.apache.org/jira</derby.soap.jiraurl>
+            </properties>
+        </profile>
+    </profiles>
+                
+    <dependencies>
+
+        <dependency> 
+            <groupId>org.apache.axis</groupId> 
+            <artifactId>axis</artifactId> 
+            <version>1.4</version> 
+        </dependency> 
+        <dependency> 
+            <groupId>org.apache.axis</groupId> 
+            <artifactId>axis-jaxrpc</artifactId> 
+            <version>1.4</version> 
+        </dependency> 
+        <dependency> 
+            <groupId>org.apache.axis</groupId> 
+            <artifactId>axis-saaj</artifactId> 
+            <version>1.4</version> 
+        </dependency> 
+        <dependency> 
+            <groupId>axis</groupId> 
+            <artifactId>axis-wsdl4j</artifactId> 
+            <version>1.5.1</version> 
+            <scope>compile</scope> 
+        </dependency>
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-discovery</groupId>
+            <artifactId>commons-discovery</artifactId>
+            <version>0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.6.5</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.activation</groupId>
+            <artifactId>activation</artifactId>
+            <version>1.1</version>
+        </dependency>
+    </dependencies>
+    <description>Client fetching information from the ASF JIRA instance needed for generation of Derby release notes.</description>
+    <properties>
+    <!-- All plugins should use this value.
+         See http://docs.codehaus.org/display/MAVENUSER/POM+Element+for+Source+File+Encoding
+      -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+</project>
