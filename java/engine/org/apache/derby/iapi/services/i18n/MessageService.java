@@ -57,12 +57,8 @@ public final class MessageService {
 	}
 
 
-	public static Object setFinder(BundleFinder theFinder) {
+	public static void setFinder(BundleFinder theFinder) {
 		finder = theFinder;
-
-		// Return an object for a caller to hang onto so
-		// Garbage collection doesn't GC this class.
-		return new MessageService().getClass();
 	}
 
 	public static String getTextMessage(String messageID) {

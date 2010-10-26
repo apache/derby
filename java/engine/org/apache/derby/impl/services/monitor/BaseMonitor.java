@@ -88,9 +88,6 @@ import java.util.NoSuchElementException;
 
 import java.lang.reflect.InvocationTargetException;
 
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-
 import java.net.URL;
 
 /**
@@ -133,9 +130,6 @@ abstract class BaseMonitor
 	private PrintStream logging;
 
 	ThreadGroup daemonGroup;
-
-	// anti GC stuff
-	AntiGC dontGC;
 
 	// class registry
 /* one byte  format identifiers never used
@@ -213,12 +207,6 @@ abstract class BaseMonitor
 		Monitor.getStream().println(LINE);
 		((TopService) services.elementAt(0)).shutdown();
 
-		synchronized (dontGC) {
-
-			dontGC.goAway = true;
-			dontGC.notifyAll();
-		}
-
 		ContextService.stop();
 		Monitor.clearMonitor();
 	}
@@ -265,39 +253,7 @@ abstract class BaseMonitor
 		if (!Monitor.setMonitor(this))
 			return;
 
-		Object msgService = MessageService.setFinder(this);
-
-		// start a backgorund thread which keeps a reference to this
-		// this monitor, and an instance of the Monitor class to ensure
-		// that the monitor instance and the class is not garbage collected
-		// See Sun's bug 4057924 in Java Developer Section 97/08/06
-
-		Object[] keepItems = new Object[3];
-		keepItems[0] = this;
-		keepItems[1] = new Monitor();
-		keepItems[2] = msgService;
-		dontGC = new AntiGC(keepItems);
-
-		final Thread dontGCthread = getDaemonThread(dontGC, "antiGC", true);
-		// DERBY-3745.  setContextClassLoader for thread to null to avoid
-		// leaking class loaders.
-		try {
-            AccessController.doPrivileged(
-            new PrivilegedAction() {
-                public Object run()  {
-                    
-                    dontGCthread.setContextClassLoader(null);
-                    return null;
-                }
-            });
-        } catch (SecurityException se1) {
-            // ignore security exception.  Earlier versions of Derby, before the 
-            // DERBY-3745 fix did not require setContextClassloader permissions.
-            // We may leak class loaders if we are not able to set this, but 
-            // cannot just fail.
-        }
-
-		dontGCthread.start();
+		MessageService.setFinder(this);
 
 		if (SanityManager.DEBUG) {
 			reportOn = Boolean.valueOf(PropertyUtil.getSystemProperty("derby.monitor.verbose")).booleanValue();
@@ -2202,26 +2158,3 @@ nextModule:
         }
     } // end of class ProviderEnumeration
 } // end of class BaseMonitor
-
-class AntiGC implements Runnable {
-
-	boolean goAway;
-	private Object keep1;
-
-	AntiGC(Object a) {
-		keep1 = a;
-	}
-
-	public void run() {
-		while (true) {
-			synchronized (this) {
-				if (goAway)
-					return;
-				try {
-					wait();
-				} catch (InterruptedException ie) {
-				}
-			}
-		}
-	}
-} // end of class AntiGC

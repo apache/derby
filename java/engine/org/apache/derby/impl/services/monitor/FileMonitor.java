@@ -77,7 +77,23 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 		return home;
 	}
 
-
+    /**
+     * Create a ThreadGroup and set the daemon property to make sure
+     * the group is destroyed and garbage collected when all its
+     * members have finished (i.e., either when the driver is
+     * unloaded, or when the last database is shut down).
+     */
+    private static ThreadGroup createDaemonGroup() {
+        try {
+            ThreadGroup group = new ThreadGroup("derby.daemons");
+            group.setDaemon(true);
+            return group;
+        } catch (SecurityException se) {
+            // In case of a lacking privilege, silently return null and let
+            // the daemon threads be created in the default thread group.
+            return null;
+        }
+    }
 
 	/**
 		SECURITY WARNING.
@@ -91,15 +107,7 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 	private boolean PBinitialize(boolean lite)
 	{
 		if (!lite) {
-			try {
-				// Create a ThreadGroup and set the daemon property to
-				// make sure the group is destroyed and garbage
-				// collected when all its members have finished (i.e.,
-				// when the driver is unloaded).
-				daemonGroup = new ThreadGroup("derby.daemons");
-				daemonGroup.setDaemon(true);
-			} catch (SecurityException se) {
-			}
+            daemonGroup = createDaemonGroup();
 		}
 
 		InputStream versionStream = getClass().getResourceAsStream(ProductGenusNames.DBMS_INFO);
@@ -279,7 +287,23 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 			// SECURITY PERMISSION - OP1
 			return PBgetJVMProperty(key3);
 		case 4:
-			return super.getDaemonThread(task, key3, intValue != 0);
+        {
+            boolean setMinPriority = (intValue != 0);
+            try {
+                return super.getDaemonThread(task, key3, setMinPriority);
+            } catch (IllegalThreadStateException e) {
+                // We may get an IllegalThreadStateException if all the
+                // previously running daemon threads have completed and the
+                // daemon group has been automatically destroyed. If that's
+                // what has happened, create a new daemon group and try again.
+                if (daemonGroup != null && daemonGroup.isDestroyed()) {
+                    daemonGroup = createDaemonGroup();
+                    return super.getDaemonThread(task, key3, setMinPriority);
+                } else {
+                    throw e;
+                }
+            }
+        }
 		case 5:
 			super.setThreadPriority(intValue);
 			return null;
