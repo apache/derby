@@ -86,7 +86,7 @@ public class GeneratorBase extends Task {
     protected ElementFacade summary;
     // Bug list file
     protected String bugListFileName;
-    protected TagReader bugListDoc;
+    protected List bugList;
 
     // Output file
     private String outputFileName;
@@ -149,7 +149,6 @@ public class GeneratorBase extends Task {
      */
     public void setBugListFileName(String bugListFileName) throws Exception {
         this.bugListFileName = bugListFileName;
-        bugListDoc = new TagReader( new FileInputStream(bugListFileName) );
     }
 
     /**
