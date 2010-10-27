@@ -83,8 +83,9 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
             if (isSunJVM() && getSystemProperty("java.version").startsWith("1.4.2")) return;
         }
         
-        /* Maximum length in bytes is 255. We subtract 12 for ;create=true  */
-        int maxNameLength = 255 - 12;
+        // Maximum length in bytes is 255. We subtract 14 to account for
+        // ;create=true and ;shutdown=true
+        int maxNameLength = 255 - 14;
         
         /**
          * \u0041 is the letter 'A' (1 byte)
@@ -113,8 +114,10 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
             /* Add the database name for cleanup on tearDown() */
             databasesForCleanup.add(dbName.toString());
             
-            /* Append one more character to make it fail */
-            dbName.append(testCharacters[ch]);
+            /* Append three more characters to make it fail */
+            for (int i = 0; i < 3; i++) {
+                dbName.append(testCharacters[ch]);
+            }
 
             url = TestConfiguration
                     .getCurrent().getJDBCUrl(dbName.toString()+ ";create=true");
@@ -255,9 +258,6 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
             String expected = usingEmbedded() ? "XJ004" : "08004";
             assertSQLState(expected, sqle);
         }
-        
-        /* Add the created database for cleanup by tearDown() */
-        databasesForCleanup.add("\u4e10");
     }
 
     public void tearDown() throws SQLException {
@@ -267,8 +267,10 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
                                 .getJDBCUrl(databasesForCleanup.get(i) + ";shutdown=true");
             try {
                 DriverManager.getConnection(shutdownUrl);
+                fail("Database didn't shut down");
             } catch (SQLException se) {
                 // ignore shutdown exception
+                assertSQLState("08006", se);
             }
             removeDirectory(getSystemProperty("derby.system.home") +  File.separator + 
                     databasesForCleanup.get(i));
