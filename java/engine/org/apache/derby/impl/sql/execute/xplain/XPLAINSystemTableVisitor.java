@@ -28,22 +28,15 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
 import java.util.Stack;
 
 import org.apache.derby.catalog.UUID;
-import org.apache.derby.jdbc.InternalDriver;
-import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.iapi.jdbc.ConnectionContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.info.JVMInfo;
-import org.apache.derby.iapi.services.io.FormatableProperties;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
 import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
 import org.apache.derby.impl.sql.catalog.XPLAINScanPropsDescriptor;
@@ -52,38 +45,6 @@ import org.apache.derby.impl.sql.catalog.XPLAINStatementDescriptor;
 import org.apache.derby.impl.sql.catalog.XPLAINStatementTimingsDescriptor;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
-import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.impl.sql.compile.IntersectOrExceptNode;
-import org.apache.derby.impl.sql.execute.rts.RealAnyResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealDeleteCascadeResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealDeleteResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealDeleteVTIResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealDistinctScalarAggregateStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealDistinctScanStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealGroupedAggregateStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealHashJoinStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealHashLeftOuterJoinStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealHashScanStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealHashTableStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealIndexRowToBaseRowStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealInsertResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealInsertVTIResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealLastIndexKeyScanStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealMaterializedResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealNestedLoopJoinStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealNestedLoopLeftOuterJoinStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealNormalizeResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealOnceResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealProjectRestrictStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealRowResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealScalarAggregateStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealScrollInsensitiveResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealSetOpResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealSortStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealTableScanStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealUnionResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealUpdateResultSetStatistics;
-import org.apache.derby.impl.sql.execute.rts.RealVTIStatistics;
 import org.apache.derby.impl.sql.execute.rts.ResultSetStatistics;
 
 /**
@@ -104,8 +65,6 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
     // the needed system objects for writing to the dictionary
     private LanguageConnectionContext lcc;
     private DataDictionary dd;
-    private TransactionController tc;
-    private DataDescriptorGenerator ddg;
     
     // the stmt activation object
     private Activation activation;
@@ -217,8 +176,6 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
     public void reset() {
         lcc = activation.getLanguageConnectionContext();
         dd  = lcc.getDataDictionary();
-        tc  = lcc.getTransactionExecute();
-        ddg = dd.getDataDescriptorGenerator(); 
     }
     
     /** the interface method, which gets called by the Top-ResultSet, which starts
@@ -324,7 +281,6 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
         }
         catch (SQLException e)
         {
-            e.printStackTrace();
             throw StandardException.plainWrapException(e);
         }
          
@@ -347,7 +303,6 @@ public class XPLAINSystemTableVisitor implements XPLAINVisitor {
         activation = null;
         lcc = null;
         dd = null;
-        tc = null;
         
         // forget about the stmt descriptors and the Stmt UUID
         stmtUUID = null;
