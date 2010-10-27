@@ -1265,7 +1265,7 @@ nextModule:
                         for( Enumeration newKeys = otherList.keys(); newKeys.hasMoreElements() ;)
                         {
                             String key = (String) newKeys.nextElement();
-                            if( moduleList.contains( key))
+                            if (moduleList.containsKey(key))
                                 // RESOLVE how do we localize messages before we have finished initialization?
                                 report( "Ignored duplicate property " + key + " in " + modulesPropertiesURL.toString());
                             else
