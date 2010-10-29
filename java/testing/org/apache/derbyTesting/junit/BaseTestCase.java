@@ -559,8 +559,9 @@ public abstract class BaseTestCase
     }
 
     public static final boolean isSunJVM() {
-        return ("Sun Microsystems Inc.".equals(
-                getSystemProperty("java.vendor")));
+        String vendor = getSystemProperty("java.vendor");
+        return "Sun Microsystems Inc.".equals(vendor) ||
+                "Oracle Corporation".equals(vendor);
     }
     
     public static final boolean isIBMJVM() {
