@@ -571,12 +571,6 @@ public abstract class OpenConglomerate
 
         if (!lock_granted_with_latch_held)
         {
-            if (!waitForLock)
-            {
-                // throw lock timeout error.
-                throw StandardException.newException(SQLState.LOCK_TIMEOUT);
-            }
-
             // Could not get the lock NOWAIT, release latch and wait for lock.
             pos.current_page.unlatch();
             pos.current_page = null;
