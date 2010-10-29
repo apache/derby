@@ -21,9 +21,6 @@
 
 package org.apache.derby.iapi.services.info;
 
-import java.sql.Types;
-
-
 /**
 	This class is used to determine which Java specification Derby will run at.
     For a useful discussion of how this class is used, please see DERBY-3176.
@@ -50,11 +47,6 @@ public abstract class JVMInfo
 
 	public static final boolean J2ME;
 
-	/**
-    JDBC Boolean type - Types.BIT in JDK1.1 & 1.2 & 1.3, Types.BOOLEAN in JDK1.4
-	*/
-	public static final int JAVA_SQL_TYPES_BOOLEAN;
-
 	static 
 	{
 		int id;
@@ -67,8 +59,8 @@ public abstract class JVMInfo
 		// set a Java 2 system property.
 		// 
 		// Otherwise, see if we recognize what is set in java.version.
-		// If we don't recoginze that, or if the property is not set, assume
-		// version 1.3.
+		// If we don't recognize that, or if the property is not set, assume
+		// version 1.4.
 		//
 		String javaVersion;
 		String javaSpec;
@@ -143,8 +135,6 @@ public abstract class JVMInfo
 
 		JDK_ID = id;
 		J2ME = isJ2ME;
-		JAVA_SQL_TYPES_BOOLEAN = (isJ2ME || id >= J2SE_14) ?
-			Types.BOOLEAN :java.sql.Types.BIT;
 	}
 
 	/**

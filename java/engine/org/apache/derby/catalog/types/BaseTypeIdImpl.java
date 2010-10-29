@@ -27,28 +27,19 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.services.io.StreamStorable;
-
-import org.apache.derby.iapi.services.i18n.MessageService;
 
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.util.IdUtil;
 
 import java.sql.Types;
 
-import java.io.InputStream;
-import java.io.ByteArrayInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.IOException;
-import java.io.EOFException;
 
 /**
  * This class is the base class for all type ids that are written to the
@@ -348,7 +339,7 @@ public class BaseTypeIdImpl implements Formatable
           case StoredFormatIds.BOOLEAN_TYPE_ID_IMPL:
               schemaName = null;
               unqualifiedName = TypeId.BOOLEAN_NAME;
-              JDBCTypeId = JVMInfo.JAVA_SQL_TYPES_BOOLEAN;
+              JDBCTypeId = Types.BOOLEAN;
               break;
 
           case StoredFormatIds.INT_TYPE_ID_IMPL:
