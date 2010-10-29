@@ -1629,11 +1629,7 @@ public class SystemProcedures  {
 
         // Use default schema if schemaName is null. This isn't consistent
         // with the other procedures, as they would fail if schema was null.
-        String entityName = IdUtil.normalToDelimited(tableName);
-        if (schemaName != null) {
-            entityName =
-                    IdUtil.normalToDelimited(schemaName) + "." + entityName;
-        }
+        String entityName = IdUtil.mkQualifiedName(schemaName, tableName);
 
 		String binsertSql = 
 			"insert into " + entityName +
