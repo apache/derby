@@ -44,8 +44,6 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 
-import org.apache.derby.iapi.store.access.TransactionController;
-
 import org.apache.derby.iapi.services.context.ContextImpl;
 
 import org.apache.derby.iapi.error.ExceptionSeverity;
@@ -54,7 +52,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.sql.SQLException;
 
 /**
  * GenericStatementContext is pushed/popped around a statement prepare and execute
@@ -90,6 +87,7 @@ final class GenericStatementContext
     private	boolean		isAtomic;	
 	private boolean		isSystemCode;
 	private boolean		rollbackParentContext;
+    private boolean     statementWasInvalidated;
     private	String		stmtText;
     private	ParameterValueSet			pvs;
 
@@ -232,6 +230,7 @@ final class GenericStatementContext
 		sqlAllowed = -1;
 		isSystemCode = false;
 		rollbackParentContext = false;
+        statementWasInvalidated = false;
 
         if (cancelTask != null) {
             cancelTask.forgetContext();
@@ -511,9 +510,19 @@ final class GenericStatementContext
         ** protocol violation errors, we treat java errors here
         ** to be of session severity.  
         */
-		int severity = (error instanceof StandardException) ?
-			((StandardException) error).getSeverity() :
-			ExceptionSeverity.SESSION_SEVERITY;
+        int severity = ExceptionSeverity.SESSION_SEVERITY;
+        if (error instanceof StandardException) {
+            StandardException se = (StandardException)error;
+            // Update the severity.
+            severity = se.getSeverity();
+            // DERBY-4849: Remember that the plan was invalidated, such that
+            // we can avoid performing certain actions more than once
+            // (for correctness, not optimization).
+            if (SQLState.LANG_STATEMENT_NEEDS_RECOMPILE.equals(
+                    se.getMessageId())) {
+                statementWasInvalidated = true;
+            }
+        }
 
 
 		/**
@@ -784,4 +793,8 @@ final class GenericStatementContext
 	public void setSQLSessionContext(SQLSessionContext ctx) {
 		sqlSessionContext = ctx;
 	}
+
+    public boolean getStatementWasInvalidated() {
+        return statementWasInvalidated;
+    }
 }

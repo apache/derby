@@ -369,7 +369,8 @@ abstract class NoRowsResultSetImpl implements ResultSet
             ** to skip printing it.
 			*/
 			if (lcc.getRunTimeStatisticsMode() &&
-				!doesCommit() && !activation.isClosed())
+                !doesCommit() && !activation.isClosed() &&
+                !lcc.getStatementContext().getStatementWasInvalidated())
 			{
 				endExecutionTime = getCurrentTimeMillis();
 

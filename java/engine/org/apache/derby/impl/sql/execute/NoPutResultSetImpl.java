@@ -158,7 +158,8 @@ extends BasicNoPutResultSetImpl
 			LanguageConnectionContext lcc = getLanguageConnectionContext();
 			
                 // only if statistics is switched on, collect & derive them
-                if (lcc.getRunTimeStatisticsMode())
+                if (lcc.getRunTimeStatisticsMode() &&
+                    !lcc.getStatementContext().getStatementWasInvalidated())
 				{   
                     endExecutionTime = getCurrentTimeMillis();
 

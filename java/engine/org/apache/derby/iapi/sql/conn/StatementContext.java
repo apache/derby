@@ -28,15 +28,10 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 
 import org.apache.derby.iapi.sql.Activation;
-import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.ParameterValueSet;
 
 import org.apache.derby.iapi.sql.depend.Dependency;
-
-import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.sql.LanguageFactory;
-import org.apache.derby.iapi.sql.conn.SQLSessionContext;
 
 /**
  * StatementContext keeps the context for a statement.
@@ -277,4 +272,10 @@ public interface StatementContext extends Context {
 	 */
 	public void setSQLSessionContext(SQLSessionContext ctx);
 
+    /**
+     * Tells if this statement has been invalidated.
+     *
+     * @return {@code true} if the statement was invalidated.
+     */
+    public boolean getStatementWasInvalidated();
 }

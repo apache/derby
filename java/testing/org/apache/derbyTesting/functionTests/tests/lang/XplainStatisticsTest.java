@@ -27,11 +27,15 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Date;
+import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder; 
 import javax.xml.parsers.DocumentBuilderFactory; 
@@ -466,17 +470,18 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 "delete from t where x = 3");
 	}
 	
-    private boolean hasTable(String schemaName, String tableName)
+    private static boolean hasTable(Statement s,
+                                    String schemaName, String tableName)
         throws SQLException
     {
-        ResultSet rs = getConnection().getMetaData().getTables((String)null,
+        ResultSet rs = s.getConnection().getMetaData().getTables((String)null,
                 schemaName, tableName,  new String[] {"TABLE"});
         boolean tableFound = rs.next();
         rs.close();
         return tableFound;
     }
     
-    private String []tableNames = {
+    private static String []tableNames = {
         "SYSXPLAIN_STATEMENTS",
         "SYSXPLAIN_STATEMENT_TIMINGS",
         "SYSXPLAIN_RESULTSETS",
@@ -485,19 +490,19 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         "SYSXPLAIN_SCAN_PROPS",
     };
     
-    private void enableXplainStyle(Statement s)
+    private static void enableXplainStyle(Statement s)
             throws SQLException
     {
         verifyXplainUnset(s);
         for (int i = 0; i < tableNames.length; i++)
-            if (hasTable("XPLTEST", tableNames[i]))
+            if (hasTable(s, "XPLTEST", tableNames[i]))
                 s.execute("delete from XPLTEST." + tableNames[i]);
         s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)");
         s.execute("call syscs_util.syscs_set_xplain_schema('XPLTEST')");
         s.execute("call syscs_util.syscs_set_xplain_mode(0)");
     }
     
-    private void enableXplainStyleWithTiming(Statement s)
+    private static void enableXplainStyleWithTiming(Statement s)
             throws SQLException
     {
         enableXplainStyle(s);
@@ -509,7 +514,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
      * @param s
      * @throws Exception
      */
-    private void disableXplainStyle(Statement s)
+    private static void disableXplainStyle(Statement s)
     throws Exception
     {
     	s.execute("call SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(0)");
@@ -528,7 +533,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     	{ 
     		stmt_id = rs.getString(1); 
     		access = 
-    			new AccessDatabase(getConnection(), "XPLTEST", stmt_id); 
+    			new AccessDatabase(s.getConnection(), "XPLTEST", stmt_id);
     		if(access.initializeDataArray()){ 
     			access.createXMLFragment();
     			access.markTheDepth();
@@ -545,7 +550,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     	} 
     }
 
-    private void verifyXplainUnset(Statement s)
+    private static void verifyXplainUnset(Statement s)
         throws SQLException
     {
     	JDBC.assertFullResultSet(
@@ -747,7 +752,57 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
 		fail(e.getMessage());
 	}
     }
-    
+
+    /**
+     * Tests that invalidation of a statement after compile-time doesn't result
+     * in duplicate entries in the XPLAIN-table(s).
+     * <p>
+     * This test is timing-dependent, and may not trigger the bug under all
+     * circumstances.
+     * <p>
+     * See DERBY-4849.
+     *
+     * @throws Exception if something goes wrong
+     */
+    public void testSimpleQueryMultiWithInvalidation()
+            throws Exception {
+        // Start two threads; one selecting from COUNTRIES with XPLAIN on, and
+        // one generating statistics for the same table.
+        // The latter thread should cause the statement executed in the former
+        // thread to be invalidated.
+        long runTime = 10*1000; // Run for 10 seconds
+        AbstractMTThread select = new MTSimpleSelect(
+                openDefaultConnection(), runTime);
+        AbstractMTThread invalidate = new MTSimpleInvalidate(
+                openDefaultConnection(), runTime);
+        Thread tInv = new Thread(invalidate);
+        Thread tSel = new Thread(select);
+        tInv.start();
+        tSel.start();
+
+        // Wait until the threads have finished.
+        tInv.join();
+        tSel.join();
+
+        // Check if any errors were raised in the worker-threads.
+        int selects = select.getActionCount();
+        int invalidations = invalidate.getActionCount();
+        println("selects=" + selects + ", invalidations=" + invalidations);
+        if (select.failed()) {
+            fail("select-thread failed", select.getError());
+        }
+        if (invalidate.failed()) {
+            fail("invalidate-thread failed", invalidate.getError());
+        }
+
+        // There should be as many entries in the XPLAIN-table as the number
+        // of times we have executed the select-statement.
+        Statement s = createStatement();
+        JDBC.assertSingleValueResultSet(s.executeQuery(
+            "select count(*) from xpltest.sysxplain_statements"),
+            Integer.toString(selects));
+    }
+
     /**
      * Verify that XPLAIN style captures basic statistics and timings.
      *
@@ -2345,7 +2400,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     {
         Statement s = createStatement();
         for (int i = 0; i < tableNames.length; i++)
-            if (hasTable("XPLTEST", tableNames[i]))
+            if (hasTable(s, "XPLTEST", tableNames[i]))
                 s.executeUpdate("drop table xpltest."+tableNames[i]);
         s.executeUpdate("create table xpltest.sysxplain_resultsets(a int)");
         try
@@ -2366,4 +2421,132 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * Abstract class for a thread executing a database action (i.e. a query).
+     */
+    private static abstract class AbstractMTThread
+            implements Runnable {
+
+        protected final Connection con;
+        /** Duration of the run. */
+        protected final long runTime;
+        /** Tells how many times the action has been performed. */
+        protected int count;
+        /** If an error is raised when performing the action. */
+        protected Throwable error;
+
+        protected AbstractMTThread(Connection con, long runTime) {
+            this.con = con;
+            this.runTime = runTime;
+        }
+
+        public int getActionCount() {
+            return count;
+        }
+
+        public boolean failed() {
+            return error != null;
+        }
+
+        public Throwable getError() {
+            return error;
+        }
+    }
+
+    /**
+     * Thread for selecting from the COUNTRIES table in a loop, with the XPLAIN-
+     * functionality enabled.
+     */
+    private static class MTSimpleSelect
+            extends AbstractMTThread {
+
+        public MTSimpleSelect(Connection con, long runTime) {
+            super(con, runTime);
+        }
+
+        /**
+         * Selects from the COUNTRIES table in a loop.
+         */
+        public void run() {
+            Random rand = new Random();
+            final long start = System.currentTimeMillis();
+            try {
+                Statement s = con.createStatement();
+                enableXplainStyleWithTiming(s);
+                PreparedStatement ps = con.prepareStatement(
+                        "SELECT country from countries WHERE " +
+                        "region = 'Central America'");
+                while (System.currentTimeMillis() - start < runTime) {
+                    JDBC.assertUnorderedResultSet(ps.executeQuery(),
+                        new String[][] {
+                            {"Belize"}, {"Costa Rica"}, {"El Salvador"},
+                            {"Guatemala"}, {"Honduras"}, {"Nicaragua"} } );
+                    count++;
+                    try {
+                        Thread.sleep(rand.nextInt(50));
+                    } catch (InterruptedException ie) {
+                        // Ignore
+                    }
+                }
+                // Don't disable XPLAIN here, as it takes a long time due to the
+                // high number of recorded plans - these are currently being
+                // exported to disk as XML in the disable-method.
+                // This connection is going away anyway.
+                //disableXplainStyle(s);
+                s.close();
+                ps.close();
+            } catch (Throwable t) {
+                // Signal failure
+                error = t;
+            } finally {
+                try {
+                    con.rollback();
+                    con.close();
+                } catch (SQLException sqle) {
+                    // Ignore
+                }
+            }
+        }
+    }
+
+    /**
+     * Thread for invalidating the COUNTRIES table in a loop.
+     */
+    private static class MTSimpleInvalidate
+            extends AbstractMTThread {
+
+        public MTSimpleInvalidate(Connection con, long runTime) {
+            super(con, runTime);
+        }
+
+        /**
+         * Invalidates the COUNTRIES table continuously by updating the
+         * associated index statistics. Loops until the run-time is up.
+         */
+        public void run() {
+            final long start = System.currentTimeMillis();
+            try {
+                PreparedStatement ps = con.prepareStatement(
+                        "call SYSCS_UTIL.SYSCS_UPDATE_STATISTICS(?, ?, ?)");
+                ps.setString(1, "APP");
+                ps.setString(2, "COUNTRIES");
+                ps.setNull(3, Types.VARCHAR);
+                while (System.currentTimeMillis() - start < runTime) {
+                    ps.execute();
+                    count++;
+                }
+                ps.close();
+            } catch (Throwable t) {
+                // Signal failure
+                error = t;
+            } finally {
+                try {
+                    con.rollback();
+                    con.close();
+                } catch (SQLException sqle) {
+                    // Ignore
+                }
+            }
+        }
+    }
 }
