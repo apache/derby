@@ -521,7 +521,6 @@ public abstract class OpenConglomerate
      */
     public boolean lockPositionForWrite(
     RowPosition pos,
-    boolean     forInsert,
     boolean     waitForLock)
         throws StandardException
     {
@@ -562,6 +561,10 @@ public abstract class OpenConglomerate
 
         if (SanityManager.DEBUG)
             SanityManager.ASSERT(pos.current_rh != null);
+
+        // This method is only used for locking existing rows, never for
+        // insert operations.
+        final boolean forInsert = false;
 
         boolean lock_granted_with_latch_held =
             this.container.getLockingPolicy().

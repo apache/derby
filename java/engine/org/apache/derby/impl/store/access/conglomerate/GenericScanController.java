@@ -257,8 +257,7 @@ public abstract class GenericScanController
             // scan positioned on the row, need to request an
             // X lock before we can actually perform the delete
 
-            open_conglom.lockPositionForWrite(
-                scan_position, false /* not insert */, true);
+            open_conglom.lockPositionForWrite(scan_position, true);
         }
     }
 

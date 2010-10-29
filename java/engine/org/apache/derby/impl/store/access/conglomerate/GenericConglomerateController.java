@@ -176,7 +176,7 @@ public abstract class GenericConglomerateController
             return false;
         }
 
-        open_conglom.lockPositionForWrite(pos, false /* not an insert */, true);
+        open_conglom.lockPositionForWrite(pos, true);
 
         boolean ret_val = true;
 
@@ -275,8 +275,7 @@ public abstract class GenericConglomerateController
 
         if (open_conglom.isForUpdate())
         {
-            open_conglom.lockPositionForWrite(
-                pos, false /* not an insert */, true);
+            open_conglom.lockPositionForWrite(pos, true);
         }
         else
         {
@@ -380,8 +379,7 @@ public abstract class GenericConglomerateController
 
         if (open_conglom.isForUpdate())
         {
-            open_conglom.lockPositionForWrite(
-                pos, false /* not an insert */, waitForLock);
+            open_conglom.lockPositionForWrite(pos, waitForLock);
         }
         else
         {
@@ -474,7 +472,7 @@ public abstract class GenericConglomerateController
             return false;
         }
 
-        open_conglom.lockPositionForWrite(pos, false, true);
+        open_conglom.lockPositionForWrite(pos, true);
 
         boolean ret_val = true;
 
