@@ -50,7 +50,7 @@
 <!-- Targets -->
 
 <!-- compile classes  -->
-  <echo message="building generated sanity info"/>
+  <echo level="info" message="building generated sanity info"/>
   <target name="compile">
   	<javac
       source="1.4"
