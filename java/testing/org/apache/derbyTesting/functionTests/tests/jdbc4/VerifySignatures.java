@@ -369,7 +369,7 @@ public class VerifySignatures extends BaseTestCase {
      * @param ifaceMethod The method that should be implemented.
      */
     private static void checkImplementationMethod(
-            Class derbyImplementation, Method ifaceMethod)
+            Class<?> derbyImplementation, Method ifaceMethod)
         throws NoSuchMethodException
     {
         

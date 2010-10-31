@@ -518,7 +518,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		for ( int i = 0; i < count; i++ )
 		{
 			Exclusions		exclusions = rawExcludables[ i ];
-			Class			iface = exclusions.getInterface();
+			Class<?>		iface = exclusions.getInterface();
 			MD[]			mds = exclusions.getExcludedMethods();
 			int				exclusionCount = mds.length;
 			HashSet<Method>	excludedMethodSet = new HashSet<Method>();

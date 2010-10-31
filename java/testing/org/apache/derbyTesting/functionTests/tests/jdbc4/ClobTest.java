@@ -175,7 +175,7 @@ public class ClobTest
      * can be exempted or not
      */
     void buildHashSet() {
-        Class iface = Clob.class;
+        Class<Clob> iface = Clob.class;
         for(int i=0;i<emd.length;i++) {
             try {
                 Method m = iface.getMethod(emd[i].getMethodName()

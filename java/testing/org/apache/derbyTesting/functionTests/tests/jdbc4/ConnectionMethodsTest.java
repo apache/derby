@@ -112,9 +112,9 @@ public class ConnectionMethodsTest extends BaseJDBCTestCase {
         clob = conn.createClob();
 
         try {
-            is = (FileInputStream) AccessController.doPrivileged(
-                    new PrivilegedExceptionAction() {
-                public Object run() throws FileNotFoundException {
+            is = AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<FileInputStream>() {
+                public FileInputStream run() throws FileNotFoundException {
                     return new FileInputStream("extin/short.txt");
                 }
             });
@@ -125,7 +125,7 @@ public class ConnectionMethodsTest extends BaseJDBCTestCase {
             throw (FileNotFoundException) e.getException();
         }
         OutputStream os = clob.setAsciiStream(1);
-        ArrayList beforeUpdateList = new ArrayList();
+        ArrayList<Integer> beforeUpdateList = new ArrayList<Integer>();
 
         c = is.read();
         while(c>0) {
@@ -146,7 +146,7 @@ public class ConnectionMethodsTest extends BaseJDBCTestCase {
 
         //Get the InputStream from this Clob.
         InputStream in = clob.getAsciiStream();
-        ArrayList afterUpdateList = new ArrayList();
+        ArrayList<Integer> afterUpdateList = new ArrayList<Integer>();
 
         b = in.read();
 
@@ -188,9 +188,9 @@ public class ConnectionMethodsTest extends BaseJDBCTestCase {
         blob = conn.createBlob();
 
         try {
-            is = (FileInputStream) AccessController.doPrivileged(
-                    new PrivilegedExceptionAction() {
-                public Object run() throws FileNotFoundException {
+            is = AccessController.doPrivileged(
+                    new PrivilegedExceptionAction<FileInputStream>() {
+                public FileInputStream run() throws FileNotFoundException {
                     return new FileInputStream("extin/short.txt");
                 }
             });
@@ -202,7 +202,7 @@ public class ConnectionMethodsTest extends BaseJDBCTestCase {
         }
 
         OutputStream os = blob.setBinaryStream(1);
-        ArrayList beforeUpdateList = new ArrayList();
+        ArrayList<Integer> beforeUpdateList = new ArrayList<Integer>();
 
         int actualLength = 0;
         c = is.read();
@@ -225,7 +225,7 @@ public class ConnectionMethodsTest extends BaseJDBCTestCase {
 
         //Get the InputStream from this Blob.
         InputStream in = blob.getBinaryStream();
-        ArrayList afterUpdateList = new ArrayList();
+        ArrayList<Integer> afterUpdateList = new ArrayList<Integer>();
 
         b = in.read();
 

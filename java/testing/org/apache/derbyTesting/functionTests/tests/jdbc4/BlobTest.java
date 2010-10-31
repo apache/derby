@@ -177,7 +177,7 @@ public class BlobTest
      * can be exempted or not
      */
     void buildHashSet() {
-        Class iface = Blob.class;
+        Class<Blob> iface = Blob.class;
         for(int i=0;i<emd.length;i++) {
             try {
                 Method m = iface.getMethod(emd[i].getMethodName()
