@@ -469,7 +469,7 @@ public class BaseDataFileFactory
 
 		boolean logBootTrace = PropertyUtil.getSystemBoolean(Property.LOG_BOOT_TRACE);
 		logMsg(LINE);
-		logMsg("\n" + new Date() +
+		logMsg(new Date() +
                 MessageService.getTextMessage(
                     MessageId.STORE_SHUTDOWN_MSG,
                     getIdentifier(),
