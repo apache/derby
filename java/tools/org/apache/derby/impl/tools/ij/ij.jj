@@ -18,7 +18,7 @@
 
 options {
 	STATIC = false;
-	LOOKAHEAD = 2;
+	LOOKAHEAD = 1;
 	DEBUG_PARSER = false;
 	DEBUG_TOKEN_MANAGER = false;
 	ERROR_REPORTING = true;
@@ -1597,15 +1597,11 @@ throws SQLException
 |	r=ElapsedTimeStatement()	
 |	r=ExecuteStatement()	
 |	r=FirstStatement()	
-|	r=FirstStatement()	
-|	r=JBMSPreparedStatementExec()	
-|	r=F2KExecuteProcedure()	
 |	r=ExitStatement()
 |	r=ExpectStatement()
 |	r=GetCursorStatement()	
 |	r=GetCurrentRowNumber()	
 |	r=HelpStatement()	
-|	r=IllegalStatementName()
 |	r=LastStatement()	
 |	r=LocalizedDisplay()
 |	r=MaximumDisplayWidthStatement()	
@@ -1714,14 +1710,10 @@ throws SQLException
 	ijResult	result;
 }
 {
-	<CONNECT> <TO>
-	( result = dynamicConnection(true) )
-	{
-		return result;
-	}
-|
-	<CONNECT>
-	( result = dynamicConnection(false) | result = staticConnection() )
+	<CONNECT> (
+		<TO> ( result = dynamicConnection(true) ) |
+		( result = dynamicConnection(false) | result = staticConnection() )
+	)
 	{
 		return result;
 	}
@@ -1759,13 +1751,13 @@ throws SQLException
 	String n = null, p = null, sVal;
     String userS =  util.getSystemProperty(USER_PROPERTY);
     String passwordS = util.getSystemProperty(PASSWORD_PROPERTY);
-	Properties connInfo = null;
+	Properties connInfo = new Properties();
 }
 {
 	t=<STRING>	[ <PROTOCOL> p=identifier() ] 
 				[ <USER> userT=<STRING> ]
 				[ <PASSWORD> passwordT=<STRING> ]
-		        [ <ATTRIBUTES> connInfo = attributeList() ]
+				[ <ATTRIBUTES> [ attributeList(connInfo) ] ]
 				[ <AS> n=identifier() ]
 	{
 		// t.image is a database URL
@@ -1859,15 +1851,26 @@ throws SQLException
 	String i = null;
 	String i2 = null;
 	Token  s = null;
+	String schema;
+	String table;
 }
 {
 	<DESCRIBE>
-	( ( i=caIdentifier() <PERIOD> i2=caIdentifier() )
-	| i2=caIdentifier()
-	| s=<STRING>
-	)
-	{
-		if(s!=null) {
+	(
+
+		( i = caIdentifier() ( <PERIOD> i2 = caIdentifier() )? )
+		{
+			if (i2 == null) {
+				schema = null;
+				table = i;
+			} else {
+				schema = i;
+				table = i2;
+			}
+		}
+	|
+		s=<STRING>
+		{
 			i2 = stringValue(s.image);
 
 			if (i2.length() == 0)
@@ -1880,12 +1883,17 @@ throws SQLException
 			}
 			if ("*".equals(i2))
 				i2 = null;
+
+			schema = i;
+			table = i2;
+		}
+	)
+	{
+		if (schema == null) {
+			schema = util.getSelectedSchema(theConnection);
 		}
 
-		if(i==null)
-			i = util.getSelectedSchema(theConnection);
-
-		return describeTable(i,i2);
+		return describeTable(schema, table);
 	}
 }
 
@@ -1995,11 +2003,13 @@ throws SQLException
 	Token v = null;
 }
 {
-	<SHOW> <CONNECTIONS>
+	<SHOW> (
+
+	<CONNECTIONS>
 	{
 		return showConnectionsMethod(false);
 	}
-|   <SHOW> (t=<TABLES> | v=<VIEWS> | <SYNONYMS> | <ALIASES>)
+|   (t=<TABLES> | v=<VIEWS> | <SYNONYMS> | <ALIASES>)
 		[ <IN> schema=caIdentifier() ]
 	{
 		if(t!=null) {
@@ -2011,7 +2021,7 @@ throws SQLException
 			types = new String[] { "SYNONYM" };
 		return showTables(schema, types);
 	}
-|	<SHOW> <INDEXES> 
+|	<INDEXES>
 		[ (<IN> schema=caIdentifier()) |
 		  (<FROM> tblname=caIdentifier() [ <PERIOD> str=caIdentifier() ] ) ]
 	{
@@ -2028,32 +2038,34 @@ throws SQLException
 			schema = util.getSelectedSchema(theConnection);
 		return showIndexes(schema,tblname);
 	}
-|	<SHOW> <PROCEDURES>
+|	<PROCEDURES>
 		[ <IN> schema=caIdentifier() ]
 	{
 		return showProcedures(schema);
 	}
-|	<SHOW> <FUNCTIONS>
+|	<FUNCTIONS>
 		[ <IN> schema=caIdentifier() ]
 	{
 		return showFunctions(schema);
 	}
-|	<SHOW> <SCHEMAS>
+|	<SCHEMAS>
 	{
 		return showSchemas();
 	}
-|       <SHOW> <ROLES>
+|       <ROLES>
         {
             return showRoles();
         }
-|       <SHOW> <ENABLED_ROLES>
+|       <ENABLED_ROLES>
         {
             return showEnabledRoles();
         }
-|       <SHOW> <SETTABLE_ROLES>
+|       <SETTABLE_ROLES>
         {
             return showSettableRoles();
         }
+
+	)
 }
 
 /**
@@ -2154,23 +2166,6 @@ throws SQLException
 }
 
 ijResult
-IllegalStatementName()
-throws SQLException
-:
-{
-	Token s = null;
-}
-{
-	<PREPARE> <PROCEDURE> <AS> s=<STRING>
-	{
-		// "procedure" is not allowed as a statement name. this is
-		// because "execute procedure" is a valid Foundation2000
-		// command
-		throw ijException.illegalStatementName( "procedure" );
-	}
-}
-
-ijResult
 PrepareStatement()
 throws SQLException
 :
@@ -2181,7 +2176,17 @@ throws SQLException
 	String sVal;
 }
 {
-	<PREPARE> qi=qualifiedIdentifier() <AS> t=<STRING>
+	<PREPARE> (
+
+	<PROCEDURE> <AS> t = <STRING>
+	{
+		// "procedure" is not allowed as a statement name. This is
+		// because "execute procedure" is a valid Foundation2000
+		// command.
+		throw ijException.illegalStatementName( "procedure" );
+	}
+|
+	qi=qualifiedIdentifier() <AS> t=<STRING>
 	{
 		Session session = findSession(qi.getSessionName());
 
@@ -2195,6 +2200,8 @@ throws SQLException
 		ps.clearWarnings();
 		return new ijWarningResult(w);
 	}
+
+	)
 }
 
 ijResult
@@ -2458,49 +2465,6 @@ throws SQLException
 }
 
 /**
- * Hack to get the grammar to leave a
- * EXECUTE STATEMENT &lt;stmt&gt; alone.  Short
- * circuit the ij EXECUTE built in.
- */
-ijResult JBMSPreparedStatementExec()	
-throws SQLException :
-{
-	Token s = null;
-}
-{
-	<EXECUTE> <STATEMENT> s = <STRING>
-	{
-		return executeImmediate(stringValue(s.image));
-	}
-}
-		
-
-/**
- * Hack to get the grammar to leave a
- * EXECUTE PROCEDURE &lt;procSpec&gt; alone.  Short
- * circuit the ij EXECUTE built in so that
- * we can deploy ij against Foundation2000.
- */
-ijResult F2KExecuteProcedure()	
-throws SQLException :
-{
-	Token s = null;
-}
-{
-	<EXECUTE> <PROCEDURE> s = <STRING>
-	{
-		haveConnection();
-
-		Statement	aStatement = theConnection.createStatement();
-		String		text = "execute procedure " + s;
-
-		aStatement.execute( text );
-
-		return new ijStatementResult( aStatement,true );
-	}
-}
-		
-/**
  * Two forms of execute: immediate, with a string
  * and prepared, with the id of a prepared statement.
  * We expect the latter form will
@@ -2529,7 +2493,32 @@ throws SQLException
 	Token	usingObject = null;
 }
 {
-	<EXECUTE> 
+	<EXECUTE> (
+
+	// Hack to get the grammar to leave a
+	// EXECUTE STATEMENT <stmt> alone. Short
+	// circuit the ij EXECUTE built in.
+	<STATEMENT> s = <STRING>
+	{
+		return executeImmediate(stringValue(s.image));
+	}
+|
+	// Hack to get the grammar to leave a
+	// EXECUTE PROCEDURE <procSpec> alone. Short
+	// circuit the ij EXECUTE built in so that
+	// we can deploy ij against Foundation2000.
+	<PROCEDURE> s = <STRING>
+	{
+		haveConnection();
+
+		Statement	aStatement = theConnection.createStatement();
+		String		text = "execute procedure " + s;
+
+		aStatement.execute( text );
+
+		return new ijStatementResult( aStatement,true );
+	}
+|
 	( qi=qualifiedIdentifier()
 	| s=<STRING>
 	)
@@ -2676,6 +2665,8 @@ throws SQLException
 	    	}
 	    }
 	}
+
+	)
 }
 
 /**
@@ -3733,20 +3724,17 @@ ijResult CP_DisconnectStatement() throws SQLException
 
 
 
-Properties
-	attributeList() :
+void attributeList(Properties properties) :
 {
-	Properties properties = new Properties();
 	Token tok;
 	String value;
 }
 {
 
-	[ property(properties) (<COMMA> property(properties) )* ]
+	LOOKAHEAD({ getToken(2).kind == EQUALS_OPERATOR })
+	( property(properties) (<COMMA> property(properties) )* )
 
 	{
-		//properties.put(tok.image,value);
-		return properties;	
 	}
 
 }
