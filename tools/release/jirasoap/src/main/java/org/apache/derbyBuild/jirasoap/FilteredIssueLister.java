@@ -118,7 +118,7 @@ public class FilteredIssueLister {
     /** Cached version objects. */
     private DerbyVersion[] allVersions;
     /** The point at which we stop listing ancestors for a release. */
-    private final DerbyVersion ancestorCutOff;
+    private final DerbyVersion ancestorCutoff;
     /** Tells if disqualified issues should be reported. */
     private final boolean reportDisqualifiedIssues;
     /** Tells if the release ancestry has been overriden by the user. */
@@ -158,7 +158,7 @@ public class FilteredIssueLister {
         }
         // Give a better error message if user-specified cutoff value is bad.
         try {
-            ancestorCutOff = getVersion(System.getProperty(
+            ancestorCutoff = getVersion(System.getProperty(
                 ANCESTOR_CUTOFF_PROP, DEFAULT_ANCESTOR_CUTOFF));
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException(
@@ -189,18 +189,20 @@ public class FilteredIssueLister {
         }
         user = username;
         allVersions = new DerbyVersion[versions.length];
-        // Expected format: release version, release date (YYYY-MM-DD)
+        // Expected format: release version, release date (YYYY-MM-DD, or null)
         for (int i=0; i < versions.length; i++) {
             allVersions[i] = new DerbyVersion(
-                    versions[i][0], parseDate(versions[i][1]));
+                    versions[i][0], versions[i][1] == null
+                                            ? DerbyVersion.NOT_RELEASED
+                                            : parseDate(versions[i][1]));
         }
         // Give a better error message if user-specified cutoff value is bad.
         try {
-            ancestorCutOff = getVersion(System.getProperty(
+            ancestorCutoff = getVersion(System.getProperty(
                 ANCESTOR_CUTOFF_PROP, DEFAULT_ANCESTOR_CUTOFF));
         } catch (IllegalArgumentException iae) {
             throw new IllegalArgumentException(
-                    "invaild ancestor cutoff version", iae);
+                    "invalid ancestor cutoff version", iae);
         }
         reportDisqualifiedIssues =
                 Boolean.getBoolean(REPORT_DISQUALIFICATIONS_PROP);
@@ -258,29 +260,23 @@ public class FilteredIssueLister {
      */
     public void printAncestors(String parentVersion) {
         DerbyVersion parent = getVersion(parentVersion);
-        if (parent.compareTo(ancestorCutOff) < 0) {
+        if (parent.compareTo(ancestorCutoff) < 0) {
             throw new IllegalArgumentException(
                     "specified version " + parentVersion +
                     " is less than the ancestor cut-off version: " +
-                    ancestorCutOff.getVersion());
+                    ancestorCutoff.getVersion());
         }
         DerbyVersion[] ancestors = getAncestors(parent);
         System.out.println("--- Ancestors for version " + parentVersion + " (" +
                 (parent.isReleased() ? "released)" : "unreleased)"));
         for (int i=0; i < ancestors.length; i++) {
-            DerbyVersion a = ancestors[i];
-            Calendar cal = GregorianCalendar.getInstance();
-            cal.setTimeInMillis(a.getReleaseDateMillis());
-            System.out.println(a.getVersion() + ", " +
-                    cal.get(Calendar.YEAR) + "-" +
-                    padZero(cal.get(Calendar.MONTH) +1) + "-" +
-                    padZero(cal.get(Calendar.DAY_OF_MONTH)));
+            System.out.println(ancestors[i]);
         }
         // Special case when there is no ancestor.
         if (ancestors.length == 0) {
             System.out.println("<no ancestors found in JIRA>");
         }
-        System.out.println("(cutoff=" + ancestorCutOff.getVersion() + ")");
+        System.out.println("(cutoff=" + ancestorCutoff.getVersion() + ")");
     }
 
     /**
@@ -308,14 +304,7 @@ public class FilteredIssueLister {
         System.out.println("--- Derby releases");
         Iterator relIter = releases.iterator();
         while (relIter.hasNext()) {
-            DerbyVersion dv = (DerbyVersion)relIter.next();
-            Calendar cal = GregorianCalendar.getInstance();
-            cal.setTimeInMillis(dv.getReleaseDateMillis());
-            System.out.println(dv.getVersion() + ", " +
-                    cal.get(Calendar.YEAR) + "-" +
-                    padZero(cal.get(Calendar.MONTH) +1) + "-" +
-                    padZero(cal.get(Calendar.DAY_OF_MONTH)));
-
+            System.out.println(relIter.next());
         }
     }
 
@@ -465,7 +454,7 @@ public class FilteredIssueLister {
         log("wrote " + count + " issues, " + issuesWithReleaseNote +
                 " with release notes, " + (issues.length - count) +
                 " issues disqualified");
-        log("dump file: " + new File(destFile).getAbsolutePath());
+        log("dump file: " + new File(destFile).getCanonicalPath());
         return count;
     }
 
@@ -499,10 +488,7 @@ public class FilteredIssueLister {
     private DerbyVersion[] getAncestors(DerbyVersion parent) {
         ArrayList ancestors = new ArrayList();
         DerbyVersion[] dv = getSortedAndFilteredReleases(parent);
-        if (!parent.isReleased() && dv.length > 0) {
-            ancestors.add(dv[0]);
-        }
-        while (dv.length > 1 && dv[0].compareTo(ancestorCutOff) >= 0) {
+        while (dv.length > 1 && dv[0].compareTo(ancestorCutoff) >= 0) {
             dv = getSortedAndFilteredReleases(dv[1]);
             ancestors.add(dv[0]);
         }
@@ -519,9 +505,8 @@ public class FilteredIssueLister {
      * <ul> <li>version number (i.e. 10.6.2.1 > 10.5.1.0)</li>
      *      <li>release date</li>
      * </ul>
-     * If the target version has been released, it will be placed at index zero.
-     * If the target version hasn't been released, it will not be included in
-     * the list.
+     * <p>
+     * The target version will always be found at index zero.
      * <p>
      * Not specifying a target version will return all Derby releases sorted by
      * version number.
@@ -536,7 +521,7 @@ public class FilteredIssueLister {
         for (int i=0; i < allVersions.length; i++) {
             DerbyVersion dv = allVersions[i];
             // Skip versions that haven't been released.
-            if (!dv.isReleased()) {
+            if (!dv.isReleased() && !dv.equals(target)) {
                 continue;
             }
             if (target != null) {
@@ -556,15 +541,6 @@ public class FilteredIssueLister {
         DerbyVersion[] result = new DerbyVersion[tmp.size()];
         tmp.toArray(result);
         return result;
-    }
-
-    /** Adds a leading zero if the value is less than ten. */
-    private static String padZero(int val) {
-        if (val < 10) {
-            return "0" + Integer.toString(val);
-        } else {
-            return Integer.toString(val);
-        }
     }
 
     /**

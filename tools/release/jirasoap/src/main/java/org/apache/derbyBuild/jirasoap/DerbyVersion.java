@@ -21,16 +21,27 @@
 
 package org.apache.derbyBuild.jirasoap;
 
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
 /**
  * Class representing a Derby version.
  * <p>
  * The format is major.minor.fixpack.point, for instance 10.6.2.1.
  */
+//@Immutable
 class DerbyVersion
         implements Comparable {
 
-    /** Constant for version which haven't been released. */
-    private static final long NOT_RELEASED = -1;
+    /**
+     * Shard static calendar used to format release date (this is not a
+     * erformance critical class).
+     */
+    // GuardedBy("CAL")
+    private static final Calendar CAL = GregorianCalendar.getInstance();
+
+    /** Constant telling that a version hasn't been released. */
+    public static final long NOT_RELEASED = -1;
 
     /** Derby version string, for instance "10.6.2.1". */
     private final String version;
@@ -39,6 +50,7 @@ class DerbyVersion
     private final int fixpack;
     private final int point;
     private final long releaseDate;
+    private final String releaseDateStr;
 
     /**
      * Creates a new Derby version object.
@@ -62,6 +74,16 @@ class DerbyVersion
         fixpack = Integer.parseInt(comp[2]);
         point = Integer.parseInt(comp[3]);
         this.releaseDate = relDate;
+        if (relDate == NOT_RELEASED) {
+            releaseDateStr = "n/a";
+        } else {
+            synchronized (CAL) {
+                CAL.setTimeInMillis(relDate);
+                releaseDateStr = CAL.get(Calendar.YEAR) + "-" +
+                        padZero(CAL.get(Calendar.MONTH) +1) + "-" +
+                        padZero(CAL.get(Calendar.DAY_OF_MONTH));
+            }
+        }
     }
 
     /**
@@ -76,7 +98,7 @@ class DerbyVersion
     /**
      * Returns the release date in milliseconds since the Epoch.
      *
-     * @return Milliseconds since the Epoch.
+     * @return Release date as milliseconds since the Epoch.
      * @throws IllegalStateException if the version hasn't been released
      */
     public long getReleaseDateMillis() {
@@ -84,6 +106,15 @@ class DerbyVersion
             throw new IllegalStateException("not released");
         }
         return releaseDate;
+    }
+
+    /**
+     * Returns the release date formatted as a string (YYYY-MM-DD).
+     *
+     * @return The release date, or "n/a" if not released.
+     */
+    public String getFormattedReleaseDate() {
+        return releaseDateStr;
     }
 
     /**
@@ -188,6 +219,15 @@ class DerbyVersion
     }
 
     public String toString() {
-        return version + " (" + (releaseDate == NOT_RELEASED ? "n/a" : Long.toString(releaseDate)) + ")";
+        return version + " (" + releaseDateStr + ")";
+    }
+
+    /** Adds a leading zero if the value is less than ten. */
+    private static String padZero(int val) {
+        if (val < 10) {
+            return "0" + Integer.toString(val);
+        } else {
+            return Integer.toString(val);
+        }
     }
 }
