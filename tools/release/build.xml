@@ -122,8 +122,9 @@
         <!-- Build the JIRA SOAP client -->
 	<exec executable="${mvn.exec}"
                 dir="${basedir}/tools/release/jirasoap">
-        <!-- comment out for debugging -->
+        <!-- comment out the two lines below for debugging -->
         <arg line="--quiet"/>
+        <arg line="--batch-mode"/>
         <arg line="-Pbuildclient"/>
         </exec>
 

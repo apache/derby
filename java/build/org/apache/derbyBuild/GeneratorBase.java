@@ -136,9 +136,7 @@ public class GeneratorBase extends Task {
 
         excludeReleaseIDList =
                 summary.getTextListByTagName(SUM_EXCLUDE_RELEASE_ID);
-        System.out.println("setting summary file name to:" + summaryFileName +
-                " previousReleaseID: " + previousReleaseID +
-                " excludeReleaseIDList.size():" + excludeReleaseIDList.size());
+        System.out.println("Summary file (input): " + summaryFileName);
     }
 
     /**
