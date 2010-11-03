@@ -37,6 +37,7 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.Vector;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 /*
  We would import these, but have name-overlap
@@ -610,6 +611,7 @@ public class EmbedStatement extends ConnectionChild
 					preparedStatement.getActivation(lcc, resultSetType ==
                         java.sql.ResultSet.TYPE_SCROLL_INSENSITIVE);
 				checkRequiresCallableStatement(activation);
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
 			 } catch (Throwable t) {
 				throw handleException(t);
 			 }
@@ -971,10 +973,17 @@ public class EmbedStatement extends ConnectionChild
 			try {
 				for (; i< size; i++) 
 				{
+                    // If we saw an interrupt, stop execution of batch now.
+                    // throwIf will likely only throw after at least one stm
+                    // has been executed, since first time around we probably
+                    // didn't do anything to notice interrupts yet.
+                    InterruptStatus.throwIf(lcc);
 					if (executeBatchElement(stmts.elementAt(i)))
 						throw newSQLException(SQLState.RESULTSET_RETURN_NOT_ALLOWED);
 					returnUpdateCountForBatch[i] = getUpdateCount();
 				}
+
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
 				return returnUpdateCountForBatch;
 			}
 			catch (StandardException se) {
@@ -1314,7 +1323,10 @@ public class EmbedStatement extends ConnectionChild
 
                     retval = (dynamicResultCount > 0);
 				}
-	        } catch (Throwable t) {
+
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
+
+            } catch (Throwable t) {
 				if (a.isSingleExecution()) {
 					try { a.close(); } catch (Throwable tt) {;}
 				}

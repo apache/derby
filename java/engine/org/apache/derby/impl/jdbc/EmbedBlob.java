@@ -30,6 +30,8 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RawToBinaryFormatStream;
 import org.apache.derby.iapi.types.Resetable;
 import org.apache.derby.iapi.services.io.InputStreamUtil;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 import java.sql.SQLException;
 import java.sql.Blob;
@@ -393,7 +395,8 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
            // we have a stream
             synchronized (getConnectionSynchronization())
             {
-                pushStack = !getEmbedConnection().isClosed();
+                EmbedConnection ec = getEmbedConnection();
+                pushStack = !ec.isClosed();
                 if (pushStack)
                     setupContextStack();
 
@@ -409,6 +412,9 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 
                 tmpStream.close();
                 // Save for future uses.
+
+                restoreIntrFlagIfSeen(pushStack, ec);
+
                 return streamLength;
             }
         }
@@ -469,19 +475,23 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             if (materialized) {
                  result = new byte [length];
                  int sz = control.read (result, 0, result.length, startPos - 1);
-                 if (sz == -1)
+                 if (sz == -1) {
+                     InterruptStatus.restoreIntrFlagIfSeen();
                      return new byte [0];
+                 }
                  if (sz < length) {
                      byte [] tmparray = new byte [sz];
                      System.arraycopy (result, 0, tmparray, 0, sz);
                      result = tmparray;
                  }
+                 InterruptStatus.restoreIntrFlagIfSeen();
             }
             else // we have a stream
             {
                 synchronized (getConnectionSynchronization())
                 {
-                    pushStack = !getEmbedConnection().isClosed();
+                    EmbedConnection ec = getEmbedConnection();
+                    pushStack = !ec.isClosed();
                     if (pushStack)
                         setupContextStack();
 
@@ -501,10 +511,17 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                     {
                         byte[] result2 = new byte[n];
                         System.arraycopy(result,0,result2,0,n);
+
+                        restoreIntrFlagIfSeen(pushStack, ec);
+
                         return result2;
                     }
+
+                    restoreIntrFlagIfSeen(pushStack,ec);
                 }
             }
+
+
             return result;
         }
         catch (StandardException e)
@@ -547,7 +564,8 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
             // if we have byte array, not a stream
             if (materialized)
             {
-                return control.getInputStream(0);
+                java.io.InputStream result = control.getInputStream(0);
+                return result;
             }
             else
             { 
@@ -555,15 +573,21 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 
                 synchronized (getConnectionSynchronization())
                 {
-                    pushStack = !getEmbedConnection().isClosed();
+                    EmbedConnection ec = getEmbedConnection();
+                    pushStack = !ec.isClosed();
                     if (pushStack)
                         setupContextStack();
 
                     // Reset stream, because AutoPositionigStream wants to read
                     // the encoded length bytes.
                     myStream.resetStream();
-                    return new UpdatableBlobStream (this, 
-                            new AutoPositioningStream (this, myStream, this));
+                    UpdatableBlobStream result = new UpdatableBlobStream(
+                        this,
+                        new AutoPositioningStream (this, myStream, this));
+
+                    restoreIntrFlagIfSeen(pushStack, ec);
+
+                    return result;
                 }
             }
         }
@@ -600,6 +624,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
         checkValidity();
         
         boolean pushStack = false;
+
         try
         {
             if (start < 1)
@@ -612,7 +637,9 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
 
             synchronized (getConnectionSynchronization())
             {
-                pushStack = !getEmbedConnection().isClosed();
+                EmbedConnection ec = getEmbedConnection();
+
+                pushStack = !ec.isClosed();
                 if (pushStack)
                     setupContextStack();
 
@@ -624,14 +651,17 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 while (true)
                 {
                     c = read(pos++); // Note the position increment.
-                    if (c == -1)  // run out of stream
+                    if (c == -1) { // run out of stream
+                        restoreIntrFlagIfSeen(pushStack, ec);
                         return -1;
+                    }
                     if (c == lookFor)
                     {
                         curPos = pos;
-                        if (checkMatch(pattern, pos))
+                        if (checkMatch(pattern, pos)) {
+                            restoreIntrFlagIfSeen(pushStack, ec);
                             return curPos;
-                        else
+                        } else
                             pos = setBlobPosition(curPos);
                     }
                 }
@@ -704,9 +734,12 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                     SQLState.BLOB_BAD_POSITION, new Long(start));
             if (pattern == null)
                 throw StandardException.newException(SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
+
             synchronized (getConnectionSynchronization())
             {
-                pushStack = !getEmbedConnection().isClosed();
+                EmbedConnection ec = getEmbedConnection();
+
+                pushStack = !ec.isClosed();
                 if (pushStack)
                     setupContextStack();
 
@@ -721,22 +754,27 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                 {
                     throw StandardException.newException(SQLState.BLOB_UNABLE_TO_READ_PATTERN);
                 }
-                if (b == null || b.length < 1)  // the 'empty' blob
+                if (b == null || b.length < 1) { // the 'empty' blob
+                    restoreIntrFlagIfSeen(pushStack, ec);
                     return start; // match DB2's SQL LOCATE function
+                }
                 int lookFor = b[0];
                 int c;
                 long curPos;
                 while (true)
                 {
                     c = read(pos++); // Note the position increment.
-                    if (c == -1)  // run out of stream
+                    if (c == -1) {  // run out of stream
+                        restoreIntrFlagIfSeen(pushStack, ec);
                         return -1;
+                    }
                     if (c == lookFor)
                     {
                         curPos = pos;
-                        if (checkMatch(pattern, pos))
+                        if (checkMatch(pattern, pos)) {
+                            restoreIntrFlagIfSeen(pushStack, ec);
                             return curPos;
-                        else
+                        } else
                             pos = setBlobPosition(curPos);
                     }
                 }

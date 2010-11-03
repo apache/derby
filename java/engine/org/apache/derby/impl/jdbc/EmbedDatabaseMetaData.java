@@ -51,6 +51,7 @@ import java.sql.Types;
 
 import java.io.IOException;
 import java.io.InputStream;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
  * This class provides information about the database as a whole.
@@ -2311,10 +2312,12 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 			throw Util.noCurrentConnection();
 
 		boolean notInSoftUpgradeMode;
+        LanguageConnectionContext lcc = getLanguageConnectionContext();
 		try {
 			notInSoftUpgradeMode =
-				getLanguageConnectionContext().getDataDictionary().checkVersion(
+               lcc.getDataDictionary().checkVersion(
 						DataDictionary.DD_VERSION_CURRENT,null);
+            InterruptStatus.restoreIntrFlagIfSeen();
 		} catch (Throwable t) {
 			throw handleException(t);
 		}
@@ -3497,6 +3500,8 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 				}
 				
                 ps = prepareSPS(nameKey, queryText, net);
+                InterruptStatus.
+                    restoreIntrFlagIfSeen(getLanguageConnectionContext());
 			}
 
 			catch (Throwable t) 
@@ -3552,7 +3557,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 				//mode or are read only, and hence need to get metadata sql from 
                                 //metadata.properties file or metadata_net.properties
 				String queryText = getQueryFromDescription(queryName, net);
-				s = getEmbedConnection().prepareMetaDataStatement(queryText);
+                s = getEmbedConnection().prepareMetaDataStatement(queryText);
+                // InterruptStatus.restoreIntrFlagIfSeen: called inside
+                // prepareMetaDataStatement while we still have context pushed.
 			} catch (Throwable t) {
 				throw handleException(t);
 			} 

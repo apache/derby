@@ -83,6 +83,7 @@ import java.util.Properties;
 import java.util.Iterator;
 
 import org.apache.derby.iapi.jdbc.EngineLOB;
+import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
 
 /**
@@ -600,10 +601,12 @@ public abstract class EmbedConnection implements EngineConnection
 			// Raise a warning in sqlAuthorization mode if authentication is not ON
 			if (usingNoneAuth && getLanguageConnection().usesSqlAuthorization())
 				addWarning(SQLWarningFactory.newSQLWarning(SQLState.SQL_AUTHORIZATION_WITH_NO_AUTHENTICATION));
+            InterruptStatus.restoreIntrFlagIfSeen(getLanguageConnection());
 		}
         catch (OutOfMemoryError noMemory)
 		{
 			//System.out.println("freeA");
+            InterruptStatus.restoreIntrFlagIfSeen();
 			restoreContextStack();
 			tr.lcc = null;
 			tr.cm = null;
@@ -617,6 +620,8 @@ public abstract class EmbedConnection implements EngineConnection
 			throw NO_MEM;
 		}
 		catch (Throwable t) {
+            InterruptStatus.restoreIntrFlagIfSeen();
+
             if (t instanceof StandardException)
             {
                 StandardException se = (StandardException) t;
@@ -1242,7 +1247,7 @@ public abstract class EmbedConnection implements EngineConnection
 
 		try {
 			tr.startTransaction();
-			LanguageConnectionContext lcc = tr.getLcc();
+            LanguageConnectionContext lcc = tr.getLcc();
             String username = lcc.getSessionUserId();
 
 			DataDictionary dd = lcc.getDataDictionary();
@@ -1266,6 +1271,7 @@ public abstract class EmbedConnection implements EngineConnection
 			}
 
 			tr.rollback();
+            InterruptStatus.restoreIntrFlagIfSeen(lcc);
 		} catch (StandardException e) {
 			try {
 				tr.rollback();
@@ -1792,6 +1798,7 @@ public abstract class EmbedConnection implements EngineConnection
 			{
 		    	getTR().commit();
 		    	clearLOBMapping();
+                InterruptStatus.restoreIntrFlagIfSeen(getLanguageConnection());
 			}
             catch (Throwable t)
 			{
@@ -1828,6 +1835,7 @@ public abstract class EmbedConnection implements EngineConnection
 			{
 		    	getTR().rollback();
 		    	clearLOBMapping();
+                InterruptStatus.restoreIntrFlagIfSeen(getLanguageConnection());
 			} catch (Throwable t) {
 				throw handleException(t);
 			}
@@ -1895,6 +1903,8 @@ public abstract class EmbedConnection implements EngineConnection
 						setupContextStack();
 						try {
 							tr.rollback();
+                            InterruptStatus.
+                                    restoreIntrFlagIfSeen(tr.getLcc());
 							
 							// Let go of lcc reference so it can be GC'ed after
 							// cleanupOnError, the tr will stay around until the
@@ -1913,6 +1923,7 @@ public abstract class EmbedConnection implements EngineConnection
 						// DERBY-1947: If another connection has closed down
 						// the database, the transaction is not active, but
 						// the cleanup has not been done yet.
+                        InterruptStatus.restoreIntrFlagIfSeen();
 						tr.clearLcc(); 
 						tr.cleanupOnError(e);
 					}
@@ -2012,7 +2023,9 @@ public abstract class EmbedConnection implements EngineConnection
 		{
                         setupContextStack();
 			try {
-				getLanguageConnection().setReadOnly(readOnly);
+                LanguageConnectionContext lcc = getLanguageConnection();
+                lcc.setReadOnly(readOnly);
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
 			} catch (StandardException e) {
 				throw handleException(e);
 			} finally {
@@ -2106,7 +2119,9 @@ public abstract class EmbedConnection implements EngineConnection
 		{
             setupContextStack();
 			try {
-				getLanguageConnection().setIsolationLevel(iLevel);
+                LanguageConnectionContext lcc = getLanguageConnection();
+                lcc.setIsolationLevel(iLevel);
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
 			} catch (StandardException e) {
 				throw handleException(e);
 			} finally {
@@ -2392,6 +2407,7 @@ public abstract class EmbedConnection implements EngineConnection
             {
                 getTR().commit();
                 clearLOBMapping();
+                InterruptStatus.restoreIntrFlagIfSeen(getLanguageConnection());
             } 
             catch (Throwable t)
             {
@@ -2424,6 +2440,7 @@ public abstract class EmbedConnection implements EngineConnection
             {
                 getTR().commit();
                 clearLOBMapping();
+                InterruptStatus.restoreIntrFlagIfSeen(getLanguageConnection());
             } 
             catch (Throwable t)
             {
@@ -2513,6 +2530,7 @@ public abstract class EmbedConnection implements EngineConnection
 				// service already exists, create a warning
 				addWarning(SQLWarningFactory.newSQLWarning(SQLState.DATABASE_EXISTS, dbname));
 			}
+
 		} catch (StandardException mse) {
             throw Util.seeNextException(SQLState.CREATE_DATABASE_FAILED,
                                         new Object[] { dbname },
@@ -2735,6 +2753,10 @@ public abstract class EmbedConnection implements EngineConnection
 											  null,
 											  null);
 			} finally {
+                // Restore here, cf. comment in
+                // EmbedDatabaseMetaData#getPreparedQuery:
+                InterruptStatus.
+                    restoreIntrFlagIfSeen(getLanguageConnection());
 			    restoreContextStack();
 			}
 			return s;
@@ -2839,7 +2861,9 @@ public abstract class EmbedConnection implements EngineConnection
 		{
 			setupContextStack();
 			try {
-				getLanguageConnection().resetFromPool();
+                LanguageConnectionContext lcc = getLanguageConnection();
+                lcc.resetFromPool();
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
 			} catch (StandardException t) {
 				throw handleException(t);
 			}
@@ -2875,8 +2899,9 @@ public abstract class EmbedConnection implements EngineConnection
             setupContextStack();
 			try
 			{
+                LanguageConnectionContext lcc = getLanguageConnection();
 				XATransactionController tc = 
-					(XATransactionController) getLanguageConnection().getTransactionExecute();
+                    (XATransactionController)lcc.getTransactionExecute();
 
 				int ret = tc.xa_prepare();
 
@@ -2891,8 +2916,9 @@ public abstract class EmbedConnection implements EngineConnection
 					// consistent.  Since the transaction is read only, there is
 					// probably not much that needs to be done.
 
-					getLanguageConnection().internalCommit(false /* don't commitStore again */);
+                    lcc.internalCommit(false /* don't commitStore again */);
 				}
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
 				return ret;
 			} catch (StandardException t)
 			{
@@ -2918,7 +2944,9 @@ public abstract class EmbedConnection implements EngineConnection
             setupContextStack();
 			try
 			{
-		    	getLanguageConnection().xaCommit(onePhase);
+                LanguageConnectionContext lcc = getLanguageConnection();
+                lcc.xaCommit(onePhase);
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
 			} catch (StandardException t)
 			{
 				throw handleException(t);
@@ -2942,7 +2970,9 @@ public abstract class EmbedConnection implements EngineConnection
             setupContextStack();
 			try
 			{
-		    	getLanguageConnection().xaRollback();
+                LanguageConnectionContext lcc = getLanguageConnection();
+                lcc.xaRollback();
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
 			} catch (StandardException t)
 			{
 				throw handleException(t);

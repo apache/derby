@@ -22,6 +22,7 @@
 package org.apache.derby.impl.jdbc;
 
 import org.apache.derby.jdbc.InternalDriver;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 import java.sql.SQLException;
 
@@ -153,6 +154,17 @@ abstract class ConnectionChild {
 	SQLException newSQLException(String messageId, Object arg1, Object arg2) {
 		return localConn.newSQLException(messageId, arg1, arg2);
 	}
+
+    protected static void restoreIntrFlagIfSeen(
+        boolean pushStack, EmbedConnection ec) {
+
+        if (pushStack) {
+            InterruptStatus.restoreIntrFlagIfSeen(ec.getLanguageConnection());
+        } else {
+            // no lcc if connection is closed:
+            InterruptStatus.restoreIntrFlagIfSeen();
+        }
+    }
 }
 
 

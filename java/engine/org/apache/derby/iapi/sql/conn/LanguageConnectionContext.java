@@ -1274,5 +1274,20 @@ public interface LanguageConnectionContext extends Context {
      * @return The Visitor for that phase. Could be null.
      */
     public ASTVisitor getASTVisitor( );
-    
+
+    /**
+     * Set the exception created and associated with the detected interruped
+     * status flag.
+     *
+     * @param e the created exception
+     */
+    public void setInterruptedException(StandardException e);
+
+    /**
+     * Get exception created when we detected interruped status
+     * flag.
+     *
+     * @return saved exception
+     */
+    public StandardException getInterruptedException();
 }

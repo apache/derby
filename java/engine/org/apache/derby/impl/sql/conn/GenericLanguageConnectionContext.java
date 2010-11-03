@@ -295,6 +295,13 @@ public class GenericLanguageConnectionContext
 
     // User-written inspector to print out query tree
     private ASTVisitor astWalker;
+
+    /**
+     * Interrupt status flag of this session's thread, in the form of an
+     * exception created where an interrupt was (last) detected during operation,
+     * null if no interrupt has been seen.
+     */
+    private StandardException interruptedException;
     
     /*
        constructor
@@ -382,6 +389,7 @@ public class GenericLanguageConnectionContext
 
 
         setDefaultSchema(initDefaultSchemaDescriptor());
+        interruptedException = null;
     }
 
     /**
@@ -3860,4 +3868,11 @@ public class GenericLanguageConnectionContext
         return astWalker;
     }
 
+    public void setInterruptedException(StandardException e) {
+        interruptedException = e;
+    }
+
+    public StandardException getInterruptedException() {
+        return interruptedException;
+    }
 }

@@ -522,6 +522,7 @@ readChars:
         }
         return true;
         } finally {
+            parent.restoreIntrFlagIfSeen(true, parent.getEmbedConnection());
             parent.restoreContextStack();
         }
         } catch (SQLException sqle) {

@@ -329,13 +329,14 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
             return start; // match DB2's SQL LOCATE function
 
         boolean pushStack = false;
+        EmbedConnection ec = getEmbedConnection();
         try
         {
 
             Object synchronization = getConnectionSynchronization();
             synchronized (synchronization)
             {
-                pushStack = !getEmbedConnection().isClosed();
+                pushStack = !ec.isClosed();
                 if (pushStack)
                     setupContextStack();
                 int matchCount = 0;
@@ -347,8 +348,10 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                 for (;;) {
                     reset = false;
                     int readCount = reader.read (tmpClob);
-                    if (readCount == -1)
+                    if (readCount == -1) {
+                        restoreIntrFlagIfSeen(pushStack, ec);
                         return -1;
+                    }
                     for (int clobOffset = 0;
                                 clobOffset < readCount; clobOffset++) {
                         if (tmpClob[clobOffset]
@@ -362,6 +365,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                             }
                             matchCount ++;
                             if (matchCount == searchStr.length()) {
+                                restoreIntrFlagIfSeen(pushStack, ec);
                                 return pos + clobOffset
                                         - searchStr.length() + 1;
                             }
@@ -399,9 +403,11 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
 
             }
         } catch (EOFException eofe) {
+            restoreIntrFlagIfSeen(pushStack, ec);
             throw Util.generateCsSQLException(
                                         SQLState.BLOB_POSITION_TOO_LARGE, eofe);
         } catch (IOException ioe) {
+            restoreIntrFlagIfSeen(pushStack, ec);
             throw Util.setStreamFailure(ioe);
         } finally {
             if (pushStack) {
@@ -437,6 +443,7 @@ final class EmbedClob extends ConnectionChild implements Clob, EngineLOB
                                 SQLState.BLOB_NULL_PATTERN_OR_SEARCH_STR);
 
         boolean pushStack = false;
+        EmbedConnection ec = getEmbedConnection();
         try
         {
             synchronized (getConnectionSynchronization())
@@ -455,9 +462,13 @@ restartScan:
                                                         subPatternChar.length);
                             if (read == -1) {
                                 //empty pattern
-                                if (!seenOneCharacter)
+                                if (!seenOneCharacter) {
                                     // matches DB2 SQL LOCATE function
+                                    restoreIntrFlagIfSeen(pushStack, ec);
                                     return start;
+                                }
+
+                                restoreIntrFlagIfSeen(pushStack, ec);
                                 return firstPosition;
                             }
                             if (read == 0) {
@@ -470,8 +481,10 @@ restartScan:
                             long position = position(subPattern, start);
                             if (position == -1) {
                                 // never seen any match
-                                if (firstPosition == -1)
+                                if (firstPosition == -1) {
+                                    restoreIntrFlagIfSeen(pushStack, ec);
                                     return -1;
+                                }
 
                                 start = firstPosition + 1;
                                 continue restartScan;
@@ -488,9 +501,10 @@ restartScan:
                             // read is the length of the subPattern string
                             start = position + read;
                     } // End inner for loop
-            } // End outer for loop
-        } // End synchronized block
+                } // End outer for loop
+            } // End synchronized block
         } catch (IOException ioe) {
+            restoreIntrFlagIfSeen(pushStack, ec);
             throw Util.setStreamFailure(ioe);
         } finally {
             if (pushStack) {

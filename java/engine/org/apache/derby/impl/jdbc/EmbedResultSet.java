@@ -80,6 +80,7 @@ import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
  * A EmbedResultSet for results from the EmbedStatement family. 
@@ -459,7 +460,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 				}
 
 				lcc.popStatementContext(statementContext, null);
-				
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
 		    } catch (Throwable t) {
 				/*
 				 * Need to close the result set here because the error might
@@ -571,6 +572,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 			}
             
 			try	{
+                LanguageConnectionContext lcc =
+                    getEmbedConnection().getLanguageConnection();
+
 				try	{
 					theResults.close(); 
 				    
@@ -579,7 +583,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 				    	this.singleUseActivation.close();
 				    	this.singleUseActivation = null;
 				    }
-				    
+
+                    InterruptStatus.restoreIntrFlagIfSeen(lcc);
 				} catch (Throwable t) {
 					throw handleException(t);
 				}
@@ -597,7 +602,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 		        //
 		        if (forMetaData) {
 
-					LanguageConnectionContext lcc = getEmbedConnection().getLanguageConnection();
 		        	if (lcc.getActivationCount() > 1) {
 		     		  // we do not want to commit here as there seems to be other
 					  // statements/resultSets currently opened for this connection.
@@ -3657,6 +3661,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 act.close();
 
                 lcc.popStatementContext(statementContext, null);
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
             } catch (Throwable t) {
                 throw closeOnTransactionError(t);
             } finally {
@@ -3757,6 +3762,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 movePosition(RELATIVE, 0, "relative");
             }
             lcc.popStatementContext(statementContext, null);
+            InterruptStatus.restoreIntrFlagIfSeen(lcc);
         } catch (Throwable t) {
             throw closeOnTransactionError(t);
         } finally {
@@ -3834,6 +3840,7 @@ public abstract class EmbedResultSet extends ConnectionChild
                 //the next row.
                 currentRow = null;
                 lcc.popStatementContext(statementContext, null);
+                InterruptStatus.restoreIntrFlagIfSeen(lcc);
             } catch (Throwable t) {
                     throw closeOnTransactionError(t);
             } finally {
@@ -3940,6 +3947,8 @@ public abstract class EmbedResultSet extends ConnectionChild
 					updateRow.setColumn(i, 
 						resultDescription.getColumnDescriptor(i).getType().getNull());
 				}
+                InterruptStatus.restoreIntrFlagIfSeen(
+                    getEmbedConnection().getLanguageConnection());
 			} catch (Throwable ex) {
 				handleException(ex);
 			} finally {
@@ -3973,6 +3982,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 					isOnInsertRow = false;
 				}
+
+                InterruptStatus.restoreIntrFlagIfSeen();
+
 			} catch (Throwable ex) {
 				handleException(ex);
 			}
@@ -4009,9 +4021,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 			boolean pushStack = false;
 			try {
 				DataValueDescriptor dvd = getColumn(columnIndex);
+                EmbedConnection ec = getEmbedConnection();
 
-				if (wasNull = dvd.isNull())
+                if (wasNull = dvd.isNull()) {
+                    InterruptStatus.restoreIntrFlagIfSeen();
 					return null;
+                }
 
 				// should set up a context stack if we have a long column,
 				// since a blob may keep a pointer to a long column in the
@@ -4022,7 +4037,9 @@ public abstract class EmbedResultSet extends ConnectionChild
 				if (pushStack)
 					setupContextStack();
 
-				return new EmbedBlob(dvd, getEmbedConnection());
+                EmbedBlob result = new EmbedBlob(dvd, ec);
+                restoreIntrFlagIfSeen(pushStack, ec);
+                return result;
 			} catch (Throwable t) {
 				throw handleException(t);
 			} finally {
@@ -4060,12 +4077,16 @@ public abstract class EmbedResultSet extends ConnectionChild
 				throw dataTypeConversion("java.sql.Clob", columnIndex);
 
 			boolean pushStack = false;
+            EmbedConnection ec = getEmbedConnection();
 			try {
 
 				StringDataValue dvd = (StringDataValue)getColumn(columnIndex);
+                LanguageConnectionContext lcc = ec.getLanguageConnection();
 
-				if (wasNull = dvd.isNull())
+                if (wasNull = dvd.isNull()) {
+                    InterruptStatus.restoreIntrFlagIfSeen();
 					return null;
+                }
 
                 // Set up a context stack if we have CLOB whose value is a long
                 // column in the database.
@@ -4074,7 +4095,9 @@ public abstract class EmbedResultSet extends ConnectionChild
                     setupContextStack();
                 }
 
-                return new EmbedClob(getEmbedConnection(), dvd);
+                EmbedClob result =  new EmbedClob(ec, dvd);
+                restoreIntrFlagIfSeen(pushStack, ec);
+                return result;
 			} catch (Throwable t) {
 				throw handleException(t);
 			} finally {
@@ -4511,7 +4534,11 @@ public abstract class EmbedResultSet extends ConnectionChild
 
 		synchronized (getConnectionSynchronization()) {
 			setupContextStack();
-			try {
+
+            LanguageConnectionContext lcc =
+                getEmbedConnection().getLanguageConnection();
+
+            try {
 				try {
 
 					/*
@@ -4519,8 +4546,6 @@ public abstract class EmbedResultSet extends ConnectionChild
 					 * that the ResultSet will get correctly closed down on an
 					 * error. (Cache the LanguageConnectionContext)
 					 */
-					LanguageConnectionContext lcc = getEmbedConnection()
-							.getLanguageConnection();
                     // No timeout for this operation (use 0)
 					StatementContext statementContext =
                         lcc.pushStatementContext(isAtomic, 
@@ -4532,7 +4557,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 					boolean result = theResults.checkRowPosition(position);
 
 					lcc.popStatementContext(statementContext, null);
-
+                    InterruptStatus.restoreIntrFlagIfSeen(lcc);
 					return result;
 
 				} catch (Throwable t) {

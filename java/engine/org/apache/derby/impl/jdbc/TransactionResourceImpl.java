@@ -39,6 +39,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 import java.util.Properties;
 import java.sql.SQLException;
@@ -304,6 +305,7 @@ public final class TransactionResourceImpl
 			 */
 			if (thrownException instanceof SQLException) {
 
+                InterruptStatus.restoreIntrFlagIfSeen();
 				return (SQLException) thrownException;
 
 			} 
@@ -341,7 +343,7 @@ public final class TransactionResourceImpl
 				}
 			}
 
-
+            InterruptStatus.restoreIntrFlagIfSeen();
 
 			return wrapInSQLException(thrownException);
 
@@ -350,6 +352,9 @@ public final class TransactionResourceImpl
 			if (cm!=null) { // something to let us cleanup?
 				cm.cleanupOnError(t);
 			}
+
+            InterruptStatus.restoreIntrFlagIfSeen();
+
 			/*
 			   We'd rather throw the Throwable,
 			   but then javac complains...

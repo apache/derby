@@ -165,6 +165,8 @@ final class StoreStreamClob
                 } catch (Throwable t) {
                     throw noStateChangeLOB(t);
                 } finally {
+                    conChild.restoreIntrFlagIfSeen(
+                        true, conChild.getEmbedConnection());
                     this.conChild.restoreContextStack();
                 }
             }
