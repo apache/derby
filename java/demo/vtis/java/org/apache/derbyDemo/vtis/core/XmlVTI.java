@@ -247,7 +247,7 @@ public  class   XmlVTI  extends StringColumnVTI
             // look up the method on top of us
             StackTraceElement[]     stack = (new Throwable()).getStackTrace();
             StackTraceElement       caller = stack[ 1 ];
-            Class                               callerClass = Class.forName( caller.getClassName() );
+            Class<?> callerClass = Class.forName( caller.getClassName() );
             String                              methodName = caller.getMethodName();
             Method                          method = callerClass.getMethod
                 ( methodName, new Class[] { String.class } );
@@ -255,7 +255,7 @@ public  class   XmlVTI  extends StringColumnVTI
             String              rowTag = annotation.rowTag();
             String[]            childTags = annotation.childTags();
             String              vtiClassName = annotation.vtiClassName();
-            Class               vtiClass = Class.forName( vtiClassName );
+            Class<?>            vtiClass = Class.forName( vtiClassName );
             Constructor     constructor = vtiClass.getConstructor
                 ( new Class[] { String.class, String.class, String[].class } );
 

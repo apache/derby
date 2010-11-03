@@ -210,7 +210,8 @@ public final class JMXManagementService implements ManagementService, ModuleCont
             final ObjectName beanName = new ObjectName(
                     DERBY_JMX_DOMAIN + ":" + keyProperties
                     + ",system=" + systemIdentifier);
-            
+
+            @SuppressWarnings("unchecked")
             final StandardMBean standardMBean =
                 new StandardMBean(bean, beanInterface) {
                 

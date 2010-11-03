@@ -272,7 +272,7 @@ public    abstract  class Subscription    extends QueryVTIHelper
             // look up the method on top of us
             StackTraceElement[]     stack = (new Throwable()).getStackTrace();
             StackTraceElement       caller = stack[ 1 ];
-            Class                   callerClass = Class.forName( caller.getClassName() );
+            Class<?>                callerClass = Class.forName( caller.getClassName() );
             String                  methodName = caller.getMethodName();
             Method                  method = callerClass.getMethod
                 ( methodName, new Class[] {} );
