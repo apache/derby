@@ -85,7 +85,7 @@
 
   </target>
 
-  <target name="compile_tools_impl">
+  <target name="compile_tools_impl" depends="parser">
 
     <javac
       source="1.4"

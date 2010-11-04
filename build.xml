@@ -521,7 +521,7 @@
 <!--                   Derby Engine build target                     -->
 <!-- ==================================================================== -->
 
-  <target name="engine" depends="shared,state,parsers">
+  <target name="engine" depends="shared,state">
     <ant dir="${derby.engine.src.dir}"/>
     <antcall target="build"/>
     <ant dir="${derby.engine.dir}/loc"/>
