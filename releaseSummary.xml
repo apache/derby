@@ -79,8 +79,9 @@ with real information.
 <overview>
 
 <p>
-Derby is a pure Java relational database engine using standard SQL and
-JDBC as its APIs.
+Apache Derby is a pure Java relational database engine using standard SQL and
+JDBC as its APIs. More information about Derby can be found on the
+<a href="http://db.apache.org/derby/">Apache web site</a>.
 </p>
 
 <p>
