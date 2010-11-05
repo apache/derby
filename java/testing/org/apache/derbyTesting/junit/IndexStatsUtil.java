@@ -68,6 +68,16 @@ public class IndexStatsUtil {
     }
 
     /**
+     * Asserts that there are no existing statistics for the specified table.
+     *
+     * @throws SQLException if obtaining the statistics fails
+     */
+    public void assertNoStatsTable(String table)
+            throws SQLException {
+        assertTableStats(table, 0);
+    }
+
+    /**
      * Asserts that the expected number of statistics exists.
      *
      * @param expectedCount expected number of statistics
