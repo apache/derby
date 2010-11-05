@@ -31,6 +31,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -91,8 +92,9 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
             client.addTestSuite(SavepointJdbc30Test.class);
             suite.addTest(TestConfiguration.clientServerDecorator(TestConfiguration.connectionXADecorator(client)));        	
         }	
-        // return suite;
-        return new CleanDatabaseTestSetup(suite) {
+
+        return new CleanDatabaseTestSetup(
+                DatabasePropertyTestSetup.setLockTimeouts(suite, 1, 2)) {
             /**
              * Creates the database objects used in the test cases.
              * 
