@@ -2385,7 +2385,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      * @return true if the server supports this
      */
     final public boolean serverSupportsBooleanValues() {
-        return supportsUDTs_;
+        return supportsBooleanValues_;
     }
 
     //------------helper methods for meta data info call methods------------------

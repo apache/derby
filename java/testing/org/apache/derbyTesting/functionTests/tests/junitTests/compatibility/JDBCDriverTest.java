@@ -254,6 +254,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
         udtTest( conn );
         derby_2602_test( conn );
         derby_4613_test( conn );
+        derby_4888_test( conn );
 
 		close( conn );
 	}
@@ -371,6 +372,15 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 
         int expectedResult = correctBehavior ? 976255123  : 976255000;
         assertEquals( expectedResult, resultNanos );
+    }
+
+    /**
+     * Test case for DERBY-4888. Check that we can call DatabaseMetaData
+     * methods returning a boolean without errors.
+     */
+    private void derby_4888_test(Connection conn) throws SQLException {
+        // Used to get a ClassCastException here in some combinations.
+        assertFalse(conn.getMetaData().storesLowerCaseIdentifiers());
     }
     
 	/////////////////////////////////////////////////////////////
