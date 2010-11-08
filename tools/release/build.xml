@@ -150,6 +150,7 @@
        summaryFileName="${relnotes.src.summary}"
        bugListFileName="${relnotes.src.buglist}"
        outputFileName="${relnotes.out.filename}"
+       releaseId="${release.version}"
      />
     <echo message="Release notes written to ${relnotes.out.filename}"/>
 

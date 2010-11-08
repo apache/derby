@@ -94,7 +94,7 @@ public class GeneratorBase extends Task {
     protected File outputFile;
 
     // computed at run time
-    protected final String releaseID;
+    protected String releaseID;
     protected String previousReleaseID;
     protected List<String> excludeReleaseIDList;
     protected final String branch;
@@ -104,17 +104,14 @@ public class GeneratorBase extends Task {
     protected boolean _invokedByAnt = true;
 
     /**
-     * Establishes state, including currrent version number.
+     * Establishes state, including branch number.
      * @throws java.lang.Exception
      */
     public GeneratorBase() throws Exception {
         Properties r = new Properties();
         r.load(new FileInputStream("../ant/properties/release.properties"));
         int maint = Integer.parseInt(r.getProperty("maint"));
-        int thirdDigit = maint / 1000000;
-        int fourthDigit = maint % 1000000;
         branch = r.getProperty("eversion");
-        releaseID = branch + "." + thirdDigit + "." + fourthDigit;
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -157,6 +154,13 @@ public class GeneratorBase extends Task {
     public void setOutputFileName(String outputFileName) throws Exception {
         this.outputFileName = outputFileName;
         outputFile = new File(outputFileName);
+    }
+
+    /**
+     * Ant mutator to set the id of the release
+     */
+    public void setReleaseId(String releaseID) throws Exception {
+        this.releaseID = releaseID;
     }
 
     /////////////////////////////////////////////////////////////////////////
