@@ -3531,13 +3531,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             boolean wn = rs.wasNull();
             if (wn) {
                 assertFalse(b);
-            } else if (usingDerbyNetClient() &&
-                    ("setByte".equals(method) ||
-                     "setObject(java.lang.Byte)".equals(method) ||
-                     "setShort".equals(method) ||
-                     "setObject(java.lang.Short)".equals(method))) {
-                // Special case for DERBY-4889.
-                assertFalse(b);
             } else {
                 assertTrue(b);
             }
