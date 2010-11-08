@@ -2823,6 +2823,7 @@ public class PreparedStatement extends Statement
                 java.sql.Types.REAL,
                 java.sql.Types.DOUBLE,
                 java.sql.Types.VARCHAR,
+                java.sql.Types.BOOLEAN,
                 java.sql.Types.DATE,
                 java.sql.Types.TIME,
                 java.sql.Types.TIMESTAMP,

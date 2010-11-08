@@ -1633,12 +1633,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         String msg;
         boolean shouldWork = B2_MOD[whichCall][type];
 
-        if (usingDerbyNetClient() && (whichCall == 8 /* getString */)
-                && (jdbcTypes[type] == Types.BOOLEAN)) {
-            // Workaround for DERBY-4890.
-            shouldWork = false;
-        }
-
         if (worked && shouldWork)
             msg = " JDBC MATCH(OK)";
         else if (worked)
@@ -1662,12 +1656,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             SQLException sqleResult, int b5o, int type) {
         String msg;
         boolean shouldWork = B5[b5o][type];
-
-        if (usingDerbyNetClient() && (b5o == 0 /* java.lang.String */)
-                && (jdbcTypes[type] == Types.BOOLEAN)) {
-            // Workaround for DERBY-4890.
-            shouldWork = false;
-        }
 
         if (worked && shouldWork)
             msg = " JDBC MATCH(OK)";

@@ -423,6 +423,23 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                  ")\n"
                  );
         }
+        
+        if ( !tableExists( conn, "T_4889" ) )
+        {
+            //
+            // create table
+            //
+            goodStatement
+                (
+                 conn,
+                 "create table t_4889\n" +
+                 "(\n" +
+                 "    key_col int,\n" +
+                 "    setter_col varchar( 20 ),\n" +
+                 "    boolean_col  boolean\n" +
+                 ")\n"
+                 );
+        }
     }
 
 
@@ -1506,6 +1523,137 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         goodStatement( conn, "drop table livenessChange" );
     }
     
+    /**
+     * <p>
+     * Verify fix for DERBY-4890.
+     * </p>
+     */
+    public void test_4890() throws Exception
+    {
+        Connection conn = getConnection();
+
+        goodStatement( conn, "delete from boolean_table" );
+
+        PreparedStatement ps = chattyPrepare( conn, "values ( cast ( ? as boolean ), cast ( ? as boolean ) )" );
+        ps.setString( 1, "true" );
+        ps.setString( 2, "false" );
+        ResultSet rs = ps.executeQuery();
+
+        rs.next();
+        assertTrue( rs.getBoolean( 1 ) );
+        assertFalse( rs.getBoolean( 2 ) );
+
+        rs.close();
+        ps.close();
+
+        ps = chattyPrepare
+            (
+             conn,
+             "insert into boolean_table( key_col, boolean_col ) values ( 1, ? ), ( 2, ? )"
+             );
+        ps.setString( 1, "true" );
+        ps.setString( 2, "false" );
+        ps.execute();
+
+        assertResults
+            (
+             conn,
+             "select * from boolean_table order by key_col",
+             new String[][]
+             {
+                 { "1",  "true" },
+                 { "2",  "false" },
+             },
+             false
+             );
+
+        goodStatement( conn, "delete from boolean_table" );
+    }
+    
+    /**
+     * <p>
+     * Verify fix for DERBY-4890.
+     * </p>
+     */
+    public void test_4889() throws Exception
+    {
+        Connection conn = getConnection();
+
+        minion_4889( conn, 0, false );
+        minion_4889( conn, 1, true );
+        minion_4889( conn, 2, true );
+    }
+    private void minion_4889( Connection conn, int value, boolean expectedBooleanResult )
+        throws Exception
+    {
+        goodStatement( conn, "delete from t_4889" );
+        
+        PreparedStatement ps = chattyPrepare
+            (
+             conn,
+             "insert into t_4889( key_col, setter_col, boolean_col ) values ( ?, ?, ? )"
+             );
+
+        ps.setInt( 1, 1 );
+        ps.setString( 2, "setByte" );
+        ps.setByte( 3, (byte) value );
+        ps.execute();
+
+        ps.setInt( 1, 2 );
+        ps.setString( 2, "setShort" );
+        ps.setShort( 3, (short) value );
+        ps.execute();
+
+        ps.setInt( 1, 3 );
+        ps.setString( 2, "setInt" );
+        ps.setInt( 3, value );
+        ps.execute();
+
+        ps.setInt( 1, 4 );
+        ps.setString( 2, "setLong" );
+        ps.setLong( 3, (long) value );
+        ps.execute();
+
+        ps.setInt( 1, 5 );
+        ps.setString( 2, "setObject( Byte )" );
+        ps.setObject( 3, new Byte( (byte) value ) );
+        ps.execute();
+
+        ps.setInt( 1, 6 );
+        ps.setString( 2, "setObject( Short )" );
+        ps.setObject( 3, new Short( (short) value ) );
+        ps.execute();
+
+        ps.setInt( 1, 7 );
+        ps.setString( 2, "setObject( Integer )" );
+        ps.setObject( 3, new Integer( value ) );
+        ps.execute();
+
+        ps.setInt( 1, 8 );
+        ps.setString( 2, "setObject( Long )" );
+        ps.setObject( 3, new Long( (long) value ) );
+        ps.execute();
+
+        String stringValue = Boolean.toString( (value != 0) );
+        assertResults
+            (
+             conn,
+             "select * from t_4889 order by key_col",
+             new String[][]
+             {
+                 { "1",  "setByte", stringValue },
+                 { "2",  "setShort", stringValue },
+                 { "3",  "setInt", stringValue },
+                 { "4",  "setLong", stringValue },
+                 { "5",  "setObject( Byte )", stringValue },
+                 { "6",  "setObject( Short )", stringValue },
+                 { "7",  "setObject( Integer )", stringValue },
+                 { "8",  "setObject( Long )", stringValue },
+             },
+             false
+             );
+
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
