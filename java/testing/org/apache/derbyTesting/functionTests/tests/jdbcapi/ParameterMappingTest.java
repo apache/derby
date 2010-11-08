@@ -67,13 +67,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
     private static int[] jdbcTypes = { Types.TINYINT, Types.SMALLINT,
             Types.INTEGER, Types.BIGINT, Types.REAL, Types.FLOAT, Types.DOUBLE,
-            Types.DECIMAL, Types.NUMERIC, Types.BIT, Types.NULL, // Types.BOOLEAN
+            Types.DECIMAL, Types.NUMERIC, Types.BIT, Types.BOOLEAN,
             Types.CHAR, Types.VARCHAR, Types.LONGVARCHAR, Types.NULL, // Types.BINARY,
             Types.VARBINARY, Types.NULL, // Types.LONGVARBINARY,
             Types.DATE, Types.TIME, Types.TIMESTAMP, Types.CLOB, Types.BLOB, };
 
     private static String[] SQLTypes = { null, "SMALLINT", "INTEGER", "BIGINT",
-            "REAL", "FLOAT", "DOUBLE", "DECIMAL(10,5)", null, null, null,
+            "REAL", "FLOAT", "DOUBLE", "DECIMAL(10,5)", null, null, "BOOLEAN",
             "CHAR(60)", "VARCHAR(60)", "LONG VARCHAR", "CHAR(60) FOR BIT DATA",
             "VARCHAR(60) FOR BIT DATA", "LONG VARCHAR FOR BIT DATA", "DATE",
             "TIME", "TIMESTAMP", "CLOB(1k)", "BLOB(1k)",
@@ -81,7 +81,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     };
 
     private static String[] validString = {null,"98","98","98",
-           "98","98", "98","98",null,null,null,
+           "98","98", "98","98",null,null,"TRUE",
            "98","98","98","0x4",
            "0x4","0x4", "2004-02-14",
            "00:00:00","2004-02-14 00:00:00","98","0x4"};
@@ -299,7 +299,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             /* 7 DECIMAL*/          { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
             /* 8 null     */        { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, X, X, X, _, _},
             /* 9 null*/             { _, _, _, _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _},
-            /*10 null      */       { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, _, X, _, _},
+            /*10 BOOLEAN   */       { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
             /*11 CHAR(60) */        { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, _, X, _, _, _},
             /*12 VARCHAR(60) */     { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
             /*13 LONG VARCHAR */    { _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _, _},
@@ -922,6 +922,13 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     private static void getXXX(PreparedStatement ps, int type, boolean isNull)
             throws SQLException, java.io.IOException {
 
+        // Expect the different getters to return some variant of the integer
+        // 32. The exception is BOOLEAN columns, which don't have high enough
+        // precision to do that. So expect 1 for BOOLEAN columns.
+        final int expectedInt =
+                (ps.getMetaData().getColumnType(1) == Types.BOOLEAN) ?
+                    1 : 32;
+
         {
          
             // getByte();
@@ -937,7 +944,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
-                    assertEquals(32, b);
+                    assertEquals(expectedInt, b);
                 }
                 worked = true;
 
@@ -962,7 +969,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
-                    assertEquals(32, s);
+                    assertEquals(expectedInt, s);
                 }
                 worked = true;
 
@@ -988,7 +995,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(isNull);
-                    assertEquals(32, i);
+                    assertEquals(expectedInt, i);
                 }
                 worked = true;
             } catch (SQLException sqle) {
@@ -1012,7 +1019,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 if (isNull) {
                     assertTrue(wn);
                 } else {
-                    assertEquals(32, l);
+                    assertEquals(expectedInt, l);
                     assertFalse(wn);
                 }
                 worked = true;
@@ -1039,7 +1046,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
-                    assertEquals(32.0, f, .000001);
+                    assertEquals((float) expectedInt, f, .000001);
                 }
                 worked = true;
 
@@ -1064,7 +1071,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     assertTrue(wn);
                 } else {
                     assertFalse(wn);
-                    assertEquals(32.0, d, .00001);
+                    assertEquals((double) expectedInt, d, .00001);
                 }
                 worked = true;
 
@@ -1092,7 +1099,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 } else {
                     assertFalse(wn);
                     assertEquals("BigDecimal comparison failed", 0,
-                            new BigDecimal("32.0").compareTo(bd));
+                            BigDecimal.valueOf(
+                                    (long)expectedInt).compareTo(bd));
                 }
                 worked = true;
 
@@ -1153,16 +1161,16 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                     case java.sql.Types.CHAR:
                     case java.sql.Types.VARCHAR:
                     case java.sql.Types.LONGVARCHAR:
-                        assertEquals("32",s);
+                        assertEquals(Integer.toString(expectedInt),s);
                         break;
                     case java.sql.Types.REAL:
                     case java.sql.Types.FLOAT:
                     case java.sql.Types.DOUBLE:
-                        assertEquals("32.0",s);
+                        assertEquals(expectedInt + ".0",s);
                         break;
                     case java.sql.Types.DECIMAL:
                     case java.sql.Types.NUMERIC:
-                        assertEquals("32.00000",s);
+                        assertEquals(expectedInt + ".00000",s);
                         break;
                     case java.sql.Types.VARBINARY:
                     case java.sql.Types.BINARY:
@@ -1623,13 +1631,21 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     private static void judge_setXXX(boolean worked, SQLException sqleResult,
             int whichCall, int type) {
         String msg;
-        if (worked && B2_MOD[whichCall][type])
+        boolean shouldWork = B2_MOD[whichCall][type];
+
+        if (usingDerbyNetClient() && (whichCall == 8 /* getString */)
+                && (jdbcTypes[type] == Types.BOOLEAN)) {
+            // Workaround for DERBY-4890.
+            shouldWork = false;
+        }
+
+        if (worked && shouldWork)
             msg = " JDBC MATCH(OK)";
         else if (worked)
             msg = " CLOUD EXT (OK)";
         else if (sqleResult != null && "0A000".equals(sqleResult.getSQLState()))
             msg = " Not Implemented (OK)";
-        else if (B2_MOD[whichCall][type]) {
+        else if (shouldWork) {
             if (sqleResult != null)
                 showException(sqleResult);
             msg = " JDBC FAIL " + SQLTypes[type];
@@ -1645,13 +1661,21 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     private static void judge_setObject(boolean worked,
             SQLException sqleResult, int b5o, int type) {
         String msg;
-        if (worked && B5[b5o][type])
+        boolean shouldWork = B5[b5o][type];
+
+        if (usingDerbyNetClient() && (b5o == 0 /* java.lang.String */)
+                && (jdbcTypes[type] == Types.BOOLEAN)) {
+            // Workaround for DERBY-4890.
+            shouldWork = false;
+        }
+
+        if (worked && shouldWork)
             msg = " JDBC MATCH(OK)";
         else if (worked)
             msg = " CLOUD EXT (OK)";
         else if ("0A000".equals(sqleResult.getSQLState()))
             msg = " Not Implemented (OK)";
-        else if (B5[b5o][type]) {
+        else if (shouldWork) {
             if (sqleResult != null)
                 showException(sqleResult);
             msg = " JDBC FAIL " + SQLTypes[type];
@@ -3217,6 +3241,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         switch (jdbcType) {
         case Types.BIT:
+        case Types.BOOLEAN:
             ps.setBoolean(param, true);
             return true;
         case Types.TINYINT:
@@ -3501,6 +3526,23 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             }
             return true;
         }
+        case Types.BOOLEAN: {
+            boolean b = rs.getBoolean(1);
+            boolean wn = rs.wasNull();
+            if (wn) {
+                assertFalse(b);
+            } else if (usingDerbyNetClient() &&
+                    ("setByte".equals(method) ||
+                     "setObject(java.lang.Byte)".equals(method) ||
+                     "setShort".equals(method) ||
+                     "setObject(java.lang.Short)".equals(method))) {
+                // Special case for DERBY-4889.
+                assertFalse(b);
+            } else {
+                assertTrue(b);
+            }
+            return true;
+        }
         default:
             fail("FAIL JDBC TYPE IN getValidValue "
                     + JDBC.sqlNameFromJdbc(jdbcType));
@@ -3550,7 +3592,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         
         int paramJdbcType= jdbcTypes[paramType];
         switch (regJdbcType) {
-        case Types.BIT: {
+        case Types.BIT:
+        case Types.BOOLEAN:
+        {
             boolean val = cs.getBoolean(param);
             boolean wn = cs.wasNull();
             if (!wn)
@@ -4021,6 +4065,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 inout[0] += 9;
                 out[0] = 88;
 
+        }
+        public static void pmap(boolean in, boolean[] inout, boolean[] out) {
+            inout[0] = true;
+            out[0] = true;
         }
         public static void pmap(long in, long[] inout, long[] out) {
                 inout[0] += 8;
