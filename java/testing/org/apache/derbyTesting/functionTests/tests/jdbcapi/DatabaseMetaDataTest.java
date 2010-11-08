@@ -707,10 +707,14 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         assertFalse("getURL is supported!", JDBC.vmSupportsJSR169());
         assertTrue("getURL is supported!", JDBC.vmSupportsJDBC3());
-        
-        assertEquals("getURL match",
-                getTestConfiguration().getJDBCUrl(),
-                url);              
+
+        // DERBY-4886: Embedded returns the URL without connection attributes,
+        // client returns the URL with connection attributes.
+        TestConfiguration config = getTestConfiguration();
+        String expectedURL = usingEmbedded() ?
+            config.getJDBCUrl() : config.getJDBCUrlWithAttributes();
+
+        assertEquals("getURL match", expectedURL, url);
     }
     
     /**

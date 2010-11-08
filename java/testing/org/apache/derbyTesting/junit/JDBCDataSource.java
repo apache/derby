@@ -126,7 +126,11 @@ public class JDBCDataSource {
         beanProperties.put("user", config.getUserName());
         beanProperties.put("password", config.getUserPassword());
 
-        
+        String attributes = config.getConnectionAttributesString();
+        if (attributes != null) {
+            beanProperties.put("connectionAttributes", attributes);
+        }
+
         return beanProperties;
     }
     

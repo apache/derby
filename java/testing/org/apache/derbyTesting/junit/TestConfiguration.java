@@ -28,6 +28,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import junit.extensions.TestSetup;
@@ -1037,6 +1038,7 @@ public final class TestConfiguration {
         logicalDbMapping.putAll(copy.logicalDbMapping);
         this.userName = copy.userName;
         this.userPassword = copy.userPassword;
+        this.connectionAttributes = new Properties(copy.connectionAttributes);
 
         this.isVerbose = copy.isVerbose;
         this.doTrace = copy.doTrace;
@@ -1060,6 +1062,7 @@ public final class TestConfiguration {
         logicalDbMapping.putAll(copy.logicalDbMapping);
         this.userName = copy.userName;
         this.userPassword = copy.userPassword;
+        this.connectionAttributes = new Properties(copy.connectionAttributes);
 
         this.isVerbose = copy.isVerbose;
         this.doTrace = copy.doTrace;
@@ -1087,6 +1090,7 @@ public final class TestConfiguration {
         logicalDbMapping.putAll(copy.logicalDbMapping);
         this.userName = copy.userName;
         this.userPassword = copy.userPassword;
+        this.connectionAttributes = new Properties(copy.connectionAttributes);
 
         this.isVerbose = copy.isVerbose;
         this.doTrace = copy.doTrace;
@@ -1123,6 +1127,7 @@ public final class TestConfiguration {
         this.userPassword = password;
         this.passwordToken = passwordToken == null ?
                 copy.passwordToken : passwordToken;
+        this.connectionAttributes = new Properties(copy.connectionAttributes);
 
         this.isVerbose = copy.isVerbose;
         this.doTrace = copy.doTrace;
@@ -1186,6 +1191,7 @@ public final class TestConfiguration {
         
         this.userName = copy.userName;
         this.userPassword = copy.userPassword;
+        this.connectionAttributes = new Properties(copy.connectionAttributes);
 
         this.isVerbose = copy.isVerbose;
         this.doTrace = copy.doTrace;
@@ -1236,6 +1242,25 @@ public final class TestConfiguration {
         }
         url = createJDBCUrlWithDatabaseName(defaultDbName);
         initConnector(null);
+    }
+
+    /**
+     * Create a copy of this configuration with some additional connection
+     * attributes.
+     *
+     * @param attrs the extra connection attributes
+     * @return a copy of the configuration with extra attributes
+     */
+    TestConfiguration addConnectionAttributes(Properties attrs) {
+        TestConfiguration copy = new TestConfiguration(this);
+        Enumeration e = attrs.propertyNames();
+        while (e.hasMoreElements()) {
+            String key = (String) e.nextElement();
+            String val = attrs.getProperty(key);
+            copy.connectionAttributes.setProperty(key, val);
+        }
+        copy.initConnector(connector);
+        return copy;
     }
 
     /**
@@ -1321,12 +1346,35 @@ public final class TestConfiguration {
     
     
     /**
+     * <p>
      * Return the jdbc url for connecting to the default database.
+     * </p>
+     *
+     * <p>
+     * The returned URL does not include the connection attributes. These must
+     * either be appended to the URL when connecting, or they must be passed
+     * as a {@code Properties} object to {@code DriverManager.getConnection()}.
+     * </p>
      *
      * @return JDBC url.
      */
     public String getJDBCUrl() {
         return url;
+    }
+
+    /**
+     * Return the JDBC URL for connecting to the default database, including
+     * any connection attributes.
+     *
+     * @return JDBC URL with connection attributes
+     */
+    public String getJDBCUrlWithAttributes() {
+        String attrs = getConnectionAttributesString();
+        if (attrs == null) {
+            return url;
+        } else {
+            return url + ';' + attrs;
+        }
     }
 
     /**
@@ -1374,6 +1422,52 @@ public final class TestConfiguration {
      */
     public String getUserPassword() {
         return userPassword;
+    }
+
+    /**
+     * Return the connection attributes to use in this configuration. The
+     * attributes won't contain user name or password. Use
+     * {@link #getUserName()} or {@link #getUserPassword()} instead to
+     * retrieve those attributes.
+     *
+     * @return connection attributes (can be {@code null})
+     */
+    Properties getConnectionAttributes() {
+        return connectionAttributes;
+    }
+
+    /**
+     * Get a flat string representation of the connection attributes. To
+     * be used in the connectionAttributes property of a data source.
+     *
+     * @return all connection attributes concatenated ({@code null} if there
+     * are no attributes)
+     */
+    String getConnectionAttributesString() {
+        if (connectionAttributes == null) {
+            return null;
+        }
+
+        StringBuffer sb = new StringBuffer();
+        Enumeration e = connectionAttributes.propertyNames();
+        boolean first = true;
+        while (e.hasMoreElements()) {
+            if (!first) {
+                sb.append(';');
+            }
+            String key = (String) e.nextElement();
+            sb.append(key);
+            sb.append('=');
+            sb.append(connectionAttributes.getProperty(key));
+            first = false;
+        }
+
+        if (first) {
+            // No connection attributes.
+            return null;
+        }
+
+        return sb.toString();
     }
 
     /**
@@ -1743,7 +1837,13 @@ public final class TestConfiguration {
     private boolean isVerbose;
     private boolean doTrace;
     private String ssl;
-    
+
+    /**
+     * Extra connection attributes. Not for user name and password, use the
+     * fields {@link #userName} and {@link #userPassword} for those attributes.
+     */
+    private Properties connectionAttributes;
+
     /**
      * Password token used by the builtin authentication decorators.
      * Default simple scheme is the password is a function

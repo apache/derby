@@ -72,8 +72,13 @@ public class DriverManagerConnector implements Connector {
             loadJDBCDriver();
         }
 
+        Properties connectionAttributes =
+                new Properties(config.getConnectionAttributes());
+        connectionAttributes.setProperty("user", user);
+        connectionAttributes.setProperty("password", password);
+
         try {
-            return DriverManager.getConnection(url, user, password);
+            return DriverManager.getConnection(url, connectionAttributes);
         } catch (SQLException e) {
             
             // Expected state for database not found.
@@ -88,9 +93,7 @@ public class DriverManagerConnector implements Connector {
             if (!expectedState.equals(e.getSQLState()))
                 throw e;
             
-            Properties attributes = new Properties();
-            attributes.setProperty("user", user);
-            attributes.setProperty("password", password);
+            Properties attributes = new Properties(connectionAttributes);
             attributes.setProperty("create", "true");
             return DriverManager.getConnection(url, attributes);
         }

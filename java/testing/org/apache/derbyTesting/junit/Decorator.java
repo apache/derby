@@ -20,10 +20,8 @@
  */
 package org.apache.derbyTesting.junit;
 
-import java.sql.SQLException;
+import java.util.Properties;
 import java.util.Random;
-
-import javax.sql.DataSource;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -43,7 +41,7 @@ public class Decorator {
     /**
      * Decorate a set of tests to use an encrypted
      * single use database. This is to run tests
-     * using encrpyption as a general test and
+     * using encryption as a general test and
      * not specific tests of how encryption is handled.
      * E.g. tests of setting various URL attributes
      * would be handled in a specific test.
@@ -53,8 +51,6 @@ public class Decorator {
      * <BR>
      * A boot password (phrase) is used with a random
      * set of characters and digits 16 characters long.
-     * <BR>
-     * The database is created during the setUp of the decorator.
      * 
      * @param test test to decorate
      * @return decorated tests
@@ -63,36 +59,18 @@ public class Decorator {
     {
         if (JDBC.vmSupportsJSR169())
             return new TestSuite("no encryption support");
-        
-        test = new BaseTestSetup(test) {
-            
-            /**
-             * Create an encrypted database using a
-             * JDBC data source.
-             */
-            protected void setUp() throws SQLException
-            {
-                String bootPhrase = getBootPhrase(16);
 
-                DataSource ds = JDBCDataSource.getDataSource();
-                               
-                JDBCDataSource.setBeanProperty(ds,
-                        "createDatabase", "create");
-                JDBCDataSource.setBeanProperty(ds,
-                        "connectionAttributes",
-                        "dataEncryption=true;bootPassword=" + bootPhrase);
-                
-                ds.getConnection().close();
-            }
-        };
-        
-        return TestConfiguration.singleUseDatabaseDecorator(test);
+        Properties attributes = new Properties();
+        attributes.setProperty("dataEncryption", "true");
+        attributes.setProperty("bootPassword", getBootPhrase(16));
+
+        return attributesDatabase(attributes, test);
     }
     
     /**
      * Decorate a set of tests to use an encrypted
      * single use database. This is to run tests
-     * using encrpyption as a general test and
+     * using encryption as a general test and
      * not specific tests of how encryption is handled.
      * E.g. tests of setting various URL attributes
      * would be handled in a specific test.
@@ -102,23 +80,18 @@ public class Decorator {
      * <BR>
      * A boot password (phrase) is used with a random
      * set of characters and digits 64 characters long.
-     * <BR>
-     * The database is created during the setUp of the decorator.
-
      * 
      * @param test test to decorate
      * @return decorated tests
      */
     public static Test encryptedDatabase(Test test, final String algorithm)
     {
-        String bootPhrase = getBootPhrase(64);
-        
-        String attributes =
-            "dataEncryption=true;bootPassword=" + bootPhrase +
-             ";encryptionAlgorithm=" + algorithm;
+        Properties attributes = new Properties();
+        attributes.setProperty("dataEncryption", "true");
+        attributes.setProperty("bootPassword", getBootPhrase(64));
+        attributes.setProperty("encryptionAlgorithm", algorithm);
 
         return attributesDatabase(attributes, test);
-        
     }
     
     private static String getBootPhrase(int length)
@@ -140,18 +113,17 @@ public class Decorator {
     /**
      * Decorate a set of tests to use an single
      * use database with TERRITORY_BASED collation
-     * set to the passed in locale. Database is created
-     * by the setUp method of the decorator.
+     * set to the passed in locale.
      * @param locale Locale used to set territory JDBC attribute. If null
      * then only collation=TERRITORY_BASED will be set.
      */
     public static Test territoryCollatedDatabase(Test test, final String locale)
     {
-        
-        String attributes = "collation=TERRITORY_BASED";
+        Properties attributes = new Properties();
+        attributes.setProperty("collation", "TERRITORY_BASED");
         
         if (locale != null)
-            attributes = attributes.concat(";territory=" + locale);
+            attributes.setProperty("territory", locale);
         
         return attributesDatabase(attributes, test);
     }
@@ -159,53 +131,36 @@ public class Decorator {
     /**
      * Decorate a set of tests to use an single
      * use database with TERRITORY_BASED:SECONDARY collation
-     * set to the passed in locale. Database is created
-     * by the setUp method of the decorator.
+     * set to the passed in locale.
      * @param locale Locale used to set territory JDBC attribute. If null
      * then only collation=TERRITORY_BASED:SECONDARY will be set.
      */
     public static Test territoryCollatedCaseInsensitiveDatabase(Test test, final String locale)
     {
-
-        String attributes = "collation=TERRITORY_BASED:SECONDARY";
+        Properties attributes = new Properties();
+        attributes.setProperty("collation", "TERRITORY_BASED:SECONDARY");
 
         if (locale != null)
-            attributes = attributes.concat(";territory=" + locale);
+            attributes.setProperty("territory", locale);
 
         return attributesDatabase(attributes, test);
     }
 
     /**
      * Decorate a test (or suite of tests) to use a single use database
-     * as the default database. The database is created by the setUp
-     * method of the decorator. The database will be created using
-     * a JDBC data source with createDatabase set to create and
-     * connectionAttributes set to the passed in attributes.
+     * as the default database with a specified set connection attributes.
      * 
-     * 
-     * @param attributes Value to set connectionAttributes to when creating
-     * the database.
+     * @param attributes properties to set in the connection URL or in the
+     * connectionAttributes of a data source when connecting to the database
      * @param test Test to decorate
      * @return Decorated test
      */
-    private static Test attributesDatabase(final String attributes, Test test)
+    private static Test attributesDatabase(
+            final Properties attributes, Test test)
     {
-        test = new BaseTestSetup(test) {
-            
-            /**
-             * Create a  database
-             * using a JDBC data source with connectionAttributes set.
-             */
-            protected void setUp() throws SQLException
-            {
-                DataSource ds = JDBCDataSource.getDataSource();
-                               
-                JDBCDataSource.setBeanProperty(ds,
-                        "createDatabase", "create");
-                JDBCDataSource.setBeanProperty(ds,
-                        "connectionAttributes", attributes);
-                                
-                ds.getConnection().close();
+        test = new ChangeConfigurationSetup(test) {
+            TestConfiguration getNewConfiguration(TestConfiguration old) {
+                return old.addConnectionAttributes(attributes);
             }
         };
         
