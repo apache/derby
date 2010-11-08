@@ -46,7 +46,7 @@ public class Price implements Externalizable
     public Timestamp timeInstant;
 
     // methods to be registered as functions
-    public static Price makePrice( ) { return new Price( "USD", new BigDecimal( 1 ), DEFAULT_TIMESTAMP ); }
+    public static Price makePrice( ) { return new Price( "USD", BigDecimal.valueOf(1L), DEFAULT_TIMESTAMP ); }
     public static Price makePrice( String currencyCode, BigDecimal amount, Timestamp timeInstant ) { return new Price( currencyCode, amount, timeInstant ); }
     public static String getCurrencyCode( Price price ) { return price.currencyCode; }
     public static BigDecimal getAmount( Price price ) { return price.amount; }

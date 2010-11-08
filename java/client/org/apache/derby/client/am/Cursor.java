@@ -971,7 +971,7 @@ public abstract class Cursor {
     final java.math.BigDecimal getBigDecimal(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case java.sql.Types.BOOLEAN:
-            return new java.math.BigDecimal( getInt( column ) );
+            return java.math.BigDecimal.valueOf(getLong(column));
         case java.sql.Types.DECIMAL:
             return get_DECIMAL(column);
         case java.sql.Types.REAL:

@@ -530,8 +530,8 @@ public class Submitter {
     
     private String percent(int count, int total)
     {
-        BigDecimal c = new BigDecimal((long) count * 100L);
-        BigDecimal t = new BigDecimal((long) total);
+        BigDecimal c = BigDecimal.valueOf((long) count * 100L);
+        BigDecimal t = BigDecimal.valueOf((long) total);
         
         BigDecimal p = c.divide(t, 2, BigDecimal.ROUND_DOWN);
         
