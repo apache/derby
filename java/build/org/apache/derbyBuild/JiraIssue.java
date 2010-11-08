@@ -70,7 +70,7 @@ class JiraIssue {
      */
     public static List createJiraIssueList(String source)
             throws IOException {
-        ArrayList jiraIssues = new ArrayList();
+        ArrayList<JiraIssue> jiraIssues = new ArrayList<JiraIssue>();
 
         BufferedReader in = new BufferedReader(new FileReader(source));
         String line;
@@ -79,7 +79,7 @@ class JiraIssue {
             System.out.println(line);
         }
 
-        ArrayList comments = new ArrayList();
+        ArrayList<String> comments = new ArrayList<String>();
         int state = STATE_ADD_KEY;
         String key = null;
         String summary = null;

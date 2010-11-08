@@ -147,7 +147,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
     private ReleaseNoteReader releaseNoteReader = new ReleaseNoteReader(docBldr);
     // set on the command line or by ant
 
-    private ArrayList missingReleaseNotes = new ArrayList();
+    private List<JiraIssue> missingReleaseNotes = new ArrayList<JiraIssue>();
 
 
     public ReleaseNotesGenerator() throws Exception {

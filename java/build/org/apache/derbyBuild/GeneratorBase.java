@@ -96,9 +96,9 @@ public class GeneratorBase extends Task {
     // computed at run time
     protected final String releaseID;
     protected String previousReleaseID;
-    protected List excludeReleaseIDList;
+    protected List<String> excludeReleaseIDList;
     protected final String branch;
-    protected ArrayList errors = new ArrayList();
+    protected ArrayList<String> errors = new ArrayList<String>();
 
     // misc
     protected boolean _invokedByAnt = true;

@@ -97,7 +97,7 @@ public class UpgradeTaglet implements Taglet {
      * Register this Taglet.
      * @param tagletMap
      */
-    public static void register(Map tagletMap) {
+    public static void register(Map<String, Taglet> tagletMap) {
        UpgradeTaglet tag = new UpgradeTaglet();
        Taglet t = (Taglet) tagletMap.get(tag.getName());
        if (t != null) {

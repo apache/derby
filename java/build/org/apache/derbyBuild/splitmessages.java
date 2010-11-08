@@ -43,7 +43,7 @@ public class splitmessages {
      *  This covers 90% of the cases.  Only add ids here if you have a 
      *  message id that is not in the XJ class.
      */
-    private static TreeSet clientMessageIds = new TreeSet();
+    private static TreeSet<String> clientMessageIds = new TreeSet<String>();
     
     /**
      * Initialize the set of message ids that the network client will use.  

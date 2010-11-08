@@ -70,9 +70,9 @@ public class MessageBundleTest {
     }    
     
     // The list of ids.  We use a HashSet so we can detect duplicates easily
-    static HashSet sqlStateIds          = new HashSet();
-    static HashSet messageIdIds         = new HashSet();
-    static HashSet messageBundleIds     = new HashSet();
+    static HashSet<String> sqlStateIds  = new HashSet<String>();
+    static HashSet<String> messageIdIds = new HashSet<String>();
+    static HashSet<String> messageBundleIds = new HashSet<String>();
     
     static {
         try {
@@ -90,7 +90,8 @@ public class MessageBundleTest {
         }
     }
     
-    static void loadClassIds(Class idclass, HashSet set) throws Exception {
+    static void loadClassIds(Class idclass, HashSet<String> set)
+            throws Exception {
         Field[] fields = idclass.getFields();
         
         int length = fields.length;

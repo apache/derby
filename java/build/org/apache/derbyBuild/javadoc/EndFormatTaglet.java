@@ -96,7 +96,7 @@ public class EndFormatTaglet implements Taglet {
      * Register this Taglet.
      * @param tagletMap
      */
-    public static void register(Map tagletMap) {
+    public static void register(Map<String, Taglet> tagletMap) {
        EndFormatTaglet tag = new EndFormatTaglet();
        Taglet t = (Taglet) tagletMap.get(tag.getName());
        if (t != null) {

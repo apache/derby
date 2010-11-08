@@ -98,7 +98,7 @@ public class FormatIdTaglet implements Taglet {
      * Register this Taglet.
      * @param tagletMap
      */
-    public static void register(Map tagletMap) {
+    public static void register(Map<String, Taglet> tagletMap) {
        FormatIdTaglet tag = new FormatIdTaglet();
        Taglet t = (Taglet) tagletMap.get(tag.getName());
        if (t != null) {

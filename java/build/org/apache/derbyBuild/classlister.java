@@ -67,7 +67,7 @@ import java.io.*;
 public class classlister {
 
 	protected String[] sets;
-	protected Hashtable foundClasses;
+	protected Hashtable<String, String> foundClasses;
 	//protected ClassUtilitiesFactory cuf;
 
 	protected boolean cloudscapeOnly = false;
@@ -84,10 +84,11 @@ public class classlister {
 	protected boolean showAll = false;
 	protected boolean keepRolling = false;
 	protected boolean showOne = false;
-	protected Hashtable masterClassList = new Hashtable();
+	protected Hashtable<String, Hashtable<String, String>> masterClassList =
+            new Hashtable<String, Hashtable<String, String>>();
     protected String classpath[] = null;
     protected String outputfile;
-    protected Hashtable classpathHash;
+    protected Hashtable<String, Object> classpathHash;
 	protected int indent = 0;
 	protected int errorCount = 0;
 	protected PrintWriter pwOut;
@@ -154,7 +155,7 @@ public class classlister {
 		loadClasspath();
 		//cuf = new ModifyClasses();
 
-		foundClasses = new Hashtable(3000, 0.8f);  
+		foundClasses = new Hashtable<String, String>(3000, 0.8f);
 		
 		for (int i = 0; i < sets.length; i++) 
 		{
@@ -259,7 +260,7 @@ public class classlister {
 
     protected void loadClasspath()
     {
-        classpathHash = new Hashtable();
+        classpathHash = new Hashtable<String, Object>();
             try
             {
                 String classpathString = System.getProperty("java.class.path");
@@ -531,13 +532,13 @@ public class classlister {
 
         try
         {
-			Hashtable localHashtable = null;
+			Hashtable<String, String> localHashtable = null;
 			
 			if (keepDependencyHistory) {
-				localHashtable = (Hashtable) masterClassList.get(className);
+				localHashtable = masterClassList.get(className);
 				if (localHashtable == null)
 				{
-					localHashtable = new Hashtable();
+					localHashtable = new Hashtable<String, String>();
 					masterClassList.put(className, localHashtable);
 				}
 			}
@@ -668,8 +669,9 @@ public class classlister {
 		{
 			String kid = (String) e.nextElement();
 			pwOut.println(kid );
-			Hashtable scoreboard = new Hashtable();
-			Hashtable grandkids = (Hashtable) masterClassList.get(kid);
+			Hashtable<String, Integer> scoreboard =
+                    new Hashtable<String, Integer>();
+			Hashtable<String, String> grandkids = masterClassList.get(kid);
 			unrollHashtable("", grandkids, scoreboard, 1);
 		}
 	}
@@ -698,22 +700,26 @@ public class classlister {
 	}
 
 
-	protected void unrollHashtable( String parent, Hashtable current, Hashtable scoreboard, int indentLevel)
+	protected void unrollHashtable(
+            String parent,
+            Hashtable<String, String> current,
+            Hashtable<String, Integer> scoreboard,
+            int indentLevel)
 	{
 		String indentString = "  ";
-		Enumeration e = current.keys();
+		Enumeration<String> e = current.keys();
 		String key = null;
  
 		while (e.hasMoreElements())
 		{
-			key = (String) e.nextElement();
+			key = e.nextElement();
 			if (key.equals(parent))
 			{
 				continue;
 			}
 			pwOut.print(indentLevel + ":");
 
-			Integer value = (Integer) scoreboard.get(key);
+			Integer value = scoreboard.get(key);
 			if (value != null )
 			{
 				for (int i = 0; i < indentLevel; i++)
@@ -729,7 +735,8 @@ public class classlister {
 			}
 			pwOut.println(key);
 
-			Hashtable currentsChildren = (Hashtable) masterClassList.get(key);
+			Hashtable<String, String> currentsChildren =
+                    masterClassList.get(key);
 	scoreboard.put(key, new Integer(indentLevel));
 			unrollHashtable(key, currentsChildren, scoreboard, (indentLevel+1));
 			scoreboard.put(key, new Integer(indentLevel));

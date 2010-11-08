@@ -33,7 +33,7 @@ import java.util.ArrayList;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-/* ****
+/**
  * This class is used at COMPILE TIME ONLY.  It is responsible for generating
  * ODBC metadata queries based on existing JDBC queries.  In a word,
  * this class reads from the org/apache/derby/impl/jdbc/metadata.properties
@@ -124,7 +124,7 @@ public class ODBCMetadataGenerator {
     
 	// List of what types of changes are required for a given
 	// metadata procedure.
-	private HashMap changeMap;
+	private HashMap<String, Byte> changeMap;
 
 	// SQL fragments and keywords that are used in composing
 	// ODBC metadata queries.  These are loaded from a file
@@ -139,7 +139,7 @@ public class ODBCMetadataGenerator {
 	// properties file that is in the SOURCE/CODELINE.
 	private FileWriter odbcMetaFile;
 
-	/* ****
+	/**
 	 * Constructor.
 	 * Initializes SQL fragments used for generation, and
 	 * then opens the output file,
@@ -177,7 +177,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * initChanges
 	 * Create a listing of the types of changes that need to be
 	 * made for each metadata query to be ODBC-compliant.
@@ -192,7 +192,7 @@ public class ODBCMetadataGenerator {
 	 */
 	private void initChanges() {
 
-		changeMap = new HashMap();
+		changeMap = new HashMap<String, Byte>();
 
 		changeMap.put("getProcedures",
 			new Byte(COL_RENAME_CHANGE));
@@ -235,7 +235,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * generateODBCQueries:
 	 * Reads the existing (JDBC) metadata queries from
 	 * metadata.properties and, for each one, makes a call
@@ -317,7 +317,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * generateODBCQuery
 	 * Takes a specific JDBC query, writes it to the output file,
 	 * and then creates an ODBC-compliant version of that
@@ -376,7 +376,7 @@ public class ODBCMetadataGenerator {
 
 		// Get a list of the column definitions in the subquery, for
 		// use by subsequent operations.
-		ArrayList colDefs = new ArrayList();
+		ArrayList<String> colDefs = new ArrayList<String>();
 		pos = getSelectColDefinitions(queryText, colDefs);
 
 		// In some cases, we need to add "helper" columns to the
@@ -447,7 +447,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * renameColsForODBC
 	 * Renames any columns in the received query so that they are
 	 * ODBC-compliant.
@@ -491,7 +491,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * renameColForODBC
 	 * Searches for the old column name in the received String
 	 * buffer and replaces it with the new column name.  Note
@@ -502,8 +502,6 @@ public class ODBCMetadataGenerator {
 	 *	rename operation.
 	 * @param oldVal The old column name.
 	 * @param newVal The new column name.
-	 * @return Occurence of <"AS " + oldVal> in the query text
-	 *	has been changed IN PLACE to newVal.
 	 */
 	private void renameColForODBC(StringBuffer queryText,
 		String oldVal, String newVal)
@@ -542,7 +540,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * generateSELECTClause
 	 * Generates an outer SELECT clause that is then wrapped around a
 	 * JDBC query to change the types and/or values of the JDBC
@@ -563,7 +561,7 @@ public class ODBCMetadataGenerator {
 	 *  elements, "A" and "B".
 	 * @param newQueryText StringBuffer to which the generated
 	 *  outer SELECT will be appended.
-	 * @return An outer SELECT clause has been generated and
+	 *  On return, an outer SELECT clause has been generated and
 	 *  appended to the received buffer.  The "FROM" keyword
 	 *  has been appended, but the subquery itself is NOT
 	 *  added here.
@@ -639,7 +637,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * changeValuesForODBC
 	 * Searches for a JDBC column name in the received String
 	 * buffer and replaces the first occurrence with an ODBC-
@@ -649,8 +647,6 @@ public class ODBCMetadataGenerator {
 	 * @param queryName Name of the query being processed.
 	 * @param newQueryText The query text in which we're doing the
 	 *	change-value operation.
-	 * @return All relevant columns have been updated IN PLACE
-	 *	to return the required ODBC-compliant values.
 	 */
 	private void changeValuesForODBC(String queryName,
 		StringBuffer newQueryText)
@@ -688,7 +684,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * changeColValueToODBC
 	 * Searches for the received column name in the received String
 	 * buffer and replaces it with an ODBC-compliant value.
@@ -696,8 +692,6 @@ public class ODBCMetadataGenerator {
 	 * @param colName Name of the specific column to update.
 	 * @param newQueryText The query text in which we're doing
 	 *	the change-value operation.
-	 * @return The received column has been updated IN PLACE
-	 *	to return the required ODBC-compliant value.
 	 */
 	private void changeColValueToODBC(String queryName, String colName,
 		StringBuffer newQueryText)
@@ -755,7 +749,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * getSelectColDefinitions
 	 * Parses the SELECT clause of a JDBC metadata SQL query
 	 * and returns a list of the columns being selected.  For
@@ -763,7 +757,7 @@ public class ODBCMetadataGenerator {
 	 * B AS C, D * 2 FROM T1", this method will return an
 	 * ArrayList with three string elements: 1) "A", 2) "B
 	 * AS C", and 3) "D * 2".
-	 * @param query The query from which we are extracting
+	 * @param queryText The query from which we are extracting
 	 *	the SELECT columns.
 	 * @param colDefList ArrayList in which we want to
 	 * 	store the column definitions that we find.
@@ -774,7 +768,7 @@ public class ODBCMetadataGenerator {
 	 *	clause, for later use by the calling method.
 	 */
 	private int getSelectColDefinitions(StringBuffer queryText,
-		ArrayList colDefList)
+		ArrayList<String> colDefList)
 	{
 
 		// Create a string for purposes of using "indexOf"
@@ -838,7 +832,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * addHelperColsToSubquery
 	 * For some of the metadata queries, the ODBC version
 	 * needs to access values that are only available in
@@ -889,7 +883,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * extractColName
 	 * Takes a single column definition from a SELECT clause
 	 * and returns only the unqualified name of the column.
@@ -940,7 +934,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * getCastInfoForCol
 	 * Returns the target type for a result set column that
 	 * needs to be cast into an ODBC type.  This is usually
@@ -1008,7 +1002,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * markNewColPosition
 	 * In effect, "marks" the position at which additional
 	 * columns are to be added for ODBC compliance.  This
@@ -1020,7 +1014,7 @@ public class ODBCMetadataGenerator {
 	 * @param selectColDefs Array list of the SELECT
 	 * 	columns that exist in the ODBC version of
 	 *	the query thus far.
-	 * @return A dummy column name has been added to
+	 *  On return, a dummy column name has been added to
 	 *	the received list of columns at the position
 	 *	at which new ODBC columns should be added.
 	 *  If a query doesn't require additional
@@ -1028,7 +1022,7 @@ public class ODBCMetadataGenerator {
 	 *	leaves the received column list unchanged.
 	 */
 	private void markNewColPosition(String queryName,
-		ArrayList selectColDefs)
+		ArrayList<String> selectColDefs)
 	{
 
 		if (!stmtNeedsChange(queryName, ADD_COLUMN_CHANGE))
@@ -1048,7 +1042,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * addNewColumnsForODBC
 	 * Adds new columns to the ODBC version of a metadata
 	 * query (the ODBC version is at this point being
@@ -1059,9 +1053,9 @@ public class ODBCMetadataGenerator {
 	 * that dummy placeholder with the SQL text for the
 	 * new columns.
 	 * @param queryName Name of query being processed.
-	 * @newQueryText The buffer in which we want to
+	 * @param newQueryText The buffer in which we want to
 	 * 	add the new column.
-	 * @return The dummy placeholder in the received
+	 *  On return, the dummy placeholder in the received
 	 *  buffer has been replaced with any ODBC columns
 	 *  that need to be added to the query in question
 	 *  for ODBC compliance.
@@ -1087,16 +1081,16 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * fragSubstitution
 	 * Replaces a single occurrence of the received
 	 * fragment key with the text corresponding to
 	 * that key.
 	 * @param fragKey The fragment key for which we are
 	 *	going to do the substitution.
-	 * @queryText The buffer in which we are going to do
+	 * @param queryText The buffer in which we are going to do
 	 * 	the substitution.
-	 * @return fragKey has been substituted (IN PLACE)
+	 *  On return, fragKey has been substituted (IN PLACE)
 	 *	with the fragment corresponding to it in the
 	 *	received buffer.  If the fragment key could not
 	 * 	be found, the buffer remains unchanged.
@@ -1150,7 +1144,7 @@ public class ODBCMetadataGenerator {
      * with
      * @param queryText The buffer in which we are going to do the
      * substitution.
-     * @return the old pattern is substituted with the new pattern (IN
+     * On return, the old pattern is substituted with the new pattern (IN
      * PLACE). If the old pattern could not be found, the queryText
      * buffer remains unchanged.
      */
@@ -1179,7 +1173,7 @@ public class ODBCMetadataGenerator {
                               newPattern);
     }
 
-	/* ****
+	/**
 	 * trimIgnorable
 	 * Removes all 'ignorable' chars that immediately precede or
 	 * follow (depending on the direction) the character at
@@ -1220,7 +1214,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * trimIgnorable
 	 * Same as trimIgnorable above, except with String argument
 	 * instead of char[].
@@ -1245,7 +1239,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * Return true if the column is a BOOLEAN column which should
 	 * be coerced to an INTEGER.
 	 */
@@ -1261,7 +1255,7 @@ public class ODBCMetadataGenerator {
 		return false;
 	}
     
-	/* ****
+	/**
 	 * stmtNeedsChange
 	 * Returns whether or not a specific metadata statement
 	 * requires the received type of change.  This is determined
@@ -1271,7 +1265,7 @@ public class ODBCMetadataGenerator {
 	 */
 	private boolean stmtNeedsChange(String queryName, byte changeType) {
 
-		Byte changeByte = (Byte)changeMap.get(queryName);
+		Byte changeByte = changeMap.get(queryName);
 		if (changeByte == null)
 		// No entry means change is not needed.
 			return false;
@@ -1280,7 +1274,7 @@ public class ODBCMetadataGenerator {
 
 	}
 
-	/* ****
+	/**
 	 * getFragment
 	 * Looks up an SQL fragment and returns the value as a String.
 	 * @param String fragId id of the fragment to look up.

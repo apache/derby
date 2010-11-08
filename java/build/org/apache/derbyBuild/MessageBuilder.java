@@ -138,7 +138,7 @@ public class MessageBuilder extends Task
         
         private         FileWriter   _fw;
         private         PrintWriter _pw;
-        private         ArrayList    _tagStack;
+        private         ArrayList<String>    _tagStack;
 
         /**
          * <p>
@@ -163,7 +163,7 @@ public class MessageBuilder extends Task
             _vacuous = false;
             _fw = new FileWriter( file );
             _pw = new PrintWriter( _fw );
-            _tagStack = new ArrayList();
+            _tagStack = new ArrayList<String>();
         }
 
         public  void    flush() throws IOException

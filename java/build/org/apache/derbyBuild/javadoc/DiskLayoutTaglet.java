@@ -96,7 +96,7 @@ public class DiskLayoutTaglet implements Taglet {
      * Register this Taglet.
      * @param tagletMap
      */
-    public static void register(Map tagletMap) {
+    public static void register(Map<String, Taglet> tagletMap) {
        DiskLayoutTaglet tag = new DiskLayoutTaglet();
        Taglet t = (Taglet) tagletMap.get(tag.getName());
        if (t != null) {

@@ -133,7 +133,7 @@ public class ClassSizeCrawler
 
         StringBuffer packagePrefix = new StringBuffer( );
 
-        Hashtable classSizes = new Hashtable();
+        Hashtable<String, int[]> classSizes = new Hashtable<String, int[]>();
 
         ClassSizeCrawler crawler = new ClassSizeCrawler(interfaceList, interfaceCount, classSizes);
 
@@ -225,14 +225,14 @@ public class ClassSizeCrawler
         }
     } // end of main
 
-    private Class[] interfaceList; // Search for classes that implement these interfaces
+    private Class<?>[] interfaceList; // Search for classes that implement these interfaces
     private int interfaceCount;
-    private Hashtable classSizes;
+    private Hashtable<String, int[]> classSizes;
     private boolean verbose = false;
 
     private ClassSizeCrawler( Class[] interfaceList,
                               int interfaceCount,
-                              Hashtable classSizes)
+                              Hashtable<String, int[]> classSizes)
     {
         this.interfaceList = interfaceList;
         this.classSizes = classSizes;
@@ -270,7 +270,7 @@ public class ClassSizeCrawler
                 // Strip off the ".class" suffix
                 String s = filenames[fileIdx].substring( 0, filenames[fileIdx].length() - 6);
                 className.append( s);
-                Class targetClass = null;
+                Class<?> targetClass = null;
                 String targetClassName = className.toString();
                 try
                 {

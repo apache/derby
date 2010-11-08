@@ -97,7 +97,7 @@ public class PurposeTaglet implements Taglet {
      * Register this Taglet.
      * @param tagletMap
      */
-    public static void register(Map tagletMap) {
+    public static void register(Map<String, Taglet> tagletMap) {
        PurposeTaglet tag = new PurposeTaglet();
        Taglet t = (Taglet) tagletMap.get(tag.getName());
        if (t != null) {
