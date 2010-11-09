@@ -58,33 +58,34 @@
 
   <target name="buildschema">
     <echo level="info" message="Begin building toursdb"/>
-    <java classname="org.apache.derby.tools.ij"
-          output="${generated.toursdb.dir}/toursdb.out"
-          failonerror="true"
-          dir="${generated.toursdb.dir}" fork="true">
-      <classpath>
-        <pathelement path="${out.dir}"/>
-        <pathelement path="${compile.classpath}"/>
-      </classpath>
-      <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
-      <sysproperty key="ij.database" value="jdbc:derby:toursdb;create=true"/>
-      <arg value="${derby.demo.src.dir}/toursdb/ToursDB_schema.sql"/>
-    </java>
+    <antcall target="runijscript">
+      <param name="script.name" value="ToursDB_schema.sql"/>
+    </antcall>
   </target>
 
   <target name="loadtables">
-    <java classname="org.apache.derby.tools.ij"
-          output="${generated.toursdb.dir}/toursdb.out" append="true"
-          failonerror="true"
-          dir="${generated.toursdb.dir}" fork="true">
-      <classpath>
-        <pathelement path="${out.dir}"/>
-        <pathelement path="${compile.classpath}"/>
-      </classpath>
-      <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
-      <sysproperty key="ij.database" value="jdbc:derby:toursdb;create=true"/>
-      <arg value="${derby.demo.src.dir}/toursdb/loadTables.sql"/>
-    </java>
+    <echo level="info" message="Begin loading toursdb"/>
+    <antcall target="runijscript">
+      <param name="script.name" value="loadCOUNTRIES.sql"/>
+    </antcall>
+    <antcall target="runijscript">
+      <param name="script.name" value="loadCITIES.sql"/>
+    </antcall>
+    <antcall target="runijscript">
+      <param name="script.name" value="loadAIRLINES.sql"/>
+    </antcall>
+    <antcall target="runijscript">
+      <param name="script.name" value="loadFLIGHTS1.sql"/>
+    </antcall>
+    <antcall target="runijscript">
+      <param name="script.name" value="loadFLIGHTS2.sql"/>
+    </antcall>
+    <antcall target="runijscript">
+      <param name="script.name" value="loadFLIGHTAVAILABILITY1.sql"/>
+    </antcall>
+    <antcall target="runijscript">
+      <param name="script.name" value="loadFLIGHTAVAILABILITY2.sql"/>
+    </antcall>
     <java classname="toursdb.insertMaps"
           output="${generated.toursdb.dir}/toursdb.out" append="true"
           failonerror="true"
@@ -103,6 +104,23 @@
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <arg value="${derby.demo.src.dir}/toursdb/disconnect.sql"/>
+    </java>
+  </target>
+
+  <target name="runijscript">
+    <echo level="info" message="Running script ${script.name}"/>
+    <java classname="org.apache.derby.tools.ij"
+          output="${generated.toursdb.dir}/toursdb.out"
+          append="true"
+          failonerror="true"
+          dir="${generated.toursdb.dir}" fork="true">
+      <classpath>
+        <pathelement path="${out.dir}"/>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <sysproperty key="ij.driver" value="org.apache.derby.jdbc.EmbeddedDriver"/>
+      <sysproperty key="ij.database" value="jdbc:derby:toursdb;create=true"/>
+      <arg value="${derby.demo.src.dir}/toursdb/${script.name}"/>
     </java>
   </target>
 
