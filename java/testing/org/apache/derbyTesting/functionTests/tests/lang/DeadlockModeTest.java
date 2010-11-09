@@ -32,7 +32,6 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * This tests for deadlock which can occur if two threads get a 
@@ -84,11 +83,12 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
      * This method creates THREAD_COUNT threads which will all try to
      * update the same table 
      */
-    private void createThreads(Thread [] t) {
+    private void createThreads(Thread [] t) throws SQLException {
         for (int i = 0; i < THREAD_COUNT; i++)
-        {   
+        {
+            final Connection c = openDefaultConnection();
             t[i] = new Thread(new Runnable() {
-                public void run() {threadWorker(); }});
+                public void run() {threadWorker(c); }});
             t[i].start();
         }
     }
@@ -117,17 +117,9 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
      * can not throw exceptions, therefore we make a "bogus"
      * assertNull(string message,Exception e) call.
      */
-    private void threadWorker() {
-        Connection threadConnection = null;
-                
+    private void threadWorker(Connection threadConnection) {
         try {
             synchronized (syncObject) {
-                
-                /* If a connection hasn't been opened for this thread, open one */
-                if (threadConnection == null){
-                    threadConnection = openDefaultConnection();
-                }
-                
                 /* A new thread started, so we increment the counter */
                 startedCount++;
                 
@@ -152,6 +144,8 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
                 stmt.executeUpdate("update t set i = 456 where i = 456");
                 threadConnection.commit();
             }
+
+            threadConnection.close();
         } catch (Exception e) {
             synchronized(syncObject){
                 listExceptions.add(e);
@@ -182,30 +176,6 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
         };
     } 
     
-    protected static Test encryptedBaseSuite(String name) {
-        TestSuite suite = new TestSuite(name);
-        suite.addTestSuite(DeadlockModeTest.class);
-        
-        return new CleanDatabaseTestSetup(
-                DatabasePropertyTestSetup.setLockTimeouts(Decorator.encryptedDatabase(suite), 2, 4)) 
-        {
-            /**
-             * Creates the tables used in the test cases.
-             * @exception SQLException if a database error occurs
-             */
-            protected void decorateSQL(Statement stmt) throws SQLException
-            {
-                stmt.execute("create table t (i int)");
-                
-                stmt.executeUpdate("insert into t values (1956)");
-        
-                stmt.executeUpdate("insert into t values (180)");
-        
-                stmt.executeUpdate("insert into t values (3)");
-            }
-        };
-    } 
-    
     public static Test suite() {
         TestSuite suite = new TestSuite("DeadlockModeTest ");
         suite.addTest(
@@ -214,9 +184,8 @@ public class DeadlockModeTest extends BaseJDBCTestCase {
         
         /* JSR169 does not have encryption support */
         if ( JDBC.vmSupportsJDBC3() ) {
-            suite.addTest(
-                    encryptedBaseSuite("DeadlockModeTest:encrypted")
-                    );
+            suite.addTest(Decorator.encryptedDatabase(
+                    baseSuite("DeadlockModeTest:encrypted")));
         }
 
         return suite;        

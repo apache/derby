@@ -3037,17 +3037,23 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         TestSuite suite = new TestSuite("BlobClob4BlobTest");
+        suite.addTest(baseSuite("embedded"));
         suite.addTest(
-                TestConfiguration.embeddedSuite(BlobClob4BlobTest.class));
-        suite.addTest(
-                TestConfiguration.clientServerSuite(BlobClob4BlobTest.class));
+                TestConfiguration.clientServerDecorator(baseSuite("client")));
+
         // JSR169 does not have encryption support
         if (JDBC.vmSupportsJDBC3())
         {
-            TestSuite encSuite = new TestSuite ("BlobClob4BlobTest:encrypted");
-            encSuite.addTestSuite (BlobClob4BlobTest.class);
+            Test encSuite = baseSuite("encrypted");
             suite.addTest(Decorator.encryptedDatabase (encSuite));
         }
+
+        return suite;
+    }
+
+    private static Test baseSuite(String name) {
+        TestSuite suite = new TestSuite(
+                BlobClob4BlobTest.class, "BlobClob4BlobTest:" + name);
         return new CleanDatabaseTestSetup(
                 DatabasePropertyTestSetup.setLockTimeouts(suite, 2, 4));
     }
