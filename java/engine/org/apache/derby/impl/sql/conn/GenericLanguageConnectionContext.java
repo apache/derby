@@ -37,6 +37,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.cache.Cacheable;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -85,6 +86,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.AbstractMap;
 import java.util.IdentityHashMap;
+import java.util.WeakHashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -302,7 +304,14 @@ public class GenericLanguageConnectionContext
      * null if no interrupt has been seen.
      */
     private StandardException interruptedException;
-    
+
+    /**
+     * Connection local state for cached {@code TableDescriptor}s used
+     * for keeping track of referenced columns for a table during DDL
+     * operations.
+     */
+    private WeakHashMap referencedColumnMap;
+
     /*
        constructor
     */
@@ -390,6 +399,7 @@ public class GenericLanguageConnectionContext
 
         setDefaultSchema(initDefaultSchemaDescriptor());
         interruptedException = null;
+        referencedColumnMap = new WeakHashMap();
     }
 
     /**
@@ -811,6 +821,8 @@ public class GenericLanguageConnectionContext
 
         // Reset the current user
         getCurrentSQLSessionContext().setUser(getSessionUserId());
+
+        referencedColumnMap = new WeakHashMap();
     }
 
     // debug methods
@@ -3874,5 +3886,14 @@ public class GenericLanguageConnectionContext
 
     public StandardException getInterruptedException() {
         return interruptedException;
+    }
+
+    public FormatableBitSet getReferencedColumnMap(TableDescriptor td) {
+        return (FormatableBitSet)referencedColumnMap.get(td);
+    }
+
+    public void setReferencedColumnMap(TableDescriptor td,
+                                       FormatableBitSet map) {
+        referencedColumnMap.put(td, map);
     }
 }

@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.sql.conn;
 
 import org.apache.derby.iapi.services.context.Context;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -1290,4 +1291,20 @@ public interface LanguageConnectionContext extends Context {
      * @return saved exception
      */
     public StandardException getInterruptedException();
+
+    /**
+     * Get the referenced column map for a table
+     *
+     * @return the map
+     */
+    public FormatableBitSet getReferencedColumnMap(TableDescriptor td);
+
+    /**
+     * Set the referenced column map for a table
+     *
+     * @param td the table descriptor
+     * @param map the map
+     */
+    public void setReferencedColumnMap(TableDescriptor td,
+                                       FormatableBitSet map);
 }

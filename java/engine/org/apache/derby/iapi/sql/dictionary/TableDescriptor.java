@@ -24,7 +24,7 @@ package org.apache.derby.iapi.sql.dictionary;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.WeakHashMap;
+import java.util.Map;
 
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.DependableFinder;
@@ -34,6 +34,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
@@ -113,43 +114,44 @@ public class TableDescriptor extends TupleDescriptor
 	UUID							oid;
 	int								tableType;
 	long							heapConglomNumber = -1;
-	ColumnDescriptorList		columnDescriptorList;
+    ColumnDescriptorList            columnDescriptorList;
 	ConglomerateDescriptorList		conglomerateDescriptorList;
 	ConstraintDescriptorList		constraintDescriptorList;
 	private	GenericDescriptorList	triggerDescriptorList;
 	ViewDescriptor					viewDescriptor;
 
-	/**
-	 * referencedColumnMap is thread local (since DERBY-2861)
-	 *
-	 * It contains a weak hash map keyed by the the TableDescriptor
-	 * and the value is the actual referencedColumnMap bitmap.  So,
-	 * each thread has a weak hash map it uses to find the appropriate
-	 * referencedColumnMap for 'this' TableDescriptor.
-	 *
-	 * Since the hash map is weak, when the TableDescriptor is no
-	 * longer referenced the hash entry can be garbage collected (it
-	 * is the *key* of a weak hash map that is weak, not the value).
-	 */
-	private static ThreadLocal referencedColumnMap = new ThreadLocal() {
-			protected Object initialValue() {
-				// Key: TableDescriptor
-				// Value: FormatableBitSet
-				return new WeakHashMap();
-			}
-		};
-
 	private FormatableBitSet referencedColumnMapGet() {
-		WeakHashMap map = (WeakHashMap)(referencedColumnMap.get());
 
-		return (FormatableBitSet) (map.get(this));
+        LanguageConnectionContext lcc =
+            (LanguageConnectionContext)ContextService.getContextOrNull(
+                LanguageConnectionContext.CONTEXT_ID);
+
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(lcc != null);
+        }
+
+        return lcc.getReferencedColumnMap(this);
+
 	}
 
 	private void referencedColumnMapPut
 		(FormatableBitSet newReferencedColumnMap) {
 
-		WeakHashMap map = (WeakHashMap)(referencedColumnMap.get());
-		map.put(this, newReferencedColumnMap);
+        LanguageConnectionContext lcc =
+            (LanguageConnectionContext)ContextService.getContextOrNull(
+                LanguageConnectionContext.CONTEXT_ID);
+
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(lcc != null || newReferencedColumnMap == null);
+        }
+
+        // This method is called with a null argument at database
+        // creation time when there is no lcc, cf stack trace in the
+        // JIRA for DERBY-4895, we can safely ignore that, as there
+        // exists no referencedColumnMap yet.
+        if (lcc != null) {
+            lcc.setReferencedColumnMap(this, newReferencedColumnMap);
+        }
 	}
 
 	/** A list of statistics pertaining to this table-- 
