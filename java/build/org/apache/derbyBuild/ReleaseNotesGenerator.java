@@ -114,8 +114,8 @@ public class ReleaseNotesGenerator extends GeneratorBase {
     private static  final   String  NEW_FEATURES_SECTION = "New Features";
     private static  final   String  BUG_FIXES_SECTION = "Bug Fixes";
     private static  final   String  ISSUES_SECTION = "Issues";
-    private static  final   String  BUILD_ENVIRONMENT_SECTION =
-            "Build Environment";
+    private static  final   String  BUILD_ENVIRONMENT_SECTION = "Build Environment";
+    private static  final   String  RELEASE_VERIFICATION_SECTION = "Verifying Releases";
 
     // headlines
     private static  final   String  ANT_HEADLINE = "Ant";
@@ -137,6 +137,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
     private static  final   String  SUM_NEW_FEATURES = "newFeatures";
     private static  final   String  SUM_OSGI = "osgi";
     private static  final   String  SUM_OVERVIEW = "overview";
+    private static  final   String  SUM_RELEASE_VERIFICATION = "releaseVerification";
 
     /////////////////////////////////////////////////////////////////////////
     //
@@ -187,6 +188,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
             buildFixedBugsList();
             buildReleaseNoteIssuesList();
             buildEnvironment();
+            buildReleaseVerification();
             replaceVariables();
             printOutput();
 
@@ -236,6 +238,8 @@ public class ReleaseNotesGenerator extends GeneratorBase {
                 ISSUES_SECTION, ISSUES_SECTION);
         createSection(body, MAIN_SECTION_LEVEL, toc,
                 BUILD_ENVIRONMENT_SECTION, BUILD_ENVIRONMENT_SECTION);
+        createSection(body, MAIN_SECTION_LEVEL, toc,
+                RELEASE_VERIFICATION_SECTION, RELEASE_VERIFICATION_SECTION);
     }
 
 
@@ -436,6 +440,21 @@ public class ReleaseNotesGenerator extends GeneratorBase {
 
         addHeadlinedItem(list, JSR169_HEADLINE,
                 summary.getTextByTagName(SUM_JSR169));
+    }
+
+    //////////////////////////////////
+    //
+    //  Release Verification SECTION
+    //
+    //////////////////////////////////
+
+    /**
+     * Build the Release Verification section.
+     */
+    private void buildReleaseVerification() throws Exception {
+        // copy the details out of the summary file into the release verification section
+        cloneChildren(summary.getElementByTagName(SUM_RELEASE_VERIFICATION),
+                getSection(outputDoc, MAIN_SECTION_LEVEL, RELEASE_VERIFICATION_SECTION));
     }
 
 

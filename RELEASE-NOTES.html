@@ -22,6 +22,9 @@
 <li>
 <a href="#Build Environment">Build Environment</a>
 </li>
+<li>
+<a href="#Verifying Releases">Verifying Releases</a>
+</li>
 </ul>
 <h2>
 <a name="Overview"></a>Overview</h2>
@@ -100,6 +103,9 @@ This is a feature release. The following new features were added:
 <td><b>Issue Id</b></td><td><b>Description</b></td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4895">DERBY-4895</a></td><td>Thread local TableDescriptor#referencedColumnMap is not removed from app threads when Derby is shut down</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4893">DERBY-4893</a></td><td>Allow Java 5 language constructs in build code</td>
 </tr>
 <tr>
@@ -109,10 +115,19 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4891">DERBY-4891</a></td><td>Enable testing of boolean type in ParameterMappingTest</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4890">DERBY-4890</a></td><td>Different string to boolean conversion on embedded and client</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4889">DERBY-4889</a></td><td>Different byte to boolean conversion on embedded and client</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4888">DERBY-4888</a></td><td>ClassCastException when calling boolean meta-data functions with 10.7 client against 10.6 server</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4885">DERBY-4885</a></td><td>Reduce lock timeout in SavepointJdbc30Test</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4884">DERBY-4884</a></td><td>DatabasePropertyTestSetup cannot change static properties in encrypted databases</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4881">DERBY-4881</a></td><td>Deadlock accessing SYS.SYSSTATISTICS</td>
@@ -938,6 +953,58 @@ the bulk fetch optimization.
 <li>
 <b>JSR 169</b> - J2ME support was built using libraries from phoneME Advanced Milestone Release 2.</li>
 </ul>
+</blockquote>
+<h2>
+<a name="Verifying Releases"></a>Verifying Releases</h2>
+<blockquote>
+
+
+<p>It is essential that you verify the integrity of the downloaded
+files using the PGP and MD5 signatures.  MD5 verification ensures the
+file was not corrupted during the download process.  PGP verification
+ensures that the file came from a certain person.</p>
+
+
+<p>The PGP signatures can be verified using
+<a href="http://www.pgpi.org/">PGP</a> or
+<a href="http://www.gnupg.org/">GPG</a>.
+First download the Apache Derby
+<a href="http://svn.apache.org/repos/asf/db/derby/code/trunk/KEYS">KEYS</a>
+as well as the <code>asc</code> signature file for the particular
+distribution. It is important that you get these files from the ultimate
+trusted source - the main ASF distribution site, rather than from a mirror.
+Then verify the signatures using ...</p>
+
+
+<pre>
+% pgpk -a KEYS
+% pgpv db-derby-X.Y.tar.gz.asc
+
+<em>or</em>
+
+% pgp -ka KEYS
+% pgp db-derby-X.Y.tar.gz.asc
+
+<em>or</em>
+
+% gpg --import KEYS
+% gpg --verify db-derby-X.Y.tar.gz.asc
+
+</pre>
+
+
+<p>To verify the MD5 signature on the files, you need to use a program
+called <code>md5</code> or <code>md5sum</code>, which is
+included in many unix distributions.  It is also available as part of
+<a href="http://www.gnu.org/software/textutils/textutils.html">GNU
+Textutils</a>.  Windows users can get binary md5 programs from <a href="http://www.fourmilab.ch/md5/">here</a>, <a href="http://www.pc-tools.net/win32/freeware/console/">here</a>, or
+<a href="http://www.slavasoft.com/fsum/">here</a>.</p>
+
+
+<p>We strongly recommend that you verify your downloads with both PGP and MD5.</p>
+
+
+
 </blockquote>
 </body>
 </html>

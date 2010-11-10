@@ -119,6 +119,59 @@ This is a feature release. The following new features were added:
 
 </newFeatures>
 
+<!--
+    These are the instructions for verifying the signed distributions. Probably you
+    won't need to touch this section.
+    
+-->
+
+<releaseVerification>
+
+<p>It is essential that you verify the integrity of the downloaded
+files using the PGP and MD5 signatures.  MD5 verification ensures the
+file was not corrupted during the download process.  PGP verification
+ensures that the file came from a certain person.</p>
+
+<p>The PGP signatures can be verified using
+<a href="http://www.pgpi.org/">PGP</a> or
+<a href="http://www.gnupg.org/">GPG</a>.
+First download the Apache Derby
+<a href="http://svn.apache.org/repos/asf/db/derby/code/trunk/KEYS">KEYS</a>
+as well as the <code>asc</code> signature file for the particular
+distribution. It is important that you get these files from the ultimate
+trusted source - the main ASF distribution site, rather than from a mirror.
+Then verify the signatures using ...</p>
+
+<pre>
+% pgpk -a KEYS
+% pgpv db-derby-X.Y.tar.gz.asc
+
+<em>or</em>
+
+% pgp -ka KEYS
+% pgp db-derby-X.Y.tar.gz.asc
+
+<em>or</em>
+
+% gpg --import KEYS
+% gpg --verify db-derby-X.Y.tar.gz.asc
+
+</pre>
+
+<p>To verify the MD5 signature on the files, you need to use a program
+called <code>md5</code> or <code>md5sum</code>, which is
+included in many unix distributions.  It is also available as part of
+<a href="http://www.gnu.org/software/textutils/textutils.html">GNU
+Textutils</a>.  Windows users can get binary md5 programs from <a
+href="http://www.fourmilab.ch/md5/">here</a>, <a
+href="http://www.pc-tools.net/win32/freeware/console/">here</a>, or
+<a href="http://www.slavasoft.com/fsum/">here</a>.</p>
+
+<p>We strongly recommend that you verify your downloads with both PGP and MD5.</p>
+
+
+</releaseVerification>
+
 </summary>
 
 
