@@ -269,18 +269,7 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 		return new LocalizedOutput(o, encoding);
 	}
 	public String getTextMessage(String key ) {
-		if ( res == null){
-			setResource();
-		}
-		String s = key;
-		try{
-			s = res.getString(key);
-		} catch (Exception e) {
-			s = key;
-		}
-		//System.out.println(local.toString());
-		//System.out.println("GetKey:"+key+"="+s);
-		return s;
+        return getTextMessage(key, new Object[0]);
 	}
 	public String getTextMessage(String key, Object o){
 			Object [] att=new Object[] {o};

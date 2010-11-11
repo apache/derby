@@ -399,7 +399,9 @@
 <!--                           Build Locale info                          -->
 <!-- ==================================================================== -->
 
-  <target name="localeinfo" depends="checklocaleinfo" unless="localeinfo.available">
+  <target name="localeinfo"
+          depends="checklocaleinfo,checkmessages"
+          unless="localeinfo.available">
 
     <antcall target="buildlocaleinfo">
       <param name="locale.iname" value="cs"/>
@@ -515,6 +517,15 @@
     <delete file="${out.dir}/org/apache/derby/info/locale_ru.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/locale_zh_CN.properties"/>
     <delete file="${out.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
+  </target>
+
+  <target name="checkmessages">
+    <java classname="org.apache.derbyBuild.MessageVetter"
+          classpath="${out.dir}"
+          failonerror="true">
+      <arg file="${out.dir}/org/apache/derby/loc"/>
+      <arg file="${out.dir}/org/apache/derby/loc/drda"/>
+    </java>
   </target>
 
 <!-- ==================================================================== -->

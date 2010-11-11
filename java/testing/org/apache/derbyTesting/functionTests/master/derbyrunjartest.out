@@ -33,7 +33,7 @@ shutdown [-h <host>][-p <portnumber>] [-ssl <sslmode>] [-user <username>] [-pass
 ping [-h <host>][-p <portnumber>] [-ssl <sslmode>]
 sysinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
 runtimeinfo [-h <host>][-p <portnumber>] [-ssl <sslmode>]
-logconnections {on|off}[-h <host>][-p <portnumber>] [-ssl <sslmode>]
+logconnections {on|off} [-h <host>][-p <portnumber>] [-ssl <sslmode>]
 maxthreads <max>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
 timeslice <milliseconds>[-h <host>][-p <portnumber>] [-ssl <sslmode>]
 trace {on|off} [-s <session id>][-h <host>][-p <portnumber>] [-ssl <sslmode>]
