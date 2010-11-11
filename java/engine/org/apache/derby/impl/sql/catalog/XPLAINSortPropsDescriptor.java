@@ -26,11 +26,11 @@ import java.sql.SQLException;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
-import org.apache.derby.impl.sql.catalog.SystemColumnImpl;
+import org.apache.derby.iapi.types.TypeId;
 import java.sql.Types;
+
 /**
  * This class describes a Tuple for the XPLAIN_SORT_PROPS System Table.
- *
  */
 public class XPLAINSortPropsDescriptor extends XPLAINTableDescriptor 
 {
@@ -135,11 +135,11 @@ public class XPLAINSortPropsDescriptor extends XPLAINTableDescriptor
             SystemColumnImpl.getColumn("NO_INPUT_ROWS", Types.INTEGER, true),
             SystemColumnImpl.getColumn("NO_OUTPUT_ROWS", Types.INTEGER, true),
             SystemColumnImpl.getColumn("NO_MERGE_RUNS", Types.INTEGER, true),
-            SystemColumnImpl.getColumn("MERGE_RUN_DETAILS", Types.VARCHAR, true, 256),
+            SystemColumnImpl.getColumn("MERGE_RUN_DETAILS", Types.VARCHAR, true,
+                    TypeId.VARCHAR_MAXWIDTH),
             SystemColumnImpl.getColumn("ELIMINATE_DUPLICATES", Types.CHAR, true, 1),
             SystemColumnImpl.getColumn("IN_SORT_ORDER", Types.CHAR, true, 1),
             SystemColumnImpl.getColumn("DISTINCT_AGGREGATE", Types.CHAR, true, 1),
-
         };
     }
 

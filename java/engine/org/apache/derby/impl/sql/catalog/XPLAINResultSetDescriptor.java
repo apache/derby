@@ -26,7 +26,7 @@ import java.sql.SQLException;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
-import org.apache.derby.impl.sql.catalog.SystemColumnImpl;
+import org.apache.derby.iapi.types.TypeId;
 import java.sql.Types;
 
 public class XPLAINResultSetDescriptor extends XPLAINTableDescriptor 
@@ -188,8 +188,10 @@ public class XPLAINResultSetDescriptor extends XPLAINTableDescriptor
         
         return new SystemColumn[] {
             SystemColumnImpl.getUUIDColumn("RS_ID", false),
-            SystemColumnImpl.getColumn("OP_IDENTIFIER",Types.VARCHAR,false,30),
-            SystemColumnImpl.getColumn("OP_DETAILS", Types.VARCHAR, true, 256),
+            SystemColumnImpl.getColumn("OP_IDENTIFIER", Types.VARCHAR, false,
+                    TypeId.VARCHAR_MAXWIDTH),
+            SystemColumnImpl.getColumn("OP_DETAILS", Types.VARCHAR, true,
+                    TypeId.VARCHAR_MAXWIDTH),
             SystemColumnImpl.getColumn("NO_OPENS", Types.INTEGER, true),
             SystemColumnImpl.getColumn("NO_INDEX_UPDATES", Types.INTEGER, true),
             SystemColumnImpl.getColumn("LOCK_MODE", Types.CHAR, true, 2),

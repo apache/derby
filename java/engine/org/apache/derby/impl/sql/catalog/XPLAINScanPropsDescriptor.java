@@ -26,7 +26,7 @@ import java.sql.SQLException;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
-import org.apache.derby.impl.sql.catalog.SystemColumnImpl;
+import org.apache.derby.iapi.types.TypeId;
 import java.sql.Types;
 
 public class XPLAINScanPropsDescriptor extends XPLAINTableDescriptor 
@@ -205,14 +205,20 @@ public class XPLAINScanPropsDescriptor extends XPLAINTableDescriptor
             SystemColumnImpl.getColumn("NO_QUALIFIED_ROWS", Types.INTEGER, true),
             SystemColumnImpl.getColumn("NO_VISITED_DELETED_ROWS", Types.INTEGER, true),
             SystemColumnImpl.getColumn("NO_FETCHED_COLUMNS", Types.INTEGER, true),
-            SystemColumnImpl.getColumn("BITSET_OF_FETCHED_COLUMNS", Types.VARCHAR, true, 256),
+            SystemColumnImpl.getColumn("BITSET_OF_FETCHED_COLUMNS",
+                    Types.VARCHAR, true, TypeId.VARCHAR_MAXWIDTH),
             SystemColumnImpl.getColumn("BTREE_HEIGHT", Types.INTEGER, true),
             SystemColumnImpl.getColumn("FETCH_SIZE", Types.INTEGER, true),
-            SystemColumnImpl.getColumn("START_POSITION", Types.VARCHAR, true, 512),
-            SystemColumnImpl.getColumn("STOP_POSITION", Types.VARCHAR, true, 512),
-            SystemColumnImpl.getColumn("SCAN_QUALIFIERS", Types.VARCHAR, true, 512),
-            SystemColumnImpl.getColumn("NEXT_QUALIFIERS", Types.VARCHAR, true, 512),
-            SystemColumnImpl.getColumn("HASH_KEY_COLUMN_NUMBERS", Types.VARCHAR, true, 512),
+            SystemColumnImpl.getColumn("START_POSITION", Types.VARCHAR, true,
+                    TypeId.VARCHAR_MAXWIDTH),
+            SystemColumnImpl.getColumn("STOP_POSITION", Types.VARCHAR, true,
+                    TypeId.VARCHAR_MAXWIDTH),
+            SystemColumnImpl.getColumn("SCAN_QUALIFIERS", Types.VARCHAR, true,
+                    TypeId.VARCHAR_MAXWIDTH),
+            SystemColumnImpl.getColumn("NEXT_QUALIFIERS", Types.VARCHAR, true,
+                    TypeId.VARCHAR_MAXWIDTH),
+            SystemColumnImpl.getColumn("HASH_KEY_COLUMN_NUMBERS",
+                    Types.VARCHAR, true, TypeId.VARCHAR_MAXWIDTH),
             SystemColumnImpl.getColumn("HASH_TABLE_SIZE", Types.INTEGER, true),
         };
     }

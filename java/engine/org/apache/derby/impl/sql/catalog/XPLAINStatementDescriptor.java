@@ -27,7 +27,6 @@ import java.sql.Timestamp;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
-import org.apache.derby.impl.sql.catalog.SystemColumnImpl;
 import org.apache.derby.iapi.types.TypeId;
 import java.sql.Types;
 
@@ -122,15 +121,21 @@ public class XPLAINStatementDescriptor extends XPLAINTableDescriptor
             SystemColumnImpl.getIdentifierColumn("STMT_NAME", true),
             SystemColumnImpl.getColumn("STMT_TYPE", Types.CHAR, false, 3),
             SystemColumnImpl.getColumn("STMT_TEXT", Types.VARCHAR, false, TypeId.VARCHAR_MAXWIDTH),
-            SystemColumnImpl.getColumn("JVM_ID", Types.CHAR, false, 30),
-            SystemColumnImpl.getColumn("OS_IDENTIFIER", Types.CHAR, false, 30),
+            SystemColumnImpl.getColumn("JVM_ID", Types.VARCHAR, false,
+                    TypeId.VARCHAR_MAXWIDTH),
+            SystemColumnImpl.getColumn("OS_IDENTIFIER", Types.VARCHAR, false,
+                    TypeId.VARCHAR_MAXWIDTH),
             SystemColumnImpl.getColumn("XPLAIN_MODE", Types.CHAR, true, 1),
             SystemColumnImpl.getColumn("XPLAIN_TIME", Types.TIMESTAMP, true),
-            SystemColumnImpl.getColumn("XPLAIN_THREAD_ID", Types.CHAR, false, 32),
-            SystemColumnImpl.getColumn("TRANSACTION_ID", Types.CHAR, false, 32),
-            SystemColumnImpl.getColumn("SESSION_ID", Types.CHAR, false, 32),
+            SystemColumnImpl.getColumn("XPLAIN_THREAD_ID", Types.VARCHAR, false,
+                    TypeId.VARCHAR_MAXWIDTH),
+            SystemColumnImpl.getColumn("TRANSACTION_ID", Types.VARCHAR, false,
+                    TypeId.VARCHAR_MAXWIDTH),
+            SystemColumnImpl.getColumn("SESSION_ID", Types.VARCHAR, false,
+                    TypeId.VARCHAR_MAXWIDTH),
             SystemColumnImpl.getIdentifierColumn("DATABASE_NAME", false),
-            SystemColumnImpl.getColumn("DRDA_ID", Types.CHAR, true, 32),
+            SystemColumnImpl.getColumn("DRDA_ID", Types.VARCHAR, true,
+                    TypeId.VARCHAR_MAXWIDTH),
             SystemColumnImpl.getUUIDColumn("TIMING_ID", true),
         };
     }
