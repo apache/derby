@@ -1009,6 +1009,7 @@ public final class TestConfiguration {
         logicalDbMapping.put(DEFAULT_DBNAME, DEFAULT_DBNAME);
         this.userName = DEFAULT_USER_NAME;
         this.userPassword = DEFAULT_USER_PASSWORD;
+        this.connectionAttributes = new Properties();
         this.hostName = null;
         this.port = basePort;
         this.isVerbose = Boolean.valueOf(
@@ -1221,6 +1222,7 @@ public final class TestConfiguration {
         userName = props.getProperty(KEY_USER_NAME, DEFAULT_USER_NAME);
         userPassword = props.getProperty(KEY_USER_PASSWORD, 
                                          DEFAULT_USER_PASSWORD);
+        connectionAttributes = new Properties();
         hostName = props.getProperty(KEY_HOSTNAME, DEFAULT_HOSTNAME);
         isVerbose = Boolean.valueOf(props.getProperty(KEY_VERBOSE)).booleanValue();
         doTrace =  Boolean.valueOf(props.getProperty(KEY_TRACE)).booleanValue();
@@ -1363,21 +1365,6 @@ public final class TestConfiguration {
     }
 
     /**
-     * Return the JDBC URL for connecting to the default database, including
-     * any connection attributes.
-     *
-     * @return JDBC URL with connection attributes
-     */
-    public String getJDBCUrlWithAttributes() {
-        String attrs = getConnectionAttributesString();
-        if (attrs == null) {
-            return url;
-        } else {
-            return url + ';' + attrs;
-        }
-    }
-
-    /**
      * Return the jdbc url for a connecting to the database.
      * 
      * @param databaseName name of database.
@@ -1430,9 +1417,9 @@ public final class TestConfiguration {
      * {@link #getUserName()} or {@link #getUserPassword()} instead to
      * retrieve those attributes.
      *
-     * @return connection attributes (can be {@code null})
+     * @return connection attributes (never {@code null})
      */
-    Properties getConnectionAttributes() {
+    public Properties getConnectionAttributes() {
         return connectionAttributes;
     }
 
@@ -1444,10 +1431,6 @@ public final class TestConfiguration {
      * are no attributes)
      */
     String getConnectionAttributesString() {
-        if (connectionAttributes == null) {
-            return null;
-        }
-
         StringBuffer sb = new StringBuffer();
         Enumeration e = connectionAttributes.propertyNames();
         boolean first = true;

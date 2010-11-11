@@ -42,6 +42,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 //import java.util.HashMap;
 //import java.util.Iterator;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 //import java.util.Map;
@@ -708,11 +710,39 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         assertFalse("getURL is supported!", JDBC.vmSupportsJSR169());
         assertTrue("getURL is supported!", JDBC.vmSupportsJDBC3());
 
+        TestConfiguration config = getTestConfiguration();
+        String expectedURL = config.getJDBCUrl();
+
         // DERBY-4886: Embedded returns the URL without connection attributes,
         // client returns the URL with connection attributes.
-        TestConfiguration config = getTestConfiguration();
-        String expectedURL = usingEmbedded() ?
-            config.getJDBCUrl() : config.getJDBCUrlWithAttributes();
+        if (usingDerbyNetClient()) {
+            String[] urlComponents = url.split(";");
+
+            // Only compare whatever comes before the first semi-colon with
+            // the expected URL. Check connection attributes separately.
+            url = urlComponents[0];
+
+            // Put each actual connection attribute in a HashSet for easy
+            // comparison.
+            HashSet attrs = new HashSet();
+            for (int i = 1; i < urlComponents.length; i++) {
+                attrs.add(urlComponents[i]);
+            }
+
+            // Put each expected connection attribute in a HashSet.
+            HashSet expectedAttrs = new HashSet();
+            Properties ca = config.getConnectionAttributes();
+            Enumeration e = ca.propertyNames();
+            while (e.hasMoreElements()) {
+                String key = (String) e.nextElement();
+                expectedAttrs.add(key + '=' + ca.getProperty(key));
+            }
+
+            // Verify that the actual connection attributes match the
+            // expected attributes. Order is irrelevant.
+            assertEquals("Connection attributes don't match",
+                         expectedAttrs, attrs);
+        }
 
         assertEquals("getURL match", expectedURL, url);
     }
