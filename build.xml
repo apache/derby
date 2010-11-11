@@ -934,7 +934,7 @@
                   targetfile="${out.dir}/org/apache/derby/iapi/store/raw/ContainerKey.class"/>
         <uptodate srcfile="${derby.engine.dir}/iapi/services/cache/SizedCacheable.java"
                   targetfile="${out.dir}/org/apache/derby/iapi/services/cache/SizedCacheable.class"/>
-        <available file="${derby.engine.dir}/iapi/services/cache/ClassSizeCatalog.java"/>
+        <available file="${generated.src.dir}/${derby.dir}/iapi/services/cache/ClassSizeCatalog.java"/>
       </and>
     </condition>
   </target>
