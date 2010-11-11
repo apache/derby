@@ -1309,7 +1309,7 @@
 <!--                               Jar targets                           -->
 <!-- =================================================================== -->
 
-  <target name="buildjarsclean" depends="cleanjars,initjars,derbyjar,derbytoolsjar,derbynetjar,derbyclientjar,derbyrunjar,derbywar,derbylocalejars,derbytestingjar"/>
+  <target name="buildjarsclean" depends="cleanjars,buildjars"/>
 
   <target
       name="buildjars"
