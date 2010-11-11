@@ -2956,4 +2956,41 @@ you should not have to do this.
         <delete dir="${pruned.docs.dir}/pdf/${userguide}"/>
     </target>
 
+    <!-- Transform the release notes for publication on the website -->
+    <target name="transformrelnotes" depends="promptforreleaseid,promptforwebsite">
+
+        <property name="relnotes.src" value="${basedir}/RELEASE-NOTES.html" />
+
+        <taskdef
+          name="transformReleaseNotes"
+          classname="org.apache.derbyBuild.ReleaseNotesTransformer"
+          classpath="${out.dir}"
+        />
+        <transformReleaseNotes
+            inputFileName="${relnotes.src}"
+            outputFileName="${relnotes.target.dir}/release-${derby.release.id}.html"
+            releaseId="${derby.release.id}"
+        />
+
+    </target>
+
+    <!-- Prompt for and sanity check the root of your website client -->
+    <target name="promptforwebsite" depends="defineprompt">
+
+        <promptForProperty
+          propertyName="website.root"
+          prompt="Enter the root directory of your Derby website client (e.g. /Users/me/derby/site/trunk) >  "
+        />
+        <property name="relnotes.target.dir" value="${website.root}/src/documentation/content/xdocs/releases" />
+
+        <fail message="Cannot transform the release notes. The web site client does not look correct.">
+            <condition>
+              <not>
+                <available file="${relnotes.target.dir}"/>
+              </not>
+            </condition>
+        </fail>
+
+    </target>
+
 </project>
