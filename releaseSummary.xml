@@ -79,12 +79,14 @@ with real information.
 <overview>
 
 <p>
-Apache Derby is a pure Java relational database engine using standard SQL and
-JDBC as its APIs. More information about Derby can be found on the
-<a href="http://db.apache.org/derby/">Apache web site</a>.
+The most up to date information about Derby releases can be found on the
+<a href="http://db.apache.org/derby/derby_downloads.html">Derby download page</a>.
 </p>
 
 <p>
+Apache Derby is a pure Java relational database engine using standard SQL and
+JDBC as its APIs. More information about Derby can be found on the
+<a href="http://db.apache.org/derby/">Apache web site</a>.
 Derby functionality includes:
 </p>
 
