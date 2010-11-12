@@ -2967,7 +2967,7 @@ you should not have to do this.
         <delete dir="${pruned.docs.dir}/pdf/${userguide}"/>
     </target>
 
-    <!-- Transform the release notes for publication on the website -->
+    <!-- Transform the release notes for publication on the website. This creates the download page for the release -->
     <target name="transformrelnotes" depends="promptforreleaseid,promptforwebsite">
 
         <property name="relnotes.src" value="${basedir}/RELEASE-NOTES.html" />
@@ -2982,6 +2982,12 @@ you should not have to do this.
             outputFileName="${relnotes.target.dir}/release-${derby.release.id}.html"
             releaseId="${derby.release.id}"
         />
+
+        <!-- Copy the cgi script which enables mirroring for the new release -->
+        <copy
+            file="${relnotes.target.dir}/release-template.cgi"
+            tofile="${relnotes.target.dir}/release-${derby.release.id}.cgi"
+          />
 
     </target>
 
