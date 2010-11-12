@@ -272,15 +272,14 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public void	executeConstantAction(
-    Activation activation)
-        throws StandardException
-	{
-		LanguageConnectionContext   lcc = 
-            activation.getLanguageConnectionContext();
-		DataDictionary              dd = lcc.getDataDictionary();
-		DependencyManager           dm = dd.getDependencyManager();
-		TransactionController       tc = lcc.getTransactionExecute();
+    public void executeConstantAction(Activation activation)
+            throws StandardException {
+        // Save references to the main structures we need.
+        this.activation = activation;
+        lcc = activation.getLanguageConnectionContext();
+        dd = lcc.getDataDictionary();
+        dm = dd.getDependencyManager();
+        tc = lcc.getTransactionExecute();
 
 		int							numRows = 0;
         boolean						tableScanned = false;
@@ -307,7 +306,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	                purgeRows(tc);
 
 	            if (defragment)
-	                defragmentRows(tc, lcc);
+                    defragmentRows(tc);
 
 	            if (truncateEndOfTable)
 	                truncateEnd(tc);            
@@ -315,9 +314,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			}
 		}
 
-		if (updateStatistics)
-		{
-			updateStatistics(activation);
+        if (updateStatistics) {
+            updateStatistics();
             return;
 		}
 		/*
@@ -435,15 +433,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			// for each related column, stuff system.column
 			for (int ix = 0; ix < columnInfo.length; ix++)
 			{
-				ColumnDescriptorList cdl = new ColumnDescriptorList();
-
 				/* If there is a default value, use it, otherwise use null */
 				
 				// Are we adding a new column or modifying a default?
 				
 				if (columnInfo[ix].action == ColumnInfo.CREATE)
 				{
-					addNewColumnToTable(activation, lcc, dd, tc, ix);
+					addNewColumnToTable(ix);
 				}
 				else if (columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART ||
@@ -452,18 +448,17 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 						 columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_DEFAULT_VALUE)
 				{
-					modifyColumnDefault(activation, ix);
+                    modifyColumnDefault(ix);
 				}
 				else if (columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_TYPE)
 				{
-					modifyColumnType(activation, ix);
+                    modifyColumnType(ix);
 				}
 				else if (columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_CONSTRAINT)
 				{
-					modifyColumnConstraint(
-                        activation, columnInfo[ix].name, true);
+                    modifyColumnConstraint(columnInfo[ix].name, true);
 				}
 				else if (columnInfo[ix].action == 
 						 ColumnInfo.MODIFY_COLUMN_CONSTRAINT_NOT_NULL)
@@ -490,13 +485,12 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 						 * This is O.K. at this point since we would have
 						 * thrown an exception if any data was null
 						 */
-						modifyColumnConstraint(
-                            activation, columnInfo[ix].name, false);
+                        modifyColumnConstraint(columnInfo[ix].name, false);
 					}
 				}
 				else if (columnInfo[ix].action == ColumnInfo.DROP)
 				{
-					dropColumnFromTable(activation, columnInfo[ix].name);
+                    dropColumnFromTable(columnInfo[ix].name);
 				}
 				else if (SanityManager.DEBUG)
 				{
@@ -616,13 +610,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// Are we doing a compress table?
 		if (compressTable)
 		{
-			compressTable(activation);
+            compressTable();
 		}
 
 		// Are we doing a truncate table?
 		if (truncateTable)
 		{
-			truncateTable(activation);
+            truncateTable();
 		}
 	}
 
@@ -630,21 +624,15 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * Update statistics of either all the indexes on the table or only one
 	 * specific index depending on what user has requested.
 	 * 
-	 * @param   activation  the current activation
 	 * @throws StandardException
 	 */
-	private void updateStatistics(Activation activation)
-	throws StandardException
-	{
-		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
-		DataDictionary dd = lcc.getDataDictionary();
-		TransactionController tc = lcc.getTransactionExecute();
+    private void updateStatistics()
+            throws StandardException {
 		ConglomerateDescriptor[] cds;
 		long[] conglomerateNumber;
 		ExecIndexRow[] indexRow;
 		UUID[] objectUUID;
 		GroupFetchScanController gsc;
-		DependencyManager dm = dd.getDependencyManager();
 		//initialize numRows to -1 so we can tell if we scanned an index.	
 		long numRows = -1;		
 		
@@ -899,14 +887,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
      * half filled pages starting from the front of the conglomerate.
      *
      * @param tc                transaction controller to use to do updates.
-	 * @param lcc				the language connection context
      *
      **/
-	private void defragmentRows(
-			TransactionController tc,
-			LanguageConnectionContext lcc)
-        throws StandardException
-	{
+    private void defragmentRows(TransactionController tc)
+            throws StandardException {
         GroupFetchScanController base_group_fetch_cc = null;
         int                      num_indexes         = 0;
 
@@ -933,10 +917,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             default:
             	break;
             }
-
-
-			ConglomerateDescriptor heapCD = 
-                td.getConglomerateDescriptor(td.getHeapConglomerateId());
 
 			/* Get a row template for the base table */
 			ExecRow baseRow = 
@@ -1287,19 +1267,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *						statement-- currently we allow only one.
 	 * @exception StandardException 	thrown on failure.
 	 */
-	private void addNewColumnToTable(
-    Activation                  activation, 
-    LanguageConnectionContext   lcc,
-    DataDictionary              dd,
-    TransactionController       tc,
-    int                         ix) 
+    private void addNewColumnToTable(int ix)
 	        throws StandardException
 	{
 		ColumnDescriptor columnDescriptor   = 
 			td.getColumnDescriptor(columnInfo[ix].name);
 		DataValueDescriptor storableDV;
 		int                     colNumber   = td.getMaxColumnID() + ix;
-		DataDescriptorGenerator ddg         = dd.getDataDescriptorGenerator();
 
 		/* We need to verify that the table does not have an existing
 		 * column with the same name before we try to add the new
@@ -1362,7 +1336,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		if (columnDescriptor.isAutoincrement())
 		{
-			updateNewAutoincrementColumn(activation, columnInfo[ix].name,
+            updateNewAutoincrementColumn(columnInfo[ix].name,
 										 columnInfo[ix].autoincStart,
 										 columnInfo[ix].autoincInc);
 		}
@@ -1370,7 +1344,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		// Update the new column to its default, if it has a non-null default
 		if (columnDescriptor.hasNonNullDefault())
 		{
-			updateNewColumnToDefault(activation, columnDescriptor, lcc);
+            updateNewColumnToDefault(columnDescriptor);
 		}	
 
         //
@@ -1442,18 +1416,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *  - if that column was the only column in the index, the
 	 *    entire index is dropped. 
 	 *
-     * @param   activation  the current activation
 	 * @param   columnName the name of the column specfication in the ALTER 
 	 *						statement-- currently we allow only one.
 	 * @exception StandardException 	thrown on failure.
 	 */
-	private void dropColumnFromTable(Activation activation, String columnName )
+    private void dropColumnFromTable(String columnName )
 	        throws StandardException
 	{
-		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
-		DataDictionary dd = lcc.getDataDictionary();
-		DependencyManager dm = dd.getDependencyManager();
-		TransactionController tc = lcc.getTransactionExecute();
 		boolean cascade = (behavior == StatementType.DROP_CASCADE);
 
         // drop any generated columns which reference this column
@@ -1521,7 +1490,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
             // We can only recurse 2 levels since a generation clause cannot
             // refer to other generated columns.
             //
-            dropColumnFromTable( activation, generatedColumnName );
+            dropColumnFromTable(generatedColumnName);
         }
 
         /*
@@ -1732,8 +1701,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		 * creating a new conglomerate if it's just going to be
 		 * dropped again as part of another "drop constraint".
 		 */
-		createNewBackingCongloms(
-			newCongloms, (long[])null, activation, dd);
+		createNewBackingCongloms(newCongloms, (long[])null);
 
         /*
          * The work we've done above, specifically the possible
@@ -1747,7 +1715,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
          */
 		td = dd.getTableDescriptor(tableId);
 
-		compressTable(activation);
+        compressTable();
 
 		ColumnDescriptorList tab_cdl = td.getColumnDescriptorList();
 
@@ -1822,14 +1790,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         tab_cdl.remove( td.getColumnDescriptor( columnName ) );
 	}
 
-	private void modifyColumnType(Activation activation,
-								  int ix)
-		throws StandardException						  
-	{
-		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
-		DataDictionary dd = lcc.getDataDictionary();
-		TransactionController tc = lcc.getTransactionExecute();
-
+    private void modifyColumnType(int ix)
+            throws StandardException {
 		ColumnDescriptor columnDescriptor = 
 			td.getColumnDescriptor(columnInfo[ix].name),
 			newColumnDescriptor = null;
@@ -1859,17 +1821,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * Right now it is restricted to modifying a null constraint to a not null
 	 * constraint.
 	 */
-	private void modifyColumnConstraint(Activation activation, 
-										String colName,
-										boolean nullability)
-		throws StandardException								
-	{
-		LanguageConnectionContext lcc = 
-            activation.getLanguageConnectionContext();
-
-		DataDictionary dd = lcc.getDataDictionary();
-		TransactionController tc = lcc.getTransactionExecute();
-
+    private void modifyColumnConstraint(String colName, boolean nullability)
+            throws StandardException {
 		ColumnDescriptor columnDescriptor = 
 			td.getColumnDescriptor(colName),
 			newColumnDescriptor = null;
@@ -1927,20 +1880,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	/**
 	 * Workhorse for modifying the default value of a column.
 	 * 
-	 * @param 		activation 		activation
 	 * @param       ix 		the index of the column specfication in the ALTER 
 	 *						statement-- currently we allow only one.
 	 * @exception	StandardException, thrown on error.
 	 */
-	private void modifyColumnDefault(Activation activation,
-									 int ix)
+    private void modifyColumnDefault(int ix)
 			throws StandardException						 
 	{
-		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
-		DataDictionary dd = lcc.getDataDictionary();
-		DependencyManager dm = dd.getDependencyManager();
-		TransactionController tc = lcc.getTransactionExecute();
-
 		ColumnDescriptor columnDescriptor = 
 			td.getColumnDescriptor(columnInfo[ix].name);
 		DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
@@ -1994,9 +1940,8 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		{
 			// adding an autoincrement default-- calculate the maximum value 
 			// of the autoincrement column.
-			long maxValue = getColumnMax(activation, td, columnInfo[ix].name,
-										 columnInfo[ix].autoincInc,
-										 columnInfo[ix].autoincStart);
+            long maxValue = getColumnMax(td, columnInfo[ix].name,
+                                         columnInfo[ix].autoincInc);
 			dd.setAutoincrementValue(tc, td.getUUID(), columnInfo[ix].name,
 									 maxValue, true);
 		} else if (columnInfo[ix].action == ColumnInfo.MODIFY_COLUMN_DEFAULT_RESTART)
@@ -2017,19 +1962,12 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
      * <p>
      * Handles rebuilding of base conglomerate and all necessary indexes.
      **/
-	private void compressTable(
-    Activation activation)
+    private void compressTable()
 		throws StandardException
 	{
 		long					newHeapConglom;
 		Properties				properties = new Properties();
 		RowLocation				rl;
-
-		this.lcc        = activation.getLanguageConnectionContext();
-		this.dd         = lcc.getDataDictionary();
-		this.dm         = dd.getDependencyManager();
-		this.tc         = lcc.getTransactionExecute();
-		this.activation = activation;
 
 		if (SanityManager.DEBUG)
 		{
@@ -2077,7 +2015,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		validRow = new boolean[bulkFetchSize];
 
 		/* Set up index info */
-		getAffectedIndexes(activation);
+        getAffectedIndexes();
 
 		// Get an array of RowLocation template
 		compressRL = new RowLocation[bulkFetchSize];
@@ -2209,18 +2147,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * incorrect. Recompile is done internally by Derby, user does not have
 	 * any effect.
 	 */
-	private void truncateTable(Activation activation)
+    private void truncateTable()
 		throws StandardException
 	{
 		ExecRow					emptyHeapRow;
 		long					newHeapConglom;
 		Properties				properties = new Properties();
 		RowLocation				rl;
-		this.lcc = activation.getLanguageConnectionContext();
-		this.dd = lcc.getDataDictionary();
-		this.dm = dd.getDependencyManager();
-		this.tc = lcc.getTransactionExecute();
-		this.activation = activation;
 
 		if (SanityManager.DEBUG)
 		{
@@ -2302,7 +2235,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 TransactionController.IS_DEFAULT);
 		
 		/* Set up index info to perform truncate on them*/
-		getAffectedIndexes(activation);
+        getAffectedIndexes();
 		if(numIndexes > 0)
 		{
 			indexRows = new ExecIndexRow[numIndexes];
@@ -2583,7 +2516,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	private void getAffectedIndexes(Activation activation)
+    private void getAffectedIndexes()
 		throws StandardException
 	{
 		IndexLister	indexLister = td.getIndexLister( );
@@ -2649,8 +2582,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			 * dropped again as part of another "drop conglomerate"
 			 * call.
 			 */
-			createNewBackingCongloms(newCongloms,
-				indexConglomerateNumbers, activation, dd);
+            createNewBackingCongloms(newCongloms, indexConglomerateNumbers);
 
 			IndexRowGenerator[] newIRGs = new IndexRowGenerator[numIndexes];
 			long[] newIndexConglomNumbers = new long[numIndexes];
@@ -2743,7 +2675,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *   physical conglomerate.
 	 */
 	private void createNewBackingCongloms(ArrayList newConglomActions,
-		long [] ixCongNums, Activation activation, DataDictionary dd)
+                                          long [] ixCongNums)
 		throws StandardException
 	{
 		int sz = newConglomActions.size();
@@ -2828,8 +2760,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         collation       = new int[numIndexes][]; 
 		needToDropSort  = new boolean[numIndexes];
 		sortIds         = new long[numIndexes];
-
-        int[] base_table_collation_ids = td.getColumnCollationIds();
 
 		/* For each index, build a single index row and a sorter. */
 		for (int index = 0; index < numIndexes; index++)
@@ -3174,18 +3104,11 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 * issue the appropriate update statement.
 	 *
 	 * @param columnDescriptor  catalog descriptor for the column
-	 * @param lcc				the language connection context
 	 *
 	 * @exception StandardException if update to default fails
 	 */
-	private void updateNewColumnToDefault
-	(
-		Activation activation,
-        ColumnDescriptor    columnDescriptor,
-		LanguageConnectionContext		lcc
-	)
-		throws StandardException
-	{
+    private void updateNewColumnToDefault(ColumnDescriptor columnDescriptor)
+            throws StandardException {
         DefaultInfo defaultInfo = columnDescriptor.getDefaultInfo();
         String  columnName = columnDescriptor.getColumnName();
         String  defaultText;
@@ -3218,16 +3141,13 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	/**
 	 * computes the minimum/maximum value in a column of a table.
 	 */
-	private long getColumnMax(Activation activation, TableDescriptor td, String columnName, 
-							  long increment, long initial)
-							  throws StandardException
-	{
+    private long getColumnMax(TableDescriptor td, String columnName,
+                              long increment)
+            throws StandardException {
 		String maxStr = (increment > 0) ? "MAX" : "MIN";
 		String maxStmt = "SELECT " + maxStr + "(\"" + columnName + "\")"  +
 				"FROM \"" + td.getSchemaName() + "\".\"" + td.getName() + "\"";
 
-
-		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
 		PreparedStatement ps = lcc.prepareInternalStatement(maxStmt);
 
         // This is a substatement, for now we do not set any timeout for it
@@ -3239,26 +3159,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 		return rowArray[0].getLong();
 	}					
-
-	private void dropAllColumnDefaults(UUID tableId, DataDictionary dd)
-		throws StandardException
-	{
-		ColumnDescriptorList cdl = td.getColumnDescriptorList();
-		int					 cdlSize = cdl.size();
-		
-		for(int index = 0; index < cdlSize; index++)
-		{
-			ColumnDescriptor cd = (ColumnDescriptor) cdl.elementAt(index);
-
-			// If column has a default we drop the default and
-			// any dependencies
-			if (cd.getDefaultInfo() != null)
-			{
-				DefaultDescriptor defaultDesc = cd.getDefaultDescriptor(dd);
-				dm.clearDependencies(lcc, defaultDesc);
-			}
-		}
-	}
 
 	private void openBulkFetchScan(long heapConglomNumber)
 		throws StandardException
@@ -3299,12 +3199,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *
 	 * @see #updateNewColumnToDefault
 	 */
-	private void updateNewAutoincrementColumn(Activation activation, String columnName, long initial,
+    private void updateNewAutoincrementColumn(String columnName, long initial,
 											 long increment)
 		throws StandardException
 	{
-		LanguageConnectionContext lcc = activation.getLanguageConnectionContext();
-
 		// Don't throw an error in bind when we try to update the 
 		// autoincrement column.
 		lcc.setAutoincrementUpdate(true);
@@ -3526,4 +3424,3 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	}
 
 }
-
