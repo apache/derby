@@ -115,7 +115,7 @@ This is a feature release. The following new features were added:
 	
 <li><b>Query plan browsing</b> - A new PlanExporter tool helps developers visualize query plans better.</li>
 
-<li><b>Unicode database names</b> - Remote clients can now use database names which include unicode characters outside the ascii codeset.</li>
+<li><b>Unicode database names</b> - Remote clients can now use database names which include Unicode characters outside the ASCII codeset.</li>
 
 </ul>
 

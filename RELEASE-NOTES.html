@@ -1,10 +1,10 @@
 <html>
-<title>Release Notes for Derby 10.7.1.0</title>
+<title>Release Notes for Apache Derby 10.7.1.0</title>
 <body>
 <h1>
-<a name="Release Notes for Derby 10.7.1.0"></a>Release Notes for Derby 10.7.1.0</h1>
+<a name="Release Notes for Apache Derby 10.7.1.0"></a>Release Notes for Apache Derby 10.7.1.0</h1>
 <blockquote>
-<p>These notes describe the difference between Derby release 10.7.1.0 and the preceding release 10.6.2.1.</p>
+<p>These notes describe the difference between Apache Derby release 10.7.1.0 and the preceding release 10.6.2.1.</p>
 </blockquote>
 <ul>
 <li>
@@ -89,7 +89,7 @@ This is a feature release. The following new features were added:
 
 
 <li>
-<b>Unicode database names</b> - Remote clients can now use database names which include unicode characters outside the ascii codeset.</li>
+<b>Unicode database names</b> - Remote clients can now use database names which include Unicode characters outside the ASCII codeset.</li>
 
 
 </ul>
@@ -103,6 +103,9 @@ This is a feature release. The following new features were added:
 <table border="2">
 <tr>
 <td><b>Issue Id</b></td><td><b>Description</b></td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4899">DERBY-4899</a></td><td>Refactor access to primary structures in AlterTableConstantAction</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4898">DERBY-4898</a></td><td>testGetURL test fails in nightly runs.</td>
@@ -234,6 +237,9 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4799">DERBY-4799</a></td><td>IllegalArgumentException when generating error message on server</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4796">DERBY-4796</a></td><td>Missing escape for apostrophes in many messages</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4791">DERBY-4791</a></td><td>LIKE operator optimizations and concatenation</td>
 </tr>
 <tr>
@@ -241,6 +247,9 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4777">DERBY-4777</a></td><td>Different behavior in Client and Embedded modes when update on an invalid cursor</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4772">DERBY-4772</a></td><td>Data truncation error with XPLAIN-functionality enabled</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4767">DERBY-4767</a></td><td>Detailed prompt for Error XCL16 is different between Client and Embed</td>
@@ -471,21 +480,30 @@ This is a feature release. The following new features were added:
 <li>
 <a href="#Note for DERBY-4786">
 <p>Note for DERBY-4786: 
-A shutdown request with no user credentials to a 10.3 and earlier servers from a newer client will give multiple messages on both server and client side.
+A shutdown request with no user credentials to a 10.3 (or earlier)
+server from a newer client will give multiple messages on both the server and client sides.
 </p>
 </a>
 </li>
 <li>
 <a href="#Note for DERBY-4777">
 <p>Note for DERBY-4777: 
-When update on an invalid cursor in Client mode, 'ERROR 42X30' will be thrown instead of 'ERROR XJ202'.
+When a network client attempts to update through an invalid cursor,
+Derby now throws 'ERROR 42X30' instead of 'ERROR XJ202'.
+</p>
+</a>
+</li>
+<li>
+<a href="#Note for DERBY-4772">
+<p>Note for DERBY-4772: 
+Column types in the XPLAIN tables changed to accommodate more data.
 </p>
 </a>
 </li>
 <li>
 <a href="#Note for DERBY-4577">
 <p>Note for DERBY-4577: 
-  An UPDATE statement may fail with the following error: "ERROR nospc: nospc.U"
+  UPDATE statements should not raise the following error: "ERROR nospc: nospc.U"
 </p>
 </a>
 </li>
@@ -522,7 +540,8 @@ cursor is holdable.
 <h4>Summary of Change</h4>
 
 <p>
-A shutdown request with no user credentials to a 10.3 and earlier servers from a newer client will give multiple messages on both server and client side.
+A shutdown request with no user credentials to a 10.3 (or earlier)
+server from a newer client will give multiple messages on both the server and client sides.
 </p>
 
 
@@ -540,20 +559,33 @@ A shutdown request with no user credentials to a 10.3 and earlier servers from a
 
 
 <h4>Symptoms Seen by Applications Affected by Change</h4>
-A shutdown request from a 10.4 and higher client with no user credentials to a 10.3 and earlier server will show following messages on server side(Note that the version info about the product will change depending on the release being used for the server).<br>
-java.lang.Throwable: DRDA_UnknownProtocol.S, 2
-<br>
-Execution failed because of a Distributed Protocol Error: DRDA_Proto_SYNTAXRM;CODPNT arg = 0; Error Code Value = 1. Plaintext connection attempt from an SSL enabled client?
-<br>
-Apache Derby Network Server - 10.3.3.1 - (1) shutdown at {2}
-<br>
 
-<br>
-Messages on client side will be as follows(Note that the version info about the product will change depending on the release being used for the client).
-<br>
+<p>
+A shutdown request from a 10.4 (or higher) client with no user
+credentials to a 10.3 (or earlier) server shows the following messages
+on the server side. (Note that the version info about the product
+changes depending on the release being used for the server.)
+</p>
+
+
+<pre>
+java.lang.Throwable: DRDA_UnknownProtocol.S, 2
+Execution failed because of a Distributed Protocol Error: DRDA_Proto_SYNTAXRM;CODPNT arg = 0; Error Code Value = 1. Plaintext connection attempt from an SSL enabled client?
+Apache Derby Network Server - 10.3.3.1 - (1) shutdown at {2}
+</pre>
+
+
+<p>
+Messages on the client side appear as follows. (Note that the version
+info about the product changes depending on the release being used
+for the client.)
+</p>
+
+
+<pre>
 Invalid reply header from network server: Invalid string . Plaintext connection attempt to an SSL enabled server?
-<br>
-Apache Derby Network Server - 10.7.0.0 alpha - (1) shutdown
+Apache Derby Network Server - 10.7.1.0 - (1) shutdown
+</pre>
 
 
 <!-- 
@@ -565,10 +597,22 @@ Apache Derby Network Server - 10.7.0.0 alpha - (1) shutdown
   is correct.
 -->
 
+
 <h4>Rationale for Change</h4>
 
 <p>
-10.3 and earlier versions do not support shutdown command with credentials. That command was introduced in 10.4 at a different protocol level(2). When a shutdown is sent by a 10.4 or higher client, it is sent at protocol level 2 which is not recognized by 10.3 and earlier versions. Because of this, a 10.4 and higher client can't shutdown a 10.3 or lower server. With DERBY-4786, the 10.4 and higher version clients will first try the shutdown at level 2 protocol and if that does not succeed, then it will send the shutdown at level 1 protocol thus allowing 10.4 and higher versions to shutdown 10.3 and lower version servers.
+10.3 (and earlier) versions do not support shutdown commands with
+credentials. The credential-bearing shutdown command was introduced in
+10.4 and requires network
+protocol level 2.
+10.3 and earlier versions understand protocol level 1 and do not recognize the credential-bearing
+shutdown command. Because of this, a 10.4 (or higher) client
+can't shutdown a 10.3 (or lower) server. With DERBY-4786, a 10.7 client
+will first try the shutdown at protocol level 2. If that does not
+succeed, then the 10.7 client will send the shutdown at protocol level 1.
+This fix has been backported to the 10.4, 10.5, and 10.6
+branches also. Future releases on those branches will enjoy this ability to
+successfully shutdown 10.3 (and earlier) servers.
 </p>
 
 
@@ -591,7 +635,8 @@ Apache Derby Network Server - 10.7.0.0 alpha - (1) shutdown
 <h4>Summary of Change</h4>
 
 <p>
-When update on an invalid cursor in Client mode, 'ERROR 42X30' will be thrown instead of 'ERROR XJ202'.
+When a network client attempts to update through an invalid cursor,
+Derby now throws 'ERROR 42X30' instead of 'ERROR XJ202'.
 </p>
 
 
@@ -611,12 +656,17 @@ When update on an invalid cursor in Client mode, 'ERROR 42X30' will be thrown in
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-In previous releases, when an update on an invalid cursor (closed or nonexistent) is attempted in Client mode, 
-'ERROR XJ202' will be thrown. For instance, if the cursor name is "JDK4", the detailed message is "ERROR XJ202: Invalid cursor name 'JDK4'."
-While, in the current release, 'ERROR 42X30' will be thrown, and the detailed message is "ERROR 42X30: Cursor 'JDK4' not found. Verify that autocommit is OFF."
-<br>
-From now on, DERBY will perform the same in both Client and Embedded modes 
-when update on an invalid cursor (closed or nonexistent).
+In previous releases, Derby threw 'ERROR XJ202' when a network client
+tried to update through a closed or nonexistent cursor.
+For a cursor named "JDK4", the detailed message was "ERROR XJ202: Invalid cursor name 'JDK4'."
+If you are running 10.7, however, Derby now throws 'ERROR 42X30'
+instead, and the detailed message is "ERROR 42X30: Cursor 'JDK4' not found. Verify that autocommit is OFF."
+</p>
+
+
+<p>
+From now on, DERBY performs identically in Client and Embedded modes 
+when you attempt to update through a closed or nonexistent cursor.
 </p>
 
 
@@ -633,8 +683,8 @@ when update on an invalid cursor (closed or nonexistent).
 <h4>Incompatibilities with Previous Release</h4>
 
 <p>
-In previous releases, applications that expect 'ERROR XJ202' is thrown
-when update on an invalid cursor (closed or nonexistent) in Client mode will fail.
+Applications may fail if they expect 'ERROR XJ202' to be thrown
+in this situation.
 </p>
 
 
@@ -651,9 +701,7 @@ when update on an invalid cursor (closed or nonexistent) in Client mode will fai
 <h4>Rationale for Change</h4>
 
 <p>
-'ERROR XJ202' should just be used to show the 'name' of a cursor is invalid, 
-just like using in Statement.setCursorName(), but not the cursor itself is invalid.
-If a cursor itself is not invalid, a 'ERROR 42X30' is more suitable. This behavior should be the same for Derby Client and Embedded.
+This change was made so that the Client and Embedded behavior would be similar.
 </p>
 
 
@@ -670,8 +718,103 @@ If a cursor itself is not invalid, a 'ERROR 42X30' is more suitable. This behavi
 <h4>Application Changes Required</h4>
 
 <p>
-When update on an invalid cursor (closed or nonexistent) in Client mode, 
-'ERROR 42X30' should be expected.
+If applications need to track updates through invalid cursors, those
+applications should look for 'ERROR 42X30' regardless of whether they
+run in Client or Embedded mode.
+</p>
+
+
+
+</blockquote>
+<hr>
+<h3>
+<a name="Note for DERBY-4772"></a>Note for DERBY-4772</h3>
+<blockquote>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+Column types in the XPLAIN tables changed to accommodate more data.
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+None.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+None, but keeping the old table definitions for the XPLAIN tables may result in data truncation errors (see DERBY-4772 and DERBY-4673).
+</p>
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+Amount of recorded data was too large to fit into the old column definitions.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+It is recommended to drop existing XPLAIN tables and have them recreated with the new table definitions. This can be done by disabling the XPLAIN feature, dropping the tables, and then enable the XPLAIN feature again. Alternatively, if you want to keep existing data, specify a different schema to save XPLAIN data in.
 </p>
 
 
@@ -686,7 +829,7 @@ When update on an invalid cursor (closed or nonexistent) in Client mode,
 <h4>Summary of Change</h4>
 
 <p>
-  An UPDATE statement may fail with the following error: "ERROR nospc: nospc.U"
+  UPDATE statements should not raise the following error: "ERROR nospc: nospc.U"
 </p>
 
 
@@ -694,10 +837,10 @@ When update on an invalid cursor (closed or nonexistent) in Client mode,
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-  An UPDATE statement of a row which spans multiple pages could fail with
+  An UPDATE of a row which spans multiple pages can fail, raising
   "ERROR nospc: nospc.U".  This error should never be returned to the client.
-  The error is very timing and data dependent, and only has been encountered
-  in a few applications.
+  The error is very timing and data dependent, and has been encountered
+  in only a few applications.
 
 </p>
 
@@ -707,8 +850,8 @@ When update on an invalid cursor (closed or nonexistent) in Client mode,
 <h4>Rationale for Change</h4>
 
 <p>
-  UPDATES of rows failed in some cases, returning an error that should never
-  be seen by clients of the software.
+  UPDATES of rows may fail in some cases, returning this error
+which clients should never see.
 </p>
 
 
@@ -716,11 +859,13 @@ When update on an invalid cursor (closed or nonexistent) in Client mode,
 <h4>Application Changes Required</h4>
 
 <p>
-  The fix insures that all rows inserted after the fix will not get this error.
-  To insure that updates of existing rows will not see this error one should 
-  run the SYSCS_UTIL.SYSCS_COMPRESS_TABLE() system procedure on the table.
-  It is also ok to wait and see if the error is encountered and run the
-  compress utility as needed on tables that encounter the error.
+  After applying the fix, clients should not see this error.
+  To ensure that updates of existing rows no longer see this error,
+  run the SYSCS_UTIL.SYSCS_COMPRESS_TABLE() system procedure on your tables.
+You may want to defensively
+compress all of your tables. Alternatively,
+  it is also ok to wait and see if the error occurs and then only compress
+  the tables that encounter the error.
 </p>
 
 

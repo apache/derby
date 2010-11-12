@@ -176,7 +176,7 @@ public class GeneratorBase extends Task {
     protected void buildDelta(Element parent)
             throws Exception {
         String deltaStatement =
-                "These notes describe the difference between Derby release " +
+                "These notes describe the difference between Apache Derby release " +
                 releaseID + " and the preceding release " +
                 previousReleaseID + ".";
 

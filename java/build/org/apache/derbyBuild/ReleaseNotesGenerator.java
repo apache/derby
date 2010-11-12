@@ -214,7 +214,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
      * Start the RELEASE_NOTES html docment.
      */
     private void beginOutput() throws Exception {
-        String titleText = "Release Notes for Derby " + releaseID;
+        String titleText = "Release Notes for Apache Derby " + releaseID;
         Element html = outputDoc.createElement(HTML);
         Element title = createTextElement(outputDoc, "title", titleText);
         Element body = outputDoc.createElement(BODY);
