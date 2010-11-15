@@ -2422,6 +2422,34 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test that queries that contain non-ASCII characters are not garbled
+     * by the plan exporter tool. Regression test case for DERBY-4902.
+     */
+    public void testPlanExporterEncoding() throws Exception {
+        String table = "D4902_BL\u00C5B\u00C6R";
+        String queryText = "SELECT * FROM " + table;
+
+        Statement s = createStatement();
+        s.execute("CREATE TABLE " + table + "(X INT)");
+
+        enableXplainStyle(s);
+        JDBC.assertEmpty(s.executeQuery(queryText));
+        disableXplainStyle(s);
+
+        ResultSet rs = s.executeQuery(
+                "SELECT STMT_ID, STMT_TEXT FROM XPLTEST.SYSXPLAIN_STATEMENTS");
+        assertTrue(rs.next());
+        String stmtId = rs.getString(1);
+        assertEquals(queryText, rs.getString(2));
+        assertFalse(rs.next());
+        rs.close();
+
+        if (XML.classpathMeetsXMLReqs()) {
+            assertEquals(queryText, readStatement(stmtId));
+        }
+    }
+
+    /**
      * Abstract class for a thread executing a database action (i.e. a query).
      */
     private static abstract class AbstractMTThread
