@@ -122,6 +122,9 @@ public interface DataDictionary
 	/** Derby 10.7 System Catalog version */
 	public static final int DD_VERSION_DERBY_10_7		= 190;
 
+	/** Derby 10.8 System Catalog version */
+	public static final int DD_VERSION_DERBY_10_8		= 200;
+
 	// general info
 	public	static	final	String	DATABASE_ID = "derby.databaseID";
 
