@@ -397,7 +397,7 @@
   </target>
 
   <!-- generate the md5 and pgp checksums for a target -->
-  <target name="sign" depends="sign.bin,sign.lib,sign.src"/>
+  <target name="sign" depends="sign.bin,sign.lib,sign.src,sign.debug"/>
   <target name="sign.bin" depends="init">
     <antcall target="md5">
       <param name="sign.archive" value="${release.dir}/${derby.bin}.zip"/>
@@ -438,6 +438,20 @@
     </antcall>
     <antcall target="pgp">
       <param name="sign.archive" value="${release.dir}/${derby.src}.tar.gz"/>
+    </antcall>
+  </target>
+  <target name="sign.debug" depends="init">
+    <antcall target="md5">
+      <param name="sign.archive" value="${release.dir}/${derby.lib-debug}.zip"/>
+    </antcall>
+    <antcall target="md5">
+      <param name="sign.archive" value="${release.dir}/${derby.lib-debug}.tar.gz"/>
+    </antcall>
+    <antcall target="pgp">
+      <param name="sign.archive" value="${release.dir}/${derby.lib-debug}.zip"/>
+    </antcall>
+    <antcall target="pgp">
+      <param name="sign.archive" value="${release.dir}/${derby.lib-debug}.tar.gz"/>
     </antcall>
   </target>
 
