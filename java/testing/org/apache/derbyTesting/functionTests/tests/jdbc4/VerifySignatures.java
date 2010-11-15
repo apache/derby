@@ -29,11 +29,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -103,7 +103,12 @@ public class VerifySignatures extends BaseTestCase {
      * @return a test suite
      */
     public static Test suite()  {
-        
+        if (JDBC.vmSupportsJDBC41()) {
+            // DERBY-4869: The runtime environment supports JDBC 4.1, but
+            // our database drivers don't yet. Disable this test until the
+            // drivers have been updated.
+            return new TestSuite("VerifySignatures - Disabled");
+        }
         return TestConfiguration.defaultSuite(VerifySignatures.class);
     }
     

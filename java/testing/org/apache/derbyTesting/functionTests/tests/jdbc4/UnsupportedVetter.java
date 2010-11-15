@@ -33,6 +33,7 @@ import java.net.URL;
 import org.apache.derbyTesting.functionTests.util.TestUtil;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -1047,6 +1048,12 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
     }
 
     public static Test suite() {
+        if (JDBC.vmSupportsJDBC41()) {
+            // DERBY-4869: The runtime environment supports JDBC 4.1, but
+            // our database drivers don't yet. Disable this test until the
+            // drivers have been updated.
+            return new TestSuite("UnsupportedVetter - Disabled");
+        }
         return TestConfiguration.defaultSuite(UnsupportedVetter.class);
     }
 }

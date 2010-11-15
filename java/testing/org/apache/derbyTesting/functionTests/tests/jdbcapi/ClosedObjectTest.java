@@ -109,6 +109,12 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
 
     /** Creates a suite with all tests in the class. */
     public static Test suite() {
+        if (JDBC.vmSupportsJDBC41()) {
+            // DERBY-4869: The runtime environment supports JDBC 4.1, but
+            // our database drivers don't yet. Disable this test until the
+            // drivers have been updated.
+            return new TestSuite("ClosedObjectTest - Disabled");
+        }
         TestSuite suite = new TestSuite("ClosedObjectTest suite");
         suite.addTest(baseSuite("ClosedObjectTest:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(

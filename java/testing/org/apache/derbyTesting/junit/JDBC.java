@@ -121,6 +121,22 @@ public class JDBC {
                            = haveClass("java.sql.SQLXML");
 
     /**
+     * Does java.sql.ResultSet implement java.lang.AutoCloseable?
+     * Indicates JDBC 4.1.
+     */
+    private static final boolean HAVE_AUTO_CLOSEABLE_RESULT_SET;
+    static {
+        boolean autoCloseable;
+        try {
+            Class acClass = Class.forName("java.lang.AutoCloseable");
+            autoCloseable = acClass.isAssignableFrom(ResultSet.class);
+        } catch (Throwable t) {
+            autoCloseable = false;
+        }
+        HAVE_AUTO_CLOSEABLE_RESULT_SET = autoCloseable;
+    }
+
+    /**
      * Can we load a specific class, use this to determine JDBC level.
      * @param className Class to attempt load on.
      * @return true if class can be loaded, false otherwise.
@@ -134,6 +150,15 @@ public class JDBC {
         	return false;
         }    	
     }
+
+    /**
+     * Return true if the virtual machine environment supports JDBC 4.1 or
+     * later. JDBC 4.1 is a superset of JDBC 4.0 and of JSR-169.
+     */
+    public static boolean vmSupportsJDBC41() {
+        return vmSupportsJDBC4() && HAVE_AUTO_CLOSEABLE_RESULT_SET;
+    }
+
  	/**
 	 * Return true if the virtual machine environment
 	 * supports JDBC4 or later. JDBC 4 is a superset
