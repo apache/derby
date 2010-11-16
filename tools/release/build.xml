@@ -469,6 +469,12 @@
     <antcall target="pgp">
       <param name="sign.archive" value="${release.dir}/${eclipse.plugin}"/>
     </antcall>
+    <antcall target="md5">
+      <param name="sign.archive" value="${release.dir}/${eclipse.ui.doc.plugin.name}"/>
+    </antcall>
+    <antcall target="pgp">
+      <param name="sign.archive" value="${release.dir}/${eclipse.ui.doc.plugin.name}"/>
+    </antcall>
   </target>
 
   <target name="md5">
