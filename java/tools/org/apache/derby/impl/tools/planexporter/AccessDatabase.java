@@ -23,9 +23,9 @@ package org.apache.derby.impl.tools.planexporter;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * This class will perform the database connection establishment,
@@ -34,18 +34,12 @@ import java.sql.Statement;
  */
 public class AccessDatabase {
 
-    private Connection conn = null;
-    private Statement stmt = null;
+    private final Connection conn;
+    private final String schema;
+    private final String query;
+    private final boolean schemaExists;
+
     private TreeNode[] data;
-    private String dbURL = null;
-    private String schema = null;
-    private String query = null;
-    /**
-     * @param query the stmt_id to set
-     */
-    public void setQuery(String query) {
-        this.query = query;
-    }
 
     /**
      * @return the stmt_id
@@ -81,12 +75,11 @@ public class AccessDatabase {
      * @param aSchema
      * @param aQuery
      */
-    public AccessDatabase(String dburl, String aSchema, String aQuery) {
-
-        dbURL = dburl;
-        schema = aSchema;
-        setQuery(aQuery);
-
+    public AccessDatabase(String dburl, String aSchema, String aQuery)
+            throws InstantiationException, IllegalAccessException,
+            ClassNotFoundException, SQLException
+    {
+        this(createConnection(dburl), aSchema, aQuery);
     }
 
     /**
@@ -96,12 +89,18 @@ public class AccessDatabase {
      * @param aQuery
      *
      */
-    public AccessDatabase(Connection aConn, String aSchema, String aQuery) {
+    public AccessDatabase(Connection aConn, String aSchema, String aQuery)
+            throws SQLException
+    {
 
         conn = aConn;
         schema = aSchema;
-        setQuery(aQuery);
+        query = aQuery;
+        schemaExists = schemaExists();
 
+        if (schemaExists) {
+            setSchema();
+        }
     }
 
     /**
@@ -111,7 +110,9 @@ public class AccessDatabase {
      * @throws ClassNotFoundException
      * @throws SQLException
      */
-    public void createConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException
+    private static Connection createConnection(String dbURL)
+            throws InstantiationException, IllegalAccessException,
+            ClassNotFoundException, SQLException
     {
 
         if(dbURL.indexOf("://") != -1)
@@ -121,11 +122,28 @@ public class AccessDatabase {
             Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
 
         //Get a connection
-        conn = DriverManager.getConnection(dbURL);
+        return DriverManager.getConnection(dbURL);
 
     }
 
-    public boolean verifySchemaExistance() throws SQLException{
+    /**
+     * Set the schema of the current connection to the XPLAIN schema in
+     * which the statistics can be found.
+     *
+     * @throws SQLException if an error happens while accessing the database
+     */
+    private void setSchema() throws SQLException {
+        PreparedStatement setSchema = conn.prepareStatement("SET SCHEMA ?");
+        setSchema.setString(1, schema);
+        setSchema.execute();
+        setSchema.close();
+    }
+
+    /**
+     * Check if there is a schema in the database that matches the schema
+     * name that was passed in to this instance.
+     */
+    private boolean schemaExists() throws SQLException {
     	boolean found=false;
     	ResultSet result = conn.getMetaData().getSchemas();
     	while(result.next()){
@@ -136,6 +154,11 @@ public class AccessDatabase {
     	}	
     	return found;
     }
+
+    public boolean verifySchemaExistance() {
+        return schemaExists;
+    }
+
     /**
      * <p>
      * This method creates the queries such that after execution
@@ -146,85 +169,85 @@ public class AccessDatabase {
     public void createXMLFragment() throws SQLException{
         createXMLData(
                 "select 'id=\"' ||RS_ID|| '\"' " +
-                "from "+schema+".SYSXPLAIN_RESULTSETS " +
-                "where STMT_ID = '"+getQuery()+"'", ID);
+                "from SYSXPLAIN_RESULTSETS " +
+                "where STMT_ID = ?", ID);
 
         createXMLData(
                 "select PARENT_RS_ID "+
-                "from "+schema+".SYSXPLAIN_RESULTSETS " +
-                "where STMT_ID = '"+getQuery()+"'", P_ID);
+                "from SYSXPLAIN_RESULTSETS " +
+                "where STMT_ID = ?", P_ID);
 
         createXMLData(
                 "select 'name=\"' ||OP_IDENTIFIER|| '\"' " +
-                "from "+schema+".SYSXPLAIN_RESULTSETS " +
-                "where STMT_ID = '"+getQuery()+"'", NODE_TYPE);
+                "from SYSXPLAIN_RESULTSETS " +
+                "where STMT_ID = ?", NODE_TYPE);
 
         createXMLData(
                 "select 'no_opens=\"' " +
                 "|| TRIM(CHAR(NO_OPENS))|| '\"' " +
-                "from "+schema+".SYSXPLAIN_RESULTSETS " +
-                "where STMT_ID = '"+getQuery()+"'", NO_OF_OPENS);
+                "from SYSXPLAIN_RESULTSETS " +
+                "where STMT_ID = ?", NO_OF_OPENS);
 
         createXMLData(
                 "select 'input_rows=\"' " +
                 "|| TRIM(CHAR(INPUT_ROWS))|| '\"' " +
-                "from "+schema+".SYSXPLAIN_RESULTSETS " +
-                "where STMT_ID = '"+getQuery()+"'", INPUT_ROWS);
+                "from SYSXPLAIN_RESULTSETS " +
+                "where STMT_ID = ?", INPUT_ROWS);
 
         createXMLData(
                 "select 'returned_rows=\"' " +
                 "|| TRIM(CHAR(RETURNED_ROWS))|| '\"' " +
-                "from "+schema+".SYSXPLAIN_RESULTSETS " +
-                "where STMT_ID = '"+getQuery()+"'", RETURNED_ROWS);
+                "from SYSXPLAIN_RESULTSETS " +
+                "where STMT_ID = ?", RETURNED_ROWS);
 
         createXMLData(
                 "select 'visited_pages=\"'" +
                 "|| TRIM(CHAR(NO_VISITED_PAGES))|| '\"' " +
-                "from ("+schema+".SYSXPLAIN_SCAN_PROPS " +
-                "NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-                "where STMT_ID = '"+getQuery()+"'", VISITED_PAGES);
+                "from (SYSXPLAIN_SCAN_PROPS " +
+                "NATURAL RIGHT OUTER JOIN SYSXPLAIN_RESULTSETS) " +
+                "where STMT_ID = ?", VISITED_PAGES);
 
         createXMLData(
                 "select 'scan_qualifiers=\"'"+
                 "||SCAN_QUALIFIERS|| '\"' " +
-                "from ("+schema+".SYSXPLAIN_SCAN_PROPS " +
-                "NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-                "where STMT_ID = '"+getQuery()+"'", SCAN_QUALIFIERS);
+                "from (SYSXPLAIN_SCAN_PROPS " +
+                "NATURAL RIGHT OUTER JOIN SYSXPLAIN_RESULTSETS) " +
+                "where STMT_ID = ?", SCAN_QUALIFIERS);
 
         createXMLData(
                 "select 'next_qualifiers=\"'"+
                 "||NEXT_QUALIFIERS|| '\"' " +
-                "from ("+schema+".SYSXPLAIN_SCAN_PROPS " +
-                "NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-                "where STMT_ID = '"+getQuery()+"'", NEXT_QUALIFIERS);
+                "from (SYSXPLAIN_SCAN_PROPS " +
+                "NATURAL RIGHT OUTER JOIN SYSXPLAIN_RESULTSETS) " +
+                "where STMT_ID = ?", NEXT_QUALIFIERS);
 
         createXMLData(
                 "select 'scanned_object=\"'"+
                 "||SCAN_OBJECT_NAME|| '\"' " +
-                "from ("+schema+".SYSXPLAIN_SCAN_PROPS " +
-                "NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-                "where STMT_ID = '"+getQuery()+"'", SCANNED_OBJECT);
+                "from (SYSXPLAIN_SCAN_PROPS " +
+                "NATURAL RIGHT OUTER JOIN SYSXPLAIN_RESULTSETS) " +
+                "where STMT_ID = ?", SCANNED_OBJECT);
 
         createXMLData(
                 "select 'scan_type=\"'"+
                 "||TRIM(SCAN_TYPE)|| '\"' " +
-                "from ("+schema+".SYSXPLAIN_SCAN_PROPS " +
-                "NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-                "where STMT_ID = '"+getQuery()+"'", SCAN_TYPE);
+                "from (SYSXPLAIN_SCAN_PROPS " +
+                "NATURAL RIGHT OUTER JOIN SYSXPLAIN_RESULTSETS) " +
+                "where STMT_ID = ?", SCAN_TYPE);
 
         createXMLData(
                 "select 'sort_type=\"'"+
                 "||TRIM(SORT_TYPE)|| '\"' " +
-                "from ("+schema+".SYSXPLAIN_SORT_PROPS " +
-                "NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-                "where STMT_ID = '"+getQuery()+"'", SORT_TYPE);
+                "from (SYSXPLAIN_SORT_PROPS " +
+                "NATURAL RIGHT OUTER JOIN SYSXPLAIN_RESULTSETS) " +
+                "where STMT_ID = ?", SORT_TYPE);
 
         createXMLData(
                 "select 'sorter_output=\"'"+
                 "||TRIM(CHAR(NO_OUTPUT_ROWS))|| '\"' " +
-                "from ("+schema+".SYSXPLAIN_SORT_PROPS " +
-                "NATURAL RIGHT OUTER JOIN "+schema+".SYSXPLAIN_RESULTSETS) " +
-                "where STMT_ID = '"+getQuery()+"'", NO_OF_OUTPUT_ROWS_BY_SORTER);
+                "from (SYSXPLAIN_SORT_PROPS " +
+                "NATURAL RIGHT OUTER JOIN SYSXPLAIN_RESULTSETS) " +
+                "where STMT_ID = ?", NO_OF_OUTPUT_ROWS_BY_SORTER);
 
     }
 
@@ -333,14 +356,19 @@ public class AccessDatabase {
     }
 
     /**
+     * Create XML data based on the query that's passed in. The query should
+     * have exactly one parameter, which will be initialized to the statement
+     * id before the query is executed.
      *
      * @param qry query to be executed
      * @throws SQLException
      */
     private void createXMLData(String qry, int x) throws SQLException{
 
-        stmt = conn.createStatement();
-        ResultSet results = stmt.executeQuery(qry);
+        PreparedStatement ps = conn.prepareStatement(qry);
+        ps.setString(1, getQuery());
+
+        ResultSet results = ps.executeQuery();
 
         int i=0;
         while(results.next())
@@ -403,7 +431,7 @@ public class AccessDatabase {
             i++;
         }
         results.close();
-        stmt.close();
+        ps.close();
     }
 
     /**
@@ -412,16 +440,14 @@ public class AccessDatabase {
      * @throws SQLException
      */
     private int noOfNodes() throws SQLException{
-
-        stmt = conn.createStatement();
-        ResultSet results = stmt.executeQuery(
-                "select count(*) from " +
-                ""+schema+".SYSXPLAIN_RESULTSETS " +
-                "where STMT_ID = '"+getQuery()+"'");
+        PreparedStatement ps = conn.prepareStatement(
+                "select count(*) from SYSXPLAIN_RESULTSETS where STMT_ID = ?");
+        ps.setString(1, getQuery());
+        ResultSet results = ps.executeQuery();
         results.next();
         int no = results.getInt(1);
         results.close();
-        stmt.close();
+        ps.close();
         return no;
     }
 
@@ -432,15 +458,14 @@ public class AccessDatabase {
      * @throws SQLException
      */
     public String statement() throws SQLException{
-        stmt = conn.createStatement();
-        ResultSet results = stmt.executeQuery(
-                "select STMT_TEXT "+
-                "from "+schema+".SYSXPLAIN_STATEMENTS " +
-                "where STMT_ID = '"+getQuery()+"'");
+        PreparedStatement ps = conn.prepareStatement(
+                "select STMT_TEXT from SYSXPLAIN_STATEMENTS where STMT_ID = ?");
+        ps.setString(1, getQuery());
+        ResultSet results = ps.executeQuery();
         results.next();
         String statement = results.getString(1);
         results.close();
-        stmt.close();
+        ps.close();
         /*Removing possible less than and greater than characters
          * in a query statement with XML representation.*/
         if(statement.indexOf('<')!= -1){
@@ -475,15 +500,16 @@ public class AccessDatabase {
      * @throws SQLException
      */
     public String time() throws SQLException{
-        stmt = conn.createStatement();
-        ResultSet results = stmt.executeQuery(
+        PreparedStatement ps = conn.prepareStatement(
                 "select '<time>'||TRIM(CHAR(XPLAIN_TIME))||" +
-                "'</time>' from "+schema+".SYSXPLAIN_STATEMENTS " +
-                "where STMT_ID = '"+getQuery()+"'");
+                "'</time>' from SYSXPLAIN_STATEMENTS " +
+                "where STMT_ID = ?");
+        ps.setString(1, getQuery());
+        ResultSet results = ps.executeQuery();
         results.next();
         String time = results.getString(1);
         results.close();
-        stmt.close();
+        ps.close();
 
         return time+"\n";
     }
@@ -503,10 +529,6 @@ public class AccessDatabase {
     {
         try
         {
-            if (stmt != null)
-            {
-                stmt.close();
-            }
             if (conn != null)
             {
                 conn.close();
