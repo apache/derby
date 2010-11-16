@@ -1983,13 +1983,13 @@
    </target>
 
    <!--
-       Checkin in-flight edits
+       Checkin in-flight edits. Do not checkin files if we are running in debug mode.
 
        Args:
            checkinComment   This is the subversion checkin comment.
            fileName   This is the name of the file to checking (could be the root of the client).
    -->
-   <target name="checkinfile">
+   <target name="checkinfile" unless="debug.release.build">
 
      <property name="checkinMessage" value="${release.base}/tmp.checkin.message"/>
      <property name="fullComment" value="[RELEASE CHECKIN] ${checkinComment}"/>
@@ -2623,10 +2623,11 @@ you should not have to do this.
     >
       <ant antfile="${basedir}/tools/release/build.xml" target="release"/>
 
-      <!-- copy the eclipse plugin into the distribution directory -->
+      <!-- copy the eclipse plugins into the distribution directory -->
       <property file="${release.base}/plugintmp.properties"/>
       <property name="eclipse.plugin" value="${plugin.derby.core.zipfile}_${plugin.derby.version}.zip"/>
       <copy file="${jarsdist.dir}/insane/${eclipse.plugin}" todir="${release.dir}"/>
+      <copy file="${eclipse.ui.doc.plugin}" tofile="${release.dir}/${eclipse.ui.doc.plugin.name}"/>
 
       <!-- sign all of the artifacts -->
       <ant antfile="${basedir}/tools/release/build.xml" target="sign"/>
@@ -2702,7 +2703,7 @@ you should not have to do this.
 
         Sneaky, very, very sneaky.
     -->
-    <target name="promptforreleaseproperties" depends="promptforsvncredentials,promptforpgpcredentials,promptforreleaseid"/>
+    <target name="promptforreleaseproperties" depends="promptforsvncredentials,promptforpgpcredentials,promptforreleaseid,promptforeclipseplugin"/>
 
     <!-- Define the task which prompts for missing properties -->
     <target name="defineprompt" depends="prebuild">
@@ -2756,6 +2757,16 @@ you should not have to do this.
         <promptForProperty
           propertyName="docs.root"
           prompt="Enter the root of the subversion docs client (e.g., /Users/me/derby/docs/trunk) >  "
+        />
+
+    </target>
+
+    <!-- Prompt for location of eclipse ui/doc plugin. This artifact does not generally change from one release to another -->
+    <target name="promptforeclipseplugin" depends="defineprompt">
+
+        <promptForProperty
+          propertyName="eclipse.ui.doc.plugin"
+          prompt="Enter the location of the eclipse ui/doc plugin (e.g., /Users/me/derby/derby_ui_doc_plugin_1.1.2.zip) >  "
         />
 
     </target>
