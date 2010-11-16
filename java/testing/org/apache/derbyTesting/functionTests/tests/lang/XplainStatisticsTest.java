@@ -754,6 +754,68 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Verify that the plan exporter doesn't choke on special characters in
+     * the name of the XPLAIN schema. Regression test case for DERBY-4904.
+     */
+    public void testPlanExporterSpecialCharactersInSchema() throws Exception {
+        String schema = "DERBY-4904 \"double\" and 'single' quoted schema";
+        String query = "select * from sysibm.sysdummy1";
+
+        PreparedStatement setStats = prepareStatement(
+                "call syscs_util.syscs_set_runtimestatistics(?)");
+        PreparedStatement setXplain = prepareStatement(
+                "call syscs_util.syscs_set_xplain_schema(?)");
+
+        // Enable XPLAIN statistics in a schema with special characters.
+        setStats.setInt(1, 1);
+        setStats.execute();
+        setXplain.setString(1, schema);
+        setXplain.execute();
+
+        // Execute a statement while XPLAIN is enabled.
+        Statement s = createStatement();
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery(query),
+                "Y");
+
+        // Disable XPLAIN.
+        setStats.setInt(1, 0);
+        setStats.execute();
+        setXplain.setString(1, "");
+        setXplain.execute();
+
+        // Get the XPLAIN statistics.
+        ResultSet rs = s.executeQuery(
+                "select stmt_id, stmt_text from " +
+                JDBC.escape(schema, "SYSXPLAIN_STATEMENTS"));
+        assertTrue(rs.next());
+        String stmtId = rs.getString(1);
+        assertEquals(query, rs.getString(2));
+        assertFalse(rs.next());
+        rs.close();
+
+        // Create the XML file. This used to result in a syntax error.
+        AccessDatabase access =
+                new AccessDatabase(getConnection(), schema, stmtId);
+        assertTrue(access.initializeDataArray());
+        access.createXMLFragment();
+        access.markTheDepth();
+        CreateXMLFile create = new CreateXMLFile(access);
+        create.writeTheXMLFile(
+                access.statement(),
+                access.time(),
+                access.getData(),
+                SupportFilesSetup.getReadWriteURL(stmtId + ".xml").getPath(),
+                null);
+
+        // If we have the required libraries for parsing XML files, verify
+        // that the output contains valid data.
+        if (XML.classpathMeetsXMLReqs()) {
+            assertEquals(query, readStatement(stmtId));
+        }
+    }
+
+    /**
      * Tests that invalidation of a statement after compile-time doesn't result
      * in duplicate entries in the XPLAIN-table(s).
      * <p>

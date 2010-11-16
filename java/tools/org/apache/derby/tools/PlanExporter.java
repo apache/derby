@@ -52,7 +52,6 @@ public class PlanExporter {
                 dbURL = args[0];
 
                 AccessDatabase access = new AccessDatabase(dbURL, args[1], args[2]);
-                access.createConnection();
                 
                 if(access.verifySchemaExistance()){
                 
