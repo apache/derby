@@ -2991,6 +2991,7 @@ you should not have to do this.
         <transformReleaseNotes
             inputFileName="${relnotes.src}"
             outputFileName="${relnotes.target.dir}/release-${derby.release.id}.html"
+            cliXconfFileName="${website.root}/src/documentation/conf/cli.xconf"
             releaseId="${derby.release.id}"
         />
 
