@@ -43,6 +43,12 @@ import org.apache.tools.ant.Task;
  * <li><b>Remove TOC</b> - Forrest adds its own table of contents and transforms the original TOC into a block of dead links.</li>
  * <li><b>Remove mini TOC</b> - Forrest also transforms the mini TOC in the Issues section into a block of dead links.</li>
  * </ul>
+ *
+ * <p>
+ * In addition, this task adds a pointer to the download page to src/documentation/conf/cli.xconf. This causes
+ * the site-building scripts to pull the download page into the build.
+ * </p>
+ *
  */
 public class ReleaseNotesTransformer extends Task
 {
@@ -140,9 +146,11 @@ public class ReleaseNotesTransformer extends Task
     private Document _inputDoc;
     private File _inputFile;
     private File _outputFile;
+    private File _cliXconfFile;
 
     private String _inputFileName;
     private String _outputFileName;
+    private String _cliXconfFileName;
     private String _releaseID;
 
     /////////////////////////////////////////////////////////////////////////
@@ -185,6 +193,18 @@ public class ReleaseNotesTransformer extends Task
     }
 
     /**
+     * Ant accessor to set the name of the cli.xconf file which pulls the download page
+     * into the built site.
+     */
+    public void setCliXconfFileName(String cliXconfFileName) throws Exception
+    {
+        _cliXconfFileName = cliXconfFileName;
+        _cliXconfFile = new File(_cliXconfFileName);
+
+        println( "Writing import instructions to to " + cliXconfFileName + "..." );
+    }
+
+    /**
      * Ant accessor to set the release id.
      */
     public void setReleaseId(String releaseID) throws Exception
@@ -203,6 +223,8 @@ public class ReleaseNotesTransformer extends Task
             transform();
             printOutput();
             postProcess();
+
+            wireIntoBuild();
         }
         catch (Throwable t) {
             t.printStackTrace();
@@ -470,6 +492,22 @@ public class ReleaseNotesTransformer extends Task
         String result = preamble + contents.substring( cutIdx );
 
         writeStringIntoFile( result, _outputFile );
+    }
+    
+    /**
+     * <p>
+     * Wire the download page into the build instructions.
+     * </p>
+     */
+    private void wireIntoBuild()
+        throws Exception
+    {
+        String contents = readFileIntoString( _cliXconfFile );
+        int insertPoint = contents.indexOf( "   </uris>" );
+        String insertion = "     <uri type=\"append\" src=\"releases/release-" + _releaseID + ".html\"/>\n";
+        String result = contents.substring( 0, insertPoint ) + insertion + contents.substring( insertPoint );
+
+        writeStringIntoFile( result, _cliXconfFile );
     }
     
     /**
