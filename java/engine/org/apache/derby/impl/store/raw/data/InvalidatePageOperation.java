@@ -46,15 +46,15 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	to deallocatePage that happens on the alloc page.
 
 	<PRE>
-	@format_id	LOGOP_INVALIDATE_PAGE
+	@derby.formatId	LOGOP_INVALIDATE_PAGE
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose	invalidate a page
-	@upgrade
-	@disk_layout
+	@derby.purpose	invalidate a page
+	@derby.upgrade
+	@derby.diskLayout
 		PhysicalPageOperation the superclass
 		OptionalData	none
-	@end_format
+	@derby.endFormat
 	</PRE>
 */
 public final class InvalidatePageOperation extends PhysicalPageOperation

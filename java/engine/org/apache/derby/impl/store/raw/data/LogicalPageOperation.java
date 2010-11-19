@@ -58,16 +58,16 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	different page than the original operation.
 
 	<PRE>
-	@format_id	no format id, an abstract class.
-	@purpose	provide methods for logical undo
-	@upgrade
-	@disk_layout
+	@derby.formatId	no format id, an abstract class.
+	@derby.purpose	provide methods for logical undo
+	@derby.upgrade
+	@derby.diskLayout
 		PageBasicOperation	the super class
 		recordId(CompressedInt)	the recordId this operation affects
 		undo(LogicalUndo)		the piece of code that can figure out which page 
 								the row has moved into
 		OptionalData	none
-	@end_format
+	@derby.endFormat
 	</PRE>
 
 */

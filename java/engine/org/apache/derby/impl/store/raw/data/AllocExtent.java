@@ -41,10 +41,10 @@ import java.io.ObjectInput;
 	without being converted to a row first.
 	<P>
 	<PRE>
-	@format_id	none, format implied by AllocPage's format
-	@purpose	manage page status of page in extent
-	@upgrade
-	@disk_layout
+	@derby.formatId	none, format implied by AllocPage's format
+	@derby.purpose	manage page status of page in extent
+	@derby.upgrade
+	@derby.diskLayout
 		extentOffset(long) the begin physical byte offset of the first page of this extent
 		extentStart(long) the first logical page mananged by this extent.
 		extentEnd(long) the last page this extent can ever hope to manage 
@@ -93,7 +93,7 @@ import java.io.ObjectInput;
 		org.apache.derby.iapi.services.io.FormatableBitSet is used to store the bit map.  
             FormatableBitSet is an externalizable class.
 
-	@end_format
+	@derby.endFormat
 
 	<PRE>
 	A page can have the following logical state:

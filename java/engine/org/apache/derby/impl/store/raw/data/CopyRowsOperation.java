@@ -53,12 +53,12 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	Represents copying num_rows from one page to another page.
 
 	<PRE>
-	@format_id	LOGOP_COPY_ROWS
+	@derby.formatId	LOGOP_COPY_ROWS
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose	copy some rows from one page to another
-	@upgrade
-	@disk_layout
+	@derby.purpose	copy some rows from one page to another
+	@derby.upgrade
+	@derby.diskLayout
 		PhysicalPageOperation the superclass
 		num_rows(CompressedInt)	number of rows to copy
 		destSlot(CompressedInt)	the first slot number at the destination page
@@ -66,7 +66,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 
 		OptionalData	the after image of the rows to be inserted into the
 						destination page
-	@end_format
+	@derby.endFormat
 	</PRE>
 */
 public class CopyRowsOperation extends PhysicalPageOperation {

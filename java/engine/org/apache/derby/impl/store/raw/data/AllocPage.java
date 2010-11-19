@@ -104,10 +104,10 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 	<P>
 	The following fields are stored in the page header
 	<PRE>
-	@format_id	RAW_STORE_ALLOC_PAGE
-	@purpose	manage page allocation
-	@upgrade
-	@disk_layout
+	@derby.formatId	RAW_STORE_ALLOC_PAGE
+	@derby.purpose	manage page allocation
+	@derby.upgrade
+	@derby.diskLayout
 		FormatId(int)
 		StoredPageHeader	see StoredPage
 		nextAllocPageNubmer(long)	the next allocation page's number
@@ -120,7 +120,7 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 		containerInfo(byte[N])		the content of the borrowed container info
 		AllocExtent					the one and only extent on this alloc page
 
-	@end_format
+	@derby.endFormat
 	</PRE>
 
 	<P>

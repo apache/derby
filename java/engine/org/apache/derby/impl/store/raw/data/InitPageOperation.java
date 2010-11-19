@@ -48,19 +48,19 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	this operation does not change the alloc page information.
 
 	<PRE>
-	@format_id	LOGOP_INIT_PAGE
+	@derby.formatId	LOGOP_INIT_PAGE
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose	initialized a page
-	@upgrade
-	@disk_layout
+	@derby.purpose	initialized a page
+	@derby.upgrade
+	@derby.diskLayout
 		PhysicalPageOperation the superclass
 		nextRecordId(CompressedInt)	the next recordId this page should give out
 		initFlag(CompressedInt)		initialization flag: reuse, overflow
 		pageformat(int)				the page's formatId
 
 		OptionalData	none
-	@end_format
+	@derby.endFormat
 	</PRE>
 */
 public final class InitPageOperation extends PhysicalPageOperation

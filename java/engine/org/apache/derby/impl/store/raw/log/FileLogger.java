@@ -71,25 +71,25 @@ import org.apache.derby.impl.store.raw.data.InitPageOperation;
 <P>
 	The format of a log record that is not a compensation operation is
 	<PRE>
-	@format_id	no formatId, format is implied by the log file format and the
+	@derby.formatId	no formatId, format is implied by the log file format and the
 		log record content.
-	@purpose	the log record and optional data
-	@upgrade
-	@disk_layout
+	@derby.purpose	the log record and optional data
+	@derby.upgrade
+	@derby.diskLayout
 		Log Record
 			(see org.apache.derby.impl.store.raw.log.LogRecord)
 		length(int)	length of optional data
 		optionalData(byte[length]) optional data written by the log record
-	@end_format
+	@derby.endFormat
 	</PRE> <HR WIDTH="100%"> 
 
 	<P>	The form of a log record that is a compensation operation is
 	<PRE>
-	@format_id	no formatId, format is implied by the log file format and the
+	@derby.formatId	no formatId, format is implied by the log file format and the
 	log record content.
-	@purpose	undo a previous log record
-	@upgrade
-	@disk_layout
+	@derby.purpose	undo a previous log record
+	@derby.upgrade
+	@derby.diskLayout
 		Log Record that contains the compenstation operation
 			(see org.apache.derby.impl.store.raw.log.LogRecord)
 		undoInstant(long) the log instant of the operation that is to be rolled back
@@ -99,7 +99,7 @@ import org.apache.derby.impl.store.raw.data.InitPageOperation;
 		There is no optional data in a compensation operation, all data
 		necessary for the rollback must be stored in the operation being
 		undone.
-	@end_format
+	@derby.endFormat
 	</PRE>
 
     <BR>

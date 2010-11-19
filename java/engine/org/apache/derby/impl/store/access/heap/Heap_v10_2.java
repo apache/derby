@@ -32,9 +32,9 @@ import java.lang.ClassNotFoundException;
 
 
 /**
- * @format_id ACCESS_HEAP_V2_ID
+ * @derby.formatId ACCESS_HEAP_V2_ID
  *
- * @purpose   The tag that describes the on disk representation of the Heap
+ * @derby.purpose   The tag that describes the on disk representation of the Heap
  *            conglomerate object.  Access contains no "directory" of 
  *            conglomerate information.  In order to bootstrap opening a file
  *            it encodes the factory that can open the conglomerate in the 
@@ -44,7 +44,7 @@ import java.lang.ClassNotFoundException;
  *            This format was used for all Derby database Heap's in version
  *            10.2 and previous versions.
  *
- * @upgrade   The format id of this object is currently always read from disk
+ * @derby.upgrade   The format id of this object is currently always read from disk
  *            as the first field of the conglomerate itself.  A bootstrap
  *            problem exists as we don't know the format id of the heap 
  *            until we are in the "middle" of reading the Heap.  Thus the
@@ -76,7 +76,7 @@ import java.lang.ClassNotFoundException;
  *                    upgrade.  Old conglomerates continue to be handled the
  *                    same as soft upgrade.
  *
- * @disk_layout
+ * @derby.diskLayout
  *     format_of_this_conlgomerate(byte[])
  *     containerid(long)
  *     segmentid(int)

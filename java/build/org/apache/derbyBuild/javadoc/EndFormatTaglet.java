@@ -25,7 +25,7 @@ import com.sun.javadoc.*;
 import java.util.Map;
 
 public class EndFormatTaglet implements Taglet {
-    private String NAME = "end_format";
+    private String NAME = "derby.endFormat";
     private String ROWNAME = "end_format";
 
     /**

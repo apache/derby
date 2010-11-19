@@ -146,11 +146,11 @@ import java.util.zip.CRC32;
 
 	Format of log control file 
 
-	@format_id	FILE_STREAM_LOG_FILE
-	@purpose	The log control file contains information about which log files
+	@derby.formatId	FILE_STREAM_LOG_FILE
+	@derby.purpose	The log control file contains information about which log files
 	are present and where the last checkpoint log record is located.
-	@upgrade	
-	@disk_layout
+	@derby.upgrade	
+	@derby.diskLayout
 	(pre-v15)
 		int format id
 		int log file version
@@ -165,19 +165,19 @@ import java.util.zip.CRC32;
 		long spare (value set to 0)
 		long spare (value set to 0)
 
-	@end_format
+	@derby.endFormat
 	</PRE>	
 	<HR WIDTH="100%">
 	<PRE>
 
 	Format of the log file
 
-	@format_id	FILE_STREAM_LOG_FILE
-	@purpose	The log file contains log record which record all the changes
+	@derby.formatId	FILE_STREAM_LOG_FILE
+	@derby.purpose	The log file contains log record which record all the changes
 	to the database.  The complete transaction log is composed of a series of
 	log files.
-	@upgrade
-	@disk_layout
+	@derby.upgrade
+	@derby.diskLayout
 		int format id - 	the format Id of this log file
 		int obsolete log file version - not used
 		long log file number - this number orders the log files in a
@@ -191,22 +191,22 @@ import java.util.zip.CRC32;
 				is the length of the log record, therefore it is never zero
 		[int fuzzy end]* zero or more int's of value 0, in case this log file
 				has been recovered and any incomplete log record set to zero.
-	@end_format
+	@derby.endFormat
 	</PRE>	
 	<HR WIDTH="100%">
 	<PRE>
 
 	Format of the log record wrapper
 
-	@format_id none.  The format is implied by the FILE_STREAM_LOG_FILE
-	@purpose	The log record wrapper provides information for the log scan.
-	@upgrade
-	@disk_layout
+	@derby.formatId none.  The format is implied by the FILE_STREAM_LOG_FILE
+	@derby.purpose	The log record wrapper provides information for the log scan.
+	@derby.upgrade
+	@derby.diskLayout
 		length(int) length of the log record (for forward scan)
 		instant(long) LogInstant of the log record
 		logRecord(byte[length]) byte array that is written by the FileLogger
 		length(int) length of the log record (for backward scan)
-	@end_format
+	@derby.endFormat
 	</PRE>
 
 

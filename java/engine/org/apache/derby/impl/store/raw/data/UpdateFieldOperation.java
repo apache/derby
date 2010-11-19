@@ -59,12 +59,12 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	Represents the update of a particular field of a row on a page.
 
 	<PRE>
-	@format_id	LOGOP_UPDATE_FIELD
+	@derby.formatId	LOGOP_UPDATE_FIELD
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose	update a field of a record on the page
-	@upgrade
-	@disk_layout
+	@derby.purpose	update a field of a record on the page
+	@derby.upgrade
+	@derby.diskLayout
 		LogicalPageOperation	the super class
 		doMeSlot(CompressedInt) the slot of the record being updated
 		fieldId(CompressedInt)	the recordId of the record being updated
@@ -73,7 +73,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 						follow by the old image of the record (length
 						included).  If this is logically undoable, then the
 						before image of the entire row is logged
-	@end_format
+	@derby.endFormat
 	</PRE>
 */
 public final class UpdateFieldOperation extends LogicalPageOperation 

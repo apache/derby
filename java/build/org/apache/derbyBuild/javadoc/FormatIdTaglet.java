@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class FormatIdTaglet implements Taglet {
 
-    private String NAME = "format_id";
+    private String NAME = "derby.formatId";
     private String ROWNAME = "Format ID";
 
     /**

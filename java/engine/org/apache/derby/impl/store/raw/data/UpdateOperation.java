@@ -58,19 +58,19 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	Represents the update of a particular row on a page.
 
 	<PRE>
-	@format_id	LOGOP_UPDATE
+	@derby.formatId	LOGOP_UPDATE
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose	update a record on the page
-	@upgrade
-	@disk_layout
+	@derby.purpose	update a record on the page
+	@derby.upgrade
+	@derby.diskLayout
 		PhysicalPageOperation	the super class
 		doMeSlot(CompressedInt)	the slot the updated record is in
 		recordId(CompressedInt) the recordId of the updated record
 
 		OptionalData	The new image of the record (length included), 
 						follow by the old image of the record (length included)
-	@end_format
+	@derby.endFormat
 	</PRE>
 */
 

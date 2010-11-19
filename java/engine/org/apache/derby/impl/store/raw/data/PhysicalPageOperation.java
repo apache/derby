@@ -47,12 +47,12 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	of the row(s) affected).
 
 	<PRE>
-	@format_id	no format id, an abstract class.
-	@purpose	provide methods for physical undo
-	@upgrade
-	@disk_layout
+	@derby.formatId	no format id, an abstract class.
+	@derby.purpose	provide methods for physical undo
+	@derby.upgrade
+	@derby.diskLayout
 		PageBasicOperation	the super class
-	@end_format
+	@derby.endFormat
 	</PRE>
 */
 

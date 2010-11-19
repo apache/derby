@@ -26,7 +26,7 @@ import com.sun.javadoc.*;
 import java.util.Map;
 
 public class UpgradeTaglet implements Taglet {
-    private String NAME = "upgrade";
+    private String NAME = "derby.upgrade";
     private String ROWNAME = "Upgrade";
 
     /**

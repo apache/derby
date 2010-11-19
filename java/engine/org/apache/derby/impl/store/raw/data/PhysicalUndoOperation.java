@@ -50,15 +50,15 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	it is loggable but not undoable.
 
 	<PRE>
-	@format_id	LOGOP_PAGE_PHYSICAL_UNDO
+	@derby.formatId	LOGOP_PAGE_PHYSICAL_UNDO
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose	update a physiacl log operation
-	@upgrade
-	@disk_layout
+	@derby.purpose	update a physiacl log operation
+	@derby.upgrade
+	@derby.diskLayout
 		PageBasicOperation	the super class
 		OptionalData	none (compensation operation never have optional data)
-	@end_format
+	@derby.endFormat
 	</PRE>
 
 */

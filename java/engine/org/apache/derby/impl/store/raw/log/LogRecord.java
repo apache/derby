@@ -53,16 +53,16 @@ import java.io.IOException;
 	<P>	<PRE>
 	The format of a log record is
 
-	@format_id LOG_RECORD
+	@derby.formatId LOG_RECORD
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose	The log record described every change to the persistent store
-	@upgrade
-	@disk_layout
+	@derby.purpose	The log record described every change to the persistent store
+	@derby.upgrade
+	@derby.diskLayout
 		loggable group(CompressedInt)	the loggable's group value
 		xactId(TransactionId)			The Transaction this log belongs to
 		op(Loggable)					the log operation
-	@end_format
+	@derby.endFormat
 	</PRE>
 
 */

@@ -26,7 +26,7 @@ import java.util.Map;
 
 public class PurposeTaglet implements Taglet {
 
-    private String NAME = "purpose";
+    private String NAME = "derby.purpose";
     private String ROWNAME = "Purpose";
 
     /**

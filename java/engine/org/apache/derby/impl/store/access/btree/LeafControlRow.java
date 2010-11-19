@@ -41,15 +41,15 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 /**
- * @format_id ACCESS_BTREE_LEAFCONTROLROW_V1_ID
+ * @derby.formatId ACCESS_BTREE_LEAFCONTROLROW_V1_ID
  *
- * @purpose   Btree pages all have a control row at the front of every page.  To
+ * @derby.purpose   Btree pages all have a control row at the front of every page.  To
  *            determine the type of row, read the first column which is a format
  *            id and it tells what kind of control row it is.
  *
- * @upgrade   This format was made obsolete in the kimono release.
+ * @derby.upgrade   This format was made obsolete in the kimono release.
  *
- * @disk_layout 
+ * @derby.diskLayout 
  * column 1 - control row type         : StorableFormatId
  * column 2 - left sibling page number : SQLLongint
  * column 3 - right sibling page number: SQLLongint

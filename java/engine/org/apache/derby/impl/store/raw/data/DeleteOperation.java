@@ -59,12 +59,12 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	Represents a delete (or undelete) of a record in a page.
 
 	<PRE>
-	@format_id	LOGOP_DELETE
+	@derby.formatId	LOGOP_DELETE
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose	delete a record from a page.
-	@upgrade
-	@disk_layout
+	@derby.purpose	delete a record from a page.
+	@derby.upgrade
+	@derby.diskLayout
 		LogicalPageOperation	the super class
 		doMeSlot(CompressedInt)	the slot of the record to delete
 		delete(boolean)			if true, delete, else undelete
@@ -72,7 +72,7 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 		OptionalData		if we need logical undo, write the row that was
 							deleted as the optional data.  If we don't need
 							logical undo, no optional data
-	@end_format
+	@derby.endFormat
 	</PRE>
 */
 public final class DeleteOperation extends LogicalPageOperation

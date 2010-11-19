@@ -45,15 +45,15 @@ import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 /**
- * @format_id ACCESS_BTREE_BRANCHCONTROLROW_V1_ID
+ * @derby.formatId ACCESS_BTREE_BRANCHCONTROLROW_V1_ID
  *
- * @purpose    Btree pages all have a control row at the front of every page.
+ * @derby.purpose    Btree pages all have a control row at the front of every page.
  *             To determine the type of row, read the first column which is a
  *             format id and it tells what kind of control row it is.
  *
- * @upgrade    RESOLVE.
+ * @derby.upgrade    RESOLVE.
  *
- * @disk_layout
+ * @derby.diskLayout
  * column 1 - control row type         : StorableFormatId
  * column 2 - left sibling page number : SQLLongint
  * column 3 - right sibling page number: SQLLongint

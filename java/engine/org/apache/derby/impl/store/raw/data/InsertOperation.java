@@ -61,18 +61,18 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	Represents an insert of a record onto a page.
 
 	<PRE>
-	@format_id	LOGOP_INSERT
+	@derby.formatId	LOGOP_INSERT
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose	insert a row onto a page
-	@upgrade
-	@disk_layout
+	@derby.purpose	insert a row onto a page
+	@derby.upgrade
+	@derby.diskLayout
 		LogicalPageOperation the superclass
 		doMeSlot(CompressedInt) which slot to operate on
 		insertFlat(byte)		to undo with purge or with delete
 
 		OptionalData	The after image of the row to be inserted.
-	@end_format
+	@derby.endFormat
 	</PRE>
     @see Page#insertAtSlot
 */

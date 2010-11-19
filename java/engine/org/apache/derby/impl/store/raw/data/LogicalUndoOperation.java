@@ -52,18 +52,18 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	it is loggable but not undoable.
 
 	<PRE>
-	@format_id	LOGOP_PAGE_LOGICAL_UNDO
+	@derby.formatId	LOGOP_PAGE_LOGICAL_UNDO
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose	undo a logical log operation 
-	@upgrade
-	@disk_layout
+	@derby.purpose	undo a logical log operation 
+	@derby.upgrade
+	@derby.diskLayout
 		PageBasicOperation	the super class
 		recordId(CompressedInt) the recordId of the changed row (this may not
 				be the recordId during rollback if the record moved from one
 				page to another) 
 		OptionalData	none (compensation operation never have optional data)
-	@end_format
+	@derby.endFormat
 	</PRE>
 
 */

@@ -57,19 +57,19 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	Represents purging of a range of rows from the page.
 
 	<PRE>
-	@format_id	LOGOP_PURGE
+	@derby.formatId	LOGOP_PURGE
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose	purge num_rows from the page
-	@upgrade
-	@disk_layout
+	@derby.purpose	purge num_rows from the page
+	@derby.upgrade
+	@derby.diskLayout
 		PagePhysicalOperation	the super class
 		slot(CompressedInt)	the slot to start purging
 		num_rows(CompressedInt)	number of rows rows to purge
 		recordIds(CompressedInt[num_rows]) the recordIds of the purged rows
 
 		OptionalData	the before images of the rows that were purged
-	@end_format
+	@derby.endFormat
 	</PRE>
 
    @see Page#purgeAtSlot

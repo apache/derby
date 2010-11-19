@@ -75,9 +75,9 @@ import org.apache.derby.impl.store.access.conglomerate.OpenConglomerate;
 import org.apache.derby.impl.store.access.conglomerate.OpenConglomerateScratchSpace;
 
 /**
- * @format_id ACCESS_HEAP_V2_ID
+ * @derby.formatId ACCESS_HEAP_V2_ID
  *
- * @purpose   The tag that describes the on disk representation of the Heap
+ * @derby.purpose   The tag that describes the on disk representation of the Heap
  *            conglomerate object.  Access contains no "directory" of 
  *            conglomerate information.  In order to bootstrap opening a file
  *            it encodes the factory that can open the conglomerate in the 
@@ -87,7 +87,7 @@ import org.apache.derby.impl.store.access.conglomerate.OpenConglomerateScratchSp
  *            This format was used for all Derby database Heap's in version
  *            10.2 and previous versions.
  *
- * @upgrade   The format id of this object is currently always read from disk
+ * @derby.upgrade   The format id of this object is currently always read from disk
  *            as the first field of the conglomerate itself.  A bootstrap
  *            problem exists as we don't know the format id of the heap 
  *            until we are in the "middle" of reading the Heap.  Thus the
@@ -119,7 +119,7 @@ import org.apache.derby.impl.store.access.conglomerate.OpenConglomerateScratchSp
  *                    upgrade.  Old conglomerates continue to be handled the
  *                    same as soft upgrade.
  *
- * @disk_layout
+ * @derby.diskLayout
  *     format_of_this_conlgomerate(byte[])
  *     containerid(long)
  *     segmentid(int)
@@ -128,13 +128,13 @@ import org.apache.derby.impl.store.access.conglomerate.OpenConglomerateScratchSp
  **/
 
 /**
- * @format_id ACCESS_HEAP_V3_ID
+ * @derby.formatId ACCESS_HEAP_V3_ID
  *
- * @purpose   The tag that describes the on disk representation of the Heap
+ * @derby.purpose   The tag that describes the on disk representation of the Heap
  *            conglomerate object.  The Heap conglomerate object is stored in
  *            a field of a row in the Conglomerate directory.
  *
- * @purpose   The tag that describes the on disk representation of the Heap
+ * @derby.purpose   The tag that describes the on disk representation of the Heap
  *            conglomerate object.  Access contains no "directory" of 
  *            conglomerate information.  In order to bootstrap opening a file
  *            it encodes the factory that can open the conglomerate in the 
@@ -146,9 +146,9 @@ import org.apache.derby.impl.store.access.conglomerate.OpenConglomerateScratchSp
  *            ACCESS_HEAP_V2_ID format, followed by a compressed representation
  *            of the collation id's of each column in the heap.
  *
- * @upgrade   This is the current version, no upgrade necessary.
+ * @derby.upgrade   This is the current version, no upgrade necessary.
  *
- * @disk_layout
+ * @derby.diskLayout
  *     format_of_this_conlgomerate(byte[])
  *     containerid(long)
  *     segmentid(int)

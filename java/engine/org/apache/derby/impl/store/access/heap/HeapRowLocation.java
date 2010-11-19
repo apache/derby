@@ -47,18 +47,18 @@ import java.io.IOException;
  * <P>
  * It is implementad as a wrapper around a raw store record handle.
  * 
- * @format_id ACCESS_HEAP_ROW_LOCATION_V1_ID
+ * @derby.formatId ACCESS_HEAP_ROW_LOCATION_V1_ID
  *
- * @purpose   Object used to store the location of a row within a Heap table.  
+ * @derby.purpose   Object used to store the location of a row within a Heap table.  
  *            One of these is stored in every row of a btree secondary index 
  *            built on a heap base table.
  *
- * @upgrade   The type of the btree determines the type of rowlocation stored.
+ * @derby.upgrade   The type of the btree determines the type of rowlocation stored.
  *            In current btree implementations only one type of rowlocation can
  *            be stored per tree, and it's type is stored in the format id 
  *            array stored in the Conglomerate object.
  *
- * @disk_layout 
+ * @derby.diskLayout 
  *     page number(CompressedNumber.writeLong())
  *     record id(CompressedNumber.writeInt())
  **/

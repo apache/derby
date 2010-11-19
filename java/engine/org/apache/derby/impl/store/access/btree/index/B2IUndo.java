@@ -60,15 +60,15 @@ import java.io.ObjectOutput;
 import org.apache.derby.iapi.services.io.LimitObjectInput;
 
 /**
- * @format_id ACCESS_B2IUNDO_V1_ID
+ * @derby.formatId ACCESS_B2IUNDO_V1_ID
  *
- * @purpose   Implements the LogicalUndo and Formatable interfaces, basically
+ * @derby.purpose   Implements the LogicalUndo and Formatable interfaces, basically
  *            providing a way for raw store recovery to "call back" access code
  *            to provide logical undo ability.
  *
- * @upgrade   RESOLVE.
+ * @derby.upgrade   RESOLVE.
  *
- * @disk_layout 
+ * @derby.diskLayout 
  *     No state associated with this format.
  *
  **/

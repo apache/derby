@@ -26,9 +26,9 @@ import java.io.ObjectOutput;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 /*
- * @format_id ACCESS_B2I_V4_ID
+ * @derby.formatId ACCESS_B2I_V4_ID
  *
- * @purpose   The tag that describes the on disk representation of the B2I
+ * @derby.purpose   The tag that describes the on disk representation of the B2I
  *            conglomerate object.  Access contains no "directory" of 
  *            conglomerate information.  In order to bootstrap opening a file
  *            it encodes the factory that can open the conglomerate in the 
@@ -37,7 +37,7 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
  *
  *            This format was used for all Derby database B2I's in version 10.3.
  *
- * @upgrade   The format id of this object is currently always read from disk
+ * @derby.upgrade   The format id of this object is currently always read from disk
  *            as the first field of the conglomerate itself.  A bootstrap
  *            problem exists as we don't know the format id of the B2I 
  *            until we are in the "middle" of reading the B2I.  Thus the
@@ -71,7 +71,7 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
  *                    upgrade.  Old conglomerates continue to be handled the
  *                    same as soft upgrade.
  *
- * @disk_layout 
+ * @derby.diskLayout 
  *     format_of_this_conlgomerate(byte[])
  *     containerid(long)
  *     segmentid(int)

@@ -66,14 +66,14 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
 	LogOperation, the page that needs roll back must be determined.
 
 	<PRE>
-	@format_id	no format id, an abstract class.
-	@purpose	provide methods for logical undo
-	@upgrade
-	@disk_layout
+	@derby.formatId	no format id, an abstract class.
+	@derby.purpose	provide methods for logical undo
+	@derby.upgrade
+	@derby.diskLayout
 		pageId(PageKey)			the page this operation applies to
 		pageVersion(CompressedLong)	the page version this operation applied to
 		OptionalData	none
-	@end_format
+	@derby.endFormat
 	</PRE>
 
 	@see Loggable

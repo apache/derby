@@ -55,16 +55,16 @@ import java.util.zip.CRC32;
 	that are written to the tranaction log file.
 
 	<PRE>
-	@format_id	LOGOP_CHECKSUM
+	@derby.formatId	LOGOP_CHECKSUM
 		the formatId is written by FormatIdOutputStream when this object is
 		written out by writeObject
-	@purpose  checksum one or more log records while writing to disk
-	@upgrade
-	@disk_layout
+	@derby.purpose  checksum one or more log records while writing to disk
+	@derby.upgrade
+	@derby.diskLayout
 		checksumAlgo(byte)  	the checksum algorithm 
 		checksumValue(long)     the checksum value 
 		dataLength(int)			number of bytes that the checksum is calculated
-	@end_format
+	@derby.endFormat
 	</PRE>
 
 	@see Loggable

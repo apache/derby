@@ -26,7 +26,7 @@ import com.sun.javadoc.*;
 import java.util.Map;
 
 public class DiskLayoutTaglet implements Taglet {
-    private String NAME = "disk_layout";
+    private String NAME = "derby.diskLayout";
     private String ROWNAME = "Disk Layout";
     /**
      * Returns the name of this taglet

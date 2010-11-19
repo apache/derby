@@ -49,14 +49,14 @@ import org.apache.derby.iapi.services.io.LimitObjectInput;
  * container is put back during undo. 
  *
  * <PRE>
- *  @format_id	LOGOP_ENCRYPT_CONTAINER
+ *  @derby.formatId	LOGOP_ENCRYPT_CONTAINER
  * 	the formatId is written by FormatIdOutputStream when this object is
  *	written out by writeObject
- * @purpose to record enctyption of container with a new encryption key.
- * @upgrade
- * @disk_layout
+ * @derby.purpose to record enctyption of container with a new encryption key.
+ * @derby.upgrade
+ * @derby.diskLayout
  *      containerId(ContainerKey)  the id of the container this operation applies to
- *	@end_format
+ *	@derby.endFormat
  *  </PRE>
  *
  *  @see Undoable
