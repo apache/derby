@@ -749,7 +749,7 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
             {"C"}
         };
         
-        JDBC.assertFullResultSet(rs, expRS, true);
+        JDBC.assertUnorderedResultSet(rs, expRS, true);
         
         assertStatementError("42Y55", st,
             " drop table t2");
