@@ -1603,9 +1603,9 @@ public interface SQLState {
     String NET_PROCEDURE_NAME_LENGTH_OUT_OF_RANGE                   = "XN011.S";
     String NET_WRONG_XA_VERSION                                     = "XN012.S";
     String NET_INVALID_SCROLL_ORIENTATION                           = "XN013.S";
-    String NET_IOEXCEPTION_ON_READ                                  = "XN014.S";
+    String NET_EXCEPTION_ON_READ                                  = "XN014.S";
     String NET_INPUTSTREAM_LENGTH_TOO_SMALL                         = "XN015.S";
-    String NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION                = "XN016.S";
+    String NET_EXCEPTION_ON_STREAMLEN_VERIFICATION                = "XN016.S";
     String NET_PREMATURE_EOS                                        = "XN017.S";
     String NET_READER_LENGTH_TOO_SMALL                              = "XN018.S";
     String NET_XARETVAL_ERROR                                       = "XN019.S";

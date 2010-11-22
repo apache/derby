@@ -317,14 +317,14 @@ public class Request {
 			do {
 				try {
 					bytesRead = in.read(bytes_, offset_, bytesToRead);
-				} catch (java.io.IOException e) {
+				} catch (Exception e) {
                     status = DRDAConstants.STREAM_READ_ERROR;
                     padScalarStreamForError(leftToRead, bytesToRead,
                             writeEXTDTAStatusByte, status);
 					// set with SQLSTATE 01004: The value of a string was truncated when assigned to a host variable.
 					netAgent_.accumulateReadException(new SqlException(
 																	   netAgent_.logWriter_,
-																	   new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
+																	   new ClientMessageId(SQLState.NET_EXCEPTION_ON_READ),
 																	   new Integer(parameterIndex),
 																	   e.getMessage(),
 																	   e));
@@ -359,12 +359,12 @@ public class Request {
 																   new ClientMessageId(SQLState.NET_INPUTSTREAM_LENGTH_TOO_SMALL),
 																   new Integer(parameterIndex)));
 			}
-		} catch (java.io.IOException e) {
+		} catch (Exception e) {
             status = DRDAConstants.STREAM_READ_ERROR;
 			netAgent_.accumulateReadException(new SqlException(
 															   netAgent_.logWriter_,
 															   new ClientMessageId(
-																				   SQLState.NET_IOEXCEPTION_ON_STREAMLEN_VERIFICATION),
+																				   SQLState.NET_EXCEPTION_ON_STREAMLEN_VERIFICATION),
 															   new Integer(parameterIndex),
 															   e.getMessage(),
 															   e));
@@ -463,13 +463,13 @@ public class Request {
                 }
                 
             }
-        } catch (java.io.IOException e) {
+        } catch (Exception e) {
             if (writeEXTDTAStatusByte) {
                 writeEXTDTAStatus(DRDAConstants.STREAM_READ_ERROR);
             }
             final SqlException sqlex = 
                 new SqlException(netAgent_.logWriter_,
-                                 new ClientMessageId(SQLState.NET_IOEXCEPTION_ON_READ),
+                                 new ClientMessageId(SQLState.NET_EXCEPTION_ON_READ),
                                  new Integer(parameterIndex),
                                  e.getMessage(),
                                  e);
