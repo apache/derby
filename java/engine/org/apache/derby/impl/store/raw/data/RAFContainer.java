@@ -33,6 +33,9 @@ import org.apache.derby.iapi.services.diag.Performance;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 
+import org.apache.derby.iapi.util.InterruptStatus;
+import org.apache.derby.iapi.util.InterruptDetectedException;
+
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.store.raw.ContainerHandle;
@@ -84,6 +87,14 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 	private static final int BACKUP_CONTAINER_ACTION = 6;
     private static final int GET_RANDOM_ACCESS_FILE_ACTION = 7;
     private ContainerKey actionIdentity;
+
+    /**
+     * Identity of this container. Make it visible to RAFContainer4, which may
+     * need to reopen the container after interrupts due to a NIO channel being
+     * closed by the interrupt.
+     */
+    protected ContainerKey currentIdentity;
+
     private boolean actionStub;
     private boolean actionErrorOK;
     private boolean actionTryAlternatePath;
@@ -177,7 +188,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 					}
 					catch (InterruptedException ie)
 					{
-						throw StandardException.interrupt(ie);
+                        InterruptStatus.setInterrupted();
 					}	
 				}
 			}
@@ -477,80 +488,114 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 	{
 		boolean waited = false;
 
-		synchronized (this) {
+        // If interrupt recovery is in progress (NIO), we must expect to
+        // release our monitor on "this" and to retry writeRAFHeader, so be
+        // prepared to retry.
+        boolean success = false;
+        int maxTries = MAX_INTERRUPT_RETRIES; // ca 60s = (120 * 0.5s)
 
-			// committed and dropped, do nothing.  
-			// This file container has already been stubbified
-			if (getCommittedDropState()) {
-				clearDirty();
-				return;
-			}
+        while (!success) {
+            success = true;
 
-			// The container is about to change, need to wait till it is really
-			// changed.  We are in the predirty state only for the duration
-			// where the log record that changed the container has been sent to
-			// the log and before the change actually happened.
-			while(preDirty == true)
-			{
-				waited = true;
-				try
-				{
-					wait();
-				}
-				catch (InterruptedException ie)
-				{
-					throw StandardException.interrupt(ie);
-				}
-			}
+            synchronized (this) {
 
-			if (waited)
-			{
-				// someone else may have stubbified this while we waited 
-				if (getCommittedDropState())
-				{
-					clearDirty();
-					return;
-				}
-			}
+                // committed and dropped, do nothing.
+                // This file container has already been stubbified
+                if (getCommittedDropState()) {
+                    clearDirty();
+                    return;
+                }
+
+                // The container is about to change, need to wait till it is
+                // really changed.  We are in the predirty state only for the
+                // duration where the log record that changed the container has
+                // been sent to the log and before the change actually
+                // happened.
+                while(preDirty == true)
+                {
+                    waited = true;
+                    try
+                    {
+                        wait();
+                    }
+                    catch (InterruptedException ie)
+                    {
+                        InterruptStatus.setInterrupted();
+                    }
+                }
+
+                if (waited)
+                {
+                    // someone else may have stubbified this while we waited
+                    if (getCommittedDropState())
+                    {
+                        clearDirty();
+                        return;
+                    }
+                }
 
 
-			if (forRemove) {
+                if (forRemove) {
 
-				//				removeFile()
-				//				clearDirty();
+                    //              removeFile()
+                    //              clearDirty();
 
-			} else if (isDirty()) {
- 
-				try {
+                } else if (isDirty()) {
 
-					// Cannot get the alloc page and write it out
-					// because in order to do so, the alloc page will need to 
-					// find this container object.  But this container object
-					// is in the middle of being cleaned and may not be 
-					// 'found' and we will hang.
-					//
-					// Instead, just clobber the container info, which is 
-					// checksum'ed seperately from the alloc page
-					//
-                    writeRAFHeader(
-                        getIdentity(),
-                        fileData,
-								   false,  // don't create, container exists 
-								   true);  // syncfile
+                    try {
 
-					clearDirty();
+                        // Cannot get the alloc page and write it out because
+                        // in order to do so, the alloc page will need to find
+                        // this container object.  But this container object is
+                        // in the middle of being cleaned and may not be
+                        // 'found' and we will hang.
+                        //
+                        // Instead, just clobber the container info, which is
+                        // checksum'ed seperately from the alloc page
+                        //
+                        writeRAFHeader(
+                            getIdentity(),
+                            fileData,
+                            false,  // don't create, container exists
+                            true);  // syncfile
 
-				} catch (IOException ioe) {
+                        clearDirty();
 
-					throw dataFactory.markCorrupt(
-                        StandardException.newException(
-                            SQLState.FILE_CONTAINER_EXCEPTION, ioe,
-                            getIdentity() != null ?
-                               getIdentity().toString() : "unknown",
-                            "clean", fileName));
-				}
-			}
-		}
+                    } catch (InterruptDetectedException e) {
+                        if (--maxTries > 0) {
+                            success = false;
+
+                            // Wait a bit so recovery can take place before
+                            // we re-grab monitor on "this" (which recovery
+                            // needs) and retry writeRAFHeader.
+                            try {
+                                Thread.sleep(500); // 0.5s
+                            } catch (InterruptedException ee) {
+                                // This thread received an interrupt as
+                                // well, make a note.
+                                InterruptStatus.setInterrupted();
+                            }
+
+                            continue; // retry write of RAFHeader
+                        } else {
+                            // We have tried for a minute, not sure what's
+                            // going on, so to be on safe side we can't
+                            // continue
+                            throw StandardException.newException(
+                                SQLState.FILE_IO_INTERRUPTED, e);
+                        }
+                    } catch (IOException ioe) {
+
+                        throw dataFactory.markCorrupt(
+                            StandardException.newException(
+                                SQLState.FILE_CONTAINER_EXCEPTION, ioe,
+                                getIdentity() != null ?
+                                getIdentity().toString() : "unknown",
+                                "clean", fileName));
+                    }
+                }
+            }
+        }
 	}
 
 	private void clearDirty() {
@@ -815,6 +860,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         try
         {
             AccessController.doPrivileged( this);
+            currentIdentity = newIdentity;
         }
         catch( PrivilegedActionException pae){ throw (StandardException) pae.getException();}
         finally{ actionIdentity = null; }
@@ -859,7 +905,12 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         actionIdentity = newIdentity;
         try
         {
-            return AccessController.doPrivileged( this) != null;
+            boolean success = AccessController.doPrivileged(this) != null;
+            if (success) {
+                currentIdentity = newIdentity;
+            }
+
+            return success;
         }
         catch( PrivilegedActionException pae) { 
             closeContainer();
@@ -1034,7 +1085,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                         }
                         catch (InterruptedException ie)
                         {
-                            throw StandardException.interrupt(ie);
+                            InterruptStatus.setInterrupted();
                         }	
                     }
 

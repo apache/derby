@@ -35,6 +35,9 @@ import org.apache.derby.iapi.services.io.FormatIdOutputStream;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.TypedFormat;
 
+import org.apache.derby.iapi.util.InterruptStatus;
+import org.apache.derby.iapi.util.InterruptDetectedException;
+
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.ContainerKey;
@@ -1497,6 +1500,9 @@ abstract class FileContainer
 		}
 	}
 
+    protected final static int INTERRUPT_RETRY_SLEEP = 500; // millis
+    protected final static int MAX_INTERRUPT_RETRIES = 120; // i.e. 60s
+
 	/**
 	  Create a new page in the container.
 
@@ -1559,7 +1565,9 @@ abstract class FileContainer
 
 		long lastPage;			// last allocated page
 		long lastPreallocPage;	// last pre-allcated page
-		long pageNumber;		// the page number of the new page
+        long pageNumber =
+            ContainerHandle.INVALID_PAGE_NUMBER; // init to appease compiler
+                                // the page number of the new page
 		PageKey pkey;			// the identity of the new page
 		boolean reuse;			// if true, we are trying to reuse a page
 
@@ -1567,7 +1575,10 @@ abstract class FileContainer
 		/* need to retry a couple of times */
 		boolean retry;
 		int numtries = 0;
-		long startSearch = lastAllocatedPage;
+
+        int maxTries = MAX_INTERRUPT_RETRIES;
+
+        long startSearch = lastAllocatedPage;
 
 		AllocPage allocPage = null;	// the alloc page
 		BasePage page = null;	// the new page
@@ -1632,8 +1643,40 @@ abstract class FileContainer
                      *
                      * Note that write page can proceed as usual.
                      */
-					allocPage = 
-                        findAllocPageForAdd(allocHandle, ntt, startSearch);
+                    try {
+                        allocPage =
+                            findAllocPageForAdd(allocHandle, ntt, startSearch);
+                    } catch (InterruptDetectedException e) {
+                        // Retry. We needed to back all the way up here in the
+                        // case of the container having been closed due to an
+                        // interrupt on another thread, since that thread's
+                        // recovery needs the monitor to allocCache which we
+                        // hold. We release it when we do "continue" below.
+                        if (--maxTries > 0) {
+                            // Clear firstAllocPageNumber, i.e. undo side
+                            // effect of makeAllocPage, so retry will work
+                            firstAllocPageNumber =
+                                ContainerHandle.INVALID_PAGE_NUMBER;
+                            retry = true;
+
+                            // Wait a bit so recovery can take place before
+                            // we re-grab monitor on "this" (which recovery
+                            // needs) and retry writeRAFHeader.
+                            try {
+                                Thread.sleep(INTERRUPT_RETRY_SLEEP);
+                            } catch (InterruptedException ee) {
+                                // This thread received an interrupt as
+                                // well, make a note.
+                                InterruptStatus.setInterrupted();
+                            }
+
+                            continue;
+                        } else {
+                            throw StandardException.newException(
+                                SQLState.FILE_IO_INTERRUPTED, e);
+                        }
+                    }
+
 
 					allocCache.invalidate(allocPage, allocPage.getPageNumber());
 				}
@@ -2014,13 +2057,48 @@ abstract class FileContainer
 		 throws StandardException
 	{
 		boolean retval = false;
+        boolean done;
+        int maxTries = MAX_INTERRUPT_RETRIES;
 
-		synchronized(allocCache)
-		{
-			if (pagenum <= allocCache.getLastPageNumber(handle, firstAllocPageNumber) && 
-				allocCache.getPageStatus(handle, pagenum, firstAllocPageNumber) == AllocExtent.ALLOCATED_PAGE)
-				retval = true;
-		}
+        do {
+            done = true;
+            synchronized(allocCache) {
+                try {
+                    if (pagenum <= allocCache.getLastPageNumber(
+                                handle, firstAllocPageNumber) &&
+                            (allocCache.getPageStatus(
+                                handle, pagenum, firstAllocPageNumber) ==
+                                 AllocExtent.ALLOCATED_PAGE)) {
+
+                        retval = true;
+                    }
+                } catch (InterruptDetectedException e) {
+                    // Retry. We needed to back all the way up here in the case
+                    // of the (file) container having been closed due to an
+                    // interrupt since the recovery needs the monitor to
+                    // allocCache
+                    if (--maxTries > 0) {
+                        done = false;
+
+                        // Wait a bit so recovery can take place before
+                        // we re-grab monitor on "this" (which recovery
+                        // needs) and retry writeRAFHeader.
+                        try {
+                            Thread.sleep(INTERRUPT_RETRY_SLEEP);
+                        } catch (InterruptedException ee) {
+                            // This thread received an interrupt as
+                            // well, make a note.
+                            InterruptStatus.setInterrupted();
+                        }
+
+                        continue;
+                    } else {
+                        throw StandardException.newException(
+                            SQLState.FILE_IO_INTERRUPTED, e);
+                    }
+                }
+            }
+        } while (!done);
 
 		return retval;
 	}

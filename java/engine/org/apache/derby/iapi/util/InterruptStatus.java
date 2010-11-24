@@ -63,7 +63,7 @@ public class InterruptStatus {
 
     /**
      * Make a note that this thread saw an interrupt. Thread's intr
-     * status flag is presumably off alread, but we reset it here
+     * status flag is presumably off already, but we reset it here
      * also. Use lcc if available, else thread local variable.
      */
     public static void setInterrupted() {

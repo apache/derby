@@ -1,5 +1,5 @@
 /*
-  Class org.apache.derbyTesting.functionTests.tests.store.Derby151Test
+  Class org.apache.derbyTesting.functionTests.tests.store.InterruptResilienceTest
 
   Licensed to the Apache Software Foundation (ASF) under one or more
   contributor license agreements.  See the NOTICE file distributed with
@@ -29,6 +29,7 @@ import junit.framework.TestSuite;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.CallableStatement;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.DriverManager;
@@ -37,10 +38,10 @@ import java.sql.DriverManager;
  *   Test to reproduce and verify fix for DERBY-151.
  */
 
-public class Derby151Test extends BaseJDBCTestCase
+public class InterruptResilienceTest extends BaseJDBCTestCase
 {
 
-    public Derby151Test(String name)
+    public InterruptResilienceTest(String name)
     {
         super(name);
     }
@@ -56,7 +57,7 @@ public class Derby151Test extends BaseJDBCTestCase
             // using DriverManager and jdbc:default:connection.
             // DriverManager is not supported with JSR169.
 
-            suite.addTestSuite(Derby151Test.class);
+            suite.addTestSuite(InterruptResilienceTest.class);
             return new CleanDatabaseTestSetup(suite);
         } else {
             return suite;
@@ -65,20 +66,20 @@ public class Derby151Test extends BaseJDBCTestCase
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("Derby151Test");
+        TestSuite suite = new TestSuite("InterruptResilienceTest");
         if (! isSunJVM()) {
             // DERBY-4463 test fails on IBM VMs. Remove this
             // exception when that issue is solved.
             println("Test skipped for this VM, cf. DERBY-4463");
-            return suite;            
+            return suite;
         }
-        
+
         suite.addTest(
-            baseSuite("Derby151Test:embedded"));
+            baseSuite("InterruptResilienceTest:embedded"));
 
         suite.addTest(
             TestConfiguration.clientServerDecorator(
-                baseSuite("Derby151Test:c/s")));
+                baseSuite("InterruptResilienceTest:c/s")));
 
         return suite;
     }
@@ -88,7 +89,7 @@ public class Derby151Test extends BaseJDBCTestCase
         super.setUp();
 
         Statement stmt = createStatement();
-        stmt.executeUpdate("CREATE TABLE d151(x int primary key)");
+        stmt.executeUpdate("CREATE TABLE irt(x int primary key)");
         stmt.close();
     }
 
@@ -99,7 +100,7 @@ public class Derby151Test extends BaseJDBCTestCase
             throws java.lang.Exception {
 
         Statement stmt = createStatement();
-        stmt.executeUpdate("DROP TABLE d151");
+        stmt.executeUpdate("DROP TABLE irt");
         stmt.close();
 
         super.tearDown();
@@ -108,17 +109,38 @@ public class Derby151Test extends BaseJDBCTestCase
     // We do the actual test inside a stored procedure so we can test this for
     // client/server as well, otherwise we would just interrupt the client
     // thread.
-    public static void d151() throws SQLException {
+    public static void irt() throws SQLException {
         Connection c = DriverManager.getConnection("jdbc:default:connection");
-
+        c.setAutoCommit(false);
         PreparedStatement insert = null;
+        long seen = 0;
+        long lost = 0;
         try {
-            insert = c.prepareStatement("insert into d151 values (?)");
+            insert = c.prepareStatement("insert into irt values (?)");
 
-            for (int i = 0; i < 10000; i++) {
+            // About 75000 iterations is needed to see any concurrency
+            // wait on RawDaemonThread during recovery, cf.
+            // running with debug flag "RAF4Recovery".
+            for (int i = 0; i < 100000; i++) {
+                if (i % 1000 == 0) {
+                    c.commit();
+                }
+
+                // Make sure to interrupt after commit, since log writing isn't
+                // safe for interrupts (on Solaris only) yet.
+                Thread.currentThread().interrupt();
+
                 insert.setInt(1, i);
                 insert.executeUpdate();
-                Thread.currentThread().interrupt();
+
+                if (Thread.interrupted()) { // test and reset
+                    seen++;
+                    // println(ff() + "interrupt seen");
+                } else {
+                    // println(ff() + "interrupt lost");
+                    lost++;
+                }
+
             }
         } finally {
             // always clear flag
@@ -132,27 +154,27 @@ public class Derby151Test extends BaseJDBCTestCase
             }
 
             c.close();
+            println("interrupts recovered: " + seen);
+            println("interrupts lost: " + lost + " (" +
+                    (lost * 100.0/(seen + lost)) + "%)");
         }
     }
 
-    public void testD151 () throws SQLException {
+    public void testIRT () throws SQLException {
         Statement s = createStatement();
         s.executeUpdate(
-            "create procedure D151 () MODIFIES SQL DATA " +
+            "create procedure IRT () MODIFIES SQL DATA " +
             "external name 'org.apache.derbyTesting.functionTests" +
-            ".tests.store.Derby151Test.d151' " +
+            ".tests.store.InterruptResilienceTest.irt' " +
             "language java parameter style java");
 
-        try {
-            s.executeUpdate("call D151()");
 
-            // We were not able to prokove any error, but that should not fail
-            // the test; the results here may depend on VMs possibly.  So just
-            // report this fact in verbose mode:
+        s.executeUpdate("call IRT()");
 
-            println("Not able to test fix for DERBY-151: No interrupt seen");
-        } catch (SQLException e) {
-            assertSQLState("XSDG9", e);
-        }
     }
+
+
+    // private static String ff() {
+    //     return Thread.currentThread().getName();
+    // }
 }
