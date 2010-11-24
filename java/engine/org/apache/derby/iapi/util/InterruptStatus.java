@@ -22,6 +22,7 @@
 package org.apache.derby.iapi.util;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.context.ContextService;
@@ -155,9 +156,15 @@ public class InterruptStatus {
      */
     public static void restoreIntrFlagIfSeen() {
 
-        LanguageConnectionContext lcc =
-            (LanguageConnectionContext)ContextService.getContextOrNull(
-                LanguageConnectionContext.CONTEXT_ID);
+        LanguageConnectionContext lcc = null;
+        try {
+            lcc =
+                (LanguageConnectionContext)ContextService.getContextOrNull(
+                    LanguageConnectionContext.CONTEXT_ID);
+        } catch (ShutdownException e) {
+            // Ignore. DERBY-4911 Restoring interrupt flag is moot anyway if we
+            // are closing down.
+        }
 
         if (lcc == null) {
             // no lcc available for this thread, use thread local flag
