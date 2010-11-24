@@ -400,7 +400,7 @@ public class Derby2017LayerBTest
 
         // Select data in the table, compare to MASTER
         ResultSet rs = stmt.executeQuery("select * from t2017");
-        JDBC.assertFullResultSet(rs, MASTER);
+        JDBC.assertUnorderedResultSet(rs, MASTER);
     }
 
     /**
@@ -490,7 +490,7 @@ public class Derby2017LayerBTest
 
         // Select data in the table, compare to MASTER
         ResultSet rs = stmt.executeQuery("select * from t2017_binary");
-        JDBC.assertFullResultSet(rs, MASTER);
+        JDBC.assertUnorderedResultSet(rs, MASTER);
     }
 
     /**
