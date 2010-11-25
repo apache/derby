@@ -260,6 +260,7 @@ public class AccessDatabase {
         for(int i=0;i<data.length;i++){
             //assume only one root element for any query
             if(data[i].getDepth()==0){//root element
+
                 xmlDetails += indent(1);
                 xmlDetails += data[i].toString();
                 getChildren(1, data[i].getId());
@@ -374,7 +375,16 @@ public class AccessDatabase {
         while(results.next())
         {
             String text= results.getString(1);
+
             if(text != null){
+
+                /*Removing possible occurrences of special XML characters
+                 * from XML node attributes in XML representation.*/
+                text = replaceInAttribute(text, '<',"&lt;");
+                text = replaceInAttribute(text, '>',"&gt;");
+                text = replaceInAttribute(text, '\'',"&apos;");
+                text = replaceInAttribute(text, '"',"&quot;");
+
                 switch(x){
                 case ID:
                     data[i].setId(text+" ");
@@ -466,32 +476,50 @@ public class AccessDatabase {
         String statement = results.getString(1);
         results.close();
         ps.close();
-        /*Removing possible less than and greater than characters
-         * in a query statement with XML representation.*/
-        if(statement.indexOf('<')!= -1){
-            statement = replace(statement, "<","&lt;");
-        }
-        if(statement.indexOf('>')!= -1){
-            statement = replace(statement, ">","&gt;");
-        }
+
+        /*Removing possible occurrences of special XML characters
+         * from a query statement with XML representation.*/
+        statement = replace(statement, '<',"&lt;");
+        statement = replace(statement, '>',"&gt;");
+        statement = replace(statement, '\'',"&apos;");
+        statement = replace(statement, '"',"&quot;");
+
         return "<statement>"+statement+"</statement>\n";
     }
 
     /**
      *
-     * @param stmt statement to be changed
+     * @param text text to be checked
      * @param expr string to be removed
      * @param replace string to be added
      * @return modified string
      */
-    private String replace(String stmt, String expr, String replace){
-    	 int idx = stmt.indexOf(expr);
+    private String replace(String text, char expr, String replace){
+         int idx = text.indexOf(expr);
     	 while (idx >= 0)
     	 {
-    	   stmt = stmt.substring(0, idx) + replace + stmt.substring(idx+1);
-    	   idx = stmt.indexOf(expr);
+             text = text.substring(0, idx) + replace + text.substring(idx+1);
+             idx = text.indexOf(expr);
     	 }
-    	 return stmt;
+         return text;
+    }
+
+    /**
+     * This method is needed since in the case of XML attributes
+     * we have to filter the quotation (&quot;) marks that is compulsory.
+     * eg:
+     * scanned_object="A &quot;quoted&quot;  table name";
+     *
+     * @param text attribute string to be checked
+     * @param expr string to be removed
+     * @param replace string to be added
+     * @return modified string
+     */
+    private String replaceInAttribute(String text, char expr, String replace){
+        if (text.indexOf('"') == -1)
+            return text;
+        String correctXMLString = replace(text.substring(text.indexOf('"')+1, text.length()-1), expr, replace);
+        return text.substring(0,text.indexOf('"')+1)+correctXMLString+"\"";
     }
    
     /**
