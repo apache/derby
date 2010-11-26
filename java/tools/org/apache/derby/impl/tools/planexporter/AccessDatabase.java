@@ -260,6 +260,7 @@ public class AccessDatabase {
         for(int i=0;i<data.length;i++){
             //assume only one root element for any query
             if(data[i].getDepth()==0){//root element
+
                 xmlDetails += indent(1);
                 xmlDetails += data[i].toString();
                 getChildren(1, data[i].getId());
@@ -374,7 +375,13 @@ public class AccessDatabase {
         while(results.next())
         {
             String text= results.getString(1);
+
             if(text != null){
+
+                /*Removing possible occurrences of special XML characters
+                 * from XML node attributes in XML representation.*/
+                text = escapeInAttribute(text);
+
                 switch(x){
                 case ID:
                     data[i].setId(text+" ");
@@ -466,32 +473,64 @@ public class AccessDatabase {
         String statement = results.getString(1);
         results.close();
         ps.close();
-        /*Removing possible less than and greater than characters
-         * in a query statement with XML representation.*/
-        if(statement.indexOf('<')!= -1){
-            statement = replace(statement, "<","&lt;");
-        }
-        if(statement.indexOf('>')!= -1){
-            statement = replace(statement, ">","&gt;");
-        }
+
+        /*Removing possible occurrences of special XML characters
+         * from a query statement with XML representation.*/
+        statement = escapeForXML(statement);
+
         return "<statement>"+statement+"</statement>\n";
     }
 
     /**
+     * Escape characters that have a special meaning in XML.
      *
-     * @param stmt statement to be changed
-     * @param expr string to be removed
-     * @param replace string to be added
+     * @param text the text to escape
+     * @return the text with special characters escaped
+     */
+    private static String escapeForXML(String text) {
+        StringBuffer sb = new StringBuffer();
+
+        for (int i = 0; i < text.length(); i++) {
+            char ch = text.charAt(i);
+            switch (ch) {
+                case '&':
+                    sb.append("&amp;");
+                    break;
+                case '<':
+                    sb.append("&lt;");
+                    break;
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                case '\'':
+                    sb.append("&apos;");
+                    break;
+                case '"':
+                    sb.append("&quot;");
+                    break;
+                default:
+                    sb.append(ch);
+            }
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * This method is needed since in the case of XML attributes
+     * we have to filter the quotation (&quot;) marks that is compulsory.
+     * eg:
+     * scanned_object="A &quot;quoted&quot;  table name";
+     *
+     * @param text attribute string to be checked
      * @return modified string
      */
-    private String replace(String stmt, String expr, String replace){
-    	 int idx = stmt.indexOf(expr);
-    	 while (idx >= 0)
-    	 {
-    	   stmt = stmt.substring(0, idx) + replace + stmt.substring(idx+1);
-    	   idx = stmt.indexOf(expr);
-    	 }
-    	 return stmt;
+    private String escapeInAttribute(String text) {
+        if (text.indexOf('"') == -1)
+            return text;
+        String correctXMLString = escapeForXML(
+                text.substring(text.indexOf('"') + 1, text.length() - 1));
+        return text.substring(0,text.indexOf('"')+1)+correctXMLString+"\"";
     }
    
     /**
