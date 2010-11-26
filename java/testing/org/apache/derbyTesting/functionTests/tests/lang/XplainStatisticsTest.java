@@ -2555,15 +2555,23 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Test that queries that contain table names with quotation marks are not garbled
-     * by the plan exporter tool. Regression test case for DERBY-4903.
+     * Test that queries that contain characters with a special meaning in
+     * XML are not garbled by the plan exporter tool. Regression test case
+     * for DERBY-4903.
      */
     public void testPlanExporterHandlingSpecialCharacters() throws Exception{
-        String table = "\"A \"\"quoted\"\" table name\"";
-        String queryText = "SELECT * FROM " + table;
+        String table =
+                "A \"double\" and 'single' quoted table name " +
+                "with some other special characters, like <, > and &";
+
+        String escapedTable = JDBC.escape(table);
+
+        String queryText =
+                "SELECT * FROM " + escapedTable +
+                " WHERE X < LENGTH('a & b') AND X > 1";
 
         Statement s = createStatement();
-        s.execute("CREATE TABLE " + table + "(X INT)");
+        s.execute("CREATE TABLE " + escapedTable + "(X INT)");
 
         enableXplainStyle(s);
         JDBC.assertEmpty(s.executeQuery(queryText));
@@ -2588,8 +2596,7 @@ public class XplainStatisticsTest extends BaseJDBCTestCase {
             //for TABLESCAN node, test scanned_object entry
             //is exist and verify its value correctly replaced
             //by special XML symbols.
-            Assert.assertEquals("A \"quoted\" table name",
-                    getNodeAttribute(stmtId,"scanned_object",0));
+            assertEquals(table, getNodeAttribute(stmtId, "scanned_object", 0));
         }
 
     }

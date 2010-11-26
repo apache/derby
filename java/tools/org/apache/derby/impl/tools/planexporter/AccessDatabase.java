@@ -380,10 +380,7 @@ public class AccessDatabase {
 
                 /*Removing possible occurrences of special XML characters
                  * from XML node attributes in XML representation.*/
-                text = replaceInAttribute(text, '<',"&lt;");
-                text = replaceInAttribute(text, '>',"&gt;");
-                text = replaceInAttribute(text, '\'',"&apos;");
-                text = replaceInAttribute(text, '"',"&quot;");
+                text = escapeInAttribute(text);
 
                 switch(x){
                 case ID:
@@ -479,29 +476,44 @@ public class AccessDatabase {
 
         /*Removing possible occurrences of special XML characters
          * from a query statement with XML representation.*/
-        statement = replace(statement, '<',"&lt;");
-        statement = replace(statement, '>',"&gt;");
-        statement = replace(statement, '\'',"&apos;");
-        statement = replace(statement, '"',"&quot;");
+        statement = escapeForXML(statement);
 
         return "<statement>"+statement+"</statement>\n";
     }
 
     /**
+     * Escape characters that have a special meaning in XML.
      *
-     * @param text text to be checked
-     * @param expr string to be removed
-     * @param replace string to be added
-     * @return modified string
+     * @param text the text to escape
+     * @return the text with special characters escaped
      */
-    private String replace(String text, char expr, String replace){
-         int idx = text.indexOf(expr);
-    	 while (idx >= 0)
-    	 {
-             text = text.substring(0, idx) + replace + text.substring(idx+1);
-             idx = text.indexOf(expr);
-    	 }
-         return text;
+    private static String escapeForXML(String text) {
+        StringBuffer sb = new StringBuffer();
+
+        for (int i = 0; i < text.length(); i++) {
+            char ch = text.charAt(i);
+            switch (ch) {
+                case '&':
+                    sb.append("&amp;");
+                    break;
+                case '<':
+                    sb.append("&lt;");
+                    break;
+                case '>':
+                    sb.append("&gt;");
+                    break;
+                case '\'':
+                    sb.append("&apos;");
+                    break;
+                case '"':
+                    sb.append("&quot;");
+                    break;
+                default:
+                    sb.append(ch);
+            }
+        }
+
+        return sb.toString();
     }
 
     /**
@@ -511,14 +523,13 @@ public class AccessDatabase {
      * scanned_object="A &quot;quoted&quot;  table name";
      *
      * @param text attribute string to be checked
-     * @param expr string to be removed
-     * @param replace string to be added
      * @return modified string
      */
-    private String replaceInAttribute(String text, char expr, String replace){
+    private String escapeInAttribute(String text) {
         if (text.indexOf('"') == -1)
             return text;
-        String correctXMLString = replace(text.substring(text.indexOf('"')+1, text.length()-1), expr, replace);
+        String correctXMLString = escapeForXML(
+                text.substring(text.indexOf('"') + 1, text.length() - 1));
         return text.substring(0,text.indexOf('"')+1)+correctXMLString+"\"";
     }
    
