@@ -637,6 +637,10 @@ class RAFContainer4 extends RAFContainer {
         }
 
         synchronized (channelCleanupMonitor) {
+            // Pave way for the thread that received the interrupt that caused
+            // the channel close to clean up, by signaling we are waiting (no
+            // longer doing IO):
+
             threadsInPageIO--;
         }
 
@@ -671,6 +675,9 @@ class RAFContainer4 extends RAFContainer {
                     }
                 }
 
+                // Since the channel is presumably ok (lest giveUpIO is set,
+                // see below), we put ourselveds back in the IO set of threads:
+
                 threadsInPageIO++;
                 break;
             }
@@ -685,6 +692,7 @@ class RAFContainer4 extends RAFContainer {
                         "resurrecting container ");
                 }
 
+                threadsInPageIO--;
                 throw StandardException.newException(
                     SQLState.FILE_IO_INTERRUPTED);
             }
@@ -715,7 +723,7 @@ class RAFContainer4 extends RAFContainer {
         boolean stealthMode) throws StandardException {
 
         if (stealthMode && restoreChannelInProgress) {
-            // Another interrupted thread got to do the cleanup before us, so
+            // 1) Another interrupted thread got to do the cleanup before us, so
             // yield.
             // This should not happen, but since
             // we had to "fix" NIO, cf. the code marked (**), we could
@@ -734,6 +742,11 @@ class RAFContainer4 extends RAFContainer {
             // Not safe for Java 1.4 (only volatile protection for
             // restoreChannelInProgress here), compare safe test below (not
             // stealthMode).
+            //
+            // 2) The other way to end up here is if we get interrupted during
+            // getEmbryonicPage called during container recovery from the same
+            // thread (restoreChannelInProgress is set then, and
+            // getEmbryonicPage is stealthMode)
 
             InterruptStatus.noteAndClearInterrupt(
                 whence,
@@ -808,26 +821,22 @@ class RAFContainer4 extends RAFContainer {
                         try {
                             closeContainer();
                             openContainer(currentIdentity);
-                        } catch (Exception newE) {
+                        } catch (InterruptDetectedException e) {
                             // Interrupted again?
+                            debugTrace("interrupted during recovery's " +
+                                       "readEmbryonicPage");
+                            continue;
+                        } catch (Exception newE) {
+                            // Something else failed - shutdown happening?
+                            synchronized(giveUpIOm) {
+                                // Make sure other threads will give up and
+                                // throw, too.
+                                giveUpIO = true;
 
-                            if (InterruptStatus.noteAndClearInterrupt(
-                                        "RAF: isInterrupted during recovery",
-                                        threadsInPageIO,
-                                        hashCode())) {
-                                continue;
-                            } else {
-                                // Something else failed - shutdown happening?
-                                synchronized(giveUpIOm) {
-                                    // Make sure other threads will give up and
-                                    // throw, too.
-                                    giveUpIO = true;
-
-                                    if (SanityManager.DEBUG) {
-                                        debugTrace(
-                                            "can't resurrect container: " +
-                                            newE);
-                                    }
+                                if (SanityManager.DEBUG) {
+                                    debugTrace(
+                                        "can't resurrect container: " +
+                                        newE);
                                 }
 
                                 throw StandardException.newException(
@@ -838,7 +847,12 @@ class RAFContainer4 extends RAFContainer {
                     }
                 }
 
-                threadsInPageIO++;
+                if (stealthMode) {
+                    // don't touch threadsInPageIO
+                } else {
+                    threadsInPageIO++;
+                }
+
                 // retry IO
             } finally {
                 // Recovery work done (or failed), now set other threads free

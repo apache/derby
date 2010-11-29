@@ -898,18 +898,30 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 		return true;
     } // end of privRemoveFile
 
-	synchronized boolean openContainer(ContainerKey newIdentity)
+    protected ContainerKey idAPriori = null;
+
+    synchronized boolean openContainer(ContainerKey newIdentity)
         throws StandardException
     {
         actionCode = OPEN_CONTAINER_ACTION;
         actionIdentity = newIdentity;
+        boolean success = false;
+        idAPriori = currentIdentity;
+
         try
         {
-            boolean success = AccessController.doPrivileged(this) != null;
-            if (success) {
-                currentIdentity = newIdentity;
-            }
+            currentIdentity = newIdentity;
+            // NIO: We need to set currentIdentity before we try to open, in
+            // case we need its value to perform a recovery in the case of an
+            // interrupt during readEmbryonicPage as part of
+            // OPEN_CONTAINER_ACTION.  Note that this gives a recursive call to
+            // openContainer.
+            //
+            // If we don't succeed in opening, we reset currentIdentity to its
+            // a priori value.
 
+            success = AccessController.doPrivileged(this) != null;
+            idAPriori = currentIdentity;
             return success;
         }
         catch( PrivilegedActionException pae) { 
@@ -921,7 +933,11 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
             throw e;
         }
         finally
-        { 
+        {
+            if (!success) {
+                currentIdentity = idAPriori;
+            }
+
             actionIdentity = null; 
         }
     }
