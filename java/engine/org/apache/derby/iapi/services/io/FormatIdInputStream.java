@@ -136,7 +136,9 @@ public final class FormatIdInputStream extends DataInputStream
 			// they have readExternal (or SQLData) that doesn't match
 			// the writeExternal. and thus the object read is of
 			// the incorrect type, e.g. Integer i = (Integer) in.readObject();
-			throw new StreamCorruptedException(cce.toString());
+			StreamCorruptedException sce = new StreamCorruptedException(cce.toString());
+			sce.initCause(cce);
+			throw sce;
 		}
 	}
 
