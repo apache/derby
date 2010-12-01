@@ -21,19 +21,10 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
 import org.apache.derby.iapi.sql.depend.DependencyManager;
-import org.apache.derby.iapi.sql.depend.Dependent;
-import org.apache.derby.iapi.sql.depend.Provider;
-
-import org.apache.derby.iapi.sql.PreparedStatement;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.error.StandardException;
@@ -47,8 +38,6 @@ import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import java.sql.Types;
 import java.util.List;
 import java.util.Hashtable;
-import java.util.Properties;
-import java.util.Vector;
 
 /**
  * The DataDictionary interface is used with the data dictionary to get
@@ -1074,8 +1063,8 @@ public interface DataDictionary
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public DataTypeDescriptor[] getSPSParams(SPSDescriptor spsd, Vector defaults)
-		throws StandardException;
+    public DataTypeDescriptor[] getSPSParams(SPSDescriptor spsd, List defaults)
+            throws StandardException;
 
 	/**
 	 * Adds the given SPSDescriptor to the data dictionary,

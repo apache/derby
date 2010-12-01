@@ -143,13 +143,13 @@ import org.apache.derby.iapi.services.locks.ShExLockable;
 import org.apache.derby.iapi.services.locks.ShExQual;
 import org.apache.derby.iapi.util.IdUtil;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.Vector;
 
 import java.util.List;
 import java.util.Iterator;
@@ -4110,10 +4110,9 @@ public final class	DataDictionaryImpl
 		*/
 		if (spsd != null)
 		{
-			Vector v = new Vector();
-			spsd.setParams(getSPSParams(spsd, v));
-			Object[] defaults = new Object[v.size()];
-			v.copyInto(defaults);
+            List tmpDefaults = new ArrayList();
+            spsd.setParams(getSPSParams(spsd, tmpDefaults));
+            Object[] defaults = tmpDefaults.toArray();
 			spsd.setParameterDefaults(defaults);
 		}
 
@@ -4216,14 +4215,14 @@ public final class	DataDictionaryImpl
 	 * into parameter descriptors.  
 	 *
 	 * @param spsd	sps descriptor
-	 * @param defaults	vector for storing column defaults
+     * @param defaults list for storing column defaults
 	 *
 	 * @return array of data type descriptors
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public DataTypeDescriptor[] getSPSParams(SPSDescriptor spsd, Vector defaults)
-		throws StandardException
+    public DataTypeDescriptor[] getSPSParams(SPSDescriptor spsd, List defaults)
+        throws StandardException
 	{
 		ColumnDescriptorList cdl = new ColumnDescriptorList();
 		getColumnDescriptorsScan(spsd.getUUID(), cdl, spsd);
@@ -4234,9 +4233,8 @@ public final class	DataDictionaryImpl
 		{
 			ColumnDescriptor cd = (ColumnDescriptor) cdl.elementAt(index);
 			params[index] = cd.getType();
-			if (defaults != null)
-			{
-				defaults.addElement(cd.getDefaultValue());
+            if (defaults != null) {
+                defaults.add(cd.getDefaultValue());
 			}
 		}
 

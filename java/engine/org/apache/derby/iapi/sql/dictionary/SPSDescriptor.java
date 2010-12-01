@@ -22,8 +22,8 @@
 package org.apache.derby.iapi.sql.dictionary;
 
 import java.sql.Timestamp;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.DependableFinder;
@@ -43,7 +43,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.sql.depend.ProviderInfo;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
@@ -73,7 +72,7 @@ public class SPSDescriptor extends TupleDescriptor
 	/**
 	 * Statement types.  
 	 * <UL>
-	 * <LI> SPS_TYPE_TRIGGER	- trigger (<B>NOT IMPLEMENTED</B>) </LI>
+     * <LI> SPS_TYPE_TRIGGER    - trigger</LI>
 	 * <LI> SPS_TYPE_EXPLAIN	- explain (<B>NOT IMPLEMENTED</B>) </LI>
 	 * <LI> SPS_TYPE_REGULAR	- catchall</LI>
 	 * </UL>
@@ -119,14 +118,15 @@ public class SPSDescriptor extends TupleDescriptor
 
 		
 	// Class contents
-	private SchemaDescriptor		sd;
-	private String					name;
+    private final SchemaDescriptor sd;
+    private final String name;
+    private final UUID compSchemaId;
+    private final char type;
+    private final String text;
+    private final String usingText;
+
 	private UUID					uuid;
-	private UUID					compSchemaId;
-	private char					type;
 	private	boolean					valid;
-	private	String					text;
-	private	String					usingText;
 	private	ExecPreparedStatement	preparedStatement;
 	private	DataTypeDescriptor		params[];
 	private	Timestamp				compileTime;
@@ -303,6 +303,19 @@ public class SPSDescriptor extends TupleDescriptor
 		prepareAndRelease(lcc, (TableDescriptor)null, (TransactionController)null);
 	}
 
+    /**
+     * Compiles this SPS.
+     * <p>
+     * <em>Note:</em> This SPS may still be marked as invalid after this method
+     * has completed, because an invalidation request may have been received
+     * while compiling.
+     *
+     * @param lcc connection
+     * @param triggerTable subject table (may be {@code null})
+     * @param tc transaction controller to use (may be {@code null})
+     * @throws StandardException if something fails
+     */
+    //@GuardedBy("this")
 	private void compileStatement
 	(
 		LanguageConnectionContext	lcc,
@@ -312,9 +325,6 @@ public class SPSDescriptor extends TupleDescriptor
 		throws StandardException
 	{
 		ContextManager cm = lcc.getContextManager();
-		DependencyManager dm;
-		ProviderInfo[] providerInfo;
-
 		LanguageConnectionFactory	lcf = lcc.getLanguageConnectionFactory();
 
 		DataDictionary dd = getDataDictionary();
@@ -330,6 +340,8 @@ public class SPSDescriptor extends TupleDescriptor
 		*/
 		if (type == SPS_TYPE_TRIGGER && triggerTable == null)
 		{
+            // 49 because name consists of (see CreateTriggerConstantAction):
+            // TRIGGER<ACTN|WHEN>_<UUID:36>_<UUID:36>
 			String uuidStr = name.substring(49);
 			triggerTable = dd.getTableDescriptor(recreateUUID(uuidStr));
 			if (SanityManager.DEBUG)
@@ -386,7 +398,7 @@ public class SPSDescriptor extends TupleDescriptor
 			*/
 			dd.startWriting(lcc);
 
-			dm = dd.getDependencyManager();
+            DependencyManager dm = dd.getDependencyManager();
 			/*
 			** Clear out all the dependencies that exist
 			** before we recreate them so we don't grow
@@ -457,12 +469,9 @@ public class SPSDescriptor extends TupleDescriptor
 	 *
 	 * @return type as a string
 	 */	
-	public final String getTypeAsString()
-	{
-		char[] charArray = new char[1];
-		charArray[0] = type;
-		return new String(charArray);
-	}
+    public final String getTypeAsString() {
+        return String.valueOf(type);
+    }
 
 	/**
 	 * Is the statement initially compilable?  
@@ -480,7 +489,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 *
 	 * @return true/false	
 	 */
-	public final static boolean validType(char type)
+    public static boolean validType(char type)
 	{
 		return (type == SPSDescriptor.SPS_TYPE_REGULAR) || 
 				(type == SPSDescriptor.SPS_TYPE_TRIGGER);
@@ -522,7 +531,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 *
 	 * @return The text
 	 */
-	public final synchronized String getUsingText()
+    public final String getUsingText()
 	{
 		return usingText;
 	}
@@ -542,8 +551,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 *
 	 * @return	the uuid
 	 */
-	public final UUID	getUUID()
-	{
+    public final synchronized UUID getUUID() {
 		return uuid;
 	}
 	
@@ -561,19 +569,12 @@ public class SPSDescriptor extends TupleDescriptor
 	public final synchronized DataTypeDescriptor[] getParams()
 		throws StandardException
 	{
-		if (params == null && !lookedUpParams)
-		{
-			Vector v = new Vector();
-			params = getDataDictionary().getSPSParams(this, v);
-			paramDefaults = new Object[v.size()];	
-			Enumeration iterator = v.elements();
-			for (int i = 0; iterator.hasMoreElements(); i++)
-			{
-				paramDefaults[i] = iterator.nextElement();
-			}
-
-			lookedUpParams = true;
-		}
+        if (params == null && !lookedUpParams) {
+            List tmpDefaults = new ArrayList();
+            params = getDataDictionary().getSPSParams(this, tmpDefaults);
+            paramDefaults = tmpDefaults.toArray();
+            lookedUpParams = true;
+        }
 
 		return params;
 	}
@@ -616,16 +617,6 @@ public class SPSDescriptor extends TupleDescriptor
 	{
 		this.paramDefaults = values;
 	}
-	
-	/**
-	 * Get the constant action for this statement
-	 *
-	 * @return the constant action
-	 */
-	//public final synchronized ConstantAction getConstantAction()
-	//{
-	//	return preparedStatement.getConstantAction();
-	//}
 	
 	/**
 	 * Get the preparedStatement for this statement.
@@ -857,7 +848,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 *
 	 * @exception StandardException thrown if unable to make it invalid
 	 */
-	public final synchronized void prepareToInvalidate(
+    public final void prepareToInvalidate(
 									Provider p, int action,
 									LanguageConnectionContext lcc) 
 		throws StandardException

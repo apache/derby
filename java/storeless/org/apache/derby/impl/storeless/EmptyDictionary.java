@@ -23,7 +23,6 @@ package org.apache.derby.impl.storeless;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
@@ -445,7 +444,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return null;
 	}
 
-	public DataTypeDescriptor[] getSPSParams(SPSDescriptor spsd, Vector defaults)
+	public DataTypeDescriptor[] getSPSParams(SPSDescriptor spsd, List defaults)
 			throws StandardException {
 		// TODO Auto-generated method stub
 		return null;
