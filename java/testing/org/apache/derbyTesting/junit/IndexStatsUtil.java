@@ -38,10 +38,24 @@ import junit.framework.Assert;
  * Helper class for obtaining index statistics and doing asserts on them.
  * <p>
  * This implementation assumes all tables/indexes belong to the current schema.
+ * <p>
+ * The <em>timeout</em> value is used to make the utility more resilient to
+ * differences in timing due to varying scheduling decisions, processor speeds,
+ * etc. If the system table contains the wrong number of statistics objects for
+ * the query, it will be queried repeatedly until the right number of statistics
+ * objects is obtained or the query times out.
  */
 public class IndexStatsUtil {
 
+    private static final boolean INDEX = false;
+    private static final boolean TABLE = true;
+    private static final int NO_EXPECTATION = -1;
+    private static final String SEP =
+                BaseJDBCTestCase.getSystemProperty("line.separator");
+
     private final Connection con;
+    /** Timeout in milliseconds. */
+    private final long timeout;
     private PreparedStatement psGetTableId;
     private PreparedStatement psGetStatsForTable;
     private PreparedStatement psGetIndexId;
@@ -50,11 +64,39 @@ public class IndexStatsUtil {
     private PreparedStatement psGetIdToNameMapConglom;
     private PreparedStatement psGetIdToNameMapTable;
 
-    public IndexStatsUtil(Connection con)
-            throws SQLException {
+    /**
+     * Creates an instance querying the given database with no timeout set.
+     * <p>
+     * Querying with no timeout means that if there are too few or too many
+     * statistics objects matching the query, a failure will be raised
+     * immediately.
+     *
+     * @param con connection to the database to query
+     */
+    public IndexStatsUtil(Connection con) {
+        this(con, 0L);
+    }
+
+    /**
+     * Creates an instance querying the given database with the specified
+     * timeout value.
+     *
+     * @param con connection to the database to query
+     * @param timeout the longest time to wait to see if the expectations for a
+     *      query are met (milliseconds)
+     */
+    public IndexStatsUtil(Connection con, long timeout) {
         // Rely on auto-commit to release locks.
-        Assert.assertTrue(con.getAutoCommit());
+        try {
+            Assert.assertTrue(con.getAutoCommit());
+        } catch (SQLException sqle) {
+            Assert.fail("Failed to get auto commit: " + sqle.getMessage());
+        }
+        if (timeout < 0) {
+            throw new IllegalArgumentException("timeout cannot be negative");
+        }
         this.con = con;
+        this.timeout = timeout;
     }
 
     /**
@@ -85,7 +127,11 @@ public class IndexStatsUtil {
      */
     public void assertStats(int expectedCount)
             throws SQLException {
-        assertStatCount(getStats(), "<ALL>", expectedCount, false);
+        IdxStats[] ret = getStats();
+        if (ret.length != expectedCount) {
+            Assert.assertEquals(buildStatString(ret, "<ALL TABLES>"),
+                    expectedCount, ret.length);
+        }
     }
 
     /**
@@ -98,7 +144,7 @@ public class IndexStatsUtil {
      */
     public void assertTableStats(String table, int expectedCount)
             throws SQLException {
-        assertStatCount(getStatsTable(table), table, expectedCount, false);
+        getStatsTable(table, expectedCount);
     }
 
     /**
@@ -111,24 +157,7 @@ public class IndexStatsUtil {
      */
     public void assertIndexStats(String index, int expectedCount)
             throws SQLException {
-        assertStatCount(getStatsIndex(index), index, expectedCount, true);
-    }
-
-    /**
-     * Asserts that the expected number of statistics exists.
-     *
-     * @param stats statistics
-     * @param conglom conglomerate name
-     * @param expectedCount expected number of statistics
-     * @param isIndex {@code true} if the conglomerate is an index
-     */
-    private void assertStatCount(IdxStats[] stats, String conglom,
-                                 int expectedCount, boolean isIndex) {
-        if (stats.length != expectedCount) {
-            String name = (isIndex ? "index " : "table ") + "'" + conglom + "'";
-            Assert.assertEquals(buildStatString(stats, name),
-                    expectedCount, stats.length);
-        }
+        getStatsIndex(index, expectedCount);
     }
 
     /**
@@ -139,8 +168,6 @@ public class IndexStatsUtil {
      * @return A string representation of the statistics.
      */
     private String buildStatString(IdxStats[] stats, String name) {
-        String SEP =
-                BaseJDBCTestCase.getSystemProperty("line.separator");
         StringBuffer sb = new StringBuffer(
                 "Index statistics for " + name + SEP);
         for (int i=0; i < stats.length; i++) {
@@ -163,7 +190,8 @@ public class IndexStatsUtil {
             throws SQLException {
         if (psGetStats == null) {
             psGetStats = con.prepareStatement(
-                    "select * from SYS.SYSSTATISTICS");
+                    "select * from SYS.SYSSTATISTICS " +
+                    "order by TABLEID, REFERENCEID, COLCOUNT");
         }
         return buildStatisticsList(psGetStats.executeQuery(), getIdToNameMap());
     }
@@ -177,13 +205,23 @@ public class IndexStatsUtil {
      */
     public IdxStats[] getStatsTable(String table)
             throws SQLException {
+        return getStatsTable(table, NO_EXPECTATION);
+    }
+
+    /**
+     * Obtains statistics for the specified table, fails if the number of
+     * statistics objects isn't as expected within the timeout.
+     *
+     * @param table table name
+     * @param expectedCount number of expected statistics objects
+     * @return A list of statistics entries (possibly empty).
+     * @throws SQLException if obtaining the statistics fail
+     */
+    public IdxStats[] getStatsTable(String table, int expectedCount)
+            throws SQLException {
         if (psGetTableId == null) {
             psGetTableId = con.prepareStatement(
                 "select TABLEID from SYS.SYSTABLES where TABLENAME = ?");
-        }
-        if (psGetStatsForTable == null) {
-            psGetStatsForTable = con.prepareStatement(
-                "select * from SYS.SYSSTATISTICS where TABLEID = ?");
         }
         psGetTableId.setString(1, table);
         ResultSet rs = psGetTableId.executeQuery();
@@ -191,9 +229,16 @@ public class IndexStatsUtil {
         String tableId = rs.getString(1);
         Assert.assertFalse("More than one table named " + table, rs.next());
         rs.close();
-        psGetStatsForTable.setString(1, tableId);
-        return buildStatisticsList(
-                psGetStatsForTable.executeQuery(), getIdToNameMap());
+
+        IdxStats[] ret = querySystemTable(tableId, TABLE, expectedCount);
+        // Avoid building the stat string if not necessary.
+        if (expectedCount != NO_EXPECTATION && ret.length != expectedCount) {
+            Assert.assertEquals("failed to get statistics for table " + table +
+                    " (#expected=" + expectedCount + ", timeout=" + timeout +
+                    ")" + SEP + buildStatString(ret, table),
+                    expectedCount, ret.length);
+        }
+        return ret;
     }
 
     /**
@@ -205,15 +250,25 @@ public class IndexStatsUtil {
      */
     public IdxStats[] getStatsIndex(String index)
              throws SQLException {
+        return getStatsIndex(index, NO_EXPECTATION);
+    }
+
+    /**
+     * Obtains statistics for the specified index, fails if the number of
+     * statistics objects isn't as expected within the timeout.
+     *
+     * @param index index name
+     * @param expectedCount number of expected statistics objects
+     * @return A list of statistics entries (possibly empty).
+     * @throws SQLException if obtaining the statistics fail
+     */
+    public IdxStats[] getStatsIndex(String index, int expectedCount)
+             throws SQLException {
         if (psGetIndexId == null) {
             psGetIndexId = con.prepareStatement(
                     "select CONGLOMERATEID from SYS.SYSCONGLOMERATES where " +
                     "CONGLOMERATENAME = ? and " +
                     "CAST(ISINDEX as VARCHAR(5)) = 'true'");
-        }
-        if (psGetStatsForIndex == null) {
-            psGetStatsForIndex = con.prepareStatement(
-                   "select * from SYS.SYSSTATISTICS where REFERENCEID = ?");
         }
         psGetIndexId.setString(1, index);
         ResultSet rs = psGetIndexId.executeQuery();
@@ -221,9 +276,67 @@ public class IndexStatsUtil {
         String indexId = rs.getString(1);
         Assert.assertFalse("More than one index named " + index, rs.next());
         rs.close();
-        psGetStatsForIndex.setString(1, indexId);
-        return buildStatisticsList(
-                psGetStatsForIndex.executeQuery(), getIdToNameMap());
+
+        IdxStats[] ret = querySystemTable(indexId, INDEX, expectedCount);
+        // Avoid building the stat string if not necessary.
+        if (expectedCount != NO_EXPECTATION && ret.length != expectedCount) {
+            Assert.assertEquals("failed to get statistics for index " + index +
+                    " (#expected=" + expectedCount + ", timeout=" + timeout +
+                    ")" + SEP + buildStatString(ret, index),
+                    expectedCount, ret.length);
+        }
+        return ret;
+    }
+
+    /**
+     * Queries the system table {@code SYS.SYSSTATISTICS} for statistics
+     * associated with a specific table or index.
+     *
+     * @param conglomId conglomerate id (UUID)
+     * @param isTable tells if the conglomerate is a table or an index
+     * @param expectedCount the number of statistics objects expected, use
+     *      {@code NO_EXPECTATION} to return whatever matches the query
+     *      immediately
+     */
+    private IdxStats[] querySystemTable(String conglomId, boolean isTable,
+                                        int expectedCount)
+            throws SQLException {
+        // Assign the correct prepared statement.
+        PreparedStatement ps;
+        if (isTable) {
+            if (psGetStatsForTable == null) {
+                psGetStatsForTable = con.prepareStatement(
+                        "select * from SYS.SYSSTATISTICS " +
+                            "where TABLEID = ? " +
+                            "order by REFERENCEID, COLCOUNT");
+            }
+            ps = psGetStatsForTable;
+        } else {
+            if (psGetStatsForIndex == null) {
+                psGetStatsForIndex = con.prepareStatement(
+                        "select * from SYS.SYSSTATISTICS " +
+                            "where REFERENCEID = ? " +
+                            "order by COLCOUNT");
+            }
+            ps = psGetStatsForIndex;
+        }
+        ps.setString(1, conglomId);
+
+        long started = System.currentTimeMillis();
+        long waited = -1;
+        IdxStats[] ret = null;
+        while (waited < timeout) {
+            // Don't wait the first time.
+            if (ret != null) {
+                Utilities.sleep(Math.min(250L, timeout - waited));
+            }
+            ret = buildStatisticsList(ps.executeQuery(), getIdToNameMap());
+            if (expectedCount == NO_EXPECTATION || ret.length == expectedCount){
+                break;
+            }
+            waited = System.currentTimeMillis() - started;
+        }
+        return ret;
     }
 
     /**
@@ -397,6 +510,29 @@ public class IndexStatsUtil {
                     append(", unique/card=").append(card).
                     append(", created=").append(created).append('}');
             return sb.toString();
+        }
+
+        /**
+         * Equality is based on the statistics entry UUID.
+         *
+         * @param obj other object
+         * @return {@code true} if the other object is considered equal to this
+         */
+        public boolean equals(Object obj) {
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            final IdxStats other = (IdxStats) obj;
+            return this.id.equals(other.id);
+        }
+
+        public int hashCode() {
+            int hash = 7;
+            hash = 17 * hash + this.id.hashCode();
+            return hash;
         }
     }
 }
