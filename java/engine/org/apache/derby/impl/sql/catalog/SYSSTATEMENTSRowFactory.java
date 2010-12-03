@@ -176,11 +176,6 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 		{
 			name = spsDescriptor.getName();
 			uuid = spsDescriptor.getUUID();
-			if ( uuid == null )
-		    {
-				uuid = getUUIDFactory().createUUID();
-				spsDescriptor.setUUID(uuid);
-			}
 			suuidStr = spsDescriptor.getSchemaDescriptor().getUUID().toString();
 			uuidStr = uuid.toString();
 			text = spsDescriptor.getText();			

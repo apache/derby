@@ -124,8 +124,8 @@ public class SPSDescriptor extends TupleDescriptor
     private final char type;
     private final String text;
     private final String usingText;
+    private final UUID uuid;
 
-	private UUID					uuid;
 	private	boolean					valid;
 	private	ExecPreparedStatement	preparedStatement;
 	private	DataTypeDescriptor		params[];
@@ -208,6 +208,10 @@ public class SPSDescriptor extends TupleDescriptor
 	{
 		super( dataDictionary );
 
+        // Added this check when setUUID was removed, see DERBY-4918.
+        if (uuid == null) {
+            throw new IllegalArgumentException("UUID is null");
+        }
 		this.name = name;
 		this.uuid = uuid; 
 		this.type = type;
@@ -536,22 +540,12 @@ public class SPSDescriptor extends TupleDescriptor
 		return usingText;
 	}
 
-	/**
-	 * Sets the UUID of the SPS.
-	 *
-	 * @param uuid	The UUID of the SPS to be set in the descriptor
-	 */
-	public final synchronized void setUUID(UUID uuid)
-	{
-		this.uuid = uuid;
-	}
-
-	/**
-	 * Gets the UUID of the SPS.
-	 *
-	 * @return	the uuid
-	 */
-    public final synchronized UUID getUUID() {
+    /**
+     * Gets the UUID of the SPS.
+     *
+     * @return The UUID.
+     */
+    public final UUID getUUID() {
 		return uuid;
 	}
 	
