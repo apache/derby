@@ -580,23 +580,6 @@ public abstract class QueryTreeNode implements Visitable
 	}
 
 	/**
-	 * Get the optimizer's estimate of the number of rows returned or affected
-	 * for an optimized QueryTree.
-	 *
-	 * For non-optimizable statements (for example, CREATE TABLE),
-	 * return 0. For optimizable statements, this method will be
-	 * over-ridden in the statement's root node (DMLStatementNode
-	 * in all cases we know about so far).
-	 *
-	 * @return	0L
-	 */
-
-	public long	getRowEstimate()
-	{
-		return	0L;
-	}
-
-	/**
 	 * Do the code generation for this node.  This is a place-holder
 	 * method - it should be over-ridden in the sub-classes.
 	 *
