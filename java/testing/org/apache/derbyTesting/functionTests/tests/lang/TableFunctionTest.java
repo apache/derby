@@ -788,9 +788,9 @@ public class TableFunctionTest extends BaseJDBCTestCase
             FUNCTION_RESULT_COLUMN,
             JDBC_TYPE_TIMESTAMP,
             "TIMESTAMP",
-            new Integer( 26 ),     // PRECISION
+            new Integer( 29 ),     // PRECISION
             new Integer( 16 ),         // LENGTH
-            new Integer( 6 ),       // SCALE
+            new Integer( 9 ),       // SCALE
             RADIX_INTEGER,    // RADIX
             ALLOWS_NULLS,
             EMPTY_REMARKS,

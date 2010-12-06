@@ -329,12 +329,12 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
         
         // COLUMN 16 TIMESTAMP
         assertEquals("java.sql.Timestamp", rsmd.getColumnClassName(16));
-        assertEquals(26, rsmd.getColumnDisplaySize(16));
+        assertEquals(29, rsmd.getColumnDisplaySize(16));
         assertEquals("TIMESTAMPCOL", rsmd.getColumnLabel(16));
         assertEquals(java.sql.Types.TIMESTAMP,rsmd.getColumnType(16));
         assertEquals("TIMESTAMP", rsmd.getColumnTypeName(16));
-        assertEquals(26,rsmd.getPrecision(16));
-        assertEquals(6, rsmd.getScale(16));
+        assertEquals(29,rsmd.getPrecision(16));
+        assertEquals(9, rsmd.getScale(16));
 
         // COLUMN 17 BLOB
         assertEquals("java.sql.Blob", rsmd.getColumnClassName(17));

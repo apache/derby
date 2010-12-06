@@ -119,16 +119,16 @@ public final class TypeId
         public static final int DATE_MAXWIDTH           = 10;	// yyyy-mm-dd
         public static final int TIME_MAXWIDTH           = 8;	// hh:mm:ss
 
-        // I believe that the following is wrong. The format of java.sql.Timestamp.toString()
+        // The format of java.sql.Timestamp.toString()
         // is yyyy-mm-dd hh:mm:ss.fffffffff
-        public static final int TIMESTAMP_MAXWIDTH      = DRDAConstants.DRDA_TIMESTAMP_LENGTH;	// yyyy-mm-dd hh:mm:ss.ffffff
+        public static final int TIMESTAMP_MAXWIDTH      = DRDAConstants.DRDA_TIMESTAMP_LENGTH;	// yyyy-mm-dd hh:mm:ss.fffffffff
 
         // Scale DOES exist for time values.  For a TIMESTAMP value,
-        // it's 6 ('ffffff'); for a TIME value, it's 0 (because there
+        // it's 9 ('fffffffff'); for a TIME value, it's 0 (because there
         // are no fractional seconds).  Note that date values do
         // not have a scale.
         public static final int TIME_SCALE           = 0;
-        public static final int TIMESTAMP_SCALE      = 6;
+        public static final int TIMESTAMP_SCALE      = 9;
 
         /* These define all the type names for SQL92 and JDBC 
          * NOTE: boolean is SQL3

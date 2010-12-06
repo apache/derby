@@ -200,7 +200,7 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertFalse(met.isCurrency(7));
         assertEquals(ResultSetMetaData.columnNullable, met.isNullable(7));
         assertFalse(met.isSigned(7));
-        assertEquals(26, met.getColumnDisplaySize(7));
+        assertEquals(29, met.getColumnDisplaySize(7));
         assertEquals("TS", met.getColumnLabel(7));
         assertEquals("TS", met.getColumnName(7));
         // beetle 5323
@@ -208,8 +208,8 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
         assertEquals("APP", met.getSchemaName(7));
         assertEquals("", met.getCatalogName(7));
         assertEquals(java.sql.Types.TIMESTAMP, met.getColumnType(7));
-        assertEquals(26, met.getPrecision(7));
-        assertEquals(6, met.getScale(7));
+        assertEquals(29, met.getPrecision(7));
+        assertEquals(9, met.getScale(7));
         assertEquals("TIMESTAMP", met.getColumnTypeName(7));
         // DERBY-142 client incorrectly returns true. Enable on client
         // once DERBY-142 is fixed

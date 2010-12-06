@@ -339,7 +339,7 @@ public class CoalesceTest extends BaseJDBCTestCase
                 "COL1(datatype : TIME, precision : 8, scale : 0) null 15:30:20 15:30:20 null ",
                 "COL1(datatype : TIME, precision : 8, scale : 0) null 15:30:20 15:30:20 15:30:20 ",
                 "COL1(datatype : TIME, precision : 8, scale : 0) null 15:30:20 15:30:20 15:30:20 ",
-                "COL1(datatype : TIMESTAMP, precision : 26, scale : 6) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
+                "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
                 "", "",
                 "COL1(datatype : BLOB, precision : 1024, scale : 0) null null null null "
         };
@@ -525,11 +525,11 @@ public class CoalesceTest extends BaseJDBCTestCase
                 "COL1(datatype : TIME, precision : 8, scale : 0) null 15:30:20 15:30:20 null ",
                 "COL1(datatype : TIME, precision : 8, scale : 0) null 15:30:20 15:30:20 null ",
                 "","","","","","","","","","","","","","","","",
-                "COL1(datatype : TIMESTAMP, precision : 26, scale : 6) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
-                "COL1(datatype : TIMESTAMP, precision : 26, scale : 6) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
+                "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
+                "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
                 "","","","","","","","","","","","","","","","",
-                "COL1(datatype : TIMESTAMP, precision : 26, scale : 6) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
-                "COL1(datatype : TIMESTAMP, precision : 26, scale : 6) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
+                "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
+                "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 2000-01-01 15:30:20.0 2000-01-01 15:30:20.0 null ",
                 "","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",
                 "COL1(datatype : BLOB, precision : 1024, scale : 0) null null null null ",
                 "COL1(datatype : BLOB, precision : 1024, scale : 0) null null null null "
@@ -681,9 +681,9 @@ public class CoalesceTest extends BaseJDBCTestCase
         s.executeUpdate("insert into tH values(null, null, null)");
         s.executeUpdate("insert into tH values(timestamp('1992-01-01 12:30:30'), '1992-01-01 12:30:31', '1992-01-01 12:30:32')");
 
-        String expectedValue = "COL1(datatype : TIMESTAMP, precision : 26, scale : 6) null 1992-01-01 12:30:30.0 ";
-        String expectedValue1 = "COL1(datatype : TIMESTAMP, precision : 26, scale : 6) null 1992-01-01 12:30:31.0 ";
-        String expectedValue2 = "COL1(datatype : TIMESTAMP, precision : 26, scale : 6) null 1992-01-01 12:30:32.0 ";
+        String expectedValue = "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 1992-01-01 12:30:30.0 ";
+        String expectedValue1 = "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 1992-01-01 12:30:31.0 ";
+        String expectedValue2 = "COL1(datatype : TIMESTAMP, precision : 29, scale : 9) null 1992-01-01 12:30:32.0 ";
 
         dumpRS(s.executeQuery("select coalesce(timestampCol,timestampCol) from tH"), expectedValue);
         dumpRS(s.executeQuery("select value(timestampCol,timestampCol) from tH"), expectedValue);
