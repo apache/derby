@@ -38,8 +38,8 @@ import java.sql.Array;
 
 /**
 	An abstract implementation of ResultSet (JDK1.1/JDBC 1.2) that is useful
-	when writing a read-only VTI (virtual table interface) or for
-	the ResultSet returned by executeQuery in read-write VTI classes.
+	when writing table functions, read-only VTIs (virtual table interface), and
+	the ResultSets returned by executeQuery in read-write VTI classes.
 	
 	This class implements most of the methods of the JDBC 1.2 interface java.sql.ResultSet,
 	each one throwing a  SQLException with the name of the method. 
@@ -54,11 +54,11 @@ import java.sql.Array;
 	</UL>
 	<P>
 
-	For virtual tables the database engine only calls methods defined
+	For table functions and virtual tables, the database engine only calls methods defined
 	in the JDBC 1.2 definition of java.sql.ResultSet.
 	<BR>
 	Classes that implement a JDBC 2.0 conformant java.sql.ResultSet can be used
-	as virtual tables.
+	as table functions and virtual tables.
  */
 public abstract class VTITemplate implements ResultSet {
 
