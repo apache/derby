@@ -506,6 +506,7 @@ public class IndexStatsUtil {
             sb.append("{tableId=").append(tableId).
                     append(", tableName=").append(tableName).
                     append(", indexName=").append(indexName).
+                    append(", lcols=").append(lcols).
                     append(", rows=").append(rows).
                     append(", unique/card=").append(card).
                     append(", created=").append(created).append('}');
