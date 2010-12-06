@@ -21,6 +21,7 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.lang.reflect.Method;
 import java.io.IOException;
 import java.math.BigDecimal;
 //import java.lang.reflect.Constructor;
@@ -2185,7 +2186,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 precision = 8;
                 break;
             case Types.TIMESTAMP:
-                precision = 26;
+                precision = 29;
                 break;
                                 
             case Types.DECIMAL:
@@ -2363,7 +2364,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             maxScale = 31; // Max Scale for Decimal & Numeric is 31: Derby-2262
             break;
             case Types.TIMESTAMP:
-                maxScale = 6;
+                maxScale = 9;
                 break;
             case Types.SMALLINT:
             case Types.INTEGER:
@@ -4524,7 +4525,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 {null,"APP","GETPCTEST1","I","1","8","DOUBLE","52","8",null,"2","1",null,null,"8",null,null,"9","YES","genid","12","8"},                
                 {null,"APP","GETPCTEST1","K","1","91","DATE","10","6","0","10","1",null,null,"9","1",null,"10","YES","genid","12","9"},                
                 {null,"APP","GETPCTEST1","L","1","92","TIME","8","6","0","10","1",null,null,"9","2",null,"11","YES","genid","12","10"},                
-                {null,"APP","GETPCTEST1","T","1","93","TIMESTAMP","26","16","6","10","1",null,null,"9","3",null,"12","YES","genid","12","11"},                
+                {null,"APP","GETPCTEST1","T","1","93","TIMESTAMP","29","16","9","10","1",null,null,"9","3",null,"12","YES","genid","12","11"},                
                 {null,"APP","GETPCTEST2","PA","1","4","INTEGER","10","4","0","10","1",null,null,"4",null,null,"1","YES","genid","2","0"},
                 {null,"APP","GETPCTEST2","PB","1","-5","BIGINT","19","40","0","10","1",null,null,"-5",null,null,"2","YES","genid","2","1"},
                 {null,"APP","GETPCTEST3A","STRING1","1","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","1","YES","genid","2","0"}, 
@@ -4776,6 +4777,85 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         return rss;        
     }
 
+    /**
+     * Test DatabaseMetaData.getFunctionColumns()
+     */
+    public void testGetFunctionColumns() throws Exception
+    {
+        // this method is supported in database meta data only from 10.2 onward
+
+        boolean supportsBoolean = true;
+        Version dataVersion = getDataVersion( getConnection() );
+        if ( dataVersion.compareTo( new Version( 10, 7, 0, 0 ) ) < 0 ) { supportsBoolean = false; }
+        
+        if ( dataVersion.compareTo( new Version( 10, 2, 0, 0 ) ) < 0 ) { return; }
+
+        DatabaseMetaData dmd = getDMD();
+        Statement s = createStatement();
+        getConnection().setAutoCommit(false);
+        
+        s.execute("create function f_gfc_1 (" +
+                "a VARCHAR(3), b NUMERIC, c SMALLINT, " +
+                "e CHAR(3), f INTEGER, g BIGINT, h FLOAT, i DOUBLE PRECISION, " +
+                "k DATE, l TIME, T TIMESTAMP ) returns int "+
+                "language java external name " +
+                "'org.apache.derbyTesting.BlahBlah.blah'" +
+        " parameter style java"); 
+
+        if ( supportsBoolean )
+        {
+            s.execute("create function f_gfc_2 ( a boolean) returns boolean "+
+                      "language java external name " +
+                      "'org.apache.derbyTesting.functionTests.BlahBlah.blah'" +
+                      " parameter style java");
+        }
+
+        // We have to use reflection to get the getFunctionColumns() method.
+        // That is because we compile this test to run on old versions of the
+        // vm whose DatabaseMetaData doesn't include this method, even though
+        // our actual drivers do.
+        Method gfcMethod = dmd.getClass().getMethod
+            ( "getFunctionColumns", new Class[] { String.class, String.class, String.class, String.class, } );
+        
+        ResultSet rs = (ResultSet) gfcMethod.invoke( dmd, new String[] { null, "%", "F_GFC_%", "%" } );
+
+        String[][] expRS = new String[][]
+            {
+                {null,"APP","F_GFC_1","","4","4","INTEGER","10","4","0","10","1",null,null,"0","YES","genid","11","-1"},                
+                {null,"APP","F_GFC_1","A","1","12","VARCHAR","3","6",null,null,"1",null,"6","1","YES","genid","11","0"},
+                {null,"APP","F_GFC_1","B","1","2","NUMERIC","5","14","0","10","1",null,null,"2","YES","genid","11","1"},
+                {null,"APP","F_GFC_1","C","1","5","SMALLINT","5","2","0","10","1",null,null,"3","YES","genid","11","2"},
+                {null,"APP","F_GFC_1","E","1","1","CHAR","3","6",null,null,"1",null,"6","4","YES","genid","11","3"},
+                {null,"APP","F_GFC_1","F","1","4","INTEGER","10","4","0","10","1",null,null,"5","YES","genid","11","4"},                
+                {null,"APP","F_GFC_1","G","1","-5","BIGINT","19","40","0","10","1",null,null,"6","YES","genid","11","5"},                
+                {null,"APP","F_GFC_1","H","1","8","DOUBLE","52","8",null,"2","1",null,null,"7","YES","genid","11","6"},                
+                {null,"APP","F_GFC_1","I","1","8","DOUBLE","52","8",null,"2","1",null,null,"8","YES","genid","11","7"},                
+                {null,"APP","F_GFC_1","K","1","91","DATE","10","6","0","10","1",null,null,"9","YES","genid","11","8"},                
+                {null,"APP","F_GFC_1","L","1","92","TIME","8","6","0","10","1",null,null,"10","YES","genid","11","9"},                
+                {null,"APP","F_GFC_1","T","1","93","TIMESTAMP","29","16","9","10","1",null,null,"11","YES","genid","11","10"},                
+            };
+        if ( supportsBoolean )
+        {
+            expRS = appendArray
+                (
+                 expRS,
+                 new String[][]
+                 {
+                     {null,"APP","F_GFC_2","","4","16","BOOLEAN","1","1",null,null,"1",null,null,"0","YES","genid","1","-1"},
+                     {null,"APP","F_GFC_2","A","1","16","BOOLEAN","1","1",null,null,"1",null,null,"1","YES","genid","1","0"},
+                 }
+                 );
+        }
+
+        int rowcount = 0;
+
+        assertResults( rs, expRS, true );
+        
+        if ( supportsBoolean ) { s.execute("drop function f_gfc_2"); }
+        s.execute("drop function f_gfc_1");
+        commit();
+    }
+
     public void testBugFixes() throws SQLException {
         
         Statement s = createStatement();
@@ -4915,6 +4995,44 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         {
             if ( rs != null ) { rs.close(); }
             if ( ps != null ) { ps.close(); }
+        }
+    }
+
+    /**
+     * Assert that the ResultSet returns the desired rows.
+     */
+    private void assertResults( ResultSet rs, String[][] rows, boolean trimResults )
+        throws Exception
+    {
+        int     actualColumnCount = rs.getMetaData().getColumnCount();
+        int     rowCount = rows.length;
+
+        for ( int i = 0; i < rowCount; i++ )
+        {
+            String[]    row = rows[ i ];
+            int             columnCount = row.length;
+
+            assertTrue( rs.next() );
+            assertEquals( columnCount, actualColumnCount );
+
+            for ( int j = 0; j < columnCount; j++ )
+            {
+                String  expectedValue =  row[ j ];
+                //println( "XXX (row, column ) ( " + i + ", " +  j + " ) should be " + expectedValue );
+                String  actualValue = null;
+                int         column = j+1;
+
+                actualValue = rs.getString( column );
+                if ( rs.wasNull() ) { actualValue = null; }
+
+                if ( (actualValue != null) && trimResults ) { actualValue = actualValue.trim(); }
+                
+                assertEquals( (expectedValue == null), rs.wasNull() );
+                
+                if ( expectedValue == null )    { assertNull( actualValue ); }
+                else if ( "genid".equals( expectedValue ) ) { assertTrue( actualValue.startsWith( "SQL" ) ); }
+                else { assertEquals(expectedValue, actualValue); }
+            }
         }
     }
 

@@ -318,7 +318,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             case Types.TIME:
                 return 8;
             case Types.TIMESTAMP:
-                return 26;
+                return 29;
             case Types.JAVA_OBJECT:
                 return JDBC30Translation.DEFAULT_COLUMN_DISPLAY_SIZE;
             case Types.BINARY:
@@ -452,7 +452,7 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
             case Types.TIME:
                 return 8;
             case Types.TIMESTAMP:
-                return 26;
+                return 29;
             case Types.JAVA_OBJECT:
                 return JDBC30Translation.UNKNOWN_PRECISION;
             default:
@@ -471,15 +471,6 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         {
             checkForClosedStatement();
             checkForValidColumnIndex(column);
-
-            // We get the scale from the SQLDA as returned by DERBY, but DERBY does not return the ANSI-defined
-            // value of scale 6 for TIMESTAMP.
-            //
-            //   The JDBC drivers should hardcode this info as a short/near term solution.
-            //
-            if (types_[column - 1] == Types.TIMESTAMP) {
-                return 6;
-            }
 
             return sqlScale_[column - 1];
         }

@@ -31,6 +31,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.math.BigDecimal;
 
@@ -645,6 +646,43 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
        		stmt.execute("DROP PROCEDURE PMDC");
             stmt.close();
 	}
+
+	/**
+         * test ParameterMetaData for Java procedures with TIMESTAMP parameters
+	 *
+	 * @exception SQLException if error occurs
+         */
+    public void testParameterMetadataWithTimestampParameters () throws SQLException
+    {
+        Statement stmt = createStatement();
+        stmt.execute("CREATE PROCEDURE PMDT(IN pmdI_1 TIMESTAMP, INOUT pmdI_2 TIMESTAMP, OUT pmdI_3 TIMESTAMP) language java parameter style java external name 'org.apache.derbyTesting.functionTests.tests.jdbcapi.ParameterMetaDataJdbc30Test.dummyString'");
+        CallableStatement cs = prepareCall("CALL PMDT(?, ?, ?)");
+        // parameter 1 is input only	
+        cs.setTimestamp(1, new Timestamp( 0L ) );
+        // parameter 2 is input and output
+        Object x = new Timestamp( 2L );
+        cs.setObject(2,x, Types.CHAR);
+        cs.registerOutParameter(2,Types.TIMESTAMP);
+        //parameter 3 is output only
+        cs.registerOutParameter(3,Types.TIMESTAMP);
+        //verify the meta data for the parameters
+        ParameterMetaData paramMetaData = cs.getParameterMetaData();
+        assertEquals("Unexpected parameter count", 3, paramMetaData.getParameterCount());
+        
+        //expected values to be stored in a 2dim. array
+        String parameterMetaDataArray0 [][] = {
+            //isNullable, isSigned, getPrecision, getScale, getParameterType, getParameterTypeName, getParameterClassName, getParameterMode
+            {"PARAMETER_NULLABLE", "false", "29", "9", "93", "TIMESTAMP", "java.sql.Timestamp", "PARAMETER_MODE_IN"},
+            {"PARAMETER_NULLABLE", "false", "29", "9", "93", "TIMESTAMP", "java.sql.Timestamp", "PARAMETER_MODE_IN_OUT"},
+            {"PARAMETER_NULLABLE", "false", "29", "9", "93", "TIMESTAMP", "java.sql.Timestamp", "PARAMETER_MODE_OUT"}};
+        
+        testParameterMetaData(cs.getParameterMetaData(), parameterMetaDataArray0);
+        
+        cs.close();
+        stmt.execute("DROP PROCEDURE PMDT");
+        stmt.close();
+    }
+    
 	/**
          *  test ParameterMetaData for Java procedures with DECIMAL parameters
 	 *
@@ -913,6 +951,13 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
          */
         public static void dummyString (String in_param, String in_param2, String[] in_param3, String[] in_param4) {
         }
+	
+	/**
+     * Java method for procedure PMDT which tests ParameterMetaData for Java procedures 
+     * with TIMESTAMP parameters.  
+     */
+    public static void dummyString (Timestamp in_param1, Timestamp[] inout_param2, Timestamp[] out_param3) {}
+
 	
 	/**
          * Java method for procedure PMDD which tests ParameterMetaData for Java procedures

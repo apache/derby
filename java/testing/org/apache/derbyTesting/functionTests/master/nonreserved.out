@@ -181,29 +181,29 @@ create table timestamp (timestamp timestamp);
 ij> insert into timestamp(timestamp) values (timestamp('2002-05-22 16:17:34.144'));
 1 row inserted/updated/deleted
 ij> select timestamp from timestamp;
-TIMESTAMP                 
---------------------------
-2002-05-22 16:17:34.144   
+TIMESTAMP                    
+-----------------------------
+2002-05-22 16:17:34.144      
 ij> select timestamp( '2003-05-22 16:17:34.144'), timestamp "2003-05-22 16:17:34.144" from timestamp;
-1                         |2003-05-22 16:17:34.144   
------------------------------------------------------
-2003-05-22 16:17:34.144   |2002-05-22 16:17:34.144   
+1                            |2003-05-22 16:17:34.144      
+-----------------------------------------------------------
+2003-05-22 16:17:34.144      |2002-05-22 16:17:34.144      
 ij> select timestamp timestamp from timestamp;
-TIMESTAMP                 
---------------------------
-2002-05-22 16:17:34.144   
+TIMESTAMP                    
+-----------------------------
+2002-05-22 16:17:34.144      
 ij> select timestamp as timestamp from timestamp;
-TIMESTAMP                 
---------------------------
-2002-05-22 16:17:34.144   
+TIMESTAMP                    
+-----------------------------
+2002-05-22 16:17:34.144      
 ij> select timestamp.timestamp as timestamp from timestamp timestamp;
-TIMESTAMP                 
---------------------------
-2002-05-22 16:17:34.144   
+TIMESTAMP                    
+-----------------------------
+2002-05-22 16:17:34.144      
 ij> select timestamp.timestamp as timestamp from timestamp as timestamp;
-TIMESTAMP                 
---------------------------
-2002-05-22 16:17:34.144   
+TIMESTAMP                    
+-----------------------------
+2002-05-22 16:17:34.144      
 ij> delete from timestamp where timestamp = timestamp('2002-05-22 16:17:34.144');
 1 row inserted/updated/deleted
 ij> create index timestamp on timestamp(timestamp);

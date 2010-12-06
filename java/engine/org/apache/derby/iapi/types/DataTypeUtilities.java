@@ -156,7 +156,7 @@ public abstract class DataTypeUtilities  {
 		switch (typeId)
 		{
 			case Types.TIMESTAMP:
-				size = 26;
+				size = 29;
 				break;
 			case Types.DATE:
 				size = 10;
