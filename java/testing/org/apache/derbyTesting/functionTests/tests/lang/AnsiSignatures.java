@@ -25,8 +25,12 @@ import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+
+import org.apache.derby.iapi.types.HarmonySerialBlob;
+import org.apache.derby.iapi.types.HarmonySerialClob;
 
 /**
  * <p>
@@ -1281,26 +1285,26 @@ public  class   AnsiSignatures
     
     // legal resolutions
 
-    public  static  Clob  clob_Clob_String( String a ) { return new StringColumnVTI.SimpleClob( a ); }
-    public  static  Clob  clob_Clob_String( boolean a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( byte a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( int a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( long a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( float a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( double a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Boolean a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Byte a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Short a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Long a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Float a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Double a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( BigDecimal a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Date a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Time a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Timestamp a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Clob a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Blob a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
-    public  static  Clob  clob_Clob_String( Object a ) { return new StringColumnVTI.SimpleClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( String a ) { return new HarmonySerialClob( a ); }
+    public  static  Clob  clob_Clob_String( boolean a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( byte a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( int a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( long a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( float a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( double a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Boolean a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Byte a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Short a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Long a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Float a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Double a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( BigDecimal a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Date a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Time a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Timestamp a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Clob a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Blob a ) { return new HarmonySerialClob( "-1" ); }
+    public  static  Clob  clob_Clob_String( Object a ) { return new HarmonySerialClob( "-1" ); }
 
     //
     // BLOB
@@ -1308,26 +1312,26 @@ public  class   AnsiSignatures
     
     // legal resolutions
 
-    public  static  Blob  blob_Blob_String( String a ) throws Exception { return new StringColumnVTI.SimpleBlob( a.getBytes( "UTF-8" ) ); }
-    public  static  Blob  blob_Blob_String( boolean a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( byte a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( int a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( long a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( float a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( double a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Boolean a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Byte a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Short a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Long a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Float a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Double a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( BigDecimal a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Date a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Time a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Timestamp a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Clob a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Blob a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
-    public  static  Blob  blob_Blob_String( Object a ) { return new StringColumnVTI.SimpleBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( String a ) throws Exception { return new HarmonySerialBlob( a.getBytes( "UTF-8" ) ); }
+    public  static  Blob  blob_Blob_String( boolean a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( byte a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( int a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( long a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( float a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( double a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Boolean a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Byte a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Short a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Long a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Float a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Double a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( BigDecimal a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Date a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Time a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Timestamp a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Clob a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Blob a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
+    public  static  Blob  blob_Blob_String( Object a ) throws SQLException { return new HarmonySerialBlob( new byte[] { (byte) -1 } ); }
 
     //
     // BLOB arguments

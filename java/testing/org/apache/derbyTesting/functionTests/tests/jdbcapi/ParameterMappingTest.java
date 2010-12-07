@@ -47,7 +47,9 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.Utilities;
-import org.apache.derbyTesting.functionTests.tests.lang.StringColumnVTI;
+
+import org.apache.derby.iapi.types.HarmonySerialBlob;
+import org.apache.derby.iapi.types.HarmonySerialClob;
 
 /**
  * 
@@ -657,7 +659,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         cs.close();
 
         cs = chattyPrepareCall( conn, "call clobIn( ?, ? )" );
-        cs.setClob( 1, new StringColumnVTI.SimpleClob( "ghi" ) );
+        cs.setClob( 1, new HarmonySerialClob( "ghi" ) );
         cs.registerOutParameter( 2, Types.VARCHAR );
         cs.execute();
         assertEquals( "ghi", cs.getString( 2 ) );
@@ -703,7 +705,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         ps.close();
         
         cs = chattyPrepareCall( conn, "call clobInOut( ? )" );
-        cs.setClob( 1, new StringColumnVTI.SimpleClob( "ghi" ) );
+        cs.setClob( 1, new HarmonySerialClob( "ghi" ) );
         cs.registerOutParameter( 1, Types.CLOB );
         cs.execute();
         outVal = cs.getClob( 1 );
@@ -733,7 +735,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                           
         }
         
-        return new StringColumnVTI.SimpleClob( new String( value ) );
+        return new HarmonySerialClob( new String( value ) );
     }
     private void compareClobs( Clob left, Clob right ) throws Exception
     {
@@ -795,7 +797,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         ps.close();
 
         cs = chattyPrepareCall( conn, "call blobIn( ?, ? )" );
-        cs.setBlob( 1, new StringColumnVTI.SimpleBlob( "ghi".getBytes( UTF8 ) ) );
+        cs.setBlob( 1, new HarmonySerialBlob( "ghi".getBytes( UTF8 ) ) );
         cs.registerOutParameter( 2, Types.VARCHAR );
         cs.execute();
         assertEquals( "ghi", cs.getString( 2 ) );
@@ -841,7 +843,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         ps.close();
 
         cs = chattyPrepareCall( conn, "call blobInOut( ? )" );
-        cs.setBlob( 1, new StringColumnVTI.SimpleBlob( "ghi".getBytes( UTF8 ) ) );
+        cs.setBlob( 1, new HarmonySerialBlob( "ghi".getBytes( UTF8 ) ) );
         cs.registerOutParameter( 1, Types.BLOB );
         cs.execute();
         outVal = cs.getBlob( 1 );
@@ -871,7 +873,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                           
         }
         
-        return new StringColumnVTI.SimpleBlob( value );
+        return new HarmonySerialBlob( value );
     }
     private void compareBlobs( Blob left, Blob right ) throws Exception
     {
@@ -4114,14 +4116,14 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         byte[] retval = new byte[ leftLength + rightLength ];
         System.arraycopy( left, 0, retval, 0, leftLength );
         System.arraycopy( right, 0, retval, leftLength, rightLength );
-        inout[0] = new StringColumnVTI.SimpleBlob( retval );
+        inout[0] = new HarmonySerialBlob( retval );
         
-        out[0] = new StringColumnVTI.SimpleBlob( new byte[] { (byte) 1, (byte) 2, (byte) 3 } );
+        out[0] = new HarmonySerialBlob( new byte[] { (byte) 1, (byte) 2, (byte) 3 } );
     }
 
     public static void pmap(Clob in, Clob[] inout, Clob[] out) throws SQLException {
-        inout[0] = new StringColumnVTI.SimpleClob( in.getSubString( 1L, (int) in.length() ) + inout[0].getSubString( 1L, (int) inout[0].length() ) );
-        out[0] = new StringColumnVTI.SimpleClob( "abc" );
+        inout[0] = new HarmonySerialClob( in.getSubString( 1L, (int) in.length() ) + inout[0].getSubString( 1L, (int) inout[0].length() ) );
+        out[0] = new HarmonySerialClob( "abc" );
     }
 
     //
@@ -4134,7 +4136,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     }
     public static void clobOut( Clob[] c ) throws SQLException
     {
-        c[ 0 ] = new StringColumnVTI.SimpleClob( "abc" );
+        c[ 0 ] = new HarmonySerialClob( "abc" );
     }
     public static void clobInOut( Clob[] c ) throws SQLException
     {
@@ -4143,7 +4145,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         char[] inValue = value.toCharArray();
         char[] outValue = reverse( inValue );
 
-        c[ 0 ] = new StringColumnVTI.SimpleClob( new String( outValue ) );
+        c[ 0 ] = new HarmonySerialClob( new String( outValue ) );
     }
 
     private static String getClobValue( Clob c ) throws SQLException
@@ -4170,7 +4172,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     }
     public static void blobOut( Blob[] c ) throws Exception
     {
-        c[ 0 ] = new StringColumnVTI.SimpleBlob( "abc".getBytes( UTF8 ) );
+        c[ 0 ] = new HarmonySerialBlob( "abc".getBytes( UTF8 ) );
     }
     public static void blobInOut( Blob[] c ) throws Exception
     {
@@ -4179,7 +4181,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         char[] inValue = value.toCharArray();
         char[] outValue = reverse( inValue );
 
-        c[ 0 ] = new StringColumnVTI.SimpleBlob( (new String( outValue )).getBytes( UTF8 ) );
+        c[ 0 ] = new HarmonySerialBlob( (new String( outValue )).getBytes( UTF8 ) );
     }
 
     private static String getBlobValue( Blob c ) throws Exception

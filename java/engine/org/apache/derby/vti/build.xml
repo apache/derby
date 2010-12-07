@@ -55,6 +55,7 @@
       </classpath>
       <include name="${derby.dir}/vti/*.java"/>
       <exclude name="${derby.dir}/vti/*Template.java"/>
+      <exclude name="${derby.dir}/vti/StringColumnVTI.java"/>
 
     </javac>
     <javac
@@ -74,6 +75,7 @@
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
     	<include name="${derby.dir}/vti/*Template.java"/>
+    	<include name="${derby.dir}/vti/StringColumnVTI.java"/>
     </javac>
   </target>
 

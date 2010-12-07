@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.types.SQLClob
+   Derby - Class org.apache.derby.iapi.types.HarmonySerialBlob
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with

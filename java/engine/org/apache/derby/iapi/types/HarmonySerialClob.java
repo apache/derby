@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.types.SQLClob
+   Derby - Class org.apache.derby.iapi.types.HarmonySerialClob
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -52,6 +52,8 @@ public class HarmonySerialClob implements Clob, Serializable, Cloneable {
 
     // required by serialized form
     private long origLen;
+
+    public HarmonySerialClob( String raw ) { this( raw.toCharArray() ); }
 
     public HarmonySerialClob(char[] ch) {
         buf = new char[ch.length];

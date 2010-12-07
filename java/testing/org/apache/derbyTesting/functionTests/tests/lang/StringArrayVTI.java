@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import  java.sql.*;
 import java.util.Arrays;
 
+import org.apache.derby.vti.StringColumnVTI;
 import org.apache.derby.vti.VTICosting;
 import org.apache.derby.vti.VTIEnvironment;
 

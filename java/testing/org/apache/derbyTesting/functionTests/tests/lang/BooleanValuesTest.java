@@ -36,6 +36,8 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.XML;
 
+import org.apache.derby.iapi.types.HarmonySerialBlob;
+
 /**
  * <p>
  * Test Derby's expanding support for BOOLEAN values.
@@ -1661,9 +1663,9 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    public static Blob makeSimpleBlob()
+    public static Blob makeSimpleBlob() throws SQLException
     {
-        return new StringColumnVTI.SimpleBlob( new byte[] { 1 } );
+        return new HarmonySerialBlob( new byte[] { 1 } );
     }
     
     public static String booleanValue( Boolean b )
