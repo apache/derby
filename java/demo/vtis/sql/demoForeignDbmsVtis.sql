@@ -30,30 +30,15 @@
 --
 ----------------------------------------------------------------------------------------
 
-connect 'jdbc:derby:vtitest;create=true';
+connect 'jdbc:derby:memory:vtitest;create=true';
 
 ----------------------------------------------------------------------------------------
 --
--- Drop and recreate the database procedures and tables needed
+-- Create the database procedures and tables needed
 -- by this demonstration script.
 --
 ----------------------------------------------------------------------------------------
 
---
--- Drop procedures and tables
---
-drop procedure registerQueryRowVTIs;
-
-drop procedure closeConnection;
-
-drop procedure createSubscription;
-drop procedure dropSubscription;
-
-drop table countryLanguage;
-
---
--- Recreate procedures
---
 create procedure registerQueryRowVTIs
 ( className varchar( 32672 ), connectionURL varchar( 32672 ) )
 language java

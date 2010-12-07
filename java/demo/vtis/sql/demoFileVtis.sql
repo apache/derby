@@ -30,30 +30,15 @@
 --
 ----------------------------------------------------------------------------------------
 
-connect 'jdbc:derby:vtitest;create=true';
+connect 'jdbc:derby:memory:vtitest;create=true';
 
 ----------------------------------------------------------------------------------------
 --
--- Drop and recreate the database procedures and tables needed
+-- Create the database procedures and tables needed
 -- by this demonstration script.
 --
 ----------------------------------------------------------------------------------------
 
---
--- Drop procedures and tables
---
-drop procedure registerXMLRowVTIs;
-
---
--- Drop miscellaneous table functions
---
-drop function svnLogReader;
-drop function propertyFileVTI;
-
-
---
--- Recreate procedures
---
 create procedure registerXMLRowVTIs( className varchar( 32672 ) )
 language java
 parameter style java
