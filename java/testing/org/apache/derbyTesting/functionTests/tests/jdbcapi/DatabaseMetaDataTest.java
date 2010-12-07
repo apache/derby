@@ -4471,15 +4471,23 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                       " parameter style java");
         }
         
+        JDBC.GeneratedId genid = new JDBC.GeneratedId();
+
+        String classname = getClass().getName();
+        String getpc = classname + ".getpc";
+        String getpc4a = classname + ".getpc4a";
+        String getpc4b = classname + ".getpc4b";
+        String foo = classname + ".foo";
+
         ResultSet rs[] = getProcedures(null, "%", "GETPCTEST%");
-        String[][] expRS = new String[][] {
-                {"","APP","GETPCTEST1","null","null","null","getpc","1"},
-                {"","APP","GETPCTEST2","null","null","null","getpc","1"},
-                {"","APP","GETPCTEST3A","null","null","null","getpc","1"},
-                {"","APP","GETPCTEST3B","null","null","null","getpc","1"},
-                {"","APP","GETPCTEST4A","null","null","null","getpc4a","1"},
-                {"","APP","GETPCTEST4B","null","null","null","getpc4b","1"},
-                {"","APP","GETPCTEST4BX","null","null","null","getpc4b","1"},
+        Object[][] expRS = new Object[][] {
+                {"","APP","GETPCTEST1",null,null,null,getpc,i(1),genid},
+                {"","APP","GETPCTEST2",null,null,null,getpc,i(1),genid},
+                {"","APP","GETPCTEST3A",null,null,null,getpc,i(1),genid},
+                {"","APP","GETPCTEST3B",null,null,null,getpc,i(1),genid},
+                {"","APP","GETPCTEST4A",null,null,null,getpc4a,i(1),genid},
+                {"","APP","GETPCTEST4B",null,null,null,getpc4b,i(1),genid},
+                {"","APP","GETPCTEST4BX",null,null,null,getpc4b,i(1),genid},
         };
 
         if ( supportsBoolean )
@@ -4487,102 +4495,91 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             expRS = appendArray
                 (
                  expRS,
-                 new String[][]
+                 new Object[][]
                  {
-                     {"","APP","GETPCTEST5","null","null","null","foo","1"},
+                     {"","APP","GETPCTEST5",null,null,null,foo,i(1),genid},
                  }
                  );
         }
-        for (int j=0 ; j<2 ; j++)
-        {
-            int rowcount = 0;
-            while (rowcount < expRS.length){
-                rs[j].next();
-                assertEquals(expRS[rowcount][0], rs[j].getString(1));
-                assertEquals(expRS[rowcount][1], rs[j].getString(2));
-                assertEquals(expRS[rowcount][2], rs[j].getString(3));
-                assertNull(rs[j].getString(4));
-                assertNull(rs[j].getString(5));
-                assertNull(rs[j].getString(6));
-                assertTrue(rs[j].getString(7).indexOf(expRS[rowcount][6])>0);
-                assertEquals(expRS[rowcount][7], rs[j].getString(8));
-                if (j == 0)
-                    assertNotNull(rs[j].getString(9));
-                rowcount++;
-            }
+
+        // Check the JDBC variant of getProcedures().
+        JDBC.assertFullResultSet(rs[0], expRS, false);
+
+        // Check the ODBC variant of getProcedures(). It's identical to the
+        // JDBC variant, except that it lacks the last column.
+        for (int i = 0; i < expRS.length; i++) {
+            Object[] jdbcRow = expRS[i];
+            Object[] odbcRow = new Object[jdbcRow.length - 1];
+            System.arraycopy(jdbcRow, 0, odbcRow, 0, odbcRow.length);
+            expRS[i] = odbcRow;
         }
+        JDBC.assertFullResultSet(rs[1], expRS, false);
+
         rs = getProcedureColumns(null, "%", "GETPCTEST%", "%");
 
-        expRS = new String[][] {
-                {null,"APP","GETPCTEST1","OUTB","4","12","VARCHAR","3","6",null,null,"1",null,null,"12",null,"6","1","YES","genid","12","0"},
-                {null,"APP","GETPCTEST1","A","1","12","VARCHAR","3","6",null,null,"1",null,null,"12",null,"6","2","YES","genid","12","1"},
-                {null,"APP","GETPCTEST1","B","1","2","NUMERIC","5","14","0","10","1",null,null,"2",null,null,"3","YES","genid","12","2"},
-                {null,"APP","GETPCTEST1","C","1","5","SMALLINT","5","2","0","10","1",null,null,"5",null,null,"4","YES","genid","12","3"},
-                {null,"APP","GETPCTEST1","E","1","5","SMALLINT","5","2","0","10","1",null,null,"5",null,null,"5","YES","genid","12","4"},
-                {null,"APP","GETPCTEST1","F","1","4","INTEGER","10","4","0","10","1",null,null,"4",null,null,"6","YES","genid","12","5"},                
-                {null,"APP","GETPCTEST1","G","1","-5","BIGINT","19","40","0","10","1",null,null,"-5",null,null,"7","YES","genid","12","6"},                
-                {null,"APP","GETPCTEST1","H","1","8","DOUBLE","52","8",null,"2","1",null,null,"8",null,null,"8","YES","genid","12","7"},                
-                {null,"APP","GETPCTEST1","I","1","8","DOUBLE","52","8",null,"2","1",null,null,"8",null,null,"9","YES","genid","12","8"},                
-                {null,"APP","GETPCTEST1","K","1","91","DATE","10","6","0","10","1",null,null,"9","1",null,"10","YES","genid","12","9"},                
-                {null,"APP","GETPCTEST1","L","1","92","TIME","8","6","0","10","1",null,null,"9","2",null,"11","YES","genid","12","10"},                
-                {null,"APP","GETPCTEST1","T","1","93","TIMESTAMP","29","16","9","10","1",null,null,"9","3",null,"12","YES","genid","12","11"},                
-                {null,"APP","GETPCTEST2","PA","1","4","INTEGER","10","4","0","10","1",null,null,"4",null,null,"1","YES","genid","2","0"},
-                {null,"APP","GETPCTEST2","PB","1","-5","BIGINT","19","40","0","10","1",null,null,"-5",null,null,"2","YES","genid","2","1"},
-                {null,"APP","GETPCTEST3A","STRING1","1","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","1","YES","genid","2","0"}, 
-                {null,"APP","GETPCTEST3A","STRING2","4","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","2","YES","genid","2","1"},
-                {null,"APP","GETPCTEST3B","STRING3","1","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","1","YES","genid","2","0"},
-                {null,"APP","GETPCTEST3B","STRING4","2","12","VARCHAR","5","10",null,null,"1",null,null,"12",null,"10","2","YES","genid","2","1"},
-                {null,"APP","GETPCTEST4BX","RETPARAM","4","4","INTEGER","10","4","0","10","1",null,null,"4",null,null,"1","YES","genid","1","0"},
+        expRS = new Object[][] {
+                {null,"APP","GETPCTEST1","OUTB",i(4),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,null,i(12),null,i(6),i(1),"YES",genid,i(12),i(0)},
+                {null,"APP","GETPCTEST1","A",i(1),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,null,i(12),null,i(6),i(2),"YES",genid,i(12),i(1)},
+                {null,"APP","GETPCTEST1","B",i(1),i(2),"NUMERIC",i(5),i(14),i(0),i(10),i(1),null,null,i(2),null,null,i(3),"YES",genid,i(12),i(2)},
+                {null,"APP","GETPCTEST1","C",i(1),i(5),"SMALLINT",i(5),i(2),i(0),i(10),i(1),null,null,i(5),null,null,i(4),"YES",genid,i(12),i(3)},
+                {null,"APP","GETPCTEST1","E",i(1),i(5),"SMALLINT",i(5),i(2),i(0),i(10),i(1),null,null,i(5),null,null,i(5),"YES",genid,i(12),i(4)},
+                {null,"APP","GETPCTEST1","F",i(1),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(4),null,null,i(6),"YES",genid,i(12),i(5)},
+                {null,"APP","GETPCTEST1","G",i(1),i(-5),"BIGINT",i(19),i(40),i(0),i(10),i(1),null,null,i(-5),null,null,i(7),"YES",genid,i(12),i(6)},
+                {null,"APP","GETPCTEST1","H",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(8),null,null,i(8),"YES",genid,i(12),i(7)},
+                {null,"APP","GETPCTEST1","I",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(8),null,null,i(9),"YES",genid,i(12),i(8)},
+                {null,"APP","GETPCTEST1","K",i(1),i(91),"DATE",i(10),i(6),i(0),i(10),i(1),null,null,i(9),i(1),null,i(10),"YES",genid,i(12),i(9)},
+                {null,"APP","GETPCTEST1","L",i(1),i(92),"TIME",i(8),i(6),i(0),i(10),i(1),null,null,i(9),i(2),null,i(11),"YES",genid,i(12),i(10)},
+                {null,"APP","GETPCTEST1","T",i(1),i(93),"TIMESTAMP",i(29),i(16),i(9),i(10),i(1),null,null,i(9),i(3),null,i(12),"YES",genid,i(12),i(11)},
+                {null,"APP","GETPCTEST2","PA",i(1),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(4),null,null,i(1),"YES",genid,i(2),i(0)},
+                {null,"APP","GETPCTEST2","PB",i(1),i(-5),"BIGINT",i(19),i(40),i(0),i(10),i(1),null,null,i(-5),null,null,i(2),"YES",genid,i(2),i(1)},
+                {null,"APP","GETPCTEST3A","STRING1",i(1),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(1),"YES",genid,i(2),i(0)},
+                {null,"APP","GETPCTEST3A","STRING2",i(4),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(2),"YES",genid,i(2),i(1)},
+                {null,"APP","GETPCTEST3B","STRING3",i(1),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(1),"YES",genid,i(2),i(0)},
+                {null,"APP","GETPCTEST3B","STRING4",i(2),i(12),"VARCHAR",i(5),i(10),null,null,i(1),null,null,i(12),null,i(10),i(2),"YES",genid,i(2),i(1)},
+                {null,"APP","GETPCTEST4BX","RETPARAM",i(4),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(4),null,null,i(1),"YES",genid,i(1),i(0)},
         };
         if ( supportsBoolean )
         {
             expRS = appendArray
                 (
                  expRS,
-                 new String[][]
+                 new Object[][]
                  {
-                     {null,"APP","GETPCTEST5","INARG","1","16","BOOLEAN","1","1",null,null,"1",null,null,"16",null,null,"1","YES","genid","3","0"},
-                     {null,"APP","GETPCTEST5","OUTARG","4","16","BOOLEAN","1","1",null,null,"1",null,null,"16",null,null,"2","YES","genid","3","1"},
-                     {null,"APP","GETPCTEST5","INOUTARG","2","16","BOOLEAN","1","1",null,null,"1",null,null,"16",null,null,"3","YES","genid","3","2"},
+                     {null,"APP","GETPCTEST5","INARG",i(1),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(1),"YES",genid,i(3),i(0)},
+                     {null,"APP","GETPCTEST5","OUTARG",i(4),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(2),"YES",genid,i(3),i(1)},
+                     {null,"APP","GETPCTEST5","INOUTARG",i(2),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(16),null,null,i(3),"YES",genid,i(3),i(2)},
                  }
                  );
         }
-        for (int j=0 ; j<2 ; j++)
-        {
-            int rowcount = 0;
-            while (rowcount < expRS.length){
-                rs[j].next();
-                for (int k=0 ; k<19 ; k++){
-                    if (j == 0 && (k == 14 || k == 15))
-                        assertNull(rs[j].getString(k+1));
-                    else
-                    {
-                        // the datetime rows are a little different with odbc.
-                        if (j==1 && k==9 && rowcount==9)
-                            assertNull(rs[j].getString(k+1));
-                        else if (j==1 && k==10 && 
-                                (rowcount==9 || rowcount==10 || rowcount==11))
-                            assertEquals("2",rs[j].getString(k+1));
-                        else
-                            assertEquals(expRS[rowcount][k], rs[j].getString(k+1));
-                    }
-                }
-                if (j == 0)
-                {
-                    // one column more for jdbc...
-                    assertNotNull(rs[j].getString(20));
-                    assertEquals(expRS[rowcount][20], rs[j].getString(21));
-                    assertEquals(expRS[rowcount][21], rs[j].getString(22));
-                }
-                else
-                {
-                    assertEquals(expRS[rowcount][20], rs[j].getString(20));
-                    assertEquals(expRS[rowcount][21], rs[j].getString(21));
-                }                
-                rowcount++;
+
+        Object[][] jdbcExpRS = new Object[expRS.length][];
+        Object[][] odbcExpRS = new Object[expRS.length][];
+        for (int i = 0; i < jdbcExpRS.length; i++) {
+            Object[] row = expRS[i];
+
+            // JDBC variant has always null in column #15 (SQL_DATA_TYPE) and
+            // column #16 (SQL_DATETIME_SUB)
+            Object[] jdbcRow = (Object[]) row.clone();
+            jdbcRow[14] = jdbcRow[15] = null;
+
+            // ODBC variant lacks column #20 (SPECIFIC_NAME)...
+            ArrayList odbcRow = new ArrayList(Arrays.asList(row));
+            odbcRow.remove(19);
+            // ... and it is a bit different in the datetime rows
+            if (i == 9) {
+                odbcRow.set(9, null);
             }
+            if (i >= 9 && i <= 11) {
+                odbcRow.set(10, i(2));
+            }
+
+            jdbcExpRS[i] = jdbcRow;
+            odbcExpRS[i] = odbcRow.toArray();
         }
-        
+
+        JDBC.assertFullResultSet(rs[0], jdbcExpRS, false);
+        JDBC.assertFullResultSet(rs[1], odbcExpRS, false);
+
         if ( supportsBoolean ) { s.execute("drop procedure GETPCTEST5"); }
         s.execute("drop procedure GETPCTEST4Bx");
         s.execute("drop procedure GETPCTEST4B");
@@ -4593,15 +4590,19 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         s.execute("drop procedure GETPCTEST1");
         commit();
     }
-    private String[][] appendArray( String[][] target, String[][] suffix )
+
+    /**
+     * Append one two-dimensional array to another.
+     */
+    private Object[][] appendArray(Object[][] target, Object[][] suffix)
     {
         int targetLength = target.length;
         int suffixLength = suffix.length;
         int resultLength = targetLength + suffixLength;
 
-        String[][] result = new String[ resultLength ][];
-        for ( int i = 0; i < targetLength; i++ ) { result[ i ] = target[ i ]; }
-        for ( int i = 0; i < suffixLength; i++ ) { result[ targetLength + i ] = suffix[ i ]; }
+        Object[][] result = new Object[resultLength][];
+        System.arraycopy(target, 0, result, 0, targetLength);
+        System.arraycopy(suffix, 0, result, targetLength, suffixLength);
 
         println( "Appended array" );
 
@@ -4819,41 +4820,48 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         
         ResultSet rs = (ResultSet) gfcMethod.invoke( dmd, new String[] { null, "%", "F_GFC_%", "%" } );
 
-        String[][] expRS = new String[][]
-            {
-                {null,"APP","F_GFC_1","","4","4","INTEGER","10","4","0","10","1",null,null,"0","YES","genid","11","-1"},                
-                {null,"APP","F_GFC_1","A","1","12","VARCHAR","3","6",null,null,"1",null,"6","1","YES","genid","11","0"},
-                {null,"APP","F_GFC_1","B","1","2","NUMERIC","5","14","0","10","1",null,null,"2","YES","genid","11","1"},
-                {null,"APP","F_GFC_1","C","1","5","SMALLINT","5","2","0","10","1",null,null,"3","YES","genid","11","2"},
-                {null,"APP","F_GFC_1","E","1","1","CHAR","3","6",null,null,"1",null,"6","4","YES","genid","11","3"},
-                {null,"APP","F_GFC_1","F","1","4","INTEGER","10","4","0","10","1",null,null,"5","YES","genid","11","4"},                
-                {null,"APP","F_GFC_1","G","1","-5","BIGINT","19","40","0","10","1",null,null,"6","YES","genid","11","5"},                
-                {null,"APP","F_GFC_1","H","1","8","DOUBLE","52","8",null,"2","1",null,null,"7","YES","genid","11","6"},                
-                {null,"APP","F_GFC_1","I","1","8","DOUBLE","52","8",null,"2","1",null,null,"8","YES","genid","11","7"},                
-                {null,"APP","F_GFC_1","K","1","91","DATE","10","6","0","10","1",null,null,"9","YES","genid","11","8"},                
-                {null,"APP","F_GFC_1","L","1","92","TIME","8","6","0","10","1",null,null,"10","YES","genid","11","9"},                
-                {null,"APP","F_GFC_1","T","1","93","TIMESTAMP","29","16","9","10","1",null,null,"11","YES","genid","11","10"},                
-            };
+        JDBC.GeneratedId genid = new JDBC.GeneratedId();
+
+        Object[][] expRS = new Object[][] {
+            {null,"APP","F_GFC_1","",i(4),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(0),"YES",genid,i(11),i(-1)},
+            {null,"APP","F_GFC_1","A",i(1),i(12),"VARCHAR",i(3),i(6),null,null,i(1),null,i(6),i(1),"YES",genid,i(11),i(0)},
+            {null,"APP","F_GFC_1","B",i(1),i(2),"NUMERIC",i(5),i(14),i(0),i(10),i(1),null,null,i(2),"YES",genid,i(11),i(1)},
+            {null,"APP","F_GFC_1","C",i(1),i(5),"SMALLINT",i(5),i(2),i(0),i(10),i(1),null,null,i(3),"YES",genid,i(11),i(2)},
+            {null,"APP","F_GFC_1","E",i(1),i(1),"CHAR",i(3),i(6),null,null,i(1),null,i(6),i(4),"YES",genid,i(11),i(3)},
+            {null,"APP","F_GFC_1","F",i(1),i(4),"INTEGER",i(10),i(4),i(0),i(10),i(1),null,null,i(5),"YES",genid,i(11),i(4)},
+            {null,"APP","F_GFC_1","G",i(1),i(-5),"BIGINT",i(19),i(40),i(0),i(10),i(1),null,null,i(6),"YES",genid,i(11),i(5)},
+            {null,"APP","F_GFC_1","H",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(7),"YES",genid,i(11),i(6)},
+            {null,"APP","F_GFC_1","I",i(1),i(8),"DOUBLE",i(52),i(8),null,i(2),i(1),null,null,i(8),"YES",genid,i(11),i(7)},
+            {null,"APP","F_GFC_1","K",i(1),i(91),"DATE",i(10),i(6),i(0),i(10),i(1),null,null,i(9),"YES",genid,i(11),i(8)},
+            {null,"APP","F_GFC_1","L",i(1),i(92),"TIME",i(8),i(6),i(0),i(10),i(1),null,null,i(10),"YES",genid,i(11),i(9)},
+            {null,"APP","F_GFC_1","T",i(1),i(93),"TIMESTAMP",i(29),i(16),i(9),i(10),i(1),null,null,i(11),"YES",genid,i(11),i(10)},
+        };
+
         if ( supportsBoolean )
         {
             expRS = appendArray
                 (
                  expRS,
-                 new String[][]
+                 new Object[][]
                  {
-                     {null,"APP","F_GFC_2","","4","16","BOOLEAN","1","1",null,null,"1",null,null,"0","YES","genid","1","-1"},
-                     {null,"APP","F_GFC_2","A","1","16","BOOLEAN","1","1",null,null,"1",null,null,"1","YES","genid","1","0"},
+                     {null,"APP","F_GFC_2","",i(4),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(0),"YES",genid,i(1),i(-1)},
+                     {null,"APP","F_GFC_2","A",i(1),i(16),"BOOLEAN",i(1),i(1),null,null,i(1),null,null,i(1),"YES",genid,i(1),i(0)},
                  }
                  );
         }
 
-        int rowcount = 0;
+        JDBC.assertFullResultSet(rs, expRS, false);
 
-        assertResults( rs, expRS, true );
-        
         if ( supportsBoolean ) { s.execute("drop function f_gfc_2"); }
         s.execute("drop function f_gfc_1");
         commit();
+    }
+
+    /**
+     * Convert an {@code int} to a {@code java.lang.Integer}.
+     */
+    private static Integer i(int i) {
+        return new Integer(i);
     }
 
     public void testBugFixes() throws SQLException {
@@ -4997,43 +5005,4 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             if ( ps != null ) { ps.close(); }
         }
     }
-
-    /**
-     * Assert that the ResultSet returns the desired rows.
-     */
-    private void assertResults( ResultSet rs, String[][] rows, boolean trimResults )
-        throws Exception
-    {
-        int     actualColumnCount = rs.getMetaData().getColumnCount();
-        int     rowCount = rows.length;
-
-        for ( int i = 0; i < rowCount; i++ )
-        {
-            String[]    row = rows[ i ];
-            int             columnCount = row.length;
-
-            assertTrue( rs.next() );
-            assertEquals( columnCount, actualColumnCount );
-
-            for ( int j = 0; j < columnCount; j++ )
-            {
-                String  expectedValue =  row[ j ];
-                //println( "XXX (row, column ) ( " + i + ", " +  j + " ) should be " + expectedValue );
-                String  actualValue = null;
-                int         column = j+1;
-
-                actualValue = rs.getString( column );
-                if ( rs.wasNull() ) { actualValue = null; }
-
-                if ( (actualValue != null) && trimResults ) { actualValue = actualValue.trim(); }
-                
-                assertEquals( (expectedValue == null), rs.wasNull() );
-                
-                if ( expectedValue == null )    { assertNull( actualValue ); }
-                else if ( "genid".equals( expectedValue ) ) { assertTrue( actualValue.startsWith( "SQL" ) ); }
-                else { assertEquals(expectedValue, actualValue); }
-            }
-        }
-    }
-
 }
