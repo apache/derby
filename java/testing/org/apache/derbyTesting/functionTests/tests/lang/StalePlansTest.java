@@ -50,27 +50,12 @@ public class StalePlansTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         Properties props = new Properties();
+        // Check for stale plans on every 10th execution (default 100) to
+        // reduce the number of times we need to execute each statement.
         props.setProperty("derby.language.stalePlanCheckInterval", "10");
-        props.setProperty("derby.storage.checkpointInterval", "100000");
         Test suite = new DatabasePropertyTestSetup(
             new TestSuite(StalePlansTest.class), props, true);
-        return new CleanDatabaseTestSetup(suite) {
-            protected void decorateSQL(Statement s) throws SQLException {
-                // Create and populate a table to be used for flushing the
-                // cache. Flushing the cache causes all row count changes to be
-                // written, which is necessary for the results of this test to
-                // be stable (because otherwise the row count changes would be
-                // written asynchronously)
-                s.executeUpdate("create table flusher (c1 varchar(3000))");
-                PreparedStatement ps = getConnection().prepareStatement(
-                    "insert into flusher values ?");
-                ps.setString(1, Formatters.padString("a", 3000));
-                for (int i = 0; i < 64; i++) {
-                    ps.executeUpdate();
-                }
-                ps.close();
-            }
-        };
+        return new CleanDatabaseTestSetup(suite);
     }
 
     /**
@@ -98,12 +83,15 @@ public class StalePlansTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Flush the cache so that row count changes are visible.
+     * Flush the cache so that row count changes are visible. When a dirty
+     * page is written to disk, the row count estimate for the container will
+     * be updated with the number of added/deleted rows on that page since
+     * the last time the page was read from disk or written to disk. We invoke
+     * a checkpoint in order to force all dirty pages to be flushed and make
+     * all row count changes visible.
      */
     private void flushRowCount(Statement stmt) throws SQLException {
-        JDBC.assertFullResultSet(
-            stmt.executeQuery("select count(c1) from flusher"),
-            new String[][] { { "64" } });
+        stmt.execute("CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()");
     }
 
     /**
@@ -234,8 +222,9 @@ public class StalePlansTest extends BaseJDBCTestCase {
                    getRuntimeStatisticsParser(stmt).usedIndexScan());
         commit();
 
-        // Change the row count a little bit
-        for (int i = 1025; i <= 1034; i++) {
+        // Change the row count a little bit. A recompile will only be
+        // triggered if the row count changes by 10% or more.
+        for (int i = 1025; i <= 1250; i++) {
             insert.setInt(1, i);
             insert.setInt(2, i);
             insert.executeUpdate();
@@ -254,8 +243,7 @@ public class StalePlansTest extends BaseJDBCTestCase {
 
         // Execute 11 more times, the plan should not change
         for (int i = 0; i < 11; i++) {
-            JDBC.assertFullResultSet(ps.executeQuery(),
-                                     new String[][] { { "1034" } });
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), "1250");
         }
 
         // Expect this to use table scan, as the above update has basically
@@ -272,8 +260,7 @@ public class StalePlansTest extends BaseJDBCTestCase {
 
         // Execute 11 times, the plan should change
         for (int i = 0; i < 11; i++) {
-            JDBC.assertFullResultSet(ps.executeQuery(),
-                                     new String[][] { { "2068" } });
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), "2500");
         }
 
         // Expect this to do table scan
