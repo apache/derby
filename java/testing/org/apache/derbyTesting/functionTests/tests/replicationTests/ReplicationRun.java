@@ -338,18 +338,19 @@ public class ReplicationRun extends BaseTestCase
                 if ( (errCode == -1)
                 && (sState.equalsIgnoreCase(expectedState) ) )
                 {
+                    if (count++ >= 600) {
+                        // Have tried 600 * 200 ms == 2 minutes without
+                        // success, so give up now.
+                        fail("Failover did not succeed", se);
+                    }
                     util.DEBUG("Failover not complete.");
                     Thread.sleep(sleeptime); // ms.
                 }
                 else
                 {
-                    se.printStackTrace(); // FIXME!
-                    assertTrue("Connect failed. " + lastmsg, false);
-                    return;
+                    fail("Connect failed", se);
                 }
             }
-            
-            assertTrue("Failover did not succeed.", count++ < 600); // 600*200ms = 120s = 2mins.
         }
     }
     
@@ -389,7 +390,7 @@ public class ReplicationRun extends BaseTestCase
     {
         int count = 0;
         String msg = null;
-        while ( count++ <= tries )
+        while (true)
         {
             try
             {
@@ -406,14 +407,16 @@ public class ReplicationRun extends BaseTestCase
             }
             catch ( SQLException se )
             {
+                if (count++ > tries) {
+                    fail("Could not connect in " + (tries * sleepTime) + " ms",
+                          se);
+                }
                 msg = se.getErrorCode() + "' '" + se.getSQLState()
                         + "' '" + se.getMessage();
                 util.DEBUG(count  + " got '" + msg +"'.");
                 Thread.sleep(sleepTime); // ms. Sleep and try again...
             }
         }        
-        assertTrue(msg + ": Could NOT connect in "
-                + tries+"*"+sleepTime + "ms.",false);
     }
     void waitForSQLState(String expectedState, 
             long sleepTime, int tries,
@@ -423,7 +426,7 @@ public class ReplicationRun extends BaseTestCase
     {
         int count = 0;
         String msg = null;
-        while ( count++ <= tries )
+        while (true)
         {
             try
             {
@@ -454,16 +457,17 @@ public class ReplicationRun extends BaseTestCase
                             + (count-1)+"*"+sleepTime + "ms.");
                     return; // Got desired SQLState.
                 }
+                else if (count++ > tries)
+                {
+                    fail("SQLState '" + expectedState + "' was not reached in "
+                            + (tries * sleepTime) + " ms", se);
+                }
                 else
                 {
                     Thread.sleep(sleepTime); // ms. Sleep and try again...
                 }
             }
-            
         }
-        assertTrue(msg + ": SQLState '"+expectedState+"' was not reached in "
-                + tries+"*"+sleepTime + "ms.",false);
-        
     }
     void shutdownDb(String jvmVersion, // Not yet used
             String serverHost, int serverPort, 
@@ -482,10 +486,11 @@ public class ReplicationRun extends BaseTestCase
         try{
             Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
             DriverManager.getConnection(dbURL+";shutdown=true");
+            fail("Database shutdown should throw exception");
         }
         catch (SQLException se)
         {
-            
+            BaseJDBCTestCase.assertSQLState("08006", se);
         }
         
     }
@@ -1051,6 +1056,11 @@ public class ReplicationRun extends BaseTestCase
                     if ( (errCode == -1)
                     && (sState.equalsIgnoreCase(expectedState) ) )
                     {
+                        if (count++ > 1200) {
+                            // Have tried for 1200 * 100 ms == 2 minutes
+                            // without success. Give up.
+                            fail("startMaster did not succeed", se);
+                        }
                         util.DEBUG("Not ready to startMaster. "
                                 +"Beware: Will also report "
                                 + "'... got a fatal error for database '...../<dbname>'"
@@ -1068,8 +1078,6 @@ public class ReplicationRun extends BaseTestCase
                         throw se;
                     }
                 }
-
-                assertTrue("startMaster did not succeed.", count++ < 1200); // 1200*100ms = 120s = 2mins.
             }
             util.DEBUG("startMaster_direct exit.");
     }
@@ -1078,14 +1086,10 @@ public class ReplicationRun extends BaseTestCase
      * Get a connection to the master database.
      * @return A connection to the master database
      */
-    protected Connection getMasterConnection() {
+    protected Connection getMasterConnection() throws SQLException {
         if (masterConn == null) {
             String url = masterURL(replicatedDb);
-            try {
-                masterConn = DriverManager.getConnection(url);
-            } catch (SQLException sqle) {
-                fail("Could not connect to master database");
-            }
+            masterConn = DriverManager.getConnection(url);
         }
         return masterConn;
     }
@@ -1094,14 +1098,10 @@ public class ReplicationRun extends BaseTestCase
      * Get a connection to the slave database.
      * @return A connection to the slave database
      */
-    protected Connection getSlaveConnection() {
+    protected Connection getSlaveConnection() throws SQLException {
         if (slaveConn == null) {
             String url = slaveURL(replicatedDb);
-            try {
-                slaveConn = DriverManager.getConnection(url);
-            } catch (SQLException sqle) {
-                fail("Could not connect to slave database");
-            }
+            slaveConn = DriverManager.getConnection(url);
         }
         return slaveConn;
     }
