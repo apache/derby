@@ -30,7 +30,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.types.PositionedStream;
-import org.apache.derby.shared.common.error.ExceptionUtil;
+import org.apache.derby.iapi.error.ExceptionUtil;
 
 /**
  * This input stream is built on top of {@link LOBStreamControl}.

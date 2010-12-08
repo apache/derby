@@ -29,6 +29,7 @@ import org.apache.derby.iapi.error.PassThroughException;
 import org.apache.derby.iapi.error.ShutdownException;
 
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.error.ExceptionUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.reference.Property;
@@ -37,6 +38,7 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -302,9 +304,7 @@ public class ContextManager
 
 forever: for (;;) {
 
-			int errorSeverity = error instanceof StandardException ?
-				((StandardException) error).getSeverity() :
-				ExceptionSeverity.NO_APPLICABLE_SEVERITY;
+            int errorSeverity = getErrorSeverity(error);
  			if (reportError) {
 				errorStringBuilder.stackTrace(error);
 				flushErrorString();
@@ -331,6 +331,12 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 					lastHandler = ctx.isLastHandler(errorSeverity);
 
 					ctx.cleanupOnError(error);
+                    if (reportError
+                            && errorSeverity >= ExceptionSeverity.SESSION_SEVERITY) {
+                        threadDump = ExceptionUtil.dumpThreads();
+                    } else {
+                        threadDump = null;
+                    }
 				}
 				catch (StandardException se) {
 	
@@ -401,6 +407,8 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 				}
 			}
 
+            if (threadDump != null)
+                errorStream.println(threadDump);
 			if (reportError) {
 				errorStream.println("Cleanup action completed");
 				errorStream.flush();
@@ -504,6 +512,29 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 		return !(t instanceof ShutdownException);
 
 	}
+    
+    /**
+     * return the severity of the exception. Currently, this method 
+     * does not determine a severity that is not StandardException 
+     * or SQLException.
+     * @param error - Throwable error
+     * 
+     * @return int vendorcode/severity for the Throwable error
+     *            - error/exception to extract vendorcode/severity. 
+     *            For error that we can not get severity, 
+     *            NO_APPLICABLE_SEVERITY will return.
+     */
+    public int getErrorSeverity(Throwable error) {
+        
+        if (error instanceof StandardException) {
+            return ((StandardException) error).getErrorCode();
+        }
+        
+        if (error instanceof SQLException) {
+            return ((SQLException) error).getErrorCode();
+        }
+        return ExceptionSeverity.NO_APPLICABLE_SEVERITY;
+    }
 
 	/**
 	 * Constructs a new instance. No CtxStacks are inserted into the
@@ -526,6 +557,8 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 
 	private HeaderPrintWriter errorStream;
 	private ErrorStringBuilder errorStringBuilder;
+    // DERBY-4856 add thread dump information.
+    private String threadDump;
 
 	private boolean shutdown;
 	private LocaleFinder finder;

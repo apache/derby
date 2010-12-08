@@ -27,7 +27,7 @@ import java.io.OutputStream;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.shared.common.error.ExceptionUtil;
+import org.apache.derby.iapi.error.ExceptionUtil;
 
 /**
  * This is an output stream built on top of LOBStreamControl.

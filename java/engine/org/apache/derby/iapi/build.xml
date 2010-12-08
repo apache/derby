@@ -60,6 +60,25 @@
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/error/**"/>
+      <exclude name="${derby.dir}/iapi/error/ThreadDump.java"/>
+    </javac>
+
+    <javac
+      source="1.5"
+      target="1.5"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="${debug}"
+      depend="${depend}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.engine.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+         <pathelement path="${java15compile.classpath}"/>
+      </classpath>
+      <include name="${derby.dir}/iapi/error/ThreadDump.java"/>
     </javac>
     <ant dir="${derby.engine.dir}/iapi/types" />
     <ant dir="${derby.engine.dir}/iapi/util"/>
