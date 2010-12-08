@@ -496,18 +496,6 @@ public interface DependencyManager {
 	public int countDependencies() 		throws StandardException;
 
 	/**
-	 * Dump out debugging info on all of the dependencies currently
-	 * within the system.
-	 *
-	 * @return String	Debugging info on the dependencies.
-	 *					(null if SanityManger.DEBUG is false)
-
-		@exception StandardException thrown if something goes wrong
-		@exception java.sql.SQLException thrown if something goes wrong
-	 */
-	public String dumpDependencies() throws StandardException, java.sql.SQLException;
-	
-	/**
 	 	Erases all of the dependencies the dependent has, be they
 	 	valid or invalid, of any dependency type.  This action is
 	 	usually performed as the first step in revalidating a

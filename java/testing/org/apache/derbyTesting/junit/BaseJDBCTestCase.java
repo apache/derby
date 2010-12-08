@@ -34,6 +34,7 @@ import java.security.PrivilegedActionException;
 import java.net.URL;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -53,6 +54,9 @@ import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
  */
 public abstract class BaseJDBCTestCase
     extends BaseTestCase {
+
+    private static final boolean ORDERED = true;
+    private static final boolean UNORDERED = false;
 
     /**
      * Maintain a single connection to the default
@@ -950,8 +954,49 @@ public abstract class BaseJDBCTestCase
      * @param query the query to compile and execute.
      */
     public static void assertStatementError(String[] sqlStates,
-        Statement st, String query)
-    {
+            Statement st, String query) {
+        assertStatementErrorMinion(sqlStates, ORDERED, st, query);
+    }
+
+    /**
+     * Assert that the query fails (either in compilation,
+     * execution, or retrieval of results--doesn't matter)
+     * and throws a SQLException with the expected states.
+     *
+     * Assumption is that 'query' does *not* have parameters
+     * that need binding and thus can be executed using a
+     * simple Statement.execute() call.
+     *
+     * If there are extra chained SQLExceptions that are
+     * not in sqlStates, this method will not fail.
+     *
+     * @param sqlStates  expected sql states.
+     * @param st Statement object on which to execute.
+     * @param query the query to compile and execute.
+     */
+    public static void assertStatementErrorUnordered(String[] sqlStates,
+            Statement st, String query) {
+        assertStatementErrorMinion(sqlStates, UNORDERED, st, query);
+    }
+
+    /**
+     * Asserts that the given statement fails (compilation, execution or
+     * retrieval of results) and throws an {@code SQLException} with the
+     * expected (chained) states.
+     *
+     * @param sqlStates the expected states
+     * @param orderedStates whether or not the states are expected in the
+     *      specified order or not
+     * @param st the statement used to execute the query
+     * @param query the query to execute
+     */
+    private static void assertStatementErrorMinion(
+            String[] sqlStates, boolean orderedStates,
+            Statement st, String query) {
+        ArrayList statesBag = null;
+        if (!orderedStates) {
+            statesBag = new ArrayList(Arrays.asList(sqlStates));
+        }
         try {
             boolean haveRS = st.execute(query);
             fetchAndDiscardAllResults(st, haveRS);
@@ -963,7 +1008,15 @@ public abstract class BaseJDBCTestCase
         } catch (SQLException se) {
             int count = 0;
             do {
-                assertSQLState(sqlStates[count], se);
+                if (orderedStates) {
+                    assertSQLState(sqlStates[count], se);
+                } else {
+                    String state = se.getSQLState();
+                    assertTrue("Unexpected state: " + state,
+                            statesBag.remove(state));
+                    // Run through assertSQLStates too, to catch invalid states.
+                    assertSQLState(state, se);
+                }
                 count++;
                 se = se.getNextException();
             } while (se != null && count < sqlStates.length);

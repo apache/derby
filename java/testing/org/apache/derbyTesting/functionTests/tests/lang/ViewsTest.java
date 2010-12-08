@@ -1,10 +1,29 @@
+/*
+
+   Derby - Class org.apache.derbyTesting.functionTests.tests.lang.ViewsTest
+
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+ */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -15,8 +34,6 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.Utilities;
-
 
 public final class ViewsTest extends BaseJDBCTestCase {
 
@@ -222,11 +239,13 @@ public final class ViewsTest extends BaseJDBCTestCase {
         
         assertStatementError("X0X95", st,
             " drop view cv8");
-        
-        assertStatementError(new String[] {"X0Y23","X0Y23","X0Y23","X0X95"}, st,
+
+        assertStatementErrorUnordered(
+            new String[] {"X0Y23","X0Y23","X0Y23","X0X95"}, st,
             " drop view sv5");
         
-        assertStatementError(new String[] {"X0Y23","X0Y23","X0Y23","X0Y23","X0X95"}, st,
+        assertStatementErrorUnordered(
+            new String[] {"X0Y23","X0Y23","X0Y23","X0Y23","X0X95"}, st,
             " drop view sv4");
         
         c1.close();

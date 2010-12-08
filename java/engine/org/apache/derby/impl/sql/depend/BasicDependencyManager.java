@@ -21,10 +21,13 @@
 
 package org.apache.derby.impl.sql.depend;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
@@ -51,9 +54,23 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.impl.sql.compile.CreateViewNode;
 
 /**
-	The dependency manager tracks needs that dependents have of providers.
+ * The dependency manager tracks needs that dependents have of providers.
+ * <p>
+ * A dependency can be either persistent or non-persistent. Persistent
+ * dependencies are stored in the data dictionary, and non-persistent
+ * dependencies are stored within the dependency manager itself (in memory).
+ * <p>
+ * <em>Synchronization:</em> The need for synchronization is different depending
+ * on whether the dependency is an in-memory dependency or a stored dependency.
+ * When accessing and modifying in-memory dependencies, Java synchronization
+ * must be used (specifically, we synchronize on {@code this}). When accessing
+ * and modifying stored dependencies, which are stored in the data dictionary,
+ * we expect that the locking protocols will provide the synchronization needed.
+ * Note that stored dependencies should not be accessed while holding the
+ * monitor of {@code this}, as this may result in deadlocks. So far the need
+ * for synchronization across both in-memory and stored dependencies hasn't
+ * occured.
  */
-
 public class BasicDependencyManager implements DependencyManager {
   
     /**
@@ -72,7 +89,8 @@ public class BasicDependencyManager implements DependencyManager {
      * Dependency objects in the List are unique.
      * 
      */
-    private final Hashtable dependents = new Hashtable();
+    //@GuardedBy("this")
+    private final Map dependents = new HashMap();
     
     /**
      * Map of in-memory dependencies for Providers.
@@ -85,7 +103,8 @@ public class BasicDependencyManager implements DependencyManager {
      * Dependency objects in the List are unique.
      * 
      */    
-    private final Hashtable providers = new Hashtable();
+    //@GuardedBy("this")
+    private final Map providers = new HashMap();
 
 
 	//
@@ -110,71 +129,107 @@ public class BasicDependencyManager implements DependencyManager {
 		throws StandardException {
 		addDependency(d, p, cm, null);
 	}
-	
-	private void addDependency(Dependent d, Provider p, ContextManager cm, 
-			TransactionController tc) throws StandardException {
 
-		synchronized(this)
-		{
-			Dependency dy = new BasicDependency(d, p);
+    /**
+     * Adds the dependency to the data dictionary or the in-memory dependency
+     * map.
+     * <p>
+     * The action taken is detmermined by whether the dependent and/or the
+     * provider are persistent.
+     *
+     * @param d the dependent
+     * @param p the provider
+     * @param cm context manager
+     * @param tc transaction controller, used to determine if any transactional
+     *      operations should be attempted carried out in a nested transaction.
+     *      If {@code tc} is {@code null}, the user transaction is used.
+     * @throws StandardException if adding the dependency fails
+     */
+    private void addDependency(Dependent d, Provider p,
+                               ContextManager cm, TransactionController tc)
+            throws StandardException {
+        // Dependencies are either in-memory or stored, but not both.
+        if (! d.isPersistent() || ! p.isPersistent()) {
+            addInMemoryDependency(d, p, cm);
+        } else {
+            addStoredDependency(d, p, cm, tc);
+        }
+    }
 
-			/* Dependencies are either in-memory or stored, but not both */
-			if (! d.isPersistent() || ! p.isPersistent())
-			{
-				/* Duplicate dependencies are not added to the lists.
-				 * If we find that the dependency we are trying to add in
-				 * one list is a duplicate, then it should be a duplicate in the
-				 * other list.
-				 */
-				boolean addedToDeps = false;
-				boolean addedToProvs = false;
-				
-				addedToDeps = addDependencyToTable(dependents, d.getObjectID(), dy);
-				if (addedToDeps)
-				{
-					addedToProvs = addDependencyToTable(providers, p.getObjectID(), dy);
-				}
-				else if (SanityManager.DEBUG)
-				{
-					addedToProvs = addDependencyToTable(providers, p.getObjectID(), dy);
-				}
+    /**
+     * Adds the dependency as an in-memory dependency.
+     *
+     * @param d the dependent
+     * @param p the provider
+     * @param cm context manager
+     * @throws StandardException if adding the dependency fails
+     * @see #addStoredDependency
+     */
+    private synchronized void addInMemoryDependency(Dependent d, Provider p,
+                                                    ContextManager cm)
+            throws StandardException {
+        Dependency dy = new BasicDependency(d, p);
 
-				/* Dependency should have been added to both or neither */
-				if (SanityManager.DEBUG)
-				{
-                    if (addedToDeps != addedToProvs)
-                    {
-                        SanityManager.THROWASSERT(
-                            "addedToDeps (" + addedToDeps + 
-                            ") and addedToProvs (" +
-                            addedToProvs + ") are expected to agree");
-                    }
-				}
+        // Duplicate dependencies are not added to the lists.
+        // If we find that the dependency we are trying to add in
+        // one list is a duplicate, then it should be a duplicate in the
+        // other list.
+        boolean addedToDeps = false;
+        boolean addedToProvs = false;
 
-				/* Add the dependency to the StatementContext, so that
-			 	* it can be cleared on a pre-execution error.
-			 	*/
-				StatementContext sc = (StatementContext) cm.getContext(org.apache.derby.iapi.reference.ContextId.LANG_STATEMENT);
-				sc.addDependency(dy);
-			}
-			else
-			{
-				/* Add a stored dependency */
-				LanguageConnectionContext	lcc = getLanguageConnectionContext(cm);
-				DependencyDescriptor		dependencyDescriptor;
-                // tc == null means do it in the user transaction
-                TransactionController tcToUse =
-                        (tc == null) ? lcc.getTransactionExecute() : tc;
-			
-				dependencyDescriptor = new DependencyDescriptor(d, p);
+        addedToDeps = addDependencyToTable(dependents, d.getObjectID(), dy);
+        if (addedToDeps) {
+            addedToProvs = addDependencyToTable(providers, p.getObjectID(), dy);
+        } else if (SanityManager.DEBUG) {
+            addedToProvs = addDependencyToTable(providers, p.getObjectID(), dy);
+        }
 
-				/* We can finally call the DataDictionary to store the dependency */
-				dd.addDescriptor(dependencyDescriptor, null,
-								 DataDictionary.SYSDEPENDS_CATALOG_NUM, true,
-								 tcToUse);
-			}
-		}
-	}
+        // Dependency should have been added to both or neither.
+        if (SanityManager.DEBUG) {
+            if (addedToDeps != addedToProvs) {
+                SanityManager.THROWASSERT(
+                    "addedToDeps (" + addedToDeps +
+                    ") and addedToProvs (" +
+                    addedToProvs + ") are expected to agree");
+            }
+        }
+
+        // Add the dependency to the StatementContext, so that
+        // it can be cleared on a pre-execution error.
+        StatementContext sc = (StatementContext) cm.getContext(
+                org.apache.derby.iapi.reference.ContextId.LANG_STATEMENT);
+        sc.addDependency(dy);
+    }
+
+    /**
+     * Adds the dependency as a stored dependency.
+     * <p>
+     * We expect that transactional locking (in the data dictionary) is enough
+     * to protect us from concurrent changes when adding stored dependencies.
+     * Adding synchronization here and accessing the data dictionary (which is
+     * transactional) may cause deadlocks.
+     *
+     * @param d the dependent
+     * @param p the provider
+     * @param cm context manager
+     * @param tc transaction controller (may be {@code null})
+     * @throws StandardException if adding the dependency fails
+     * @see #addInMemoryDependency
+     */
+    private void addStoredDependency(Dependent d, Provider p,
+                                     ContextManager cm,
+                                     TransactionController tc)
+            throws StandardException {
+        LanguageConnectionContext lcc = getLanguageConnectionContext(cm);
+        // tc == null means do it in the user transaction
+        TransactionController tcToUse =
+                (tc == null) ? lcc.getTransactionExecute() : tc;
+
+        // Call the DataDictionary to store the dependency.
+        dd.addDescriptor(new DependencyDescriptor(d, p), null,
+                         DataDictionary.SYSDEPENDS_CATALOG_NUM, true,
+                         tcToUse);
+    }
 
 	/**
 		drops a single dependency
@@ -248,18 +303,16 @@ public class BasicDependencyManager implements DependencyManager {
 		}
 	}
 
-	/**
-	 * A version of invalidateFor that does not provide synchronization among
-	 * invalidators.  If parameter "forSync" is true, it also provides
-	 * synchronization on the dependents.  Currently, this means synchronizing
-	 * on the prepared statements, which might be being executed on other
-	 * threads.
-	 * @param p			provider
-	 * @param action	The action causing the invalidate
-	 * @param lcc		Language connection context
-	 *
-	 * @exception StandardException		Thrown on error.
-	 */
+    /**
+     * A version of invalidateFor that does not provide synchronization among
+     * invalidators.
+     *
+     * @param p the provider
+     * @param action the action causing the invalidation
+     * @param lcc language connection context
+     *
+     * @throws StandardException if something goes wrong
+     */
 	private void coreInvalidateFor(Provider p, int action, LanguageConnectionContext lcc)
 		throws StandardException
 	{
@@ -445,36 +498,31 @@ public class BasicDependencyManager implements DependencyManager {
 	 */
 	public void clearDependencies(LanguageConnectionContext lcc, 
 									Dependent d, TransactionController tc) throws StandardException {
-		List deps = (List) dependents.get(d.getObjectID());
 
-		synchronized(this)
-		{
-			/* Remove all the stored dependencies */
-			if (d.isPersistent())
-			{
-				boolean wait = (tc == null);
-				
-				dd.dropDependentsStoredDependencies(d.getObjectID(),
-								((wait)?lcc.getTransactionExecute():tc),
-								wait);
-			}
+        UUID id = d.getObjectID();
+        // Remove all the stored dependencies.
+        if (d.isPersistent()) {
+            boolean wait = (tc == null);
+            dd.dropDependentsStoredDependencies(id,
+                            ((wait)?lcc.getTransactionExecute():tc),
+                            wait);
+        }
 
-			/* Now remove the in-memory dependencies */
-
-			if (deps == null) return; // already removed
-
-			// go through the list notifying providers to remove
-			// the dependency from their lists
-			for (ListIterator depsIterator = deps.listIterator();
-				depsIterator.hasNext(); ) {
-
-				Dependency dy = (Dependency)depsIterator.next();
-				clearProviderDependency(dy.getProviderKey(), dy);
-			}
-
-			dependents.remove(d.getObjectID());
-		}
-	}
+        // Now remove the in-memory dependencies, if any.
+        synchronized(this) {
+            List deps = (List) dependents.get(id);
+            if (deps != null) {
+                Iterator depsIter = deps.iterator();
+                // go through the list notifying providers to remove
+                // the dependency from their lists
+                while (depsIter.hasNext()) {
+                    Dependency dy = (Dependency)depsIter.next();
+                    clearProviderDependency(dy.getProviderKey(), dy);
+                }
+                dependents.remove(id);
+            }
+        }
+    }
 
 	/**
 	 * Clear the specified in memory dependency.
@@ -482,164 +530,100 @@ public class BasicDependencyManager implements DependencyManager {
 	 * (We clear all in-memory dependencies added in the current
 	 * StatementContext.)
 	 */
-	public void clearInMemoryDependency(Dependency dy)
-	{
-		synchronized(this)
-		{
-			List deps =
-				(List) dependents.get(dy.getDependent().getObjectID());
+    public synchronized void clearInMemoryDependency(Dependency dy) {
+        final UUID deptId = dy.getDependent().getObjectID();
+        final UUID provId = dy.getProviderKey();
+        List deps = (List) dependents.get(deptId);
 
-			// NOTE - this is a NEGATIVE Sanity mode check, in sane mode we continue
-			// to ensure the dependency manager is consistent.
-			if (!SanityManager.DEBUG) {
-				// dependency has already been removed
-				if (deps == null)
-					return;
-			}
+        // NOTE - this is a NEGATIVE Sanity mode check, in sane mode we continue
+        // to ensure the dependency manager is consistent.
+        if (!SanityManager.DEBUG) {
+            // dependency has already been removed
+            if (deps == null)
+                return;
+        }
 
-			List provs =
-				(List) providers.get(dy.getProvider().getObjectID());
+        List provs = (List) providers.get(provId);
 
-			if (SanityManager.DEBUG)
-			{
-				// if both are null then everything is OK
-				if ((deps != null) || (provs != null)) {
+        if (SanityManager.DEBUG)
+        {
+            // if both are null then everything is OK
+            if ((deps != null) || (provs != null)) {
 
-					// ensure that the Dependency dy is either
-					// in both lists or in neither. Even if dy
-					// is out of the list we can have non-null
-					// deps and provs here because other dependencies
-					// with the the same providers or dependents can exist
+                // ensure that the Dependency dy is either
+                // in both lists or in neither. Even if dy
+                // is out of the list we can have non-null
+                // deps and provs here because other dependencies
+                // with the the same providers or dependents can exist
 
-					//
-					int depCount = 0;
-					if (deps != null) {
-						for (int ci = 0; ci < deps.size(); ci++) {
-							if (dy.equals(deps.get(ci)))
-								depCount++;
-						}
-					}
+                //
+                int depCount = 0;
+                if (deps != null) {
+                    for (int ci = 0; ci < deps.size(); ci++) {
+                        if (dy.equals(deps.get(ci)))
+                            depCount++;
+                    }
+                }
 
-					int provCount = 0;
-					if (provs != null) {
-						for (int ci = 0; ci < provs.size(); ci++) {
-							if (dy.equals(provs.get(ci)))
-								provCount++;
-						}
-					}
+                int provCount = 0;
+                if (provs != null) {
+                    for (int ci = 0; ci < provs.size(); ci++) {
+                        if (dy.equals(provs.get(ci)))
+                            provCount++;
+                    }
+                }
 
-					if (depCount != provCount) {
-						SanityManager.THROWASSERT("Dependency count mismatch count in deps: " + depCount +
-							", count in provs " + provCount +
-							", dy.getDependent().getObjectID() = " + dy.getDependent().getObjectID() +
-							", dy.getProvider().getObjectID() = " + dy.getProvider().getObjectID());
-					}
-				}
+                SanityManager.ASSERT(depCount == provCount,
+                        "Dependency count mismatch count in deps: " + depCount +
+                        ", count in provs " + provCount +
+                        ", dy.getDependent().getObjectID() = " + deptId +
+                        ", dy.getProvider().getObjectID() = " + provId);
+            }
 
-				// dependency has already been removed,
-				// matches code that is protected by !DEBUG above
-				if (deps == null)
-					return;
-			}
+            // dependency has already been removed,
+            // matches code that is protected by !DEBUG above
+            if (deps == null)
+                return;
+        }
 
-			// dependency has already been removed
-			if (provs == null)
-				return;
+        // dependency has already been removed
+        if (provs == null)
+            return;
 
 
-			deps.remove(dy);
-			if (deps.size() == 0)
-				dependents.remove(dy.getDependent().getObjectID());
-			provs.remove(dy);
-			if (provs.size() == 0)
-				providers.remove(dy.getProvider().getObjectID());
-		}
-	}
-
-
-	/**
-	 * @see DependencyManager#getAllProviders
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-//	public SList getAllProviders(Dependent dependent)
-//							throws StandardException
-//	{
-//		synchronized(this)
-//		{
-//			SList list = getProviders(dependent);
-//			return list;
-//		}
-//	}
-
-	/**
-	 * @see DependencyManager#getAllProviderInfos
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-/*	public ProviderInfo[] getAllProviderInfos(Dependent dependent)
-							throws StandardException
-	{
-		synchronized(this)
-		{
-			ProviderInfo[]	retval;
-			SList list = getProviders(dependent);
-			retval = new ProviderInfo[list.size()];
-			if (list == null)
-			{
-				return retval;
-			}
-			
-			int piCtr = 0;
-
-			Enumeration enum = list.elements();
-			while (enum != null && enum.hasMoreElements())
-			{
-				Dependency dep = (Dependency) enum.nextElement();
-
-				retval[piCtr++] = new BasicProviderInfo(
-										dep.getProvider().getObjectID(),
-										dep.getProvider().getDependableFinder(),
-										dep.getProvider().getObjectName()
-										);
-			}
-
-			return retval;
-		}
-	}
-*/
+        deps.remove(dy);
+        if (deps.isEmpty())
+            dependents.remove(deptId);
+        provs.remove(dy);
+        if (provs.isEmpty())
+            providers.remove(provId);
+    }
 
 	/**
 	 * @see DependencyManager#getPersistentProviderInfos
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public synchronized ProviderInfo[] getPersistentProviderInfos(Dependent dependent)
-							throws StandardException
-	{
+    public ProviderInfo[] getPersistentProviderInfos(Dependent dependent)
+            throws StandardException {
 		List list = getProviders(dependent);
-		if (list == null)
-		{
+        if (list.isEmpty()) {
 			return EMPTY_PROVIDER_INFO;
 		}
 
-		java.util.ArrayList pih = new java.util.ArrayList();
+        Iterator provIter = list.iterator();
+        List pih = new ArrayList();
+        while (provIter.hasNext()) {
+            Provider p = (Provider)provIter.next();
 
-		for (ListIterator depsIterator = list.listIterator();
-					depsIterator.hasNext(); ) 
-		{
-			Dependency dep = (Dependency) depsIterator.next();
-
-			if (dep.getProvider().isPersistent())
-			{
+            if (p.isPersistent()) {
 				pih.add(new BasicProviderInfo(
-									dep.getProvider().getObjectID(),
-									dep.getProvider().getDependableFinder(),
-									dep.getProvider().getObjectName()
+                                        p.getObjectID(),
+                                        p.getDependableFinder(),
+                                        p.getObjectName()
 									));
 			}
 		}
-
 
 		return (ProviderInfo[]) pih.toArray(EMPTY_PROVIDER_INFO);
 	}
@@ -732,7 +716,7 @@ public class BasicDependencyManager implements DependencyManager {
 	/**
 	 * @inheritDoc 
 	 */
-	public synchronized void copyDependencies(
+    public void copyDependencies(
 									Dependent	copy_From, 
 									Dependent	copyTo,
 									boolean		persistentOnly,
@@ -742,13 +726,9 @@ public class BasicDependencyManager implements DependencyManager {
 	{
 
 		List list = getProviders(copy_From);
-		if (list == null)
-			return;
-
-		for (ListIterator depsIterator = list.listIterator(); depsIterator.hasNext(); ) 
-		{
-			Provider provider = ((Dependency) depsIterator.next()).getProvider();
-				
+        Iterator depsIter = list.iterator();
+        while (depsIter.hasNext()) {
+            Provider provider = (Provider)depsIter.next();
 			if (!persistentOnly || provider.isPersistent())
 			{
 				this.addDependency(copyTo, provider, cm, tc);
@@ -915,200 +895,23 @@ public class BasicDependencyManager implements DependencyManager {
 	public int countDependencies()
 		throws StandardException
 	{
-		synchronized(this)
-		{
-			int numDependencies = 0;
-			Enumeration deps = dependents.elements();
-			Enumeration provs = providers.elements();
-			List storedDeps = dd.getAllDependencyDescriptorsList();
+        // Add the stored dependencies.
+        List storedDeps = dd.getAllDependencyDescriptorsList();
+        int numDependencies = storedDeps.size();
+        synchronized(this) {
+            Iterator deps = dependents.values().iterator();
+            Iterator provs = providers.values().iterator();
 
-			/* Count the in memory dependencies */
-			while (deps.hasMoreElements())
-			{
-				numDependencies += ((List) deps.nextElement()).size();
-			}
+            // Count the in memory dependencies.
+            while (deps.hasNext()) {
+                numDependencies += ((List) deps.next()).size();
+            }
 
-			while (provs.hasMoreElements())
-			{
-				numDependencies += ((List) provs.nextElement()).size();
-			}
-
-			/* Add in the stored dependencies */
-			numDependencies += storedDeps.size();
-
-			return numDependencies;
-		}
-	}
-
-	/**
-	 * Dump out debugging info on all of the dependencies currently
-	 * within the system.
-	 *
-	 * @return String	Debugging info on the dependencies.
-	 *					(null if SanityManger.DEBUG is false)
-
-	 * @exception StandardException thrown if something goes wrong
-	 * @exception java.sql.SQLException thrown if something goes wrong
-	 */
-	public String dumpDependencies() throws StandardException, java.sql.SQLException
-	{
-		synchronized(this)
-		{
-			boolean foundInMemory = false;
-			boolean foundStored = false;
-			StringBuffer debugBuf = new StringBuffer();
-
-			if (SanityManager.DEBUG)
-			{
-				Enumeration deps = dependents.keys();
-				UUID[]		depKeys = new UUID[dependents.size()];
-
-				/* Record the in memory dependencies */
-				for (int i = 0; deps.hasMoreElements(); i++)
-				{
-					/*
-					** Get all the keys and sort them, so that they will always
-					** be printed in the same order (we have tests that canonize
-					** the order of printing the dependencies, and since the key
-					** is a UUID, the order they are returned from
-					** hasMoreElements() changes from run to run).
-					*/
-					depKeys[i] = (UUID) deps.nextElement();
-				}
-
-				/* Do a bubble sort - there aren't likely to be many elements */
-				bubbleSort(depKeys);
-
-				/* Iterate through the sorted keys */
-				for (int i = 0; i < depKeys.length; i++)
-				{
-					List depsSList = (List) dependents.get(depKeys[i]);
-
-					for (ListIterator depsIterator = depsSList.listIterator();
-					 	depsIterator.hasNext(); ) 
-					{
-						Dependency dy = (Dependency)depsIterator.next();
-
-						if (! foundInMemory)
-						{
-							debugBuf.append("In Memory Dependencies:\n");
-							foundInMemory = true;
-						}
-
-						debugBuf.append(dy.getDependent().toString() +
-										", type " + 
-										dy.getDependent().getClassType() +
-										", " +
-										" is dependent on " +
-										dy.getProvider().getObjectName() + 
-										", type " +
-										dy.getProvider().getClassType() +
-										"\n");
-					}
-				}
-
-				/* Record the in memory dependencies */
-				Enumeration provs = providers.keys();
-				UUID[]		provKeys = new UUID[providers.size()];
-				for (int i = 0; provs.hasMoreElements(); i++)
-				{
-					/*
-					** Get all the keys and sort them, so that they will always
-					** be printed in the same order (we have tests that canonize
-					** the order of printing the dependencies, and since the key
-					** is a UUID, the order they are returned from
-					** hasMoreElements() changes from run to run).
-					*/
-					provKeys[i] = (UUID) provs.nextElement();
-				}
-
-				/* Do a bubble sort - there aren't likely to be many elements */
-				bubbleSort(provKeys);
-
-				/* Iterate through the sorted keys */
-				for (int i = 0; i < provKeys.length; i++)
-				{
-					List depsSList = (List) providers.get(provKeys[i]);
-
-					for (ListIterator depsIterator = depsSList.listIterator();
-						depsIterator.hasNext(); ) 
-					{
-
-						Dependency dy = (Dependency)depsIterator.next();
-
-						if (! foundInMemory)
-						{
-							debugBuf.append("In Memory Dependencies:\n");
-							foundInMemory = true;
-						}
-
-						debugBuf.append( 
-										dy.getProvider().toString() + 
-										", type " +
-										dy.getProvider().getClassType() +
-										", provides for " +
-										dy.getDependent().getObjectName() +
-										", type " +
-										dy.getDependent().getClassType() +
-										"\n");
-					}
-				}
-				/* Record the stored dependencies in sorted order to avoid
-				   ordering problems in canons. Also the dependencyDescriptor.getUUID()
-				   in this list is not unique, hence the sort on the output string values instead
-				*/
-				List storedDeps = dd.getAllDependencyDescriptorsList();
-
-				String[] dependStr = new String[storedDeps.size()];
-
-				int i = 0;
-				for (ListIterator depsIterator = storedDeps.listIterator();
-					 depsIterator.hasNext(); )
-				{
-					DependencyDescriptor dependDescr =
-                        (DependencyDescriptor) depsIterator.next();
-
-					if (! foundStored)
-					{
-						debugBuf.append("Stored Dependencies:\n");
-						foundStored = true;
-					}
-                    
-                    DependableFinder providerFinder = dependDescr.getProviderFinder();
-                    DependableFinder dependentFinder = dependDescr.getDependentFinder();
-                    
-
-					dependStr[i++] =
-                        providerFinder.getDependable(dd, dependDescr.getProviderID()).getObjectName() +
-                        ", type " + providerFinder.getSQLObjectType() +
-                        ", provides for " +
-                        dependentFinder.getDependable(dd, dependDescr.getUUID()).getObjectName() +
-                        ", type " + dependentFinder.getSQLObjectType() +
-                        "\n";
-				}
-
-				// sort stored dependencies; dependStr
-				for (i = 0; i < dependStr.length; i++)
-				{
-					for (int j = i + 1; j < dependStr.length; j++)
-					{
-						if (dependStr[i].compareTo(dependStr[j]) > 0)
-						{
-							String save = dependStr[i];
-							dependStr[i] = dependStr[j];
-							dependStr[j] = save;
-						}
-					}
-				}
-
-				for(i=0; i < dependStr.length; i++)
-						debugBuf.append(dependStr[i]);
-
-
-			}
-
-			return debugBuf.toString();
-		}
+            while (provs.hasNext()) {
+                numDependencies += ((List) provs.next()).size();
+            }
+        }
+        return numDependencies;
 	}
 
 	//
@@ -1128,12 +931,11 @@ public class BasicDependencyManager implements DependencyManager {
 	 *
 	 * @return boolean		Whether or not the dependency get added.
 	 */
-	private boolean addDependencyToTable(Hashtable table, 
-		Object key, Dependency dy) {
+    private boolean addDependencyToTable(Map table, Object key, Dependency dy) {
 
 		List deps = (List) table.get(key);
 		if (deps == null) {
-			deps = newSList();
+            deps = new ArrayList();
 			deps.add(dy);
 			table.put(key, deps);
 		}
@@ -1264,140 +1066,78 @@ public class BasicDependencyManager implements DependencyManager {
 	}
 
 	/**
-	 * Do a bubble sort on the given array of UUIDs.  This sorts by the
-	 * String values of the UUIDs.  It's slow, but it doesn't matter
-	 * because this is only for testing and debugging.  Sorting by
-	 * UUID.toString() always gives the same order because, within a
-	 * single boot of the system, UUIDs are distinguished only by a
-	 * sequence number.
-	 *
-	 * @param uuids		The array of UUIDs to sort.
-	 */
-	private void bubbleSort(UUID[] uuids)
-	{
-		if (SanityManager.DEBUG)
-		{
-			for (int i = 0; i < uuids.length; i++)
-			{
-				for (int j = i + 1; j < uuids.length; j++)
-				{
-					if (uuids[i].toString().compareTo(uuids[j].toString()) > 0)
-					{
-						UUID	save = uuids[i];
-						uuids[i] = uuids[j];
-						uuids[j] = save;
-					}
-				}
-			}
-		}
-	}
+     * Returns a list of all providers that this dependent has (even invalid
+     * ones). Includes all dependency types.
+     *
+     * @param d the dependent
+     * @return A list of providers (possibly empty).
+     * @throws StandardException thrown if something goes wrong
+     */
+    private List getProviders (Dependent d) throws StandardException {
+        List provs = new ArrayList();
+        synchronized (this) {
+            List deps = (List) dependents.get(d.getObjectID());
+            if (deps != null) {
+                Iterator depsIter = deps.iterator();
+                while (depsIter.hasNext()) {
+                    provs.add(((Dependency)depsIter.next()).getProvider());
+                }
+            }
+        }
 
-	/**
-		Returns an enumeration of all dependencies that this
-		dependent has with any provider (even
-		invalid ones). Includes all dependency types.
-
-		@param d the dependent
-
-		@exception StandardException thrown if something goes wrong
-	 */
-	private List getProviders (Dependent d) throws StandardException {
-
-		List deps = (List) dependents.get(d.getObjectID());
-
-		/* If the Dependent is not persistent, then we only have to
-	 	* worry about in-memory dependencies.  Otherwise, we have to
-	 	* integrate the 2.
-	 	*/
-		if (! d.isPersistent())
-		{
-			return (deps == null? null : deps);
-		}
-		else
-		{
-			if (deps == null)
-			{
-				deps = newSList();
-			}
-			else
-			{
-				deps = newSList(deps);
-			}
-
-			/* Now we need to add any persistent dependencies to the
-		 	* list before returning
-		 	*/
+        // If the dependent is persistent, we have to take stored dependencies
+        // into consideration as well.
+        if (d.isPersistent()) {
 			List storedList = getDependencyDescriptorList(
 								dd.getDependentsDescriptorList(
 												d.getObjectID().toString()
 															),
 								(Provider) null
 													);
-
-			if (storedList.size() > 0)
-			{
-				deps.addAll(0, storedList);
-			}
-
-			return deps;
+            Iterator depIter = storedList.iterator();
+            while (depIter.hasNext()) {
+                provs.add(((Dependency)depIter.next()).getProvider());
+            }
 		}
+        return provs;
 	}
 
-	/**
-		Returns an enumeration of all dependencies that this
-		provider is supporting for any dependent at all (even
-		invalid ones). Includes all dependency types.
-
-		@param p the provider
-
-		@exception StandardException thrown if something goes wrong
+    /**
+     * Returns an enumeration of all dependencies that this
+     * provider is supporting for any dependent at all (even
+     * invalid ones). Includes all dependency types.
+     *
+     * @param p the provider
+     * @return {@code null} or a list of dependents (possibly empty).
+     * @throws StandardException if something goes wrong
 	 */
 	private List getDependents (Provider p) 
 			throws StandardException {
+        List deps;
+        synchronized (this) {
+            deps = (List) providers.get(p.getObjectID());
+        }
 
-		List deps = (List) providers.get(p.getObjectID());
-
-		/* If the Provider is not persistent, then we only have to
-		* worry about in-memory dependencies.  Otherwise, we have to
-		* integrate the 2.
-		*/
-		if (! p.isPersistent())
-		{
-			return deps;
-		}
-		else
-		{
-			if (deps == null)
-			{
-				deps = newSList();
-			}
-			else
-			{
-				deps = newSList(deps);
-			}
-
-			/* Now we need to add any persistent dependencies to the
-		 	* list before returning
-		 	*/
+        // If the provider is persistent, then we have to add providers for
+        // stored dependencies as well.
+        if (p.isPersistent()) {
 			List storedList = getDependencyDescriptorList(
 								dd.getProvidersDescriptorList(
 												p.getObjectID().toString()
 															),
 							p
 													);
-			if (storedList.size() > 0)
-			{
-				deps.addAll(0, storedList);
-			}
-
-			return deps;
-		}
-	}
-
-	private static List newSList() {
-		return java.util.Collections.synchronizedList(new java.util.LinkedList());
-	}
-	private static List newSList(List list) {
-		return java.util.Collections.synchronizedList(new java.util.LinkedList(list));
+            if (deps == null) {
+                deps = storedList;
+            } else {
+                // We can't modify the list we got from 'providers', create a
+                // new one to merge the two lists.
+                List merged = new ArrayList(deps.size() + storedList.size());
+                merged.addAll(deps);
+                merged.addAll(storedList);
+                deps = merged;
+            }
+        }
+        return deps;
 	}
 }
