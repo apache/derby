@@ -30,6 +30,8 @@ import java.text.ParseException;
 import javax.xml.parsers.*;
 import org.w3c.dom.*;
 
+import org.apache.derby.vti.StringColumnVTI;
+    
 /**
  * <p>
  * This is a VTI designed to read XML files which are structured like row sets.
@@ -306,15 +308,14 @@ public  class   XmlVTI  extends StringColumnVTI
      private    void    parseRow( int rowNumber ) throws Exception
     {
         Element         rawRow = (Element) _rawRows.item( rowNumber );
-       String[]        columnNames = getColumnNames();
-        int                 columnCount = columnNames.length;
+        int                 columnCount = getColumnCount();
         
         _currentRow = new String[ columnCount ];
 
         for ( int i = 0; i < columnCount; i++ )
         {
             // first look for an attribute by the column name
-            String      columnName = columnNames[ i ];
+            String      columnName = getColumnName( i + 1 );
             String      contents = rawRow.getAttribute( columnName );
 
             // if there is not attribute by that name, then look for descendent elements by

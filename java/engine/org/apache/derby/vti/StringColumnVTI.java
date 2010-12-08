@@ -106,6 +106,26 @@ public  abstract    class   StringColumnVTI extends VTITemplate
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
+    // ACCESSORS
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Get the number of columns.
+     * </p>
+     */
+    public int getColumnCount() { return _columnNames.length; }
+
+    /**
+     * <p>
+     * Get name of a column (1-based indexing).
+     * </p>
+     */
+    public String getColumnName( int columnNumber ) { return _columnNames[ columnNumber - 1 ]; }
+
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
     // ResultSet BEHAVIOR
     //
     ///////////////////////////////////////////////////////////////////////////////////

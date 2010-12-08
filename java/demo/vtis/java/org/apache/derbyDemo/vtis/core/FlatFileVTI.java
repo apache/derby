@@ -27,6 +27,8 @@ import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 
+import org.apache.derby.vti.StringColumnVTI;
+
 /**
  * <p>
  * This VTI makes a table out of the records in a flat file. This is an abstract

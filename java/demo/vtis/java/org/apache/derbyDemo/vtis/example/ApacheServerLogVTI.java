@@ -68,7 +68,7 @@ public  class   ApacheServerLogVTI  extends XmlVTI
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // ResultSet BEHAVIOR
+    // OVERRIDES
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -77,15 +77,11 @@ public  class   ApacheServerLogVTI  extends XmlVTI
      * The Apache Server's logs represent nulls as "-".
      * </p>
      */
-    public String getString(int columnIndex) throws SQLException
+    public String getRawColumn(int columnIndex) throws SQLException
     {
-        String  columnValue = super.getString( columnIndex );
+        String  columnValue = super.getRawColumn( columnIndex );
 
-        if ( "-".equals( columnValue ) )
-        {
-            setWasNull();
-            return null;
-        }
+        if ( "-".equals( columnValue ) ) { return null; }
         else { return columnValue; }
     }
 

@@ -81,7 +81,7 @@ public  class   DerbyJiraReportVTI  extends XmlVTI
     {
         String  rawValue = super.getString( columnIndex );
 
-        if ( !"key".equals( getColumnNames()[ columnIndex - 1 ] ) )
+        if ( !"key".equals( getColumnName( columnIndex ) ) )
         { return rawValue; }
         else
         { return rawValue.substring( 6 ); }
