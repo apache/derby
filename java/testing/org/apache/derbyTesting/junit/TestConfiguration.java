@@ -1389,7 +1389,7 @@ public final class TestConfiguration {
      * 
      * @return Physical name of the database.
      */
-    String getPhysicalDatabaseName(String logicalName) {
+    public String getPhysicalDatabaseName(String logicalName) {
         return (String) logicalDbMapping.get(logicalName);
     }
 
