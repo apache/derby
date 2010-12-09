@@ -411,7 +411,6 @@ public class CreateTriggerNode extends DDLStatementNode
 		*/
 		if (triggerCols != null && triggerCols.size() != 0)
 		{
-			referencedColInts = new int[triggerCols.size()];
 			Hashtable columnNames = new Hashtable();
 			int tcSize = triggerCols.size();
 			for (int i = 0; i < tcSize; i++)
@@ -431,12 +430,7 @@ public class CreateTriggerNode extends DDLStatementNode
 																rc.getName(),
 																tableName);
 				}
-
-				referencedColInts[i] = cd.getPosition();
 			}
- 
-			// sort the list
-			java.util.Arrays.sort(referencedColInts);
 		}
 
 		//If attempting to reference a SESSION schema table (temporary or permanent) in the trigger action, throw an exception
@@ -467,14 +461,16 @@ public class CreateTriggerNode extends DDLStatementNode
 	** 1) validate the referencing clause (if any)
 	**
 	** 2) convert trigger action text.  e.g. 
-	**		DELETE FROM t WHERE c = old.c
+	**	DELETE FROM t WHERE c = old.c
 	** turns into
-	**		DELETE FROM t WHERE c = org.apache.derby.iapi.db.Factory::
-	**					getTriggerExecutionContext().getOldRow().getInt('C');
+	**	DELETE FROM t WHERE c = org.apache.derby.iapi.db.Factory::
+	**		getTriggerExecutionContext().getOldRow().
+	**      getInt(columnNumberFor'C'inRuntimeResultset);
 	** or
-	**		DELETE FROM t WHERE c in (SELECT c FROM OLD)
+	**	DELETE FROM t WHERE c in (SELECT c FROM OLD)
 	** turns into
-	**		DELETE FROM t WHERE c in (SELECT c FROM new TriggerOldTransitionTable OLD)
+	**	DELETE FROM t WHERE c in (
+	**      SELECT c FROM new TriggerOldTransitionTable OLD)
 	**
 	** 3) check all column references against new/old transition 
 	**	variables (since they are no longer 'normal' column references
@@ -500,38 +496,6 @@ public class CreateTriggerNode extends DDLStatementNode
 	** out what its OLD/NEW tables are, etc.  Also, it is just plain
 	** easier to just generate the sql and rebind.
 	**
-	** More information on step 4 above. 
-	** DERBY-1482 One of the work done by this method for row level triggers
-	** is to find the columns which are referenced in the trigger action 
-	** through the REFERENCES clause ie thro old/new transition variables.
-	** This information will be saved in SYSTRIGGERS so it can be retrieved
-	** during the trigger execution time. The purpose of this is to recognize
-	** what columns from the trigger table should be read in during trigger
-	** execution. Before these code change, during trigger execution, Derby
-	** was opting to read all the columns from the trigger table even if they
-	** were not all referenced during the trigger execution. This caused Derby
-	** to run into OOM at times when it could really be avoided.
-	**
-	** We go through the trigger action text and collect the column positions
-	** of all the REFERENCEd columns through new/old transition variables. We
-	** keep that information in SYSTRIGGERS. At runtime, when the trigger is
-	** fired, we will look at this information along with trigger columns from
-	** the trigger definition and only fetch those columns into memory rather
-	** than all the columns from the trigger table.
-	** This is especially useful when the table has LOB columns and those
-	** columns are not referenced in the trigger action and are not recognized
-	** as trigger columns. For such cases, we can avoid reading large values of
-	** LOB columns into memory and thus avoiding possibly running into OOM 
-	** errors.
-	** 
-	** If there are no trigger columns defined on the trigger, we will read all
-	** the columns from the trigger table when the trigger fires because no
-	** specific columns were identified as trigger column by the user. The 
-	** other case where we will opt to read all the columns are when trigger
-	** columns and REFERENCING clause is identified for the trigger but there
-	** is no trigger action column information in SYSTRIGGERS. This can happen
-	** for triggers created prior to 10.7 release and later that database got
-	** hard/soft-upgraded to 10.7 or higher release.
 	*/
 	private boolean bindReferencesClause(DataDictionary dd) throws StandardException
 	{
@@ -539,344 +503,83 @@ public class CreateTriggerNode extends DDLStatementNode
 
         // the actions of before triggers may not reference generated columns
         if ( isBefore ) { forbidActionsOnGenCols(); }
-        
-		//Total Number of columns in the trigger table
-		int numberOfColsInTriggerTable = triggerTableDescriptor.getNumberOfColumns();
 
-		StringBuffer newText = new StringBuffer();
-		boolean regenNode = false;
+		String transformedActionText;
 		int start = 0;
+		if (triggerCols != null && triggerCols.size() != 0) {
+			//If the trigger is defined on speific columns, then collect
+			//their column positions and ensure that those columns do
+			//indeed exist in the trigger table.
+			referencedColInts = new int[triggerCols.size()];
+			ResultColumn rc;
+			ColumnDescriptor cd;
+			//This is the most interesting case for us. If we are here, 
+			//then it means that the trigger is defined at the row level
+			//and a set of trigger columns are specified in the CREATE
+			//TRIGGER statement. This can only happen for an UPDATE
+			//trigger.
+			//eg
+			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
+			//    REFERENCING OLD AS oldt NEW AS newt
+			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+			
+			for (int i=0; i < triggerCols.size(); i++){
+				rc = (ResultColumn)triggerCols.elementAt(i);
+				cd = triggerTableDescriptor.getColumnDescriptor(rc.getName());
+				//Following will catch the case where an invalid trigger column
+				//has been specified in CREATE TRIGGER statement.
+				//CREATE TRIGGER tr1 AFTER UPDATE OF c1678 ON table1 
+				//    REFERENCING OLD AS oldt NEW AS newt
+				//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+				if (cd == null)
+				{
+					throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, 
+																rc.getName(),
+																tableName);
+				}
+				referencedColInts[i] = cd.getPosition();
+			}
+			// sort the list
+			java.util.Arrays.sort(referencedColInts);
+		}
+		
 		if (isRow)
 		{
-			ResultColumn rc;
-			
-			//The purpose of following array(triggerActionColsOnly) is to
-			//identify all the columns from the trigger action which are
-			//referenced though old/new transition variables(in other words,
-			//accessed through the REFERENCING clause section of
-			//CREATE TRIGGER sql). This array will be initialized to -1 at the
-			//beginning. By the end of this method, all the columns referenced
-			//by the trigger action through the REFERENCING clause will have
-			//their column positions in the trigger table noted in this array.
-			//eg
-			//CREATE TABLE table1 (c11 int, c12 int, c13 int, c14 int, c15 int);
-			//CREATE TABLE table2 (c21 int, c22 int, c23 int, c24 int, c25 int);
-			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
-			//    REFERENCING OLD AS oldt NEW AS newt
-			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
-			//For the trigger above, triggerActionColsOnly will finally have 
-			//[-1,-1,-1,4,-1]. We will note all the entries for this array
-			//which are not -1 into SYSTRIGGERS(-1 indiciates columns with
-			//those column positions from the trigger table are not being
-			//referenced in the trigger action through the old/new transition
-			//variables.
-			int[] triggerActionColsOnly = new int[numberOfColsInTriggerTable];
-			for (int i=0; i < numberOfColsInTriggerTable; i++)
-				triggerActionColsOnly[i]=-1;
-			
-			//The purpose of following array(triggerColsAndTriggerActionCols)
-			//is to identify all the trigger columns and all the columns from
-			//the trigger action which are referenced though old/new 
-			//transition variables(in other words, accessed through the
-			//REFERENCING clause section of CREATE TRIGGER sql). This array 
-			//will be initialized to -1 at the beginning. By the end of this
-			//method, all the columns referenced by the trigger action 
-			//through the REFERENCING clause and all the trigger columns will
-			//have their column positions in the trigger table noted in this
-			//array.
-			//eg
-			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
-			//    REFERENCING OLD AS oldt NEW AS newt
-			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
-			//For the trigger above, triggerColsAndTriggerActionCols will
-			//finally have [-1,2,-1,4,-1] This list will include all the
-			//columns that need to be fetched into memory during trigger
-			//execution. All the columns with their entries marked -1 will
-			//not be read into memory because they are not referenced in the
-			//trigger action through old/new transition variables and they are
-			//not recognized as trigger columns.
-			int[] triggerColsAndTriggerActionCols = new int[numberOfColsInTriggerTable];
-			for (int i=0; i < numberOfColsInTriggerTable; i++) 
-				triggerColsAndTriggerActionCols[i]=-1;
-			
-			if (triggerCols == null || triggerCols.size() == 0) {
-				//This means that even though the trigger is defined at row 
-				//level, it is either an INSERT/DELETE trigger. Or it is an
-				//UPDATE trigger with no specific column(s) identified as the
-				//trigger column(s). In these cases, Derby is going to read all
-				//the columns from the trigger table during trigger execution.
-				//eg of an UPDATE trigger with no specific trigger column(s) 
-				// CREATE TRIGGER tr1 AFTER UPDATE ON table1 
-				//    REFERENCING OLD AS oldt NEW AS newt
-				//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
-				for (int i=0; i < numberOfColsInTriggerTable; i++) {
-					triggerColsAndTriggerActionCols[i]=i+1;
-				}
-			} else {
-				//This is the most interesting case for us. If we are here, 
-				//then it means that the trigger is defined at the row level
-				//and a set of trigger columns are specified in the CREATE
-				//TRIGGER statement. This can only happen for an UPDATE
-				//trigger.
-				//eg
-				//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
-				//    REFERENCING OLD AS oldt NEW AS newt
-				//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
-				
-				for (int i=0; i < triggerCols.size(); i++){
-					rc = (ResultColumn)triggerCols.elementAt(i);
-					ColumnDescriptor cd = triggerTableDescriptor.getColumnDescriptor(rc.getName());
-					//Following will catch the case where an invalid trigger column
-					//has been specified in CREATE TRIGGER statement.
-					//CREATE TRIGGER tr1 AFTER UPDATE OF c1678 ON table1 
-					//    REFERENCING OLD AS oldt NEW AS newt
-					//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
-					if (cd == null)
-					{
-						throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, 
-																	rc.getName(),
-																	tableName);
-					}
-					//Make a note of this trigger column's column position in
-					//triggerColsAndTriggerActionCols. This will tell us that 
-					//this column needs to be read in when the trigger fires.
-					//eg for the CREATE TRIGGER below, we will make a note of
-					//column c12's position in triggerColsAndTriggerActionCols
-					//eg
-					//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
-					//    REFERENCING OLD AS oldt NEW AS newt
-					//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
-					triggerColsAndTriggerActionCols[cd.getPosition()-1]=cd.getPosition();				
-				}
-			}
-			//By this time, we have collected the positions of the trigger
-			//columns in array triggerColsAndTriggerActionCols. Now we need
-			//to start looking at the columns in trigger action to collect
-			//all the columns referenced through REFERENCES clause. These
-			//columns will be noted in triggerColsAndTriggerActionCols and
-			//triggerActionColsOnly arrays.
-
-			CollectNodesVisitor visitor = new CollectNodesVisitor(ColumnReference.class);
-			actionNode.accept(visitor);
-			Vector refs = visitor.getList();
-			/* we need to sort on position in string, beetle 4324
-			 */
-			QueryTreeNode[] cols = sortRefs(refs, true);
-
-			//At the end of the for loop below, we will have both arrays
-			//triggerColsAndTriggerActionCols & triggerActionColsOnly
-			//filled up with the column positions of the columns which are
-			//either trigger columns or triger action columns which are
-			//referenced through old/new transition variables. 
-			//eg
-			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
-			//    REFERENCING OLD AS oldt NEW AS newt
-			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
-			//For the above trigger, before the for loop below, the contents
-			//of the 2 arrays will be as follows
-			//triggerActionColsOnly [-1,-1,-1,-1,-1]
-			//triggerColsAndTriggerActionCols [-1,2,-1,-1,-1]
-			//After the for loop below, the 2 arrays will look as follows
-			//triggerActionColsOnly [-1,-1,-1,4,-1]
-			//triggerColsAndTriggerActionCols [-1,2,-1,4,-1]
-			//If the database is at 10.6 or earlier version(meaning we are in
-			//soft-upgrade mode), then we do not want to collect any 
-			//information about trigger action columns. The collection and 
-			//usage of trigger action columns was introduced in 10.7 DERBY-1482
-			boolean in10_7_orHigherVersion =
-					getLanguageConnectionContext().getDataDictionary().checkVersion(
-							DataDictionary.DD_VERSION_DERBY_10_7,null);
-			for (int i = 0; i < cols.length; i++)
-			{
-				ColumnReference ref = (ColumnReference) cols[i];
-				/*
-				** Only occurrences of those OLD/NEW transition tables/variables 
-				** are of interest here.  There may be intermediate nodes in the 
-				** parse tree that have its own RCL which contains copy of 
-				** column references(CR) from other nodes. e.g.:  
-				**
-				** CREATE TRIGGER tt 
-				** AFTER INSERT ON x
-				** REFERENCING NEW AS n 
-				** FOR EACH ROW
-				**    INSERT INTO y VALUES (n.i), (999), (333);
-				** 
-				** The above trigger action will result in InsertNode that 
-				** contains a UnionNode of RowResultSetNodes.  The UnionNode
-				** will have a copy of the CRs from its left child and those CRs 
-				** will not have its beginOffset set which indicates they are 
-				** not relevant for the conversion processing here, so we can 
-				** safely skip them. 
-				*/
-				if (ref.getBeginOffset() == -1) 
-				{
-					continue;
-				}
-
-				TableName tableName = ref.getTableNameNode();
-				if ((tableName == null) ||
-					((oldTableName == null || !oldTableName.equals(tableName.getTableName())) &&
-					(newTableName == null || !newTableName.equals(tableName.getTableName()))))
-				{
-					continue;
-				}
-
-				if (tableName.getBeginOffset() == -1)
-				{
-					continue;
-				}
-
-				checkInvalidTriggerReference(tableName.getTableName());
-				String colName = ref.getColumnName();
-
-				ColumnDescriptor triggerColDesc;
-				//Following will catch the case where an invalid column is
-				//used in trigger action through the REFERENCING clause. The
-				//following tigger is trying to use oldt.c13 but there is no
-				//column c13 in trigger table table1
-				//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
-				//    REFERENCING OLD AS oldt NEW AS newt
-				//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14567;
-				if ((triggerColDesc = triggerTableDescriptor.getColumnDescriptor(colName)) == 
-	                null) {
-					throw StandardException.newException(
-			                SQLState.LANG_COLUMN_NOT_FOUND, tableName+"."+colName);
-					}
-
-				if (in10_7_orHigherVersion) {
-					int triggerColDescPosition = triggerColDesc.getPosition();
-					triggerColsAndTriggerActionCols[triggerColDescPosition-1]=triggerColDescPosition;
-					triggerActionColsOnly[triggerColDescPosition-1]=triggerColDescPosition;
-				}
-			}
-
-			//Now that we know what columns we need for trigger columns and
-			//trigger action columns, we can get rid of remaining -1 entries
-			//for the remaining columns from trigger table.
-			//eg
-			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
-			//    REFERENCING OLD AS oldt NEW AS newt
-			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
-			//For the above trigger, before the justTheRequiredColumns() call,
-			//the content of triggerColsAndTriggerActionCols array were as
-			//follows [-1, 2, -1, 4, -1]
-			//After the justTheRequiredColumns() call below, 
-			//triggerColsAndTriggerActionCols will have [2,4]. What this means
-			//that, at run time, during trigger execution, these are the only
-			//2 column positions that will be read into memory from the
-			//trigger table. The columns in other column positions are not
-			//needed for trigger execution.
-			triggerColsAndTriggerActionCols = justTheRequiredColumns(triggerColsAndTriggerActionCols);
-
-			for (int i = 0; i < cols.length; i++)
-			{
-				ColumnReference ref = (ColumnReference) cols[i];
-				
-				/*
-				** Only occurrences of those OLD/NEW transition tables/variables 
-				** are of interest here.  There may be intermediate nodes in the 
-				** parse tree that have its own RCL which contains copy of 
-				** column references(CR) from other nodes. e.g.:  
-				**
-				** CREATE TRIGGER tt 
-				** AFTER INSERT ON x
-				** REFERENCING NEW AS n 
-				** FOR EACH ROW
-				**    INSERT INTO y VALUES (n.i), (999), (333);
-				** 
-				** The above trigger action will result in InsertNode that 
-				** contains a UnionNode of RowResultSetNodes.  The UnionNode
-				** will have a copy of the CRs from its left child and those CRs 
-				** will not have its beginOffset set which indicates they are 
-				** not relevant for the conversion processing here, so we can 
-				** safely skip them. 
-				*/
-				if (ref.getBeginOffset() == -1) 
-				{
-					continue;
-				}
-				
-				TableName tableName = ref.getTableNameNode();
-				if ((tableName == null) ||
-					((oldTableName == null || !oldTableName.equals(tableName.getTableName())) &&
-					(newTableName == null || !newTableName.equals(tableName.getTableName()))))
-				{
-					continue;
-				}
-					
-				int tokBeginOffset = tableName.getBeginOffset();
-				int tokEndOffset = tableName.getEndOffset();
-				if (tokBeginOffset == -1)
-				{
-					continue;
-				}
-
-				regenNode = true;
-				String colName = ref.getColumnName();
-				int columnLength = ref.getEndOffset() - ref.getBeginOffset() + 1;
-
-				newText.append(originalActionText.substring(start, tokBeginOffset-actionOffset));
-				int colPositionInRuntimeResultSet = -1;
-				ColumnDescriptor triggerColDesc = triggerTableDescriptor.getColumnDescriptor(colName);
-				int colPositionInTriggerTable = triggerColDesc.getPosition();
-
-				//This part of code is little tricky and following will help
-				//understand what mapping is happening here.
-				//eg
-				//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
-				//    REFERENCING OLD AS oldt NEW AS newt
-				//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
-				//For the above trigger, triggerColsAndTriggerActionCols will 
-				//have [2,4]. What this means that, at run time, during trigger
-				//execution, these are the only 2 column positions that will be
-				//read into memory from the trigger table. The columns in other
-				//column positions are not needed for trigger execution. But
-				//even though column positions in original trigger table are 2
-				//and 4, their relative column positions in the columns read at
-				//execution time is really [1,2]. At run time, when the trigger
-				//gets fired, column position 2 from the trigger table will be
-				//read as the first column and column position 4 from the
-				//trigger table will be read as the second column. And those
-				//relative column positions at runtime is what should be used
-				//during trigger action conversion from
-				//UPDATE table2 SET c24=oldt.c14
-				//to
-				//UPDATE table2 SET c24=org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().getOldRow().getInt(2)
-				//Note that the generated code above refers to column c14 from
-				//table1 by position 2 rather than position 4. Column c14's
-				//column position in table1 is 4 but in the relative columns
-				//that will be fetched during trigger execution, it's position
-				//is 2. That is what the following code is doing.
-				if (in10_7_orHigherVersion && triggerColsAndTriggerActionCols != null){
-					for (int j=0; j<triggerColsAndTriggerActionCols.length; j++){
-						if (triggerColsAndTriggerActionCols[j] == colPositionInTriggerTable)
-							colPositionInRuntimeResultSet=j+1;
-					}
-				} else
-					colPositionInRuntimeResultSet=colPositionInTriggerTable;
-
-				newText.append(genColumnReferenceSQL(dd, colName, 
-						tableName.getTableName(), 
-						tableName.getTableName().equals(oldTableName),
-						colPositionInRuntimeResultSet));
-				start = tokEndOffset- actionOffset + columnLength + 2;
-			}
-			//By this point, we are finished transforming the trigger action if
-			//it has any references to old/new transition variables.
-
-			//Now that we know what columns we need for trigger action columns,
-			//we can get rid of -1 entries for the remaining columns from
-			//trigger table.
-			//The final step is to put all the column positions from the 
-			//trigger table of the columns which are referenced in the trigger
-			//action through old/new transition variables. This information
-			//will be saved in SYSTRIGGERS and will be used at trigger 
-			//execution time to decide which columns need to be read into
-			//memory for trigger action
-			referencedColsInTriggerAction = justTheRequiredColumns(triggerActionColsOnly);
+			//Create an array for column positions of columns referenced in 
+			//trigger action. Initialize it to -1. The call to 
+			//DataDictoinary.getTriggerActionSPS will find out the actual 
+			//columns, if any, referenced in the trigger action and put their
+			//column positions in the array.
+			referencedColsInTriggerAction = new int[triggerTableDescriptor.getNumberOfColumns()];
+			java.util.Arrays.fill(referencedColsInTriggerAction, -1);
+			//Now that we have verified that are no invalid column references
+			//for trigger columns, let's go ahead and transform the OLD/NEW
+			//transient table references in the trigger action sql.
+			transformedActionText = getDataDictionary().getTriggerActionString(actionNode, 
+					oldTableName,
+					newTableName,
+					originalActionText,
+					referencedColInts,
+					referencedColsInTriggerAction,
+					actionOffset,
+					triggerTableDescriptor,
+					triggerEventMask,
+					true
+					);			
+			//Now that we know what columns we need for REFERENCEd columns in
+			//trigger action, we can get rid of -1 entries for the remaining 
+			//columns from trigger table. This information will be saved in
+			//SYSTRIGGERS and will be used at trigger execution time to decide 
+			//which columns need to be read into memory for trigger action
+			referencedColsInTriggerAction = justTheRequiredColumns(
+					referencedColsInTriggerAction);
 		}
 		else
 		{
+			//This is a table level trigger	        
+			//Total Number of columns in the trigger table
+			int numberOfColsInTriggerTable = triggerTableDescriptor.getNumberOfColumns();
+			StringBuffer newText = new StringBuffer();
 			/*
 			** For a statement trigger, we find all FromBaseTable nodes.  If
 			** the from table is NEW or OLD (or user designated alternates
@@ -906,7 +609,6 @@ public class CreateTriggerNode extends DDLStatementNode
 
 				checkInvalidTriggerReference(baseTableName);
 
-				regenNode = true;
 				newText.append(originalActionText.substring(start, tokBeginOffset-actionOffset));
 				newText.append(baseTableName.equals(oldTableName) ?
 								"new org.apache.derby.catalog.TriggerOldTransitionRows() " :
@@ -928,6 +630,11 @@ public class CreateTriggerNode extends DDLStatementNode
 				for (int j=0; j < numberOfColsInTriggerTable; j++)
 					referencedColInts[j]=j+1;
 			}
+			if (start < originalActionText.length())
+			{
+				newText.append(originalActionText.substring(start));
+			}
+			transformedActionText = newText.toString();
 		}
 
 		if (referencedColsInTriggerAction != null)
@@ -938,13 +645,11 @@ public class CreateTriggerNode extends DDLStatementNode
 		** Also, we reset the actionText to this new value.  This
 		** is what we are going to stick in the system tables.
 		*/
-		if (regenNode)
+		boolean regenNode = false;
+		if (!transformedActionText.equals(actionText))
 		{
-			if (start < originalActionText.length())
-			{
-				newText.append(originalActionText.substring(start));
-			}
-			actionText = newText.toString();
+			regenNode = true;
+			actionText = transformedActionText;
 			actionNode = parseStatement(actionText, true);
 		}
 
@@ -978,22 +683,15 @@ public class CreateTriggerNode extends DDLStatementNode
 		} else
 			return null;
 	}
+
 	/*
 	** Sort the refs into array.
 	*/
 	private QueryTreeNode[] sortRefs(Vector refs, boolean isRow)
 	{
 		int size = refs.size();
-		QueryTreeNode[] sorted = new QueryTreeNode[size];
+		QueryTreeNode[] sorted = (QueryTreeNode[]) refs.toArray(new QueryTreeNode[size]);
 		int i = 0;
-		for (Enumeration e = refs.elements(); e.hasMoreElements(); )
-		{
-			if (isRow)
-				sorted[i++] = (ColumnReference)e.nextElement();
-			else
-				sorted[i++] = (FromBaseTable)e.nextElement();
-		}
-
 		/* bubble sort
 		 */
 		QueryTreeNode temp;
@@ -1080,121 +778,6 @@ public class CreateTriggerNode extends DDLStatementNode
             return left.equals( right );
         }
     }
-    
-	/*
-	** Make sure the given column name is found in the trigger
-	** target table.  Generate the appropriate SQL to get it.
-	**
-	** @return a string that is used to get the column using
-	** getObject() on the desired result set and CAST it back
-	** to the proper type in the SQL domain. 
-	**
-	** @exception StandardException on invalid column name
-	*/
-	private String genColumnReferenceSQL
-	(
-		DataDictionary	dd, 
-		String			colName, 
-		String			tabName,
-		boolean			isOldTable,
-		int				colPositionInRuntimeResultSet
-	) throws StandardException
-	{
-		ColumnDescriptor colDesc = null;
-		if ((colDesc = triggerTableDescriptor.getColumnDescriptor(colName)) == 
-                null)
-		{
-			throw StandardException.newException(
-                SQLState.LANG_COLUMN_NOT_FOUND, tabName+"."+colName);
-		}
-
-		/*
-		** Generate something like this:
-		**
-		** 		CAST (org.apache.derby.iapi.db.Factory::
-		**			getTriggerExecutionContext().getNewRow().
-		**				getObject(<colPosition>) AS DECIMAL(6,2))
-        **
-        ** Column position is used to avoid the wrong column being
-        ** selected problem (DERBY-1258) caused by the case insensitive
-        ** JDBC rules for fetching a column by name.
-		**
-		** The cast back to the SQL Domain may seem redundant
-		** but we need it to make the column reference appear
-		** EXACTLY like a regular column reference, so we need
-		** the object in the SQL Domain and we need to have the
-		** type information.  Thus a user should be able to do 
-		** something like
-		**
-		**		CREATE TRIGGER ... INSERT INTO T length(Column), ...
-        **
-        */
-
-		DataTypeDescriptor  dts     = colDesc.getType();
-		TypeId              typeId  = dts.getTypeId();
-
-        if (!typeId.isXMLTypeId())
-        {
-
-            StringBuffer methodCall = new StringBuffer();
-            methodCall.append(
-                "CAST (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().");
-            methodCall.append(isOldTable ? "getOldRow()" : "getNewRow()");
-            methodCall.append(".getObject(");
-            methodCall.append(colPositionInRuntimeResultSet);
-            methodCall.append(") AS ");
-
-            /*
-            ** getSQLString() returns <typeName> 
-            ** for user types, so call getSQLTypeName in that
-            ** case.
-            */
-            methodCall.append(
-                (typeId.userType() ? 
-                     typeId.getSQLTypeName() : dts.getSQLstring()));
-            
-            methodCall.append(") ");
-
-            return methodCall.toString();
-        }
-        else
-        {
-            /*  DERBY-2350
-            **
-            **  Triggers currently use jdbc 1.2 to access columns.  The default
-            **  uses getObject() which is not supported for an XML type until
-            **  jdbc 4.  In the meantime use getString() and then call 
-            **  XMLPARSE() on the string to get the type.  See Derby issue and
-            **  http://wiki.apache.org/db-derby/TriggerImplementation , for
-            **  better long term solutions.  Long term I think changing the
-            **  trigger architecture to not rely on jdbc, but instead on an
-            **  internal direct access interface to execution nodes would be
-            **  best future direction, but believe such a change appropriate
-            **  for a major release, not a bug fix.
-            **
-            **  Rather than the above described code generation, use the 
-            **  following for XML types to generate an XML column from the
-            **  old or new row.
-            ** 
-            **          XMLPARSE(DOCUMENT
-            **              CAST (org.apache.derby.iapi.db.Factory::
-            **                  getTriggerExecutionContext().getNewRow().
-            **                      getString(<colPosition>) AS CLOB)  
-            **                        PRESERVE WHITESPACE)
-            */
-
-            StringBuffer methodCall = new StringBuffer();
-            methodCall.append("XMLPARSE(DOCUMENT CAST( ");
-            methodCall.append(
-                "org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().");
-            methodCall.append(isOldTable ? "getOldRow()" : "getNewRow()");
-            methodCall.append(".getString(");
-            methodCall.append(colPositionInRuntimeResultSet);
-            methodCall.append(") AS CLOB) PRESERVE WHITESPACE ) ");
-
-            return methodCall.toString();
-        }
-	}
 
 	/*
 	** Check for illegal combinations here: insert & old or
@@ -1213,7 +796,7 @@ public class CreateTriggerNode extends DDLStatementNode
 			throw StandardException.newException(SQLState.LANG_TRIGGER_BAD_REF_MISMATCH, "DELETE", "old");
 		}
 	}
-
+    
 	/*
 	** Make sure that the referencing clause is legitimate.
 	** While we are at it we set the new/oldTableName to

@@ -122,7 +122,7 @@ public class SPSDescriptor extends TupleDescriptor
     private final String name;
     private final UUID compSchemaId;
     private final char type;
-    private final String text;
+    private String text;
     private final String usingText;
     private final UUID uuid;
 
@@ -529,6 +529,25 @@ public class SPSDescriptor extends TupleDescriptor
 		return text;
 	}
 
+	/**
+	 * It is possible that when a trigger is invalidated, the generated trigger
+	 * action sql associated with it needs to be regenerated. One example
+	 * of such a case would be when ALTER TABLE on the trigger table
+	 * changes the length of a column. The need for this code was found
+	 * as part of DERBY-4874 where the Alter table had changed the length 
+	 * of a varchar column from varchar(30) to varchar(64) but the generated 
+	 * trigger action plan continued to use varchar(30). To fix varchar(30) in
+	 * in trigger action sql to varchar(64), we need to regenerate the 
+	 * trigger action sql which is saved as stored prepared statement. This 
+	 * new trigger action sql will then get updated into SYSSTATEMENTS table.
+	 * DERBY-4874
+	 * 
+	 * @param newText
+	 */
+	public final void setText(String newText)
+	{
+		text = newText;
+	}
 	/**
 	 * Get the text of the USING clause used on CREATE
 	 * or ALTER statement.
