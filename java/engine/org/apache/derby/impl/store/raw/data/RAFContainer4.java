@@ -79,7 +79,7 @@ class RAFContainer4 extends RAFContainer {
      */
     private FileChannel ourChannel = null;
 
-    private Object channelCleanupMonitor = new Object();
+    private final Object channelCleanupMonitor = new Object();
 
     // channelCleanupMonitor protects next three state variables:
 
@@ -603,6 +603,32 @@ class RAFContainer4 extends RAFContainer {
         }
     }
 
+    /**
+     * Use when seeing an exception during IO and when another thread is
+     * presumably doing the recovery.
+     * <p/>
+     * If {@code stealthMode == false}, wait for another thread to recover the
+     * container after an interrupt. If {@code stealthMode == true}, throw
+     * internal exception {@code InterruptDetectedException} to do retry from
+     * higher in the stack.
+     * <p/>
+     * If {@code stealthMode == false}, maximum wait time for the container to
+     * become available again is determined by the product {@code
+     * FileContainer#MAX_INTERRUPT_RETRIES * FileContainer#INTERRUPT_RETRY_SLEEP}.
+     * There is a chance this thread will not see any recovery occuring (yet),
+     * in which case it waits for a bit and just returns, so the caller must
+     * retry IO until success.
+     * <p/>
+     * If for some reason the recovering thread has given up on resurrecting
+     * the container, cf {@code #giveUpIO}, the method throws {@code
+     * FILE_IO_INTERRUPTED}.
+     * 
+     * @param e the exception we saw during IO
+     * @param stealthMode true if the thread doing IO in stealth mode
+
+     * @throws StandardException {@code InterruptDetectedException} and normal
+     *                            error policy
+     */
     private void awaitRestoreChannel (Exception e,
                                       boolean stealthMode)
             throws StandardException {
@@ -662,7 +688,7 @@ class RAFContainer4 extends RAFContainer {
                     }
 
                     if (timesWaited > MAX_INTERRUPT_RETRIES) {
-                        // Max 60s, then give up, probably way too long anyway,
+                        // Max, give up, probably way too long anyway,
                         // but doesn't hurt?
                         throw StandardException.newException(
                             SQLState.FILE_IO_INTERRUPTED, e);
@@ -713,9 +739,14 @@ class RAFContainer4 extends RAFContainer {
 
 
     /**
+     * Use this when the thread has received a AsynchronousCloseException
+     * exception during IO and its interruped flag is also set. This makes this
+     * thread a likely candicate to do container recovery (aka resurrection),
+     * unless another thread started it already, cf. return value.
+     *
      * @param whence caller site (debug info)
      * @param stealthMode don't update threadsInPageIO if true
-     * @return true if we did it, false if we saw someone else do it and
+     * @return true if we did recovery, false if we saw someone else do it and
      * abstained
      */
     private boolean recoverContainerAfterInterrupt(
@@ -881,9 +912,9 @@ class RAFContainer4 extends RAFContainer {
         if (SanityManager.DEBUG) {
             if (pageNumber == FIRST_ALLOC_PAGE_NUMBER) {
                 // page 0
-                SanityManager.ASSERT(Thread.currentThread().holdsLock(this));
+                SanityManager.ASSERT(Thread.holdsLock(this));
             } else {
-                SanityManager.ASSERT(!Thread.currentThread().holdsLock(this));
+                SanityManager.ASSERT(!Thread.holdsLock(this));
             }
         }
 
@@ -1065,9 +1096,6 @@ class RAFContainer4 extends RAFContainer {
                                 long position)
             throws IOException, StandardException
     {
-        boolean beforeOpen = srcChannel.isOpen();
-        boolean beforeInterrupted = Thread.currentThread().isInterrupted();
-
         while(dstBuffer.remaining() > 0) {
             if (srcChannel.read(dstBuffer,
                                     position + dstBuffer.position()) == -1) {
@@ -1105,9 +1133,6 @@ class RAFContainer4 extends RAFContainer {
                                  long position)
             throws IOException
     {
-        boolean beforeOpen = dstChannel.isOpen();
-        boolean beforeInterrupted = Thread.currentThread().isInterrupted();
-
         while(srcBuffer.remaining() > 0) {
             dstChannel.write(srcBuffer, position + srcBuffer.position());
 
