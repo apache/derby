@@ -54,7 +54,9 @@
         <pathelement path="${compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/vti/*.java"/>
-      <exclude name="${derby.dir}/vti/*Template.java"/>
+      <exclude name="${derby.dir}/vti/UpdatableVTITemplate.java"/>
+      <exclude name="${derby.dir}/vti/VTITemplate.java"/>
+      <exclude name="${derby.dir}/vti/VTITemplateBase.java"/>
       <exclude name="${derby.dir}/vti/StringColumnVTI.java"/>
 
     </javac>
@@ -74,7 +76,9 @@
       <classpath>
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
-    	<include name="${derby.dir}/vti/*Template.java"/>
+    	<include name="${derby.dir}/vti/UpdatableVTITemplate.java"/>
+    	<include name="${derby.dir}/vti/VTITemplate.java"/>
+    	<include name="${derby.dir}/vti/VTITemplateBase.java"/>
     	<include name="${derby.dir}/vti/StringColumnVTI.java"/>
     </javac>
   </target>
