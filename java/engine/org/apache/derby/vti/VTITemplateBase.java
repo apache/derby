@@ -44,7 +44,7 @@ import java.sql.Array;
 	the ResultSets returned by executeQuery in read-write VTI classes. This
     implementation raises "unimplemented method" exceptions for all methods.
 */
-public class VTITemplateBase implements ResultSet
+class VTITemplateBase implements ResultSet
 {
 
     //
