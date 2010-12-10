@@ -35,6 +35,7 @@ public class _Suite extends BaseJDBCTestCase {
 
     public static Test suite() throws Exception{
         TestSuite suite = new TestSuite("Memory Suite");
+        suite.addTest(TriggerTests.suite());
         suite.addTest(BlobMemTest.suite());
         suite.addTest(ClobMemTest.suite());
         suite.addTest(MultiByteClobTest.suite());
