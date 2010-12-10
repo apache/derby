@@ -114,6 +114,7 @@ import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 
+import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
 
 // RESOLVE - paulat - remove this import when track 3677 is fixed
@@ -134,6 +135,7 @@ import org.apache.derby.iapi.services.locks.C_LockFactory;
 
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
+import org.apache.derby.impl.services.daemon.IndexStatisticsDaemonImpl;
 import org.apache.derby.impl.services.locks.Timeout;
 
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
@@ -144,6 +146,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.BaseTypeIdImpl;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
+import org.apache.derby.iapi.services.daemon.IndexStatisticsDaemon;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.locks.CompatibilitySpace;
 import org.apache.derby.iapi.services.locks.ShExLockable;
@@ -366,6 +369,8 @@ public final class	DataDictionaryImpl
 
 	private	ExecutionFactory	exFactory;
 	protected UUIDFactory		uuidFactory;
+    /** Daemon creating and refreshing index cardinality statistics. */
+    private IndexStatisticsDaemon indexRefresher;
 
 	Properties			startupParameters;
 	int					engineType;
@@ -421,6 +426,18 @@ public final class	DataDictionaryImpl
 
 	*/
 	public boolean readOnlyUpgrade;
+    /**
+     * Tells if the automatic index statistics refresher has been disabled.
+     * <p>
+     * The refresher can be disabled explicitly by the user by setting a
+     * property (system wide or database property), or if the daemon encounters
+     * an exception it doesn't know how to recover from.
+     */
+    private boolean indexStatsUpdateDisabled;
+    private boolean indexStatsUpdateLogging;
+    /** TODO: Remove this when code goes into production (i.e. a release). */
+    private boolean indexStatsUpdateLoggingExplicitlySet;
+    private String indexStatsUpdateTracing;
 
 	//systemSQLNameNumber is the number used as the last digit during the previous call to getSystemSQLName.
 	//If it is 9 for a given calendarForLastSystemSQLName, we will restart the counter to 0
@@ -622,6 +639,28 @@ public final class	DataDictionaryImpl
 		permissionsCacheSize = PropertyUtil.intPropertyValue(Property.LANG_PERMISSIONS_CACHE_SIZE, value,
 									   0, Integer.MAX_VALUE, Property.LANG_PERMISSIONS_CACHE_SIZE_DEFAULT);
 
+        // See if automatic index statistics update is disabled through a
+        // system wide property. May be overridden by a database specific
+        // property later on.
+        // The default is that automatic index statistics update is enabled.
+        indexStatsUpdateDisabled = !PropertyUtil.getSystemBoolean(
+                // TODO: Disabled by default for now, fix in DERBY-4939.
+                //       Note that the daemon does nothing automatically
+                //       without DERBY-4938.
+                Property.STORAGE_AUTO_INDEX_STATS, false);
+                //Property.STORAGE_AUTO_INDEX_STATS, true);
+
+        // See if we should enable logging of index stats activities.
+        indexStatsUpdateLogging = PropertyUtil.getSystemBoolean(
+                Property.STORAGE_AUTO_INDEX_STATS_LOGGING);
+        // TODO: Remove this when going into production code (i.e. a release).
+        indexStatsUpdateLoggingExplicitlySet =
+                PropertyUtil.getSystemProperty(
+                    Property.STORAGE_AUTO_INDEX_STATS_LOGGING) != null;
+
+        // See if we should enable tracing of index stats activities.
+        indexStatsUpdateTracing = PropertyUtil.getSystemProperty(
+                Property.STORAGE_AUTO_INDEX_STATS_TRACING, "off");
 
 		/*
 		 * data dictionary contexts are only associated with connections.
@@ -781,6 +820,37 @@ public final class	DataDictionaryImpl
 				// Get the ids for non-core tables
 				loadDictionaryTables(bootingTC, ddg, startParams);
 
+                // See if index stats update is disabled by a database prop.
+                String dbIndexStatsUpdateAuto =
+                        PropertyUtil.getDatabaseProperty(bootingTC,
+                                    Property.STORAGE_AUTO_INDEX_STATS);
+                if (dbIndexStatsUpdateAuto != null) {
+                    indexStatsUpdateDisabled = !Boolean.valueOf(
+                            dbIndexStatsUpdateAuto).booleanValue();
+                }
+                String dbEnableIndexStatsLogging =
+                        PropertyUtil.getDatabaseProperty(bootingTC,
+                            Property.STORAGE_AUTO_INDEX_STATS_LOGGING);
+                if (dbEnableIndexStatsLogging != null) {
+                    indexStatsUpdateLogging = Boolean.valueOf(
+                            dbEnableIndexStatsLogging).booleanValue();
+                    indexStatsUpdateLoggingExplicitlySet = true;
+                }
+                // TODO: This property may go away in production code.
+                String dbEnableIndexStatsTracing =
+                        PropertyUtil.getDatabaseProperty(bootingTC,
+                            Property.STORAGE_AUTO_INDEX_STATS_TRACING);
+                if (dbEnableIndexStatsTracing != null) {
+                    if (!(dbEnableIndexStatsTracing.equalsIgnoreCase("off") ||
+                          dbEnableIndexStatsTracing.equalsIgnoreCase("log") ||
+                          dbEnableIndexStatsTracing.equalsIgnoreCase("stdout") ||
+                          dbEnableIndexStatsTracing.equalsIgnoreCase("both"))) {
+                        indexStatsUpdateTracing = "off";
+                    } else {
+                        indexStatsUpdateTracing = dbEnableIndexStatsTracing;
+                    }
+                }
+
 				String sqlAuth = PropertyUtil.getDatabaseProperty(bootingTC,
 										Property.SQL_AUTHORIZATION_PROPERTY);
 
@@ -901,9 +971,14 @@ public final class	DataDictionaryImpl
 	 * Stop this module.  In this case, nothing needs to be done.
 	 */
 
-	public void stop()
-	{
-	}
+    public void stop() {
+        // Shut down the index statistics refresher, mostly to make it print
+        // processing stats
+        if (indexRefresher != null) {
+            indexRefresher.stop();
+            indexRefresher = null;
+        }
+    }
 
 	/*
 	** CacheableFactory interface
@@ -13649,5 +13724,49 @@ public final class	DataDictionaryImpl
             ti.deleteRow(tc, uuidKey, rf.PERMS_UUID_IDX_NUM);
         }
     }
-}
 
+    /** {@inheritDoc} */
+    public IndexStatisticsDaemon getIndexStatsRefresher(boolean asDaemon) {
+        if (indexStatsUpdateDisabled && asDaemon) {
+            return null;
+        } else {
+            return indexRefresher;
+        }
+    }
+
+    /** {@inheritDoc} */
+    public void disableIndexStatsRefresher() {
+        indexStatsUpdateDisabled = true;
+        // NOTE: This will stop the automatic updates of index statistics,
+        //       but users can still do this explicitly (i.e. by invoking
+        //       the SYSCS_UTIL.SYSCS_UPDATE_STATISTICS system procedure).
+        // Set at boot time, we expect it to be non-null.
+        indexRefresher.stop();
+    }
+
+    /** {@inheritDoc} */
+    public boolean doCreateIndexStatsRefresher() {
+        return (indexRefresher == null);
+    }
+
+    /** {@inheritDoc} */
+    public void createIndexStatsRefresher(Database db, String dbName) {
+        // Check if the access factory is read-only.
+        if (af.isReadOnly()) {
+            indexStatsUpdateDisabled = true;
+            return;
+        }
+
+        // TODO: Remove this override after initial testing.
+        //       Unless logging has been explicitly disabled, turn it on to
+        //       make sure we have some information if things go wrong.
+        if (!indexStatsUpdateLoggingExplicitlySet) {
+            indexStatsUpdateLogging = true;
+        }
+
+        indexRefresher = new IndexStatisticsDaemonImpl(
+                   Monitor.getStream(), indexStatsUpdateLogging,
+                   indexStatsUpdateTracing, db, authorizationDatabaseOwner,
+                   dbName);
+    }
+}

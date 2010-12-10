@@ -24,11 +24,9 @@ package org.apache.derby.impl.db;
 import org.apache.derby.iapi.error.PublicAPI;
 
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.EngineType;
 import org.apache.derby.iapi.util.DoubleProperties;
 import org.apache.derby.iapi.util.IdUtil;
-import org.apache.derby.iapi.services.info.JVMInfo;
 
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.loader.ClassFactory;
@@ -41,27 +39,21 @@ import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.monitor.ModuleFactory;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.services.property.PersistentSet;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.db.DatabaseContext;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.types.DataValueFactory;
-import org.apache.derby.iapi.sql.compile.OptimizerFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionFactory;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
-import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
 
-import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.LanguageFactory;
-import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.FileResource;
 import org.apache.derby.iapi.services.property.PropertyFactory;
@@ -75,19 +67,11 @@ import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.io.File;
-import java.sql.Date;
-import java.sql.Timestamp;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Locale;
-import java.lang.reflect.Method;
 import java.text.DateFormat;
 
 /**
@@ -249,7 +233,12 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
 
 		active = true;
 
-	}
+        // Create an index statistics update daemon.
+        if (dd.doCreateIndexStatsRefresher()) {
+            dd.createIndexStatsRefresher(this, allParams.getProperty(
+                        Property.PROPERTY_RUNTIME_PREFIX + "serviceDirectory"));
+        }
+    }
 
 	public void stop() {
 		active = false;

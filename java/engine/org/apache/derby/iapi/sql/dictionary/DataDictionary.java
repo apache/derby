@@ -22,9 +22,12 @@
 package org.apache.derby.iapi.sql.dictionary;
 
 import org.apache.derby.iapi.sql.depend.DependencyManager;
+
+import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.DataValueFactory;
+import org.apache.derby.iapi.services.daemon.IndexStatisticsDaemon;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.error.StandardException;
@@ -2200,5 +2203,55 @@ public interface DataDictionary
     public void dropAllPermDescriptors(UUID objectID, TransactionController tc)
             throws StandardException;
 
+    /**
+     * Tells if an index statistics refresher should be created for this
+     * database.
+     * <p>
+     * The only reason not to create an index statistics refresher is if one
+     * already exists.
+     *
+     * @return {@code true} if an index statistics refresher should be created,
+     *      {@code false} if one already exists.
+     */
+    public boolean doCreateIndexStatsRefresher();
 
+    /**
+     * Creates an index statistics refresher for this data dictionary.
+     * <p>
+     * The index statistics refresher is used to create and refresh index
+     * cardinality statistics, either automatically or on user demand (i.e.
+     * by invoking SYSCS_UTIL.SYSCS_UPDATE_STATISTICS).
+     *
+     * @param db the database object associated with this data dictionary
+     * @param databaseName the name of the database
+     */
+    public void createIndexStatsRefresher(Database db, String databaseName);
+
+    /**
+     * Returns the index statistics refresher.
+     *
+     * @param asDaemon whether the usage is automatic ({@code true}) or
+     *      explicit ({@code false})
+     * @return The index statistics refresher instance, or {@code null} if
+     *      disabled. If {@code asDaemon} is {@code false}, an instance will
+     *      always be returned.
+     */
+    public IndexStatisticsDaemon getIndexStatsRefresher(boolean asDaemon);
+
+    /**
+     * Disables automatic refresh/creation of index statistics at runtime.
+     * <p>
+     * If the daemon is disabled, it can only be enabled again by rebooting
+     * the database. Note that this method concerns diabling the daemon at
+     * runtime, and only the automatic updates of statistics. If wanted, the
+     * user would disable the daemon at boot-time by setting a property
+     * (system-wide or database property).
+     * <p>
+     * <em>Usage note:</em> This method was added to allow the index refresher
+     * itself to notify the data dictionary that it should be disabled. This
+     * only happens if the refresher/daemon experiences severe errors, or a
+     * large amount of errors. It would then disable itself to avoid eating up
+     * system resources and potentially cause side-effects due to the errors.
+     */
+    public void disableIndexStatsRefresher();
 }

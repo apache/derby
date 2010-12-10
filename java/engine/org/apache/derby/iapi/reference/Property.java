@@ -645,6 +645,63 @@ public interface Property {
 	String STATEMENT_CACHE_SIZE = "derby.language.statementCacheSize";
 	int STATEMENT_CACHE_SIZE_DEFAULT = 100;
 
+    /**
+     * Tells if automatic index statistics update is enabled (default is true).
+     */
+    String STORAGE_AUTO_INDEX_STATS = "derby.storage.indexStats.auto";
+
+    /**
+     * Tells if activities related to automatic index statistics update should
+     * be written to the Derby system log file (derby.log).
+     */
+    String STORAGE_AUTO_INDEX_STATS_LOGGING = "derby.storage.indexStats.log";
+
+    /**
+     * Tells if more detailed activities related to automatic index statistics
+     * update should be traced. Accepted values are: *none*, stdout, log, both
+     */
+    String STORAGE_AUTO_INDEX_STATS_TRACING = "derby.storage.indexStats.trace";
+
+    /**
+     * Specifies the lower threshold for the number of rows in a table before
+     * creating statistics for the associated indexes.
+     * <p>
+     * <em>NOTE:</em> This is a debug property which will be removed or renamed.
+     */
+    String STORAGE_AUTO_INDEX_STATS_DEBUG_CREATE_THRESHOLD =
+            "derby.storage.indexStats.debug.createThreshold";
+    int STORAGE_AUTO_INDEX_STATS_DEBUG_CREATE_THRESHOLD_DEFAULT = 100;
+
+    /**
+     * Specifies the lower threshold for the absolute difference between the
+     * row estimate for the table and the row estimate for the index before
+     * creating statistics for the associated indexes.
+     * <p>
+     * <em>NOTE:</em> This is a debug property which will be removed or renamed.
+     */
+    String STORAGE_AUTO_INDEX_STATS_DEBUG_ABSDIFF_THRESHOLD =
+            "derby.storage.indexStats.debug.absdiffThreshold";
+    int STORAGE_AUTO_INDEX_STATS_DEBUG_ABSDIFF_THRESHOLD_DEFAULT = 0;
+
+    /**
+     * Specifies the lower threshold for the logarithmical (natural logarithm e)
+     * difference between the row estimate for the table and the row estimate
+     * for the index before creating statistics for the associated indexes.
+     * <p>
+     * <em>NOTE:</em> This is a debug property which will be removed or renamed.
+     */
+    String STORAGE_AUTO_INDEX_STATS_DEBUG_LNDIFF_THRESHOLD =
+            "derby.storage.indexStats.debug.lndiffThreshold";
+    double STORAGE_AUTO_INDEX_STATS_DEBUG_LNDIFF_THRESHOLD_DEFAULT = 1.0;
+
+    /**
+     * Specifies the size of the work unit queue in the index statistics update
+     * daemon.
+     */
+    String STORAGE_AUTO_INDEX_STATS_DEBUG_QUEUE_SIZE =
+            "derby.storage.indexStats.debug.queueSize";
+    int STORAGE_AUTO_INDEX_STATS_DEBUG_QUEUE_SIZE_DEFAULT = 20;
+
 	/*
 	** Transactions
 	*/

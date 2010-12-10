@@ -25,8 +25,10 @@ import java.util.List;
 import java.util.Properties;
 
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.EngineType;
+import org.apache.derby.iapi.services.daemon.IndexStatisticsDaemon;
 import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
@@ -880,5 +882,21 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
     public void dropAllPermDescriptors(UUID objectID, TransactionController tc)
             throws StandardException {
         // TODO Auto-generated method stub
+    }
+
+    public IndexStatisticsDaemon getIndexStatsRefresher(boolean asDaemon) {
+        return null;
+    }
+
+    public void disableIndexStatsRefresher() {
+        // Do nothing here...
+    }
+
+    public boolean doCreateIndexStatsRefresher() {
+        return false;
+    }
+
+    public void createIndexStatsRefresher(Database db, String dbName) {
+        // Do nothing
     }
 }
