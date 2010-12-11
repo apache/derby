@@ -21,17 +21,12 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.impl.sql.execute.FKInfo;
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
@@ -40,16 +35,14 @@ import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptorList;
 import org.apache.derby.iapi.sql.dictionary.ConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.CheckConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.sql.execute.ConstantAction;
@@ -57,7 +50,6 @@ import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecPreparedStatement;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 
-import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.StatementType;
 
@@ -72,9 +64,9 @@ import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
+import java.util.Enumeration;
 import java.lang.reflect.Modifier;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Vector;
 
 /**
@@ -914,7 +906,15 @@ public final class UpdateNode extends DMLModStatementNode
 	  *	4)	finds all constraints which overlap the updated columns
 	  *		and adds the constrained columns to the bitmap
 	  *	5)	finds all triggers which overlap the updated columns.
-	  *	6)	if there are any triggers, marks all columns in the bitmap
+	  *	6)	if there are any UPDATE triggers, then do one of the following
+	  *     a)If all of the triggers have MISSING referencing clause, then that
+	  *      means that the trigger actions do not have access to before and
+	  *      after values. In that case, there is no need to blanketly decide 
+	  *      to include all the columns in the read map just because there are
+	  *      triggers defined on the table.
+	  *     b)Since one/more triggers have REFERENCING clause on them, get all
+	  *      the columns because we don't know what the user will ultimately 
+	  *      reference.
 	  *	7)	adds the triggers to an evolving list of triggers
 	  *
 	  *	@param	updateColumnList	a list of updated columns
@@ -997,19 +997,41 @@ public final class UpdateNode extends DMLModStatementNode
 		}
 
 		/*
-	 	** If we have any triggers, then get all the columns
-		** because we don't know what the user will ultimately
-		** reference.
+	 	** If we have any UPDATE triggers, then do one of the following
+	 	** 1)If all of the triggers have MISSING referencing clause, then that
+	 	** means that the trigger actions do not have access to before and 
+	 	** after values. In that case, there is no need to blanketly decide to
+	 	** include all the columns in the read map just because there are
+	 	** triggers defined on the table.
+	 	** 2)Since one/more triggers have REFERENCING clause on them, get all 
+	 	** the columns because we don't know what the user will ultimately reference.
 	 	*/
-
 		baseTable.getAllRelevantTriggers( StatementType.UPDATE, changedColumnIds, relevantTriggers );
-		if ( relevantTriggers.size() > 0 ) { needsDeferredProcessing[0] = true; }
 
 		if (relevantTriggers.size() > 0)
-		{
-			for (int i = 1; i <= columnCount; i++)
+		{ 
+			needsDeferredProcessing[0] = true;
+			
+			boolean needToIncludeAllColumns = false;
+			Enumeration descs = relevantTriggers.elements();
+			while (descs.hasMoreElements())
 			{
-				columnMap.set(i);
+				TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
+				//Does this trigger have REFERENCING clause defined on it
+				if (!trd.getReferencingNew() && !trd.getReferencingOld())
+					continue;
+				else
+				{
+					needToIncludeAllColumns = true;
+					break;
+				}
+			}
+
+			if (needToIncludeAllColumns) {
+				for (int i = 1; i <= columnCount; i++)
+				{
+					columnMap.set(i);
+				}
 			}
 		}
 
