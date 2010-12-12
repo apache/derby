@@ -44,6 +44,8 @@ import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 
+import org.apache.derby.impl.sql.compile.StatementNode;
+
 import java.sql.Types;
 import java.util.List;
 import java.util.Hashtable;
@@ -1168,6 +1170,133 @@ public interface DataDictionary
 	 */
 	public TriggerDescriptor getTriggerDescriptor(String name, SchemaDescriptor sd)
 				throws StandardException;
+
+	/**
+	 * This method does the job of transforming the trigger action plan text
+	 * as shown below. 
+	 * 	DELETE FROM t WHERE c = old.c
+	 * turns into
+	 *  DELETE FROM t WHERE c = org.apache.derby.iapi.db.Factory::
+	 *  	getTriggerExecutionContext().getOldRow().
+	 *      getInt(columnNumberFor'C'inRuntimeResultset);
+	 * In addition to that, for CREATE TRIGGER time, it does the job of 
+	 * collecting the column positions of columns referenced in trigger 
+	 * action plan through REFERENCEs clause. This information will get
+	 * saved in SYSTRIGGERS table by the caller in CREATE TRIGGER case.
+	 *  
+	 * It gets called either 
+	 * 1)at the trigger creation time for row level triggers or
+	 * 2)if the trigger got invalidated by some other sql earlier and the 
+	 * current sql needs that trigger to fire. For such a trigger firing 
+	 * case, this method will get called only if it is row level trigger 
+	 * with REFERENCES clause. This work was done as part of DERBY-4874. 
+	 * Before DERBY-4874, once the stored prepared statement for trigger 
+	 * action plan was generated, it was never updated ever again. But, 
+	 * one case where the trigger action plan needs to be regenerated is say
+	 * when the column length is changed for a column which is REFERENCEd as
+	 * old or new column value. eg of such a case would be say the Alter
+	 * table has changed the length of a varchar column from varchar(30) to
+	 * varchar(64) but the stored prepared statement associated with the 
+	 * trigger action plan continued to use varchar(30). To fix varchar(30) 
+	 * in stored prepared statement for trigger action sql to varchar(64), 
+	 * we need to regenerate the trigger action sql. This new trigger 
+	 * action sql will then get updated into SYSSTATEMENTS table.
+	 * 
+	 * If we are here for case 1) above, then we will collect all column 
+	 * references in trigger action through new/old transition variables. 
+	 * Information about them will be saved in SYSTRIGGERS table DERBY-1482
+	 * (if we are dealing with pre-10.7 db, then we will not put any 
+	 * information about trigger action columns in the system table to ensure 
+	 * backward compatibility). This information along with the trigger 
+	 * columns will decide what columns from the trigger table will be
+	 * fetched into memory during trigger execution.
+	 * 
+	 * If we are here for case 2) above, then all the information about 
+	 * column references in trigger action has already been collected during
+	 * CREATE TRIGGER time and hence we can use that available information 
+	 * about column positions to do the transformation of OLD/NEW transient 
+	 * references.
+	 * 
+	 * More information on case 1) above. 
+	 * DERBY-1482 One of the work done by this method for row level triggers
+	 * is to find the columns which are referenced in the trigger action 
+	 * through the REFERENCES clause ie thro old/new transition variables.
+	 * This information will be saved in SYSTRIGGERS so it can be retrieved
+	 * during the trigger execution time. The purpose of this is to recognize
+	 * what columns from the trigger table should be read in during trigger
+	 * execution. Before these code changes, during trigger execution, Derby
+	 * was opting to read all the columns from the trigger table even if they
+	 * were not all referenced during the trigger execution. This caused Derby
+	 * to run into OOM at times when it could really be avoided.
+	 *
+	 * We go through the trigger action text and collect the column positions
+	 * of all the REFERENCEd columns through new/old transition variables. We
+	 * keep that information in SYSTRIGGERS. At runtime, when the trigger is
+	 * fired, we will look at this information along with trigger columns from
+	 * the trigger definition and only fetch those columns into memory rather
+	 * than all the columns from the trigger table.
+	 * This is especially useful when the table has LOB columns and those
+	 * columns are not referenced in the trigger action and are not recognized
+	 * as trigger columns. For such cases, we can avoid reading large values of
+	 * LOB columns into memory and thus avoiding possibly running into OOM
+	 * errors.
+	 * 
+	 * If there are no trigger columns defined on the trigger, we will read all
+	 * the columns from the trigger table when the trigger fires because no
+	 * specific columns were identified as trigger column by the user. The
+	 * other case where we will opt to read all the columns are when trigger
+	 * columns and REFERENCING clause is identified for the trigger but there
+	 * is no trigger action column information in SYSTRIGGERS. This can happen
+	 * for triggers created prior to 10.7 release and later that database got
+	 * hard/soft-upgraded to 10.7 or higher release.
+	 *
+	 * @param actionStmt This is needed to get access to the various nodes
+	 * 	generated by the Parser for the trigger action sql. These nodes will be
+	 * 	used to find REFERENCEs column nodes.
+	 * 
+	 * @param oldReferencingName The name specified by the user for REFERENCEs
+	 * 	to old row columns
+	 * 
+	 * @param newReferencingName The name specified by the user for REFERENCEs
+	 * 	to new row columns
+	 * 
+	 * @param triggerDefinition The original trigger action text provided by
+	 * 	the user during CREATE TRIGGER time.
+	 * 
+	 * @param referencedCols Trigger is defined on these columns (will be null
+	 *   in case of INSERT AND DELETE Triggers. Can also be null for DELETE
+	 *   Triggers if UPDATE trigger is not defined on specific column(s))
+	 *   
+	 * @param referencedColsInTriggerAction	what columns does the trigger 
+	 * 	action reference through old/new transition variables (may be null)
+	 * 
+	 * @param actionOffset offset of start of action clause
+	 * 
+	 * @param triggerTableDescriptor Table descriptor for trigger table
+	 * 
+	 * @param triggerEventMask TriggerDescriptor.TRIGGER_EVENT_XXX
+	 * 
+	 * @param createTriggerTime True if here for CREATE TRIGGER,
+	 * 	false if here because an invalidated row level trigger with 
+	 *  REFERENCEd columns has been fired and hence trigger action
+	 *  sql associated with SPSDescriptor may be invalid too.
+	 * 
+	 * @return Transformed trigger action sql
+	 * @throws StandardException
+	 */
+	public String getTriggerActionString(
+			StatementNode actionStmt,
+			String oldReferencingName,
+			String newReferencingName,
+			String triggerDefinition,
+			int[] referencedCols,
+			int[] referencedColsInTriggerAction,
+			int actionOffset,
+			TableDescriptor triggerTableDescriptor,
+			int triggerEventMask,
+			boolean createTriggerTime)
+	throws StandardException;
+	
 
 	/**
 	 * Load up the trigger descriptor list for this table
