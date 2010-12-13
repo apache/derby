@@ -1272,7 +1272,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	/**
 	 * Following will do an insert into table1 which will cause insert 
 	 * trigger to fire. The insert involves the LOB column.
-	 * @param p1
 	 * @throws SQLException
 	 */
 	public void runtest2InsertTriggerTest() throws SQLException{
@@ -1286,7 +1285,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	/**
 	 * Following will update a row in table1 which will cause update 
 	 * trigger to fire. The update does not involve the LOB column.
-	 * @param p1
 	 * @throws SQLException
 	 */
 	public void runtest1UpdateTrigger() throws SQLException{
@@ -1299,7 +1297,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	/**
 	 * Following will update a row in table1 which will cause update 
 	 * trigger to fire. The update involves the LOB column.
-	 * @param p1
 	 * @throws SQLException
 	 */
 	public void runtest2UpdateTrigger() throws SQLException{
@@ -1313,7 +1310,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	/**
 	 * Following will update a row in table1 which will cause update 
 	 * trigger to fire. The update involves the LOB column.
-	 * @param p1
 	 * @throws SQLException
 	 */
 	public void runtest3UpdateTrigger() throws SQLException{
@@ -1326,7 +1322,6 @@ public class TriggerTests extends BaseJDBCTestCase {
 	/**
 	 * Following will delete a row from table1 which will cause delete 
 	 * trigger to fire. 
-	 * @param p1
 	 * @throws SQLException
 	 */
 	public void runDeleteTriggerTest() throws SQLException{
