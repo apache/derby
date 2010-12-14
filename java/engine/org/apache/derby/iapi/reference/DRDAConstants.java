@@ -228,6 +228,7 @@ public	interface	DRDAConstants
     // nanoseconds precision: yyyy-mm-dd-hh.mm.ss.ffffff
     // In contrast, JDBC supports full nanoseconds precision: yyyy-mm-dd-hh.mm.ss.fffffffff
     //
+    public   static final int DRDA_OLD_TIMESTAMP_LENGTH = 26;
     public   static final int DRDA_TIMESTAMP_LENGTH = 29;
     public   static final int JDBC_TIMESTAMP_LENGTH = 29;
 

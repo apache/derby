@@ -745,7 +745,7 @@ public class DateTime {
     public static int getTimestampLength( boolean supportsTimestampNanoseconds )
     {
         return supportsTimestampNanoseconds ?
-            DRDAConstants.JDBC_TIMESTAMP_LENGTH : DRDAConstants.DRDA_TIMESTAMP_LENGTH;
+            DRDAConstants.JDBC_TIMESTAMP_LENGTH : DRDAConstants.DRDA_OLD_TIMESTAMP_LENGTH;
     }
 
 }
