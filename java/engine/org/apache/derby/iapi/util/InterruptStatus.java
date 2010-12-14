@@ -68,9 +68,18 @@ public class InterruptStatus {
      * also. Use lcc if available, else thread local variable.
      */
     public static void setInterrupted() {
-        LanguageConnectionContext lcc =
-            (LanguageConnectionContext)ContextService.getContextOrNull(
+        LanguageConnectionContext lcc = null;
+        try {
+            lcc = (LanguageConnectionContext)ContextService.getContextOrNull(
                 LanguageConnectionContext.CONTEXT_ID);
+
+        } catch (ShutdownException e) {
+            // Ignore. Can happen when: a) background thread (RawStoreDaemon)
+            // is performing checkpointing and b) a user thread starts shutdown
+            // and interrupts the background thread. During recovery of the
+            // container we get here. DERBY-4920.
+        }
+
 
         Thread.interrupted();
 
@@ -204,13 +213,18 @@ public class InterruptStatus {
     public static void restoreIntrFlagIfSeen(LanguageConnectionContext lcc) {
 
         if (SanityManager.DEBUG) {
-            LanguageConnectionContext ctxLcc =
-                (LanguageConnectionContext)ContextService.
-                getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+            LanguageConnectionContext ctxLcc = null;
+            try {
+                ctxLcc = (LanguageConnectionContext)ContextService.
+                    getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
 
-            SanityManager.ASSERT(
-                lcc == ctxLcc,
-                "lcc=" + lcc + " getContextOrNull=" + ctxLcc);
+                SanityManager.ASSERT(
+                    lcc == ctxLcc,
+                    "lcc=" + lcc + " getContextOrNull=" + ctxLcc);
+
+            } catch (ShutdownException e) {
+                // ignore
+            }
         }
 
         if (lcc.getInterruptedException() != null) {

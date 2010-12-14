@@ -104,9 +104,9 @@ class RAFContainer4 extends RAFContainer {
     private volatile boolean restoreChannelInProgress = false;
 
 
-    // In case the recovering thread can't successfully recover the container,
-    // it will throw, so other waiting threads need to give up as well.  This
-    // can happen at shutdown time when interrupts are used to stop threads.
+    // In case the recovering thread can't successfully recover the container
+    // for some reason, it will throw, so other waiting threads need to give up
+    // as well.
     private boolean giveUpIO = false;
     private final Object giveUpIOm = new Object(); // its monitor
 
@@ -530,6 +530,8 @@ class RAFContainer4 extends RAFContainer {
         }
 
         boolean success = false;
+        int retries = MAX_INTERRUPT_RETRIES;
+
         while (!success) {
             try {
                 if (pageNumber == FIRST_ALLOC_PAGE_NUMBER) {
@@ -591,6 +593,10 @@ class RAFContainer4 extends RAFContainer {
                 // had seen ClosedChannelException.
 
                 awaitRestoreChannel(e, stealthMode);
+                if (retries-- == 0) {
+                    throw StandardException.newException(
+                        SQLState.FILE_IO_INTERRUPTED);
+                }
             }
         }
 
@@ -702,7 +708,7 @@ class RAFContainer4 extends RAFContainer {
                 }
 
                 // Since the channel is presumably ok (lest giveUpIO is set,
-                // see below), we put ourselveds back in the IO set of threads:
+                // see below), we put ourselves back in the IO set of threads:
 
                 threadsInPageIO++;
                 break;
