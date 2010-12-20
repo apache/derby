@@ -318,8 +318,7 @@ public class BasicDependencyManager implements DependencyManager {
 	{
 		List list = getDependents(p);
 
-		if (list == null)
-		{
+        if (list.isEmpty()) {
 			return;
 		}
 
@@ -976,7 +975,8 @@ public class BasicDependencyManager implements DependencyManager {
 	 * that the dependent removal is being dealt with elsewhere.
 	 * Won't assume that the dependent only appears once in the list.
 	 */
-	protected void clearProviderDependency(UUID p, Dependency d) {
+    //@GuardedBy("this")
+    private void clearProviderDependency(UUID p, Dependency d) {
 		List deps = (List) providers.get(p);
 
 		if (deps == null)
@@ -1108,14 +1108,17 @@ public class BasicDependencyManager implements DependencyManager {
      * invalid ones). Includes all dependency types.
      *
      * @param p the provider
-     * @return {@code null} or a list of dependents (possibly empty).
+     * @return A list of dependents (possibly empty).
      * @throws StandardException if something goes wrong
 	 */
 	private List getDependents (Provider p) 
 			throws StandardException {
-        List deps;
+        List deps = new ArrayList();
         synchronized (this) {
-            deps = (List) providers.get(p.getObjectID());
+            List memDeps = (List) providers.get(p.getObjectID());
+            if (memDeps != null) {
+                deps.addAll(memDeps);
+            }
         }
 
         // If the provider is persistent, then we have to add providers for
@@ -1127,16 +1130,7 @@ public class BasicDependencyManager implements DependencyManager {
 															),
 							p
 													);
-            if (deps == null) {
-                deps = storedList;
-            } else {
-                // We can't modify the list we got from 'providers', create a
-                // new one to merge the two lists.
-                List merged = new ArrayList(deps.size() + storedList.size());
-                merged.addAll(deps);
-                merged.addAll(storedList);
-                deps = merged;
-            }
+            deps.addAll(storedList);
         }
         return deps;
 	}
