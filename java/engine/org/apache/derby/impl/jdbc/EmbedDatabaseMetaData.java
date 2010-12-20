@@ -2693,7 +2693,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 * @exception SQLException thrown on failure.
      */
 	public ResultSet getTypeInfo() throws SQLException {
-		return getSimpleQuery("getTypeInfo");
+		return getTypeInfoMinion("getTypeInfo");
 	}
 
 	/**
@@ -2704,8 +2704,30 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	 * conform to ODBC specifications.
 	 */
 	public ResultSet getTypeInfoForODBC() throws SQLException {
-		return getSimpleQuery("odbc_getTypeInfo");
+		return getTypeInfoMinion("odbc_getTypeInfo");
 	}
+
+    /**
+     * Get a description of the standard SQL types supported by this database.
+     *
+     * @param queryName the name of the query that fetches the information
+     * @return a result set with SQL type description
+     */
+    private ResultSet getTypeInfoMinion(String queryName) throws SQLException {
+        try {
+            // DERBY-4946: BOOLEAN data type was introduced in 10.7
+            boolean booleanSupported =
+                    getLanguageConnectionContext().getDataDictionary().
+                    checkVersion(DataDictionary.DD_VERSION_DERBY_10_7, null);
+
+            PreparedStatement ps = getPreparedQuery(queryName);
+            ps.setBoolean(1, booleanSupported);
+            return ps.executeQuery();
+
+        } catch (StandardException se) {
+            throw handleException(se);
+        }
+    }
 
     /**
      * Get a description of a table's indices and statistics. They are

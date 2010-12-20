@@ -22,22 +22,15 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 
-import org.apache.derbyTesting.junit.JDBCDataSource;
-import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Connection;
-import java.sql.CallableStatement;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-
-import javax.sql.DataSource;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derby.catalog.types.RoutineAliasInfo;
-import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derbyTesting.junit.JDBC;
 
 
@@ -124,19 +117,39 @@ public class Changes10_7 extends UpgradeChange
         {
         case PH_CREATE: // create with old version
         case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old version after soft-upgrade
+            assertFalse(getSupportedTypes().contains("BOOLEAN"));
             assertStatementError(  SYNTAX_ERROR, s, booleanValuedFunction );
             break;
 
         case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
+            assertFalse(getSupportedTypes().contains("BOOLEAN"));
             assertStatementError( UPGRADE_REQUIRED, s, booleanValuedFunction );
             break;
             
         case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
+            assertTrue(getSupportedTypes().contains("BOOLEAN"));
             s.execute( booleanValuedFunction );
             break;
         }
         
         s.close();
+    }
+
+    /**
+     * Get the names of all supported types, as reported by
+     * {@code DatabaseMetaData.getTypeInfo()}.
+     *
+     * @return a set with the names of all supported types in the loaded
+     * version of Derby
+     */
+    private Set getSupportedTypes() throws SQLException {
+        HashSet types = new HashSet();
+        ResultSet rs = getConnection().getMetaData().getTypeInfo();
+        while (rs.next()) {
+            types.add(rs.getString("TYPE_NAME"));
+        }
+        rs.close();
+        return types;
     }
 
     /**

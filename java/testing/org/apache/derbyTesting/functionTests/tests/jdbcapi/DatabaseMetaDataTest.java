@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 //import java.util.HashMap;
 //import java.util.Iterator;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -2075,9 +2076,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
     
     /**
      * Test getTypeInfo
-     * @throws SQLException 
      */
-    public void testGetTypeInfo() throws SQLException
+    public void testGetTypeInfo() throws Exception
     {
         // Client returns BOOLEAN type from the engine as SMALLINT
         int BOOLEAN = Types.BOOLEAN;      
@@ -2131,7 +2131,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
 	 Derby-2258 Removed 3 data types which are not supported by Derby
 	 and added XML data type which is supported by Derby
 	*/
-        int[] supportedTypes = new int[] {
+        int[] allTypes = new int[] {
           Types.BIGINT, Types.BINARY, Types.BLOB, Types.BOOLEAN,
           Types.CHAR, Types.CLOB, Types.DATE,
           Types.DECIMAL, Types.DOUBLE, Types.FLOAT,
@@ -2140,10 +2140,25 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
           Types.TIME, Types.TIMESTAMP,  Types.VARBINARY,
           Types.VARCHAR, JDBC.SQLXML, Types.JAVA_OBJECT
         };
+
+        ArrayList supportedTypes = new ArrayList();
+        for (int i = 0; i < allTypes.length; i++) {
+            supportedTypes.add(new Integer(allTypes[i]));
+        }
+
+        Version dataVersion = getDataVersion(getConnection());
+        boolean booleanSupported =
+                dataVersion.compareTo(new Version(10, 7, 0, 0)) >= 0;
         
+        // DERBY-4946: Boolean isn't supported if DB is soft-upgraded from
+        // pre-10.7 version
+        if (!booleanSupported) {
+            supportedTypes.remove(new Integer(Types.BOOLEAN));
+        }
+
         // Rows are returned from getTypeInfo in order of
         // "DATA_TYPE" (which is a constant from java.sql.Types)
-        Arrays.sort(supportedTypes);
+        Collections.sort(supportedTypes);
         
         int offset = 0;
         while (rs.next()) {
@@ -2154,7 +2169,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             // DATA_TYPE (column 2)
             int type = rs.getInt("DATA_TYPE");
             assertFalse(rs.wasNull());
-            if (supportedTypes[offset] != type)
+            if (!supportedTypes.get(offset).equals(new Integer(type)))
             {
                 fail("Unexpected type " + typeName);
             }
