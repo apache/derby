@@ -20,31 +20,11 @@
 
 <center><h1>Derby Compatibility Tests</h1></center>
 
-<TABLE border="2">
-  <TBODY>
-
-    <TR>
-      <TD><b>Revision</b></TD>
-      <TD><b>Author</b></TD>
-      <TD><b>Date</b></TD>
-      <TD><b>Comment</b></TD>
-    </TR>
-
-    <TR>
-      <TD>1.0</TD>
-      <TD>Rick Hillegas</TD>
-      <TD>06 September 2005</TD>
-      <TD>First cut.</TD>
-    </TR>
-
-  </TBODY>
-</TABLE>
-
 <ul>
   <li><a href="#Overview">Overview</a></li>
   <li><a href="#Test Setup">Test Setup</a></li>
-  <li><a href="#Running the Tests">Running the Tests</a></li>
-  <li><a href="#Analyzing Failures">Analyzing Failures</a></li>
+  <li><a href="#Running the Tests from Ant">Running the Tests from Ant</a></li>
+  <li><a href="#Running the Tests from JUnit">Running the Tests from JUnit</a></li>
 </ul>
 
 <h2><a name="Overview">Overview</a></h2>
@@ -58,7 +38,7 @@ currently test the following combinations:
 
 <blockquote>
 
-<h3><a name="Clients">Clients</a></h2>
+<h3><a name="Clients">Clients</a></h3>
 
 <TABLE border="2">
   <TBODY>
@@ -70,7 +50,7 @@ currently test the following combinations:
   </TBODY>
 </TABLE>
 
-<h3><a name="Servers">Servers</a></h2>
+<h3><a name="Servers">Servers</a></h3>
 
 <TABLE border="2">
   <TBODY>
@@ -81,7 +61,7 @@ currently test the following combinations:
   </TBODY>
 </TABLE>
 
-<h3><a name="VMs">VMs</a></h2>
+<h3><a name="VMs">VMs</a></h3>
 
 <TABLE border="2">
   <TBODY>
@@ -109,7 +89,7 @@ invoking testScript.xml (which lives in the same directory as this web page):
 ant -buildfile testScript.xml -projecthelp
 </pre></blockquote>
 
-<h2><a name="Running the Tests">Running the Tests</a></h2>
+<h2><a name="Running the Tests from Ant">Running the Tests from Ant</a></h2>
 
 <p>
 To run the tests, you will need to do the following:
@@ -154,8 +134,6 @@ _stopServer:
      [exec] Result: 1
 </pre></blockquote>
 
-<h2><a name="Analyzing Failures">Analyzing Failures</a></h2>
-
 <p>
 If the tests succeed, ant will happily report:
 </p>
@@ -171,6 +149,159 @@ identify which test run failed. More specifically, SUMMARY_COMPAT.txt
 will hold the name of an output file which describes the specific test failures.
 </p>
 
+<h2><a name="Running the Tests from JUnit">Running the Tests from JUnit</a></h2>
+
+<p>
+You can also run the tests directly using JUnit. In that case, you
+need a properties file that tells which combinations to test. The file
+should be named <tt>compatibilitytest.properties</tt> and it must be
+placed in the directory from which the tests are started (current
+working directory).
+</p>
+
+<p>
+For example, <tt>compatibilitytest.properties</tt> could look like this:
+</p>
+
+<blockquote><pre>
+##
+## Example compatibilitytest.properties file
+##
+
+##
+## Specify which JVMs to test by defining properties named
+## jvm.versions, containing the number of JVMs to test, and jvm.N
+## (where 0 &lt;= N &lt; ${jvm.versions}), containing a symbolic name for
+## the particular JVM to test.
+##
+## This example will make the test run with Java SE 5 and Java SE 6:
+##
+
+jvm.versions=2
+jvm.0=j15lib
+jvm.1=j16lib
+
+##
+## Specify where to find the JVMs. Property names should match the
+## symbolic names in the jvm.N properties. The properties should point
+## to the jre/lib directory of a JDK.
+##
+
+j15lib=/usr/jdk/instances/jdk1.5.0/jre/lib
+j16lib=/usr/jdk/instances/jdk1.6.0/jre/lib
+
+##
+## Specify which Derby versions to test. derby.versions contains the
+## number of versions to test, derby.versionN (where 0 &lt;= N &lt;
+## ${derby.versions}) contains the name of a Derby version.
+##
+## This example tests four versions of Derby: 10.0.2.1, 10.4.1.3,
+## 10.5.3.0 and head of trunk:
+##
+
+derby.versions=4
+derby.version0=10.0.2.1
+derby.version1=10.4.1.3
+derby.version2=10.5.3.0
+derby.version3=Trunk
+
+##
+## Specify where to find the jars for the Derby versions specified
+## above. Property names should match names used in the derby.versionN
+## properties.
+##
+
+10.0.2.1=/opt/db-derby-10.0.2.1-bin/lib
+10.4.1.3=/opt/db-derby-10.4.1.3-bin/lib
+10.5.3.0=/opt/db-derby-10.5.3.0-bin/lib
+Trunk=/code/derby/trunk/jars/sane
+
+##
+## We also need to specify whether or not the Derby versions tested
+## support the -noSecurityManager option when starting the network
+## server. 10.2 and earlier versions don't support it, 10.3 and later
+## versions do. Use the version name specified in the derby.versionN
+## properties and append "_SA" to the name (short for security
+## enabled).
+##
+
+10.0.2.1_SA=false
+10.4.1.3_SA=true
+10.5.3.0_SA=true
+Trunk_SA=true
+
+##
+## Specify the name of the -noSecurityManager option. (Yes, it's
+## required, but it will always be the same.)
+##
+
+test.securityOption=noSecurityManager
+
+##
+## Tell the tests where to find junit.jar.
+##
+
+junit_jar=/usr/share/lib/java/junit.jar
+
+##
+## Specify where to find the DB2JCC jar files. This property is only
+## required if you test Derby 10.0.2.1, which doesn't have its own
+## network client driver.
+##
+
+db2jcc_lib=/opt/db2jcc/lib
+
+##
+## Optional properties to limit the number of combinations to test.
+##
+## Test only a with a single Derby Network Server version:
+##  test.singleServer=N
+##
+## Test only with a single JVM version on the server side:
+##  test.singleServerVM=N
+##
+## Test only with a single Derby Network Client version:
+##  test.singleClient=N
+##
+## Test only with a single JVM version on the client side:
+##  test.singleClientVM=N
+##
+## The N in the property values is a number that matches the N in one
+## of the jvm.N or derby.versionN properties.
+##
+## Example: Only test combinations that use the trunk version of the
+## Network Server, running on a Java 6 virtual machine:
+##
+## test.singleServer=3
+## test.singleServerVM=1
+##
+
+</pre></blockquote>
+
+<p>
+To start the compatibility tests, add the Derby jar files and
+<tt>junit.jar</tt> to your <tt>CLASSPATH</tt>, and execute the
+following command:
+</p>
+
+<blockquote><pre>
+java -Djava.security.policy=&quot;&lt;NONE&gt;&quot; junit.textui.TestRunner \
+    org.apache.derbyTesting.functionTests.tests.junitTests.compatibility.CompatibilityCombinations
+</pre></blockquote>
+
+<p>
+If all the tests pass, JUnit will report:
+</p>
+
+<blockquote><pre>
+OK (2 tests)
+</pre></blockquote>
+
+<p>
+Otherwise, JUnit will report a failure. In that case, the file
+<tt>ServerClient_wombat_failed</tt> will contain a list of file names
+with more information about the failed combinations.
+</p>
 
 </body>
 </html>
