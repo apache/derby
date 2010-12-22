@@ -275,11 +275,11 @@ public class NetResultSet40 extends NetResultSet{
 
         if ( type == null )
         {
-            throw new SQLException( "NULL", SQLState.LANG_DATA_TYPE_GET_MISMATCH );
+            throw mismatchException( "NULL", columnIndex, null );
         }
 
         Exception ex = null;
-
+        
         try {
             if ( String.class.equals( type ) ) { return (T) getString( columnIndex ); }
             else if ( BigDecimal.class.equals( type ) ) { return (T) getBigDecimal( columnIndex ); }
@@ -296,11 +296,25 @@ public class NetResultSet40 extends NetResultSet{
             else if ( Blob.class.equals( type ) ) { return (T) getBlob( columnIndex ); }
             else if ( Clob.class.equals( type ) ) { return (T) getClob( columnIndex ); }
             else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { return (T) getBytes( columnIndex ); }
-            else { return (T) getObject( columnIndex ); }
+            else
+            {
+                Object  result = getObject( columnIndex );
+                if ( !type.isInstance( result ) ) { throw new ClassCastException( type.getName() ); }
+                return (T) result;
+            }
         }
-        catch (ClassCastException e) {}
+        catch (Exception e) { ex = e; }
         
-        throw new SQLException( type.getName(), SQLState.LANG_DATA_TYPE_GET_MISMATCH, ex );
+        throw mismatchException( type.getName(), columnIndex, ex );
+    }
+    private SQLException    mismatchException( String targetTypeName, int columnIndex, Throwable t )
+        throws SQLException
+    {
+        String sourceTypeName = getMetaData().getColumnTypeName( columnIndex );
+        ClientMessageId cmi = new ClientMessageId( SQLState.LANG_DATA_TYPE_GET_MISMATCH );
+        SqlException se = new SqlException( agent_.logWriter_, cmi, targetTypeName, sourceTypeName, t );
+
+        return se.getSQLException();
     }
 
     public  <T> T getObject( String columnName, Class<T> type )

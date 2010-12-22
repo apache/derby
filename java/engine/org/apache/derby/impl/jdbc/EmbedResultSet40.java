@@ -258,10 +258,8 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
 
         if ( type == null )
         {
-            throw new SQLException( "NULL", SQLState.LANG_DATA_TYPE_GET_MISMATCH );
+            throw mismatchException( "NULL", columnIndex );
         }
-
-        Exception ex = null;
 
         try {
             if ( String.class.equals( type ) ) { return (T) getString( columnIndex ); }
@@ -279,11 +277,24 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
             else if ( Blob.class.equals( type ) ) { return (T) getBlob( columnIndex ); }
             else if ( Clob.class.equals( type ) ) { return (T) getClob( columnIndex ); }
             else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { return (T) getBytes( columnIndex ); }
-            else { return (T) getObject( columnIndex ); }
+            else
+            {
+                Object  result = getObject( columnIndex );
+                if ( !type.isInstance( result ) ) { throw new ClassCastException( type.getName() ); }
+                return (T) result;
+            }
         }
-        catch (ClassCastException e) { ex = e; }
+        catch (ClassCastException e) {}
         
-        throw new SQLException( type.getName(), SQLState.LANG_DATA_TYPE_GET_MISMATCH, ex );
+        throw mismatchException( type.getName(), columnIndex );
+    }
+    private SQLException    mismatchException( String targetTypeName, int columnIndex )
+        throws SQLException
+    {
+        String sourceTypeName = getMetaData().getColumnTypeName( columnIndex );
+        SQLException se = newSQLException( SQLState.LANG_DATA_TYPE_GET_MISMATCH, targetTypeName, sourceTypeName );
+
+        return se;
     }
 
     public  <T> T getObject( String columnName, Class<T> type )
