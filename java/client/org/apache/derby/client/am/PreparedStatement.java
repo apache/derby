@@ -329,6 +329,15 @@ public class PreparedStatement extends Statement
 
     //------------------- Prohibited overrides from Statement --------------------
 
+    public void addBatch(String sql) throws SQLException {
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceEntry(this, "addBatch", sql);
+        }
+        throw new SqlException(agent_.logWriter_,
+            new ClientMessageId(SQLState.NOT_FOR_PREPARED_STATEMENT),
+            "addBatch(String)").getSQLException();
+    }
+
     public boolean execute(String sql) throws SQLException {
         if (agent_.loggingEnabled()) {
             agent_.logWriter_.traceEntry(this, "execute", sql);

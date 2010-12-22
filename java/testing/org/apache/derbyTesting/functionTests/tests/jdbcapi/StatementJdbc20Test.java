@@ -21,7 +21,9 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
@@ -40,6 +42,8 @@ import junit.framework.TestSuite;
  * to JUnit.
  */
 public class StatementJdbc20Test extends BaseJDBCTestCase {
+
+    private static  final   String  METHOD_NOT_ALLOWED = "XJ016";
     
     /**
      * Create a test with the given name.
@@ -256,4 +260,35 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
         stmt.close();
         commit();
     }
+
+    /**
+     * Test the following clarification made by JDBC 4.1: You should
+     * raise an exception when addBatch(String) is called on a PreparedStatement
+     * or a CallableStatement.
+     */
+    public void testAddBatchClarification_jdbc4_1() throws SQLException
+    {
+        PreparedStatement ps = prepareStatement( "select * from sys.systables" );
+        CallableStatement cs = prepareCall( "CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)" );
+
+        try {
+            ps.addBatch( "select * from sys.systables" );
+            fail( "Oops. ps.addBatch() worked." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( METHOD_NOT_ALLOWED, se );
+        }
+        
+        try {
+            cs.addBatch( "CALL SYSCS_UTIL.SYSCS_SET_RUNTIMESTATISTICS(1)" );
+            fail( "Oops. cs.addBatch() worked." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( METHOD_NOT_ALLOWED, se );
+        }
+    }
+
+
 }
