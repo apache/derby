@@ -2174,6 +2174,7 @@ public class ResultSetTest
         vetWrappedString( wrapper, 18, "VARCHARCOL" );
         vetWrappedBinary( wrapper, 19, "VARCHARFORBITDATACOL" );
     }
+    @SuppressWarnings("unchecked")
     private void    vetWrappedNull( Wrapper41 wrapper ) throws Exception
     {
             try {
