@@ -23,10 +23,17 @@ package org.apache.derby.client.net;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
 import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.sql.SQLFeatureNotSupportedException;
 import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.client.am.Cursor;
@@ -245,4 +252,72 @@ public class NetResultSet40 extends NetResultSet{
                            throws SQLException {
          throw SQLExceptionFactory.notImplemented("updateNClob(String,Reader,long)");
      }
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+    
+    /**
+     * Retrieve the column as an object of the desired type.
+     */
+    @SuppressWarnings("unchecked")
+    public  <T> T getObject( int columnIndex, Class<T> type )
+            throws SQLException
+    {
+        // closeCloseFilterInputStream() should be called by all of the
+        // more specific methods to which we forward this call
+
+        if (agent_.loggingEnabled()) {
+            agent_.logWriter_.traceEntry(this, "getObject", columnIndex );
+        }
+
+        if ( type == null )
+        {
+            throw new SQLException( "NULL", SQLState.LANG_DATA_TYPE_GET_MISMATCH );
+        }
+
+        Exception ex = null;
+
+        try {
+            if ( String.class.equals( type ) ) { return (T) getString( columnIndex ); }
+            else if ( BigDecimal.class.equals( type ) ) { return (T) getBigDecimal( columnIndex ); }
+            else if ( Boolean.class.equals( type ) ) { return (T) Boolean.valueOf( getBoolean(columnIndex ) ); }
+            else if ( Byte.class.equals( type ) ) { return (T) Byte.valueOf( getByte( columnIndex ) ); }
+            else if ( Short.class.equals( type ) ) { return (T) Short.valueOf( getShort( columnIndex ) ); }
+            else if ( Integer.class.equals( type ) ) { return (T) Integer.valueOf( getInt( columnIndex ) ); }
+            else if ( Long.class.equals( type ) ) { return (T) Long.valueOf( getLong( columnIndex ) ); }
+            else if ( Float.class.equals( type ) ) { return (T) Float.valueOf( getFloat( columnIndex ) ); }
+            else if ( Double.class.equals( type ) ) { return (T) Double.valueOf( getDouble( columnIndex ) ); }
+            else if ( Date.class.equals( type ) ) { return (T) getDate( columnIndex ); }
+            else if ( Time.class.equals( type ) ) { return (T) getTime( columnIndex ); }
+            else if ( Timestamp.class.equals( type ) ) { return (T) getTimestamp( columnIndex ); }
+            else if ( Blob.class.equals( type ) ) { return (T) getBlob( columnIndex ); }
+            else if ( Clob.class.equals( type ) ) { return (T) getClob( columnIndex ); }
+            else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { return (T) getBytes( columnIndex ); }
+            else { return (T) getObject( columnIndex ); }
+        }
+        catch (ClassCastException e) {}
+        
+        throw new SQLException( type.getName(), SQLState.LANG_DATA_TYPE_GET_MISMATCH, ex );
+    }
+
+    public  <T> T getObject( String columnName, Class<T> type )
+            throws SQLException
+    {
+        try
+        {
+            if (agent_.loggingEnabled()) {
+                agent_.logWriter_.traceEntry(this, "getObject", columnName);
+            }
+            return getObject( findColumnX(columnName, "getObject"), type );
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+
 }

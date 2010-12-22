@@ -1938,7 +1938,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     }
 
     // An untraced version of findColumn()
-    private final int findColumnX(String columnName, String operation) throws SqlException {
+    protected final int findColumnX(String columnName, String operation) throws SqlException {
         checkForClosedResultSet(operation);
         return resultSetMetaData_.findColumnX(columnName);
     }
