@@ -519,11 +519,11 @@ public class SqlException extends Exception implements Diagnosable {
 // for common ResultSet data conversion exceptions.
 
 class ColumnTypeConversionException extends SqlException {
-    ColumnTypeConversionException(LogWriter logWriter, String sourceType,
-        String targetType) {
+    ColumnTypeConversionException(LogWriter logWriter, String targetType,
+        String sourceType) {
         super(logWriter,
             new ClientMessageId(SQLState.LANG_DATA_TYPE_GET_MISMATCH),
-            sourceType, targetType);
+            targetType, sourceType);
     }
 }
 

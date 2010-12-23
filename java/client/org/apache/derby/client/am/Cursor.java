@@ -792,8 +792,7 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getBooleanFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "boolean");
+            throw coercionError( "boolean", column );
         }
     }
 
@@ -821,8 +820,7 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getByteFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "byte");
+            throw coercionError( "byte", column );
         }
     }
 
@@ -849,8 +847,7 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getShortFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "short");
+            throw coercionError( "short", column );
         }
     }
 
@@ -877,8 +874,7 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getIntFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "int");
+            throw coercionError(  "int", column );
         }
     }
 
@@ -905,8 +901,7 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getLongFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "long");
+            throw coercionError( "long", column );
         }
     }
 
@@ -933,8 +928,7 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getFloatFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "float");
+            throw coercionError( "float", column );
         }
     }
 
@@ -963,8 +957,7 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getDoubleFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "double");
+            throw coercionError( "double", column );
         }
     }
 
@@ -994,8 +987,7 @@ public abstract class Cursor {
         case java.sql.Types.LONGVARCHAR:
             return agent_.crossConverters_.getBigDecimalFromString(getVARCHAR(column));
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "java.math.BigDecimal");
+            throw coercionError( "java.math.BigDecimal", column );
         }
     }
 
@@ -1013,8 +1005,7 @@ public abstract class Cursor {
             return agent_.crossConverters_.
                     getDateFromString(getVARCHAR(column), cal);
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Date");
+            throw coercionError( "java.sql.Date", column );
         }
     }
 
@@ -1032,8 +1023,7 @@ public abstract class Cursor {
             return agent_.crossConverters_.
                     getTimeFromString(getVARCHAR(column), cal);
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Time");
+            throw coercionError( "java.sql.Time", column );
         }
     }
 
@@ -1054,8 +1044,7 @@ public abstract class Cursor {
             return agent_.crossConverters_.
                     getTimestampFromString(getVARCHAR(column), cal);
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Timestamp");
+            throw coercionError( "java.sql.Timestamp", column );
         }
     }
 
@@ -1117,8 +1106,7 @@ public abstract class Cursor {
                 tempString = c.getSubString(1, (int) c.length());
                 return tempString;
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_,
-                    "java.sql.Types " + jdbcTypes_[column -1], "String");
+                throw coercionError( "String", column );
             }
         } catch ( SQLException se ) {
             throw new SqlException(se);
@@ -1138,8 +1126,7 @@ public abstract class Cursor {
                 byte[] bytes = b.getBytes(1, (int) b.length());
                 return bytes;
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_,
-                    "java.sql.Types " + jdbcTypes_[column -1], "byte[]");
+                throw coercionError( "byte[]", column );
             }
         } catch ( SQLException se ) {
             throw new SqlException(se);
@@ -1165,8 +1152,7 @@ public abstract class Cursor {
                     return b.getBinaryStreamX();
                 }
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_,
-                    "java.sql.Types " + jdbcTypes_[column -1], "java.io.InputStream");
+                throw coercionError( "java.io.InputStream", column );
         }
     }
 
@@ -1208,8 +1194,7 @@ public abstract class Cursor {
             case java.sql.Types.BLOB:
                 return getBinaryStream(column);
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_,
-                    "java.sql.Types " + jdbcTypes_[column -1], "java.io.InputStream");
+                throw coercionError( "java.io.InputStream", column );
         }
     }
  
@@ -1255,8 +1240,7 @@ public abstract class Cursor {
             case java.sql.Types.BLOB:
                 return getBinaryStream(column);
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_,
-                    "java.sql.Types " + jdbcTypes_[column -1], "UnicodeStream");
+                throw coercionError( "UnicodeStream", column );
             }
         } catch ( SQLException se ) {
             throw new SqlException(se);
@@ -1308,8 +1292,7 @@ public abstract class Cursor {
                     		"BLOB", "java.io.Reader", e);
                 }
             default:
-                throw new ColumnTypeConversionException(agent_.logWriter_,
-                    "java.sql.Types " + jdbcTypes_[column -1], "java.io.Reader");
+                throw coercionError( "java.io.Reader", column );
             }
     }
 
@@ -1318,8 +1301,7 @@ public abstract class Cursor {
         case Types.BLOB:
             return getBlobColumn_(column, agent_, true);
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Blob");
+            throw coercionError( "java.sql.Blob", column );
         }
     }
 
@@ -1328,8 +1310,7 @@ public abstract class Cursor {
         case Types.CLOB:
             return getClobColumn_(column, agent_, true);
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "java.sql.Clob");
+            throw coercionError( "java.sql.Clob", column );
         }
     }
 
@@ -1383,8 +1364,7 @@ public abstract class Cursor {
         case java.sql.Types.CLOB:
             return getClobColumn_(column, agent_, true);
         default:
-            throw new ColumnTypeConversionException(agent_.logWriter_,
-                "java.sql.Types " + jdbcTypes_[column -1], "Object");
+            throw coercionError( "Object", column );
         }
     }
 
@@ -1417,6 +1397,13 @@ public abstract class Cursor {
         }
 
         return new String(charBuffer_, 0, charCount);
+    }
+
+    private ColumnTypeConversionException coercionError
+        ( String targetType, int sourceColumn )
+    {
+        return new ColumnTypeConversionException
+                ( agent_.logWriter_, targetType, Types.getTypeString( jdbcTypes_[sourceColumn -1] ));
     }
 
     public void nullDataForGC() {
