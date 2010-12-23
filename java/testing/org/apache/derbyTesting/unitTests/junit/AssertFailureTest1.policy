@@ -73,6 +73,10 @@ grant codeBase "${derbyTesting.codeclasses}" {
 
 };
 
+grant codeBase "${derbyTesting.junit}" {
+    // This permission is needed when running the tests using ant 1.7
+    permission java.io.FilePermission "${user.dir}${/}*", "write";
+};
 
 // Ant's junit runner requires setOut to redirect the System output streams
 // to the forked JVM used when running junit tests inside Ant. Ant requires
