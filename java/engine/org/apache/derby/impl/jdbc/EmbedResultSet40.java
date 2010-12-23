@@ -279,9 +279,7 @@ public class EmbedResultSet40 extends org.apache.derby.impl.jdbc.EmbedResultSet2
             else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { return (T) getBytes( columnIndex ); }
             else
             {
-                Object  result = getObject( columnIndex );
-                if ( !type.isInstance( result ) ) { throw new ClassCastException( type.getName() ); }
-                return (T) result;
+                return type.cast( getObject( columnIndex ) );
             }
         }
         catch (ClassCastException e) {}
