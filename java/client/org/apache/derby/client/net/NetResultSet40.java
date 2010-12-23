@@ -275,11 +275,9 @@ public class NetResultSet40 extends NetResultSet{
 
         if ( type == null )
         {
-            throw mismatchException( "NULL", columnIndex, null );
+            throw mismatchException( "NULL", columnIndex );
         }
 
-        Exception ex = null;
-        
         try {
             if ( String.class.equals( type ) ) { return (T) getString( columnIndex ); }
             else if ( BigDecimal.class.equals( type ) ) { return (T) getBigDecimal( columnIndex ); }
@@ -301,16 +299,16 @@ public class NetResultSet40 extends NetResultSet{
                 return type.cast( getObject( columnIndex ) );
             }
         }
-        catch (Exception e) { ex = e; }
+        catch (ClassCastException e) {}
         
-        throw mismatchException( type.getName(), columnIndex, ex );
+        throw mismatchException( type.getName(), columnIndex );
     }
-    private SQLException    mismatchException( String targetTypeName, int columnIndex, Throwable t )
+    private SQLException    mismatchException( String targetTypeName, int columnIndex )
         throws SQLException
     {
         String sourceTypeName = getMetaData().getColumnTypeName( columnIndex );
         ClientMessageId cmi = new ClientMessageId( SQLState.LANG_DATA_TYPE_GET_MISMATCH );
-        SqlException se = new SqlException( agent_.logWriter_, cmi, targetTypeName, sourceTypeName, t );
+        SqlException se = new SqlException( agent_.logWriter_, cmi, targetTypeName, sourceTypeName );
 
         return se.getSQLException();
     }
