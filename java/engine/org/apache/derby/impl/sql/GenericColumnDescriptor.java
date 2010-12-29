@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql;
 
+import org.apache.derby.catalog.types.RoutineAliasInfo;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
@@ -220,7 +221,7 @@ public final class GenericColumnDescriptor
 		tableName = (String)fh.get("tableName");
 		schemaName = (String)fh.get("schemaName");
 		columnPos = fh.getInt("columnPos");
-		type = (DataTypeDescriptor)fh.get("type");
+		type = getStoredDataTypeDescriptor(fh.get("type"));
 		isAutoincrement = fh.getBoolean("isAutoincrement");
 		updatableByCursor = fh.getBoolean("updatableByCursor");
 	}
@@ -248,4 +249,27 @@ public final class GenericColumnDescriptor
 			return "";
 		}
 	}
+
+    /**
+     * When retrieving a DataTypeDescriptor, it might just be a regular
+     * DataTypeDescriptor or may be an OldRoutineType, as used for Routine
+     * parameters and return values prior to DERBY-2775. If it is not a regular
+     * DataTypeDescriptor, it must be an OldRoutineType, so convert it to a
+     * DataTypeDescriptor DERBY-4913
+     * 
+     * @param o
+     *            object as obtained by fh.get("type") in readExternal
+     * @return DataTypeDescriptor
+     */
+    private DataTypeDescriptor getStoredDataTypeDescriptor(Object o) {
+
+        if (o instanceof DataTypeDescriptor)
+            return (DataTypeDescriptor) o;
+        else
+            // Must be an OldRoutineType, so we will convert it to a
+            // DataTypeDescriptor for our purposes
+            return DataTypeDescriptor
+                    .getType(RoutineAliasInfo.getStoredType(o));
+    }
+
 }

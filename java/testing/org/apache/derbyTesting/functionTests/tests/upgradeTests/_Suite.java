@@ -130,9 +130,15 @@ public class _Suite extends BaseTestCase {
         old = OldVersions.getSupportedVersions();
         
         for (int i = 0; i < old.length; i++) {
-            suite.addTest(UpgradeRun.suite(old[i]));
+            // DERBY-4913. Test upgrade and create together for 10.3.3.0 since
+            // that combination seems to trigger a different code path.
+            if (i == OldVersions.VERSION_10_3_3_0_OFFSET)
+                suite.addTest(UpgradeRun.suite(old[i], true));
+            else
+                suite.addTest(UpgradeRun.suite(old[i], false));
         }
 
+        
         return suite;
     }
     

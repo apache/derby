@@ -45,13 +45,17 @@ final class PhaseChanger extends BaseTestSetup {
     private ClassLoader loader;
     private ClassLoader previousLoader;
     private boolean trace = false;
+    private String upgradeAttributes="upgrade=true";
     
     public PhaseChanger(Test test, int phase,
-            ClassLoader loader, int[] version) {
+            ClassLoader loader, int[] version, boolean useCreateOnUpgrade) {
         super(test);
         this.phase = phase;
         this.loader = loader;
         this.version = version;
+        if (useCreateOnUpgrade) {
+            upgradeAttributes += ";create=true";
+        }
     }
     
     /**
@@ -99,7 +103,7 @@ final class PhaseChanger extends BaseTestSetup {
             
         case UpgradeChange.PH_HARD_UPGRADE:
             JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
-                    "upgrade=true");
+                    upgradeAttributes);
             break;
         default:
             break;
