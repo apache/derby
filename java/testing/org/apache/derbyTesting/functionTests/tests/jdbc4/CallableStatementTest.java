@@ -1,6 +1,6 @@
 /*
  
-   Derby - Class CallableStatementTest
+   Derby - Class org.apache.derbyTesting.functionTests.tests.jdbc4.CallableStatementTest
  
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -23,11 +23,16 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import junit.framework.*;
 
+import org.apache.derby.iapi.types.HarmonySerialBlob;
+import org.apache.derby.iapi.types.HarmonySerialClob;
+
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
+
 import java.io.IOException;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.sql.*;
 import java.lang.reflect.Method;
 import java.util.Vector;
@@ -35,10 +40,8 @@ import java.util.Vector;
 /**
  * Tests of the <code>java.sql.CallableStatement</code> JDBC40 API.
  */
-public class CallableStatementTest
-    extends BaseJDBCTestCase {
-
-
+public class CallableStatementTest  extends Wrapper41Test
+{
     /** Default callable statement used by the tests. */
     private CallableStatement cStmt = null;
     
@@ -578,6 +581,152 @@ public class CallableStatementTest
             //Do nothing as this is the expected behaviour
 
         }
+    }
+
+    /**
+     * Test the JDBC 4.1 extensions.
+     */
+    public  void    testJDBC4_1() throws Exception
+    {
+        Connection  conn = getConnection();
+        
+        vetDataTypeCount( conn );
+
+        PreparedStatement   ps = prepareStatement
+            (
+             conn,
+             "create procedure allTypesProc\n" +
+             "(\n" +
+             "    out bigintCol bigint,\n" +
+             "    out blobCol blob,\n" +
+             "    out booleanCol boolean,\n" +
+             "    out charCol char(1),\n" +
+             "    out charForBitDataCol char(1) for bit data,\n" +
+             "    out clobCol clob,\n" +
+             "    out dateCol date,\n" +
+             "    out doubleCol double,\n" +
+             "    out floatCol float,\n" +
+             "    out intCol int,\n" +
+             "    out longVarcharCol long varchar,\n" +
+             "    out longVarcharForBitDataCol long varchar for bit data,\n" +
+             "    out numericCol numeric,\n" +
+             "    out realCol real,\n" +
+             "    out smallintCol smallint,\n" +
+             "    out timeCol time,\n" +
+             "    out timestampCol timestamp,\n" +
+             "    out varcharCol varchar( 2 ),\n" +
+             "    out varcharForBitDataCol varchar( 2 ) for bit data\n" +
+             ")\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.jdbc4.CallableStatementTest.allTypesProc'\n"
+             );
+        ps.execute();
+        ps.close();
+
+        CallableStatement cs = prepareCall
+            (
+             conn,
+             "call allTypesProc(  ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )"
+             );
+        int param = 1;
+        cs.registerOutParameter( param++, Types.BIGINT );
+        cs.registerOutParameter( param++, Types.BLOB );
+        cs.registerOutParameter( param++, Types.BOOLEAN );
+        cs.registerOutParameter( param++, Types.CHAR );
+        cs.registerOutParameter( param++, Types.BINARY );
+        cs.registerOutParameter( param++, Types.CLOB );
+        cs.registerOutParameter( param++, Types.DATE );
+        cs.registerOutParameter( param++, Types.DOUBLE );
+        cs.registerOutParameter( param++, Types.FLOAT );
+        cs.registerOutParameter( param++, Types.INTEGER );
+        cs.registerOutParameter( param++, Types.LONGVARCHAR );
+        cs.registerOutParameter( param++, Types.LONGVARBINARY );
+        cs.registerOutParameter( param++, Types.NUMERIC );
+        cs.registerOutParameter( param++, Types.REAL );
+        cs.registerOutParameter( param++, Types.SMALLINT );
+        cs.registerOutParameter( param++, Types.TIME );
+        cs.registerOutParameter( param++, Types.TIMESTAMP );
+        cs.registerOutParameter( param++, Types.VARCHAR );
+        cs.registerOutParameter( param++, Types.VARBINARY );
+        cs.execute();
+        examineJDBC4_1extensions( new Wrapper41( cs ) );
+        cs.close();
+
+        ps = prepareStatement( conn, "drop procedure allTypesProc" );
+        ps.execute();
+        ps.close();
+    }
+    private void    vetDataTypeCount( Connection conn ) throws Exception
+    {
+        ResultSet rs = conn.getMetaData().getTypeInfo();
+        int actualTypeCount = 0;
+        while ( rs.next() ) { actualTypeCount++; }
+        rs.close();
+
+        //
+        // If this assertion fails, that means that another data type has been added
+        // to Derby. You need to add that datatype to the allTypesProc procedure created
+        // by testJDBC4_1() and you need to add a verification case to examineJDBC4_1extensions().
+        //
+        assertEquals( 22, actualTypeCount );
+    }
+    
+    /**
+     * <p>
+     * Procedure used by jdbc 4.1 tests.
+     * </p>
+     */
+    public  static  void    allTypesProc
+        (
+         long[] bigintarg,
+         Blob[] blobarg,
+         boolean[] booleanarg,
+         String[] chararg,
+         byte[][] charforbitdataarg,
+         Clob[] clobarg,
+         Date[] datearg,
+         double[] doublearg,
+         double[] floatarg,
+         int[] intarg,
+         String[] longvarchararg,
+         byte[][] longvarcharforbitdataarg,
+         BigDecimal[] numericarg,
+         float[] realarg,
+         short[] smallintarg,
+         Time[] timearg,
+         Timestamp[] timestamparg,
+         String[] varchararg,
+         byte[][] varcharforbitdataarg
+         )
+        throws Exception
+    {
+        String  stringValue = "a";
+        byte[]  binaryValue = new byte[] { (byte) 0xde };
+        byte    intValue = (byte) 1;
+        float   floatValue = 1.0F;
+        String lobValue = "abc";
+        
+        bigintarg[0] = intValue;
+        blobarg[0] = new HarmonySerialBlob( lobValue.getBytes( "UTF-8" ));
+        booleanarg[0] = true;
+        chararg[0] = stringValue;
+        charforbitdataarg[0] = binaryValue;
+        clobarg[0] = new HarmonySerialClob( lobValue );
+        datearg[0]= new Date( 761990400000L );
+        doublearg[0] = floatValue;
+        floatarg[0] = floatValue;
+        intarg[0] = intValue;
+        longvarchararg[0] = stringValue;
+        longvarcharforbitdataarg[0] =  binaryValue;
+        numericarg[0] = new BigDecimal( "1.0" );
+        realarg[0] = floatValue;
+        smallintarg[0] = intValue;
+        timearg[0] = new Time( 83342000L );
+        timestamparg[0] = new Timestamp( -229527385766L );
+        varchararg[0] = stringValue;
+        varcharforbitdataarg[0] = binaryValue;
     }
 
     /**

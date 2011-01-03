@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.impl.jdbc.Util;
+import org.apache.derby.impl.jdbc.EmbedCallableStatement40;
 
 public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
     
@@ -440,5 +441,23 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
     public final void setCharacterStream(String parameterName, Reader x, long length)
     throws SQLException {
         getCallableStatement().setCharacterStream(parameterName,x,length);
+    }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+    
+    public <T> T getObject( int parameterIndex, Class<T> type )
+        throws SQLException
+    {
+        return ((EmbedCallableStatement40) getCallableStatement()).getObject( parameterIndex, type );
+    }
+    
+    public <T> T getObject(String parameterName, Class<T> type)
+        throws SQLException
+    {
+        return ((EmbedCallableStatement40) getCallableStatement()).getObject( parameterName, type );
     }
 }

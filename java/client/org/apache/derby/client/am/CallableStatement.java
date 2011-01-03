@@ -1201,7 +1201,7 @@ public class CallableStatement extends PreparedStatement
         }
     }
     
-    private SQLException jdbcMethodNotImplemented() throws SQLException
+    protected SQLException jdbcMethodNotImplemented() throws SQLException
     {
         try
         {

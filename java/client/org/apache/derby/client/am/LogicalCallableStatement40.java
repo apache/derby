@@ -348,4 +348,23 @@ public class LogicalCallableStatement40
             throws SQLException {
          getPhysCs().setNClob(arg0, arg1);
     }
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+    
+    public <T> T getObject( int parameterIndex, Class<T> type )
+        throws SQLException
+    {
+        return ((CallableStatement40)getPhysCs()).getObject( parameterIndex, type );
+    }
+    
+    public <T> T getObject(String parameterName, Class<T> type)
+        throws SQLException
+    {
+        return ((CallableStatement40)getPhysCs()).getObject( parameterName, type );
+    }
+
 }

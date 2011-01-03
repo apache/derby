@@ -23,12 +23,16 @@ package org.apache.derby.client.am;
 
 import java.io.InputStream;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.Date;
 import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
@@ -320,4 +324,64 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
     throws SQLException {
        throw SQLExceptionFactory.notImplemented ("setCharacterStream(String,Reader,long)");
     }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+    
+    @SuppressWarnings("unchecked")
+    public <T> T getObject( int parameterIndex, Class<T> type )
+        throws SQLException
+    {
+        // checkForClosedStatement() should be called by all of the
+        // more specific methods to which we forward this call
+
+        if ( type == null )
+        {
+            throw mismatchException( "NULL", parameterIndex );
+        }
+
+        try {
+            if ( String.class.equals( type ) ) { return (T) getString( parameterIndex ); }
+            else if ( BigDecimal.class.equals( type ) ) { return (T) getBigDecimal( parameterIndex ); }
+            else if ( Boolean.class.equals( type ) ) { return (T) Boolean.valueOf( getBoolean(parameterIndex ) ); }
+            else if ( Byte.class.equals( type ) ) { return (T) Byte.valueOf( getByte( parameterIndex ) ); }
+            else if ( Short.class.equals( type ) ) { return (T) Short.valueOf( getShort( parameterIndex ) ); }
+            else if ( Integer.class.equals( type ) ) { return (T) Integer.valueOf( getInt( parameterIndex ) ); }
+            else if ( Long.class.equals( type ) ) { return (T) Long.valueOf( getLong( parameterIndex ) ); }
+            else if ( Float.class.equals( type ) ) { return (T) Float.valueOf( getFloat( parameterIndex ) ); }
+            else if ( Double.class.equals( type ) ) { return (T) Double.valueOf( getDouble( parameterIndex ) ); }
+            else if ( Date.class.equals( type ) ) { return (T) getDate( parameterIndex ); }
+            else if ( Time.class.equals( type ) ) { return (T) getTime( parameterIndex ); }
+            else if ( Timestamp.class.equals( type ) ) { return (T) getTimestamp( parameterIndex ); }
+            else if ( Blob.class.equals( type ) ) { return (T) getBlob( parameterIndex ); }
+            else if ( Clob.class.equals( type ) ) { return (T) getClob( parameterIndex ); }
+            else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { return (T) getBytes( parameterIndex ); }
+            else
+            {
+                return type.cast( getObject( parameterIndex ) );
+            }
+        }
+        catch (ClassCastException e) {}
+        
+        throw mismatchException( type.getName(), parameterIndex );
+    }
+    private SQLException    mismatchException( String targetTypeName, int parameterIndex )
+        throws SQLException
+    {
+        String sourceTypeName = getParameterMetaData().getParameterTypeName( parameterIndex );
+        ClientMessageId cmi = new ClientMessageId( SQLState.LANG_DATA_TYPE_GET_MISMATCH );
+        SqlException se = new SqlException( agent_.logWriter_, cmi, targetTypeName, sourceTypeName );
+
+        return se.getSQLException();
+    }
+
+    public <T> T getObject(String parameterName, Class<T> type)
+        throws SQLException
+    {
+        throw jdbcMethodNotImplemented();
+    }
+    
 }
