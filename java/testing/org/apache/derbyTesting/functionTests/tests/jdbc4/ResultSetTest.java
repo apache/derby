@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import org.apache.derby.iapi.types.HarmonySerialBlob;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 import junit.framework.Test;
@@ -1981,9 +1982,9 @@ public class ResultSetTest  extends Wrapper41Test
         PreparedStatement   ps = prepareStatement
             (
              conn,
-             "create function makeBlob( a varchar( 32670 ) ) returns blob\n" +
+             "create function makeBlob( ) returns blob\n" +
              "language java parameter style java no sql deterministic\n" +
-             "external name 'org.apache.derbyTesting.functionTests.tests.lang.AnsiSignatures.blob_Blob_String'\n"
+             "external name 'org.apache.derbyTesting.functionTests.tests.jdbc4.ResultSetTest.makeBlob'\n"
              );
         ps.execute();
         ps.close();
@@ -2047,7 +2048,7 @@ public class ResultSetTest  extends Wrapper41Test
              "values\n" +
              "(\n" +
              "    1,\n" +
-             "    makeBlob( 'abc' ),\n" +
+             "    makeBlob(  ),\n" +
              "    true,\n" +
              "    'a',\n" +
              "    X'DE',\n" +
@@ -2097,6 +2098,16 @@ public class ResultSetTest  extends Wrapper41Test
         // by testJDBC4_1() and you need to add a verification case to examineJDBC4_1extensions().
         //
         assertEquals( 22, actualTypeCount );
+    }
+
+    /**
+     * <p>
+     * Function for making a Blob.
+     * </p>
+     */
+    public  static  final   Blob    makeBlob()  throws Exception
+    {
+        return new HarmonySerialBlob( BINARY_VALUE );
     }
     
 }

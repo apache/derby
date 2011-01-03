@@ -703,30 +703,29 @@ public class CallableStatementTest  extends Wrapper41Test
         throws Exception
     {
         String  stringValue = "a";
-        byte[]  binaryValue = new byte[] { (byte) 0xde };
         byte    intValue = (byte) 1;
         float   floatValue = 1.0F;
         String lobValue = "abc";
         
         bigintarg[0] = intValue;
-        blobarg[0] = new HarmonySerialBlob( lobValue.getBytes( "UTF-8" ));
+        blobarg[0] = new HarmonySerialBlob( BINARY_VALUE );
         booleanarg[0] = true;
         chararg[0] = stringValue;
-        charforbitdataarg[0] = binaryValue;
+        charforbitdataarg[0] = BINARY_VALUE;
         clobarg[0] = new HarmonySerialClob( lobValue );
         datearg[0]= new Date( 761990400000L );
         doublearg[0] = floatValue;
         floatarg[0] = floatValue;
         intarg[0] = intValue;
         longvarchararg[0] = stringValue;
-        longvarcharforbitdataarg[0] =  binaryValue;
+        longvarcharforbitdataarg[0] =  BINARY_VALUE;
         numericarg[0] = new BigDecimal( "1.0" );
         realarg[0] = floatValue;
         smallintarg[0] = intValue;
         timearg[0] = new Time( 83342000L );
         timestamparg[0] = new Timestamp( -229527385766L );
         varchararg[0] = stringValue;
-        varcharforbitdataarg[0] = binaryValue;
+        varcharforbitdataarg[0] = BINARY_VALUE;
     }
 
     /**

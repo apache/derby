@@ -60,6 +60,10 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
 
     private static  final   String  VARIABLE_STRING = "XXXXX";
 
+    public  static  final   byte[]  BINARY_VALUE = new byte[] { (byte) 0xde };
+
+
+
     ///////////////////////////////////////////////////////////////////////
     //
     // STATE
@@ -180,7 +184,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              2,
              "BLOBCOL",
-             "abc",
+             BINARY_VALUE,
              new Class[] { Blob.class, Object.class, byteArrayClass, String.class,  }
              );
         
@@ -309,7 +313,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             "\ufffd",
+             BINARY_VALUE,
              new Class[] { byteArrayClass, Object.class }
              );
         
@@ -505,7 +509,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
 
     @SuppressWarnings("unchecked")
     private void    vetWrapperOK
-        ( Wrapper41 wrapper, int colID, String colName, String expectedValue, Class[] supportedCoercions )
+        ( Wrapper41 wrapper, int colID, String colName, Object expectedValue, Class[] supportedCoercions )
         throws Exception
     {
         int coercionCount = supportedCoercions.length;
@@ -523,22 +527,24 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
         }
     }
     @SuppressWarnings("unchecked")
-    private void    vetCandidate( Class candidate, String expectedValue, Object actualValue )
+    private void    vetCandidate( Class candidate, Object expectedValue, Object actualValue )
         throws Exception
     {
         assertTrue( candidate.getName(), candidate.isAssignableFrom( actualValue.getClass( ) ) );
 
         if ( VARIABLE_STRING.equals( expectedValue ) ) { return; }
-        
+
         String  actualString;
         if ( actualValue instanceof Blob )
         {
             Blob    blob = (Blob) actualValue;
-            actualString = squeezeString( blob.getBytes( 1L, (int) blob.length() ) );
+            vetBytes( (byte[]) expectedValue, blob.getBytes( 1L, (int) blob.length() ) );
+            return;
         }
         else if ( actualValue instanceof byte[] )
         {
-            actualString = squeezeString( (byte[]) actualValue );
+            vetBytes( (byte[]) expectedValue, (byte[]) actualValue );
+            return;
         }
         else if ( actualValue instanceof Clob )
         {
@@ -547,14 +553,17 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
         }
         else { actualString = actualValue.toString(); }
         
-        assertEquals( candidate.getName(), expectedValue, actualString );
+        assertEquals( candidate.getName(), (String) expectedValue, actualString );
     }
-    private String  squeezeString( byte[] bytes ) throws Exception
+    private void    vetBytes( byte[] expected, byte[] actual ) throws Exception
     {
-        
-        String result = new String( bytes, "UTF-8" );
+        int count = expected.length;
 
-        return result;
+        assertEquals( count, actual.length );
+        for ( int i = 0; i < count; i++ )
+        {
+            assertEquals( expected[ i ], actual[ i ] );
+        }
     }
     private void    vetNoWrapper
         ( Wrapper41 wrapper, int colID, String colName, Class[] unsupportedCoercions )
