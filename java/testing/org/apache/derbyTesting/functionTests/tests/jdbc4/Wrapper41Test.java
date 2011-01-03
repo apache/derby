@@ -438,7 +438,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              16,
              "TIMECOL",
-             "15:09:02",
+             VARIABLE_STRING,
              new Class[] { String.class, Time.class, Object.class }
              );
         vetWrapperOK
