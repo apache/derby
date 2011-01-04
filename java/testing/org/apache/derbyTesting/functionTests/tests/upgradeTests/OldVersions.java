@@ -57,7 +57,7 @@ public class OldVersions
     //Constant for special upgrade testing with both upgrade and create 
     // set. We just test this with one version in the interest of time
     // DERBY-4913
-    public static int VERSION_10_3_3_0_OFFSET = 7;
+    public static int[] VERSION_10_3_3_0=  new int[] {10,3,3,0};
     /**
      * <p>
      * Get an array of versions supported by this platform.

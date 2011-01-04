@@ -79,6 +79,9 @@ final class PhaseChanger extends BaseTestSetup {
                     + "." +  ((int[]) UpgradeChange.oldVersion.get())[3];
             BaseTestCase.traceit("Test upgrade from: " + versStr + ", phase: " 
                     + UpgradeChange.PHASES[phase]);
+            if (UpgradeChange.PHASES[phase].equals("UPGRADE")) {
+                BaseTestCase.traceit("Upgrade attributes = " + upgradeAttributes);
+            }
         }
         
         if (loader != null) {
