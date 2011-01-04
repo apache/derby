@@ -953,6 +953,14 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
         //
         if ( fromClass.getName().equals( toClass.getName() ) ) { return true; }
 
+        //
+        // OUT and INOUT args are arrays. Compare the cell types rather than the array types.
+        //
+        if ( fromClass.isArray() && toClass.isArray() )
+        {
+            return classConvertableFromTo( fromClass.getComponentType(), toClass.getComponentType(), mixTypes );
+        }
+
 		// When comparing two candidate methods to see which one is closer,
 		// we want to mix object type and primitive type, because they could
 		// both be chosen in the second pass.  But when deciding if a method

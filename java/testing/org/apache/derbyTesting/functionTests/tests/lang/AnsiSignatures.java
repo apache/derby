@@ -1377,4 +1377,29 @@ public  class   AnsiSignatures
     public  static  String  varchar_Clob_Clob( String a ) { return "-1"; }
     public  static  String  varchar_Clob_Clob( Object a ) { return "-1"; }
 
+
+    //
+    // Procedure with OUT parameters of wrapper type
+    //
+    public  static  void    wrapperProc
+        (
+         Long[] bigintarg,
+         Boolean[] booleanarg,
+         Double[] doublearg,
+         Double[] floatarg,
+         Integer[] intarg,
+         Float[] realarg,
+         Integer[] smallintarg
+         )
+    {
+        bigintarg[ 0 ] = new Long( 1L );
+        booleanarg[ 0 ] = Boolean.TRUE;
+        doublearg[ 0 ] = new Double( 1.0 );
+        floatarg[ 0 ] = new Double( 1.0 );
+        intarg[ 0 ] = new Integer( 1 );
+        realarg[ 0 ] = new Float( 1.0F );
+        smallintarg[ 0 ] = new Integer( 1 );
+    }
+
+        
 }

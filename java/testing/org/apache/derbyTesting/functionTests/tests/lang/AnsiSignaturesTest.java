@@ -24,12 +24,14 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Blob;
+import java.sql.CallableStatement;
 import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.DriverManager;
+import java.sql.Types;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -728,6 +730,60 @@ public class AnsiSignaturesTest extends BaseJDBCTestCase
     }
 
         
+    ///////////////////////////////////////////////////////////////////////////////////
+    //
+    // PRODEDURES
+    //
+    ///////////////////////////////////////////////////////////////////////////////////
+
+    public  void    test_wrapperOutputArgs()
+        throws Exception
+    {
+        Connection  conn = getConnection();
+        PreparedStatement   ps = conn.prepareStatement
+            (
+             "create procedure wrapperProc\n" +
+             "(\n" +
+             "    out bigintCol bigint,\n" +
+             "    out booleanCol boolean,\n" +
+             "    out doubleCol double,\n" +
+             "    out floatCol float,\n" +
+             "    out intCol int,\n" +
+             "    out realCol real,\n" +
+             "    out smallintCol smallint\n" +
+             ")\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.AnsiSignatures.wrapperProc'\n"
+             );
+        ps.execute();
+        ps.close();
+
+        CallableStatement cs = conn.prepareCall
+            (
+             "call wrapperProc(  ?, ?, ?, ?, ?, ?, ? )"
+             );
+        int param = 1;
+        cs.registerOutParameter( param++, Types.BIGINT );
+        cs.registerOutParameter( param++, Types.BOOLEAN );
+        cs.registerOutParameter( param++, Types.DOUBLE );
+        cs.registerOutParameter( param++, Types.FLOAT );
+        cs.registerOutParameter( param++, Types.INTEGER );
+        cs.registerOutParameter( param++, Types.REAL );
+        cs.registerOutParameter( param++, Types.SMALLINT );
+
+        cs.execute();
+        param = 1;
+        assertEquals( 1L, cs.getLong( param++ ) );
+        assertEquals( true, cs.getBoolean( param++ ) );
+        assertEquals( 1.0, cs.getDouble( param++ ), 0.0 );
+        assertEquals( 1.0, cs.getDouble( param++ ), 0.0 );
+        assertEquals( 1, cs.getInt( param++ ) );
+        assertEquals( 1.0F, cs.getFloat( param++ ), 0.0F );
+        assertEquals( (short) 1, cs.getShort( param++ ) );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
