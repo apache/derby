@@ -34,6 +34,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Types;
 
@@ -2636,6 +2637,44 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         st.executeUpdate("drop table trigSPS1");
         st.executeUpdate("drop table trigSPS2");
         st.close();
+    }
+
+    /**
+     * Test how numeric values returned by XPath queries are formatted.
+     */
+    public void testNumericReturnValues() throws SQLException {
+        // Array of XPath queries and their expected return values
+        String[][] queries = {
+            // Long.MAX_VALUE. We lose some precision.
+            { "9223372036854775807", "9223372036854776000" },
+            // We can also have numbers larger than Long.MAX_VALUE, but we
+            // don't get higher precision.
+            { "9223372036854775807123456789", "9223372036854776000000000000" },
+            // Expect plain format, not scientific notation like 1.23E-10
+            { "123 div 1000000000000", "0.000000000123" },
+            // Trailing zeros after decimal point should be stripped away
+            { "1", "1" },
+            { "1.0", "1" },
+            { "1.000", "1" },
+            { "1.00010", "1.0001" },
+            // -0 should be normalized to 0
+            { "-0", "0" },
+            { "-0.0", "0" },
+            { "-0.00", "0" },
+        };
+
+        Statement s = createStatement();
+
+        for (int i = 0; i < queries.length; i++) {
+            String xpath = queries[i][0];
+            String expected = queries[i][1];
+
+            String sql = "select xmlserialize(xmlquery('" + xpath +
+                    "' passing by ref x empty on empty) as clob) " +
+                    "from t1 where i = 1";
+
+            JDBC.assertSingleValueResultSet(s.executeQuery(sql), expected);
+        }
     }
 
     /**
