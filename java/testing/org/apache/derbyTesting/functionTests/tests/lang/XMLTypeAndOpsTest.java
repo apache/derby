@@ -2661,6 +2661,10 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             { "-0", "0" },
             { "-0.0", "0" },
             { "-0.00", "0" },
+            // Division by zero yields Not A Number or +/- Infinity
+            { "0 div 0", "NaN" },
+            { "3.14 div 0", "Infinity" },
+            { "-3.14 div 0", "-Infinity" },
         };
 
         Statement s = createStatement();
