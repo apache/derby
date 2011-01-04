@@ -21,7 +21,6 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -30,7 +29,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.Date;
 import java.sql.NClob;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLException;
@@ -49,9 +47,7 @@ import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import junit.extensions.TestSetup;
 
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -2062,12 +2058,14 @@ public class ResultSetTest  extends Wrapper41Test
              "    1.0,\n" +
              "    1.0,\n" +
              "    1,\n" +
-             "    time('15:09:02'),\n" +
-             "    timestamp('1962-09-23 03:23:34.234'),\n" +
+             "    ?,\n" +
+             "    ?,\n" +
              "    'a',\n" +
              "    X'DE'\n" +
              ")\n"
              );
+        ps.setTime(1, new Time(TIME_VALUE));
+        ps.setTimestamp(2, new Timestamp(TIMESTAMP_VALUE));
         ps.executeUpdate();
         ps.close();
 

@@ -23,23 +23,17 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
-import java.sql.NClob;
-import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import junit.framework.*;
+import java.util.Calendar;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  * <p>
@@ -62,6 +56,8 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
 
     public  static  final   byte[]  BINARY_VALUE = new byte[] { (byte) 0xde };
 
+    static final long TIME_VALUE = 83342000L;
+    static final long TIMESTAMP_VALUE = -229527385766L;
 
 
     ///////////////////////////////////////////////////////////////////////
@@ -433,12 +429,14 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
     }
     private void    vetWrappedTime( Wrapper41 wrapper ) throws Exception
     {
+        Time expectedTime = new Time(TIME_VALUE);
+
         vetWrapperOK
             (
              wrapper,
              16,
              "TIMECOL",
-             VARIABLE_STRING,
+             expectedTime.toString(),
              new Class[] { String.class, Time.class, Object.class }
              );
         vetWrapperOK
@@ -446,7 +444,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              16,
              "TIMECOL",
-             VARIABLE_STRING,
+             timeToTimestamp(expectedTime).toString(),
              new Class[] { Timestamp.class }
              );
         
@@ -467,28 +465,33 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
     }
     private void    vetWrappedTimestamp( Wrapper41 wrapper ) throws Exception
     {
+        String expectedTimestamp = new Timestamp(TIMESTAMP_VALUE).toString();
         vetWrapperOK
             (
              wrapper,
              17,
              "TIMESTAMPCOL",
-             "1962-09-23 03:23:34.234",
+             expectedTimestamp,
              new Class[] { String.class, Timestamp.class, Object.class }
              );
+
+        String expectedTime = new Time(TIMESTAMP_VALUE).toString();
         vetWrapperOK
             (
              wrapper,
              17,
              "TIMESTAMPCOL",
-             "03:23:34",
+             expectedTime,
              new Class[] { Time.class }
              );
+
+        String expectedDate = new Date(TIMESTAMP_VALUE).toString();
         vetWrapperOK
             (
              wrapper,
              17,
              "TIMESTAMPCOL",
-             "1962-09-23",
+             expectedDate,
              new Class[] { Date.class }
              );
         
@@ -631,6 +634,42 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
         CallableStatement cs = conn.prepareCall( text );
 
         return cs;
+    }
+
+    /**
+     * Convert a Time value to a Timestamp value the same way as when we call
+     * getTimestamp() on a TIME column. That is, construct a Timestamp value
+     * with the date component set to the current date and the time component
+     * set to the specified time of day.
+     *
+     * @param time the Time value to convert
+     * @return a Timestamp value representing the specified time on the
+     * current date
+     */
+    private static Timestamp timeToTimestamp(Time time) {
+        // Create a calendar object representing the time value
+        Calendar timeCal = Calendar.getInstance();
+        timeCal.setTime(time);
+
+        // Create a calendar object for the timestamp, initialized with
+        // the current time value
+        Calendar tsCal = Calendar.getInstance();
+
+        // Copy all fields, except the date fields, from the time calendar
+        // to the timestamp calendar
+        int[] timeFields = {
+            Calendar.HOUR_OF_DAY,
+            Calendar.MINUTE,
+            Calendar.SECOND,
+            Calendar.MILLISECOND
+        };
+
+        for (int field : timeFields) {
+            tsCal.set(field, timeCal.get(field));
+        }
+
+        // Return a timestamp based on the current date and the specified time
+        return new Timestamp(tsCal.getTimeInMillis());
     }
 
 }

@@ -26,16 +26,12 @@ import junit.framework.*;
 import org.apache.derby.iapi.types.HarmonySerialBlob;
 import org.apache.derby.iapi.types.HarmonySerialClob;
 
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
 
 import java.io.IOException;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.lang.reflect.Method;
-import java.util.Vector;
 
 /**
  * Tests of the <code>java.sql.CallableStatement</code> JDBC40 API.
@@ -722,8 +718,8 @@ public class CallableStatementTest  extends Wrapper41Test
         numericarg[0] = new BigDecimal( "1.0" );
         realarg[0] = floatValue;
         smallintarg[0] = intValue;
-        timearg[0] = new Time( 83342000L );
-        timestamparg[0] = new Timestamp( -229527385766L );
+        timearg[0] = new Time(TIME_VALUE);
+        timestamparg[0] = new Timestamp(TIMESTAMP_VALUE);
         varchararg[0] = stringValue;
         varcharforbitdataarg[0] = BINARY_VALUE;
     }
