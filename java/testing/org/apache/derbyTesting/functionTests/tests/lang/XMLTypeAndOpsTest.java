@@ -101,18 +101,18 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // If the column's definition doesn't make sense for XML,
         // then we should throw the correct error.
 
-        Statement st = createStatement();
-        assertStatementError("42894", st,
+        assertCompileError("42894",
             "create table fail1 (i int, x xml default 'oops')");
 
-        assertStatementError("42894", st,
+        assertCompileError("42894",
             "create table fail2 (i int, x xml default 8)");
 
-        assertStatementError("42818", st,
+        assertCompileError("42818",
             "create table fail3 (i int, x xml check (x != 0))");
 
         // These should all work.
 
+        Statement st = createStatement();
         st.executeUpdate("create table tc1 (i int, x xml)");
         st.executeUpdate("create table tc2 (i int, x xml not null)");
         st.executeUpdate("create table tc3 (i int, x xml default null)");
@@ -155,26 +155,21 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     public void testXMLColsWithNonXMLVals() throws Exception
     {
-        Statement st = createStatement();
-        assertStatementError("42821", st, "insert into t1 values (3, 'hmm')");
-        assertStatementError("42821", st, "insert into t1 values (1, 2)");
-        assertStatementError("42821", st,
-            " insert into t1 values (1, 123.456)");
+        assertCompileError("42821", "insert into t1 values (3, 'hmm')");
+        assertCompileError("42821", "insert into t1 values (1, 2)");
+        assertCompileError("42821", "insert into t1 values (1, 123.456)");
 
-        assertStatementError("42821", st, "insert into t1 values (1, x'01')");
-        assertStatementError("42821", st, "insert into t1 values (1, x'ab')");
-        assertStatementError("42821", st,
-            "insert into t1 values (1, current date)");
+        assertCompileError("42821", "insert into t1 values (1, x'01')");
+        assertCompileError("42821", "insert into t1 values (1, x'ab')");
+        assertCompileError("42821", "insert into t1 values (1, current date)");
 
-        assertStatementError("42821", st,
-            " insert into t1 values (1, current time)");
+        assertCompileError("42821", "insert into t1 values (1, current time)");
 
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             " insert into t1 values (1, current timestamp)");
 
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             " insert into t1 values (1, ('hmm' || 'andstuff'))");
-        st.close();
     }
 
     /**
@@ -190,49 +185,49 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             + "float, d double, vc varchar(20), da date, ti time, "
             + "ts timestamp, cl clob, bl blob)");
 
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (si) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (i) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (bi) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (vcb) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (nu) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (f) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (d) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (vc) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (da) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (ti) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (ts) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (cl) values (cast (null as xml))");
         
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (bl) values (cast (null as xml))");
 
         // And just to be safe, try to insert a non-null XML
         // value.  This should fail, too.
 
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "insert into nonXTable (cl) values (xmlparse(document " +
             "'</simp>' preserve whitespace))");
 
@@ -246,45 +241,45 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     public void testXMLCasting() throws Exception
     {
-        Statement st = createStatement();
-        assertStatementError("42846", st,
+        assertCompileError("42846",
             "insert into t1 values (1, cast ('hmm' as xml))");
         
-        assertStatementError("42846", st,
+        assertCompileError("42846",
             "insert into t1 values (1, cast (2 as xml))");
         
-        assertStatementError("42846", st,
+        assertCompileError("42846",
             "insert into t1 values (1, cast (123.456 as xml))");
         
-        assertStatementError("42846", st,
+        assertCompileError("42846",
             "insert into t1 values (1, cast (x'01' as xml))");
         
-        assertStatementError("42846", st,
+        assertCompileError("42846",
             "insert into t1 values (1, cast (x'ab' as xml))");
         
-        assertStatementError("42846", st,
+        assertCompileError("42846",
             "insert into t1 values (1, cast (current date as xml))");
         
-        assertStatementError("42846", st,
+        assertCompileError("42846",
             "insert into t1 values (1, cast (current time as xml))");
         
-        assertStatementError("42846", st,
+        assertCompileError("42846",
             "insert into t1 values (1, cast (current timestamp as xml))");
         
-        assertStatementError("42846", st,
+        assertCompileError("42846",
             "insert into t1 values (1, cast (('hmm' || "
             + "'andstuff') as xml))");
 
         // And try to cast an XML value into something else.
         // These should fail, too.
 
+        Statement st = createStatement();
         st.executeUpdate("create table nonXTable (i int, cl clob)");
 
-        assertStatementError("42846", st,
+        assertCompileError("42846",
             "insert into nonXTable (cl) values (cast ((xmlparse(document " +
             "'</simp>' preserve whitespace)) as clob))");
 
-        assertStatementError("42846", st,
+        assertCompileError("42846",
             "insert into nonXTable (i) values (cast ((xmlparse(document " +
             "'</simp>' preserve whitespace)) as int))");
 
@@ -300,20 +295,17 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     public void testXMLInNonXMLOps() throws Exception
     {
-        Statement st = createStatement();
-        assertStatementError("42Y95", st, "select i + x from t1");
-        assertStatementError("42Y95", st, "select i * x from t1");
-        assertStatementError("42Y95", st, "select i / x from t1");
-        assertStatementError("42Y95", st, "select i - x from t1");
-        assertStatementError("42X37", st, "select -x from t1");
-        assertStatementError("42846", st, "select 'hi' || x from t1");
-        assertStatementError("42X25", st, "select substr(x, 0) from t1");
-        assertStatementError("42Y22", st, "select max(x) from t1");
-        assertStatementError("42Y22", st, "select min(x) from t1");
-        assertStatementError("42X25", st, "select length(x) from t1");
-        assertStatementError("42884", st,
-            "select i from t1 where x like 'hmm'");
-        st.close();
+        assertCompileError("42Y95", "select i + x from t1");
+        assertCompileError("42Y95", "select i * x from t1");
+        assertCompileError("42Y95", "select i / x from t1");
+        assertCompileError("42Y95", "select i - x from t1");
+        assertCompileError("42X37", "select -x from t1");
+        assertCompileError("42846", "select 'hi' || x from t1");
+        assertCompileError("42X25", "select substr(x, 0) from t1");
+        assertCompileError("42Y22", "select max(x) from t1");
+        assertCompileError("42Y22", "select min(x) from t1");
+        assertCompileError("42X25", "select length(x) from t1");
+        assertCompileError("42884", "select i from t1 where x like 'hmm'");
     }
 
     /**
@@ -322,13 +314,10 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
      */
     public void testXMLComparisons() throws Exception
     {
-        Statement st = createStatement();
-        assertStatementError("42818", st, "select i from t1 where x = 'hmm'");
-        assertStatementError("42818", st, "select i from t1 where x > 0");
-        assertStatementError("42818", st, "select i from t1 where x < x");
-        assertStatementError("42818", st,
-            "select i from t1 where x <> 'some char'");
-        st.close();
+        assertCompileError("42818", "select i from t1 where x = 'hmm'");
+        assertCompileError("42818", "select i from t1 where x > 0");
+        assertCompileError("42818", "select i from t1 where x < x");
+        assertCompileError("42818", "select i from t1 where x <> 'some char'");
     }
 
     /**
@@ -339,9 +328,8 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
     {
         // Indexing/ordering on XML cols is not allowed.
 
-        Statement st = createStatement();
-        assertStatementError("X0X67", st, "create index oops_ix on t1(x)");
-        assertStatementError("X0X67", st,
+        assertCompileError("X0X67", "create index oops_ix on t1(x)");
+        assertCompileError("X0X67",
             "select i from t1 where x is null order by x");
         
         // XML cannot be imported or exported (DERBY-1892).
@@ -373,12 +361,12 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         
         // XML cannot be used with procedures/functions.
 
-        assertStatementError("42962", st,
+        assertCompileError("42962",
             "create procedure hmmproc (in i int, in x xml)"
             + "  parameter style java language java external name "
             + "'hi.there'");
         
-        assertStatementError("42962", st,
+        assertCompileError("42962",
             " create function hmmfunc (i int, x xml) returns int"
             + "  parameter style java language java external name "
             + "'hi.there'");
@@ -386,11 +374,9 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // XML columns cannot be used for global temporary 
         // tables.
 
-        assertStatementError("42962", st,
+        assertCompileError("42962",
             "declare global temporary table SESSION.xglobal (myx XML)"
             + "  not logged on commit preserve rows");
-        
-        st.close();
     }
 
     /**
@@ -400,12 +386,12 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
     public void testTriggerSetXML() throws Exception
     {
         // This should fail.
-        Statement st = createStatement();
-        assertStatementError("42821", st,
+        assertCompileError("42821",
             "create trigger tr2 after insert on t1 for each row "
             + "mode db2sql update t1 set x = 'hmm'");
 
         // This should succeed.
+        Statement st = createStatement();
         st.executeUpdate("create trigger tr1 after insert on t1 for each row "
             + "mode db2sql update t1 set x = null");
 
@@ -425,26 +411,26 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // These should fail with various parse errors.
 
         Statement st = createStatement();
-        assertStatementError("42Z74", st,
+        assertCompileError("42Z74",
             "insert into t1 values (1, xmlparse(document "
             + "'<hmm/>' strip whitespace))");
         
-        assertStatementError("42Z72", st,
+        assertCompileError("42Z72",
             " insert into t1 values (1, xmlparse(document '<hmm/>'))");
         
-        assertStatementError("42Z72", st,
+        assertCompileError("42Z72",
             " insert into t1 values (1, xmlparse('<hmm/>' "
             + "preserve whitespace))");
         
-        assertStatementError("42Z74", st,
+        assertCompileError("42Z74",
             " insert into t1 values (1, xmlparse(content "
             + "'<hmm/>' preserve whitespace))");
         
-        assertStatementError("42X25", st,
+        assertCompileError("42X25",
             " select xmlparse(document xmlparse(document "
             + "'<hein/>' preserve whitespace) preserve whitespace) from t1");
         
-        assertStatementError("42X19", st,
+        assertCompileError("42X19",
             " select i from t1 where xmlparse(document '<hein/>' "
             + "preserve whitespace)");
 
@@ -620,15 +606,15 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         Statement st = createStatement();
         st.executeUpdate("create table vcTab (vc varchar(100))");
 
-        assertStatementError("42Z71", st, "select x from t1");
-        assertStatementError("42Z71", st, "select * from t1");
-        assertStatementError("42Z71", st,
+        assertCompileError("42Z71", "select x from t1");
+        assertCompileError("42Z71", "select * from t1");
+        assertCompileError("42Z71",
             " select xmlparse(document vc preserve whitespace) from vcTab");
         
-        assertStatementError("42Z71", st,
+        assertCompileError("42Z71",
             " values xmlparse(document '<bye/>' preserve whitespace)");
         
-        assertStatementError("42Z71", st,
+        assertCompileError("42Z71",
             " values xmlparse(document '<hel' || 'lo/>' preserve "
             + "whitespace)");
 
@@ -650,25 +636,25 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         
         // These should fail with various parse errors.
 
-        assertStatementError("42Z72", st, "select xmlserialize(x) from t1");
-        assertStatementError("42X01", st, "select xmlserialize(x as) from t1");
-        assertStatementError("42Z73", st,
+        assertCompileError("42Z72", "select xmlserialize(x) from t1");
+        assertCompileError("42X01", "select xmlserialize(x as) from t1");
+        assertCompileError("42Z73",
             " select xmlserialize(x as int) from t1");
 
-        assertStatementError("42Z73", st,
+        assertCompileError("42Z73",
             " select xmlserialize(x as boolean) from t1");
         
-        assertStatementError("42Z73", st,
+        assertCompileError("42Z73",
             " select xmlserialize(x as varchar(20) for bit data) from t1");
         
-        assertStatementError("42X04", st,
+        assertCompileError("42X04",
             " select xmlserialize(y as char(10)) from t1");
         
-        assertStatementError("42X25", st,
+        assertCompileError("42X25",
             " select xmlserialize(xmlserialize(x as clob) as "
             + "clob) from t1");
         
-        assertStatementError("42X25", st,
+        assertCompileError("42X25",
             " values xmlserialize('<okay> dokie </okay>' as clob)");
         
         // These should succeed.
@@ -822,7 +808,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             "select xmlserialize(xmlparse(document '<hmm>' "
             + "preserve whitespace) as clob) from t1");
         
-        assertStatementError("42X25", st,
+        assertCompileError("42X25",
             " select xmlserialize(xmlparse(document x preserve "
             + "whitespace) as char(100)) from t1");
         
@@ -906,36 +892,36 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
     {
         // These should fail with various parse errors.
 
-        Statement st = createStatement();
-        assertStatementError("42X01", st,
+        assertCompileError("42X01",
             "select i from t1 where xmlexists(x)");
         
-        assertStatementError("42X01", st,
+        assertCompileError("42X01",
             "select i from t1 where xmlexists(i)");
         
-        assertStatementError("42X01", st,
+        assertCompileError("42X01",
             "select i from t1 where xmlexists('//*')");
         
-        assertStatementError("42X01", st,
+        assertCompileError("42X01",
             "select i from t1 where xmlexists('//*' x)");
         
-        assertStatementError("42X01", st,
+        assertCompileError("42X01",
             "select i from t1 where xmlexists('//*' passing x)");
         
-        assertStatementError("42Z74", st,
+        assertCompileError("42Z74",
             "select i from t1 where xmlexists('//*' passing by value x)");
         
-        assertStatementError("42Z77", st,
+        assertCompileError("42Z77",
             "select i from t1 where xmlexists('//*' passing by ref i)");
         
-        assertStatementError("42Z75", st,
+        assertCompileError("42Z75",
             "select i from t1 where xmlexists(i passing by ref x)");
         
-        assertStatementError("42Z76", st,
+        assertCompileError("42Z76",
             "select i from t1 where xmlexists(i passing by ref x, x)");
         
         // These should succeed.
         
+        Statement st = createStatement();
         ResultSet rs = st.executeQuery(
             "select i from t1 where xmlexists('//*' passing by ref x)");
         
@@ -1510,53 +1496,52 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
     {
         // These should fail w/ syntax errors.
 
-        Statement st = createStatement();
-        assertStatementError("42X01", st, "select i, xmlquery('//*') from t1");
-        assertStatementError("42X01", st,
+        assertCompileError("42X01", "select i, xmlquery('//*') from t1");
+        assertCompileError("42X01",
             " select i, xmlquery('//*' passing) from t1");
         
-        assertStatementError("42X01", st,
+        assertCompileError("42X01",
             " select i, xmlquery('//*' passing by ref x) from t1");
         
-        assertStatementError("42X01", st,
+        assertCompileError("42X01",
             " select i, xmlquery('//*' passing by ref x "
             + "returning sequence) from t1");
         
-        assertStatementError("42X01", st,
+        assertCompileError("42X01",
             " select i, xmlquery(passing by ref x empty on empty) from t1");
         
-        assertStatementError("42X01", st,
+        assertCompileError("42X01",
             " select i, xmlquery(xmlquery('//*' returning "
             + "sequence empty on empty) as char(75)) from t1");
         
         // These should fail with "not supported" errors.
         
-        assertStatementError("42Z74", st,
+        assertCompileError("42Z74",
             "select i, xmlquery('//*' passing by ref x returning "
             + "sequence null on empty) from t1");
         
-        assertStatementError("42Z74", st,
+        assertCompileError("42Z74",
             " select i, xmlquery('//*' passing by ref x "
             + "returning content empty on empty) from t1");
         
         // This should fail because XMLQUERY returns an XML value 
         // which is not allowed in top-level result set.
 
-        assertStatementError("42Z71", st,
+        assertCompileError("42Z71",
             "select i, xmlquery('//*' passing by ref x empty on "
             + "empty) from t1");
         
         // These should fail because context item must be XML.
 
-        assertStatementError("42Z77", st,
+        assertCompileError("42Z77",
             "select i, xmlquery('//*' passing by ref i empty on "
             + "empty) from t1");
         
-        assertStatementError("42Z77", st,
+        assertCompileError("42Z77",
             " select i, xmlquery('//*' passing by ref 'hello' "
             + "empty on empty) from t1");
         
-        assertStatementError("42Z77", st,
+        assertCompileError("42Z77",
             " select i, xmlquery('//*' passing by ref cast "
             + "('hello' as clob) empty on empty) from t1");
         
@@ -1565,7 +1550,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // saying what the problem is; it should *NOT* be a NPE, 
         // which is what we were seeing before DERBY-688 was completed.
 
-        assertStatementError("10000", st,
+        assertCompileError("10000",
             "select i,"
             + "  xmlserialize("
             + "    xmlquery('data(//@*)' passing by ref x "
@@ -1606,6 +1591,7 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
         // selection of queries is random and is not meant to be 
         // exhaustive.
         
+        Statement st = createStatement();
         ResultSet rs = st.executeQuery(
             "select i,"
             + "  xmlserialize("
