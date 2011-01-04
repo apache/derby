@@ -1572,7 +1572,30 @@ public final class XMLTypeAndOpsTest extends BaseJDBCTestCase {
             + "returning sequence empty on empty)"
             + "  as char(70))"
             + "from t1");
-        
+
+        // This should also fail because the function is not recognized.
+        // In addition, we have prefixed the function with an unrecognized
+        // namespace. Verify that it fails with an SQLException and that there
+        // isn't any NPE in the exception chain.
+        try {
+            prepareStatement(
+                    "select i,"
+                    + "  xmlserialize("
+                    + "    xmlquery('myns:data(//@*)' passing by ref x "
+                    + "returning sequence empty on empty)"
+                    + "  as char(70))"
+                    + "from t1");
+            fail("Compilation should fail because of unrecognized namespace");
+        } catch (SQLException sqle) {
+            assertSQLState("10000", sqle);
+            Throwable t = sqle;
+            while ((t = t.getCause()) != null) {
+                if (t instanceof NullPointerException) {
+                    fail("No NPE, please!", t);
+                }
+            }
+        }
+
         // These should all succeed.  Since it's Xalan that's 
         // actually doing the query evaluation we don't need to 
         // test very many queries; we just want to make sure we get 
