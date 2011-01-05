@@ -288,7 +288,7 @@ public class RoutineAliasInfo extends MethodAliasInfo
      * @param onDiskType The object read that represents the type.
      * @return A type descriptor.
      */
-    private static TypeDescriptor getStoredType(Object onDiskType)
+    public static TypeDescriptor getStoredType(Object onDiskType)
     {
         if (onDiskType instanceof OldRoutineType)
             return ((OldRoutineType) onDiskType).getCatalogType();
