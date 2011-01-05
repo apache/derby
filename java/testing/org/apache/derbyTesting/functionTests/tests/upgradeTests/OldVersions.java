@@ -53,6 +53,10 @@ public class OldVersions
         {10, 6, 2, 1}, // 10.6.2.1 (Oct 6, 2010/ SVN 999685
     };
 
+    //Constant for special upgrade testing with both upgrade and create 
+    // set. We just test this with one version in the interest of time
+    // DERBY-4913
+    public static int[] VERSION_10_3_3_0=  new int[] {10,3,3,0};
     /**
      * <p>
      * Get an array of versions supported by this platform.

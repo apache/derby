@@ -77,7 +77,7 @@ class UpgradeRun extends UpgradeClassLoader
         new AdditionalDb("BUILTIN_10_6", false),
     };
     
-    public final static Test suite(final int[] version) {
+    public final static Test suite(final int[] version, boolean useCreateOnUpgrade) {
         
         ClassLoader oldLoader = makeClassLoader( version );
         
@@ -115,7 +115,7 @@ class UpgradeRun extends UpgradeClassLoader
                     + " Upgrade Phase: " + UpgradeChange.PHASES[phase] + " ",
                     phase, version);
             
-            Test phaseSet = new PhaseChanger(phaseTests, phase, loader, version);
+            Test phaseSet = new PhaseChanger(phaseTests, phase, loader, version, useCreateOnUpgrade);
             phaseSet = handleJavaSE6(phase, version, phaseSet);
             suite.addTest(phaseSet);
         }
