@@ -668,6 +668,73 @@ public class CallableStatementTest  extends Wrapper41Test
         //
         assertEquals( 22, actualTypeCount );
     }
+
+    /**
+     * <p>
+     * Regression test for https://issues.apache.org/jira/browse/DERBY-4959, an NPE
+     * trying to return null LOBs as procedure output args.
+     * </p>
+     */
+    public  void    test_4959() throws Exception
+    {
+        Connection  conn = getConnection();
+
+        PreparedStatement   ps = prepareStatement
+            (
+             conn,
+             "create procedure blobProc\n" +
+             "(\n" +
+             "    out blobCol blob\n" +
+             ")\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.jdbc4.CallableStatementTest.blobProc'\n"
+             );
+        ps.execute();
+        ps.close();
+        ps = prepareStatement
+            (
+             conn,
+             "create procedure clobProc\n" +
+             "(\n" +
+             "    out clobCol clob\n" +
+             ")\n" +
+             "language java\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.jdbc4.CallableStatementTest.clobProc'\n"
+             );
+        ps.execute();
+        ps.close();
+
+        CallableStatement cs = prepareCall
+            (
+             conn,
+             "call blobProc(  ? )"
+             );
+        cs.registerOutParameter( 1, Types.BLOB );
+        cs.execute();
+        assertNull( cs.getBlob( 1 ) );
+        cs.close();
+        
+        cs = prepareCall
+            (
+             conn,
+             "call clobProc(  ? )"
+             );
+        cs.registerOutParameter( 1, Types.CLOB );
+        cs.execute();
+        assertNull( cs.getClob( 1 ) );
+        cs.close();
+
+        ps = prepareStatement( conn, "drop procedure blobProc" );
+        ps.execute();
+        ps.close();
+        ps = prepareStatement( conn, "drop procedure clobProc" );
+        ps.execute();
+        ps.close();
+    }
     
     /**
      * <p>
@@ -722,6 +789,24 @@ public class CallableStatementTest  extends Wrapper41Test
         timestamparg[0] = new Timestamp(TIMESTAMP_VALUE);
         varchararg[0] = stringValue;
         varcharforbitdataarg[0] = BINARY_VALUE;
+    }
+
+    public  static  void    blobProc
+        (
+         Blob[] blobarg
+         )
+        throws Exception
+    {
+        blobarg[0] = null;
+    }
+
+    public  static  void    clobProc
+        (
+         Clob[] clobarg
+         )
+        throws Exception
+    {
+        clobarg[0] = null;
     }
 
     /**

@@ -150,9 +150,13 @@ class EXTDTAInputStream extends InputStream {
         switch ( ndrdaType )
         {
         case DRDAConstants.DRDA_TYPE_NLOBBYTES:
-            return new EXTDTAInputStream( cs.getBlob( column ), ndrdaType );
+            Blob    blob = cs.getBlob( column );
+            if ( blob ==  null ) { return null; }
+            return new EXTDTAInputStream( blob, ndrdaType );
         case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
-            return new EXTDTAInputStream( cs.getClob( column ), ndrdaType );
+            Clob    clob = cs.getClob( column );
+            if ( clob == null ) { return null; }
+            return new EXTDTAInputStream( clob, ndrdaType );
         default:
             badDRDAType( ndrdaType );
 			return null;
