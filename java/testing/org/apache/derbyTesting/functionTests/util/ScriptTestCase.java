@@ -21,7 +21,9 @@ package org.apache.derbyTesting.functionTests.util;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.security.AccessController;
 import java.sql.Connection;
+import java.util.Locale;
 
 import org.apache.derbyTesting.junit.Derby;
 
@@ -38,6 +40,7 @@ public abstract class ScriptTestCase extends CanonTestCase {
 	private final String inputEncoding;
 	private final String user;
     private boolean useSystemProperties = false;
+    private Locale oldLocale;
 
     /**
 	 * Create a ScriptTestCase to run a single test
@@ -197,4 +200,32 @@ public abstract class ScriptTestCase extends CanonTestCase {
         
         this.compareCanon(canon);
 	}
+    
+    /**
+     * Set up the new locale for the test
+     */
+    protected void setUp() {
+        oldLocale = Locale.getDefault();
+
+        AccessController.doPrivileged(new java.security.PrivilegedAction() {
+            public Object run() {
+                Locale.setDefault(Locale.US);
+                return null;
+            }
+        });
+    }
+
+    /**
+     * Revert the locale back to the old one
+     */
+    protected void tearDown() throws Exception {
+        super.tearDown();
+
+        AccessController.doPrivileged(new java.security.PrivilegedAction() {
+            public Object run() {
+                Locale.setDefault(oldLocale);
+                return null;
+            }
+        });
+    }
 }

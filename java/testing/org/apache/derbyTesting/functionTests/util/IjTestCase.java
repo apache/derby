@@ -54,7 +54,7 @@ public class IjTestCase extends ScriptTestCase {
 		outfile = new File(outfileName);
 	}
 	
-	public void setUp() throws Exception{
+	public void setUp() {
 	    super.setUp();
 		setSystemProperty("ij.outfile", outfileName);
 		setSystemProperty("ij.defaultResourcePackage",

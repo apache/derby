@@ -179,6 +179,7 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
      * Set up the test environment.
      */
     protected void setUp() {
+        super.setUp();
         LocalizedResource.resetLocalizedResourceCache();
     }
 }

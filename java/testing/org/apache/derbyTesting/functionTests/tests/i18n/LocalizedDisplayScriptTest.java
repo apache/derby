@@ -120,6 +120,7 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
      * Set up the test environment.
      */
     protected void setUp() {
+        super.setUp();
         // the canon contains time columns, which would display localized -
         // and so cause errors. Thus, run this with timezone PST.
         defaultTimeZone = TimeZone.getDefault(); 
