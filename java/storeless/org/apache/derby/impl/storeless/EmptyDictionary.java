@@ -60,6 +60,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.RowLocation;
+import org.apache.derby.impl.sql.compile.StatementNode;
 
 /**
  * DataDictionary implementation that does nothing!
@@ -396,6 +397,21 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	public void invalidateAllSPSPlans() throws StandardException {
 		// TODO Auto-generated method stub
 
+	}
+
+	public String getTriggerActionString(
+			StatementNode actionStmt,
+			String oldReferencingName,
+			String newReferencingName,
+			String triggerDefinition,
+			int[] referencedCols,
+			int actionOffset,
+			TableDescriptor td,
+			int triggerEventMask,
+			boolean createTriggerTime)
+	throws StandardException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	public TriggerDescriptor getTriggerDescriptor(UUID uuid)

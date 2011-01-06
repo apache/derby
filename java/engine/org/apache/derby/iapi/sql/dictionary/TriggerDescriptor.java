@@ -30,7 +30,6 @@ import java.sql.Timestamp;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
@@ -40,7 +39,9 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.services.context.ContextService;
 
-import org.apache.derby.impl.sql.execute.DropTriggerConstantAction;
+import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Parser;
+import org.apache.derby.impl.sql.compile.StatementNode;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -301,8 +302,15 @@ public class TriggerDescriptor extends TupleDescriptor
 	}
 
 	/**
-	 * Get the trigger action sps
+	 * Get the trigger action sps from SYSSTATEMENTS. If we find that
+	 * the sps is invalid and the trigger is defined at row level and it
+	 * has OLD/NEW transient variables through REFERENCES clause, then
+	 * the sps from SYSSTATEMENTS may not be valid anymore. In such a 
+	 * case, we regenerate the trigger action sql and use that for the
+	 * sps and update SYSSTATEMENTS using this new sps. This update of
+	 * SYSSTATEMENTS was introduced with DERBY-4874
 	 *
+	 * @param lcc	The LanguageConnectionContext to use.
 	 * @return the trigger action sps
 	 *
 	 * @exception StandardException on error
@@ -321,6 +329,46 @@ public class TriggerDescriptor extends TupleDescriptor
 			actionSPS = getDataDictionary().getSPSDescriptor(actionSPSId);
 			lcc.commitNestedTransaction();
 		}
+		
+		//We need to regenerate the trigger action sql if 
+		//1)the trigger is found to be invalid, 
+		//2)the trigger is defined at row level (that is the only kind of 
+		//  trigger which allows reference to individual columns from 
+		//  old/new row)
+		//3)the trigger action plan has columns that reference 
+		//  old/new row columns
+		//This code was added as part of DERBY-4874 where the Alter table 
+		//had changed the length of a varchar column from varchar(30) to 
+		//varchar(64) but the trigger action plan continued to use varchar(30).
+		//To fix varchar(30) in trigger action sql to varchar(64), we need
+		//to regenerate the trigger action sql. This new trigger action sql
+		//will then get updated into SYSSTATEMENTS table.
+		if((!actionSPS.isValid() ||
+				 (actionSPS.getPreparedStatement() == null)) && 
+				 isRow &&
+				 (oldReferencingName != null || newReferencingName != null)) 
+		{
+			SchemaDescriptor compSchema;
+			compSchema = getDataDictionary().getSchemaDescriptor(triggerSchemaId, null);
+			CompilerContext newCC = lcc.pushCompilerContext(compSchema);
+			Parser	pa = newCC.getParser();
+			StatementNode stmtnode = (StatementNode)pa.parseStatement(triggerDefinition);
+			lcc.popCompilerContext(newCC);
+					
+			actionSPS.setText(getDataDictionary().getTriggerActionString(stmtnode, 
+					oldReferencingName,
+					newReferencingName,
+					triggerDefinition,
+					referencedCols,
+					0,
+					td,
+					-1,
+					false
+					));
+			//By this point, we are finished transforming the trigger action if
+			//it has any references to old/new transition variables.
+		}
+		
 		return actionSPS;
 	}
 
