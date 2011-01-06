@@ -66,7 +66,8 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////
 
-    private Class   byteArrayClass;
+    private Class       _byteArrayClass;
+    private boolean _rowOfNulls;
 
     ///////////////////////////////////////////////////////////////////////
     //
@@ -79,7 +80,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
      *
      * @param name name of the test.
      */
-    public Wrapper41Test(String name) { super(name); }
+    public Wrapper41Test( String name ) { super( name ); }
 
     ///////////////////////////////////////////////////////////////////////
     //
@@ -87,11 +88,12 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
     //
     ///////////////////////////////////////////////////////////////////////
 
-    protected void examineJDBC4_1extensions( Wrapper41 wrapper ) throws Exception
+    protected void examineJDBC4_1extensions( Wrapper41 wrapper, boolean rowOfNulls ) throws Exception
     {
-        println( "Vetting a " + wrapper.getWrappedObject().getClass().getName() );
+        println( "Vetting a " + wrapper.getWrappedObject().getClass().getName() + ". rowOfNulls = " + rowOfNulls );
 
-        byteArrayClass = Class.forName( "[B" );
+        _byteArrayClass = Class.forName( "[B" );
+        _rowOfNulls = rowOfNulls;
 
         vetWrappedNull( wrapper );
         vetWrappedInteger( wrapper, 1, "BIGINTCOL" );
@@ -145,7 +147,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             "1",
+             _rowOfNulls ? null : "1",
              new Class[] { String.class, BigDecimal.class, Byte.class, Short.class, Integer.class, Long.class, Number.class, Object.class }
              );
         vetWrapperOK
@@ -153,7 +155,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             "1.0",
+             _rowOfNulls ? null : "1.0",
              new Class[] { Float.class, Double.class }
              );
         vetWrapperOK
@@ -161,7 +163,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             "true",
+             _rowOfNulls ? null : "true",
              new Class[] { Boolean.class }
              );
         
@@ -170,7 +172,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             new Class[] { Date.class, Time.class, Timestamp.class, Blob.class, Clob.class, byteArrayClass, getClass() }
+             new Class[] { Date.class, Time.class, Timestamp.class, Blob.class, Clob.class, _byteArrayClass, getClass() }
              );
     }
     private void    vetWrappedBlob( Wrapper41 wrapper ) throws Exception
@@ -180,8 +182,8 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              2,
              "BLOBCOL",
-             BINARY_VALUE,
-             new Class[] { Blob.class, Object.class, byteArrayClass, String.class,  }
+             _rowOfNulls ? null : BINARY_VALUE,
+             new Class[] { Blob.class, Object.class, _byteArrayClass, String.class,  }
              );
         
         vetNoWrapper
@@ -210,7 +212,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              3,
              "BOOLEANCOL",
-             "true",
+             _rowOfNulls ? null : "true",
              new Class[] { String.class, Boolean.class, Object.class }
              );
         vetWrapperOK
@@ -218,7 +220,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              3,
              "BOOLEANCOL",
-             "1",
+             _rowOfNulls ? null : "1",
              new Class[] { BigDecimal.class, Byte.class, Short.class, Integer.class, Long.class }
              );
         vetWrapperOK
@@ -226,7 +228,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              3,
              "BOOLEANCOL",
-             "1.0",
+             _rowOfNulls ? null : "1.0",
              new Class[] { Float.class, Double.class }
              );
         
@@ -235,7 +237,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              3,
              "BOOLEANCOL",
-             new Class[] { Date.class, Time.class, Timestamp.class, Blob.class, Clob.class, byteArrayClass, getClass() }
+             new Class[] { Date.class, Time.class, Timestamp.class, Blob.class, Clob.class, _byteArrayClass, getClass() }
              );
     }
     private void    vetWrappedString( Wrapper41 wrapper, int colID, String colName ) throws Exception
@@ -245,7 +247,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             "a",
+             _rowOfNulls ? null : "a",
              new Class[] { String.class, Object.class }
              );
 
@@ -254,7 +256,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             "true",
+             _rowOfNulls ? null : "true",
              new Class[] { Boolean.class }
              );
 
@@ -290,7 +292,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              colName,
              new Class[]
              {
-                 Blob.class, Clob.class, byteArrayClass, getClass()
+                 Blob.class, Clob.class, _byteArrayClass, getClass()
              }
              );
     }
@@ -301,7 +303,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             "de",
+             _rowOfNulls ? null : "de",
              new Class[] { String.class }
              );
         vetWrapperOK
@@ -309,8 +311,8 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             BINARY_VALUE,
-             new Class[] { byteArrayClass, Object.class }
+             _rowOfNulls ? null : BINARY_VALUE,
+             new Class[] { _byteArrayClass, Object.class }
              );
         
         vetNoWrapper
@@ -333,7 +335,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              6,
              "CLOBCOL",
-             "abc",
+             _rowOfNulls ? null : "abc",
              new Class[] { String.class, Clob.class, Object.class }
              );
 
@@ -348,7 +350,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
                  BigDecimal.class, Byte.class, Short.class, Integer.class, Long.class,
                  Float.class, Double.class,
                  Date.class, Time.class, Timestamp.class,
-                 byteArrayClass
+                 _byteArrayClass
              }
              );
 
@@ -365,7 +367,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              7,
              "DATECOL",
-             "1994-02-23",
+             _rowOfNulls ? null : "1994-02-23",
              new Class[] { String.class, Date.class, Object.class }
              );
         vetWrapperOK
@@ -373,7 +375,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              7,
              "DATECOL",
-             "1994-02-23 00:00:00.0",
+             _rowOfNulls ? null : "1994-02-23 00:00:00.0",
              new Class[] { Timestamp.class }
              );
         
@@ -388,7 +390,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
                  BigDecimal.class, Byte.class, Short.class, Integer.class, Long.class,
                  Float.class, Double.class,
                  Time.class,
-                 Blob.class, Clob.class, byteArrayClass, getClass()
+                 Blob.class, Clob.class, _byteArrayClass, getClass()
              }
              );
     }
@@ -399,7 +401,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             "1.0",
+             _rowOfNulls ? null : "1.0",
              new Class[] { String.class, Float.class, Double.class, BigDecimal.class, Number.class, Object.class }
              );
         vetWrapperOK
@@ -407,7 +409,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             "1",
+             _rowOfNulls ? null : "1",
              new Class[] { Byte.class, Short.class, Integer.class, Long.class }
              );
         vetWrapperOK
@@ -415,7 +417,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             "true",
+             _rowOfNulls ? null : "true",
              new Class[] { Boolean.class }
              );
         
@@ -424,7 +426,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              colID,
              colName,
-             new Class[] { Date.class, Time.class, Timestamp.class, Blob.class, Clob.class, byteArrayClass, getClass() }
+             new Class[] { Date.class, Time.class, Timestamp.class, Blob.class, Clob.class, _byteArrayClass, getClass() }
              );
     }
     private void    vetWrappedTime( Wrapper41 wrapper ) throws Exception
@@ -436,7 +438,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              16,
              "TIMECOL",
-             expectedTime.toString(),
+             _rowOfNulls ? null : expectedTime.toString(),
              new Class[] { String.class, Time.class, Object.class }
              );
         vetWrapperOK
@@ -444,7 +446,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              16,
              "TIMECOL",
-             timeToTimestamp(expectedTime).toString(),
+             _rowOfNulls ? null : timeToTimestamp(expectedTime).toString(),
              new Class[] { Timestamp.class }
              );
         
@@ -459,7 +461,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
                  BigDecimal.class, Byte.class, Short.class, Integer.class, Long.class,
                  Float.class, Double.class,
                  Date.class,
-                 Blob.class, Clob.class, byteArrayClass, getClass()
+                 Blob.class, Clob.class, _byteArrayClass, getClass()
              }
              );
     }
@@ -471,7 +473,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              17,
              "TIMESTAMPCOL",
-             expectedTimestamp,
+             _rowOfNulls ? null : expectedTimestamp,
              new Class[] { String.class, Timestamp.class, Object.class }
              );
 
@@ -481,7 +483,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              17,
              "TIMESTAMPCOL",
-             expectedTime,
+             _rowOfNulls ? null : expectedTime,
              new Class[] { Time.class }
              );
 
@@ -491,7 +493,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
              wrapper,
              17,
              "TIMESTAMPCOL",
-             expectedDate,
+             _rowOfNulls ? null : expectedDate,
              new Class[] { Date.class }
              );
         
@@ -505,7 +507,7 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
                  Boolean.class,
                  BigDecimal.class, Byte.class, Short.class, Integer.class, Long.class,
                  Float.class, Double.class,
-                 Blob.class, Clob.class, byteArrayClass, getClass()
+                 Blob.class, Clob.class, _byteArrayClass, getClass()
              }
              );
     }
@@ -533,7 +535,13 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
     private void    vetCandidate( Class candidate, Object expectedValue, Object actualValue )
         throws Exception
     {
-        assertTrue( candidate.getName(), candidate.isAssignableFrom( actualValue.getClass( ) ) );
+        if ( actualValue != null ) { assertTrue( candidate.getName(), candidate.isAssignableFrom( actualValue.getClass( ) ) ); }
+
+        if ( expectedValue == null )
+        {
+            assertNull( actualValue );
+            return;
+        }
 
         if ( VARIABLE_STRING.equals( expectedValue ) ) { return; }
 
@@ -579,6 +587,9 @@ public  class   Wrapper41Test   extends BaseJDBCTestCase
         ( Wrapper41 wrapper, int colID, String colName, Class[] unsupportedCoercions, String expectedSQLState )
         throws Exception
     {
+        // null can be coerced to anything
+        if ( _rowOfNulls ) { return; }
+        
         int coercionCount = unsupportedCoercions.length;
         for ( int i = 0; i < coercionCount; i++ )
         {

@@ -331,7 +331,6 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
     //
     ////////////////////////////////////////////////////////////////////
     
-    @SuppressWarnings("unchecked")
     public <T> T getObject( int parameterIndex, Class<T> type )
         throws SQLException
     {
@@ -344,25 +343,31 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
         }
 
         try {
-            if ( String.class.equals( type ) ) { return (T) getString( parameterIndex ); }
-            else if ( BigDecimal.class.equals( type ) ) { return (T) getBigDecimal( parameterIndex ); }
-            else if ( Boolean.class.equals( type ) ) { return (T) Boolean.valueOf( getBoolean(parameterIndex ) ); }
-            else if ( Byte.class.equals( type ) ) { return (T) Byte.valueOf( getByte( parameterIndex ) ); }
-            else if ( Short.class.equals( type ) ) { return (T) Short.valueOf( getShort( parameterIndex ) ); }
-            else if ( Integer.class.equals( type ) ) { return (T) Integer.valueOf( getInt( parameterIndex ) ); }
-            else if ( Long.class.equals( type ) ) { return (T) Long.valueOf( getLong( parameterIndex ) ); }
-            else if ( Float.class.equals( type ) ) { return (T) Float.valueOf( getFloat( parameterIndex ) ); }
-            else if ( Double.class.equals( type ) ) { return (T) Double.valueOf( getDouble( parameterIndex ) ); }
-            else if ( Date.class.equals( type ) ) { return (T) getDate( parameterIndex ); }
-            else if ( Time.class.equals( type ) ) { return (T) getTime( parameterIndex ); }
-            else if ( Timestamp.class.equals( type ) ) { return (T) getTimestamp( parameterIndex ); }
-            else if ( Blob.class.equals( type ) ) { return (T) getBlob( parameterIndex ); }
-            else if ( Clob.class.equals( type ) ) { return (T) getClob( parameterIndex ); }
-            else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { return (T) getBytes( parameterIndex ); }
+            Object   retval;
+            
+            if ( String.class.equals( type ) ) { retval = getString( parameterIndex ); }
+            else if ( BigDecimal.class.equals( type ) ) { retval = getBigDecimal( parameterIndex ); }
+            else if ( Boolean.class.equals( type ) ) { retval = Boolean.valueOf( getBoolean(parameterIndex ) ); }
+            else if ( Byte.class.equals( type ) ) { retval = Byte.valueOf( getByte( parameterIndex ) ); }
+            else if ( Short.class.equals( type ) ) { retval = Short.valueOf( getShort( parameterIndex ) ); }
+            else if ( Integer.class.equals( type ) ) { retval = Integer.valueOf( getInt( parameterIndex ) ); }
+            else if ( Long.class.equals( type ) ) { retval = Long.valueOf( getLong( parameterIndex ) ); }
+            else if ( Float.class.equals( type ) ) { retval = Float.valueOf( getFloat( parameterIndex ) ); }
+            else if ( Double.class.equals( type ) ) { retval = Double.valueOf( getDouble( parameterIndex ) ); }
+            else if ( Date.class.equals( type ) ) { retval = getDate( parameterIndex ); }
+            else if ( Time.class.equals( type ) ) { retval = getTime( parameterIndex ); }
+            else if ( Timestamp.class.equals( type ) ) { retval = getTimestamp( parameterIndex ); }
+            else if ( Blob.class.equals( type ) ) { retval = getBlob( parameterIndex ); }
+            else if ( Clob.class.equals( type ) ) { retval = getClob( parameterIndex ); }
+            else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { retval = getBytes( parameterIndex ); }
             else
             {
-                return type.cast( getObject( parameterIndex ) );
+                retval = type.cast( getObject( parameterIndex ) );
             }
+
+            if ( wasNull() ) { retval = null; }
+
+            return type.cast( retval );
         }
         catch (ClassCastException e) {}
         

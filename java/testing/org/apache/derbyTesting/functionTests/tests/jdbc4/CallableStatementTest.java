@@ -40,6 +40,8 @@ public class CallableStatementTest  extends Wrapper41Test
 {
     /** Default callable statement used by the tests. */
     private CallableStatement cStmt = null;
+
+    private static  boolean _nullOutArgs;
     
     /**
      * Create a test with the given name.
@@ -646,8 +648,15 @@ public class CallableStatementTest  extends Wrapper41Test
         cs.registerOutParameter( param++, Types.TIMESTAMP );
         cs.registerOutParameter( param++, Types.VARCHAR );
         cs.registerOutParameter( param++, Types.VARBINARY );
+
+        _nullOutArgs = false;
         cs.execute();
-        examineJDBC4_1extensions( new Wrapper41( cs ) );
+        examineJDBC4_1extensions( new Wrapper41( cs ), _nullOutArgs );
+        
+        _nullOutArgs = true;
+        cs.execute();
+        examineJDBC4_1extensions( new Wrapper41( cs ), _nullOutArgs );
+        
         cs.close();
 
         ps = prepareStatement( conn, "drop procedure allTypesProc" );
@@ -743,21 +752,21 @@ public class CallableStatementTest  extends Wrapper41Test
      */
     public  static  void    allTypesProc
         (
-         long[] bigintarg,
+         Long[] bigintarg,
          Blob[] blobarg,
-         boolean[] booleanarg,
+         Boolean[] booleanarg,
          String[] chararg,
          byte[][] charforbitdataarg,
          Clob[] clobarg,
          Date[] datearg,
-         double[] doublearg,
-         double[] floatarg,
-         int[] intarg,
+         Double[] doublearg,
+         Double[] floatarg,
+         Integer[] intarg,
          String[] longvarchararg,
          byte[][] longvarcharforbitdataarg,
          BigDecimal[] numericarg,
-         float[] realarg,
-         short[] smallintarg,
+         Float[] realarg,
+         Integer[] smallintarg,
          Time[] timearg,
          Timestamp[] timestamparg,
          String[] varchararg,
@@ -769,26 +778,26 @@ public class CallableStatementTest  extends Wrapper41Test
         byte    intValue = (byte) 1;
         float   floatValue = 1.0F;
         String lobValue = "abc";
-        
-        bigintarg[0] = intValue;
-        blobarg[0] = new HarmonySerialBlob( BINARY_VALUE );
-        booleanarg[0] = true;
-        chararg[0] = stringValue;
-        charforbitdataarg[0] = BINARY_VALUE;
-        clobarg[0] = new HarmonySerialClob( lobValue );
-        datearg[0]= new Date( 761990400000L );
-        doublearg[0] = floatValue;
-        floatarg[0] = floatValue;
-        intarg[0] = intValue;
-        longvarchararg[0] = stringValue;
-        longvarcharforbitdataarg[0] =  BINARY_VALUE;
-        numericarg[0] = new BigDecimal( "1.0" );
-        realarg[0] = floatValue;
-        smallintarg[0] = intValue;
-        timearg[0] = new Time(TIME_VALUE);
-        timestamparg[0] = new Timestamp(TIMESTAMP_VALUE);
-        varchararg[0] = stringValue;
-        varcharforbitdataarg[0] = BINARY_VALUE;
+
+        bigintarg[0] = _nullOutArgs ? null : new Long( intValue );
+        blobarg[0] = _nullOutArgs ? null : new HarmonySerialBlob( BINARY_VALUE );
+        booleanarg[0] = _nullOutArgs ? null : Boolean.TRUE;
+        chararg[0] = _nullOutArgs ? null : stringValue;
+        charforbitdataarg[0] = _nullOutArgs ? null : BINARY_VALUE;
+        clobarg[0] = _nullOutArgs ? null : new HarmonySerialClob( lobValue );
+        datearg[0]= _nullOutArgs ? null : new Date( 761990400000L );
+        doublearg[0] = _nullOutArgs ? null : new  Double( floatValue );
+        floatarg[0] = _nullOutArgs ? null : new Double( floatValue );
+        intarg[0] = _nullOutArgs ? null : new Integer( intValue );
+        longvarchararg[0] = _nullOutArgs ? null : stringValue;
+        longvarcharforbitdataarg[0] =  _nullOutArgs ? null : BINARY_VALUE;
+        numericarg[0] = _nullOutArgs ? null : new BigDecimal( "1.0" );
+        realarg[0] = _nullOutArgs ? null : new Float( floatValue );
+        smallintarg[0] = _nullOutArgs ? null : new Integer( intValue );
+        timearg[0] = _nullOutArgs ? null : new Time(TIME_VALUE);
+        timestamparg[0] = _nullOutArgs ? null : new Timestamp(TIMESTAMP_VALUE);
+        varchararg[0] = _nullOutArgs ? null : stringValue;
+        varcharforbitdataarg[0] = _nullOutArgs ? null : BINARY_VALUE;
     }
 
     public  static  void    blobProc

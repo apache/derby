@@ -2069,10 +2069,21 @@ public class ResultSetTest  extends Wrapper41Test
         ps.executeUpdate();
         ps.close();
 
-        ps = prepareStatement( conn, "select * from allTypes" );
+        ps = prepareStatement
+            (
+             conn,
+             "insert into allTypes values " +
+             "( null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null )"
+             );
+        ps.executeUpdate();
+        ps.close();
+
+        ps = prepareStatement( conn, "select * from allTypes order by bigintCol" );
         ResultSet   rs = ps.executeQuery();
         rs.next();
-        examineJDBC4_1extensions( new Wrapper41( rs ) );
+        examineJDBC4_1extensions( new Wrapper41( rs ), false );
+        rs.next();
+        examineJDBC4_1extensions( new Wrapper41( rs ), true );
         rs.close();
         ps.close();
 
