@@ -286,7 +286,6 @@ public class CreateTriggerNode extends DDLStatementNode
 		*/
 		if (triggerCols != null && triggerCols.size() != 0)
 		{
-			referencedColInts = new int[triggerCols.size()];
 			Hashtable columnNames = new Hashtable();
 			int tcSize = triggerCols.size();
 			for (int i = 0; i < tcSize; i++)
@@ -306,12 +305,7 @@ public class CreateTriggerNode extends DDLStatementNode
 																rc.getName(),
 																tableName);
 				}
-
-				referencedColInts[i] = cd.getPosition();
 			}
- 
-			// sort the list
-			java.util.Arrays.sort(referencedColInts);
 		}
 
 		//If attempting to reference a SESSION schema table (temporary or permanent) in the trigger action, throw an exception
@@ -341,14 +335,16 @@ public class CreateTriggerNode extends DDLStatementNode
 	** 1) validate the referencing clause (if any)
 	**
 	** 2) convert trigger action text.  e.g. 
-	**		DELETE FROM t WHERE c = old.c
+	**	DELETE FROM t WHERE c = old.c
 	** turns into
-	**		DELETE FROM t WHERE c = org.apache.derby.iapi.db.Factory::
-	**					getTriggerExecutionContext().getOldRow().getInt('C');
+	**	DELETE FROM t WHERE c = org.apache.derby.iapi.db.Factory::
+	**		getTriggerExecutionContext().getOldRow().
+	**      getInt(columnNumberFor'C'inTriggerTable);
 	** or
-	**		DELETE FROM t WHERE c in (SELECT c FROM OLD)
+	**	DELETE FROM t WHERE c in (SELECT c FROM OLD)
 	** turns into
-	**		DELETE FROM t WHERE c in (SELECT c FROM new TriggerOldTransitionTable OLD)
+	**	DELETE FROM t WHERE c in (
+	**      SELECT c FROM new TriggerOldTransitionTable OLD)
 	**
 	** 3) check all column references against new/old transition 
 	**	variables (since they are no longer 'normal' column references
@@ -373,75 +369,66 @@ public class CreateTriggerNode extends DDLStatementNode
         // the actions of before triggers may not reference generated columns
         if ( isBefore ) { forbidActionsOnGenCols(); }
         
-		StringBuffer newText = new StringBuffer();
-		boolean regenNode = false;
+		String transformedActionText;
 		int start = 0;
+		if (triggerCols != null && triggerCols.size() != 0) {
+			//If the trigger is defined on speific columns, then collect
+			//their column positions and ensure that those columns do
+			//indeed exist in the trigger table.
+			referencedColInts = new int[triggerCols.size()];
+			ResultColumn rc;
+			ColumnDescriptor cd;
+			//This is the most interesting case for us. If we are here, 
+			//then it means that the trigger is defined at the row level
+			//and a set of trigger columns are specified in the CREATE
+			//TRIGGER statement. This can only happen for an UPDATE
+			//trigger.
+			//eg
+			//CREATE TRIGGER tr1 AFTER UPDATE OF c12 ON table1 
+			//    REFERENCING OLD AS oldt NEW AS newt
+			//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+			
+			for (int i=0; i < triggerCols.size(); i++){
+				rc = (ResultColumn)triggerCols.elementAt(i);
+				cd = triggerTableDescriptor.getColumnDescriptor(rc.getName());
+				//Following will catch the case where an invalid trigger column
+				//has been specified in CREATE TRIGGER statement.
+				//CREATE TRIGGER tr1 AFTER UPDATE OF c1678 ON table1 
+				//    REFERENCING OLD AS oldt NEW AS newt
+				//    FOR EACH ROW UPDATE table2 SET c24=oldt.c14;
+				if (cd == null)
+				{
+					throw StandardException.newException(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE, 
+																rc.getName(),
+																tableName);
+				}
+				referencedColInts[i] = cd.getPosition();
+			}
+			// sort the list
+			java.util.Arrays.sort(referencedColInts);
+		}
+		
 		if (isRow)
 		{
 			/*
 			** For a row trigger, we find all column references.  If
 			** they are referencing NEW or OLD we turn them into
-			** getTriggerExecutionContext().getOldRow().getInt('C');
+			** getTriggerExecutionContext().
+			** getOldRow().getInt(columnNumberFor'C'inTriggerTable);
 			*/
-			CollectNodesVisitor visitor = new CollectNodesVisitor(ColumnReference.class);
-			actionNode.accept(visitor);
-			Vector refs = visitor.getList();
-			/* we need to sort on position in string, beetle 4324
-			 */
-			QueryTreeNode[] cols = sortRefs(refs, true);
-
-			for (int i = 0; i < cols.length; i++)
-			{
-				ColumnReference ref = (ColumnReference) cols[i];
-				
-				/*
-				** Only occurrences of those OLD/NEW transition tables/variables 
-				** are of interest here.  There may be intermediate nodes in the 
-				** parse tree that have its own RCL which contains copy of 
-				** column references(CR) from other nodes. e.g.:  
-				**
-				** CREATE TRIGGER tt 
-				** AFTER INSERT ON x
-				** REFERENCING NEW AS n 
-				** FOR EACH ROW
-				**    INSERT INTO y VALUES (n.i), (999), (333);
-				** 
-				** The above trigger action will result in InsertNode that 
-				** contains a UnionNode of RowResultSetNodes.  The UnionNode
-				** will have a copy of the CRs from its left child and those CRs 
-				** will not have its beginOffset set which indicates they are 
-				** not relevant for the conversion processing here, so we can 
-				** safely skip them. 
-				*/
-				if (ref.getBeginOffset() == -1) 
-				{
-					continue;
-				}
-				
-				TableName tableName = ref.getTableNameNode();
-				if ((tableName == null) ||
-					((oldTableName == null || !oldTableName.equals(tableName.getTableName())) &&
-					(newTableName == null || !newTableName.equals(tableName.getTableName()))))
-				{
-					continue;
-				}
-					
-				int tokBeginOffset = tableName.getBeginOffset();
-				int tokEndOffset = tableName.getEndOffset();
-				if (tokBeginOffset == -1)
-				{
-					continue;
-				}
-
-				regenNode = true;
-				checkInvalidTriggerReference(tableName.getTableName());
-				String colName = ref.getColumnName();
-				int columnLength = ref.getEndOffset() - ref.getBeginOffset() + 1;
-
-				newText.append(originalActionText.substring(start, tokBeginOffset-actionOffset));
-				newText.append(genColumnReferenceSQL(dd, colName, tableName.getTableName(), tableName.getTableName().equals(oldTableName)));
-				start = tokEndOffset- actionOffset + columnLength + 2;
-			}
+			//Now that we have verified that are no invalid column references
+			//for trigger columns, let's go ahead and transform the OLD/NEW
+			//transient table references in the trigger action sql.
+			transformedActionText = getDataDictionary().getTriggerActionString(actionNode, 
+					oldTableName,
+					newTableName,
+					originalActionText,
+					referencedColInts,
+					actionOffset,
+					triggerTableDescriptor,
+					triggerEventMask,
+					true
+					);			
 		}
 		else
 		{
@@ -450,6 +437,8 @@ public class CreateTriggerNode extends DDLStatementNode
 			** the from table is NEW or OLD (or user designated alternates
 			** REFERENCING), we turn them into a trigger table VTI.
 			*/
+			StringBuffer newText = new StringBuffer();
+
 			CollectNodesVisitor visitor = new CollectNodesVisitor(FromBaseTable.class);
 			actionNode.accept(visitor);
 			Vector refs = visitor.getList();
@@ -474,7 +463,6 @@ public class CreateTriggerNode extends DDLStatementNode
 
 				checkInvalidTriggerReference(baseTableName);
 
-				regenNode = true;
 				newText.append(originalActionText.substring(start, tokBeginOffset-actionOffset));
 				newText.append(baseTableName.equals(oldTableName) ?
 								"new org.apache.derby.catalog.TriggerOldTransitionRows() " :
@@ -490,6 +478,11 @@ public class CreateTriggerNode extends DDLStatementNode
 				}
 				start=tokEndOffset-actionOffset+1;
 			}
+			if (start < originalActionText.length())
+			{
+				newText.append(originalActionText.substring(start));
+			}
+			transformedActionText = newText.toString();
 		}
 
 		/*
@@ -497,13 +490,11 @@ public class CreateTriggerNode extends DDLStatementNode
 		** Also, we reset the actionText to this new value.  This
 		** is what we are going to stick in the system tables.
 		*/
-		if (regenNode)
+		boolean regenNode = false;
+		if (!transformedActionText.equals(actionText))
 		{
-			if (start < originalActionText.length())
-			{
-				newText.append(originalActionText.substring(start));
-			}
-			actionText = newText.toString();
+			regenNode = true;
+			actionText = transformedActionText;
 			actionNode = parseStatement(actionText, true);
 		}
 
@@ -516,16 +507,8 @@ public class CreateTriggerNode extends DDLStatementNode
 	private QueryTreeNode[] sortRefs(Vector refs, boolean isRow)
 	{
 		int size = refs.size();
-		QueryTreeNode[] sorted = new QueryTreeNode[size];
+		QueryTreeNode[] sorted = (QueryTreeNode[]) refs.toArray(new QueryTreeNode[size]);
 		int i = 0;
-		for (Enumeration e = refs.elements(); e.hasMoreElements(); )
-		{
-			if (isRow)
-				sorted[i++] = (ColumnReference)e.nextElement();
-			else
-				sorted[i++] = (FromBaseTable)e.nextElement();
-		}
-
 		/* bubble sort
 		 */
 		QueryTreeNode temp;
@@ -611,121 +594,7 @@ public class CreateTriggerNode extends DDLStatementNode
         {
             return left.equals( right );
         }
-    }
-    
-	/*
-	** Make sure the given column name is found in the trigger
-	** target table.  Generate the appropriate SQL to get it.
-	**
-	** @return a string that is used to get the column using
-	** getObject() on the desired result set and CAST it back
-	** to the proper type in the SQL domain. 
-	**
-	** @exception StandardException on invalid column name
-	*/
-	private String genColumnReferenceSQL
-	(
-		DataDictionary	dd, 
-		String			colName, 
-		String			tabName,
-		boolean			isOldTable
-	) throws StandardException
-	{
-		ColumnDescriptor colDesc = null;
-		if ((colDesc = triggerTableDescriptor.getColumnDescriptor(colName)) == 
-                null)
-		{
-			throw StandardException.newException(
-                SQLState.LANG_COLUMN_NOT_FOUND, tabName+"."+colName);
-		}
-
-		/*
-		** Generate something like this:
-		**
-		** 		CAST (org.apache.derby.iapi.db.Factory::
-		**			getTriggerExecutionContext().getNewRow().
-		**				getObject(<colPosition>) AS DECIMAL(6,2))
-        **
-        ** Column position is used to avoid the wrong column being
-        ** selected problem (DERBY-1258) caused by the case insensitive
-        ** JDBC rules for fetching a column by name.
-		**
-		** The cast back to the SQL Domain may seem redundant
-		** but we need it to make the column reference appear
-		** EXACTLY like a regular column reference, so we need
-		** the object in the SQL Domain and we need to have the
-		** type information.  Thus a user should be able to do 
-		** something like
-		**
-		**		CREATE TRIGGER ... INSERT INTO T length(Column), ...
-        **
-        */
-
-		DataTypeDescriptor  dts     = colDesc.getType();
-		TypeId              typeId  = dts.getTypeId();
-
-        if (!typeId.isXMLTypeId())
-        {
-
-            StringBuffer methodCall = new StringBuffer();
-            methodCall.append(
-                "CAST (org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().");
-            methodCall.append(isOldTable ? "getOldRow()" : "getNewRow()");
-            methodCall.append(".getObject(");
-            methodCall.append(colDesc.getPosition());
-            methodCall.append(") AS ");
-
-            /*
-            ** getSQLString() returns <typeName> 
-            ** for user types, so call getSQLTypeName in that
-            ** case.
-            */
-            methodCall.append(
-                (typeId.userType() ? 
-                     typeId.getSQLTypeName() : dts.getSQLstring()));
-            
-            methodCall.append(") ");
-
-            return methodCall.toString();
-        }
-        else
-        {
-            /*  DERBY-2350
-            **
-            **  Triggers currently use jdbc 1.2 to access columns.  The default
-            **  uses getObject() which is not supported for an XML type until
-            **  jdbc 4.  In the meantime use getString() and then call 
-            **  XMLPARSE() on the string to get the type.  See Derby issue and
-            **  http://wiki.apache.org/db-derby/TriggerImplementation , for
-            **  better long term solutions.  Long term I think changing the
-            **  trigger architecture to not rely on jdbc, but instead on an
-            **  internal direct access interface to execution nodes would be
-            **  best future direction, but believe such a change appropriate
-            **  for a major release, not a bug fix.
-            **
-            **  Rather than the above described code generation, use the 
-            **  following for XML types to generate an XML column from the
-            **  old or new row.
-            ** 
-            **          XMLPARSE(DOCUMENT
-            **              CAST (org.apache.derby.iapi.db.Factory::
-            **                  getTriggerExecutionContext().getNewRow().
-            **                      getString(<colPosition>) AS CLOB)  
-            **                        PRESERVE WHITESPACE)
-            */
-
-            StringBuffer methodCall = new StringBuffer();
-            methodCall.append("XMLPARSE(DOCUMENT CAST( ");
-            methodCall.append(
-                "org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().");
-            methodCall.append(isOldTable ? "getOldRow()" : "getNewRow()");
-            methodCall.append(".getString(");
-            methodCall.append(colDesc.getPosition());
-            methodCall.append(") AS CLOB) PRESERVE WHITESPACE ) ");
-
-            return methodCall.toString();
-        }
-	}
+    }    
 
 	/*
 	** Check for illegal combinations here: insert & old or

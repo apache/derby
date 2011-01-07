@@ -107,6 +107,54 @@ public class TriggerTest extends BaseJDBCTestCase {
     }
     
     /**
+     * Altering the column length should regenerate the trigger
+     * action plan which is saved in SYSSTATEMENTS. DERBY-4874
+     * 
+     * @throws SQLException 
+     * 
+     */
+    public void testAlerColumnLength() throws SQLException
+    {
+        Statement s = createStatement();
+        s.executeUpdate("CREATE TABLE TestAlterTable( " +
+        		"element_id INTEGER NOT NULL, "+
+        		"altered_id VARCHAR(30) NOT NULL, "+
+        		"counter SMALLINT NOT NULL DEFAULT 0, "+
+        		"timets TIMESTAMP NOT NULL)");
+        s.executeUpdate("CREATE TRIGGER mytrig "+
+        		"AFTER UPDATE ON TestAlterTable "+
+        		"REFERENCING NEW AS newt OLD AS oldt "+
+        		"FOR EACH ROW MODE DB2SQL "+
+        		"  UPDATE TestAlterTable set "+
+        		"  TestAlterTable.counter = CASE WHEN "+
+        		"  (oldt.counter < 32767) THEN (oldt.counter + 1) ELSE 1 END "+
+        		"  WHERE ((newt.counter is null) or "+
+        		"  (oldt.counter = newt.counter)) " +
+        		"  AND newt.element_id = TestAlterTable.element_id "+
+        		"  AND newt.altered_id = TestAlterTable.altered_id");
+        s.executeUpdate("ALTER TABLE TestAlterTable ALTER altered_id "+
+        		"SET DATA TYPE VARCHAR(64)");
+        s.executeUpdate("insert into TestAlterTable values (99, "+
+        		"'012345678901234567890123456789001234567890',"+
+        		"1,CURRENT_TIMESTAMP)");
+
+        ResultSet rs = s.executeQuery("SELECT element_id, counter "+
+        		"FROM TestAlterTable");
+        JDBC.assertFullResultSet(rs, 
+        		new String[][] {{"99", "1"}});
+        
+        s.executeUpdate("update TestAlterTable "+
+        		"set timets = CURRENT_TIMESTAMP "+
+        		"where ELEMENT_ID = 99");
+        rs = s.executeQuery("SELECT element_id, counter "+
+        		"FROM TestAlterTable");
+        JDBC.assertFullResultSet(rs, 
+        		new String[][] {{"99", "2"}});
+
+        s.executeUpdate("DROP TABLE TestAlterTable");
+    }
+    
+    /**
      * Test the firing order of triggers. Should be:
      * 
      * Before operations
