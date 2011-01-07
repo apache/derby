@@ -1216,7 +1216,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * clause, meaning that before and after values are not available to
 	 * the trigger action. 
 	 * @throws SQLException
-	 */
+	 */ 
 	public void test5DeleteBeforeTriggerNoReferencingClause() throws SQLException{
         basicSetup();
         Statement s = createStatement();
