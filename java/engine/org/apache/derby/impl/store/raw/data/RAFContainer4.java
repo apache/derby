@@ -857,7 +857,7 @@ class RAFContainer4 extends RAFContainer {
                     synchronized(this) {
                         try {
                             closeContainer();
-                            openContainer(currentIdentity);
+                            reopenContainer(currentIdentity);
                         } catch (InterruptDetectedException e) {
                             // Interrupted again?
                             debugTrace("interrupted during recovery's " +
@@ -1097,9 +1097,9 @@ class RAFContainer4 extends RAFContainer {
      * @throws IOException if an I/O error occurs while reading
      * @throws StandardException If thread is interrupted.
      */
-    private final void readFull(ByteBuffer dstBuffer,
-                                FileChannel srcChannel,
-                                long position)
+    private void readFull(ByteBuffer dstBuffer,
+                          FileChannel srcChannel,
+                          long position)
             throws IOException, StandardException
     {
         while(dstBuffer.remaining() > 0) {
@@ -1134,9 +1134,9 @@ class RAFContainer4 extends RAFContainer {
      * @throws IOException if an I/O error occurs while writing
      * @throws StandardException If thread is interrupted.
      */
-    private final void writeFull(ByteBuffer srcBuffer,
-                                 FileChannel dstChannel,
-                                 long position)
+    private void writeFull(ByteBuffer srcBuffer,
+                           FileChannel dstChannel,
+                           long position)
             throws IOException
     {
         while(srcBuffer.remaining() > 0) {

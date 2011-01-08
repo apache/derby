@@ -94,6 +94,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
      * closed by the interrupt.
      */
     protected ContainerKey currentIdentity;
+    private boolean reopen;
 
     private boolean actionStub;
     private boolean actionErrorOK;
@@ -901,9 +902,21 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
     protected ContainerKey idAPriori = null;
 
     synchronized boolean openContainer(ContainerKey newIdentity)
-        throws StandardException
+            throws StandardException {
+        return openContainerMinion(newIdentity, false);
+    }
+
+    synchronized boolean reopenContainer(ContainerKey newIdentity)
+            throws StandardException {
+        return openContainerMinion(newIdentity, true);
+    }
+
+    private boolean openContainerMinion(
+        ContainerKey newIdentity,
+        boolean doReopen) throws StandardException
     {
         actionCode = OPEN_CONTAINER_ACTION;
+        reopen = doReopen;
         actionIdentity = newIdentity;
         boolean success = false;
         idAPriori = currentIdentity;
@@ -1485,8 +1498,15 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
              try {
 
                  fileData = file.getRandomAccessFile(canUpdate ? "rw" : "r");
-                 readHeader(getEmbryonicPage(fileData,
-                                             FIRST_ALLOC_PAGE_OFFSET));
+
+                 if (!reopen) {
+                     // under reopen: can give race condition or if we
+                     // synchronize access, deadlock, so skip, we know
+                     // what's there anyway.
+                     readHeader(getEmbryonicPage(fileData,
+                                                 FIRST_ALLOC_PAGE_OFFSET));
+                 }
+
 
                  if (SanityManager.DEBUG)
                  {
