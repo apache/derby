@@ -45,7 +45,7 @@ import org.apache.derby.iapi.types.TypeId;
 /**
  * A CreateTriggerNode is the root of a QueryTree 
  * that represents a CREATE TRIGGER
- * statement.
+ * statement. 
  *
  */
 
