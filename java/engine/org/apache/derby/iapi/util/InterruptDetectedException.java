@@ -35,6 +35,6 @@ public class InterruptDetectedException extends StandardException {
     */
 
     public InterruptDetectedException() {
-        super("nospc.U");
+        super("intrp.U");
     }
 }
