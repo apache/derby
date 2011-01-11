@@ -60,13 +60,9 @@ class DirRandomAccessFile extends RandomAccessFile implements StorageRandomAcces
     /**
      * Force any changes out to the persistent store.
      *
-     * @param metaData If true then this method is required to force changes to both the file's
-     *          content and metadata to be written to storage; otherwise, it need only force content changes
-     *          to be written.
-     *
      * @exception IOException If an IO error occurs.
      */
-    public void sync( boolean metaData) throws IOException
+    public void sync( ) throws IOException
     {
         getFD().sync();
     }

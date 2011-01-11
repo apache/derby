@@ -660,7 +660,7 @@ public class LogAccessFile
             {
                 synchronized( this)
                 {
-                    log.sync( false);
+                    log.sync();
                 }
 
                 // the sync succeed, so return

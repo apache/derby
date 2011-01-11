@@ -53,7 +53,6 @@
       </classpath>
       <include name="${derby.dir}/impl/io/**"/>
       <exclude name="${derby.dir}/impl/io/DirFile4.java"/>
-      <exclude name="${derby.dir}/impl/io/DirRandomAccessFile4.java"/>
       <exclude name="${derby.dir}/impl/io/DirStorageFactory4.java"/>
     </javac>
   </target>
@@ -75,7 +74,6 @@
         <pathelement path="${java14compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/io/DirFile4.java"/>
-	  <include name="${derby.dir}/impl/io/DirRandomAccessFile4.java"/>
       <include name="${derby.dir}/impl/io/DirStorageFactory4.java"/>
     </javac>
   </target>

@@ -364,7 +364,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 				try
 				{
                     if (!dataFactory.dataNotSyncedAtAllocation)
-                        fileData.sync( false);
+                        fileData.sync();
 				}
 				finally
 				{
@@ -640,7 +640,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 					inwrite = true;
 
                     if (!dataFactory.dataNotSyncedAtAllocation)
-                        fileData.sync(false);
+                        fileData.sync();
   				}
 				catch (IOException ioe)
 				{
@@ -758,7 +758,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 			try
 			{
                 if (!dataFactory.dataNotSyncedAtCheckpoint)
-                   file.sync(false);
+                   file.sync();
 
 			}
 			finally
@@ -1320,7 +1320,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
             }
 
             // sync the new version of the container.
-            newRaf.sync(true);
+            newRaf.sync();
             newRaf.close();
             newRaf = null;
             

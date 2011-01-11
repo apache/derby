@@ -272,6 +272,6 @@ class DirFile4 extends DirFile
         // Assume that modes "rws" and "rwd" are not supported.
         if(!rwsOK && ("rws".equals( mode) || "rwd".equals( mode)))
             mode = "rw";
-        return new DirRandomAccessFile4( (File) this, mode);
+        return new DirRandomAccessFile( (File) this, mode);
     } // end of getRandomAccessFile
 }

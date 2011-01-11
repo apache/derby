@@ -98,15 +98,11 @@ public interface StorageRandomAccessFile extends DataInput, DataOutput
      * Force any changes out to the persistent store. If the database is to be transient, that is, if the database
      * does not survive a restart, then the sync method implementation need not do anything.
      *
-     * @param metaData If true then this method must force both changes to the file's
-     *          contents and metadata to be written to storage; if false, it need only force file content changes
-     *          to be written. The implementation is allowed to ignore this parameter and always force out
-     *          metadata changes.
      *
      * @exception SyncFailedException if a possibly recoverable error occurs.
      * @exception IOException If an IO error occurs.
      */
-    public void sync( boolean metaData) throws IOException;
+    public void sync() throws IOException;
 
     /**
      * Reads up to <code>len</code> bytes of data from this file into an

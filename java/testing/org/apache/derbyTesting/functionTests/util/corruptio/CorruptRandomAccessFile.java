@@ -101,9 +101,9 @@ public class CorruptRandomAccessFile implements StorageRandomAccessFile
     /**
      * Force any changes out to the persistent store. 
      */
-    public void sync( boolean metaData) throws IOException
+    public void sync() throws IOException
 	{
-		realRaf.sync(metaData);
+		realRaf.sync();
 	}
 
 

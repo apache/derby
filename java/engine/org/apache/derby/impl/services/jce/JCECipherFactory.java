@@ -899,7 +899,7 @@ public final class JCECipherFactory implements CipherFactory, java.security.Priv
 				verifyKeyFile.writeInt(checksum.length);
 				verifyKeyFile.write(checksum);
 				verifyKeyFile.write(data);
-				verifyKeyFile.sync(true);
+				verifyKeyFile.sync();
 			}
 			else
 			{

@@ -1818,7 +1818,7 @@ public class T_RecoverBadLog extends T_Generic {
 				filepos +=512;
 
 			}
-			log.sync(false);
+			log.sync();
 			log.close();
 		}catch(IOException ie)
 		{

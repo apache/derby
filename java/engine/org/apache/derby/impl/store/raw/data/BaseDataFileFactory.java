@@ -1899,7 +1899,7 @@ public class BaseDataFileFactory
             // write it out for future reference
             fileLockOnDB.writeUTF(myUUID.toString()); 
 
-            fileLockOnDB.sync( false);
+            fileLockOnDB.sync();
             fileLockOnDB.seek(0);
             // check the UUID
             UUID checkUUID = uuidFactory.recreateUUID(fileLockOnDB.readUTF());
@@ -1988,7 +1988,7 @@ public class BaseDataFileFactory
                 // write it out for future reference
                 fileLockOnDB.writeUTF(myUUID.toString()); 
 
-                fileLockOnDB.sync( false);
+                fileLockOnDB.sync();
                 fileLockOnDB.close();
             }
             catch (IOException ioe)

@@ -4194,7 +4194,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
             // mounted disk.  We re-try to do this 20 times.
             try
             {
-                raf.sync( false);
+                raf.sync();
 
                 // the sync succeed, so return
                 break;

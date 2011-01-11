@@ -125,7 +125,7 @@ public class VirtualRandomAccessFile
         }
     }
 
-    public void sync(boolean metaData) {
+    public void sync() {
         // Do nothing, everything is already synced.
     }
 
