@@ -2,7 +2,7 @@
  * Repro for DERBY-1482:
  * Update triggers on tables with blob columns stream blobs
  * into memory even when the blobs are not referenced/accessed.
- */
+ */ 
 
 package org.apache.derbyTesting.functionTests.tests.memory;
 import java.sql.*;
