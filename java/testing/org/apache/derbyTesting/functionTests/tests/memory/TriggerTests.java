@@ -270,19 +270,11 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void basicSetup() throws SQLException{
+        dropTable("TABLE1");
+        dropTable("TABLE2");
+        dropTable("TABLE3");
+
         Statement s = createStatement();
-		try {
-			s.execute("drop table table1");
-		} catch (SQLException sqle) {}
-
-		try {
-			s.execute("drop table table2");
-		} catch (SQLException sqle) {}
-
-		try {
-			s.execute("drop table table3");
-		} catch (SQLException sqle) {}
-
 		try {
 			s.execute("drop trigger trigger1");
 		} catch (SQLException sqle) {}
