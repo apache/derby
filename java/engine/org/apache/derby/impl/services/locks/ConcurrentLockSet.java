@@ -598,10 +598,12 @@ forever:	for (;;) {
                         {
                             // ending wait because of lock timeout or interrupt
 
-                            if (wakeupReason == Constants.WAITING_LOCK_INTERRUPTED) {
+                            if (wakeupReason ==
+                                    Constants.WAITING_LOCK_INTERRUPTED) {
 
                                 Thread.currentThread().interrupt();
-                                throw StandardException.newException(SQLState.CONN_INTERRUPT);
+                                throw StandardException.
+                                    newException(SQLState.CONN_INTERRUPT);
 
                             } else if (deadlockTrace)
                             {   
