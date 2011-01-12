@@ -40,6 +40,7 @@ import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
  * Abstract ResultSet for for operations that return rows but
@@ -1004,10 +1005,13 @@ implements NoPutResultSet
         throws
             StandardException
 	{
-        StatementContext localStatementContext = getLanguageConnectionContext().getStatementContext();            
+        LanguageConnectionContext lcc = getLanguageConnectionContext();
+        StatementContext localStatementContext = lcc.getStatementContext();            
         if (localStatementContext == null) {
             return;
         }
+
+		InterruptStatus.throwIf(lcc);
 
         if (localStatementContext.isCancelled()) {
             throw StandardException.newException(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT);
