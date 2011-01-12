@@ -346,8 +346,9 @@ forever:	for (;;) {
                                 waitingLock, willQuitWait, this);
 
 
-                        // If we were not woken by another then we have
-                        // timed out. Either deadlock out or timeout
+                        // If we were not woken by another then we have timed
+                        // out. Either deadlock out or timeout. Or thread has
+                        // been interrupted.
                         if (willQuitWait) {
 
                             if (SanityManager.DEBUG) 
@@ -405,11 +406,16 @@ forever:	for (;;) {
 
                         }
 
+                        
                         if (deadlockData == null)
                         {
-                            // ending wait because of lock timeout.
+                            // ending wait because of lock timeout or interrupt
+                            if (wakeupReason == Constants.WAITING_LOCK_INTERRUPTED) {
 
-                            if (deadlockTrace)
+                                Thread.currentThread().interrupt();
+                                throw StandardException.newException(SQLState.CONN_INTERRUPT);
+
+                            } else if (deadlockTrace)
                             {   
                                 // Turn ON derby.locks.deadlockTrace to build 
                                 // the lockTable.

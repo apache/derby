@@ -119,7 +119,7 @@ public final class ActiveLock extends Lock {
 				}
 
 			} catch (InterruptedException ie) {
-				throw StandardException.interrupt(ie);
+				wakeUpNow = Constants.WAITING_LOCK_INTERRUPTED;
 			}
 		}
 

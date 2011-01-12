@@ -46,4 +46,5 @@ public class Constants {
 	static final byte WAITING_LOCK_IN_WAIT = 0;
 	static final byte WAITING_LOCK_GRANT = 1;
 	static final byte WAITING_LOCK_DEADLOCK = 2;
+	static final byte WAITING_LOCK_INTERRUPTED = 3;
 }

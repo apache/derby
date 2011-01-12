@@ -596,9 +596,14 @@ forever:	for (;;) {
 
                         if (deadlockData == null)
                         {
-                            // ending wait because of lock timeout.
+                            // ending wait because of lock timeout or interrupt
 
-                            if (deadlockTrace)
+                            if (wakeupReason == Constants.WAITING_LOCK_INTERRUPTED) {
+
+                                Thread.currentThread().interrupt();
+                                throw StandardException.newException(SQLState.CONN_INTERRUPT);
+
+                            } else if (deadlockTrace)
                             {   
                                 // Turn ON derby.locks.deadlockTrace to build 
                                 // the lockTable.
