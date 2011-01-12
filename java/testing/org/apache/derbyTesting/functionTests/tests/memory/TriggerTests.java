@@ -13,6 +13,7 @@ import junit.framework.Test;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -229,6 +230,12 @@ public class TriggerTests extends BaseJDBCTestCase {
     public static Test suite() {
         Test suite = new CleanDatabaseTestSetup(TestConfiguration
                 .embeddedSuite(TriggerTests.class));
+
+        // Dump lock table on lock timeout to debug failure seen
+        // in Tinderbox after DERBY-4874.
+        suite = DatabasePropertyTestSetup.singleProperty(
+                    suite, "derby.locks.deadlockTrace", "true");
+
         Properties p = new Properties();
         // use small pageCacheSize so we don't run out of memory on the insert.
         p.setProperty("derby.storage.pageCacheSize", "100");
