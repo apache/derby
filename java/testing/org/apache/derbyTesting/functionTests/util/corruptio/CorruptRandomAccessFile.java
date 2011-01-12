@@ -103,7 +103,7 @@ public class CorruptRandomAccessFile implements StorageRandomAccessFile
      */
     public void sync() throws IOException
 	{
-		realRaf.sync();
+        realRaf.sync();
 	}
 
 
