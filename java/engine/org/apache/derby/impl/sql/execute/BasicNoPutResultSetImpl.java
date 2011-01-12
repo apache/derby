@@ -1006,7 +1006,7 @@ implements NoPutResultSet
             StandardException
 	{
         LanguageConnectionContext lcc = getLanguageConnectionContext();
-        StatementContext localStatementContext = lcc.getStatementContext();            
+        StatementContext localStatementContext = lcc.getStatementContext();
         if (localStatementContext == null) {
             return;
         }
