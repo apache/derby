@@ -342,35 +342,29 @@ public class CallableStatement40 extends org.apache.derby.client.am.CallableStat
             throw mismatchException( "NULL", parameterIndex );
         }
 
-        try {
-            Object   retval;
+        Object   retval;
             
-            if ( String.class.equals( type ) ) { retval = getString( parameterIndex ); }
-            else if ( BigDecimal.class.equals( type ) ) { retval = getBigDecimal( parameterIndex ); }
-            else if ( Boolean.class.equals( type ) ) { retval = Boolean.valueOf( getBoolean(parameterIndex ) ); }
-            else if ( Byte.class.equals( type ) ) { retval = Byte.valueOf( getByte( parameterIndex ) ); }
-            else if ( Short.class.equals( type ) ) { retval = Short.valueOf( getShort( parameterIndex ) ); }
-            else if ( Integer.class.equals( type ) ) { retval = Integer.valueOf( getInt( parameterIndex ) ); }
-            else if ( Long.class.equals( type ) ) { retval = Long.valueOf( getLong( parameterIndex ) ); }
-            else if ( Float.class.equals( type ) ) { retval = Float.valueOf( getFloat( parameterIndex ) ); }
-            else if ( Double.class.equals( type ) ) { retval = Double.valueOf( getDouble( parameterIndex ) ); }
-            else if ( Date.class.equals( type ) ) { retval = getDate( parameterIndex ); }
-            else if ( Time.class.equals( type ) ) { retval = getTime( parameterIndex ); }
-            else if ( Timestamp.class.equals( type ) ) { retval = getTimestamp( parameterIndex ); }
-            else if ( Blob.class.equals( type ) ) { retval = getBlob( parameterIndex ); }
-            else if ( Clob.class.equals( type ) ) { retval = getClob( parameterIndex ); }
-            else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { retval = getBytes( parameterIndex ); }
-            else
-            {
-                retval = type.cast( getObject( parameterIndex ) );
-            }
+        if ( String.class.equals( type ) ) { retval = getString( parameterIndex ); }
+        else if ( BigDecimal.class.equals( type ) ) { retval = getBigDecimal( parameterIndex ); }
+        else if ( Boolean.class.equals( type ) ) { retval = Boolean.valueOf( getBoolean(parameterIndex ) ); }
+        else if ( Byte.class.equals( type ) ) { retval = Byte.valueOf( getByte( parameterIndex ) ); }
+        else if ( Short.class.equals( type ) ) { retval = Short.valueOf( getShort( parameterIndex ) ); }
+        else if ( Integer.class.equals( type ) ) { retval = Integer.valueOf( getInt( parameterIndex ) ); }
+        else if ( Long.class.equals( type ) ) { retval = Long.valueOf( getLong( parameterIndex ) ); }
+        else if ( Float.class.equals( type ) ) { retval = Float.valueOf( getFloat( parameterIndex ) ); }
+        else if ( Double.class.equals( type ) ) { retval = Double.valueOf( getDouble( parameterIndex ) ); }
+        else if ( Date.class.equals( type ) ) { retval = getDate( parameterIndex ); }
+        else if ( Time.class.equals( type ) ) { retval = getTime( parameterIndex ); }
+        else if ( Timestamp.class.equals( type ) ) { retval = getTimestamp( parameterIndex ); }
+        else if ( Blob.class.equals( type ) ) { retval = getBlob( parameterIndex ); }
+        else if ( Clob.class.equals( type ) ) { retval = getClob( parameterIndex ); }
+        else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { retval = getBytes( parameterIndex ); }
+        else { retval = getObject( parameterIndex ); }
 
-            if ( wasNull() ) { retval = null; }
+        if ( wasNull() ) { retval = null; }
 
-            return type.cast( retval );
-        }
-        catch (ClassCastException e) {}
-        
+        if ( (retval == null) || (type.isInstance( retval )) ) { return type.cast( retval ); }
+                
         throw mismatchException( type.getName(), parameterIndex );
     }
     private SQLException    mismatchException( String targetTypeName, int parameterIndex )

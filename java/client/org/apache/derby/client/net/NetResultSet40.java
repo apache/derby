@@ -277,34 +277,28 @@ public class NetResultSet40 extends NetResultSet{
             throw mismatchException( "NULL", columnIndex );
         }
 
-        try {
-            Object   retval;
+        Object   retval;
             
-            if ( String.class.equals( type ) ) { retval = getString( columnIndex ); }
-            else if ( BigDecimal.class.equals( type ) ) { retval = getBigDecimal( columnIndex ); }
-            else if ( Boolean.class.equals( type ) ) { retval = Boolean.valueOf( getBoolean(columnIndex ) ); }
-            else if ( Byte.class.equals( type ) ) { retval = Byte.valueOf( getByte( columnIndex ) ); }
-            else if ( Short.class.equals( type ) ) { retval = Short.valueOf( getShort( columnIndex ) ); }
-            else if ( Integer.class.equals( type ) ) { retval = Integer.valueOf( getInt( columnIndex ) ); }
-            else if ( Long.class.equals( type ) ) { retval = Long.valueOf( getLong( columnIndex ) ); }
-            else if ( Float.class.equals( type ) ) { retval = Float.valueOf( getFloat( columnIndex ) ); }
-            else if ( Double.class.equals( type ) ) { retval = Double.valueOf( getDouble( columnIndex ) ); }
-            else if ( Date.class.equals( type ) ) { retval = getDate( columnIndex ); }
-            else if ( Time.class.equals( type ) ) { retval = getTime( columnIndex ); }
-            else if ( Timestamp.class.equals( type ) ) { retval = getTimestamp( columnIndex ); }
-            else if ( Blob.class.equals( type ) ) { retval = getBlob( columnIndex ); }
-            else if ( Clob.class.equals( type ) ) { retval = getClob( columnIndex ); }
-            else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { retval = getBytes( columnIndex ); }
-            else
-            {
-                retval = type.cast( getObject( columnIndex ) );
-            }
+        if ( String.class.equals( type ) ) { retval = getString( columnIndex ); }
+        else if ( BigDecimal.class.equals( type ) ) { retval = getBigDecimal( columnIndex ); }
+        else if ( Boolean.class.equals( type ) ) { retval = Boolean.valueOf( getBoolean(columnIndex ) ); }
+        else if ( Byte.class.equals( type ) ) { retval = Byte.valueOf( getByte( columnIndex ) ); }
+        else if ( Short.class.equals( type ) ) { retval = Short.valueOf( getShort( columnIndex ) ); }
+        else if ( Integer.class.equals( type ) ) { retval = Integer.valueOf( getInt( columnIndex ) ); }
+        else if ( Long.class.equals( type ) ) { retval = Long.valueOf( getLong( columnIndex ) ); }
+        else if ( Float.class.equals( type ) ) { retval = Float.valueOf( getFloat( columnIndex ) ); }
+        else if ( Double.class.equals( type ) ) { retval = Double.valueOf( getDouble( columnIndex ) ); }
+        else if ( Date.class.equals( type ) ) { retval = getDate( columnIndex ); }
+        else if ( Time.class.equals( type ) ) { retval = getTime( columnIndex ); }
+        else if ( Timestamp.class.equals( type ) ) { retval = getTimestamp( columnIndex ); }
+        else if ( Blob.class.equals( type ) ) { retval = getBlob( columnIndex ); }
+        else if ( Clob.class.equals( type ) ) { retval = getClob( columnIndex ); }
+        else if ( type.isArray() && type.getComponentType().equals( byte.class ) ) { retval = getBytes( columnIndex ); }
+        else { retval = getObject( columnIndex ); }
 
-            if ( wasNull() ) { retval = null; }
+        if ( wasNull() ) { retval = null; }
 
-            return type.cast( retval );
-        }
-        catch (ClassCastException e) {}
+        if ( (retval == null) || (type.isInstance( retval )) ) { return type.cast( retval ); }
         
         throw mismatchException( type.getName(), columnIndex );
     }
