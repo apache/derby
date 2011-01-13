@@ -356,7 +356,9 @@ public class BasicDaemon implements DaemonService, Runnable
 		{
 			if (SanityManager.DEBUG)
 				SanityManager.showTrace(e);
-			cm.cleanupOnError(e);
+
+            //Assume database is not active. DERBY-4856 thread dump
+            cm.cleanupOnError(e, false);
 		}
 	}
 
@@ -399,7 +401,10 @@ public class BasicDaemon implements DaemonService, Runnable
 			running = false;
 			stopped = true;
 		}
-		contextMgr.cleanupOnError(StandardException.normalClose());
+        
+        //Assume database is not active. DERBY-4856 thread dump 
+        contextMgr.cleanupOnError(StandardException.normalClose(), false);
+
 		contextService.resetCurrentContextManager(contextMgr);
 	}
 

@@ -37,6 +37,7 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
+import org.apache.derby.iapi.services.info.JVMInfo;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -236,12 +237,21 @@ public class ContextManager
 		final CtxStack cs = (CtxStack) ctxTable.get(contextId);
 		return (cs==null?Collections.EMPTY_LIST:cs.getUnmodifiableList());
 	}
-
-
-	/**
-		@return true if the context manager is shutdown, false otherwise.
-	 */
-	public boolean cleanupOnError(Throwable error)
+    
+    /**
+     * clean up error and print it to derby.log. Extended diagnosis including
+     * thread dump to derby.log and javaDump if available, will print if the
+     * database is active and severity is greater than or equals to
+     * SESSTION_SEVERITY or as configured by
+     * derby.stream.error.extendedDiagSeverityLevel property
+     * 
+     * @param error the error we want to clean up
+     * @param diagActive
+     *        true if extended diagnostics should be considered, 
+     *        false not interested of extended diagnostic information
+     * @return true if the context manager is shutdown, false otherwise.
+     */
+    public boolean cleanupOnError(Throwable error, boolean diagActive)
 	{
 		if (shutdown)
 			return true;
@@ -331,8 +341,14 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 					lastHandler = ctx.isLastHandler(errorSeverity);
 
 					ctx.cleanupOnError(error);
-                    if (reportError
-                            && errorSeverity >= ExceptionSeverity.SESSION_SEVERITY) {
+                    //When errorSeverity greater or equals Property.EXT_DIAG_SEVERITY_LEVEL,
+                    //the threadDump information will be in derby.log and 
+                    //the diagnosis information will be prepared.
+                    //If Property.EXT_DIAG_SEVERITY_LEVEL is not set in JVM property or
+                    //derby property, we will only handle threadDump information and diagnosis
+                    //information for errorSeverity = ExceptionSeverity.SESSION_SEVERITY.
+                    if (reportError && diagActive
+                            && (errorSeverity >= extDiagSeverityLevel)) {
                         threadDump = ExceptionUtil.dumpThreads();
                     } else {
                         threadDump = null;
@@ -407,8 +423,11 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 				}
 			}
 
-            if (threadDump != null)
+            if (threadDump != null) {
                 errorStream.println(threadDump);
+                JVMInfo.javaDump();
+            }
+
 			if (reportError) {
 				errorStream.println("Cleanup action completed");
 				errorStream.flush();
@@ -549,11 +568,16 @@ cleanup:	for (int index = holder.size() - 1; index >= 0; index--) {
 
 		logSeverityLevel = PropertyUtil.getSystemInt(Property.LOG_SEVERITY_LEVEL,
 			SanityManager.DEBUG ? 0 : ExceptionSeverity.SESSION_SEVERITY);
+        extDiagSeverityLevel = PropertyUtil.getSystemInt(
+                Property.EXT_DIAG_SEVERITY_LEVEL,
+                ExceptionSeverity.SESSION_SEVERITY);
 	}
 
 	final ContextService owningCsf;
 
 	private int		logSeverityLevel;
+    // DERBY-4856 track extendedDiagSeverityLevel variable
+    private int extDiagSeverityLevel;
 
 	private HeaderPrintWriter errorStream;
 	private ErrorStringBuilder errorStringBuilder;

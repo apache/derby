@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.unitTests.store;
 
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.raw.*;
 
 // impl imports are the preferred way to create unit tests.
@@ -34,6 +35,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
@@ -258,7 +260,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 
 		} catch (StandardException se) {
 
-			cm1.cleanupOnError(se);
+            //Assume database is not active. DERBY-4856 thread dump
+            cm1.cleanupOnError(se, false);
 			throw T_Fail.exceptionFail(se);
 		}
 		finally {
@@ -5480,7 +5483,8 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			catch (StandardException se)
 			{
 				REPORT("cleanup on error");
-				cm1.cleanupOnError(se);
+                //Assume database is not active. DERBY-4856 thread dump
+                cm1.cleanupOnError(se, false);
 				REPORT("done cleanup on error");
 			}
 
@@ -7255,11 +7259,12 @@ public class T_RawStoreFactory extends T_MultiThreadedIterations {
 			t.printStackTrace(System.err);
 
 			if (cm1 != null)
-				cm1.cleanupOnError(t);
+                //Assume database is not active. DERBY-4856 thread dump
+                cm1.cleanupOnError(t, false);
 			if (cm2 != null)
-				cm2.cleanupOnError(t);
+                cm2.cleanupOnError(t, false);
 			//		if (cpm != null)
-			//			cpm.cleanupOnError(t);
+            //			cpm.cleanupOnError(t, false);
 
 		} finally {
 

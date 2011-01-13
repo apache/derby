@@ -21,6 +21,14 @@
 
 package org.apache.derby.iapi.services.info;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
+
+import org.apache.derby.shared.common.sanity.SanityManager;
+
 /**
 	This class is used to determine which Java specification Derby will run at.
     For a useful discussion of how this class is used, please see DERBY-3176.
@@ -161,4 +169,71 @@ public abstract class JVMInfo
 		}
 	}
 
+    /**
+     * Get system property.
+     *
+     * @param name name of the property
+     */
+    private static String getSystemProperty(final String name) {
+        
+        return (String) AccessController
+                .doPrivileged(new java.security.PrivilegedAction() {
+                    
+                    public Object run() {
+                        return System.getProperty(name);
+                        
+                    }
+                    
+                });
+    }
+    
+    /**
+     * Check whether this is sun jvm.
+     *
+     * @return true if it is sun jvm, false if it is not sun jvm
+     */
+    public static final boolean isSunJVM() {
+        String vendor = getSystemProperty("java.vendor");
+        return "Sun Microsystems Inc.".equals(vendor)
+                || "Oracle Corporation".equals(vendor);
+    }
+    
+    /**
+     * Check whether this is IBM jvm.
+     *
+     * @return true if it is IBM jvm, false if it is not IBM jvm
+     */
+    public static final boolean isIBMJVM() {
+        return ("IBM Corporation".equals(getSystemProperty("java.vendor")));
+    }
+    
+    /**
+     * For IBM jvm, this method will dump more diagnostic information to file.
+     * JVM specific code for other vender can be added. DERBY-4856 
+     *  
+     */
+    public static void javaDump() {
+        if (isIBMJVM()) {
+            Class ibmc = null;
+            try {
+                ibmc = Class.forName("com.ibm.jvm.Dump");
+                final Method ibmm = ibmc.getMethod("JavaDump", new Class[] {});
+                
+                AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                    public Object run() throws IllegalAccessException,
+                            MalformedURLException, InstantiationException,
+                            InvocationTargetException {
+                        return ibmm.invoke(null, new Object[] {});
+                    }
+                });
+            } catch (Exception e) {
+                if (SanityManager.DEBUG) {
+                    SanityManager
+                            .THROWASSERT(
+                                    "Failed to execute com.ibm.jvm.Dump.JavaDump in IBM JVM",
+                                    e);
+                }
+            }
+        }
+    }
 }

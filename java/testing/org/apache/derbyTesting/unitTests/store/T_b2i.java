@@ -43,7 +43,9 @@ import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 
+import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.ConglomerateController;
@@ -208,7 +210,7 @@ public class T_b2i extends T_MultiIterations
 			REPORT(msg);
 
             e.printStackTrace(out.getPrintWriter());
-            cm1.cleanupOnError(e);
+            cm1.cleanupOnError(e, isdbActive());
 
             pass = false;
 		}
@@ -220,7 +222,7 @@ public class T_b2i extends T_MultiIterations
 			REPORT(msg);
 
             t.printStackTrace(out.getPrintWriter());
-            cm1.cleanupOnError(t);
+            cm1.cleanupOnError(t, isdbActive());
 
             pass = false;
         }
@@ -861,7 +863,7 @@ public class T_b2i extends T_MultiIterations
                 if (SanityManager.DEBUG)
                     SanityManager.ASSERT(cm != null);
 
-                cm.cleanupOnError(e);
+                cm.cleanupOnError(e, isdbActive());
                 
                 // RESOLVE (mikem) - when split abort works come up with 
                 // a good sanity check here.
@@ -3267,7 +3269,7 @@ public class T_b2i extends T_MultiIterations
                 if (SanityManager.DEBUG)
                     SanityManager.ASSERT(cm != null);
 
-                cm.cleanupOnError(e);
+                cm.cleanupOnError(e, isdbActive());
             }
         }
 
@@ -5089,6 +5091,16 @@ public class T_b2i extends T_MultiIterations
 
 		return s;
 	}
+    
+    /** Check wheather the database is active or not
+     * @return {@code true} if the database is active, {@code false} otherwise
+     */
+    public boolean isdbActive() {
+        LanguageConnectionContext lcc = (LanguageConnectionContext) ContextService
+                .getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+        Database db = (Database) (lcc != null ? lcc.getDatabase() : null);
+        return (db != null ? db.isActive() : false);
+    }
 
 }
 

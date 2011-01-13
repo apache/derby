@@ -628,7 +628,8 @@ public abstract class EmbedConnection implements EngineConnection
                 if (se.getSeverity() < ExceptionSeverity.SESSION_SEVERITY)
                     se.setSeverity(ExceptionSeverity.SESSION_SEVERITY);
             }
-			tr.cleanupOnError(t);
+            //DERBY-4856, assume database is not up
+            tr.cleanupOnError(t, false);
 			throw handleException(t);
 		} finally {
 			restoreContextStack();
@@ -1912,7 +1913,8 @@ public abstract class EmbedConnection implements EngineConnection
 							// on how long the client program wants to hold on to
 							// the Connection object.
 							tr.clearLcc(); 
-							tr.cleanupOnError(e);
+                            // DERBY-4856, assume database is not up
+                            tr.cleanupOnError(e, false);
 							
 						} catch (Throwable t) {
 							throw handleException(t);
@@ -1925,7 +1927,8 @@ public abstract class EmbedConnection implements EngineConnection
 						// the cleanup has not been done yet.
                         InterruptStatus.restoreIntrFlagIfSeen();
 						tr.clearLcc(); 
-						tr.cleanupOnError(e);
+                        // DERBY-4856, assume database is not up
+                        tr.cleanupOnError(e, false);
 					}
 				}
 			}

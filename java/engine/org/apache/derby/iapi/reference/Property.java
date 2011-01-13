@@ -74,16 +74,25 @@ public interface Property {
 		@see org.apache.derby.iapi.error.ExceptionSeverity#SESSION_SEVERITY
 	*/
 	String LOG_SEVERITY_LEVEL = "derby.stream.error.logSeverityLevel";
-
-	/**
-	 * derby.stream.error.logBootTrace
-	 * <BR>
-	 * defaults to false. If set to true logs a stack trace to 
-	 * the error stream on successful boot or shutdown.
-	 * This can be useful when trying to debug dual boot 
-	 * scenarios especially with multiple class loaders.
-	 * 
-	 */
+    
+    /**
+      * derby.stream.error.ExtendedDiagSeverityLevel=integerValue
+      * <BR>
+      * Indicates the minimum level of severity for errors that are reported thread dump information
+      * and diagnosis information depends on jvm vender.
+      * Default to SESSION_SEVERITY(40000).
+      *
+     */
+    String EXT_DIAG_SEVERITY_LEVEL = "derby.stream.error.extendedDiagSeverityLevel";
+    /**
+     * derby.stream.error.logBootTrace
+     * <BR>
+     * defaults to false. If set to true logs a stack trace to 
+     * the error stream on successful boot or shutdown.
+     * This can be useful when trying to debug dual boot 
+     * scenarios especially with multiple class loaders.
+     * 
+     */
 	
 	String LOG_BOOT_TRACE = "derby.stream.error.logBootTrace";
         /**

@@ -216,7 +216,8 @@ public class T_StreamFile extends T_MultiThreadedIterations {
 
 		} catch (StandardException se) {
 
-			cm1.cleanupOnError(se);
+            //Assume database is not active. DERBY-4856 thread dump
+            cm1.cleanupOnError(se, false);
 			throw T_Fail.exceptionFail(se);
 		}
 		finally {
@@ -241,7 +242,8 @@ public class T_StreamFile extends T_MultiThreadedIterations {
 		}
 		catch (StandardException se) {
 
-			cm1.cleanupOnError(se);
+            //Assume database is not active. DERBY-4856 thread dump
+            cm1.cleanupOnError(se, false);
 			throw T_Fail.exceptionFail(se);
 		}
 		finally {

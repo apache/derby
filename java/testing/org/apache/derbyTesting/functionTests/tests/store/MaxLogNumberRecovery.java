@@ -20,6 +20,7 @@
  */
 
 package org.apache.derbyTesting.functionTests.tests.store;
+import java.security.AccessController;
 import java.sql.Connection;
 import java.sql.SQLException;
 import org.apache.derby.tools.ij;
@@ -84,11 +85,37 @@ public class MaxLogNumberRecovery extends MaxLogNumber {
 		logMessage("End MaxLogNumberRecovery Test");
 	}
 
-	
+
+    /**
+     * Set system property
+     *
+     * @param name name of the property
+     * @param value value of the property
+     */
+    private static void setSystemProperty(final String name, 
+                        final String value)
+    {
+    
+    AccessController.doPrivileged
+        (new java.security.PrivilegedAction(){
+            
+            public Object run(){
+            System.setProperty( name, value);
+            return null;
+            
+            }
+            
+        }
+         );
+    
+    }
 	public static void main(String[] argv) throws Throwable {
 		
         MaxLogNumberRecovery test = new MaxLogNumberRecovery();
    		ij.getPropertyArg(argv); 
+        //DERBY -4856 will cause XSLAK create diagnostic information set the
+        //extenedDiagSeverityLevel higher so no thread dump or diagnostic info
+        setSystemProperty("derby.stream.error.extendedDiagSeverityLevel","50000");
         Connection conn = ij.startJBMS();
         conn.setAutoCommit(false);
 

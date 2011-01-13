@@ -98,7 +98,16 @@ class EmbedPooledConnection implements javax.sql.PooledConnection, BrokeredConne
 
 	protected boolean isActive;
     
-	EmbedPooledConnection(ReferenceableDataSource ds, String u, String p, boolean requestPassword) throws SQLException
+    /**
+     * getter function for isActive
+     * @return boolean is isActive is true
+     **/
+    public boolean isActive() {
+        return isActive;
+    }
+    
+    EmbedPooledConnection(ReferenceableDataSource ds, String u, String p,
+            boolean requestPassword) throws SQLException
 	{
 		dataSource = ds;
 		username = u;

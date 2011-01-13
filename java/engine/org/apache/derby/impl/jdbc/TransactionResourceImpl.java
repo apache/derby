@@ -336,7 +336,7 @@ public final class TransactionResourceImpl
 			// it was already removed.  all that's left to cleanup is
 			// JDBC objects.
 			if (cm!=null) {
-				boolean isShutdown = cleanupOnError(thrownException);
+				boolean isShutdown = cleanupOnError(thrownException, database != null ? database.isActive() : false);
 				if (checkForShutdown && isShutdown) {
 					// Change the error message to be a known shutdown.
 					thrownException = shutdownDatabaseException();
@@ -349,8 +349,8 @@ public final class TransactionResourceImpl
 
 		} catch (Throwable t) {
 
-			if (cm!=null) { // something to let us cleanup?
-				cm.cleanupOnError(t);
+            if (cm != null) { // something to let us cleanup?
+                cm.cleanupOnError(t, database != null ? isActive() : false);
 			}
 
             InterruptStatus.restoreIntrFlagIfSeen();
@@ -416,12 +416,21 @@ public final class TransactionResourceImpl
 		return  username;
 	}
 
-	boolean cleanupOnError(Throwable e)
+    /**
+     * clean up error and print it to derby.log if diagActive is true
+     * @param error the error we want to clean up
+     * @param diagActive
+     *        true if extended diagnostics should be considered, 
+     *        false not interested of extended diagnostic information
+     * @return true if the context manager is shutdown, false otherwise.
+     */
+    boolean cleanupOnError(Throwable e, boolean diagActive)
 	{
 		if (SanityManager.DEBUG)
 			SanityManager.ASSERT(cm != null, "cannot cleanup on error with null context manager");
 
-		return cm.cleanupOnError(e);
+        //DERBY-4856 thread dump
+        return cm.cleanupOnError(e, diagActive);
 	}
 
 	boolean isIdle()

@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -287,6 +288,32 @@ public abstract class BaseTestCase
 
 		}
 	     );
+    }
+    
+    /**
+     * Get files in a directory which contain certain prefix
+     * 
+     * @param dir
+     *        The directory we are checking for files with certain prefix
+     * @param prefix
+     *        The prefix pattern we are interested.
+     * @retrun String[] The list indicates files with certain prefix.
+     */
+    protected static String[] getFilesWith(final File dir, String prefix) {
+        return (String[]) AccessController
+                .doPrivileged(new java.security.PrivilegedAction() {
+                    public Object run() {
+                        //create a FilenameFilter and override its accept-method to file
+                        //files start with "javacore"*
+                        FilenameFilter filefilter = new FilenameFilter() {
+                            public boolean accept(File dir, String name) {
+                                //if the file has prefix javacore return true, else false
+                                return name.startsWith("javacore");
+                            }
+                        };
+                        return dir.list(filefilter);
+                    }
+                });
     }
     
     /**
@@ -623,7 +650,15 @@ public abstract class BaseTestCase
     {
         DropDatabaseSetup.removeDirectory(dir);
     }
-
+ 
+    /**
+     * Remove all the files in the list
+     * @param list the list contains all the files
+     */
+    public static void removeFiles(String[] list)
+    {
+        DropDatabaseSetup.removeFiles(list);
+    }
     /**
      * Fail; attaching an exception for more detail on cause.
      *

@@ -89,6 +89,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     }
     
     public static Test baseSuite(String name) {
+        setSystemProperty("derby.stream.error.extendedDiagSeverityLevel","50000");
+        
         TestSuite suite = new TestSuite("AuthenticationTest");
         
         Test test = new AuthenticationTest(

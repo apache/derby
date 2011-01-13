@@ -758,7 +758,7 @@ public class IndexStatisticsDaemonImpl
             // Do nothing, just let the thread die.
         } catch (ShutdownException se) {
             stop(); // Call stop to log activity statistics.
-            ctxMgr.cleanupOnError(se);
+            ctxMgr.cleanupOnError(se, db.isActive());
         } finally {
             synchronized (queue) {
                 runningThread = null;
@@ -851,7 +851,7 @@ public class IndexStatisticsDaemonImpl
             // The database or system is going down. Probably handled elsewhere
             // but disable daemon anyway.
             disable = true;
-            cm.cleanupOnError(se);
+            cm.cleanupOnError(se, db.isActive());
         }
 
         if (disable) {

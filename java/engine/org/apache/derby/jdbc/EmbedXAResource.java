@@ -100,14 +100,15 @@ class EmbedXAResource implements XAResource {
                 rm.commit(inDoubtCM, xid_im, onePhase);
                 
                 // close the connection/transaction since it can never
-                // be used again.
-                inDoubtCM.cleanupOnError(StandardException.closeException());
+                // be used again. DERBY-4856 No extended diagnostic information needed.
+                inDoubtCM.cleanupOnError(StandardException.closeException(),
+                        false);
                 return;
             } catch (StandardException se) {
                 // The rm threw an exception, clean it up in the approprate
                 // context.  There is no transactionResource to handle the
                 // exception for us.
-                inDoubtCM.cleanupOnError(se);
+                inDoubtCM.cleanupOnError(se, con.isActive());
                 throw wrapInXAException(se);
             } finally {
                 csf.resetCurrentContextManager(inDoubtCM);
@@ -404,13 +405,14 @@ class EmbedXAResource implements XAResource {
                 rm.forget(inDoubtCM, xid_im);
                 
                 // close the connection/transaction since it can never be used again.
-                inDoubtCM.cleanupOnError(StandardException.closeException());
+                inDoubtCM.cleanupOnError(StandardException.closeException(),
+                        false);
                 return;
             } catch (StandardException se) {
                 // The rm threw an exception, clean it up in the approprate
                 // context.  There is no transactionResource to handle the
                 // exception for us.
-                inDoubtCM.cleanupOnError(se);
+                inDoubtCM.cleanupOnError(se, con.isActive());
                 throw wrapInXAException(se);
             } finally {
                 csf.resetCurrentContextManager(inDoubtCM);
@@ -454,13 +456,14 @@ class EmbedXAResource implements XAResource {
                 rm.rollback(inDoubtCM, xid_im);
                 
                 // close the connection/transaction since it can never be used again.
-                inDoubtCM.cleanupOnError(StandardException.closeException());
+                inDoubtCM.cleanupOnError(StandardException.closeException(),
+                        false);
                 return;
             } catch (StandardException se) {
                 // The rm threw an exception, clean it up in the approprate
                 // context.  There is no transactionResource to handle the
                 // exception for us.
-                inDoubtCM.cleanupOnError(se);
+                inDoubtCM.cleanupOnError(se, con.isActive());
                 throw wrapInXAException(se);
             } finally {
                 csf.resetCurrentContextManager(inDoubtCM);

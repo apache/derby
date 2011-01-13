@@ -20,6 +20,7 @@
  */
 package org.apache.derby.impl.sql.catalog;
 
+import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.cache.Cacheable;
@@ -211,7 +212,11 @@ public abstract class SequenceUpdater implements Cacheable
             clean( false );
         } catch (StandardException se)
         {
-            getLCC().getContextManager().cleanupOnError( se );
+            //Doing check for lcc and db to be certain
+            LanguageConnectionContext lcc = getLCC();
+            Database db = (lcc != null ? lcc.getDatabase() : null);
+            boolean isactive = (db != null ? db.isActive() : false);
+            lcc.getContextManager().cleanupOnError(se, isactive);
         }
     }
 

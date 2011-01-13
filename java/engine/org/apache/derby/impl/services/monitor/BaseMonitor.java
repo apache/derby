@@ -1822,8 +1822,10 @@ nextModule:
 				usProperties.setServiceBooted();
 			}
             
-            if (cm != previousCM)
-                cm.cleanupOnError(StandardException.closeException());
+            if (cm != previousCM) {
+                //Assume database is not active. DERBY-4856 thread dump
+                cm.cleanupOnError(StandardException.closeException(), false);
+            }
             
 		} catch (Throwable t) {
 
@@ -1835,7 +1837,8 @@ nextModule:
 				se = Monitor.exceptionStartingModule(t);
 
 			if (cm != previousCM) {
-				cm.cleanupOnError(se);
+                //Assume database is not active. DERBY-4856 thread dump
+                cm.cleanupOnError(se, false);
 			}
 
 			if (ts != null) {
