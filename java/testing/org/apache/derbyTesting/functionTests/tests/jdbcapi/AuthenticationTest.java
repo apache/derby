@@ -89,8 +89,6 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     }
     
     public static Test baseSuite(String name) {
-        setSystemProperty("derby.stream.error.extendedDiagSeverityLevel","50000");
-        
         TestSuite suite = new TestSuite("AuthenticationTest");
         
         Test test = new AuthenticationTest(
@@ -174,6 +172,8 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         Properties sysprops = new Properties();
         sysprops.put("derby.user.system", "admin");
         sysprops.put("derby.user.mickey", "mouse");
+        //Derby-4856,set the property to avoid thread dump and diagnostic info
+        sysprops.put("derby.stream.error.extendedDiagSeverityLevel","50000");
         test = DatabasePropertyTestSetup.builtinAuthentication(test,
             USERS, PASSWORD_SUFFIX);
         test = new DatabasePropertyTestSetup (test, props, true);
