@@ -297,7 +297,7 @@ public abstract class BaseTestCase
      *        The directory we are checking for files with certain prefix
      * @param prefix
      *        The prefix pattern we are interested.
-     * @retrun String[] The list indicates files with certain prefix.
+     * @return The list indicates files with certain prefix.
      */
     protected static String[] getFilesWith(final File dir, String prefix) {
         return (String[]) AccessController

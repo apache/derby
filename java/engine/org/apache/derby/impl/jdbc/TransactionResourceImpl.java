@@ -418,7 +418,7 @@ public final class TransactionResourceImpl
 
     /**
      * clean up error and print it to derby.log if diagActive is true
-     * @param error the error we want to clean up
+     * @param e the error we want to clean up
      * @param diagActive
      *        true if extended diagnostics should be considered, 
      *        false not interested of extended diagnostic information
