@@ -574,16 +574,13 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
      * @exception SQLException if a database-access error occurs.
      */
     public Blob getBlob (int parameterIndex) throws SQLException {
-		checkStatus();
-		try {
-			DataValueDescriptor param = getParms().getParameterForGet(parameterIndex-1);
-			Blob v = (Blob) param.getObject();
-			wasNull = (v == null);
-			return v;
-		} catch (StandardException e)
-		{
-			throw EmbedResultSet.noStateChangeException(e);
-		}
+        Object o = getObject(parameterIndex);
+        if (o == null || o instanceof Blob) {
+            return (Blob) o;
+        }
+        throw newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH,
+                Blob.class.getName(),
+                Util.typeName(getParameterJDBCType(parameterIndex)));
     }
 
     /**
@@ -596,16 +593,13 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
      * @exception SQLException if a database-access error occurs.
      */
     public Clob getClob (int parameterIndex) throws SQLException {
-		checkStatus();
-		try {
-			DataValueDescriptor param = getParms().getParameterForGet(parameterIndex-1);
-			Clob v = (Clob) param.getObject();
-			wasNull = (v == null);
-			return v;
-		} catch (StandardException e)
-		{
-			throw EmbedResultSet.noStateChangeException(e);
-		}
+        Object o = getObject(parameterIndex);
+        if (o == null || o instanceof Clob) {
+            return (Clob) o;
+        }
+        throw newSQLException(SQLState.LANG_DATA_TYPE_GET_MISMATCH,
+                Clob.class.getName(),
+                Util.typeName(getParameterJDBCType(parameterIndex)));
     }
     
 	public void addBatch() throws SQLException {

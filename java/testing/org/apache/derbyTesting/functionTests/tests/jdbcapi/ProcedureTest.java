@@ -26,6 +26,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -593,6 +594,40 @@ public class ProcedureTest extends BaseJDBCTestCase {
         JDBC.assertNoMoreResults(ps);
     }
 
+    /**
+     * Test that a call to getBlob() to retrieve the value of a non-BLOB
+     * parameter fails with the expected SQLException. Used to throw
+     * ClassCastException, see DERBY-4970.
+     */
+    public void testGetBlobFromIntParameter() throws SQLException {
+        CallableStatement cs = prepareCall("call int_out(?)");
+        cs.registerOutParameter(1, Types.INTEGER);
+        cs.execute();
+        try {
+            cs.getBlob(1);
+            fail("getBlob() on int parameter expected to fail");
+        } catch (SQLException sqle) {
+            assertSQLState("22005", sqle);
+        }
+    }
+
+    /**
+     * Test that a call to getClob() to retrieve the value of a non-CLOB
+     * parameter fails with the expected SQLException. Used to throw
+     * ClassCastException, see DERBY-4970.
+     */
+    public void testGetClobFromIntParameter() throws SQLException {
+        CallableStatement cs = prepareCall("call int_out(?)");
+        cs.registerOutParameter(1, Types.INTEGER);
+        cs.execute();
+        try {
+            cs.getClob(1);
+            fail("getClob() on int parameter expected to fail");
+        } catch (SQLException sqle) {
+            assertSQLState("22005", sqle);
+        }
+    }
+
     // UTILITY METHODS
 
     /**
@@ -737,8 +772,11 @@ public class ProcedureTest extends BaseJDBCTestCase {
           "CREATE PROCEDURE NESTED_RESULT_SETS(proctext VARCHAR(128)) LANGUAGE JAVA " +
           "PARAMETER STYLE JAVA EXTERNAL NAME '" +
           ProcedureTest.class.getName() + ".nestedDynamicResultSets' " +
-          "DYNAMIC RESULT SETS 6"
+          "DYNAMIC RESULT SETS 6",
 
+          "CREATE PROCEDURE INT_OUT(OUT X INTEGER) LANGUAGE JAVA " +
+          "PARAMETER STYLE JAVA EXTERNAL NAME '" +
+          ProcedureTest.class.getName() + ".intOut'",
     };
 
     /**
@@ -888,6 +926,13 @@ public class ProcedureTest extends BaseJDBCTestCase {
     
     }
 
+    /**
+     * Stored procedure with an integer output parameter.
+     * @param out an output parameter
+     */
+    public static void intOut(int[] out) {
+        out[0] = 42;
+    }
     
         /**
          * Test various combinations of getMoreResults
