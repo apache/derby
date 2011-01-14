@@ -23,11 +23,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -57,6 +59,12 @@ public class LockInterruptTest extends BaseJDBCTestCase {
         // expect for timeouts.
         test = DatabasePropertyTestSetup.setLockTimeouts(
                 test, DEADLOCK_TIMEOUT, LOCK_TIMEOUT);
+        Properties syspros = new Properties();
+        //Derby-4856 interrupt error create thread dump and diagnostic
+        //info. Add property to avoid the information.
+        syspros.put("derby.stream.error.extendedDiagSeverityLevel", "50000");
+        test = new SystemPropertyTestSetup(test, syspros, true);
+        
 
         return new CleanDatabaseTestSetup(test);
     }
