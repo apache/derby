@@ -1655,6 +1655,101 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
 
     }
 
+    /**
+     * Verify fix for DERBY-4964 - failure to convert string to boolean with
+     * the client driver.
+     */
+    public void test_4964() throws SQLException {
+        PreparedStatement ps = prepareStatement("values cast(? as boolean)");
+
+        // These should work
+        test_4964_minion(ps, null, null);
+        test_4964_minion(ps, "unknown", null);
+        test_4964_minion(ps, "UNKNOWN", null);
+        test_4964_minion(ps, "unKnoWn", null);
+        test_4964_minion(ps, "  unknown  ", null);
+        test_4964_minion(ps, "true", Boolean.TRUE);
+        test_4964_minion(ps, "TRUE", Boolean.TRUE);
+        test_4964_minion(ps, "TrUe", Boolean.TRUE);
+        test_4964_minion(ps, "  true  ", Boolean.TRUE);
+        test_4964_minion(ps, "false", Boolean.FALSE);
+        test_4964_minion(ps, "FALSE", Boolean.FALSE);
+        test_4964_minion(ps, "FaLsE", Boolean.FALSE);
+        test_4964_minion(ps, "FaLsE", Boolean.FALSE);
+        test_4964_minion(ps, "  false  ", Boolean.FALSE);
+
+        // These should fail
+        test_4964_minion(ps, "0", BAD_CAST);
+        test_4964_minion(ps, "1", BAD_CAST);
+        test_4964_minion(ps, "2", BAD_CAST);
+        test_4964_minion(ps, "null", BAD_CAST);
+        test_4964_minion(ps, "true true", BAD_CAST);
+        test_4964_minion(ps, "false false", BAD_CAST);
+    }
+
+    /**
+     * Set a boolean parameter using a string value and verify that we get
+     * the expected result.
+     *
+     * @param ps a prepared statement that takes a boolean parameter
+     * @param input input string for the parameter
+     * @param expectedValue the expected result; either the expected Boolean return
+     * value if the operation is expected to succeed, or the SQLState of the
+     * exception if it is expected to fail
+     */
+    private void test_4964_minion(
+            PreparedStatement ps, String input, Object expectedValue)
+        throws SQLException
+    {
+        // If the expected value is a string, it denotes the SQLState of an
+        // expected failure
+        boolean shouldFail = expectedValue instanceof String;
+
+        Object[][] rows = { { expectedValue } };
+
+        // test setString(int, String)
+        try {
+            ps.setString(1, input);
+            JDBC.assertFullResultSet(ps.executeQuery(), rows, false);
+            assertFalse(shouldFail);
+        } catch (SQLException sqle) {
+            if (shouldFail) {
+                assertSQLState((String) expectedValue, sqle);
+            } else {
+                throw sqle;
+            }
+        }
+
+        // test setObject(int, Object)
+        try {
+            ps.setObject(1, input);
+            JDBC.assertFullResultSet(ps.executeQuery(), rows, false);
+            assertFalse(shouldFail);
+        } catch (SQLException sqle) {
+            if (shouldFail) {
+                assertSQLState((String) expectedValue, sqle);
+            } else {
+                throw sqle;
+            }
+        }
+
+        // test setObject(int, Object, int) with various target types
+        int[] types = { Types.BIT, Types.BOOLEAN, Types.CHAR, Types.VARCHAR };
+        for (int i = 0; i < types.length; i++) {
+            try {
+                ps.setObject(1, input, types[i]);
+                JDBC.assertFullResultSet(ps.executeQuery(), rows, false);
+                assertFalse(shouldFail);
+            } catch (SQLException sqle) {
+                if (shouldFail) {
+                    assertSQLState((String) expectedValue, sqle);
+                } else {
+                    throw sqle;
+                }
+            }
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES

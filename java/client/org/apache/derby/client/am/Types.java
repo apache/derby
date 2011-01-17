@@ -29,8 +29,7 @@ import org.apache.derby.iapi.reference.JDBC40Translation;
 public class Types {
     // -------------------------------- Driver types -------------------------------------------------
 
-    // Not currently supported as a DERBY column type.  Mapped to SMALLINT.
-    // public final static int BIT        =  java.sql.Types.BIT;          // -7;
+    public final static int BIT        =  java.sql.Types.BIT;          // -7;
 
     // Not currently supported as a DERBY column type.  Mapped to SMALLINT.
     //public final static int TINYINT 	= java.sql.Types.TINYINT;       // -6;
@@ -90,6 +89,7 @@ public class Types {
             case BIGINT:        return "BIGINT";
             case BINARY:        return "BINARY";
             case BLOB:          return "BLOB";
+            case BIT:
             case BOOLEAN:       return "BOOLEAN";
             case CHAR:          return "CHAR";
             case CLOB:          return "CLOB";

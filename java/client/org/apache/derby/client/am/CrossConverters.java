@@ -25,6 +25,7 @@ import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Locale;
 import org.apache.derby.shared.common.reference.SQLState;
 
 // All currently supported derby types are mapped to one of the following jdbc types:
@@ -113,6 +114,10 @@ final class CrossConverters {
     // In support of PS.setShort()
     final Object setObject(int targetType, short source) throws SqlException {
         switch (targetType) {
+        case Types.BIT:
+        case Types.BOOLEAN:
+            return Boolean.valueOf(source != 0);
+
         case Types.SMALLINT:
             return new Short(source);
 
@@ -147,6 +152,10 @@ final class CrossConverters {
     // In support of PS.setInt()
     final Object setObject(int targetType, int source) throws SqlException {
         switch (targetType) {
+        case Types.BIT:
+        case Types.BOOLEAN:
+            return Boolean.valueOf(source != 0);
+
         case Types.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
@@ -237,6 +246,10 @@ final class CrossConverters {
     // In support of PS.setLong()
     final Object setObject(int targetType, long source) throws SqlException {
         switch (targetType) {
+        case Types.BIT:
+        case Types.BOOLEAN:
+            return Boolean.valueOf(source != 0);
+
         case Types.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
@@ -279,6 +292,10 @@ final class CrossConverters {
     // In support of PS.setFloat()
     final Object setObject(int targetType, float source) throws SqlException {
         switch (targetType) {
+        case Types.BIT:
+        case Types.BOOLEAN:
+            return Boolean.valueOf(source != 0);
+
         case Types.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
@@ -354,6 +371,10 @@ final class CrossConverters {
     // In support of PS.setDouble()
     final Object setObject(int targetType, double source) throws SqlException {
         switch (targetType) {
+        case Types.BIT:
+        case Types.BOOLEAN:
+            return Boolean.valueOf(source != 0);
+
         case Types.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
@@ -417,6 +438,11 @@ final class CrossConverters {
     // In support of PS.setBigDecimal()
     final Object setObject(int targetType, java.math.BigDecimal source) throws SqlException {
         switch (targetType) {
+        case Types.BIT:
+        case Types.BOOLEAN:
+            return Boolean.valueOf(
+                    java.math.BigDecimal.valueOf(0L).compareTo(source) != 0);
+
         case Types.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxShortValue__) == 1 || source.compareTo(bdMinShortValue__) == -1)) {
@@ -543,6 +569,23 @@ final class CrossConverters {
     final Object setObject(int targetDriverType, String source) throws SqlException {
         try {
             switch (targetDriverType) {
+            case Types.BIT:
+            case Types.BOOLEAN:
+            {
+                String cleanSource = source.trim().toUpperCase(Locale.ENGLISH);
+                if (cleanSource.equals("UNKNOWN")) {
+                    return null;
+                } else if (cleanSource.equals("TRUE")) {
+                    return Boolean.TRUE;
+                } else if (cleanSource.equals("FALSE")) {
+                    return Boolean.FALSE;
+                } else {
+                    throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId(SQLState.LANG_FORMAT_EXCEPTION),
+                        Types.getTypeString(targetDriverType));
+                }
+            }
+
             case Types.SMALLINT:
                 return Short.valueOf(source);
 
@@ -604,8 +647,6 @@ final class CrossConverters {
      */
     public static int getInputJdbcType(int jdbcType) {
         switch (jdbcType) {
-        case java.sql.Types.BIT:
-        case java.sql.Types.BOOLEAN:
         case java.sql.Types.TINYINT:
         case java.sql.Types.SMALLINT:
             return java.sql.Types.INTEGER;
