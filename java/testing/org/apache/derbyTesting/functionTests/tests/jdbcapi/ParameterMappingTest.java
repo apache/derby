@@ -3125,52 +3125,81 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * Do the {@code setObject()} tests for {@code setXXX()}. Test both for
+     * the two-argument {@code setObject(int,Object)} method and the
+     * three-argument {@code setObject(int,Object,int)} method.
+     */
     private static void setXXX_setObject(Statement s, PreparedStatement psi,
             PreparedStatement psq, int type, Object value, String className,
             int b5o) throws SQLException, java.io.IOException {
-        {
-            s.execute("DELETE FROM PM.TYPE_AS");
 
-            SQLException sqleResult = null;
-            boolean worked;
-            try {
-                // setObject(" + className + ")
+        // Test setObject(int, Object)
+        setXXX_setObject_doWork(
+                s, psi, psq, type, value, className, b5o, false, false);
+
+        // Test setObject(int, Object) with batch execution
+        setXXX_setObject_doWork(
+                s, psi, psq, type, value, className, b5o, false, true);
+
+        // Test setObject(int, Object, int)
+        setXXX_setObject_doWork(
+                s, psi, psq, type, value, className, b5o, true, false);
+
+        // Test setObject(int, Object, int) with batch execution
+        setXXX_setObject_doWork(
+                s, psi, psq, type, value, className, b5o, true, true);
+
+    }
+
+    /**
+     * Helper method that does all the work for setXXX_setObject().
+     *
+     * @param withTypeFlag if true, use the setObject() method that takes a
+     * type parameter; otherwise, use the two-argument type-less setObject()
+     * method
+     * @param batchExecution if true, do batch execution; otherwise, do
+     * normal execution
+     */
+    private static void setXXX_setObject_doWork(
+            Statement s, PreparedStatement psi, PreparedStatement psq,
+            int type, Object value, String className, int b5o,
+            boolean withTypeFlag, boolean batchExecution)
+        throws SQLException, IOException
+    {
+        int jdbcType = jdbcTypes[type];
+        String method = "setObject(" + className + ")";
+
+        s.execute("DELETE FROM PM.TYPE_AS");
+
+        SQLException sqleResult = null;
+        boolean worked;
+        try {
+            // Set the parameter value, either with or without explicit type
+            if (withTypeFlag) {
+                psi.setObject(1, value, jdbcType);
+            } else {
                 psi.setObject(1, value);
-                psi.executeUpdate();
-                getValidValue(psq, jdbcTypes[type], "setObject(" + className
-                        + ")");
-                worked = true;
-
-            } catch (SQLException sqle) {
-                sqleResult = sqle;
-                worked = false;
             }
-            judge_setObject(worked, sqleResult, b5o, type);
-        }
-        {
-            s.execute("DELETE FROM PM.TYPE_AS");
 
-            SQLException sqleResult = null;
-            boolean worked;
-            try {
-                // setObject(" + className + ") as batch
-                psi.setObject(1, value);
+            // Execute the statement, either single execution or batch
+            if (batchExecution) {
                 psi.addBatch();
                 psi.executeBatch();
-                getValidValue(psq, jdbcTypes[type], "setObject(" + className
-                        + ")");
-
-                worked = true;
-
-            } catch (SQLException sqle) {
-                sqleResult = sqle;
-                worked = false;
-            } catch (Throwable t) {
-                fail("FAIL " + t.getMessage());
-                return;
+            } else {
+                psi.executeUpdate();
             }
-            judge_setObject(worked, sqleResult, b5o, type);
+
+            // Check if we got a valid value back
+            getValidValue(psq, jdbcType, method);
+            worked = true;
+        } catch (SQLException sqle) {
+            sqleResult = sqle;
+            worked = false;
         }
+
+        // Check if the we got the correct response
+        judge_setObject(worked, sqleResult, b5o, type);
     }
 
     /**
