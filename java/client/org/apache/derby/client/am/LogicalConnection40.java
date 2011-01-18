@@ -319,7 +319,10 @@ public class LogicalConnection40
     
     public  void    abort( Executor executor )  throws SQLException
     {
-        ((NetConnection40) physicalConnection_).abort( executor );
+        if ( physicalConnection_ != null )
+        {
+            ((NetConnection40) physicalConnection_).abort( executor );
+        }
     }
     
 } // End class LogicalConnection40

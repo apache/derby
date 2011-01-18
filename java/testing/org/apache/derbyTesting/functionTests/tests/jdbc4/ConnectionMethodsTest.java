@@ -40,7 +40,11 @@ import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.Blob;
 import java.sql.Clob;
+import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
+import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
+import javax.sql.XADataSource;
 import java.security.AccessController;
 import java.security.*;
 import java.util.concurrent.Executor;
@@ -51,6 +55,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -64,6 +69,8 @@ import junit.framework.TestSuite;
  */
 public class ConnectionMethodsTest extends Wrapper41Test
 {
+    public  static  final   String  CLOSED_CONNECTION = "08003";
+    
     ///////////////////////////////////////////////////////////////////////
     //
     // NESTED CLASSES
@@ -386,9 +393,9 @@ public class ConnectionMethodsTest extends Wrapper41Test
     }
     
     /**
-     * Test the JDBC 4.1 Connection.abort(Executor) method.
+     * Test the JDBC 4.1 Connection.abort(Executor) method on physical connections.
      */
-    public void testAbort() throws Exception
+    public void testAbortPhysical() throws Exception
     {
         //
         // In order to run this test, a special permission must be granted to
@@ -396,13 +403,94 @@ public class ConnectionMethodsTest extends Wrapper41Test
         //
         if ( !TestConfiguration.loadingFromJars() ) { return; }
 
-        // NOP if called on a closed connection
         Connection conn0 = openUserConnection( "user0");
+        Connection conn1 = openUserConnection( "user1");
+        Connection conn2 = openUserConnection( "user2");
+
+        abortVetter( conn0, conn1, conn2 );
+    }
+    
+    /**
+     * Test the JDBC 4.1 Connection.abort(Executor) method on pooled connections.
+     */
+    public void testAbortPooled() throws Exception
+    {
+        //
+        // In order to run this test, a special permission must be granted to
+        // the jar file containing this method.
+        //
+        if ( !TestConfiguration.loadingFromJars() ) { return; }
+
+        ConnectionPoolDataSource cpDs =
+                J2EEDataSource.getConnectionPoolDataSource();
+        
+        PooledConnection conn0 = getPooledConnection( cpDs, "user0");
+        PooledConnection conn1 = getPooledConnection( cpDs, "user1");
+        PooledConnection conn2 = getPooledConnection( cpDs, "user2");
+
+        abortVetter( conn0.getConnection(), conn1.getConnection(), conn2.getConnection() );
+
+        // verify that the underlying physical connection is closed
+        try {
+            conn1.getConnection();
+            fail( "Expected physical connection to be closed." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( CLOSED_CONNECTION, se );
+        }
+    }
+    private PooledConnection    getPooledConnection
+        ( ConnectionPoolDataSource cpDs, String userName ) throws Exception
+    {
+        return cpDs.getPooledConnection( userName, getTestConfiguration().getPassword( userName ) );
+    }
+    
+    /**
+     * Test the JDBC 4.1 Connection.abort(Executor) method on XA connections.
+     */
+    public void testAbortXA() throws Exception
+    {
+        //
+        // In order to run this test, a special permission must be granted to
+        // the jar file containing this method.
+        //
+        if ( !TestConfiguration.loadingFromJars() ) { return; }
+
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        
+        XAConnection conn0 = getXAConnection( xads, "user0");
+        XAConnection conn1 = getXAConnection( xads, "user1");
+        XAConnection conn2 = getXAConnection( xads, "user2");
+
+        abortVetter( conn0.getConnection(), conn1.getConnection(), conn2.getConnection() );
+
+        // verify that the underlying physical connection is closed
+        try {
+            conn1.getConnection();
+            fail( "Expected physical connection to be closed." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( CLOSED_CONNECTION, se );
+        }
+    }
+    private XAConnection    getXAConnection
+        ( XADataSource xads, String userName ) throws Exception
+    {
+        return xads.getXAConnection( userName, getTestConfiguration().getPassword( userName ) );
+    }
+
+    /**
+     * Test the JDBC 4.1 Connection.abort(Executor) method.
+     */
+    public void abortVetter( Connection conn0, Connection conn1, Connection conn2 ) throws Exception
+    {
+        // NOP if called on a closed connection
         conn0.close();
         Wrapper41Conn   wrapper0 = new Wrapper41Conn( conn0 );
         wrapper0.abort( new DirectExecutor() );
 
-        Connection conn1 = openUserConnection( "user1");
         conn1.setAutoCommit( false );
         final   Wrapper41Conn   wrapper1 = new Wrapper41Conn( conn1 );
 
@@ -459,11 +547,10 @@ public class ConnectionMethodsTest extends Wrapper41Test
         }
         catch (SQLException se)
         {
-            assertSQLState( "08003", se );
+            assertSQLState( CLOSED_CONNECTION, se );
         }
 
         // verify that the changes were rolled back
-        Connection conn2 = openUserConnection( "user2");
         ps = prepareStatement( conn2, "select * from app.abort_table" );
         ResultSet   rs = ps.executeQuery();
         assertFalse( rs.next() );

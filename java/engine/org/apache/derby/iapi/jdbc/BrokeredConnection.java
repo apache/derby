@@ -53,7 +53,7 @@ public abstract class BrokeredConnection implements EngineConnection
 	int stateHoldability = ResultSet.HOLD_CURSORS_OVER_COMMIT;
 
 	final BrokeredConnectionControl control;
-	private boolean isClosed;
+	protected boolean isClosed;
         private String connString;
 
 	/**

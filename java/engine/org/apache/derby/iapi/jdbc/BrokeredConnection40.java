@@ -354,7 +354,10 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
     
     public  void    abort( Executor executor )  throws SQLException
     {
-        ((EmbedConnection40) getRealConnection()).abort( executor );
+        if (!isClosed)
+        {
+            ((EmbedConnection40) getRealConnection()).abort( executor );
+        }
     }
     
 }

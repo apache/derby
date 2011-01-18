@@ -1888,7 +1888,7 @@ public final class TestConfiguration {
      * Get the password that is a function of the user
      * name and the token for the current configuration.
      */
-    final String getPassword(String user)
+    public final String getPassword(String user)
     {
         return getPassword(user, passwordToken);
     }
