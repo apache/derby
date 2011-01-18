@@ -30,9 +30,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javax.sql.ConnectionPoolDataSource;
+import javax.sql.DataSource;
+import javax.sql.PooledConnection;
+import javax.sql.XAConnection;
+import javax.sql.XADataSource;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -145,13 +151,69 @@ public class AbortTest extends Wrapper41Test
         println( "AbortTest( " + _hasSecurityManager + " )" );
         assertEquals( _hasSecurityManager, (System.getSecurityManager() != null) );
 
-        // NOP if called on a closed connection
+        physical();
+        pooled();
+        xa();
+    }
+
+    private void    physical()  throws Exception
+    {
         Connection conn0 = openUserConnection( "user0");
+        Connection conn1 = openUserConnection( "user1");
+        Connection conn2 = openUserConnection( "user2");
+
+        vet( conn0, conn1, conn2 );
+    }
+
+    private void    pooled()    throws Exception
+    {
+        ConnectionPoolDataSource cpDs =
+                J2EEDataSource.getConnectionPoolDataSource();
+        
+        PooledConnection conn0 = getPooledConnection( cpDs, "user3");
+        PooledConnection conn1 = getPooledConnection( cpDs, "user4");
+        PooledConnection conn2 = getPooledConnection( cpDs, "user5");
+
+        vet( conn0.getConnection(), conn1.getConnection(), conn2.getConnection() );
+    }
+    private PooledConnection    getPooledConnection
+        ( ConnectionPoolDataSource cpDs, String userName ) throws Exception
+    {
+        return cpDs.getPooledConnection( userName, getTestConfiguration().getPassword( userName ) );
+    }
+    
+    private void    xa()        throws Exception
+    {
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        
+        XAConnection conn0 = getXAConnection( xads, "user6");
+        XAConnection conn1 = getXAConnection( xads, "user7");
+        XAConnection conn2 = getXAConnection( xads, "user8");
+
+        vet( conn0.getConnection(), conn1.getConnection(), conn2.getConnection() );
+    }
+    private XAConnection    getXAConnection
+        ( XADataSource xads, String userName ) throws Exception
+    {
+        return xads.getXAConnection( userName, getTestConfiguration().getPassword( userName ) );
+    }
+    
+    /**
+     * <p>
+     * Test Connection.abort(Executor) with and without a security manager.
+     * </p>
+     */
+    public  void    vet( Connection conn0, Connection conn1, Connection conn2 ) throws Exception
+    {
+        assertNotNull( conn0 );
+        assertNotNull( conn1 );
+        assertNotNull( conn2 );
+        
+        // NOP if called on a closed connection
         conn0.close();
         Wrapper41Conn   wrapper0 = new Wrapper41Conn( conn0 );
         wrapper0.abort( new ConnectionMethodsTest.DirectExecutor() );
 
-        Connection conn1 = openUserConnection( "user1");
         conn1.setAutoCommit( false );
         final   Wrapper41Conn   wrapper1 = new Wrapper41Conn( conn1 );
 
@@ -165,7 +227,7 @@ public class AbortTest extends Wrapper41Test
         }
 
         if ( _hasSecurityManager ) { missingPermission( wrapper1 ); }
-        else { noSecurityManager( wrapper1 ); }
+        else { noSecurityManager( wrapper1, conn2 ); }
     }
 
     // Run if we have a security manager. This tests that abort() fails
@@ -202,7 +264,7 @@ public class AbortTest extends Wrapper41Test
 
     // Run if we don't have a security manager. Verifies that abort() is uncontrolled
     // in that situation.
-    private void    noSecurityManager(  final Wrapper41Conn wrapper1  ) throws Exception
+    private void    noSecurityManager(  final Wrapper41Conn wrapper1, Connection conn2  ) throws Exception
     {
         PreparedStatement   ps = prepareStatement
             ( wrapper1.getWrappedObject(), "insert into app.abort_table( a ) values ( 1 )" );
@@ -224,7 +286,6 @@ public class AbortTest extends Wrapper41Test
         }
 
         // verify that the changes were rolled back
-        Connection conn2 = openUserConnection( "user2");
         ps = prepareStatement( conn2, "select * from app.abort_table" );
         ResultSet   rs = ps.executeQuery();
         assertFalse( rs.next() );

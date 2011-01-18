@@ -88,6 +88,8 @@ public  class   Wrapper41Conn
     {
         if ( _embedded != null ) { return _embedded; }
         else if ( _netclient != null ) { return _netclient; }
+        else if ( _brokeredConnection != null ) { return _brokeredConnection; }
+        else if ( _logicalConnection != null ) { return _logicalConnection; }
         else { throw nothingWrapped(); }
     }
 
