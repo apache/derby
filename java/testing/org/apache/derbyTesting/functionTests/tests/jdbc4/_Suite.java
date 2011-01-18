@@ -75,6 +75,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest (JDBC4FromJDBC3DataSourceTest.suite());
         suite.addTest(Derby3650Test.suite());
         suite.addTest(Derby2017LayerBTest.suite());
+        suite.addTest(AbortTest.suite());
 		
 		return suite;
 	}
