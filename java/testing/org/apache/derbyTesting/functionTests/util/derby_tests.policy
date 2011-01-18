@@ -133,6 +133,9 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   // traces upon failure.
   permission java.lang.RuntimePermission "getStackTrace";
   permission java.lang.RuntimePermission "modifyThreadGroup";
+
+  // This permission is needed to call the Connection.abort(Executor) method added by JDBC 4.1
+  permission java.sql.SQLPermission "callAbort";
 };
 
 //
@@ -182,6 +185,9 @@ grant codeBase "${derbyTesting.clientjar}derbyclient.jar" {
   permission java.lang.RuntimePermission "getStackTrace";
   permission java.lang.RuntimePermission "modifyThreadGroup";
 
+  // This permission is needed to call the Connection.abort(Executor) method added by JDBC 4.1
+  permission java.sql.SQLPermission "callAbort";
+  
 };
 
 //
@@ -248,6 +254,12 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission org.apache.derby.security.SystemPermission "jmx", "control";
   permission org.apache.derby.security.SystemPermission "engine", "monitor";
   permission org.apache.derby.security.SystemPermission "server", "control,monitor";
+
+  // useful for debugging
+  //permission java.lang.RuntimePermission "getProtectionDomain";
+
+  // This permission is needed to call the Connection.abort(Executor) method added by JDBC 4.1
+  permission java.sql.SQLPermission "callAbort";
   
   // These permissions are needed when testing code instrumented with EMMA.
   permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";

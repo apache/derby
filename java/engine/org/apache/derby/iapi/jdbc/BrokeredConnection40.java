@@ -31,9 +31,11 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import java.sql.Struct;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 import org.apache.derby.impl.jdbc.Util;
 //import org.apache.derby.impl.jdbc.EmbedConnection40;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.impl.jdbc.EmbedConnection40;
 
 
 public class BrokeredConnection40 extends BrokeredConnection30 {
@@ -342,5 +344,17 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
             notifyException(sqle);
             throw sqle;
         }
-    }    
+    }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+    
+    public  void    abort( Executor executor )  throws SQLException
+    {
+        ((EmbedConnection40) getRealConnection()).abort( executor );
+    }
+    
 }

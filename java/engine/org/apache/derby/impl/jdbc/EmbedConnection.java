@@ -115,7 +115,7 @@ import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
  * @see TransactionResourceImpl
  *
  */
-public abstract class EmbedConnection implements EngineConnection
+public abstract class EmbedConnection implements EngineConnection, Runnable
 {
 
 	private static final StandardException exceptionClose = StandardException.closeException();
@@ -165,6 +165,7 @@ public abstract class EmbedConnection implements EngineConnection
 	// specific)
 	//////////////////////////////////////////////////////////
 	private boolean	active;
+    private boolean aborting = false;
 	boolean	autoCommit = true;
 	boolean	needCommit;
 
@@ -1899,7 +1900,7 @@ public abstract class EmbedConnection implements EngineConnection
 				/*
 				 * If it isn't active, it's already been closed.
 				 */
-				if (active) {
+				if (active || isAborting()) {
 					if (tr.isActive()) {
 						setupContextStack();
 						try {
@@ -1933,6 +1934,8 @@ public abstract class EmbedConnection implements EngineConnection
 				}
 			}
 
+            aborting = false;
+            
 			if (!isClosed())
 				setInactive();
 		}
@@ -2247,7 +2250,7 @@ public abstract class EmbedConnection implements EngineConnection
 	public final LanguageConnectionContext getLanguageConnection() {
 
 		if (SanityManager.DEBUG)
-			SanityManager.ASSERT(!isClosed(), "connection is closed");
+			SanityManager.ASSERT(!isClosed() || isAborting(), "connection is closed");
 
 		return getTR().getLcc();
 	}
@@ -2472,7 +2475,7 @@ public abstract class EmbedConnection implements EngineConnection
 			is in a finally block.
 		 */
 
-		checkIfClosed();
+		if ( !isAborting()) { checkIfClosed(); }
 
 		getTR().setupContextStack();
 
@@ -3322,4 +3325,32 @@ public abstract class EmbedConnection implements EngineConnection
 			lobFiles.remove(lobFile);
 		}
 	}
+
+    /** Return true if the connection is aborting */
+    public  boolean isAborting() { return aborting; }
+
+    /** Begin aborting the connection */
+    public  void    beginAborting()
+    {
+        aborting = true;
+        setInactive();
+    }
+    
+	//////////////////////////////////////////////////////////
+    //
+	// Runnable BEHAVIOR
+    //
+    // This class implements Runnable so that the JDBC 4.1 abort(Executor)
+    // method can run the close() logic in a separate thread if necessary.
+    //
+	//////////////////////////////////////////////////////////
+
+    public  void    run()
+    {
+        try {
+            rollback();
+            close(exceptionClose);
+        } catch (SQLException se) { Util.logSQLException( se ); }
+    }
+    
 }

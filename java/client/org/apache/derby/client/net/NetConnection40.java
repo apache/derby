@@ -32,12 +32,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLClientInfoException;
 import java.sql.SQLException;
+import java.sql.SQLPermission;
 import java.sql.SQLXML;
 import java.sql.Struct;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Enumeration;
+import java.util.concurrent.Executor;
 import org.apache.derby.client.ClientPooledConnection;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.FailedProperties40;
@@ -393,4 +395,49 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
         }
     }
     
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  void    abort( Executor executor )  throws SQLException
+    {
+        // NOP if called on a closed connection.
+        if ( !open_ ) { return; }
+        // Null executor not allowed.
+        if ( executor == null )
+        {
+            ClientMessageId cmi = new ClientMessageId( SQLState.UU_INVALID_PARAMETER  );
+            SqlException se = new SqlException( agent_.logWriter_, cmi, "executor", "null" );
+
+            throw se.getSQLException();
+        }
+
+        //
+        // Must have privilege to invoke this method.
+        //
+        // The derby jars should be granted this permission. We deliberately
+        // do not wrap this check in an AccessController.doPrivileged() block.
+        // If we did so, that would absolve outer code blocks of the need to
+        // have this permission granted to them too. It is critical that the
+        // outer code blocks enjoy this privilege. That is what allows
+        // connection pools to prevent ordinary code from calling abort()
+        // and restrict its usage to privileged tools.
+        //
+        SecurityManager securityManager = System.getSecurityManager();
+        if ( securityManager != null )
+        { securityManager.checkPermission( new SQLPermission( "callAbort" ) ); }
+
+        // Mark the Connection as closed. Set the "aborting" flag to allow internal
+        // processing in close() to proceed.
+        beginAborting();
+
+        //
+        // The run() method in Connection does the
+        // actual releasing of resources.
+        //
+        executor.execute( this );
+    }
+
 }

@@ -43,6 +43,7 @@ import java.sql.Clob;
 import javax.sql.DataSource;
 import java.security.AccessController;
 import java.security.*;
+import java.util.concurrent.Executor;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derby.jdbc.ClientDataSource;
@@ -61,13 +62,46 @@ import junit.framework.TestSuite;
  * This class is used to test the implementations of the JDBC 4.0 methods
  * in the Connection interface
  */
-public class ConnectionMethodsTest extends BaseJDBCTestCase {
+public class ConnectionMethodsTest extends Wrapper41Test
+{
+    ///////////////////////////////////////////////////////////////////////
+    //
+    // NESTED CLASSES
+    //
+    ///////////////////////////////////////////////////////////////////////
+
+    /** An Executor which runs in the current thread. */
+    public static   final   class DirectExecutor implements Executor
+    {
+        public void execute(Runnable r)
+        {
+            r.run();
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////
+    //
+    // STATE
+    //
+    ///////////////////////////////////////////////////////////////////////
 
     FileInputStream is;
+
+    ///////////////////////////////////////////////////////////////////////
+    //
+    // CONSTRUCTORS
+    //
+    ///////////////////////////////////////////////////////////////////////
 
     public ConnectionMethodsTest(String name) {
         super(name);
     }
+
+    ///////////////////////////////////////////////////////////////////////
+    //
+    // JUnit SETUP
+    //
+    ///////////////////////////////////////////////////////////////////////
 
     public static Test suite() {
         TestSuite suite = new TestSuite("ConnectionMethodsTest");
@@ -87,10 +121,18 @@ public class ConnectionMethodsTest extends BaseJDBCTestCase {
             protected void decorateSQL(Statement s) throws SQLException {
                 s.execute("create table clobtable2(n int,clobcol CLOB)");
                 s.execute("create table blobtable2(n int,blobcol BLOB)");
+                s.execute("create table abort_table(a int)");
 
             }
         };
     }
+    
+    ///////////////////////////////////////////////////////////////////////
+    //
+    // TEST CASES
+    //
+    ///////////////////////////////////////////////////////////////////////
+
     /**
      * Test the createClob method implementation in the Connection interface
      *
@@ -342,4 +384,92 @@ public class ConnectionMethodsTest extends BaseJDBCTestCase {
             }
         }
     }
+    
+    /**
+     * Test the JDBC 4.1 Connection.abort(Executor) method.
+     */
+    public void testAbort() throws Exception
+    {
+        //
+        // In order to run this test, a special permission must be granted to
+        // the jar file containing this method.
+        //
+        if ( !TestConfiguration.loadingFromJars() ) { return; }
+
+        // NOP if called on a closed connection
+        Connection conn0 = openUserConnection( "user0");
+        conn0.close();
+        Wrapper41Conn   wrapper0 = new Wrapper41Conn( conn0 );
+        wrapper0.abort( new DirectExecutor() );
+
+        Connection conn1 = openUserConnection( "user1");
+        conn1.setAutoCommit( false );
+        final   Wrapper41Conn   wrapper1 = new Wrapper41Conn( conn1 );
+
+        // the Executor may not be null
+        try {
+            wrapper1.abort( null );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( "XCZ02", se );
+        }
+
+        PreparedStatement   ps = prepareStatement
+            ( conn1, "insert into app.abort_table( a ) values ( 1 )" );
+        ps.execute();
+        ps.close();
+
+        // abort the connection
+        try {
+            //
+            // This doPrivileged block absolves outer code blocks (like JUnit)
+            // of the need to be granted SQLPermission( "callAbort" ). However,
+            // derbyTesting.jar still needs that permission.
+            //
+            AccessController.doPrivileged
+                (
+                 new PrivilegedExceptionAction<Object>()
+                 {
+                     public Object    run() throws Exception
+                     {
+                         DirectExecutor  executor = new DirectExecutor();
+                         wrapper1.abort( executor );
+                         return null;
+                     }
+                 }
+                 );
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            //
+            // We need to fail now. But the connection holds locks
+            // which prevent our test apparatus from cleaning up.
+            // We need to release those locks before failing.
+            //
+            conn1.rollback();
+            fail( "Could not abort connection!" );
+        }
+
+        // verify that the connection is closed
+        try {
+            prepareStatement( conn1, "select * from sys.systables" );
+            fail( "Connection should be dead!" );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( "08003", se );
+        }
+
+        // verify that the changes were rolled back
+        Connection conn2 = openUserConnection( "user2");
+        ps = prepareStatement( conn2, "select * from app.abort_table" );
+        ResultSet   rs = ps.executeQuery();
+        assertFalse( rs.next() );
+        rs.close();
+        ps.close();
+        conn2.close();
+    }
+    
 }

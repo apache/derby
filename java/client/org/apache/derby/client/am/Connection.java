@@ -29,8 +29,9 @@ import java.sql.SQLException;
 import org.apache.derby.client.net.NetXAResource;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
-public abstract class Connection implements java.sql.Connection,
-        ConnectionCallbackInterface {
+public abstract class Connection
+    implements java.sql.Connection, ConnectionCallbackInterface, Runnable
+{
     //---------------------navigational members-----------------------------------
 
 
@@ -92,6 +93,7 @@ public abstract class Connection implements java.sql.Connection,
     // ------------------------dynamic properties---------------------------------
 
     protected boolean open_ = true;
+    private boolean aborting_ = false;
     private boolean availableForReuse_ = false;
 
     /**
@@ -646,7 +648,7 @@ public abstract class Connection implements java.sql.Connection,
                 agent_.logWriter_.traceEntry(this, "rollback");
             }
             
-            checkForClosedConnection();
+            if ( !isAborting() ) { checkForClosedConnection(); }
             checkForInvalidXAStateOnCommitOrRollback();
 
             flowRollback();
@@ -740,7 +742,7 @@ public abstract class Connection implements java.sql.Connection,
 
     // This is a no-op if the connection is already closed.
     synchronized public void closeX() throws SQLException {
-        if (!open_) {
+        if (!open_ && !isAborting()) {
             return;
         }
         closeResourcesX();
@@ -756,6 +758,7 @@ public abstract class Connection implements java.sql.Connection,
     }
 
     private void closeResourcesX() throws SQLException {
+
         try
         {
             checkForTransactionInProgress();
@@ -793,6 +796,7 @@ public abstract class Connection implements java.sql.Connection,
         }
 
         markClosed(false);
+        aborting_ = false;
         try {
             agent_.close();
         } catch (SqlException e) {
@@ -2462,7 +2466,36 @@ public abstract class Connection implements java.sql.Connection,
         
         return blob;
     }
+
+    /** Return true if the connection is aborting */
+    public  boolean isAborting() { return aborting_; }
     
+    /** Begin aborting the connection */
+    public  void    beginAborting()
+    {
+        aborting_ = true;
+        markClosed( false );
+    }
+    
+	//////////////////////////////////////////////////////////
+    //
+	// Runnable BEHAVIOR
+    //
+    // This class implements Runnable so that the JDBC 4.1 abort(Executor)
+    // method can run the closeX() logic in a separate thread if necessary.
+    //
+	//////////////////////////////////////////////////////////
+
+    public  void    run()
+    {
+        try {
+            rollback();
+            close();
+        } catch (SQLException se)
+        {
+            se.printStackTrace( agent_.getLogWriter() );
+        }
+    }
     
 
 }

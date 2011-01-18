@@ -30,8 +30,10 @@ import java.sql.SQLXML;
 import java.sql.SQLException;
 import java.sql.Struct;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 import org.apache.derby.client.ClientPooledConnection;
+import org.apache.derby.client.net.NetConnection40;
 import org.apache.derby.shared.common.reference.SQLState;
 import java.util.Map;
 
@@ -307,6 +309,17 @@ public class LogicalConnection40
     		notifyException(sqle);
     		throw sqle;
     	}
+    }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+    
+    public  void    abort( Executor executor )  throws SQLException
+    {
+        ((NetConnection40) physicalConnection_).abort( executor );
     }
     
 } // End class LogicalConnection40

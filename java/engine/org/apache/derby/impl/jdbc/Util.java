@@ -105,7 +105,7 @@ public abstract class Util  {
 	 * 
 	 * @param se SQLException to log
 	 */
-	private static void logSQLException(SQLException se) {
+	public static void logSQLException(SQLException se) {
     	if (se == null)
     		return;
     	String message = se.getMessage();
