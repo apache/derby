@@ -524,7 +524,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 *
 	 * @return The text
 	 */
-	public final String getText()
+	public final synchronized String getText()
 	{
 		return text;
 	}
@@ -544,7 +544,7 @@ public class SPSDescriptor extends TupleDescriptor
 	 * 
 	 * @param newText
 	 */
-	public final void setText(String newText)
+	public final synchronized void setText(String newText)
 	{
 		text = newText;
 	}
