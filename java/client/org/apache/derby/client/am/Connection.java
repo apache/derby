@@ -30,7 +30,7 @@ import org.apache.derby.client.net.NetXAResource;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 public abstract class Connection
-    implements java.sql.Connection, ConnectionCallbackInterface, Runnable
+    implements java.sql.Connection, ConnectionCallbackInterface
 {
     //---------------------navigational members-----------------------------------
 
@@ -2471,30 +2471,10 @@ public abstract class Connection
     public  boolean isAborting() { return aborting_; }
     
     /** Begin aborting the connection */
-    public  void    beginAborting()
+    protected  void    beginAborting()
     {
         aborting_ = true;
         markClosed( false );
-    }
-    
-	//////////////////////////////////////////////////////////
-    //
-	// Runnable BEHAVIOR
-    //
-    // This class implements Runnable so that the JDBC 4.1 abort(Executor)
-    // method can run the closeX() logic in a separate thread if necessary.
-    //
-	//////////////////////////////////////////////////////////
-
-    public  void    run()
-    {
-        try {
-            rollback();
-            close();
-        } catch (SQLException se)
-        {
-            se.printStackTrace( agent_.getLogWriter() );
-        }
     }
     
 

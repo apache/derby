@@ -115,10 +115,10 @@ import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
  * @see TransactionResourceImpl
  *
  */
-public abstract class EmbedConnection implements EngineConnection, Runnable
+public abstract class EmbedConnection implements EngineConnection
 {
 
-	private static final StandardException exceptionClose = StandardException.closeException();
+	protected static final StandardException exceptionClose = StandardException.closeException();
     
     /**
      * Static exception to be thrown when a Connection request can not
@@ -1891,7 +1891,7 @@ public abstract class EmbedConnection implements EngineConnection, Runnable
 	//
 	// NOTE: This method is not part of JDBC specs.
 	//
-    private void close(StandardException e) throws SQLException {
+    protected void close(StandardException e) throws SQLException {
 		
 		synchronized(getConnectionSynchronization())
 		{
@@ -3330,27 +3330,10 @@ public abstract class EmbedConnection implements EngineConnection, Runnable
     public  boolean isAborting() { return aborting; }
 
     /** Begin aborting the connection */
-    public  void    beginAborting()
+    protected  void    beginAborting()
     {
         aborting = true;
         setInactive();
     }
-    
-	//////////////////////////////////////////////////////////
-    //
-	// Runnable BEHAVIOR
-    //
-    // This class implements Runnable so that the JDBC 4.1 abort(Executor)
-    // method can run the close() logic in a separate thread if necessary.
-    //
-	//////////////////////////////////////////////////////////
-
-    public  void    run()
-    {
-        try {
-            rollback();
-            close(exceptionClose);
-        } catch (SQLException se) { Util.logSQLException( se ); }
-    }
-    
+        
 }

@@ -301,10 +301,21 @@ public class EmbedConnection40 extends EmbedConnection30 {
         beginAborting();
 
         //
-        // The run() method in EmbedConnection does the
-        // actual releasing of resources.
+        // Now pass the Executor a Runnable which does the real work.
         //
-        executor.execute( this );
+        executor.execute
+            (
+             new Runnable()
+             {
+                 public void run()
+                 {
+                     try {
+                         rollback();
+                         close(exceptionClose);
+                     } catch (SQLException se) { Util.logSQLException( se ); }
+                 }
+             }
+             );
     }
     
 }
