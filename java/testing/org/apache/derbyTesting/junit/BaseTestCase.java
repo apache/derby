@@ -37,6 +37,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.InterruptedIOException;
+import java.io.RandomAccessFile;
 import java.net.URL;
 import java.sql.SQLException;
 import java.security.AccessController;
@@ -590,7 +592,63 @@ public abstract class BaseTestCase
         return "Sun Microsystems Inc.".equals(vendor) ||
                 "Oracle Corporation".equals(vendor);
     }
-    
+
+    /**
+     * Check if we have old style (before Sun Java 1.7) Solaris interruptible
+     * IO. On Sun Java 1.5 >= update 22 and Sun Java 1.6 this can be disabled
+     * with Java option {@code -XX:-UseVMInterruptibleIO}. On Sun Java 1.7 it
+     * is by default disabled.
+     *
+     * @return true if we have old style interruptible IO
+     */
+    public static final boolean hasInterruptibleIO()
+            throws Exception {
+
+
+        boolean interruptibleIO = false;
+
+        try {
+            AccessController.doPrivileged(
+                new PrivilegedExceptionAction() {
+                    public Object run() throws
+                        IOException, InterruptedIOException {
+
+                        TestConfiguration curr = TestConfiguration.getCurrent();
+
+                        String sysHome = getSystemProperty("derby.system.home");
+
+                        StringBuffer arbitraryRAFFileName = new StringBuffer();
+
+                        arbitraryRAFFileName.append(sysHome);
+                        arbitraryRAFFileName.append(File.separatorChar);
+                        arbitraryRAFFileName.append("derby.log");
+
+                        RandomAccessFile f = new RandomAccessFile(
+                            arbitraryRAFFileName.toString(), "r");
+
+                        try {
+                            Thread.currentThread().interrupt();
+                            f.read();
+                        } finally {
+                            Thread.interrupted(); // clear flag
+                            f.close();
+                        }
+
+                        return null;
+                    }});
+        } catch (PrivilegedActionException e) {
+            if (e.getCause() instanceof InterruptedIOException) {
+                interruptibleIO = true;
+            } else {
+                throw e;
+            }
+
+        }
+
+        return interruptibleIO;
+    }
+
+
     public static final boolean isIBMJVM() {
         return ("IBM Corporation".equals(
                 getSystemProperty("java.vendor")));

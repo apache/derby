@@ -108,6 +108,16 @@ public class LockInterruptTest extends BaseJDBCTestCase {
         }
         assertSQLState(INTERRUPTED, (SQLException) e1);
 
+        if (hasInterruptibleIO()) {
+            println("Skipping assert for t1.InterruptFlagSetOnThrow due " +
+                    " to interruptible IO.");
+            println("This is default on Solaris/Sun Java <= 1.6, use " +
+                    "-XX:-UseVMInterruptibleIO if available.");
+            // The flag will may get swallowed
+        } else {
+            assertTrue(t1.InterruptFlagSetOnThrow);
+        }
+
         // The second thread should be able to complete successfully.
         Throwable e2 = t2.throwable;
         if (e2 != null) {
@@ -137,6 +147,7 @@ public class LockInterruptTest extends BaseJDBCTestCase {
         private final PreparedStatement ps;
 
         private Throwable throwable;
+        private boolean InterruptFlagSetOnThrow;
         private long elapsedTime;
 
         private Waiter() throws SQLException {
@@ -149,6 +160,7 @@ public class LockInterruptTest extends BaseJDBCTestCase {
                 runWaiter();
             } catch (Throwable t) {
                 throwable = t;
+                InterruptFlagSetOnThrow = interrupted(); // clears also
             }
         };
 
