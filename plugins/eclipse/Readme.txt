@@ -49,6 +49,14 @@ I. Creating the Apache Derby UI and Help Plug-in projects:
   
 2) Install Eclipse 3.x and the JDK needed
 
+   You need an Eclipse build/package that supports Plugin Development.
+ 
+   You need to install JDK 1.5. 
+   If you use 1.6, the ui plugin will be unusable with 1.5 jvms.
+   On MS Windows systems, you may have to uninstall or temporarily remove the java
+   version installed in the system and/or use a command prompt window in which 
+   you have explicitly changed the path, to start the eclipse IDE rather than use icons.  
+
 3) Install the Apache Derby 10.x Eclipse Core plug-in from:
    http://db.apache.org/derby/derby_downloads.html
 
