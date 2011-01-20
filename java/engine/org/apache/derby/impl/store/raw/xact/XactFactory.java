@@ -66,6 +66,7 @@ import org.apache.derby.iapi.types.DataValueFactory;
 
 import org.apache.derby.iapi.error.StandardException;
 
+import org.apache.derby.iapi.util.InterruptStatus;
 
 import java.util.Enumeration;
 import java.util.Properties;
@@ -1068,11 +1069,8 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
      *             is blocked. 
      * @return     <tt>true</tt> if backup is blocked.
      *			   <tt>false</tt> otherwise.
-     * @exception StandardException if interrupted while waiting for a 
-     *           backup  to complete.
      */
 	protected boolean blockBackup(boolean wait)
-        throws StandardException 
 	{
 		synchronized(backupSemaphore) {
             // do not allow backup blocking operations, if online backup is
@@ -1084,7 +1082,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
                         try {
                             backupSemaphore.wait();
                         } catch (InterruptedException ie) {
-                            throw StandardException.interrupt(ie);
+                            InterruptStatus.setInterrupted();
                         }
                     }
                 }else {
@@ -1133,10 +1131,10 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 	 * @return     <tt>true</tt> if no backup blocking operations are in 
      *             progress
 	 *             <tt>false</tt> otherwise.
-	 * @exception StandardException if interrupted or a runtime exception occurs
+     * @exception RuntimeException if runtime exception occurs, in which case
+     *             other threads blocked on backupSemaphore are notified
 	 */
 	public boolean blockBackupBlockingOperations(boolean wait) 
-		throws StandardException 
 	{
 		synchronized(backupSemaphore) {
 			if (wait) {
@@ -1151,14 +1149,7 @@ public class XactFactory implements TransactionFactory, ModuleControl, ModuleSup
 							backupSemaphore.wait();
 						}
 						catch (InterruptedException ie) {
-							// make sure we are not stuck in the backup state 
-                            // if we caught an interrupt exception and the 
-                            // calling thread may not have a chance to clear 
-                            // the in backup state.
-
-							inBackup = false;
-							backupSemaphore.notifyAll();
-							throw StandardException.interrupt(ie);
+                            InterruptStatus.setInterrupted();
 						}
 					}
 				}

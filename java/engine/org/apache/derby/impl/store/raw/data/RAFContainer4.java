@@ -314,10 +314,7 @@ class RAFContainer4 extends RAFContainer {
                     try {
                         channelCleanupMonitor.wait();
                     } catch (InterruptedException e) {
-                        InterruptStatus.noteAndClearInterrupt(
-                            "interrupt while waiting to gain entry",
-                            threadsInPageIO,
-                            hashCode());
+                        InterruptStatus.setInterrupted();
                     }
 
                 }
@@ -517,10 +514,7 @@ class RAFContainer4 extends RAFContainer {
                     try {
                         channelCleanupMonitor.wait();
                     } catch (InterruptedException e) {
-                        InterruptStatus.noteAndClearInterrupt(
-                            "interrupt while waiting to gain entry",
-                            threadsInPageIO,
-                            hashCode());
+                        InterruptStatus.setInterrupted();
                     }
 
                 }
@@ -833,7 +827,7 @@ class RAFContainer4 extends RAFContainer {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException te) {
-                // again! No need, we have already taken note, pal!
+                InterruptStatus.setInterrupted();
             }
         }
 

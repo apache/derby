@@ -37,6 +37,9 @@ import org.apache.derby.iapi.services.io.FormatIdUtil;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.error.ExceptionSeverity;
+
+import org.apache.derby.iapi.util.InterruptStatus;
+
 import java.io.IOException;
 
 /**
@@ -563,7 +566,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 				} 
                 catch (InterruptedException ie) 
                 {
-					throw StandardException.interrupt(ie);
+                    InterruptStatus.setInterrupted();
 				}
 			}
 
@@ -586,8 +589,7 @@ public abstract class CachedPage extends BasePage implements Cacheable
 				} 
                 catch (InterruptedException ie) 
 				{
-					inClean = false;
-					throw StandardException.interrupt(ie);
+                    InterruptStatus.setInterrupted();
 				}
 			}
 

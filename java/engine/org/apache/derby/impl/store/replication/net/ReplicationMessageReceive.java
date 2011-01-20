@@ -34,6 +34,7 @@ import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.impl.store.raw.log.LogCounter;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
  * This class is the Receiver (viz. Socket server or listener) part of the
@@ -81,6 +82,12 @@ public class ReplicationMessageReceive {
 
     /** Used for synchronization of the ping thread */
     private final Object sendPingSemaphore = new Object();
+
+    /**
+     * Whether or not the ping thread has been notified to check connection.
+     * Protected by sendPingSemaphore.
+     */
+    private boolean doSendPing = false;
 
     /** Used for synchronization when waiting for a ping reply message */
     private final Object receivePongSemaphore = new Object();
@@ -464,17 +471,40 @@ public class ReplicationMessageReceive {
         // synchronize on receivePongSemaphore so that this thread is
         // guaraneed to get to receivePongSemaphore.wait before the pong
         // message is processed in readMessage
+
         synchronized (receivePongSemaphore) {
             connectionConfirmed = false;
+
+            long startWaitingatTime;
+            long giveupWaitingAtTime;
+            long nextWait = DEFAULT_PING_TIMEOUT;
+
             synchronized (sendPingSemaphore) {
                 // Make ping thread send a ping message to the master
+                doSendPing = true;
                 sendPingSemaphore.notify();
+
+                // want result within DEFAULT_PING_TIMEOUT millis.
+                startWaitingatTime = System.currentTimeMillis();
+                giveupWaitingAtTime = startWaitingatTime + DEFAULT_PING_TIMEOUT;
             }
 
-            try {
-                // Wait for the pong response message
-                receivePongSemaphore.wait(DEFAULT_PING_TIMEOUT);
-            } catch (InterruptedException ex) {
+            while (true) {
+                try {
+                    // Wait for the pong response message
+                    receivePongSemaphore.wait(nextWait);
+                } catch (InterruptedException ex) {
+                    InterruptStatus.setInterrupted();
+                }
+
+                nextWait = giveupWaitingAtTime - System.currentTimeMillis();
+
+                if (!connectionConfirmed && nextWait > 0) {
+                    // we could have been interrupted or seen a spurious
+                    // wakeup, so wait a bit longer
+                    continue;
+                }
+                break;
             }
         }
         return connectionConfirmed;
@@ -500,8 +530,17 @@ public class ReplicationMessageReceive {
             try {
                 while (!killPingThread) {
                     synchronized (sendPingSemaphore) {
-                        sendPingSemaphore.wait();
+                        while (!doSendPing) {
+                            try {
+                                sendPingSemaphore.wait();
+                            } catch (InterruptedException e) {
+                                InterruptStatus.setInterrupted();
+                            }
+                        }
+
+                        doSendPing = false;
                     }
+
                     if (killPingThread) {
                         // The thread was notified to terminate
                         break;
@@ -509,7 +548,6 @@ public class ReplicationMessageReceive {
 
                     sendMessage(pingMsg);
                 }
-            } catch (InterruptedException ie) {
             } catch (IOException ioe) {
             // For both exceptions: Do nothing. isConnectedToMaster will return
             // 'false' and appropriate action will be taken.

@@ -31,7 +31,6 @@ import org.apache.derby.io.StorageRandomAccessFile;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.SyncFailedException;
-import java.io.InterruptedIOException;
 import java.util.LinkedList;
 
 import org.apache.derby.iapi.services.io.FormatIdOutputStream;
@@ -39,6 +38,7 @@ import org.apache.derby.iapi.services.io.ArrayOutputStream;
 import org.apache.derby.iapi.store.replication.master.MasterFactory;
 import org.apache.derby.iapi.store.raw.RawStoreFactory;
 
+import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
 	Wraps a RandomAccessFile file to provide buffering
@@ -513,11 +513,7 @@ public class LogAccessFile
 						wait();
 					}catch (InterruptedException ie) 
 					{
-						//do nothing, let the flush request to complete.
-						//because it possible that other thread which is
-						//currently might have completed this request also ,
-						//if exited  on interrupt and throw exception, can not
-						//be sure whether this transaction is COMMITTED ot not.
+                        InterruptStatus.setInterrupted();
 					}
 				}
 		
@@ -676,7 +672,8 @@ public class LogAccessFile
                     Thread.sleep( 200 ); 
                 }
                 catch( InterruptedException ie )
-                {   //does not matter weather I get interrupted or not
+                {
+                    InterruptStatus.setInterrupted();
                 }
 
                 if( i > 20 )

@@ -91,6 +91,9 @@ import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.io.StorageRandomAccessFile;
 
+import org.apache.derby.iapi.util.InterruptStatus;
+import org.apache.derby.iapi.util.InterruptDetectedException;
+
 import java.io.File; // Plain files are used for backups
 import java.io.IOException;
 import java.io.SyncFailedException;
@@ -99,6 +102,7 @@ import java.io.DataOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.FileNotFoundException;
+import java.io.InterruptedIOException;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -715,7 +719,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                     try {
                         slaveRecoveryMonitor.wait();
                     } catch (InterruptedException ie) {
-                        // do nothing
+                        InterruptStatus.setInterrupted();
                     }
                 }
             }
@@ -1522,7 +1526,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 		@exception StandardException Derby Standard Error Policy 
 	*/
-	protected boolean checkpointWithTran(
+    private boolean checkpointWithTran(
     RawTransaction      cptran, 
     RawStoreFactory     rsf,
     DataFactory         df,
@@ -1601,7 +1605,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                             }	
                             catch (InterruptedException ie)
                             {
-                                throw StandardException.interrupt(ie);
+                                InterruptStatus.setInterrupted();
                             }	
                         }
                     }
@@ -2023,7 +2027,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				}
 				catch (InterruptedException ie)
 				{
-					throw StandardException.interrupt(ie);
+                    InterruptStatus.setInterrupted();
 				}	
 			}
 
@@ -2985,7 +2989,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                     try {
                         slaveRecoveryMonitor.wait();
                     } catch (InterruptedException ie) {
-                        // do nothing
+                        InterruptStatus.setInterrupted();
                     }
                 }
             }
@@ -3946,7 +3950,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						} 
 						catch (InterruptedException ie) 
 						{
-							throw StandardException.interrupt(ie);
+                            InterruptStatus.setInterrupted();
 						}
 					}
 
@@ -4008,7 +4012,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 						}
 						catch (InterruptedException ie)
 						{
-							throw StandardException.interrupt(ie);
+                            InterruptStatus.setInterrupted();
 						}
 					}
 					else
@@ -4210,7 +4214,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 }
                 catch( InterruptedException ie )
                 {   
-                    //does not matter weather I get interrupted or not
+                    InterruptStatus.setInterrupted();
                 }
 
                 if( i > 20 )
@@ -4974,7 +4978,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				}	
 				catch (InterruptedException ie)
 				{
-					throw StandardException.interrupt(ie);
+                    InterruptStatus.setInterrupted();
 				}	
 			}
 		

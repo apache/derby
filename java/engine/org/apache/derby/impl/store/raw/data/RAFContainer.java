@@ -570,7 +570,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                             // we re-grab monitor on "this" (which recovery
                             // needs) and retry writeRAFHeader.
                             try {
-                                Thread.sleep(500); // 0.5s
+                                Thread.sleep(INTERRUPT_RETRY_SLEEP);
                             } catch (InterruptedException ee) {
                                 // This thread received an interrupt as
                                 // well, make a note.

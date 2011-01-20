@@ -34,6 +34,7 @@ import org.apache.derby.impl.store.replication.ReplicationLogger;
 import org.apache.derby.impl.store.replication.buffer.ReplicationLogBuffer;
 import org.apache.derby.impl.store.replication.net.ReplicationMessage;
 import org.apache.derby.impl.store.replication.net.ReplicationMessageTransmit;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
  * <p>
@@ -221,8 +222,7 @@ public class AsynchronousLogShipper extends Thread implements
                     }
                 }
             } catch (InterruptedException ie) {
-                //Interrupt the log shipping thread.
-                return;
+                InterruptStatus.setInterrupted();
             } catch (IOException ioe) {
                 //The transmitter is recreated if the connection to the
                 //slave can be re-established.
@@ -334,6 +334,7 @@ public class AsynchronousLogShipper extends Thread implements
             try {
                 forceFlushSemaphore.wait(DEFAULT_FORCEFLUSH_TIMEOUT);
             } catch (InterruptedException ex) {
+                InterruptStatus.setInterrupted();
             }
         }
     }

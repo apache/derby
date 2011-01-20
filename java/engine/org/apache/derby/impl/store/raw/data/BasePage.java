@@ -45,6 +45,8 @@ import org.apache.derby.iapi.store.raw.log.LogInstant;
 
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
 
+import org.apache.derby.iapi.util.InterruptStatus;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.ObjectInput;
@@ -1683,7 +1685,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 					// Expect notify from releaseExclusive().
 					wait();
 				} catch (InterruptedException ie) {
-					throw StandardException.interrupt(ie);
+                    InterruptStatus.setInterrupted();
 				}
 			}
 
@@ -1712,6 +1714,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
                 } 
                 catch (InterruptedException ie) 
                 {
+                    InterruptStatus.setInterrupted();
                 }
             }
 
@@ -1770,6 +1773,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
                 } 
                 catch (InterruptedException ie) 
                 {
+                    InterruptStatus.setInterrupted();
                 }
             }
 

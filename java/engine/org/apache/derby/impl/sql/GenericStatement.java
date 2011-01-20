@@ -42,6 +42,7 @@ import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.impl.sql.compile.StatementNode;
 import org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 public class GenericStatement
 	implements Statement {
@@ -196,7 +197,7 @@ public class GenericStatement
 				try {
 					preparedStmt.wait();
 				} catch (InterruptedException ie) {
-					throw StandardException.interrupt(ie);
+                    InterruptStatus.setInterrupted();
 				}
 			}
 

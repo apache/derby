@@ -71,6 +71,7 @@ import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.ByteArray;
+import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -2350,13 +2351,7 @@ public class BaseDataFileFactory
 					}
 					catch (InterruptedException ie) 
 					{
-						// make sure we are not stuck in frozen state if we
-						// caught an interrupt exception and the calling 
-                        // thread may not have a chance to call unfreeze
-						isFrozen = false;
-						freezeSemaphore.notifyAll();
-
-						throw StandardException.interrupt(ie);
+                        InterruptStatus.setInterrupted();
 					}
 				}
 			}
@@ -2399,7 +2394,7 @@ public class BaseDataFileFactory
 				}
 				catch (InterruptedException ie)
 				{
-					throw StandardException.interrupt(ie);
+                    InterruptStatus.setInterrupted();
 				}
 			}
 
