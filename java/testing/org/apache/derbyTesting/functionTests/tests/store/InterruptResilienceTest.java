@@ -74,6 +74,13 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             return suite;
         }
 
+        if (hasInterruptibleIO()) {
+            println("Test skipped due to interruptible IO.");
+            println("This is default on Solaris/Sun Java <= 1.6, use " +
+                    "-XX:-UseVMInterruptibleIO if available.");
+            return suite;
+        }
+
         suite.addTest(
             baseSuite("InterruptResilienceTest:embedded"));
 

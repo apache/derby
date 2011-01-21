@@ -601,9 +601,7 @@ public abstract class BaseTestCase
      *
      * @return true if we have old style interruptible IO
      */
-    public static final boolean hasInterruptibleIO()
-            throws Exception {
-
+    public static final boolean hasInterruptibleIO() {
 
         boolean interruptibleIO = false;
 
@@ -617,14 +615,20 @@ public abstract class BaseTestCase
 
                         String sysHome = getSystemProperty("derby.system.home");
 
-                        StringBuffer arbitraryRAFFileName = new StringBuffer();
+                        StringBuffer arbitraryRAFFileNameB = new StringBuffer();
 
-                        arbitraryRAFFileName.append(sysHome);
-                        arbitraryRAFFileName.append(File.separatorChar);
-                        arbitraryRAFFileName.append("derby.log");
+                        arbitraryRAFFileNameB.append(sysHome);
+                        arbitraryRAFFileNameB.append(File.separatorChar);
+                        arbitraryRAFFileNameB.append("derby.log");
+
+                        String arbitraryRAFFileName =
+                            arbitraryRAFFileNameB.toString();
+                        // Create if it does not exist:
+                        new File(sysHome).mkdirs(); // e.g. "system"
+                        new File(arbitraryRAFFileName).createNewFile();
 
                         RandomAccessFile f = new RandomAccessFile(
-                            arbitraryRAFFileName.toString(), "r");
+                            arbitraryRAFFileName, "r");
 
                         try {
                             Thread.currentThread().interrupt();
@@ -640,9 +644,14 @@ public abstract class BaseTestCase
             if (e.getCause() instanceof InterruptedIOException) {
                 interruptibleIO = true;
             } else {
-                throw e;
+                // Better to assume nothing when the test fails. Then, tests
+                // will not be skipped and we would not miss that something is
+                // amiss.
+                println("Could not test for interruptible IO," +
+                        " so assuming we don't have it: " + e);
+                e.getCause().printStackTrace();
+                return false;
             }
-
         }
 
         return interruptibleIO;
