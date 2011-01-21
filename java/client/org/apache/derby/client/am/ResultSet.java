@@ -39,6 +39,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     //---------------------navigational members-----------------------------------
 
     public Statement statement_;
+    Statement outerStatement_; // for auto-generated keys
     public ColumnMetaData resultSetMetaData_; // As obtained from the SQLDA
     private SqlWarning warnings_;
     public Cursor cursor_;
@@ -461,6 +462,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
 
         statement_.closeMeOnCompletion();
+        if ( (outerStatement_ != null) && (outerStatement_ != statement_) ) { outerStatement_.closeMeOnCompletion(); }
+        outerStatement_ = null;
 
         nullDataForGC();
     }
