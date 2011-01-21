@@ -622,6 +622,12 @@ public abstract class EmbedResultSet extends ConnectionChild
 			// the idea is to release resources, so:
 			currentRow = null;
 
+            // to prevent infinite looping, tell our parent Statement
+            // that we have closed AFTER
+            // we have marked ourself as closed
+            if ( stmt != null) { stmt.closeMeOnCompletion(); }
+            if ( (owningStmt != null) && (owningStmt != stmt) ) { owningStmt.closeMeOnCompletion(); }
+            
 			// we hang on to theResults and messenger
 			// in case more calls come in on this resultSet
 		}

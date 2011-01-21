@@ -147,6 +147,19 @@ abstract class LogicalStatementEntity
     }
 
     /**
+     * Returns the associated physical statement.
+     *
+     * @return A statement.
+     * @throws SQLException if the logical statement has been closed
+     */
+    synchronized java.sql.Statement getPhysStmt()
+            throws SQLException
+    {
+        if ( hasCallableStmt ) { return getPhysCs(); }
+        else { return getPhysPs(); }
+    }
+
+    /**
      * Close the logical statement.
      *
      * @throws SQLException if closing the statement fails
@@ -204,5 +217,21 @@ abstract class LogicalStatementEntity
      */
     synchronized boolean isLogicalEntityClosed() {
         return (physicalPs == null);
+    }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  void    closeOnCompletion() throws SQLException
+    {
+        ((org.apache.derby.client.am.Statement) getPhysStmt()).closeOnCompletion();
+    }
+
+    public  boolean isCloseOnCompletion() throws SQLException
+    {
+        return ((org.apache.derby.client.am.Statement) getPhysStmt()).isCloseOnCompletion();
     }
 }

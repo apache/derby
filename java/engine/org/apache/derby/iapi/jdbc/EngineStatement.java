@@ -46,4 +46,14 @@ public interface EngineStatement extends Statement {
      * @see java.sql.Statement#getResultSetHoldability()
      */ 
     public int getResultSetHoldability() throws SQLException;
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  void    closeOnCompletion() throws SQLException;
+    public  boolean isCloseOnCompletion() throws SQLException;
+    
 }

@@ -460,6 +460,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
             statement_.closeX();
         }
 
+        statement_.closeMeOnCompletion();
+
         nullDataForGC();
     }
 

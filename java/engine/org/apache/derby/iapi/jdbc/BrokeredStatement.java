@@ -584,4 +584,21 @@ public class BrokeredStatement implements EngineStatement
                                               "Statement");
         }
     }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  void    closeOnCompletion() throws SQLException
+    {
+        ((EngineStatement) getStatement()).closeOnCompletion();
+    }
+
+    public  boolean isCloseOnCompletion() throws SQLException
+    {
+        return ((EngineStatement) getStatement()).isCloseOnCompletion();
+    }
+    
 }

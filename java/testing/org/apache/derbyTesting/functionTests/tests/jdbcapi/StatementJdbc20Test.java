@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -44,6 +45,7 @@ import junit.framework.TestSuite;
 public class StatementJdbc20Test extends BaseJDBCTestCase {
 
     private static  final   String  METHOD_NOT_ALLOWED = "XJ016";
+    private static  final   String  CLOSED_STATEMENT = "XJ012";
     
     /**
      * Create a test with the given name.
@@ -90,6 +92,14 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
                  */
                 stmt.execute("create table tab1 (i int, s smallint, r real)");
                 stmt.executeUpdate("insert into tab1 values(1, 2, 3.1)");
+
+                stmt.execute
+                    (
+                     "create procedure dynamic_results() " +
+                     "language java parameter style java external name '" +
+                     StatementJdbc20Test.class.getName() + ".dynamicResults' " +
+                     "dynamic result sets 2"
+                     );
             }
         };
     }
@@ -290,5 +300,155 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * Test the closeOnCompletion() and isCloseOnCompletion() methods
+     * added by JDBC 4.1.
+     */
+    public void testCompletionClosure_jdbc4_1() throws Exception
+    {
+        vetClosure( false, false );
+        vetClosure( false, true );
+        vetClosure( true, false );
+        vetClosure( true, true );
+    }
+    private void vetClosure( boolean closeOnCompletion, boolean delayClosureCall ) throws Exception
+    {
+        vetClosedSelect( closeOnCompletion, delayClosureCall );
+        vetClosedCall( closeOnCompletion, delayClosureCall );
+        vetClosedPS( closeOnCompletion, delayClosureCall );
+    }
+    private void vetClosedSelect( boolean closeOnCompletion, boolean delayClosureCall ) throws Exception
+    {
+        Statement stmt = createStatement();
+        ResultSet rs;
+
+        println( "Verifying SELECT wrapper on " + stmt.getClass().getName() +
+                 " with closeOnCompletion = " + closeOnCompletion +
+                 " and delayClosureCall = " + delayClosureCall );
+        Wrapper41Statement  wrapper = new Wrapper41Statement( stmt );
+
+        if ( !delayClosureCall )
+        { setCloseOnCompletion( wrapper, closeOnCompletion ); }
+
+        rs = stmt.executeQuery( "select * from tab1" );
+
+        if ( delayClosureCall )
+        { setCloseOnCompletion( wrapper, closeOnCompletion ); }
+
+        rs.close();
+
+        assertEquals( closeOnCompletion, wrapper.isClosed() );
+
+        vetSuccessfulClosure( wrapper, closeOnCompletion );
+    }
+    private void vetClosedCall( boolean closeOnCompletion, boolean delayClosureCall ) throws Exception
+    {
+        Statement stmt = createStatement();
+        ResultSet rs;
+
+        println( "Verifying CALL wrapper on " + stmt.getClass().getName() +
+                 " with closeOnCompletion = " + closeOnCompletion +
+                 " and delayClosureCall = " + delayClosureCall );
+        Wrapper41Statement  wrapper = new Wrapper41Statement( stmt );
+
+        if ( !delayClosureCall )
+        { setCloseOnCompletion( wrapper, closeOnCompletion ); }
+
+        assertTrue( stmt.execute( "call dynamic_results()" ) );
+
+        assertFalse( wrapper.isClosed() );
+
+        ResultSet   rs1 = stmt.getResultSet();
+
+        if ( delayClosureCall )
+        { setCloseOnCompletion( wrapper, closeOnCompletion ); }
+
+        assertTrue( stmt.getMoreResults() ); // implicitly closes rs1
+        assertFalse( wrapper.isClosed() );
+
+        ResultSet   rs2 = stmt.getResultSet();
+        rs2.close();
+        assertEquals( closeOnCompletion, wrapper.isClosed() );
+
+        vetSuccessfulClosure( wrapper, closeOnCompletion );
+    }
+    private void vetClosedPS( boolean closeOnCompletion, boolean delayClosureCall ) throws Exception
+    {
+        PreparedStatement ps = getConnection().prepareStatement( "select * from tab1" );
+        ResultSet rs;
+
+        println( "Verifying PreparedStatement wrapper on " + ps.getClass().getName() +
+                 " with closeOnCompletion = " + closeOnCompletion +
+                 " and delayClosureCall = " + delayClosureCall );
+        Wrapper41Statement  wrapper = new Wrapper41Statement( ps );
+
+        if ( !delayClosureCall )
+        { setCloseOnCompletion( wrapper, closeOnCompletion ); }
+
+        rs = ps.executeQuery();
+
+        if ( delayClosureCall )
+        { setCloseOnCompletion( wrapper, closeOnCompletion ); }
+
+        rs.close();
+
+        assertEquals( closeOnCompletion, wrapper.isClosed() );
+
+        vetSuccessfulClosure( wrapper, closeOnCompletion );
+
+        if ( !wrapper.isClosed() ) { ps.close(); }
+    }
+    
+    private void    setCloseOnCompletion( Wrapper41Statement wrapper, boolean closeOnCompletion )
+        throws Exception
+    {
+        assertFalse( wrapper.isCloseOnCompletion() );
+        if ( closeOnCompletion ) { wrapper.closeOnCompletion(); }
+        assertEquals( closeOnCompletion, wrapper.isCloseOnCompletion() );
+    }
+    private void    vetSuccessfulClosure
+        ( Wrapper41Statement wrapper, boolean closeOnCompletion )
+        throws Exception
+    {
+        if ( closeOnCompletion )
+        {
+            try {
+                wrapper.closeOnCompletion();
+                fail( "Expected closed statement failure." );
+            }
+            catch (SQLException se)
+            {
+                assertSQLState( CLOSED_STATEMENT, se );
+            }
+
+            try {
+                wrapper.isCloseOnCompletion();
+                fail( "Expected closed statement failure." );
+            }
+            catch (SQLException se)
+            {
+                assertSQLState( CLOSED_STATEMENT, se );
+            }
+        }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////
+    //
+    // PROCEDURES
+    //
+    ///////////////////////////////////////////////////////////////////////
+
+
+    /**
+     * Stored procedure which returns 2 ResultSets.
+     */
+    public static void dynamicResults
+        ( ResultSet[] rs1, ResultSet[] rs2 )
+        throws SQLException
+    {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+        rs1[0] = c.createStatement().executeQuery("VALUES(1)");
+        rs2[0] = c.createStatement().executeQuery("VALUES(2)");
+    }
 
 }

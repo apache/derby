@@ -198,6 +198,9 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     // PreparedStatement overrides this.
     protected boolean isPoolable = false;    
 
+    private boolean closeOnCompletion_ = false;
+    private boolean closingResultSets_ = false;
+    
     //---------------------constructors/finalizer/accessors--------------------
 
     private Statement() {
@@ -1936,24 +1939,35 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
      * from the commit and rollback listeners list in
      * <code>org.apache.derby.client.am.Connection</code>.
      */
-    final void markResultSetsClosed(boolean removeListener) {
-        if (resultSetList_ != null) {
-            for (int i = 0; i < resultSetList_.length; i++) {
-                if (resultSetList_[i] != null) {
-                    resultSetList_[i].markClosed(removeListener);
+    final void markResultSetsClosed(boolean removeListener)
+    {
+        try {
+            //
+            // This prevents us from accidentally closing ourself as part
+            // of cleaning up the previous operation. This flag short-circuits the logic which enforces
+            // closeOnCompletion().
+            //
+            closingResultSets_ = true;
+            
+            if (resultSetList_ != null) {
+                for (int i = 0; i < resultSetList_.length; i++) {
+                    if (resultSetList_[i] != null) {
+                        resultSetList_[i].markClosed(removeListener);
+                    }
+                    resultSetList_[i] = null;
                 }
-                resultSetList_[i] = null;
             }
+            if (generatedKeysResultSet_ != null) {
+                generatedKeysResultSet_.markClosed(removeListener);
+            }
+            if (resultSet_ != null) {
+                resultSet_.markClosed(removeListener);
+            }
+            resultSet_ = null;
+            resultSetList_ = null;
+            generatedKeysResultSet_ = null;
         }
-        if (generatedKeysResultSet_ != null) {
-            generatedKeysResultSet_.markClosed(removeListener);
-        }
-        if (resultSet_ != null) {
-            resultSet_.markClosed(removeListener);
-        }
-        resultSet_ = null;
-        resultSetList_ = null;
-        generatedKeysResultSet_ = null;
+        finally { closingResultSets_ = false; }
     }
 
     private void flowExecute(int executeType, String sql) throws SqlException {
@@ -3034,4 +3048,62 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     {
         return jdbc3FeatureNotSupported(true);
     }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  void    closeOnCompletion() throws SQLException
+    {
+        try { checkForClosedStatement(); }
+        catch (SqlException se) { throw se.getSQLException(); }
+        
+        closeOnCompletion_ = true;
+    }
+
+    public  boolean isCloseOnCompletion() throws SQLException
+    {
+        try { checkForClosedStatement(); }
+        catch (SqlException se) { throw se.getSQLException(); }
+        
+        return closeOnCompletion_;
+    }
+
+    //
+    // For tracking all of the ResultSets produced by this Statement so
+    // that the Statement can be cleaned up if closeOnCompletion() was invoked.
+    //
+    void    closeMeOnCompletion()
+    {
+        // If necessary, close the Statement after all of its dependent
+        // ResultSets have closed.
+        boolean active = ( (connection_ != null) && (!connection_.isClosed() ) );
+        if ( active && (!closingResultSets_) && closeOnCompletion_ )
+        {
+            try {
+                if ( isOpen( resultSet_ ) ) { return; }
+                if ( isOpen( generatedKeysResultSet_ ) ) { return; }
+
+                if ( resultSetList_ != null )
+                {
+                    int count = resultSetList_.length;
+                    for ( int i = 0; i < count; i++ )
+                    {
+                        if ( isOpen( resultSetList_[ i ] ) ) { return; }
+                    }
+                }
+
+                // if we got here, then the Statement has no open ResultSets left
+                close();
+            }
+            catch (SQLException se) {  se.printStackTrace( agent_.getLogWriter() ); }
+        }
+    }
+    private boolean isOpen( ResultSet rs ) throws SQLException
+    {
+        return ( (rs != null) && (!rs.isClosed()) );
+    }
+    
 }
