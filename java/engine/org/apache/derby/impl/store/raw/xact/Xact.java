@@ -624,14 +624,17 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
 		return myId;
 	}
 
-	/**
-		Get my transaction context Id
-	*/
-	public final String getContextId() 
-	{
-		return (xc == null) ? null : xc.getIdName();
-	}
-
+    /**
+     * Get my transaction context Id
+     */
+    public final String getContextId() {
+        //DERBY-4973. Make a copy of xc so we are working on a stable 
+        // copy, especially for the lock table VTI. If we don't, there may
+        // be a chance for a NullPointerException if close() is called 
+        //by another thread after the check but before the dereference.
+        XactContext tempxc = xc;
+        return (tempxc == null) ? null : tempxc.getIdName();
+    }
 
 	/**
 		Get the current default locking policy for all operations within this
