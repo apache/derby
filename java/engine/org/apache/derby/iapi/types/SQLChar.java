@@ -1420,8 +1420,7 @@ readingLoop:
 
     public void setValue(boolean theValue) throws StandardException
     {
-        // match JCC.
-        setValue(theValue ? "1" : "0");
+        setValue(Boolean.toString(theValue));
     }
 
     public void setValue(int theValue)  throws StandardException

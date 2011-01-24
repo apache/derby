@@ -99,9 +99,41 @@ final class CrossConverters {
 
     // Convert from boolean source to target type.
     // In support of PS.setBoolean().
-    // See differences.html for DNC setBoolean() semantics.
     final Object setObject(int targetType, boolean source) throws SqlException {
-        return setObject(targetType, (short) (source ? 1 : 0));
+        short numVal = source ? (short) 1 : 0;
+        switch (targetType) {
+        case Types.BIT:
+        case Types.BOOLEAN:
+            return Boolean.valueOf(source);
+
+        case Types.SMALLINT:
+            return new Short(numVal);
+
+        case Types.INTEGER:
+            return new Integer(numVal);
+
+        case Types.BIGINT:
+            return new Long(numVal);
+
+        case Types.REAL:
+            return new Float(numVal);
+
+        case Types.DOUBLE:
+            return new Double(numVal);
+
+        case Types.DECIMAL:
+            return java.math.BigDecimal.valueOf(numVal);
+
+        case Types.CHAR:
+        case Types.VARCHAR:
+        case Types.LONGVARCHAR:
+            return String.valueOf(source);
+
+        default:
+            throw new SqlException(agent_.logWriter_,
+                new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),
+                "boolean", Types.getTypeString(targetType));
+        }
     }
 
     // Convert from byte source to target type

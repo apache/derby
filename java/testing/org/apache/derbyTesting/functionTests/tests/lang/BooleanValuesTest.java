@@ -1752,6 +1752,72 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
         }
     }
 
+    /**
+     * Verify fix for DERBY-4965 - conversion from boolean to char results
+     * in 1/0 instead of true/false.
+     */
+    public void test_4965() throws SQLException {
+        String[] stringTypes = { "CHAR(10)", "VARCHAR(10)", "LONG VARCHAR" };
+        for (int i = 0; i < stringTypes.length; i++) {
+            PreparedStatement ps = prepareStatement(
+                    "values cast(? as " + stringTypes[i] + ")");
+
+            // Test setBoolean()
+            ps.setBoolean(1, true);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), "true");
+            ps.setBoolean(1, false);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), "false");
+
+            // Test setObject(int, Object)
+            ps.setObject(1, Boolean.TRUE);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), "true");
+            ps.setObject(1, Boolean.FALSE);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), "false");
+
+            // Test setObject(int, Object, int)
+            int[] targetTypes = {
+                Types.BIT, Types.BOOLEAN,
+                Types.CHAR, Types.VARCHAR, Types.LONGVARCHAR,
+            };
+            for (int j = 0; j < targetTypes.length; j++) {
+                ps.setObject(1, Boolean.TRUE, targetTypes[j]);
+                JDBC.assertSingleValueResultSet(ps.executeQuery(), "true");
+                ps.setObject(1, Boolean.FALSE, targetTypes[j]);
+                JDBC.assertSingleValueResultSet(ps.executeQuery(), "false");
+            }
+        }
+
+        String[] intTypes = { "SMALLINT", "INTEGER", "BIGINT" };
+        for (int i = 0; i < intTypes.length; i++) {
+            PreparedStatement ps = prepareStatement(
+                    "values cast(? as " + intTypes[i] + ")");
+
+            // Test setBoolean()
+            ps.setBoolean(1, true);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+            ps.setBoolean(1, false);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), "0");
+
+            // Test setObject(int, Object)
+            ps.setObject(1, Boolean.TRUE);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+            ps.setObject(1, Boolean.FALSE);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), "0");
+
+            // Test setObject(int, Object, int)
+            int[] targetTypes = {
+                Types.BIT, Types.BOOLEAN,
+                Types.SMALLINT, Types.INTEGER, Types.BIGINT,
+            };
+            for (int j = 0; j < targetTypes.length; j++) {
+                ps.setObject(1, Boolean.TRUE, targetTypes[j]);
+                JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+                ps.setObject(1, Boolean.FALSE, targetTypes[j]);
+                JDBC.assertSingleValueResultSet(ps.executeQuery(), "0");
+            }
+        }
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES

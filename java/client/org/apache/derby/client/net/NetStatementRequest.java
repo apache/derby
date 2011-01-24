@@ -721,6 +721,9 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         }
                         break;
 
+                    case DRDAConstants.DRDA_TYPE_NBOOLEAN:
+                        write1Byte(((Short) inputs[i]).shortValue());
+                        break;
                     case DRDAConstants.DRDA_TYPE_NINTEGER:
                         writeIntFdocaData(((Integer) inputs[i]).intValue());
                         break;
@@ -1217,8 +1220,10 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NINTEGER;
                     lidAndLengths[i][1] = 4;
                     break;
+                case java.sql.Types.BIT:
                 case java.sql.Types.BOOLEAN:
-                    if ( netAgent_.netConnection_.serverSupportsBooleanValues() )
+                    if ( netAgent_.netConnection_.databaseMetaData_.
+                            serverSupportsBooleanParameterTransport() )
                     {
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NBOOLEAN;
                         lidAndLengths[i][1] = 1;
@@ -1231,7 +1236,6 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     break;
                 case java.sql.Types.SMALLINT:
                 case java.sql.Types.TINYINT:
-                case java.sql.Types.BIT:
                     // lid: PROTOCOL_TYPE_NSMALL,  length override: 2
                     // dataFormat: Short
                     lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NSMALL;

@@ -4635,6 +4635,14 @@ class DRDAConnThread extends Thread {
 
 		switch (drdaType)
 		{
+            case DRDAConstants.DRDA_TYPE_NBOOLEAN:
+            {
+                boolean paramVal = (reader.readByte() == 1);
+                if (SanityManager.DEBUG)
+                    trace("boolean parameter value is: " + paramVal);
+                ps.setBoolean(i+1, paramVal);
+                break;
+            }
 			case DRDAConstants.DRDA_TYPE_NSMALL:
 			{
 				short paramVal = (short) reader.readShort(getByteOrder());

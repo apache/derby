@@ -96,6 +96,14 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
     /** True if the server supports boolean values */
     private boolean supportsBooleanValues_;
 
+    /**
+     * True if the server supports transport of boolean parameter values as
+     * booleans. If false, boolean values used as parameters in prepared
+     * statements will be transported as smallints to preserve backwards
+     * compatibility. See DERBY-4965.
+     */
+    private boolean supportsBooleanParameterTransport_;
+
     //---------------------constructors/finalizer---------------------------------
 
     protected DatabaseMetaData(Agent agent, Connection connection, ProductLevel productLevel) {
@@ -2332,6 +2340,9 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
 
         supportsBooleanValues_ =
                 productLevel_.greaterThanOrEqualTo(10, 7, 0);
+
+        supportsBooleanParameterTransport_ =
+                productLevel_.greaterThanOrEqualTo(10, 8, 0);
     }
 
     /**
@@ -2386,6 +2397,14 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
      */
     final public boolean serverSupportsBooleanValues() {
         return supportsBooleanValues_;
+    }
+
+    /**
+     * Check if the server accepts receiving booleans as parameter values.
+     * @return true if the server supports this
+     */
+    final public boolean serverSupportsBooleanParameterTransport() {
+        return supportsBooleanParameterTransport_;
     }
 
     //------------helper methods for meta data info call methods------------------

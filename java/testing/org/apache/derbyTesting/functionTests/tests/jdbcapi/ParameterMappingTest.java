@@ -3564,9 +3564,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
     private static void checkValidStringValue(String method, String s) {
         s = s.trim();
-        if ("setBoolean".equals(method) ||
-                "setObject(java.lang.Boolean)".equals(method) )
-            assertEquals("1",s);
+        if (isBooleanMethod(method))
+            assertEquals("true", s);
         else if ("setBytes".equals(method) ||
                 ("setObject(byte[])".equals(method)))
             assertEquals("EncodedString: > 1027 ",s.substring(0,22));
