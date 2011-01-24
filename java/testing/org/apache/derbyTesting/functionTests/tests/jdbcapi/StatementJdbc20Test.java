@@ -462,6 +462,115 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
         }
     }
     
+    /**
+     * <p>
+     * Spec clarifications in JDBC 4.1. Verify that an exception is raised if a PreparedStatement
+     * or CallableStatement tries to execute one of the methods which compiles SQL text.
+     * </p>
+     */
+    public  void    test_clarification_jdbc4_1()    throws Exception
+    {
+        Connection  conn = getConnection();
+
+        PreparedStatement   ps = conn.prepareStatement( "select * from sys.syscolumns" );
+        CallableStatement   cs = conn.prepareCall( "call dynamic_results()" );
+
+        vetNotAllowed( ps );
+        vetNotAllowed( cs );
+
+        ps.close();
+        cs.close();
+    }
+    private void    vetNotAllowed( Statement stmt ) throws Exception
+    {
+        println( "Vetting a " + stmt.getClass().getName() );
+        
+        try {
+            stmt.execute( "select * from sys.systables" );
+            failVNA();
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( METHOD_NOT_ALLOWED, se );
+        }
+        
+        try {
+            stmt.execute( "select * from sys.systables", Statement.NO_GENERATED_KEYS );
+            failVNA();
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( METHOD_NOT_ALLOWED, se );
+        }
+        
+        try {
+            stmt.execute( "select * from sys.systables", new int[] { 1 } );
+            failVNA();
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( METHOD_NOT_ALLOWED, se );
+        }
+        
+        try {
+            stmt.execute( "select * from sys.systables", new String[] { "COLUMNNAME" } );
+            failVNA();
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( METHOD_NOT_ALLOWED, se );
+        }
+        
+        try {
+            stmt.executeQuery( "select * from sys.systables" );
+            failVNA();
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( METHOD_NOT_ALLOWED, se );
+        }
+        
+        try {
+            stmt.executeUpdate( "insert into tab1 values(1, 2, 3.1)" );
+            failVNA();
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( METHOD_NOT_ALLOWED, se );
+        }
+        
+        try {
+            stmt.executeUpdate( "insert into tab1 values(1, 2, 3.1)", Statement.NO_GENERATED_KEYS );
+            failVNA();
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( METHOD_NOT_ALLOWED, se );
+        }
+        
+        try {
+            stmt.executeUpdate( "insert into tab1 values(1, 2, 3.1)", new int[] { 1 } );
+            failVNA();
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( METHOD_NOT_ALLOWED, se );
+        }
+        
+        try {
+            stmt.executeUpdate( "insert into tab1 values(1, 2, 3.1)", new String[] { "COLUMNNAME" } );
+            failVNA();
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( METHOD_NOT_ALLOWED, se );
+        }
+    }
+    private void    failVNA() throws Exception
+    {
+            fail( "Should have failed when run on a PreparedStatement or CallableStatement" );
+    }
+
     ///////////////////////////////////////////////////////////////////////
     //
     // PROCEDURES
