@@ -32,6 +32,7 @@ import java.sql.SQLException;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.JDBC;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -308,6 +309,8 @@ public class StatementJdbc20Test extends BaseJDBCTestCase {
      */
     public void testCompletionClosure_jdbc4_1() throws Exception
     {
+        if ( JDBC.vmSupportsJSR169() ) { return; }
+        
         vetClosure( false, false );
         vetClosure( false, true );
         vetClosure( true, false );
