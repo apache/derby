@@ -69,6 +69,15 @@ public class StatementTestSetup
                     "42X05",
                     sqle.getSQLState());
         }
+
+        try {
+            stmt.execute("drop function delay_st");
+        }
+        catch (SQLException se)
+        {
+            // ignore object does not exist error
+            assertEquals( "42Y55", se.getSQLState() );
+        }
         stmt.execute("create table stmtTable (id int, val varchar(10))");
         stmt.execute("insert into stmtTable values (1, 'one'),(2,'two')");
         // Check just to be sure, and to notify developers if the database
@@ -78,6 +87,12 @@ public class StatementTestSetup
         assertEquals("Number of rows are not as expected", 
                 2, rs.getInt(1));
         rs.close();
+        stmt.execute
+            (
+             "create function delay_st(seconds integer, value integer) returns integer\n" +
+             "parameter style java no sql language java\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.jdbcapi.SetQueryTimeoutTest.delay'"
+             );
         stmt.close();
         con.commit();
     }

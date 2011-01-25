@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class StatementTest
+ * Derby - Class org.apache.derbyTesting.functionTests.tests.jdbc4.StatementTest
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -20,6 +20,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.SetQueryTimeoutTest;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -262,6 +263,34 @@ public class StatementTest
 
         stmt.setPoolable(false);
         assertFalse("Statement cannot be poolable", stmt.isPoolable());
+    }
+
+    /**
+     * Test that Statement.setQueryTimeout() causes statements to
+     * raise SQLTimeoutException per the JDBC 4.1 spec clarification.
+     */
+    public  void    test_jdbc4_1_queryTimeoutException() throws Exception
+    {
+        PreparedStatement ps = prepareStatement
+            (
+             "select columnnumber from sys.syscolumns c, sys.systables t\n" +
+             "where t.tablename = 'SYSTABLES'\n" +
+             "and t.tableid = c.referenceid\n" +
+             "and c.columnnumber = delay_st( 5, 1 )"
+             );
+        println( "Testing timeout exception for a " + ps.getClass().getName() );
+
+        SetQueryTimeoutTest.StatementExecutor   executor =
+            new SetQueryTimeoutTest.StatementExecutor( ps, true, 1 );
+
+        executor.start();
+        executor.join();
+
+        ps.close();
+
+        SQLException    se = executor.getSQLException();
+        assertNotNull( se );
+        assertEquals( SQLTimeoutException.class.getName(), se.getClass().getName() );
     }
 
     /**

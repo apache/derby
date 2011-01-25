@@ -276,7 +276,7 @@ public class SetQueryTimeoutTest
             + tablePrefix + "_orig where DELAY(1,1)=1";
     }
     
-    private static class StatementExecutor
+    public static class StatementExecutor
         extends
             Thread
     {

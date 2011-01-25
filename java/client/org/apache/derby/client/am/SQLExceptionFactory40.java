@@ -30,6 +30,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLInvalidAuthorizationSpecException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.SQLSyntaxErrorException;
+import java.sql.SQLTimeoutException;
 import java.sql.SQLTransactionRollbackException;
 
 
@@ -92,6 +93,8 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
             sqlState.equals(DRDA_REPLY_MSG_NOT_SUPPORTED)           ) {
             ex = new SQLFeatureNotSupportedException(message, sqlState, 
                     errCode);
+        } else if (sqlState.equals(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT.substring(0, 5))) {
+            ex = new SQLTimeoutException(message, sqlState, errCode);
         } else {
             ex = new SQLException(message, sqlState, errCode); 
         }

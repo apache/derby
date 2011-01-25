@@ -27,6 +27,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.SQLInvalidAuthorizationSpecException;
 import java.sql.SQLNonTransientConnectionException;
 import java.sql.SQLSyntaxErrorException;
+import java.sql.SQLTimeoutException;
 import java.sql.SQLTransactionRollbackException;
 import java.sql.SQLFeatureNotSupportedException;
 import org.apache.derby.iapi.error.StandardException;
@@ -91,6 +92,8 @@ public class SQLExceptionFactory40 extends SQLExceptionFactory {
             ex = new SQLSyntaxErrorException(message, sqlState, severity, t);
         } else if (sqlState.startsWith(SQLState.UNSUPPORTED_PREFIX)) {
             ex = new SQLFeatureNotSupportedException(message, sqlState, severity, t);
+        } else if (sqlState.equals(SQLState.LANG_STATEMENT_CANCELLED_OR_TIMED_OUT.substring(0, 5))) {
+            ex = new SQLTimeoutException(message, sqlState, severity, t);
         } else {
             ex = new SQLException(message, sqlState, severity, t);
         }
