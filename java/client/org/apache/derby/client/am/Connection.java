@@ -2477,5 +2477,42 @@ public abstract class Connection
         markClosed( false );
     }
     
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    /**
+     * Get the name of the current schema.
+     */
+    public String   getSchema() throws SQLException
+	{
+        return getCurrentSchemaName();
+    }
+    
+    /**
+     * Set the default schema for the Connection.
+     */
+    public void   setSchema(  String schemaName ) throws SQLException
+	{
+        try {
+            checkForClosedConnection();
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+
+        java.sql.PreparedStatement   ps = null;
+
+        try {
+            ps = prepareStatement( "set schema ?" );
+            ps.setString( 1, schemaName );
+            ps.execute();
+        }
+        finally
+        {
+            if ( ps != null ) { ps.close(); }
+        }
+	}
 
 }

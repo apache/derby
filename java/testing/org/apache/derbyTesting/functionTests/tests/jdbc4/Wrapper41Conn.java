@@ -78,6 +78,24 @@ public  class   Wrapper41Conn
         else { throw nothingWrapped(); }
     }
 
+    public  String    getSchema() throws SQLException
+    {
+        if ( _embedded != null ) { return _embedded.getSchema(); }
+        else if ( _netclient != null ) { return _netclient.getSchema(); }
+        else if ( _brokeredConnection != null ) { return _brokeredConnection.getSchema(); }
+        else if ( _logicalConnection != null ) { return _logicalConnection.getSchema(); }
+        else { throw nothingWrapped(); }
+    }
+
+    public  void    setSchema( String schemaName ) throws SQLException
+    {
+        if ( _embedded != null ) { _embedded.setSchema( schemaName ); }
+        else if ( _netclient != null ) { _netclient.setSchema( schemaName ); }
+        else if ( _brokeredConnection != null ) { _brokeredConnection.setSchema( schemaName ); }
+        else if ( _logicalConnection != null ) { _logicalConnection.setSchema( schemaName ); }
+        else { throw nothingWrapped(); }
+    }
+
     ///////////////////////////////////////////////////////////////////////
     //
     // OTHER PUBLIC BEHAVIOR

@@ -3336,4 +3336,49 @@ public abstract class EmbedConnection implements EngineConnection
         setInactive();
     }
         
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    /**
+     * Get the name of the current schema.
+     */
+    public String   getSchema() throws SQLException
+	{
+		checkIfClosed();
+
+		synchronized(getConnectionSynchronization())
+		{
+            setupContextStack();
+			try {
+                LanguageConnectionContext lcc = getLanguageConnection();
+                return lcc.getCurrentSchemaName();
+			} finally {
+				restoreContextStack();
+			}
+		}
+	}
+
+    /**
+     * Set the default schema for the Connection.
+     */
+    public void   setSchema(  String schemaName ) throws SQLException
+	{
+		checkIfClosed();
+
+        PreparedStatement   ps = null;
+
+        try {
+            ps = prepareStatement( "set schema ?" );
+            ps.setString( 1, schemaName );
+            ps.execute();
+        }
+        finally
+        {
+            if ( ps != null ) { ps.close(); }
+        }
+	}
+
 }

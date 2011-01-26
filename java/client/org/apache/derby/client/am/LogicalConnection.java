@@ -601,4 +601,38 @@ public class LogicalConnection implements java.sql.Connection {
         }
     }
 
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    /**
+     * Get the name of the current schema.
+     */
+    public String   getSchema() throws SQLException
+	{
+		try {
+	        checkForNullPhysicalConnection();
+	        return physicalConnection_.getSchema();
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
+    }
+    
+    /**
+     * Set the default schema for the Connection.
+     */
+    public void   setSchema(  String schemaName ) throws SQLException
+	{
+		try {
+	        checkForNullPhysicalConnection();
+	        physicalConnection_.setSchema( schemaName );
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
+    }
+    
 }

@@ -116,4 +116,21 @@ public interface EngineConnection extends Connection {
      * schema are reset.
      */
     public void resetFromPool() throws SQLException;
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    /**
+     * Get the name of the current schema.
+     */
+    public String   getSchema() throws SQLException;
+
+    /**
+     * Set the default schema for the Connection.
+     */
+    public void   setSchema(  String schemaName ) throws SQLException;
+    
 }

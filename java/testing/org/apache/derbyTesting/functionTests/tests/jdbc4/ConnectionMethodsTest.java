@@ -129,7 +129,8 @@ public class ConnectionMethodsTest extends Wrapper41Test
                 s.execute("create table clobtable2(n int,clobcol CLOB)");
                 s.execute("create table blobtable2(n int,blobcol BLOB)");
                 s.execute("create table abort_table(a int)");
-
+                s.execute("create schema foo");
+                s.execute("create table foo.set_schema_table( a int )");
             }
         };
     }
@@ -557,6 +558,60 @@ public class ConnectionMethodsTest extends Wrapper41Test
         rs.close();
         ps.close();
         conn2.close();
+    }
+    
+    /**
+     * Test the JDBC 4.1 Connection.getSchema() and setSchema() methods.
+     */
+    public void testGetSetSchema() throws Exception
+    {
+        Connection  conn = getConnection();
+        println( "Testing get/setSchema() on a " + conn.getClass().getName() );
+        Wrapper41Conn   wrapper = new Wrapper41Conn( conn );
+
+        assertEquals( "APP", wrapper.getSchema() );
+        try {
+            prepareStatement( "select * from set_schema_table" );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( "42X05", se );
+        }
+
+        wrapper.setSchema( "FOO" );
+        assertEquals( "FOO", wrapper.getSchema() );
+
+        prepareStatement( "select * from set_schema_table" );
+
+        try {
+            wrapper.setSchema( "foo" );
+            fail( "Should not have been able to change to a non-existent schema." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( "42Y07", se );
+        }
+
+        conn.close();
+        
+        try {
+            wrapper.setSchema( "APP" );
+            fail( "Should fail on a closed connection." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( CLOSED_CONNECTION, se );
+        }
+
+        try {
+            wrapper.getSchema();
+            fail( "Should fail on a closed connection." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( CLOSED_CONNECTION, se );
+        }
+
     }
     
 }

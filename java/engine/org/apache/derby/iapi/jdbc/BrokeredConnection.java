@@ -668,4 +668,41 @@ public abstract class BrokeredConnection implements EngineConnection
             throws SQLException {
         getRealConnection().resetFromPool();
     }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    /**
+     * Get the name of the current schema.
+     */
+    public String   getSchema() throws SQLException
+    {
+    	try {
+            return getRealConnection().getSchema();
+    	}
+    	catch (SQLException se)
+    	{
+    		notifyException(se);
+    		throw se;
+    	}
+    }
+
+    /**
+     * Set the default schema for the Connection.
+     */
+    public void   setSchema(  String schemaName ) throws SQLException
+	{
+    	try {
+            getRealConnection().setSchema( schemaName );
+    	}
+    	catch (SQLException se)
+    	{
+    		notifyException(se);
+    		throw se;
+    	}
+    }
+    
 }
