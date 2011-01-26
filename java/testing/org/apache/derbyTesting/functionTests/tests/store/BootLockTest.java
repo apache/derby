@@ -58,6 +58,8 @@ public class BootLockTest extends BaseJDBCTestCase {
 
     private final static String dbName = "BootLockTestDB";
     private final static String dbDir = DEFAULT_DB_DIR + File.separator + dbName;
+    public static String minionCompleteFileName = BootLockTest.dbDir + 
+        File.separator + "minionComplete";
     private final static String dbLockFile = dbDir + File.separator +
     DataFactory.DB_LOCKFILE_NAME;
     private final static String dbExLockFile = dbDir + File.separator +
@@ -181,14 +183,12 @@ public class BootLockTest extends BaseJDBCTestCase {
         BufferedReader minionSysErr = new BufferedReader(
             new InputStreamReader(p.getErrorStream()));
         String minionErrLine= null ;
+        File checkFile = new File(minionCompleteFileName);
         do {
-            if (lockFile.exists() && servicePropertiesFile.exists()) { 
-                // if the lock file is there and service.properties,
-                // the database has booted, return. If we don't check for
-                // service.properties, we may get just an error that the
-                // directory already exists. We'll give a few seconds too
-                // for service.properties to finish writing.
-                Thread.sleep(3000);
+            if (checkFile.exists()) { 
+                //The checkFile was created by BootLockMinion when we were
+                //sure it was finished with creating the database and making 
+                //the connection. It will get cleaned up with the database.
                 return;
             }
             // otherwise sleep for a second and try again
