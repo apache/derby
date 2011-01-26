@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.store;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.net.Socket;
+import java.io.File;
 import java.lang.Integer;
 
 import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
@@ -53,6 +54,11 @@ public class BootLockMinion {
             stmt = con.createStatement();
 
             stmt.execute("create table t1(i int)");
+            // Once we are finished creating the database and making the
+            // connection, create the file minionComplete that BootLockTest
+            //can check in order to proceed with its work.
+            File checkFile = new File(BootLockTest.minionCompleteFileName);
+            checkFile.createNewFile();
             //infinite loop until we get killed by BootLockTest.java
             for(;;)
             {
