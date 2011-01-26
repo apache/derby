@@ -2502,6 +2502,11 @@ public abstract class Connection
             throw se.getSQLException();
         }
 
+        // nothing to do if the current schema name is cached and is the same
+        // as the new schema name
+        if ( ( currentSchemaName_ != null) && (currentSchemaName_.equals( schemaName )) )
+        { return; }
+
         java.sql.PreparedStatement   ps = null;
 
         try {
