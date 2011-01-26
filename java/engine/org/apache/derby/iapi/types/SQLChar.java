@@ -250,7 +250,7 @@ public class SQLChar
      * Return false for only "0" or "false" for false. No case insensitivity. 
      * Everything else is true.
      * <p>
-     * The above matches JCC.
+     * The above matches JCC and the client driver.
      *
      *
      * @see DataValueDescriptor#getBoolean
@@ -263,8 +263,8 @@ public class SQLChar
         if (isNull()) 
             return false;
 
-        // match JCC, match only "0" or "false" for false. No case 
-        // insensitivity. everything else is true.
+        // Match JCC and the client driver. Match only "0" or "false" for
+        // false. No case insensitivity. Everything else is true.
 
         String cleanedValue = getString().trim();
 

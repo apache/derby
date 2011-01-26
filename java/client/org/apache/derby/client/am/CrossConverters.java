@@ -971,9 +971,26 @@ final class CrossConverters {
         return source.intValue() != 0;
     }
 
-    // See differences.html for DNC getBoolean() semantics.
-    final boolean getBooleanFromString(String source) throws SqlException {
-        return !(source.trim().equals("0") || source.trim().equals("false"));
+    /**
+     * <p>
+     * Get a boolean value from a CHAR column. In order to match the embedded
+     * driver and JCC we return false iff the CHAR value is "0" or "false".
+     * </p>
+     *
+     * <p>
+     * Leading and trailing whitespace is removed from the input string before
+     * it's compared to "0" and "false". No other normalization is performed.
+     * Specifically, no case conversion is performed, so the comparison is
+     * case sensitive, and everything that doesn't exactly match "0" or "false"
+     * will be considered true.
+     * </p>
+     *
+     * @param source the value of a CHAR column
+     * @return false if source is "0" or "false", true otherwise
+     */
+    final boolean getBooleanFromString(String source) {
+        String trimmed = source.trim();
+        return !(trimmed.equals("0") || trimmed.equals("false"));
     }
 
     //---------------------------- getByte*() methods ----------------------------
