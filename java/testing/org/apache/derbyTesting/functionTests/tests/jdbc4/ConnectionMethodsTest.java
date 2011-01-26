@@ -40,6 +40,7 @@ import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.Blob;
 import java.sql.Clob;
+import java.sql.SQLFeatureNotSupportedException;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
@@ -612,6 +613,55 @@ public class ConnectionMethodsTest extends Wrapper41Test
             assertSQLState( CLOSED_CONNECTION, se );
         }
 
+    }
+    
+    /**
+     * Test the JDBC 4.1 Connection.getNetworkTimeout() and setNetworkTimeout() methods.
+     */
+    public void testGetSetNetworkTimeout() throws Exception
+    {
+        Connection  conn = getConnection();
+        println( "Testing get/setNetoworkTimeout() on a " + conn.getClass().getName() );
+        Wrapper41Conn   wrapper = new Wrapper41Conn( conn );
+
+        try {
+            wrapper.getNetworkTimeout();
+            fail( "Should raise an Unimplemented Feature exception." );
+        }
+        catch (SQLException se)
+        {
+            assertEquals( SQLFeatureNotSupportedException.class.getName(), se.getClass().getName() );
+        }
+
+        try {
+            wrapper.setNetworkTimeout( null, 3 );
+            fail( "Should raise an Unimplemented Feature exception." );
+        }
+        catch (SQLException se)
+        {
+            assertEquals( SQLFeatureNotSupportedException.class.getName(), se.getClass().getName() );
+        }
+
+        // now close the connection
+        conn.close();
+        
+        try {
+            wrapper.getNetworkTimeout();
+            fail( "Should object that the connection is closed." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( CLOSED_CONNECTION, se );
+        }
+        
+        try {
+            wrapper.setNetworkTimeout( null, 3 );
+            fail( "Should object that the connection is closed." );
+        }
+        catch (SQLException se)
+        {
+            assertSQLState( CLOSED_CONNECTION, se );
+        }
     }
     
 }

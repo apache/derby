@@ -319,10 +319,40 @@ public class LogicalConnection40
     
     public  void    abort( Executor executor )  throws SQLException
     {
-        if ( physicalConnection_ != null )
+        try
         {
-            ((NetConnection40) physicalConnection_).abort( executor );
-        }
+            if ( physicalConnection_ != null )
+            {
+                ((NetConnection40) physicalConnection_).abort( executor );
+            }
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
+    }
+
+    public int getNetworkTimeout() throws SQLException
+    {
+        try
+        {
+    		checkForNullPhysicalConnection();
+            return ((NetConnection40) physicalConnection_).getNetworkTimeout();
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
+    }
+    
+    public void setNetworkTimeout( Executor executor, int milliseconds ) throws SQLException
+    {
+        try
+        {
+    		checkForNullPhysicalConnection();
+            ((NetConnection40) physicalConnection_).setNetworkTimeout( executor, milliseconds );
+		} catch (SQLException sqle) {
+			notifyException(sqle);
+			throw sqle;
+		}
     }
     
 } // End class LogicalConnection40

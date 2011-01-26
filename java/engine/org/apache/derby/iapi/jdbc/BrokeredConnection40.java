@@ -360,4 +360,24 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
         }
     }
     
+    public int getNetworkTimeout() throws SQLException
+    {
+         try {
+             return ((EmbedConnection40) getRealConnection()).getNetworkTimeout();
+         } catch (SQLException sqle) {
+             notifyException(sqle);
+             throw sqle;
+         }
+    }
+    
+    public void setNetworkTimeout( Executor executor, int milliseconds ) throws SQLException
+    {
+         try {
+             ((EmbedConnection40) getRealConnection()).setNetworkTimeout( executor, milliseconds );
+         } catch (SQLException sqle) {
+             notifyException(sqle);
+             throw sqle;
+         }
+    }
+
 }

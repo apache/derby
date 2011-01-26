@@ -96,6 +96,24 @@ public  class   Wrapper41Conn
         else { throw nothingWrapped(); }
     }
 
+    public  int    getNetworkTimeout() throws SQLException
+    {
+        if ( _embedded != null ) { return _embedded.getNetworkTimeout(); }
+        else if ( _netclient != null ) { return _netclient.getNetworkTimeout(); }
+        else if ( _brokeredConnection != null ) { return _brokeredConnection.getNetworkTimeout(); }
+        else if ( _logicalConnection != null ) { return _logicalConnection.getNetworkTimeout(); }
+        else { throw nothingWrapped(); }
+    }
+
+    public  void    setNetworkTimeout( Executor executor, int milliseconds ) throws SQLException
+    {
+        if ( _embedded != null ) { _embedded.setNetworkTimeout( executor, milliseconds ); }
+        else if ( _netclient != null ) { _netclient.setNetworkTimeout( executor, milliseconds ); }
+        else if ( _brokeredConnection != null ) { _brokeredConnection.setNetworkTimeout( executor, milliseconds ); }
+        else if ( _logicalConnection != null ) { _logicalConnection.setNetworkTimeout( executor, milliseconds ); }
+        else { throw nothingWrapped(); }
+    }
+
     ///////////////////////////////////////////////////////////////////////
     //
     // OTHER PUBLIC BEHAVIOR
