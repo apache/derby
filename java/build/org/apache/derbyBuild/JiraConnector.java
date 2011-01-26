@@ -56,7 +56,7 @@ public class JiraConnector {
 		"fixVersion=10.3.0.0&sorter/field=issuekey&sorter/order=DESC&" +
 		"tempMax=1000&reset=true&decorator=none";
 
-	public static String jira_allBugsSource= "http://issues.apache.org/jira/secure/IssueNavigator.jspa?view=rss&pid=10594&sorter/field=issuekey&sorter/order=DESC&tempMax=6000&reset=true&decorator=none";
+	public static String jira_allBugsSource= "https://issues.apache.org/jira/secure/IssueNavigator.jspa?view=rss&pid=10594&sorter/field=issuekey&sorter/order=DESC&tempMax=6000&reset=true&decorator=none";
 
 	// other urls to some cute jira reports in xml.
 	// all 
