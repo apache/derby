@@ -1671,13 +1671,14 @@ abstract class BasePage implements Page, Observer, TypedFormat
 					return;
 				}
 
-				// just deadlock out if a transaction tries to double latch the
-				// page while not in abort
-
-				if (SanityManager.DEBUG) {
-					SanityManager.THROWASSERT("Attempted to latch page twice");
-				}
-
+                // A transaction tries to double latch the page while not in
+                // abort: if we let it wait, it would hang forever, so it's
+                // better to throw an exception. This should never occur unless
+                // the code is wrong.  If it still does, we'd better tear down
+                // the connection just in case, so the error has session level
+                // severity;
+                throw StandardException.newException(
+                    SQLState.DATA_DOUBLE_LATCH_INTERNAL_ERROR, identity);
 			}
 
 			while (owner != null) {

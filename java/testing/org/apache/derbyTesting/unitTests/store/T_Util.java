@@ -1142,48 +1142,15 @@ public class T_Util
 	 */
 	public void t_checkGetLatchedPage(ContainerHandle c, long pageNumber)
 			throws StandardException, T_Fail {
-		// we expect to hang in getPage() so make sure we are interrupted
-		final Thread me = Thread.currentThread();
-		Runnable r = new Runnable() {
-				public void run() {
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException e) { }
-					me.interrupt();
-				}
-			};
-		Thread interrupter = new Thread(r);
-		if (!SanityManager.DEBUG) {
-			// don't run the interrupter thread in sane builds, since getPage()
-			// will throw an assert error instead of hanging (DERBY-2635)
-			interrupter.start();
-		}
 
 		try {
 			Page p = c.getPage(pageNumber);
 			throw T_Fail.testFailMsg("got latched page");
 		} catch (StandardException se) {
-			// expect thread interrupted exception in insane builds
-			if (SanityManager.DEBUG || !se.getMessageId().equals("08000")) {
+            if (!"XSDAO".equals(se.getSQLState())) {
 				throw se;
 			}
-		} catch (RuntimeException e) {
-			// When running in sane mode, an AssertFailure will be thrown if we
-			// try to double latch a page. The AssertFailure class is not
-			// available in insane jars, so we cannot reference the class
-			// directly.
-			if (!(SanityManager.DEBUG &&
-				  e.getClass().getName().endsWith(".sanity.AssertFailure") &&
-				  e.getMessage().endsWith("Attempted to latch page twice"))) {
-				throw e;
-			}
 		}
-
-		try {
-			if (interrupter.isAlive()) {
-				interrupter.join();
-			}
-		} catch (InterruptedException ie) { }
 	}
 
 	/**

@@ -5516,6 +5516,11 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <arg>className</arg>
             </msg>
 
+            <msg>
+                <name>XSDAO.S</name>
+                <text>Internal error: page {0} attempted latched twice.</text>
+                <arg>pageNumber</arg>
+            </msg>
         </family>
 
 

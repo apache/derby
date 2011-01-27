@@ -483,6 +483,7 @@ public interface SQLState {
 	String DATA_UNEXPECTED_OVERFLOW_PAGE                        = "XSDAL.S";
     String DATA_SQLDATA_READ_INSTANTIATION_EXCEPTION            = "XSDAM.S";
     String DATA_SQLDATA_READ_ILLEGAL_ACCESS_EXCEPTION           = "XSDAN.S";
+    String DATA_DOUBLE_LATCH_INTERNAL_ERROR                     = "XSDAO.S";
 
 	/*
 	** RawStore - Data.Generic transaction exceptions
