@@ -1533,7 +1533,7 @@ public final class TestConfiguration {
      *
      * @return connection to default database.
      */
-    Connection openDefaultConnection()
+    public Connection openDefaultConnection()
         throws SQLException {
         return connector.openConnection();
     }

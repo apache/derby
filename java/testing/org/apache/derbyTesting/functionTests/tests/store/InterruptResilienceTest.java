@@ -23,6 +23,7 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -30,12 +31,18 @@ import junit.framework.TestSuite;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.sql.DriverManager;
+import java.util.ArrayList;
+import java.util.Random;
+import java.lang.Math;
+import java.util.Properties;
 
 /**
- *   Test to reproduce and verify fix for DERBY-151.
+ * Test started as a test reproduce and verify fix for DERBY-151.  Later
+ * evolved into test for DERBY-4741.
  */
 
 public class InterruptResilienceTest extends BaseJDBCTestCase
@@ -46,58 +53,81 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         super(name);
     }
 
+    // Share the main thread's configuration with the server side threads.
+    private static volatile TestConfiguration thisConf;
 
-    protected static Test baseSuite(String name)
+    protected static Test makeSuite(String name)
     {
         TestSuite suite = new TestSuite(name);
 
-        if (JDBC.vmSupportsJDBC3()) {
-            // We need a JDBC level that supports DriverManager in order
-            // to run tests that access the database from a stored procedure
-            // using DriverManager and jdbc:default:connection.
-            // DriverManager is not supported with JSR169.
+        Test est = TestConfiguration.embeddedSuite(
+            InterruptResilienceTest.class);
+        Test cst = TestConfiguration.clientServerSuite(
+            InterruptResilienceTest.class);
 
-            suite.addTestSuite(InterruptResilienceTest.class);
-            return new CleanDatabaseTestSetup(suite);
-        } else {
-            return suite;
-        }
+        est = TestConfiguration.singleUseDatabaseDecorator(est);
+        cst = TestConfiguration.singleUseDatabaseDecorator(cst);
+        // Cut down on running time:
+        Properties p = new Properties();
+        p.put("derby.system.durability", "test");
+        p.put("derby.infolog.append", "true");
+
+        suite.addTest(
+            // new CleanDatabaseTestSetup(
+            // TestConfiguration.singleUseDatabaseDecorator(
+                new SystemPropertyTestSetup(est, p, true));
+
+        suite.addTest(
+            // new CleanDatabaseTestSetup(
+            // TestConfiguration.singleUseDatabaseDecorator(
+                new SystemPropertyTestSetup(cst, p, true));
+        return suite;
     }
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("InterruptResilienceTest");
+        String testName = "InterruptResilienceTest";
+
         if (! isSunJVM()) {
             // DERBY-4463 test fails on IBM VMs. Remove this
             // exception when that issue is solved.
             println("Test skipped for this VM, cf. DERBY-4463");
-            return suite;
+            return new TestSuite(testName);
+        }
+
+        if (!JDBC.vmSupportsJDBC3()) {
+            println("Test skipped for this VM, " +
+                    "DriverManager is not supported with JSR169");
+            return new TestSuite(testName);
         }
 
         if (hasInterruptibleIO()) {
             println("Test skipped due to interruptible IO.");
             println("This is default on Solaris/Sun Java <= 1.6, use " +
                     "-XX:-UseVMInterruptibleIO if available.");
-            return suite;
+            return new TestSuite(testName);
         }
 
-        suite.addTest(
-            baseSuite("InterruptResilienceTest:embedded"));
-
-        suite.addTest(
-            TestConfiguration.clientServerDecorator(
-                baseSuite("InterruptResilienceTest:c/s")));
-
-        return suite;
+        return makeSuite(testName);
     }
 
     protected void setUp()
             throws java.lang.Exception {
+        try {
+            Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();
+        } catch (Exception e) {
+        }
         super.setUp();
-
         Statement stmt = createStatement();
-        stmt.executeUpdate("CREATE TABLE irt(x int primary key)");
+        stmt.executeUpdate("create table t1(x int primary key)");
+        stmt.executeUpdate("create table mtTab(i bigint, " +
+                           "inserter varchar(40), " +
+                           "primary key(i, inserter))");
         stmt.close();
+
+        thisConf = TestConfiguration.getCurrent();
+        threadNo = 0;    // counter for multiple threads tests
+        allDone = false; // flag for threads to terminate
     }
 
     /**
@@ -107,7 +137,8 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             throws java.lang.Exception {
 
         Statement stmt = createStatement();
-        stmt.executeUpdate("DROP TABLE irt");
+        stmt.executeUpdate("drop table t1");
+        stmt.executeUpdate("drop table mtTab");
         stmt.close();
 
         super.tearDown();
@@ -115,19 +146,19 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
 
     // We do the actual test inside a stored procedure so we can test this for
     // client/server as well, otherwise we would just interrupt the client
-    // thread.
-    public static void irt() throws SQLException {
+    // thread. This SP correposnds to #testRAFWriteInterrupted.
+    public static void tstRAFwriteInterrupted() throws SQLException {
         Connection c = DriverManager.getConnection("jdbc:default:connection");
         c.setAutoCommit(false);
         PreparedStatement insert = null;
         long seen = 0;
         long lost = 0;
         try {
-            insert = c.prepareStatement("insert into irt values (?)");
+            insert = c.prepareStatement("insert into t1 values (?)");
 
             // About 75000 iterations is needed to see any concurrency
             // wait on RawDaemonThread during recovery, cf.
-            // running with debug flag "RAF4Recovery".
+            // running with debug flag "RAF4" for RAFContainer4.
             for (int i = 0; i < 100000; i++) {
                 if (i % 1000 == 0) {
                     c.commit();
@@ -137,17 +168,10 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                 // safe for interrupts (on Solaris only) yet.
                 Thread.currentThread().interrupt();
 
-                insert.setInt(1, i);
+                insert.setLong(1, i);
                 insert.executeUpdate();
 
-                if (Thread.interrupted()) { // test and reset
-                    seen++;
-                    // println(ff() + "interrupt seen");
-                } else {
-                    // println(ff() + "interrupt lost");
-                    lost++;
-                }
-
+                assertTrue("interrupt flag lost", Thread.interrupted());
             }
         } finally {
             // always clear flag
@@ -161,27 +185,298 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             }
 
             c.close();
-            println("interrupts recovered: " + seen);
-            println("interrupts lost: " + lost + " (" +
-                    (lost * 100.0/(seen + lost)) + "%)");
         }
     }
 
-    public void testIRT () throws SQLException {
+    public void testRAFWriteInterrupted () throws SQLException {
         Statement s = createStatement();
         s.executeUpdate(
-            "create procedure IRT () MODIFIES SQL DATA " +
+            "create procedure tstRAFWriteInterrupted () modifies sql data " +
             "external name 'org.apache.derbyTesting.functionTests" +
-            ".tests.store.InterruptResilienceTest.irt' " +
+            ".tests.store.InterruptResilienceTest.tstRAFwriteInterrupted' " +
             "language java parameter style java");
 
-
-        s.executeUpdate("call IRT()");
-
+        s.executeUpdate("call tstRAFWriteInterrupted()");
     }
 
 
-    // private static String ff() {
-    //     return Thread.currentThread().getName();
-    // }
+    // We do the actual test inside a stored procedure so we can test this for
+    // client/server as well, otherwise we would just interrupt the client
+    // thread. This SP correponds to #testRAFReadWriteMultipleThreads.
+    public static void tstRAFReadWriteMultipleThreads() throws Exception {
+
+        //--------------------
+        // part 1
+        //--------------------
+
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+
+        ArrayList workers = new ArrayList();
+
+        ArrayList interruptors = new ArrayList();
+
+        for (int i = 0; i < NO_OF_THREADS; i++) {
+            WorkerThread w = new WorkerThread(
+                thisConf.openDefaultConnection(),
+                false /* read */,
+                NO_OF_MT_OPS);
+
+            workers.add(w);
+
+            w.start();
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+            }
+
+            InterruptorThread it = new InterruptorThread(w, 500);
+            interruptors.add(it);
+            it.start();
+        }
+
+        for (int i = 0; i < workers.size(); i++) {
+            WorkerThread w = (WorkerThread)workers.get(i);
+            w.join();
+
+            if (w.e != null) {
+                fail("WorkerThread " + i, w.e);
+            }
+        }
+
+        allDone = true;
+
+        for (int i = 0; i < interruptors.size(); i++) {
+            ((Thread)interruptors.get(i)).join();
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+        }
+
+        Statement s = c.createStatement();
+        ResultSet rs = s.executeQuery("select count(*) from mtTab");
+
+        JDBC.assertSingleValueResultSet(
+            rs, Long.toString(NO_OF_THREADS * NO_OF_MT_OPS));
+
+        //--------------------
+        // part 2
+        //--------------------
+
+        // Reset thread state variables
+        allDone = false;
+        threadNo = 0;
+
+        workers.clear();
+        interruptors.clear();
+
+        for (int i = 0; i < NO_OF_THREADS; i++) {
+            WorkerThread w = new WorkerThread(
+                // This will be an embedded connection always since for the
+                // server thread current cf will be JUNIT_CONFIG.
+                thisConf.openDefaultConnection(),
+                true,
+                NO_OF_MT_OPS);
+
+            workers.add(w);
+
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+            }
+
+            InterruptorThread it = new InterruptorThread(w, 500);
+            interruptors.add(it);
+            it.start();
+        }
+
+        // Wait till here to start works, so interruptors don't get too late to
+        // the game
+        for (int i = 0; i < workers.size(); i++) {
+            ((Thread)workers.get(i)).start();
+        }
+
+        for (int i = 0; i < workers.size(); i++) {
+            WorkerThread w = (WorkerThread)workers.get(i);
+            w.join();
+
+            if (w.e != null) {
+                fail("WorkerThread " + i, w.e);
+            }
+        }
+
+        allDone = true;
+
+        for (int i = 0; i < interruptors.size(); i++) {
+            ((Thread)interruptors.get(i)).join();
+        }
+
+        c.close();
+    }
+
+
+    static class InterruptorThread extends Thread {
+        private WorkerThread myVictim;
+        private int millisBetweenShots;
+
+        public InterruptorThread(WorkerThread v, int m){
+            super();
+            myVictim = v;
+            millisBetweenShots = m;
+        }
+
+        public void run() {
+            setName("InterruptorThread. Thread #" + getThreadNo());
+            println("Running " + getName() +
+                    " with victim " + myVictim.getName());
+
+            int shots = 0;
+
+            while (!allDone) {
+                try {
+                    Thread.sleep(millisBetweenShots);
+                    myVictim.interrupt();
+                    shots++;
+                } catch (Exception e) {
+                }
+            }
+
+            println(getName() + " shot " + shots +
+                    " interrupts at " + myVictim.getName());
+        }
+    }
+
+
+    static class WorkerThread extends Thread {
+        private final boolean readertest;
+        private final long noOps;
+        public SQLException e; // if any seen
+        private Connection c;
+
+        public WorkerThread(Connection c, boolean readertest, long noOps) {
+            super();
+            this.readertest = readertest;
+            this.noOps = noOps;
+            this.c = c;
+        }
+
+        public void run() {
+            int threadNo = getThreadNo();
+            int interruptsSeen = 0;
+
+            setName("WorkerThread. Thread#" + threadNo);
+            println("Running " + getName());
+
+            try {
+                c.setAutoCommit(false);
+
+                PreparedStatement s = c.prepareStatement(
+                    readertest ?
+                    "select * from mtTab where i=?" :
+                    "insert into mtTab values (?,?)");
+
+                Random rnd = new Random();
+
+                for (long ops = 0; ops < noOps; ops++) {
+
+                    if (readertest) {
+                        // Arbitrarily select one of the rows int the tables to
+                        // read
+                        long candidate = randAbs(rnd.nextLong()) % noOps;
+                        s.setLong(1, candidate);
+                        ResultSet rs = s.executeQuery();
+                        rs.next();
+                        if (interrupted()) {
+                            interruptsSeen++;
+                        }
+
+                        assertEquals("wrong row content",
+                                     candidate, rs.getLong(1));
+
+                        rs.close();
+
+                        c.commit();
+
+                        if (interrupted()) {
+                            interruptsSeen++;
+                        }
+
+                        rs.close();
+                    } else {
+                        s.setLong(1, ops);
+                        s.setString(2, getName());
+                        s.executeUpdate();
+
+                        if (Thread.interrupted()) {
+                            interruptsSeen++;
+                        }
+
+                        c.commit();
+
+                        if (interrupted()) {
+                            interruptsSeen++;
+                        }
+                    }
+                }
+                s.close();
+            } catch (SQLException e) {
+                this.e = e;
+            } finally {
+                try { c.close(); } catch (Exception e) {}
+            }
+
+            println("Thread " + getName() + " saw " + interruptsSeen +
+                    " interrupts");
+        }
+    }
+
+    // Number of parallel threads to use
+    static int NO_OF_THREADS = 3;
+
+    static long NO_OF_MT_OPS = 10000;
+
+    // Counter to enumerate threads for tests employing several threads.  Reset
+    // for each test in setUp.
+    private static int threadNo;
+
+    synchronized static int getThreadNo() {
+        return ++threadNo;
+    }
+
+    private static long randAbs(long l) {
+        if (l == Long.MIN_VALUE) {
+            return Long.MAX_VALUE; // 2's complement, so no way to make value
+                                   // positive
+        } else {
+            return Math.abs(l);
+        }
+    }
+
+    // Signal to threads to stop whatever they are doing. Reset
+    // for each test in setUp.
+    static volatile boolean allDone;
+
+    /**
+     * MT write (part 1) and read (part 2) test under interrupt shower.  This
+     * stess tests the NIO random access file interrupt channel recovery in
+     * RAFContainer4.
+     */
+    public void testRAFReadWriteMultipleThreads () throws SQLException {
+            try {
+                Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
+            } catch (ClassNotFoundException e) {
+            }
+        Statement s = createStatement();
+
+        s.executeUpdate(
+            "create procedure tstRAFReadWriteMultipleThreads () " +
+            "modifies sql data " +
+            "external name 'org.apache.derbyTesting.functionTests" +
+            ".tests.store.InterruptResilienceTest" +
+            ".tstRAFReadWriteMultipleThreads' " +
+            "language java parameter style java");
+
+        s.executeUpdate("call tstRAFReadWriteMultipleThreads()");
+    }
 }

@@ -133,7 +133,13 @@ public class DriverManagerConnector implements Connector {
         attributes.setProperty("user", config.getUserName());
         attributes.setProperty("password", config.getUserPassword());
         attributes.setProperty(key, value);
-        
+
+        try {
+            DriverManager.getDriver(url);
+        } catch (SQLException e) {
+            loadJDBCDriver();
+        }
+
         return DriverManager.getConnection(url, attributes);
     }
 

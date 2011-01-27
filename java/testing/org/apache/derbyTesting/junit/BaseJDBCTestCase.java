@@ -429,7 +429,29 @@ public abstract class BaseJDBCTestCase
         initializeConnection(conn);
         return conn;
     }
-    
+
+
+    /**
+     * Open a connection to the default database for the given configuration.
+     * If the database does not exist, it will be created.  A default username
+     * and password will be used for the connection.
+     *
+     * The connection will be initialized by calling initializeConnection.
+     * A sub-class may provide an implementation of initializeConnection
+     * to ensure its connections are in a consistent state that is different
+     * to the default.
+     * @param configuration
+     * @return connection to default database for the configuration
+     * @see TestConfiguration#openDefaultConnection()
+     * @see BaseJDBCTestCase#initializeConnection(Connection)
+     */
+    public Connection openDefaultConnection(TestConfiguration tc)
+        throws SQLException {
+        Connection conn =  tc.openDefaultConnection();
+        initializeConnection(conn);
+        return conn;
+    }
+
     /**
      * Open a connection to the current default database using the
      * specified user name and password.

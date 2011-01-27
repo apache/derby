@@ -266,16 +266,21 @@ class RAFContainer4 extends RAFContainer {
     private void readPage(long pageNumber, byte[] pageData, long offset)
          throws IOException, StandardException
     {
-        // Interrupt recovery: If this thread holds a monitor on "this" (when
-        // RAFContainer#clean calls getEmbryonicPage via writeRAFHEader) or
-        // "allocCache" (e.g. FileContainer#newPage, #pageValid) we cannot grab
-        // channelCleanupMonitor lest another thread is one doing recovery,
-        // since the recovery thread will try to grab both those monitors
-        // during container resurrection.  So, just forge ahead in stealth mode
-        // (i.e. the recovery thread doesn't see us). If we see
+        // Interrupt recovery "stealthMode": If this thread holds a monitor on
+        //
+        //   a) "this" (when RAFContainer#clean calls getEmbryonicPage via
+        //       writeRAFHEader) or
+        //   b) "allocCache" (e.g. FileContainer#newPage,
+        //       #pageValid)
+        //
+        // we cannot grab channelCleanupMonitor lest another thread is one
+        // doing recovery, since the recovery thread will try to grab both
+        // those monitors during container resurrection.  So, just forge ahead
+        // in stealth mode (i.e. the recovery thread doesn't see us). If we see
         // ClosedChannelException, throw InterruptDetectedException, so we can
-        // retry from RAFContainer ("this") or FileContainer ("allocCache")
-        // after having released the relevant monitor.
+        // retry from RAFContainer releasing "this", or FileContainer
+        // (releasing allocCache) as the case may be, so the recovery thread
+        // can do its thing.
 
         final boolean holdsThis = Thread.holdsLock(this);
         final boolean holdsAllocCache = Thread.holdsLock(allocCache);
@@ -486,15 +491,17 @@ class RAFContainer4 extends RAFContainer {
     protected void writePage(long pageNumber, byte[] pageData, boolean syncPage)
          throws IOException, StandardException
     {
-        // Interrupt recovery: If this thread holds a monitor "allocCache"
-        // (e.g. FileContainer#newPage, #pageValid) we cannot grab
-        // channelCleanupMonitor lest another thread is one doing recovery,
-        // since the recovery thread will try to grab both those monitors
-        // during container resurrection.  So, just forge ahead in stealth mode
-        // (i.e. the recovery thread doesn't see us). If we see
+        // Interrupt recovery "stealthMode": If this thread holds a monitor on
+        //
+        //   a) "allocCache" (e.g. FileContainer#newPage, #pageValid),
+        //
+        // we cannot grab channelCleanupMonitor lest another thread is one
+        // doing recovery, since the recovery thread will try to grab both
+        // those monitors during container resurrection.  So, just forge ahead
+        // in stealth mode (i.e. the recovery thread doesn't see us). If we see
         // ClosedChannelException, throw InterruptDetectedException, so we can
-        // retry from FileContainer ("allocCache") after having released the
-        // relevant monitor.
+        // retry from FileContainer releasing allocCache, so the recovery
+        // thread can do its thing.
         boolean stealthMode = Thread.holdsLock(allocCache);
 
         if (SanityManager.DEBUG) {
