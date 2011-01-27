@@ -271,24 +271,34 @@ public class StatementTest
      */
     public  void    test_jdbc4_1_queryTimeoutException() throws Exception
     {
-        PreparedStatement ps = prepareStatement
-            (
-             "select columnnumber from sys.syscolumns c, sys.systables t\n" +
-             "where t.tablename = 'SYSTABLES'\n" +
-             "and t.tableid = c.referenceid\n" +
-             "and c.columnnumber = delay_st( 5, 1 )"
-             );
-        println( "Testing timeout exception for a " + ps.getClass().getName() );
+        SQLException    se = null;
 
-        SetQueryTimeoutTest.StatementExecutor   executor =
-            new SetQueryTimeoutTest.StatementExecutor( ps, true, 1 );
+        // try to force a timeout. try a couple times to reduce the risk
+        // of instability in this test.
+        for ( int i = 0; i < 10; i++ )
+        {
+            PreparedStatement ps = prepareStatement
+                (
+                 "select columnnumber from sys.syscolumns c, sys.systables t\n" +
+                 "where t.tablename = 'SYSTABLES'\n" +
+                 "and t.tableid = c.referenceid\n" +
+                 "and c.columnnumber = delay_st( 5, 1 )"
+                 );
+            println( "Testing timeout exception for a " + ps.getClass().getName() );
 
-        executor.start();
-        executor.join();
+            SetQueryTimeoutTest.StatementExecutor   executor =
+                new SetQueryTimeoutTest.StatementExecutor( ps, true, 1 );
 
-        ps.close();
+            executor.start();
+            executor.join();
 
-        SQLException    se = executor.getSQLException();
+            ps.close();
+
+            se = executor.getSQLException();
+
+            if ( se != null ) { break; }
+        }
+        
         assertNotNull( se );
         assertEquals( SQLTimeoutException.class.getName(), se.getClass().getName() );
     }
