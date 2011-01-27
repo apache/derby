@@ -440,7 +440,7 @@ public abstract class BaseJDBCTestCase
      * A sub-class may provide an implementation of initializeConnection
      * to ensure its connections are in a consistent state that is different
      * to the default.
-     * @param configuration
+     * @param tc
      * @return connection to default database for the configuration
      * @see TestConfiguration#openDefaultConnection()
      * @see BaseJDBCTestCase#initializeConnection(Connection)
