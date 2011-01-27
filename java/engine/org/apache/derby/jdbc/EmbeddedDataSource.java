@@ -24,6 +24,7 @@ package org.apache.derby.jdbc;
 import org.apache.derby.iapi.reference.Attribute;
 
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
@@ -501,11 +502,16 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
 
 				// If we know the driver, we loaded it.   Otherwise only
 				// work if DriverManager has already loaded it.
-
-				AutoloadedDriver	autoloadedDriver =
-					(AutoloadedDriver) DriverManager.getDriver(url);
-				driver = (InternalDriver) autoloadedDriver.getDriverModule();
-				// DriverManager will throw an exception if it cannot find the driver
+                // DriverManager will throw an exception if driver is not found
+                Driver registerDriver = DriverManager.getDriver(url);
+                if (registerDriver instanceof AutoloadedDriver) {
+                    AutoloadedDriver autoloadedDriver = 
+                        (AutoloadedDriver) registerDriver;
+                    driver = (InternalDriver) autoloadedDriver
+                            .getDriverModule();
+                } else {
+                    driver = (InternalDriver) registerDriver;
+                }
 			}
 		}
 		return driver;

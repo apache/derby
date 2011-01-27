@@ -22,8 +22,10 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.sql.Driver;
+import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import javax.sql.DataSource;
 import java.util.Enumeration;
 
 import junit.framework.Test;
@@ -33,6 +35,7 @@ import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -157,7 +160,7 @@ public class AutoloadTest extends BaseJDBCTestCase
         }
         
         suite.addTest(new AutoloadTest("testSuccessfulConnect"));
-        
+      	
         if ("embedded".equals(which)) {
             suite.addTest(SecurityManagerSetup.noSecurityManager(
                 new AutoloadTest("testEmbeddedStarted")));
@@ -165,6 +168,10 @@ public class AutoloadTest extends BaseJDBCTestCase
 
         suite.addTest(new AutoloadTest("testUnsuccessfulConnect"));
         suite.addTest(new AutoloadTest("testExplicitLoad"));
+
+	 if ("embedded".equals(which)) {
+            suite.addTest(new AutoloadTest("testAutoloadDriverUnregister"));
+        }
         return suite;
     }
 
@@ -173,6 +180,54 @@ public class AutoloadTest extends BaseJDBCTestCase
 	// TEST ENTRY POINTS
 	//
 	// ///////////////////////////////////////////////////////////
+
+    /**
+     * Test DERBY-2905:Shutting down embedded Derby does not remove all code,
+     * the AutoloadDriver is left registered in the DriverManager.
+     * 
+     * @throws Exception
+     */
+    public void testAutoloadDriverUnregister() throws Exception {
+        if (usingEmbedded()) {
+            String AutoloadedDriver = "org.apache.derby.jdbc.AutoloadedDriver";
+            String Driver40 = "org.apache.derby.jdbc.Driver40";
+            String Driver30 = "org.apache.derby.jdbc.Driver30";
+            String Driver20 = "org.apache.derby.jdbc.Driver20";
+
+            // Test whether the Autoload driver successfully unregister after
+            // DB shutdown.
+            String url = getTestConfiguration().getJDBCUrl();
+            url = url.concat(";create=true");
+            String user = getTestConfiguration().getUserName();
+            String password = getTestConfiguration().getUserPassword();
+            DriverManager.getConnection(url, user, password);
+
+            assertTrue(getRegisteredDrivers(AutoloadedDriver));
+
+            // shut down engine
+            TestConfiguration.getCurrent().shutdownEngine();
+
+            assertFalse(getRegisteredDrivers(AutoloadedDriver));
+
+            // Test explicit loading of Embedded driver after Autoload driver
+            // is un-registered.
+            String driverClass = getTestConfiguration().getJDBCClient()
+                    .getJDBCDriverName();
+
+            Class.forName(driverClass).newInstance();
+            url = getTestConfiguration().getJDBCUrl();
+            user = getTestConfiguration().getUserName();
+            password = getTestConfiguration().getUserPassword();
+            DriverManager.getConnection(url, user, password);
+
+            // shut down engine
+            TestConfiguration.getCurrent().shutdownEngine();
+
+            assertFalse(getRegisteredDrivers(Driver40));
+            assertFalse(getRegisteredDrivers(Driver30));
+            assertFalse(getRegisteredDrivers(Driver20));
+        }
+    }
     
     /**
      * @throws SQLException
@@ -197,8 +252,8 @@ public class AutoloadTest extends BaseJDBCTestCase
         assertTrue(isEmbeddedDriverRegistered());
         TestConfiguration.getCurrent().shutdownEngine();
         
-        // DERBY-2905 - Autoload driver is left around.
-        // assertFalse(isEmbeddedDriverRegistered());   
+        // DERBY-2905 - Autoload driver is [not] left around.
+        assertFalse(isEmbeddedDriverRegistered());   
     }
     
     /**
@@ -225,7 +280,7 @@ public class AutoloadTest extends BaseJDBCTestCase
     }
 
 	/**
-     * Test we can connect successfully to a database.
+     	 * Test we can connect successfully to a database.
 	 */
 	public void testSuccessfulConnect()
        throws SQLException
@@ -296,7 +351,7 @@ public class AutoloadTest extends BaseJDBCTestCase
             testSuccessfulConnect();
             testUnsuccessfulConnect();
         }
-        
+
         Class.forName(driverClass).newInstance();
         testSuccessfulConnect();
         testUnsuccessfulConnect();
@@ -387,7 +442,49 @@ public class AutoloadTest extends BaseJDBCTestCase
     {
         assertTrue(hasDerbyThreadGroup());
     }
-    
+
+    private boolean getRegisteredDrivers(String driver) {
+
+	Enumeration e = DriverManager.getDrivers();
+
+        while(e.hasMoreElements())
+        {
+                Driver drv = (Driver)e.nextElement();
+                if(drv.getClass().getName().equals(driver))	
+			return true;
+        }
+
+	return false;
+    }
+
+    private void assertShutdownOK() throws SQLException {
+
+        Connection conn = getConnection();
+
+        if (usingEmbedded()) {
+            DataSource ds = JDBCDataSource.getDataSource();
+            JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
+            try {
+                ds.getConnection();
+                fail("expected shutdown to fail");
+            } catch (SQLException e) {
+                // expect 08006 on successful shutdown
+                assertSQLState("08006", e);
+            }
+            assertTrue(conn.isClosed());
+        } else if (usingDerbyNetClient()) {
+            DataSource ds = JDBCDataSource.getDataSource();
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes","shutdown=true");
+            try {
+                ds.getConnection();
+                fail("expected shutdown to fail");
+            } catch (SQLException e) {
+                // expect 08006 on successful shutdown
+                assertSQLState("08006", e);
+            }
+        }
+    }
+
     /**
      * Return true if a ThreadGroup exists that has a name
      * starting with 'derby.'. This needs to run without a security

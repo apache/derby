@@ -34,6 +34,7 @@ import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.jdbc.JDBCBoot;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 
 /**
@@ -59,6 +60,12 @@ public class AutoloadedDriver implements Driver
 	// This flag is set if the engine is forcibly brought down.
 	private	static	boolean	_engineForcedDown = false;
 	
+    // This flag is set if AutoloadedDriver exists
+    private static boolean activeautoloadeddriver = false;
+
+    //This is the driver that memorizes the autoloadeddriver (DERBY-2905)
+    private static Driver _autoloadedDriver;
+
 	//
 	// This is the driver that's specific to the JDBC level we're running at.
 	// It's the module which boots the whole Derby engine.
@@ -68,7 +75,9 @@ public class AutoloadedDriver implements Driver
 	static
 	{
 		try {
-			DriverManager.registerDriver( new AutoloadedDriver() );
+            _autoloadedDriver = new AutoloadedDriver();
+            DriverManager.registerDriver( _autoloadedDriver );
+            activeautoloadeddriver = true;
 		}
 		catch (SQLException se)
 		{
@@ -180,7 +189,7 @@ public class AutoloadedDriver implements Driver
 	*/
 	static	Driver getDriverModule() throws SQLException {
 
-		if ( _engineForcedDown )
+		if ( _engineForcedDown && (_autoloadedDriver == null))
 		{
 			// Driver not registered 
 			throw new SQLException
@@ -192,23 +201,45 @@ public class AutoloadedDriver implements Driver
 		return _driverModule;
 	}
 	
-	/*
+	/**
 	** Record which driver module actually booted.
-	*/
+	*  @param driver the driver register to DriverManager is not AutoloadedDriver
+	**/
 	static	void	registerDriverModule( Driver driver )
 	{
 		_driverModule = driver;
 		_engineForcedDown = false;
+		
+        try {
+            if (!activeautoloadeddriver)
+                DriverManager.registerDriver(_driverModule);
+        } catch (SQLException e) {
+            if (SanityManager.DEBUG)
+                SanityManager.THROWASSERT(e);
+        }
 	}
 	
-	/*
-	** Unregister the driver. This happens when the engine is
-	** forcibly shut down.
-	*/
+	/**
+	** Unregister the driver and the AutoloadedDriver if exists. 
+	*  This happens when the engine is forcibly shut down.
+	*  
+	**/
 	static	void	unregisterDriverModule()
 	{
-		_driverModule = null;
 		_engineForcedDown = true;
+        try {
+            if (activeautoloadeddriver) {
+                DriverManager.deregisterDriver(_autoloadedDriver);
+                activeautoloadeddriver = false;
+                _autoloadedDriver = null;
+            } else {
+                DriverManager.deregisterDriver(_driverModule);
+            }
+            _driverModule = null;
+        } catch (SQLException e) {
+            if (SanityManager.DEBUG)
+                SanityManager.THROWASSERT(e);
+        }
 	}
 	
 
