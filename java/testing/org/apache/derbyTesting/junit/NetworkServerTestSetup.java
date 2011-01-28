@@ -617,7 +617,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
     {
         if ( !t.getClass().getName().equals( "java.lang.Exception" ) ) { return false; }
         
-        return ( t.getMessage().startsWith( "DRDA_NoIO.S:Could not connect to Derby Network Server" ) );
+        return ( t.getMessage().startsWith( "DRDA_NoIO.S:" ) );
     }
     
     // return true if this is a drda error
