@@ -828,8 +828,8 @@ public final class ViewsTest extends BaseJDBCTestCase {
         DatabaseMetaData dmd = getConnection().getMetaData();
         ResultSet columns = dmd.getColumns(null, null, "V", null);
         String[][] expectedDBMetaRows = new String[][] {{"","APP","V","DATA","12","VARCHAR","20",null,null,null,"1","",null,null,null
-            ,"40","1","YES",null,null,null,null,"NO"},
-            {"","APP","V","NUM","4","INTEGER","10",null,"0","10","1","",null,null,null,null,"2","YES",null,null,null,null,"NO"}};  
+            ,"40","1","YES",null,null,null,null,"NO","NO"},
+            {"","APP","V","NUM","4","INTEGER","10",null,"0","10","1","",null,null,null,null,"2","YES",null,null,null,null,"NO","NO"}};  
         JDBC.assertFullResultSet(columns,expectedDBMetaRows);
         // Make sure ResultSetMetaData is right when selecting from view.
         // This wasn't a problem with DERBY-4230, but checking for good measure.
@@ -874,19 +874,19 @@ public final class ViewsTest extends BaseJDBCTestCase {
 
         String[][] expectedDBMetaRows = new String[][]
             {{"","APP","V1","J","4","INTEGER","10",null,"0","10","1","",
-              null,null,null,null,"1","YES",null,null,null,null,"NO"},
+              null,null,null,null,"1","YES",null,null,null,null,"NO","NO"},
              {"","APP","V1","I","4","INTEGER","10",null,"0","10","1","",
-              null,null,null,null,"2","YES",null,null,null,null,"NO"}};
+              null,null,null,null,"2","YES",null,null,null,null,"NO","NO"}};
 
         JDBC.assertFullResultSet(columns,expectedDBMetaRows);
 
         expectedDBMetaRows = new String[][]
             {{"","APP","V2","X","4","INTEGER","10",null,"0","10","1","",
-              null,null,null,null,"1","YES",null,null,null,null,"NO"},
+              null,null,null,null,"1","YES",null,null,null,null,"NO","NO"},
              {"","APP","V2","Y","4","INTEGER","10",null,"0","10","1","",
-              null,null,null,null,"2","YES",null,null,null,null,"NO"},
+              null,null,null,null,"2","YES",null,null,null,null,"NO","NO"},
              {"","APP","V2","Z","4","INTEGER","10",null,"0","10","1","",
-              null,null,null,null,"3","YES",null,null,null,null,"NO"}};
+              null,null,null,null,"3","YES",null,null,null,null,"NO","NO"}};
 
         columns = dmd.getColumns(null, null, "V2", null);
         JDBC.assertFullResultSet(columns,expectedDBMetaRows);

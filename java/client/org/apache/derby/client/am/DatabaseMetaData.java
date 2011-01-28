@@ -2838,6 +2838,54 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         return ps.executeQueryX();
     }
 
+    // ------------------- JDBC 4.1 -------------------------
+
+    /** See DatabaseMetaData javadoc */
+    public  boolean generatedKeyAlwaysReturned() { return true; }
+
+    public java.sql.ResultSet getPseudoColumns
+        ( String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern )
+        throws SQLException
+    {
+        try
+        {
+            synchronized (connection_) {
+                if (agent_.loggingEnabled()) {
+                    agent_.logWriter_.traceEntry
+                        ( this, "getPseudoColumns", catalog, schemaPattern, tableNamePattern, columnNamePattern );
+                }
+                return getPseudoColumnsX();
+            }
+        }
+        catch ( SqlException se )
+        {
+            throw se.getSQLException();
+        }
+    }
+
+    private ResultSet getPseudoColumnsX() throws SqlException
+    {
+        checkForClosedConnectionX();
+        String sql =
+            "SELECT \n" +
+            "        CAST(NULL AS VARCHAR(128)) AS TABLE_CAT, \n" +
+            "        CAST(NULL AS VARCHAR(128)) AS TABLE_SCHEM, \n" +
+            "        VARCHAR('', 128) AS TABLE_NAME, \n" +
+            "        VARCHAR('',128) AS COLUMN_NAME, \n" +
+            "        CAST(1 AS INT) AS DATA_TYPE, \n" +
+            "        CAST(1 AS INT) AS COLUMN_SIZE, \n" +
+            "        CAST(NULL AS INT) AS DECIMAL_DIGITS, \n" +
+            "        CAST(NULL AS INT) AS NUM_PREC_RADIX, \n" +
+            "        VARCHAR('',128) AS COLUMN_USAGE, \n" +
+            "        CAST(NULL AS VARCHAR(32672)) AS REMARKS, \n" +
+            "        CAST(NULL AS INT) AS CHAR_OCTET_LENGTH, \n" +
+            "        VARCHAR('NO',128) AS IS_NULLABLE \n" +
+            "    FROM SYSIBM.SYSDUMMY1 WHERE 1=0 WITH UR"
+            ;
+        PreparedStatement ps = connection_.prepareDynamicCatalogQuery(sql);
+        return ps.executeQueryX();
+    }
+
     //----------------------------helper methods----------------------------------
 
 

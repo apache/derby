@@ -893,7 +893,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 null, null, "1", "",
                 null, null, null, null,
                 "1", "YES", null, null,
-                null, null, "NO"
+                null, null, "NO", "NO"
             },
         };
         JDBC.assertFullResultSet( rs, expectedRows );
@@ -2487,8 +2487,17 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.VARCHAR,
                 Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER,
                 Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
-                Types.VARCHAR, Types.SMALLINT, Types.VARCHAR
+                Types.VARCHAR, Types.SMALLINT, Types.VARCHAR, Types.VARCHAR
                 };
+        boolean[]   nullability =
+        {
+            false,   false,  false,  false,
+            true,  true,   true,  true,
+            true,   true,   true,  false,
+            true,   true,   true,   true,
+            false,  false,  true,   true,
+            true,   true,   false,  false
+        };
         if (odbc == 1)
         {
             columnTypes[4] = Types.SMALLINT;
@@ -2498,17 +2507,21 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             columnTypes[13] = Types.SMALLINT;
             columnTypes[14] = Types.SMALLINT;
         }
-        assertMetaDataResultSet(rs,
-                new String[] {
-                "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME",
-                "DATA_TYPE", "TYPE_NAME", "COLUMN_SIZE", "BUFFER_LENGTH",
-                "DECIMAL_DIGITS", "NUM_PREC_RADIX", "NULLABLE", "REMARKS",
-                "COLUMN_DEF", "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH",
-                "ORDINAL_POSITION", "IS_NULLABLE", "SCOPE_CATLOG", "SCOPE_SCHEMA",
-                "SCOPE_TABLE", "SOURCE_DATA_TYPE", "IS_AUTOINCREMENT"
-               }, columnTypes
-        , null
-              );          
+        assertMetaDataResultSet
+            (
+             rs,
+             new String[]
+             {
+                 "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME",
+                 "DATA_TYPE", "TYPE_NAME", "COLUMN_SIZE", "BUFFER_LENGTH",
+                 "DECIMAL_DIGITS", "NUM_PREC_RADIX", "NULLABLE", "REMARKS",
+                 "COLUMN_DEF", "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH",
+                 "ORDINAL_POSITION", "IS_NULLABLE", "SCOPE_CATLOG", "SCOPE_SCHEMA",
+                 "SCOPE_TABLE", "SOURCE_DATA_TYPE", "IS_AUTOINCREMENT", "IS_GENERATEDCOLUMN"
+             },
+             columnTypes,
+             nullability
+             );          
     }
 
     /**
@@ -4879,6 +4892,90 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         return new Integer(i);
     }
 
+    /**
+     * Test methods added by JDBC 4.1
+     */
+    public void test_jdbc4_1() throws Exception
+    {
+        Version dataVersion = getDataVersion( getConnection() );
+        if ( dataVersion.compareTo( new Version( 10, 8, 0, 0 ) ) < 0 ) { return; }
+
+        Statement s = createStatement();
+        DatabaseMetaData dmd = getDMD();
+        println( "Testing JDBC 4.1 methods on a " + dmd.getClass().getName() );
+        Wrapper41DBMD wrapper = new Wrapper41DBMD( dmd );
+
+        //
+        // generatedKeyAlwaysReturned()
+        //
+        assertEquals( true, wrapper.generatedKeyAlwaysReturned() );
+
+        //
+        // getPseudoColumns()
+        //
+        ResultSet   rs = wrapper.getPseudoColumns( null, null, null, null );
+        assertMetaDataResultSet
+            (
+             rs,
+             new String[]
+             {
+                 "TABLE_CAT", "TABLE_SCHEM", "TABLE_NAME", "COLUMN_NAME",
+                 "DATA_TYPE", "COLUMN_SIZE", "DECIMAL_DIGITS", "NUM_PREC_RADIX",
+                 "COLUMN_USAGE", "REMARKS", "CHAR_OCTET_LENGTH", "IS_NULLABLE",
+             },
+             new int[]
+             {
+                 Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
+                 Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.INTEGER,
+                 Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR,
+             },
+             new boolean[]
+             {
+                 true,  true,   false,  false,
+                 false, false,  true,   true,
+                 false, true,   true,   false,
+             }
+             );
+        JDBC.assertFullResultSet( rs, new String[][] {} );
+
+        //
+        // IS_GENERATEDCOLUMN added to ResultSet returned by getColumns()
+        //
+        s.execute( "create table t_jdbc41( a int, b int, c generated always as ( -a ) )" );
+        ResultSet   rs2 = dmd.getColumns( null, "APP", "T_JDBC41", null );
+        String[][] expectedRows = new String[][]
+        {
+            {
+                "", "APP", "T_JDBC41", "A",
+                "4", "INTEGER", "10", null,
+                "0", "10", "1", "",
+                null, null, null, null,
+                "1", "YES", null, null,
+                null, null, "NO", "NO"
+            },
+            {
+                "", "APP", "T_JDBC41", "B",
+                "4", "INTEGER", "10", null,
+                "0", "10", "1", "",
+                null, null, null, null,
+                "2", "YES", null, null,
+                null, null, "NO", "NO"
+            },
+            {
+                "", "APP", "T_JDBC41", "C",
+                "4", "INTEGER", "10", null,
+                "0", "10", "1", "",
+                "GENERATED ALWAYS AS ( -a )", null, null, null,
+                "3", "YES", null, null,
+                null, null, "NO", "YES"
+            },
+        };
+        JDBC.assertFullResultSet( rs2, expectedRows );
+
+
+        s.execute( "drop table t_jdbc41" );
+    }
+    
     public void testBugFixes() throws SQLException {
         
         Statement s = createStatement();

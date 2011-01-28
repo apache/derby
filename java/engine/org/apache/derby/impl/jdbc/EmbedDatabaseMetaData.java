@@ -3439,6 +3439,26 @@ public class EmbedDatabaseMetaData extends ConnectionChild
         return s.executeQuery();
     }
 
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //  JDBC 4.1 - New public methods
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    /** See DatabaseMetaData javadoc */
+    public  boolean generatedKeyAlwaysReturned() { return true; }
+
+	/**
+    * See DatabaseMetaData javadoc. Empty ResultSet because Derby does
+    * not support pseudo columns.
+	*/
+	public ResultSet getPseudoColumns
+        ( String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern )
+        throws SQLException
+	{
+		return getSimpleQuery("getPseudoColumns");
+	}
+
 	//////////////////////////////////////////////////////////////
 	//
 	// MISC 
