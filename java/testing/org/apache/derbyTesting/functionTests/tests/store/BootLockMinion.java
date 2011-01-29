@@ -38,6 +38,8 @@ import org.apache.derby.jdbc.EmbeddedSimpleDataSource;
  */
 
 public class BootLockMinion {
+    private static int WAIT_FOR_DESTROY_MAX_MILLIS = BootLockTest.MINION_WAIT_MAX_MILLIS;
+    
     public static void main(String[] args) {
         String dbName = args[0];
         Connection con;
@@ -60,10 +62,13 @@ public class BootLockMinion {
             File checkFile = new File(BootLockTest.minionCompleteFileName);
             checkFile.createNewFile();
             //infinite loop until we get killed by BootLockTest.java
-            for(;;)
+            int wait = WAIT_FOR_DESTROY_MAX_MILLIS;
+            while(wait > 0)
             {
-                Thread.sleep(30000);
+                Thread.sleep(10000);
+                wait -= 10000;
             }
+            System.err.println("BootLockMinion exceeded maximum wait for destroy");
         }
         catch (Exception e) {
             e.printStackTrace();

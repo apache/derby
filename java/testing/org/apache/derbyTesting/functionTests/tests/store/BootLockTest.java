@@ -74,6 +74,8 @@ public class BootLockTest extends BaseJDBCTestCase {
 
     private final static String DATA_MULTIPLE_JBMS_ON_DB = "XSDB6";
     private final static String DATA_MULTIPLE_JBMS_FORCE_LOCK = "XSDB8";
+    // Ten minutes should hopefully be enough!
+    public static final int MINION_WAIT_MAX_MILLIS = 600000;
 
     /**
      * Constructor
@@ -130,7 +132,7 @@ public class BootLockTest extends BaseJDBCTestCase {
         Process p = null;
 
         p = execJavaCmd(cmd);
-        waitForMinionBoot(p,60000);
+        waitForMinionBoot(p,MINION_WAIT_MAX_MILLIS);
 
         // We now know minion has booted
 
@@ -174,6 +176,8 @@ public class BootLockTest extends BaseJDBCTestCase {
     }
 
     private void waitForMinionBoot(Process p, int waitmillis) throws InterruptedException {
+        boolean minionComplete;
+        int minionExitValue;
         StringBuffer failmsg = new StringBuffer();
         // boolean set to true once we find the  lock file
         File lockFile = new File(dbLockFile);
@@ -202,22 +206,38 @@ public class BootLockTest extends BaseJDBCTestCase {
         
         // If we got here, the database did not boot. Try to print the error.
         failmsg.append(
-                "Minion did not start or boot db in 60 seconds.\n" +
-                "----Minion's stderr:\n");
-        do {
-            try {
-                minionErrLine = minionSysErr.readLine();
-            } catch (Exception ioe) {
-                // may not always work, so just bail out.
-                failmsg.append("could not read minion's stderr");
-            }
+                "Minion did not start or boot db in " +
+                (MINION_WAIT_MAX_MILLIS/1000) +
+                " seconds.\n");                
+        try {
+            minionExitValue = p.exitValue();
+            minionComplete =true;
+            failmsg.append("exitValue = " + minionExitValue);
+        }catch (IllegalThreadStateException e )
+        {
+            // got exception on exitValue.
+            // still running ..
+            minionComplete=false;
+        }
+        // If the process exited try to print why.
+        if (minionComplete) {
+            failmsg.append("----Process exited. Minion's stderr:\n");
+            do {
+                try {
+                    minionErrLine = minionSysErr.readLine();
+                } catch (Exception ioe) {
+                    // may not always work, so just bail out.
+                    failmsg.append("could not read minion's stderr");
+                }
 
-            if (minionErrLine != null) {
-                failmsg.append(minionErrLine);
-            }
-        } while (minionErrLine != null);
+                if (minionErrLine != null) {
+                    failmsg.append(minionErrLine);
+                }
+            } while (minionErrLine != null);
 
-        failmsg.append("\n----Minion's stderr ended");
+            failmsg.append("\n----Minion's stderr ended");
+        }
+        
         p.destroy();
         p.waitFor();
         fail(failmsg.toString());
