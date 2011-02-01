@@ -615,24 +615,35 @@ public abstract class EmbedResultSet extends ConnectionChild
 		     	}
 
 			} finally {
-				isClosed = true;
+				markClosed();
 			    restoreContextStack();
 			}
 
 			// the idea is to release resources, so:
 			currentRow = null;
 
-            // to prevent infinite looping, tell our parent Statement
-            // that we have closed AFTER
-            // we have marked ourself as closed
-            if ( stmt != null) { stmt.closeMeOnCompletion(); }
-            if ( (owningStmt != null) && (owningStmt != stmt) ) { owningStmt.closeMeOnCompletion(); }
-            
 			// we hang on to theResults and messenger
 			// in case more calls come in on this resultSet
 		}
 
 	}
+
+    /**
+     * Mark this ResultSet as closed and trigger the closing of the Statement
+     * if necessary.
+     */
+    private void    markClosed()
+    {
+        if ( isClosed ) { return; }
+        
+        isClosed = true;
+
+        // to prevent infinite looping, tell our parent Statement
+        // that we have closed AFTER
+        // we have marked ourself as closed
+        if ( stmt != null) { stmt.closeMeOnCompletion(); }
+        if ( (owningStmt != null) && (owningStmt != stmt) ) { owningStmt.closeMeOnCompletion(); }
+    }
 
     /**
      * A column may have the value of SQL NULL; wasNull reports whether
@@ -4325,7 +4336,7 @@ public abstract class EmbedResultSet extends ConnectionChild
 			// basic cleanup and mark it as closed.
 			if (!isClosed) {
 				closeCurrentStream();
-				isClosed = true;
+                markClosed();
 			}
 
 			throw newSQLException(SQLState.LANG_RESULT_SET_NOT_OPEN, operation);
@@ -4350,7 +4361,7 @@ public abstract class EmbedResultSet extends ConnectionChild
             
 		if (appConn.isClosed()) {
             closeCurrentStream();
-            isClosed = true;
+            markClosed();
 			throw Util.noCurrentConnection();
         }
 	}

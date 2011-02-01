@@ -1892,6 +1892,16 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
     void markClosed(boolean removeListener) {
         openOnClient_ = false;
         markResultSetsClosed();
+        closeEverythingExceptResultSets( removeListener );
+    }
+
+    /**
+     * Close all resources except for ResultSets. This code was factored out
+     * of markClosed() so that closeMeOnCompletion() could close the
+     * Statement without having to re-close the already closed ResultSets.
+     */
+    private void    closeEverythingExceptResultSets( boolean removeListener )
+    {
         // in case a cursorName was set on the Statement but the Statement was
         // never used to execute a query, the cursorName will not be removed
         // when the resultSets are mark closed, so we need to remove the
@@ -3097,7 +3107,8 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                 }
 
                 // if we got here, then the Statement has no open ResultSets left
-                close();
+                openOnClient_ = false;
+                closeEverythingExceptResultSets( true );
             }
             catch (SQLException se) {  se.printStackTrace( agent_.getLogWriter() ); }
         }

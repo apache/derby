@@ -20,6 +20,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
+import org.apache.derbyTesting.functionTests.tests.jdbcapi.Wrapper41Statement;
 import org.apache.derbyTesting.functionTests.tests.jdbcapi.SetQueryTimeoutTest;
 import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -301,6 +302,56 @@ public class StatementTest
         
         assertNotNull( se );
         assertEquals( SQLTimeoutException.class.getName(), se.getClass().getName() );
+    }
+
+    /**
+     * Test the closeOnCompletion() and isCloseOnCompletion() methods
+     * when using ResultSets which close implicitly.
+     */
+    public void testCompletionClosure_jdbc4_1_implicitRSClosure() throws Exception
+    {
+        Connection  conn = getConnection();
+        conn.setHoldability( ResultSet.CLOSE_CURSORS_AT_COMMIT );
+        conn.setAutoCommit( true );
+
+        PreparedStatement   ps;
+        ResultSet   rs;
+        Wrapper41Statement  wrapper;
+
+        ps = conn.prepareStatement( "values ( 1 )" );
+        println( "Testing implicit closure WITH autocommit on a " + ps.getClass().getName() );
+        
+        wrapper = new Wrapper41Statement( ps );
+        wrapper.closeOnCompletion();
+
+        rs = ps.executeQuery();
+        rs.next();
+        rs.next();
+
+        assertTrue( rs.isClosed() );
+        assertTrue( ps.isClosed() );
+
+        conn.setAutoCommit( false );
+
+        // now retry the experiment with an explicit commit
+
+        ps = conn.prepareStatement( "values ( 1 )" );
+        println( "Testing implicit closure WITHOUT autocommit on a " + ps.getClass().getName() );
+        
+        wrapper = new Wrapper41Statement( ps );
+        wrapper.closeOnCompletion();
+
+        rs = ps.executeQuery();
+        rs.next();
+        rs.next();
+
+        assertFalse( rs.isClosed() );
+        assertFalse( ps.isClosed() );
+
+        conn.commit();
+        
+        assertTrue( rs.isClosed() );
+        assertTrue( ps.isClosed() );
     }
 
     /**

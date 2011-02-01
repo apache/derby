@@ -460,12 +460,16 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (statement_.openOnClient_ && statement_.isCatalogQuery_) {
             statement_.closeX();
         }
+        
+        nullDataForGC();
+    }
 
+    /** Close Statement if it is set to closeOnCompletion */
+    private void    closeStatementOnCompletion()
+    {
         statement_.closeMeOnCompletion();
         if ( (outerStatement_ != null) && (outerStatement_ != statement_) ) { outerStatement_.closeMeOnCompletion(); }
         outerStatement_ = null;
-
-        nullDataForGC();
     }
 
     public void nullDataForGC() {
@@ -4424,6 +4428,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (removeListener) {
             connection_.CommitAndRollbackListeners_.remove(this);
         }
+        closeStatementOnCompletion();
     }
 
     /**
