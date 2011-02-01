@@ -20,7 +20,7 @@ limitations under the License.
 <!-- 
 This is the template for the release summary which the Release Manager
 writes. The ReleaseNotesGenerator uses this summary in order to
-generate various sections of the release notes. Please replace all ???
+generate various sections of the release notes. Please replace all placeholders
 with real information.
 -->
 
@@ -68,11 +68,11 @@ with real information.
   <compilers>The 1.6.0_17-b04-248-9M3125 javac was used to compile all classes.</compilers>
 
   <!--
-         Say here whether you built the J2ME support and, if so, which
+         Say here whether you built the Java ME support and, if so, which
          tookit you used.
-         E.g.: J2ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).
+         E.g.: Java ME support was built using java.sun.com/j2me (j2me_cdc_fp-1_0_2).
   -->
-  <jsr169>J2ME support was built using libraries from phoneME Advanced Milestone Release 2.</jsr169>
+  <jsr169>Java ME support was built using libraries from phoneME Advanced Milestone Release 2.</jsr169>
 
 </buildInfo>
 
@@ -97,6 +97,15 @@ Derby functionality includes:
 <li>Command line tools: ij (SQL scripting), dblook (schema dump) and sysinfo (system info)</li>
 </ul>
 
+<p>
+Java and JDBC versions supported:
+<ul>
+  <li>Java SE 1.4 and higher with
+    JDBC 2.1, 3.0, 4.0 and 4.1</li>
+  <li>Java ME CDC/Foundation Profile 1.1 with
+    JSR-169 JDBC Optional Package for CDC/Foundation Profile.</li>
+</ul>
+</p>
 </overview>
 
 <newFeatures>
