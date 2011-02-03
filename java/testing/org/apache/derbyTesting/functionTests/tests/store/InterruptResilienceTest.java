@@ -507,7 +507,6 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             // assertTrue(c.isClosed()); // DERBY-4993
             assertTrue(Thread.interrupted());
         }
-
     }
 
     // Test that query if interrupted will get stopped as expected in
@@ -529,6 +528,70 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             assertSQLState("expected 40XC0", "40XC0", e); // dead statement
             assertTrue(c.isClosed());
         }
+
+    }
+
+
+    // We do the actual test inside a stored procedure so we can test this for
+    // client/server as well, otherwise we would just interrupt the client
+    // thread. This SP correponds to #testInterruptBatch
+    public static void tstInterruptBatch() throws Exception {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+        Statement s = c.createStatement();
+        s.executeUpdate("create table tmp(i int)");
+        PreparedStatement ps = c.prepareStatement("insert into tmp values (?)");
+
+        // fill batch:
+        for (int i=0; i < 10; i++) {
+            s.addBatch("insert into tmp values (" + i + ")");
+        }
+
+        s.executeBatch(); // should work OK, since no interrupt present
+
+        // refill batch:
+        for (int i=0; i < 10; i++) {
+            s.addBatch("insert into tmp values (" + i + ")");
+        }
+
+        try {
+            Thread.currentThread().interrupt();
+            s.executeBatch();
+            fail("expected CONN_INTERRUPT");
+        } catch (SQLException e) {
+            assertSQLState("expected CONN_INTERRUPT", "08000", e);
+            // assertTrue(c.isClosed()); // DERBY-4993
+            assertTrue(Thread.interrupted());
+        }
+    }
+
+
+    // Test that batched statements, if interrupted, will get stopped as
+    // expected.
+    public void testInterruptBatch() throws SQLException {
+        Connection c = getConnection();
+        Statement s = createStatement();
+        setAutoCommit(false);
+
+        s.executeUpdate(
+            "create procedure tstInterruptBatch() " +
+            "modifies sql data " +
+            "external name 'org.apache.derbyTesting.functionTests" +
+            ".tests.store.InterruptResilienceTest" +
+            ".tstInterruptBatch' " +
+            "language java parameter style java");
+        try {
+            s.executeUpdate("call tstInterruptBatch()");
+            fail("expected 40XC0 exception");
+        } catch (SQLException e) {
+            assertSQLState("expected 40XC0", "40XC0", e); // dead statement
+            assertTrue(c.isClosed());
+        }
+
+        setAutoCommit(false);
+        s = createStatement();
+        // The table created inside stored routine should be gone:
+        s.executeUpdate("create table tmp(i int)");
+        rollback();
 
     }
 }
