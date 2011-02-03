@@ -238,17 +238,24 @@ public class InterruptStatus {
 
     /**
      * Check if the we ever noticed and reset the thread's interrupt status
-     * flag to allow safe operation during execution.  Called when operations
-     * will be be prematurely terminated due to the interrupt.
+     * flag to allow safe operation during execution, or if the interrupt
+     * status flag is set now.  Called when operations want to be prematurely
+     * terminated due to interrupt.
      * <p/>
-     * If an interrupt status flag was seen, we set it back ON here and throw
-     * session level SQLState.CONN_INTERRUPT.
+     * If an interrupt status flag was seen, but temporarily switched off, we
+     * set it back ON here.
      *
      * @param lcc the language connection context for this session
-     * @throws StandardException (SQLState.CONN_INTERRUPT)
+     * @throws StandardException (session level SQLState.CONN_INTERRUPT) if
+     *                           interrupt seen
      */
     public static void throwIf(LanguageConnectionContext lcc)
             throws StandardException {
+
+        if (Thread.currentThread().isInterrupted()) {
+            setInterrupted();
+        }
+
         StandardException e = lcc.getInterruptedException();
 
         if (e != null) {
@@ -258,5 +265,6 @@ public class InterruptStatus {
 
             throw e;
         }
+
     }
 }

@@ -73,13 +73,9 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         p.put("derby.infolog.append", "true");
 
         suite.addTest(
-            // new CleanDatabaseTestSetup(
-            // TestConfiguration.singleUseDatabaseDecorator(
                 new SystemPropertyTestSetup(est, p, true));
 
         suite.addTest(
-            // new CleanDatabaseTestSetup(
-            // TestConfiguration.singleUseDatabaseDecorator(
                 new SystemPropertyTestSetup(cst, p, true));
         return suite;
     }
@@ -351,7 +347,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
     static class WorkerThread extends Thread {
         private final boolean readertest;
         private final long noOps;
-        public SQLException e; // if any seen
+        public Exception e; // if any seen
         private Connection c;
 
         public WorkerThread(Connection c, boolean readertest, long noOps) {
@@ -371,10 +367,11 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             try {
                 c.setAutoCommit(false);
 
-                PreparedStatement s = c.prepareStatement(
+                String pStmtText =
                     readertest ?
                     "select * from mtTab where i=?" :
-                    "insert into mtTab values (?,?)");
+                    "insert into mtTab values (?,?)";
+                PreparedStatement s = c.prepareStatement(pStmtText);
 
                 Random rnd = new Random();
 
@@ -385,24 +382,40 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                         // read
                         long candidate = randAbs(rnd.nextLong()) % noOps;
                         s.setLong(1, candidate);
-                        ResultSet rs = s.executeQuery();
-                        rs.next();
-                        if (interrupted()) {
-                            interruptsSeen++;
+
+                        // Since when we query, we might see 08000 if the
+                        // interrupt flag is set when the rs.getNextRow calls
+                        // checkCancellationFlag, we must be prepared to
+                        // reestablish connection.
+
+                        try {
+                            ResultSet rs = s.executeQuery();
+                            rs.next();
+                            if (interrupted()) {
+                                interruptsSeen++;
+                            }
+
+                            assertEquals("wrong row content",
+                                         candidate, rs.getLong(1));
+
+                            rs.close();
+                        } catch (SQLException e) {
+                            if ("08000".equals(e.getSQLState())) {
+                                c = thisConf.openDefaultConnection();
+                                s = c.prepareStatement(pStmtText);
+                                assertTrue(interrupted());
+                                interruptsSeen++;
+                                continue;
+                            } else {
+                                throw new Exception("expected 08000, saw" + e);
+                            }
                         }
-
-                        assertEquals("wrong row content",
-                                     candidate, rs.getLong(1));
-
-                        rs.close();
 
                         c.commit();
 
                         if (interrupted()) {
                             interruptsSeen++;
                         }
-
-                        rs.close();
                     } else {
                         s.setLong(1, ops);
                         s.setString(2, getName());
@@ -420,7 +433,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                     }
                 }
                 s.close();
-            } catch (SQLException e) {
+            } catch (Exception e) {
                 this.e = e;
             } finally {
                 try { c.close(); } catch (Exception e) {}
@@ -463,10 +476,6 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
      * RAFContainer4.
      */
     public void testRAFReadWriteMultipleThreads () throws SQLException {
-            try {
-                Class.forName("org.apache.derby.jdbc.EmbeddedDriver");
-            } catch (ClassNotFoundException e) {
-            }
         Statement s = createStatement();
 
         s.executeUpdate(
@@ -478,5 +487,48 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             "language java parameter style java");
 
         s.executeUpdate("call tstRAFReadWriteMultipleThreads()");
+    }
+
+    // We do the actual test inside a stored procedure so we can test this for
+    // client/server as well, otherwise we would just interrupt the client
+    // thread. This SP correponds to #testLongQueryInterrupt
+    public static void tstInterruptLongQuery() throws Exception {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+        Statement s = c.createStatement();
+
+        try {
+            Thread.currentThread().interrupt();
+            ResultSet rs = s.executeQuery(
+                "select * from sys.syscolumns");
+            while (rs.next()) {};
+            fail("expected CONN_INTERRUPT");
+        } catch (SQLException e) {
+            assertSQLState("expected CONN_INTERRUPT", "08000", e);
+            // assertTrue(c.isClosed()); // DERBY-4993
+            assertTrue(Thread.interrupted());
+        }
+
+    }
+
+    // Test that query if interrupted will get stopped as expected in
+    // BasicNoPutResultSetImpl#checkCancellationFlag
+    public void testLongQueryInterrupt() throws SQLException {
+        Connection c = getConnection();
+        Statement s = createStatement();
+        s.executeUpdate(
+            "create procedure tstInterruptLongQuery() " +
+            "reads sql data " +
+            "external name 'org.apache.derbyTesting.functionTests" +
+            ".tests.store.InterruptResilienceTest" +
+            ".tstInterruptLongQuery' " +
+            "language java parameter style java");
+        try {
+            s.executeUpdate("call tstInterruptLongQuery()");
+            fail("expected 40XC0 exception");
+        } catch (SQLException e) {
+            assertSQLState("expected 40XC0", "40XC0", e); // dead statement
+            assertTrue(c.isClosed());
+        }
+
     }
 }
