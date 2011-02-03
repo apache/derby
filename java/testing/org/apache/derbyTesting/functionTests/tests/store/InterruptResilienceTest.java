@@ -419,7 +419,24 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                     } else {
                         s.setLong(1, ops);
                         s.setString(2, getName());
-                        s.executeUpdate();
+
+                        try {
+                            s.executeUpdate();
+                        } catch (SQLException e) {
+                            // Occasionally we could see a lock wait being
+                            // interrupted: reconnect and continue. DERBY-5001.
+                            // See also LockInterruptTest.
+                            if ("08000".equals(e.getSQLState())) {
+                                c = thisConf.openDefaultConnection();
+                                s = c.prepareStatement(pStmtText);
+                                assertTrue(interrupted());
+                                interruptsSeen++;
+                                continue;
+                            } else {
+                                throw new Exception("expected 08000, saw" + e);
+                            }
+                        }
+
 
                         if (Thread.interrupted()) {
                             interruptsSeen++;
