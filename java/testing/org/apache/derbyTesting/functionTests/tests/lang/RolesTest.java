@@ -1060,6 +1060,23 @@ public class RolesTest extends BaseJDBCTestCase
             fail("execute of set role ? failed: [foo]" + e, e);
         }
 
+        // Test that trimming works:
+        try {
+            pstmt.setString(1, " BAR ");
+            int rowcnt = pstmt.executeUpdate();
+            assertEquals("rowcount from set role ? not 0", rowcnt, 0);
+        } catch (SQLException e) {
+            fail("execute of set role ? failed: [foo]" + e, e);
+        }
+
+        try {
+            int rowcnt = conn.createStatement().executeUpdate(
+                "set role ' BAR '");
+            assertEquals("rowcount from set role ? not 0", rowcnt, 0);
+        } catch (SQLException e) {
+            fail("execute of set role ? failed: [foo]" + e, e);
+        }
+
 
         try {
             pstmt.setString(1, "");
