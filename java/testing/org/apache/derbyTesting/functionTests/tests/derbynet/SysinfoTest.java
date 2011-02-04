@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.derbynet;
 import java.io.File;
 import java.net.URL;
 import java.security.AccessController;
+import java.util.ArrayList;
 import java.util.Properties;
 
 import junit.framework.Test;
@@ -45,7 +46,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class SysinfoTest extends BaseJDBCTestCase {
 
     private static String TARGET_POLICY_FILE_NAME="sysinfo.policy";
-    private String [] OUTPUT;
+    private ArrayList OUTPUT;
 
     /**
      * Set to true before adding a test to the suite to add some extra properties.
@@ -62,41 +63,28 @@ public class SysinfoTest extends BaseJDBCTestCase {
         /**
          * Output from sysinfo without the extra properties. 
          */
-        String [] OUTPUT1 = {
-            "--------- Derby Network Server Information --------" , 
-            "derby.drda.maxThreads=0" ,
-            "derby.drda.sslMode=off" , 
-            "derby.drda.keepAlive=true" , 
-            "derby.drda.minThreads=0" , 
-            "derby.drda.portNumber="+TestConfiguration.getCurrent().getPort(), 
-            "derby.drda.logConnections=false" ,
-            "derby.drda.timeSlice=0" , 
-            "derby.drda.startNetworkServer=false" , 
-            "derby.drda.traceAll=false" ,
-            "--------- Derby Information --------" , 
-            "------------------------------------------------------" , 
-            "----------------- Locale Information -----------------" , 
-            "------------------------------------------------------"};
+        ArrayList OUTPUT1 = new ArrayList();
+        OUTPUT1.add("--------- Derby Network Server Information --------");
+        OUTPUT1.add("derby.drda.maxThreads=0");
+        OUTPUT1.add("derby.drda.sslMode=off"); 
+        OUTPUT1.add("derby.drda.keepAlive=true"); 
+        OUTPUT1.add("derby.drda.minThreads=0");
+        OUTPUT1.add("derby.drda.portNumber="+TestConfiguration.getCurrent().getPort());
+        OUTPUT1.add("derby.drda.logConnections=false");
+        OUTPUT1.add("derby.drda.timeSlice=0"); 
+        OUTPUT1.add("derby.drda.startNetworkServer=false"); 
+        OUTPUT1.add("derby.drda.traceAll=false");
+        OUTPUT1.add("--------- Derby Information --------"); 
+        OUTPUT1.add("------------------------------------------------------"); 
+        OUTPUT1.add("----------------- Locale Information -----------------" ); 
+        OUTPUT1.add("------------------------------------------------------");
 
         /**
          * Output by sysinfo with the extra properties.
          */
-        String [] OUTPUT2 = {
-            "--------- Derby Network Server Information --------" , 
-            "derby.drda.securityMechanism=USER_ONLY_SECURITY" , 
-            "derby.drda.maxThreads=0" ,
-            "derby.drda.sslMode=off" ,
-            "derby.drda.keepAlive=true" , 
-            "derby.drda.minThreads=0" , 
-            "derby.drda.portNumber="+TestConfiguration.getCurrent().getPort() , 
-            "derby.drda.logConnections=false" ,
-            "derby.drda.timeSlice=0" ,
-            "derby.drda.startNetworkServer=false" , 
-            "derby.drda.traceAll=false" ,
-            "--------- Derby Information --------" , 
-            "------------------------------------------------------" , 
-            "----------------- Locale Information -----------------" , 
-            "------------------------------------------------------"};
+        ArrayList OUTPUT2 = (ArrayList) OUTPUT1.clone();
+        OUTPUT2.add("--------- Derby Network Server Information --------"); 
+        OUTPUT2.add("derby.drda.securityMechanism=USER_ONLY_SECURITY"); 
 
         if (useProperties)
             OUTPUT = OUTPUT2;
@@ -208,7 +196,6 @@ public class SysinfoTest extends BaseJDBCTestCase {
 
         Process p = execJavaCmd(SysInfoCmd);
         String s = readProcessOutput(p);
-        s = sed(s);
  
         print("testSysinfo", s);
   
@@ -224,8 +211,6 @@ public class SysinfoTest extends BaseJDBCTestCase {
 
         String s = NetworkServerTestSetup.
         getNetworkServerControl(TestConfiguration.getCurrent().getPort()).getSysinfo();
-        s = sed(s);
-
         print("testSysinfoMethod", s);
         assertMatchingStringExists(s);
     }		
@@ -243,45 +228,8 @@ public class SysinfoTest extends BaseJDBCTestCase {
                 "-p", String.valueOf(TestConfiguration.getCurrent().getPort())};
         Process p = execJavaCmd(SysInfoLocaleCmd);
         String s = readProcessOutput(p);
-        //System.out.println("before sed");
-        //System.out.println(s);
-        s = sed(s);
-
-        //System.out.println("after sed");
-        //System.out.println(s);
         print("testSysinfoLocale", s);
         assertMatchingStringExists(s);
-    }
-
-    /**
-     * Removes lines containing a number of preset words from the given string.
-     * Also trims the string to make it easier to compare.
-     * 
-     * @param s the string to remove lines from
-     * @return the string with the lines removed
-     */
-    private String sed(String s) {
-        /**
-         * Lines containing these strings will be deleted from the output before
-         * asserting that output is correct.
-         * ibm jvm prints extra line for java.fullversion
-         */
-        String[] sed = {"Version", "version", "Java", "OS",
-        		"J9VM", "JIT", "GC",
-                "[0-9*]\\.[0-9*]\\.[0-9*]","JRE - JDBC","derby.drda.traceDirectory",
-                "Unable to access Protection Domain","listing properties",
-                "Current Locale",           //Remove these because locale info is
-                "Found support for locale:" //not printed when running from jars..
-        };                          
-
-        for (int i = 0; i < sed.length; i++) {
-            // first, replace \r\n with \n, that's needed if we're on
-            // windows
-            s = s.replaceAll("\r\n", "\n");
-            s = s.replaceAll("(?m)^.*" + sed[i] + ".*\n", "");
-        }
-        s = s.trim();
-        return s;
     }
 
     /**
@@ -320,33 +268,24 @@ public class SysinfoTest extends BaseJDBCTestCase {
         }
         return url.getPath();
     }
+
     
+    /**
+     *  Check sysinfo output to make sure that it contains strings
+     *  specfied in OUTPUT. This was changed in DERBY-4997 to no
+     *  longer use a sed method to strip out the unchecked lines,
+     *  but rather to just make sure the ones we want to check are 
+     *  there
+     *  
+     * @param actualOutput Actual sysinfo output 
+     */
     private void assertMatchingStringExists(String actualOutput) {
-        String delimiter = "\n";
-        String [] actualOutputArray = actualOutput.split(delimiter);
-        int lineCount = actualOutputArray.length;
-        assertEquals(OUTPUT.length, lineCount);
-        for (int i=0 ; i<lineCount ; i++)
-        {
-            String fullExpOutput="";
-            for (int j=0 ; j < OUTPUT.length; j++) {
-                fullExpOutput=fullExpOutput + OUTPUT[j] + "\n";
-            }
-            String ns = actualOutputArray[i];
-            assertTrue("Output string: " + ns + 
-                "\ndoesn't match any of the expected strings: \n" + 
-                fullExpOutput,
-                searchMatchingString(ns));
-        }
+        for (int i=0; i < OUTPUT.size(); i ++ ) {
+            String s = (String) OUTPUT.get(i);
+            assertTrue("cannot find " + s + " in actualOutput:" + actualOutput,
+                    actualOutput.indexOf(s) >=0);            
+        }        
     }
         
-    private boolean searchMatchingString(String substring){
-        for (int i=0; i<OUTPUT.length;i++)
-        {
-            if (!substring.equals(OUTPUT[i]))
-                continue;
-            else return true;
-        }
-        return false;
-    }
+ 
 }
