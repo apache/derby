@@ -22,7 +22,6 @@
  */
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,6 +33,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -222,7 +222,11 @@ public class SetTransactionIsolationTest extends BaseJDBCTestCase {
         TestSuite suite = new TestSuite(name);
         suite.addTestSuite(SetTransactionIsolationTest.class);
 
-        return new CleanDatabaseTestSetup(suite) {
+        // Some test cases expect lock timeouts, so reduce the timeout to
+        // make the test go faster.
+        Test test = DatabasePropertyTestSetup.setLockTimeouts(suite, 1, 3);
+
+        return new CleanDatabaseTestSetup(test) {
 
             /**
              * Create and populate table
@@ -268,15 +272,6 @@ public class SetTransactionIsolationTest extends BaseJDBCTestCase {
                 s.executeUpdate("INSERT INTO T1 VALUES(3,'Third Hello')");
 
                 s.executeUpdate("create table t3 (i integer)");
-                
-
-                CallableStatement cs = conn
-                        .prepareCall("CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY (?, ?)");
-                cs.setString(1, "derby.locks.waitTimeout");
-                cs.setString(2, "3");
-                cs.execute();
-                cs.setString(1, "derby.locks.deadlockTimeout");
-                cs.setString(2, "3");
             }
 
         };
