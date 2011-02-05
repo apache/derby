@@ -2184,7 +2184,7 @@ public class ReplicationRun extends BaseTestCase
         
         securityOption = "-noSecurityManager";
         
-        String workingDirName = masterDatabasePath +FS+ masterDbSubPath;
+        String workingDirName = masterDatabasePath +FS+ dbSubDirPath;
         
         final String[] commandElements = {ReplicationRun.getMasterJavaExecutableName()
                 , " -Dderby.system.home=" + workingDirName
