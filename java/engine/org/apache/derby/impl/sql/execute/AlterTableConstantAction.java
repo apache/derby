@@ -1530,24 +1530,96 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                 lcc, columnDescriptor.getDefaultDescriptor(dd));
 		}
 
-		// need to deal with triggers if has referencedColumns
+		//Now go through each trigger on this table and see if the column 
+		//being dropped is part of it's trigger columns or trigger action 
+		//columns which are used through REFERENCING clause
 		GenericDescriptorList tdl = dd.getTriggerDescriptors(td);
 		Enumeration descs = tdl.elements();
 		while (descs.hasMoreElements())
 		{
 			TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
+			//If we find that the trigger is dependent on the column being 
+			//dropped because column is part of trigger columns list, then
+			//we will give a warning or drop the trigger based on whether
+			//ALTER TABLE DROP COLUMN is RESTRICT or CASCADE. In such a
+			//case, no need to check if the trigger action columns referenced
+			//through REFERENCING clause also used the column being dropped.
+			boolean triggerDroppedAlready = false;
+
 			int[] referencedCols = trd.getReferencedCols();
-			if (referencedCols == null)
+			if (referencedCols != null) {
+				int refColLen = referencedCols.length, j;
+				boolean changed = false;
+				for (j = 0; j < refColLen; j++)
+				{
+					if (referencedCols[j] > droppedColumnPosition)
+	                {
+						//Trigger is not defined on the column being dropped
+						//but the column position of trigger column is changing
+						//because the position of the column being dropped is
+						//before the the trigger column
+						changed = true;
+	                }
+					else if (referencedCols[j] == droppedColumnPosition)
+					{
+						//the trigger is defined on the column being dropped
+						if (cascade)
+						{
+	                        trd.drop(lcc);
+	                        triggerDroppedAlready = true;
+							activation.addWarning(
+								StandardException.newWarning(
+	                                SQLState.LANG_TRIGGER_DROPPED, 
+	                                trd.getName(), td.getName()));
+						}
+						else
+						{	// we'd better give an error if don't drop it,
+							// otherwsie there would be unexpected behaviors
+							throw StandardException.newException(
+	                            SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
+	                            dm.getActionString(DependencyManager.DROP_COLUMN),
+	                            columnName, "TRIGGER",
+	                            trd.getName() );
+						}
+						break;
+					}
+				}
+
+				// change triggers to refer to columns in new positions
+				if (j == refColLen && changed)
+				{
+					dd.dropTriggerDescriptor(trd, tc);
+					for (j = 0; j < refColLen; j++)
+					{
+						if (referencedCols[j] > droppedColumnPosition)
+							referencedCols[j]--;
+					}
+					dd.addDescriptor(trd, sd,
+									 DataDictionary.SYSTRIGGERS_CATALOG_NUM,
+									 false, tc);
+				}
+			}
+
+			//If the trigger under consideration already got dropped through 
+			//the referencedCols loop above, then move to next trigger
+			if (triggerDroppedAlready) continue;
+			
+			//None of the triggers use column being dropped as a trigger 
+			//column. Check if the column being dropped is getting used 
+			//inside the trigger action through REFERENCING clause.
+			int[] referencedColsInTriggerAction = trd.getReferencedColsInTriggerAction();
+			if (referencedColsInTriggerAction == null)
 				continue;
-			int refColLen = referencedCols.length, j;
-			boolean changed = false;
-			for (j = 0; j < refColLen; j++)
+
+			int refColInTriggerActionLen = referencedColsInTriggerAction.length, j;
+			boolean changedColPositionInTriggerAction = false;
+			for (j = 0; j < refColInTriggerActionLen; j++)
 			{
-				if (referencedCols[j] > droppedColumnPosition)
-                {
-					changed = true;
-                }
-				else if (referencedCols[j] == droppedColumnPosition)
+				if (referencedColsInTriggerAction[j] > droppedColumnPosition)
+				{
+					changedColPositionInTriggerAction = true;
+				}
+				else if (referencedColsInTriggerAction[j] == droppedColumnPosition)
 				{
 					if (cascade)
 					{
@@ -1559,7 +1631,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					}
 					else
 					{	// we'd better give an error if don't drop it,
-						// otherwsie there would be unexpected behaviors
+						// otherwise there would be unexpected behaviors
 						throw StandardException.newException(
                             SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
                             dm.getActionString(DependencyManager.DROP_COLUMN),
@@ -1568,20 +1640,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 					}
 					break;
 				}
-			}
-
-			// change triggers to refer to columns in new positions
-			if (j == refColLen && changed)
-			{
-				dd.dropTriggerDescriptor(trd, tc);
-				for (j = 0; j < refColLen; j++)
-				{
-					if (referencedCols[j] > droppedColumnPosition)
-						referencedCols[j]--;
-				}
-				dd.addDescriptor(trd, sd,
-								 DataDictionary.SYSTRIGGERS_CATALOG_NUM,
-								 false, tc);
 			}
 		}
 
