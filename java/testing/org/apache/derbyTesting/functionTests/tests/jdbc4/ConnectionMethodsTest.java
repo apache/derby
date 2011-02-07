@@ -647,20 +647,20 @@ public class ConnectionMethodsTest extends Wrapper41Test
         
         try {
             wrapper.getNetworkTimeout();
-            fail( "Should object that the connection is closed." );
+            fail( "Should raise an Unimplemented Feature exception." );
         }
         catch (SQLException se)
         {
-            assertSQLState( CLOSED_CONNECTION, se );
+            assertEquals( SQLFeatureNotSupportedException.class.getName(), se.getClass().getName() );
         }
         
         try {
             wrapper.setNetworkTimeout( null, 3 );
-            fail( "Should object that the connection is closed." );
+            fail( "Should raise an Unimplemented Feature exception." );
         }
         catch (SQLException se)
         {
-            assertSQLState( CLOSED_CONNECTION, se );
+            assertEquals( SQLFeatureNotSupportedException.class.getName(), se.getClass().getName() );
         }
     }
     

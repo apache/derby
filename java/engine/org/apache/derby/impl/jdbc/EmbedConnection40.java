@@ -320,13 +320,11 @@ public class EmbedConnection40 extends EmbedConnection30 {
     
     public int getNetworkTimeout() throws SQLException
     {
-        checkIfClosed();
         throw Util.notImplemented();
     }
     
     public void setNetworkTimeout( Executor executor, int milliseconds ) throws SQLException
     {
-        checkIfClosed();
         throw Util.notImplemented();
     }
     

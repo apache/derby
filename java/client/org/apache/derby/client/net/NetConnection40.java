@@ -453,33 +453,11 @@ public class  NetConnection40 extends org.apache.derby.client.net.NetConnection 
 
     public int getNetworkTimeout() throws SQLException
     {
-        try
-        {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "getNetworkTimeout");
-            }
-            checkForClosedConnection();
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
         throw SQLExceptionFactory.notImplemented ("getNetworkTimeout");
     }
     
     public void setNetworkTimeout( Executor executor, int milliseconds ) throws SQLException
     {
-        try
-        {
-            if (agent_.loggingEnabled()) {
-                agent_.logWriter_.traceEntry(this, "setNetworkTimeout");
-            }
-            checkForClosedConnection();
-        }
-        catch ( SqlException se )
-        {
-            throw se.getSQLException();
-        }
         throw SQLExceptionFactory.notImplemented ("setNetworkTimeout");
     }
 
