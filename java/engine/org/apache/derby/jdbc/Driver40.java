@@ -45,7 +45,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
+import java.util.logging.Logger;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 
 /** -- jdbc 2.0. extension -- */
@@ -189,4 +191,17 @@ public class Driver40 extends Driver30 {
         return new EmbedXAConnection40(
             eds, ra, user, password, requestPassword);
     }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  Logger getParentLogger()
+        throws SQLFeatureNotSupportedException
+    {
+        throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
+    }
+
 }
