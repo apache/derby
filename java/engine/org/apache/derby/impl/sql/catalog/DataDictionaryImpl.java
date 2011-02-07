@@ -1624,6 +1624,7 @@ public final class	DataDictionaryImpl
 						(TupleDescriptor) null,
 						(List) null,
 						false,
+                        TransactionController.ISOLATION_REPEATABLE_READ,
 						tc);
 	}
 
@@ -5067,9 +5068,16 @@ public final class	DataDictionaryImpl
 					false);
 	}
 
-	/** get all the statistiscs descriptors for a given table.
-	 * @param  td	Table Descriptor for which I need statistics
-	 */
+    /**
+     * Returns all the statistics descriptors for the given table.
+     * <p>
+     * NOTE: As opposed to most other data dictionary lookups, this operation is
+     * performed with isolation level READ_UNCOMMITTED. The reason is to avoid
+     * deadlocks with inserts into the statistics system table.
+     *
+     * @param td {@code TableDescriptor} for which I need statistics
+     * @return A list of tuple descriptors, possibly empty.
+     */
 	public List getStatisticsDescriptors(TableDescriptor td)
 		throws StandardException
 	{
@@ -5081,13 +5089,16 @@ public final class	DataDictionaryImpl
 		UUIDStringOrderable = getIDValueAsCHAR(td.getUUID());
 		ExecIndexRow keyRow = exFactory.getIndexableRow(1);
 		keyRow.setColumn(1, UUIDStringOrderable);
-		
+
 		getDescriptorViaIndex(SYSSTATISTICSRowFactory.SYSSTATISTICS_INDEX1_ID,
-							  keyRow,
-							  (ScanQualifier [][])null,
-							  ti, 
-							  (TupleDescriptor)null,
-							  statDescriptorList, false);
+                              keyRow,
+                              (ScanQualifier [][])null,
+                              ti,
+                              (TupleDescriptor)null,
+                              statDescriptorList,
+                              false,
+                              TransactionController.ISOLATION_READ_UNCOMMITTED,
+                              getTransactionCompile());
 
 		return statDescriptorList;
 	}
@@ -8567,63 +8578,16 @@ public final class	DataDictionaryImpl
 		// Get the current transaction controller
 		TransactionController tc = getTransactionCompile();
 
-		return getDescriptorViaIndexMinion(
-			indexId,
-			keyRow,
-			scanQualifiers,
-			ti,
-			parentTupleDescriptor,
-			list,
-			forUpdate,
-			TransactionController.ISOLATION_REPEATABLE_READ,
-			tc);
-	}
-
-	/**
-	 * Return a (single or list of) catalog row descriptor(s) from a
-	 * system table where the access is from the index to the heap.
-	 *
-	 * This overload variant takes an explicit tc, in contrast to the normal
-	 * one which uses the one returned by getTransactionCompile.
-	 *
-	 * @param indexId	The id of the index (0 to # of indexes on table) to use
-	 * @param keyRow	The supplied ExecIndexRow for search
-	 * @param ti		The TabInfoImpl to use
-	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
-	 * @param list      The list to build, if supplied.  If null, then
-	 *					caller expects a single descriptor
-	 * @param forUpdate	Whether or not to open the index for update.
-	 * @param tc        Transaction controller
-	 *
-	 * @return	The last matching descriptor
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	private final TupleDescriptor getDescriptorViaIndex(
-						int indexId,
-						ExecIndexRow keyRow,
-						ScanQualifier [][] scanQualifiers,
-						TabInfoImpl ti,
-						TupleDescriptor parentTupleDescriptor,
-						List list,
-						boolean forUpdate,
-						TransactionController tc)
-			throws StandardException
-	{
-		if (tc == null) {
-			tc = getTransactionCompile();
-		}
-
-		return getDescriptorViaIndexMinion(
-			indexId,
-			keyRow,
-			scanQualifiers,
-			ti,
-			parentTupleDescriptor,
-			list,
-			forUpdate,
-			TransactionController.ISOLATION_REPEATABLE_READ,
-			tc);
+        return getDescriptorViaIndexMinion(
+                indexId,
+                keyRow,
+                scanQualifiers,
+                ti,
+                parentTupleDescriptor,
+                list,
+                forUpdate,
+                TransactionController.ISOLATION_REPEATABLE_READ,
+                tc);
 	}
 
 	/**
@@ -8697,7 +8661,6 @@ public final class	DataDictionaryImpl
 		CatalogRowFactory		rf = ti.getCatalogRowFactory();
 		ConglomerateController	heapCC;
 		ExecIndexRow	  		indexRow1;
-		ExecIndexRow			indexTemplateRow;
 		ExecRow 				outRow;
 		RowLocation				baseRowLocation;
 		ScanController			scanController;
@@ -8709,13 +8672,6 @@ public final class	DataDictionaryImpl
 				 TransactionController.ISOLATION_REPEATABLE_READ ||
 				 isolationLevel ==
 				 TransactionController.ISOLATION_READ_UNCOMMITTED);
-
-			if (isolationLevel ==
-				 TransactionController.ISOLATION_READ_UNCOMMITTED) {
-				// list not used for this case
-				SanityManager.ASSERT(list == null);
-			}
-
 		}
 
 		outRow = rf.makeEmptyRow();
@@ -8828,7 +8784,10 @@ public final class	DataDictionaryImpl
 				// possibly see that the base row does not exist even if the
 				// index row did.  This mode is currently only used by
 				// TableNameInfo's call to hashAllTableDescriptorsByTableId,
-				// cf. DERBY-3678. A table's schema descriptor is attempted
+				// cf. DERBY-3678, and by getStatisticsDescriptors,
+                // cf. DERBY-4881.
+                //
+                // For the former call, a table's schema descriptor is attempted
 				// read, and if the base row for the schema has gone between
 				// reading the index and the base table, the table that needs
 				// this information has gone, too.  So, the table should not
@@ -8864,7 +8823,7 @@ public final class	DataDictionaryImpl
 			{
 				break;
 			}
-			else
+			else if (td != null)
 			{
 				list.add(td);
 			}
