@@ -53,11 +53,9 @@ import org.apache.derby.vti.VTIEnvironment;
 	
 	This virtual table can be invoked by calling it
 	directly, and supplying the schema name and table name as arguments.
-	<PRE> select * from new org.apache.derby.diag.SpaceTable('MYSCHEMA','MYTABLE') t; </PRE>
+    <PRE> SELECT * FROM TABLE(SYSCS_DIAG.SPACE_TABLE('MYSCHEMA', 'MYTABLE')) T;  </PRE>
     If the schema name is not supplied, the default schema is used.
-    <PRE> select * from new org.apache.derby.diag.SpaceTable('MYTABLE') t; </PRE>
-    Alternatively, the table can be invoked through the system alias SpaceTable
-    <PRE> select * from new SPACETABLE('MYTABLE') t; </PRE>
+    <PRE> SELECT * FROM TABLE(SYSCS_DIAG.SPACE_TABLE('MYTABLE')) T; </PRE>
     <P>
     NOTE: Both the schema name and the table name must be any expression that evaluates to a
     string data type. If you created a schema or table name as a non-delimited identifier,
@@ -102,7 +100,7 @@ import org.apache.derby.vti.VTIEnvironment;
     select v.*
     from SYS.SYSSCHEMAS s,
          SYS.SYSTABLES t,
-         new org.apache.derby.diag.SpaceTable(SCHEMANAME,TABLENAME) v
+         TABLE(SYSCS_DIAG.SPACE_TABLE(SCHEMANAME, TABLENAME)) v
     where s.SCHEMAID = t.SCHEMAID;
     </PRE>
 */
