@@ -76,6 +76,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(Derby3650Test.suite());
         suite.addTest(Derby2017LayerBTest.suite());
         suite.addTest(AbortTest.suite());
+        suite.addTest(Driver40Test.suite());
 		
 		return suite;
 	}

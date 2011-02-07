@@ -47,7 +47,24 @@ public class ClientDriver implements java.sql.Driver {
     // Keep track of the registere driver so that we can deregister it if we're a stored proc.
     static private ClientDriver registeredDriver__ = null;
 
-    static {
+	static
+	{
+        try {
+            //
+            // We'd rather load this slightly more capable driver.
+            // But if the vm level doesn't support it, then we fall
+            // back on the JDBC3 level driver.
+            //
+            Class.forName( "org.apache.derby.jdbc.ClientDriver40" );
+        }
+        catch (Throwable e)
+        {
+            registerMe( new ClientDriver() );
+        }
+	}
+
+	protected static void   registerMe( ClientDriver me )
+	{
         // This may possibly hit the race-condition bug of java 1.1.
         // The Configuration static clause should execute before the following line does.
         if (Configuration.exceptionsOnLoadResources != null) {
@@ -57,7 +74,7 @@ public class ClientDriver implements java.sql.Driver {
                             exceptionsOnLoadDriver__);
         }
         try {
-            registeredDriver__ = new ClientDriver();
+            registeredDriver__ = me;
             java.sql.DriverManager.registerDriver(registeredDriver__);
         } catch (java.sql.SQLException e) {
             // A null log writer is passed, because jdbc 1 sql exceptions are automatically traced

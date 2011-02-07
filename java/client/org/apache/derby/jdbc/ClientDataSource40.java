@@ -22,6 +22,8 @@
 package org.apache.derby.jdbc;
 
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
@@ -137,6 +139,21 @@ public class ClientDataSource40 extends ClientDataSource {
             throw new SqlException(null,new ClientMessageId(SQLState.UNABLE_TO_UNWRAP),
                     interfaces).getSQLException();
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  Logger getParentLogger()
+        throws SQLFeatureNotSupportedException
+    {
+        throw (SQLFeatureNotSupportedException)
+            (
+             new SqlException( null, new ClientMessageId(SQLState.NOT_IMPLEMENTED), "getParentLogger" )
+             ).getSQLException();
     }
     
 }

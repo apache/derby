@@ -74,8 +74,24 @@ public class AutoloadedDriver implements Driver
 	
 	static
 	{
+        try {
+            //
+            // We'd rather load this slightly more capable driver.
+            // But if the vm level doesn't support it, then we fall
+            // back on the JDBC3 level driver.
+            //
+            Class.forName( "org.apache.derby.jdbc.AutoloadedDriver40" );
+        }
+        catch (Throwable e)
+        {
+            registerMe( new AutoloadedDriver() );
+        }
+	}
+
+	protected static void   registerMe( AutoloadedDriver me )
+	{
 		try {
-            _autoloadedDriver = new AutoloadedDriver();
+            _autoloadedDriver = me;
             DriverManager.registerDriver( _autoloadedDriver );
             activeautoloadeddriver = true;
 		}

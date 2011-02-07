@@ -22,6 +22,8 @@
 package org.apache.derby.jdbc;
 
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 import org.apache.derby.impl.jdbc.Util;
@@ -219,4 +221,17 @@ public class EmbeddedDataSource40 extends EmbeddedDataSource {
                     interfaces);
         }
     }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  Logger getParentLogger()
+        throws SQLFeatureNotSupportedException
+    {
+        throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
+    }
+
 }

@@ -24,6 +24,8 @@ package org.apache.derby.jdbc;
 import org.apache.derby.iapi.jdbc.ResourceAdapter;
 
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 import javax.sql.DataSource;
 import javax.sql.XAConnection;
 import javax.sql.XADataSource;
@@ -97,6 +99,18 @@ public class EmbeddedXADataSource40 extends EmbeddedXADataSource {
             throw Util.generateCsSQLException(SQLState.UNABLE_TO_UNWRAP,
                     interfaces);
         }
+    }
+    
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  Logger getParentLogger()
+        throws SQLFeatureNotSupportedException
+    {
+        throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
     }
 	
 }

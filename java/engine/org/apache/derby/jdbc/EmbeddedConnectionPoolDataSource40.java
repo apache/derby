@@ -21,6 +21,8 @@
 package org.apache.derby.jdbc;
 
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.logging.Logger;
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 import javax.sql.PooledConnection;
@@ -90,4 +92,17 @@ public class EmbeddedConnectionPoolDataSource40
                     interfaces);
         }
     }
+   
+    ////////////////////////////////////////////////////////////////////
+    //
+    // INTRODUCED BY JDBC 4.1 IN JAVA 7
+    //
+    ////////////////////////////////////////////////////////////////////
+
+    public  Logger getParentLogger()
+        throws SQLFeatureNotSupportedException
+    {
+        throw (SQLFeatureNotSupportedException) Util.notImplemented( "getParentLogger()" );
+    }
+
 }

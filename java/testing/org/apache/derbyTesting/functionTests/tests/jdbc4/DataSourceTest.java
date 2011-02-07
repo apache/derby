@@ -294,6 +294,38 @@ public class DataSourceTest extends BaseJDBCTestCase {
     }
 
     /**
+     * <p>
+     * Test the new method added by JDBC 4.1.
+     * </p>
+     */
+    public void test_jdbc4_1() throws Exception
+    {
+        DataSource  ds = JDBCDataSource.getDataSource();
+        ConnectionPoolDataSource cpds = J2EEDataSource.getConnectionPoolDataSource();
+        XADataSource xads = J2EEDataSource.getXADataSource();
+
+        vetDSjdbc4_1( ds );
+        vetDSjdbc4_1( cpds );
+        vetDSjdbc4_1( xads );
+    }
+    private void    vetDSjdbc4_1( CommonDataSource cds ) throws Exception
+    {
+        println( "Vetting a " + cds.getClass().getName() );
+
+        Wrapper41DataSource wrapper = new Wrapper41DataSource( cds );
+        
+        try {
+            wrapper.getParentLogger();
+            fail( "Should raise an Unimplemented Feature exception." );
+        }
+        catch (SQLException se)
+        {
+            assertEquals( SQLFeatureNotSupportedException.class.getName(), se.getClass().getName() );
+        }
+    }
+
+
+    /**
      * Return suite with all tests of the class.
      */
     public static Test suite() {

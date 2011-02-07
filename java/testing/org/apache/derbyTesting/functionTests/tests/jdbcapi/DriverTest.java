@@ -217,6 +217,11 @@ public class DriverTest extends BaseJDBCTestCase {
 
         assertEquals(dbmd.getDriverMajorVersion(), driver.getMajorVersion());
         assertEquals(dbmd.getDriverMinorVersion(), driver.getMinorVersion());
+
+        // test that the driver is one of the special 40 versions if we are running
+        // on Java 6 or higher
+        println( "Driver is a " + driver.getClass().getName() );
+        assertEquals( JDBC.vmSupportsJDBC4(), driver.getClass().getName().endsWith( "40" ) );
         
         conn.close();
     }
