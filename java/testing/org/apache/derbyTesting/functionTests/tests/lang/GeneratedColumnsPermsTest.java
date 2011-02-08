@@ -637,6 +637,152 @@ public class GeneratedColumnsPermsTest extends GeneratedColumnsHelper
 
     }
     
+    /**
+     * <p>
+     * Test that unqualified function references in check constraints resolve
+     * to the current schema in effect when the constraint was declared.
+     * See DERBY-3944, which is related to the bug above, DERBY-3945.
+     * </p>
+     */
+    public  void    test_005_functionSchema()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  janetConnection = openUserConnection( JANET );
+
+        goodStatement
+            (
+             dboConnection,
+             "create function f_3944\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.minus'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create table t_3944( a int, constraint t_3944_check check ( f_3944( a ) < 0 ) )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant insert on t_3944 to public"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant execute on function f_3944 to public"
+             );
+
+        expectExecutionError
+            (
+             janetConnection,
+             CONSTRAINT_VIOLATION,
+             "insert into test_dbo.t_3944( a ) values ( -100 )"
+             );
+        goodStatement
+            (
+             janetConnection,
+             "insert into test_dbo.t_3944( a ) values ( 200 )"
+             );
+        assertResults
+            (
+             dboConnection,
+             "select * from t_3944 order by a",
+             new String[][]
+             {
+                 { "200", },
+             },
+             false
+             );
+    }
+
+   /**
+     * <p>
+     * Test that unqualified function references in views resolve
+     * to the view's schema.
+     * See DERBY-3953, which is related to the bugs above, DERBY-3944 and DERBY-3945.
+     * </p>
+     */
+    public  void    test_006_functionSchema()
+        throws Exception
+    {
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  janetConnection = openUserConnection( JANET );
+
+        goodStatement
+            (
+             dboConnection,
+             "create function f_3953\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.minus'\n"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "create view v_3953( a, b ) as values ( f_3953( 1 ), f_3953( 2 ) )"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant select on v_3953 to public"
+             );
+        goodStatement
+            (
+             dboConnection,
+             "grant execute on function f_3953 to public"
+             );
+        
+        goodStatement
+            (
+             janetConnection,
+             "create function f_3953\n" +
+             "(\n" +
+             "    a int\n" +
+             ")\n" +
+             "returns int\n" +
+             "language java\n" +
+             "deterministic\n" +
+             "parameter style java\n" +
+             "no sql\n" +
+             "external name 'java.lang.Math.abs'\n"
+             );
+        
+        assertResults
+            (
+             janetConnection,
+             "values ( f_3953( 1 ), f_3953( 2 ) )",
+             new String[][]
+             {
+                 { "1", "2" },
+             },
+             false
+             );
+        assertResults
+            (
+             janetConnection,
+             "select * from test_dbo.v_3953",
+             new String[][]
+             {
+                 { "-1", "-2" },
+             },
+             false
+             );
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

@@ -625,8 +625,10 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			return null;
 		}
 
+        CompilerContext compilerContext = getCompilerContext();
+        
  		// Donot need privileges to execute constraints
-		getCompilerContext().pushCurrentPrivType( Authorizer.NULL_PRIV);
+		compilerContext.pushCurrentPrivType( Authorizer.NULL_PRIV);
 		try {
 			getAllRelevantConstraints(dataDictionary, 	
 											targetTableDescriptor, 
@@ -650,15 +652,24 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
             if (checkConstraints != null)
 			{
-				bindRowScopedExpression(nodeFactory, getContextManager(),
-								targetTableDescriptor,
-								sourceRCL,
-								checkConstraints);
+                SchemaDescriptor    originalCurrentSchema = targetTableDescriptor.getSchemaDescriptor();
+                compilerContext.pushCompilationSchema( originalCurrentSchema );
+
+                try {
+                    bindRowScopedExpression(nodeFactory, getContextManager(),
+                                            targetTableDescriptor,
+                                            sourceRCL,
+                                            checkConstraints);
+                }
+                finally
+                {
+                    compilerContext.popCompilationSchema();
+                }
 			}
 		}
 		finally
 		{
-			getCompilerContext().popCurrentPrivType();
+			compilerContext.popCurrentPrivType();
 		}
 
 		return	checkConstraints;
