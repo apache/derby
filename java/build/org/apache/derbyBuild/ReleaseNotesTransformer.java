@@ -419,8 +419,8 @@ public class ReleaseNotesTransformer extends Task
         rawString = fullReplaceToken( rawString, "<hr>", "<hr/>" );
 
         // Forrest doesn't like square brackets and swallows the bracketed content
-        rawString.replace( '[', '(' );
-        rawString.replace( ']', ')' );
+        rawString = rawString.replace( '[', '(' );
+        rawString = rawString.replace( ']', ')' );
 
         FileWriter fileWriter = new FileWriter( outputFile );
         fileWriter.append( rawString );
