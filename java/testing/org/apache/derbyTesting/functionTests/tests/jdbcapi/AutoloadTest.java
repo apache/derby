@@ -189,7 +189,7 @@ public class AutoloadTest extends BaseJDBCTestCase
      */
     public void testAutoloadDriverUnregister() throws Exception {
         if (usingEmbedded()) {
-            String AutoloadedDriver = "org.apache.derby.jdbc.AutoloadedDriver";
+            String AutoloadedDriver = getAutoloadedDriverName();
             String Driver40 = "org.apache.derby.jdbc.Driver40";
             String Driver30 = "org.apache.derby.jdbc.Driver30";
             String Driver20 = "org.apache.derby.jdbc.Driver20";
@@ -228,6 +228,16 @@ public class AutoloadTest extends BaseJDBCTestCase
             assertFalse(getRegisteredDrivers(Driver20));
         }
     }
+    private String  getAutoloadedDriverName()
+    {
+        if ( JDBC.vmSupportsJDBC4() ) { return "org.apache.derby.jdbc.AutoloadedDriver40"; }
+        else { return "org.apache.derby.jdbc.AutoloadedDriver"; }
+    }
+    private String  getClientDriverName()
+    {
+        if ( JDBC.vmSupportsJDBC4() ) { return "org.apache.derby.jdbc.ClientDriver40"; }
+        else { return "org.apache.derby.jdbc.ClientDriver"; }
+    }
     
     /**
      * @throws SQLException
@@ -263,6 +273,8 @@ public class AutoloadTest extends BaseJDBCTestCase
      */
     private boolean isEmbeddedDriverRegistered()
     {
+        String  clientDriverName = getClientDriverName();
+        
         for (Enumeration e = DriverManager.getDrivers();
                 e.hasMoreElements(); )
         {
@@ -270,8 +282,10 @@ public class AutoloadTest extends BaseJDBCTestCase
             String driverClass = d.getClass().getName();
             if (!driverClass.startsWith("org.apache.derby."))
                 continue;
-            if (driverClass.equals("org.apache.derby.jdbc.ClientDriver"))
+            if (driverClass.equals( clientDriverName ))
                 continue;
+
+            println( "Found " + driverClass );
             
             // Some form of Derby embedded driver seems to be registered.
             return true;
