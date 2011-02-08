@@ -3887,8 +3887,6 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		 * loop until we can't find any more statistics or we have exhausted all
 		 * the predicates for which we are trying to find statistics.
 		 *--------------------------------------------------------------------*/
-		Vector statistics = new Vector(numWorkingPredicates);
-
 		double selectivity = 1.0;
 
 		Vector maxPreds = new Vector();
