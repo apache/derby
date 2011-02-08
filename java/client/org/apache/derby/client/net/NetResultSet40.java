@@ -265,6 +265,12 @@ public class NetResultSet40 extends NetResultSet{
     public  <T> T getObject( int columnIndex, Class<T> type )
             throws SQLException
     {
+        try {
+            checkForClosedResultSet("getObject");
+        } catch (SqlException se) {
+            throw se.getSQLException();
+        }
+        
         // closeCloseFilterInputStream() should be called by all of the
         // more specific methods to which we forward this call
 

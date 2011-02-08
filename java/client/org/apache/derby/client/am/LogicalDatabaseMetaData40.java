@@ -106,4 +106,29 @@ public class LogicalDatabaseMetaData40
                             ).getSQLException();
         }
     }
+    
+    /////////////////////////////////////////////////////////////////////////
+    //
+    //  JDBC 4.1 - New public methods
+    //
+    /////////////////////////////////////////////////////////////////////////
+
+    /** See DatabaseMetaData javadoc */
+    public  boolean generatedKeyAlwaysReturned() throws SQLException
+    {
+        return ((org.apache.derby.client.am.DatabaseMetaData) getRealMetaDataObject()).generatedKeyAlwaysReturned();
+    }
+
+	/**
+    * See DatabaseMetaData javadoc. Empty ResultSet because Derby does
+    * not support pseudo columns.
+	*/
+	public ResultSet getPseudoColumns
+        ( String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern )
+        throws SQLException
+	{
+		return ((org.apache.derby.client.am.DatabaseMetaData) getRealMetaDataObject()).getPseudoColumns
+            ( catalog, schemaPattern, tableNamePattern, columnNamePattern );
+	}
+
 }

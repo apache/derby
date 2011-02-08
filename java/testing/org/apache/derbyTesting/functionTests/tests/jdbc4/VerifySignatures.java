@@ -103,12 +103,6 @@ public class VerifySignatures extends BaseTestCase {
      * @return a test suite
      */
     public static Test suite()  {
-        if (JDBC.vmSupportsJDBC41()) {
-            // DERBY-4869: The runtime environment supports JDBC 4.1, but
-            // our database drivers don't yet. Disable this test until the
-            // drivers have been updated.
-            return new TestSuite("VerifySignatures - Disabled");
-        }
         return TestConfiguration.defaultSuite(VerifySignatures.class);
     }
     

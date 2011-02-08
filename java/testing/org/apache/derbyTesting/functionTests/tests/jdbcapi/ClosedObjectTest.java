@@ -96,8 +96,15 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
 
             method_.invoke(object,
                            getNullArguments(method_.getParameterTypes()));
-            assertFalse("No exception was thrown",
-                        decorator_.expectsException(method_));
+
+            // so far, only one method is allowed to be called (and is a NOP)
+            // on a closed JDBC object
+
+            if ( !"public abstract void java.sql.Connection.abort(java.util.concurrent.Executor) throws java.sql.SQLException".equals( method_.toString() ) )
+            {
+                assertFalse("No exception was thrown for method " + method_,
+                            decorator_.expectsException(method_));
+            }
         } catch (InvocationTargetException ite) {
             try {
                 throw ite.getCause();
@@ -109,12 +116,6 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
 
     /** Creates a suite with all tests in the class. */
     public static Test suite() {
-        if (JDBC.vmSupportsJDBC41()) {
-            // DERBY-4869: The runtime environment supports JDBC 4.1, but
-            // our database drivers don't yet. Disable this test until the
-            // drivers have been updated.
-            return new TestSuite("ClosedObjectTest - Disabled");
-        }
         TestSuite suite = new TestSuite("ClosedObjectTest suite");
         suite.addTest(baseSuite("ClosedObjectTest:embedded"));
         suite.addTest(TestConfiguration.clientServerDecorator(
@@ -469,7 +470,8 @@ public class ClosedObjectTest extends BaseJDBCTestCase {
                 String methodString=method.getName();
                 if (methodString.indexOf("(") > 1 )
                     methodString=methodString.substring(0, (methodString.length() -2));
-                assertTrue("method: " + methodString + ", but message: " + sqle.getMessage(), sqle.getMessage().indexOf(methodString) > 0); 
+                assertTrue("method = " + method.toString() + ", but message: " + sqle.getMessage(),
+                           sqle.getMessage().indexOf(methodString) > 0); 
                 // everything is OK, do nothing
             } else {
                 // unexpected exception

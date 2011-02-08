@@ -78,9 +78,11 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 						new MD( "createNClob", new Class[] { } ),
 						new MD( "createSQLXML", new Class[] { } ),
 						new MD( "createStruct", new Class[] { String.class, Object[].class } ),
+						new MD( "getNetworkTimeout", new Class[] { }, JDBC.vmSupportsJDBC41() ),
 						new MD( "getTypeMap", new Class[] { } ),
 						new MD( "prepareStatement", new Class[] { String.class, int[].class } ),
 						new MD( "prepareStatement", new Class[] { String.class, String[].class } ),
+						new MD( "setNetworkTimeout", new Class[] { java.util.concurrent.Executor.class, int.class }, JDBC.vmSupportsJDBC41() ),
 						new MD( "setTypeMap", new Class[] { Map.class } ),
 						} ),
 		    new Exclusions
@@ -157,6 +159,7 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 					new MD( "getNString", new Class[] { int.class } ),
 					new MD( "getNString", new Class[] { String.class } ),
 					new MD( "getObject", new Class[] { String.class } ),
+					new MD( "getObject", new Class[] { String.class, Class.class }, JDBC.vmSupportsJDBC41() ),
 					new MD( "getRef", new Class[] { int.class } ),
 					new MD( "getRef", new Class[] { String.class } ),
 					new MD( "getRowId", new Class[] { int.class } ),
@@ -345,14 +348,9 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 		printUnsupportedList( unsupportedList );
 		printNotUnderstoodList( notUnderstoodList );
 
-		int		actualErrorCount =
-			vanishedMethodList.size() +
-			unsupportedList.size() +
-			notUnderstoodList.size();
-
-		assertEquals
-			( "Unexpected discrepancies.",
-			  0, actualErrorCount );
+        assertEquals( "vanishedMethodList", 0, vanishedMethodList.size() );
+        assertEquals( "unsupportedList", 0, unsupportedList.size() );
+        assertEquals( "notUnderstoodList", 0, notUnderstoodList.size() );
 	}
 
 	//
@@ -527,6 +525,8 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 			for ( int j = 0; j < exclusionCount; j++ )
 			{
 				MD		md = mds[ j ];
+
+                if ( !md.requiredAtThisLevel() ) { continue; }
 
 				//
 				// If we are strictly enforcing the JDBC standard,
@@ -882,12 +882,18 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 	{
 		private	String	_methodName;
 		private	Class[]	_argTypes;
+        private  boolean _requiredAtThisLevel;
 
 		/** Construct from methodName and argument types. */
 		public	MD( String methodName, Class[] argTypes )
 		{
+            this( methodName, argTypes, true );
+		}
+		public	MD( String methodName, Class[] argTypes, boolean requiredAtThisLevel )
+		{
 			_methodName = methodName;
 			_argTypes = argTypes;
+            _requiredAtThisLevel = requiredAtThisLevel;
 		}
 
 		/** Get the name of this method. */
@@ -898,6 +904,9 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
 
 		/** Return whether this method is optional */
 		public	boolean	isOptional() { return true; }
+
+		/** Return whether this method is required at the current JDBC level */
+		public	boolean	requiredAtThisLevel() { return _requiredAtThisLevel; }
 
 		public	String	toString()
 		{
@@ -1048,12 +1057,6 @@ public class UnsupportedVetter	extends BaseJDBCTestCase
     }
 
     public static Test suite() {
-        if (JDBC.vmSupportsJDBC41()) {
-            // DERBY-4869: The runtime environment supports JDBC 4.1, but
-            // our database drivers don't yet. Disable this test until the
-            // drivers have been updated.
-            return new TestSuite("UnsupportedVetter - Disabled");
-        }
         return TestConfiguration.defaultSuite(UnsupportedVetter.class);
     }
 }
