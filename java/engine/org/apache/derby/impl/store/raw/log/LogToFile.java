@@ -2157,11 +2157,11 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 					if (privExists(newLogFile))
 					    privDelete(newLogFile);
-					newLogFile = null;
 
 					logErrMsg(MessageService.getTextMessage(
                         MessageId.LOG_CANNOT_CREATE_NEW,
                         newLogFile.getPath()));
+					newLogFile = null;
  				}
 
 			}
