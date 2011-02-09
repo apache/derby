@@ -25,6 +25,8 @@ import java.sql.Driver;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.sql.Statement;
+
 import javax.sql.DataSource;
 import java.util.Enumeration;
 
@@ -123,6 +125,7 @@ public class AutoloadTest extends BaseJDBCTestCase
                 // left registered in the driver manager
                 // and that after a shutdown, an explicit load
                 // can restart the engine.
+                suite.addTest(new AutoloadTest("testAssertShutdownOK"));
                 suite.addTest(new AutoloadTest("testShutdownDeRegister"));
                 suite.addTest(new AutoloadTest("testExplicitReload"));
             }
@@ -182,8 +185,8 @@ public class AutoloadTest extends BaseJDBCTestCase
 	// ///////////////////////////////////////////////////////////
 
     /**
-     * Test DERBY-2905:Shutting down embedded Derby does not remove all code,
-     * the AutoloadDriver is left registered in the DriverManager.
+     * Test DERBY-2905:Shutting down embedded Derby does remove all code,
+     * the AutoloadDriver is dergistered from DriverManager.
      * 
      * @throws Exception
      */
@@ -214,15 +217,21 @@ public class AutoloadTest extends BaseJDBCTestCase
             String driverClass = getTestConfiguration().getJDBCClient()
                     .getJDBCDriverName();
 
+            //Derby should be able to get a connection if AutoloaderDriver is
+            //not in DriverManager. Make a connection to test it. Derby-2905
             Class.forName(driverClass).newInstance();
             url = getTestConfiguration().getJDBCUrl();
             user = getTestConfiguration().getUserName();
             password = getTestConfiguration().getUserPassword();
             DriverManager.getConnection(url, user, password);
+            //newInstance is gettin AutoloadedDriver
+            AutoloadedDriver = "org.apache.derby.jdbc.AutoloadedDriver";
+            assertTrue(getRegisteredDrivers(AutoloadedDriver));
 
             // shut down engine
             TestConfiguration.getCurrent().shutdownEngine();
 
+            assertFalse(getRegisteredDrivers(AutoloadedDriver));
             assertFalse(getRegisteredDrivers(Driver40));
             assertFalse(getRegisteredDrivers(Driver30));
             assertFalse(getRegisteredDrivers(Driver20));
@@ -471,8 +480,8 @@ public class AutoloadTest extends BaseJDBCTestCase
 	return false;
     }
 
-    private void assertShutdownOK() throws SQLException {
-
+    public void testAssertShutdownOK() throws SQLException {
+        String AutoloadedDriver = getAutoloadedDriverName();
         Connection conn = getConnection();
 
         if (usingEmbedded()) {
@@ -488,7 +497,9 @@ public class AutoloadTest extends BaseJDBCTestCase
             assertTrue(conn.isClosed());
         } else if (usingDerbyNetClient()) {
             DataSource ds = JDBCDataSource.getDataSource();
-            JDBCDataSource.setBeanProperty(ds, "connectionAttributes","shutdown=true");
+            //Case 1: Test the deregister attribute error
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                    "shutdown=true;deregiste=false");
             try {
                 ds.getConnection();
                 fail("expected shutdown to fail");
@@ -496,6 +507,37 @@ public class AutoloadTest extends BaseJDBCTestCase
                 // expect 08006 on successful shutdown
                 assertSQLState("08006", e);
             }
+            //Case 2: Test with deregister=false, AutoloadedDriver should
+            //still be in DriverManager
+            JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
+                    "shutdown=tru e;deregister=false");
+            try {
+                ds.getConnection();
+                fail("expected shutdown to fail");
+            } catch (SQLException e) {
+                // expect 08006 on successful shutdown
+                assertSQLState("08006", e);
+            }
+            //DERBY-2905 deregister=false should keep AutoloadedDriver in
+            //DriverManager
+            assertTrue(getRegisteredDrivers(AutoloadedDriver));
+            //Test getting a connection just right after the shutdown.
+            String url = getTestConfiguration().getJDBCUrl();
+            conn = DriverManager.getConnection(url);
+            Statement stmt = conn.createStatement();
+            stmt.executeUpdate("values 1");
+            JDBCDataSource.setBeanProperty(ds, "connectonAttributes",
+                    "shutdown=true;deregister=true");
+            try {
+                ds.getConnection();
+                fail("expected shutdown to fail");
+            } catch (SQLException e) {
+                // expect 08006 on successful shutdown
+                assertSQLState("08006", e);
+            }
+            //DERBY-2905 deregister=true should deregister AutoloadedDriver in
+            //DriverManager
+            assertFalse(getRegisteredDrivers(AutoloadedDriver));
         }
     }
 

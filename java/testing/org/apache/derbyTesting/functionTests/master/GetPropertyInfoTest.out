@@ -14,6 +14,7 @@ restoreFrom - value: null - description: backup path for restoring database from
 bootPassword - value:  - description: secret cryptographic key - required false - choices null 
 password - value:  - description: user password - required false - choices null 
 shutdown - value: false - description: shut down Derby - required false     - choices [0] : false     - choices [1] : true
+deregister - value: false - description: deregister AutoloadedDriver - required false     - choices [0] : false     - choices [1] : true
 create - value: true - description: create database - required false     - choices [0] : false     - choices [1] : true
 dataEncryption - value: true - description: encrypt database on disk - required false     - choices [0] : false     - choices [1] : true
 upgrade - value: false - description: upgrade database - required false     - choices [0] : false     - choices [1] : true
@@ -32,6 +33,7 @@ restoreFrom - value: null - description: backup path for restoring database from
 bootPassword - value: **** - description: secret cryptographic key - required false - choices null 
 password - value:  - description: user password - required false - choices null 
 shutdown - value: false - description: shut down Derby - required false     - choices [0] : false     - choices [1] : true
+deregister - value: false - description: deregister AutoloadedDriver - required false     - choices [0] : false     - choices [1] : true
 create - value: true - description: create database - required false     - choices [0] : false     - choices [1] : true
 dataEncryption - value: true - description: encrypt database on disk - required false     - choices [0] : false     - choices [1] : true
 upgrade - value: false - description: upgrade database - required false     - choices [0] : false     - choices [1] : true

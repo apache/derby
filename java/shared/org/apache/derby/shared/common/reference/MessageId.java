@@ -114,6 +114,7 @@ public interface MessageId {
 	String CONN_SHUT_DOWN_ENGINE		    = "J003"; // shutting down Derby Engine
 	String CONN_DATABASE_IDENTITY			= "J004"; // database identity
 	String CONN_SHUT_DOWN_CLOUDSCAPE		= "J005"; // shut down Derby
+    String CONN_DEREGISTER_AUTOLOADEDDRIVER = "J006"; // remove registered AutoloadedDriver
 	String CONN_CREATE_DATABASE				= "J007"; // create database
 	String CONN_NO_DETAILS					= "J008"; // no details
     String CONN_DATA_ENCRYPTION             = "J010"; // encrypt database on disk

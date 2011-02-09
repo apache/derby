@@ -159,6 +159,7 @@ public abstract class Driver20 extends InternalDriver implements Driver {
 
 			String[][] connBooleanAttributes = {
 				{Attribute.SHUTDOWN_ATTR, MessageId.CONN_SHUT_DOWN_CLOUDSCAPE},
+                {Attribute.DEREGISTER_ATTR, MessageId.CONN_DEREGISTER_AUTOLOADEDDRIVER},
 				{Attribute.CREATE_ATTR, MessageId.CONN_CREATE_DATABASE},
 				{Attribute.DATA_ENCRYPTION, MessageId.CONN_DATA_ENCRYPTION},
 				{Attribute.UPGRADE_ATTR, MessageId.CONN_UPGRADE_DATABASE},

@@ -158,6 +158,11 @@ public interface Attribute {
 	*/
 	String SHUTDOWN_ATTR = "shutdown";
 
+    /**
+     * The attribute that is to keep autoloading idiom for driver
+     */
+    String DEREGISTER_ATTR = "deregister";
+
 	/**
 		The attribute that is used to request a database create.
 	*/

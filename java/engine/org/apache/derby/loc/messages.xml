@@ -7655,6 +7655,11 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
             </msg>
 
             <msg>
+	        <name>J006</name>
+		<text>deregister AutoloadedDriver</text>
+            </msg>
+
+            <msg>
                 <name>J007</name>
                 <text>create database</text>
             </msg>

@@ -60,12 +60,13 @@ public class AutoloadedDriver implements Driver
 	// This flag is set if the engine is forcibly brought down.
 	private	static	boolean	_engineForcedDown = false;
 	
-    // This flag is set if AutoloadedDriver exists
-    private static boolean activeautoloadeddriver = false;
 
     //This is the driver that memorizes the autoloadeddriver (DERBY-2905)
     private static Driver _autoloadedDriver;
 
+    //This flag is set is deregister attribute is set by user, 
+    //default is true (DERBY-2905)
+    private static boolean deregister = true;
 	//
 	// This is the driver that's specific to the JDBC level we're running at.
 	// It's the module which boots the whole Derby engine.
@@ -93,7 +94,6 @@ public class AutoloadedDriver implements Driver
 		try {
             _autoloadedDriver = me;
             DriverManager.registerDriver( _autoloadedDriver );
-            activeautoloadeddriver = true;
 		}
 		catch (SQLException se)
 		{
@@ -227,8 +227,10 @@ public class AutoloadedDriver implements Driver
 		_engineForcedDown = false;
 		
         try {
-            if (!activeautoloadeddriver)
-                DriverManager.registerDriver(_driverModule);
+            if (_autoloadedDriver == null) {
+                _autoloadedDriver = new AutoloadedDriver();
+                DriverManager.registerDriver(_autoloadedDriver);
+            }
         } catch (SQLException e) {
             if (SanityManager.DEBUG)
                 SanityManager.THROWASSERT(e);
@@ -244,9 +246,9 @@ public class AutoloadedDriver implements Driver
 	{
 		_engineForcedDown = true;
         try {
-            if (activeautoloadeddriver) {
+            // deregister is false if user set deregister=false attribute (DERBY-2905)
+            if (deregister && _autoloadedDriver != null) {
                 DriverManager.deregisterDriver(_autoloadedDriver);
-                activeautoloadeddriver = false;
                 _autoloadedDriver = null;
             } else {
                 DriverManager.deregisterDriver(_driverModule);
@@ -267,5 +269,19 @@ public class AutoloadedDriver implements Driver
 		return ( _driverModule != null );
 	}
 	
+    /**
+     * @param theValue set the deregister value
+     */
+    public static void setDeregister(boolean theValue) {
+        AutoloadedDriver.deregister = theValue;
+    }
+
+    /**
+     * @return the deregister value
+     */
+    public static boolean getDeregister() {
+        return deregister;
+    }
+
 }
 

@@ -223,6 +223,15 @@ public abstract class InternalDriver implements ModuleControl {
                                     getTextMessage(MessageId.AUTH_INVALID));
 					}
 
+                    // DERBY-2905, allow users to provide deregister attribute to 
+                    // left AutoloadedDriver in DriverManager, default value is true
+                    if (finfo.getProperty(Attribute.DEREGISTER_ATTR) != null) {
+                        boolean deregister = Boolean.valueOf(
+                                finfo.getProperty(Attribute.DEREGISTER_ATTR))
+                                .booleanValue();
+                        AutoloadedDriver.setDeregister(deregister);
+                    }
+
 					// check for shutdown privileges
 					// DERBY-3495: uncomment to enable system privileges checks
 					//final String user = IdUtil.getUserNameFromURLProps(finfo);
@@ -383,6 +392,7 @@ public abstract class InternalDriver implements ModuleControl {
 		checkBoolean(finfo, Attribute.DATA_ENCRYPTION);
 		checkBoolean(finfo, Attribute.CREATE_ATTR);
 		checkBoolean(finfo, Attribute.SHUTDOWN_ATTR);
+        checkBoolean(finfo, Attribute.DEREGISTER_ATTR);
 		checkBoolean(finfo, Attribute.UPGRADE_ATTR);
 
 		return finfo;
