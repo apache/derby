@@ -2448,10 +2448,10 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
                 case '-':
                     if (idx == sql.length() - 1) {
                         // no more characters, so this is the token
-                        tokenFound = "/";
+                        tokenFound = "-";
                     } else if (sql.charAt(idx + 1) == '-') {
                         state = INSIDE_SIMPLECOMMENT;
-                        idx = idx++;
+                        ++idx;
                     }
 
                     idx++;
