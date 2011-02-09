@@ -21,14 +21,9 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.compile.CompilerContext;
-import org.apache.derby.iapi.sql.compile.Parser;
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
 import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -64,6 +59,9 @@ import java.lang.reflect.Modifier;
 
 public abstract class StatementNode extends QueryTreeNode
 {
+
+    /** Cached empty list object. */
+    static final TableDescriptor[] EMPTY_TD_LIST = new TableDescriptor[0];
 
 	/**
 	 * By default, assume StatementNodes are atomic.
@@ -404,4 +402,20 @@ public abstract class StatementNode extends QueryTreeNode
 			throw e;
 		}
 	 }
+
+    /**
+     * Returns a list of base tables for which the index statistics of the
+     * associated indexes should be updated.
+     * <p>
+     * This default implementation always returns an empty list.
+     *
+     * @return A list of table descriptors (potentially empty).
+     * @throws StandardException if accessing the index descriptors of a base
+     *      table fails
+     */
+    public TableDescriptor[] updateIndexStatisticsFor()
+            throws StandardException {
+        // Do nothing, overridden by appropriate nodes.
+        return EMPTY_TD_LIST;
+    }
 }

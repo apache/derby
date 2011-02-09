@@ -33,6 +33,13 @@ package org.apache.derby.catalog;
 
 public interface Statistics
 {
+    /**
+     * Returns the estimated number of rows in the index.
+     *
+     * @return Number of rows.
+     */
+    long getRowEstimate();
+
 	/**
 	 * @return the selectivity for a set of predicates.
 	 */

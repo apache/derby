@@ -24,15 +24,11 @@ package org.apache.derby.iapi.store.access;
 import org.apache.derby.iapi.error.StandardException; 
 
 /**
-
-RowCountable provides the interfaces to read and write row counts in
-tables.
-<p>
-@see ScanController
-@see StoreCostController
-
-**/
-
+ * Allows clients to read and write row count estimates for conglomerates.
+ *
+ * @see ScanController
+ * @see StoreCostController
+ */
 public interface RowCountable
 {
     /**
@@ -52,23 +48,28 @@ public interface RowCountable
      * of rows in the heap table to estimate the number of rows in the index
      * rather than use the index estimated row count.
      *
-	 * @return The total estimated number of rows in the conglomerate.
+     * @return The total estimated number of rows in the conglomerate.
      *
-	 * @exception  StandardException  Standard exception policy.
-     **/
+     * @throws  StandardException  Standard exception policy.
+     */
     public long getEstimatedRowCount()
-		throws StandardException;
+        throws StandardException;
 
     /**
      * Set the total estimated number of rows in the container.
      * <p>
      * Often, after a scan, the client of RawStore has a much better estimate
-     * of the number of rows in the container than what store has.  For 
-     * instance if we implement some sort of update statistics command, or
-     * just after a create index a complete scan will have been done of the
-     * table.  In this case this interface allows the client to set the
-     * estimated row count for the container, and store will use that number
-     * for all future references.
+     * of the number of rows in the container than what store has. Currently,
+     * a scan, followed by an update of the estimate, will be performed when:
+     * <ul>
+     *      <li>running SYSCS_UTIL.SYSCS_UPDATE_STATISTICS</li>
+     *      <li>the automatic update of index statistics kicks in
+     *          (see {@code IndexStatisticsDaemon})</li>
+     *      <li>performing table scans</li>
+     *      <li>creating an index on a populated table</li>
+     * </ul>
+     * This interface allows the client to set the estimated row count for the
+     * container, and store will use that number for all future references.
      * <p>
      * This routine can also be used to set the estimated row count in the
      * index to the number of rows in the base table, another workaround for
@@ -76,9 +77,9 @@ public interface RowCountable
      *
      * @param count the estimated number of rows in the container.
      *
-	 * @exception  StandardException  Standard exception policy.
-     **/
+     * @throws  StandardException  Standard exception policy.
+     */
     public void setEstimatedRowCount(long count)
-		throws StandardException;
+        throws StandardException;
 
 }

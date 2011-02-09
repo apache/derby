@@ -25,6 +25,7 @@ import java.sql.Timestamp;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.daemon.IndexStatisticsDaemon;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -39,6 +40,7 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.StatementContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
+import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecutionContext;
 import org.apache.derby.impl.sql.compile.StatementNode;
 import org.apache.derby.impl.sql.conn.GenericLanguageConnectionContext;
@@ -508,7 +510,20 @@ public class GenericStatement
 					preparedStmt.setSPSName(qt.getSPSName());
 					preparedStmt.completeCompile(qt);
 					preparedStmt.setCompileTimeWarnings(cc.getWarnings());
-				}
+
+                    // Schedule updates of any stale index statistics we may
+                    // have detected when creating the plan.
+                    TableDescriptor[] tds = qt.updateIndexStatisticsFor();
+                    if (tds.length > 0) {
+                        IndexStatisticsDaemon isd = lcc.getDataDictionary().
+                            getIndexStatsRefresher(true);
+                        if (isd != null) {
+                            for (int i=0; i < tds.length; i++) {
+                                isd.schedule(tds[i]);
+                            }
+                        }
+                    }
+                }
 				catch (StandardException e) 	// hold it, throw it
 				{
 					lcc.commitNestedTransaction();

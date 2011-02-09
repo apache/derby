@@ -51,7 +51,6 @@ import org.apache.derby.iapi.sql.compile.AccessPath;
 import org.apache.derby.iapi.sql.compile.JoinStrategy;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
@@ -117,6 +116,12 @@ import java.util.Set;
 public class FromBaseTable extends FromTable
 {
 	static final int UNSET = -1;
+
+    /**
+     * Whether or not we have checked the index statistics for staleness.
+     * Used to avoid performing the check multiple times per compilation.
+     */
+    private boolean hasCheckedIndexStats;
 
 	TableName		tableName;
 	TableDescriptor	tableDescriptor;
@@ -920,8 +925,19 @@ public class FromBaseTable extends FromTable
 			statisticsForTable = tableDescriptor.statisticsExist(null);
 			unknownPredicateList = new PredicateList();
 			predList.copyPredicatesToOtherList(unknownPredicateList);
-
-		}
+            // If not already done, check if this table has indexes and if
+            // their statistics need to get updated.
+            if (!hasCheckedIndexStats) {
+                hasCheckedIndexStats = true;
+                // Only mark if a base table and there are indexes. Skip VTIs,
+                // system tables, subqueries etc.
+                if (tableDescriptor.getTableType() ==
+                        TableDescriptor.BASE_TABLE_TYPE &&
+                        tableDescriptor.getTotalNumberOfIndexes() > 0) {
+                    tableDescriptor.markForIndexStatsUpdate(baseRowCount());
+                }
+            }
+        }
 
 		AccessPath currentAccessPath = getCurrentAccessPath();
 		JoinStrategy currentJoinStrategy = 

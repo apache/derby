@@ -23,7 +23,6 @@ package	org.apache.derby.impl.sql.compile;
 
 import java.util.ArrayList;
 import java.util.Vector;
-import java.sql.Types;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
@@ -36,9 +35,6 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.impl.sql.CursorInfo;
 import org.apache.derby.impl.sql.CursorTableReference;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.TypeId;
 
 /**
  * A CursorNode represents a result set that can be returned to a client.
@@ -70,6 +66,12 @@ public class CursorNode extends DMLStatementNode
 	private Vector	updatableColumns;
 	private FromTable updateTable;
 	private ResultColumnDescriptor[]	targetColumnDescriptors;
+    /**
+     * List of {@code TableDescriptor}s for base tables whose associated
+     * indexes should be checked for stale statistics.
+     */
+    private ArrayList statsToUpdate;
+    private boolean checkIndexStats;
 
 	//If cursor references session schema tables, save the list of those table names in savedObjects in compiler context
 	//Following is the position of the session table names list in savedObjects in compiler context
@@ -221,6 +223,7 @@ public class CursorNode extends DMLStatementNode
 		DataDictionary				dataDictionary;
 
 		dataDictionary = getDataDictionary();
+        checkIndexStats = (dataDictionary.getIndexStatsRefresher(true) != null);
 
 		// This is how we handle queries like: SELECT A FROM T ORDER BY B.
 		// We pull up the order by columns (if they don't appear in the SELECT
@@ -274,21 +277,11 @@ public class CursorNode extends DMLStatementNode
 			getCompilerContext().pushCurrentPrivType(Authorizer.MIN_SELECT_PRIV);
 			FromList resultSetFromList = resultSet.getFromList();
 			for (int index = 0; index < resultSetFromList.size(); index++) {
-				FromTable fromTable = (FromTable) resultSetFromList.elementAt(index);
-				if (fromTable.isPrivilegeCollectionRequired() && fromTable instanceof FromBaseTable)
-					//We ask for MIN_SELECT_PRIV requirement of the first
-					//column in the table. The first column is just a 
-					//place holder. What we really do at execution time when 
-					//we see we are looking for MIN_SELECT_PRIV privilege is
-					//as follows
-					//1)we will look for SELECT privilege at table level
-					//2)If not found, we will look for SELECT privilege on 
-					//ANY column, not necessarily the first column. But since
-					//the constructor for column privilege requires us to pass
-					//a column descriptor, we just choose the first column for
-					//MIN_SELECT_PRIV requirement.
-					getCompilerContext().addRequiredColumnPriv(fromTable.getTableDescriptor().getColumnDescriptor(1));
-			}
+                Object fromTable = resultSetFromList.elementAt(index);
+                if (fromTable instanceof FromBaseTable) {
+                    collectTablePrivsAndStats((FromBaseTable)fromTable);
+                }
+            }
 			getCompilerContext().popCurrentPrivType();
 		}
 		finally
@@ -386,6 +379,42 @@ public class CursorNode extends DMLStatementNode
 
 	}
 
+    /**
+     * Collects required privileges for all types of tables, and table
+     * descriptors for base tables whose index statistics we want to check for
+     * staleness (or to create).
+     *
+     * @param fromTable the table
+     */
+    private void collectTablePrivsAndStats(FromBaseTable fromTable) {
+        TableDescriptor td = fromTable.getTableDescriptor();
+        if (fromTable.isPrivilegeCollectionRequired()) {
+            // We ask for MIN_SELECT_PRIV requirement of the first column in
+            // the table. The first column is just a place holder. What we
+            // really do at execution time when we see we are looking for
+            // MIN_SELECT_PRIV privilege is as follows:
+            //
+            // 1) We will look for SELECT privilege at table level.
+            // 2) If not found, we will look for SELECT privilege on
+            //    ANY column, not necessarily the first column. But since
+            //    the constructor for column privilege requires us to pass
+            //    a column descriptor, we just choose the first column for
+            //    MIN_SELECT_PRIV requirement.
+            getCompilerContext().addRequiredColumnPriv(
+                    td.getColumnDescriptor(1));
+        }
+        // Save a list of base tables to check the index statistics for at a
+        // later time. We want to compute statistics for base user tables only,
+        // not for instance system tables or VTIs (see TableDescriptor for a
+        // list of all available "table types").
+        if (checkIndexStats &&
+                td.getTableType() == TableDescriptor.BASE_TABLE_TYPE) {
+            if (statsToUpdate == null) {
+                statsToUpdate = new ArrayList();
+            }
+            statsToUpdate.add(td);
+        }
+    }
 
 	/**
 	 * Return true if the node references SESSION schema tables (temporary or permanent)
@@ -828,4 +857,36 @@ public class CursorNode extends DMLStatementNode
 	{
 		return null;
 	}
+
+    /**
+     * Returns a list of base tables for which the index statistics of the
+     * associated indexes should be updated.
+     *
+     * @return A list of table descriptors (potentially empty).
+     * @throws StandardException if accessing the index descriptors of a base
+     *      table fails
+     */
+    public TableDescriptor[] updateIndexStatisticsFor()
+            throws StandardException {
+        if (!checkIndexStats || statsToUpdate == null) {
+            return EMPTY_TD_LIST;
+        }
+        // Remove table descriptors whose statistics are considered up-to-date.
+        // Iterate backwards to remove elements, chances are high the stats are
+        // mostly up-to-date (minor performance optimization to avoid copy).
+        for (int i=statsToUpdate.size() -1; i >= 0; i--) {
+            TableDescriptor td = (TableDescriptor)statsToUpdate.get(i);
+            if (td.getAndClearIndexStatsIsUpToDate()) {
+                statsToUpdate.remove(i);
+            }
+        }
+        if (statsToUpdate.isEmpty()) {
+            return EMPTY_TD_LIST;
+        } else {
+            TableDescriptor[] tmp = new TableDescriptor[statsToUpdate.size()];
+            statsToUpdate.toArray(tmp);
+            statsToUpdate.clear();
+            return tmp;
+        }
+    }
 }

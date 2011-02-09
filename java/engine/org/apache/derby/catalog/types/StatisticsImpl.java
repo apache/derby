@@ -25,7 +25,6 @@ import org.apache.derby.catalog.Statistics;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.FormatableHashtable;
-import org.apache.derby.iapi.services.io.FormatableLongHolder;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -62,6 +61,11 @@ public class StatisticsImpl	implements Statistics, Formatable
 	/** Zero argument constructor for Formatable Interface */
 	public StatisticsImpl()
 	{}
+
+    /** {@inheritDoc} */
+    public long getRowEstimate() {
+        return numRows;
+    }
 
 	/** @see Statistics#selectivity */
 	public double selectivity(Object[] predicates)

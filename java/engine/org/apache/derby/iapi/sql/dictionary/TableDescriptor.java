@@ -24,17 +24,18 @@ package org.apache.derby.iapi.sql.dictionary;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
@@ -102,6 +103,32 @@ public class TableDescriptor extends TupleDescriptor
 	public static final char	TABLE_LOCK_GRANULARITY = 'T';
 	public static final char	DEFAULT_LOCK_GRANULARITY = ROW_LOCK_GRANULARITY;
 
+    // Constants for the automatic index statistics update feature.
+    public static final int ISTATS_CREATE_THRESHOLD;
+    public static final int ISTATS_ABSDIFF_THRESHOLD;
+    public static final double ISTATS_LNDIFF_THRESHOLD;
+    static {
+        ISTATS_CREATE_THRESHOLD = PropertyUtil.getSystemInt(
+                Property.STORAGE_AUTO_INDEX_STATS_DEBUG_CREATE_THRESHOLD,
+                Property.STORAGE_AUTO_INDEX_STATS_DEBUG_CREATE_THRESHOLD_DEFAULT
+                );
+        ISTATS_ABSDIFF_THRESHOLD = PropertyUtil.getSystemInt(
+            Property.STORAGE_AUTO_INDEX_STATS_DEBUG_ABSDIFF_THRESHOLD,
+            Property.STORAGE_AUTO_INDEX_STATS_DEBUG_ABSDIFF_THRESHOLD_DEFAULT);
+        double tmpLog2Diff =
+            Property.STORAGE_AUTO_INDEX_STATS_DEBUG_LNDIFF_THRESHOLD_DEFAULT;
+        try {
+            String tmpStr = PropertyUtil.getSystemProperty(
+                    Property.STORAGE_AUTO_INDEX_STATS_DEBUG_LNDIFF_THRESHOLD);
+            if (tmpStr != null) {
+                tmpLog2Diff = Double.parseDouble(tmpStr);
+            }
+        } catch (NumberFormatException nfe) {
+            // Ignore, use the default.
+        }
+        ISTATS_LNDIFF_THRESHOLD = tmpLog2Diff;
+    }
+
 	/**
 	*/
 
@@ -109,6 +136,8 @@ public class TableDescriptor extends TupleDescriptor
 	private char					lockGranularity;
 	private boolean					onCommitDeleteRows; //true means on commit delete rows, false means on commit preserve rows of temporary table.
 	private boolean					onRollbackDeleteRows; //true means on rollback delete rows. This is the only value supported.
+    private boolean                 indexStatsUpToDate = true;
+    private String                  indexStatsUpdateReason;
 	SchemaDescriptor				schema;
 	String							tableName;
 	UUID							oid;
@@ -1264,6 +1293,74 @@ public class TableDescriptor extends TupleDescriptor
 		DataDictionary dd = getDataDictionary();
 		return statisticsDescriptorList = dd.getStatisticsDescriptors(this);
 	}
+
+    /**
+     * Marks the cardinality statistics for the indexes associated with this
+     * table for update if they are considered stale, or for creation if they
+     * don't exist, and if it is considered useful to update/create them.
+     *
+     * @param tableRowCountEstimate row count estimate for this table
+     * @throws StandardException if obtaining index statistics fails
+     */
+    public void markForIndexStatsUpdate(long tableRowCountEstimate)
+            throws StandardException {
+        List sdl = getStatistics();
+        if (sdl.isEmpty() && tableRowCountEstimate >= ISTATS_CREATE_THRESHOLD) {
+            // No statistics exists, create them.
+            indexStatsUpToDate = false;
+            indexStatsUpdateReason = "no stats, row-estimate=" +
+                    tableRowCountEstimate;
+            return;
+        }
+
+        // Check the state of the existing indexes (if any).
+        Iterator statIter = sdl.iterator();
+        while (statIter.hasNext()) {
+            StatisticsDescriptor sd = (StatisticsDescriptor)statIter.next();
+            long indexRowCountEstimate = sd.getStatistic().getRowEstimate();
+            long diff = Math.abs(tableRowCountEstimate - indexRowCountEstimate);
+            // TODO: Set a proper limit here to avoid too frequent updates.
+            if (diff >= ISTATS_ABSDIFF_THRESHOLD) {
+                double cmp = Math.abs(
+                        Math.log(indexRowCountEstimate) -
+                        Math.log(tableRowCountEstimate));
+                if (Double.compare(cmp, ISTATS_LNDIFF_THRESHOLD) == 1) {
+                    indexStatsUpToDate= false;
+                    indexStatsUpdateReason = "t-est=" + tableRowCountEstimate +
+                            ", i-est=" + indexRowCountEstimate + " => cmp=" +
+                            cmp;
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Tells if the index statistics for the indexes associated with this table
+     * are consideres up-to-date, and clears the state.
+     *
+     * @return {@code true} if the statistics are considered up-to-date,
+     *      {@code false} if not.
+     */
+    public boolean getAndClearIndexStatsIsUpToDate() {
+        // TODO: Consider adding a flag telling if statistics update has been
+        //       scheduled already.
+        boolean tmp = indexStatsUpToDate;
+        indexStatsUpToDate = true;
+        return tmp;
+    }
+
+    /**
+     * Returns the update criteria telling why the statistics are considered
+     * stale.
+     * <p>
+     * This method is used for debugging.
+     *
+     * @return A string describing the update criteria that were met.
+     */
+    public String getIndexStatsUpdateReason() {
+        return indexStatsUpdateReason;
+    }
 
 	/** 
 	 * Are there statistics for this particular conglomerate.
