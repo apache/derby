@@ -4694,16 +4694,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     private final void resetUpdatedColumnsForInsert() {
         // initialize updateColumns with nulls for all columns
-        if (updatedColumns_ == null) {
-            updatedColumns_ = new Object[resultSetMetaData_.columns_];
-        }
-        if (columnUpdated_ != null) {
-            columnUpdated_ = new boolean[resultSetMetaData_.columns_];
-        }
-        for (int i = 0; i < updatedColumns_.length; i++) {
+        for (int i = 0; i < resultSetMetaData_.columns_; i++) {
             updateColumn(i+1, null);
-        }
-        for (int i = 0; i < columnUpdated_.length; i++) {
             columnUpdated_[i] = false;
         }
     }
