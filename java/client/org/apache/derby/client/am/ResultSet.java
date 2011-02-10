@@ -4702,14 +4702,10 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     private final void resetUpdatedColumns() {
         if (updatedColumns_ != null) {
-            for (int i = 0; i < updatedColumns_.length; i++) {
-                updatedColumns_[i] = null;
-            }
+            Arrays.fill(updatedColumns_, null);
         }
         if (columnUpdated_ != null) {
-            for (int i = 0; i < columnUpdated_.length; i++) {
-                columnUpdated_[i] = false;
-            }
+            Arrays.fill(columnUpdated_, false);
         }
     }
 
@@ -5437,9 +5433,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     private void resetRowsetSqlca() {
         if (rowsetSqlca_ != null) {
-            for (int i = 0; i < rowsetSqlca_.length; i++) {
-                rowsetSqlca_[i] = null;
-            }
+            Arrays.fill(rowsetSqlca_, null);
         }
     }
 	
