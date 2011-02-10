@@ -644,11 +644,7 @@ public final class	DataDictionaryImpl
         // property later on.
         // The default is that automatic index statistics update is enabled.
         indexStatsUpdateDisabled = !PropertyUtil.getSystemBoolean(
-                // TODO: Disabled by default for now, fix in DERBY-4939.
-                //       Note that the daemon does nothing automatically
-                //       without DERBY-4938.
-                Property.STORAGE_AUTO_INDEX_STATS, false);
-                //Property.STORAGE_AUTO_INDEX_STATS, true);
+                Property.STORAGE_AUTO_INDEX_STATS, true);
 
         // See if we should enable logging of index stats activities.
         indexStatsUpdateLogging = PropertyUtil.getSystemBoolean(

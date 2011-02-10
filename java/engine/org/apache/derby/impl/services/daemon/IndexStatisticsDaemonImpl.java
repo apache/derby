@@ -215,14 +215,12 @@ public class IndexStatisticsDaemonImpl
         this.timeOfCreation = System.currentTimeMillis();
         trace(0, "created{log=" + doLog + ", traceLog=" +
                 traceToDerbyLog + ", traceOut=" + traceToStdOut +
-                /* Will be fixed by DERBY-4936.
                 ", createThreshold=" +
                 TableDescriptor.ISTATS_CREATE_THRESHOLD +
                 ", absdiffThreshold=" +
                 TableDescriptor.ISTATS_ABSDIFF_THRESHOLD +
                 ", lndiffThreshold=" +
                 TableDescriptor.ISTATS_LNDIFF_THRESHOLD +
-                */
                 ", queueLength=" + MAX_QUEUE_LENGTH +
                 "}) -> " + databaseName);
     }
@@ -236,8 +234,7 @@ public class IndexStatisticsDaemonImpl
      * @param td base table descriptor to update index statistics for
      */
     public void schedule(TableDescriptor td) {
-        // TODO: Will be fixed in DERBY-4936.
-        String schedulingReason = null; // td.getIndexStatsUpdateReason();
+        String schedulingReason = td.getIndexStatsUpdateReason();
         trace(0, "scheduling " + td.getQualifiedName() +
                     (schedulingReason == null
                         ? ""
