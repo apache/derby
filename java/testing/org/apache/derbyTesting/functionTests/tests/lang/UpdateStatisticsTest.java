@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.IndexStatsUtil;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -44,14 +45,17 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
     }
 
     public static Test suite() {
-        // TODO: Disable automatic index statistics generation when the feature
-        //       is added. As currently planned, the generation will be
+        //       Disable automatic index statistics generation. The generation will be
         //       triggered when preparing a statement and this will interfere
         //       with some of the asserts in testUpdateStatistics.
         //       With automatic generation enabled, testUpdateStatistics may
-        //       fail intermittently due to timing, mostly (only?) when run
+        //       fail intermittently due to timing, mostly when run
         //       with the client driver.
-        return TestConfiguration.defaultSuite(UpdateStatisticsTest.class);
+        Test test = TestConfiguration.defaultSuite(UpdateStatisticsTest.class);
+        Test statsDisabled = DatabasePropertyTestSetup.singleProperty
+            ( test, "derby.storage.indexStats.auto", "false", true );
+
+        return statsDisabled;
     }
 
     /**
