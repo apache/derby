@@ -145,7 +145,8 @@
     <available classname="java.sql.Wrapper" property="compilerLevel16" value="1.6"/>
     <property name="compilerLevel16" value="1.5"/>
 
-    <javac source="1.5" srcdir="${basedir}" failonerror="false">
+    <javac source="1.5" srcdir="${basedir}" failonerror="false"
+           includeantruntime="false">
       <include name="${dummy.src}"/>
     </javac>
 
