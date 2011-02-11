@@ -187,10 +187,6 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
     /**
      * Test that SYSCS_UPDATE_STATISTICS doesn't obtain exclusive locks on
      * the table or rows in the table (DERBY-4274).
-     * <p>
-     * TODO: Make sure this test is also run with automatic index statistics
-     * generation enabled, as it revealed a bug in the data dictionary access
-     * pattern (dd was left in write mode when it shouldn't have been).
      */
     public void testNoExclusiveLockOnTable() throws SQLException {
         Statement s = createStatement();
