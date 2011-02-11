@@ -61,11 +61,11 @@ public class AutoloadedDriver implements Driver
 	private	static	boolean	_engineForcedDown = false;
 	
 
-    //This is the driver that memorizes the autoloadeddriver (DERBY-2905)
+    // This is the driver that memorizes the autoloadeddriver (DERBY-2905)
     private static Driver _autoloadedDriver;
 
-    //This flag is set is deregister attribute is set by user, 
-    //default is true (DERBY-2905)
+    // This flag is true unless the deregister attribute has been set to
+    // false by the user (DERBY-2905)
     private static boolean deregister = true;
 	//
 	// This is the driver that's specific to the JDBC level we're running at.
@@ -228,7 +228,8 @@ public class AutoloadedDriver implements Driver
 		
         try {
             if (_autoloadedDriver == null) {
-                _autoloadedDriver = new AutoloadedDriver();
+                //Support JDBC 4 or higher (DERBY-2905)
+                _autoloadedDriver = makeAutoloadedDriver();
                 DriverManager.registerDriver(_autoloadedDriver);
             }
         } catch (SQLException e) {
@@ -283,5 +284,20 @@ public class AutoloadedDriver implements Driver
         return deregister;
     }
 
+    /**
+     * load slightly more capable driver if possible.
+     * But if the vm level doesn't support it, then we fall
+     * back on the JDBC3 level driver.
+     * @return AutoloadedDriver 
+     */
+    private static AutoloadedDriver makeAutoloadedDriver() 
+    { 
+        try { 
+            return (AutoloadedDriver) Class.forName( "org.apache.derby.jdbc.AutoloadedDriver40" ).newInstance(); 
+        } 
+        catch (Throwable t) {} 
+
+        return new AutoloadedDriver(); 
+    } 
 }
 

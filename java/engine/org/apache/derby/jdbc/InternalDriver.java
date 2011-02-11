@@ -224,7 +224,8 @@ public abstract class InternalDriver implements ModuleControl {
 					}
 
                     // DERBY-2905, allow users to provide deregister attribute to 
-                    // left AutoloadedDriver in DriverManager, default value is true
+                    // leave AutoloadedDriver registered in DriverManager, default
+                    // value is true
                     if (finfo.getProperty(Attribute.DEREGISTER_ATTR) != null) {
                         boolean deregister = Boolean.valueOf(
                                 finfo.getProperty(Attribute.DEREGISTER_ATTR))

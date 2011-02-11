@@ -186,7 +186,7 @@ public class AutoloadTest extends BaseJDBCTestCase
 
     /**
      * Test DERBY-2905:Shutting down embedded Derby does remove all code,
-     * the AutoloadDriver is dergistered from DriverManager.
+     * the AutoloadDriver is deregistered from DriverManager.
      * 
      * @throws Exception
      */
@@ -224,8 +224,6 @@ public class AutoloadTest extends BaseJDBCTestCase
             user = getTestConfiguration().getUserName();
             password = getTestConfiguration().getUserPassword();
             DriverManager.getConnection(url, user, password);
-            //newInstance is gettin AutoloadedDriver
-            AutoloadedDriver = "org.apache.derby.jdbc.AutoloadedDriver";
             assertTrue(getRegisteredDrivers(AutoloadedDriver));
 
             // shut down engine
@@ -510,7 +508,7 @@ public class AutoloadTest extends BaseJDBCTestCase
             //Case 2: Test with deregister=false, AutoloadedDriver should
             //still be in DriverManager
             JDBCDataSource.setBeanProperty(ds, "connectionAttributes",
-                    "shutdown=tru e;deregister=false");
+                    "shutdown=true;deregister=false");
             try {
                 ds.getConnection();
                 fail("expected shutdown to fail");
