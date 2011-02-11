@@ -148,7 +148,19 @@ public class FromSubquery extends FromTable
 	protected FromTable getFromTableByName(String name, String schemaName, boolean exactMatch)
 		throws StandardException
 	{
-		return super.getFromTableByName(name, schemaName, exactMatch);
+        if (schemaName != null && origTableName != null) {
+            // View can have schema
+            if (!schemaName.equals(origTableName.schemaName)) {
+                return null;
+            }
+            // So far, so good, now go on to compare table name
+        }
+
+        if (getExposedName().equals(name)) {
+            return this;
+        }
+
+        return null;
 	}
 
 	/**

@@ -114,7 +114,7 @@ public class OrderByList extends OrderedColumnList
 
 	/**
 	 *	Bind the update columns by their names to the target resultset of the
-	 * cursor specification. This variant is used by InsertNode.
+     * cursor specification.
 	 *
 	 * 	@param target	The underlying result set
 	 *	@exception StandardException		Thrown on error
