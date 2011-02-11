@@ -159,10 +159,6 @@ public class NetPreparedStatement extends NetStatement
         this.resetNetPreparedStatement(preparedStatement_, netAgent, netConnection);
     }
 
-    protected void finalize() throws java.lang.Throwable {
-        super.finalize();
-    }
-
     public void writeExecute_(Section section,
                               ColumnMetaData parameterMetaData,
                               Object[] inputs,

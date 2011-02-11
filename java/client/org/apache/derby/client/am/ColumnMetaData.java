@@ -155,10 +155,6 @@ public class ColumnMetaData implements java.sql.ResultSetMetaData {
         sqlUDTclassName_ = new String[upperBound];
     }
 
-    protected void finalize() throws java.lang.Throwable {
-        super.finalize();
-    }
-
     //--------------------Abstract material layer call-down methods-----------------
 
     //------------------material layer event callback methods-----------------------

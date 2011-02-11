@@ -105,10 +105,6 @@ public class NetStatement implements org.apache.derby.client.am.MaterialStatemen
         resetNetStatement(statement_, netAgent, netConnection);
     }
 
-    protected void finalize() throws java.lang.Throwable {
-        super.finalize();
-    }
-
     // ------------------------abstract box car methods-----------------------------------------------
 
     public void writeSetSpecialRegister_(Section section, java.util.ArrayList sqlsttList) throws SqlException {

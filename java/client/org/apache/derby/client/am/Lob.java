@@ -91,10 +91,6 @@ public abstract class Lob implements UnitOfWorkListener {
         transactionID_ = agent_.connection_.getTransactionID();
     }
 
-    protected void finalize() throws java.lang.Throwable {
-        super.finalize();
-    }
-
     // ---------------------------jdbc 2------------------------------------------
 
     /**

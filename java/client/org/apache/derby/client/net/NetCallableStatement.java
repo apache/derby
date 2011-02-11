@@ -109,9 +109,4 @@ public class NetCallableStatement extends NetPreparedStatement
         callableStatement_.resetCallableStatement(netAgent, netConnection, sql, section, parameterMetaData, resultSetMetaData);
         resetNetCallableStatement(callableStatement_, netAgent, netConnection);
     }
-
-    protected void finalize() throws java.lang.Throwable {
-        super.finalize();
-    }
-
 }
