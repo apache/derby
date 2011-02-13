@@ -373,14 +373,19 @@ public final class FormatableBitSet implements Formatable, Cloneable
 	 *
 	 * @return TRUE|FALSE
 	 */
-	public boolean equals(FormatableBitSet other)
+	public boolean equals(Object other)
 	{
-		if (this.getLength() != other.getLength())
-		{
-			return false;
-		}
+        if (other instanceof FormatableBitSet) 
+        {
+            FormatableBitSet that = (FormatableBitSet) other;
+		    if (this.getLength() != that.getLength())
+		    {
+			    return false;
+		    }
 
-		return (this.compare(other) == 0);
+		    return (this.compare(that) == 0);
+        }
+        return false;
 	}
 
 	/**
