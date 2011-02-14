@@ -3428,7 +3428,7 @@ class DRDAConnThread extends Thread {
 					break;
 				case CodePoint.TRGDFTRT:
 					byte b = reader.readByte();
-					if (b == 0xF1)
+					if (b == (byte)0xF1)
 						database.sendTRGDFTRT = true;
 					break;
 				//optional - not used in JCC so skip for now
