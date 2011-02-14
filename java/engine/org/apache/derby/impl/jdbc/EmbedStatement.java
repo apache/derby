@@ -1003,10 +1003,7 @@ public class EmbedStatement extends ConnectionChild
 			}
 
 			int successfulUpdateCount[] = new int[i];
-			for (int j=0; j<i; j++)
-			{
-				successfulUpdateCount[j] = returnUpdateCountForBatch[j];
-			}
+            System.arraycopy(returnUpdateCountForBatch, 0, successfulUpdateCount, 0, i);
 
 			SQLException batch =
 			new java.sql.BatchUpdateException(sqle.getMessage(), sqle.getSQLState(),

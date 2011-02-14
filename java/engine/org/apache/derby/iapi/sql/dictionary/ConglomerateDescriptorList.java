@@ -89,8 +89,7 @@ public class ConglomerateDescriptorList extends ArrayList
 		if (j == size)
 			return draft;
 		ConglomerateDescriptor[] returnValue = new ConglomerateDescriptor[j];
-		for (int i = 0; i < j; i++)
-			returnValue[i] = draft[i];
+        System.arraycopy(draft, 0, returnValue, 0, j);
 
 		return returnValue;
 	}
@@ -181,8 +180,7 @@ public class ConglomerateDescriptorList extends ArrayList
 		if (j == size)
 			return draft;
 		ConglomerateDescriptor[] returnValue = new ConglomerateDescriptor[j];
-		for (int i = 0; i < j; i++)
-			returnValue[i] = draft[i];
+        System.arraycopy(draft, 0, returnValue, 0, j);
 
 		return returnValue;
 	}

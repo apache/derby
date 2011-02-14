@@ -223,16 +223,12 @@ public class EncryptionManager {
         //USRENCPWD, the userid is used as token
         if (securityMechanism == 7) {
             if (initVector.length < 8) { //shorter than 8 bytes, zero padded to 8 bytes
-                for (int i = 0; i < initVector.length; i++) {
-                    token[i] = initVector[i];
-                }
+                System.arraycopy(initVector, 0, token, 0, initVector.length);
                 for (int i = initVector.length; i < 8; i++) {
                     token[i] = 0;
                 }
             } else {  //longer than 8 bytes, truncated to 8 bytes
-                for (int i = 0; i < 8; i++) {
-                    token[i] = initVector[i];
-                }
+                System.arraycopy(initVector, 0, token, 0, 8);
             }
         }
         //EUSRIDPWD - The middle 8 bytes of the server's connection key is used as
