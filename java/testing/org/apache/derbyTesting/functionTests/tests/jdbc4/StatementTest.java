@@ -274,40 +274,27 @@ public class StatementTest
     {
         SQLException    se = null;
 
-        // try to force a timeout. try a couple times to reduce the risk
-        // of instability in this test.
-        for ( int i = 0; i < 20; i++ )
-        {
-            PreparedStatement ps = prepareStatement
-                (
-                 "select columnnumber from sys.syscolumns c, sys.systables t\n" +
-                 "where t.tablename = 'SYSTABLES'\n" +
-                 "and t.tableid = c.referenceid\n" +
-                 "and c.columnnumber = delay_st( 5, 1 )"
-                 );
-            println( "Testing timeout exception for a " + ps.getClass().getName() );
-
-            SetQueryTimeoutTest.StatementExecutor   executor =
-                new SetQueryTimeoutTest.StatementExecutor( ps, true, 1 );
-
-            executor.start();
-            executor.join();
-
-            ps.close();
-
-            se = executor.getSQLException();
-
-            if ( se != null ) { break; }
-        }
+        PreparedStatement ps = prepareStatement
+            (
+             "select columnnumber from sys.syscolumns c, sys.systables t\n" +
+             "where t.tablename = 'SYSTABLES'\n" +
+             "and t.tableid = c.referenceid\n" +
+             "and mod( delay_st( 5, c.columnnumber ), 3 ) = 0"
+             );
+        println( "Testing timeout exception for a " + ps.getClass().getName() );
         
-        if ( se == null )
-        {
-            println( "Dang! Still can't force a timeout on this platform!" );
-        }
-        else
-        {
-            assertEquals( SQLTimeoutException.class.getName(), se.getClass().getName() );
-        }
+        SetQueryTimeoutTest.StatementExecutor   executor =
+            new SetQueryTimeoutTest.StatementExecutor( ps, true, 1 );
+        
+        executor.start();
+        executor.join();
+        
+        ps.close();
+        
+        se = executor.getSQLException();
+
+        assertNotNull( se );
+        assertEquals( SQLTimeoutException.class.getName(), se.getClass().getName() );
     }
 
     /**
