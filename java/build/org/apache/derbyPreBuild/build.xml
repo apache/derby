@@ -45,7 +45,7 @@
       includeantruntime="false">
       <include name="org/apache/derbyPreBuild/**"/>
       <classpath>
-        <pathelement path="${ant.library.dir}/ant.jar"/>
+        <pathelement path="${ant.core.lib}"/>
       </classpath>
     </javac>
   </target>
