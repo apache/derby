@@ -37,6 +37,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.services.cache.Cacheable;
+import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -82,6 +83,7 @@ import org.apache.derby.iapi.reference.Property;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.WeakHashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -137,7 +139,9 @@ public class GenericLanguageConnectionContext
 	private String dbname;
 
     private Object lastQueryTree; // for debugging
-    
+ 
+    private WeakHashMap referencedColumnMap;
+
 	/**
 	The transaction to use within this language connection context.  It may
 	be more appropriate to have it in a separate context (LanguageTransactionContext?).
@@ -346,6 +350,7 @@ public class GenericLanguageConnectionContext
 
 
 		setDefaultSchema(initDefaultSchemaDescriptor());
+        referencedColumnMap = new WeakHashMap();
 	}
 
 	/**
@@ -719,6 +724,7 @@ public class GenericLanguageConnectionContext
 
 		// Reset the current role
 		getCurrentSQLSessionContext().setRole(null);
+		referencedColumnMap = new WeakHashMap();
 	}
 
     // debug methods
@@ -3550,4 +3556,13 @@ public class GenericLanguageConnectionContext
 			getInitialDefaultSchemaDescriptor());
 	}
 
+
+    public FormatableBitSet getReferencedColumnMap(TableDescriptor td) {
+        return (FormatableBitSet)referencedColumnMap.get(td);
+    }
+
+    public void setReferencedColumnMap(TableDescriptor td,
+                                       FormatableBitSet map) {
+        referencedColumnMap.put(td, map);
+    }
 }
