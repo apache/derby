@@ -352,6 +352,12 @@ public class StaticMethodCallNode extends MethodCallNode
 		int		count = methodParms.length;
 		for (int parm = 0; parm < count; parm++)
 		{
+            //
+            // We also skip the optimization if the argument must be cast to a primitive. In this case we need
+            // a runtime check to make sure that the argument is not null. See DERBY-4459.
+            //
+            if ( (methodParms != null) && methodParms[ parm ].mustCastToPrimitive() ) { continue; }
+            
 			if (methodParms[parm] instanceof SQLToJavaValueNode &&
 				((SQLToJavaValueNode)methodParms[parm]).getSQLValueNode() instanceof
 				JavaToSQLValueNode)
