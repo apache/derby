@@ -342,7 +342,8 @@ public class AutomaticIndexStatisticsTest
             assertTrue("current stats created " + s.created +
                     ", previous stats created " + earlier,
                     s.created.after(earlier));
-            assertTrue(s.created.before(now));
+            // Stats cannot have been created after the current time (future).
+            assertFalse(s.created.compareTo(now) > 0);
             switch (s.lcols) {
                 case 1:
                     assertEquals(10, s.card);
