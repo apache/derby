@@ -621,15 +621,15 @@ public abstract class BaseTestCase
      * Fail; attaching an exception for more detail on cause.
      *
      * @param msg message explaining the failure
-     * @param e exception related to the cause
+     * @param t the cause of the failure
      *
      * @exception AssertionFailedError
      */
-    public static void fail(String msg, Exception e)
+    public static void fail(String msg, Throwable t)
             throws AssertionFailedError {
 
         AssertionFailedError ae = new AssertionFailedError(msg);
-        ae.initCause(e);
+        ae.initCause(t);
         throw ae;
     }
 } // End class BaseTestCase

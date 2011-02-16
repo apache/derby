@@ -460,12 +460,22 @@ final class ConcurrentLockSet implements LockTable {
 
 forever:	for (;;) {
 
-                byte wakeupReason = waitingLock.waitForGrant(actualTimeout);
-                
+                byte wakeupReason = 0;
                 ActiveLock nextWaitingLock = null;
                 Object[] deadlockData = null;
 
                 try {
+                    try {
+                        wakeupReason = waitingLock.waitForGrant(actualTimeout);
+                    } catch(StandardException e) {
+                        // DERBY-4711: If waitForGrant() fails, we need to
+                        // remove ourselves from the queue so that those
+                        // behind us in the queue don't get stuck waiting for
+                        // us.
+                        nextWaitingLock = control.getNextWaiter(waitingLock, true, this);
+                        throw e;
+                    }
+
                     boolean willQuitWait;
                     Enumeration timeoutLockTable = null;
                     long currentTime = 0;
