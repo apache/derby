@@ -69,7 +69,7 @@ class PiggyBackedSessionData {
      * the xModified() methods can be used.
      * @param conn the connection to obtain data from
      */
-    private PiggyBackedSessionData(EngineConnection conn) throws SQLException {
+    private PiggyBackedSessionData(EngineConnection conn) {
         conn_ = conn;
         iso_ = -1; // Initialize to an illegal value
     }

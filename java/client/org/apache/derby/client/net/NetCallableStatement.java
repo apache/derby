@@ -59,7 +59,7 @@ public class NetCallableStatement extends NetPreparedStatement
         initNetCallableStatement(statement);
     }
 
-    private void initNetCallableStatement(CallableStatement statement) throws SqlException {
+    private void initNetCallableStatement(CallableStatement statement) {
         callableStatement_ = statement;
         callableStatement_.materialCallableStatement_ = this;
 
