@@ -27,11 +27,6 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException; 
 
-import org.apache.derby.iapi.store.access.RowUtil;
-import org.apache.derby.iapi.store.access.Qualifier;
-import org.apache.derby.iapi.store.access.ScanController;
-
-import org.apache.derby.iapi.store.raw.FetchDescriptor;
 import org.apache.derby.iapi.store.raw.Page;
 import org.apache.derby.iapi.store.raw.RecordHandle;
 
@@ -56,7 +51,7 @@ import org.apache.derby.iapi.store.access.BackingStoreHashtable;
 
 /**
 
-A BTreeScan implementation that provides the 90% solution to the max on
+A BTreeScan implementation that provides the 95% solution to the max on
 btree problem.  If the row is the last row in the btree it works very
 efficiently.  This implementation will be removed once backward scan is
 fully functional.
@@ -72,13 +67,13 @@ To return the maximum row this implementation does the following:
    the latch.  At this point the slot position is just right of the
    locked row.
 2) in fetchMax() it loops backward on the last leaf page, locking rows
-   as it does so, until it either finds the first non-deleted and locks
-   that row without having to wait and thus did not give up the latch on the 
-   page.  If successful it returns that row.
-3) If it is not successful in this last page search it faults over to 
-   the original implementation of max scan, which is simply a search from 
-   left to right at the leaf level for the last row in the table.
-
+   as it does so, until it finds the first non-deleted, non-NULL row.
+3) If it is not successful in this last page search it attempts to latch
+   the left sibling page, without waiting to avoid deadlocks with forward
+   scans, and continue the search on that page.
+4) If the sibling page couldn't be latched without waiting, save the
+   current position, release all latches, and restart the scan from the
+   saved position.
 
 **/
 
@@ -91,191 +86,41 @@ public class BTreeMaxScan extends BTreeScan
      */
 
     /**
-     * Fetch the maximum non-deleted row from the table.
+     * Move the current position to the page to the left of the current page,
+     * right after the last slot on that page. If we have to wait for a latch,
+     * give up the latch on the current leaf and give up. The caller will have
+     * to reposition and retry.
      *
-     * Scan from left to right at the leaf level searching for the 
-     * rightmost non deleted row in the index.
-     *
-	 * @exception  StandardException  Standard exception policy.
-     **/
-    private boolean fetchMaxRowFromBeginning(
-    DataValueDescriptor[]   fetch_row)
-        throws StandardException
-	{
-        int                 ret_row_count     = 0;
-        RecordHandle        max_rh            = null;
+     * @return true if the position was successfully moved, false if we had
+     * to wait for a latch
+     */
+    private boolean moveToLeftSibling() throws StandardException {
+        try {
+            positionAtPreviousPage();
+            return true;
+        } catch (WaitError we) {
+            // We couldn't get the latch without waiting. Let's save the
+            // position and let the caller retry.
+            //
+            // If the page is empty, there is no position to save. Since
+            // positionAtPreviousPage() skips empty pages mid-scan, we know
+            // that an empty page seen here must be the rightmost leaf. In
+            // that case, the caller can simply restart the scan, so there's
+            // no need to save the position.
+            if (isEmpty(scan_position.current_leaf.getPage())) {
+                scan_position.current_leaf.release();
+                scan_position.init();
+            } else {
+                // Save the leftmost record on the page. That's the record in
+                // slot 1, since slot 0 is the control row.
+                scan_position.current_slot = 1;
+                savePositionAndReleasePage();
+            }
 
-        // we need to scan until we hit the end of the table or until we
-        // run into a null.  Use this template to probe the "next" row so
-        // that if we need to finish, fetch_row will have the right value.
-        DataValueDescriptor[] check_row_template = new DataValueDescriptor[1];
-        check_row_template[0] = fetch_row[0].cloneValue(false);
-        FetchDescriptor check_row_desc = RowUtil.getFetchDescriptorConstant(1);
+            return false;
+        }
+    }
 
-        // reopen the scan for reading from the beginning of the table.
-        reopenScan(
-            (DataValueDescriptor[]) null,
-            ScanController.NA,
-            (Qualifier[][]) null,
-            (DataValueDescriptor[]) null,
-            ScanController.NA);
-
-        BTreeRowPosition pos = scan_position;
-
-        positionAtStartForForwardScan(pos);
-
-        // At this point:
-        // current_page is latched.  current_slot is the slot on current_page
-        // just before the "next" record this routine should process.
-
-        // loop through successive leaf pages and successive slots on those
-        // leaf pages.  Stop when either the last leaf is reached. At any
-        // time in the scan fetch_row will contain "last" non-deleted row
-        // seen.
-
-        boolean nulls_not_reached = true;
-        leaf_loop:
-		while ((pos.current_leaf != null) && nulls_not_reached)
-		{
-            slot_loop:
-			while ((pos.current_slot + 1) < pos.current_leaf.page.recordCount())
-			{
-                // unlock the previous row if doing read.
-                if (pos.current_rh != null)
-                {
-                    this.getLockingPolicy().unlockScanRecordAfterRead(
-                        pos, init_forUpdate);
-
-                    // current_rh is used to track which row we need to unlock,
-                    // at this point no row needs to be unlocked.
-                    pos.current_rh = null;
-                }
-
-                // move scan current position forward.
-                pos.current_slot++;
-                this.stat_numrows_visited++;
-
-                // get current record handle for positioning but don't read
-                // data until we verify it is not deleted.  rh is needed
-                // for repositioning if we lose the latch.
-                RecordHandle rh = 
-                    pos.current_leaf.page.fetchFromSlot(
-                        (RecordHandle) null,
-                        pos.current_slot, 
-                        check_row_template,
-                        null,
-                        true);
-
-                // lock the row.
-                boolean latch_released =
-                    !this.getLockingPolicy().lockScanRow(
-                        this, this.getConglomerate(), pos,
-                        init_lock_fetch_desc,
-                        pos.current_lock_template,
-                        pos.current_lock_row_loc,
-                        false, init_forUpdate, lock_operation);
-
-                // special test to see if latch release code works
-                if (SanityManager.DEBUG)
-                {
-                    latch_released = 
-                        test_errors(
-                            this,
-                            "BTreeMaxScan_fetchNextGroup", pos,
-                            this.getLockingPolicy(),
-                            pos.current_leaf, latch_released);
-                }
-
-                // At this point we have successfully locked this record, so
-                // remember the record handle so that it can be unlocked if
-                // necessary.  If the above lock deadlocks, we will not try
-                // to unlock a lock we never got in close(), because current_rh
-                // is null until after the lock is granted.
-                pos.current_rh = rh;
-
-                if (latch_released)
-                {
-                    // lost latch on page in order to wait for row lock.
-                    // Call reposition() which will use the saved record
-                    // handle to reposition to the same spot on the page.
-                    // If the row is no longer on the page, reposition()
-                    // will take care of searching the tree and position
-                    // on the correct page.
-                    if (!reposition(pos, false))
-                    {
-                        // Could not position on the exact same row that was
-                        // saved, which means that it has been purged.
-                        // Reposition on the row immediately to the left of
-                        // the purged row instead.
-                        if (!reposition(pos, true))
-                        {
-                            if (SanityManager.DEBUG)
-                            {
-                                SanityManager.THROWASSERT(
-                                        "Cannot fail with 2nd param true");
-                            }
-                            // reposition will set pos.current_leaf to null if
-                            // it returns false, so if this ever does fail in
-                            // delivered code, expect a NullPointerException at
-                            // the top of this loop when we call recordCount().
-                        }
-
-                        // Now we're positioned to the left of our saved
-                        // position. Go to the top of the loop so that we move
-                        // the scan to the next row and release the lock on
-                        // the purged row.
-                        continue slot_loop;
-                    }
-                }
-
-
-                if (pos.current_leaf.page.isDeletedAtSlot(pos.current_slot))
-                {
-                    this.stat_numdeleted_rows_visited++;
-
-                    if (check_row_template[0].isNull())
-                    {
-                        // nulls sort at high end and are not to be returned
-                        // by max scan, so search is over, return whatever is
-                        // in fetch_row.
-                        nulls_not_reached = false;
-                        break;
-                    }
-                }
-                else if (check_row_template[0].isNull())
-                {
-                    nulls_not_reached = false;
-                    break;
-                }
-                else 
-                {
-
-                    pos.current_leaf.page.fetchFromSlot(
-                        pos.current_rh,
-                        pos.current_slot, fetch_row, init_fetchDesc,
-                        true);
-
-                    stat_numrows_qualified++;
-                    max_rh = pos.current_rh;
-                }
-			}
-
-            // Move position of the scan to slot 0 of the next page.  If there
-            // is no next page current_page will be null.
-            positionAtNextPage(pos);
-
-            this.stat_numpages_visited++;
-		}
-
-
-        // Reached last leaf of tree.
-        positionAtDoneScan(pos);
-
-        // we need to decrement when we stop scan at the end of the table.
-        this.stat_numpages_visited--;
-
-        return(max_rh != null);
-	}
 
     /**************************************************************************
      * Protected implementation of abstract methods of BTreeScan class:
@@ -419,7 +264,7 @@ public class BTreeMaxScan extends BTreeScan
      * Search last page for last non deleted row, and if one is found return
      * it as max.
      *
-     * If no row found on last page, or could not find row withou losing latch
+     * If no row found on last page, or could not find row without losing latch
      * then call fetchMaxRowFromBeginning() to search from left to right
      * for maximum value in index.
      *
@@ -478,7 +323,7 @@ public class BTreeMaxScan extends BTreeScan
         // At this point:
         // current_page is latched.  current_slot is the slot on current_page
         // just "right" of the "next" record this routine should process.
-        // In this case teh "next" record is the last row on the rightmost
+        // In this case the "next" record is the last row on the rightmost
         // leaf page.
 
 
@@ -487,8 +332,98 @@ public class BTreeMaxScan extends BTreeScan
         // Code is positioned on the rightmost leaf of the index, the rightmost
         // non-deleted row on this page is the maximum row to return.
 
-        if ((pos.current_slot - 1) > 0)
+        leaf_loop:
+        while (!max_found && pos.current_leaf != null)
         {
+            if (pos.current_slot <= 1)
+            {
+                // Reached beginning of this leaf page without finding a
+                // value, so move position to the end of the left sibling and
+                // resume the scan.
+                boolean latch_released = !moveToLeftSibling();
+
+                if (latch_released)
+                {
+                    // The previous page was latched by someone else, so we
+                    // gave up the latch on this page to avoid running into a
+                    // deadlock with someone scanning the leaves in the
+                    // opposite direction.
+
+                    if (SanityManager.DEBUG)
+                    {
+                        SanityManager.DEBUG(
+                                "BTreeMaxScan.latchConflict",
+                                "Couldn't get latch nowait, will retry");
+                    }
+
+                    if (pos.current_positionKey == null)
+                    {
+                        // We haven't seen any rows yet, so no position has
+                        // been saved. See comment in moveToLeftSibling().
+                        // Restart the scan from the rightmost leaf.
+                        if (SanityManager.DEBUG)
+                        {
+                            SanityManager.DEBUG(
+                                    "BTreeMaxScan.latchConflict",
+                                    "Restart scan from rightmost leaf");
+                        }
+                        scan_state = SCAN_INIT;
+                        positionAtStartPosition(pos);
+                    }
+                    else if (!reposition(pos, false))
+                    {
+                        if (SanityManager.DEBUG)
+                        {
+                            SanityManager.DEBUG(
+                                    "BTreeMaxScan.latchConflict",
+                                    "Saved position is gone");
+                        }
+
+                        // The row on the saved position doesn't exist anymore,
+                        // so it must have been purged. Move to the position
+                        // immediately to the left of where the row should
+                        // have been.
+                        if (!reposition(pos, true))
+                        {
+                            if (SanityManager.DEBUG)
+                            {
+                                SanityManager.THROWASSERT(
+                                        "Cannot fail with 2nd param true");
+                            }
+                        }
+
+                        // reposition() will position to the left of the purged
+                        // row, whereas we want to be on the right side of it
+                        // since we're moving backwards.
+                        pos.current_slot++;
+                    }
+                }
+
+                // We now have one of the following scenarios:
+                //
+                // 1) Current position is right after the last row on the left
+                //    sibling page if we could move to the sibling page without
+                //    waiting for a latch.
+                // 2) Current position is on the same row as the last one we
+                //    looked at if we had to wait for a latch on the sibling
+                //    page and the row hadn't been purged before we
+                //    repositioned.
+                // 3) Current position is right after the position where we
+                //    should have found the last row we looked at if we had
+                //    to wait for a latch on the sibling page and the row was
+                //    purged before we repositioned.
+                // 4) There is no current position if we already were at the
+                //    leftmost leaf page.
+                //
+                // For scenarios 1-3, we're positioned immediately to the right
+                // of the next row we want to look at, so going to the top of
+                // the loop will make us move to the next interesting row. For
+                // scenario 4, we want to break out of the loop, which also
+                // is handled by going to the top of the loop and reevaluating
+                // the loop condition.
+                continue;
+            }
+
             // move scan backward in search of last non-deleted row on page.
             pos.current_slot--;
 
@@ -524,10 +459,33 @@ public class BTreeMaxScan extends BTreeScan
 
                 if (latch_released)
                 {
-                    // had to wait on lock while lost latch, now last page of
-                    // index may have changed, give up on "easy/fast" max scan.
-                    pos.current_leaf = null;
-                    break;
+                    // Had to wait on lock while not holding the latch, so now
+                    // the current row may have been moved to another page and
+                    // we need to reposition.
+                    if (!reposition(pos, false))
+                    {
+                        // Could not position on the exact same row that was
+                        // saved, which means that it has been purged.
+                        // Reposition on the row immediately to the left of
+                        // where the purged row should have been.
+                        if (!reposition(pos, true))
+                        {
+                            if (SanityManager.DEBUG)
+                            {
+                                SanityManager.THROWASSERT(
+                                        "Cannot fail with 2nd param true");
+                            }
+                        }
+
+                        // Now we're positioned immediately to the left of our
+                        // previous position. We want to be positioned to the
+                        // right of that position so that we can restart the
+                        // scan from where we were before we came to the row
+                        // that disappeared for us. Adjust position one step
+                        // to the right and continue from the top of the loop.
+                        pos.current_slot++;
+                        continue leaf_loop;
+                    }
                 }
 
                 if (pos.current_leaf.page.isDeletedAtSlot(pos.current_slot))
@@ -572,12 +530,6 @@ public class BTreeMaxScan extends BTreeScan
 
         // Clean up the scan based on searching through rightmost leaf of btree
         positionAtDoneScan(scan_position);
-
-        if (!max_found)
-        {
-            // max row in table was not last row in table
-            max_found = fetchMaxRowFromBeginning(fetch_row);
-        }
 
         return(max_found);
 	}

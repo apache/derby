@@ -511,6 +511,91 @@ public abstract class BTreeScan extends OpenBTree implements ScanManager
     }
 
     /**
+     * <p>
+     * Position the scan after the last row on the previous page. Hold the
+     * latch on the current page until the previous page has been latched. If
+     * the immediate left sibling is empty, move further until a non-empty page
+     * is found or there are no more leaves to be found. The latch on the
+     * current page will be held until a non-empty left sibling page is found.
+     * </p>
+     *
+     * <p>
+     * This method never waits for a latch, as waiting for latches while
+     * holding another latch is only allowed when moving forward in the B-tree.
+     * Waiting while moving backward may result in deadlocks with scanners
+     * going forward. A {@code WaitError} is thrown if the previous page cannot
+     * be latched without waiting. {@code scan_position.current_leaf} will
+     * point to the same page as before the method was called in the case where
+     * a {@code WaitError} is thrown, and the page will still be latched.
+     * </p>
+     *
+     * @throws StandardException standard exception policy
+     * @throws WaitError if the previous page cannot be latched immediately
+     */
+    protected void positionAtPreviousPage()
+            throws StandardException, WaitError {
+        BTreeRowPosition pos = scan_position;
+
+        LeafControlRow leaf =
+                (LeafControlRow) pos.current_leaf.getLeftSibling(this);
+
+        // Skip empty leaves. We don't want to stop on empty pages while
+        // moving backwards, since pages with no rows have no keys and we will
+        // need to save the current position by key if we cannot latch a page
+        // immediately.
+        while (leaf != null && isEmpty(leaf.page))
+        {
+            final LeafControlRow next;
+            try {
+                next = (LeafControlRow) leaf.getLeftSibling(this);
+            } finally {
+                leaf.release();
+            }
+
+            // Successfully managed to latch the leaf to the left of the empty
+            // sibling page. Use that leaf instead.
+            leaf = next;
+        }
+
+        // Now that we either have the latch on the first non-empty leaf to
+        // the left of the current leaf, or we have passed the leftmost leaf,
+        // we can release the latch on the current page.
+
+        // Unlock the previous row if doing read.
+        if (pos.current_rh != null)
+        {
+            this.getLockingPolicy().unlockScanRecordAfterRead(
+                pos, init_forUpdate);
+        }
+
+        pos.current_leaf.release();
+        pos.current_leaf = leaf;
+
+        // Set up for scan to continue at the end of the page.
+        pos.current_slot = (pos.current_leaf == null) ?
+            Page.INVALID_SLOT_NUMBER : pos.current_leaf.page.recordCount();
+        pos.current_rh = null;
+    }
+
+    /**
+     * Check if a B-tree page is empty. The control row, which is always
+     * present, is not counted.
+     *
+     * @param page the B-tree page to check
+     * @return true if the page is empty, false otherwise
+     * @throws StandardException standard exception policy
+     */
+    static boolean isEmpty(Page page) throws StandardException {
+        // Because of the control row, the page should always have at least
+        // one record. It's empty if that's the only record on the page.
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(
+                    page.recordCount() > 0, "Page without control row?");
+        }
+        return page.recordCount() <= 1;
+    }
+
+    /**
     Position scan at "start" position.
     <p>
     Positions the scan to the slot just before the first record to be returned

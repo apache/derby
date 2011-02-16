@@ -71,6 +71,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(AccessTest.suite());
         suite.addTest(AutomaticIndexStatisticsTest.suite());
         suite.addTest(AutomaticIndexStatisticsMultiTest.suite());
+        suite.addTest(BTreeMaxScanTest.suite());
         
         /* Tests that only run in sane builds */
         if (SanityManager.DEBUG) {
