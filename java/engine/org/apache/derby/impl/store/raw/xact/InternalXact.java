@@ -96,7 +96,7 @@ public class InternalXact extends Xact
 		@see org.apache.derby.iapi.store.raw.xact.RawTransaction#recoveryRollbackFirst
 	*/
 	
-	 public void checkLogicalOperationOK() 
+	 public void checkLogicalOperationOk() 
          throws StandardException 
      {
 		throw StandardException.newException(
