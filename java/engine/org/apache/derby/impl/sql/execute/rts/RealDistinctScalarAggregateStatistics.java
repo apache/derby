@@ -35,9 +35,6 @@ public class RealDistinctScalarAggregateStatistics
 	extends RealScalarAggregateStatistics
 {
 
-	/* Leave these fields public for object inspectors */
-	public int rowsInput;
-
 	// CONSTRUCTORS
 
 	/**
