@@ -321,7 +321,7 @@ public class IndexStatisticsDaemonImpl
         while (true) {
             try {
                 ConglomerateDescriptor[] cds = td.getConglomerateDescriptors();
-                updateIndexStatsMinion(lcc, td, cds, AS_BACKGROUND_TASK);
+                tryToGatherStats(lcc, td, cds, AS_BACKGROUND_TASK);
                 break;
             } catch (StandardException se) {
                 // At this level, we retry the whole operation. If this happens,
@@ -350,6 +350,47 @@ public class IndexStatisticsDaemonImpl
         trace(0, "generateStatistics::end");
     }
 
+    /**
+     * Try to gather statistics. Fail gracefully if we are being shutdown, e.g., the database is killed
+     * while we're busy. See DERBY-5037.
+     *
+     * @param lcc language connection context used to perform the work
+     * @param td the table to update index stats for
+     * @param cds the conglomerates to update statistics for (non-index
+     *      conglomerates will be ignored)
+     * @param asBackgroundTask whether the updates are done automatically as
+     *      part of a background task or if explicitly invoked by the user
+     * @throws StandardException if something goes wrong
+     */
+    private void tryToGatherStats(LanguageConnectionContext lcc,
+                                        TableDescriptor td,
+                                        ConglomerateDescriptor[] cds,
+                                        boolean asBackgroundTask)
+            throws StandardException
+    {
+        //
+        // Swallow exceptions raised while we are being shutdown.
+        //
+        try {
+            updateIndexStatsMinion( lcc, td, cds, asBackgroundTask );
+        }
+        catch (StandardException se)
+        {
+            if ( !isShuttingDown( lcc ) ) { throw se; }
+        }
+        // to filter assertions raised by debug jars
+        catch (RuntimeException re)
+        {
+            if ( !isShuttingDown( lcc ) ) { throw re; }
+        }
+    }
+    /** Return true if we are being shutdown */
+    private boolean isShuttingDown( LanguageConnectionContext lcc )
+    {
+        if ( daemonStopped ) { return true; }
+        else { return !lcc.getDatabase().isActive(); }
+    }
+    
     /**
      * Updates the index statistics for the given table and the specified
      * indexes.
