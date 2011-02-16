@@ -692,11 +692,11 @@ public abstract class ConstraintDescriptor
         boolean clearDependencies) throws StandardException
     {       
         DataDictionary dd = getDataDictionary();
-        DependencyManager dm = dd.getDependencyManager();
         TransactionController tc = lcc.getTransactionExecute();
 
         if (clearDependencies)
         {
+            DependencyManager dm = dd.getDependencyManager();
             dm.clearDependencies(lcc, this);
         }
 

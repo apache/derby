@@ -95,7 +95,6 @@ public class ExtractOperatorNode extends UnaryOperatorNode {
 
 		opTypeId = operand.getTypeId();
 		operandType = opTypeId.getJDBCTypeId();
-		TypeCompiler tc = operand.getTypeCompiler();
 
 		/*
 		** Cast the operand, if necessary, - this function is allowed only on
@@ -105,6 +104,7 @@ public class ExtractOperatorNode extends UnaryOperatorNode {
 		*/
 		if (opTypeId.isStringTypeId())
 		{
+            TypeCompiler tc = operand.getTypeCompiler();
 			int castType = (extractField < 3) ? Types.DATE : Types.TIME;
 			operand =  (ValueNode)
 				getNodeFactory().getNode(

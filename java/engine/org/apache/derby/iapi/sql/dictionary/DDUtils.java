@@ -381,9 +381,6 @@ public	class	DDUtils
 
 		Integer rAction;
 
-		String refTableName = refTd.getSchemaName() + "." + refTd.getName();
-
-
 		/*
 		** Validate the new referentail action value with respect to the 
 		** already existing connections to this table we gathered  from
@@ -392,6 +389,7 @@ public	class	DDUtils
 
 		if(checkImmediateRefTable)
 		{
+		    String refTableName = refTd.getSchemaName() + "." + refTd.getName();
 			rAction = ((Integer)dch.get(refTableName));
 			
 			// check possible invalide cases incase of self referencing foreign key

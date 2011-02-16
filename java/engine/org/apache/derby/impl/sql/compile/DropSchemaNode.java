@@ -63,7 +63,6 @@ public class DropSchemaNode extends DDLStatementNode
 		
         LanguageConnectionContext lcc = getLanguageConnectionContext();
         StatementContext stx = lcc.getStatementContext();
-        String currentUser = stx.getSQLSessionContext().getCurrentUser();
 		/* 
 		** Users are not permitted to drop
 		** the SYS or APP schemas.
@@ -81,6 +80,7 @@ public class DropSchemaNode extends DDLStatementNode
         */
         if (isPrivilegeCollectionRequired())
         {
+            String currentUser = stx.getSQLSessionContext().getCurrentUser();
             getCompilerContext().addRequiredSchemaPriv(schemaName, 
                 currentUser,
                 Authorizer.DROP_SCHEMA_PRIV);

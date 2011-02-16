@@ -505,14 +505,14 @@ public class Reply {
             int oldCount = count_;
             count_ = count_ - (encryptedByte.length - clearedByte.length);
             if (((clearedByte[2] & 0xff) << 8) + ((clearedByte[3] & 0xff) << 0) == 0x146c) {
-                int firstLobLength = ((clearedByte[0] & 0xFF) << 8) +
-                        ((clearedByte[1] & 0xFF) << 0);
 
                 boolean flag = false;
                 if (gdsFormatter == 0x54) {
                     flag = true;
                 }
                 if (flag) {
+                    int firstLobLength = ((clearedByte[0] & 0xFF) << 8) +
+                        ((clearedByte[1] & 0xFF) << 0);
                     if (oldCount - oldDssLength < 6) {
                         int totalBytesRead = fill(6); //sometimes the 2nd EXTDTA doesn't come back, need to fetch again to get it
                         if (totalBytesRead > 0) {

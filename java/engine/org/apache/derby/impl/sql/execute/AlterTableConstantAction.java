@@ -2387,9 +2387,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		numIndexes = compressIRGs.length;
 		indexConglomerateNumbers = indexLister.getIndexConglomerateNumbers();
 
-		ArrayList newCongloms = new ArrayList();
 		if (! (compressTable || truncateTable))		// then it's drop column
 		{
+		    ArrayList newCongloms = new ArrayList();
 			for (int i = 0; i < compressIRGs.length; i++)
 			{
 				int[] baseColumnPositions = compressIRGs[i].baseColumnPositions();

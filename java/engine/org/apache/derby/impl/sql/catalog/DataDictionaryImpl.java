@@ -4123,12 +4123,12 @@ public final class	DataDictionaryImpl
 		}
 
 		schemaUUID = sd.getUUID();
-		stmtKey = new TableKey(schemaUUID, stmtName);
 
 		/* Only use the cache if we're in compile-only mode */
 		if ((spsNameCache != null) && 
 			(getCacheMode() == DataDictionary.COMPILE_ONLY_MODE))
 		{
+		    stmtKey = new TableKey(schemaUUID, stmtName);
 			SPSNameCacheable cacheEntry = (SPSNameCacheable) spsNameCache.find(stmtKey);
 			if (cacheEntry != null)
 			{
@@ -8651,11 +8651,11 @@ public final class	DataDictionaryImpl
             // while the Row interface is 1 based.
             NumberDataValue currentAI = (NumberDataValue)row.getColumn(columnNum);
             long currentAIValue = currentAI.getLong();
-            NumberDataValue increment = (NumberDataValue)row.getColumn(columnNum + 2);
             
             if (doUpdate)
             {
                 // we increment and store the new value in SYSCOLUMNS
+                NumberDataValue increment = (NumberDataValue)row.getColumn(columnNum + 2);
                 currentAI = currentAI.plus(currentAI, increment, currentAI);
                 row.setColumn(columnNum, currentAI);
                 heapCC.replace(rl, row.getRowArray(), columnToUpdate);

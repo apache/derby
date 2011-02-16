@@ -77,10 +77,10 @@ abstract class ExportAbstract {
                                       boolean[] isLargeChar) 
         throws Exception 
 	{
-    int columnCount = exportResultSetForObject.getColumnCount();
 
-	ResultSetMetaData rsm=rs.getMetaData();
     if (rs.next()){
+       int columnCount = exportResultSetForObject.getColumnCount();
+	   ResultSetMetaData rsm=rs.getMetaData();
        String[] rowObjects = new String[columnCount];
        for (int colNum = 0; colNum < columnCount; colNum++) {
            if (lobsInExtFile && 

@@ -116,11 +116,11 @@ public class D_HeapController extends DiagnosticableGeneric
     double  ratio,
     String  ratio_desc)
     {
-        String double_str = "" + ratio;
         String short_str;
 
         if (ratio > 0.001)
         {
+            String double_str = "" + ratio;
             short_str = double_str.substring(
                 0, 
                 Math.min(double_str.lastIndexOf(".") + 3, double_str.length()));

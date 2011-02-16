@@ -424,12 +424,9 @@ public abstract class BrokeredConnection implements EngineConnection
 
 	*/
 	public void setState(boolean complete) throws SQLException {
-		Class[] CONN_PARAM = { Integer.TYPE };
-		Object[] CONN_ARG = { new Integer(stateHoldability)};
-
-		Connection conn = getRealConnection();
 
 		if (complete) {
+		    Connection conn = getRealConnection();
 			conn.setTransactionIsolation(stateIsolationLevel);
 			conn.setReadOnly(stateReadOnly);
 			conn.setAutoCommit(stateAutoCommit);
@@ -439,6 +436,8 @@ public abstract class BrokeredConnection implements EngineConnection
 			// jdk13 does not have Connection.setHoldability method and hence using
 			// reflection to cover both jdk13 and higher jdks
 			try {
+		        Class[] CONN_PARAM = { Integer.TYPE };
+		        Object[] CONN_ARG = { new Integer(stateHoldability)};
 				Method sh = conn.getClass().getMethod("setHoldability", CONN_PARAM);
 				sh.invoke(conn, CONN_ARG);
 			} catch( Exception e)

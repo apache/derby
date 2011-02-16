@@ -114,10 +114,10 @@ public class StatementTablePermission extends StatementPermission
 					   Activation activation)
 		throws StandardException
 	{
-		DataDictionary dd = lcc.getDataDictionary();
 		ExecPreparedStatement ps = activation.getPreparedStatement();
 
         if (!hasPermissionOnTable(lcc, activation, forGrant, ps)) {
+		    DataDictionary dd = lcc.getDataDictionary();
 			TableDescriptor td = getTableDescriptor( dd);
             throw StandardException.newException(
                 (forGrant ? SQLState.AUTH_NO_TABLE_PERMISSION_FOR_GRANT

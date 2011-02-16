@@ -1983,10 +1983,10 @@ public class SystemProcedures  {
     private static void createXplainSchema(String schemaName)
         throws SQLException
     {
-        String escapedSchema = IdUtil.normalToDelimited(schemaName);
         Connection conn = getDefaultConn();
         if (!hasSchema(conn, schemaName))
         {
+            String escapedSchema = IdUtil.normalToDelimited(schemaName);
             Statement s = conn.createStatement();
             s.executeUpdate("CREATE SCHEMA " + escapedSchema);
             s.close();
