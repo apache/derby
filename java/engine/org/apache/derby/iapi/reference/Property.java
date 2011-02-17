@@ -690,7 +690,7 @@ public interface Property {
      */
     String STORAGE_AUTO_INDEX_STATS_DEBUG_ABSDIFF_THRESHOLD =
             "derby.storage.indexStats.debug.absdiffThreshold";
-    int STORAGE_AUTO_INDEX_STATS_DEBUG_ABSDIFF_THRESHOLD_DEFAULT = 0;
+    int STORAGE_AUTO_INDEX_STATS_DEBUG_ABSDIFF_THRESHOLD_DEFAULT = 1000;
 
     /**
      * Specifies the lower threshold for the logarithmical (natural logarithm e)
