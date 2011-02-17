@@ -104,21 +104,28 @@ public class AutomaticIndexStatisticsTest
      */
     public void testStatsCreatedOnGrowthThenDeleteDb()
             throws SQLException {
+        String db = "singleUse/newCleanDb";
+        DataSource ds = JDBCDataSource.getDataSource();
+        JDBCDataSource.setBeanProperty(ds, "databaseName", db);
+        JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+        Connection con = ds.getConnection();
         String TAB = "TEST_GROWTH_EMPTY";
-        createAndInsertSimple(TAB, 300);
+        createAndInsertSimple(con, TAB, 300);
         // This should trigger creation of statistics.
-        prepareStatement("select * from " + TAB + " where id = ?");
+        PreparedStatement ps = con.prepareStatement(
+                "select * from " + TAB + " where id = ?");
+        ps.close();
 
         // Get statistics
-        IdxStats[] myStats = stats.getStatsTable(TAB, 1);
+        IdxStats[] myStats = new IndexStatsUtil(
+                ds.getConnection(), DEFAULT_TIMEOUT).getStatsTable(TAB, 1);
         assertEquals(1, myStats.length);
         assertTrue(myStats[0].rows == 300);
         assertTrue(myStats[0].card == 300);
 
         // Shutdown database and try to delete it.
-        TestConfiguration.getCurrent().shutdownDatabase();
-        assertDirectoryDeleted(constructDbPath(
-                getTestConfiguration().getDefaultDatabaseName()));
+        JDBCDataSource.shutdownDatabase(ds);
+        assertDirectoryDeleted(constructDbPath(db));
     }
 
     /** Make sure stats are updated when the table grows. */
