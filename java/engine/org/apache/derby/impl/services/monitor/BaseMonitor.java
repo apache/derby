@@ -36,6 +36,7 @@ import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.Context;
 import org.apache.derby.iapi.services.context.ContextService;
 
+import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.stream.InfoStreams;
 import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
 
@@ -179,13 +180,14 @@ abstract class BaseMonitor
 				return;
 			inShutdown = true;
 		}
+ 
+		Monitor.getStream().println(LINE);
 		long shutdownTime = System.currentTimeMillis();
 		//Make a note of Engine shutdown in the log file
 		Monitor.getStream().printlnWithHeader("\n" +
 				COLON +
                 MessageService.getTextMessage(
                     MessageId.CONN_SHUT_DOWN_ENGINE));
-		Monitor.getStream().println(LINE);
 
 		if (SanityManager.DEBUG && reportOn) {
 			report("Shutdown request");
@@ -222,6 +224,8 @@ abstract class BaseMonitor
 			}
 
 		}
+		
+		Monitor.getStream().println(LINE);
 		((TopService) services.elementAt(0)).shutdown();
 
 		synchronized (dontGC) {

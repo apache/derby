@@ -481,7 +481,8 @@ public class BaseDataFileFactory
 
 		long shutdownTime = System.currentTimeMillis();
 		boolean logBootTrace = PropertyUtil.getSystemBoolean(Property.LOG_BOOT_TRACE);
-		logMsg("\n" + CheapDateFormatter.formatDate(shutdownTime) +
+		istream.println(LINE);
+		logMsg("\n" + new Date() +
                 MessageService.getTextMessage(
                     MessageId.STORE_SHUTDOWN_MSG,
                     getIdentifier(),
@@ -494,8 +495,6 @@ public class BaseDataFileFactory
 		if (logBootTrace)
 			Monitor.logThrowable(new Throwable("shutdown trace"));
 			
-		istream.println(LINE);
-
 		if (!isCorrupt) 
         {
 			try 
