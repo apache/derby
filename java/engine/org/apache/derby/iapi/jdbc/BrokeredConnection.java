@@ -32,14 +32,7 @@ import java.sql.SQLWarning;
 
 import org.apache.derby.impl.jdbc.Util;
 
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-
-import java.lang.reflect.*;
-
-import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.error.SQLWarningFactory;
-import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.shared.common.reference.SQLState;
 
 /**
@@ -433,17 +426,7 @@ public abstract class BrokeredConnection implements EngineConnection
 			// make the underlying connection pick my holdability state
 			// since holdability is a state of the connection handle
 			// not the underlying transaction.
-			// jdk13 does not have Connection.setHoldability method and hence using
-			// reflection to cover both jdk13 and higher jdks
-			try {
-		        Class[] CONN_PARAM = { Integer.TYPE };
-		        Object[] CONN_ARG = { new Integer(stateHoldability)};
-				Method sh = conn.getClass().getMethod("setHoldability", CONN_PARAM);
-				sh.invoke(conn, CONN_ARG);
-			} catch( Exception e)
-			{
-				throw PublicAPI.wrapStandardException( StandardException.plainWrapException( e));
-			}
+            conn.setHoldability(stateHoldability);
 		}
 	}
 
