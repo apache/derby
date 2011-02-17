@@ -54,7 +54,7 @@ public class LockInterruptTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         
-        if (! isSunJVM()) {
+        if (isIBMJVM()) {
             // DERBY-4463 test fails on IBM VM 1.5.
             // It's fixed in IBM VM 1.6 SR9 and above.
             // Remove this condition when that issue is solved in IBM VM 1.5 SR13.
