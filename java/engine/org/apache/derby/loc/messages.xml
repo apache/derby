@@ -7308,8 +7308,9 @@ Loaded from {4}</text>
             <msg>
                 <name>D002</name>
                 <text>:
-Shutting down instance {0} with class loader {1} </text>
+Shutting down instance {0} on database directory {1} with class loader {2} </text>
                 <arg>id</arg>
+                <arg>dbDirectory</arg>
 		<arg>classloader</arg>
             </msg>
 
@@ -7424,6 +7425,11 @@ Shutting down instance {0} with class loader {1} </text>
 
         <family>
             <title>Undocumented JDBC Messages</title>
+
+            <msg>
+                <name>J003</name>
+                <text>Shutting down Derby Engine</text>
+            </msg>
 
             <msg>
                 <name>J004</name>

@@ -484,7 +484,8 @@ public class BaseDataFileFactory
 		logMsg("\n" + CheapDateFormatter.formatDate(shutdownTime) +
                 MessageService.getTextMessage(
                     MessageId.STORE_SHUTDOWN_MSG,
-                    getIdentifier(), 
+                    getIdentifier(),
+                    getRootDirectory(),
                     // print object and ide of classloader.
                     // Cast to object so we don't get just the toString() 
                     // method

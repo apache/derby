@@ -45,6 +45,7 @@ import org.apache.derby.iapi.error.ShutdownException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.iapi.services.timer.TimerFactory;
+import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Module;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
@@ -67,6 +68,8 @@ import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.jmx.ManagementService;
 
 import org.apache.derby.impl.services.monitor.StorageFactoryService;
+
+import org.apache.derby.iapi.util.CheapDateFormatter;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,6 +120,9 @@ abstract class BaseMonitor
 		Hash table of objects that implement PersistentService keyed by their getType() method.
 	*/
 	private HashMap serviceProviders = new HashMap();
+	private static final String LINE = 
+        "----------------------------------------------------------------";
+    private final static char COLON = ':';
 
 	// Vector of class objects of implementations, found in the System, application
 	// and default (modules.properties) properties
@@ -173,6 +179,13 @@ abstract class BaseMonitor
 				return;
 			inShutdown = true;
 		}
+		long shutdownTime = System.currentTimeMillis();
+		//Make a note of Engine shutdown in the log file
+		Monitor.getStream().printlnWithHeader("\n" +
+				COLON +
+                MessageService.getTextMessage(
+                    MessageId.CONN_SHUT_DOWN_ENGINE));
+		Monitor.getStream().println(LINE);
 
 		if (SanityManager.DEBUG && reportOn) {
 			report("Shutdown request");
