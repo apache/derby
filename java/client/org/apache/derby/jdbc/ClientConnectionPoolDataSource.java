@@ -74,6 +74,8 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
         LogWriter dncLogWriter = null;
         try
         {
+            updateDataSourceValues(
+                    tokenizeAttributes(getConnectionAttributes(), null));
             dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
             if (dncLogWriter != null) {
                 dncLogWriter.traceEntry(this, "getPooledConnection");
@@ -98,6 +100,8 @@ public class ClientConnectionPoolDataSource extends ClientDataSource
         LogWriter dncLogWriter = null;
         try
         {
+            updateDataSourceValues(
+                    tokenizeAttributes(getConnectionAttributes(), null));
             dncLogWriter = super.computeDncLogWriterForNewConnection("_cpds");
             if (dncLogWriter != null) {
                 dncLogWriter.traceEntry(this, "getPooledConnection", user, "<escaped>");
