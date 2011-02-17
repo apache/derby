@@ -85,6 +85,7 @@ import org.apache.derby.iapi.util.CheapDateFormatter;
 import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
+import java.util.Date;
 import java.util.Properties;
 import java.util.Hashtable;
 import java.util.Enumeration;
