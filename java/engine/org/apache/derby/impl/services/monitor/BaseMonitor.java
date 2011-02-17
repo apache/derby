@@ -84,6 +84,7 @@ import java.io.PrintStream;
 
 import java.util.Collections;
 import java.util.Hashtable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -182,10 +183,8 @@ abstract class BaseMonitor
 		}
  
 		Monitor.getStream().println(LINE);
-		long shutdownTime = System.currentTimeMillis();
 		//Make a note of Engine shutdown in the log file
-		Monitor.getStream().printlnWithHeader("\n" +
-				COLON +
+		Monitor.getStream().println(new Date() + 
                 MessageService.getTextMessage(
                     MessageId.CONN_SHUT_DOWN_ENGINE));
 

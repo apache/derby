@@ -7428,7 +7428,7 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
             <msg>
                 <name>J003</name>
-                <text>Shutting down Derby Engine</text>
+                <text>:Shutting down Derby Engine</text>
             </msg>
 
             <msg>
