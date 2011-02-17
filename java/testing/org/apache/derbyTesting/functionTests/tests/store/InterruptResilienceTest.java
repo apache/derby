@@ -71,6 +71,11 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         Properties p = new Properties();
         p.put("derby.system.durability", "test");
         p.put("derby.infolog.append", "true");
+        // we'll force interrupts and thus serious errors, which with
+        // ibm jvms would result in javacore files, which aren't of 
+        // interest if the test passes. Setting the stream error level 
+        // so we don't get those javacores.
+        p.put("derby.stream.error.extendedDiagSeverityLevel", "50000");
 
         suite.addTest(
                 new SystemPropertyTestSetup(est, p, true));
@@ -85,10 +90,14 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         String testName = "InterruptResilienceTest";
 
         if (! isSunJVM()) {
-            // DERBY-4463 test fails on IBM VMs. Remove this
-            // exception when that issue is solved.
-            println("Test skipped for this VM, cf. DERBY-4463");
-            return new TestSuite(testName);
+            // DERBY-4463 test fails on IBM VM 1.5.
+            // It's fixed in IBM VM 1.6 SR9 and above.
+            // Remove this condition when that issue is solved in IBM VM 1.5 SR13.
+            if (getSystemProperty("java.version").startsWith("1.5.0"))
+            {
+                println("Test skipped for this VM, cf. DERBY-4463");
+                return new TestSuite(testName);
+            }
         }
 
         if (!JDBC.vmSupportsJDBC3()) {
