@@ -43,14 +43,6 @@ public class ijMultipleResultSetResult extends ijResultImpl {
     int[] columnWidths = null;
 
     /**
-     * Create a ijResultImpl that represents multiple result set.
-     */
-    public ijMultipleResultSetResult(List resultSets) throws SQLException {
-        resultSets = new ArrayList();
-        resultSets.addAll(resultSets);
-    }
-
-    /**
      * Create a ijResultImpl that represents multiple result sets, only
      * displaying a subset of the columns, using specified column widths.
      * 
