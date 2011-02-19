@@ -776,7 +776,7 @@ public class FromBaseTable extends FromTable
 			{
 				try
 				{
-					loadFactor = Float.valueOf(value).floatValue();
+					loadFactor = Float.parseFloat(value);
 				}
 				catch (NumberFormatException nfe)
 				{

@@ -195,7 +195,7 @@ public  abstract    class   StringColumnVTI extends VTITemplate
         else
         {
             try {
-                return Integer.valueOf( columnValue ).intValue();
+                return Integer.parseInt( columnValue );
             } catch (NumberFormatException e) { throw wrap( e ); }
         }
     }
@@ -221,7 +221,7 @@ public  abstract    class   StringColumnVTI extends VTITemplate
         else
         {
             try {
-                return Float.valueOf( columnValue ).floatValue();
+                return Float.parseFloat( columnValue );
             } catch (NumberFormatException e) { throw wrap( e ); }
         }
     }
@@ -234,7 +234,7 @@ public  abstract    class   StringColumnVTI extends VTITemplate
         else
         {
             try {
-                return Double.valueOf( columnValue ).doubleValue();
+                return Double.parseDouble( columnValue );
             } catch (NumberFormatException e) { throw wrap( e ); }
         }
     }

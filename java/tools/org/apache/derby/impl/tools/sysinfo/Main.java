@@ -468,9 +468,9 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
                                                                    localeName));
 
 
-			int major = Integer.valueOf(p.getProperty ("derby.locale.version.major")).intValue();
-			int minor = Integer.valueOf(p.getProperty ("derby.locale.version.minor")).intValue();
-			int maint = Integer.valueOf(p.getProperty ("derby.locale.version.maint")).intValue();
+			int major = Integer.parseInt(p.getProperty ("derby.locale.version.major"));
+			int minor = Integer.parseInt(p.getProperty ("derby.locale.version.minor"));
+			int maint = Integer.parseInt(p.getProperty ("derby.locale.version.maint"));
 			String build = p.getProperty ("derby.locale.build.number");
 
 			String lv = ProductVersionHolder.fullVersionString(major, minor, maint, false, build);

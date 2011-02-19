@@ -89,7 +89,7 @@ public class NetServlet extends HttpServlet {
 				
 		String port = config.getInitParameter("portNumber");
 		if (port != null) {
-			int p = Integer.valueOf(port).intValue();
+			int p = Integer.parseInt(port);
 			if (p > 0)
 				portNumber = p;
 		}

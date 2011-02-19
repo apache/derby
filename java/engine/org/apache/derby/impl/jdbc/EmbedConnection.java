@@ -911,7 +911,7 @@ public abstract class EmbedConnection implements EngineConnection
             p.getProperty(Attribute.REPLICATION_SLAVE_PORT);
         int slaveport = -1; // slaveport < 0 will use the default port
         if (portString != null) {
-            slaveport = Integer.valueOf(portString).intValue();
+            slaveport = Integer.parseInt(portString);
         }
 
         tr.getDatabase().startReplicationMaster(getTR().getDBName(),

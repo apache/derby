@@ -4651,7 +4651,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			String TestPartialLogWrite = PropertyUtil.getSystemProperty(TEST_LOG_PARTIAL_LOG_WRITE_NUM_BYTES);
 			if (TestPartialLogWrite != null)
 			{
-				bytesToWrite = Integer.valueOf(TestPartialLogWrite).intValue();
+				bytesToWrite = Integer.parseInt(TestPartialLogWrite);
 			}
 
 			Monitor.logMessage("TEST_LOG_INCOMPLETE_LOG_WRITE: writing " + bytesToWrite + 
@@ -4786,7 +4786,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 			{
 				String RecordToFillLog = PropertyUtil.getSystemProperty(TEST_RECORD_TO_FILL_LOG);
 				if (RecordToFillLog != null)
-					test_numRecordToFillLog = Integer.valueOf(RecordToFillLog).intValue();
+					test_numRecordToFillLog = Integer.parseInt(RecordToFillLog);
 				else
 					test_numRecordToFillLog = 100;
 			}

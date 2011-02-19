@@ -461,7 +461,7 @@ abstract class FromTable extends ResultSetNode implements Optimizable
 			{
 				try
 				{
-					loadFactor = Float.valueOf(value).floatValue();
+					loadFactor = Float.parseFloat(value);
 				}
 				catch (NumberFormatException nfe)
 				{

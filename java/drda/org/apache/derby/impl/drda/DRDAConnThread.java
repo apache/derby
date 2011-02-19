@@ -5341,7 +5341,7 @@ class DRDAConnThread extends Thread {
 
                         if (sqlStmt.startsWith(TIMEOUT_STATEMENT)) {
                             String timeoutString = sqlStmt.substring(TIMEOUT_STATEMENT.length());
-                            pendingStatementTimeout = Integer.valueOf(timeoutString).intValue();
+                            pendingStatementTimeout = Integer.parseInt(timeoutString);
                             break;
                         }
 

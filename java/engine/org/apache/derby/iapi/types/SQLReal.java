@@ -384,7 +384,7 @@ public final class SQLReal
             // what if String is rouned to zero?
             //System.out.println("SQLReal.setValue(String) - rounding issue?"+theValue);
 		    try {
-		        setValue(Double.valueOf(theValue.trim()).doubleValue());
+		        setValue(Double.parseDouble(theValue.trim()));
 			} catch (NumberFormatException nfe) {
 			    throw invalidFormat();
 			}

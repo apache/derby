@@ -320,7 +320,7 @@ public final class SQLInteger
 		else
 		{
 		    try {
-		        value = Integer.valueOf(theValue.trim()).intValue();
+		        value = Integer.parseInt(theValue.trim());
 			} catch (NumberFormatException nfe) {
 			    throw invalidFormat();
 			}

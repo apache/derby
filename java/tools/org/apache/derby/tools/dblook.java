@@ -676,7 +676,7 @@ public final class dblook {
 			}
 			try {
 				String colName = getColNameFromNumber(tableId,
-					(Integer.valueOf(tok)).intValue());
+					(Integer.parseInt(tok)));
 				if (!firstCol)
 					sb.append(", ");
 				sb.append(colName);

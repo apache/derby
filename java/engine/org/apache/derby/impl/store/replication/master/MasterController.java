@@ -204,8 +204,7 @@ public class MasterController
         }
 
         try {
-            slaveAddr = new SlaveAddress(slavehost, 
-                    (new Integer(slaveport)).intValue());
+            slaveAddr = new SlaveAddress(slavehost, slaveport);
         } catch (UnknownHostException uhe) {
             throw StandardException.newException
                     (SQLState.REPLICATION_CONNECTION_EXCEPTION, uhe, 
