@@ -52,38 +52,38 @@ public class LangHarnessJavaTest extends HarnessJavaTest {
     private static final String[] LANG_TESTS_EMEBDDED=
     {
         // old derbylang.runall suite
-        //"AIjdbc",
-        //"bug4356",
-        //"bug5052rts",
-        //"bug5054",
-        //"casting", TODO: investigate/convert, uses TestUtil.isNetFramework()
-        //"closed", TODO: investigate/convert
+        //"AIjdbc", CONVERTED (jdbcapi/AIjdbcTest)
+        //"bug4356", CONVERTED (Bug4356Test)
+        //"bug5052rts", CONVERTED (Bug5052rtsTest)
+        //"bug5054", CONVERTED (Bug5054Test)
+        //"casting", CONVERTED (CastingTest)
+        //"closed", CONVERTED/DISCARDED (DatabaseMetadataTest - DERBY-2514)
         "concateTests",
-        // "currentof", being converted
-        // "cursor", TODO: investigate/convert
+        // "currentof", CONVERTED (CurrentOfTest)
+        // "cursor", CONVERTED: (CursorTest)
         "dbManagerLimits",
         //"deadlockMode", CONVERTED (DeadlockModeTest)
-        // "declareGlobalTempTableJava", TODO: investigate/convert
-        // "declareGlobalTempTableJavaJDBC30", TODO: uses TestUtil.isNetFramework()
-        // "errorStream", TODO: investigate/convert
-        // "forbitdata", TODO: investigate/convert
-        // "grantRevoke", TODO: uses TestUtil.isNetFramework()
+        // "declareGlobalTempTableJava", CONVERTED DeclareGlobalTempTableJavaTest)
+        // "declareGlobalTempTableJavaJDBC30", CONVERTED DeclareGlobalTempTableJavaJDBC30Test)
+        // "errorStream", CONVERTED (engine/errorStreamTest)
+        // "forbitdata", CONVERTED (ForBitDataTest)
+        // "grantRevoke", CONVERTED (GrantRevokeTest)
         "JitTest",
-        // "logStream", TODO: investigate/convert
+        // "logStream", CONVERTED (engine/errorStreamTest)
         // "maxMemPerTab", TODO: investigate/convert
         // "outparams", TODO: investigate/convert
-        // "procedure", TODO: uses TestUtil.isNetFramework()
+        // "procedure", CONVERTED (LangProcedureTest)
         // "repeat", CONVERTED (StatementPlanCacheTest)
         "simpleThreadWrapper",
-        // "SpillHash", TODO: calls System.exit
-        // "stmtCache3", TODO: investigate/convert
-        // "streams",TODO: convert
-        // "timestampArith", TODO calls exit?
-        // "triggerStream", TODO: investigate/convert - simple master update?
-        // "unaryArithmeticDynamicParameter", TODO: investigate/convert - simple master update?
-        // "updateCursor", TODO: investigate/convert 
+        // "SpillHash", CONVERTED (SpillHashTest)
+        // "stmtCache3", DISCARDED (StatementPlanCacheTest - DERBY-2332)
+        // "streams", CONVERTED (StreamsTest)
+        // "timestampArith", CONVERTED (TimeStampArithTest)
+        // "triggerStream", DISCARDED (TriggerTest - DERBY-1102)
+        // "unaryArithmeticDynamicParameter", CONVERTED (UnaryArithmeticParameterTest)
+        // "updateCursor", CONVERTED (UpdateCursorTest)
         // "wisconsin", TODO: investigate/convert - needs ext files. 
-        // "ShutdownDatabase", TODO: convert
+        // "ShutdownDatabase", CONVERTED (ShutdownDatabaseTest)
         };
     
     private LangHarnessJavaTest(String name) {
