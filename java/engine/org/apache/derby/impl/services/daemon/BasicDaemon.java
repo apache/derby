@@ -721,14 +721,14 @@ public class BasicDaemon implements DaemonService, Runnable
 
 		if (oldPriority <= Thread.MIN_PRIORITY)
 		{
-			currentThread.yield();
+			Thread.yield();
 		}
 		else
 		{
 			ModuleFactory mf = Monitor.getMonitor();
 			if (mf != null)
 				mf.setThreadPriority(Thread.MIN_PRIORITY);
-			currentThread.yield();
+			Thread.yield();
 			if (mf != null)
 				mf.setThreadPriority(oldPriority);
 		}

@@ -241,12 +241,12 @@ public class D_HeapController extends DiagnosticableGeneric
 
         while (page != null)
         {
-            this.diag_page(page, prop, stat);
+            D_HeapController.diag_page(page, prop, stat);
             pageid = page.getPageNumber();
             page.unlatch();
             page = container.getNextPage(pageid);
         }
 
-        return(this.diag_tabulate(prop, stat));
+        return(D_HeapController.diag_tabulate(prop, stat));
     }
 }

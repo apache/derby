@@ -1637,7 +1637,7 @@ public abstract class QueryTreeNode implements Visitable
 
 		if (ad == null)
 		{
-			throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, ad.getAliasType(udtNameSpace),  unqualifiedTypeName);
+			throw StandardException.newException(SQLState.LANG_OBJECT_NOT_FOUND, AliasDescriptor.getAliasType(udtNameSpace),  unqualifiedTypeName);
 		}
 
         createTypeDependency( ad );

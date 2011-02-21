@@ -8910,7 +8910,7 @@ class DRDAConnThread extends Thread {
 
         // SECMEC_USRSSBPWD target initialization
         try {
-            myTargetSeed = decryptionManager.generateSeed();
+            myTargetSeed = DecryptionManager.generateSeed();
             database.secTokenOut = myTargetSeed;
         } catch (SQLException se) {
             println2Log(null, session.drdaID, se.getMessage());

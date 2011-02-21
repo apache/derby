@@ -505,10 +505,7 @@ public class EmbeddedDataSource extends ReferenceableDataSource implements
                 // DriverManager will throw an exception if driver is not found
                 Driver registerDriver = DriverManager.getDriver(url);
                 if (registerDriver instanceof AutoloadedDriver) {
-                    AutoloadedDriver autoloadedDriver = 
-                        (AutoloadedDriver) registerDriver;
-                    driver = (InternalDriver) autoloadedDriver
-                            .getDriverModule();
+                    driver = (InternalDriver) AutoloadedDriver.getDriverModule();
                 } else {
                     driver = (InternalDriver) registerDriver;
                 }

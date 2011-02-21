@@ -295,7 +295,7 @@ public class NewInvocationNode extends MethodCallNode
 
 		for (int i = 0; i < methodParameterTypes.length; i++)
 		{
-			if (classInspector.primitiveType(methodParameterTypes[i]))
+			if (ClassInspector.primitiveType(methodParameterTypes[i]))
 				methodParms[i].castToPrimitive(true);
 		}
 

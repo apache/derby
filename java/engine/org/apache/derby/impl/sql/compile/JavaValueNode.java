@@ -362,14 +362,12 @@ abstract class JavaValueNode extends QueryTreeNode
 											JavaValueNode receiver)
 									throws StandardException
 	{
-		ClassInspector classInspector = getClassFactory().getClassInspector();
-
 		/*
 		** Don't generate the expression now if it returns a primitive
 		** type to the Java domain.
 		*/
 		if ( (! valueReturnedToSQLDomain()) &&
-				classInspector.primitiveType(getJavaTypeName()))
+				ClassInspector.primitiveType(getJavaTypeName()))
 		{
 			return false;
 		}

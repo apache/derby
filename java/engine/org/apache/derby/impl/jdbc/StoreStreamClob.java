@@ -165,9 +165,9 @@ final class StoreStreamClob
                 } catch (Throwable t) {
                     throw noStateChangeLOB(t);
                 } finally {
-                    conChild.restoreIntrFlagIfSeen(
+                    ConnectionChild.restoreIntrFlagIfSeen(
                         true, conChild.getEmbedConnection());
-                    this.conChild.restoreContextStack();
+                    conChild.restoreContextStack();
                 }
             }
             // Update the stream descriptor.

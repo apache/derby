@@ -482,7 +482,7 @@ public class AllocPage extends StoredPage
 		// in 1.3 or later, make sure the upgrade from before 1.3 is legal.
 		if (SanityManager.DEBUG)
 		{
-			int max_range = newExtent.MAX_RANGE(getMaxFreeSpace());
+			int max_range = AllocExtent.MAX_RANGE(getMaxFreeSpace());
 			long extent_start = newExtent.getFirstPagenum();
 			long extent_end = newExtent.getExtentEnd();
 

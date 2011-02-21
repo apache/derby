@@ -624,7 +624,7 @@ public class LeafControlRow extends ControlRow
             // there is no way to know the state of the tree, so the
             // current split pass recursion must end.
             return(
-                ((BranchControlRow) parent_page).restartSplitFor(
+                BranchControlRow.restartSplitFor(
                     open_btree, template, parent_page, this, 
                     branchrow.getRow(), splitrow, flag));
 
