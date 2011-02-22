@@ -520,45 +520,6 @@ public final class SQLBoolean
 	}
 
 	/**
-	 * Set the value of this BooleanDataValue to the given byte array value
-	 *
-	 * @param theValue	The value to set this BooleanDataValue to
-	 */
-	public void setValue(byte[] theValue)
-	{
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT( ! immutable,
-						"Attempt to set the value of an immutable SQLBoolean");
-
-		if (theValue != null)
-		{
-			isnull = false;
-			int length = theValue.length;
-	
-			/*
-			** Step through all bytes.  As soon
-			** as we get one with something other
-			** than 0, then we know we have a 'true'
-			*/
-			for (int i = 0; i < length; i++)
-			{
-				if (theValue[i] != 0)
-				{
-					value = true;
-					return;
-				}
-			}
-		}
-		else
-		{
-			isnull = true;
-		}
-		value = false;
-
-	}
-
-
-	/**
 	 * Set the value of this BooleanDataValue to the given String.
 	 * String is trimmed and upcased.  If resultant string is not
 	 * TRUE or FALSE, then an error is thrown.

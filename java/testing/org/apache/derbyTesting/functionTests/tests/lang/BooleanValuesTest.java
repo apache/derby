@@ -58,6 +58,7 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     private static final String BAD_CONVERSION = "42846";
     private static final String ILLEGAL_INSERT = "42821";
     private static final String BAD_DEFAULT = "42894";
+    private static final String ILLEGAL_UPDATE = "XCL12";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -1816,6 +1817,44 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
                 JDBC.assertSingleValueResultSet(ps.executeQuery(), "0");
             }
         }
+    }
+
+    /**
+     * Verify fix for DERBY-5063 - updateBytes() should fail when invoked
+     * on boolean columns.
+     */
+    public void test_5063_updateBytes() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+        s.execute("create table derby5063(b boolean)");
+
+        PreparedStatement ps = prepareStatement("select b from derby5063",
+                ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_UPDATABLE);
+
+        byte[] bytes = "abc".getBytes();
+
+        // Test updateBytes()
+        ResultSet rs = ps.executeQuery();
+        rs.moveToInsertRow();
+        try {
+            rs.updateBytes(1, bytes);
+            fail("updateBytes should fail");
+        } catch (SQLException sqle) {
+            assertSQLState(ILLEGAL_UPDATE, sqle);
+        }
+        rs.close();
+
+        // setObject() should also fail when the argument is a byte array
+        rs = ps.executeQuery();
+        rs.moveToInsertRow();
+        try {
+            rs.updateObject(1, bytes);
+            fail("updateObject should fail");
+        } catch (SQLException sqle) {
+            assertSQLState(ILLEGAL_UPDATE, sqle);
+        }
+        rs.close();
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
