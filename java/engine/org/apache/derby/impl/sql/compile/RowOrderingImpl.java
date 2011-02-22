@@ -101,7 +101,7 @@ class RowOrderingImpl implements RowOrdering {
 		if (orderPosition >= ordering.size())
 			return false;
 
-		ColumnOrdering co = (ColumnOrdering) ordering.elementAt(orderPosition);
+		ColumnOrdering co = (ColumnOrdering) ordering.get(orderPosition);
 
 		/*
 		** Is the column in question ordered with the given direction at
@@ -138,7 +138,7 @@ class RowOrderingImpl implements RowOrdering {
 		boolean ordered = false;
 
 		for (int i = 0; i < ordering.size(); i++) {
-			ColumnOrdering co = (ColumnOrdering) ordering.elementAt(i);
+			ColumnOrdering co = (ColumnOrdering) ordering.get(i);
 
 			/*
 			** Is the column in question ordered with the given direction at
@@ -168,7 +168,7 @@ class RowOrderingImpl implements RowOrdering {
 		for (i = vec.size() - 1; i >= 0; i--)
 		{
 			Optimizable optTable =
-							(Optimizable) vec.elementAt(i);
+							(Optimizable) vec.get(i);
 
 			if (optTable.hasTableNumber())
 			{
@@ -195,12 +195,12 @@ class RowOrderingImpl implements RowOrdering {
 		if (ordering.size() == 0)
 		{
 			currentColumnOrdering = new ColumnOrdering(direction);
-			ordering.addElement(currentColumnOrdering);
+			ordering.add(currentColumnOrdering);
 		}
 		else
 		{
 			currentColumnOrdering =
-				(ColumnOrdering) ordering.elementAt(ordering.size() - 1);
+				(ColumnOrdering) ordering.get(ordering.size() - 1);
 		}
 
 		if (SanityManager.DEBUG)
@@ -223,7 +223,7 @@ class RowOrderingImpl implements RowOrdering {
 			return;
 
 		currentColumnOrdering = new ColumnOrdering(direction);
-		ordering.addElement(currentColumnOrdering);
+		ordering.add(currentColumnOrdering);
 	}
 
 	public void optimizableAlwaysOrdered(Optimizable optimizable)
@@ -253,7 +253,7 @@ class RowOrderingImpl implements RowOrdering {
 				(ordering.size() == 0) ||
 				(
 					hasTableNumber &&
-					((ColumnOrdering) ordering.elementAt(0)).hasTable(
+					((ColumnOrdering) ordering.get(0)).hasTable(
 																	tableNumber)
 				)
 			)
@@ -267,7 +267,7 @@ class RowOrderingImpl implements RowOrdering {
 			if (optimizable.hasTableNumber())
 				removeOptimizable(optimizable.getTableNumber());
 
-			alwaysOrderedOptimizables.addElement(optimizable);
+			alwaysOrderedOptimizables.add(optimizable);
 		}
 	}
 
@@ -301,10 +301,10 @@ class RowOrderingImpl implements RowOrdering {
 			/*
 			** First, remove the table from all the ColumnOrderings
 			*/
-			ColumnOrdering ord = (ColumnOrdering) ordering.elementAt(i);
+			ColumnOrdering ord = (ColumnOrdering) ordering.get(i);
 			ord.removeColumns(tableNumber);
 			if (ord.empty())
-				ordering.removeElementAt(i);
+				ordering.remove(i);
 		}
 
 		/* Remove from list of always-ordered columns */
@@ -328,13 +328,13 @@ class RowOrderingImpl implements RowOrdering {
 		for (i = vec.size() - 1; i >= 0; i--)
 		{
 			Optimizable optTable =
-							(Optimizable) vec.elementAt(i);
+							(Optimizable) vec.get(i);
 
 			if (optTable.hasTableNumber())
 			{
 				if (optTable.getTableNumber() == tableNumber)
 				{
-					vec.removeElementAt(i);
+					vec.remove(i);
 				}
 			}
 		}
@@ -343,7 +343,7 @@ class RowOrderingImpl implements RowOrdering {
 	/** @see RowOrdering#addUnorderedOptimizable */
 	public void addUnorderedOptimizable(Optimizable optimizable)
 	{
-		unorderedOptimizables.addElement(optimizable);
+		unorderedOptimizables.add(optimizable);
 	}
 
 	/** @see RowOrdering#copy */
@@ -359,25 +359,25 @@ class RowOrderingImpl implements RowOrdering {
 		RowOrderingImpl dest = (RowOrderingImpl) copyTo;
 
 		/* Clear the ordering of what we're copying to */
-		dest.ordering.removeAllElements();
+		dest.ordering.clear();
 		dest.currentColumnOrdering = null;
 
-		dest.unorderedOptimizables.removeAllElements();
+		dest.unorderedOptimizables.clear();
 		for (int i = 0; i < unorderedOptimizables.size(); i++) {
-			dest.unorderedOptimizables.addElement(
-											unorderedOptimizables.elementAt(i));
+			dest.unorderedOptimizables.add(
+											unorderedOptimizables.get(i));
 		}
 
-		dest.alwaysOrderedOptimizables.removeAllElements();
+		dest.alwaysOrderedOptimizables.clear();
 		for (int i = 0; i < alwaysOrderedOptimizables.size(); i++) {
-			dest.alwaysOrderedOptimizables.addElement(
-										alwaysOrderedOptimizables.elementAt(i));
+			dest.alwaysOrderedOptimizables.add(
+										alwaysOrderedOptimizables.get(i));
 		}
 
 		for (int i = 0; i < ordering.size(); i++) {
-			ColumnOrdering co = (ColumnOrdering) ordering.elementAt(i);
+			ColumnOrdering co = (ColumnOrdering) ordering.get(i);
 
-			dest.ordering.addElement(co.cloneMe());
+			dest.ordering.add(co.cloneMe());
 
 			if (co == currentColumnOrdering)
 				dest.rememberCurrentColumnOrdering(i);
@@ -389,7 +389,7 @@ class RowOrderingImpl implements RowOrdering {
 	}
 
 	private void rememberCurrentColumnOrdering(int posn) {
-		currentColumnOrdering = (ColumnOrdering) ordering.elementAt(posn);
+		currentColumnOrdering = (ColumnOrdering) ordering.get(posn);
 	}
 
 	public String toString() {
@@ -402,14 +402,14 @@ class RowOrderingImpl implements RowOrdering {
 
 			for (i = 0; i < unorderedOptimizables.size(); i++) 
 			{
-				Optimizable opt = (Optimizable) unorderedOptimizables.elementAt(i);
+				Optimizable opt = (Optimizable) unorderedOptimizables.get(i);
 				if (opt.getBaseTableName() != null)
 				{
 					retval += opt.getBaseTableName();
 				}
 				else
 				{
-					retval += unorderedOptimizables.elementAt(i).toString();
+					retval += unorderedOptimizables.get(i).toString();
 				}
 				retval += " ";
 			}
@@ -419,21 +419,21 @@ class RowOrderingImpl implements RowOrdering {
 
 			for (i = 0; i < alwaysOrderedOptimizables.size(); i++) 
 			{
-				Optimizable opt = (Optimizable) alwaysOrderedOptimizables.elementAt(i);
+				Optimizable opt = (Optimizable) alwaysOrderedOptimizables.get(i);
 				if (opt.getBaseTableName() != null)
 				{
 					retval += opt.getBaseTableName();
 				}
 				else
 				{
-					retval += alwaysOrderedOptimizables.elementAt(i).toString();
+					retval += alwaysOrderedOptimizables.get(i).toString();
 				}
 				retval += " ";
 			}
 			retval += "\n";
 
 			for (i = 0; i < ordering.size(); i++) {
-				retval += " ColumnOrdering " + i + ": " + ordering.elementAt(i);
+				retval += " ColumnOrdering " + i + ": " + ordering.get(i);
 			}
 		}
 
@@ -449,7 +449,7 @@ class RowOrderingImpl implements RowOrdering {
 		for (int i = 0; i < unorderedOptimizables.size(); i++)
 		{
 			Optimizable thisOpt =
-				(Optimizable) unorderedOptimizables.elementAt(i);
+				(Optimizable) unorderedOptimizables.get(i);
 
 			if (thisOpt != optimizable)
 				return true;

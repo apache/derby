@@ -1967,13 +1967,13 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				if (predicate.getEquivalenceClass() != -1)
 				{
 					outerJCL.removeElementAt(jcIndex);
-					movePreds.addElement(predicate);
+					movePreds.add(predicate);
 				}
 			}
 			for (int mpIndex = 0; mpIndex < movePreds.size(); mpIndex++)
 			{
 				outerJCL.insertElementAt(
-                    (Predicate) movePreds.elementAt(mpIndex), 0);
+                    (Predicate) movePreds.get(mpIndex), 0);
 			}
 
 			// Walk this list as the outer
@@ -3893,7 +3893,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 
 		while (true)
 		{
-			maxPreds.removeAllElements();
+			maxPreds.clear();
 			int conglomIndex = chooseLongestMatch(predsForConglomerates,
 												  maxPreds, numWorkingPredicates);
 			
@@ -3908,7 +3908,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				/* remove the predicates that we've calculated the selectivity
 				 * of, from workingPredicates.
 				 */
-				Predicate p =(Predicate) maxPreds.elementAt(i);
+				Predicate p =(Predicate) maxPreds.get(i);
 				workingPredicates.removeOptPredicate(p);
 			}	
 			
@@ -4018,8 +4018,8 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 		for (int i = 0; i < uniquepreds.size(); i++)
 		{
 			Predicate p = 
-				((PredicateWrapper)uniquepreds.elementAt(i)).getPredicate();
-			ret.addElement(p);
+				((PredicateWrapper)uniquepreds.get(i)).getPredicate();
+			ret.add(p);
 			for (int j = 0; j < predArray.length; j++)
 			{
 				if (predArray[j] == null)
@@ -4151,13 +4151,13 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				if (nextPW.getIndexPosition() == index)
 					numDuplicates--;
 			}
-			pwList.removeElementAt(index);
+			pwList.remove(index);
 			numPreds--;
 		}
 
 		PredicateWrapper elementAt(int i)
 		{
-			return (PredicateWrapper)pwList.elementAt(i);
+			return (PredicateWrapper)pwList.get(i);
 		}
 
 		void insert(PredicateWrapper pw)
@@ -4172,7 +4172,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 					break;
 			}
 			numPreds++;
-			pwList.insertElementAt(pw, i);
+			pwList.add(i, pw);
 		} 
 		
 		int size()
@@ -4203,7 +4203,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 
 			if (elementAt(0).getIndexPosition() != 0)
 			{
-				pwList.removeAllElements();
+				pwList.clear();
 				numPreds = numDuplicates = 0;
 				return;
 			}
@@ -4228,7 +4228,7 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 				if (elementAt(k).getIndexPosition() == 
 							elementAt(k-1).getIndexPosition())
 					numDuplicates--;
-				pwList.removeElementAt(k);
+				pwList.remove(k);
 			}
 			numPreds = j + 1;
 		}
@@ -4251,14 +4251,14 @@ public class PredicateList extends QueryTreeNodeVector implements OptimizablePre
 			if (lastIndexPosition != 0)
 				return null;
 
-			scratch.addElement(elementAt(0));	// always add 0.
+			scratch.add(elementAt(0));	// always add 0.
 
 			for (int i = 1; i < numPreds; i++)
 			{
 				if (elementAt(i).getIndexPosition() == lastIndexPosition)
 					continue;
 				lastIndexPosition = elementAt(i).getIndexPosition();
-				scratch.addElement(elementAt(i));
+				scratch.add(elementAt(i));
 			}
 			return scratch;
 		}

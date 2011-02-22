@@ -809,7 +809,7 @@ public class CursorNode extends DMLStatementNode
 
 		for (int index = 0; index < size; index++)
 		{
-		    columnName = (String) updatableColumns.elementAt(index);
+		    columnName = (String) updatableColumns.get(index);
 		    tableDescriptor = targetTable.getTableDescriptor();
 		    if ( tableDescriptor.getColumnDescriptor(columnName) == null)
 		    {

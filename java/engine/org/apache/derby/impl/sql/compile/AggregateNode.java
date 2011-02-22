@@ -276,7 +276,7 @@ public class AggregateNode extends UnaryOperatorNode
 		instantiateAggDef();
 
 		/* Add ourselves to the aggregateVector before we do anything else */
-		aggregateVector.addElement(this);
+		aggregateVector.add(this);
 
         CompilerContext cc = getCompilerContext();
         

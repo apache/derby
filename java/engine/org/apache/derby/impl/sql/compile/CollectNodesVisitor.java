@@ -95,7 +95,7 @@ public class CollectNodesVisitor implements Visitor
 	{
 		if (nodeClass.isInstance(node))
 		{
-			nodeList.addElement(node);	
+			nodeList.add(node);
 		}
 		return node;
 	}

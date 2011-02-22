@@ -421,7 +421,7 @@ public class ParameterNode extends ValueNode
 			** Check the first parameter to see if it is a return
 			** parameter.
 			*/
-			boolean hasReturnParam = ((ParameterNode)parameterList.elementAt(0)).isReturnOutputParam();
+			boolean hasReturnParam = ((ParameterNode)parameterList.get(0)).isReturnOutputParam();
 
 			/*
 			** Generate the following:

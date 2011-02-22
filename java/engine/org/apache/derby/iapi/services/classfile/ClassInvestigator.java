@@ -143,7 +143,7 @@ public class ClassInvestigator extends ClassHolder {
 
         for (int i = 0; i < interfaceCount; i++)
         {
-            implemented.addElement(className(interfaces[i]));
+            implemented.add(className(interfaces[i]));
         }
         return implemented.elements();
 	}
@@ -458,7 +458,7 @@ public class ClassInvestigator extends ClassHolder {
 
 		newCpe.index = index;
 
-		cptEntries.setElementAt(newCpe, index);
+		cptEntries.set(index, newCpe);
 	}
 
 	private static ConstantPoolEntry getConstant(ClassInput in)

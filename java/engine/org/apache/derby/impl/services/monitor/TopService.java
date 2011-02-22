@@ -280,7 +280,7 @@ final class TopService {
                 // and result in an ArrayIndexOutOfBoundsException.
                 synchronized (moduleInstances) {
                     if (i < moduleInstances.size()) {
-                        module = (ModuleInstance) moduleInstances.elementAt(i);
+                        module = (ModuleInstance) moduleInstances.get(i);
                     } else {
                         // No more instances to look at, break out of the loop.
                         break;
@@ -327,12 +327,12 @@ final class TopService {
 		ModuleInstance module = new ModuleInstance(instance, key.getIdentifier(), service,
 				topModule == null ? (Object) null : topModule.getInstance());
 
-		moduleInstances.addElement(module);
+		moduleInstances.add(module);
 
 		try {
 			BaseMonitor.boot(instance, create, properties);
 		} catch (StandardException se) {
-			moduleInstances.removeElement(module);
+			moduleInstances.remove(module);
 			throw se;
 		}
 
@@ -357,7 +357,7 @@ final class TopService {
 		}
 	
 		TopService.stop(instance);
-		moduleInstances.removeElement(module);
+		moduleInstances.remove(module);
 
 		// if we reached here it's because someone else beat us adding the module, so use theirs.
 		return findModule(key, true, properties);
@@ -385,7 +385,7 @@ final class TopService {
 				if (moduleInstances.isEmpty())
 					return true;
 
-				module = (ModuleInstance) moduleInstances.elementAt(0);
+				module = (ModuleInstance) moduleInstances.get(0);
 
 			}
 			
@@ -393,7 +393,7 @@ final class TopService {
 			TopService.stop(instance);
 			
 			synchronized (this) {
-				moduleInstances.removeElementAt(0);
+				moduleInstances.remove(0);
 			}
 		}
 	}

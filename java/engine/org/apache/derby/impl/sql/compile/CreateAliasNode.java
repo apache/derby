@@ -173,7 +173,7 @@ public class CreateAliasNode extends DDLStatementNode
 
 					modes = new int[paramCount];
 					for (int i = 0; i < paramCount; i++) {
-                        int currentMode =  ((Integer) (((Vector) parameters[2]).elementAt(i))).intValue();
+                        int currentMode =  ((Integer) (((Vector) parameters[2]).get(i))).intValue();
                         modes[i] = currentMode;
   
                         //

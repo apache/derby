@@ -129,7 +129,7 @@ public abstract class IdUtil
 		while (true)
 		{
 			String thisId = parseId(r,true);
-			v.addElement(thisId);
+			v.add(thisId);
 			int dot;
 
 			try {
@@ -421,7 +421,7 @@ public abstract class IdUtil
 				if (thisQName.length != 2)
 					throw StandardException.newException(SQLState.DB_CLASS_PATH_PARSE_ERROR,input);
 
-				v.addElement(thisQName); 
+				v.add(thisQName);
 				int delim = r.read();
 				if (delim != ':')
 				{
@@ -492,7 +492,7 @@ public abstract class IdUtil
 			int delim;
 			try {
 				String thisId = IdUtil.parseId(r,normalize);
-				v.addElement(thisId);
+				v.add(thisId);
 				r.mark(0);
 				delim = r.read();
 				if (delim != ',')
@@ -532,7 +532,7 @@ public abstract class IdUtil
 		HashSet h = new HashSet();
 		for(int ix=0;ix<l2.length;ix++) h.add(l2[ix]); 
 		Vector v = new Vector();
-		for(int ix=0;ix<l1.length;ix++) if (h.contains(l1[ix])) v.addElement(l1[ix]);
+		for(int ix=0;ix<l1.length;ix++) if (h.contains(l1[ix])) v.add(l1[ix]);
 		return vectorToIdList(v,true); 
 	}
 
@@ -603,7 +603,7 @@ public abstract class IdUtil
 			if (!h.contains(l[ix]))
 				h.add(l[ix]);
 			else
-				v.addElement(l[ix]);
+				v.add(l[ix]);
 		}
 		return vectorToIdList(v,true);
 	}
@@ -626,7 +626,7 @@ public abstract class IdUtil
 			if (!h.contains(normal_a[ix]))
 			{
 				h.add(normal_a[ix]);
-				v.addElement(external_a[ix]);
+				v.add(external_a[ix]);
 			}
 		}
 		return vectorToIdList(v,false);
@@ -709,7 +709,7 @@ public abstract class IdUtil
 		//to normal form.
 		for (int ix=0; ix < enteredList_a.length; ix++)
 			if (!id.equals(IdUtil.parseSQLIdentifier(enteredList_a[ix])))
-				v.addElement(enteredList_a[ix]);
+				v.add(enteredList_a[ix]);
 		if (v.size() == 0)
 			return null;
 		else

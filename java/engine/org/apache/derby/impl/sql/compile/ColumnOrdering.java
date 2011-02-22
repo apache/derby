@@ -83,8 +83,8 @@ class ColumnOrdering {
 	boolean contains(int tableNumber, int columnNumber)
 	{
 		for (int i = 0; i < columns.size(); i++) {
-			Integer col = (Integer) columns.elementAt(i);
-			Integer tab = (Integer) tables.elementAt(i);
+			Integer col = (Integer) columns.get(i);
+			Integer tab = (Integer) tables.get(i);
 
 			if (tab.intValue() == tableNumber &&
 				col.intValue() == columnNumber) {
@@ -112,8 +112,8 @@ class ColumnOrdering {
 	 */
 	void addColumn(int tableNumber, int columnNumber)
 	{
-		tables.addElement(new Integer(tableNumber));
-		columns.addElement(new Integer(columnNumber));
+		tables.add(new Integer(tableNumber));
+		columns.add(new Integer(columnNumber));
 	}
 
 	/**
@@ -127,11 +127,11 @@ class ColumnOrdering {
 		*/
 		for (int i = tables.size() - 1; i >= 0; i--)
 		{
-			Integer tab = (Integer) tables.elementAt(i);
+			Integer tab = (Integer) tables.get(i);
 			if (tab.intValue() == tableNumber)
 			{
-				tables.removeElementAt(i);
-				columns.removeElementAt(i);
+				tables.remove(i);
+				columns.remove(i);
 			}
 		}
 	}
@@ -150,8 +150,8 @@ class ColumnOrdering {
 
 		for (int i = 0; i < columns.size(); i++) {
 			/* Integers are immutable, so just copy the pointers */
-			retval.columns.addElement(columns.elementAt(i));
-			retval.tables.addElement(tables.elementAt(i));
+			retval.columns.addElement(columns.get(i));
+			retval.tables.addElement(tables.get(i));
 		}
 
 		return retval;
@@ -163,7 +163,7 @@ class ColumnOrdering {
 			return false;
 
 		for (int i = 0; i < tables.size(); i++) {
-			Integer tab = (Integer) tables.elementAt(i);
+			Integer tab = (Integer) tables.get(i);
 			
 			if (tab.intValue() == tableNumber)
 				return true;
@@ -178,7 +178,7 @@ class ColumnOrdering {
 			return false;
 
 		for (int i = 0; i < tables.size(); i++) {
-			Integer tab = (Integer) tables.elementAt(i);
+			Integer tab = (Integer) tables.get(i);
 			
 			if (tab.intValue() != tableNumber)
 				return true;
@@ -194,8 +194,8 @@ class ColumnOrdering {
 			retval += "Direction: " + myDirection;
 
 			for (int i = 0; i < columns.size(); i++) {
-				retval += " Table " + tables.elementAt(i) +
-							", Column " + columns.elementAt(i);
+				retval += " Table " + tables.get(i) +
+							", Column " + columns.get(i);
 			}
 		}
 

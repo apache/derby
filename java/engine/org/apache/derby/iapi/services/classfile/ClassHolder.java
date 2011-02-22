@@ -421,12 +421,12 @@ public class ClassHolder {
 		item.setIndex(cptEntries.size());
 		if (key != null)
 			cptHashTable.put(key, item);
-		cptEntries.addElement(item);
+		cptEntries.add(item);
 
 		cptEstimatedSize += item.classFileSize();
 
 		if (item.doubleSlot()) {
-			cptEntries.addElement(null);
+			cptEntries.add(null);
 			return 2;
 		} else {
 			return 1;
@@ -567,7 +567,7 @@ public class ClassHolder {
 	*/
 
 	public ConstantPoolEntry getEntry(int index) {
-		return (ConstantPoolEntry) cptEntries.elementAt(index);
+		return (ConstantPoolEntry) cptEntries.get(index);
 	}
 
 	/**

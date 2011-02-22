@@ -1899,7 +1899,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 
 		for (int index = 0; index < size; index++)
 		{
-			count += (((AggregateNode) aggregateVector.elementAt(index)).isDistinct() == true) ?
+			count += (((AggregateNode) aggregateVector.get(index)).isDistinct() == true) ?
 						1 : 0;
 		}
 		

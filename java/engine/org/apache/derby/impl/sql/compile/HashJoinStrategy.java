@@ -651,7 +651,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 			// Is there an equijoin condition on this column?
 			if (predList.hasOptimizableEquijoin(innerTable, columns[colCtr]))
 			{
-				hashKeyVector.addElement(new Integer(colCtr));
+				hashKeyVector.add(new Integer(colCtr));
 			}
 		}
 
@@ -661,7 +661,7 @@ public class HashJoinStrategy extends BaseJoinStrategy {
 			int[] keyCols = new int[hashKeyVector.size()];
 			for (int index = 0; index < keyCols.length; index++)
 			{
-				keyCols[index] = ((Integer) hashKeyVector.elementAt(index)).intValue();
+				keyCols[index] = ((Integer) hashKeyVector.get(index)).intValue();
 			}
 			return keyCols;
 		}

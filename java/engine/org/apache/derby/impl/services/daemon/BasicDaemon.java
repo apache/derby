@@ -147,7 +147,7 @@ public class BasicDaemon implements DaemonService, Runnable
 			clientNumber = numClients++;
 
 			clientRecord = new ServiceRecord(newClient, onDemandOnly, true);
-			subscription.insertElementAt(clientRecord, clientNumber);
+			subscription.add(clientNumber, clientRecord);
 		}
 
 
@@ -177,7 +177,7 @@ public class BasicDaemon implements DaemonService, Runnable
 			return;
 
 		// client number is never reused.  Just null out the vector entry.
-		subscription.setElementAt(null, clientNumber);
+		subscription.set(clientNumber, null);
 	}
 
 	public void serviceNow(int clientNumber)
@@ -185,7 +185,7 @@ public class BasicDaemon implements DaemonService, Runnable
 		if (clientNumber < 0 || clientNumber > subscription.size())
 			return;
 
-		ServiceRecord clientRecord = (ServiceRecord)subscription.elementAt(clientNumber);
+		ServiceRecord clientRecord = (ServiceRecord)subscription.get(clientNumber);
 		if (clientRecord == null)
 			return;
 
@@ -251,7 +251,7 @@ public class BasicDaemon implements DaemonService, Runnable
 
 		while (nextService < subscription.size())
 		{
-			clientRecord = (ServiceRecord)subscription.elementAt(nextService++);
+			clientRecord = (ServiceRecord)subscription.get(nextService++);
 			if (clientRecord != null && (clientRecord.needImmediateService() || (!urgent && clientRecord.needService())))
 				return clientRecord;
 		}
@@ -503,7 +503,7 @@ public class BasicDaemon implements DaemonService, Runnable
 				boolean noSubscriptionRequests = true; 
 				for (int urgentServiced = 0; urgentServiced < subscription.size(); urgentServiced++)
 				{
-					ServiceRecord clientRecord = (ServiceRecord)subscription.elementAt(urgentServiced);
+					ServiceRecord clientRecord = (ServiceRecord)subscription.get(urgentServiced);
 					if (clientRecord != null &&	clientRecord.needService())
 					{
 						noSubscriptionRequests = false;

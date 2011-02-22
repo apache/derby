@@ -341,7 +341,7 @@ public class CompilerContextImpl extends ContextImpl
 	public int addSavedObject(Object obj) {
 		if (savedObjects == null) savedObjects = new Vector();
 
-		savedObjects.addElement(obj);
+		savedObjects.add(obj);
 		return savedObjects.size()-1;
 	}
 
@@ -456,9 +456,9 @@ public class CompilerContextImpl extends ContextImpl
 		*/
 		for (int i = 0; i < storeCostConglomIds.size(); i++)
 		{
-			Long conglomId = (Long) storeCostConglomIds.elementAt(i);
+			Long conglomId = (Long) storeCostConglomIds.get(i);
 			if (conglomId.longValue() == conglomerateNumber)
-				return (StoreCostController) storeCostControllers.elementAt(i);
+				return (StoreCostController) storeCostControllers.get(i);
 		}
 
 		/*
@@ -468,13 +468,10 @@ public class CompilerContextImpl extends ContextImpl
 						lcc.getTransactionCompile().openStoreCost(conglomerateNumber);
 
 		/* Put it in the array */
-		storeCostControllers.insertElementAt(retval,
-											storeCostControllers.size());
+		storeCostControllers.add(storeCostControllers.size(), retval);
 
 		/* Put the conglomerate number in its array */
-		storeCostConglomIds.insertElementAt(
-								new Long(conglomerateNumber),
-								storeCostConglomIds.size());
+		storeCostConglomIds.add(storeCostConglomIds.size(), new Long(conglomerateNumber));
 
 		return retval;
 	}
@@ -487,15 +484,15 @@ public class CompilerContextImpl extends ContextImpl
 		for (int i = 0; i < storeCostControllers.size(); i++)
 		{
 			StoreCostController scc =
-				(StoreCostController) storeCostControllers.elementAt(i);
+				(StoreCostController) storeCostControllers.get(i);
 			try {
 				scc.close();
 			} catch (StandardException se) {
 			}
 		}
 
-		storeCostControllers.removeAllElements();
-		storeCostConglomIds.removeAllElements();
+		storeCostControllers.clear();
+		storeCostConglomIds.clear();
 	}
 
 	/**

@@ -659,7 +659,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		int alSize = aggregateVector.size();
 		for (int index = 0; index < alSize; index++)
 		{
-			aggregate = (AggregateNode) aggregateVector.elementAt(index);
+			aggregate = (AggregateNode) aggregateVector.get(index);
 
 			/*
 			** AGG RESULT: Set the aggregate result to null in the
@@ -896,7 +896,7 @@ public class GroupByNode extends SingleChildResultSetNode
 
 			for (int i=0; i < aggregateVector.size(); i++) {
 					AggregateNode agg =
-						(AggregateNode)aggregateVector.elementAt(i);
+						(AggregateNode)aggregateVector.get(i);
 					debugPrint(formatNodeString("[" + i + "]:", depth + 1));
 					agg.treePrint(depth + 1);
 			}
@@ -1232,7 +1232,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		{
 			if (aggregateVector.size() == 1)
 			{
-				AggregateNode an = (AggregateNode) aggregateVector.elementAt(0);
+				AggregateNode an = (AggregateNode) aggregateVector.get(0);
 				AggregateDefinition ad = an.getAggregateDefinition();
 				if (ad instanceof MaxMinAggregateDefinition)
 				{

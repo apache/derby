@@ -1021,7 +1021,7 @@ public abstract class EmbedPreparedStatement
           //This way we will get a copy of the current statement's parameter
           //values rather than a pointer to the statement's parameter value
           //set which will change with every new statement in the batch.
-          batchStatements.addElement(getParms().getClone());
+          batchStatements.add(getParms().getClone());
           clearParameters();
   	  }
     }

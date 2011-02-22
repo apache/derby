@@ -211,7 +211,7 @@ class BCMethod implements MethodBuilder {
 
 		if (thrownExceptions == null)
 			thrownExceptions = new Vector();
-		thrownExceptions.addElement(exceptionClass);
+		thrownExceptions.add(exceptionClass);
 	}
 
 	/**
@@ -358,7 +358,7 @@ class BCMethod implements MethodBuilder {
 
 				for (int i = 0; i < numExc; i++) {
 					// put each exception into the constant pool
-					String e = thrownExceptions.elementAt(i).toString();
+					String e = thrownExceptions.get(i).toString();
 					int ei2 = modClass.addClassReference(e);
 
 					// add constant pool index to exception attribute_info

@@ -516,7 +516,7 @@ public class RowUtil
                     {
                         str += 
                             "vec[" + i + "]:" + 
-                            RowUtil.toString((Object[]) vec.elementAt(i));
+                            RowUtil.toString((Object[]) vec.get(i));
 
                         str += "\n";
                     }

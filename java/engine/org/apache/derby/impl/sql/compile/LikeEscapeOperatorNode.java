@@ -897,15 +897,15 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         // using a method call directly, thus need internal sql capability
         methodCall.internalCall = true;
 
-        param.addElement(parameterNode);
+        param.add(parameterNode);
         if (escapeNode != null)
-            param.addElement(escapeNode);
+            param.add(escapeNode);
 
         QueryTreeNode maxWidthNode = getNodeFactory().getNode(
             C_NodeTypes.INT_CONSTANT_NODE,
             new Integer(maxWidth),
             getContextManager());
-        param.addElement(maxWidthNode);
+        param.add(maxWidthNode);
 
         methodCall.addParms(param);
 

@@ -1834,8 +1834,8 @@ public final class NetworkServerControlImpl {
 					else
 						return currentSession;
 				}
-				retval = (Session) runQueue.elementAt(0);
-				runQueue.removeElementAt(0);
+				retval = (Session) runQueue.get(0);
+				runQueue.remove(0);
 				if (currentSession != null)
 					runQueueAdd(currentSession);
 			} catch (InterruptedException e) {
@@ -2246,13 +2246,13 @@ public final class NetworkServerControlImpl {
 				break;
 			case COMMAND_TRACE:
 				{
-					boolean on = isOn((String)commandArgs.elementAt(0));
+					boolean on = isOn((String)commandArgs.get(0));
 					trace(sessionArg, on);
 					consoleTraceMessage(sessionArg, on);
 					break;
 				}
 			case COMMAND_TRACEDIRECTORY:
-				String directory = (String) commandArgs.elementAt(0);
+				String directory = (String) commandArgs.get(0);
 				sendSetTraceDirectory(directory);
 				consolePropertyMessage("DRDA_TraceDirectoryChange.I", directory);
 				break;
@@ -2263,7 +2263,7 @@ public final class NetworkServerControlImpl {
 				break;
 			case COMMAND_LOGCONNECTIONS:
 				{
-					boolean on = isOn((String)commandArgs.elementAt(0));
+					boolean on = isOn((String)commandArgs.get(0));
 					logConnections(on);
 					consolePropertyMessage("DRDA_LogConnectionsChange.I", on ? "DRDA_ON.I" : "DRDA_OFF.I");
 					break;
@@ -2277,10 +2277,10 @@ public final class NetworkServerControlImpl {
 			case COMMAND_MAXTHREADS:
 				max = 0;
 				try{
-					max = Integer.parseInt((String)commandArgs.elementAt(0));
+					max = Integer.parseInt((String)commandArgs.get(0));
 				}catch(NumberFormatException e){
 					consolePropertyMessage("DRDA_InvalidValue.U", new String [] 
-						{(String)commandArgs.elementAt(0), "maxthreads"});
+						{(String)commandArgs.get(0), "maxthreads"});
 				}
 				if (max < MIN_MAXTHREADS)
 					consolePropertyMessage("DRDA_InvalidValue.U", new String [] 
@@ -2294,12 +2294,12 @@ public final class NetworkServerControlImpl {
 				break;
 			case COMMAND_TIMESLICE:
 				int timeslice = 0;
-				String timeSliceArg = (String)commandArgs.elementAt(0);
+				String timeSliceArg = (String)commandArgs.get(0);
             	try{
                 	timeslice = Integer.parseInt(timeSliceArg);
             	}catch(NumberFormatException e){
 					consolePropertyMessage("DRDA_InvalidValue.U", new String [] 
-						{(String)commandArgs.elementAt(0), "timeslice"});
+						{(String)commandArgs.get(0), "timeslice"});
             	}
 				if (timeslice < MIN_TIMESLICE)
 					consolePropertyMessage("DRDA_InvalidValue.U", new String [] 
@@ -2324,7 +2324,7 @@ public final class NetworkServerControlImpl {
 	{
 		synchronized(runQueue)
 		{
-			runQueue.addElement(clientSession);
+			runQueue.add(clientSession);
 			runQueue.notify();
 		}
 	}
@@ -2349,12 +2349,12 @@ public final class NetworkServerControlImpl {
 				{
 					newpos = processDashArg(i, args);
 					if (newpos == i)
-						commandArgs.addElement(args[i++]);
+						commandArgs.add(args[i++]);
 					else
 						i = newpos;
 				}
 				else
-					commandArgs.addElement(args[i++]);
+					commandArgs.add(args[i++]);
 			}
 					
 			// look up command
@@ -2365,7 +2365,7 @@ public final class NetworkServerControlImpl {
 					if (StringUtil.SQLEqualsIgnoreCase(COMMANDS[i], 
 													   (String)commandArgs.firstElement()))
 					{
-						commandArgs.removeElementAt(0);
+						commandArgs.remove(0);
 						return i;
 					}
 				}

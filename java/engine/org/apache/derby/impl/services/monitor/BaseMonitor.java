@@ -143,7 +143,7 @@ abstract class BaseMonitor
 		super();
 
 		services = new Vector(0, 1);
-		services.addElement(new TopService(this));	// first element is always the free-floating service
+		services.add(new TopService(this));	// first element is always the free-floating service
 	}
 
 	/* Methods of ModuleFactory includes BootStrap and Runnable */
@@ -184,7 +184,7 @@ abstract class BaseMonitor
 				if (position == 0)
 					break;
 
-				ts = (TopService) services.elementAt(position);
+				ts = (TopService) services.get(position);
 			}
 
 			// push a new context manager
@@ -205,7 +205,7 @@ abstract class BaseMonitor
 		}
 		
 		Monitor.getStream().println(LINE);
-		((TopService) services.elementAt(0)).shutdown();
+		((TopService) services.get(0)).shutdown();
 
 		ContextService.stop();
 		Monitor.clearMonitor();
@@ -230,7 +230,7 @@ abstract class BaseMonitor
 		} finally {
 			synchronized (this) {
 				if (removeService) {
-					boolean found = services.removeElement(ts);
+					boolean found = services.remove(ts);
 					if (SanityManager.DEBUG) {
 						SanityManager.ASSERT(found, "service was not found " + serviceModule);
 					}
@@ -408,7 +408,7 @@ abstract class BaseMonitor
 		TopService myts = null;
 		synchronized (this) {
 			for (int i = 1; i < services.size(); i++) {
-				TopService ts = (TopService) services.elementAt(i);
+				TopService ts = (TopService) services.get(i);
 				if (ts.isPotentialService(key)) {
 					myts = ts;
 					break;
@@ -539,10 +539,10 @@ abstract class BaseMonitor
 	private synchronized TopService findTopService(Object serviceModule) {
 
 		if (serviceModule == null)
-			return (TopService) services.elementAt(0);
+			return (TopService) services.get(0);
 
 		for (int i = 1; i < services.size(); i++) {
-			TopService ts = (TopService) services.elementAt(i);
+			TopService ts = (TopService) services.get(i);
 			if (ts.inService(serviceModule))
 				return ts;
 		}
@@ -729,7 +729,7 @@ abstract class BaseMonitor
 				return null;
 
 			// try to create an instance
-			Object instance = newInstance((Class) implementations.elementAt(index));
+			Object instance = newInstance((Class) implementations.get(index));
 
 			if (BaseMonitor.canSupport(instance, properties))
 				return instance;
@@ -747,7 +747,7 @@ abstract class BaseMonitor
 		for (int i = startIndex; i < implementations.size(); i++) {
 
 			//try {
-				Class factoryClass = (Class) implementations.elementAt(i);
+				Class factoryClass = (Class) implementations.get(i);
 				if (!factoryInterface.isAssignableFrom(factoryClass)) {
 					continue;
 				}
@@ -831,7 +831,7 @@ abstract class BaseMonitor
 
 			// count the number of services that implement the required protocol
 			for (int i = 1; i < services.size(); i++) {
-				ts = (TopService) services.elementAt(i);
+				ts = (TopService) services.get(i);
 				if (ts.isActiveService()) {
 					if (ts.getKey().getFactoryInterface().getName().equals(protocol))
 						count++;
@@ -843,7 +843,7 @@ abstract class BaseMonitor
 			if (count != 0) {
 				int j = 0;
 				for (int i = 1; i < services.size(); i++) {
-					ts = (TopService) services.elementAt(i);
+					ts = (TopService) services.get(i);
 					if (ts.isActiveService()) {
 						if (ts.getKey().getFactoryInterface().getName().equals(protocol)) {
 							list[j++] = ts.getServiceType().getUserServiceName(ts.getKey().getIdentifier());
@@ -1149,13 +1149,13 @@ nextModule:
 						offset += envModuleCount[eji];
 					}
 
-					implementations.insertElementAt(possibleModule, offset);
+					implementations.add(offset, possibleModule);
 					envModuleCount[envJDKId]++;
 
 				}
 				else {
 					// just add to the end of the vector
-					implementations.addElement(possibleModule);
+					implementations.add(possibleModule);
 				}
 
 				// Since ModuleControl and ModuleSupportable are not called directly
@@ -1715,7 +1715,7 @@ nextModule:
 				}
 
 				for (int i = 1; i < services.size(); i++) {
-					TopService ts2 = (TopService) services.elementAt(i);
+					TopService ts2 = (TopService) services.get(i);
 					if (ts2.isPotentialService(serviceKey)) {
 						// if the service already exists then  just return null
 						return null;
@@ -1748,7 +1748,7 @@ nextModule:
 				}
 
 				ts = new TopService(this, serviceKey, provider, serviceLocale);
-				services.addElement(ts);
+				services.add(ts);
 			}
 
 			if (SanityManager.DEBUG) {
@@ -1844,7 +1844,7 @@ nextModule:
 			if (ts != null) {
 				ts.shutdown();
 				synchronized (this) {
-					services.removeElement(ts);
+					services.remove(ts);
 				}
 
 				// Service root will only have been created if

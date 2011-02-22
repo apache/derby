@@ -2965,7 +2965,7 @@ public class ResultColumnList extends QueryTreeNodeVector
 
 			for (int index = 0; index < ucSize; index++)
 			{
-				columnName = (String) updateColumns.elementAt(index);
+				columnName = (String) updateColumns.get(index);
 
 				resultColumn = getResultColumn(columnName);
 				if (SanityManager.DEBUG)

@@ -834,8 +834,8 @@ public class TestProto {
 				case CodePoint.MGRLVLLS:
 					while (reader.moreDdmData())
 					{
-						manager.addElement(new Integer(reader.readNetworkShort()));
-						managerLevel.addElement(new Integer(reader.readNetworkShort()));
+						manager.add(new Integer(reader.readNetworkShort()));
+						managerLevel.add(new Integer(reader.readNetworkShort()));
 					}
 					break;
 				default:
@@ -883,13 +883,13 @@ public class TestProto {
 			for (int i = 0; i < manager.size(); i++)
 			{
 				reqVal = getCP();
-				mgr = ((Integer)(manager.elementAt(i))).intValue();
+				mgr = ((Integer)(manager.get(i))).intValue();
 				if (mgr != reqVal)
 				{
 					cpError(mgr, reqVal);
 					return;
 				}
-				mgrLevel = ((Integer)(managerLevel.elementAt(i))).intValue();
+				mgrLevel = ((Integer)(managerLevel.get(i))).intValue();
 				reqVal = getInt();
 				if (mgrLevel != reqVal)
 				{

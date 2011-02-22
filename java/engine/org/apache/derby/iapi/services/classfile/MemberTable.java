@@ -45,7 +45,7 @@ class MemberTable {
 									item.getDescriptor(),
 									entries.size());
 		/* Add to the Vector */
-		entries.addElement(item);
+		entries.add(item);
 
 		/* Add to the Hashtable */
 		hashtable.put(mth, mth);
@@ -65,7 +65,7 @@ class MemberTable {
 			return null;
 		}
 
-		return (ClassMember) entries.elementAt(mth.index);
+		return (ClassMember) entries.get(mth.index);
 	}
 
 	void put(ClassFormatOutput out) throws IOException {
@@ -73,7 +73,7 @@ class MemberTable {
 		Vector lentries = entries;
 		int count = lentries.size();
 		for (int i = 0; i < count; i++) {
-			((ClassMember) lentries.elementAt(i)).put(out);
+			((ClassMember) lentries.get(i)).put(out);
 		}
 	}
 
@@ -87,7 +87,7 @@ class MemberTable {
 		Vector lentries = entries;
 		int count = lentries.size();
 		for (int i = 0; i < count; i++) {
-			size += ((ClassMember) lentries.elementAt(i)).classFileSize();
+			size += ((ClassMember) lentries.get(i)).classFileSize();
 		}
 
 		return size;

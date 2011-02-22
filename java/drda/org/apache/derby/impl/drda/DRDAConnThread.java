@@ -1685,7 +1685,7 @@ class DRDAConnThread extends Thread {
 			managerLevel = reader.readNetworkShort();
 			if (CodePoint.isKnownManager(manager))
 			{
-				knownManagers.addElement(new Integer(manager));
+				knownManagers.add(new Integer(manager));
 				//if the manager level hasn't been set, set it
 				currentLevel = appRequester.getManagerLevel(manager);
 				if (currentLevel == appRequester.MGR_LEVEL_UNKNOWN)
@@ -1696,14 +1696,14 @@ class DRDAConnThread extends Thread {
 					if (currentLevel != managerLevel)
 					{
 						//keep a list of conflicting managers
-						errorManagers.addElement(new Integer(manager));
-						errorManagersLevel.addElement(new Integer (managerLevel));
+						errorManagers.add(new Integer(manager));
+						errorManagersLevel.add(new Integer (managerLevel));
 					}
 				}
 
 			}
 			else
-				unknownManagers.addElement(new Integer(manager));
+				unknownManagers.add(new Integer(manager));
 			if (SanityManager.DEBUG)
 			   trace("Manager = " + java.lang.Integer.toHexString(manager) + 
 					  " ManagerLevel " + managerLevel);
@@ -1716,8 +1716,8 @@ class DRDAConnThread extends Thread {
 			int j = 0;
 			for (int i = 0; i < errorManagers.size(); i++)
 			{
-				oa[j++] = errorManagers.elementAt(i);
-				oa[j++] = errorManagersLevel.elementAt(i);
+				oa[j++] = errorManagers.get(i);
+				oa[j++] = errorManagersLevel.get(i);
 			}
 			throw new DRDAProtocolException(DRDAProtocolException.DRDA_Proto_MGRLVLRM,
 										  this, 0,
@@ -1798,7 +1798,7 @@ class DRDAConnThread extends Thread {
 		writer.startDdm(CodePoint.MGRLVLLS);
 		for (int i = 0; i < knownManagers.size(); i++)
 		{
-			manager = ((Integer)knownManagers.elementAt(i)).intValue();
+			manager = ((Integer)knownManagers.get(i)).intValue();
 			appLevel = appRequester.getManagerLevel(manager);
 			serverLevel = server.getManagerLevel(manager);
 			if (serverLevel >= appLevel)
@@ -1817,7 +1817,7 @@ class DRDAConnThread extends Thread {
 		// write 0 for all unknown managers
 		for (int i = 0; i < unknownManagers.size(); i++)
 		{
-			manager = ((Integer)unknownManagers.elementAt(i)).intValue();
+			manager = ((Integer)unknownManagers.get(i)).intValue();
 			writer.writeCodePoint4Bytes(manager, 0);
 		}
 		writer.endDdm();

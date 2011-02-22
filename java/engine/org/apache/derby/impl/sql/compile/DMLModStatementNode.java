@@ -953,8 +953,8 @@ abstract class DMLModStatementNode extends DMLStatementNode
 					{
 						//find  the referencing  table Name
 						fktd = fkcd.getTableDescriptor();
-						refTableNames.addElement(fktd.getSchemaName() + "." + fktd.getName());
-						refActions.addElement(new Integer(raRules[inner]));
+						refTableNames.add(fktd.getSchemaName() + "." + fktd.getName());
+						refActions.add(new Integer(raRules[inner]));
 						//find the referencing column name required for update null.
 						refColumns = fkcd.getReferencedColumns();
 						coldl = fktd.getColumnDescriptorList();
@@ -964,9 +964,9 @@ abstract class DMLModStatementNode extends DMLStatementNode
 							cold =(ColumnDescriptor)coldl.elementAt(refColumns[i]-1);
 							releventColDes.add(cold);
 						}
-						refColDescriptors.addElement(releventColDes);
-						refIndexConglomNum.addElement(new Long(conglomNumbers[inner]));
-						fkColMap.addElement(colArray);
+						refColDescriptors.add(releventColDes);
+						refIndexConglomNum.add(new Long(conglomNumbers[inner]));
+						fkColMap.add(colArray);
 					}
 				}
 			}
@@ -980,7 +980,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			ConglomerateDescriptor pkIndexConglom = pktd.getConglomerateDescriptor(pkuuid);
 
 			TableDescriptor refTd = cd.getTableDescriptor();
-			fkVector.addElement(new FKInfo(
+			fkVector.add(new FKInfo(
 									fkNames,							// foreign key names
 									refTd.getName(),				// table being modified
 									statementType,						// INSERT|UPDATE|DELETE
@@ -1006,7 +1006,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			fkInfo = new FKInfo[size];
 			for (int i = 0; i < size; i++)
 			{
-				fkInfo[i] = (FKInfo)fkVector.elementAt(i);
+				fkInfo[i] = (FKInfo)fkVector.get(i);
 			}
 		}
 
@@ -1021,13 +1021,13 @@ abstract class DMLModStatementNode extends DMLStatementNode
 			fkColArrays = new int[size][];
 			for (int i = 0; i < size; i++)
 			{
-				fkTableNames[i] = (String)refTableNames.elementAt(i);
-				fkRefActions[i]  = ((Integer) refActions.elementAt(i)).intValue();
+				fkTableNames[i] = (String)refTableNames.get(i);
+				fkRefActions[i]  = ((Integer) refActions.get(i)).intValue();
 				fkColDescriptors[i] =
-					(ColumnDescriptorList)refColDescriptors.elementAt(i);
+					(ColumnDescriptorList)refColDescriptors.get(i);
 				fkIndexConglomNumbers[i] =
-					((Long)refIndexConglomNum.elementAt(i)).longValue();
-				fkColArrays[i] = ((int[])fkColMap.elementAt(i));
+					((Long)refIndexConglomNum.get(i)).longValue();
+				fkColArrays[i] = ((int[])fkColMap.get(i));
 			}
 		}		
 
@@ -1759,7 +1759,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 				if (i == distinctCount)		// first appearence
 				{
 					distinctConglomNums[distinctCount++] = cd.getConglomerateNumber();
-					conglomVector.addElement( cd );
+					conglomVector.add( cd );
 				}
 			}
 
@@ -1793,7 +1793,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 
 		for ( int ictr = 0; ictr < indexCount; ictr++ )
 		{
-			cd = (ConglomerateDescriptor) affectedConglomerates.elementAt( ictr );
+			cd = (ConglomerateDescriptor) affectedConglomerates.get( ictr );
 
 			indicesToMaintain[ ictr ] = cd.getIndexDescriptor();
 			indexConglomerateNumbers[ ictr ] = cd.getConglomerateNumber();

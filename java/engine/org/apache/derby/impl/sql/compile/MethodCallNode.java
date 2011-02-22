@@ -176,7 +176,7 @@ abstract class MethodCallNode extends JavaValueNode
 		{
 			QueryTreeNode	qt;
 
-			qt = (QueryTreeNode) parameterList.elementAt(index);
+			qt = (QueryTreeNode) parameterList.get(index);
 
 			/*
 			** Since we need the parameter to be in Java domain format, put a
