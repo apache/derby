@@ -2256,28 +2256,19 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         // Another test
         // drop column restrict should fail because trigger uses the column 
-        // inside the trigger action. DERBY-4887. Currently, Derby does not
-        // look at the columns being used inside the trigger action unless
-        // they are being used through the REFERENCING clause and hence does 
-        // not catch the trigger dependencies
+        // inside the trigger action. 
         st.executeUpdate("create table atdc_12 (a integer, b integer)");
-        //Following is not going to be caught by the information available
-        //in systriggers even in 10.7 and higher. We only keep the information
-        //about the columns used through REFERENCING clause.
         st.executeUpdate(
                 " create trigger atdc_12_trigger_1 after update of a " +
                 "on atdc_12 for each row select a,b from atdc_12");
-        //Following will be caught because of the information available in 
-        //systriggers in 10.7 and higher because we keep the information 
-        //about the columns used through REFERENCING clause.
         st.executeUpdate(
                 " create trigger atdc_12_trigger_2 " +
                 " after update of a on atdc_12" +
                 " REFERENCING NEW AS newt OLD AS oldt "+
                 " for each row select oldt.b from atdc_12");
 
-        // We got an error because Derby detected the dependency on 
-        // atdc_12_trigger_2
+        // We got an error because Derby detected the dependency of 
+        // the triggers
         assertStatementError("X0Y25", st,
         		"alter table atdc_12 drop column b restrict");
         rs =
@@ -2292,25 +2283,15 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         //column list
         st.executeUpdate("alter table atdc_12 drop column b");
         checkWarning(st, "01502");
-        // the 2 triggers should have been dropped as a result of cascade but
-        // only one gets dropped. Derby does not recognize the dependency of 
-        // trigger action column where the column is not getting referenced
-        // through REFERENCING clause
-        rs =
-            st.executeQuery(
-                    " select triggername from sys.systriggers where " +
-                    "triggername = 'ATDC_12_TRIGGER_1'");
-            JDBC.assertFullResultSet(rs, new String[][]{{"ATDC_12_TRIGGER_1"}});
+        // the 2 triggers will get dropped as a result of cascade
+        JDBC.assertEmpty(st.executeQuery(
+        		" select triggername from sys.systriggers where " +
+        		"triggername in ('ATDC_12_TRIGGER_1', 'ATDC_12_TRIGGER_2')"));
 
         // Another test
         // drop column restrict should fail because there is a table level
         // trigger defined with the column being dropped in it's trigger
-        // action. Currently, Derby does not look at the columns being used
-        // inside the trigger action and hence does not catch the trigger 
-        // dependency unless they are being referenced through REFERENCING
-        // clause. Similarly, drop column cascade should drop this table
-        // level trigger because it is using the colunm in it's trigger 
-        // action but Derby does not catch that. DERBY-4887.
+        // action. 
         st.executeUpdate("create table atdc_13 (a integer, b integer)");
         st.executeUpdate(
                 " create trigger atdc_13_trigger_1 after update " +
@@ -2348,24 +2329,53 @@ public final class AlterTableTest extends BaseJDBCTestCase {
             	{"ATDC_13_TRIGGER_4"}, {"ATDC_13_TRIGGER_5"},
             	{"ATDC_13_TRIGGER_6"}});
         
-        // following is not the right behavior. Derby should have dropped
-        // all the 6 triggers but it drops only 3. Other 3 didn't get
-        // dropped because Derby does not recognize the dependency of 
-        // trigger action column where the column is not getting referenced
-        // through REFERENCING clause
+        // Derby will drop all the 6 triggers
         st.executeUpdate("alter table atdc_13 drop column b");
         checkWarning(st, "01502");
-        // the triggers should have been dropped as a result of cascade but
-        // Derby does not recognize the dependency of trigger action column
-        rs =
-            st.executeQuery(
-            " select triggername from sys.systriggers where " +
-            "triggername in ('ATDC_13_TRIGGER_1', "+
-            "'ATDC_13_TRIGGER_2', 'ATDC_13_TRIGGER_3')");
-        JDBC.assertFullResultSet(rs, new String[][]{{"ATDC_13_TRIGGER_1"},
-            	{"ATDC_13_TRIGGER_2"}, {"ATDC_13_TRIGGER_3"}});
+        JDBC.assertEmpty(st.executeQuery(
+        		" select triggername from sys.systriggers where " +
+        		"triggername in ('ATDC_13_TRIGGER_1', "+
+        		"'ATDC_13_TRIGGER_2', 'ATDC_13_TRIGGER_3')"));
         
-        // Another test
+        // Another test DERBY-5044
+        // ALTER TABLE DROP COLUMN in following test case causes the column
+        // position of trigger column to change. Derby detects that dependency
+        // and fixes the trigger column position
+        st.executeUpdate("create table atdc_16_tab1 (a1 integer, b1 integer, c1 integer)");
+        st.executeUpdate("create table atdc_16_tab2 (a2 integer, b2 integer, c2 integer)");        
+        st.executeUpdate("insert into atdc_16_tab1 values(1,11,111)");
+        st.executeUpdate("insert into atdc_16_tab2 values(1,11,111)");
+        rs =
+            st.executeQuery(" select * from atdc_16_tab1");
+        JDBC.assertFullResultSet(rs, new String[][]{{"1","11","111"}});
+        rs =
+            st.executeQuery(" select * from atdc_16_tab2");
+        JDBC.assertFullResultSet(rs, new String[][]{{"1","11","111"}});
+
+        st.executeUpdate(
+                " create trigger atdc_16_trigger_1 " +
+                " after update of b1 on atdc_16_tab1" +
+                " REFERENCING NEW AS newt"+
+                " for each row " +
+                " update atdc_16_tab2 set c2 = newt.c1");
+        st.executeUpdate("update atdc_16_tab1 set b1=22,c1=222");
+        rs =
+            st.executeQuery(" select * from atdc_16_tab1");
+        JDBC.assertFullResultSet(rs, new String[][]{{"1","22","222"}});
+        rs =
+            st.executeQuery(" select * from atdc_16_tab2");
+        JDBC.assertFullResultSet(rs, new String[][]{{"1","11","222"}});
+        st.executeUpdate("alter table atdc_16_tab1 drop column a1 restrict");
+        st.executeUpdate("update atdc_16_tab1 set b1=33, c1=333");
+        rs =
+            st.executeQuery(" select * from atdc_16_tab1");
+        JDBC.assertFullResultSet(rs, new String[][]{{"33","333"}});
+        rs =
+            st.executeQuery(" select * from atdc_16_tab2");
+        JDBC.assertFullResultSet(rs, new String[][]{{"1","11","333"}});
+
+        
+        // Another test DERBY-5044
         //Following test case involves two tables. The trigger is defined 
         //on table 1 and it uses the column from table 2 in it's trigger  
     	//action. This dependency of the trigger on a column from another 
@@ -2404,14 +2414,51 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "for each row " +
                 "update atdc_14_tab2 set a2 = newt.a1");
 
-        // following is not the right behavior. we should have gotten an error
-        // because column being dropped is getting used in a trigger action 
+        // following is not the right behavior. we should have dropped 
+        // trigger ATDC_14_TRIGGER_1 because of DROP COLUMN CASCADE
         st.executeUpdate("alter table atdc_14_tab2 drop column a2");
         rs =
                 st.executeQuery(
                 " select triggername from sys.systriggers where " +
                 "triggername = 'ATDC_14_TRIGGER_1' ");
         JDBC.assertFullResultSet(rs, new String[][]{{"ATDC_14_TRIGGER_1"}});
+        
+        // Another test
+        // ALTER TABLE DROP COLUMN in following test case causes the column 
+        // positions of trigger action columns to change. Derby detects 
+        // that and regenerates the internal trigger action sql with correct
+        // column positions. The trigger here is defined at the table level
+        st.executeUpdate("create table atdc_15_tab1 (a1 integer, b1 integer)");
+        st.executeUpdate("create table atdc_15_tab2 (a2 integer, b2 integer)");        
+        st.executeUpdate("insert into atdc_15_tab1 values(1,11)");
+        st.executeUpdate("insert into atdc_15_tab2 values(1,11)");
+        rs =
+            st.executeQuery(" select * from atdc_15_tab1");
+        JDBC.assertFullResultSet(rs, new String[][]{{"1","11"}});
+        rs =
+            st.executeQuery(" select * from atdc_15_tab2");
+        JDBC.assertFullResultSet(rs, new String[][]{{"1","11"}});
+
+        st.executeUpdate(
+                " create trigger atdc_15_trigger_1 after update " +
+                "on atdc_15_tab1 REFERENCING NEW AS newt " +
+                "for each row " +
+                "update atdc_15_tab2 set b2 = newt.b1");
+        st.executeUpdate("update atdc_15_tab1 set b1=22");
+        rs =
+            st.executeQuery(" select * from atdc_15_tab1");
+        JDBC.assertFullResultSet(rs, new String[][]{{"1","22"}});
+        rs =
+            st.executeQuery(" select * from atdc_15_tab2");
+        JDBC.assertFullResultSet(rs, new String[][]{{"1","22"}});
+        st.executeUpdate("alter table atdc_15_tab1 drop column a1 restrict");
+        st.executeUpdate("update atdc_15_tab1 set b1=33");
+        rs =
+            st.executeQuery(" select * from atdc_15_tab1");
+        JDBC.assertFullResultSet(rs, new String[][]{{"33"}});
+        rs =
+            st.executeQuery(" select * from atdc_15_tab2");
+        JDBC.assertFullResultSet(rs, new String[][]{{"1","33"}});
         
 
         st.executeUpdate(

@@ -4844,7 +4844,13 @@ public final class	DataDictionaryImpl
 			//We are here because we have come across an invalidated trigger 
 			//which is being fired. This code gets called for such a trigger
 			//only if it is a row level trigger with REFERENCEs clause
-			if (referencedCols != null){
+			//
+			// referencedColsInTriggerAction can be null if trigger action
+			// does not use any columns through REFERENCING clause. This can
+			// happen when we are coming here through ALTER TABLE DROP COLUMN
+			// and the trigger being rebuilt does not use any columns through 
+			// REFERENCING clause. DERBY-4887
+			if (referencedCols != null && referencedColsInTriggerAction != null){
 				for (int i = 0; i < referencedColsInTriggerAction.length; i++)
 				{
 					triggerColsAndTriggerActionCols[referencedColsInTriggerAction[i]-1] = referencedColsInTriggerAction[i];

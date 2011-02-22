@@ -154,17 +154,21 @@ public class Changes10_7 extends UpgradeChange
     }
     
     /**
-     * Make sure that DERBY-4998 changes do not break backward compatibility.
+     * This test creates 2 kinds of triggers in old release for each of the
+     * three phase of upgrade. The triggers are of following 2 types
+     * 1)trigger action using columns available through the REFERENCING clause.
+     * 2)trigger action using columns without the REFERENCING clause.
+     * For both kinds of triggers, there is test case which drops the column 
+     * being used in the trigger action column. 
      * 
-     * It creates triggers in old release with trigger action columns getting
-     * used through the REFERENCING clause. Those triggers in soft upgrade
-     * mode, post soft upgrade mode and hard upgrade mode do not get detected 
-     * by ALTER TABLE DROP COLUMN because prior to 10.7, we did not keep 
-     * information about trigger action columns getting used through the 
-     * REFERENCING clause.
+     * In all three modes of upgrade, soft upgrade, post soft upgrade, and 
+     * hard upgrade, ALTER TABLE DROP COLUMN will detect the trigger 
+     * dependency.
      */
     public void testAlterTableDropColumnAndTriggerAction() throws Exception
     {
+    	// ALTER TABLE DROP COLUMN was introduced in 10.3 so no point running
+    	// this test with earlier releases
     	if (!oldAtLeast(10, 3)) return;
     	
         Statement s = createStatement();
@@ -173,231 +177,352 @@ public class Changes10_7 extends UpgradeChange
         switch ( getPhase() )
         {
         case PH_CREATE: // create with old version
-        	//Create 2 tables for each of the upgrade phases which are 
-        	//a)soft upgrade b)post soft upgrade and c)hard upgrade
-        	//For each of the upgrade phase, one table will be used for 
+        	// Create 4 tables for each of the upgrade phases
+        	//
+        	// There will be 2 tests in each upgrade phase. 
+        	// 1)One test will use the column being dropped as part of the
+        	//   trigger action column through the REFERENCING clause
+        	// 2)Second test will use the column being dropped as part of the
+        	//   trigger action sql without the REFERENCING clause
+        	//
+        	//For each of the two tests, one table will be used for 
         	//ALTER TABLE DROP COLUMN RESTRICT and the second table will
         	//be used for ALTER TABLE DROP COLUMN CASCADE
 
-        	//Following 2 tables and triggers are for soft upgrade mode check
-        	s.execute("CREATE TABLE DERBY4998_SOFT_UPGRADE_RESTRICT(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_SOFT_UPGRADE_RESTRICT VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_SOFT_UPGRADE_RESTRICT_tr1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_SOFT_UPGRADE_RESTRICT REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_SOFT_UPGRADE_RESTRICT");
-            s.executeUpdate("UPDATE DERBY4998_SOFT_UPGRADE_RESTRICT SET c12=c12+1");
+        	//Following 4 tables and triggers will be used in soft upgrade mode
+        	// The trigger actions on following 2 table use a column through 
+        	// REFERENCING clause
+        	createTableAndTrigger("TAB1_SOFT_UPGRADE_RESTRICT", 
+        			"TAB1_SOFT_UPGRADE_RESTRICT_TR1", true);
+        	createTableAndTrigger("TAB1_SOFT_UPGRADE_CASCADE",
+        			"TAB1_SOFT_UPGRADE_CASCADE_TR1", true);
+        	// The trigger actions on following 2 table use a column without
+        	// the REFERENCING clause
+        	createTableAndTrigger("TAB2_SOFT_UPGRADE_RESTRICT",
+        			"TAB2_SOFT_UPGRADE_RESTRICT_TR1", false);
+        	createTableAndTrigger("TAB2_SOFT_UPGRADE_CASCADE",
+        			"TAB2_SOFT_UPGRADE_CASCADE_TR1", false);
 
-            s.execute("CREATE TABLE DERBY4998_soft_upgrade_cascade(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_soft_upgrade_cascade VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_soft_upgrade_cascade_tr1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_soft_upgrade_cascade REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_soft_upgrade_cascade");
-            s.executeUpdate("UPDATE DERBY4998_soft_upgrade_cascade SET c12=c12+1");
+        	//Following 4 tables and triggers will be used in post-soft 
+        	// upgrade mode
+        	// The trigger actions on following 2 table use a column through 
+        	// REFERENCING clause
+        	createTableAndTrigger("TAB1_POSTSOFT_UPGRADE_RESTRICT", 
+        			"TAB1_POSTSOFT_UPGRADE_RESTRICT_TR1", true);
+        	createTableAndTrigger("TAB1_POSTSOFT_UPGRADE_CASCADE",
+        			"TAB1_POSTSOFT_UPGRADE_CASCADE_TR1", true);
+        	// The trigger actions on following 2 table use a column without
+        	// the REFERENCING clause
+        	createTableAndTrigger("TAB2_POSTSOFT_UPGRADE_RESTRICT",
+        			"TAB2_POSTSOFT_UPGRADE_RESTRICT_TR1", false);
+        	createTableAndTrigger("TAB2_POSTSOFT_UPGRADE_CASCADE",
+        			"TAB2_POSTSOFT_UPGRADE_CASCADE_TR1", false);
 
-        	//Following 2 tables and triggers are for post-soft upgrade mode
-            //check
-            s.execute("CREATE TABLE DERBY4998_postsoft_upgrade_restrict(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_postsoft_upgrade_restrict VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_postsoft_upgrade_restrict_tr1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_postsoft_upgrade_restrict REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_postsoft_upgrade_restrict");
-            s.executeUpdate("UPDATE DERBY4998_postsoft_upgrade_restrict SET c12=c12+1");
+        	//Following 4 tables and triggers will be used in hard 
+        	// upgrade mode
+        	// The trigger actions on following 2 table use a column through 
+        	// REFERENCING clause
+        	createTableAndTrigger("TAB1_HARD_UPGRADE_RESTRICT", 
+        			"TAB1_HARD_UPGRADE_RESTRICT_TR1", true);
+        	createTableAndTrigger("TAB1_HARD_UPGRADE_CASCADE",
+        			"TAB1_HARD_UPGRADE_CASCADE_TR1", true);
+        	// The trigger actions on following 2 table use a column without
+        	// the REFERENCING clause
+        	createTableAndTrigger("TAB2_HARD_UPGRADE_RESTRICT",
+        			"TAB2_HARD_UPGRADE_RESTRICT_TR1", false);
+        	createTableAndTrigger("TAB2_HARD_UPGRADE_CASCADE",
+        			"TAB2_HARD_UPGRADE_CASCADE_TR1", false);
 
-            s.execute("CREATE TABLE DERBY4998_postsoft_upgrade_cascade(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_postsoft_upgrade_cascade VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_postsoft_upgrade_cascade_tr1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_postsoft_upgrade_cascade REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_postsoft_upgrade_cascade");
-            s.executeUpdate("UPDATE DERBY4998_postsoft_upgrade_cascade SET c12=c12+1");
-
-        	//Following 2 tables and triggers are for hard upgrade mode check
-            s.execute("CREATE TABLE DERBY4998_hard_upgrade_restrict(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_hard_upgrade_restrict VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_hard_upgrade_restrict_tr1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_hard_upgrade_restrict REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_hard_upgrade_restrict");
-            s.executeUpdate("UPDATE DERBY4998_hard_upgrade_restrict SET c12=c12+1");
-
-            s.execute("CREATE TABLE DERBY4998_hard_upgrade_cascade(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_hard_upgrade_cascade VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_hard_upgrade_cascade_tr1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_hard_upgrade_cascade REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_hard_upgrade_cascade");
-            s.executeUpdate("UPDATE DERBY4998_hard_upgrade_cascade SET c12=c12+1");
             break;
 
         case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
-        	//The tables created with 10.6 and prior versions will exhibit
-        	//incorrect behavoir
-        	incorrectBehaviorForDropColumn("DERBY4998_SOFT_UPGRADE_RESTRICT",
-        			"DERBY4998_SOFT_UPGRADE_RESTRICT_TR1", "RESTRICT");
-        	incorrectBehaviorForDropColumn("DERBY4998_SOFT_UPGRADE_CASCADE",
-        			"DERBY4998_SOFT_UPGRADE_CASCADE_TR1", "CASCADE");
+        	// The trigger has trigger action using the column being dropped
+            // through the REFERENCING clause. Because of this, 
+        	// DROP COLUMN RESTRICT will fail.
+            assertStatementError("X0Y25", s,
+            		" alter table TAB1_SOFT_UPGRADE_RESTRICT " +
+            		" drop column c11 restrict");
+            //Verify that trigger still exists in the system
+            rs = s.executeQuery(
+                    " select triggername from sys.systriggers where " +
+                    "triggername='TAB1_SOFT_UPGRADE_RESTRICT_TR1'");
+            JDBC.assertFullResultSet(rs, 
+               		new String[][]{{"TAB1_SOFT_UPGRADE_RESTRICT_TR1"}});
+                           	
+        	// The trigger has trigger action using the column being dropped
+            // through the REFERENCING clause. Because of this, 
+        	// DROP COLUMN CASCADE will drop the dependent trigger.
+            s.executeUpdate("alter table TAB1_SOFT_UPGRADE_CASCADE " +
+            		" drop column c11 CASCADE");
+            checkWarning(s, "01502");
+            //Verify that the trigger does not exist in the system anymore
+            JDBC.assertEmpty(s.executeQuery(
+                    " select triggername from sys.systriggers where " +
+                    "triggername='TAB1_SOFT_UPGRADE_CASCADE_TR1'"));
 
-        	//Even though we are in soft upgrade mode using Derby 10.7 release,
-        	//newly created triggers will still not keep track of trigger
-        	//action columns referenced through REFERENCING clause because
-        	//that will break the backward compatibility when this db gets
-        	//used with earlier Derby version again after soft upgrade.
-        	//Show this with an example
-            s.execute("CREATE TABLE DERBY4998_SOFT_UPGRADE_NEW_TABLE_RESTRICT(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_SOFT_UPGRADE_NEW_TABLE_RESTRICT VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_SOFT_UPGRADE_NEW_TABLE_RESTRICT_tr1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_SOFT_UPGRADE_NEW_TABLE_RESTRICT REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_SOFT_UPGRADE_NEW_TABLE_RESTRICT");
-            s.executeUpdate("UPDATE DERBY4998_SOFT_UPGRADE_NEW_TABLE_RESTRICT SET c12=c12+1");
-        	incorrectBehaviorForDropColumn("DERBY4998_SOFT_UPGRADE_NEW_TABLE_RESTRICT",
-        			"DERBY4998_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1", "RESTRICT");
-        	
-            s.execute("CREATE TABLE DERBY4998_SOFT_UPGRADE_NEW_TABLE_CASCADE(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_SOFT_UPGRADE_NEW_TABLE_CASCADE VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_SOFT_UPGRADE_NEW_TABLE_CASCADE REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_SOFT_UPGRADE_NEW_TABLE_CASCADE");
-            s.executeUpdate("UPDATE DERBY4998_SOFT_UPGRADE_NEW_TABLE_CASCADE SET c12=c12+1");
-        	incorrectBehaviorForDropColumn("DERBY4998_SOFT_UPGRADE_NEW_TABLE_CASCADE",
-        			"DERBY4998_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1", "RESTRICT");
+        	// The trigger has trigger action using the column being dropped
+        	// (not through the REFERENCING clause). Because of this, 
+        	// DROP COLUMN RESTRICT will fail.
+            assertStatementError("X0Y25", s,
+            		" alter table TAB2_SOFT_UPGRADE_RESTRICT " +
+            		" drop column c11 restrict");
+            //Verify that trigger still exists in the system
+            rs = s.executeQuery(
+                    " select triggername from sys.systriggers where " +
+                    "triggername='TAB2_SOFT_UPGRADE_RESTRICT_TR1'");
+            JDBC.assertFullResultSet(rs, 
+               		new String[][]{{"TAB2_SOFT_UPGRADE_RESTRICT_TR1"}});
+                           	
+        	// The trigger has trigger action using the column being dropped
+            // (not through the REFERENCING clause). Because of this, 
+        	// DROP COLUMN CASCADE will drop the dependent trigger.
+            s.executeUpdate("alter table TAB2_SOFT_UPGRADE_CASCADE " +
+            		" drop column c11 CASCADE");
+            checkWarning(s, "01502");
+            //Verify that the trigger does not exist in the system anymore
+            JDBC.assertEmpty(s.executeQuery(
+                    " select triggername from sys.systriggers where " +
+                    "triggername='TAB2_SOFT_UPGRADE_CASCADE_TR1'"));
+
+            // Same behavior can be seen with tables and triggers created
+            // in soft upgrade mode using Derby 10.7 release,
+            // The trigger actions in this test case uses a column through 
+        	// REFERENCING clause. Because of this, 
+        	// DROP COLUMN RESTRICT will fail.
+        	createTableAndTrigger("TAB1_SOFT_UPGRADE_NEW_TABLE_RESTRICT", 
+        			"TAB1_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1", true);
+            assertStatementError("X0Y25", s,
+            		" alter table TAB1_SOFT_UPGRADE_NEW_TABLE_RESTRICT " +
+            		" drop column c11 restrict");
+            //Verify that trigger still exists in the system
+            rs = s.executeQuery(
+                    " select triggername from sys.systriggers where " +
+                    "triggername='TAB1_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1'");
+            JDBC.assertFullResultSet(rs,
+            		new String[][]{{"TAB1_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1"}});
+            
+            // Same behavior can be seen with tables and triggers created
+            // in soft upgrade mode using Derby 10.7 release,
+            // The trigger actions in this test case uses a column through 
+        	// REFERENCING clause. Because of this, 
+        	// DROP COLUMN CASCADE will drop the dependent trigger.
+        	createTableAndTrigger("TAB1_SOFT_UPGRADE_NEW_TABLE_CASCADE",
+        			"TAB1_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1", true);
+            s.executeUpdate("alter table TAB1_SOFT_UPGRADE_NEW_TABLE_CASCADE " +
+            		" drop column c11 CASCADE");
+            checkWarning(s, "01502");
+            //Verify that the trigger does not exist in the system anymore
+            JDBC.assertEmpty(s.executeQuery(
+            		" select triggername from sys.systriggers where " +
+            		"triggername='TAB1_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1'"));
+
+            // Same behavior can be seen with tables and triggers created
+            // in soft upgrade mode using Derby 10.7 release,
+            // The trigger actions in this test case uses a column  
+        	// (not through the REFERENCING clause). Because of this, 
+        	// DROP COLUMN RESTRICT will fail.
+        	createTableAndTrigger("TAB2_SOFT_UPGRADE_NEW_TABLE_RESTRICT", 
+        			"TAB2_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1", false);
+            assertStatementError("X0Y25", s,
+            		" alter table TAB2_SOFT_UPGRADE_NEW_TABLE_RESTRICT " +
+            		" drop column c11 restrict");
+            //Verify that trigger still exists in the system
+            rs = s.executeQuery(
+                    " select triggername from sys.systriggers where " +
+                    "triggername='TAB2_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1'");
+            JDBC.assertFullResultSet(rs,
+            		new String[][]{{"TAB2_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1"}});
+
+            // Same behavior can be seen with tables and triggers created
+            // in soft upgrade mode using Derby 10.7 release,
+            // The trigger actions in this test case uses a column  
+        	// (not through the REFERENCING clause). Because of this, 
+        	// DROP COLUMN RESTRICT will fail.
+        	createTableAndTrigger("TAB2_SOFT_UPGRADE_NEW_TABLE_CASCADE", 
+        			"TAB2_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1", false);
+            s.executeUpdate("alter table TAB2_soft_upgrade_NEW_TABLE_cascade " +
+            		" drop column c11 CASCADE");
+            checkWarning(s, "01502");
+            //Verify that the trigger does not exist in the system anymore
+            JDBC.assertEmpty(s.executeQuery(
+            		" select triggername from sys.systriggers where " +
+            		"triggername='TAB2_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1'"));
             break;
 
         case PH_POST_SOFT_UPGRADE: 
         	// soft-downgrade: boot with old version after soft-upgrade
 
-        	//The tables created with 10.6 and prior versions will continue to 
-        	//exhibit incorrect behavoir
-        	incorrectBehaviorForDropColumn("DERBY4998_POSTSOFT_UPGRADE_RESTRICT",
-        			"DERBY4998_POSTSOFT_UPGRADE_RESTRICT_TR1", "RESTRICT");
-        	incorrectBehaviorForDropColumn("DERBY4998_POSTSOFT_UPGRADE_CASCADE",
-        			"DERBY4998_POSTSOFT_UPGRADE_CASCADE_TR1", "CASCADE");
-        	
+        	//The tables created with 10.6 and prior versions will exhibit
+        	// incorrect behavior because changes for DERBY-4887/DERBY-4984 
+        	// have not been backported to 10.6 and earlier yet
+        	//
+        	//ALTER TABLE DROP COLUMN will not detect column being dropped
+        	// in trigger action of dependent triggers.
+        	incorrectBehaviorForDropColumn("TAB1_POSTSOFT_UPGRADE_RESTRICT",
+        			"TAB1_POSTSOFT_UPGRADE_RESTRICT_TR1", "RESTRICT");
+        	incorrectBehaviorForDropColumn("TAB1_POSTSOFT_UPGRADE_CASCADE",
+        			"TAB1_POSTSOFT_UPGRADE_CASCADE_TR1", "CASCADE");
+        	incorrectBehaviorForDropColumn("TAB2_POSTSOFT_UPGRADE_RESTRICT",
+        			"TAB2_POSTSOFT_UPGRADE_RESTRICT_TR1", "RESTRICT");
+        	incorrectBehaviorForDropColumn("TAB2_POSTSOFT_UPGRADE_CASCADE",
+        			"TAB2_POSTSOFT_UPGRADE_CASCADE_TR1", "CASCADE");
+
         	//We are back to pre-10.7 version after the soft upgrade. 
         	//ALTER TABLE DROP COLUMN will continue to behave incorrectly
         	//and will not detect the trigger actions referencing the column
         	//being dropped through the REFERENCING clause
-            s.execute("CREATE TABLE DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT");
-            s.executeUpdate("UPDATE DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT SET c12=c12+1");
-        	incorrectBehaviorForDropColumn("DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT",
-        			"DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1", "RESTRICT");
+        	createTableAndTrigger("TAB1_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT",
+        			"TAB1_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1", true);
+        	incorrectBehaviorForDropColumn("TAB1_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT",
+        			"TAB1_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1", "RESTRICT");
+        	createTableAndTrigger("TAB1_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE",
+        			"TAB1_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1", true);
+        	incorrectBehaviorForDropColumn("TAB1_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE",
+        			"TAB1_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1", "RESTRICT");
+
+        	//We are back to pre-10.7 version after the soft upgrade. 
+        	//ALTER TABLE DROP COLUMN will continue to behave incorrectly
+        	//and will not detect the trigger actions referencing the column
+        	//being dropped directly (ie without the REFERENCING clause)
+        	createTableAndTrigger("TAB2_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT",
+        			"TAB2_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1", false);
+        	incorrectBehaviorForDropColumn("TAB2_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT",
+        			"TAB2_POST_SOFT_UPGRADE_NEW_TABLE_RESTRICT_TR1", "RESTRICT");
         	
-            s.execute("CREATE TABLE DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE");
-            s.executeUpdate("UPDATE DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE SET c12=c12+1");
-        	incorrectBehaviorForDropColumn("DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE",
-        			"DERBY4998_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1", "RESTRICT");
-            break;
+        	createTableAndTrigger("TAB2_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE",
+        			"TAB2_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1", false);
+        	incorrectBehaviorForDropColumn("TAB2_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE",
+        			"TAB2_POST_SOFT_UPGRADE_NEW_TABLE_CASCADE_TR1", "RESTRICT");
+        	
+        	break;
 
         case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
-        	//The tables created with 10.6 and prior versions will exhibit
-        	//incorrect behavior. Even though the database is at 10.7 level,
-        	//the triggers created with prior Derby releases did not keep
-        	//track of trigger action columns referenced through REFERENCING
-        	//clause.
-        	incorrectBehaviorForDropColumn("DERBY4998_HARD_UPGRADE_RESTRICT",
-        			"DERBY4998_HARD_UPGRADE_RESTRICT_TR1", "RESTRICT");
-        	incorrectBehaviorForDropColumn("DERBY4998_HARD_UPGRADE_CASCADE",
-        			"DERBY4998_HARD_UPGRADE_CASCADE_TR1", "CASCADE");
-        	
-        	//Create 2 new tables now that the database has been upgraded to 
-        	//10.7 Notice that newly created tables will be able to detect
-        	//trigger action reference to column through REFERENCING clause.
-        	//This is because starting 10.7, for new triggers, we have
-        	//started keeping track of trigger action columns referenced 
-        	//through REFERENCING clause.
-            s.execute("CREATE TABLE DERBY4998_HARD_UPGRADE_NEW_TABLE_RESTRICT(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_HARD_UPGRADE_NEW_TABLE_RESTRICT VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_HARD_UPGRADE_NEW_TABLE_RESTRICT_tr1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_HARD_UPGRADE_NEW_TABLE_RESTRICT REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_HARD_UPGRADE_NEW_TABLE_RESTRICT");
-            s.executeUpdate("UPDATE DERBY4998_HARD_UPGRADE_NEW_TABLE_RESTRICT SET c12=c12+1");
+        	// The trigger has trigger action using the column being dropped
+            // through the REFERENCING clause. Because of this, 
+        	// DROP COLUMN RESTRICT will fail.
             assertStatementError("X0Y25", s,
-            		" alter table DERBY4998_HARD_UPGRADE_NEW_TABLE_RESTRICT " +
+            		" alter table TAB1_HARD_UPGRADE_RESTRICT " +
+            		" drop column c11 restrict");
+            //Verify that trigger still exists in the system
+            rs = s.executeQuery(
+                    " select triggername from sys.systriggers where " +
+                    "triggername='TAB1_HARD_UPGRADE_RESTRICT_TR1'");
+            JDBC.assertFullResultSet(rs, 
+                    new String[][]{{"TAB1_HARD_UPGRADE_RESTRICT_TR1"}});
+
+        	// The trigger has trigger action using the column being dropped
+            // through the REFERENCING clause. Because of this, 
+        	// DROP COLUMN CASCADE will drop the dependent trigger.
+            s.executeUpdate("alter table TAB1_HARD_UPGRADE_CASCADE " +
+                    " drop column c11 CASCADE");
+            checkWarning(s, "01502");
+            //Verify that the trigger does not exist in the system anymore
+            JDBC.assertEmpty(s.executeQuery(
+                    " select triggername from sys.systriggers where " +
+                    "triggername='TAB1_HARD_UPGRADE_CASCADE_TR1'"));
+        	
+        	// The trigger has trigger action using the column being dropped
+        	// (not through the REFERENCING clause). Because of this, 
+        	// DROP COLUMN RESTRICT will fail.
+            assertStatementError("X0Y25", s,
+            		" alter table TAB2_HARD_UPGRADE_RESTRICT " +
+            		" drop column c11 restrict");
+            //Verify that trigger still exists in the system
+            rs = s.executeQuery(
+                    " select triggername from sys.systriggers where " +
+                    "triggername='TAB2_HARD_UPGRADE_RESTRICT_TR1'");
+            JDBC.assertFullResultSet(rs, 
+                    new String[][]{{"TAB2_HARD_UPGRADE_RESTRICT_TR1"}});
+
+        	// The trigger has trigger action using the column being dropped
+            // (not through the REFERENCING clause). Because of this, 
+        	// DROP COLUMN CASCADE will drop the dependent trigger.
+            s.executeUpdate("alter table TAB2_HARD_UPGRADE_CASCADE " +
+                    " drop column c11 CASCADE");
+            checkWarning(s, "01502");
+            //Verify that the trigger does not exist in the system anymore
+            JDBC.assertEmpty(s.executeQuery(
+                    " select triggername from sys.systriggers where " +
+                    "triggername='TAB2_HARD_UPGRADE_CASCADE_TR1'"));
+
+            //Create 2 new tables now that the database has been upgraded.
+        	//Notice that newly created tables will be able to detect
+        	//trigger action reference to column through REFERENCING clause.
+        	createTableAndTrigger("TAB1_HARD_UPGRADE_NEW_TABLE_RESTRICT",
+        			"TAB1_HARD_UPGRADE_NEW_TABLE_RESTRICT_TR1", true);
+            assertStatementError("X0Y25", s,
+            		" alter table TAB1_HARD_UPGRADE_NEW_TABLE_RESTRICT " +
+            		" drop column c11 restrict");
+            //Verify that trigger still exists in the system
+            rs = s.executeQuery(
+            " select triggername from sys.systriggers where " +
+            "triggername='TAB1_HARD_UPGRADE_NEW_TABLE_RESTRICT_TR1'");
+            JDBC.assertFullResultSet(rs, 
+            		new String[][]{{"TAB1_HARD_UPGRADE_NEW_TABLE_RESTRICT_TR1"}});
+
+        	// The trigger has trigger action using the column being dropped
+            // through the REFERENCING clause. Because of this, 
+        	// DROP COLUMN CASCADE will drop the dependent trigger.
+        	createTableAndTrigger("TAB1_HARD_UPGRADE_NEW_TABLE_CASCADE",
+        			"TAB1_HARD_UPGRADE_NEW_TABLE_CASCADE_TR1", true);
+            s.executeUpdate("alter table TAB1_HARD_UPGRADE_NEW_TABLE_CASCADE " +
+            		" drop column c11 CASCADE");
+            checkWarning(s, "01502");
+            //Verify that the trigger does not exist in the system anymore
+            JDBC.assertEmpty(s.executeQuery(
+                    " select triggername from sys.systriggers where " +
+                    "triggername='TAB1_HARD_UPGRADE_NEW_TABLE_CASCADE_TR1'"));
+
+            //Create 2 new tables now that the database has been upgraded.
+        	// Notice that newly created tables will be able to detect
+        	// trigger action column (without the REFERENCING clause.)
+        	//Because of this, DROP COLUMN RESTRICT will fail.
+        	createTableAndTrigger("TAB2_HARD_UPGRADE_NEW_TABLE_RESTRICT",
+        			"TAB2_HARD_UPGRADE_NEW_TABLE_RESTRICT_TR1", false);
+            //Verify that trigger still exists in the system
+            assertStatementError("X0Y25", s,
+            		" alter table TAB2_HARD_UPGRADE_NEW_TABLE_RESTRICT " +
             		" drop column c11 restrict");
             rs = s.executeQuery(
             " select triggername from sys.systriggers where " +
-            "triggername='DERBY4998_HARD_UPGRADE_NEW_TABLE_RESTRICT_TR1'");
+            "triggername='TAB2_HARD_UPGRADE_NEW_TABLE_RESTRICT_TR1'");
             JDBC.assertFullResultSet(rs, 
-            		new String[][]{{"DERBY4998_HARD_UPGRADE_NEW_TABLE_RESTRICT_TR1"}});
-            s.execute("CREATE TABLE DERBY4998_HARD_UPGRADE_NEW_TABLE_CASCADE(c11 int, c12 int)");
-            s.execute("INSERT INTO DERBY4998_HARD_UPGRADE_NEW_TABLE_CASCADE VALUES (1,10)");
-            //Create a trigger in the older release where the database has been
-            //created. The trigger action uses a column in trigger action
-            //through REFERENCING clause
-            s.execute("CREATE TRIGGER DERBY4998_HARD_UPGRADE_NEW_TABLE_CASCADE_TR1 " +
-            		"AFTER UPDATE OF c12 " +
-            		"ON DERBY4998_HARD_UPGRADE_NEW_TABLE_CASCADE REFERENCING OLD AS oldt " +
-            		"FOR EACH ROW " +
-                    "SELECT oldt.c11 from DERBY4998_HARD_UPGRADE_NEW_TABLE_CASCADE");
-            s.executeUpdate("UPDATE DERBY4998_HARD_UPGRADE_NEW_TABLE_CASCADE SET c12=c12+1");
-            s.executeUpdate("alter table DERBY4998_HARD_UPGRADE_NEW_TABLE_CASCADE " +
+            		new String[][]{{"TAB2_HARD_UPGRADE_NEW_TABLE_RESTRICT_TR1"}});
+
+        	// The trigger has trigger action using the column being dropped
+            // (not through the REFERENCING clause). Because of this, 
+        	// DROP COLUMN CASCADE will drop the dependent trigger.
+        	createTableAndTrigger("TAB2_HARD_UPGRADE_NEW_TABLE_CASCADE",
+        			"TAB2_HARD_UPGRADE_NEW_TABLE_CASCADE_TR1", false);
+            s.executeUpdate("alter table TAB2_HARD_UPGRADE_NEW_TABLE_CASCADE " +
             		" drop column c11 CASCADE");
             checkWarning(s, "01502");
+            //Verify that the trigger does not exist in the system anymore
             JDBC.assertEmpty(s.executeQuery(
                     " select triggername from sys.systriggers where " +
-                    "triggername='DERBY4998_HARD_UPGRADE_NEW_TABLE_CASCADE_TR1'"));
+                    "triggername='TAB2_HARD_UPGRADE_NEW_TABLE_CASCADE_TR1'"));
             break;
         }
     }
+
+    //Create the table and trigger necessary for ALTER TABLE DROP COLUMN test
+    private void createTableAndTrigger(String tableName,
+    		String triggerName, boolean usesReferencingClause) 
+    throws SQLException {
+        Statement s = createStatement();
+        ResultSet rs;
+        
+        s.execute("CREATE TABLE " + tableName + " (c11 int, c12 int) ");
+        s.execute("INSERT INTO " + tableName + " VALUES (1,10)");
+        s.execute("CREATE TRIGGER " + triggerName + 
+        		" AFTER UPDATE OF c12 ON " + tableName +
+        		(usesReferencingClause ? " REFERENCING OLD AS oldt" : "" )+
+        		" FOR EACH ROW SELECT " +
+        		(usesReferencingClause ? "oldt.c11 " : "c11 " )+
+                "FROM " + tableName);
+        s.executeUpdate("UPDATE " + tableName + " SET c12=c12+1");
+    }
+    
 
     //ALTER TABLE DROP COLUMN in not detected the trigger column dependency for
     //columns being used through the REFERENCING clause for triggers created
