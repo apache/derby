@@ -51,6 +51,7 @@ import org.apache.derby.iapi.store.access.GroupFetchScanController;
 import org.apache.derby.iapi.store.access.ScanController;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
  * Daemon acting as a coordinator for creating and updating index cardinality
@@ -959,8 +960,7 @@ public class IndexStatisticsDaemonImpl
         try {
             Thread.sleep(ms);
         } catch (InterruptedException ie) {
-            // Set the interrupt flag again.
-            Thread.currentThread().interrupt();
+            InterruptStatus.setInterrupted();
         }
     }
 

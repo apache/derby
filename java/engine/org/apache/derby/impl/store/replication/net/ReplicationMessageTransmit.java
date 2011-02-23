@@ -30,6 +30,7 @@ import java.security.PrivilegedExceptionAction;
 import javax.net.SocketFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.shared.common.reference.MessageId;
 
 /**
@@ -202,12 +203,25 @@ public class ReplicationMessageTransmit {
         receivedMsg = null;
         checkSocketConnection();
         socketConn.writeMessage(message);
-        synchronized (receiveSemaphore) {
-            try {
-                receiveSemaphore.wait(DEFAULT_MESSAGE_RESPONSE_TIMEOUT);
-            } catch (InterruptedException ie) {
+        long startMillis = System.currentTimeMillis();
+        long waited = 0L;
+
+        while (receivedMsg == null &&
+               waited < DEFAULT_MESSAGE_RESPONSE_TIMEOUT) {
+
+            synchronized (receiveSemaphore) {
+                try {
+                    receiveSemaphore.wait(
+                        DEFAULT_MESSAGE_RESPONSE_TIMEOUT - waited);
+                } catch (InterruptedException ie) {
+                    InterruptStatus.setInterrupted();
+                    waited = System.currentTimeMillis() - startMillis;
+                    continue;
+                }
+                break;
             }
         }
+
         if (receivedMsg == null) {
             throw StandardException.
                 newException(SQLState.REPLICATION_CONNECTION_LOST, dbname);

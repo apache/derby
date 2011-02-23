@@ -2614,22 +2614,27 @@ public abstract class EmbedConnection implements EngineConnection
     }
 
     /**
-     * Puts the current thread to sleep and sets the interrupt flag of the
-     * thread if an {@code InterruptedException} is thrown while sleeping.
+     * Puts the current thread to sleep.
      * <p>
-     * <em>NOTE</em>: This method does not guarantee that the thread sleeps at
+     * <em>NOTE</em>: This method guarantees that the thread sleeps at
      * least {@code millis} milliseconds.
      *
      * @param millis milliseconds to sleep
      */
     private static void sleep(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException ie) {
-            // Set the interrupt flag of the thread to allow code higher up the
-            // stack to detect the interruption.
-            Thread.currentThread().interrupt();
+        long startMillis = System.currentTimeMillis();
+        long waited = 0L;
+        while (waited < millis) {
+            try {
+                Thread.sleep(millis - waited);
+            } catch (InterruptedException ie) {
+                InterruptStatus.setInterrupted();
+                waited = System.currentTimeMillis() - startMillis;
+                continue;
+            }
+            break;
         }
+
     }
 
     /**

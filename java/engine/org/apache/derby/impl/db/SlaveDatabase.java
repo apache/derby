@@ -30,6 +30,7 @@ import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.services.monitor.Monitor;
+import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
@@ -271,7 +272,7 @@ public class SlaveDatabase extends BasicDatabase {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException ie) {
-                // do nothing
+                    InterruptStatus.setInterrupted();
                 }
             }
         } else {
@@ -347,7 +348,7 @@ public class SlaveDatabase extends BasicDatabase {
                 try {
                     Thread.sleep(500);
                 } catch (InterruptedException ie) {
-                    // do nothing
+                    InterruptStatus.setInterrupted();
                 }
             }
         }

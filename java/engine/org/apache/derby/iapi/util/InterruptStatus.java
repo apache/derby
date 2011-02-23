@@ -58,7 +58,7 @@ public class InterruptStatus {
 
     /**
      * Use thread local variable to store interrupt status flag *only* if we
-     * don't have lcc, e.g. during database creation.
+     * don't have lcc, e.g. during database creation, shutdown etc.
      */
     private static final ThreadLocal exception = new ThreadLocal ();
 

@@ -90,13 +90,20 @@ public class LowMemory {
             // up some memory that throws off our calcuation. This is
             // avoided by clearing lowMemory some time later on an
             // isLowMemory() call.
+            boolean interrupted = false;
+
             for (int i = 0; i < 5; i++) {
                 System.gc();
                 System.runFinalization();
                 try {
                     Thread.sleep(50L);
                 } catch (InterruptedException e) {
+                    interrupted = true;
                 }
+            }
+            if (interrupted) {
+                // reinstate flag
+                Thread.currentThread().interrupt();
             }
         }
         synchronized (this) {
