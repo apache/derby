@@ -68,7 +68,7 @@ public class EnvTest extends TestCase {
     ** XML related tests
     */
     public void testClasspathHasXalanAndJAXP() {
-        setName(XML.classpathHasXalanAndJAXP() + "_classpathHasXalanAndJAXP");
+        setName(XML.classpathHasJAXP() + "_classpathHasJAXP");
     }
     public void testClasspathMeetsXMLReqs() {
         setName(XML.classpathMeetsXMLReqs() + "_classpathMeetsXMLReqs");

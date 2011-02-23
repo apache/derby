@@ -28,11 +28,6 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.lang.reflect.*;
-import java.util.StringTokenizer;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
-import java.util.Collections;
 
 /**
 	Methods to find out relationships between classes and methods within a class.
@@ -1059,27 +1054,6 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 		}
 
 		return sb.toString();
-	}
-
-	/**
-	 * Determine whether or not the received class can be
-	 * loaded.
-	 *
-	 * @param className The name of the class in question
-	 * @return True if className can be loaded, false otherwise
-	 */
-	public static boolean classIsLoadable(String className)
-	{
-		try {
-
-			Class.forName(className);
-			return true;
-
-		} catch (ClassNotFoundException ce) {
-			return false;
-		} catch (LinkageError ce) {
-			return false;
-		}
 	}
 
 	/**

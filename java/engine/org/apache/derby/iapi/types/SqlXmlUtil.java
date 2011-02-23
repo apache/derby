@@ -29,20 +29,28 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.util.Properties;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
 import java.io.StringReader;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+
 // -- JDBC 3.0 JAXP API classes.
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.Text;
+
+import org.w3c.dom.xpath.XPathEvaluator;
+import org.w3c.dom.xpath.XPathExpression;
+import org.w3c.dom.xpath.XPathResult;
 
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
@@ -53,21 +61,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
-
-// -- Xalan-specific classes.
-
-import org.apache.xpath.XPath;
-import org.apache.xpath.XPathContext;
-import org.apache.xpath.objects.XObject;
-import org.apache.xpath.objects.XNodeSet;
-
-import org.apache.xml.utils.PrefixResolverDefault;
-
-import org.apache.xalan.serialize.DOMSerializer;
-import org.apache.xalan.serialize.Serializer;
-import org.apache.xalan.serialize.SerializerFactory;
-import org.apache.xalan.templates.OutputProperties;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 /**
  * This class contains "utility" methods that work with XML-specific
@@ -122,19 +121,52 @@ public class SqlXmlUtil implements Formatable
 
     // Used to serialize an XML value according the standard
     // XML serialization rules.
-    private Serializer serializer;
+    private Transformer serializer;
 
     // Classes used to compile and execute an XPath expression
     // against Xalan.
-    private XPath query;
-    private XPathContext xpContext;
+    private XPathExpression query;
 
     // Used to recompile the XPath expression when this formatable
     // object is reconstructed.  e.g.:  SPS 
     private String queryExpr;
     private String opName;
     private boolean recompileQuery;
-    
+
+    /**
+     * <p>
+     * An object representing the {@code BigDecimal.toPlainString()} method
+     * if it's available on the platform. If it's not available, this field
+     * will be initialized to {@code null}, and in that case the
+     * {@code BigDecimal.toString()} method should be used instead without
+     * reflection.
+     * </p>
+     *
+     * <p>
+     * The behaviour of the {@code toString()} method changed when
+     * {@code toPlainString()} was introduced in Java SE 5. On older
+     * platforms, it behaves just like {@code toPlainString()} does on
+     * newer platforms. So when {@code toPlainString()} is not
+     * available, it is safe to fall back to {@code toString()}. It
+     * behaves differently on newer platforms, so we need to use
+     * {@code toPlainString()} when it is available in order to get
+     * consistent behaviour across all platforms.
+     * </p>
+     *
+     * @see #numberToString(double)
+     */
+    private static final Method TO_PLAIN_STRING;
+    static {
+        Method m = null;
+        try {
+            m = BigDecimal.class.getMethod("toPlainString", new Class[0]);
+        } catch (NoSuchMethodException nsme) {
+            // Couldn't find the method, so we'll just fall back to toString()
+            // on this platform.
+        }
+        TO_PLAIN_STRING = m;
+    }
+
     /**
      * Constructor: Initializes objects required for parsing
      * and serializing XML values.  Since most XML operations
@@ -256,18 +288,17 @@ public class SqlXmlUtil implements Formatable
         try {
 
             /* The following XPath constructor compiles the expression
-             * as part of the construction process.  We have to pass
-             * in a PrefixResolver object in order to avoid NPEs when
-             * invalid/unknown functions are used, so we just create
-             * a dummy one, which means prefixes will not be resolved
+             * as part of the construction process.  We pass a null
+             * namespace resolver object so that the implementation will
+             * provide one for us, which means prefixes will not be resolved
              * in the query (Xalan will just throw an error if a prefix
              * is used).  In the future we may want to revisit this
              * to make it easier for users to query based on namespaces.
              */
-            query = new XPath(queryExpr, null,
-                new PrefixResolverDefault(dBuilder.newDocument()),
-                XPath.SELECT);
-            
+            XPathEvaluator eval = (XPathEvaluator)
+                dBuilder.getDOMImplementation().getFeature("+XPath", "3.0");
+            query = eval.createExpression(queryExpr, null);
+
             this.queryExpr = queryExpr;
             this.opName = opName;
             this.recompileQuery = false;
@@ -381,12 +412,13 @@ public class SqlXmlUtil implements Formatable
      *  normalized sequence created from the items in the received
      *  list.
      */
-    protected String serializeToString(ArrayList items,
-        XMLDataValue xmlVal) throws java.io.IOException
+    protected String serializeToString(List items,
+        XMLDataValue xmlVal) throws TransformerException
     {
-        if ((items == null) || (items.size() == 0))
+        if ((items == null) || items.isEmpty()) {
         // nothing to do; return empty sequence.
             return "";
+        }
 
         java.io.StringWriter sWriter = new java.io.StringWriter();
 
@@ -396,9 +428,6 @@ public class SqlXmlUtil implements Formatable
             SanityManager.ASSERT(serializer != null,
                 "Tried to serialize with uninitialized XML serializer.");
         }
-
-        serializer.setWriter(sWriter);
-        DOMSerializer dSer = serializer.asDOMSerializer();
 
         int sz = items.size();
         Object obj = null;
@@ -473,7 +502,8 @@ public class SqlXmlUtil implements Formatable
                  */
                 if (xmlVal != null)
                     xmlVal.markAsHavingTopLevelAttr();
-                dSer.serialize((Node)obj);
+                serializer.transform(
+                        new DOMSource((Node) obj), new StreamResult(sWriter));
                 lastItemWasString = false;
             }
             else
@@ -507,7 +537,8 @@ public class SqlXmlUtil implements Formatable
                      * "serialized" as an atomic value, attribute, or
                      * text node.
                      */
-                    dSer.serialize(n);
+                    serializer.transform(
+                            new DOMSource(n), new StreamResult(sWriter));
                 }
 
                 lastItemWasString = false;
@@ -555,7 +586,7 @@ public class SqlXmlUtil implements Formatable
      * @exception Exception thrown on error (and turned into a
      *  StandardException by the caller).
      */
-    protected ArrayList evalXQExpression(XMLDataValue xmlContext,
+    protected List evalXQExpression(XMLDataValue xmlContext,
         boolean returnResults, int [] resultXType) throws Exception
     {
         // if this object is in an SPS, we need to recompile the query
@@ -567,7 +598,7 @@ public class SqlXmlUtil implements Formatable
         // Make sure we have a compiled query.
         if (SanityManager.DEBUG) {
             SanityManager.ASSERT(
-                (query != null) && (query.getExpression() != null),
+                (query != null),
                 "Failed to locate compiled XML query expression.");
         }
 
@@ -592,56 +623,66 @@ public class SqlXmlUtil implements Formatable
                 new StringReader(xmlContext.getString())));
 
         // Evaluate the expresion using Xalan.
-        getXPathContext();
-        xpContext.reset();
-        XObject xOb = query.execute(xpContext, docNode, null);
+        XPathResult result = (XPathResult)
+                query.evaluate(docNode, XPathResult.ANY_TYPE, null);
 
         if (!returnResults)
         {
             // We don't want to return the actual results, we just
             // want to know if there was at least one item in the
             // result sequence.
-            if ((xOb instanceof XNodeSet) &&
-                (((XNodeSet)xOb).nodelist().getLength() > 0))
-            { // If we have a sequence (XNodeSet) of length greater
-              // than zero, then we know that at least one item
-              // "exists" in the result so return a non-null list.
-                return new ArrayList(0);
-            }
-            else if (!(xOb instanceof XNodeSet))
-            // we have a single atomic value, which means the result is
-            // non-empty.  So return a non-null list.
-                return new ArrayList(0);
-            else {
-            // return null; caller will take this to mean we have an
-            // an empty sequence.
-                return null;
+            switch (result.getResultType()) {
+                case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
+                case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
+                    if (result.iterateNext() == null) {
+                        // We have an empty sequence, so return null.
+                        return null;
+                    } else {
+                        // We have a non-empty sequence, so return a non-null
+                        // list to indicate that we found at least one item.
+                        return Collections.EMPTY_LIST;
+                    }
+                default:
+                    // We have a single atomic value, which means the result is
+                    // non-empty. So return a non-null list.
+                    return Collections.EMPTY_LIST;
             }
         }
 
         // Else process the results.
-        NodeList nodeList = null;
-        int numItems = 0;
-        if (!(xOb instanceof XNodeSet))
-        // then we only have a single (probably atomic) item.
-            numItems = 1;
-        else {
-            nodeList = xOb.nodelist();
-            numItems = nodeList.getLength();
+        List itemRefs;
+        switch (result.getResultType()) {
+            case XPathResult.NUMBER_TYPE:
+                // Single atomic number. Get its string value.
+                String val = numberToString(result.getNumberValue());
+                itemRefs = Collections.singletonList(val);
+                break;
+            case XPathResult.STRING_TYPE:
+                // Single atomic string value.
+                itemRefs = Collections.singletonList(result.getStringValue());
+                break;
+            case XPathResult.BOOLEAN_TYPE:
+                // Single atomic boolean. Get its string value.
+                itemRefs = Collections.singletonList(
+                        String.valueOf(result.getBooleanValue()));
+                break;
+            case XPathResult.UNORDERED_NODE_ITERATOR_TYPE:
+            case XPathResult.ORDERED_NODE_ITERATOR_TYPE:
+                // We have a sequence. Get all nodes.
+                itemRefs = new ArrayList();
+                Node node;
+                while ((node = result.iterateNext()) != null) {
+                    itemRefs.add(node);
+                }
+                break;
+            default:
+                if (SanityManager.DEBUG) {
+                    SanityManager.THROWASSERT(
+                            "Don't know how to handle XPath result type " +
+                            result.getResultType());
+                }
+                itemRefs = null;
         }
-
-        // Return a list of the items contained in the query results.
-        ArrayList itemRefs = new ArrayList();
-        if (nodeList == null)
-        // result is a single, non-node value (ex. it's an atomic number);
-        // in this case, just take the string value.
-            itemRefs.add(xOb.str());
-        else {
-            for (int i = 0; i < numItems; i++)
-                itemRefs.add(nodeList.item(i));
-        }
-
-        nodeList = null;
 
         /* Indicate what kind of XML result value we have.  If
          * we have a sequence of exactly one Document then it
@@ -649,7 +690,7 @@ public class SqlXmlUtil implements Formatable
          * XML_DOC_ANY (which means we can store it in a Derby
          * XML column).
          */
-        if ((numItems == 1) && (itemRefs.get(0) instanceof Document))
+        if ((itemRefs.size() == 1) && (itemRefs.get(0) instanceof Document))
             resultXType[0] = XML.XML_DOC_ANY;
         else
             resultXType[0] = XML.XML_SEQUENCE;
@@ -662,26 +703,14 @@ public class SqlXmlUtil implements Formatable
      * */
 
     /**
-     * Create and return an instance of Xalan's XPathContext
-     * that can be used to compile an XPath expression.
-     */
-    private XPathContext getXPathContext()
-    {
-        if (xpContext == null)
-            xpContext = new XPathContext();
-
-        return xpContext;
-    }
-
-    /**
      * Create an instance of Xalan serializer for the sake of
      * serializing an XML value according the SQL/XML specification
      * for serialization.
      */
-    private void loadSerializer() throws java.io.IOException
+    private void loadSerializer() throws TransformerConfigurationException
     {
         // Set serialization properties.
-        Properties props = OutputProperties.getDefaultMethodProperties("xml");
+        Properties props = new Properties();
 
         // SQL/XML[2006] 10.15:General Rules:6 says method is "xml".
         props.setProperty(OutputKeys.METHOD, "xml");
@@ -718,8 +747,60 @@ public class SqlXmlUtil implements Formatable
         props.setProperty(OutputKeys.ENCODING, "UTF-8");
 
         // Load the serializer with the correct properties.
-        serializer = SerializerFactory.getSerializer(props);
+        serializer = TransformerFactory.newInstance().newTransformer();
+        serializer.setOutputProperties(props);
         return;
+    }
+
+    /**
+     * Convert a number returned by an XPath query to a string, following the
+     * rules for the <a href="http://www.w3.org/TR/xpath/#function-string">
+     * XPath string function</a>.
+     *
+     * @param d {@code double} representation of the number
+     * @return {@code String} representation of the number
+     */
+    private static String numberToString(double d)
+            throws IllegalAccessException, InvocationTargetException {
+        if (Double.isNaN(d) || Double.isInfinite(d)) {
+            // BigDecimal doesn't know how to handle NaN or +/- infinity, so
+            // use Double to handle those cases.
+            return Double.toString(d);
+        } else {
+            // Otherwise, use BigDecimal to format the number the way we want.
+            // Ideally, we'd just return
+            // BigDecimal.valueOf(d).stripTrailingZeros().toPlainString(),
+            // but valueOf(double), stripTrailingZeros() and toPlainString()
+            // were all introduced in Java 5, and we still need to support
+            // older platforms.
+            BigDecimal dec = new BigDecimal(Double.toString(d));
+
+            // See how many trailing zeros we have after the decimal point.
+            long unscaledValue = dec.unscaledValue().longValue();
+            int scale = dec.scale();
+            while (scale > 0 && unscaledValue % 10 == 0) {
+                scale--;
+                unscaledValue /= 10;
+            }
+
+            // If we have trailing zeros after the decimal point, remove them.
+            if (scale != dec.scale()) {
+                dec = BigDecimal.valueOf(unscaledValue, scale);
+            }
+
+            // Finally, convert the value to a string. The method
+            // BigDecimal.toPlainString() formats the number the way we want
+            // it, but it's only available on Java 5 and later. Luckily, on
+            // older platforms, BigDecimal.toString() is defined the same way
+            // as toPlainString(), so we can fall back to that method if
+            // toPlainString() isn't available. toString() was redefined in
+            // Java 5, so we cannot use toString() unconditionally, however.
+            if (TO_PLAIN_STRING == null) {
+                return dec.toString();
+            } else {
+                return (String) TO_PLAIN_STRING.invoke(dec, (Object[]) null);
+            }
+        }
     }
 
     /* ****

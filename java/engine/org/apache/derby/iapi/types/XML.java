@@ -33,10 +33,6 @@ import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
-import org.apache.derby.iapi.types.BooleanDataValue;
-
 import org.apache.derby.iapi.reference.SQLState;
 
 import java.sql.ResultSet;
@@ -48,9 +44,9 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
-import java.io.StringReader;
+import java.lang.reflect.Method;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This type implements the XMLDataValue interface and thus is
@@ -867,7 +863,7 @@ public class XML
             // Return an XML data value whose contents are the
             // serialized version of the query results.
             int [] xType = new int[1];
-            ArrayList itemRefs = sqlxUtil.evalXQExpression(
+            List itemRefs = sqlxUtil.evalXQExpression(
                 this, true, xType);
 
             if (result == null)
@@ -995,7 +991,8 @@ public class XML
              * provided as part the JVM if it is jdk 1.4 or
              * greater.
              */
-            if (!ClassInspector.classIsLoadable("org.w3c.dom.Document"))
+            Object docImpl = checkJAXPRequirement();
+            if (docImpl == null)
                 xmlReqCheck = "JAXP";
 
             /* If the XPath class exists, then we assume that our XML
@@ -1007,8 +1004,8 @@ public class XML
              * point in checking for Xalan unless we've already confirmed
              * that we have the JAXP interfaces.
              */
-            else if (!ClassInspector.classIsLoadable("org.apache.xpath.XPath"))
-                xmlReqCheck = "Xalan";
+            else if (!checkXPathRequirement(docImpl))
+                xmlReqCheck = "XPath 3.0";
         }
 
         if (xmlReqCheck.length() != 0)
@@ -1020,4 +1017,60 @@ public class XML
         return;
     }
 
+    /**
+     * Check if we have a JAXP implementation installed.
+     *
+     * @return a {@code DOMImplementation} object retrieved from the
+     * JAXP implementation, if one is installed, or {@code null} if an
+     * implementation couldn't be found
+     */
+    private static Object checkJAXPRequirement() {
+        try {
+            Class factoryClass =
+                    Class.forName("javax.xml.parsers.DocumentBuilderFactory");
+            Method newFactory = factoryClass.getMethod(
+                    "newInstance", new Class[0]);
+            Method newBuilder = factoryClass.getMethod(
+                    "newDocumentBuilder", new Class[0]);
+
+            Class builderClass =
+                    Class.forName("javax.xml.parsers.DocumentBuilder");
+            Method getImpl = builderClass.getMethod(
+                    "getDOMImplementation", new Class[0]);
+
+            Object factory = newFactory.invoke(null, new Object[0]);
+            Object builder = newBuilder.invoke(factory, new Object[0]);
+            Object impl = getImpl.invoke(builder, new Object[0]);
+
+            return impl;
+
+        } catch (Throwable t) {
+            // Oops... Couldn't get a DOMImplementation object for
+            // some reason. Assume we don't have JAXP.
+            return null;
+        }
+    }
+
+    /**
+     * Check if the supplied {@code DOMImplementation} object has
+     * support for DOM Level 3 XPath.
+     *
+     * @param domImpl the {@code DOMImplementation} instance to check
+     * @return {@code true} if the required XPath level is supported,
+     * {@code false} otherwise
+     */
+    private static boolean checkXPathRequirement(Object domImpl) {
+        try {
+            Class domImplClass = Class.forName("org.w3c.dom.DOMImplementation");
+            Method getFeature = domImplClass.getMethod(
+                    "getFeature", new Class[] {String.class, String.class});
+            Object impl =
+                    getFeature.invoke(domImpl, new Object[] {"+XPath", "3.0"});
+            return impl != null;
+        } catch (Throwable t) {
+            // Oops... Something went wrong when checking for XPath
+            // 3.0 support. Assume we don't have it.
+            return false;
+        }
+    }
 }

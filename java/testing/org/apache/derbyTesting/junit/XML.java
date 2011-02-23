@@ -20,8 +20,6 @@
 package org.apache.derbyTesting.junit;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStreamReader;
 
 import java.lang.reflect.Method;
@@ -30,8 +28,6 @@ import java.security.PrivilegedActionException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-
-import java.util.StringTokenizer;
 
 import junit.framework.Assert;
 
@@ -72,15 +68,6 @@ import junit.framework.Assert;
  * </ul>
  */
 public class XML {
-    
-    /**
-     * Minimum version of Xalan required to run XML tests under
-     * Security Manager. In this case, we're saying that the
-     * minimum version is Xalan 2.5.0 (because there's a bug
-     * in earlier versions that causes problems with security
-     * manager).
-     */
-    private static int [] MIN_XALAN_VERSION = new int [] { 2, 5, 0 };
 
     /**
      * Determine whether or not the classpath with which we're
@@ -92,26 +79,17 @@ public class XML {
 
     /**
      * Determine whether or not the classpath with which we're
-     * running has a version of Xalan in it.  Xalan is required
-     * for use of the Derby XML operators.  In particular we
-     * check for:
-     *
-     *  1. Xalan classes (version doesn't matter here)
-     *  2. The Xalan "EnvironmentCheck" class, which is included
-     *     as part of Xalan.  This allows us to check the specific
-     *     version of Xalan in use so that we can determine if
-     *     if we satisfy the minimum requirement.
+     * running has a JAXP implementation.
      */
-    private static final boolean HAVE_XALAN =
-            JDBC.haveClass("org.apache.xpath.XPath") &&
-            JDBC.haveClass("org.apache.xalan.xslt.EnvironmentCheck");
+    private static final boolean HAVE_JAXP_IMPL =
+            HAVE_JAXP && checkJAXPImplementation();
 
     /**
-     * Determine if we have the minimum required version of Xalan
+     * Determine if we have support for DOM level 3 XPath, which is required
      * for successful use of the XML operators.
      */
-    private static final boolean HAVE_MIN_XALAN
-            = HAVE_XALAN && checkXalanVersion();
+    private static final boolean HAVE_XPATH_LEVEL_3
+            = HAVE_JAXP_IMPL && checkXPathSupport();
 
     /**
      * The filepath for the directory that holds the XML "helper" files
@@ -122,23 +100,24 @@ public class XML {
 
     /**
      * Return true if the classpath contains JAXP and
+     * an implementation of the JAXP interfaces, for example the
      * Xalan classes (this method doesn't care about
-     * the particular version of Xalan).
+     * support for DOM level 3 XPath).
      */
-    public static boolean classpathHasXalanAndJAXP()
+    public static boolean classpathHasJAXP()
     {
-        return HAVE_JAXP && HAVE_XALAN;
+        return HAVE_JAXP_IMPL;
     }
 
     /**
      * Return true if the classpath meets all of the requirements
      * for use of the SQL/XML operators.  This means that all
-     * required classes exist in the classpath AND the version
-     * of Xalan that we found is at least MIN_XALAN_VERSION.
+     * required classes exist in the classpath AND there is support
+     * for DOM level 3 XPath.
      */
     public static boolean classpathMeetsXMLReqs()
     {
-        return HAVE_JAXP && HAVE_MIN_XALAN;
+        return HAVE_XPATH_LEVEL_3;
     }
 
     /**
@@ -265,157 +244,79 @@ public class XML {
     }
 
     /**
+     * <p>
      * Determine whether or not the classpath with which we're
-     * running has a version of Xalan that meets the minimum
-     * Xalan version requirement.  We do that by using a Java
-     * utility that ships with Xalan--namely, "EnvironmentCheck"--
-     * and by parsing the info gathered by that method to find
-     * the Xalan version.  We use reflection when doing this
-     * so that this file will compile/execute even if XML classes
-     * are missing.
+     * running contains a JAXP implementation that supports
+     * DOM level 3 XPath.
+     * </p>
      *
+     * <p>
      * Assumption is that we only get to this method if we already
-     * know that there *is* a version of Xalan in the classpath
-     * and that version includes the "EnvironmentCheck" class.
-     *
-     * Note that this method returns false if the call to Xalan's
-     * EnvironmentCheck.checkEnvironment() returns false for any
-     * reason.  As a specific example, that method will always
-     * return false when running with ibm131 because it cannot
-     * find the required methods on the SAX 2 classes (apparently
-     * the classes in ibm131 jdk don't have all of the methods
-     * required by Xalan).  Thus this method will always return
-     * "false" for ibm131.
+     * know that there *is* an implementation of JAXP in the classpath.
+     * </p>
      */
-    private static boolean checkXalanVersion()
+    private static boolean checkXPathSupport()
     {
-        boolean haveMinXalanVersion = false;
+        boolean supportsXPath;
+
+        // Invoke the following using reflection to see if we have support
+        // for DOM level 3 XPath:
+        //
+        //     DocumentBuilderFactory.newInstance().newDocumentBuilder()
+        //             .getDOMImplementation().getFeature("+XPath", "3.0");
+        //
         try {
+            Class factoryClass =
+                    Class.forName("javax.xml.parsers.DocumentBuilderFactory");
 
-            // These io objects allow us to retrieve information generated
-            // by the call to EnvironmenCheck.checkEnvironment()
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            PrintWriter pW = new PrintWriter(bos);
+            Method newFactory =
+                    factoryClass.getMethod("newInstance", new Class[0]);
 
-            // Call the method using reflection.
+            Object factory = newFactory.invoke(null, new Object[0]);
 
-            Class cl = Class.forName("org.apache.xalan.xslt.EnvironmentCheck");
-            Method meth = cl.getMethod("checkEnvironment",
-                new Class[] { PrintWriter.class });
+            Method newBuilder = factoryClass.getMethod(
+                    "newDocumentBuilder", new Class[0]);
 
-            Boolean boolObj = (Boolean)meth.invoke(
-                cl.newInstance(), new Object [] { pW });
+            Object builder = newBuilder.invoke(factory, new Object[0]);
 
-            pW.flush();
-            bos.flush();
+            Class builderClass =
+                    Class.forName("javax.xml.parsers.DocumentBuilder");
 
-            cl = null;
-            meth = null;
-            pW = null;
+            Method getImpl = builderClass.getMethod(
+                    "getDOMImplementation", new Class[0]);
 
-            /* At this point 'bos' holds a list of properties with
-             * a bunch of environment information.  The specific
-             * property we're looking for is "version.xalan2_2",
-             * so get that property, parse the value, and see
-             * if the version is at least the minimum required.
-             */
-            if (boolObj.booleanValue())
-            {
-                /* We wrote the byte array using the platform's default
-                 * encodinging (that's what we get with the call to
-                 * "new PrintWriter(bos)" above), so read it in using
-                 * the default encoding, as well (i.e. don't pass an
-                 * encoding into toString()).
-                 */
-                String checkEnvOutput = bos.toString();
-                bos.close();
+            Object impl = getImpl.invoke(builder, new Object[0]);
 
-                /* The property we're looking for is on a single line
-                 * of the output, and that line starts with the name
-                 * of the property.  So extract that line out now. If
-                 * we can't find it, just return "false" to say that
-                 * we could not find the minimum version. Note: it's
-                 * possible (though admittedly unlikely) that the
-                 * string "version.xalan2_2" appears in the user's
-                 * classpath.  Adding an equals sign ("=") at the end
-                 * of our search pattern reduces the chance of the
-                 * search string appearing in the classpath, but does
-                 * not eliminate it...
-                 */
-                int pos = checkEnvOutput.indexOf("version.xalan2_2=");
-                if (pos < 0)
-                    return false;
+            Class domImplClass = Class.forName("org.w3c.dom.DOMImplementation");
 
-                String ver = checkEnvOutput.substring(
-                    pos, checkEnvOutput.indexOf("\n", pos));
+            Method getFeature = domImplClass.getMethod(
+                    "getFeature", new Class[] {String.class, String.class});
 
-                // Now pull out the one we need.
-                haveMinXalanVersion = (ver != null);
-                if (haveMinXalanVersion)
-                {
-                    /* We found the property, so parse out the necessary
-                     * piece.  The value is of the form:
-                     *
-                     *   <productName> Major.minor.x
-                     *
-                     * Ex:
-                     *
-                     *   version.xalan2_2=Xalan Java 2.5.1 
-                     *   version.xalan2_2=XSLT4J Java 2.6.6
-                     */
-                    int i = 0;
-                    StringTokenizer tok = new StringTokenizer(ver, ". ");
-                    while (tok.hasMoreTokens())
-                    {
-                        String str = tok.nextToken().trim();
-                        if (Character.isDigit(str.charAt(0)))
-                        {
-                            int val = Integer.valueOf(str).intValue();
-                            if (val < MIN_XALAN_VERSION[i])
-                            {
-                                haveMinXalanVersion = false;
-                                break;
-                            }
-                            i++;
-                        }
+            Object ret =
+                    getFeature.invoke(impl, new Object[] {"+XPath", "3.0"});
 
-                        /* If we've checked all parts of the min version,
-                         * then we assume we're okay. Ex. "2.5.0.2"
-                         * is considered greater than "2.5.0".
-                         */
-                        if (i >= MIN_XALAN_VERSION.length)
-                            break;
-                    }
-
-                    /* If the value had fewer parts than the
-                     * mininum version, then it doesn't meet
-                     * the requirement.  Ex. "2.5" is considered
-                     * to be a lower version than "2.5.0".
-                     */
-                    if (i < MIN_XALAN_VERSION.length)
-                        haveMinXalanVersion = false;
-                }
-            }
-
-            /* Else the call to checkEnvironment() returned "false",
-             * which means it couldn't find all of the classes/methods
-             * required for Xalan to function.  So in that case we'll
-             * fall through and just return false, as well.
-             */
+            supportsXPath = (ret != null);
 
         } catch (Throwable t) {
-
-            System.out.println("Unexpected exception while " +
-                "trying to find Xalan version:");
-            t.printStackTrace(System.err);
-
             // If something went wrong, assume we don't have the
             // necessary classes.
-            haveMinXalanVersion = false;
-
+            supportsXPath = false;
         }
 
-        return haveMinXalanVersion;
+        return supportsXPath;
+    }
+
+    private static boolean checkJAXPImplementation() {
+        try {
+            Class factoryClass =
+                    Class.forName("javax.xml.parsers.DocumentBuilderFactory");
+            Method newFactory =
+                    factoryClass.getMethod("newInstance", new Class[0]);
+            Object factory = newFactory.invoke(null, new Object[0]);
+            return factory != null;
+        } catch (Throwable t) {
+            return false;
+        }
     }
 
     /**
@@ -436,7 +337,7 @@ public class XML {
          * parser in the classpath, the result for J2ME would be
          * be a NoClassDefFound error (DERBY-2153).
          */
-        if (!classpathHasXalanAndJAXP())
+        if (!classpathHasJAXP())
             return null;
 
         return JAXPFinder.getJAXPParserLocation();

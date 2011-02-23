@@ -22,7 +22,6 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.XML;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -73,17 +72,11 @@ public final class XMLMissingClassesTest extends BaseJDBCTestCase {
      * for use of Derby SQL/XML operators, then just return
      * an empty suite (the operators are tested in a different
      * JUnit test--namely XMLTypeAndOpTests.java).
-     *
-     * NOTE: We do not want to run this test if it has Xalan
-     * but the version of Xalan is not the minimum required.
-     * Attempts to do so can lead to unexpected errors (which
-     * is why we have a "minimum Xalan version" to begin with;
-     * see JDBC.checkXalanVersion()).
      */
     public static Test suite()
     {
         TestSuite suite = new TestSuite("XML Missing Classes Suite");
-        if (!XML.classpathHasXalanAndJAXP())
+        if (!XML.classpathMeetsXMLReqs())
         {
             // Run this test in embedded and client modes.
             suite.addTest(TestConfiguration.defaultSuite(
