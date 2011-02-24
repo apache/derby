@@ -368,6 +368,92 @@ public class BTreeMaxScanTest extends BaseJDBCTestCase {
         commit();
     }
 
+    /**
+     * <p>
+     * Test that B-tree max scans reposition correctly after waiting for a
+     * lock on the last row and detect any new max value inserted while the
+     * scan was waiting for the lock.
+     * </p>
+     *
+     * <p>
+     * <b>Note:</b> Currently, B-tree max scans always take a table lock when
+     * running with serializable isolation level, so the scans in this test
+     * case will not actually be blocked waiting for a row lock. The test case
+     * is added to verify that the scans behave correctly if the lock mode is
+     * changed in the future.
+     * </p>
+     */
+    public void testSerializable() throws Exception {
+        setAutoCommit(false);
+
+        getConnection().
+                setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
+        Statement s = createStatement();
+        s.execute("create table t(x int, y int)");
+        s.execute("insert into t(x) values 0,1,2,3,4,null,null,null");
+        s.execute("create index i on t(x)");
+
+        PreparedStatement ps = prepareStatement(
+                "select max(x) from t --derby-properties index=i");
+
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "4");
+
+        commit();
+
+        // Set up another transaction that holds an exclusive lock on the
+        // row with the max value.
+        final Connection c2 = openDefaultConnection();
+        final Statement s2 = c2.createStatement();
+        c2.setAutoCommit(false);
+        s2.execute("update t set y = x where x = 4");
+
+        final Exception[] exception = new Exception[1];
+
+        Thread t = new Thread() {
+            public void run() {
+                try {
+                    // Wait a little while so that the main thread gets time
+                    // to start the scan and get blocked by the lock on the
+                    // highest row.
+                    Thread.sleep(1000L);
+                    // While the main thread is still blocked, insert a new
+                    // max value.
+                    s2.execute("insert into t(x) values 5");
+                    // Commit, release the locks, and let the main thread
+                    // continue.
+                    c2.commit();
+                } catch (Exception sqle) {
+                    exception[0] = sqle;
+                }
+            }
+        };
+
+        t.start();
+
+        // The two max scans should return the same value since they are
+        // in the same transaction and the isolation level is serializable.
+        // The first scan will be blocked by the lock held by the other
+        // transaction. When it wakes up, it should see the newly inserted
+        // row.
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "5");
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "5");
+        commit();
+
+        t.join();
+        s2.close();
+        c2.rollback();
+        c2.close();
+
+        // Did the other thread fail?
+        if (exception[0] != null) {
+            throw exception[0];
+        }
+
+        dropTable("T");
+        commit();
+    }
+
     // HELPER METHODS
 
     /**
