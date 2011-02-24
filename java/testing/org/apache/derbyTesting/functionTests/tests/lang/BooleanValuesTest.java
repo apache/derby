@@ -1820,6 +1820,42 @@ public class BooleanValuesTest  extends GeneratedColumnsHelper
     }
 
     /**
+     * Verify fix for DERBY-5042, where updateBoolean() and updateObject()
+     * would fail on a BOOLEAN column when using the client driver.
+     */
+    public void test_5042_updateBoolean() throws SQLException {
+        setAutoCommit(false);
+
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                                      ResultSet.CONCUR_UPDATABLE);
+        s.execute("create table derby5042(b boolean, i int, c char(10))");
+
+        ResultSet rs = s.executeQuery("select * from derby5042");
+
+        // Test updateBoolean() on various column types
+        rs.moveToInsertRow();
+        rs.updateBoolean("B", true); // Used to fail with client driver
+        rs.updateBoolean("I", true);
+        rs.updateBoolean("C", true);
+        rs.insertRow();
+
+        // Test updateObject() with a java.lang.Boolean on various column types
+        rs.moveToInsertRow();
+        rs.updateObject("B", Boolean.FALSE); // Used to fail with client driver
+        rs.updateObject("I", Boolean.FALSE);
+        rs.updateObject("C", Boolean.FALSE);
+        rs.insertRow();
+
+        rs.close();
+
+        JDBC.assertFullResultSet(
+                s.executeQuery("select * from derby5042 order by 1,2,3"),
+                new String[][]{
+                    {"false", "0", "false"},
+                    {"true", "1", "true"}});
+    }
+
+    /**
      * Verify fix for DERBY-5063 - updateBytes() should fail when invoked
      * on boolean columns.
      */

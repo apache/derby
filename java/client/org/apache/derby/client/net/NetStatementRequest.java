@@ -722,7 +722,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                         break;
 
                     case DRDAConstants.DRDA_TYPE_NBOOLEAN:
-                        write1Byte(((Short) inputs[i]).shortValue());
+                        writeBoolean(((Boolean) inputs[i]).booleanValue());
                         break;
                     case DRDAConstants.DRDA_TYPE_NINTEGER:
                         writeIntFdocaData(((Integer) inputs[i]).intValue());

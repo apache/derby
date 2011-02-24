@@ -497,7 +497,7 @@ public class PreparedStatement extends Statement
                 }
                 
                 parameterMetaData_.clientParamtertype_[parameterIndex - 1] = java.sql.Types.BIT;
-                setInput(parameterIndex, new Short((short) (x ? 1 : 0)));
+                setInput(parameterIndex, Boolean.valueOf(x));
             }
         }
         catch ( SqlException se )
