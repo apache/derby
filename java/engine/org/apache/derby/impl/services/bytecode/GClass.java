@@ -78,8 +78,6 @@ public abstract class GClass implements ClassBuilder {
 
 		final File classFile = new File(dir,filename);
 
-		// find the error stream
-		HeaderPrintWriter errorStream = Monitor.getStream();
 		FileOutputStream fos = null;
 		try {
 			try {
@@ -97,6 +95,8 @@ public abstract class GClass implements ClassBuilder {
 				bytecode.getOffset(), bytecode.getLength());
 			fos.flush();
 			if (logMessage) {
+		        // find the error stream
+		        HeaderPrintWriter errorStream = Monitor.getStream();
 				errorStream.printlnWithHeader("Wrote class "+getFullName()+" to file "+classFile.toString()+". Please provide support with the file and the following exception message: "+t);
 			}
 			fos.close();

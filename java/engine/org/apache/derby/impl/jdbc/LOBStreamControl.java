@@ -552,8 +552,8 @@ class LOBStreamControl {
     synchronized long replaceBytes (byte [] buf, long stPos, long endPos)
             throws IOException, StandardException {
         long length = getLength();
-        long finalLength = length - endPos + stPos + buf.length;
         if (isBytes) {
+            long finalLength = length - endPos + stPos + buf.length;
             if (finalLength > bufferSize) {
                 byte [] tmpBytes = dataBytes;
                 init (tmpBytes, stPos);

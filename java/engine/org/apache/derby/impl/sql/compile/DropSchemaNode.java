@@ -60,9 +60,6 @@ public class DropSchemaNode extends DDLStatementNode
 
 	public void bindStatement() throws StandardException
 	{
-		
-        LanguageConnectionContext lcc = getLanguageConnectionContext();
-        StatementContext stx = lcc.getStatementContext();
 		/* 
 		** Users are not permitted to drop
 		** the SYS or APP schemas.
@@ -80,6 +77,9 @@ public class DropSchemaNode extends DDLStatementNode
         */
         if (isPrivilegeCollectionRequired())
         {
+            LanguageConnectionContext lcc = getLanguageConnectionContext();
+            StatementContext stx = lcc.getStatementContext();
+            
             String currentUser = stx.getSQLSessionContext().getCurrentUser();
             getCompilerContext().addRequiredSchemaPriv(schemaName, 
                 currentUser,

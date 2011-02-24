@@ -119,15 +119,18 @@ public class EmbedParameterSetMetaData implements EngineParameterMetaData
    		checkPosition(param);
 
 		int outparamPrecision = -1;
-		int precision = DataTypeUtilities.getPrecision(types[param - 1]);
 	   
    		if (((param == 1) && pvs.hasReturnOutputParameter()))
 		{
 			outparamPrecision = pvs.getPrecision(param);
 		}
 
-		return (outparamPrecision == -1) ? precision : outparamPrecision;
+        if (outparamPrecision == -1)
+        {
+            return DataTypeUtilities.getPrecision(types[param - 1]);
+        }
 
+		return outparamPrecision;
     }
 		
 	/**

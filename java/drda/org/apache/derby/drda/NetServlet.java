@@ -85,8 +85,6 @@ public class NetServlet extends HttpServlet {
 		throws ServletException
 	{
 		
-		LocalizedResource langUtil = new LocalizedResource(null,null,SERVLET_PROP_MESSAGES);
-				
 		String port = config.getInitParameter("portNumber");
 		if (port != null) {
 			int p = Integer.parseInt(port);
@@ -124,6 +122,7 @@ public class NetServlet extends HttpServlet {
 			boolean start = Boolean.valueOf(startup).booleanValue();
 			if (start)
 			{
+                LocalizedResource langUtil = new LocalizedResource(null,null,SERVLET_PROP_MESSAGES);
 				runServer(langUtil, null, null);
 				return;
 			}

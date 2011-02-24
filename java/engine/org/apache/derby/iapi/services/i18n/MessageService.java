@@ -128,11 +128,11 @@ public final class MessageService {
 		//figure out client locale from input locale string
 
 		int _pos1 = localeStr.indexOf("_");		// "_" position
-		int _pos2 = localeStr.lastIndexOf("_");
 
 		Locale locale = EN;		//default locale
 		if (_pos1 != -1)
 		{
+		    int _pos2 = localeStr.lastIndexOf("_");
 			String language = localeStr.substring(0, _pos1);
 			if (_pos2 == _pos1)
 			{
