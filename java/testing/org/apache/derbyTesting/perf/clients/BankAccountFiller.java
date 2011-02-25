@@ -147,7 +147,7 @@ public class BankAccountFiller implements DBFiller {
         Statement s = c.createStatement();
 
         s.executeUpdate("CREATE TABLE " + ACCOUNT_TABLE +
-                        "(ACCOUNT_ID INT PRIMARY KEY, " +
+                        "(ACCOUNT_ID INT NOT NULL, " +
                         "BRANCH_ID INT NOT NULL, " +
                         // The balance column must be able to hold 10
                         // digits and sign per TPC-B spec, so BIGINT
@@ -156,7 +156,7 @@ public class BankAccountFiller implements DBFiller {
                         "EXTRA_DATA CHAR(" + ACCOUNT_EXTRA + ") NOT NULL)");
 
         s.executeUpdate("CREATE TABLE " + BRANCH_TABLE +
-                        "(BRANCH_ID INT PRIMARY KEY, " +
+                        "(BRANCH_ID INT NOT NULL, " +
                         // The balance column must be able to hold 10
                         // digits and sign per TPC-B spec, so BIGINT
                         // is needed.
@@ -164,7 +164,7 @@ public class BankAccountFiller implements DBFiller {
                         "EXTRA_DATA CHAR(" + BRANCH_EXTRA + ") NOT NULL)");
 
         s.executeUpdate("CREATE TABLE " + TELLER_TABLE +
-                        "(TELLER_ID INT PRIMARY KEY, " +
+                        "(TELLER_ID INT NOT NULL, " +
                         "BRANCH_ID INT NOT NULL, " +
                         // The balance column must be able to hold 10
                         // digits and sign per TPC-B spec, so BIGINT
@@ -192,6 +192,8 @@ public class BankAccountFiller implements DBFiller {
      */
     private void fillTables(Connection c) throws SQLException {
 
+        Statement s = c.createStatement();
+
         PreparedStatement atIns =
             c.prepareStatement("INSERT INTO " + ACCOUNT_TABLE +
                                "(ACCOUNT_ID, BRANCH_ID, ACCOUNT_BALANCE, " +
@@ -203,6 +205,10 @@ public class BankAccountFiller implements DBFiller {
             atIns.executeUpdate();
         }
         atIns.close();
+
+        s.executeUpdate("ALTER TABLE " + ACCOUNT_TABLE + " ADD CONSTRAINT " +
+                ACCOUNT_TABLE + "_PK PRIMARY KEY (ACCOUNT_ID)");
+
         c.commit();
 
         PreparedStatement btIns =
@@ -215,6 +221,10 @@ public class BankAccountFiller implements DBFiller {
             btIns.executeUpdate();
         }
         btIns.close();
+
+        s.executeUpdate("ALTER TABLE " + BRANCH_TABLE + " ADD CONSTRAINT " +
+                BRANCH_TABLE + "_PK PRIMARY KEY (BRANCH_ID)");
+
         c.commit();
 
         PreparedStatement ttIns =
@@ -228,7 +238,13 @@ public class BankAccountFiller implements DBFiller {
             ttIns.executeUpdate();
         }
         ttIns.close();
+
+        s.executeUpdate("ALTER TABLE " + TELLER_TABLE + " ADD CONSTRAINT " +
+                TELLER_TABLE + "_PK PRIMARY KEY (TELLER_ID)");
+
         c.commit();
+
+        s.close();
     }
 
     /**

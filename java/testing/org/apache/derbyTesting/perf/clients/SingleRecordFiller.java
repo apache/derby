@@ -116,7 +116,7 @@ public class SingleRecordFiller implements DBFiller {
                     withSecIndexColumn, withNonIndexedColumn);
             WisconsinFiller.dropTable(c, tableName);
             s.executeUpdate(
-                    "CREATE TABLE " + tableName + "(ID INT PRIMARY KEY, " +
+                    "CREATE TABLE " + tableName + "(ID INT NOT NULL, " +
                     (withSecIndexColumn ? "SEC INT, " : "") +
                     (withNonIndexedColumn ? "NI INT, " : "") +
                     "TEXT " + dataTypeString + "(" + TEXT_SIZE + "))");
@@ -171,6 +171,9 @@ public class SingleRecordFiller implements DBFiller {
                     c.commit();
                 }
             }
+
+            s.executeUpdate("ALTER TABLE " + tableName + " ADD CONSTRAINT " +
+                    tableName + "_PK PRIMARY KEY (ID)");
 
             if (withSecIndexColumn) {
                 s.executeUpdate(
