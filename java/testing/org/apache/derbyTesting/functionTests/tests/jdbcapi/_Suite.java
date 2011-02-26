@@ -74,7 +74,10 @@ public class _Suite extends BaseTestCase  {
 		suite.addTest(ClosedObjectTest.suite());
 		suite.addTest(SetTransactionIsolationTest.suite());
 		suite.addTest(AuthenticationTest.suite());
-		suite.addTest(DriverTest.suite());
+		if (!JDBC.vmSupportsJSR169()) {
+		    // DERBY-5069 Suites.All fails with InvocationTargetException
+		    suite.addTest(DriverTest.suite());
+		}
 		suite.addTest(SURijTest.suite());
 		suite.addTest(NullSQLTextTest.suite());
 		suite.addTest(PrepStmtNullTest.suite());

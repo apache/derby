@@ -30,6 +30,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.SpawnedProcess;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
@@ -75,6 +76,12 @@ public class Driver40UnbootedTest extends BaseJDBCTestCase
      */
     public static Test suite()
     {
+        if (JDBC.vmSupportsJSR169())
+        {
+            return new TestSuite(
+                "DriverTest tests java.sql.Driver, not supported with JSR169");
+        }
+        
         Test test = TestConfiguration.embeddedSuite(Driver40UnbootedTest.class);
 
         return SecurityManagerSetup.noSecurityManager( test );

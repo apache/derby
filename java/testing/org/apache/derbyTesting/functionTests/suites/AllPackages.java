@@ -148,6 +148,8 @@ public class AllPackages extends BaseTestCase {
                return new TestSuite("SKIPPED: " + className + " - " +
                        cause.getMessage());
             } else {
+                System.err.println("FAILED to invoke " + className);
+                ite.printStackTrace();
                throw ite;
             }
         } catch (ClassNotFoundException ce) { // Do not add a suite not built.
@@ -164,8 +166,14 @@ public class AllPackages extends BaseTestCase {
      * @throws Exception if the suite() method cannot be called or fails
      */
     private static Test invokeSuite(Class klass) throws Exception {
-        Method suite = klass.getMethod("suite", null);
-        return (Test) suite.invoke(null, null);
+        try {
+            Method suite = klass.getMethod("suite", null);
+            return (Test) suite.invoke(null, null);
+        } catch (Exception e) {
+            System.err.println("Failed to invoke class " + klass.getName());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     /**
