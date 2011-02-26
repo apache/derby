@@ -50,6 +50,8 @@
       <classpath>
         <pathelement path="${compile.classpath}"/>
       </classpath>
+      <sourcepath>
+      </sourcepath>
       <include name="${derby.dir}/mbeans/**"/>
     </javac>
   </target>

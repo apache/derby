@@ -74,9 +74,9 @@
     <ant dir="${derby.engine.dir}/iapi/reference"/>
     <ant dir="${derby.engine.dir}/authentication"/>
     <ant dir="${derby.engine.dir}/security"/> 
-  	<ant dir="${derby.engine.dir}/mbeans"/>
     <ant dir="${derby.engine.dir}/io"/>
      <ant dir="${derby.engine.dir}/iapi" target="compile_iapi_error_jsr169"/>
+    <ant dir="${derby.engine.dir}/mbeans"/>
      <ant dir="${derby.engine.dir}/database"/>
      <ant dir="${derby.engine.dir}/impl" target="compile_impl_169"/>
 
