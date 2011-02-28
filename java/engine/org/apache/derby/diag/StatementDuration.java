@@ -265,10 +265,10 @@ public class StatementDuration extends VTITemplate
 				/* Executing prepared statement is a special case as
 				 * it could span multiple lines
 				 */
-				String output;
+				StringBuffer output = new StringBuffer(64);
 				if (line.indexOf(BEGIN_EXECUTING_STRING) == -1)
 				{
-					output = line.substring(line.indexOf(END_XID_STRING, lccidIndex) + 3);
+					output.append(line.substring(line.indexOf(END_XID_STRING, lccidIndex) + 3));
 				}
 				else
 				{
@@ -277,12 +277,12 @@ public class StatementDuration extends VTITemplate
 				int endIndex = line.indexOf(END_EXECUTING_STRING, lccidIndex);
 				if (endIndex == -1)
 				{
-					output = line.substring(line.indexOf(END_XID_STRING, lccidIndex) + 3);
+					output.append(line.substring(line.indexOf(END_XID_STRING, lccidIndex) + 3));
 				}
 				else
 				{
-					output = line.substring(line.indexOf(END_XID_STRING, lccidIndex) + 3,
-											endIndex);
+					output.append(line.substring(line.indexOf(END_XID_STRING, lccidIndex) + 3,
+											endIndex));
 				}
 
 				while (endIndex == -1)
@@ -298,19 +298,16 @@ public class StatementDuration extends VTITemplate
 					endIndex = line.indexOf(END_EXECUTING_STRING);
 					if (endIndex == -1)
 					{
-						output = output + line;
+						output.append(line);
 					}
 					else
 					{
-						output = output + line.substring(0, endIndex);
+						output.append(line.substring(0, endIndex));
 					}
 				}
 				}
 
-				output = StringUtil.truncate(output, Limits.DB2_VARCHAR_MAXWIDTH);
-
-
-				return output;
+				return StringUtil.truncate(output.toString(), Limits.DB2_VARCHAR_MAXWIDTH);
 
 			default:
 				return null;

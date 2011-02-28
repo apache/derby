@@ -530,18 +530,20 @@ public class Level2OptimizerImpl extends OptimizerImpl
 	private String buildJoinOrder(String prefix, boolean addJoinOrderNumber,
 								  int joinOrderNumber, int[] joinOrder)
 	{
-		String joinOrderString = prefix;
+		StringBuffer joinOrderString = new StringBuffer();
+        joinOrderString.append(prefix);
 
 		for (int i = 0; i <= joinPosition; i++)
 		{
-			joinOrderString = joinOrderString + " " + joinOrder[i];
+			joinOrderString.append(" ").append(joinOrder[i]);
 		}
 		if (addJoinOrderNumber)
 		{
-			joinOrderString = joinOrderString + " " + joinOrderNumber;
+			joinOrderString.append(" ").append(joinOrderNumber);
 		}
 
-		return joinOrderString + " with assignedTableMap = " + assignedTableMap + "\n\n";
+        joinOrderString.append(" with assignedTableMap = ").append(assignedTableMap).append("\n\n");
+        return joinOrderString.toString();
 	}
 
 	private String lockModeThreshold(

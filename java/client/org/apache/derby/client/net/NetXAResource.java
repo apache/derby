@@ -746,7 +746,7 @@ public class NetXAResource implements XAResource {
     }
 
     protected void throwXAException(int rc, boolean resetFlag) throws XAException { // ~~~
-        String xaExceptionText;
+        StringBuffer xaExceptionText = new StringBuffer(64);
         if (resetFlag) {
             // reset the state of the failed connection
             NetXACallInfo callInfo = callInfoArray_[conn_.currXACallInfoOffset_];
@@ -754,19 +754,19 @@ public class NetXAResource implements XAResource {
             callInfo.xaWasSuspended = false;
         }
 
-        xaExceptionText = getXAExceptionText(rc);
+        xaExceptionText.append(getXAExceptionText(rc));
         // save the SqlException chain to add it to the XAException
         org.apache.derby.client.am.SqlException sqlExceptions = exceptionsOnXA;
 
         while (exceptionsOnXA != null) { // one or more SqlExceptions received, format them
-            xaExceptionText = xaExceptionText + " : " + exceptionsOnXA.getMessage();
+            xaExceptionText.append(" : ").append(exceptionsOnXA.getMessage());
             exceptionsOnXA = (org.apache.derby.client.am.SqlException)
                     exceptionsOnXA.getNextException();
         }
         org.apache.derby.client.am.XaException xaException =
                 new org.apache.derby.client.am.XaException(conn_.agent_.logWriter_,
                         sqlExceptions,
-                        xaExceptionText);
+                        xaExceptionText.toString());
         xaException.errorCode = rc;
         setXaStateForXAException(rc); 
         throw xaException;

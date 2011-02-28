@@ -4495,10 +4495,11 @@ class DRDAConnThread extends Thread {
 						trace("numVars = " + numVars);
 					if (ps == null)		// it is a CallableStatement under construction
 					{
-						String marks = "(?";	// construct parameter marks
+						StringBuffer marks = new StringBuffer();	// construct parameter marks
+                        marks.append("(?");
 						for (int i = 1; i < numVars; i++)
-							marks += ", ?";
-						String prepareString = "call " + stmt.procName + marks + ")";
+							marks.append(", ?");
+						String prepareString = "call " + stmt.procName + marks.toString() + ")";
 						if (SanityManager.DEBUG) 
 							trace ("$$ prepareCall is: "+prepareString);
 						CallableStatement cs = null;

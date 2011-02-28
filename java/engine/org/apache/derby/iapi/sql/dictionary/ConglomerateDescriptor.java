@@ -307,24 +307,24 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 	{
 		if (SanityManager.DEBUG)
 		{
-			String keyString = "";
+			StringBuffer keyString = new StringBuffer();
 
 			if (indexable && columnNames != null )
 			{
 				int[] keyColumns = indexRowGenerator.baseColumnPositions();
 
-				keyString = ", key columns = {" + columnNames[keyColumns[0] - 1];
+				keyString.append(", key columns = {").append(columnNames[keyColumns[0] - 1]);
 				for (int index = 1; index < keyColumns.length; index++)
 				{
-					keyString = keyString + ", " + columnNames[keyColumns[index] - 1];
+					keyString.append(", ").append(columnNames[keyColumns[index] - 1]);
 				}
-				keyString = keyString + "}";
+				keyString.append("}");
 			}
 
 			return "ConglomerateDescriptor: conglomerateNumber = " + conglomerateNumber +
 				" name = " + name +
 				" uuid = " + uuid +
-				" indexable = " + indexable + keyString;
+				" indexable = " + indexable + keyString.toString();
 		}
 		else
 		{

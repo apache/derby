@@ -238,21 +238,19 @@ public abstract class ArrayUtil
 
     public static String toString(int[] value)
     {
-        String ret_val;
-
         if (value == null || value.length == 0)
         {
-            ret_val = "null";
+            return "null";
         }
         else
         {
-            ret_val = "";
+            StringBuffer ret_val = new StringBuffer();
             for (int i = 0; i < value.length; i++)
             {
-                ret_val += "[" + value[i] + "],";
+                ret_val.append("[").append(value[i]).append("],");
             }
+            return ret_val.toString();
         }
-        return(ret_val);
     }
 
 

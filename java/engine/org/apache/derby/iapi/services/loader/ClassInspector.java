@@ -737,20 +737,20 @@ nextMethod:	for (int i = 0; i < methods.length; i++) {
 		if (ambiguous)
 		{
 			/* Put the parameter type names into a single string */
-			String	parmTypesString = "";
+			StringBuffer parmTypesString = new StringBuffer();
 			for (int i = 0; i < paramClasses.length; i++)
 			{
 				if (i != 0)
-					parmTypesString += ", ";
-				parmTypesString += (paramClasses[i] == null ? "null" : paramClasses[i].getName());
+					parmTypesString.append(", ");
+				parmTypesString.append(paramClasses[i] == null ? "null" : paramClasses[i].getName());
 				if (primParamClasses != null && primParamClasses[i] != null)
-					parmTypesString += "(" + primParamClasses[i].getName() + ")";
+					parmTypesString.append("(").append(primParamClasses[i].getName()).append(")");
 			}
 
 			throw StandardException.newException(SQLState.LANG_AMBIGUOUS_METHOD_INVOCATION, 
 												receiverClass.getName(), 
 												methodName,
-												parmTypesString);
+												parmTypesString.toString());
 		}
 
 		if (candidateIndex == -1)

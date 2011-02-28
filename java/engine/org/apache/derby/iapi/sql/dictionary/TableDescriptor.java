@@ -822,7 +822,8 @@ public class TableDescriptor extends TupleDescriptor
 			return tableName;
 		else
 		{
-			String name = new String(tableName);
+			StringBuffer name = new StringBuffer();
+            name.append(tableName);
 			boolean first = true;
 
 			for (int i = 0; i < columnDescriptorList.size(); i++)
@@ -832,16 +833,16 @@ public class TableDescriptor extends TupleDescriptor
 				{
 					if (first)
 					{
-						name += "(" + cd.getColumnName();
+						name.append("(").append(cd.getColumnName());
 						first = false;
 					}
 					else
-						name += ", " + cd.getColumnName();
+						name.append(", ").append(cd.getColumnName());
 				}
 			}
 			if (! first)
-				name += ")";
-			return name;
+				name.append(")");
+			return name.toString();
 		}
 	}
 

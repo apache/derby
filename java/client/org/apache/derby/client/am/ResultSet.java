@@ -4558,17 +4558,17 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         // For Derby, eg update t1 set c1=?, c2=? where current of cursorname
         boolean foundOneUpdatedColumnAlready = false;
-        String updateString = "UPDATE " + getTableName() + " SET ";
+        StringBuffer updateString = new StringBuffer(64);
+        updateString.append("UPDATE ").append(getTableName()).append(" SET ");
 
         for (column = 1; column <= resultSetMetaData_.columns_; column++) {
             if (columnUpdated_[column - 1]) {
                 if (foundOneUpdatedColumnAlready) {
-                    updateString += ",";
+                    updateString.append(",");
                 }
                 try {
-                    updateString += quoteSqlIdentifier(
-                            resultSetMetaData_.getColumnName(column)) + 
-                            " = ? ";
+                    updateString.append(quoteSqlIdentifier(
+                            resultSetMetaData_.getColumnName(column))).append(" = ? ");
                 } catch ( SQLException sqle ) {
                     throw new SqlException(sqle);
                 }
@@ -4580,13 +4580,13 @@ public abstract class ResultSet implements java.sql.ResultSet,
         {
             return null;
         }
-        updateString = updateString + " WHERE CURRENT OF " + getServerCursorName();
+        updateString.append(" WHERE CURRENT OF ").append(getServerCursorName());
 
         if (isRowsetCursor_) {
-            updateString += " FOR ROW ? OF ROWSET";
+            updateString.append(" FOR ROW ? OF ROWSET");
         }
 
-        return updateString;
+        return updateString.toString();
     }
 
     private String buildDeleteString() throws SqlException {
@@ -4644,13 +4644,15 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     private String quoteSqlIdentifier(String orgValue) {
         int i = 0, start = 0;
-        String retValue = "";
+        StringBuffer retValue = new StringBuffer();
+        retValue.append("\"");
         while ((i = orgValue.indexOf("\"", start) + 1) > 0) {
-            retValue += orgValue.substring(start, i) + "\"";
+            retValue.append(orgValue.substring(start, i)).append("\"");
             start = i;
         }
-        retValue += orgValue.substring(start, orgValue.length());
-        return "\"" + retValue + "\"";
+        retValue.append(orgValue.substring(start, orgValue.length()));
+        retValue.append("\"");
+        return retValue.toString();
     }
     
     private String getServerCursorName() throws SqlException {
