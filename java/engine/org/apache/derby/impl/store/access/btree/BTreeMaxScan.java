@@ -100,8 +100,11 @@ public class BTreeMaxScan extends BTreeScan
             return true;
         } catch (WaitError we) {
             // We couldn't get the latch without waiting. Let's save the
-            // position and let the caller retry.
-            //
+            // position and let the caller retry. But first, let's save the
+            // page number of the left sibling so that we can try again to
+            // get the latch after we've saved the position.
+            long left = scan_position.current_leaf.getleftSiblingPageNumber();
+
             // If the page is empty, there is no position to save. Since
             // positionAtPreviousPage() skips empty pages mid-scan, we know
             // that an empty page seen here must be the rightmost leaf. In
@@ -115,6 +118,20 @@ public class BTreeMaxScan extends BTreeScan
                 // slot 1, since slot 0 is the control row.
                 scan_position.current_slot = 1;
                 savePositionAndReleasePage();
+            }
+
+            // There's no point in attempting to reposition too early, as we're
+            // likely to hit the same WaitError again (and again). So instead
+            // let's sleep here until the left sibling page has been released,
+            // and then return to let the caller reposition and retry.
+            Page leftPage = container.getPage(left);
+            if (leftPage != null) {
+                // Got the latch. Anything may have happened while we didn't
+                // hold any latches, so we don't know if we're still supposed
+                // to go to that page. Just release the latch and let the
+                // caller reposition to the right spot in the B-tree.
+                leftPage.unlatch();
+                leftPage = null;
             }
 
             return false;
