@@ -33,7 +33,7 @@ with real information.
     E.g.: 10.2.1.7
 
 -->
-<previousReleaseID>10.6.2.1</previousReleaseID>
+<previousReleaseID>10.7.1.1</previousReleaseID>
 
 <!--
     Identifier(s) of previously released versions. Any issue that was fixed in
@@ -116,15 +116,13 @@ This is a feature release. The following new features were added:
 
 <ul>
 
-<li><b>Definer's rights</b> - Procedures and functions can now run with their creators' privileges, rather than with the current user's permissions.</li>
+<li><b>JDBC 4.1</b> - Derby's JDBC drivers support the new Java 7 methods on <i>java.sql</i> and <i>javax.sql</i> interfaces.</li>
 	
-<li><b>BOOLEAN data type</b> - Boolean is now a legal data type for columns, routine arguments, and function return values.</li>
+<li><b>Automatic calculation of index stats</b> - Derby recalculates optimizer statistics on tables whose statistics have grown stale.</li>
 	
-<li><b>Table truncation</b> - A new TRUNCATE TABLE command drops all rows in a table quickly.</li>
+<li><b>Improved interrupt handling </b> - Thread interrupts no longer crash the Derby engine.</li>
 	
-<li><b>Query plan browsing</b> - A new PlanExporter tool helps developers visualize query plans better.</li>
-
-<li><b>Unicode database names</b> - Remote clients can now use database names which include Unicode characters outside the ASCII codeset.</li>
+<li><b>MAX optimization</b> - On indexed tables, MAX queries run faster in more cases.</li>
 
 </ul>
 
