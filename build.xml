@@ -259,7 +259,7 @@
     <!-- 
             If a 1.4 JDK is not present, then use the Java 5 environment to build the 1.4 support
     -->
-    <property name="java14compile.classpath" value="${java15compile.classpath}:${xalan}:${serializer}"/>
+    <property name="java14compile.classpath" value="${java15compile.classpath}"/>
 
     <property file="${properties.dir}/compilepath.properties"/>
     <!-- Release and version info -->
@@ -1113,7 +1113,7 @@
         access="private"
         breakiterator="yes"
         useexternalfile="yes"
-        classpath="${out.dir};${java16compile.classpath};${jars.extras};${osgi}:${xalan}:${serializer}"
+        classpath="${out.dir};${java16compile.classpath};${jars.extras};${osgi}"
         destdir="${out.javadoc.dir}/engine"
         windowtitle="Apache Derby V${major}.${minor} Internals"
         doctitle="Apache Derby V${major}.${minor} Internals"
