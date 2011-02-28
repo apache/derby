@@ -148,7 +148,6 @@ public class CreateIndexNode extends DDLStatementNode
 	public void bindStatement() throws StandardException
 	{
 		CompilerContext			cc = getCompilerContext();
-		DataDictionary			dd = getDataDictionary();
 		SchemaDescriptor		sd;
 		int						columnCount;
 
