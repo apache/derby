@@ -81,7 +81,8 @@ public class Configuration {
     public final static boolean jdbcCompliant = true;
 
     // for Driver.getCompatibileJREVersions()
-    public final static String[] dncCompatibleJREVersions = new String[]{"1.3", "1.4"};
+    public final static String[] dncCompatibleJREVersions =
+            {"1.4", "1.5", "1.6"};
 
     //---------------------- database URL protocols ------------------------------
 
