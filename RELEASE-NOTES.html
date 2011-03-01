@@ -95,7 +95,7 @@ This is a feature release. The following new features were added:
 	
 
 <li>
-<b>Improved interrupt handling </b> - Thread interrupts no longer crash the Derby engine.</li>
+<b>Improved interrupt handling </b> - Interrupting connection threads no longer crashes the Derby engine.</li>
 	
 
 <li>
@@ -115,6 +115,12 @@ This is a feature release. The following new features were added:
 <td><b>Issue Id</b></td><td><b>Description</b></td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5078">DERBY-5078</a></td><td>Incorrect list of compatible JRE versions in client trace</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5076">DERBY-5076</a></td><td>[patch] move instanceof check up above where casts occur</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5069">DERBY-5069</a></td><td>Since Feb 7,2011 weme 6.2 Junit tests have failed to run completely with Failed to invoke suite():java.lang.reflect.InvocationTargetException</td>
 </tr>
 <tr>
@@ -128,6 +134,9 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5060">DERBY-5060</a></td><td>[patch] use collection apis</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5056">DERBY-5056</a></td><td>Incorrect statement in reference manual about memory requirement when streaming columns</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5055">DERBY-5055</a></td><td>[patch] add visibility to static method calls</td>
@@ -173,6 +182,9 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5028">DERBY-5028</a></td><td>InterruptResilienceTest passes with IBM 1.6 SR9 but creates javacore dumps</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5024">DERBY-5024</a></td><td>Document the behavior of interrupt handling.</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5023">DERBY-5023</a></td><td>Cannot find Ant libraries when building from NetBeans</td>
@@ -415,35 +427,42 @@ This is a feature release. The following new features were added:
 <li>
 <a href="#Note for DERBY-4965">
 <p>Note for DERBY-4965: 
-JDBC-level conversion from BOOLEAN to CHAR changed
+The JDBC-level conversion from BOOLEAN to CHAR has changed.
+</p>
+</a>
+</li>
+<li>
+<a href="#Note for DERBY-4963">
+<p>Note for DERBY-4963: 
+Interrupt resilience may degrade the performance of writes on some platforms.
 </p>
 </a>
 </li>
 <li>
 <a href="#Note for DERBY-4856">
 <p>Note for DERBY-4856: 
-On experiencing a system crash or session error, Derby will print as much diagnostic information as possible to the Derby error log, including stack traces of all threads.i.e. Users will find thread dump information with error severity higher than session error in the Derby error log. It is also possible to get thread dump and diagnostic information for errors with lower severity by adjusting a property.
+Diagnostics for system crashes and session errors have been expanded.
 </p>
 </a>
 </li>
 <li>
 <a href="#Note for DERBY-4614">
 <p>Note for DERBY-4614: 
-The precision and scale of Timestamps, reported by JDBC metadata, has changed.
+JDBC metadata reports longer precision and scale for Timestamps.
 </p>
 </a>
 </li>
 <li>
 <a href="#Note for DERBY-2905">
 <p>Note for DERBY-2905: 
-After a shutdown of the embedded driver, the AutoloadedDriver is unregistered from the DriverManager. Users who wish to keep the AutoloadedDriver can set the deregister attribute on the connection url to false. The default behavior is to unregister AutoloadedDriver from DriverManager (deregister=true).
+Engine shutdown now deregisters the embedded JDBC driver.
 </p>
 </a>
 </li>
 <li>
 <a href="#Note for DERBY-2739">
 <p>Note for DERBY-2739: 
-Requirements for XML operators have changed
+The requirements for XML operators have changed.
 </p>
 </a>
 </li>
@@ -465,7 +484,7 @@ Requirements for XML operators have changed
 <h4>Summary of Change</h4>
 
 <p>
-JDBC-level conversion from BOOLEAN to CHAR changed
+The JDBC-level conversion from BOOLEAN to CHAR has changed.
 </p>
 
 
@@ -588,7 +607,7 @@ in order to preserve the old behavior.
 </blockquote>
 <hr>
 <h3>
-<a name="Note for DERBY-4856"></a>Note for DERBY-4856</h3>
+<a name="Note for DERBY-4963"></a>Note for DERBY-4963</h3>
 <blockquote>
 
 <!-- 
@@ -603,7 +622,7 @@ in order to preserve the old behavior.
 <h4>Summary of Change</h4>
 
 <p>
-On experiencing a system crash or session error, Derby will print as much diagnostic information as possible to the Derby error log, including stack traces of all threads.i.e. Users will find thread dump information with error severity higher than session error in the Derby error log. It is also possible to get thread dump and diagnostic information for errors with lower severity by adjusting a property.
+Interrupt resilience may degrade the performance of writes on some platforms.
 </p>
 
 
@@ -623,7 +642,8 @@ On experiencing a system crash or session error, Derby will print as much diagno
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-If errors have error severity level greater or equal than value derby.stream.error.extendedDiagSeverityLevel is set, thread dump information and extened diagnostic information will be printed by Derby. Users can find thread dump information in the Derby error log. For IBM JVM users, a javacore file will be created.
+In Derby 10.8, INSERTs and UPDATEs may run slower on platforms which
+do not support write synchronization. Solaris/JDK5 is one of these platforms.
 </p>
 
 
@@ -640,7 +660,11 @@ If errors have error severity level greater or equal than value derby.stream.err
 <h4>Incompatibilities with Previous Release</h4>
 
 <p>
-None
+On some platforms, INSERTs and UPDATEs may run slower than they did in
+previous Derby releases.  Changes needed for interrupt resilience may cause extra io calls on platforms
+which do not support the "rws"/"rwd" modes in the constructor for
+<a href="http://download.oracle.com/javase/6/docs/api/java/io/RandomAccessFile.html#RandomAccessFile%28java.io.File,%20java.lang.String%29">RandomAccessFile(File,String)</a>
+
 </p>
 
 
@@ -657,7 +681,8 @@ None
 <h4>Rationale for Change</h4>
 
 <p>
-The intention of the change to get more detail information related to the status of Derby when important errors happen, "important" by default meaning errors with session severity and higher. This will help users, DBAs and support personnel to dertermine the exact cause of the error condition or system crash.
+Derby's log flushing logic was changed to prevent Thread interrupts
+from crashing the engine.
 </p>
 
 
@@ -674,9 +699,131 @@ The intention of the change to get more detail information related to the status
 <h4>Application Changes Required</h4>
 
 <p>
-Users do not need to change anything for this change. If more thread dump information is required for errors that have severity level less than session error, the property derby.stream.error.extendedDiagSeverityLevel can be set. Please refer to <a href="http://db.apache.org/derby/docs/10.7/devguide/cdevsetprop16827.html">Derby system property</a> For example, if there is a deadlock issue and users would like to see thread dump information while the deadlock is happening, users can then set derby.stream.error.extendedDiagSeverityLevel=30000. The diagnostics and the thread dump information is found in the Derby error log. derby.stream.error.extendedDiagSeverityLevel=30000 means that extra diagnostics and thread dump will be activated for errors with severity equal to or higher than transaction severity (30000). Please consult the Derby documentation for explanation of error severity and for other possible settings of extenedDiagSeverityLevel.
+Upgrade the JVM to JDK 6 or higher if your
+application suffers slower INSERTs/UPDATEs after upgrading
+to Derby 10.8.
 </p>
 
+
+
+</blockquote>
+<hr>
+<h3>
+<a name="Note for DERBY-4856"></a>Note for DERBY-4856</h3>
+<blockquote>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+Diagnostics for system crashes and session errors have been expanded.
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+After a severe error (system crash or session error), the Derby error log will snapshot
+stack traces for all threads. On IBM
+JVMs these errors will produce a javacore file too.
+</p>
+
+
+<p>
+To obtain thread dumps and diagnostics for
+less severe errors, adjust the
+<i>derby.stream.error.extendedDiagSeverityLevel</i> property as
+described in the
+<a href="http://db.apache.org/derby/docs/10.7/devguide/cdevsetprop16827.html">Setting system-wide properties</a>
+section of the Derby Developer's Guide.
+Please consult the Derby documentation for explanations of
+error severities and the other possible settings of
+<i>extendedDiagSeverityLevel</i>.
+</p>
+
+
+<p>
+For example, to obtain this extra information while diagnosing deadlocks, set
+<tt>derby.stream.error.extendedDiagSeverityLevel=30000</tt>. Then
+deadlocks will dump thread stacks into the Derby
+error log. 
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+None.
+</p>
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+This change gives DBAs and tech support engineers more information to
+help them diagnose errors and crashes.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+No application changes are required. To disable this
+feature, simply set
+the <i>derby.stream.error.extendedDiagSeverityLevel</i> property to
+the value 50001.
+</p>
 
 
 </blockquote>
@@ -697,7 +844,7 @@ Users do not need to change anything for this change. If more thread dump inform
 <h4>Summary of Change</h4>
 
 <p>
-The precision and scale of Timestamps, reported by JDBC metadata, has changed.
+JDBC metadata reports longer precision and scale for Timestamps.
 </p>
 
 
@@ -719,8 +866,7 @@ The precision and scale of Timestamps, reported by JDBC metadata, has changed.
 <p>
 Previously, JDBC metadata calls reported that Derby Timestamps had
 precision 26 and scale 6. Now the precision of Timestamps is 29 and
-the scale is 9. The following metadata
-have been corrected:
+the scale is 9. The following metadata were corrected:
 </p>
 
 
@@ -820,7 +966,7 @@ verify that they correctly handle the longer lengths.
 <h4>Summary of Change</h4>
 
 <p>
-After a shutdown of the embedded driver, the AutoloadedDriver is unregistered from the DriverManager. Users who wish to keep the AutoloadedDriver can set the deregister attribute on the connection url to false. The default behavior is to unregister AutoloadedDriver from DriverManager (deregister=true).
+Engine shutdown now deregisters the embedded JDBC driver.
 </p>
 
 
@@ -840,7 +986,11 @@ After a shutdown of the embedded driver, the AutoloadedDriver is unregistered fr
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-Application that have seen problems due to the AutoloadedDriver remaining registered should no longer see the associated leaks. Applications that had worked around the issue by calling DriverManager.deregister(driver) should remove the work around code.
+In release 10.1, orderly engine shutdown unregistered the embedded
+JDBC driver, allowing the JVM to garbage-collect the Derby
+classes. Later releases (10.2 through 10.7) did not unregister the
+driver. 10.8 revives the 10.1 behavior. In 10.8, orderly engine
+shutdown unregisters the embedded JDBC driver.
 </p>
 
 
@@ -857,7 +1007,7 @@ Application that have seen problems due to the AutoloadedDriver remaining regist
 <h4>Incompatibilities with Previous Release</h4>
 
 <p>
-None
+None.
 </p>
 
 
@@ -874,7 +1024,8 @@ None
 <h4>Rationale for Change</h4>
 
 <p>
-After a shutdown of the embedded driver, the AutoloadDriver was not unregistered from the DriverManager preventing garage collection of the Derby classes. The change allows shutdown to completely remove Derby but provides an attribute to keep the AutoloadedDriver loaded if that is the desired behavior. 
+The 10.1 behavior has been revived so that the JVM can 
+garbage-collect the Derby classes after orderly engine shutdown.
 </p>
 
 
@@ -891,7 +1042,9 @@ After a shutdown of the embedded driver, the AutoloadDriver was not unregistered
 <h4>Application Changes Required</h4>
 
 <p>
-If users prefer the autoloading behavior after engine shutdown, they need to set the deregister=false attribute when shutting down Derby. Please refer to <a href="http://db.apache.org/derby/docs/dev/ref/rrefattrib24612.html">Derby Attribute Setting</a> Applications that had worked around the issue by calling DriverManager.deregister(driver) should remove the work around code.
+Applications no longer need to call
+<tt>DriverManager.deregister(driver)</tt> in order to enable garbage-collection of
+the Derby classes after orderly engine shutdown.
 </p>
 
 
@@ -914,7 +1067,7 @@ If users prefer the autoloading behavior after engine shutdown, they need to set
 <h4>Summary of Change</h4>
 
 <p>
-Requirements for XML operators have changed
+The requirements for XML operators have changed.
 </p>
 
 
@@ -935,10 +1088,9 @@ Requirements for XML operators have changed
 
 
 <p>
-Applications that use any of the XML operators
-(<tt>XMLPARSE</tt>, <tt>XMLSERIALIZE</tt>, <tt>XMLQUERY</tt>
-or <tt>XMLEXISTS</tt>) may fail with the following error message after
-upgrading to Derby 10.8:
+After upgrading to Derby 10.8, applications may fail if they use the
+XMLPARSE, XMLSERIALIZE, XMLQUERY,
+and XMLEXISTS operators. Using those operators may raise the following error message:
 </p>
 
 
@@ -948,10 +1100,18 @@ ERROR XML00: Failed to locate 'XPath 3.0' API or implementation classes.  XML op
 
 
 <p>
-This happens if the Java Runtime Environment doesn't have
-the <a href="http://www.w3.org/TR/DOM-Level-3-XPath/">DOM Level 3
-XPath</a> interfaces or an implementation of those interfaces on the
-classpath.
+This happens if the classpath doesn't include
+the
+<a href="http://www.w3.org/TR/DOM-Level-3-XPath/">DOM Level 3 XPath</a>
+interfaces or an implementation of those interfaces.
+</p>
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+On Java 5 and earlier JVMs, the XMLPARSE, XMLSERIALIZE, XMLQUERY,
+and XMLEXISTS operators may fail as described above.
 </p>
 
 <!-- 
@@ -978,7 +1138,7 @@ work out of the box on many platforms.
 
 <p>
 In this release, the XML operators access the platform's XML libraries
-via the <tt>javax.xml</tt> and <tt>org.w3c.dom</tt> interfaces instead
+via the <i>javax.xml</i> and <i>org.w3c.dom</i> interfaces instead
 of accessing the Xalan implementation classes directly. This change
 makes the XML operators work out of the box on most Java SE 6 or later
 platforms, but may break the functionality on older platforms that
@@ -999,16 +1159,16 @@ don't contain all the required interfaces.
 
 
 <p>
-In environments affected by this change, the XML operators can be made
-working again either by upgrading the JVM (IBM's versions 1.5.0 and
-1.6.0 and Oracle's version 1.6.0 are known to work), or by installing
+In environments affected by this change, the XML operators can be fixed
+by upgrading the JVM (IBM's versions 1.5.0 and
+1.6.0 and Oracle's version 1.6.0 are known to work) or by installing
 a recent version of Apache Xalan-Java.
 </p>
 
 
 <p>
 Installation of Xalan-Java may require the Endorsed Standards Override
-Mechanism to be used. This is described in the "XML data types and
+Mechanism. This is described in the "XML data types and
 operators" section of the Derby Developer's Guide.
 </p>
 
