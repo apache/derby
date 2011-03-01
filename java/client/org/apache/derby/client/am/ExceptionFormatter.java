@@ -40,19 +40,19 @@ public class ExceptionFormatter {
                 if (throwable != null) {
                     printTrace(throwable, printWriter, header);
                 }
-                Sqlca sqlca = ((Diagnosable) e).getSqlca();
+                Sqlca sqlca = e.getSqlca();
                 if (sqlca != null) {
                     printTrace(sqlca, printWriter, header);
                     // JDK stack trace calls e.getMessage(), so we must set some state on the sqlca that says return tokens only.
-                    ((Sqlca) sqlca).returnTokensOnlyInMessageText(returnTokensOnly);
+                    sqlca.returnTokensOnlyInMessageText(returnTokensOnly);
                 }
 
                 printWriter.println(header + " SQL state  = " + e.getSQLState());
                 printWriter.println(header + " Error code = " + String.valueOf(e.getErrorCode()));
-                if (((Diagnosable) e).getSqlca() == null) { // Too much has changed, so escape out here.
+                if (e.getSqlca() == null) { // Too much has changed, so escape out here.
                     printWriter.println(header + " Message    = " + e.getMessage());
                 } else { // This is server-side error.
-                    sqlca = ((Diagnosable) e).getSqlca();
+                    sqlca = e.getSqlca();
                     if (returnTokensOnly) {
                         // print message tokens directly.
                         printWriter.println(header + " Tokens     = " + sqlca.getSqlErrmc()); // a string containing error tokens only
@@ -81,13 +81,11 @@ public class ExceptionFormatter {
                 printWriter.println(header + " Stack trace follows");
                 e.printStackTrace(printWriter);
 
-                if (e instanceof Diagnosable) {
-                    sqlca = (Sqlca) ((Diagnosable) e).getSqlca();
-                    if (sqlca != null) {
-                        // JDK stack trace calls e.getMessage(), now that it is finished,
-                        // we can reset the state on the sqlca that says return tokens only.
-                        sqlca.returnTokensOnlyInMessageText(false);
-                    }
+                sqlca = e.getSqlca();
+                if (sqlca != null) {
+                    // JDK stack trace calls e.getMessage(), now that it is finished,
+                    // we can reset the state on the sqlca that says return tokens only.
+                    sqlca.returnTokensOnlyInMessageText(false);
                 }
 
                 e = e.getNextException();
