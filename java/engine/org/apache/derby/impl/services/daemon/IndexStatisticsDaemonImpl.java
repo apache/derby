@@ -131,8 +131,6 @@ public class IndexStatisticsDaemonImpl
     /** Tells if the daemon has been disabled. */
     // @GuardedBy("queue")
     private boolean daemonDisabled;
-    /** Tells if the daemon has been stopped. */
-    private volatile boolean daemonStopped;
     /** The context manager for the worker thread. */
     private final ContextManager ctxMgr;
     /** The language connection context for the worker thread. */
@@ -388,8 +386,12 @@ public class IndexStatisticsDaemonImpl
     /** Return true if we are being shutdown */
     private boolean isShuttingDown( LanguageConnectionContext lcc )
     {
-        if ( daemonStopped ) { return true; }
-        else { return !lcc.getDatabase().isActive(); }
+        synchronized (queue) {
+            if (daemonDisabled ){
+                return true;
+            }
+        }
+        return !lcc.getDatabase().isActive();
     }
     
     /**
@@ -849,9 +851,8 @@ public class IndexStatisticsDaemonImpl
      * first time the method is invoked.
      */
     public void stop() {
-        if (!daemonStopped) {
-            daemonStopped = true;
-            synchronized (queue) {
+        synchronized (queue) {
+            if (!daemonDisabled) {
                 StringBuffer sb = new StringBuffer(100);
                 sb.append("stopping daemon, active=").
                         append(runningThread != null).

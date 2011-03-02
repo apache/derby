@@ -970,9 +970,10 @@ public final class	DataDictionaryImpl
     public void stop() {
         // Shut down the index statistics refresher, mostly to make it print
         // processing stats
+        // Not sure if the reference can be null here, but it may be possible
+        // if multiple threads are competing to boot and shut down the db.
         if (indexRefresher != null) {
             indexRefresher.stop();
-            indexRefresher = null;
         }
     }
 
