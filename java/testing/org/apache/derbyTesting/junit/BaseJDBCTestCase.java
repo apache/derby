@@ -1468,19 +1468,49 @@ public abstract class BaseJDBCTestCase
      * <p>
      * This method will attempt to delete all the files inside the root
      * directory, even if one of the delete operations fails.
+     * <p>
+     * After having tried to delete all files once, any remaining files will be
+     * attempted deleted again after a pause. This is repeated twice, resulting
+     * in three failed delete attempts for any single file before the method
+     * gives up and raises a failure.
+     * <p>
+     * The approach above will mask any slowness involved in releasing file
+     * handles, but should fail if a file handle actually isn't released on a
+     * system that doesn't allow deletes on files with open handles (i.e.
+     * Windows). It will also mask slowness caused by the JVM, the file system,
+     * or the operation system.
      *
      * @param dir the root to start deleting from (root will also be deleted)
      */
     public static void assertDirectoryDeleted(File dir) {
         File[] fl = null;
-        try {
-            fl = PrivilegedFileOpsForTests.persistentRecursiveDelete(dir);
-        } catch (FileNotFoundException fnfe) {
-            fail("directory doesn't exist: " +
-                    PrivilegedFileOpsForTests.getAbsolutePath(dir));
-        }
-        if (fl.length == 0) {
-            return;
+        int attempts = 0;
+        while (attempts < 3) {
+            try {
+                fl = PrivilegedFileOpsForTests.persistentRecursiveDelete(dir);
+                attempts++;
+            } catch (FileNotFoundException fnfe) {
+                fail("directory doesn't exist: " +
+                        PrivilegedFileOpsForTests.getAbsolutePath(dir));
+            }
+            if (fl.length == 0) {
+                return;
+            } else {
+                // Print the list of remaining files to stdout for debugging.
+                StringBuffer sb = new StringBuffer();
+                sb.append("<assertDirectoryDeleted> attempt ").append(attempts).
+                        append(" left ").append(fl.length).
+                        append(" files/dirs behind:");
+                for (int i=0; i < fl.length; i++) {
+                    sb.append(' ').append(i).append('=').append(fl[i]);
+                }
+                System.out.println(sb);
+                try {
+                    Thread.sleep(attempts * 1000);
+                } catch (InterruptedException ie) {
+                    // Ignore
+                }
+            }
         }
 
         // If we failed to delete some of the files, list them and obtain some

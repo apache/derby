@@ -116,25 +116,9 @@ class DropDatabaseSetup extends BaseTestSetup {
         if (!dir.exists())
             return;
 
-        String[] list = dir.list();
-
-        // Some JVMs return null for File.list() when the
-        // directory is empty.
-        if (list != null) {
-            for (int i = 0; i < list.length; i++) {
-                File entry = new File(dir, list[i]);
-
-                if (entry.isDirectory()) {
-                    removeDir(entry);
-                } else {
-                    assertTrue(entry.getPath(), entry.delete());
-                }
-            }
-        }
-
-        assertTrue(dir.getPath(), dir.delete());
+        BaseJDBCTestCase.assertDirectoryDeleted(dir);
     }
-    
+
     /**
      * Remove all the files in the list
      * @param list the list of files that will be deleted
