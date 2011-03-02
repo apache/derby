@@ -384,7 +384,9 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
 
                 Random rnd = new Random();
 
-                for (long ops = 0; ops < noOps; ops++) {
+                int retries = 0;
+
+                for (long ops = 0; ops < noOps + retries; ops++) {
 
                     if (readertest) {
                         // Arbitrarily select one of the rows int the tables to
@@ -414,6 +416,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                                 s = c.prepareStatement(pStmtText);
                                 assertTrue(interrupted());
                                 interruptsSeen++;
+                                retries++;
                                 continue;
                             } else {
                                 throw new Exception("expected 08000, saw" + e);
@@ -440,6 +443,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                                 s = c.prepareStatement(pStmtText);
                                 assertTrue(interrupted());
                                 interruptsSeen++;
+                                retries++;
                                 continue;
                             } else {
                                 throw new Exception("expected 08000, saw" + e);
