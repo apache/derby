@@ -741,6 +741,7 @@ public class IndexStatisticsDaemonImpl
                         tc = null;
                         daemonLCC = null;
                         queue.clear();
+                        break;
                     }
                     if (queue.isEmpty()) {
                         trace(1, "queue empty");
@@ -863,8 +864,14 @@ public class IndexStatisticsDaemonImpl
                 log(AS_BACKGROUND_TASK, null, sb.toString());
                 // If there is no running thread and the daemon lcc is still
                 // around, destroy the transaction and clear the lcc reference.
-                if (runningThread == null && daemonLCC != null) {
-                    daemonLCC.getTransactionExecute().destroy();
+                if (runningThread == null && daemonLCC != null &&
+                        !isShuttingDown(daemonLCC)) {
+                    // try/catch as safe-guard against shutdown race condition.
+                    try {
+                        daemonLCC.getTransactionExecute().destroy();
+                    } catch (ShutdownException se) {
+                        // Ignore
+                    }
                     daemonLCC = null;
                 }
                 daemonDisabled = true;
