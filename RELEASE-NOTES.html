@@ -87,7 +87,9 @@ This is a feature release. The following new features were added:
 
 
 <li>
-<b>JDBC 4.1</b> - Derby's JDBC drivers support the new Java 7 methods on <i>java.sql</i> and <i>javax.sql</i> interfaces.</li>
+<b>JDBC 4.1</b> - Derby's JDBC drivers support the new Java 7 methods on the <i>java.sql</i> and <i>javax.sql</i> interfaces. This support works with
+the pre-GA OpenJDK 7 build 131 available at http://download.java.net/jdk7/ on March 3, 2011. Derby's implementation of these interfaces may
+change in a future release in the highly unlikely event that the actual GA version of these interfaces changes.</li>
 	
 
 <li>
@@ -115,10 +117,22 @@ This is a feature release. The following new features were added:
 <td><b>Issue Id</b></td><td><b>Description</b></td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5086">DERBY-5086</a></td><td>Disable istat logging by default</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5085">DERBY-5085</a></td><td>After specifying deregister=false on the engine shutdown URL, Derby forgets that the default behavior is deregister=true</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5082">DERBY-5082</a></td><td>ShutdownException in ContextManager.checkInterrupt() during shutdown</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5078">DERBY-5078</a></td><td>Incorrect list of compatible JRE versions in client trace</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5076">DERBY-5076</a></td><td>[patch] move instanceof check up above where casts occur</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5074">DERBY-5074</a></td><td>test failure(s) with IBM 1.4.2 in store.InterruptResilienceTest.testRAFWriteInterrupted: java.sql.SQLException: The exception 'junit.framework.AssertionFailedError: interrupt flag lost' was thrown while evaluating an expression.</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5069">DERBY-5069</a></td><td>Since Feb 7,2011 weme 6.2 Junit tests have failed to run completely with Failed to invoke suite():java.lang.reflect.InvocationTargetException</td>
@@ -157,13 +171,22 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5046">DERBY-5046</a></td><td>Intermittent assert failure in AutomaticIndexStatisticsTest.testStatisticsCorrectness</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5043">DERBY-5043</a></td><td>Document the new url attribute deregister to keep the AutoloadedDriver registers in DriverManager</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5042">DERBY-5042</a></td><td>ResultSet.updateBoolean() on new BOOLEAN type throws exception</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5040">DERBY-5040</a></td><td>On Windows, cascade of errors after failed test AutomaticIndexStatisticsTest</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5039">DERBY-5039</a></td><td>store/updatelocksJDBC30.sql test failing in tinderbox when background update statistics are enabled.</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5038">DERBY-5038</a></td><td>updatelocks test failing in tinderbox when background update statistics are enabled.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5037">DERBY-5037</a></td><td>Assertion failure from index-stat-thread when running AutomaticIndexStatisticsTest</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5036">DERBY-5036</a></td><td>[patch] fix impossible comparison due to sign extension</td>
@@ -230,6 +253,9 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5002">DERBY-5002</a></td><td>In case of checksum error, insure correct error reported to user.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5001">DERBY-5001</a></td><td>Intermittent bug in InterruptResilienceTest</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4999">DERBY-4999</a></td><td>Docs build fails under C locale</td>
@@ -352,6 +378,9 @@ This is a feature release. The following new features were added:
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4936">DERBY-4936</a></td><td>Add core istat daemon</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4935">DERBY-4935</a></td><td>Add initial istat tests</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4933">DERBY-4933</a></td><td>Use framework helper methods to check result sets in DatabaseMetaDataTest</td>
 </tr>
 <tr>
@@ -368,6 +397,9 @@ This is a feature release. The following new features were added:
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4918">DERBY-4918</a></td><td>Minor refactoring of SPSDescriptor</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4915">DERBY-4915</a></td><td>test failure in OSReadOnlyTest in assertDirectoryDeleted</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4913">DERBY-4913</a></td><td>10.3 to 10.5 upgrade fails with ava.io.StreamCorruptedException: java.lang.ClassCastException: org.apache.derby.catalog.types.OldRoutineType incompatible with org.apache.derby.iapi.types.DataTypeDescriptor</td>
@@ -435,6 +467,13 @@ The JDBC-level conversion from BOOLEAN to CHAR has changed.
 <a href="#Note for DERBY-4963">
 <p>Note for DERBY-4963: 
 Interrupt resilience may degrade the performance of writes on some platforms.
+</p>
+</a>
+</li>
+<li>
+<a href="#Note for DERBY-4939">
+<p>Note for DERBY-4939: 
+Index cardinality statistics are updated automatically.
 </p>
 </a>
 </li>
@@ -643,7 +682,9 @@ Interrupt resilience may degrade the performance of writes on some platforms.
 
 <p>
 In Derby 10.8, INSERTs and UPDATEs may run slower on platforms which
-do not support write synchronization. Solaris/JDK5 is one of these platforms.
+do not support write synchronization. Affected platforms include JDK
+1.4.0 and JDK 1.4.1 (on all operating systems) and Java 5 (on Mac OSX and
+BSD variants).
 </p>
 
 
@@ -702,6 +743,121 @@ from crashing the engine.
 Upgrade the JVM to JDK 6 or higher if your
 application suffers slower INSERTs/UPDATEs after upgrading
 to Derby 10.8.
+</p>
+
+
+
+</blockquote>
+<hr>
+<h3>
+<a name="Note for DERBY-4939"></a>Note for DERBY-4939</h3>
+<blockquote>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+Index cardinality statistics are updated automatically.
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+During query compilation, Derby now checks if the index cardinality
+statistics for the tables involved in the query are out of date. If
+the statistics are outdated, the query compiler will schedule a job
+that updates them in a separate thread. The thread that updates the
+statistics in the background may affect the performance of the user
+threads.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+This release of Derby may cause more threads to be running than
+previous releases did. These threads may use resources also needed by
+the user threads (for example, disk bandwidth, CPU or locks on system
+tables) and thereby interfere with the execution in the user threads.
+</p>
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+Derby's optimizer will often choose query execution plans that yield
+bad performance if the index cardinality statistics are out of date.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE HOW TO REVERT TO THE PREVIOUS BEHAVIOR OR
+  OTHERWISE AVOID THE INCOMPATIBILITIES INTRODUCED BY THIS CHANGE.
+
+  For instance:
+
+  Users must recode applications which open multiple streams on the same column.
+-->
+
+
+<h4>Application Changes Required</h4>
+
+<p>
+If the automatic updating of index cardinality statistics causes
+problems, the application can disable it by setting the database
+property <tt>derby.storage.indexStats.auto=false</tt>.
+</p>
+
+
+<p>
+To diagnose problems with automatic updating of index statistics, the
+application may set the database
+property <tt>derby.storage.indexStats.log=true</tt>. When this
+property is set, the thread that updates the statistics will write
+messages to the Derby system log (derby.log) every time it performs a
+task.
 </p>
 
 

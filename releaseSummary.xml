@@ -116,7 +116,9 @@ This is a feature release. The following new features were added:
 
 <ul>
 
-<li><b>JDBC 4.1</b> - Derby's JDBC drivers support the new Java 7 methods on <i>java.sql</i> and <i>javax.sql</i> interfaces.</li>
+<li><b>JDBC 4.1</b> - Derby's JDBC drivers support the new Java 7 methods on the <i>java.sql</i> and <i>javax.sql</i> interfaces. This support works with
+the pre-GA OpenJDK 7 build 131 available at http://download.java.net/jdk7/ on March 3, 2011. Derby's implementation of these interfaces may
+change in a future release in the highly unlikely event that the actual GA version of these interfaces changes.</li>
 	
 <li><b>Automatic calculation of index stats</b> - Derby recalculates optimizer statistics on tables whose statistics have grown stale.</li>
 	
