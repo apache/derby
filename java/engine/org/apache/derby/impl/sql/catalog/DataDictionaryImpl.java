@@ -435,8 +435,6 @@ public final class	DataDictionaryImpl
      */
     private boolean indexStatsUpdateDisabled;
     private boolean indexStatsUpdateLogging;
-    /** TODO: Remove this when code goes into production (i.e. a release). */
-    private boolean indexStatsUpdateLoggingExplicitlySet;
     private String indexStatsUpdateTracing;
 
 	//systemSQLNameNumber is the number used as the last digit during the previous call to getSystemSQLName.
@@ -649,10 +647,6 @@ public final class	DataDictionaryImpl
         // See if we should enable logging of index stats activities.
         indexStatsUpdateLogging = PropertyUtil.getSystemBoolean(
                 Property.STORAGE_AUTO_INDEX_STATS_LOGGING);
-        // TODO: Remove this when going into production code (i.e. a release).
-        indexStatsUpdateLoggingExplicitlySet =
-                PropertyUtil.getSystemProperty(
-                    Property.STORAGE_AUTO_INDEX_STATS_LOGGING) != null;
 
         // See if we should enable tracing of index stats activities.
         indexStatsUpdateTracing = PropertyUtil.getSystemProperty(
@@ -830,7 +824,6 @@ public final class	DataDictionaryImpl
                 if (dbEnableIndexStatsLogging != null) {
                     indexStatsUpdateLogging = Boolean.valueOf(
                             dbEnableIndexStatsLogging).booleanValue();
-                    indexStatsUpdateLoggingExplicitlySet = true;
                 }
                 // TODO: This property may go away in production code.
                 String dbEnableIndexStatsTracing =
@@ -13757,13 +13750,6 @@ public final class	DataDictionaryImpl
         if (af.isReadOnly()) {
             indexStatsUpdateDisabled = true;
             return;
-        }
-
-        // TODO: Remove this override after initial testing.
-        //       Unless logging has been explicitly disabled, turn it on to
-        //       make sure we have some information if things go wrong.
-        if (!indexStatsUpdateLoggingExplicitlySet) {
-            indexStatsUpdateLogging = true;
         }
 
         indexRefresher = new IndexStatisticsDaemonImpl(
