@@ -307,6 +307,8 @@ public class IndexStatisticsDaemonImpl
     /**
      * Generates index statistics for all indexes associated with the given
      * table descriptor.
+     * <p>
+     * This method is run as a background task.
      *
      * @param lcc connection context to use to perform the work
      * @param td target base table descriptor
@@ -320,7 +322,7 @@ public class IndexStatisticsDaemonImpl
         while (true) {
             try {
                 ConglomerateDescriptor[] cds = td.getConglomerateDescriptors();
-                tryToGatherStats(lcc, td, cds, AS_BACKGROUND_TASK);
+                updateIndexStatsMinion(lcc, td, cds, AS_BACKGROUND_TASK);
                 break;
             } catch (StandardException se) {
                 // At this level, we retry the whole operation. If this happens,
@@ -349,51 +351,17 @@ public class IndexStatisticsDaemonImpl
         trace(0, "generateStatistics::end");
     }
 
-    /**
-     * Try to gather statistics. Fail gracefully if we are being shutdown, e.g., the database is killed
-     * while we're busy. See DERBY-5037.
-     *
-     * @param lcc language connection context used to perform the work
-     * @param td the table to update index stats for
-     * @param cds the conglomerates to update statistics for (non-index
-     *      conglomerates will be ignored)
-     * @param asBackgroundTask whether the updates are done automatically as
-     *      part of a background task or if explicitly invoked by the user
-     * @throws StandardException if something goes wrong
-     */
-    private void tryToGatherStats(LanguageConnectionContext lcc,
-                                        TableDescriptor td,
-                                        ConglomerateDescriptor[] cds,
-                                        boolean asBackgroundTask)
-            throws StandardException
-    {
-        //
-        // Swallow exceptions raised while we are being shutdown.
-        //
-        try {
-            updateIndexStatsMinion( lcc, td, cds, asBackgroundTask );
-        }
-        catch (StandardException se)
-        {
-            if ( !isShuttingDown( lcc ) ) { throw se; }
-        }
-        // to filter assertions raised by debug jars
-        catch (RuntimeException re)
-        {
-            if ( !isShuttingDown( lcc ) ) { throw re; }
-        }
-    }
     /** Return true if we are being shutdown */
-    private boolean isShuttingDown( LanguageConnectionContext lcc )
-    {
+    private boolean isShuttingDown() {
         synchronized (queue) {
-            if (daemonDisabled ){
+            if (daemonDisabled || daemonLCC == null){
                 return true;
+            } else {
+                return !daemonLCC.getDatabase().isActive();
             }
         }
-        return !lcc.getDatabase().isActive();
     }
-    
+
     /**
      * Updates the index statistics for the given table and the specified
      * indexes.
@@ -699,8 +667,41 @@ public class IndexStatisticsDaemonImpl
      */
     public void run() {
         final long runStart = System.currentTimeMillis();
-        final ContextService ctxService = ContextService.getFactory();
-        ctxService.setCurrentContextManager(ctxMgr);
+        ContextService ctxService = null;
+        // Implement the outer-level exception handling here.
+        try {
+            // DERBY-5088: Factory-call may fail.
+            ctxService = ContextService.getFactory();
+            ctxService.setCurrentContextManager(ctxMgr);
+            processingLoop();
+        } catch (ShutdownException se) {
+            // The database is/has been shut down.
+            // Log processing statistics and exit.
+            stop();
+            ctxMgr.cleanupOnError(se, db.isActive());
+        } catch (RuntimeException re) {
+            // DERBY-4037
+            // Extended filtering of runtime exceptions during shutdown:
+            //  o assertions raised by debug jars
+            //  o runtime exceptions, like NPEs, raised by production jars -
+            //    happens because the background thread interacts with store
+            //    on a lower level
+            if (!isShuttingDown()) {
+                throw re;
+            }
+        } finally {
+            if (ctxService != null) {
+                ctxService.resetCurrentContextManager(ctxMgr);
+            }
+            runTime += (System.currentTimeMillis() - runStart);
+        }
+    }
+
+    /**
+     * Main processing loop which will compute statistics until the queue
+     * of scheduled work units has been drained.
+     */
+    private void processingLoop() {
         // If we don't have a connection to the database, create one.
         if (daemonLCC == null) {
             try {
@@ -715,8 +716,7 @@ public class IndexStatisticsDaemonImpl
                 daemonLCC.getTransactionExecute().setNoLockWait(true);
             } catch (StandardException se) {
                 log(AS_BACKGROUND_TASK, null, se,
-                        "failed to setup index statistics updater");
-                ctxService.resetCurrentContextManager(ctxMgr);
+                        "failed to initialize index statistics updater");
                 return;
             }
         }
@@ -798,9 +798,6 @@ public class IndexStatisticsDaemonImpl
         } catch (StandardException se) {
             log(AS_BACKGROUND_TASK, null, se, "thread died");
             // Do nothing, just let the thread die.
-        } catch (ShutdownException se) {
-            stop(); // Call stop to log activity statistics.
-            ctxMgr.cleanupOnError(se, db.isActive());
         } finally {
             synchronized (queue) {
                 runningThread = null;
@@ -818,8 +815,6 @@ public class IndexStatisticsDaemonImpl
                     log(AS_BACKGROUND_TASK, null, se, "forced rollback failed");
                 }
             }
-            ctxService.resetCurrentContextManager(ctxMgr);
-            runTime += (System.currentTimeMillis() - runStart);
         }
     }
 
@@ -865,7 +860,7 @@ public class IndexStatisticsDaemonImpl
                 // If there is no running thread and the daemon lcc is still
                 // around, destroy the transaction and clear the lcc reference.
                 if (runningThread == null && daemonLCC != null &&
-                        !isShuttingDown(daemonLCC)) {
+                        !isShuttingDown()) {
                     // try/catch as safe-guard against shutdown race condition.
                     try {
                         daemonLCC.getTransactionExecute().destroy();
@@ -894,7 +889,9 @@ public class IndexStatisticsDaemonImpl
             // We are not allowed to write into the database, most likely the
             // data dictionary. No point to keep doing work we can't gain from.
             disable = true;
-        } else if (se.getSeverity() >= ExceptionSeverity.DATABASE_SEVERITY) {
+        } else if (isShuttingDown() ||
+                se.getSeverity() >= ExceptionSeverity.DATABASE_SEVERITY) {
+            // DERBY-4037: Swallow exceptions raised during shutdown.
             // The database or system is going down. Probably handled elsewhere
             // but disable daemon anyway.
             disable = true;
@@ -903,7 +900,6 @@ public class IndexStatisticsDaemonImpl
 
         if (disable) {
             daemonLCC.getDataDictionary().disableIndexStatsRefresher();
-            stop();
         }
         return disable;
     }
