@@ -253,6 +253,8 @@ public class AutoloadedDriver implements Driver
                 _autoloadedDriver = null;
             } else {
                 DriverManager.deregisterDriver(_driverModule);
+                //DERBY 5085, need to restore the default value
+                deregister = true;
             }
             _driverModule = null;
         } catch (SQLException e) {
