@@ -137,8 +137,11 @@ public class EmbeddedXADataSource extends EmbeddedDataSource implements
 			{
 				// If it is inactive, it is useless.
 				ra = null;
-
-				String dbName = getDatabaseName();
+				
+				// DERBY-4907 make sure the database name sent to find service
+				// does not include attributes.
+				String dbName = getShortDatabaseName();
+				
 				if (dbName != null) {
 
 					// see if database already booted, if it is, then don't make a
