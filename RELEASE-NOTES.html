@@ -168,6 +168,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5050">DERBY-5050</a></td><td>BrokeredConnection could call setHoldability() without using reflection</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5047">DERBY-5047</a></td><td>Documentation links to java.sun.com should be updated</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5046">DERBY-5046</a></td><td>Intermittent assert failure in AutomaticIndexStatisticsTest.testStatisticsCorrectness</td>
 </tr>
 <tr>
@@ -494,7 +497,7 @@ JDBC metadata reports longer precision and scale for Timestamps.
 <li>
 <a href="#Note for DERBY-2905">
 <p>Note for DERBY-2905: 
-Engine shutdown now deregisters the embedded JDBC driver.
+Engine shutdown now unregisters the embedded JDBC driver.
 </p>
 </a>
 </li>
@@ -1122,7 +1125,7 @@ verify that they correctly handle the longer lengths.
 <h4>Summary of Change</h4>
 
 <p>
-Engine shutdown now deregisters the embedded JDBC driver.
+Engine shutdown now unregisters the embedded JDBC driver.
 </p>
 
 
@@ -1147,6 +1150,32 @@ JDBC driver, allowing the JVM to garbage-collect the Derby
 classes. Later releases (10.2 through 10.7) did not unregister the
 driver. 10.8 revives the 10.1 behavior. In 10.8, orderly engine
 shutdown unregisters the embedded JDBC driver.
+</p>
+
+
+<p>
+After the embedded driver has been unregistered, it must be
+re-registered in order to obtain a new Connection to
+Derby. Re-registration occurs when the application invokes the
+following statement:
+</p>
+
+
+<blockquote>
+
+<tt>Class.forName("org.apache.derby.jdbc.EmbeddedDriver").newInstance();</tt>
+
+</blockquote>
+
+
+<p>
+It is also possible for an application to request orderly shutdown
+without unregistering the embedded driver. After such a shutdown it is not
+necessary to re-register the embedded driver. To request this kind of
+shutdown, the application needs to add <tt>deregister=false</tt> to
+the end of the shutdown URL. For more information on this feature,
+please see the section on the <i>deregister</i> attribute in the Derby
+Reference Manual.
 </p>
 
 
