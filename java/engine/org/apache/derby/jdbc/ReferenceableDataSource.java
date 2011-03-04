@@ -79,9 +79,6 @@ public class ReferenceableDataSource implements
 	private String description;
 	private String dataSourceName;
 	private String databaseName;
-	/** shortDatabaseName has attributes of databaseName stripped */
-	private String shortDatabaseName;	
-
 	private String password;
 	private String user;
 	private int loginTimeout;
@@ -112,24 +109,10 @@ public class ReferenceableDataSource implements
 	*/
 	public final synchronized void setDatabaseName(String databaseName) {
 		this.databaseName = databaseName;
-		if( databaseName!= null && databaseName.contains(";")){
-			String[] dbShort = databaseName.split(";");
-			this.shortDatabaseName = dbShort[0];
-		}
-		else {
-			this.shortDatabaseName = databaseName;
-		}
 		update();
 	}
 	public String getDatabaseName() {
 		return databaseName;
-	}
-	
-	/**
-	 * @return databaseName with attributes stripped.
-	 */
-	protected String getShortDatabaseName() {
-		return shortDatabaseName;
 	}
 
 	/** 

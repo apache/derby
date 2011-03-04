@@ -832,67 +832,6 @@ public class J2EEDataSourceTest extends BaseJDBCTestCase {
     }
 
     /**
-     * Test that a connection to XADataSource can be established
-     * successfully while creating a database using setDatabaseName()
-     * with create=true
-     *  
-     * @throws SQLException
-     * @throws XAException
-     */
-    public void testCreateInDatabaseName_XA() throws SQLException, XAException
-    {
-    	//test with XADataSource
-    	XADataSource xads = J2EEDataSource.getXADataSource();
-    	String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();    	
-    	J2EEDataSource.setBeanProperty(xads,"databaseName",dbName +";create=true");       
-    	XAConnection xa = xads.getXAConnection();
-    	Connection c = xa.getConnection();  
-    	c.setAutoCommit(false); 
-    	c.close();
-    }
-    
-    /**
-     * Test that a connection to PoolDataSource can be established
-     * successfully while creating a database using setDatabaseName()
-     * with create=true
-     * 
-     * @throws SQLException
-     */
-    
-    public void testCreateInDatabaseName_Pooled() throws SQLException
-    {
-    	//test with PooledConnection
-    	ConnectionPoolDataSource cpds = J2EEDataSource.getConnectionPoolDataSource();
-    	PooledConnection pc = cpds.getPooledConnection();
-    	String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
-    	J2EEDataSource.setBeanProperty(cpds, "databaseName",dbName +";create=true");
-    	Connection c;
-    	c = pc.getConnection();
-    	c.setAutoCommit(false);
-    	c.close();
-    	pc.close();
-    }
-    
-    /**
-     * Test that a connection to JDBCDataSource can be established
-     * successfully while creating a database using setDatabaseName()
-     * with create=true
-     * 
-     * @throws SQLException
-     */
-    
-    public void testCreateInDatabaseName_DS() throws SQLException
-    {
-    	DataSource ds = JDBCDataSource.getDataSource();
-    	String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
-    	JDBCDataSource.setBeanProperty(ds, "databaseName", dbName +";create=true");
-        Connection c = ds.getConnection();
-        c.setAutoCommit(false);
-        c.close();
-    }
-        
-    
-    /**
      * Test that a PooledConnection can be reused and closed
      * (separately) during the close event raised by the
      * closing of its logical connection.
