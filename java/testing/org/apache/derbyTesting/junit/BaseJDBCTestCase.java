@@ -1470,8 +1470,8 @@ public abstract class BaseJDBCTestCase
      * directory, even if one of the delete operations fails.
      * <p>
      * After having tried to delete all files once, any remaining files will be
-     * attempted deleted again after a pause. This is repeated twice, resulting
-     * in three failed delete attempts for any single file before the method
+     * attempted deleted again after a pause. This is repeated, resulting
+     * in multiple failed delete attempts for any single file before the method
      * gives up and raises a failure.
      * <p>
      * The approach above will mask any slowness involved in releasing file
@@ -1485,7 +1485,12 @@ public abstract class BaseJDBCTestCase
     public static void assertDirectoryDeleted(File dir) {
         File[] fl = null;
         int attempts = 0;
-        while (attempts < 3) {
+        while (attempts < 4) {
+            try {
+                Thread.sleep(attempts * 2000);
+            } catch (InterruptedException ie) {
+                // Ignore
+            }
             try {
                 fl = PrivilegedFileOpsForTests.persistentRecursiveDelete(dir);
                 attempts++;
@@ -1505,11 +1510,6 @@ public abstract class BaseJDBCTestCase
                     sb.append(' ').append(i).append('=').append(fl[i]);
                 }
                 System.out.println(sb);
-                try {
-                    Thread.sleep(attempts * 1000);
-                } catch (InterruptedException ie) {
-                    // Ignore
-                }
             }
         }
 
