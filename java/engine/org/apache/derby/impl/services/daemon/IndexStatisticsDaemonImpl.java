@@ -234,20 +234,16 @@ public class IndexStatisticsDaemonImpl
      */
     public void schedule(TableDescriptor td) {
         String schedulingReason = td.getIndexStatsUpdateReason();
-        trace(0, "scheduling " + td.getQualifiedName() +
-                    (schedulingReason == null
-                        ? ""
-                        : " reason=[" + schedulingReason + "]"));
         synchronized (queue) {
             if (acceptWork(td)) {
                 // Add the work description for the given table.
                 queue.add(td);
                 wuScheduled++;
                 log(AS_BACKGROUND_TASK, td,
-                        "update scheduled - " + td.getUUID() +
+                        "update scheduled" +
                         (schedulingReason == null
                             ? ""
-                            : " reason=[" + schedulingReason + "]") +
+                            : ", reason=[" + schedulingReason + "]") +
                         " (queueSize=" + queue.size() + ")");
                 // If we're idle, fire off the worker thread.
                 if (runningThread == null) {
@@ -290,16 +286,18 @@ public class IndexStatisticsDaemonImpl
 
         // If the work was rejected, trace it.
         if (!accept) {
+            String msg = td.getQualifiedName() + " rejected, ";
             if (daemonDisabled) {
                 wuRejectedOther++;
-                trace(1, "daemon disabled - work not scheduled");
+                msg += "daemon disabled";
             } else if (queue.size() >= MAX_QUEUE_LENGTH) {
                 wuRejectedFQ++;
-                trace(1, "queue full - work not scheduled");
+                msg += "queue full";
             } else {
                 wuRejectedDup++;
-                trace(1, "duplicate found - not scheduled");
+                msg += "duplicate";
             }
+            trace(1, msg);
         }
         return accept;
     }
@@ -317,7 +315,7 @@ public class IndexStatisticsDaemonImpl
     private void generateStatistics(LanguageConnectionContext lcc,
                                     TableDescriptor td)
             throws StandardException {
-        trace(0, "generateStatistics::start {" + td.getQualifiedName() + "}");
+        trace(1, "processing " + td.getQualifiedName());
         boolean lockConflictSeen = false;
         while (true) {
             try {
@@ -348,7 +346,6 @@ public class IndexStatisticsDaemonImpl
                 }
             }
         }
-        trace(0, "generateStatistics::end");
     }
 
     /** Return true if we are being shutdown */
@@ -557,8 +554,10 @@ public class IndexStatisticsDaemonImpl
 
             // Log some information.
             log(asBackgroundTask, td,
-                    "wrote stats for index " + index + " (rows=" + numRows +
-                    ", card=" + cardToStr(cardinality) + ")");
+                    "wrote stats for index "  + 
+                    dd.getConglomerateDescriptor(index).getDescriptorName() +
+                    " (" + index + "): rows=" + numRows +
+                    ", card=" + cardToStr(cardinality));
         }
 
         // Only commit tx as we go if running as background task.
@@ -677,6 +676,7 @@ public class IndexStatisticsDaemonImpl
         } catch (ShutdownException se) {
             // The database is/has been shut down.
             // Log processing statistics and exit.
+            trace(1, "swallowed shutdown exception: " + extractIstatInfo(se));
             stop();
             ctxMgr.cleanupOnError(se, db.isActive());
         } catch (RuntimeException re) {
@@ -687,13 +687,18 @@ public class IndexStatisticsDaemonImpl
             //    happens because the background thread interacts with store
             //    on a lower level
             if (!isShuttingDown()) {
+                log(AS_BACKGROUND_TASK, null, re,
+                        "runtime exception during normal operation");
                 throw re;
             }
+            trace(1, "swallowed runtime exception during shutdown: " +
+                    extractIstatInfo(re));
         } finally {
             if (ctxService != null) {
                 ctxService.resetCurrentContextManager(ctxMgr);
             }
             runTime += (System.currentTimeMillis() - runStart);
+            trace(0, "worker thread exit");
         }
     }
 
@@ -707,7 +712,6 @@ public class IndexStatisticsDaemonImpl
             try {
                 daemonLCC =
                         db.setupConnection(ctxMgr, dbOwner, null, databaseName);
-                trace(1, "got database connection");
                 // Initialize the lcc/transaction.
                 // TODO: Would be nice to name the transaction.
                 daemonLCC.setIsolationLevel(
@@ -741,6 +745,7 @@ public class IndexStatisticsDaemonImpl
                         tc = null;
                         daemonLCC = null;
                         queue.clear();
+                        trace(1, "daemon disabled");
                         break;
                     }
                     if (queue.isEmpty()) {
@@ -751,7 +756,6 @@ public class IndexStatisticsDaemonImpl
                 }
                 try {
                     start = System.currentTimeMillis();
-                    log(AS_BACKGROUND_TASK, td, "generating index statistics");
                     generateStatistics(daemonLCC, td);
                     wuProcessed++;
                     // Reset consecutive error counter.
@@ -794,7 +798,6 @@ public class IndexStatisticsDaemonImpl
                     }
                 }
             }
-            trace(0, "run::normal_exit");
         } catch (StandardException se) {
             log(AS_BACKGROUND_TASK, null, se, "thread died");
             // Do nothing, just let the thread die.
@@ -833,11 +836,11 @@ public class IndexStatisticsDaemonImpl
                               ConglomerateDescriptor[] cds,
                               String runContext)
             throws StandardException {
-        trace(0, "explicit run" + (runContext != null
-                                        ? " (" + runContext + "): "
-                                        : ":") +
-                                    td.getQualifiedName());
         updateIndexStatsMinion(lcc, td, cds, AS_EXPLICIT_TASK);
+        trace(0, "explicit run completed" + (runContext != null
+                                        ? " (" + runContext + "): "
+                                        : ": ") +
+                                    td.getQualifiedName());
     }
 
     /**
@@ -894,6 +897,8 @@ public class IndexStatisticsDaemonImpl
             // DERBY-4037: Swallow exceptions raised during shutdown.
             // The database or system is going down. Probably handled elsewhere
             // but disable daemon anyway.
+            trace(1, "swallowed exception during shutdown: " +
+                    extractIstatInfo(se));
             disable = true;
             cm.cleanupOnError(se, db.isActive());
         }
@@ -926,7 +931,6 @@ public class IndexStatisticsDaemonImpl
             errorsKnown++;
             log(AS_BACKGROUND_TASK, td, "generation aborted (reason: " +
                     state + ") {" + extractIstatInfo(se) + "}");
-            trace(1, "top level expected exception: " + extractIstatInfo(se));
             return true;
         }
         return false;
@@ -1080,13 +1084,14 @@ public class IndexStatisticsDaemonImpl
     }
 
     /** Purely for debugging, to avoid printing too much info. */
-    private static String extractIstatInfo(StandardException se) {
-        StackTraceElement[] stack = se.getStackTrace();
-        String trace = "<n/a>";
+    private static String extractIstatInfo(Throwable t) {
+        String istatClass = IndexStatisticsDaemonImpl.class.getName();
+        StackTraceElement[] stack = t.getStackTrace();
+        String trace = "<no stacktrace>";
+        String sqlState = "";
         for (int i=0; i < stack.length ; i++) {
             StackTraceElement ste = stack[i];
-            if (IndexStatisticsDaemonImpl.class.getName().equals(
-                    ste.getClassName())) {
+            if (ste.getClassName().startsWith(istatClass)) {
                 trace = ste.getMethodName() + "#" + ste.getLineNumber();
                 if (i > 0) {
                     ste = stack[i -1];
@@ -1096,8 +1101,11 @@ public class IndexStatisticsDaemonImpl
                 break;
             }
         }
-        return trace + " got " + se.getSQLState() +
-                " (" +  se.getMessage() + ")";
+        if (t instanceof StandardException) {
+            sqlState = ", SQLSTate=" + ((StandardException)t).getSQLState();
+        }
+        return "<" + t.getClass() + ", msg=" + t.getMessage() + sqlState +
+                "> " + trace;
     }
 
     /**
