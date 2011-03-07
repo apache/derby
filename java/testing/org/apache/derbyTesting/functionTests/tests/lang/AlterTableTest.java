@@ -2297,10 +2297,9 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(st.executeQuery(
         		" select triggername from sys.systriggers where " +
         		"triggername in ('ATDC_12_TRIGGER_1', 'ATDC_12_TRIGGER_2')"));
-        //Following returns incorrect rows for SYS.SYSDEPENDS DERBY-5079
-//        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
-  //      		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeCreateTrigger);
-  //      st.executeUpdate("drop table ATDC_12");
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeCreateTrigger);
+        st.executeUpdate("drop table ATDC_12");
 
         // Another test
         // drop column restrict should fail because there is a table level
@@ -2347,10 +2346,9 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         		" select triggername from sys.systriggers where " +
         		"triggername in ('ATDC_13_TRIGGER_1', "+
         		"'ATDC_13_TRIGGER_2', 'ATDC_13_TRIGGER_3')"));
-        //Following returns incorrect rows for SYS.SYSDEPENDS DERBY-5079
-//        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
-  //      		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeCreateTrigger);
-    //    st.executeUpdate("drop table ATDC_13");
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeCreateTrigger);
+        st.executeUpdate("drop table ATDC_13");
         
         // Another test DERBY-5044
         // ALTER TABLE DROP COLUMN in following test case causes the column
@@ -2390,10 +2388,10 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         rs =
             st.executeQuery(" select * from atdc_16_tab2");
         JDBC.assertFullResultSet(rs, new String[][]{{"1","11","333"}});
-        //Following returns incorrect rows for SYS.SYSDEPENDS DERBY-5079
-//        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
-  //            		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
-    //    st.executeUpdate("drop table ATDC_13");
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
+              		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        st.executeUpdate("drop table ATDC_16_TAB1");
+        st.executeUpdate("drop table ATDC_16_TAB2");
         
         // Another test DERBY-5044
         //Following test case involves two tables. The trigger is defined 
@@ -2470,9 +2468,8 @@ public final class AlterTableTest extends BaseJDBCTestCase {
             st.executeQuery(" select * from atdc_15_tab2");
         JDBC.assertFullResultSet(rs, new String[][]{{"1","22"}});
         st.executeUpdate("alter table atdc_15_tab1 drop column a1 restrict");
-        //Following returns incorrect rows for SYS.SYSDEPENDS DERBY-5079
-//        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
-  //      		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
         st.executeUpdate("update atdc_15_tab1 set b1=33");
         rs =
             st.executeQuery(" select * from atdc_15_tab1");
@@ -2481,7 +2478,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
             st.executeQuery(" select * from atdc_15_tab2");
         JDBC.assertFullResultSet(rs, new String[][]{{"1","33"}});
         st.executeUpdate("drop table ATDC_15_TAB1");
-//        st.executeUpdate("drop table ATDC_15_TAB2");
+        st.executeUpdate("drop table ATDC_15_TAB2");
 
         st.executeUpdate(
                 " create table atdc_7 (a int, b int, c int, primary key (a))");
