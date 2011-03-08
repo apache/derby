@@ -389,7 +389,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                 // Destroy the process if a failed shutdown
                 // to avoid hangs running tests as the complete()
                 // waits for the process to complete.
-                spawnedServer.complete(failedShutdown != null);
+                spawnedServer.complete(failedShutdown != null, getWaitTime());
                 spawnedServer = null;
             }
             

@@ -126,15 +126,47 @@ public final class SpawnedProcess {
        return sb.toString();
     }
 
-    /**
-     * Complete the method.
-     * @param destroy True to destroy it, false to wait for it to complete.
+    /*Complete the method
+     * @param destroy true to destroy it, false to wait indefinitely to complete 
      */
     public int complete(boolean destroy) throws InterruptedException, IOException {
+        return complete(destroy, -1L);
+    }
+    
+    /**
+     * Complete the method.
+     * @param destroy True to destroy it, false to wait for it to complete 
+     * based on timeout.
+     *  
+     * @param timeout milliseconds to wait until finished or else destroy.
+     * -1 don't timeout
+     *  
+     */
+    public int complete(boolean destroy, long timeout) throws InterruptedException, IOException {
+        int exitCode;
+        if (timeout >= 0 ) {
+            long totalwait = -1;
+            while (totalwait < timeout) {
+               try  { 
+               exitCode = javaProcess.exitValue();
+               //if no exception thrown, exited normally
+               destroy = false;
+               break;
+               }catch (IllegalThreadStateException ite) {
+                   if (totalwait >= timeout) {
+                       destroy = true;
+                       break;
+                   } else {
+                       totalwait += 1000;
+                       Thread.sleep(1000);
+                   }
+               }
+            }
+    	}
         if (destroy)
             javaProcess.destroy();
 
-        int exitCode = javaProcess.waitFor();
+        exitCode = javaProcess.waitFor();
         Thread.sleep(500);
         synchronized (this) {
 
