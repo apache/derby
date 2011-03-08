@@ -903,6 +903,8 @@ public final class CheckConstraintTest extends BaseJDBCTestCase {
         // If we get here, all is well, and DERBY-4282 did not occur.
         st1.close();
         st.close();
+
+        dropTable("t4282");
     }
     // This test verifies that if the PRIMARY KEY constraint mentions a
     // column which is potentially large, then Derby will automatically
