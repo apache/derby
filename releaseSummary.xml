@@ -126,6 +126,8 @@ change in a future release in the highly unlikely event that the actual GA versi
 	
 <li><b>MAX optimization</b> - On indexed tables, MAX queries run faster in more cases.</li>
 
+<li><b>XML operator portability</b> - The xmlparse and xmlserialize operators work out-of-the-box on more platforms.</li>
+
 </ul>
 
 </newFeatures>

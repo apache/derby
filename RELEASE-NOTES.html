@@ -104,6 +104,10 @@ change in a future release in the highly unlikely event that the actual GA versi
 <b>MAX optimization</b> - On indexed tables, MAX queries run faster in more cases.</li>
 
 
+<li>
+<b>XML operator portability</b> - The xmlparse and xmlserialize operators work out-of-the-box on more platforms.</li>
+
+
 </ul>
 
 
@@ -117,6 +121,27 @@ change in a future release in the highly unlikely event that the actual GA versi
 <td><b>Issue Id</b></td><td><b>Description</b></td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5106">DERBY-5106</a></td><td>Lacking cleanup in CheckConstraintTest.testJira4282()</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5104">DERBY-5104</a></td><td>InterruptResilienceTest fails to remove tables in tearDown()</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5099">DERBY-5099</a></td><td>PrepareStatementTest depends on ordering of test cases</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5095">DERBY-5095</a></td><td>Update XML operator documentation to reflect new requirements</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5089">DERBY-5089</a></td><td>Improve tracing/logging of runtime exceptions raised in the istat thread</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5088">DERBY-5088</a></td><td>ShutdownException raised in istat thread during factory call</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5087">DERBY-5087</a></td><td>NPE in istat daemon when encountering critical exception during shutdown</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5086">DERBY-5086</a></td><td>Disable istat logging by default</td>
 </tr>
 <tr>
@@ -124,6 +149,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5082">DERBY-5082</a></td><td>ShutdownException in ContextManager.checkInterrupt() during shutdown</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5079">DERBY-5079</a></td><td>DERBY-4984 caused a regression which will not allow users to drop a table if the table was involved in a trigger action rebind during ALTER TABLE DROP COLUMN</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5078">DERBY-5078</a></td><td>Incorrect list of compatible JRE versions in client trace</td>
@@ -402,13 +430,13 @@ change in a future release in the highly unlikely event that the actual GA versi
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4918">DERBY-4918</a></td><td>Minor refactoring of SPSDescriptor</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-4915">DERBY-4915</a></td><td>test failure in OSReadOnlyTest in assertDirectoryDeleted</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4913">DERBY-4913</a></td><td>10.3 to 10.5 upgrade fails with ava.io.StreamCorruptedException: java.lang.ClassCastException: org.apache.derby.catalog.types.OldRoutineType incompatible with org.apache.derby.iapi.types.DataTypeDescriptor</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4912">DERBY-4912</a></td><td>Instability in Derby2017LayerBTest</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4907">DERBY-4907</a></td><td>EmbeddedXADataSource with ;create=true attribute set in setDatabaseName fails with java.sql.SQLException: Database not available</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4897">DERBY-4897</a></td><td>Get rid of warning for customized tags in javadoc build</td>
@@ -418,6 +446,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4837">DERBY-4837</a></td><td>Prepare lang.UpdateStatisticsTest for automatic index statistics generation</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4771">DERBY-4771</a></td><td>Continue investigation of automatic creation/update of index statistics</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4741">DERBY-4741</a></td><td>Make embedded Derby work reliably in the presence of thread interrupts</td>
@@ -451,6 +482,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-2739">DERBY-2739</a></td><td>Use DOM interfaces to implement XML operators</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-642">DERBY-642</a></td><td>SELECT MAX doesn't use indices optimally</td>
 </tr>
 </table>
 </blockquote>
