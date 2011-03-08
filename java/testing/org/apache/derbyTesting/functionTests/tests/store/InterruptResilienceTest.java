@@ -141,10 +141,13 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
     protected void tearDown()
             throws java.lang.Exception {
 
-        Statement stmt = createStatement();
-        stmt.executeUpdate("drop table t1");
-        stmt.executeUpdate("drop table mtTab");
-        stmt.close();
+        // Forget about uncommitted changes
+        rollback();
+
+        // Drop the tables created in setUp() if they still exist
+        dropTable("t1");
+        dropTable("mtTab");
+        commit();
 
         super.tearDown();
     }
