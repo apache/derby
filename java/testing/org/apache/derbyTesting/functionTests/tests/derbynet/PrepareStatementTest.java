@@ -39,6 +39,7 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.functionTests.util.Formatters;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -677,26 +678,44 @@ public class PrepareStatementTest extends BaseJDBCTestCase
     }
 
     /**
+     * <p>
+     * Regression test for DERBY-614. The test consists of two parts:
+     * </p>
+     *
+     * <p>
+     * <b>Part 1:</b>
      * Test how the server responds when the client closes the statement in
      * between split QRYDTA blocks. We have to cause a split QRYDTA block,
      * which we can do by having a bunch of moderately-sized rows which mostly
      * fill a 32K block followed by a single giant row which overflows the
      * block. Then, we fetch some of the rows, then close the result set.
-     * (This is a test for Derby bug 614.)
+     * </p>
+     *
+     * <p>
+     * <b>Part 2:</b>
+     * Verifies that the server-side statement state is cleaned up when a
+     * statement is re-used. Specifically, we set up a statement which has a
+     * non-null splitQRYDTA value, then we close that statement and re-use it
+     * for a totally unrelated query. If the splitQRYDTA wasn't cleaned up
+     * properly, it comes flooding back as the response to that unrelated
+     * query, causing a protocol parsing exception on the client.
+     * </p>
      */
     public void testSplitQRYDTABlock() throws Exception
     {
+        // Part 1:
+
         PreparedStatement ps
             = prepareStatement("create table jira614 (c1 varchar(10000))");
         assertUpdateCount(ps, 0);
         ps.close();
 
-        String workString = genString("a", 150);
+        String workString = Formatters.repeatChar("a", 150);
         ps = prepareStatement("insert into jira614 values (?)");
         ps.setString(1, workString);
         for (int row = 0; row < 210; ++row) ps.executeUpdate();
 
-        workString = genString("b", 10000);
+        workString = Formatters.repeatChar("b", 10000);
         ps.setString(1, workString);
         ps.executeUpdate();
         ps.close();
@@ -710,40 +729,14 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         }
         rs.close(); // This statement actually triggers the bug.
         ps.close();
-    }
 
-    /**
-     * Build a string with the given number of repetions of the given pattern.
-     *
-     * @param c String pattern to use when building string.
-     * @param howMany Number of repetions of the given pattern.
-     * @return String with given number of repetitions of pattern.
-     */
-    private static String genString(String c, int howMany)
-    {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < howMany; ++i) buf.append(c);
-        return buf.toString();
-     }
+        // Part 2:
 
-
-    /**
-     * Verifies that the server-side statement state is cleaned up when a
-     * statement is re-used. Specifically, we set up a statement which has a
-     * non-null splitQRYDTA value, then we close that statement and re-use it
-     * for a totally unrelated query. If the splitQRYDTA wasn't cleaned up
-     * properly, it comes flooding back as the response to that unrelated
-     * query, causing a protocol parsing exception on the client. (This is
-     * part two of the regression test for bug 614).
-     */
-    public void testServerStatementCleanUp() throws Exception
-    {
         // 1: set up a second table to use for an unrelated query:
         Statement stmt = createStatement();
         stmt.execute("create table jira614_a (c1 int)");
 
-        PreparedStatement ps =
-            prepareStatement("insert into jira614_a values (?)");
+        ps = prepareStatement("insert into jira614_a values (?)");
         for (int row = 1; row <= 5; ++row)
         {
             ps.setInt(1, row);
@@ -751,8 +744,8 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         }
 
         // 2: get the first statement into a splitQRYDTA state:
-        ResultSet rs = stmt.executeQuery("select * from jira614");
-        int rowNum = 0;
+        rs = stmt.executeQuery("select * from jira614");
+        rowNum = 0;
         while (rs.next())
         {
             if (++rowNum == 26) break;
