@@ -287,6 +287,7 @@ public class SequenceTest extends GeneratedColumnsHelper {
         Statement s = createStatement();
         s.executeUpdate("CREATE SEQUENCE mySeq1");
         s.execute("SELECT NEXT VALUE FOR mySeq1 from sys.systables");
+        s.execute("DROP SEQUENCE mySeq1 restrict");
     }
 
     /**
