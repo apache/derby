@@ -185,6 +185,8 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 
                 testParameterMetaData(paramMetaData, parameterMetaDataArray1);
 
+        stmt.execute("drop procedure dummyint");
+
 		stmt.close();
 		cs.close();
 	}
@@ -521,6 +523,15 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 	public void testMetatdataAfterProcRecompile () throws SQLException {
 
 		Statement stmt = createStatement();
+
+        stmt.executeUpdate("create procedure dummyint( "
+                + "in a integer, in b integer, "
+                + "out c integer, inout d integer) "
+                + "language java external name "
+                + "'org.apache.derbyTesting.functionTests."
+                + "tests.jdbcapi.ParameterMetaDataJdbc30Test.dummyint' "
+                + "parameter style java");
+
       		CallableStatement cs = prepareCall("CALL dummyint(?,?,?,?)");
           	cs.registerOutParameter(3,Types.INTEGER);
       		cs.registerOutParameter(4,Types.INTEGER);
@@ -569,6 +580,8 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
 			assertEquals("Unexpected DUMMYINT alias returned", 22222, cs.getInt(4));
 		}
       		cs.close();
+
+        stmt.execute("drop procedure dummyint");
 	}
 	/**
          * test ParameterMetaData for Java procedures with INTEGER parameters 
