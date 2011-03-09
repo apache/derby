@@ -133,12 +133,17 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
     }
 
     /**
-     * setUp: Just keep AutoCommit off.
+     * Set up the test environment.
      */
     protected void setUp() throws Exception {
         super.setUp();
         // Keep Autocommit off
         getConnection().setAutoCommit(false);
+        // Clear the tables created by the decorator
+        Statement s = createStatement();
+        s.execute("truncate table t1");
+        s.execute("truncate table t2");
+        commit();
     }
 
     /**
