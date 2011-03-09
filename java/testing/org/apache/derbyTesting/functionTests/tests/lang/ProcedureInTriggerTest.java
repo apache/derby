@@ -102,7 +102,6 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(rs);
         s.execute("drop trigger before_stmt_trig_no_sql");
         s.execute("drop trigger before_row_trig_no_sql");
-        s.execute("insert into t2 values (1,2), (2,4)");
         s.close();
     }
     
@@ -114,6 +113,7 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
      */
     public void testTriggerContainsSql() throws SQLException{
         Statement s = createStatement();
+        s.execute("insert into t2 values (1,2), (2,4)");
         s.execute("create trigger after_row_trig_contains_sql AFTER update on t2 for each ROW call proc_contains_sql()");
         // --- update 2 rows. check that trigger is fired - procedure should be called twice
         s.execute("update t2 set x = x*2");
@@ -306,6 +306,10 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
      */
     public void testTriggerNegative() throws SQLException {
         Statement s = createStatement();
+
+        // Insert some test data.
+        s.execute("insert into t1 values (5,'two'), (6,'four'), (8,'eight')");
+
         ResultSet rs;
         assertStatementError("42Y03",s,"create trigger call_non_existent_proc1 AFTER insert on t2 for each ROW call non_existent_proc()");
           rs = s.executeQuery("select count(*) from SYS.SYSTRIGGERS where CAST(triggername AS VARCHAR(128))='CALL_NON_EXISTENT_PROC1'");
@@ -449,6 +453,12 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          // -- check index is not dropped
          rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CAST(CONGLOMERATENAME AS VARCHAR(128))='IX' and ISINDEX");
          JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
+
+         // Clean up triggers.
+         s.execute("drop trigger alter_table_trig");
+         s.execute("drop trigger test_trig");
+         s.execute("drop trigger drop_index_trig");
+
          s.close();
     }
     
@@ -495,6 +505,27 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
                 suite.addTest(TestConfiguration.clientServerDecorator(basesuite()));
             }
             return suite;
+        }
+
+        /**
+         * Tear down the test environment.
+         */
+        protected void tearDown() throws Exception {
+            rollback();
+
+            // Remove all rows in the test tables, so that each test case
+            // sees the same initial state.
+            Statement stmt = createStatement();
+            stmt.execute("truncate table t1");
+            stmt.execute("truncate table t2");
+            commit();
+
+            // Reset the counters.
+            zeroArgCount = 0;
+            getConnectionProcCount = 0;
+            selectRowsCount = 0;
+
+            super.tearDown();
         }
 
         private void checkAndResetZeroArgCount(int count) {
