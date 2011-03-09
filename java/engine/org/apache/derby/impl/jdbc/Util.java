@@ -325,9 +325,7 @@ public abstract class Util  {
 		msg = e.getMessage();
 		if (msg == null) 
 			msg = e.getClass().getName();
-		return newEmbedSQLException(SQLState.SET_STREAM_FAILURE,
-			new Object[] {msg},
-                StandardException.getSeverityFromIdentifier(SQLState.SET_STREAM_FAILURE));
+        return generateCsSQLException(SQLState.SET_STREAM_FAILURE, msg, e);
 	}
 
 	static SQLException typeMisMatch(int targetSQLType) {
