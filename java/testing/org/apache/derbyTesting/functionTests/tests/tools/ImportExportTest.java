@@ -99,6 +99,13 @@ public class ImportExportTest extends BaseJDBCTestCase {
                 }
         };
 	}
+
+    /**
+     * Set up the test environment.
+     */
+    protected void setUp() throws Exception {
+        resetTables();
+    }
 	
 	public void testImportFromNonExistantFile() {
 		try {
@@ -131,32 +138,26 @@ public class ImportExportTest extends BaseJDBCTestCase {
 	}
 	
 	public void testWithDefaultOptions() throws Exception {
-		resetTables();
         doImportAndExport(null, "T1", null, null, null);
 	}
 	
 	public void testWithCodeset() throws Exception {
-		resetTables();
         doImportAndExport(null, "T1", null, null, "8859_1");
 	}
 
 	public void testDelimiterAndCodeset() throws Exception {
-		resetTables();
         doImportAndExport(null, "T1", "\t", "|", "8859_1");
 	}
 	
 	public void testSpecialDelimitersAndCodeset() throws Exception {
-		resetTables();
         doImportAndExport(null, "T1", "%", "&", "Cp1252");
 	}
 
 	public void testSpecialDelimitersAndUTF16() throws Exception {
-		resetTables();
         doImportAndExport(null, "T1", "%", "&", "UTF-16");
 	}
 	
 	public void testInvalidEncoding() throws Exception {
-		resetTables();
 		try {
             doImportAndExport(null, "T1", "^", "#", "INAVALID ENCODING");
             fail();
@@ -180,7 +181,6 @@ public class ImportExportTest extends BaseJDBCTestCase {
      * with the same name exists in a different schema (DERBY-3296).
      */
     public void testImportWithSameNameInDifferentSchema() throws Exception {
-        resetTables();
         doExport(null, "T1", null, null, null);
         Statement s = createStatement();
         s.executeUpdate("create table otherschema.t2(x int)");
@@ -199,8 +199,6 @@ public class ImportExportTest extends BaseJDBCTestCase {
      * are handled properly (DERBY-4042).
      */
     public void testQuotesInArguments() throws Exception {
-        resetTables();
-
         // Create schema names and table names containing both single quotes
         // and double quotes to expose bugs both for internally generated
         // string literals (enclosed in single quotes) and SQL identifiers
@@ -283,8 +281,6 @@ public class ImportExportTest extends BaseJDBCTestCase {
      */
     public void testCastingProblem() throws Exception
     {
-        resetTables();
-
         final String fileName = SupportFilesSetup.
                 getReadWrite("castCheck.dat").getPath();
 
@@ -409,7 +405,7 @@ public class ImportExportTest extends BaseJDBCTestCase {
     }
 	
 	/**
-	 * Called from each fixture that verifies data in the table.
+	 * Called from {@link #setUp()}.
 	 * Ensures that the import and export operate on a consistent
 	 * set of data.
 	 */
