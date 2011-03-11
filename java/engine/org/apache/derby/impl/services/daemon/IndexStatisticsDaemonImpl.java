@@ -553,9 +553,10 @@ public class IndexStatisticsDaemonImpl
             }
 
             // Log some information.
+            ConglomerateDescriptor cd = dd.getConglomerateDescriptor(index);
             log(asBackgroundTask, td,
                     "wrote stats for index "  + 
-                    dd.getConglomerateDescriptor(index).getDescriptorName() +
+                    (cd == null ? "n/a" : cd.getDescriptorName()) +
                     " (" + index + "): rows=" + numRows +
                     ", card=" + cardToStr(cardinality));
         }
