@@ -10070,8 +10070,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             new String [][] {{"1", "2"}, {"2", "3"}});
 
         st_mamta2.execute("drop table fkt2");
+        st_mamta2.execute("drop schema mamta2 restrict");
         st_mamta1.execute("drop table pkt2");
         st_mamta1.execute("drop table pkt1");
+        st_mamta1.execute("drop schema mamta1 restrict");
         st_mamta2.close();
         st_mamta1.close();
         mamta2.close();
@@ -10327,6 +10329,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // close result sets
         rs.close();
 
+        // Drop the objects created in this test case
+        dboSt.execute("drop table session.t2");
+        dboSt.execute("drop schema session restrict");
+
         // close statements
         dboSt.close();
         georgeSt.close();
@@ -10350,6 +10356,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
 
         st_mamta1.execute(
             "create view v_4502( a ) as select tablename from sys.systables");
+
+        // Clean up
+        st_mamta1.execute("drop view v_4502");
+        st_mamta1.execute("drop schema mamta1 restrict");
     }
     
 }
