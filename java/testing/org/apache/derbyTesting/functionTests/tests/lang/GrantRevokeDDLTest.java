@@ -10241,6 +10241,10 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
 		" ( select max(x) + 2 from user1.t4191 )");
 
         user1St.execute("drop table t4191");
+        user1St.execute("drop table t4191_table2");
+        user1St.execute("drop view view_t4191_table3");
+        user1St.execute("drop table t4191_table3");
+        user1St.execute("drop schema user1 restrict");
         user1.close();
         user2.close();
 }
