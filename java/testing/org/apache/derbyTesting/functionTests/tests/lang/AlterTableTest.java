@@ -1795,6 +1795,10 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         createTestObjects(st);
         int sysdependsRowCountBeforeCreateTrigger;
         int sysdependsRowCountAfterCreateTrigger; 
+        int countAfter1Trigger;
+        int countAfter2Triggers;
+        int countAfter3Triggers;
+        int countAfter4Triggers;
 
         st.executeUpdate("create table atdc_0 (a integer)");
         st.executeUpdate("create table atdc_1 (a integer, b integer)");
@@ -2345,7 +2349,9 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         JDBC.assertEmpty(st.executeQuery(
         		" select triggername from sys.systriggers where " +
         		"triggername in ('ATDC_13_TRIGGER_1', "+
-        		"'ATDC_13_TRIGGER_2', 'ATDC_13_TRIGGER_3')"));
+        		"'ATDC_13_TRIGGER_2', 'ATDC_13_TRIGGER_3'," +
+        		"'ATDC_13_TRIGGER_4', 'ATDC_13_TRIGGER_5'," +
+        		"'ATDC_13_TRIGGER_6')"));        
         Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
         		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeCreateTrigger);
         st.executeUpdate("drop table ATDC_13");
@@ -2444,6 +2450,344 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
         st.executeUpdate("drop table ATDC_14_TAB1");
         st.executeUpdate("drop table ATDC_14_TAB2");
+        
+        // Start of another test for DERBY-5044. Test INSERT/DELETE/UPDATE
+        // inside the trigger action from base tables
+        createTableAndInsertData(st, "ATDC_13_TAB1", "C11", "C12");
+        createTableAndInsertData(st, "ATDC_13_TAB1_BACKUP", "C11", "C12");
+        createTableAndInsertData(st, "ATDC_13_TAB2", "C21", "C22");
+        createTableAndInsertData(st, "ATDC_13_TAB3", "C31", "C32");
+        sysdependsRowCountBeforeCreateTrigger = numberOfRowsInSysdepends(st);
+        
+        //Test triggers with trigger action doing INSERT
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_1 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "INSERT INTO ATDC_13_TAB1_BACKUP " +
+                " SELECT C31, C32 from ATDC_13_TAB3");
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_2 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "INSERT INTO ATDC_13_TAB1_BACKUP " +
+                " SELECT * from ATDC_13_TAB3");
+        countAfter2Triggers = numberOfRowsInSysdepends(st);
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_3 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "INSERT INTO ATDC_13_TAB1_BACKUP VALUES(1,1)");
+        countAfter3Triggers = numberOfRowsInSysdepends(st);
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_4 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "INSERT INTO ATDC_13_TAB1_BACKUP(C11) " +
+                " SELECT C21 from ATDC_13_TAB2");
+        countAfter4Triggers = numberOfRowsInSysdepends(st);
+        sysdependsRowCountAfterCreateTrigger = numberOfRowsInSysdepends(st);
+/*
+        DERBY-5120
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        st.executeUpdate("update ATDC_13_TAB1 set c12=11");
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        rs = st.executeQuery("select * from ATDC_13_TAB1_BACKUP ORDER BY C11, C12");
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        JDBC.assertFullResultSet(rs, new String[][]{
+        		{"1","1"}, {"1","11"}, {"1","11"}, {"1","11"}, {"1",null} });
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        st.executeUpdate("delete from ATDC_13_TAB1_BACKUP");
+*/
+        // following is not the right behavior. we should have gotten an error
+        // because column being dropped is getting used in a trigger action 
+        st.executeUpdate("alter table ATDC_13_TAB2 drop column c21 restrict");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"},
+            	{"ATDC_13_TAB1_TRIGGER_4"}});
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following won't be needed
+        st.executeUpdate("alter table ATDC_13_TAB2 add column c21 int");
+        
+        // following is not the right behavior. we should have dropped 
+        // dependent triggers  
+        st.executeUpdate("alter table ATDC_13_TAB2 drop column c21");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"},
+            	{"ATDC_13_TAB1_TRIGGER_4"}});
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        st.executeUpdate("alter table ATDC_13_TAB2 add column c21 int");
+        
+        // following is not the right behavior. we should have gotten an error
+        // because column being dropped is getting used in a trigger action 
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP drop column c11 restrict");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"},
+            	{"ATDC_13_TAB1_TRIGGER_4"}});
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following won't be needed
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP add column c11 int");
+        // following is not the right behavior. we should have gotten an error
+        // because column being dropped is getting used in a trigger action 
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP drop column c11");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"},
+            	{"ATDC_13_TAB1_TRIGGER_4"}});
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP add column c11 int");
+        //Done testing triggers with trigger action doing INSERT
+        st.executeUpdate("drop trigger ATDC_13_TAB1_TRIGGER_1");
+        st.executeUpdate("drop trigger ATDC_13_TAB1_TRIGGER_2");
+        st.executeUpdate("drop trigger ATDC_13_TAB1_TRIGGER_3");
+        st.executeUpdate("drop trigger ATDC_13_TAB1_TRIGGER_4");
+        
+        //Test triggers with trigger action doing UPDATE
+        sysdependsRowCountBeforeCreateTrigger = numberOfRowsInSysdepends(st);
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_1 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "UPDATE ATDC_13_TAB1_BACKUP SET C11=123 " +
+                "WHERE C12>1");
+        countAfter1Trigger = numberOfRowsInSysdepends(st);
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_2 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "UPDATE ATDC_13_TAB2 SET C21=123");
+        countAfter2Triggers = numberOfRowsInSysdepends(st);
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_3 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "UPDATE ATDC_13_TAB3 SET C31=123 WHERE "+
+                "C32 IN (values(1))");
+        countAfter3Triggers = numberOfRowsInSysdepends(st);
+        sysdependsRowCountAfterCreateTrigger = numberOfRowsInSysdepends(st);
+
+        // following is not the right behavior. we should have gotten an error
+        // because column being dropped is getting used in a trigger action 
+        st.executeUpdate("alter table ATDC_13_TAB3 drop column c31 restrict");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"}});
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following won't be needed
+        st.executeUpdate("alter table ATDC_13_TAB3 add column c31 int");
+        
+        // following is not the right behavior. we should have dropped 
+        // dependent triggers  
+        st.executeUpdate("alter table ATDC_13_TAB3 drop column c31");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"}});
+        // DERBY-5044 The row count in systriggers should  have been 
+        // countAfter2Triggers
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following should be rewritten
+        st.executeUpdate("alter table ATDC_13_TAB3 add column c31 int");
+
+        // following is not the right behavior. we should have gotten an error
+        // because column being dropped is getting used in a trigger action 
+        st.executeUpdate("alter table ATDC_13_TAB2 drop column c21 restrict");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"}});
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following won't be needed
+        st.executeUpdate("alter table ATDC_13_TAB2 add column c21 int");
+        
+        // following is not the right behavior. we should have dropped 
+        // dependent triggers  
+        st.executeUpdate("alter table ATDC_13_TAB2 drop column c21");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"}});
+        // DERBY-5044 The row count in systriggers should  have been 
+        // countAfter1Trigger
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following should be rewritten
+        st.executeUpdate("alter table ATDC_13_TAB2 add column c21 int");
+
+        // following is not the right behavior. we should have gotten an error
+        // because column being dropped is getting used in a trigger action 
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP drop column c12 restrict");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"}});
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following won't be needed
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP add column c12 int");
+        
+        // following is not the right behavior. we should have dropped 
+        // dependent triggers  
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP drop column c12");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"}});
+        // DERBY-5044 The row count in systriggers should  have been 
+        // countAfter1Trigger
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following should be rewritten
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP add column c12 int");
+        //Done testing triggers with trigger action doing UPDATE
+        st.executeUpdate("drop trigger ATDC_13_TAB1_TRIGGER_1");
+        st.executeUpdate("drop trigger ATDC_13_TAB1_TRIGGER_2");
+        st.executeUpdate("drop trigger ATDC_13_TAB1_TRIGGER_3");
+
+        //Test triggers with trigger action doing DELETE
+        sysdependsRowCountBeforeCreateTrigger = numberOfRowsInSysdepends(st);
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_1 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "DELETE FROM ATDC_13_TAB1_BACKUP " +
+                "WHERE C12>1");
+        countAfter1Trigger = numberOfRowsInSysdepends(st);
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_2 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "DELETE FROM ATDC_13_TAB3 WHERE "+
+                "C32 IN (values(1))");
+        countAfter2Triggers = numberOfRowsInSysdepends(st);
+        sysdependsRowCountAfterCreateTrigger = numberOfRowsInSysdepends(st);
+
+        // following is not the right behavior. we should have gotten an error
+        // because column being dropped is getting used in a trigger action 
+        st.executeUpdate("alter table ATDC_13_TAB3 drop column c32 restrict");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}});
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following won't be needed
+        st.executeUpdate("alter table ATDC_13_TAB3 add column c32 int");
+        
+        // following is not the right behavior. we should have dropped 
+        // dependent triggers  
+        st.executeUpdate("alter table ATDC_13_TAB3 drop column c32");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}});
+        // DERBY-5044 The row count in systriggers should  have been 
+        // countAfter1Trigger
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following should be rewritten
+        st.executeUpdate("alter table ATDC_13_TAB3 add column c32 int");
+
+        // following is not the right behavior. we should have gotten an error
+        // because column being dropped is getting used in a trigger action 
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP drop column c12 restrict");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}});
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following won't be needed
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP add column c12 int");
+        
+        // following is not the right behavior. we should have dropped 
+        // dependent triggers  
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP drop column c12");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}});
+        // DERBY-5044 The row count in systriggers should  have been 
+        // countAfter1Trigger
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following should be rewritten
+        st.executeUpdate("alter table ATDC_13_TAB1_BACKUP add column c12 int");
+
+        //Done testing triggers with trigger action doing DELETE
+        st.executeUpdate("drop trigger ATDC_13_TAB1_TRIGGER_1");
+        st.executeUpdate("drop trigger ATDC_13_TAB1_TRIGGER_2");
+
+        st.executeUpdate("drop table ATDC_13_TAB1");
+        st.executeUpdate("drop table ATDC_13_TAB1_BACKUP");
+        st.executeUpdate("drop table ATDC_13_TAB2");
+        st.executeUpdate("drop table ATDC_13_TAB3");
+        // End of that test
+        
+        // Start of another test for DERBY-5044. 
+        // Test SELECT from views inside the trigger action. The drop column 
+        // detects the view dependnecy and does not allow drop column restrict 
+        // to work but cascade option only drops the view but not the trigger.
+        createTableAndInsertData(st, "ATDC_13_TAB1", "C11", "C12");
+        createTableAndInsertData(st, "ATDC_13_TAB2", "C11", "C12");
+        createTableAndInsertData(st, "ATDC_13_TAB3", "C11", "C12");
+        st.executeUpdate("create view ATDC_13_VIEW1 as " +
+        		"select c11 from ATDC_13_TAB2");
+        st.executeUpdate("create view ATDC_13_VIEW2 as " +
+        		"select c12 from ATDC_13_TAB3 where c12>0");
+        st.executeUpdate("create view ATDC_13_VIEW3 as " +
+		"select * from ATDC_13_TAB2");
+        //Test triggers with trigger action using views
+        sysdependsRowCountBeforeCreateTrigger = numberOfRowsInSysdepends(st);
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_1 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "SELECT * from ATDC_13_VIEW1 WHERE C11>0");
+        countAfter1Trigger = numberOfRowsInSysdepends(st);
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_2 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "SELECT * from ATDC_13_VIEW2 ");
+        countAfter2Triggers = numberOfRowsInSysdepends(st);
+        st.executeUpdate(
+                " create trigger ATDC_13_TAB1_trigger_3 after update " +
+                "on ATDC_13_TAB1 for each row " +
+                "SELECT * from ATDC_13_VIEW3");
+        countAfter3Triggers = numberOfRowsInSysdepends(st);
+        sysdependsRowCountAfterCreateTrigger = numberOfRowsInSysdepends(st);
+
+        // DROP COLUMN RESTRICT fails because there is a view using the column
+        assertStatementError("X0Y23", st,
+		"alter table ATDC_13_TAB3 drop column c12 restrict");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"}});
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        
+        // following is not the right behavior. we should have dropped 
+        // dependent triggers while dropping dependent view
+        st.executeUpdate("alter table ATDC_13_TAB3 drop column c12");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"}});
+        // One row from sysdepends got dropped because of a view getting
+        // dropped
+        sysdependsRowCountAfterCreateTrigger = sysdependsRowCountAfterCreateTrigger-1;
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following should be rewritten
+        st.executeUpdate("alter table ATDC_13_TAB3 add column c32 int");
+
+        // DROP COLUMN RESTRICT fails because there is a view using the column
+        assertStatementError("X0Y23", st,
+		"alter table ATDC_13_TAB2 drop column c11 restrict");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"}});
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        
+        // following is not the right behavior. we should have dropped 
+        // dependent triggers while dropping dependent view
+        st.executeUpdate("alter table ATDC_13_TAB2 drop column c11");
+        triggersExist(st, new String[][]{{"ATDC_13_TAB1_TRIGGER_1"},
+            	{"ATDC_13_TAB1_TRIGGER_2"}, {"ATDC_13_TAB1_TRIGGER_3"}});
+        // Two rows from sysdepends got dropped because of 2 views getting
+        // dropped
+        sysdependsRowCountAfterCreateTrigger = sysdependsRowCountAfterCreateTrigger-2;
+        // DERBY-5044 The row count in systriggers should  have been 
+        // countAfter1Trigger
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should reduce",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountAfterCreateTrigger);
+        // After DERBY-5044 is fixed, following should be rewritten
+        st.executeUpdate("alter table ATDC_13_TAB2 add column c11 int");
+
+        st.executeUpdate("drop trigger ATDC_13_TAB1_TRIGGER_1");
+        st.executeUpdate("drop table ATDC_13_TAB1");
+        st.executeUpdate("drop table ATDC_13_TAB2");
+        st.executeUpdate("drop table ATDC_13_TAB3");
+        // End of that test
+
         
         // Another test
         // ALTER TABLE DROP COLUMN in following test case causes the column 
