@@ -559,6 +559,18 @@ public class IndexStatisticsDaemonImpl
                     (cd == null ? "n/a" : cd.getDescriptorName()) +
                     " (" + index + "): rows=" + numRows +
                     ", card=" + cardToStr(cardinality));
+
+            // DERBY-5045: When running as a background task, we don't take
+            // intention locks that prevent dropping the table or its indexes.
+            // So there is a possibility that this index was dropped before
+            // we wrote the statistics to the SYSSTATISTICS table. If the table
+            // isn't there anymore, issue a rollback to prevent inserting rows
+            // for non-existent indexes in SYSSTATISTICS.
+            if (asBackgroundTask && cd == null) {
+                log(asBackgroundTask, td,
+                    "rolled back index stats because index has been dropped");
+                lcc.internalRollback();
+            }
         }
 
         // Only commit tx as we go if running as background task.
