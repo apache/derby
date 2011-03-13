@@ -43,6 +43,17 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public final class AccessTest extends BaseJDBCTestCase {
 
     /**
+     * Array with names of database properties that may be modified by
+     * the test cases in this class. The properties will be cleared in
+     * {@link #tearDown()}.
+     */
+    private static final String[] MODIFIED_DB_PROPS = {
+        "derby.storage.pageSize",
+        "derby.storage.minimumRecordSize",
+        "derby.storage.pageReservedSpace",
+    };
+
+    /**
      * Public constructor required for running test as standalone JUnit.
      */
     public AccessTest(String name)
@@ -73,7 +84,26 @@ public final class AccessTest extends BaseJDBCTestCase {
             }
         };
     }    
-    
+
+    /**
+     * Tear down the test environment.
+     */
+    protected void tearDown() throws Exception {
+        rollback();
+
+        // Clear the database properties set by this test so that they
+        // don't affect other tests.
+        PreparedStatement clearProp = prepareStatement(
+                "CALL SYSCS_UTIL.SYSCS_SET_DATABASE_PROPERTY(?, NULL)");
+        for (int i = 0; i < MODIFIED_DB_PROPS.length; i++) {
+            clearProp.setString(1, MODIFIED_DB_PROPS[i]);
+            clearProp.executeUpdate();
+        }
+        commit();
+
+        super.tearDown();
+    }
+
     //---------------------------------------------------------
     //    test qualifier skip code on fields with length  
     //    having the 8th bit set in low order length byte. 
