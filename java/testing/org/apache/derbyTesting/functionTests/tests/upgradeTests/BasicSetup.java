@@ -79,8 +79,14 @@ public class BasicSetup extends UpgradeChange {
     		"VALUES(20)");
             break;
         case PH_POST_SOFT_UPGRADE:
-            s.executeUpdate("INSERT INTO Trigger_t1(max_size) "+
-    		"VALUES(20)");
+            // DERBY-5105: The post soft upgrade phase may fail with
+            // NoSuchMethodError if the old version suffers from DERBY-4835.
+            // Only execute this part of the test for versions that don't
+            // have this problem.
+            if (!oldSuffersFromDerby4835()) {
+                s.executeUpdate("INSERT INTO Trigger_t1(max_size) " +
+                                "VALUES(20)");
+            }
             break;
         case PH_HARD_UPGRADE:
             s.executeUpdate("INSERT INTO Trigger_t1(max_size) "+
@@ -88,6 +94,15 @@ public class BasicSetup extends UpgradeChange {
             break;
         }
         s.close();
+    }
+
+    /**
+     * Check if the old version from which we upgrade suffers from DERBY-4835.
+     */
+    private boolean oldSuffersFromDerby4835() {
+        // DERBY-4835 exists on 10.5 and 10.6 prior to 10.5.3.2 and 10.6.2.3.
+        return (oldAtLeast(10, 5) && oldLessThan(10, 5, 3, 2)) ||
+                (oldAtLeast(10, 6) && oldLessThan(10, 6, 2, 3));
     }
 
     /**
