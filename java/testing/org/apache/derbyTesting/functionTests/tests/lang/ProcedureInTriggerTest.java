@@ -454,10 +454,11 @@ public class ProcedureInTriggerTest extends BaseJDBCTestCase {
          rs = s.executeQuery("select count(*) from SYS.SYSCONGLOMERATES where CAST(CONGLOMERATENAME AS VARCHAR(128))='IX' and ISINDEX");
          JDBC.assertFullResultSet(rs, new String[][] {{"1"}});
 
-         // Clean up triggers.
+         // Clean up objects created by the test case.
          s.execute("drop trigger alter_table_trig");
          s.execute("drop trigger test_trig");
          s.execute("drop trigger drop_index_trig");
+         s.execute("drop index ix");
 
          s.close();
     }
