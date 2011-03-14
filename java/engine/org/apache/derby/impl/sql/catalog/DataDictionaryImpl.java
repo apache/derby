@@ -641,8 +641,12 @@ public final class	DataDictionaryImpl
         // system wide property. May be overridden by a database specific
         // property later on.
         // The default is that automatic index statistics update is enabled.
-        indexStatsUpdateDisabled = !PropertyUtil.getSystemBoolean(
-                Property.STORAGE_AUTO_INDEX_STATS, true);
+        //
+        // Disabled for the 10.8.1 release. Will be re-enabled on the trunk.
+        //
+        indexStatsUpdateDisabled = !PropertyUtil.getSystemBoolean
+            ( Property.STORAGE_AUTO_INDEX_STATS, false );
+        //        (Property.STORAGE_AUTO_INDEX_STATS, true);
 
         // See if we should enable logging of index stats activities.
         indexStatsUpdateLogging = PropertyUtil.getSystemBoolean(
