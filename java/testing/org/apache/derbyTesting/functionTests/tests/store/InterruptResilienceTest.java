@@ -95,7 +95,12 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
             // Remove this condition when that issue is solved in IBM VM 1.5 SR13.
             if (getSystemProperty("java.version").startsWith("1.5.0"))
             {
-                println("Test skipped for this VM, cf. DERBY-4463");
+                println("InterruptResilienceTest skipped for this VM, cf. DERBY-4463");
+                return new TestSuite(testName);
+            }
+            if (getSystemProperty("java.version").startsWith("1.4.2"))
+            {
+                println("InterruptResilienceTest skipped for this VM, cf. DERBY-5074/5109");
                 return new TestSuite(testName);
             }
         }
