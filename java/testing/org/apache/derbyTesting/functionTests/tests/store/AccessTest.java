@@ -90,7 +90,16 @@ public final class AccessTest extends BaseJDBCTestCase {
      */
     protected void tearDown() throws Exception {
         rollback();
-
+        Statement s = createStatement();
+        //DERBY-5119 Table foo is used in lots of fixtures.
+        // make sure it gets cleaned up.
+        try {
+            s.executeUpdate("DROP TABLE FOO");
+        } catch (SQLException se) {
+            // if the table couldn't drop make sure it is because it doesn't
+            // exist
+            assertSQLState("42Y55",se);
+        }
         // Clear the database properties set by this test so that they
         // don't affect other tests.
         PreparedStatement clearProp = prepareStatement(
