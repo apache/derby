@@ -120,8 +120,6 @@ This is a feature release. The following new features were added:
 the pre-GA OpenJDK 7 build 131 available at http://download.java.net/jdk7/ on March 3, 2011. Derby's implementation of these interfaces may
 change in a future release in the highly unlikely event that the actual GA version of these interfaces changes.</li>
 	
-<li><b>Automatic calculation of index stats</b> - Derby recalculates optimizer statistics on tables whose statistics have grown stale.</li>
-	
 <li><b>Improved interrupt handling </b> - Interrupting connection threads no longer crashes the Derby engine.</li>
 	
 <li><b>MAX optimization</b> - On indexed tables, MAX queries run faster in more cases.</li>
