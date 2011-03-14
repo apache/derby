@@ -594,6 +594,29 @@ public abstract class BaseTestCase
     }
 
     /**
+     * Determine if there is a platform match with os.name.
+     * This method uses an exact equals. Other methods might be useful
+     * later for starts with.
+     * 
+     * @param osName value we want to check against the system property
+     *      os.name
+     * @return return true if osName is an exact match for osName
+     */
+    
+    public static final boolean isPlatform(String osName)  {
+
+        return getSystemProperty("os.name").equals(osName);
+    }
+    
+    /**
+     * Check if this is java 5
+     * @return true if java.version system property starts with 1.5
+     */
+    public static final boolean isJava5() {
+        return getSystemProperty("java.version").startsWith("1.5");
+    }
+   
+    /**
      * Check if we have old style (before Sun Java 1.7) Solaris interruptible
      * IO. On Sun Java 1.5 >= update 22 and Sun Java 1.6 this can be disabled
      * with Java option {@code -XX:-UseVMInterruptibleIO}. On Sun Java 1.7 it
