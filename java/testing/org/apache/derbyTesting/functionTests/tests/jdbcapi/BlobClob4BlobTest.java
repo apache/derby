@@ -3513,9 +3513,48 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         
     }
 
+    /**
+     * Test that Blob.truncate() resets the position before copying the first
+     * N bytes into a new holder object. The bug is only triggered if the
+     * BLOB returned as a stream from store. That is, it must be larger than
+     * one page so that it's not materialized. Regression test for DERBY-5113.
+     */
+    public void testDerby5113() throws Exception {
+        setAutoCommit(false);
 
+        // Insert a BLOB larger than one page. Normally, this means larger
+        // than 32K, but the test tables use smaller pages, see comment in
+        // setUp().
+        PreparedStatement insert = prepareStatement(
+                "insert into testblob(a) values ?");
+        insert.setBinaryStream(1, new LoopingAlphabetStream(5000), 5000);
+        insert.executeUpdate();
 
+        // Retrieve the BLOB.
+        Statement s = createStatement();
+        ResultSet rs = s.executeQuery("select a from testblob");
+        rs.next();
+        Blob blob = rs.getBlob(1);
 
+        // Now call getBytes() so that the position in the underlying stream
+        // is changed.
+        byte[] bytes = blob.getBytes(1, 3000);
+        assertEquals(new LoopingAlphabetStream(3000),
+                     new ByteArrayInputStream(bytes));
+
+        // Truncate the BLOB. This used to fail with "Reached EOF prematurely"
+        // because truncate() didn't move the position in the underlying stream
+        // back to the beginning.
+        blob.truncate(4000);
+
+        // Verify that the BLOB was truncated correctly.
+        assertEquals(4000, blob.length());
+        bytes = blob.getBytes(1, 4000);
+        assertEquals(new LoopingAlphabetStream(4000),
+                     new ByteArrayInputStream(bytes));
+
+        rs.close();
+    }
         
     
     private static final String BLOB_BAD_POSITION = "XJ070";

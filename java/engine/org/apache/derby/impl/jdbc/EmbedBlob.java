@@ -1023,6 +1023,7 @@ final class EmbedBlob extends ConnectionChild implements Blob, EngineLOB
                     control.truncate (len);
                 }
                 else {
+                    setBlobPosition(0); // copy from the beginning
                     control = new LOBStreamControl (getEmbedConnection());
                     control.copyData (myStream, len);
                     myStream.close();
