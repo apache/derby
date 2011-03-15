@@ -424,12 +424,11 @@ public class IndexStatisticsDaemonImpl
         {
             if (conglomerateNumber[indexNumber] == -1)
                 continue;
+
             // Check if daemon has been disabled.
             if (asBackgroundTask) {
-                synchronized (queue) {
-                    if (daemonDisabled) {
-                        break;
-                    }
+                if (isShuttingDown()) {
+                    break;
                 }
             }
 
@@ -458,9 +457,25 @@ public class IndexStatisticsDaemonImpl
 
             try
             {
-                int rowsFetched = 0;
+                int     rowsFetched           = 0;
+                boolean giving_up_on_shutdown = false;
+
                 while ((rowsFetched = cmp.fetchRows(gsc)) > 0)
                 {
+                    // DERBY-5108
+                    // Check if daemon has been disabled, and if so stop
+                    // scan and exit asap.  On shutdown the system will
+                    // send interrupts, but the system currently will
+                    // recover from these during the scan and allow the
+                    // scan to finish. Checking here after each group
+                    // I/O that is processed as a convenient point.
+                    if (asBackgroundTask) {
+                        if (isShuttingDown()) {
+                            giving_up_on_shutdown = true;
+                            break;
+                        }
+                    }
+
                     for (int i = 0; i < rowsFetched; i++)
                     {
                         int whichPositionChanged = cmp.compareWithPrevKey(i);
@@ -469,7 +484,12 @@ public class IndexStatisticsDaemonImpl
                                 cardinality[j]++;
                         }
                     }
+
                 } // while
+
+                if (giving_up_on_shutdown)
+                    break;
+
                 gsc.setEstimatedRowCount(cmp.getRowCount());
             } // try
             finally
@@ -478,6 +498,7 @@ public class IndexStatisticsDaemonImpl
                 gsc = null;
             }
             scanTimes[sci++][2] = System.currentTimeMillis();
+
             // We have scanned the indexes, so let's give this a few attempts
             // before giving up.
             int retries = 0;
@@ -502,6 +523,7 @@ public class IndexStatisticsDaemonImpl
                 }
             }
         }
+
         log(asBackgroundTask, td, fmtScanTimes(scanTimes));
     }
 
@@ -863,6 +885,8 @@ public class IndexStatisticsDaemonImpl
      * first time the method is invoked.
      */
     public void stop() {
+        Thread threadToWaitFor = null;
+
         synchronized (queue) {
             if (!daemonDisabled) {
                 StringBuffer sb = new StringBuffer(100);
@@ -886,11 +910,25 @@ public class IndexStatisticsDaemonImpl
                     daemonLCC = null;
                 }
                 daemonDisabled = true;
+                threadToWaitFor = runningThread;
                 runningThread = null;
                 queue.clear();
             }
+
+        }
+
+        // Wait for the currently running thread, if there is one. Must do
+        // this outside of the synchronized block so that we don't deadlock
+        // with the thread.
+        if (threadToWaitFor != null) {
+            try {
+                threadToWaitFor.join();
+            } catch (InterruptedException ie) {
+                // Never mind. The thread will die eventually.
+            }
         }
     }
+
 
     /**
      * Handles fatal errors that will cause the daemon to be shut down.
