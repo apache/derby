@@ -93,7 +93,11 @@ change in a future release in the highly unlikely event that the actual GA versi
 	
 
 <li>
-<b>Improved interrupt handling </b> - Interrupting connection threads no longer crashes the Derby engine.</li>
+<b>Automatic calculation of index statistics</b> - Applications can ask Derby to automatically refresh statistics which help Derby pick better query plans.</li>
+	
+
+<li>
+<b>Improved interrupt handling</b> - Interrupting connection threads no longer crashes the Derby engine.</li>
 	
 
 <li>
@@ -118,6 +122,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5124">DERBY-5124</a></td><td>NPE or assert failure printed when dropping table while statistics are written out</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5119">DERBY-5119</a></td><td>testQualifiers(org.apache.derbyTesting.functionTests.tests.store.AccessTest)java.sql.SQLException: Table/View 'FOO' already exists in Schema 'APP'.</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5117">DERBY-5117</a></td><td>ParameterMetaDataJdbc30Test fails with "'DUMMYINT' is not recognized as a function or procedure"</td>
@@ -499,6 +506,12 @@ change in a future release in the highly unlikely event that the actual GA versi
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4573">DERBY-4573</a></td><td>Reference manual is unclear about the purpose of REFERENCEDCOLUMNS in SYSTRIGGERS table.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4540">DERBY-4540</a></td><td>'AssertionFailedError' in 'store.AccessTest.testCS4595B_UniqueIndex(AccessTest.java:1729)' on SUSE Linux / IBM JIT  - r9</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-3980">DERBY-3980</a></td><td>Conflicting select then update with REPEATABLE_READ gives lock timeout instead of deadlock</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-3258">DERBY-3258</a></td><td>'Unexpected row count: expected:&lt;0&gt; but was:&lt;3&gt;' in testReleaseCompileLocks</td>
