@@ -513,7 +513,9 @@ public abstract class BaseTestCase
 	            expectedExitValue, exitValue);
 	    if (expectedString != null) {
 	        for (int i = 0; i < expectedString.length; i++) {
-	            assertFalse(output.indexOf(expectedString[i]) < 0);
+	            assertTrue("Could not find expectedString:" +
+	                    expectedString + " in output:" + output,
+	                    output.indexOf(expectedString[i]) >= 0);
 	        }
 	    }
 	}
