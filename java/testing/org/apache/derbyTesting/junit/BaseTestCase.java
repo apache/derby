@@ -506,8 +506,11 @@ public abstract class BaseTestCase
 	    Process pr = execJavaCmd(cmd);
 	    String output = readProcessOutput(pr);
 	    int exitValue = pr.exitValue();
-
-	    Assert.assertEquals(expectedExitValue, exitValue);
+	    Assert.assertEquals("expectedExitValue:" + expectedExitValue +
+	            " does not match exitValue:" + exitValue +"\n" +
+	            "expected output:" + expectedString + 
+	            " actual output:" + output,
+	            expectedExitValue, exitValue);
 	    if (expectedString != null) {
 	        for (int i = 0; i < expectedString.length; i++) {
 	            assertFalse(output.indexOf(expectedString[i]) < 0);
