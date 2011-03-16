@@ -4652,8 +4652,7 @@ public final class	DataDictionaryImpl
 			boolean createTriggerTime
 			) throws StandardException
 	{
-		boolean in10_7_orHigherVersion =
-			checkVersion(DataDictionary.DD_VERSION_DERBY_10_7,null);
+		boolean in10_7_orHigherVersion = false;
 		
 		StringBuffer newText = new StringBuffer();
 		int start = 0;
@@ -4937,6 +4936,14 @@ public final class	DataDictionaryImpl
 			newText.append(triggerDefinition.substring(start, tokBeginOffset-actionOffset));
 			int colPositionInRuntimeResultSet = -1;
 			ColumnDescriptor triggerColDesc = triggerTableDescriptor.getColumnDescriptor(colName);
+			//DERBY-5121 We can come here if the column being used in trigger
+			// action is getting dropped and we have come here through that
+			// ALTER TABLE DROP COLUMN. In that case, we will not find the
+			// column in the trigger table.
+			if (triggerColDesc == null) {
+				throw StandardException.newException(
+		                SQLState.LANG_COLUMN_NOT_FOUND, tableName+"."+colName);
+			}
 			int colPositionInTriggerTable = triggerColDesc.getPosition();
 
 			//This part of code is little tricky and following will help
