@@ -131,7 +131,7 @@ public class JDBCDataSource {
     }
     
     /**
-     * Return a DataSource object of the passsed in type
+     * Return a DataSource object of the passed in type
      * configured with the passed in Java bean properties.
      * This will actually work with any object that has Java bean
      * setter methods.
@@ -227,7 +227,7 @@ public class JDBCDataSource {
     
     /**
      * Clear a String Java bean property by setting it to null.
-     * @param ds ds DataSource to have property cleared
+     * @param ds DataSource to have property cleared
      * @param property name of property.
      */
     public static void clearStringBeanProperty(Object ds, String property)
