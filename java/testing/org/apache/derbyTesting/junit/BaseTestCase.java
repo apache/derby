@@ -514,7 +514,7 @@ public abstract class BaseTestCase
 	    if (expectedString != null) {
 	        for (int i = 0; i < expectedString.length; i++) {
 	            assertTrue("Could not find expectedString:" +
-	                    expectedString + " in output:" + output,
+	                    expectedString[i] + " in output:" + output,
 	                    output.indexOf(expectedString[i]) >= 0);
 	        }
 	    }
