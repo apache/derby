@@ -25,7 +25,6 @@ import java.util.Properties;
 import java.util.Enumeration;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import junit.framework.Test;
-import junit.framework.TestSuite;
 import org.apache.derby.drda.NetworkServerControl;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -52,15 +51,20 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
 
     public static Test suite()
     {
-        TestSuite suite = new TestSuite("GetCurrentPropertiesTest");
-        Test test = TestConfiguration
-            .clientServerSuite(GetCurrentPropertiesTest.class);
+        // Use a fixed order for the test cases so that we know the exact
+        // order in which they run. Some of them depend on the connection
+        // number having a specific value, which can only be guaranteed if
+        // we know exactly how many connections have been opened, hence the
+        // need for a fixed order. Some also depend on seeing property values
+        // set by the previous test case.
+        Test test =
+                TestConfiguration.orderedSuite(GetCurrentPropertiesTest.class);
+        test = TestConfiguration.clientServerDecorator(test);
         // Install a security manager using the special policy file.
         test = decorateWithPolicy(test);
-        suite.addTest(test);
         // return suite; to ensure that nothing interferes with setting of
         // properties, wrap in singleUseDatabaseDecorator 
-        return TestConfiguration.singleUseDatabaseDecorator(suite);
+        return TestConfiguration.singleUseDatabaseDecorator(test);
     }
     /**
      * Construct the name of the server policy file.
@@ -104,7 +108,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
      * 
      * @throws Exception
      */
-    public void testPropertiesBeforeConnection() throws Exception {
+    public void test_01_propertiesBeforeConnection() throws Exception {
         Properties p = null;
         String  userDir = getSystemProperty( "user.dir" );
         String traceDir = userDir + File.separator + "system";
@@ -138,7 +142,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
      * 
      * @throws Exception
      */
-    public void testPropertiesAfterConnection() throws Exception { 
+    public void test_02_propertiesAfterConnection() throws Exception {
         Properties p = null;
         String  userDir = getSystemProperty( "user.dir" );
         String traceDir = userDir + File.separator + "system";
@@ -176,7 +180,7 @@ public class GetCurrentPropertiesTest extends BaseJDBCTestCase {
      * 
      * @throws Exception
      */
-    public void testPropertiesTraceOn() throws Exception { 
+    public void test_03_propertiesTraceOn() throws Exception {
         Properties p = null;
 
         NetworkServerControl nsctrl = NetworkServerTestSetup.getNetworkServerControl();

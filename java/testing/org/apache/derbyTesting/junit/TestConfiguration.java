@@ -28,8 +28,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 
 import junit.extensions.TestSetup;
 import junit.framework.Assert;
@@ -412,6 +415,39 @@ public final class TestConfiguration {
             suiteName = suiteName.substring(lastDot + 1, suiteName.length());
         
         return suiteName;
+    }
+
+    /**
+     * A comparator that orders {@code TestCase}s lexicographically by
+     * their names.
+     */
+    private static final Comparator TEST_ORDERER = new Comparator() {
+        public int compare(Object o1, Object o2) {
+            TestCase t1 = (TestCase) o1;
+            TestCase t2 = (TestCase) o2;
+            return t1.getName().compareTo(t2.getName());
+        }
+    };
+
+    /**
+     * Create a test suite with all the test cases in the specified class. The
+     * test cases should be ordered lexicographically by their names.
+     *
+     * @param testClass the class with the test cases
+     * @return a lexicographically ordered test suite
+     */
+    public static Test orderedSuite(Class testClass) {
+        // Extract all tests from the test class and order them.
+        ArrayList tests = Collections.list(new TestSuite(testClass).tests());
+        Collections.sort(tests, TEST_ORDERER);
+
+        // Build a new test suite with the tests in lexicographic order.
+        TestSuite suite = new TestSuite(suiteName(testClass));
+        for (Iterator it = tests.iterator(); it.hasNext(); ) {
+            suite.addTest((Test) it.next());
+        }
+
+        return suite;
     }
     
     /**
