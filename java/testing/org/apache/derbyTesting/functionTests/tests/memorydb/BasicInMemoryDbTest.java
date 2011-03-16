@@ -68,6 +68,20 @@ public class BasicInMemoryDbTest
     public void tearDown()
             throws Exception {
         dbm.cleanUp();
+        super.tearDown();
+    }
+
+    /**
+     * Helper method to make sure the driver is loaded. May be needed when
+     * calling DriverManager.getConnection() directly since the driver may
+     * not already be loaded (in particular when running from classes so that
+     * driver auto-loading doesn't come into play), or it may have been
+     * unloaded by an engine shutdown in an earlier test case.
+     */
+    private void loadDriver() throws SQLException {
+        // If we get a default connection through the framework, the driver
+        // will be loaded implicitly.
+        getConnection();
     }
 
     /**
@@ -206,7 +220,7 @@ public class BasicInMemoryDbTest
      */
     public void testEnginehutdown()
             throws SQLException {
-        DriverManager.getConnection("jdbc:derby:memory:/tmp/myDB;create=true");
+        dbm.createDatabase("/tmp/myDB");
         try {
             DriverManager.getConnection(
                     "jdbc:derby:;shutdown=true");
@@ -216,7 +230,7 @@ public class BasicInMemoryDbTest
         }
         // Another hack, to make sure later tests in this class doesn't fail.
         // Get a connection to the default database to reload the engine.
-        getConnection();
+        loadDriver();
     }
 
     /**
@@ -259,6 +273,7 @@ public class BasicInMemoryDbTest
      */
     public void testDelete()
             throws SQLException {
+            loadDriver();
             Connection conCreate = DriverManager.getConnection(
                     "jdbc:derby:memory:deleteDbSimple;create=true");
             Statement stmt = dbm.createStatement(conCreate);
@@ -308,6 +323,7 @@ public class BasicInMemoryDbTest
      */
     public void testDeleteWhenInUse()
             throws IOException, SQLException {
+        loadDriver();
         Connection con = DriverManager.getConnection(
                 "jdbc:derby:memory:deleteDb;create=true");
         PreparedStatement ps = dbm.prepareStatement(con,
