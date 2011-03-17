@@ -543,7 +543,10 @@ public abstract class BaseTestCase
 	    System.arraycopy(cmd, 0, tcmd, 3, cmd.length);
 
 	    final String[] command = tcmd;
-
+	    println("execute java command:");
+	    for (int i = 0; i < command.length; i++) {
+	        println("command[" + i + "]" + command[i]);
+	    }
 	    Process pr = null;
 	    try {
 	        pr = (Process) AccessController
