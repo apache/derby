@@ -164,6 +164,20 @@ public class TruncateTableTest extends BaseJDBCTestCase {
     public void testSelfReferencing() throws SQLException {
         Connection aliceConnection = openUserConnection( ALICE );
         Statement s = aliceConnection.createStatement();
+
+        // Workaround for DERBY-5139: If this test case happens to be running
+        // first, before the schema ALICE has been created, the CREATE TABLE
+        // statement below will fail. Normally, CREATE TABLE should create the
+        // ALICE schema automatically, but for some reason that doesn't happen
+        // when creating a self-referencing table. Create the schema manually
+        // for now, if it doesn't already exist.
+        try {
+            s.execute("CREATE SCHEMA ALICE");
+        } catch (SQLException sqle) {
+            // It's OK to fail if schema already exists.
+            assertSQLState("X0Y68", sqle);
+        }
+
         s.execute("create table self_referencing_t1(x int primary key, "
                 + "y int references self_referencing_t1)");
         s.execute("insert into self_referencing_t1 values (1, null), (2, 1)");
