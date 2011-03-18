@@ -901,3 +901,6 @@ select k from d3303 group by i,k order by 2;
 select k as s from d3303 group by i,k order by 2;
 
 drop table d3303;
+
+-- See also Derby5005.java which should be merged with this test when
+-- it gets converted to JUnit.
