@@ -509,6 +509,14 @@ public class ConnectionMethodsTest extends Wrapper41Test
             ( conn1, "insert into app.abort_table( a ) values ( 1 )" );
         ps.execute();
         ps.close();
+        
+        ps = prepareStatement( conn1, "select * from app.abort_table");
+        ResultSet rsconn1 = ps.executeQuery();
+        assertTrue(rsconn1.next());
+        rsconn1.close();
+        ps.close();
+        
+        
 
         // abort the connection
         try {

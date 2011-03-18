@@ -31,6 +31,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Map;
 import java.util.Properties;
 import javax.sql.*;
 
@@ -184,6 +186,64 @@ public class ConnectionTest
      */
     public void testGetTypeMapReturnsEmptyMap() throws SQLException {
         assertTrue(getConnection().getTypeMap().isEmpty());
+    }
+    
+    /**
+     * Tests that <code>getTypeMap()</code> returns the input map
+     * @exception SQLException if an error occurs
+     */
+    public void testGetTypeMapReturnsasExcepted() throws SQLException {
+        Statement s = getConnection().createStatement();
+        int ret;
+        try {
+            ret = s.executeUpdate("DROP TABLE T1");
+            ret = s.executeUpdate("DROP TYPE JAVA_UTIL_LIST RESTRICT");
+        } catch (Exception e) {}
+        
+        ret = s.executeUpdate("CREATE TYPE JAVA_UTIL_LIST " +
+                              "EXTERNAL NAME 'java.util.List'" +
+                              "LANGUAGE JAVA");
+
+        s.execute("CREATE TABLE T1 (A1 JAVA_UTIL_LIST)");
+        
+        PreparedStatement ps = getConnection().prepareStatement(
+                "INSERT INTO T1(A1) VALUES (?)");
+        
+        ArrayList lst = new ArrayList();
+        lst.add("First element");
+        lst.add("Second element");
+        
+        ps.setObject(1, lst);
+        ps.execute();     
+        
+        Map<String, Class<?>> map = getConnection().getTypeMap();
+        try {
+             map.put("JAVA_UTIL_LIST", Class.forName("java.util.List"));
+        } catch (ClassNotFoundException se) {
+            se.printStackTrace();
+            println("map.put has exception");
+        }
+        
+        try {
+            getConnection().setTypeMap(map);
+            fail( "Should raise an Unimplemented Feature exception." );
+        }
+        catch (SQLException se)
+        {
+            assertEquals( SQLFeatureNotSupportedException.class.getName(), se.getClass().getName() );
+        }
+        
+        ResultSet rs = s.executeQuery("select * from T1");
+        assertTrue(rs.next());
+        for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+            Object o = rs.getObject(i);
+            assertEquals(lst, o);
+            //System.out.print(o + "(Type " + o.getClass().getName() + " )");
+        }
+        s.executeUpdate("DROP TABLE T1");
+        s.executeUpdate("DROP TYPE JAVA_UTIL_LIST RESTRICT");
+        s.close();
+        ps.close();
     }
 
     public void testIsWrapperReturnsFalse()
