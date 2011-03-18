@@ -167,40 +167,59 @@ inner:		for (;;) {
 				}
 				chain.push(space);
 
-				Lock waitingLock = (Lock) waiters.get(space);
-				if (waitingLock == null) {
-					// end of the road, no deadlock in this path
-					// pop items until the previous Stack
-					rollback(chain);
-					continue outer;
-				}
+                skip_space: while (true) {
 
-				// Is a LockControl or another ActiveLock
-				Object waitOn = waiters.get(waitingLock); 
-				if (waitOn instanceof LockControl) {
+                    Lock waitingLock = (Lock) waiters.get(space);
+                    if (waitingLock == null) {
+                        // end of the road, no deadlock in this path
+                        // pop items until the previous Stack
+                        rollback(chain);
+                        continue outer;
+                    }
 
-					LockControl waitOnControl = (LockControl) waitOn;
+                    // Is a LockControl or another ActiveLock
+                    Object waitOn = waiters.get(waitingLock);
+                    if (waitOn instanceof LockControl) {
 
-					// This lock control may have waiters but no
-					// one holding the lock. This is true if lock
-					// has just been released but the waiters haven't
-					// woken up, or they are trying to get the synchronization we hold.
+                        LockControl waitOnControl = (LockControl) waitOn;
 
-					if (waitOnControl.isUnlocked()) {
-						// end of the road, no deadlock in this path
-						// pop items until the previous Stack
-						rollback(chain);
-						continue outer;
-					}
+                        // This lock control may have waiters but no
+                        // one holding the lock. This is true if lock
+                        // has just been released but the waiters haven't
+                        // woken up, or they are trying to get the
+                        // synchronization we hold.
 
-					chain.push(waitOnControl.getGrants());
+                        if (waitOnControl.isUnlocked()) {
+                            // end of the road, no deadlock in this path
+                            // pop items until the previous Stack
+                            rollback(chain);
+                            continue outer;
+                        }
 
-					continue outer;
-				} else {
-					// simply waiting on another waiter
-					space = waitingLock.getCompatabilitySpace();
-				}
-		}
+                        chain.push(waitOnControl.getGrants());
+
+                        continue outer;
+                    } else {
+                        // simply waiting on another waiter
+                        ActiveLock waitOnLock = (ActiveLock) waitOn;
+
+                        space = waitOnLock.getCompatabilitySpace();
+
+                        if (waitingLock.getLockable().requestCompatible(
+                                waitingLock.getQualifier(),
+                                waitOnLock.getQualifier())) {
+                            // We're behind another waiter in the queue, but we
+                            // request compatible locks, so we'll get the lock
+                            // too once it gets it. Since we're not actually
+                            // blocked by the waiter, skip it and see what's
+                            // blocking it instead.
+                            continue skip_space;
+                        } else {
+                            continue inner;
+                        }
+                    }
+                }
+            }
 		}
 
 		return null;
