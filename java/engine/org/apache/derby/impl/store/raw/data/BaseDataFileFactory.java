@@ -382,6 +382,26 @@ public class BaseDataFileFactory
 		//Log the JVM version info
 		logMsg(jvmVersion);
 
+		//Log derby.system.home It will have null value if user didn't set it
+		logMsg(Property.SYSTEM_HOME_PROPERTY+"=" + 
+				PropertyUtil.getSystemProperty(Property.SYSTEM_HOME_PROPERTY));
+		
+		//Log properties related to redirection of derby.log 
+		String target = 
+			PropertyUtil.getSystemProperty(Property.ERRORLOG_FILE_PROPERTY);
+		if (target != null)
+			logMsg(Property.ERRORLOG_FILE_PROPERTY+"=" + target);
+		
+		target = 
+			PropertyUtil.getSystemProperty(Property.ERRORLOG_METHOD_PROPERTY);
+		if (target != null)
+			logMsg(Property.ERRORLOG_METHOD_PROPERTY+"=" + target);
+		
+		target = 
+			PropertyUtil.getSystemProperty(Property.ERRORLOG_FIELD_PROPERTY);
+		if (target != null)
+			logMsg(Property.ERRORLOG_FIELD_PROPERTY+"=" + target);
+
         if (logBootTrace)
            Monitor.logThrowable(new Throwable("boot trace"));
 		uf = null;
@@ -2216,6 +2236,8 @@ public class BaseDataFileFactory
                      jvmversion += "\njava.runtime.version=" + currentProp;
                  if ((currentProp = PropertyUtil.getSystemProperty("java.fullversion")) != null)
                      jvmversion += "\njava.fullversion=" + currentProp ;         
+                 if ((currentProp = PropertyUtil.getSystemProperty("user.dir")) != null)
+                     jvmversion += "\nuser.dir=" + currentProp ;         
               }
               catch (SecurityException se) {
                    return se.getMessage();
