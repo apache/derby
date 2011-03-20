@@ -2234,4 +2234,7 @@ ij> select k as s from d3303 group by i,k order by 2;
 ERROR 42X77: Column position '2' is out of range for the query expression.
 ij> drop table d3303;
 0 rows inserted/updated/deleted
+ij> -- See also Derby5005.java which should be merged with this test when
+-- it gets converted to JUnit.
+;
 ij> 
