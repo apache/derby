@@ -1328,7 +1328,7 @@ public abstract class Cursor {
     public final Object getObject(int column) throws SqlException {
         switch (jdbcTypes_[column - 1]) {
         case java.sql.Types.BOOLEAN:
-            return new Boolean(get_BOOLEAN(column));
+            return get_BOOLEAN(column) ? Boolean.TRUE : Boolean.FALSE;
         case java.sql.Types.SMALLINT:
             return new Integer(get_SMALLINT(column)); // See Table 4 in JDBC 1 spec (pg. 932 in jdbc book)
         case java.sql.Types.INTEGER:
