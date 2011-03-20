@@ -31,6 +31,7 @@ import javax.net.SocketFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.InterruptStatus;
+import org.apache.derby.impl.store.replication.ReplicationLogger;
 import org.apache.derby.shared.common.reference.MessageId;
 
 /**
@@ -368,11 +369,14 @@ public class ReplicationMessageTransmit {
                 } catch (SocketTimeoutException ste) {
                     // ignore socket timeout on reads
                 } catch (ClassNotFoundException cnfe) {
-                    // TODO: print problem to log
+                    ReplicationLogger repLogger = new ReplicationLogger(dbname);
+                    repLogger.logError(MessageId.REPLICATION_ERROR_BEGIN, cnfe);
                 } catch (IOException ex) {
                     // TODO: print problem to log
                     // If we get an exception for this socket, the log shipper
                     // will clean up. Stop this thread.
+                    ReplicationLogger repLogger = new ReplicationLogger(dbname);
+                    repLogger.logError(MessageId.REPLICATION_ERROR_BEGIN, ex);                    
                     stopMessageReceiver = true;
                 }
             }
