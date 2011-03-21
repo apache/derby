@@ -26,15 +26,11 @@ import org.apache.derbyTesting.functionTests.util.SQLStateConstants;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import javax.sql.*;
 
 /**
  * Tests for the JDBC 4.0 specific methods in the connection object(s).
@@ -192,7 +188,7 @@ public class ConnectionTest
      * Tests that <code>getTypeMap()</code> returns the input map
      * @exception SQLException if an error occurs
      */
-    public void testGetTypeMapReturnsasExcepted() throws SQLException {
+    public void testGetTypeMapReturnsAsExpected() throws SQLException {
         Statement s = getConnection().createStatement();
         int ret;
         try {
@@ -209,7 +205,7 @@ public class ConnectionTest
         PreparedStatement ps = getConnection().prepareStatement(
                 "INSERT INTO T1(A1) VALUES (?)");
         
-        ArrayList lst = new ArrayList();
+        ArrayList<String> lst = new ArrayList<String>();
         lst.add("First element");
         lst.add("Second element");
         
@@ -217,12 +213,7 @@ public class ConnectionTest
         ps.execute();     
         
         Map<String, Class<?>> map = getConnection().getTypeMap();
-        try {
-             map.put("JAVA_UTIL_LIST", Class.forName("java.util.List"));
-        } catch (ClassNotFoundException se) {
-            se.printStackTrace();
-            println("map.put has exception");
-        }
+        map.put("JAVA_UTIL_LIST", List.class);
         
         try {
             getConnection().setTypeMap(map);
