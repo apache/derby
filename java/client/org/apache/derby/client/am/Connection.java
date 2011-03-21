@@ -26,6 +26,7 @@ import org.apache.derby.jdbc.ClientDataSource;
 import org.apache.derby.shared.common.reference.SQLState;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import org.apache.derby.client.net.NetXAResource;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -1407,7 +1408,7 @@ public abstract class Connection
                 agent_.logWriter_.traceEntry(this, "getTypeMap");
             }
             checkForClosedConnection();
-            java.util.Map map = new java.util.HashMap();
+            java.util.Map map = Collections.EMPTY_MAP;
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceExit(this, "getTypeMap", map);
             }

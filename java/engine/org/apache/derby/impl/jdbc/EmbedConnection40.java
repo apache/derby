@@ -22,19 +22,14 @@
 package org.apache.derby.impl.jdbc;
 
 import java.sql.Array;
-import java.sql.Blob;
 import java.sql.SQLClientInfoException;
-import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.NClob;
 import java.sql.SQLException;
 import java.sql.SQLPermission;
 import java.sql.SQLXML;
 import java.sql.Struct;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Enumeration;
 import java.util.concurrent.Executor;
 import org.apache.derby.jdbc.InternalDriver;
 import org.apache.derby.iapi.reference.SQLState;
@@ -212,19 +207,12 @@ public class EmbedConnection40 extends EmbedConnection30 {
      * @return type map for this connection
      * @exception SQLException if a database access error occurs
      */
+    @SuppressWarnings("unchecked")
     public final Map<String, Class<?>> getTypeMap() throws SQLException {
-        // This method is already implemented with a non-generic
-        // signature in EmbedConnection. We could just use that method
-        // directly, but then we get a compiler warning (unchecked
-        // cast/conversion). Copy the map to avoid the compiler
-        // warning.
-        Map typeMap = super.getTypeMap();
-        if (typeMap == null) return null;
-        Map<String, Class<?>> genericTypeMap = new HashMap<String, Class<?>>();
-        for (Object key : typeMap.keySet()) {
-            genericTypeMap.put((String) key, (Class) typeMap.get(key));
-        }
-        return genericTypeMap;
+        // Return the map from the super class. The method is overridden
+        // just to get the generic signature and prevent an unchecked warning
+        // at compile time.
+        return super.getTypeMap();
     }
     
     /**

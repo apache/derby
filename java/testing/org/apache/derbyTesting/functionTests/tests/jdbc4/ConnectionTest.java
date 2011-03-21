@@ -28,6 +28,7 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -213,6 +214,16 @@ public class ConnectionTest
         ps.execute();     
         
         Map<String, Class<?>> map = getConnection().getTypeMap();
+        try {
+            map.put("JAVA_UTIL_LIST", List.class);
+            fail("returned map should be immutable");
+        } catch (UnsupportedOperationException uoe) {
+            // Ignore expected exception
+        }
+
+        // Create a non-empty map to test setTypeMap(). setTypeMap() raises
+        // a feature not supported exception if the map isn't empty.
+        map = new HashMap<String, Class<?>>();
         map.put("JAVA_UTIL_LIST", List.class);
         
         try {
