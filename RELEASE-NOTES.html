@@ -93,7 +93,7 @@ change in a future release in the highly unlikely event that the actual GA versi
 	
 
 <li>
-<b>Automatic calculation of index statistics</b> - Applications can ask Derby to automatically refresh statistics which help Derby pick better query plans.</li>
+<b>Automatic calculation of index statistics</b> - Derby automatically refreshes statistics to help it pick better query plans.</li>
 	
 
 <li>
@@ -121,6 +121,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 <td><b>Issue Id</b></td><td><b>Description</b></td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5136">DERBY-5136</a></td><td>Simple accessibility fixes to frames HTML doc output</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5124">DERBY-5124</a></td><td>NPE or assert failure printed when dropping table while statistics are written out</td>
 </tr>
 <tr>
@@ -133,6 +136,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5116">DERBY-5116</a></td><td>SequenceTest fails with "Sequence 'MYSEQ1' already exists"</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5115">DERBY-5115</a></td><td>NetworkServerControlApiTest depends on implicit ordering of test cases</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5114">DERBY-5114</a></td><td>Assert failure in SavepointJdbc30Test.testReleaseSqlSavepointAndRollback</td>
 </tr>
 <tr>
@@ -140,6 +146,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5112">DERBY-5112</a></td><td>ImportExportTest depends on implicit ordering of test cases</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5107">DERBY-5107</a></td><td>BasicInMemoryDbTest depends on implicit ordering of test cases</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5106">DERBY-5106</a></td><td>Lacking cleanup in CheckConstraintTest.testJira4282()</td>
@@ -154,10 +163,19 @@ change in a future release in the highly unlikely event that the actual GA versi
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5102">DERBY-5102</a></td><td>GrantRevokeDDLTest depends on implicit ordering of test cases</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5101">DERBY-5101</a></td><td>TruncateTableTest depends on implicit ordering of test cases</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5100">DERBY-5100</a></td><td>GetCurrentPropertiesTest depends on implicit ordering of test cases</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5099">DERBY-5099</a></td><td>PrepareStatementTest depends on ordering of test cases</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5095">DERBY-5095</a></td><td>Update XML operator documentation to reflect new requirements</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5092">DERBY-5092</a></td><td>[patch] avoid Boolean allocations for rowset data in client cursor</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5089">DERBY-5089</a></td><td>Improve tracing/logging of runtime exceptions raised in the istat thread</td>
@@ -472,13 +490,13 @@ change in a future release in the highly unlikely event that the actual GA versi
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4912">DERBY-4912</a></td><td>Instability in Derby2017LayerBTest</td>
 </tr>
 <tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-4907">DERBY-4907</a></td><td>EmbeddedXADataSource with ;create=true attribute set in setDatabaseName fails with java.sql.SQLException: Database not available</td>
-</tr>
-<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4897">DERBY-4897</a></td><td>Get rid of warning for customized tags in javadoc build</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4856">DERBY-4856</a></td><td>Add thread dump information when derby crash</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4853">DERBY-4853</a></td><td>log derby.properties location and derby.log location to derby.log</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4837">DERBY-4837</a></td><td>Prepare lang.UpdateStatisticsTest for automatic index statistics generation</td>
@@ -552,7 +570,7 @@ Interrupt resilience may degrade the performance of writes on some platforms.
 <li>
 <a href="#Note for DERBY-4939">
 <p>Note for DERBY-4939: 
-By setting a property, index cardinality statistics can be updated automatically.
+Index cardinality statistics are updated automatically.
 </p>
 </a>
 </li>
@@ -844,7 +862,7 @@ to Derby 10.8.
 <h4>Summary of Change</h4>
 
 <p>
-By setting a property, index cardinality statistics can be updated automatically.
+Index cardinality statistics are updated automatically.
 </p>
 
 
@@ -864,12 +882,11 @@ By setting a property, index cardinality statistics can be updated automatically
 <h4>Symptoms Seen by Applications Affected by Change</h4>
 
 <p>
-If the <i>derby.storage.indexStats.auto</i> property is set to true,
-then Derby will check the freshness of index statistics during query compilation.
-If statistics are stale on tables involved in the current query, then
-the query compiler will schedule a job
+During query compilation, Derby now checks if the index cardinality
+statistics for the tables involved in the query are out of date. If
+the statistics are outdated, the query compiler will schedule a job
 that updates them in a separate thread. The thread that updates the
-statistics in the background may affect the performance of user
+statistics in the background may affect the performance of the user
 threads.
 </p>
 
@@ -887,10 +904,10 @@ threads.
 <h4>Incompatibilities with Previous Release</h4>
 
 <p>
-When <i>derby.storage.indexStats.auto</i> is set to true, statistics-collecting
-threads may run. These threads may use resources also needed by
-user threads (for example, disk bandwidth, CPU, or locks on system
-tables) and thereby may interfere with the execution of user threads.
+This release of Derby may cause more threads to be running than
+previous releases did. These threads may use resources also needed by
+the user threads (for example, disk bandwidth, CPU or locks on system
+tables) and thereby interfere with the execution in the user threads.
 </p>
 
 
@@ -925,15 +942,15 @@ bad performance if the index cardinality statistics are out of date.
 <h4>Application Changes Required</h4>
 
 <p>
-To make Derby automatically refresh index statistics,
-set the database
-property <tt>derby.storage.indexStats.auto=true</tt>.
+If the automatic updating of index cardinality statistics causes
+problems, the application can disable it by setting the database
+property <tt>derby.storage.indexStats.auto=false</tt>.
 </p>
 
 
 <p>
-To diagnose problems with automatic updating of index statistics,
-set the database
+To diagnose problems with automatic updating of index statistics, the
+application may set the database
 property <tt>derby.storage.indexStats.log=true</tt>. When this
 property is set, the thread that updates the statistics will write
 messages to the Derby system log (derby.log) every time it performs a
