@@ -576,6 +576,34 @@ public class TriggerTest extends BaseJDBCTestCase {
         JDBC.assertFullResultSet(rs, result);
     }
     
+    public void testDERBY5121() throws SQLException
+    {
+        Statement s = createStatement();
+
+        s.executeUpdate("CREATE TABLE T1 (A1 int)");
+        s.executeUpdate("CREATE TABLE T2 (B1 int, B2 int, B3 int)");
+        s.executeUpdate("CREATE TRIGGER t2UpdateTrigger "+
+        		"after UPDATE of b1 on t2 " +
+        		"referencing new row as nr for each ROW " +
+        		"insert into t1 values ( nr.b3 ) ");
+        s.executeUpdate("INSERT INTO T2 VALUES(0,0,0)");
+        s.executeUpdate("update t2 set b1 = 100 , b2 = 1");
+        ResultSet rs =s.executeQuery("SELECT * FROM T1");
+        JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
+
+        s.executeUpdate("CREATE TABLE T3 (A1 int)");
+        s.executeUpdate("CREATE TABLE T4 (B1 int, B2 int, B3 int)");
+        s.executeUpdate("CREATE TRIGGER t4UpdateTrigger "+
+        		"after UPDATE of b1 on t4 " +
+        		"referencing new table as nt for each STATEMENT " +
+        		"insert into t3 select b3 from nt");
+        s.executeUpdate("INSERT INTO T4 VALUES(0,0,0)");
+        s.executeUpdate("update t4 set b1 = 100 , b2 = 1");
+        rs =s.executeQuery("SELECT * FROM T3");
+        JDBC.assertFullResultSet(rs, new String[][] {{"0"}});
+
+    }
+    
     /** 
      * Test for DERBY-3238 trigger fails with IOException if triggering table has large lob.
      * 

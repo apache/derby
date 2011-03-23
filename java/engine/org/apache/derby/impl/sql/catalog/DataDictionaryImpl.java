@@ -4716,8 +4716,13 @@ public final class	DataDictionaryImpl
 			boolean createTriggerTime
 			) throws StandardException
 	{
-		boolean in10_7_orHigherVersion =
-			checkVersion(DataDictionary.DD_VERSION_DERBY_10_7,null);
+		// DERBY-1482 has caused a regression which is being worked
+		// under DERBY-5121. Until DERBY-5121 is fixed, we want
+		// Derby to create triggers same as it is done in 10.6 and
+		// earlier. This in other words means that do not try to
+		// optimize how many columns are read from the trigger table,
+		// simply read all the columns from the trigger table.
+		boolean in10_7_orHigherVersion = false;
 		
 		StringBuffer newText = new StringBuffer();
 		int start = 0;
@@ -5001,6 +5006,14 @@ public final class	DataDictionaryImpl
 			newText.append(triggerDefinition.substring(start, tokBeginOffset-actionOffset));
 			int colPositionInRuntimeResultSet = -1;
 			ColumnDescriptor triggerColDesc = triggerTableDescriptor.getColumnDescriptor(colName);
+			//DERBY-5121 We can come here if the column being used in trigger
+			// action is getting dropped and we have come here through that
+			// ALTER TABLE DROP COLUMN. In that case, we will not find the
+			// column in the trigger table.
+			if (triggerColDesc == null) {
+				throw StandardException.newException(
+		                SQLState.LANG_COLUMN_NOT_FOUND, tableName+"."+colName);
+			}
 			int colPositionInTriggerTable = triggerColDesc.getPosition();
 
 			//This part of code is little tricky and following will help

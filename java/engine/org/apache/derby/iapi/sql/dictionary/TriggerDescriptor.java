@@ -352,8 +352,7 @@ public class TriggerDescriptor extends TupleDescriptor
 		//will then get updated into SYSSTATEMENTS table.
 		if((!actionSPS.isValid() ||
 				 (actionSPS.getPreparedStatement() == null)) && 
-				 isRow &&
-				 referencedColsInTriggerAction != null) 
+				 isRow && (referencingOld || referencingNew))
 		{
 			SchemaDescriptor compSchema;
 			compSchema = getDataDictionary().getSchemaDescriptor(triggerSchemaId, null);
