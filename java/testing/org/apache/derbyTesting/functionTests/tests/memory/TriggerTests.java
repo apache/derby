@@ -41,9 +41,19 @@ import org.apache.derbyTesting.junit.JDBC;
 public class TriggerTests extends BaseJDBCTestCase {
 
 	final int lobsize = 50000*1024;
-	boolean testWithLargeDataInLOB = true;
-	
-	/**
+	boolean testWithLargeDataInLOB = true;	
+    // DERBY-1482 has caused a regression which is being worked
+    // under DERBY-5121. Until DERBY-5121 is fixed, we want
+    // Derby to create triggers same as it is done in 10.6 and
+    // earlier. This in other words means that do not try to
+    // optimize how many columns are read from the trigger table,
+    // simply read all the columns from the trigger table.
+    // Because of this, we need to disable the tests that were
+    // added as part of DERBY-1482 to check the column read
+    // optimization.
+    boolean isDerby1482Fixed = false;	
+
+    /**
 	 * Insert trigger tests
 	 * ****************
 	 * 1)test1InsertAfterTrigger
@@ -333,6 +343,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertAfterTrigger() throws SQLException{	
+        if (isDerby1482Fixed == false)
+            return;
+
         basicSetup();
         Statement s = createStatement();
 		s.execute("create trigger trigger1 AFTER INSERT on table1 referencing " +
@@ -350,6 +363,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertAfterTriggerStoredProc() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
         // JSR169 cannot run with tests with stored procedures
         // that do database access - for they require a
         // DriverManager connection to jdbc:default:connection;
@@ -394,6 +410,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1DeleteAfterTrigger() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -419,6 +438,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1DeleteAfterTriggerStoredProc() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -469,6 +491,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateAfterTrigger() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
         basicSetup();
         Statement s = createStatement();
 		s.execute("create trigger trigger1 after update of status on table1 referencing " +
@@ -486,6 +511,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateAfterTriggerStoredProc() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
         // JSR169 cannot run with tests with stored procedures
         // that do database access - for they require a
         // DriverManager connection to jdbc:default:connection;
@@ -526,6 +554,8 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertBeforeTrigger() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
 		
         basicSetup();
         Statement s = createStatement();
@@ -544,6 +574,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1InsertBeforeTriggerStoredProc() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
         // JSR169 cannot run with tests with stored procedures
         // that do database access - for they require a
         // DriverManager connection to jdbc:default:connection;
@@ -588,6 +621,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1DeleteBeforeTrigger() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -613,6 +649,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1DeleteBeforeTriggerStoredProc() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -665,6 +704,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateBeforeTrigger() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
         basicSetup();
         Statement s = createStatement();
 
@@ -683,6 +725,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test1UpdateBeforeTriggerStoredProc() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
         // JSR169 cannot run with tests with stored procedures
         // that do database access - for they require a
         // DriverManager connection to jdbc:default:connection;
@@ -729,6 +774,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2InsertAfterTriggerAccessLOB() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -765,6 +813,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2DeleteAfterTriggerAccessLOB() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -815,6 +866,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2UpdateAfterTriggerAccessLOB() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -850,6 +904,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2InsertAfterTriggerUpdatedLOB() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -887,6 +944,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2UpdateAfterTriggerUpdatedLOB() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -923,6 +983,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2InsertBeforeTriggerAccessLOB() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -957,6 +1020,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2DeleteBeforeTriggerAccessLOB() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -992,6 +1058,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test2UpdateBeforeTriggerAccessLOB() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -1036,6 +1105,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test3UpdateAfterTrigger() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -1060,6 +1132,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test3UpdateAfterTriggerStoredProc() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -1104,6 +1179,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test3UpdateBeforeTrigger() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -1129,6 +1207,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test3UpdateBeforeTriggerStoredProc() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -1179,6 +1260,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test4UpdateAfterTriggerAccessLOB() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -1214,6 +1298,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */ 
 	public void test4UpdateAfterTriggerUpdatedLOB() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		
@@ -1252,6 +1339,9 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void test4UpdateBeforeTrigger() throws SQLException{
+        if (isDerby1482Fixed == false)
+            return;
+
 		if (testWithLargeDataInLOB)
 			return;
 		

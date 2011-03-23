@@ -4652,6 +4652,12 @@ public final class	DataDictionaryImpl
 			boolean createTriggerTime
 			) throws StandardException
 	{
+        // DERBY-1482 has caused a regression which is being worked
+        // under DERBY-5121. Until DERBY-5121 is fixed, we want
+        // Derby to create triggers same as it is done in 10.6 and
+        // earlier. This in other words means that do not try to
+        // optimize how many columns are read from the trigger table,
+        // simply read all the columns from the trigger table.
 		boolean in10_7_orHigherVersion = false;
 		
 		StringBuffer newText = new StringBuffer();
