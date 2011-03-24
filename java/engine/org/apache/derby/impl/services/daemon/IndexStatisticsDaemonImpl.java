@@ -921,11 +921,15 @@ public class IndexStatisticsDaemonImpl
         // this outside of the synchronized block so that we don't deadlock
         // with the thread.
         if (threadToWaitFor != null) {
-            try {
-                threadToWaitFor.join();
-            } catch (InterruptedException ie) {
-                // Never mind. The thread will die eventually.
+            while (true) {
+                try {
+                    threadToWaitFor.join();
+                    break;
+                } catch (InterruptedException ie) {
+                    InterruptStatus.setInterrupted();
+                }
             }
+
         }
     }
 
