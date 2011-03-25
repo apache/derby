@@ -2560,7 +2560,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             }
             java.util.StringTokenizer st = new java.util.StringTokenizer(returnedFromSP, ",");
             while (st.hasMoreTokens()) {
-                if ((new Integer(st.nextToken())).intValue() == type) {
+                if ((Integer.parseInt(st.nextToken())) == type) {
                     return true;
                 }
             }
@@ -2600,9 +2600,9 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             while (st.hasMoreTokens()) {
                 java.util.StringTokenizer stForConc = 
 		    new java.util.StringTokenizer(st.nextToken(), ",");
-                if ((new Integer(stForConc.nextToken())).intValue() == type) {
+                if ((Integer.parseInt(stForConc.nextToken())) == type) {
                     while (stForConc.hasMoreTokens()) {
-                        if ((new Integer(stForConc.nextToken())).intValue() == concurrency) {
+                        if ((Integer.parseInt(stForConc.nextToken())) == concurrency) {
                             return true;
                         }
                     }
@@ -2635,9 +2635,9 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             java.util.StringTokenizer st = new java.util.StringTokenizer(returnedFromSP, ";");
             while (st.hasMoreTokens()) {
                 java.util.StringTokenizer stForType = new java.util.StringTokenizer(st.nextToken(), ",");
-                if ((new Integer(stForType.nextToken())).intValue() == fromType) {
+                if ((Integer.parseInt(stForType.nextToken())) == fromType) {
                     while (st.hasMoreTokens()) {
-                        if ((new Integer(st.nextToken())).intValue() == toType) {
+                        if ((Integer.parseInt(st.nextToken())) == toType) {
                             return true;
                         }
                     }
