@@ -59,7 +59,6 @@ class CallStatementResultSet extends NoRowsResultSetImpl
     CallStatementResultSet(
 				GeneratedMethod methodCall,
 				Activation a) 
-			throws StandardException
     {
 		super(a);
 		this.methodCall = methodCall;

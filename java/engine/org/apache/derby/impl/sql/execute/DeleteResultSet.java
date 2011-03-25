@@ -200,9 +200,6 @@ class DeleteResultSet extends DMLWriteResultSet
 		activation.checkStatementValidity();
 
 		/* Get or re-use the row changer.
-		 * NOTE: We need to set ourself as the top result set
-		 * if this is not the 1st execution.  (Done in constructor
-		 * for 1st execution.)
 		 */
 		if (firstExecute)
 		{
@@ -223,10 +220,7 @@ class DeleteResultSet extends DMLWriteResultSet
 								constants.getStreamStorableHeapColIds(),
 								activation);
 		}
-		else
-		{
-			lcc.getStatementContext().setTopResultSet(this, subqueryTrackingArray);
-		}
+
 		/* decode the lock mode for the execution isolation level */
 		lockMode = decodeLockMode(constants.lockMode);
 

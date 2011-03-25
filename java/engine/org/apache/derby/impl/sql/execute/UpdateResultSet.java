@@ -293,9 +293,6 @@ class UpdateResultSet extends DMLWriteResultSet
 		}
 
 		/* Get or re-use the row changer.
-		 * NOTE: We need to set ourself as the top result set
-		 * if this is not the 1st execution.  (Done in constructor
-		 * for 1st execution.)
 		 */
 		if (firstOpen)
 		{
@@ -315,10 +312,6 @@ class UpdateResultSet extends DMLWriteResultSet
 										 constants.getStreamStorableHeapColIds(),
 										 activation);
 			rowChanger.setIndexNames(constants.indexNames);
-		}
-		else
-		{
-			lcc.getStatementContext().setTopResultSet(this, subqueryTrackingArray);
 		}
 
 

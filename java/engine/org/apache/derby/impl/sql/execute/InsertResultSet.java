@@ -877,9 +877,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
                 long user_autoinc=0;
                         
 		/* Get or re-use the row changer.
-		 * NOTE: We need to set ourself as the top result set
-		 * if this is not the 1st execution.  (Done in constructor
-		 * for 1st execution.)
 		 */
 		if (firstExecute)
 		{
@@ -899,10 +896,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 									 activation
 							       );
 			rowChanger.setIndexNames(constants.indexNames);
-		}
-		else
-		{
-			lcc.getStatementContext().setTopResultSet(this, subqueryTrackingArray);
 		}
 
 		/* decode lock mode for the execution isolation level */
