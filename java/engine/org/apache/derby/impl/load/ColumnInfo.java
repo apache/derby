@@ -555,12 +555,13 @@ class ColumnInfo {
         if ( stringMap == null ) { return null; }
         
         HashMap retval = new HashMap();
-        Iterator keys = stringMap.keySet().iterator();
+        Iterator entries = stringMap.entrySet().iterator();
 
-        while ( keys.hasNext() )
+        while ( entries.hasNext() )
         {
-            String columnName = (String) keys.next();
-            String className = (String) stringMap.get( columnName );
+            Map.Entry entry = (Map.Entry)entries.next();
+            String columnName = (String) entry.getKey();
+            String className = (String) entry.getValue();
 
             Class classValue = Class.forName( className );
 

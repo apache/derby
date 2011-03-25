@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.sql.ResultSetMetaData;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.Iterator;
 
@@ -76,11 +77,12 @@ public class DB_Table {
 		// each one.
 
 		boolean firstTime = true;
-		Set tableIds = tableIdToNameMap.keySet();
-		for (Iterator itr = tableIds.iterator(); itr.hasNext(); ) {
+		Set entries = tableIdToNameMap.entrySet();
+		for (Iterator itr = entries.iterator(); itr.hasNext(); ) {
 
-			String tableId = (String)itr.next();
-			String tableName = (String)(tableIdToNameMap.get(tableId));
+            Map.Entry entry = (Map.Entry)itr.next();
+			String tableId = (String)entry.getKey();
+			String tableName = (String)entry.getValue();
 			if (dblook.isExcludedTable(tableName))
 			// table isn't included in user-given list; skip it.
 				continue;
