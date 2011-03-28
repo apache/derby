@@ -94,6 +94,19 @@ public class InterruptStatus {
         }
     }
 
+    /**
+     * Use when lcc is dying to save info in thread local instead. Useful under
+     * shutdown.
+     */
+    public static void saveInfoFromLcc(LanguageConnectionContext lcc) {
+        
+        StandardException e = lcc.getInterruptedException();
+
+        if (e != null) {
+            exception.set(e);
+        }
+    }
+
 
     /**
      * Checks if the thread has been interrupted in NIO, presumably because we

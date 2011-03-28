@@ -75,6 +75,7 @@ import org.apache.derby.iapi.sql.ParameterValueSet;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
@@ -3136,6 +3137,8 @@ public class GenericLanguageConnectionContext
             }
                        
             popMe();
+
+            InterruptStatus.saveInfoFromLcc(this);
         }
 
         /*

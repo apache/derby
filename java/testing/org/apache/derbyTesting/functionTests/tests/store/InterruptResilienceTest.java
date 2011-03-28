@@ -19,6 +19,7 @@
 */
 package org.apache.derbyTesting.functionTests.tests.store;
 
+import java.io.File;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
@@ -41,8 +42,12 @@ import java.lang.Math;
 import java.util.Properties;
 
 /**
- * Test started as a test reproduce and verify fix for DERBY-151.  Later
- * evolved into test for DERBY-4741.
+ * This test started out as a test reproduce and verify fix for DERBY-151.
+ * Later evolved into test for DERBY-4741.
+ * <p/>
+ * The use of stored procedures was done to make the tests meaningful in client
+ * server mode as well, but be removed/simplified as long as we only make
+ * claims about the resilience of embedded Derby.
  */
 
 public class InterruptResilienceTest extends BaseJDBCTestCase
@@ -459,7 +464,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                         }
 
 
-                        if (Thread.interrupted()) {
+                        if (interrupted()) {
                             interruptsSeen++;
                         }
 
@@ -631,5 +636,38 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         s.executeUpdate("create table tmp(i int)");
         rollback();
 
+    }
+
+
+    public void testInterruptShutdown() throws SQLException {
+        if (!usingEmbedded()) {
+            // Only meaningful for embedded.
+            return;
+        }
+
+        setAutoCommit(false);
+
+        try {
+            Statement s = createStatement();
+            s.executeUpdate("create table foo (i int)");
+            PreparedStatement ps =
+                prepareStatement("insert into foo values ?");
+
+            for (int i = 0; i < 1000; i++) {
+                ps.setInt(1,i);
+                ps.executeUpdate();
+            }
+
+            Thread.currentThread().interrupt();
+
+            TestConfiguration.getCurrent().shutdownDatabase();
+
+            // Assert and clear thread's flag:
+            // DERBY-5152: Fails before fix due to lcc going away.
+            assertTrue(Thread.interrupted());
+
+        } finally {
+            Thread.interrupted(); // clear flag
+        }
     }
 }
