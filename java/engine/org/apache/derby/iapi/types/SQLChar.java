@@ -1260,6 +1260,7 @@ readingLoop:
     public void restoreToNull()
     {
         value = null;
+        _clobValue = null;
         stream = null;
         rawLength = -1;
         cKey = null;
