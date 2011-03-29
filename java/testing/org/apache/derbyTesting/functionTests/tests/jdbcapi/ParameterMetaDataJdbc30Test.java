@@ -99,6 +99,17 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
             		
 				Connection conn = getConnection();
 
+                // Create procedure used by
+                // testParameterMetadataWithDECIMALParameters() and
+                // testParameterMetadataWithLITERALParameters().
+                stmt.execute(
+                    "CREATE PROCEDURE PMDD(IN pmdI_1 DECIMAL(5,3), " +
+                    "IN pmdI_2 DECIMAL(4,2), INOUT pmdI_3 DECIMAL(9,0), " +
+                    "OUT pmdI_4 DECIMAL(10,2)) language java " +
+                    "parameter style java external name " +
+                    "'org.apache.derbyTesting.functionTests.tests.jdbcapi." +
+                    "ParameterMetaDataJdbc30Test.dummyDecimal'");
+
 				/**
 		                 * Creates the table used in the test cases.
                			 *
@@ -703,8 +714,6 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
          */
 	public void testParameterMetadataWithDECIMALParameters () throws SQLException {
 
-		Statement stmt = createStatement();
-       		stmt.execute("CREATE PROCEDURE PMDD(IN pmdI_1 DECIMAL(5,3), IN pmdI_2 DECIMAL(4,2), INOUT pmdI_3 DECIMAL(9,0), OUT pmdI_4 DECIMAL(10,2)) language java parameter style java external name 'org.apache.derbyTesting.functionTests.tests.jdbcapi.ParameterMetaDataJdbc30Test.dummyDecimal'");
       		CallableStatement cs = prepareCall("CALL PMDD(?, ?, ?, ?)");
 
 		// parameters 1 and 2 are input only
@@ -739,7 +748,6 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
          */
 	public void testParameterMetadataWithLITERALParameters () throws SQLException {
 
-		Statement stmt = createStatement();
       		CallableStatement cs = prepareCall("CALL PMDD(32.4, ?, ?, ?)");
 		// parameters 2 is input only
                 cs.setBigDecimal(1,new BigDecimal("1"));;
@@ -809,8 +817,6 @@ public class ParameterMetaDataJdbc30Test extends BaseJDBCTestCase {
                 testParameterMetaData(cs.getParameterMetaData(), parameterMetaDataArray2);
 
           	cs.close();
-          	stmt.execute("DROP PROCEDURE PMDD");
-            stmt.close();
 	}
 	/**
          * print the parameter isNullable value in human readable form
