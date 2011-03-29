@@ -1169,6 +1169,50 @@ public class CallableStatement extends PreparedStatement
             throw se.getSQLException();
         }
     }
+
+    //----------------------------overrides----------------------------------
+
+    public void completeExecuteCall(Sqlca sqlca, Cursor singletonParams) // no result sets returned
+    {
+        super.completeExecuteCall( sqlca, singletonParams );
+
+        //
+        // For INOUT parameters, propagate return values back to the input parameter array.
+        // See DERBY-2515.
+        //
+
+        if ( singletonParams == null ) { return ; }
+        if ( parameterMetaData_ == null ) { return; }
+
+        int     cursorParamCount = singletonParams.columns_;
+        try {
+            for ( int i = 0; i < cursorParamCount; i++ )
+            {
+                if ( parameterMetaData_.sqlxParmmode_[ i ] == java.sql.ParameterMetaData.parameterModeInOut )
+                {
+                    int jdbcParamNumber = i + 1;
+                    Object  returnArg = singletonParams.isNull_[ i ] ? null : singletonParams.getObject( jdbcParamNumber );
+
+                    //
+                    // special case to coerce Integer to Short for SMALLINT
+                    //
+                    if ( parameterMetaData_.types_[ i ] == Types.SMALLINT )
+                    {
+                        if ( (returnArg != null) && (returnArg instanceof Integer) )
+                        {
+                            returnArg = new Short( ((Integer) returnArg).shortValue() );
+                        }
+                    }
+                    
+                    setInput( jdbcParamNumber, returnArg );
+                }
+            }
+        } catch (Exception se)
+        {
+            throw new IllegalArgumentException( se.getMessage() );
+        }
+    }
+
     
     //----------------------------helper methods----------------------------------
 

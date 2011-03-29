@@ -1,4 +1,6 @@
 /*
+ * Derby - Class org.apache.derbyTesting.functionTests.tests.jdbcapi.ProcedureTest
+ *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -19,22 +21,32 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+import java.math.BigDecimal;
+import java.sql.Blob;
 import java.sql.CallableStatement;
+import java.sql.Clob;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Types;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derby.iapi.types.HarmonySerialBlob;
+import org.apache.derby.iapi.types.HarmonySerialClob;
+
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.functionTests.tests.lang.Price;
 
 /**
  * Tests of stored procedures.
@@ -628,6 +640,170 @@ public class ProcedureTest extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * Test that INOUT args are preserved over procedure invocations.
+     * See DERBY-2515.
+     */
+    public  void    test_2515()   throws Exception
+    {
+        Connection  conn = getConnection();
+        
+        PreparedStatement ps = conn.prepareStatement
+            (
+             "create type price_2515 external name 'org.apache.derbyTesting.functionTests.tests.lang.Price' language java\n"
+             );
+        ps.execute();
+        ps.close();
+        
+        ps = conn.prepareStatement
+            (
+             "create procedure proc_2515\n" +
+             "(\n" +
+             "\tin passNumber int,\n" +
+             "\tout returnMessage varchar( 32672 ),\n" +
+             "\tinout bigintArg bigint,\n" +
+             "\tinout blobArg blob,\n" +
+             "inout booleanArg boolean,\n" +
+             "inout charArg char( 6 ),\n" +
+             "inout charForBitDataArg char( 3 ) for bit data,\n" +
+             "inout clobArg clob,\n" +
+             "inout dateArg date,\n" +
+             "inout decimalArg decimal,\n" +
+             "inout doubleArg double,\n" +
+             "inout intArg int,\n" +
+             "inout longVarcharArg long varchar,\n" +
+             "inout longVarcharForBitDataArg long varchar for bit data,\n" +
+             "inout realArg real,\n" +
+             "inout smallintArg smallint,\n" +
+             "inout timeArg time,\n" +
+             "inout timestampArg timestamp,\n" +
+             "inout priceArg price_2515,\n" +
+             "inout varcharArg varchar( 20 ),\n" +
+             "inout varcharForBitDataArg varchar( 3 ) for bit data\n" +
+            ")\n" +
+            "parameter style java language java no sql\n" +
+            "external name '" + ProcedureTest.class.getName() + ".proc_2515'"
+             );
+        ps.execute();
+        ps.close();
+
+        CallableStatement   cs = conn.prepareCall
+            ( "call proc_2515( ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ?,  ? )" );
+        AllTypesTuple   firstArgs = makeFirstAllTypesTuple();
+
+        int     idx = 2;
+        
+        cs.registerOutParameter( idx++, Types.VARCHAR );
+
+        cs.registerOutParameter( idx, Types.BIGINT );
+        cs.setLong( idx++, firstArgs.get_bigintArg().longValue() );
+
+        cs.registerOutParameter( idx, Types.BLOB );
+        cs.setBlob( idx++, firstArgs.get_blobArg() );
+
+        cs.registerOutParameter( idx, Types.BOOLEAN );
+        cs.setBoolean( idx++, firstArgs.get_booleanArg().booleanValue() );
+
+        cs.registerOutParameter( idx, Types.CHAR );
+        cs.setString( idx++, firstArgs.get_charArg() );
+
+        cs.registerOutParameter( idx, Types.BINARY );
+        cs.setBytes( idx++, firstArgs.get_charForBitDataArg() );
+
+        cs.registerOutParameter( idx, Types.CLOB );
+        cs.setClob( idx++, firstArgs.get_clobArg() );
+
+        cs.registerOutParameter( idx, Types.DATE );
+        cs.setDate( idx++, firstArgs.get_dateArg() );
+
+        cs.registerOutParameter( idx, Types.DECIMAL );
+        cs.setBigDecimal( idx++, firstArgs.get_decimalArg() );
+
+        cs.registerOutParameter( idx, Types.DOUBLE );
+        cs.setDouble( idx++, firstArgs.get_doubleArg().doubleValue() );
+
+        cs.registerOutParameter( idx, Types.INTEGER );
+        cs.setInt( idx++, firstArgs.get_intArg().intValue() );
+
+        cs.registerOutParameter( idx, Types.LONGVARCHAR );
+        cs.setString( idx++, firstArgs.get_longVarcharArg() );
+
+        cs.registerOutParameter( idx, Types.LONGVARBINARY );
+        cs.setBytes( idx++, firstArgs.get_longVarcharForBitDataArg() );
+
+        cs.registerOutParameter( idx, Types.REAL );
+        cs.setFloat( idx++, firstArgs.get_realArg().floatValue() );
+
+        cs.registerOutParameter( idx, Types.SMALLINT );
+        cs.setShort( idx++, firstArgs.get_smallintArg().shortValue() );
+
+        cs.registerOutParameter( idx, Types.TIME );
+        cs.setTime( idx++, firstArgs.get_timeArg() );
+
+        cs.registerOutParameter( idx, Types.TIMESTAMP );
+        cs.setTimestamp( idx++, firstArgs.get_timestampArg() );
+
+        cs.registerOutParameter( idx, Types.JAVA_OBJECT );
+        cs.setObject( idx++, firstArgs.get_priceArg() );
+
+        cs.registerOutParameter( idx, Types.VARCHAR );
+        cs.setString( idx++, firstArgs.get_varcharArg() );
+
+        cs.registerOutParameter( idx, Types.VARBINARY );
+        cs.setBytes( idx++, firstArgs.get_varcharForBitDataArg() );
+
+        cs.setInt( 1, 0 );
+        cs.execute();
+        assertEquals( "", cs.getString( 2 ) );  // the return message should be empty, meaning the call args were what the procedure expected
+        assertEquals( "", makeSecondAllTypesTuple().compare( getActualReturnArgs( cs ) ) );
+
+        cs.setInt( 1, 1 );
+        cs.execute();
+        assertEquals( "", cs.getString( 2 ) );  // the return message should be empty, meaning the call args were what the procedure expected
+        assertEquals( "", makeThirdAllTypesTuple().compare( getActualReturnArgs( cs ) ) );
+
+        cs.setInt( 1, 2 );
+        cs.execute();
+        assertEquals( "", cs.getString( 2 ) );  // the return message should be empty, meaning the call args were what the procedure expected
+        assertEquals( "", makeFourthAllTypesTuple().compare( getActualReturnArgs( cs ) ) );
+
+        ps = conn.prepareStatement( "drop procedure proc_2515" );
+        ps.execute();
+        ps.close();
+
+        ps = conn.prepareStatement( "drop type price_2515 restrict" );
+        ps.execute();
+        ps.close();
+    }
+    private AllTypesTuple   getActualReturnArgs( CallableStatement cs )
+        throws Exception
+    {
+        int idx = 3;
+        
+        return new AllTypesTuple
+            (
+             (Long) cs.getObject( idx++ ),
+             (Blob) cs.getObject( idx++ ),
+             (Boolean) cs.getObject( idx++ ),
+             (String) cs.getObject( idx++ ),
+             (byte[]) cs.getObject( idx++ ),
+             (Clob) cs.getObject( idx++ ),
+             (Date) cs.getObject( idx++ ),
+             (BigDecimal) cs.getObject( idx++ ),
+             (Double) cs.getObject( idx++ ),
+             (Integer) cs.getObject( idx++ ),
+             (String) cs.getObject( idx++ ),
+             (byte[]) cs.getObject( idx++ ),
+             (Float) cs.getObject( idx++ ),
+             (Integer) cs.getObject( idx++ ),
+             (Time) cs.getObject( idx++ ),
+             (Timestamp) cs.getObject( idx++ ),
+             (Price) cs.getObject( idx++ ),
+             (String) cs.getObject( idx++ ),
+             (byte[]) cs.getObject( idx++ )
+             );
+    }
+
     // UTILITY METHODS
 
     /**
@@ -933,6 +1109,183 @@ public class ProcedureTest extends BaseJDBCTestCase {
     public static void intOut(int[] out) {
         out[0] = 42;
     }
+
+    /**
+     * Procedure to test that INOUT args preserve their value when the
+     * procedure is re-executed (DERBY-2515). If you add a new datatype
+     * to Derby, you will need to add a new argument at the end of this
+     * procedure's signature.
+     */
+    public static  AllTypesTuple   makeFirstAllTypesTuple() throws Exception
+    {
+        return new AllTypesTuple
+            (
+             new Long( 1L ),
+             new HarmonySerialBlob( new byte[] { (byte) 1, (byte) 1, (byte) 1 } ),
+             Boolean.TRUE,
+             "firstt",
+             new byte[] { (byte) 1, (byte) 1, (byte) 1 },
+             new HarmonySerialClob( "firstt" ),
+             new Date( 1L ),
+             new BigDecimal( 1 ),
+             new Double( 1.0 ),
+             new Integer( 1 ),
+             new String( "firstt" ),
+             new byte[] { (byte) 1, (byte) 1, (byte) 1 },
+             new Float( 1.0F ),
+             new Integer( 1 ),
+             new Time( 1L ),
+             new Timestamp( 1L ),
+             new Price( "USD", new BigDecimal( 1 ), new Timestamp( 1 ) ),
+             "firstt",
+             new byte[] { (byte) 1, (byte) 1, (byte) 1 }
+             );
+    }
+    public static  AllTypesTuple   makeSecondAllTypesTuple() throws Exception
+    {
+        return new AllTypesTuple
+            (
+             new Long( 2L ),
+             new HarmonySerialBlob( new byte[] { (byte) 2, (byte) 2, (byte) 2 } ),
+             Boolean.FALSE,
+             "second",
+             new byte[] { (byte) 2, (byte) 2, (byte) 2 },
+             new HarmonySerialClob( "second" ),
+             new Date( 2L ),
+             new BigDecimal( 2 ),
+             new Double( 2.0 ),
+             new Integer( 2 ),
+             new String( "second" ),
+             new byte[] { (byte) 2, (byte) 2, (byte) 2 },
+             new Float( 2.0F ),
+             new Integer( 2 ),
+             new Time( 2L ),
+             new Timestamp( 2L ),
+             new Price( "USD", new BigDecimal( 2 ), new Timestamp( 2 ) ),
+             "second",
+             new byte[] { (byte) 2, (byte) 2, (byte) 2 }
+             );
+    }
+    public static  AllTypesTuple   makeThirdAllTypesTuple() throws Exception
+    {
+        return new AllTypesTuple
+            (
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null,
+             null
+             );
+    }
+    public static  AllTypesTuple   makeFourthAllTypesTuple() throws Exception
+    {
+        return makeFirstAllTypesTuple();
+    }
+    public  static  void    proc_2515
+        (
+         int passNumber,
+         String[] message,
+         
+         Long[] bigintArg,
+         Blob[] blobArg,
+         Boolean[] booleanArg,
+         String[] charArg,
+         byte[][] charForBitDataArg,
+         Clob[] clobArg,
+         Date[] dateArg,
+         BigDecimal[] decimalArg,
+         Double[] doubleArg,
+         Integer[] intArg,
+         String[] longVarcharArg,
+         byte[][] longVarcharForBitDataArg,
+         Float[] realArg,
+         Integer[] smallintArg,
+         Time[] timeArg,
+         Timestamp[] timestampArg,
+         Price[] priceArg,
+         String[] varcharArg,
+         byte[][] varcharForBitDataArg
+         )
+        throws Exception
+    {
+        AllTypesTuple   actualCallSignature = new AllTypesTuple
+            (
+             bigintArg[ 0 ],
+             blobArg[ 0 ],
+             booleanArg[ 0 ],
+             charArg[ 0 ],
+             charForBitDataArg[ 0 ],
+             clobArg[ 0 ],
+             dateArg[ 0 ],
+             decimalArg[ 0 ],
+             doubleArg[ 0 ],
+             intArg[ 0 ],
+             longVarcharArg[ 0 ],
+             longVarcharForBitDataArg[ 0 ],
+             realArg[ 0 ],
+             smallintArg[ 0 ],
+             timeArg[ 0 ],
+             timestampArg[ 0 ],
+             priceArg[ 0 ],
+             varcharArg[ 0 ],
+             varcharForBitDataArg[ 0 ]
+             );
+        AllTypesTuple   expectedCallSignature;
+        AllTypesTuple   returnSignature;
+
+        switch( passNumber )
+        {
+        case 0:
+            expectedCallSignature = makeFirstAllTypesTuple();
+            returnSignature = makeSecondAllTypesTuple();
+            break;
+        case 1:
+            expectedCallSignature = makeSecondAllTypesTuple();
+            returnSignature = makeThirdAllTypesTuple();
+            break;
+        case 2:
+        default:
+            expectedCallSignature = makeThirdAllTypesTuple();
+            returnSignature = makeFourthAllTypesTuple();
+            break;
+        }
+
+        message[ 0 ] = expectedCallSignature.compare( actualCallSignature );
+        
+        bigintArg[ 0 ] = returnSignature.get_bigintArg();
+        blobArg[ 0 ] = returnSignature.get_blobArg();
+        booleanArg[ 0 ] = returnSignature.get_booleanArg();
+        charArg[ 0 ] = returnSignature.get_charArg();
+        charForBitDataArg[ 0 ] = returnSignature.get_charForBitDataArg();
+        clobArg[ 0 ] = returnSignature.get_clobArg();
+        dateArg[ 0 ] = returnSignature.get_dateArg();
+        decimalArg[ 0 ] = returnSignature.get_decimalArg();
+        doubleArg[ 0 ] = returnSignature.get_doubleArg();
+        intArg[ 0 ] = returnSignature.get_intArg();
+        longVarcharArg[ 0 ] = returnSignature.get_longVarcharArg();
+        longVarcharForBitDataArg[ 0 ] = returnSignature.get_longVarcharForBitDataArg();
+        realArg[ 0 ] = returnSignature.get_realArg();
+        smallintArg[ 0 ] = returnSignature.get_smallintArg();
+        timeArg[ 0 ] = returnSignature.get_timeArg();
+        timestampArg[ 0 ] = returnSignature.get_timestampArg();
+        priceArg[ 0 ] = returnSignature.get_priceArg();
+        varcharArg[ 0 ] = returnSignature.get_varcharArg();
+        varcharForBitDataArg[ 0 ] = returnSignature.get_varcharForBitDataArg();
+    }
     
         /**
          * Test various combinations of getMoreResults
@@ -1187,5 +1540,179 @@ public class ProcedureTest extends BaseJDBCTestCase {
             for (int i = 0; i < 5; i++)
                 JDBC.assertClosed(allRS[i]);
         }
+
+    ////////////////////////////////////////////
+    //
+    // Nested classes.
+    //
+    ////////////////////////////////////////////
+
+    public  static  final   class   AllTypesTuple
+    {
+        private Long _bigintArg;
+        private Blob _blobArg;
+        private Boolean _booleanArg;
+        private String _charArg;
+        private byte[] _charForBitDataArg;
+        private Clob _clobArg;
+        private Date _dateArg;
+        private BigDecimal _decimalArg;
+        private Double _doubleArg;
+        private Integer _intArg;
+        private String _longVarcharArg;
+        private byte[] _longVarcharForBitDataArg;
+        private Float _realArg;
+        private Integer _smallintArg;
+        private Time _timeArg;
+        private Timestamp _timestampArg;
+        private Price _priceArg;
+        private String _varcharArg;
+        private byte[] _varcharForBitDataArg;
+
+        public AllTypesTuple
+            (
+             Long  bigintArg,
+             Blob  blobArg,
+             Boolean  booleanArg,
+             String  charArg,
+             byte[]   charForBitDataArg,
+             Clob  clobArg,
+             Date  dateArg,
+             BigDecimal  decimalArg,
+             Double  doubleArg,
+             Integer  intArg,
+             String  longVarcharArg,
+             byte[]   longVarcharForBitDataArg,
+             Float  realArg,
+             Integer  smallintArg,
+             Time  timeArg,
+             Timestamp  timestampArg,
+             Price  priceArg,
+             String  varcharArg,
+             byte[]   varcharForBitDataArg
+             )
+        {
+            _bigintArg = bigintArg;
+            _blobArg = blobArg;
+            _booleanArg = booleanArg;
+            _charArg = charArg;
+            _charForBitDataArg = charForBitDataArg;
+            _clobArg = clobArg;
+            _dateArg = dateArg;
+            _decimalArg = decimalArg;
+            _doubleArg = doubleArg;
+            _intArg = intArg;
+            _longVarcharArg = longVarcharArg;
+            _longVarcharForBitDataArg = longVarcharForBitDataArg;
+            _realArg = realArg;
+            _smallintArg = smallintArg;
+            _timeArg = timeArg;
+            _timestampArg = timestampArg;
+            _priceArg = priceArg;
+            _varcharArg = varcharArg;
+            _varcharForBitDataArg = varcharForBitDataArg;
+        }
+
+        public Long get_bigintArg() { return _bigintArg; }
+        public Blob get_blobArg() { return _blobArg; }
+        public Boolean get_booleanArg() { return _booleanArg; }
+        public String get_charArg() { return _charArg; }
+        public byte[] get_charForBitDataArg() { return _charForBitDataArg; }
+        public Clob get_clobArg() { return _clobArg; }
+        public Date get_dateArg() { return _dateArg; }
+        public BigDecimal get_decimalArg() { return _decimalArg; }
+        public Double get_doubleArg() { return _doubleArg; }
+        public Integer get_intArg() { return _intArg; }
+        public String get_longVarcharArg() { return _longVarcharArg; }
+        public byte[] get_longVarcharForBitDataArg() { return _longVarcharForBitDataArg; }
+        public Float get_realArg() { return _realArg; }
+        public Integer get_smallintArg() { return _smallintArg; }
+        public Time get_timeArg() { return _timeArg; }
+        public Timestamp get_timestampArg() { return _timestampArg; }
+        public Price get_priceArg() { return _priceArg; }
+        public String get_varcharArg() { return _varcharArg; }
+        public byte[] get_varcharForBitDataArg() { return _varcharForBitDataArg; }
+
+        public  String  compare( AllTypesTuple that ) throws Exception
+        {
+            String  message = "";
+
+            message = message + compare( "_bigintArg", this._bigintArg, that._bigintArg );
+            message = message + compare( "_blobArg", this.getBlobBytes(), that.getBlobBytes() );
+            message = message + compare( "_booleanArg", this._booleanArg, that._booleanArg );
+            message = message + compare( "_charArg", this._charArg, that._charArg );
+            message = message + compare( "_charForBitDataArg", this._charForBitDataArg, that._charForBitDataArg );
+            message = message + compare( "_clobArg", this.getClobString(), that.getClobString() );
+            message = message + compare( "_dateArg", this.getDateString(), that.getDateString() );
+            message = message + compare( "_decimalArg", this._decimalArg, that._decimalArg );
+            message = message + compare( "_doubleArg", this._doubleArg, that._doubleArg );
+            message = message + compare( "_intArg", this._intArg, that._intArg );
+            message = message + compare( "_longVarcharArg", this._longVarcharArg, that._longVarcharArg );
+            message = message + compare( "_longVarcharForBitDataArg", this._longVarcharForBitDataArg, that._longVarcharForBitDataArg );
+            message = message + compare( "_realArg", this._realArg, that._realArg );
+            message = message + compare( "_smallintArg", this._smallintArg, that._smallintArg );
+            message = message + compare( "_timeArg", this.getTimeString(), that.getTimeString() );
+            message = message + compare( "_timestampArg", this._timestampArg, that._timestampArg );
+            message = message + compare( "_priceArg", this._priceArg, that._priceArg );
+            message = message + compare( "_varcharArg", this._varcharArg, that._varcharArg );
+            message = message + compare( "_varcharForBitDataArg", this._varcharForBitDataArg, that._varcharForBitDataArg );
+
+            return message;
+        }
+        private byte[]  getBlobBytes() throws Exception
+        {
+            if ( _blobArg == null ) { return null; }
+            else { return _blobArg.getBytes( 1, (int) _blobArg.length() ); }
+        }
+        private String  getClobString() throws Exception
+        {
+            if ( _clobArg == null ) { return null; }
+            else { return _clobArg.getSubString( 1, (int) _clobArg.length() ); }
+        }
+        private String  getDateString()
+        {
+            if ( _dateArg ==  null ) { return null; }
+            else { return _dateArg.toString(); }
+        }
+        private String  getTimeString()
+        {
+            if ( _timeArg == null ) { return null; }
+            else { return _timeArg.toString(); }
+        }
+        private String  compare( String argName, Object left, Object right )
+        {
+            if ( left == null )
+            {
+                if ( right == null ) { return ""; }
+                return (argName + ": left was null but right was " + right);
+            }
+            if ( right == null ) { return (argName + ": left = " + left + " but right is null" ); }
+            if ( left instanceof byte[] ) { return compareBytes( argName, (byte[]) left, (byte[]) right ); }
+
+            if ( left.equals( right ) ) { return ""; }
+
+            return (argName + ": left = " + left + " but right = " + right);
+        }
+        private String  compareBytes( String argName, byte[] left, byte[] right )
+        {
+            int count = left.length;
+
+            if ( count != right.length )
+            {
+                return (argName + ": left count = " + count + " but right count = " + right.length );
+            }
+            for ( int i = 0; i < count; i++ )
+            {
+                if ( left[ i ] != right[ i ] )
+                {
+                    return (argName + ": left[ " + i + " ] = " + left[ i ] + " but right[ " + i + " ] = " + right[ i ] );
+                }
+            }
+
+            return "";
+        }
+    }
+
+    
 
 }
