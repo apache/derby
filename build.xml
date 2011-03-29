@@ -337,10 +337,27 @@
 
             bumpID    true or false, depending on whether you want to increment the last digit of the release id (defaults to false)
     -->
-  <target name="writeReleaseProperties" depends="init,prebuild,promptforsvncredentials,promptforreleaseid">
+  <target name="writeAndCheckinReleaseProperties" depends="writeRelProps,promptforsvncredentials">
+
+    <!-- Check in the new release id. -->
+    <antcall target="checkinfile">
+       <param name="checkinComment" value="Derby release ID set to: ${derby.release.id.new}"/>
+       <param name="fileName" value="${releasePropertyFile}"/>
+    </antcall>
+    
+  </target>  
+
+    <!--
+        Create the release properties file.
+
+        Args:
+
+            bumpID    true or false, depending on whether you want to increment the last digit of the release id (defaults to false)
+    -->
+  <target name="writeRelProps" depends="init,prebuild,promptforreleaseid">
 
     <taskdef
-      name="writeReleaseProperties"
+      name="writeAndCheckinReleaseProperties"
       classname="org.apache.derbyPreBuild.ReleaseProperties"
       classpath="${out.dir}"
     />
@@ -348,7 +365,7 @@
     <property name="releasePropertyFile" value="${properties.dir}/release.properties"/>
     <property name="bumpID" value="false"/>
 
-    <writeReleaseProperties
+    <writeAndCheckinReleaseProperties
       releaseID="${derby.release.id}"
       releasePropertiesFileName="${releasePropertyFile}"
       bump="${bumpID}"
@@ -359,12 +376,6 @@
         will be different from the original id passed into this target.
     -->
     <echo message="Derby release ID set to: ${derby.release.id.new}"/>
-
-    <!-- Check in the new release id. -->
-    <antcall target="checkinfile">
-       <param name="checkinComment" value="Derby release ID set to: ${derby.release.id.new}"/>
-       <param name="fileName" value="${releasePropertyFile}"/>
-    </antcall>
     
   </target>  
 
@@ -2640,7 +2651,7 @@ you should not have to do this.
       <delete file="${release.dir}/maintversion.properties"/>
 
        <!-- the release candidate has been built. now we can bump the release id.  -->
-       <antcall target="writeReleaseProperties">
+       <antcall target="writeAndCheckinReleaseProperties">
           <param name="bumpID" value="true"/>
        </antcall>
 
@@ -2650,7 +2661,7 @@ you should not have to do this.
     <target name="prepareforrelease" depends="checkdocsroot,checksvnclientsclean,promptforreleaseproperties,checkstateremoved,checksanenotset,cleanalljars,cleandocs,clobber,cleanreleasefiles">
 
         <!-- set the release id -->
-        <antcall target="writeReleaseProperties">
+        <antcall target="writeAndCheckinReleaseProperties">
            <param name="bumpID" value="false"/>
         </antcall>
 
