@@ -84,6 +84,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.util.IdUtil;
+import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.sql.catalog.DDColumnDependableFinder;
 import org.apache.derby.impl.sql.compile.CollectNodesVisitor;
 import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
@@ -3181,9 +3182,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		/* Need to use delimited identifiers for all object names
 		 * to ensure correctness.
 		 */
-		String updateStmt = "UPDATE \"" + td.getSchemaName() + "\".\"" +
-							td.getName() + "\" SET \"" +
-							 columnName + "\" = " + defaultText;
+        String updateStmt = "UPDATE " +
+                IdUtil.mkQualifiedName(td.getSchemaName(), td.getName()) +
+                " SET " + IdUtil.normalToDelimited(columnName) + "=" +
+                defaultText;
 
 
 		AlterTableConstantAction.executeUpdate(lcc, updateStmt);
@@ -3207,8 +3209,9 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
                               long increment)
             throws StandardException {
 		String maxStr = (increment > 0) ? "MAX" : "MIN";
-		String maxStmt = "SELECT " + maxStr + "(\"" + columnName + "\")"  +
-				"FROM \"" + td.getSchemaName() + "\".\"" + td.getName() + "\"";
+        String maxStmt = "SELECT  " + maxStr + "(" +
+                IdUtil.normalToDelimited(columnName) + ") FROM " +
+                IdUtil.mkQualifiedName(td.getSchemaName(), td.getName());
 
 		PreparedStatement ps = lcc.prepareInternalStatement(maxStmt);
 
@@ -3278,13 +3281,14 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		//  set ai_column = ConnectionInfo.nextAutoincrementValue(
 		//							schemaName, tableName, 
 		//							columnName)
-		String updateStmt = "UPDATE \"" + td.getSchemaName() + "\".\"" +
-			td.getName() + "\" SET \"" + columnName + "\" = " + 
+        String updateStmt = "UPDATE " +
+            IdUtil.mkQualifiedName(td.getSchemaName(), td.getName()) +
+            " SET " + IdUtil.normalToDelimited(columnName) + "=" +
 			"org.apache.derby.iapi.db.ConnectionInfo::" + 
 			"nextAutoincrementValue(" + 
-			"'" + td.getSchemaName() + "'" + "," +
-			"'" + td.getName() +  "'" + "," +
-			"'" + columnName + "'" + ")";
+            StringUtil.quoteStringLiteral(td.getSchemaName()) + "," +
+            StringUtil.quoteStringLiteral(td.getName()) + "," +
+            StringUtil.quoteStringLiteral(columnName) + ")";
 
 
 

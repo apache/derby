@@ -3435,4 +3435,37 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         
         conn.rollback();
     }
+
+    /**
+     * Test that an ALTER TABLE statement that adds a new column with a
+     * default value, doesn't fail if the schema name, table name or column
+     * name contains a double quote character.
+     */
+    public void testDerby5157_addColumnWithDefaultValue() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create schema \"\"\"\"");
+        s.execute("create table \"\"\"\".\"\"\"\" (x int)");
+
+        // The following statement used to fail with a syntax error.
+        s.execute("alter table \"\"\"\".\"\"\"\" " +
+                  "add column \"\"\"\" int default 42");
+    }
+
+    /**
+     * Test that an ALTER TABLE statement that changes the increment value of
+     * an identity column, doesn't fail if the schema name, table name or
+     * column name contains a double quote character.
+     */
+    public void testDerby5157_changeIncrement() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create schema \"\"\"\"");
+        s.execute("create table \"\"\"\".\"\"\"\"" +
+                  "(\"\"\"\" int generated always as identity)");
+
+        // The following statement used to fail with a syntax error.
+        s.execute("alter table \"\"\"\".\"\"\"\" " +
+                  "alter column \"\"\"\" set increment by 2");
+    }
 }
