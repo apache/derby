@@ -552,6 +552,11 @@ public class GenericStatement
 		{
 			if (foundInCache)
 				((GenericLanguageConnectionContext)lcc).removeStatement(this);
+
+            if (statementContext != null) {
+                statementContext.cleanupOnError(se);
+            }
+
 			throw se;
 		}
 		finally
