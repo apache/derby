@@ -22,12 +22,8 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 
-import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.ResultSet;
-import java.util.HashSet;
-import java.util.Set;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -96,6 +92,70 @@ public class Changes10_8 extends UpgradeChange
     // TESTS
     //
     ///////////////////////////////////////////////////////////////////////////////////
+    public void testDERBY5121TriggerTest2() throws Exception
+    {
+        Statement s = createStatement();
+        boolean modeDb2SqlOptional = oldAtLeast(10, 3);
+    	String updateSQL = "update media "+
+    	"set name = 'Mon Liza', description = 'Something snarky.' " +
+    	"where mediaID = 1";
+        
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+        	s.execute("create table folder ( "+
+        			"folderType	int	not null, folderID	int	not null, "+
+        			"folderParent int, folderName varchar(50) not null)");
+        	s.execute("create table media ( " +
+        			"mediaID int not null, name varchar(50)	not null, "+
+        			"description clob not null, mediaType varchar(50), "+
+        			"mediaContents	blob, folderID int not null	default 7)");
+        	s.execute("create trigger mediaInsrtDupTrgr " +
+        			"after INSERT on media referencing new as nr "+
+        			"for each ROW "+
+        			(modeDb2SqlOptional?"":"MODE DB2SQL ") +
+        			"values( nr.folderID, 7, nr.name)");
+        	s.execute("create trigger mediaUpdtDupTrgr " +
+        			"after UPDATE of folderID, name on media " +
+        			"referencing new as nr "+
+        			"for each ROW "+
+        			(modeDb2SqlOptional?"":"MODE DB2SQL ") +
+        			"values( nr.folderID, 7, nr.name)");
+        	s.executeUpdate("insert into folder(folderType, folderID, "+
+        			"folderParent, folderName ) "+
+        			"values ( 7, 7, null, 'media' )");
+        	s.executeUpdate("insert into media(mediaID, name, description)"+
+        			"values (1, 'Mona Lisa', 'A photo of the Mona Lisa')");
+        	if (oldIs(10,7,1,1))
+                assertStatementError(  "XCL12", s, updateSQL );
+        	else
+        		s.executeUpdate(updateSQL);
+        	break;
+
+        case PH_SOFT_UPGRADE:
+    		s.executeUpdate(updateSQL);
+        	break;
+        	
+        case PH_POST_SOFT_UPGRADE:
+        	//Derby 10.7.1.1 is not going to work because UPDATE sql should
+        	// have read all the columns from the trigger table but it did
+        	// not and hence trigger can't find the column it needs from the
+        	// trigger table
+        	if (oldIs(10,7,1,1))
+                assertStatementError(  "S0022", s, updateSQL );
+        	else
+        		s.executeUpdate(updateSQL);
+        	break;
+        case PH_HARD_UPGRADE:
+    		s.executeUpdate(updateSQL);
+        	break;
+        case PH_POST_HARD_UPGRADE:
+    		s.executeUpdate(updateSQL);
+        	s.executeUpdate("drop table media");
+        	s.executeUpdate("drop table folder");
+        	break;
+        }
+    }
 
     /**
      * Changes made for DERBY-1482 caused corruption which is being logged 
