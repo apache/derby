@@ -17,6 +17,11 @@
 -- assumes the connection connOne is set up already
 -- and that connThree, connFour failed to be setup correctly (bad URLs)
 
+--disconnect connection created by ScriptTestCase 
+show connections;
+disconnect CONNECTION0;
+set connection connOne; 
+
 -- expect connOne to be active
 show connections;
 connect 'jdbc:derby:lemming;create=true' as connTwo;
@@ -40,3 +45,6 @@ disconnect current;
 
 -- see no more connections to use
 show connections;
+
+-- shutdown system
+connect 'jdbc:derby:;shutdown=true';

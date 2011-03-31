@@ -1,4 +1,5 @@
-ij> --
+ERROR XJ004: Database 'nevercreated' not found.
+ij(CONNECTION0)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -16,7 +17,16 @@ ij> --
 --
 -- assumes the connection connOne is set up already
 -- and that connThree, connFour failed to be setup correctly (bad URLs)
--- expect connOne to be active
+
+--disconnect connection created by ScriptTestCase 
+show connections;
+CONNECTION0* - 	jdbc:derby:wombat
+CONNONE - 	jdbc:derby:wombat
+* = current connection
+WARNING 01J01: Database 'wombat' not created, connection made to existing database instead.
+ij(CONNECTION0)> disconnect CONNECTION0;
+ij> set connection connOne;
+ij> -- expect connOne to be active
 show connections;
 CONNONE* - 	jdbc:derby:wombat
 * = current connection
@@ -53,4 +63,7 @@ ij> disconnect current;
 ij> -- see no more connections to use
 show connections;
 No connections available.
+ij> -- shutdown system
+connect 'jdbc:derby:;shutdown=true';
+ERROR XJ015: Derby system shutdown.
 ij> 
