@@ -121,10 +121,31 @@ change in a future release in the highly unlikely event that the actual GA versi
 <td><b>Issue Id</b></td><td><b>Description</b></td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5162">DERBY-5162</a></td><td>CLOB INOUT arg set to NULL by procedure does not preserve NULL value when re-invoked</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5161">DERBY-5161</a></td><td>Cannot rollback after syntax error in internal statement</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5157">DERBY-5157</a></td><td>Incomplete quoting of SQL identifiers in AlterTableConstantAction</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5152">DERBY-5152</a></td><td>Shutting down db, information that the thread received an interrupt will not be restored to thread's interrupt flag</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5148">DERBY-5148</a></td><td>Fixes for problems with figures in documentation</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5143">DERBY-5143</a></td><td>Remove unnecessary copying of the map in getTypeMap()</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5136">DERBY-5136</a></td><td>Simple accessibility fixes to frames HTML doc output</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5124">DERBY-5124</a></td><td>NPE or assert failure printed when dropping table while statistics are written out</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5121">DERBY-5121</a></td><td>Data corruption when executing an UPDATE trigger</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5119">DERBY-5119</a></td><td>testQualifiers(org.apache.derbyTesting.functionTests.tests.store.AccessTest)java.sql.SQLException: Table/View 'FOO' already exists in Schema 'APP'.</td>
@@ -173,6 +194,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5095">DERBY-5095</a></td><td>Update XML operator documentation to reflect new requirements</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5093">DERBY-5093</a></td><td>[patch] avoid Integer allocations fetching client meta data info</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5092">DERBY-5092</a></td><td>[patch] avoid Boolean allocations for rowset data in client cursor</td>
@@ -296,6 +320,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5022">DERBY-5022</a></td><td>[patch] override equals correctly</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5021">DERBY-5021</a></td><td>[patch] avoid map look ups in a loop by using entrySet</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5020">DERBY-5020</a></td><td>[patch] remove redundant finalizer methods</td>
@@ -490,6 +517,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4912">DERBY-4912</a></td><td>Instability in Derby2017LayerBTest</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-4907">DERBY-4907</a></td><td>EmbeddedXADataSource with ;create=true attribute set in setDatabaseName fails with java.sql.SQLException: Database not available</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4897">DERBY-4897</a></td><td>Get rid of warning for customized tags in javadoc build</td>
 </tr>
 <tr>
@@ -535,6 +565,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 <td><a href="https://issues.apache.org/jira/browse/DERBY-3258">DERBY-3258</a></td><td>'Unexpected row count: expected:&lt;0&gt; but was:&lt;3&gt;' in testReleaseCompileLocks</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-3009">DERBY-3009</a></td><td>Out of memory error when creating a very large table</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-2949">DERBY-2949</a></td><td>AssertionFailedError in testStalePlansOnLargeTable</td>
 </tr>
 <tr>
@@ -542,6 +575,9 @@ change in a future release in the highly unlikely event that the actual GA versi
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-2739">DERBY-2739</a></td><td>Use DOM interfaces to implement XML operators</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-2515">DERBY-2515</a></td><td>Network client does not retain the INOUT parameter value change for subsequent execution</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-642">DERBY-642</a></td><td>SELECT MAX doesn't use indices optimally</td>
@@ -553,6 +589,14 @@ change in a future release in the highly unlikely event that the actual GA versi
 <blockquote>
 <p>Compared with the previous release (10.7.1.1), Derby release 10.8.0.0 introduces the following new features and incompatibilities. These merit your special attention.</p>
 <ul>
+<li>
+<a href="#Note for DERBY-5121">
+<p>Note for DERBY-5121: 
+In Derby 10.7.1.1, update triggers with REFERENCING clauses can corrupt data. Users are urged to
+upgrade to the next release in the 10.7 family or to 10.8.
+</p>
+</a>
+</li>
 <li>
 <a href="#Note for DERBY-4965">
 <p>Note for DERBY-4965: 
@@ -603,6 +647,91 @@ The requirements for XML operators have changed.
 </a>
 </li>
 </ul>
+<hr>
+<h3>
+<a name="Note for DERBY-5121"></a>Note for DERBY-5121</h3>
+<blockquote>
+
+<!-- 
+  SUMMARIZE THE ISSUE. This is a one line summary of the issue.
+
+  For instance:
+
+  Applications may no longer open two InputStreams on the same ResultSet column.
+-->
+
+
+<h4>Summary of Change</h4>
+
+<p>
+In Derby 10.7.1.1, update triggers with REFERENCING clauses can corrupt data. Users are urged to
+upgrade to the next release in the 10.7 family or to 10.8.
+</p>
+
+
+<!-- 
+  DESCRIBE WHAT IT IS THAT THE USER ACTUALLY SEES WHEN THE PROBLEM OCCURS.
+
+  For instance:
+
+  In the previous release, applications were able to open two
+  InputStreams on the same column. Depending on how these streams
+  interacted, the value siphoned out of the column was erratic. Now
+  Derby raises a SQLException when the application attempts to create
+  the second InputStream.
+-->
+
+
+<h4>Symptoms Seen by Applications Affected by Change</h4>
+
+<p>
+In Derby 10.7.1.1, UPDATE triggers which use the REFERENCING clause can be confused about which columns
+to pass to their triggered actions. This can silently corrupt data
+manipulated by the triggered actions.
+</p>
+
+
+<!-- 
+  OPTIONAL: DESCRIBE INCOMPATIBILITIES WITH PREVIOUS RELEASE, IF ANY.
+
+  For instance:
+
+  Applications which open two InputStreams on the ResultSet column now
+  fail.
+-->
+
+
+<h4>Incompatibilities with Previous Release</h4>
+
+<p>
+Derby 10.7.1.1 is the only release whose triggers corrupt data this
+way. Upgrading to a later 10.7 release
+or to 10.8 will recompile these triggers correctly.
+Applications should check for data corruption if they used 10.7.1.1 to
+create UPDATE triggers with the REFERENCING clause.
+</p>
+
+
+<!-- 
+  DESCRIBE WHY THE CHANGE WAS MADE.
+
+  For instance:
+
+  The previous behavior violated the JDBC standard. The new behavior
+  is correct.
+-->
+
+
+<h4>Rationale for Change</h4>
+
+<p>
+This change was made in order to fix a data corruption problem caused
+by UPDATE triggers with REFERENCING clauses.
+</p>
+
+
+
+</blockquote>
 <hr>
 <h3>
 <a name="Note for DERBY-4965"></a>Note for DERBY-4965</h3>
