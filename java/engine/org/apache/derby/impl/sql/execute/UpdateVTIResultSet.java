@@ -76,8 +76,6 @@ class UpdateVTIResultSet extends DMLVTIResultSet
 
         if( null != row)
             rowLocationColumn = row.nColumns();
-		if (!firstExecute)
-			lcc.getStatementContext().setTopResultSet(this, subqueryTrackingArray);
 
 		/* The source does not know whether or not we are doing a
 		 * deferred mode insert.  If we are, then we must clear the

@@ -43,11 +43,8 @@ class MiscResultSet extends NoRowsResultSetImpl
      * Construct a MiscResultSet
 	 *
 	 *  @param activation		Describes run-time environment.
-	 *
-	 *  @exception StandardException Standard Derby error policy.
      */
     MiscResultSet(Activation activation)
-		 throws StandardException
     {
 		super(activation);
 	}
