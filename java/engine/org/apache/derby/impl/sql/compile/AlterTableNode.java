@@ -352,6 +352,12 @@ public String statementToString()
                         //
 
                         if ( cdn.hasGenerationClause() && ( cdn.getType() == null ) ) { continue; }
+
+                        if ( cdn.getType() == null )
+                        {
+                            throw StandardException.newException
+                                ( SQLState.LANG_NEEDS_DATATYPE, cdn.getColumnName() );
+                        }
                         
 						if (cdn.getType().getTypeId().isStringTypeId()) {
 							//we found what we are looking for. Set the 

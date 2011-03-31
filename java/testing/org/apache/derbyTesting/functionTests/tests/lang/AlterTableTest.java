@@ -130,6 +130,10 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         assertStatementError("X0Y32", st,
                 "alter table t0 add column c1 int");
 
+        // add a column without a datatype (DERBY-5160)
+        assertStatementError("42XA9", st,
+                "alter table t0 add column y");
+
         // alter a system table
         assertStatementError("42X62", st,
                 "alter table sys.systables add column c1 int");
