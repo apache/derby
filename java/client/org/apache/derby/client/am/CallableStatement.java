@@ -1185,32 +1185,37 @@ public class CallableStatement extends PreparedStatement
         if ( parameterMetaData_ == null ) { return; }
 
         int     cursorParamCount = singletonParams.columns_;
-        try {
-            for ( int i = 0; i < cursorParamCount; i++ )
-            {
-                if ( parameterMetaData_.sqlxParmmode_[ i ] == java.sql.ParameterMetaData.parameterModeInOut )
-                {
-                    int jdbcParamNumber = i + 1;
-                    Object  returnArg = singletonParams.isNull_[ i ] ? null : singletonParams.getObject( jdbcParamNumber );
-
-                    //
-                    // special case to coerce Integer to Short for SMALLINT
-                    //
-                    if ( parameterMetaData_.types_[ i ] == Types.SMALLINT )
-                    {
-                        if ( (returnArg != null) && (returnArg instanceof Integer) )
-                        {
-                            returnArg = new Short( ((Integer) returnArg).shortValue() );
-                        }
-                    }
-                    
-                    setInput( jdbcParamNumber, returnArg );
-                }
-            }
-        } catch (Exception se)
+        
+        for ( int i = 0; i < cursorParamCount; i++ )
         {
-            throw new IllegalArgumentException( se.getMessage() );
-        }
+            if ( parameterMetaData_.sqlxParmmode_[ i ] == java.sql.ParameterMetaData.parameterModeInOut )
+            {
+                int jdbcParamNumber = i + 1;
+                Object  returnArg;
+                
+                try {
+                    returnArg = singletonParams.isNull_[ i ] ? null : singletonParams.getObject( jdbcParamNumber );
+                } catch (SqlException se)
+                {
+                    IllegalArgumentException iae = new IllegalArgumentException( se.getMessage() );
+                    iae.initCause( se );
+                    throw iae;
+                }
+                
+                //
+                // special case to coerce Integer to Short for SMALLINT
+                //
+                if ( parameterMetaData_.types_[ i ] == Types.SMALLINT )
+                {
+                    if ( (returnArg != null) && (returnArg instanceof Integer) )
+                    {
+                        returnArg = new Short( ((Integer) returnArg).shortValue() );
+                    }
+                }
+                
+                setInput( jdbcParamNumber, returnArg );
+            }   // end if INOUT arg
+        }       // end loop through args
     }
 
     
