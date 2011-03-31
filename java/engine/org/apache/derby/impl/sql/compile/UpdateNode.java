@@ -1087,57 +1087,30 @@ public final class UpdateNode extends DMLModStatementNode
 		if (relevantTriggers.size() > 0)
 		{
 			needsDeferredProcessing[0] = true;
+			
+			boolean needToIncludeAllColumns = false;
 			Enumeration descs = relevantTriggers.elements();
 			while (descs.hasMoreElements())
 			{
 				TriggerDescriptor trd = (TriggerDescriptor) descs.nextElement();
 				
-				int[] referencedColsInTriggerAction = trd.getReferencedColsInTriggerAction();
-				int[] triggerCols = trd.getReferencedCols();
-				if (triggerCols == null || triggerCols.length == 0) {
-					for (int i=0; i < columnCount; i++) {
-						columnMap.set(i+1);
-					}
-					//no need to go through the test of the trigger because
-					//we have already decided to read all the columns 
-					//because no trigger action columns were found for the
-					//trigger that we are considering right now.
-					break; 
-				} else {
-					if (referencedColsInTriggerAction == null || 
-							referencedColsInTriggerAction.length == 0) {
-						//Does this trigger have REFERENCING clause defined on it
-						if (!trd.getReferencingNew() && !trd.getReferencingOld()) {
-							for (int ix = 0; ix < triggerCols.length; ix++)
-							{
-								columnMap.set(triggerCols[ix]);
-							}
-						} else {
-							for (int i=0; i < columnCount; i++) {
-								columnMap.set(i+1);
-							}							
-							//no need to go through the test of the trigger because
-							//we have already decided to read all the columns 
-							//because no trigger action columns were found for the
-							//trigger that we are considering right now.
-							break; 
-						}
-					} else {
-						for (int ix = 0; ix < triggerCols.length; ix++)
-						{
-							columnMap.set(triggerCols[ix]);
-						}
-						for (int ix = 0; ix < referencedColsInTriggerAction.length; ix++)
-						{
-							columnMap.set(referencedColsInTriggerAction[ix]);
-						}
-					}
-				}			
+				//Does this trigger have REFERENCING clause defined on it
+				if (!trd.getReferencingNew() && !trd.getReferencingOld())
+					continue;
+				else
+				{
+					needToIncludeAllColumns = true;
+					break;
+				}
+			}
 
+			if (needToIncludeAllColumns) {
+				for (int i = 1; i <= columnCount; i++)
+				{
+					columnMap.set(i);
+				}
 			}
 		}
-
-
 		return	columnMap;
 	}
 
