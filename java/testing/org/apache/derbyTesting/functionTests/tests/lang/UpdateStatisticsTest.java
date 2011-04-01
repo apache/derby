@@ -21,8 +21,10 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.Test;
@@ -207,5 +209,94 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
 
         s.execute("drop table t");
         commit();
+    }
+
+    /**
+     * Regression test case for DERBY-5153. Compilation in parallel with
+     * update of statistics sometimes failed on debug builds.
+     *
+     * The test case should be disabled until the bug is fixed.
+     */
+    public void disabled_testParallelCompilationAndUpdate() throws Exception {
+        setAutoCommit(false);
+
+        // Create and populate a test table with a multi-column index.
+        Statement s = createStatement();
+        s.execute("create table derby5153(a int, b int, c int, d int)");
+        s.execute("create index idx on derby5153(a,b,c,d)");
+
+        PreparedStatement ins =
+                prepareStatement("insert into derby5153 values (1,2,3,4)");
+        for (int i = 0; i < 100; i++) {
+            ins.execute();
+        }
+
+        commit();
+
+        // Start a thread that repeatedly updates the statistics for IDX.
+        Connection updateConn = openDefaultConnection();
+        IndexUpdateThread t =
+                new IndexUpdateThread(updateConn, "APP", "DERBY5153", "IDX");
+        t.start();
+
+        try {
+
+            // Compile/execute the query a number of times while the index
+            // statistics are being updated. This often failed with an assert
+            // failure in debug builds before DERBY-5153.
+            for (int i = 0; i < 100; i++) {
+                ResultSet rs = s.executeQuery(
+                        "select * from derby5153 t1, derby5153 t2 " +
+                        "where t1.a = t2.a");
+                rs.close();
+            }
+
+        } finally {
+
+            // Let the update thread know we're done.
+            t.done = true;
+
+        }
+
+        t.join();
+
+        // Check if the update thread failed, and report if it did.
+        if (t.exception != null) {
+            throw t.exception;
+        }
+
+        updateConn.close();
+    }
+
+    /**
+     * A thread class that repeatedly calls SYSCS_UTIL.SYSCS_UPDATE_STATISTICS
+     * until the flag {@code done} is set to true. Any exception thrown during
+     * the lifetime of the thread can be found in the field {@code exception}.
+     */
+    private static class IndexUpdateThread extends Thread {
+        private final CallableStatement updateStats;
+        private volatile boolean done;
+        private Exception exception;
+
+        private IndexUpdateThread(
+                Connection c, String schema, String table, String index)
+                throws SQLException {
+            updateStats = c.prepareCall(
+                    "call syscs_util.syscs_update_statistics(?,?,?)");
+            updateStats.setString(1, schema);
+            updateStats.setString(2, table);
+            updateStats.setString(3, index);
+        }
+
+        public void run() {
+            try {
+                while (!done) {
+                    updateStats.execute();
+                }
+                updateStats.close();
+            } catch (Exception e) {
+                this.exception = e;
+            }
+        }
     }
 }
