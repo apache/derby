@@ -28,6 +28,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * Synonym testing using junit
@@ -91,5 +92,27 @@ public class SynonymTest extends BaseJDBCTestCase {
         st.executeUpdate("drop table test1.t1");
         st.executeUpdate("drop schema test2 restrict");
         st.executeUpdate("drop schema test1 restrict");
+    }
+
+    /**
+     * Verify the fix for DERBY-5168. SynonymAliasInfo.toString() used to
+     * return a value with incorrect syntax if the synonym referred to a
+     * table that had a double quote character either in its name or in the
+     * schema name.
+     */
+    public void testSynonymsForTablesWithDoubleQuotes() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create schema \"\"\"\"");
+        s.execute("create table \"\"\"\".\"\"\"\" (x int)");
+        s.execute("create synonym derby_5168_synonym for \"\"\"\".\"\"\"\"");
+
+        // We can exercise SynonymAliasInfo.toString() by reading the ALIASINFO
+        // column in SYS.SYSALIASES. This assert used to fail before the fix.
+        JDBC.assertSingleValueResultSet(
+            s.executeQuery(
+                "select aliasinfo from sys.sysaliases " +
+                "where alias = 'DERBY_5168_SYNONYM'"),
+            "\"\"\"\".\"\"\"\"");
     }
 }

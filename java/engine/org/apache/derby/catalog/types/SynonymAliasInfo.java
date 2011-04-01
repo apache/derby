@@ -23,6 +23,7 @@ package org.apache.derby.catalog.types;
 
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.catalog.AliasInfo;
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -99,7 +100,7 @@ public class SynonymAliasInfo implements AliasInfo, Formatable
 	public	int	getTypeFormatId()	{ return StoredFormatIds.SYNONYM_INFO_V01_ID; }
 
 	public String toString() {
-		return "\"" + schemaName + "\".\"" + tableName + "\"";
+        return IdUtil.mkQualifiedName(schemaName, tableName);
 	}
 
 	public String getMethodName()
