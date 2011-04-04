@@ -264,6 +264,10 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
         }
 
         updateConn.close();
+
+        // Clean-up
+        dropTable("derby5153");
+        commit();
     }
 
     /**
