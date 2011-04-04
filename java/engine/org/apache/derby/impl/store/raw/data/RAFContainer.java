@@ -54,6 +54,7 @@ import java.util.Vector;
 import java.io.DataInput;
 import java.io.IOException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
@@ -1373,7 +1374,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
 
      // PrivilegedExceptionAction method
-    public Object run() throws StandardException, IOException
+    public Object run() throws StandardException
      {
          switch( actionCode)
          {
@@ -1686,7 +1687,15 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 		 } // end of case BACKUP_CONTAINER_ACTION
 
          case GET_RANDOM_ACCESS_FILE_ACTION: {
-             return actionFile.getRandomAccessFile("rw");
+             try
+             {
+                 return actionFile.getRandomAccessFile("rw");
+             }
+             catch (FileNotFoundException fnfe)
+             {
+                 throw StandardException.newException(
+                     SQLState.FILE_CREATE, fnfe, actionFile.getPath());
+             }
 		 } // end of case BACKUP_CONTAINER_ACTION
 
 		 
