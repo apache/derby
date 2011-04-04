@@ -4532,7 +4532,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             }
             //using quotes around the column name to preserve case sensitivity
             try {
-                insertSQL.append(quoteSqlIdentifier(
+                insertSQL.append(Utils.quoteSqlIdentifier(
                         resultSetMetaData_.getColumnName(column)));
             } catch ( SQLException sqle ) {
                 throw new SqlException(sqle);
@@ -4567,7 +4567,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                     updateString.append(",");
                 }
                 try {
-                    updateString.append(quoteSqlIdentifier(
+                    updateString.append(Utils.quoteSqlIdentifier(
                             resultSetMetaData_.getColumnName(column))).append(" = ? ");
                 } catch ( SQLException sqle ) {
                     throw new SqlException(sqle);
@@ -4632,29 +4632,16 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
         //dervied column like select 2 from t1, has null schema and table name
         if (resultSetMetaData_.sqlxSchema_[baseTableColumn] != null && !resultSetMetaData_.sqlxSchema_[baseTableColumn].equals("")) {
-            tableName += quoteSqlIdentifier(
+            tableName += Utils.quoteSqlIdentifier(
                     resultSetMetaData_.sqlxSchema_[baseTableColumn]) + ".";
         }
         if (resultSetMetaData_.sqlxBasename_[baseTableColumn] != null) {
-            tableName += quoteSqlIdentifier(
+            tableName += Utils.quoteSqlIdentifier(
                     resultSetMetaData_.sqlxBasename_[baseTableColumn]);
         }
         return tableName;
     }
 
-    private String quoteSqlIdentifier(String orgValue) {
-        int i = 0, start = 0;
-        StringBuffer retValue = new StringBuffer();
-        retValue.append("\"");
-        while ((i = orgValue.indexOf("\"", start) + 1) > 0) {
-            retValue.append(orgValue.substring(start, i)).append("\"");
-            start = i;
-        }
-        retValue.append(orgValue.substring(start, orgValue.length()));
-        retValue.append("\"");
-        return retValue.toString();
-    }
-    
     private String getServerCursorName() throws SqlException {
         return statement_.section_.getServerCursorName();
     }

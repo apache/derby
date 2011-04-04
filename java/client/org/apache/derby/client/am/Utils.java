@@ -29,6 +29,37 @@ import org.apache.derby.shared.common.reference.MessageId;
 
 public final class Utils {
 
+    /**
+     * Quote an SQL identifier by enclosing it in double-quote characters
+     * and escaping any double-quote characters with an extra double-quote
+     * character.
+     *
+     * @param identifier the identifier to quote
+     * @return the quoted identifier
+     */
+    static String quoteSqlIdentifier(String identifier) {
+        // In the common case the length of the return value is the length of
+        // the identifier plus the two surrounding double quotes. Use that as
+        // the initial capacity of the buffer.
+        StringBuffer retValue = new StringBuffer(identifier.length() + 2);
+
+        final char quote = '"';
+
+        retValue.append(quote);
+
+        for (int i = 0; i < identifier.length(); i++) {
+            char ch = identifier.charAt(i);
+            if (ch == quote) {
+                retValue.append(quote);
+            }
+            retValue.append(ch);
+        }
+
+        retValue.append(quote);
+
+        return retValue.toString();
+    }
+
     static String getStringFromBytes(byte[] bytes) {
         if (bytes == null) {
             return "{}";

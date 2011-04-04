@@ -898,6 +898,30 @@ public class SavepointJdbc30Test extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * Test that savepoint names can have double-quote characters. The client
+     * driver used to fail with a syntax error when the names contained such
+     * characters. DERBY-5170.
+     */
+    public void testQuotes() throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.execute("create table test_quotes(x int)");
+        s.execute("insert into test_quotes values 1");
+
+        Savepoint sp = getConnection().setSavepoint("a \" b ' c");
+
+        s.execute("insert into test_quotes values 2");
+
+        getConnection().rollback(sp);
+
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from test_quotes"),
+                "1");
+
+        getConnection().releaseSavepoint(sp);
+    }
+
     /** ********************* */
 
     /*

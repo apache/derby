@@ -1556,8 +1556,9 @@ public abstract class Connection
                 savepointName = dncGeneratedSavepointNamePrefix__ +
                         savepoint.getSavepointId();
             }
-            String sql = "SAVEPOINT \"" + savepointName + "\" ON ROLLBACK RETAIN CURSORS";
-            stmt.executeX(sql);
+            stmt.executeX(
+                    "SAVEPOINT " + Utils.quoteSqlIdentifier(savepointName) +
+                    " ON ROLLBACK RETAIN CURSORS");
         } catch ( SqlException se )
         {
             throw se.getSQLException();
@@ -1615,8 +1616,9 @@ public abstract class Connection
                     savepointName = dncGeneratedSavepointNamePrefix__ +
                             ((Savepoint) savepoint).getSavepointId();
                 }
-                String sql = "ROLLBACK TO SAVEPOINT \"" + savepointName + "\"";
-                stmt.executeX(sql);
+                stmt.executeX(
+                        "ROLLBACK TO SAVEPOINT " +
+                        Utils.quoteSqlIdentifier(savepointName));
             } finally {
                 if (stmt != null) {
                     try {
@@ -1676,8 +1678,9 @@ public abstract class Connection
                     savepointName = dncGeneratedSavepointNamePrefix__ +
                             ((Savepoint) savepoint).getSavepointId();
                 }
-                String sql = "RELEASE SAVEPOINT \"" + savepointName + "\"";
-                stmt.executeX(sql);
+                stmt.executeX(
+                        "RELEASE SAVEPOINT " +
+                        Utils.quoteSqlIdentifier(savepointName));
             } finally {
                 if (stmt != null) {
                     try {
