@@ -214,10 +214,8 @@ public class UpdateStatisticsTest extends BaseJDBCTestCase {
     /**
      * Regression test case for DERBY-5153. Compilation in parallel with
      * update of statistics sometimes failed on debug builds.
-     *
-     * The test case should be disabled until the bug is fixed.
      */
-    public void disabled_testParallelCompilationAndUpdate() throws Exception {
+    public void testParallelCompilationAndUpdate() throws Exception {
         setAutoCommit(false);
 
         // Create and populate a test table with a multi-column index.

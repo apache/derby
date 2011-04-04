@@ -1396,6 +1396,9 @@ public class TableDescriptor extends TupleDescriptor
 	 * numKeys. This basically returns the reciprocal of the number of unique
 	 * values in the leading numKey columns of the index. It is assumed that
 	 * statistics exist for the conglomerate if this function is called.
+     * However, no locks are held to prevent the statistics from being dropped,
+     * so the method also handles the case of missing statistics by using a
+     * heuristic to estimate the selectivity.
 	 *
 	 * @param cd		ConglomerateDescriptor (Index) whose
 	 * cardinality we are interested in.
@@ -1407,22 +1410,6 @@ public class TableDescriptor extends TupleDescriptor
 											 int numKeys) 
 		throws StandardException
 	{
-		if (!statisticsExist(cd))
-		{
-			if (SanityManager.DEBUG)
-			{
-				SanityManager.THROWASSERT("no statistics exist for conglomerate"
-										  + cd);
-			}
-			else 
-			{
-				double selectivity = 0.1;
-				for (int i = 0; i < numKeys; i++)
-					selectivity *= 0.1;
-				return selectivity;
-			}
-		}
-		
 		UUID referenceUUID = cd.getUUID();
 
 		List sdl = getStatistics();
@@ -1438,10 +1425,10 @@ public class TableDescriptor extends TupleDescriptor
 			
 			return statDesc.getStatistic().selectivity((Object[])null);
 		}
-		
-		if (SanityManager.DEBUG)
-			SanityManager.THROWASSERT("Internal Error-- statistics not found in selectivityForConglomerate.\n cd = " + cd + "\nnumKeys = " + numKeys);
-		return 0.1;				// shouldn't come here.
+
+        // Didn't find statistics for these columns. Assume uniform 10%
+        // selectivity for each column in the key.
+        return Math.pow(0.1, numKeys);
 	}
 
 	/** @see TupleDescriptor#getDescriptorName */
