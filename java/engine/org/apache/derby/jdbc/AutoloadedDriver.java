@@ -32,8 +32,10 @@ import java.util.Properties;
 
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Attribute;
+import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.jdbc.JDBCBoot;
+import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
 
@@ -207,9 +209,8 @@ public class AutoloadedDriver implements Driver
 
 		if ( _engineForcedDown && (_autoloadedDriver == null))
 		{
-			// Driver not registered 
-			throw new SQLException
-				(MessageService.getTextMessage(MessageId.CORE_JDBC_DRIVER_UNREGISTERED));
+			// Driver not registered
+            throw Util.generateCsSQLException( SQLState.CORE_JDBC_DRIVER_UNREGISTERED );
 		}
 
 		if ( !isBooted() ) { EmbeddedDriver.boot(); }

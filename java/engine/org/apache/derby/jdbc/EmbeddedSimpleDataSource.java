@@ -24,6 +24,7 @@ package org.apache.derby.jdbc;
 import org.apache.derby.iapi.jdbc.JDBCBoot;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.MessageId;
+import org.apache.derby.iapi.reference.SQLState;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -432,7 +433,9 @@ public final class EmbeddedSimpleDataSource implements DataSource {
 					driver = InternalDriver.activeDriver();
 					
 					if (driver == null)
-						throw new SQLException(MessageService.getTextMessage(MessageId.CORE_JDBC_DRIVER_UNREGISTERED));
+                    {
+                        throw Util.generateCsSQLException( SQLState.CORE_JDBC_DRIVER_UNREGISTERED );
+                    }
 				}
 			}
 		}

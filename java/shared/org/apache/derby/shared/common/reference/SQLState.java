@@ -1681,8 +1681,9 @@ public interface SQLState {
     String CONNECTION_FAILED_ON_DEFERRED_RESET                  = "08006.C.4";
     String NET_INSUFFICIENT_DATA                                = "08006.C.5";
     String NET_LOB_DATA_TOO_LARGE_FOR_JVM                       = "08006.C.6";
-  
     
+	String CORE_JDBC_DRIVER_UNREGISTERED                    = "08006.C.8"; // JDBCDriver is not registered with the JDBC driver manager
+
     // 08001 is specifically about the SQL client not being able to establish
     // a connection with the server.  Should only be used for errors that
     // occur upon attempting to open a connection.

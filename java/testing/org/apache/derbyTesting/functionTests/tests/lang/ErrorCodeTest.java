@@ -130,6 +130,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"08006","Insufficient data while reading from the network - expected a minimum of {0} bytes and received only {1} bytes.  The connection has been terminated.","40000"},
         		{"08006","Attempt to fully materialize lob data that is too large for the JVM.  The connection has been terminated.","40000"},
         		{"08006","A network protocol error was encountered and the connection has been terminated: {0}","40000"},
+        		{"08006","org.apache.derby.jdbc.EmbeddedDriver is not registered with the JDBC driver manager","40000"},
         		{"08006","Database '{0}' shutdown.","45000"},
                 {"08006","Database '{0}' dropped.","45000"},
         		{"0A000","The DRDA command {0} is not currently implemented.  The connection has been terminated.","40000"},

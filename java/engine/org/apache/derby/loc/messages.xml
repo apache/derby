@@ -462,9 +462,15 @@ Guide.
                 <arg>number</arg>
                 <arg>number</arg>
             </msg>
+
             <msg>
                 <name>08006.C.6</name>
                 <text>Attempt to fully materialize lob data that is too large for the JVM.  The connection has been terminated.</text>
+            </msg>
+
+            <msg>
+                <name>08006.C.8</name>
+                <text>org.apache.derby.jdbc.EmbeddedDriver is not registered with the JDBC driver manager</text>
             </msg>
 
             <msg>
@@ -7593,11 +7599,6 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 
         <family>
             <title>Undocumented Messages for Interface in com.ibm.db2j.core.* from MessageId.java</title>
-
-            <msg>
-                <name>I015</name>
-                <text>org.apache.derby.jdbc.EmbeddedDriver is not registered with the JDBC driver manager</text>
-            </msg>
 
             <msg>
                 <name>I024</name>
