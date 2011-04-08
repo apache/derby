@@ -46,78 +46,83 @@ public final class MadhareTest extends BaseJDBCTestCase {
       {
         super(name);
       }
-      
+
       public static Test suite()
       {
         //Add the test case into the test suite
         TestSuite suite = new TestSuite("MadhareTest Test");
         return TestConfiguration.defaultSuite(MadhareTest.class);
       }
-      
+
       public void testBasicMadhare() throws SQLException
       {
         setAutoCommit(false);
-        
+
         Statement st = createStatement();
-        st.executeUpdate(
-                    "create table t( i int )");
+        st.executeUpdate("create table t( i int )");
 
-        st.executeUpdate(
-                    "insert into t(i) values (1956)");
+        st.executeUpdate("insert into t(i) values (1956)");
 
-        st.executeQuery(
-                    "select i from t");
+        ResultSet rs = st.executeQuery("select i from t");
 
-        // multiple columns            
-        st.executeUpdate(
-                    "create table s (i int, n int, t int, e int, g int, r int)");
+        JDBC.assertFullResultSet(rs, new String[][] {{"1956"}});
+
+        // multiple columns
+        st.executeUpdate("create table s (i int, n int, t int, e int, g int, r int)");
 
         // reorder columns on insert
-        st.executeUpdate(
-                    "insert into s (i,r,t,n,g,e) values (1,6,3,2,5,4)");
+        st.executeUpdate("insert into s (i,r,t,n,g,e) values (1,6,3,2,5,4)");
 
         // do not list the columns
-        st.executeUpdate(
-                    "insert into s values (10,11,12,13,14,15)");
+        st.executeUpdate("insert into s values (10,11,12,13,14,15)");
 
         // select some of the columns
-        st.executeQuery(
-                    "select i from s");
+        rs = st.executeQuery("select i from s");
+
+        String[][] expectedResultSet = {{"1"},{"10"}};
+        JDBC.assertFullResultSet(rs, expectedResultSet);
+
         // select in random orders
-        st.executeQuery(
-                    "select n,e,r,i,t,g from s");
+        rs = st.executeQuery("select n,e,r,i,t,g from s");
+
+        expectedResultSet = new String[][] {{"2","4","6","1","3","5"},
+                                               {"11","13","15","10","12","14"}};
+        JDBC.assertFullResultSet(rs, expectedResultSet);
 
         // select with constants
-        st.executeQuery(
-                    "select 20,n,22,e,24,r from s");
+        rs = st.executeQuery("select 20,n,22,e,24,r from s");
+
+        expectedResultSet = new String[][] {{"20","2","22","4","24","6"}, 
+                                               {"20","11","22","13","24","15"}};
+        JDBC.assertFullResultSet(rs, expectedResultSet);
 
         // prepare statement and execute support
-        PreparedStatement pst = prepareStatement(
-                                            "select i,n,t,e,g,r from s");
+        PreparedStatement pst = prepareStatement("select i,n,t,e,g,r from s");
 
-        pst.executeQuery();
+        rs = pst.executeQuery();
+
+        expectedResultSet = new String[][] {{"1","2","3","4","5","6"},
+                                               {"10","11","12","13","14","15"}};
+        JDBC.assertFullResultSet(rs, expectedResultSet);
+
         //execute can be done multiple times
-        pst.executeQuery();
-
-        // with smallint
-        st.executeUpdate(
-                    "create table r(s smallint, i int)");
-
-        st.executeUpdate(
-                    "insert into r values (23,2)");
-
-        st.executeQuery(
-                    "select s,i from r");
-
+        rs = pst.executeQuery();
+        JDBC.assertFullResultSet(rs, expectedResultSet);
         pst.close();
 
+        // with smallint
+        st.executeUpdate("create table r(s smallint, i int)");
+
+        st.executeUpdate("insert into r values (23,2)");
+
+        rs = st.executeQuery("select s,i from r");
+
+        JDBC.assertFullResultSet(rs, new String[][] {{"23","2"}});
+
         //cleanup
-        st.executeUpdate(
-                    "drop table r");
-        st.executeUpdate(
-                    "drop table s");
-        st.executeUpdate(
-                    "drop table t");
-        st.close();
-        }
-    }
+        st.executeUpdate("drop table r");
+        st.executeUpdate("drop table s");
+        st.executeUpdate("drop table t");
+        st.close(); 
+      }
+ }
