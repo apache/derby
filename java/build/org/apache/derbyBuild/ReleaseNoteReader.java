@@ -101,6 +101,8 @@ public class ReleaseNoteReader
         Element                           summary = me.getReleaseNoteSummary( doc );
         Element                         details = me.getReleaseNoteDetails( doc );
 
+        me.forbidBlockQuotes( doc );
+
         // if you get this far, then everything worked
 
         println( "\n" + fileName + " passes the currently known checks performed by the release note generator.\n" );
@@ -163,6 +165,28 @@ public class ReleaseNoteReader
         return details;
     }
 
+    /**
+     * <p>
+     * Forbid BLOCKQUOTEs for accessibility reasons. See http://www.w3.org/TR/WCAG10/#gl-structure-presentation
+     * </p>
+     */
+    private void    forbidBlockQuotes( Document releaseNote )   throws Exception
+    {
+        Element     root = releaseNote.getDocumentElement();
+        String          errorMessage = "For accessibility reasons, blockquotes are not allowed. Please remove the blockquote tags.";
+
+        forbid( root, "BLOCKQUOTE", errorMessage );
+        forbid( root, "blockquote", errorMessage );
+    }
+    private void    forbid( Element root, String tag, String errorMessage ) throws Exception
+    {
+        NodeList    tags = root.getElementsByTagName( tag );
+
+        if ( (tags != null) && (tags.getLength() > 0) )
+        {
+            throw new Exception( errorMessage );
+        }
+    }
 
     ////////////////////////////////////////////////////////
     //

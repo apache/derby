@@ -219,6 +219,12 @@ public class ReleaseNotesGenerator extends GeneratorBase {
         Element title = createTextElement(outputDoc, "title", titleText);
         Element body = outputDoc.createElement(BODY);
 
+        //
+        // Set language attribute for accessibility reasons.
+        // See http://www.w3.org/TR/WCAG10/#gl-abbreviated-and-foreign
+        //
+        html.setAttribute( "lang", "en" );
+
         outputDoc.appendChild(html);
         html.appendChild(title);
         html.appendChild(body);
