@@ -56,7 +56,7 @@ public class GeneratorBase extends Task {
     private static final String COLUMN = "td";
     private static final String HORIZONTAL_LINE = "hr";
     protected static final String HTML = "html";
-    private static final String INDENT = "blockquote";
+    private static final String DIVISION = "div";
     private static final String LIST = "ul";
     private static final String LIST_ELEMENT = "li";
     private static final String NAME = "name";
@@ -286,7 +286,7 @@ public class GeneratorBase extends Task {
         Text textNode = doc.createTextNode(text);
         Element header = doc.createElement(makeHeaderTag(headerLevel));
         Element anchor = doc.createElement(ANCHOR);
-        Element block = doc.createElement(INDENT);
+        Element block = doc.createElement(DIVISION);
 
         parent.appendChild(header);
         anchor.setAttribute(NAME, text);
