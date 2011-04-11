@@ -268,6 +268,12 @@ public class SQLClob
         if (stream == null) {
             return super.getLength();
         }
+        //
+        // The following check was put in to fix DERBY-4544. We seem to get
+        // confused if we have to re-use non-resetable streams.
+        //
+        if ( !(stream instanceof Resetable) ) { return super.getLength(); }
+        
         // The Clob is represented as a stream.
         // Make sure we have a stream descriptor.
         boolean repositionStream = (csd != null);
