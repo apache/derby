@@ -45,6 +45,8 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 
+import org.apache.derby.iapi.types.HarmonySerialClob;
+
 import org.apache.derbyTesting.functionTests.util.streams.CharAlphabet;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetReader;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
@@ -684,6 +686,133 @@ public class ClobTest
         assertTrue(Arrays.equals(expectedResult, delete.executeBatch()));
         commit();
         setAutoCommit(savedAutoCommitValue);
+    }
+
+    /**
+     * Verify that generated columns don't interfere with streaming Clobs.
+     * See DERBY-4544.
+     */
+    public  void    test_4544() throws Exception
+    {
+        int     streamLength = 100;
+        String  tableName;
+
+        prepareStatement
+            ( "create table t_4544_0 ( myclob clob )" ).execute();
+        insertClob( streamLength, "t_4544_0" );
+        prepareStatement
+            (
+             "create function replace_4544( inclob clob, target varchar( 32672 ), replacement varchar( 32672 ) )\n" +
+             "returns clob\n" +
+             "language java parameter style java no sql deterministic\n" +
+             "external name '" + getClass().getName() + ".replace'"
+             ).execute();
+
+        vetTable
+            (
+             streamLength,
+             "generated always as (length(myclob))",
+             Integer.toString( streamLength )
+             );
+        vetTable
+            (
+             streamLength,
+             "varchar( 3 ) generated always as ( substr(myclob, 1, 3) )",
+             " ab"
+             );
+        vetTable
+            (
+             streamLength,
+             "generated always as (locate( 'def', myclob ))",
+             "5"
+             );
+        vetTable
+            (
+             streamLength,
+             "clob generated always as (upper( myclob ))",
+             (new DummyReader( streamLength )).toString().toUpperCase()
+             );
+        vetTable
+            (
+             streamLength,
+             "clob generated always as (trim( myclob ))",
+             (new DummyReader( streamLength )).toString().trim()
+             );
+        vetTable
+            (
+             streamLength,
+             "clob generated always as (replace_4544( myclob, 'b', 'B' ))",
+             (new DummyReader( streamLength )).toString().replace( 'b', 'B' )
+             );
+
+        dropTable( "t_4544_0" );
+        prepareStatement( "drop function replace_4544" ).execute();
+    }
+    private void    vetTable( int streamLength, String gencol, String expectedValue ) throws Exception
+    {
+        String tableName = "t_4544_1";
+        
+        prepareStatement
+            ( "create table " + tableName + "( myclob clob, gencol " + gencol + " )" ).execute();
+
+        insertClob( streamLength, tableName );
+        vetTable( tableName, expectedValue );
+        vetClob( streamLength, tableName );
+        
+        prepareStatement( "delete from " + tableName ).executeUpdate();
+
+        prepareStatement( "insert into " + tableName + "( myclob ) select myclob from t_4544_0" ).executeUpdate();
+        vetTable( tableName, expectedValue );
+        vetClob( streamLength, tableName );
+        
+        dropTable( tableName );
+    }
+    private void    vetTable( String tableName, String expectedValue ) throws Exception
+    {
+        ResultSet   rs = prepareStatement( "select gencol from " + tableName ).executeQuery();
+        rs.next();
+        assertEquals( expectedValue, rs.getString( 1 ) );
+        rs.close();
+    }
+    private void    insertClob( int streamLength, String tableName ) throws Exception
+    {
+        PreparedStatement   insert = prepareStatement( "insert into " + tableName + "( myclob ) values ( ? )" );
+        insert.setCharacterStream( 1, new DummyReader( streamLength ), streamLength );
+        insert.executeUpdate();
+    }
+    private void    vetClob( int streamLength, String tableName ) throws Exception
+    {
+        PreparedStatement   select = prepareStatement( "select myclob from " + tableName );
+        ResultSet               rs = select.executeQuery();
+        rs.next();
+        Reader      actualReader = rs.getCharacterStream( 1 );
+        Reader      expectedReader = new DummyReader( streamLength );
+
+        for ( int i = 0; i < streamLength; i++ )
+        {
+            int actual = actualReader.read();
+            if ( actual < 0 )
+            {
+                fail( "    Read stream was only " + i + " characters long." );
+            }
+            
+            int    expected = expectedReader.read();
+            
+            assertEquals( expected, actual );
+        }
+        assertTrue( actualReader.read() < 0 );
+
+        rs.close();
+    }
+    public  static  Clob    replace( Clob clob, String target, String replacement )
+        throws Exception
+    {
+        char    targetChar = target.charAt( 0 );
+        char    replacementChar = replacement.charAt( 0 );
+        String  originalString = clob.getSubString( 1, (int) clob.length() );
+        String  resultString = originalString.replace( targetChar, replacementChar );
+
+        return new HarmonySerialClob( resultString );
     }
 
     /* Test ideas for more tests
