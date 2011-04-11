@@ -79,6 +79,8 @@ public class ReplicationSuite extends BaseTestCase
             suite.addTest(ReplicationRun_Local_Encrypted_1.suite());
 
             suite.addTest(ReplicationRun_Local_3_p6.suite());
+
+            suite.addTest(ReplicationRun_Local_Derby4910.suite());
         }
 
 		return suite;
