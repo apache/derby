@@ -349,18 +349,13 @@ public class SlaveController
             return true; // will not reach this if timeout
         } catch (StandardException se) {
             throw se;
+        } catch (SocketTimeoutException ste) {
+            // Got a timeout. Return normally and let the caller retry.
+            return false;
         } catch (Exception e) {
-            // SocketTimeoutException is wrapped in
-            // PrivilegedActionException.
-            Throwable cause = e.getCause();
-            if (cause instanceof SocketTimeoutException) {
-                // Timeout! 
-                return false;
-            } else {
-                throw StandardException.newException
+            throw StandardException.newException
                     (SQLState.REPLICATION_CONNECTION_EXCEPTION, e,
                     dbname, getHostName(), String.valueOf(getPortNumber()));
-            }
         }
     }
 
