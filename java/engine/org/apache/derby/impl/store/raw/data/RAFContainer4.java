@@ -820,8 +820,10 @@ class RAFContainer4 extends RAFContainer {
         }
 
         // Wait till other concurrent threads hit the wall
-        // (ClosedChannelException) and are a ready wait for us to clean up, so
-        // we can set them loose when we're done.
+        // (ClosedChannelException) and are a ready waiting for us to clean up,
+        // so we can set them loose when we're done.
+        int retries = MAX_INTERRUPT_RETRIES;
+
         while (true) {
             synchronized (channelCleanupMonitor) {
                 if (threadsInPageIO == 0) {
@@ -831,8 +833,13 @@ class RAFContainer4 extends RAFContainer {
                 }
             }
 
+            if (retries-- == 0) {
+                throw StandardException.newException(
+                        SQLState.FILE_IO_INTERRUPTED);
+            }
+
             try {
-                Thread.sleep(10);
+                Thread.sleep(INTERRUPT_RETRY_SLEEP);
             } catch (InterruptedException te) {
                 InterruptStatus.setInterrupted();
             }
