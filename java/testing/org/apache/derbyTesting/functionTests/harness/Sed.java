@@ -83,6 +83,7 @@ public class Sed
         deleteLines.addElement("^(.*at .*)\\(.*:[0-9].*\\)$");
         deleteLines.addElement("^(.*at .*)\\(*.java\\)$");
         deleteLines.addElement("^(.*at .*)\\(Compiled Code\\)$");
+        deleteLines.addElement("^.*at java.*\\<init\\>\\(.*\\(Compiled Code\\)\\)$");
         deleteLines.addElement("^(.*at .*)\\(Interpreted Code\\)$");
         deleteLines.addElement("^(.*at .*)\\(Unknown Source\\)$");
         deleteLines.addElement("^(.*at .*)\\(Native Method\\)$");
