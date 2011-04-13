@@ -163,6 +163,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"XBM06","Startup failed. An encrypted database cannot be accessed without the correct boot password.  ","45000"},
         		{"XBM07","Startup failed. Boot password must be at least 8 bytes long.","45000"},
         		{"XBM08","Could not instantiate {0} StorageFactory class {1}.","45000"},
+        		{"XBM0A","The database directory '{0}' exists. However, it does not contain the expected '{1}' file. Perhaps Derby was brought down in the middle of creating this database. You may want to delete this directory and try creating the database again.","45000"},
         		{"XBM0G","Failed to start encryption engine. Please make sure you are running Java 2 and have downloaded an encryption provider such as jce and put it in your class path. ","45000"},
         		{"XBM0H","Directory {0} cannot be created.","45000"},
         		{"XBM0I","Directory {0} cannot be removed.","45000"},
