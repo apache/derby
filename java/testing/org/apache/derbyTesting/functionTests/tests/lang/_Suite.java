@@ -220,6 +220,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(OrderByAndOffsetFetchInSubqueries.suite());
         suite.addTest(Derby5005Test.suite());
         suite.addTest(AutoIncrementTest.suite());
+        suite.addTest(HalfCreatedDatabaseTest.suite());
         return suite;
 	}
 }

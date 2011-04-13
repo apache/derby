@@ -659,8 +659,11 @@ final class StorageFactoryService implements PersistentService
                                                                              getDirectoryPath( name));
                                 }
                                 else
+                                {
+                                    vetService( storageFactory, name );
                                     throw StandardException.newException(SQLState.SERVICE_DIRECTORY_EXISTS_ERROR,
                                                                          getDirectoryPath( name));
+                                }
                             }
 
                             if (serviceDirectory.mkdirs())
@@ -692,6 +695,22 @@ final class StorageFactoryService implements PersistentService
 
         throw StandardException.newException(SQLState.SERVICE_DIRECTORY_CREATE_ERROR, t, name);
     } // end of createServiceRoot
+
+    /**
+       Verify that the service directory looks ok before objecting that the database
+       already exists.
+    */
+    private void    vetService( StorageFactory storageFactory, String serviceName ) throws StandardException
+    {
+        // check for existence of service.properties descriptor file
+        StorageFile    service_properties = storageFactory.newStorageFile( PersistentService.PROPERTIES_NAME );
+
+        if ( !service_properties.exists() )
+        {
+            throw StandardException.newException
+                ( SQLState.MISSING_SERVICE_PROPERTIES, serviceName, PersistentService.PROPERTIES_NAME );
+        }
+    }
 
     private String getDirectoryPath( String name)
     {

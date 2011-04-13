@@ -3691,6 +3691,13 @@ Guide.
             </msg>
 
             <msg>
+                <name>XBM0A.D</name>
+                <text>The database directory '{0}' exists. However, it does not contain the expected '{1}' file. Perhaps Derby was brought down in the middle of creating this database. You may want to delete this directory and try creating the database again.</text>
+                <arg>directoryName</arg>
+                <arg>servicePropertiesName</arg>
+            </msg>
+
+            <msg>
                 <name>XBM0G.D</name>
                 <text>Failed to start encryption engine. Please make sure you are running Java 2 and have downloaded an encryption provider such as jce and put it in your class path. </text>
             </msg>
