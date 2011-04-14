@@ -65,7 +65,8 @@ class TempRAFContainer extends RAFContainer {
 		ContainerKey newIdentity = (ContainerKey) key;
 		if (newIdentity.getSegmentId() != ContainerHandle.TEMPORARY_SEGMENT) {
 
-			RAFContainer realContainer = new RAFContainer(dataFactory);
+			FileContainer realContainer =
+					(FileContainer) dataFactory.newContainerObject();
 			return realContainer.setIdent(newIdentity);
 		}
 
@@ -81,7 +82,7 @@ class TempRAFContainer extends RAFContainer {
 		ContainerKey newIdentity = (ContainerKey) key;
 
 		if (newIdentity.getSegmentId() != ContainerHandle.TEMPORARY_SEGMENT) {
-			RAFContainer realContainer = new RAFContainer(dataFactory);
+			Cacheable realContainer = dataFactory.newContainerObject();
 			return realContainer.createIdentity(newIdentity, createParameter);
 		}
 
