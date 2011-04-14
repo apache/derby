@@ -584,19 +584,49 @@ public class PropertySetter extends Task
 
         Arrays.sort( versions );
 
-        File        javadir = versions[ count - 1 ];
-        String      libStub = "";
+        // Search the versions backwards (highest first) until a usable one
+        // is found.
+        for (int i = count - 1; i >= 0; i--) {
+            File javadir = versions[i];
 
-        //
-        // If the selected java dir is a JDK rather than a JRE, then it
-        // will have a jre subdirectory
-        //
-        File        jreSubdirectory = new File( javadir, "jre" );
-        if ( jreSubdirectory.exists() ) { libStub = libStub + File.separator + "jre"; }
+            if (isExcludedJDK(javadir)) {
+                // This directory contains a JDK that we don't expect to
+                // work. Skip it.
+                continue;
+            }
 
-        libStub = libStub + File.separator + "lib";
+            String libStub = javadir.getAbsolutePath();
 
-        return javadir.getAbsolutePath() + libStub;
+            //
+            // If the selected java dir is a JDK rather than a JRE, then it
+            // will have a jre subdirectory
+            //
+            File jreSubdirectory = new File(javadir, "jre");
+            if (jreSubdirectory.exists()) {
+                libStub = libStub + File.separator + "jre";
+            }
+
+            libStub = libStub + File.separator + "lib";
+
+            return libStub;
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if the specified directory should be excluded when searching for
+     * a usable set of Java libraries.
+     *
+     * @param dir the directory to check
+     * @return {@code true} if the libraries in the directory should not be
+     * used for constructing a compile classpath
+     */
+    private static boolean isExcludedJDK(File dir) {
+        // DERBY-5189: The libraries that come with GCJ lack some classes in
+        // the javax.management.remote package and cannot be used for building
+        // Derby.
+        return dir.getName().toLowerCase().contains("gcj");
     }
 
     // JDK heuristics based on inspecting JARs.
