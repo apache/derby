@@ -68,7 +68,7 @@ from another JVM.</p>
      Network Server before exiting the program.</li>
 </ul>
 
-<p>The following files should be installed in the <font style=italic>%DERBY_INSTALL%</font><tt><span>\demo\programs\nserverdemo\</span></tt> directory in
+<p>The following files should be installed in the <tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo\</span></tt> directory in
 order to run this sample program:</p>
 
 <ul>
@@ -87,8 +87,8 @@ order to run this sample program:</p>
 <p>To run this simple Derby Network Server sample program:</p>
 
 <ol>
- <li>Open a command prompt and change directories to the <span class=italic>%DERBY_INSTALL%</span>\demo\programs\nserverdemo
-     directory, where <span class=italic>%DERBY_INSTALL%</span> is the directory
+ <li>Open a command prompt and change directories to the <tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo\</tt>
+     directory, where <tt><i>DERBY_INSTALL</i></tt> is the directory
      where you installed Derby.</li>
  <li>Set the CLASSPATH to include the following jar files in order to run this
      program.</li>
@@ -103,7 +103,7 @@ order to run this sample program:</p>
 
 <p>This command will show the Derby jar files that are in the CLASSPATH. </p></li>
 
-<li>Once you have set up your environment correctly, execute the application from the <br><span class=italic>%DERBY_INSTALL%</span>\demo\programs\nserverdemo directory:
+<li>Once you have set up your environment correctly, execute the application from the <tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo</tt> directory:
 
 <pre>java SimpleNetworkServerSample</pre>
 </li></ol>
@@ -152,7 +152,7 @@ This log file contains Derby progress and error messages.
  <li>closes the connections and then exits the program.</li>
 </ul>
 
-<p>The following files should be installed in the <span class=italic>%DERBY_INSTALL%</span><tt>\demo\programs\nserverdemo\</tt> directory in order to run this sample program:</p>
+<p>The following files should be installed in the <tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo\</tt> directory in order to run this sample program:</p>
 <ul>
  <li>Source file: <br><tt>SimpleNetworkClientSample.java</tt></li>
  <li>Compiled class file: <br><tt>SimpleNetworkClientSample.class</tt></li>
@@ -163,21 +163,19 @@ This log file contains Derby progress and error messages.
 <p>To connect to the Network Server that has been started as part of the SimpleNetworkServerSample program:</p>
 
 <ol>
- <li>Open a command prompt and change directories to the <span class=italic>%DERBY_INSTALL%</span><tt>\demo\programs\nserverdemo</tt> directory, where <span class=italic>%DERBY_INSTALL%</span> is the directory where you installed Derby.</li>
+ <li>Open a command prompt and change directories to the <tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo</tt> directory, where <tt><i>DERBY_INSTALL</i></tt> is the directory where you installed Derby.</li>
  <li>Clients of Derby Network Server only need the following jar files in the CLASSPATH in order to connect to the Network Server.<span>  </span>Set the CLASSPATH to include the following jar files:
  <ul>
   <li>the current directory (".")</li>
-<li><tt>derbyclient.jar</tt><br>This jar file must be in your CLASSPATH to use t
-he Derby Client Network JDBC Driver.</li>
+<li><tt>derbyclient.jar</tt><br>This jar file must be in your CLASSPATH to use
+the Derby Client Network JDBC Driver.</li>
  </ul></li>
 <li>Once you have set up your environment correctly, execute the
-application from the <br><span class=italic>%DERBY_INSTALL%</span><tt>\demo\programs\nserverdemo\</tt> directory:
-<pre><tt>java SimpleNetworkClientSample [driverType]</tt></pre>
+application from the <tt><i>DERBY_INSTALL</i>\demo\programs\nserverdemo\</tt> directory:
+<pre><tt>java SimpleNetworkClientSample [<i>driverType</i>]</tt></pre>
+<p>where the possible values for <i>driverType</i> are:</p>
 <ul>
-<li>Where the possible values for driverType are:
-<ul>
-<li>derbyClient (default)
-</ul>
+<li>derbyClient (default)</li>
 </ul>
 </li>
 </ol>

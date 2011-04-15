@@ -713,6 +713,12 @@ TD.heading {
 	color: #e7efff;
 }
 
+TH.heading {
+	font-weight : bold;
+	background-color : #6699cc;
+	color: #e7efff;
+}
+
 UL {
 	background-color : transparent;
 }
