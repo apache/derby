@@ -87,26 +87,27 @@ operates.
   path separators and environment variable references to the Windows-specific
   notation, for example:</em>
 </p>
-<table class="simple">
+<table summary="This table provides UNIX and Windows examples of file and
+path separators and environment variable references." class="simple">
   <tr>
-    <td class="heading">Element</td>
-    <td class="heading">Example, UNIX</td>
-    <td class="heading">Example, Windows</td>
+    <th class="heading" id="c1">Element</td>
+    <th class="heading" id="c2">Example, UNIX</td>
+    <th class="heading" id="c3">Example, Windows</td>
   </tr>
   <tr>
-    <td class="listItem">File separator</td>
-    <td class="listItem"><em class="fileName">/home/path/file</em></td>
-    <td class="listItem"><em class="fileName">c:\path\file</em></td>
+    <td class="listItem" headers="c1">File separator</td>
+    <td class="listItem" headers="c2"><em class="fileName">/home/path/file</em></td>
+    <td class="listItem" headers="c3"><em class="fileName">c:\path\file</em></td>
   </tr>
   <tr>
-    <td class="listItem">(CLASS)PATH separator</td>
-    <td class="listItem"><var class="envVar">derby.jar:derbytools.jar</var></td>
-    <td class="listItem"><var class="envVar">derby.jar;derbytools.jar</var></td>
+    <td class="listItem" headers="c1">(CLASS)PATH separator</td>
+    <td class="listItem" headers="c2"><var class="envVar">derby.jar:derbytools.jar</var></td>
+    <td class="listItem" headers="c3"><var class="envVar">derby.jar;derbytools.jar</var></td>
   </tr>
   <tr>
-    <td class="listItem">Environment Variable reference</td>
-    <td class="listItem"><var class="envVar">$DERBY_HOME</var></td>
-    <td class="listItem"><var class="envVar">%DERBY_HOME%</var></td>
+    <td class="listItem" headers="c1">Environment Variable reference</td>
+    <td class="listItem" headers="c2"><var class="envVar">$DERBY_HOME</var></td>
+    <td class="listItem" headers="c3"><var class="envVar">%DERBY_HOME%</var></td>
   </tr>
 </table>
 <p>
