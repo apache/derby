@@ -87,7 +87,8 @@ class RAFContainer4 extends RAFContainer {
 
     // volatile on threadsInPageIO, is just to ensure that we get a correct
     // value for debugging: we can't always use channelCleanupMonitor
-    // then. Not safe on 1.4, but who cares..
+    // then. Otherwise protected by channelCleanupMonitor. Debugging value not
+    // safe on 1.4, but who cares..
     private volatile int threadsInPageIO = 0;
 
     // volatile on restoreChannelInProgress: corner case where we can't use
@@ -330,6 +331,9 @@ class RAFContainer4 extends RAFContainer {
 
 
         boolean success = false;
+        int retries = MAX_INTERRUPT_RETRIES;
+
+      try {
         while (!success) {
             try {
                 if (pageNumber == FIRST_ALLOC_PAGE_NUMBER) {
@@ -393,9 +397,14 @@ class RAFContainer4 extends RAFContainer {
                 // Recovery is in progress, wait for another interrupted thread
                 // to clean up.
                 awaitRestoreChannel(e, stealthMode);
+
+                if (retries-- == 0) {
+                    throw StandardException.newException(
+                        SQLState.FILE_IO_INTERRUPTED);
+                }
             }
         }
-
+      } finally {
         if (stealthMode) {
             // don't touch threadsInPageIO
         } else {
@@ -403,6 +412,7 @@ class RAFContainer4 extends RAFContainer {
                 threadsInPageIO--;
             }
         }
+      }
     }
 
     private void readPage0(long pageNumber, byte[] pageData, long offset)
@@ -533,6 +543,7 @@ class RAFContainer4 extends RAFContainer {
         boolean success = false;
         int retries = MAX_INTERRUPT_RETRIES;
 
+      try {
         while (!success) {
             try {
                 if (pageNumber == FIRST_ALLOC_PAGE_NUMBER) {
@@ -600,7 +611,7 @@ class RAFContainer4 extends RAFContainer {
                 }
             }
         }
-
+      } finally {
         if (stealthMode) {
             // don't touch threadsInPageIO
         } else {
@@ -608,6 +619,7 @@ class RAFContainer4 extends RAFContainer {
                 threadsInPageIO--;
             }
         }
+      }
     }
 
     /**
@@ -831,11 +843,16 @@ class RAFContainer4 extends RAFContainer {
                     // for us to clean up (see ClosedChannelException case)
                     break;
                 }
-            }
 
-            if (retries-- == 0) {
-                throw StandardException.newException(
+                if (retries-- == 0) {
+                    // Clean up state and throw
+                    threadDoingRestore = null;
+                    restoreChannelInProgress = false;
+                    channelCleanupMonitor.notifyAll();
+
+                    throw StandardException.newException(
                         SQLState.FILE_IO_INTERRUPTED);
+                }
             }
 
             try {
