@@ -803,7 +803,9 @@ public final class NetworkServerControlImpl {
 			// wait until we are told to shutdown or someone sends an InterruptedException
 	        synchronized(shutdownSync) {
 	            try {
-					shutdownSync.wait();
+                    while (!shutdown) {
+                        shutdownSync.wait();
+                    }
 	            }
 	            catch (InterruptedException e)
 	            {
@@ -1196,8 +1198,8 @@ public final class NetworkServerControlImpl {
 	*/
     void directShutdownInternal() {
 		// DERBY-2109: the direct, unchecked shutdown is made private
-		shutdown = true;
 		synchronized(shutdownSync) {						
+			shutdown = true;
 			// wake up the server thread
 			shutdownSync.notifyAll();
 		}
