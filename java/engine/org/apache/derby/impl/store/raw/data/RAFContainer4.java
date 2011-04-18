@@ -308,6 +308,8 @@ class RAFContainer4 extends RAFContainer {
             synchronized (channelCleanupMonitor) {
 
                 // Gain entry
+                int retries = MAX_INTERRUPT_RETRIES;
+
                 while (restoreChannelInProgress) {
                     if (Thread.currentThread() == threadDoingRestore) {
                         // Reopening the container will do readEmbryonicPage
@@ -317,8 +319,13 @@ class RAFContainer4 extends RAFContainer {
                         break;
                     }
 
+                    if (retries-- == 0) {
+                        throw StandardException.newException(
+                            SQLState.FILE_IO_INTERRUPTED);
+                    }
+
                     try {
-                        channelCleanupMonitor.wait();
+                        channelCleanupMonitor.wait(INTERRUPT_RETRY_SLEEP);
                     } catch (InterruptedException e) {
                         InterruptStatus.setInterrupted();
                     }
@@ -527,9 +534,16 @@ class RAFContainer4 extends RAFContainer {
             synchronized (channelCleanupMonitor) {
 
                 // Gain entry
+                int retries = MAX_INTERRUPT_RETRIES;
+
                 while (restoreChannelInProgress) {
+                    if (retries-- == 0) {
+                        throw StandardException.newException(
+                            SQLState.FILE_IO_INTERRUPTED);
+                    }
+
                     try {
-                        channelCleanupMonitor.wait();
+                        channelCleanupMonitor.wait(INTERRUPT_RETRY_SLEEP);
                     } catch (InterruptedException e) {
                         InterruptStatus.setInterrupted();
                     }
