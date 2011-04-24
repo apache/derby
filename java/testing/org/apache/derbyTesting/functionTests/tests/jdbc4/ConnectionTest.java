@@ -220,6 +220,11 @@ public class ConnectionTest
         } catch (UnsupportedOperationException uoe) {
             // Ignore expected exception
         }
+        
+        //Pass empty Map to setTypeMap(). It won't raise any erros because
+        //the method does nothing when the Map is empty.
+        java.util.Map<String,Class<?>> emptyMap = new java.util.HashMap<String,Class<?>>();
+        getConnection().setTypeMap(emptyMap);
 
         // Create a non-empty map to test setTypeMap(). setTypeMap() raises
         // a feature not supported exception if the map isn't empty.
