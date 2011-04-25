@@ -517,8 +517,8 @@ public class MessageBuilder extends Task
             
             ditaWriter.beginTag( "tgroup", "cols=\"2\"" );
             {
-                ditaWriter.writeEmptyTag( "colspec", "colname=\"col1\" colwidth=\"1*\"" );
-                ditaWriter.writeEmptyTag( "colspec", "colname=\"col2\" colwidth=\"7.5*\"" );
+                ditaWriter.writeEmptyTag( "colspec", "colname=\"col1\" colnum=\"1\" colwidth=\"1*\"" );
+                ditaWriter.writeEmptyTag( "colspec", "colname=\"col2\" colnum=\"2\" colwidth=\"7.5*\"" );
 
                 ditaWriter.beginTag( "thead" );
                 {
