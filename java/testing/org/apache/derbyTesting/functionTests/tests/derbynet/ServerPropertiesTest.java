@@ -82,12 +82,8 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         // this fixture doesn't use a client/server setup, instead does the 
         // relevant starting/stopping inside the test
         // Add security manager policy that allows executing java commands
-        // omit on AIX JDK 1.5 for now as it is causing a hang DERBY-4319
-        // see also ttestDefaultProperties below
-        if (! (isPlatform(OsName.AIX) && isJava5())) {
         suite.addTest(decorateTest("ttestSetPortPriority", 
                 new String[] {}, new String[] {}, false));
-        }
         
         // test unfinished properties settings. 
         // decorateTest adds policy file and sets up properties
@@ -107,9 +103,7 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
                 };
         // fixture hits error DRDA_MissingNetworkJar (Cannot find derbynet.jar) so,
         // only run with jars
-        // DERBY-4319 
-        if (TestConfiguration.loadingFromJars() &&
-            (! (isPlatform(OsName.AIX) && isJava5())))
+        if (TestConfiguration.loadingFromJars()) 
             suite.addTest(decorateTest("ttestDefaultProperties", 
                 badServerProperties, new String[] {}, true));
         
