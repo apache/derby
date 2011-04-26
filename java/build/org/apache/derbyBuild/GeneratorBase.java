@@ -62,6 +62,7 @@ public class GeneratorBase extends Task {
     private static final String NAME = "name";
     protected static final String PARAGRAPH = "p";
     private static final String ROW = "tr";
+    protected static final String SPAN = "span";
     private static final String TABLE = "table";
 
     // tags in summary xml

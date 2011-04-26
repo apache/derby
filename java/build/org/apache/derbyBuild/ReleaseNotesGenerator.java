@@ -393,7 +393,7 @@ public class ReleaseNotesGenerator extends GeneratorBase {
 
                 String key = "Note for DERBY-" + issue.getKey();
                 //println("Release note: "+issue.getKey()+" - "+issue.getTitle());
-                Element paragraph = outputDoc.createElement(PARAGRAPH);
+                Element paragraph = outputDoc.createElement(SPAN);
                 paragraph.appendChild(outputDoc.createTextNode(key + ": "));
                 cloneChildren(summaryText, paragraph);
                 insertLine(issuesSection);
