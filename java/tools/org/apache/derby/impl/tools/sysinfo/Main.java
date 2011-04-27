@@ -44,6 +44,8 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.security.ProtectionDomain;
 import java.security.CodeSource;
 import java.security.AccessController;
@@ -366,6 +368,29 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
   } // end of getJavaProperty (String whichProperty)
 
 
+    /**
+     * wrapper for getCanonicalPath for sysinfo. For sysinfo we just want to print
+     * the security exceptions, not throw them if we don't have permmission
+     * 
+     * @param f file on which to call getCanonicalPath
+     * @return f.getCanonicalPath
+     * @throws IOException
+     */
+    private static String getCanonicalPath(final File f) throws IOException {
+
+        try {
+            return (String) AccessController
+                    .doPrivileged(new PrivilegedExceptionAction() {
+                        public Object run() throws IOException {
+                            return f.getCanonicalPath();
+                        }
+                    });
+        } catch (PrivilegedActionException pae) {
+            throw (IOException) pae.getCause();
+        } catch (SecurityException se) {
+            return Main.getTextMessage("SIF01.I", se);
+        }
+    }
 
   /**
     for use by the main () method
@@ -999,7 +1024,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
             InputStream bis = new FileInputStream(f);
 
             ZipInfoProperties zip = new ZipInfoProperties(ProductVersionHolder.getProductVersionHolderFromMyEnv(bis));
-            zip.setLocation(new File(dirname).getCanonicalPath().replace('/', File.separatorChar));
+            zip.setLocation(getCanonicalPath(new File(dirname)).replace('/', File.separatorChar));
             return zip;
         }
         catch (IOException ioe)
@@ -1048,7 +1073,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
             }
 
             ZipInfoProperties zip = new ZipInfoProperties(ProductVersionHolder.getProductVersionHolderFromMyEnv(bis));
-            zip.setLocation(new File(filename).getCanonicalPath().replace('/', File.separatorChar));
+            zip.setLocation(getCanonicalPath(new File(filename)).replace('/', File.separatorChar));
             return zip;
 
         }
@@ -1221,7 +1246,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
         String result = ""; 
         try {
-            result = new File(filename).getCanonicalPath().replace('/', File.separatorChar);
+            result = getCanonicalPath(new File(filename)).replace('/', File.separatorChar);
         } catch (IOException e) {
             result = e.getMessage();
         }
