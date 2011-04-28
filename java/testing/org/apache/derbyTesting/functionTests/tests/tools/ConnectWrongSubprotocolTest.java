@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.functionTests.tests.tools.IjConnNameTest
+   Derby - Class org.apache.derbyTesting.functionTests.tests.tools.ConnectWrongSubprotocolTest
 
        Licensed to the Apache Software Foundation (ASF) under one
        or more contributor license agreements.  See the NOTICE file
