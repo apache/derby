@@ -130,7 +130,7 @@ public class ReleaseNotesTransformer extends Task
         "      <li>derby_ui_doc_plugin - provides an Apache Derby Nature in Eclipse for easy database application development.</li>\n" +
         "    </ul>\n" +
         "    <p> <a href=\"[preferred]/db/derby/db-derby-{0}/derby_core_plugin_{1}.zip\">derby_core_plugin_{1}.zip</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/derby_core_plugin_{1}.zip.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/derby_core_plugin_{1}.zip.md5\">MD5</a>]<br/>\n" +
-        "    <a href=\"[preferred]/db/derby/db-derby-{0}/derby_ui_doc_plugin_1.1.2.zip\">derby_ui_doc_plugin_1.1.2.zip</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/derby_ui_doc_plugin_1.1.2.zip.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/derby_ui_doc_plugin_1.1.2.zip.md5\">MD5</a>]</p>\n" +
+        "    <a href=\"[preferred]/db/derby/db-derby-{0}/derby_ui_doc_plugin_1.1.3.zip\">derby_ui_doc_plugin_1.1.3.zip</a> [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/derby_ui_doc_plugin_1.1.3.zip.asc\">PGP</a>] [<a href=\"http://www.apache.org/dist/db/derby/db-derby-{0}/derby_ui_doc_plugin_1.1.3.zip.md5\">MD5</a>]</p>\n" +
         "    <p>Please note: both plugins must be installed for full functionality. For information on installing and using\n" +
         "       the Derby plugins for Eclipse, please see the <a href=\"http://db.apache.org/derby/integrate/plugin_howto.html\">Using the 10 Core and 1.1 UI Derby plug-ins</a> p  age.</p>\n";
     
