@@ -403,8 +403,11 @@ class ij {
 			return new ijStatementResult(aStatement,true);
 
 		} catch (SQLException e) {
-			if (aStatement!=null)  // free the resource
-				aStatement.close();
+            try {
+			    if (aStatement!=null)  // free the resource
+				    aStatement.close();
+            } catch (SQLException se) {
+            }
 			throw e;
 		}
 	}
@@ -638,8 +641,11 @@ class ij {
 			if(!rs.next())
 				throw ijException.noSuchTable(table);
 		} finally {
-			if(rs!=null)
-				rs.close();
+			try {
+			    if(rs!=null)
+				    rs.close();
+            } catch (SQLException e) {
+            }
 		}
 	}
 
@@ -672,8 +678,11 @@ class ij {
 
 			return new ijResultSetResult(rs, displayColumns, columnWidths);
 		} catch (SQLException e) {
-			if(rs!=null)
-				rs.close();
+			try {
+			    if(rs!=null)
+				    rs.close();
+            } catch (SQLException se) {
+            }
 			throw e;
 		}
 	}
@@ -687,20 +696,11 @@ class ij {
     private ResultSet getIndexInfoForTable(String schema, String table) 
       throws SQLException {
 
-        ResultSet rs = null;
-        try {
-            haveConnection();
-            verifyTableExists(schema, table);
+        haveConnection();
+        verifyTableExists(schema, table);
 
-            DatabaseMetaData dbmd = theConnection.getMetaData();
-            rs = dbmd.getIndexInfo(null, schema, table, false, true);
-
-        } catch (SQLException e) {
-            if(rs!=null)
-                rs.close();
-            throw e;
-        }
-        return rs;
+        DatabaseMetaData dbmd = theConnection.getMetaData();
+        return dbmd.getIndexInfo(null, schema, table, false, true);
     }
 
     /**
@@ -802,8 +802,11 @@ class ij {
             }
             return result;
         } catch (SQLException e) {
-            if(result!=null)
-                result.closeStatement();
+            try {
+                if(result!=null)
+                    result.closeStatement();
+            } catch (SQLException se) {
+            }
             throw e;
         }
     }
@@ -832,8 +835,11 @@ class ij {
 
 			return new ijResultSetResult(rs, displayColumns, columnWidths);
 		} catch (SQLException e) {
-			if(rs!=null)
-				rs.close();
+            try {
+			    if(rs!=null)
+				    rs.close();
+            } catch (SQLException se) {
+            }
 			throw e;
 		}
 	}
@@ -894,8 +900,11 @@ class ij {
 
             return new ijResultSetResult(rs, displayColumns, columnWidths);
         } catch (SQLException e) {
-            if(rs!=null)
-                rs.close();
+            try {
+                if(rs!=null)
+                    rs.close();
+            } catch (SQLException se) {
+            }
             throw e;
         }
     }
@@ -920,8 +929,11 @@ class ij {
 
 			return new ijResultSetResult(rs, displayColumns, columnWidths);
 		} catch (SQLException e) {
-			if(rs!=null)
-				rs.close();
+            try {
+			    if(rs!=null)
+				    rs.close();
+            } catch (SQLException se) {
+            }
 			throw e;
 		}
 	}
@@ -957,8 +969,11 @@ class ij {
 					theConnection.getMetaData().getDriverName());
 			}
 		} catch (SQLException e) {
-			if(rs!=null)
-				rs.close();
+            try {
+			    if(rs!=null)
+				    rs.close();
+            } catch (SQLException se) {
+            }
 			throw e;
 		}
 	}
@@ -994,8 +1009,11 @@ class ij {
 					theConnection.getMetaData().getDriverName());
 			}
 		} catch (SQLException e) {
-			if(rs!=null)
-				rs.close();
+            try {
+			    if(rs!=null)
+				    rs.close();
+            } catch (SQLException se) {
+            }
 			throw e;
 		}
 	}
@@ -1041,8 +1059,11 @@ class ij {
 					theConnection.getMetaData().getDriverName());
 			}
 		} catch (SQLException e) {
-			if(rs!=null)
-				rs.close();
+            try {
+			    if(rs!=null)
+				    rs.close();
+            } catch (SQLException se) {
+            }
 			throw e;
 		}
 	}
@@ -1101,8 +1122,11 @@ class ij {
 
 			return new ijResultSetResult(rs, displayColumns, columnWidths);
 		} catch (SQLException e) {
-			if(rs!=null)
-				rs.close();
+            try {
+			    if(rs!=null)
+				    rs.close();
+            } catch (SQLException se) {
+            }
 			throw e;
 		}
 	}
@@ -2239,8 +2263,14 @@ throws SQLException
 			sn.addCursorStatement(qi.getLocalName(),st);
 			sn.addCursor(qi.getLocalName(),rs);
 		} catch (SQLException e) {
-			if (rs!=null) rs.close();
-			if (st!=null) st.close();
+            try {
+			    if (rs!=null) rs.close();
+            } catch (SQLException se) {
+            }
+            try {
+    			if (st!=null) st.close();
+            } catch (SQLException se) {
+            }
 			throw e;
 		}
 
