@@ -30,6 +30,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.security.AccessController;
+import java.util.Locale;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -37,6 +38,7 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
 
 public class SysinfoCPCheckTest extends BaseJDBCTestCase {
 
@@ -60,7 +62,7 @@ public class SysinfoCPCheckTest extends BaseJDBCTestCase {
             isClient=false;
 
         Test suite = new TestSuite(SysinfoCPCheckTest.class, "Sysinfo ClassPath Checker");        
-        return suite;
+        return new LocaleTestSetup(suite, Locale.ENGLISH);
     }
 
     /**
