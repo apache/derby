@@ -1118,15 +1118,8 @@ public class CompatibilityCombinations extends BaseTestCase
         
         if ( removeDBfiles )
         {
-            File databaseDir = new File(fullPath);
-            if ( deleteDir(databaseDir) )
-            {
-                DEBUG("Successfully deleted database dir '" + fullPath +"'");
-            }
-            else
-            {
-                DEBUG("Failed deleting database dir '" + fullPath +"'");
-            }
+            DEBUG("Deleting database dir '" + fullPath + "'");
+            BaseTestCase.removeDirectory(fullPath);
         }
         else
         {
@@ -1419,25 +1412,6 @@ public class CompatibilityCombinations extends BaseTestCase
         DEBUG("");
     }
     
-    
-    private static boolean deleteDir(File dir)
-    {
-        if (dir.isDirectory())
-        {
-            String[] children = dir.list();
-            for (int i=0; i<children.length; i++)
-          {
-                boolean success = deleteDir(new File(dir, children[i]));
-                if (!success)
-                {
-                    return false;
-                }
-            }
-        }
-        
-        // The directory is now empty so delete it
-        return dir.delete();
-    }
     /////////////////////
     
   private static void processOutput(Process proc, PrintWriter out)
