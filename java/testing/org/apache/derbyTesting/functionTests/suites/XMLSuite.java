@@ -50,6 +50,8 @@ public final class XMLSuite extends BaseTestCase {
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLTypeAndOpsTest.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLBindingTest.suite());
         suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLMissingClassesTest.suite());
+        // XMLConcurrencyTest is disabled until DERBY-3870 is fixed.
+        // suite.addTest(org.apache.derbyTesting.functionTests.tests.lang.XMLConcurrencyTest.suite());
         
         return suite;
     }
