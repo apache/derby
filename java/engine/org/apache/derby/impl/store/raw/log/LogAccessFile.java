@@ -930,6 +930,9 @@ public class LogAccessFile
 
 	}
 
+    /** Return the length of a checksum record */
+    public  int getChecksumLogRecordSize() { return checksumLogRecordSize; }
+
 
 	protected void writeEndMarker(int marker) throws IOException, StandardException 
 	{

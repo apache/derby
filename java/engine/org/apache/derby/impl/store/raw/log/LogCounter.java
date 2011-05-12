@@ -90,9 +90,9 @@ public class LogCounter implements LogInstant {
 			SanityManager.ASSERT(position > 0, "illegal file position");
 
 			SanityManager.ASSERT(position < MAX_LOGFILE_SIZE,
-							 "log file position exceeded max log file size");
+							 "log file position exceeded max log file size. log file position = " + position );
 			SanityManager.ASSERT(fileNumber < MAX_LOGFILE_NUMBER,
-							 "log file number exceeded max log file number");
+							 "log file number exceeded max log file number. log file number = " + fileNumber );
 		}
 
 		this.fileNumber = fileNumber;
@@ -118,9 +118,9 @@ public class LogCounter implements LogInstant {
 			SanityManager.ASSERT(filepos > 0, "illegal file position");
 
 			SanityManager.ASSERT(filepos < MAX_LOGFILE_SIZE,
-							 "log file position exceeded max log file size");
+							 "log file position exceeded max log file size. log file position = " + filepos );
 			SanityManager.ASSERT(filenum < MAX_LOGFILE_NUMBER,
-							 "log file number exceeded max log file number");
+							 "log file number exceeded max log file number. log file number = " + filenum );
 		}
 
 		return ((filenum << FILE_NUMBER_SHIFT) | filepos);
