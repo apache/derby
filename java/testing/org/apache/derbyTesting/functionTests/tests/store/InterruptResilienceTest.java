@@ -369,7 +369,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
     static class WorkerThread extends Thread {
         private final boolean readertest;
         private final long noOps;
-        public Exception e; // if any seen
+        public Throwable e; // if any seen
         private Connection c;
 
         public WorkerThread(Connection c, boolean readertest, long noOps) {
@@ -432,7 +432,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                                 retries++;
                                 continue;
                             } else {
-                                throw new Exception("expected 08000, saw" + e);
+                                fail("expected 08000", e);
                             }
                         }
 
@@ -459,7 +459,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                                 retries++;
                                 continue;
                             } else {
-                                throw new Exception("expected 08000, saw" + e);
+                                fail("expected 08000", e);
                             }
                         }
 
@@ -476,7 +476,7 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
                     }
                 }
                 s.close();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 this.e = e;
             } finally {
                 try { c.close(); } catch (Exception e) {}
