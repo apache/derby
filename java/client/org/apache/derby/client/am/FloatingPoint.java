@@ -86,31 +86,4 @@ public class FloatingPoint {
         return Double.longBitsToDouble(convertFromByteToLong(buffer, offset));
     }
 
-    //--------------entry points for runtime representation-----------------------
-
-    /**
-     * Write a Java <code>float</code> to a 4-byte floating point representation.
-     */
-    public static final void floatToIeee754Bytes(byte[] buffer, int offset, float f) {
-        int intBits = Float.floatToIntBits(f);
-        buffer[offset] = (byte) ((intBits >>> 24) & 0xFF);
-        buffer[offset + 1] = (byte) ((intBits >>> 16) & 0xFF);
-        buffer[offset + 2] = (byte) ((intBits >>> 8) & 0xFF);
-        buffer[offset + 3] = (byte) (intBits & 0xFF);
-    }
-
-    /**
-     * Write a Java <code>double</code> to an 8-byte double precision floating point representation.
-     */
-    public static final void doubleToIeee754Bytes(byte[] buffer, int offset, double d) {
-        long longBits = Double.doubleToLongBits(d);
-        buffer[offset] = (byte) ((longBits >>> 56) & 0xFF);
-        buffer[offset + 1] = (byte) ((longBits >>> 48) & 0xFF);
-        buffer[offset + 2] = (byte) ((longBits >>> 40) & 0xFF);
-        buffer[offset + 3] = (byte) ((longBits >>> 32) & 0xFF);
-        buffer[offset + 4] = (byte) ((longBits >>> 24) & 0xFF);
-        buffer[offset + 5] = (byte) ((longBits >>> 16) & 0xFF);
-        buffer[offset + 6] = (byte) ((longBits >>> 8) & 0xFF);
-        buffer[offset + 7] = (byte) (longBits & 0xFF);
-    }
 }

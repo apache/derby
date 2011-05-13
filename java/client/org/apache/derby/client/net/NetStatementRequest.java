@@ -517,7 +517,7 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                                    Object[] inputRow) throws SqlException {
         createEncryptedCommandData();
 
-        int loc = offset_;
+        int loc = buffer.position();
 
         markLengthBytes(CodePoint.SQLDTA);
 

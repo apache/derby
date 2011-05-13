@@ -528,12 +528,12 @@ public class NetConnectionRequest extends Request implements ConnectionRequestIn
             // remember the position of password in order to
             // mask it out in trace (see Request.sendBytes()).
             passwordIncluded_ = true;
-            passwordStart_ = offset_ + 4;
+            passwordStart_ = buffer.position() + 4;
         }
         writeScalarString(CodePoint.PASSWORD, password, 0, NetConfiguration.PASSWORD_MAXSIZE,
                 SQLState.NET_PASSWORD_TOO_LONG);
         if (netAgent_.logWriter_ != null) {
-            passwordLength_ = offset_ - passwordStart_;
+            passwordLength_ = buffer.position() - passwordStart_;
         }
     }
 

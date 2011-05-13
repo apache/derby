@@ -134,29 +134,14 @@ public class NetPackageRequest extends NetConnectionRequest {
     private void storePKGNAMCBytes(Section section) {
         // Get the locaton where we started writing PKGNAMCSN
         int startPos = popMarkForCachingPKGNAMCSN();
-        int copyLength = offset_ - startPos;
-        byte[] b = new byte[copyLength];
-        System.arraycopy(bytes_,
-                startPos,
-                b,
-                0,
-                copyLength);
+        byte[] b = new byte[buffer.position() - startPos];
+        buffer.position(startPos);
+        buffer.get(b);
         section.setPKGNAMCBytes(b);
     }
 
     private void writeStoredPKGNAMCBytes(Section section) {
-        byte[] b = section.getPKGNAMCBytes();
-
-        // Mare sure request buffer has enough space to write this byte array.
-        ensureLength(offset_ + b.length);
-
-        System.arraycopy(b,
-                0,
-                bytes_,
-                offset_,
-                b.length);
-
-        offset_ += b.length;
+        writeBytes(section.getPKGNAMCBytes());
     }
 
     private boolean canCommandUseDefaultPKGNAMCSN() {
@@ -237,7 +222,7 @@ public class NetPackageRequest extends NetConnectionRequest {
 
     protected void buildSQLSTTcommandData(String sql) throws SqlException {
         createEncryptedCommandData();
-        int loc = offset_;
+        int loc = buffer.position();
         markLengthBytes(CodePoint.SQLSTT);
         buildSQLSTT(sql);
         updateLengthBytes();
@@ -253,7 +238,7 @@ public class NetPackageRequest extends NetConnectionRequest {
 
     protected void buildSQLATTRcommandData(String sql) throws SqlException {
         createEncryptedCommandData();
-        int loc = offset_;
+        int loc = buffer.position();
         markLengthBytes(CodePoint.SQLATTR);
         buildSQLSTT(sql);
         updateLengthBytes();
@@ -268,11 +253,11 @@ public class NetPackageRequest extends NetConnectionRequest {
 
 
     public void encryptDataStream(int lengthLocation) throws SqlException {
-        byte[] clearedBytes = new byte[offset_ - lengthLocation];
+        byte[] clearedBytes = new byte[buffer.position() - lengthLocation];
+        buffer.position(lengthLocation);
+        buffer.get(clearedBytes);
+
         byte[] encryptedBytes;
-        for (int i = lengthLocation; i < offset_; i++) {
-            clearedBytes[i - lengthLocation] = bytes_[i];
-        }
 
         encryptedBytes = netAgent_.netConnection_.getEncryptionManager().
                 encryptData(clearedBytes,
@@ -280,23 +265,11 @@ public class NetPackageRequest extends NetConnectionRequest {
                         netAgent_.netConnection_.getTargetPublicKey(),
                         netAgent_.netConnection_.getTargetPublicKey());
 
-        int length = encryptedBytes.length;
-
-        if (bytes_.length >= lengthLocation + length) {
-            System.arraycopy(encryptedBytes, 0, bytes_, lengthLocation, length);
-        } else {
-            byte[] largeByte = new byte[lengthLocation + length];
-            System.arraycopy(bytes_, 0, largeByte, 0, lengthLocation);
-            System.arraycopy(encryptedBytes, 0, largeByte, lengthLocation, length);
-            bytes_ = largeByte;
-        }
-
-        offset_ += length - clearedBytes.length;
+        buffer.position(lengthLocation);
+        writeBytes(encryptedBytes);
 
         //we need to update the length in DSS header here.
-
-        bytes_[lengthLocation - 6] = (byte) ((length >>> 8) & 0xff);
-        bytes_[lengthLocation - 5] = (byte) (length & 0xff);
+        buffer.putShort(lengthLocation - 6, (short) encryptedBytes.length);
     }
 
 }

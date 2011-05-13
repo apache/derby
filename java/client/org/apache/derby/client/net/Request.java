@@ -22,6 +22,7 @@ package org.apache.derby.client.net;
 
 import org.apache.derby.client.am.DateTime;
 import org.apache.derby.client.am.DateTimeValue;
+import org.apache.derby.client.am.Decimal;
 import org.apache.derby.client.am.DisconnectException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
@@ -33,17 +34,14 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 
 
 public class Request {
 
     // byte array buffer used for constructing requests.
     // currently requests are built starting at the beginning of the buffer.
-    protected byte[] bytes_;
-
-    // keeps track of the next position to place a byte in the buffer.
-    // so the last valid byte in the message is at bytes_[offset - 1]
-    protected int offset_;
+    protected ByteBuffer buffer;
 
     // a stack is used to keep track of offsets into the buffer where 2 byte
     // ddm length values are located.  these length bytes will be automatically updated
@@ -79,12 +77,12 @@ public class Request {
     // instance to be used when building ddm character data.
     Request(NetAgent netAgent, int minSize) {
         netAgent_ = netAgent;
-        bytes_ = new byte[minSize];
+        buffer = ByteBuffer.allocate(minSize);
         clearBuffer();
     }
 
     protected final void clearBuffer() {
-        offset_ = 0;
+        buffer.clear();
         top_ = 0;
         for (int i = 0; i < markStack_.length; i++) {
             if (markStack_[i] != 0) {
@@ -106,10 +104,12 @@ public class Request {
     // will be expanded by the larger of (2 * current size) or (current size + length).
     // the data from the previous buffer is copied into the larger buffer.
     protected final void ensureLength(int length) {
-        if (length > bytes_.length) {
-            byte newBytes[] = new byte[Math.max(bytes_.length << 1, length)];
-            System.arraycopy(bytes_, 0, newBytes, 0, offset_);
-            bytes_ = newBytes;
+        if (length > buffer.remaining()) {
+            int newLength =
+                Math.max(buffer.capacity() * 2, buffer.position() + length);
+            // copy the old buffer into a new one
+            buffer.flip();
+            buffer = ByteBuffer.allocate(newLength).put(buffer);
         }
     }
 
@@ -174,18 +174,18 @@ public class Request {
         }
 
         // RQSDSS header is 6 bytes long: (ll)(Cf)(rc)
-        ensureLength(offset_ + 6);
+        ensureLength(6);
 
         // Save the position of the length bytes, so they can be updated with a
         // different value at a later time.
-        dssLengthLocation_ = offset_;
+        dssLengthLocation_ = buffer.position();
         // Dummy values for the DSS length (token ll above).
         // The correct length will be inserted when the DSS is finalized.
-        bytes_[offset_++] = (byte) 0xFF;
-        bytes_[offset_++] = (byte) 0xFF;
+        buffer.putShort((short) 0xFFFF);
 
         // Insert the mandatory 0xD0 (token C).
-        bytes_[offset_++] = (byte) 0xD0;
+        buffer.put((byte) 0xD0);
+
         // Insert the dssType (token f), which also tells if the DSS is chained
         // or not. See DSSFMT in the DRDA specification for details.
         if (chainedToNextStructure) {
@@ -194,12 +194,11 @@ public class Request {
                 dssType |= DssConstants.GDSCHAIN_SAME_ID;
             }
         }
-        bytes_[offset_++] = (byte) (dssType & 0xff);
+        buffer.put((byte) dssType);
 
         // Write the request correlation id (two bytes, token rc).
         // use method that writes a short
-        bytes_[offset_++] = (byte) ((corrId >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (corrId & 0xff);
+        buffer.putShort((short) corrId);
 
         simpleDssFinalize = simpleFinalizeBuildingNextDss;
     }
@@ -316,7 +315,8 @@ public class Request {
 		do {
 			do {
 				try {
-					bytesRead = in.read(bytes_, offset_, bytesToRead);
+					bytesRead =
+                        in.read(buffer.array(), buffer.position(), bytesToRead);
 				} catch (Exception e) {
                     status = DRDAConstants.STREAM_READ_ERROR;
                     padScalarStreamForError(leftToRead, bytesToRead,
@@ -342,7 +342,7 @@ public class Request {
 					return;
 				} else {
 					bytesToRead -= bytesRead;
-					offset_ += bytesRead;
+                    buffer.position(buffer.position() + bytesRead);
 					leftToRead -= bytesRead;
 				}
 			} while (bytesToRead > 0);
@@ -417,7 +417,7 @@ public class Request {
 
         flushExistingDSS();
 		
-        ensureLength( DssConstants.MAX_DSS_LEN );
+        ensureLength(DssConstants.MAX_DSS_LEN - buffer.position());
         
         buildDss(true,
                  chained,
@@ -442,11 +442,11 @@ public class Request {
             int bytesRead = 0;
             
             while( ( bytesRead = 
-                     in.read(bytes_, offset_, spareInDss )  
+                     in.read(buffer.array(), buffer.position(), spareInDss)
                      ) > -1 ) {
                 
                 spareInDss -= bytesRead;
-                offset_ += bytesRead;
+                buffer.position(buffer.position() + bytesRead);
 
                 if( spareInDss <= 0 ){
                     
@@ -454,9 +454,8 @@ public class Request {
                         break;
                     
                     flushScalarStreamSegment();
-                    
-                    bytes_[offset_++] = (byte) (0xff);
-                    bytes_[offset_++] = (byte) (0xff);
+
+                    buffer.putShort((short) 0xFFFF);
                     
                     spareInDss = DssConstants.MAX_DSS_LEN - 2;
                     
@@ -538,7 +537,7 @@ public class Request {
 
         // flush the existing DSS segment if this stream will not fit in the send buffer
         if ((10 + extendedLengthByteCount + nullIndicatorSize +
-                leftToRead + offset_) > DssConstants.MAX_DSS_LEN) {
+                leftToRead + buffer.position()) > DssConstants.MAX_DSS_LEN) {
             try {
                 if (simpleDssFinalize) {
                     finalizeDssLength();
@@ -599,16 +598,15 @@ public class Request {
         // either at end of data, end of dss segment, or both.
         if (leftToRead != 0) {
             // 32k segment filled and not at end of data.
-            if ((Math.min(2 + leftToRead, 32767)) > (bytes_.length - offset_)) {
+            if ((Math.min(2 + leftToRead, 32767)) > buffer.remaining()) {
                 try {
                     sendBytes(netAgent_.getOutputStream());
                 } catch (java.io.IOException ioe) {
                     netAgent_.throwCommunicationsFailure(ioe);
                 }
             }
-            dssLengthLocation_ = offset_;
-            bytes_[offset_++] = (byte) (0xff);
-            bytes_[offset_++] = (byte) (0xff);
+            dssLengthLocation_ = buffer.position();
+            buffer.putShort((short) 0xFFFF);
             newBytesToRead = (int)Math.min(leftToRead, 32765L);
         }
 
@@ -623,7 +621,7 @@ public class Request {
             netAgent_.throwCommunicationsFailure(ioe);
         }
         
-        dssLengthLocation_ = offset_;
+        dssLengthLocation_ = buffer.position();
         return DssConstants.MAX_DSS_LEN;
     }
     
@@ -653,7 +651,7 @@ public class Request {
             throws DisconnectException {
         do {
             do {
-                bytes_[offset_++] = (byte) (0x0); // use 0x0 as the padding byte
+                buffer.put((byte) 0x0); // use 0x0 as the padding byte
                 bytesToRead--;
                 leftToRead--;
             } while (bytesToRead > 0);
@@ -670,7 +668,7 @@ public class Request {
     private final void writeExtendedLengthBytes(int extendedLengthByteCount, long length) {
         int shiftSize = (extendedLengthByteCount - 1) * 8;
         for (int i = 0; i < extendedLengthByteCount; i++) {
-            bytes_[offset_++] = (byte) ((length >>> shiftSize) & 0xff);
+            buffer.put((byte) (length >>> shiftSize));
             shiftSize -= 8;
         }
     }
@@ -682,17 +680,20 @@ public class Request {
     // bytes and chaining bits.
     protected final void finalizePreviousChainedDss(boolean dssHasSameCorrelator) {
         finalizeDssLength();
-        bytes_[dssLengthLocation_ + 3] |= 0x40;
+        int pos = dssLengthLocation_ + 3;
+        byte value = buffer.get(pos);
+        value |= 0x40;
         if (dssHasSameCorrelator) // for blobs
         {
-            bytes_[dssLengthLocation_ + 3] |= 0x10;
+            value |= 0x10;
         }
+        buffer.put(pos, value);
     }
 
     // method to determine if any data is in the request.
     // this indicates there is a dss object already in the buffer.
     protected final boolean doesRequestContainData() {
-        return offset_ != 0;
+        return buffer.position() != 0;
     }
 
     /**
@@ -714,7 +715,7 @@ public class Request {
         // require continuation dss headers.  The total length already includes the
         // the 6 byte dss header located at the beginning of the dss.  It does not
         // include the length of any continuation headers.
-        int totalSize = offset_ - dssLengthLocation_;
+        int totalSize = buffer.position() - dssLengthLocation_;
         int bytesRequiringContDssHeader = totalSize - 32767;
 
         // determine if continuation headers are needed
@@ -739,10 +740,10 @@ public class Request {
             // will be calculated and adjusted as needed.  ensure there is enough room
             // for all the conutinuation headers and adjust the offset to point to the
             // new end of the data.
-            int dataByte = offset_ - 1;
+            int dataByte = buffer.position() - 1;
             int shiftOffset = contDssHeaderCount * 2;
-            ensureLength(offset_ + shiftOffset);
-            offset_ += shiftOffset;
+            ensureLength(shiftOffset);
+            buffer.position(buffer.position() + shiftOffset);
 
             // mark passOne to help with calculating the length of the final (first or
             // rightmost) continuation header.
@@ -756,7 +757,9 @@ public class Request {
 
                 // perform the shift
                 dataByte -= dataToShift;
-                System.arraycopy(bytes_, dataByte + 1,bytes_, dataByte + shiftOffset + 1, dataToShift);
+                byte[] array = buffer.array();
+                System.arraycopy(array, dataByte + 1,
+                        array, dataByte + shiftOffset + 1, dataToShift);
 
                 // calculate the value the value of the 2 byte continuation dss header which
                 // includes the length of itself.  On the first pass, if the length is 32767
@@ -771,8 +774,8 @@ public class Request {
                 }
 
                 // insert the header's length bytes
-                bytes_[dataByte + shiftOffset - 1] = (byte) ((twoByteContDssHeader >>> 8) & 0xff);
-                bytes_[dataByte + shiftOffset] = (byte) (twoByteContDssHeader & 0xff);
+                buffer.putShort(dataByte + shiftOffset - 1,
+                                (short) twoByteContDssHeader);
 
                 // adjust the bytesRequiringContDssHeader and the amount to shift for
                 // data in upstream headers.
@@ -788,8 +791,7 @@ public class Request {
         }
 
         // insert the length bytes in the 6 byte dss header.
-        bytes_[dssLengthLocation_] = (byte) ((totalSize >>> 8) & 0xff);
-        bytes_[dssLengthLocation_ + 1] = (byte) (totalSize & 0xff);
+        buffer.putShort(dssLengthLocation_, (short) totalSize);
     }
 
     // mark the location of a two byte ddm length field in the buffer,
@@ -799,21 +801,20 @@ public class Request {
     // the ddm object is complete (see updateLengthBytes method).
     // Note: this mechanism handles extended length ddms.
     protected final void markLengthBytes(int codePoint) {
-        ensureLength(offset_ + 4);
+        ensureLength(4);
 
         // save the location of length bytes in the mark stack.
         mark();
 
         // skip the length bytes and insert the codepoint
-        offset_ += 2;
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
+        buffer.position(buffer.position() + 2);
+        buffer.putShort((short) codePoint);
     }
 
     // mark an offest into the buffer by placing the current offset value on
     // a stack.
     private final void mark() {
-        markStack_[top_++] = offset_;
+        markStack_[top_++] = buffer.position();
     }
 
     // remove and return the top offset value from mark stack.
@@ -839,7 +840,7 @@ public class Request {
         // remove the top length location offset from the mark stack\
         // calculate the length based on the marked location and end of data.
         int lengthLocation = popMark();
-        int length = offset_ - lengthLocation;
+        int length = buffer.position() - lengthLocation;
 
         // determine if any extended length bytes are needed.  the value returned
         // from calculateExtendedLengthByteCount is the number of extended length
@@ -848,7 +849,7 @@ public class Request {
         if (extendedLengthByteCount != 0) {
 
             // ensure there is enough room in the buffer for the extended length bytes.
-            ensureLength(offset_ + extendedLengthByteCount);
+            ensureLength(extendedLengthByteCount);
 
             // calculate the length to be placed in the extended length bytes.
             // this length does not include the 4 byte llcp.
@@ -856,20 +857,22 @@ public class Request {
 
             // shift the data to the right by the number of extended length bytes needed.
             int extendedLengthLocation = lengthLocation + 4;
-            System.arraycopy(bytes_,
+            byte[] array = buffer.array();
+            System.arraycopy(array,
                     extendedLengthLocation,
-                    bytes_,
+                    array,
                     extendedLengthLocation + extendedLengthByteCount,
                     extendedLength);
 
             // write the extended length
             int shiftSize = (extendedLengthByteCount - 1) * 8;
             for (int i = 0; i < extendedLengthByteCount; i++) {
-                bytes_[extendedLengthLocation++] = (byte) ((extendedLength >>> shiftSize) & 0xff);
+                buffer.put(extendedLengthLocation++,
+                           (byte) (extendedLength >>> shiftSize));
                 shiftSize -= 8;
             }
             // adjust the offset to account for the shift and insert
-            offset_ += extendedLengthByteCount;
+            buffer.position(buffer.position() + extendedLengthByteCount);
 
             // the two byte length field before the codepoint contains the length
             // of itself, the length of the codepoint, and the number of bytes used
@@ -880,8 +883,7 @@ public class Request {
         }
 
         // write the 2 byte length field (2 bytes before codepoint).
-        bytes_[lengthLocation] = (byte) ((length >>> 8) & 0xff);
-        bytes_[lengthLocation + 1] = (byte) (length & 0xff);
+        buffer.putShort(lengthLocation, (short) length);
     }
 
     // helper method to calculate the minimum number of extended length bytes needed
@@ -905,16 +907,15 @@ public class Request {
 
     // insert the padByte into the buffer by length number of times.
     final void padBytes(byte padByte, int length) {
-        ensureLength(offset_ + length);
+        ensureLength(length);
         for (int i = 0; i < length; i++) {
-            bytes_[offset_++] = padByte;
+            buffer.put(padByte);
         }
     }
 
     // insert an unsigned single byte value into the buffer.
     final void write1Byte(int value) {
-        ensureLength(offset_ + 1);
-        bytes_[offset_++] = (byte) (value & 0xff);
+        writeByte((byte) value);
     }
 
     // insert 3 unsigned bytes into the buffer.  this was
@@ -922,18 +923,17 @@ public class Request {
     final void buildTripletHeader(int tripletLength,
                                   int tripletType,
                                   int tripletId) {
-        ensureLength(offset_ + 3);
-        bytes_[offset_++] = (byte) (tripletLength & 0xff);
-        bytes_[offset_++] = (byte) (tripletType & 0xff);
-        bytes_[offset_++] = (byte) (tripletId & 0xff);
+        ensureLength(3);
+        buffer.put((byte) tripletLength);
+        buffer.put((byte) tripletType);
+        buffer.put((byte) tripletId);
     }
 
     final void writeLidAndLengths(int[][] lidAndLengthOverrides, int count, int offset) {
-        ensureLength(offset_ + (count * 3));
+        ensureLength(count * 3);
         for (int i = 0; i < count; i++, offset++) {
-            bytes_[offset_++] = (byte) (lidAndLengthOverrides[offset][0] & 0xff);
-            bytes_[offset_++] = (byte) ((lidAndLengthOverrides[offset][1] >>> 8) & 0xff);
-            bytes_[offset_++] = (byte) (lidAndLengthOverrides[offset][1] & 0xff);
+            buffer.put((byte) lidAndLengthOverrides[offset][0]);
+            buffer.putShort((short) lidAndLengthOverrides[offset][1]);
         }
     }
 
@@ -952,7 +952,7 @@ public class Request {
         // if mdd overrides are required, lookup the protocolType in the map, and substitute
         // the protocolType with the override lid.
         else {
-            ensureLength(offset_ + (count * 3));
+            ensureLength(count * 3);
             int protocolType, overrideLid;
             Object entry;
             for (int i = 0; i < count; i++, offset++) {
@@ -961,9 +961,8 @@ public class Request {
                 // if an entry exists, replace the protocolType with the overrideLid
                 entry = map.get(new Integer(protocolType));
                 overrideLid = (entry == null) ? protocolType : ((Integer) entry).intValue();
-                bytes_[offset_++] = (byte) (overrideLid & 0xff);
-                bytes_[offset_++] = (byte) ((lidAndLengthOverrides[offset][1] >>> 8) & 0xff);
-                bytes_[offset_++] = (byte) (lidAndLengthOverrides[offset][1] & 0xff);
+                buffer.put((byte) overrideLid);
+                buffer.putShort((short) lidAndLengthOverrides[offset][1]);
             }
         }
     }
@@ -972,97 +971,71 @@ public class Request {
 
     // insert a big endian unsigned 2 byte value into the buffer.
     final void write2Bytes(int value) {
-        ensureLength(offset_ + 2);
-        bytes_[offset_++] = (byte) ((value >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (value & 0xff);
+        writeShort((short) value);
     }
 
     // insert a big endian unsigned 4 byte value into the buffer.
     final void write4Bytes(long value) {
-        ensureLength(offset_ + 4);
-        bytes_[offset_++] = (byte) ((value >>> 24) & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 16) & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (value & 0xff);
+        writeInt((int) value);
     }
 
     // copy length number of bytes starting at offset 0 of the byte array, buf,
     // into the buffer.  it is up to the caller to make sure buf has at least length
     // number of elements.  no checking will be done by this method.
     final void writeBytes(byte[] buf, int length) {
-        ensureLength(offset_ + length);
-        System.arraycopy(buf, 0, bytes_, offset_, length);
-        offset_ += length;
+        ensureLength(length);
+        buffer.put(buf, 0, length);
     }
 
     final void writeBytes(byte[] buf) {
-        ensureLength(offset_ + buf.length);
-        System.arraycopy(buf, 0, bytes_, offset_, buf.length);
-        offset_ += buf.length;
+        writeBytes(buf, buf.length);
     }
 
     // insert a pair of unsigned 2 byte values into the buffer.
     final void writeCodePoint4Bytes(int codePoint, int value) {                                                      // should this be writeCodePoint2Bytes
-        ensureLength(offset_ + 4);
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (value & 0xff);
+        ensureLength(4);
+        buffer.putShort((short) codePoint);
+        buffer.putShort((short) value);
     }
 
     // insert a 4 byte length/codepoint pair and a 1 byte unsigned value into the buffer.
     // total of 5 bytes inserted in buffer.
     protected final void writeScalar1Byte(int codePoint, int value) {
-        ensureLength(offset_ + 5);
-        bytes_[offset_++] = 0x00;
-        bytes_[offset_++] = 0x05;
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
-        bytes_[offset_++] = (byte) (value & 0xff);
+        ensureLength(5);
+        buffer.put((byte) 0x00);
+        buffer.put((byte) 0x05);
+        buffer.putShort((short) codePoint);
+        buffer.put((byte) value);
     }
 
     // insert a 4 byte length/codepoint pair and a 2 byte unsigned value into the buffer.
     // total of 6 bytes inserted in buffer.
     final void writeScalar2Bytes(int codePoint, int value) {
-        ensureLength(offset_ + 6);
-        bytes_[offset_++] = 0x00;
-        bytes_[offset_++] = 0x06;
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (value & 0xff);
+        ensureLength(6);
+        buffer.put((byte) 0x00);
+        buffer.put((byte) 0x06);
+        buffer.putShort((short) codePoint);
+        buffer.putShort((short) value);
     }
 
     // insert a 4 byte length/codepoint pair and a 4 byte unsigned value into the
     // buffer.  total of 8 bytes inserted in the buffer.
     protected final void writeScalar4Bytes(int codePoint, long value) {
-        ensureLength(offset_ + 8);
-        bytes_[offset_++] = 0x00;
-        bytes_[offset_++] = 0x08;
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 24) & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 16) & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (value & 0xff);
+        ensureLength(8);
+        buffer.put((byte) 0x00);
+        buffer.put((byte) 0x08);
+        buffer.putShort((short) codePoint);
+        buffer.putInt((int) value);
     }
 
     // insert a 4 byte length/codepoint pair and a 8 byte unsigned value into the
     // buffer.  total of 12 bytes inserted in the buffer.
     final void writeScalar8Bytes(int codePoint, long value) {
-        ensureLength(offset_ + 12);
-        bytes_[offset_++] = 0x00;
-        bytes_[offset_++] = 0x0C;
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 56) & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 48) & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 40) & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 32) & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 24) & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 16) & 0xff);
-        bytes_[offset_++] = (byte) ((value >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (value & 0xff);
+        ensureLength(12);
+        buffer.put((byte) 0x00);
+        buffer.put((byte) 0x0C);
+        buffer.putShort((short) codePoint);
+        buffer.putLong(value);
     }
 
     // insert a 4 byte length/codepoint pair into the buffer.
@@ -1071,11 +1044,9 @@ public class Request {
     // passed in as an argument (this value is NOT incremented by 4 before being
     // inserted).
     final void writeLengthCodePoint(int length, int codePoint) {
-        ensureLength(offset_ + 4);
-        bytes_[offset_++] = (byte) ((length >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (length & 0xff);
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
+        ensureLength(4);
+        buffer.putShort((short) length);
+        buffer.putShort((short) codePoint);
     }
 
     // insert a 4 byte length/codepoint pair into the buffer followed
@@ -1086,14 +1057,7 @@ public class Request {
     // the size of the llcp (or length + 4). It is up to the caller to make sure
     // the array, buf, contains at least length number of bytes.
     final void writeScalarBytes(int codePoint, byte[] buf, int length) {
-        ensureLength(offset_ + length + 4);
-        bytes_[offset_++] = (byte) (((length + 4) >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) ((length + 4) & 0xff);
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
-        for (int i = 0; i < length; i++) {
-            bytes_[offset_++] = buf[i];
-        }
+        writeScalarBytes(codePoint, buf, 0, length);
     }
 
     // insert a 4 byte length/codepoint pair into the buffer.
@@ -1101,11 +1065,8 @@ public class Request {
     // Note: datalength will be incremented by the size of the llcp, 4,
     // before being inserted.
     final void writeScalarHeader(int codePoint, int dataLength) {
-        ensureLength(offset_ + dataLength + 4);
-        bytes_[offset_++] = (byte) (((dataLength + 4) >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) ((dataLength + 4) & 0xff);
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
+        writeLengthCodePoint(dataLength + 4, codePoint);
+        ensureLength(dataLength);
     }
 
     /**
@@ -1144,38 +1105,23 @@ public class Request {
         
         /* Grab the current CCSID MGR from the NetAgent */ 
         CcsidManager currentCcsidMgr = netAgent_.getCurrentCcsidManager();
-        
-        int maxByteLength = currentCcsidMgr.getByteLength(string);
 
-        ensureLength(offset_ + maxByteLength + 4);
-        // Skip length for now until we know actual length
-        int lengthOffset = offset_;
-        offset_ += 2;
-        
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
-        
-        offset_ = currentCcsidMgr.convertFromJavaString(string, bytes_, offset_, netAgent_);
-       
-        int stringByteLength = offset_ - lengthOffset - 4;
-        // reset the buffer and throw an SQLException if the length is too long
+        int stringByteLength = currentCcsidMgr.getByteLength(string);
         if (stringByteLength > byteLengthLimit) {
-            offset_ = lengthOffset;
-            throw new SqlException(netAgent_.logWriter_, 
+            throw new SqlException(netAgent_.logWriter_,
                     new ClientMessageId(sqlState), string);
         }
+
+        writeScalarHeader(codePoint, Math.max(byteMinLength, stringByteLength));
+
+        buffer.position(
+            currentCcsidMgr.convertFromJavaString(
+                string, buffer.array(), buffer.position(), netAgent_));
+
         // pad if we don't reach the byteMinLength limit
         if (stringByteLength < byteMinLength) {
-            for (int i = stringByteLength ; i < byteMinLength; i++) {
-                bytes_[offset_++] = currentCcsidMgr.space_;
-            }
-            stringByteLength = byteMinLength;
+            padBytes(currentCcsidMgr.space_, byteMinLength - stringByteLength);
         }
-        // now write the length.  We have the string byte length plus
-        // 4 bytes, 2 for length and 2 for codepoint.
-        int totalLength = stringByteLength + 4;
-        bytes_[lengthOffset] = (byte) ((totalLength >>> 8) & 0xff);
-        bytes_[lengthOffset + 1] = (byte) ((totalLength) & 0xff);
     }
 
     
@@ -1191,17 +1137,17 @@ public class Request {
     // character data. This method also assumes that the string.length() will
     // be the number of bytes following the conversion.
     final void writeScalarPaddedString(String string, int paddedLength) throws SqlException {
-        ensureLength(offset_ + paddedLength);
+        ensureLength(paddedLength);
         
         /* Grab the current CCSID MGR from the NetAgent */ 
         CcsidManager currentCcsidMgr = netAgent_.getCurrentCcsidManager();
         
         int stringLength = currentCcsidMgr.getByteLength(string);
         
-        offset_ = currentCcsidMgr.convertFromJavaString(string, bytes_, offset_, netAgent_);
-        for (int i = 0; i < paddedLength - stringLength; i++) {
-            bytes_[offset_++] = currentCcsidMgr.space_;
-        }
+        buffer.position(currentCcsidMgr.convertFromJavaString(
+                string, buffer.array(), buffer.position(), netAgent_));
+
+        padBytes(currentCcsidMgr.space_, paddedLength - stringLength);
     }
 
     // this method writes a 4 byte length/codepoint pair plus the bytes contained
@@ -1210,14 +1156,7 @@ public class Request {
     // the length of the llcp.  This method does not handle scenarios which
     // require extended length bytes.
     final void writeScalarBytes(int codePoint, byte[] buff) {
-        int buffLength = buff.length;
-        ensureLength(offset_ + buffLength + 4);
-        bytes_[offset_++] = (byte) (((buffLength + 4) >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) ((buffLength + 4) & 0xff);
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
-        System.arraycopy(buff, 0, bytes_, offset_, buffLength);
-        offset_ += buffLength;
+        writeScalarBytes(codePoint, buff, 0, buff.length);
     }
 
     // this method inserts a 4 byte length/codepoint pair plus length number of bytes
@@ -1228,13 +1167,9 @@ public class Request {
     // the length will contain the length of the data plus the length of the llcp.
     // This method does not handle scenarios which require extended length bytes.
     final void writeScalarBytes(int codePoint, byte[] buff, int start, int length) {
-        ensureLength(offset_ + length + 4);
-        bytes_[offset_++] = (byte) (((length + 4) >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) ((length + 4) & 0xff);
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
-        System.arraycopy(buff, start, bytes_, offset_, length);
-        offset_ += length;
+        writeLengthCodePoint(length + 4, codePoint);
+        ensureLength(length);
+        buffer.put(buff, start, length);
     }
 
     // insert a 4 byte length/codepoint pair plus ddm binary data into the
@@ -1246,18 +1181,8 @@ public class Request {
     // the length of the llcp or 4.
     // This method does not handle scenarios which require extended length bytes.
     final void writeScalarPaddedBytes(int codePoint, byte[] buff, int paddedLength, byte padByte) {
-        int buffLength = buff.length;
-        ensureLength(offset_ + paddedLength + 4);
-        bytes_[offset_++] = (byte) (((paddedLength + 4) >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) ((paddedLength + 4) & 0xff);
-        bytes_[offset_++] = (byte) ((codePoint >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (codePoint & 0xff);
-        System.arraycopy(buff, 0, bytes_, offset_, buffLength);
-        offset_ += buffLength;
-
-        for (int i = 0; i < paddedLength - buffLength; i++) {
-            bytes_[offset_++] = padByte;
-        }
+        writeLengthCodePoint(paddedLength + 4, codePoint);
+        writeScalarPaddedBytes(buff, paddedLength, padByte);
     }
 
     // this method inserts binary data into the buffer and pads the
@@ -1265,14 +1190,8 @@ public class Request {
     // Not: this method is not to be used for truncation and buff.length
     // must be <= paddedLength.
     final void writeScalarPaddedBytes(byte[] buff, int paddedLength, byte padByte) {
-        int buffLength = buff.length;
-        ensureLength(offset_ + paddedLength);
-        System.arraycopy(buff, 0, bytes_, offset_, buffLength);
-        offset_ += buffLength;
-
-        for (int i = 0; i < paddedLength - buffLength; i++) {
-            bytes_[offset_++] = padByte;
-        }
+        writeBytes(buff);
+        padBytes(padByte, paddedLength - buff.length);
     }
 
     // write the request to the OutputStream and flush the OutputStream.
@@ -1286,7 +1205,7 @@ public class Request {
 
     protected void sendBytes(java.io.OutputStream socketOutputStream) throws java.io.IOException {
         try {
-            socketOutputStream.write(bytes_, 0, offset_);
+            socketOutputStream.write(buffer.array(), 0, buffer.position());
             socketOutputStream.flush();
         } finally {
             if (netAgent_.logWriter_ != null && passwordIncluded_) {
@@ -1295,9 +1214,10 @@ public class Request {
                 passwordIncluded_ = false;
             }
             if (netAgent_.loggingEnabled()) {
-                ((NetLogWriter) netAgent_.logWriter_).traceProtocolFlow(bytes_,
+                ((NetLogWriter) netAgent_.logWriter_).traceProtocolFlow(
+                        buffer.array(),
                         0,
-                        offset_,
+                        buffer.position(),
                         NetLogWriter.TYPE_TRACE_SEND,
                         "Request",
                         "flush",
@@ -1316,35 +1236,33 @@ public class Request {
                 mask.append(maskChar);
             }
             // try to write mask over password.
-            netAgent_.getCurrentCcsidManager()
-                    .convertFromJavaString(mask.toString(), bytes_, passwordStart_, netAgent_);
+            netAgent_.getCurrentCcsidManager().convertFromJavaString(
+                mask.toString(), buffer.array(), passwordStart_, netAgent_);
         } catch (SqlException sqle) {
             // failed to convert mask,
             // them simply replace with 0xFF.
             for (int i = 0; i < passwordLength_; i++) {
-                bytes_[passwordStart_ + i] = (byte) 0xFF;
+                buffer.put(passwordStart_ + i, (byte) 0xFF);
             }
         }
     }
 
     // insert a java byte into the buffer.
     final void writeByte(byte v) {
-        ensureLength(offset_ + 1);
-        bytes_[offset_++] = v;
+        ensureLength(1);
+        buffer.put(v);
     }
 
     // insert a java short into the buffer.
     final void writeShort(short v) {
-        ensureLength(offset_ + 2);
-        org.apache.derby.client.am.SignedBinary.shortToBigEndianBytes(bytes_, offset_, v);
-        offset_ += 2;
+        ensureLength(2);
+        buffer.putShort(v);
     }
 
     // insert a java int into the buffer.
     void writeInt(int v) {
-        ensureLength(offset_ + 4);
-        org.apache.derby.client.am.SignedBinary.intToBigEndianBytes(bytes_, offset_, v);
-        offset_ += 4;
+        ensureLength(4);
+        buffer.putInt(v);
     }
 
     /**
@@ -1355,71 +1273,61 @@ public class Request {
      *      represented by six bytes.
      */
     final void writeLong6Bytes(long v) {
-        ensureLength(offset_ + 6);
-        org.apache.derby.client.am.SignedBinary.long6BytesToBigEndianBytes(
-                bytes_, offset_, v);
-        offset_ += 6;
+        ensureLength(6);
+        buffer.putShort((short) (v >> 32));
+        buffer.putInt((int) v);
     }
 
     // insert a java long into the buffer.
     final void writeLong(long v) {
-        ensureLength(offset_ + 8);
-        org.apache.derby.client.am.SignedBinary.longToBigEndianBytes(bytes_, offset_, v);
-        offset_ += 8;
+        ensureLength(8);
+        buffer.putLong(v);
     }
 
     //-- The following are the write short/int/long in bigEndian byte ordering --
 
     // when writing Fdoca data.
     protected void writeShortFdocaData(short v) {
-        ensureLength(offset_ + 2);
-        org.apache.derby.client.am.SignedBinary.shortToBigEndianBytes(bytes_, offset_, v);
-        offset_ += 2;
+        writeShort(v);
     }
 
     // when writing Fdoca data.
     protected void writeIntFdocaData(int v) {
-        ensureLength(offset_ + 4);
-        org.apache.derby.client.am.SignedBinary.intToBigEndianBytes(bytes_, offset_, v);
-        offset_ += 4;
+        writeInt(v);
     }
 
     // when writing Fdoca data.
     protected void writeLongFdocaData(long v) {
-        ensureLength(offset_ + 8);
-        org.apache.derby.client.am.SignedBinary.longToBigEndianBytes(bytes_, offset_, v);
-        offset_ += 8;
+        writeLong(v);
     }
 
     // insert a java float into the buffer.
     protected void writeFloat(float v) {
-        ensureLength(offset_ + 4);
-        org.apache.derby.client.am.FloatingPoint.floatToIeee754Bytes(bytes_, offset_, v);
-        offset_ += 4;
+        writeInt(Float.floatToIntBits(v));
     }
 
     // insert a java double into the buffer.
     protected void writeDouble(double v) {
-        ensureLength(offset_ + 8);
-        org.apache.derby.client.am.FloatingPoint.doubleToIeee754Bytes(bytes_, offset_, v);
-        offset_ += 8;
+        writeLong(Double.doubleToLongBits(v));
     }
 
     // insert a java.math.BigDecimal into the buffer.
     final void writeBigDecimal(java.math.BigDecimal v,
                                int declaredPrecision,
                                int declaredScale) throws SqlException {
-        ensureLength(offset_ + 16);
-        int length = org.apache.derby.client.am.Decimal.bigDecimalToPackedDecimalBytes(bytes_, offset_, v, declaredPrecision, declaredScale);
-        offset_ += length;
+        ensureLength(16);
+        int length = Decimal.bigDecimalToPackedDecimalBytes(
+                buffer.array(), buffer.position(),
+                v, declaredPrecision, declaredScale);
+        buffer.position(buffer.position() + length);
     }
 
     final void writeDate(DateTimeValue date) throws SqlException {
         try
         {
-            ensureLength(offset_ + 10);
-            org.apache.derby.client.am.DateTime.dateToDateBytes(bytes_, offset_, date);
-            offset_ += 10;
+            ensureLength(10);
+            DateTime.dateToDateBytes(buffer.array(), buffer.position(), date);
+            buffer.position(buffer.position() + 10);
         } catch (java.io.UnsupportedEncodingException e) {
             throw new SqlException(netAgent_.logWriter_, 
                     new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
@@ -1429,9 +1337,9 @@ public class Request {
 
     final void writeTime(DateTimeValue time) throws SqlException {
         try{
-            ensureLength(offset_ + 8);
-            org.apache.derby.client.am.DateTime.timeToTimeBytes(bytes_, offset_, time);
-            offset_ += 8;
+            ensureLength(8);
+            DateTime.timeToTimeBytes(buffer.array(), buffer.position(), time);
+            buffer.position(buffer.position() + 8);
         } catch(UnsupportedEncodingException e) {
             throw new SqlException(netAgent_.logWriter_, 
                     new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
@@ -1443,10 +1351,11 @@ public class Request {
         try{
             boolean supportsTimestampNanoseconds = netAgent_.netConnection_.serverSupportsTimestampNanoseconds();
             int length = DateTime.getTimestampLength( supportsTimestampNanoseconds );
-            ensureLength( offset_ + length );
-            org.apache.derby.client.am.DateTime.timestampToTimestampBytes
-                ( bytes_, offset_, timestamp, supportsTimestampNanoseconds );
-            offset_ += length;
+            ensureLength(length);
+            DateTime.timestampToTimestampBytes(
+                    buffer.array(), buffer.position(),
+                    timestamp, supportsTimestampNanoseconds);
+            buffer.position(buffer.position() + length);
         }catch(UnsupportedEncodingException e) {
             throw new SqlException(netAgent_.logWriter_,  
                     new ClientMessageId(SQLState.UNSUPPORTED_ENCODING),
@@ -1457,8 +1366,7 @@ public class Request {
     // insert a java boolean into the buffer.  the boolean is written
     // as a signed byte having the value 0 or 1.
     final void writeBoolean(boolean v) {
-        ensureLength(offset_ + 1);
-        bytes_[offset_++] = (byte) ((v ? 1 : 0) & 0xff);
+        write1Byte(v ? 1 : 0);
     }
 
     // follows the TYPDEF rules (note: don't think ddm char data is ever length
@@ -1480,13 +1388,11 @@ public class Request {
                 new ClientMessageId(SQLState.LANG_STRING_TOO_LONG),
                 "32767");
         }
-        ensureLength(offset_ + b.length + 2);
-        writeLDBytesX(b.length, b);
+        writeLDBytes(b);
     }
 
 
     final void writeLDBytes(byte[] bytes) {
-        ensureLength(offset_ + bytes.length + 2);
         writeLDBytesX(bytes.length, bytes);
     }
 
@@ -1502,10 +1408,8 @@ public class Request {
     // private helper method for writing just a subset of a byte array
     private final void writeLDBytesXSubset( int ldSize, int bytesToCopy, byte[] bytes )
     {
-        bytes_[offset_++] = (byte) ((ldSize >>> 8) & 0xff);
-        bytes_[offset_++] = (byte) (ldSize & 0xff);
-        System.arraycopy( bytes, 0, bytes_, offset_, bytesToCopy );
-        offset_ += bytesToCopy;
+        writeShort((short) ldSize);
+        writeBytes(bytes, bytesToCopy);
     }
 
     // should not be called if val is null
@@ -1546,7 +1450,6 @@ public class Request {
                  );
         }
 
-        ensureLength( offset_ + length + 2 );
         writeLDBytesXSubset( length, length, buffer );
     }
 
@@ -1556,9 +1459,10 @@ public class Request {
     final void writeDDMString(String s) throws SqlException {
         CcsidManager currentCcsidManager = netAgent_.getCurrentCcsidManager();
         
-        ensureLength(offset_ + currentCcsidManager.getByteLength(s));
+        ensureLength(currentCcsidManager.getByteLength(s));
         
-        offset_ = currentCcsidManager.convertFromJavaString(s, bytes_, offset_, netAgent_);
+        buffer.position(currentCcsidManager.convertFromJavaString(
+                s, buffer.array(), buffer.position(), netAgent_));
     }
 
     private void buildLengthAndCodePointForLob(int codePoint,
@@ -1614,10 +1518,11 @@ public class Request {
             throws DisconnectException {
         // Write the status byte to the send buffer.
         // Make sure we have enough space for the status byte.
-        if (offset_ == bytes_.length) {
+
+        if (buffer.remaining() == 0) {
             flushScalarStreamSegment(1, 0); // Trigger a flush.
         }
-        bytes_[offset_++] = flag;
+        buffer.put(flag);
         // The last byte will be sent on the next flush.
     }
 

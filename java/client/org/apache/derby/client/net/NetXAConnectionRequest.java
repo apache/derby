@@ -248,14 +248,8 @@ public class NetXAConnectionRequest extends NetResultSetRequest {
         write4Bytes(gtrid.length);
         write4Bytes(bqual.length);
 
-        // Mare sure request buffer has enough space to write this byte array.
-        ensureLength(offset_ + gtrid.length);
-        System.arraycopy(gtrid, 0, bytes_, offset_, gtrid.length);
-        offset_ += gtrid.length;
-
-        ensureLength(offset_ + bqual.length);
-        System.arraycopy(bqual, 0, bytes_, offset_, bqual.length);
-        offset_ += bqual.length;
+        writeBytes(gtrid);
+        writeBytes(bqual);
 
         updateLengthBytes();
 
