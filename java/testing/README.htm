@@ -231,28 +231,11 @@ file, or <a
 classes</font></p>
       </li>
       <li>
-        <p style="margin-bottom: 0in;"><font size="2">derby.jar<br>
-        </font>&nbsp;&nbsp;&nbsp; <font size="2">main derby package
-classes</font></p>
-      </li>
-      <li>
-        <p style="margin-bottom: 0in;"><font size="2">derbytools.jar<br>
-        </font>&nbsp;&nbsp;&nbsp; <font size="2">derby tools classes
-for tools like ij and dblook</font></p>
-      </li>
-      <li>
         <p style="margin-bottom: 0in;"><font size="2">derbyrun.jar<br>
         </font>&nbsp;&nbsp;&nbsp; <font size="2">executable jar file
-for tools like ij and dblook</font></p>
-      </li>
-      <li>
-        <p style="margin-bottom: 0in;"><font size="2">derbynet.jar<br>
-        </font>&nbsp;&nbsp;&nbsp; <font size="2">derby network server
-classes</font></p>
-      </li>
-      <li>
-        <p style="margin-bottom: 0in;"><font size="2">derbyclient.jar<br>
-        </font>&nbsp;&nbsp;&nbsp; <font size="2">derby client classes</font></p>
+for tools like ij and dblook (this jar file will automatically pull
+other required jar files - derby.jar, derbynet.jar, derbyclient.jar
+and derbyLocale_*.jar - into your classpath) </font></p>
       </li>
       <li>
         <p style="margin-bottom: 0in;"><font size="2"> db2jcc.jar and
@@ -263,11 +246,6 @@ for download)</font> <br>
         <b>These jars are optional. The tests using the IBM Universal
 JDBC driver are not run if these jar files are not present in your
 classpath</b> </font>&nbsp;&nbsp;&nbsp; </p>
-      </li>
-      <li>
-        <p><font size="2">derbyLocale_*.jar</font> <br>
-&nbsp;&nbsp;&nbsp; <font size="2">locale files holding translated
-messages.</font></p>
       </li>
       <li>
         <p><font size="2">junit.jar &nbsp;&nbsp;&nbsp; <br>
@@ -284,19 +262,13 @@ messages.</font></p>
         <tr>
           <td>
           <p><font size="2">(note that $jardir is only a convenience
-variable and that the set CLASSPATH command below has carriage returns
-for formatting reasons):<br>
+variable that points to the directory containing the Derby jar files,
+and $tstjardir ia a convenience variable that points to the directory
+containing the jar files for Jakarta ORO and JUnit):<br>
 set jardir=/local/derbyjar<br>
 set tstjardir=/local/testingjars<br>
 set
-CLASSPATH="$jardir/derby.jar:$jardir/derbytools.jar:$jardir/derbyrun.jar:$jardir/derbynet.jar:$jardir/derbyclient.jar:<br>
-$jardir/derbyTesting.jar:$tstjardir/jakarta-oro-2.0.8.jar:$tstjardir/junit.jar:<br>
-$jardir/derbyLocale_cs.jar:$jardir/derbyLocale_de_DE.jar:$jardir/derbyLocale_es.jar:<br>
-$jardir/derbyLocale_fr.jar:$jardir/derbyLocale_hu.jar:$jardir/derbyLocale_it.jar:<br>
-$jardir/derbyLocale_ja_JP.jar:$jardir/derbyLocale_ko_KR.jar:$jardir/derbyLocale_pl.jar:<br>
-$jardir/derbyLocale_pt_BR.jar:$jardir/derbyLocale_ru.jar:$jardir/derbyLocale_zh_CN.jar:<br>
-$jardir/derbyLocale_zh_TW.jar:<br>
-$CLASSPATH</font><br>
+CLASSPATH="$jardir/derbyrun.jar:$jardir/derbyTesting.jar:$tstjardir/jakarta-oro-2.0.8.jar:$tstjardir/junit.jar"</font><br>
           <font size="2">set PATH=/local/jdk141/bin:$PATH</font></p>
           </td>
         </tr>
