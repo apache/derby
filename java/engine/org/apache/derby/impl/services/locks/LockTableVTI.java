@@ -100,10 +100,9 @@ class LockTableVTI implements Enumeration
 
 	private Latch getNextLock(Control control) {
 		Latch lock = null;
-//System.out.println("next lock ");
 		if (grantedList != null) {
 			if (grantedList.hasNext()) {
-				lock = (Lock) grantedList.next();
+				lock = (Latch) grantedList.next();
 			}
 			else
 				grantedList = null;
@@ -112,7 +111,7 @@ class LockTableVTI implements Enumeration
 		if (lock == null) {
 			if (waitingList != null) {
 				if (waitingList.hasNext()) {
-					lock = (Lock) waitingList.next();
+					lock = (Latch) waitingList.next();
 				}
 				else
 					waitingList = null;

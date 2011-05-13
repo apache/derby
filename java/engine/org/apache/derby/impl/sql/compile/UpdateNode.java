@@ -498,13 +498,13 @@ public final class UpdateNode extends DMLModStatementNode
 			resultColumnList.appendResultColumns(afterColumns, false);
 
 			/* Generate the RowLocation column */
-			rowLocationNode = (CurrentRowLocationNode) getNodeFactory().getNode(
+			rowLocationNode = (ValueNode) getNodeFactory().getNode(
 										C_NodeTypes.CURRENT_ROW_LOCATION_NODE,
 										getContextManager());
         }
         else
         {
-			rowLocationNode = (NumericConstantNode) getNodeFactory().getNode(
+			rowLocationNode = (ValueNode) getNodeFactory().getNode(
 										C_NodeTypes.INT_CONSTANT_NODE,
                                         ReuseFactory.getInteger( 0),
 										getContextManager());
@@ -554,7 +554,7 @@ public final class UpdateNode extends DMLModStatementNode
 		 */
 		if (! resultColumnList.columnTypesAndLengthsMatch())
  		{
-			resultSet = (NormalizeResultSetNode) getNodeFactory().getNode(
+			resultSet = (ResultSetNode) getNodeFactory().getNode(
 			    C_NodeTypes.NORMALIZE_RESULT_SET_NODE, 
 			    resultSet, resultColumnList, null, Boolean.TRUE,
 			    getContextManager());

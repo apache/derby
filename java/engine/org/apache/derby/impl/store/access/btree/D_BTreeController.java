@@ -391,7 +391,7 @@ public class D_BTreeController extends DiagnosticableGeneric
     public String diag()
         throws StandardException
     {
-        OpenBTree   open_btree  = (BTreeController) this.diag_object;
+        OpenBTree   open_btree  = (OpenBTree) this.diag_object;
         ControlRow  root        = null;
         int         tree_height;
         LevelInfo   level_info[] = null;

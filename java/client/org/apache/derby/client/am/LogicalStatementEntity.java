@@ -100,9 +100,9 @@ abstract class LogicalStatementEntity
         this.cache = cacheInteractor.getCache();
         this.owner = cacheInteractor;
         this.physicalPs = physicalPs;
-        if (physicalPs instanceof CallableStatement) {
+        if (physicalPs instanceof java.sql.CallableStatement) {
             this.hasCallableStmt = true;
-            this.physicalCs = (CallableStatement)physicalPs;
+            this.physicalCs = (java.sql.CallableStatement)physicalPs;
         } else {
             this.hasCallableStmt = false;
             this.physicalCs = null;

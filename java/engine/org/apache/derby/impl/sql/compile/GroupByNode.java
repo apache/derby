@@ -959,7 +959,7 @@ public class GroupByNode extends SingleChildResultSetNode
 		/* We need to implement this method since a PRN can appear above a
 		 * SelectNode in a query tree.
 		 */
-		childResult = (FromTable) childResult.optimize(
+		childResult = (ResultSetNode) childResult.optimize(
 											dataDictionary,
 											predicates,
 											outerRows);

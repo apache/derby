@@ -329,7 +329,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
                 treeTop.getResultColumns().copyListAndObjects();
             newRcl.genVirtualColumnNodes(treeTop, treeTop.getResultColumns());
 
-            treeTop = (RowCountNode)getNodeFactory().getNode(
+            treeTop = (ResultSetNode)getNodeFactory().getNode(
                 C_NodeTypes.ROW_COUNT_NODE,
                 treeTop,
                 newRcl,

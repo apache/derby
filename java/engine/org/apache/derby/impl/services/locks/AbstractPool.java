@@ -396,7 +396,7 @@ abstract class AbstractPool implements LockFactory
 
 		try {
 
-			Serializable value = (String) PropertyUtil.getPropertyFromSet(dbOnly, p, key);
+			Serializable value = (Serializable) PropertyUtil.getPropertyFromSet(dbOnly, p, key);
 			if (value != null) {
 				validate(key, value, p);
 				apply(key, value, p);

@@ -445,7 +445,7 @@ public class UnionNode extends SetOperatorNode
 			if (! columnTypesAndLengthsMatch())
 			{
 			    treeTop = 
-				(NormalizeResultSetNode) getNodeFactory().getNode(
+				(ResultSetNode) getNodeFactory().getNode(
 				C_NodeTypes.NORMALIZE_RESULT_SET_NODE,
 				treeTop, null, null, Boolean.FALSE,
 				getContextManager());	
@@ -487,7 +487,7 @@ public class UnionNode extends SetOperatorNode
                 treeTop.getResultColumns().copyListAndObjects();
             newRcl.genVirtualColumnNodes(treeTop, treeTop.getResultColumns());
 
-            treeTop = (RowCountNode)getNodeFactory().getNode(
+            treeTop = (ResultSetNode)getNodeFactory().getNode(
                 C_NodeTypes.ROW_COUNT_NODE,
                 treeTop,
                 newRcl,

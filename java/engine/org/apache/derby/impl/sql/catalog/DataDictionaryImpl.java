@@ -13722,7 +13722,7 @@ public final class	DataDictionaryImpl
         keyRow.setColumn(1, objIdOrderable);
 
         while ((curRow = ti.getRow(tc, keyRow, rf.PERMS_OBJECTID_IDX_NUM)) != null) {
-            perm = (PermDescriptor) rf.buildDescriptor(curRow, (TupleDescriptor) null, this);
+            perm = (PermissionsDescriptor) rf.buildDescriptor(curRow, (TupleDescriptor) null, this);
             removePermEntryInCache(perm);
 
             // Build new key based on UUID and drop the entry as we want to drop

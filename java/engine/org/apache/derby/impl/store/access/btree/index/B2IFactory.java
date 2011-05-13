@@ -284,7 +284,7 @@ public class B2IFactory implements ConglomerateFactory, ModuleControl
                 SanityManager.ASSERT(root.getPage().isLatched());
 
             // read the Conglomerate from it's entry in the control row.
-            btree = (B2I) root.getConglom(B2I.FORMAT_NUMBER);
+            btree = (Conglomerate) root.getConglom(B2I.FORMAT_NUMBER);
 
             if (SanityManager.DEBUG)
                 SanityManager.ASSERT(btree instanceof B2I);

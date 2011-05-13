@@ -462,7 +462,7 @@ public final class InsertNode extends DMLModStatementNode
 		{
             
 			resultSet = 
-			(NormalizeResultSetNode) getNodeFactory().getNode(
+			(ResultSetNode) getNodeFactory().getNode(
 			C_NodeTypes.NORMALIZE_RESULT_SET_NODE, resultSet,
 			resultColumnList, null, Boolean.FALSE,
 			getContextManager());

@@ -70,7 +70,7 @@ public abstract class NumberDataType extends DataType
             return minus(result);
 
         if(result == null)
-            result = (NumberDataType)getNewNull();
+            result = (NumberDataValue)getNewNull();
         
         result.setValue(this);
         return result;

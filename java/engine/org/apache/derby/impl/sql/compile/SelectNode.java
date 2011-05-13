@@ -1651,7 +1651,7 @@ public class SelectNode extends ResultSetNode
             ResultColumnList newSelectList = topList.copyListAndObjects();
             prnRSN.setResultColumns(newSelectList);
             topList.genVirtualColumnNodes(prnRSN, newSelectList);
-            prnRSN = (RowCountNode)getNodeFactory().getNode(
+            prnRSN = (ResultSetNode)getNodeFactory().getNode(
                 C_NodeTypes.ROW_COUNT_NODE,
                 prnRSN,
                 topList,

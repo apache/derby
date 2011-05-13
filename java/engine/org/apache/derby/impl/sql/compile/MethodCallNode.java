@@ -186,7 +186,7 @@ abstract class MethodCallNode extends JavaValueNode
 			*/
 			if ( ! (qt instanceof JavaValueNode))
 			{
-				qt = (SQLToJavaValueNode) getNodeFactory().getNode(
+				qt = (QueryTreeNode) getNodeFactory().getNode(
 						C_NodeTypes.SQL_TO_JAVA_VALUE_NODE, 
 						qt, 
 						getContextManager());

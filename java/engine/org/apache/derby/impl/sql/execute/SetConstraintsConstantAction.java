@@ -322,7 +322,7 @@ class SetConstraintsConstantAction extends DDLConstantAction
 			int cdlSize = cdl.size();
 			for (int index = 0; index < cdlSize; index++)
 			{
-				cd = (CheckConstraintDescriptor) cdl.elementAt(index);
+				cd = (ConstraintDescriptor) cdl.elementAt(index);
 				if (text == null)
 				{
 					text = new StringBuffer("(").append(cd.getConstraintText()).append(") ");
