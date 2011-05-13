@@ -729,6 +729,7 @@ public class CompatibilityCombinations extends BaseTestCase
             Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
             PrintWriter out = new PrintWriter(new FileWriter(workingDirName+PS+combinationName));
             String result = testOutput(proc, out); // Scans test report for OK and Time...
+            proc.waitFor();
             if ( result.indexOf(" OK ") != -1 ) testOK = true;
             result= combinationName+":" + result;
             summaryFile.println(result);
