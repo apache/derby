@@ -377,6 +377,7 @@ public class GenericLanguageConnectionContext
 
     public void initialize() throws StandardException
     {
+        interruptedException = null;
         sessionUser = IdUtil.getUserAuthorizationId(userName);
         //
         //Creating the authorizer authorizes the connection.
@@ -397,9 +398,7 @@ public class GenericLanguageConnectionContext
             }
         }
 
-
         setDefaultSchema(initDefaultSchemaDescriptor());
-        interruptedException = null;
         referencedColumnMap = new WeakHashMap();
     }
 
@@ -808,6 +807,8 @@ public class GenericLanguageConnectionContext
     public void resetFromPool()
          throws StandardException
     {
+        interruptedException = null;
+
         // Reset IDENTITY_VAL_LOCAL
         identityNotNull = false;
 
