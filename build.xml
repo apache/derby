@@ -53,6 +53,7 @@
 
   <target name="init" unless="init.done" depends="setInitialProperties">
 
+    <antcall target="install_junit"/>
     <tstamp/>
     <mkdir dir="${out.dir}"/>
     <antcall target="make-generated-dirs"/>
@@ -165,6 +166,20 @@
     <available classname="java.lang.management.ManagementFactory" property="vmLevelIsAtLeast1.5"/>
     <available classname="java.sql.Wrapper" property="vmLevelIsAtLeast1.6" value="true"/>
   </target>
+
+<!-- ==================================================================== -->
+<!--                     Download junit 3.8.2                             -->
+<!-- ==================================================================== -->
+
+
+   <!-- You can override this property in local.properties to fetch from an alternative location -->
+   <property name="junit.url" value="http://repo1.maven.org/maven2/junit/junit/3.8.2/junit-3.8.2.jar"/> 
+   <target name="junit_check">
+       <available file="${basedir}/tools/java/junit.jar" property="junit.exists"/>
+   </target>
+   <target name="install_junit" depends="junit_check" unless="junit.exists" description="installs junit.jar into derby">
+       <get src="${junit.url}" dest="${basedir}/tools/java/junit.jar" verbose="true" ignoreerrors="true"/>
+   </target>
 
 <!-- ==================================================================== -->
 <!--                     Build version info files                         -->
