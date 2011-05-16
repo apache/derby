@@ -143,7 +143,7 @@ public class BlockedByteArray {
         if (blockSize == 0) {
             checkBlockSize((int)Math.min(Integer.MAX_VALUE, newLength));
         }
-        final long currentCapacity = allocatedBlocks * blockSize;
+        final long currentCapacity = (long)allocatedBlocks * blockSize;
         if (newLength > currentCapacity) {
             // Allocate more blocks.
             increaseCapacity(newLength);
@@ -187,7 +187,7 @@ public class BlockedByteArray {
             throw new ArrayIndexOutOfBoundsException(len);
         }
         // Increase the capacity if required.
-        if (pos + len >= allocatedBlocks * blockSize) {
+        if (pos + len >= (long)allocatedBlocks * blockSize) {
             increaseCapacity(pos + len);
         }
         // Calculate the block number and the index within this block.
@@ -226,7 +226,7 @@ public class BlockedByteArray {
             checkBlockSize(0);
         }
         // Increase the capacity if required.
-        if (pos >= allocatedBlocks * blockSize) {
+        if (pos >= (long)allocatedBlocks * blockSize) {
             increaseCapacity(pos);
         }
 
@@ -301,7 +301,7 @@ public class BlockedByteArray {
             SanityManager.ASSERT(blockSize > 0, "Invalid/unset block size");
         }
         // Safe-guard to avoid overwriting existing data.
-        if (lastIndex < allocatedBlocks * blockSize) {
+        if (lastIndex < (long)allocatedBlocks * blockSize) {
             return;
         }
         // Calculate required number of blocks, and create those lacking.
