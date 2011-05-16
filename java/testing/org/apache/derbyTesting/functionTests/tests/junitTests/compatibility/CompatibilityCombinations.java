@@ -237,6 +237,9 @@ public class CompatibilityCombinations extends BaseTestCase
     private static boolean includeUpgrade = false;
     
     private static long SLEEP_TIME_MILLIS = 5000L;
+
+    /** The process in which the network server is running. */
+    private Process serverProc;
     
     /**
      * Creates a new instance of CompatibilityCombinations
@@ -1025,12 +1028,11 @@ public class CompatibilityCombinations extends BaseTestCase
             {
                 public void run()
                 {
-                    Process proc = null;
                     try
                     {
                         DEBUG("************** In run().");
-                        proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
-                        // proc = Runtime.getRuntime().exec(commandElements,envElements,workingDir);
+                        serverProc = Runtime.getRuntime().
+                                exec(fullCmd, envElements, workingDir);
                         DEBUG("************** Done exec().");
                     }
                     catch (Exception ex)
@@ -1146,9 +1148,8 @@ public class CompatibilityCombinations extends BaseTestCase
         try
         {
             Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
-            proc.waitFor();
             processDEBUGOutput(proc);
-                        
+            proc.waitFor();
         }
         catch (Exception ex)
         {
@@ -1269,9 +1270,14 @@ public class CompatibilityCombinations extends BaseTestCase
                 );
             try
             {
+                // Tell the server to stop.
                 Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
                 processDEBUGOutput(proc);
-                
+                proc.waitFor();
+
+                // Now wait for it to actually stop.
+                serverProc.waitFor();
+                serverProc = null;
             }
             catch (Exception ex)
             {
@@ -1342,7 +1348,7 @@ public class CompatibilityCombinations extends BaseTestCase
         {
             Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
             processOutput(proc, out);
-            
+            proc.waitFor();
         }
         catch (Exception ex)
         {
@@ -1402,7 +1408,7 @@ public class CompatibilityCombinations extends BaseTestCase
         {
             Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
             processOutput(proc, out);
-            
+            proc.waitFor();
         }
         catch (Exception ex)
         {
