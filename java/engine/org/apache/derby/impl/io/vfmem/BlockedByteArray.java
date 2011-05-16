@@ -187,9 +187,7 @@ public class BlockedByteArray {
             throw new ArrayIndexOutOfBoundsException(len);
         }
         // Increase the capacity if required.
-        if (pos + len >= (long)allocatedBlocks * blockSize) {
-            increaseCapacity(pos + len);
-        }
+        increaseCapacity(pos + len);
         // Calculate the block number and the index within this block.
         int block = (int)(pos / blockSize);
         int index = (int)(pos % blockSize);
@@ -226,10 +224,7 @@ public class BlockedByteArray {
             checkBlockSize(0);
         }
         // Increase the capacity if required.
-        if (pos >= (long)allocatedBlocks * blockSize) {
-            increaseCapacity(pos);
-        }
-
+        increaseCapacity(pos);
         // Calculate the block number and the index within this block.
         int block = (int)(pos / blockSize);
         int index = (int)(pos % blockSize);
