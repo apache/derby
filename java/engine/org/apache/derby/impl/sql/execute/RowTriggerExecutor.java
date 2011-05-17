@@ -60,6 +60,8 @@ public class RowTriggerExecutor extends GenericTriggerExecutor
 	 * @param event the trigger event
 	 * @param brs   the before result set
 	 * @param ars   the after result set
+	 * @param colsReadFromTable   columns required from the trigger table
+	 *   by the triggering sql
 	 *
 	 * @exception StandardExcetion on error or general trigger
 	 *	exception
@@ -68,7 +70,8 @@ public class RowTriggerExecutor extends GenericTriggerExecutor
 	(
 		TriggerEvent 		event, 
 		CursorResultSet 	brs, 
-		CursorResultSet 	ars
+		CursorResultSet 	ars,
+		int[]	colsReadFromTable
 	) throws StandardException
 	{
 		tec.setTrigger(triggerd);
@@ -92,12 +95,12 @@ public class RowTriggerExecutor extends GenericTriggerExecutor
 				tec.setBeforeResultSet(brs == null ? 
 						null : 
 						TemporaryRowHolderResultSet.
-									   getNewRSOnCurrentRow(activation, brs));
+						   getNewRSOnCurrentRow(triggerd, activation, brs, colsReadFromTable));
 					
 				tec.setAfterResultSet(ars == null ? 
 									  null : 
 									  TemporaryRowHolderResultSet.
-									  getNewRSOnCurrentRow(activation, ars));
+									  getNewRSOnCurrentRow(triggerd, activation, ars, colsReadFromTable));
 
 				/* 	
 					This is the key to handling autoincrement values that might

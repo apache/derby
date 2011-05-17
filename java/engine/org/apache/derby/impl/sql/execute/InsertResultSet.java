@@ -264,7 +264,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			rowHolder.insert(execRow);
 			triggerActivator.notifyEvent(TriggerEvents.BEFORE_INSERT,
 											(CursorResultSet)null,
-											rowHolder.getResultSet());
+											rowHolder.getResultSet(), 
+											(int[])null);
 		}
 
         if ( generationClauses != null )
@@ -460,7 +461,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				// fire BEFORE trigger, do this before checking constraints
 				triggerActivator.notifyEvent(TriggerEvents.BEFORE_INSERT, 
 												(CursorResultSet)null,
-												tableScan);
+												tableScan, 
+												(int[])null);
 			
 				// if we have a check constraint or generation clauses, we have
 				// to do it the hard way now before we get
@@ -495,7 +497,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			{
 				triggerActivator.notifyEvent(TriggerEvents.AFTER_INSERT,
 										(CursorResultSet)null,
-										getTableScanResultSet(baseTableConglom)); 
+										getTableScanResultSet(baseTableConglom), 
+										(int[])null); 
 			}
 			bulkInsertPerformed = true;
 		}
@@ -1118,7 +1121,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				// fire BEFORE trigger, do this before checking constraints
 				triggerActivator.notifyEvent(TriggerEvents.BEFORE_INSERT, 
 												(CursorResultSet)null,
-												rowHolder.getResultSet());
+												rowHolder.getResultSet(), 
+												(int[])null);
 			}
 
 			CursorResultSet rs = rowHolder.getResultSet();
@@ -1166,7 +1170,8 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			{
 				triggerActivator.notifyEvent(TriggerEvents.AFTER_INSERT, 
 										(CursorResultSet)null,
-										rowHolder.getResultSet());
+										rowHolder.getResultSet(), 
+										(int[])null);
 			}
 		}
 

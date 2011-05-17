@@ -4716,13 +4716,12 @@ public final class	DataDictionaryImpl
 			boolean createTriggerTime
 			) throws StandardException
 	{
-		// DERBY-1482 has caused a regression which is being worked
-		// under DERBY-5121. Until DERBY-5121 is fixed, we want
-		// Derby to create triggers same as it is done in 10.6 and
-		// earlier. This in other words means that do not try to
-		// optimize how many columns are read from the trigger table,
-		// simply read all the columns from the trigger table.
-		boolean in10_7_orHigherVersion = false;
+		// If we are dealing with database created in 10.8 and prior,
+		// then we must be in soft upgrade mode. For such databases,
+		// we want to generate trigger action sql which assumes that
+		// all columns are getting read from the trigger table. We
+		// need to do this to maintain backward compatibility. 
+		boolean in10_9_orHigherVersion = checkVersion(DataDictionary.DD_VERSION_DERBY_10_9,null);
 		
 		StringBuffer newText = new StringBuffer();
 		int start = 0;
@@ -4838,10 +4837,15 @@ public final class	DataDictionaryImpl
 			//After the for loop below, the 2 arrays will look as follows
 			//triggerActionColsOnly [-1,-1,-1,4,-1]
 			//triggerColsAndTriggerActionCols [-1,2,-1,4,-1]
-			//If the database is at 10.6 or earlier version(meaning we are in
+			//If the database is at 10.8 or earlier version(meaning we are in
 			//soft-upgrade mode), then we do not want to collect any 
 			//information about trigger action columns. The collection and 
-			//usage of trigger action columns was introduced in 10.7 DERBY-1482
+			//usage of trigger action columns was introduced in first 10.7 
+			//release (DERBY-1482) but a regression was found (DERBY-5121) and
+			//hence we stopped doing the collection of trigger action columns
+			//in next version of 10.7 and 10.8. In 10.9, DERBY-1482 was
+			//reimplemented correctly and we started doing the collection and
+			//usage of trigger action columns again in 10.9
 			for (int i = 0; i < cols.length; i++)
 			{
 				ColumnReference ref = (ColumnReference) cols[i];
@@ -4902,7 +4906,7 @@ public final class	DataDictionaryImpl
 			                SQLState.LANG_COLUMN_NOT_FOUND, tableName+"."+colName);
 					}
 
-				if (in10_7_orHigherVersion) {
+				if (in10_9_orHigherVersion) {
 					int triggerColDescPosition = triggerColDesc.getPosition();
 					triggerColsAndTriggerActionCols[triggerColDescPosition-1]=triggerColDescPosition;
 					triggerActionColsOnly[triggerColDescPosition-1]=triggerColDescPosition;
@@ -5006,15 +5010,15 @@ public final class	DataDictionaryImpl
 			newText.append(triggerDefinition.substring(start, tokBeginOffset-actionOffset));
 			int colPositionInRuntimeResultSet = -1;
 			ColumnDescriptor triggerColDesc = triggerTableDescriptor.getColumnDescriptor(colName);
-			//DERBY-5121 We can come here if the column being used in trigger
-			// action is getting dropped and we have come here through that
-			// ALTER TABLE DROP COLUMN. In that case, we will not find the
-			// column in the trigger table.
-			if (triggerColDesc == null) {
-				throw StandardException.newException(
-		                SQLState.LANG_COLUMN_NOT_FOUND, tableName+"."+colName);
-			}
-			int colPositionInTriggerTable = triggerColDesc.getPosition();
+            //DERBY-5121 We can come here if the column being used in trigger
+            // action is getting dropped and we have come here through that
+            // ALTER TABLE DROP COLUMN. In that case, we will not find the
+            // column in the trigger table.
+            if (triggerColDesc == null) {
+                    throw StandardException.newException(
+                    SQLState.LANG_COLUMN_NOT_FOUND, tableName+"."+colName);
+            }			
+            int colPositionInTriggerTable = triggerColDesc.getPosition();
 
 			//This part of code is little tricky and following will help
 			//understand what mapping is happening here.
@@ -5045,7 +5049,7 @@ public final class	DataDictionaryImpl
 			//column position in table1 is 4 but in the relative columns
 			//that will be fetched during trigger execution, it's position
 			//is 2. That is what the following code is doing.
-			if (in10_7_orHigherVersion && triggerColsAndTriggerActionCols != null){
+			if (in10_9_orHigherVersion && triggerColsAndTriggerActionCols != null){
 				for (int j=0; j<triggerColsAndTriggerActionCols.length; j++){
 					if (triggerColsAndTriggerActionCols[j] == colPositionInTriggerTable)
 						colPositionInRuntimeResultSet=j+1;

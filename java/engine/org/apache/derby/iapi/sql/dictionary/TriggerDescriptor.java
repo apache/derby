@@ -343,16 +343,28 @@ public class TriggerDescriptor extends TupleDescriptor
 		//  trigger which allows reference to individual columns from 
 		//  old/new row)
 		//3)the trigger action plan has columns that reference 
-		//  old/new row columns
+		//  old/new row columns(if we are working with pre-10.9 db,
+		//  meaning we are in soft-upgrade mode, then we won't have
+		//  information about the actual trigger action columns since
+		//  we didn't keep that info in those releases. For such dbs,
+		//  we will just check if they are using REFERENCING OLD and/or
+		//  NEW clause.)
 		//This code was added as part of DERBY-4874 where the Alter table 
 		//had changed the length of a varchar column from varchar(30) to 
 		//varchar(64) but the trigger action plan continued to use varchar(30).
 		//To fix varchar(30) in trigger action sql to varchar(64), we need
 		//to regenerate the trigger action sql. This new trigger action sql
 		//will then get updated into SYSSTATEMENTS table.
+		DataDictionary dd = getDataDictionary();
+		boolean in10_9_orHigherVersion = dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_9,null);
+		boolean usesReferencingClause = (in10_9_orHigherVersion) ? 
+				referencedColsInTriggerAction != null :
+					(referencingOld || referencingNew);
+
 		if((!actionSPS.isValid() ||
 				 (actionSPS.getPreparedStatement() == null)) && 
-				 isRow && (referencingOld || referencingNew))
+					isRow &&
+					usesReferencingClause)
 		{
 			SchemaDescriptor compSchema;
 			compSchema = getDataDictionary().getSchemaDescriptor(triggerSchemaId, null);

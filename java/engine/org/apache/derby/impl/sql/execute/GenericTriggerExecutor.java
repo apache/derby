@@ -81,6 +81,8 @@ public abstract class GenericTriggerExecutor
 	 * @param event	    the trigger event
 	 * @param brs		the before result set
 	 * @param ars		the after result set
+	 * @param colsReadFromTable   columns required from the trigger table
+	 *   by the triggering sql
 	 *
 	 * @exception StandardException on error or user exception
 	 * from trigger action
@@ -89,7 +91,8 @@ public abstract class GenericTriggerExecutor
 	(
 		TriggerEvent 		event, 
 		CursorResultSet 	brs, 
-		CursorResultSet 	ars
+		CursorResultSet 	ars,
+		int[]	colsReadFromTable
 	) throws StandardException;
 
 	protected SPSDescriptor getWhenClause() throws StandardException

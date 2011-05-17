@@ -30,6 +30,7 @@ import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.sql.Row;
+import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.execute.CursorResultSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.sql.execute.NoPutResultSet;
@@ -41,7 +42,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.iapi.types.SQLLongint;
-
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 /**
  * A result set to scan temporary row holders.  Ultimately, this
@@ -172,13 +173,106 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 		}
 	}
 
+	//Make an array which is a superset of the 2 passed column arrays.
+	//The superset will not have any duplicates
+	private static int[] supersetofAllColumns(int[] columnsArray1, int[] columnsArray2)
+	{
+		int maxLength = columnsArray1.length + columnsArray2.length;
+		int[] maxArray = new int[maxLength];
+		for (int i=0; i<maxLength; i++) maxArray[i]=-1;
+		
+		//First simply copy the first array into superset
+		for (int i=0; i<columnsArray1.length; i++) {
+			maxArray[i] = columnsArray1[i];
+		}
+		
+		//Now copy only new values from second array into superset
+		int validColsPosition=columnsArray1.length;
+		for (int i=0; i<columnsArray2.length; i++) {
+			boolean found = false;
+			for (int j=0;j<validColsPosition;j++) {
+				if (maxArray[j] == columnsArray2[i]) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				maxArray[validColsPosition] = columnsArray2[i];
+				validColsPosition++;
+			}
+		}
+		maxArray = shrinkArray(maxArray);
+		java.util.Arrays.sort(maxArray);
+		return maxArray;
+	}
+
+	//The passed array can have some -1 elements and some +ve elements
+	// Return an array containing just the +ve elements
+	private static int[] shrinkArray(int[] columnsArrary) {
+		int countOfColsRefedInArray = 0;
+		int numberOfColsInTriggerTable = columnsArrary.length;
+
+		//Count number of non -1 entries
+		for (int i=0; i < numberOfColsInTriggerTable; i++) {
+			if (columnsArrary[i] != -1)
+				countOfColsRefedInArray++;
+		}
+
+		if (countOfColsRefedInArray > 0){
+			int[] tempArrayOfNeededColumns = new int[countOfColsRefedInArray];
+			int j=0;
+			for (int i=0; i < numberOfColsInTriggerTable; i++) {
+				if (columnsArrary[i] != -1)
+					tempArrayOfNeededColumns[j++] = columnsArrary[i];
+			}
+			return tempArrayOfNeededColumns;
+		} else
+			return null;
+	}
+
+	//Return an array which contains the column positions of all the 
+	// +ve columns in the passed array
+	private static int[] justTheRequiredColumnsPositions(int[] columnsArrary) {
+		int countOfColsRefedInArray = 0;
+		int numberOfColsInTriggerTable = columnsArrary.length;
+
+		//Count number of non -1 entries
+		for (int i=0; i < numberOfColsInTriggerTable; i++) {
+			if (columnsArrary[i] != -1)
+				countOfColsRefedInArray++;
+		}
+
+		if (countOfColsRefedInArray > 0){
+			int[] tempArrayOfNeededColumns = new int[countOfColsRefedInArray];
+			int j=0;
+			for (int i=0; i < numberOfColsInTriggerTable; i++) {
+				if (columnsArrary[i] != -1)
+					tempArrayOfNeededColumns[j++] = i+1;
+			}
+			return tempArrayOfNeededColumns;
+		} else
+			return null;
+	}
 
 	/**
 	 * Whip up a new Temp ResultSet that has a single
-	 * row, the current row of this result set.
+	 * row. This row will either have all the columns from
+	 * the current row of the passed resultset or a subset 
+	 * of the columns from the passed resulset. It all depends
+	 * on what columns are needed by the passed trigger and what
+	 * columns exist in the resulset. The Temp resulset
+	 * should only have the columns required by the trigger.
 	 * 
+	 * @param triggerd We are building Temp resultset for this trigger
 	 * @param activation the activation
 	 * @param rs the result set 
+	 * @param colsReadFromTable The passed resultset is composed of
+	 *   these columns. We will create a temp resultset which
+	 *   will have either all these columns or only a subset of
+	 *   these columns. It all depends on what columns are needed
+	 *   by the trigger. If this param is null, then that means that
+	 *   all the columns from the trigger table have been read into
+	 *   the passed resultset.
 	 * 
 	 * @return a single row result set
 	 *
@@ -186,14 +280,90 @@ class TemporaryRowHolderResultSet implements CursorResultSet, NoPutResultSet, Cl
 	 */
 	public static TemporaryRowHolderResultSet getNewRSOnCurrentRow
 	(
+			TriggerDescriptor triggerd,
 		Activation				activation,
-		CursorResultSet 		rs
+		CursorResultSet 		rs,
+		int[]	colsReadFromTable
 	) throws StandardException
 	{
-		TemporaryRowHolderImpl singleRow =
-			new TemporaryRowHolderImpl(activation, null,
-									   rs.getResultDescription());
-		singleRow.insert(rs.getCurrentRow());
+		TemporaryRowHolderImpl singleRow;
+		DataDictionary dd = activation.getLanguageConnectionContext().getDataDictionary();
+		// In soft upgrade mode, we could be dealing with databases created 
+		// with 10.8 or prior and for such databases, we do not want to do
+		// any column reading optimization to maintain backward compatibility
+		if (!dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_9,null)) {
+	    	singleRow =
+	    		new TemporaryRowHolderImpl(activation, null,
+						   rs.getResultDescription());
+			singleRow.insert(rs.getCurrentRow());
+			return (TemporaryRowHolderResultSet) singleRow.getResultSet();
+		}
+
+		//Get columns referenced in trigger action through REFERENCING clause
+    	int[] referencedColsInTriggerAction = triggerd.getReferencedColsInTriggerAction();
+    	// Get trigger column. If null, then it means that all the columns
+    	// have been read because this trigger can be fired for any of the
+    	// columns in the table
+    	int[] referencedColsInTrigger = triggerd.getReferencedCols();
+
+	    if ((referencedColsInTrigger != null) && //this means not all the columns are being read
+	    		(triggerd.isRowTrigger() && referencedColsInTriggerAction!=null &&
+	    		referencedColsInTriggerAction.length != 0)) {
+	    	//If we are here, then trigger is defined on specific columns and
+	    	// it has trigger action columns used through REFERENCING clause
+
+	    	//Make an array which is a superset of trigger columns and 
+	    	// trigger action columns referenced through REFERENCING clause.
+	    	//This superset is what the trigger is looking for in it's
+	    	// resulset. 
+		    int[] colsInTrigger = supersetofAllColumns(referencedColsInTrigger,referencedColsInTriggerAction);
+	    	int colsCountInTrigger = colsInTrigger.length;
+		    int[] colsReallyNeeded = new int[colsCountInTrigger];
+
+		    //Here, we find out what columns make up the passed resulset
+	    	int[] actualColsReadFromTable;
+    		if (colsReadFromTable != null) //this means not all the columns are being read
+    			actualColsReadFromTable = justTheRequiredColumnsPositions(colsReadFromTable);
+    		else {
+    			int colsInTriggerTable = triggerd.getTableDescriptor().getNumberOfColumns();
+    			actualColsReadFromTable = new int[colsInTriggerTable];
+    			for (int i=1; i<=colsInTriggerTable; i++)
+    				actualColsReadFromTable[i-1] = i;
+    		}
+	    	
+    		//Now we have what columns make up the passed resulset and what
+    		// columns are needed by the trigger. We will map a temporary
+    		// resultset for the trigger out of the above information using
+    		// the passed resultset
+	    	int indexInActualColsReadFromTable = 0;
+	    	for (int i=0; i<colsCountInTrigger; i++) {
+
+	    		for (;indexInActualColsReadFromTable < actualColsReadFromTable.length; indexInActualColsReadFromTable++)
+	    		{
+	    			/* Return 1-based key column position if column is in the key */
+	    			if (actualColsReadFromTable[indexInActualColsReadFromTable] 
+	    			                            == colsInTrigger[i])
+	    			{
+	    				colsReallyNeeded[i] = indexInActualColsReadFromTable+1;
+	    				break;
+	    			}
+	    		}
+	    	}    			
+	    	singleRow =
+	    		new TemporaryRowHolderImpl(activation, null,
+	    				activation.getLanguageConnectionContext().getLanguageFactory().
+	    				getResultDescription(rs.getResultDescription(),colsReallyNeeded));
+			ExecRow				row = activation.getExecutionFactory().getValueRow( colsCountInTrigger );
+			for (int i=0; i<colsCountInTrigger; i++)
+				row.setColumn(i+1, rs.getCurrentRow().getColumn(colsReallyNeeded[i]));
+			singleRow.insert(row);
+	    } else {
+	    	singleRow =
+	    		new TemporaryRowHolderImpl(activation, null,
+						   rs.getResultDescription());
+			singleRow.insert(rs.getCurrentRow());
+	    }
+	    
 		return (TemporaryRowHolderResultSet) singleRow.getResultSet();
 	}
 

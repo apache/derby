@@ -224,6 +224,8 @@ public class TriggerEventActivator
  	 * @param ars the after result set. Typically
 	 * 		a TemporaryRowHolderResultSet but sometimes a
 	 * 		BulkTableScanResultSet
+	 * @param colsReadFromTable   columns required from the trigger table
+	 *   by the triggering sql
 	 *
  	 * @exception StandardException on error
 	 */
@@ -231,7 +233,8 @@ public class TriggerEventActivator
 	(
 		TriggerEvent 		event,
 		CursorResultSet		brs,
-		CursorResultSet		ars
+		CursorResultSet		ars,
+		int[]	colsReadFromTable
 	) throws StandardException
 	{
 		if (executors == null)
@@ -275,7 +278,7 @@ public class TriggerEventActivator
 				// Reset the AI counters to the beginning before firing next
 				// trigger. 
 				tec.resetAICounters(true);				
-				executors[eventNumber][i].fireTrigger(event, brs, ars);
+				executors[eventNumber][i].fireTrigger(event, brs, ars, colsReadFromTable);
 			}
 		}
 		finally

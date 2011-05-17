@@ -42,16 +42,7 @@ public class TriggerTests extends BaseJDBCTestCase {
 
 	final int lobsize = 50000*1024;
 	boolean testWithLargeDataInLOB = true;
-	// DERBY-1482 has caused a regression which is being worked
-	// under DERBY-5121. Until DERBY-5121 is fixed, we want
-	// Derby to create triggers same as it is done in 10.6 and
-	// earlier. This in other words means that do not try to
-	// optimize how many columns are read from the trigger table,
-	// simply read all the columns from the trigger table. 
-	// Because of this, we need to disable the tests that were
-	// added as part of DERBY-1482 to check the column read
-	// optimization.
-	boolean isDerby1482Fixed = false;
+	boolean isDerby1482Fixed = true;
 
 	/**
 	 * Insert trigger tests

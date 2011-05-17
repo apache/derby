@@ -802,7 +802,8 @@ class UpdateResultSet extends DMLWriteResultSet
 				// fire BEFORE trigger, do this before checking constraints
 				triggerActivator.notifyEvent(TriggerEvents.BEFORE_UPDATE, 
 												deletedRowHolder.getResultSet(),
-												insertedRowHolder.getResultSet());
+												insertedRowHolder.getResultSet(),
+												constants.getBaseRowReadMap());
 
 			}
 		}
@@ -816,7 +817,8 @@ class UpdateResultSet extends DMLWriteResultSet
 			{
 				triggerActivator.notifyEvent(TriggerEvents.AFTER_UPDATE, 
 										deletedRowHolder.getResultSet(),
-										insertedRowHolder.getResultSet());
+										insertedRowHolder.getResultSet(),
+										constants.getBaseRowReadMap());
 			}
 		}
 	}

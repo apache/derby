@@ -60,6 +60,8 @@ public class StatementTriggerExecutor extends GenericTriggerExecutor
 	 * @param event	the trigger event
 	 * @param brs   the before result set
 	 * @param ars   the after result set
+	 * @param colsReadFromTable   columns required from the trigger table
+	 *   by the triggering sql
 	 *
 	 * @exception StandardException on error or general trigger
 	 *	exception
@@ -68,7 +70,8 @@ public class StatementTriggerExecutor extends GenericTriggerExecutor
 	(
 		TriggerEvent 		event, 
 		CursorResultSet 	brs, 
-		CursorResultSet 	ars
+		CursorResultSet 	ars,
+		int[] colsReadFromTable
 	) throws StandardException
 	{
 		tec.setTrigger(triggerd);
