@@ -33,6 +33,7 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
+import org.apache.derbyTesting.junit.BaseTestCase;
 
 /**
  * Test decorator that starts the network server on startup
@@ -320,12 +321,13 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         final   String[]  command = new String[ al.size() ];
         al.toArray(command);
 
-        /* System.out.println( "XXX server startup command = ");
+        String startcommand ="";
         for (int i = 0 ; i < command.length ; i++) {
-            System.out.print( command[i] + " " );
+        	startcommand += command[i] + " ";
         }
-        System.out.println();
-        */
+
+        BaseTestCase.println("XXX server startup command = " +
+	startcommand + "\n");
 
         Process serverProcess;
         
