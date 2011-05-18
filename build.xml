@@ -175,8 +175,30 @@
    <!-- You can override this property in local.properties to fetch from an alternative location -->
    <property name="junit.url" value="http://repo1.maven.org/maven2/junit/junit/3.8.2/junit-3.8.2.jar"/> 
    <target name="junit_check">
-       <available file="${basedir}/tools/java/junit.jar" property="junit.exists"/>
+       <!-- check if junit is set, if set, if junit.jar is really there, if not, error out  -->
+       <fail message="junit property is set to ${junit}, but there is no junit.jar there.">
+           <condition>
+               <and>
+                   <isset property="junit"/>
+                   <not>
+                       <available file="${junit}"/>
+                   </not>
+               </and>
+           </condition>
+       </fail>
+       <condition property="junitfile" value="${junit}">
+           <and>
+               <isset property="junit"/>
+           </and>
+       </condition>
+       <condition property="junitfile" value="${basedir}/tools/java/junit.jar">
+           <not>
+               <isset property="junit"/>
+           </not>
+       </condition>
+       <available file="${junitfile}" property="junit.exists"/>
    </target>
+
    <target name="install_junit" depends="junit_check" unless="junit.exists" description="installs junit.jar into derby">
        <get src="${junit.url}" dest="${basedir}/tools/java/junit.jar" verbose="true" ignoreerrors="true"/>
    </target>

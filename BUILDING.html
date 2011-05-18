@@ -380,6 +380,24 @@ sane=false
       </TD>
     </TR>
 
+    <TR>
+      <TD><b><i>junit</i></b></TD>
+      <TD>Setting this property will overwrite the default location for 
+          <i>junit.jar</i>, used to build the tests. 
+      The default location is <i>tools/java</i>.
+      If you set this property, the build will not automatically download 
+      <i>junit.jar</i>, and if it's not in the specified location, the build will
+      stop.</TD>
+      <TD><blockquote><i>tools/java/junit.jar</i></blockquote></TD>
+      <TD>
+<blockquote>
+<pre><b><font color="blue" size="+2">
+junit=/local0/junit.jar
+</font></b></pre>
+</blockquote>
+      </TD>
+    </TR>
+
   </TBODY>
 </TABLE>
 
