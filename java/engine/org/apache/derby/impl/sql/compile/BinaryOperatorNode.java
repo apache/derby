@@ -21,25 +21,17 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import java.lang.reflect.Modifier;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.SqlXmlUtil;
-
-import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.JDBC40Translation;
@@ -48,7 +40,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.sql.Types;
 import java.util.Vector;
 
 /**
@@ -59,7 +50,7 @@ import java.util.Vector;
  *
  */
 
-public class BinaryOperatorNode extends ValueNode
+public class BinaryOperatorNode extends OperatorNode
 {
 	String	operator;
 	String	methodName;
@@ -125,9 +116,8 @@ public class BinaryOperatorNode extends ValueNode
 		{ClassName.StringDataValue, ClassName.XMLDataValue}		// XMLQuery
 	};
 
-	// Class used to compile an XML query expression and/or load/process
-	// XML-specific objects.
-	private SqlXmlUtil sqlxUtil;
+    /** The query expression if the operator is XMLEXISTS or XMLQUERY. */
+    private String xmlQuery;
 
 	/**
 	 * Initializer for a BinaryOperatorNode
@@ -352,11 +342,13 @@ public class BinaryOperatorNode extends ValueNode
                 SQLState.LANG_INVALID_XML_QUERY_EXPRESSION);
         }
         else {
-        // compile the query expression.
-            sqlxUtil = new SqlXmlUtil();
-            sqlxUtil.compileXQExpr(
-                ((CharConstantNode)leftOperand).getString(),
-                (operatorType == XMLEXISTS_OP ? "XMLEXISTS" : "XMLQUERY"));
+            xmlQuery = ((CharConstantNode)leftOperand).getString();
+
+            // Compile the query expression. The compiled query will not be
+            // used, as each activation will need to compile its own version.
+            // But we still do this here to get a compile-time error in case
+            // the query expression has syntax errors.
+            new SqlXmlUtil().compileXQExpr(xmlQuery, operator);
         }
 
         // Right operand must be an XML data value.  NOTE: This
@@ -518,7 +510,8 @@ public class BinaryOperatorNode extends ValueNode
 		// row); see SqlXmlExecutor.java for more.
 			mb.pushNewStart(
 				"org.apache.derby.impl.sql.execute.SqlXmlExecutor");
-			mb.pushNewComplete(addXmlOpMethodParams(acb, mb));
+            pushSqlXmlUtil(acb, mb, xmlQuery, operator);
+            mb.pushNewComplete(1);
 		}
 
 		/*
@@ -875,32 +868,4 @@ public class BinaryOperatorNode extends ValueNode
         	       && leftOperand.isEquivalent(other.leftOperand)
         	       && rightOperand.isEquivalent(other.rightOperand);
         }
-
-	/**
-	 * Push the fields necessary to generate an instance of
-	 * SqlXmlExecutor, which will then be used at execution
-	 * time to retrieve the compiled XML query expression,
-	 * along with any other XML-specific objects.
-	 *
-	 * @param acb The ExpressionClassBuilder for the class we're generating
-	 * @param mb  The method the code to place the code
-	 *
-	 * @return The number of items that this method pushed onto
-	 *  the mb's stack.
-	 */
-	private int addXmlOpMethodParams(ExpressionClassBuilder acb,
-		MethodBuilder mb) throws StandardException
-	{
-		// Push activation so that we can get our saved object
-		// (which will hold the compiled XML query expression)
-		// back at execute time.
-		acb.pushThisAsActivation(mb);
-
-		// Push our saved object (the compiled query and XML-specific
-		// objects).
-		mb.push(getCompilerContext().addSavedObject(sqlxUtil));
-
-		// We pushed 2 items to the stack.
-		return 2;
-	}
 }

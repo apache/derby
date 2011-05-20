@@ -23,10 +23,7 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.store.access.Qualifier;
 
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 
 import org.apache.derby.iapi.reference.JDBC40Translation;
 import org.apache.derby.iapi.reference.SQLState;
@@ -35,15 +32,11 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.SqlXmlUtil;
 
 import java.lang.reflect.Modifier;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
@@ -59,7 +52,7 @@ import java.util.Vector;
  *
  */
 
-public class UnaryOperatorNode extends ValueNode
+public class UnaryOperatorNode extends OperatorNode
 {
 	String	operator;
 	String	methodName;
@@ -120,10 +113,6 @@ public class UnaryOperatorNode extends ValueNode
 	// Array to hold Objects that contain primitive
 	// args required by the operator method call.
 	private Object [] additionalArgs;
-
-	// Class used to hold XML-specific objects required for
-	// parsing/serializing XML data.
-	private SqlXmlUtil sqlxUtil;
 
 	/**
 	 * Initializer for a UnaryOperatorNode.
@@ -382,12 +371,6 @@ public class UnaryOperatorNode extends ValueNode
                 }
             }
         }
-
-        // Create a new XML compiler object; the constructor
-        // here automatically creates the XML-specific objects 
-        // required for parsing/serializing XML, so all we
-        // have to do is create an instance.
-        sqlxUtil = new SqlXmlUtil();
 
         // The result type of XMLParse() is always an XML type.
         setType(DataTypeDescriptor.getBuiltInDataTypeDescriptor(
@@ -798,20 +781,12 @@ public class UnaryOperatorNode extends ValueNode
 
         /* Else we're here for XMLPARSE. */
 
-        // Push activation, which we use at execution time to
-        // get our saved object (which will hold objects used
-        // for parsing/serializing) back.
-        acb.pushThisAsActivation(mb);
-
-        // Push our XML object (used for parsing/serializing) as
-        // a saved object, so that we can retrieve it at execution
-        // time.  This allows us to avoid having to re-create the
-        // objects for every row in a given result set.
-        mb.push(getCompilerContext().addSavedObject(sqlxUtil));
+        // Push the SqlXmlUtil instance as the first argument.
+        pushSqlXmlUtil(acb, mb, null, null);
 
         // Push whether or not we want to preserve whitespace.
         mb.push(((Boolean)additionalArgs[0]).booleanValue());
-        return 3;
+        return 2;
     }
     
     /**

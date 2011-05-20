@@ -22,8 +22,6 @@
 package org.apache.derby.impl.sql.execute;
 
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.sql.Activation;
 
 import org.apache.derby.iapi.types.BooleanDataValue;
 import org.apache.derby.iapi.types.StringDataValue;
@@ -32,6 +30,7 @@ import org.apache.derby.iapi.types.XMLDataValue;
 import org.apache.derby.iapi.types.SqlXmlUtil;
 
 /**
+ * <p>
  * This class is really just an execution time "utility" that
  * makes calls to methods on the XMLDataValue interface.  Instances
  * of this class are generated at execution time by the various
@@ -40,33 +39,38 @@ import org.apache.derby.iapi.types.SqlXmlUtil;
  * that instance (see, for example, the generateExpression() methods
  * in UnaryOperatorNode and BinaryOperatorNode).  When an instance
  * of this class is instantiated, one of the arguments that can be
- * provided is an id that is used to retrieve an already-constructed
- * (from compilation time) instance of SqlXmlUtil from the current
+ * provided is an already-constructed instance of SqlXmlUtil from the current
  * Activation.  When it comes time to execute the operator, this class
  * just makes the appropriate call on the received XMLDataValue object
  * and passes in the SqlXmlUtil, from which the XMLDataValue can
  * retrieve compile-time objects.  The XMLDataValue can also make
  * calls to various XML-specific utilities on the SqlXmlUtil
  * object.
+ * </p>
  *
+ * <p>
  * Let's take an example.  Assume the statement that the user
  * wants to execute is:
+ * </p>
  *
+ * <pre>
  *   select id from xtable
  *      where XMLEXISTS('/simple' PASSING BY REF xcol)
+ * </pre>
  *
- * At compilation time we will compile the expression "/simple"
- * and store the compiled version of the query into an instance
- * of SqlXmlUtil.  Then we will save that instance of SqlXmlUtil
- * as an object in the statement activation, from which we will
- * receive an id that can be used later to retrieve the object
- * (i.e. to retrieve the SqlXmlUtil).  Then, for *each* row
- * in xtable, we'll generate the following:
+ * <p>
+ * For each activation of the statement, the first time a row is read from
+ * xtable, the expression "/simple" is compiled and stored in the activation.
+ * Then, for each row in xtable, we'll generate the following:
+ * </p>
  *
+ * <pre>
  *  boolean result =
- *    (new SqlXmlExecutor(activation, compileTimeObjectId)).
+ *    (new SqlXmlExecutor(cachedSqlXmlUtilInstance)).
  *      XMLExists("/simple", xcol);
+ * </pre>
  *
+ * <p>
  * In other words, for each row we create a new instance of
  * this class and call "XMLExists" on that instance.  Then,
  * as seen below, we retrieve the SqlXmlUtil from the activation
@@ -75,7 +79,9 @@ import org.apache.derby.iapi.types.SqlXmlUtil;
  * methods and objects (which include the compiled query
  * expression for "/simple") defined on SqlXmlUtil to complete
  * the operation.
- * 
+ * </p>
+ *
+ * <p>
  * Okay, so why do we use this execution-time SqlXmlExecutor class
  * instead of just generating a call to XMLDataValue.XMLExists()
  * directly?  The reason is that we only want to compile the XML
@@ -88,22 +94,32 @@ import org.apache.derby.iapi.types.SqlXmlUtil;
  * and then pass the compiled object into XMLDataValue--in either
  * case, we'd end up compiling the XML query expression (and creating
  * the corresponding XML-specific objects) once for each row in
- * the target result set.  By using the "saveObject" functionality
- * in Activation along with this SqlXmlExecutor class, we make
+ * the target result set.  By caching the SqlXmlUtil instance in the
+ * Activation and access it via this SqlXmlExecutor class, we make
  * it so that we only have to compile the XML query expression and
- * create XML-specific objects once (at compile time), and then
+ * create XML-specific objects once per activation, and then
  * we can re-use those objects for every row in the target
  * result set.  Yes, we're still creating an instance of this
- * class (SqlXmlExecutor) once per row, and yes we have to fetch
- * the appropriate SqlXmlUtil object once per row, but this is
+ * class (SqlXmlExecutor) once per row, but this is
  * still going to be cheaper than having to re-compile the query
  * expression and re-create XML objects for every row.
- * 
+ * </p>
+ *
+ * <p>
  * So in short, this class allows us to improve the execution-time
  * performance of XML operators by allowing us to create XML-
  * specific objects and compile XML query expressions once per
  * statement, instead of once per row.
+ * </p>
  *
+ * <p>
+ * The next paragraph contains a historical note about why this class is
+ * placed in this package. It is no longer true that the class uses the
+ * {@code getSavedObject()} method on the Activation, so it should now be
+ * safe to move it to the types package.
+ * </p>
+ *
+ * <p><i>
  * One final note: the reason this class is in this package
  * instead of the types package is that, in order to retrieve
  * the compile-time objects, we have to use the "getSavedObject()"
@@ -116,15 +132,13 @@ import org.apache.derby.iapi.types.SqlXmlUtil;
  * the execution package seems more appropriate since this
  * class is only instantiated and used during execution, not
  * during compilation.
+ * </i></p>
  */
 
 public class SqlXmlExecutor {
 
-    // The activation from which we load the compile-time XML
-    // objects (including the compiled XML query expression in
-    // case of XMLEXISTS and XMLQUERY).
-    private Activation activation;
-    private int sqlXUtilId;
+    /** Utility instance that performs the actual XML operations. */
+    private final SqlXmlUtil sqlXmlUtil;
 
     // Target type, target width and target collation type that 
     // were specified for an XMLSERIALIZE operator.
@@ -138,15 +152,12 @@ public class SqlXmlExecutor {
 
     /**
      * Constructor 1: Used for XMLPARSE op.
-     * @param activation Activation from which to retrieve saved objects
-     * @param utilId Id by which we find saved objects in activation
+     * @param sqlXmlUtil utility that performs the parsing
      * @param preserveWS Whether or not to preserve whitespace
      */
-    public SqlXmlExecutor(Activation activation, int utilId,
-        boolean preserveWS)
+    public SqlXmlExecutor(SqlXmlUtil sqlXmlUtil, boolean preserveWS)
     {
-        this.activation = activation;
-        this.sqlXUtilId = utilId;
+        this.sqlXmlUtil = sqlXmlUtil;
         this.preserveWS = preserveWS;
     }
 
@@ -159,6 +170,7 @@ public class SqlXmlExecutor {
     public SqlXmlExecutor(int targetTypeId, int targetMaxWidth, 
     		int targetCollationType)
     {
+        this.sqlXmlUtil = null;
         this.targetTypeId = targetTypeId;
         this.targetMaxWidth = targetMaxWidth;
         this.targetCollationType = targetCollationType;
@@ -166,13 +178,11 @@ public class SqlXmlExecutor {
 
     /**
      * Constructor 3: Used for XMLEXISTS/XMLQUERY ops.
-     * @param activation Activation from which to retrieve saved objects
-     * @param utilId Id by which we find saved objects in activation
+     * @param sqlXmlUtil utility that performs the query
      */
-    public SqlXmlExecutor(Activation activation, int utilId)
+    public SqlXmlExecutor(SqlXmlUtil sqlXmlUtil)
     {
-        this.activation = activation;
-        this.sqlXUtilId = utilId;
+        this.sqlXmlUtil = sqlXmlUtil;
     }
 
     /**
@@ -201,7 +211,7 @@ public class SqlXmlExecutor {
         }
 
         return result.XMLParse(
-            xmlText.getString(), preserveWS, getSqlXmlUtil());
+            xmlText.getString(), preserveWS, sqlXmlUtil);
     }
 
     /**
@@ -235,7 +245,7 @@ public class SqlXmlExecutor {
     public BooleanDataValue XMLExists(StringDataValue xExpr,
         XMLDataValue xmlContext) throws StandardException
     {
-        return xmlContext.XMLExists(getSqlXmlUtil());
+        return xmlContext.XMLExists(sqlXmlUtil);
     }
 
     /**
@@ -249,7 +259,7 @@ public class SqlXmlExecutor {
      *  the expression.
      * @param result XMLDataValue in which to store the result
      * @return The received XMLDataValue with its content set to
-     *  result of evaulating the query expression against xmlContext.
+     *  result of evaluating the query expression against xmlContext.
      *  If the received XMLDataValue is null, then create a new one
      *  and set its content to correspond to the received xmlText.
      */
@@ -257,19 +267,6 @@ public class SqlXmlExecutor {
         XMLDataValue xmlContext, XMLDataValue result)
         throws StandardException
     {
-        return xmlContext.XMLQuery(result, getSqlXmlUtil());
+        return xmlContext.XMLQuery(result, sqlXmlUtil);
     }
-
-    /**
-     * Return the saved object in this.activation that corresponds to
-     * this.sqlxUtilId.  Assumption is that those fields have been
-     * set by the time we get here.
-     */
-    private SqlXmlUtil getSqlXmlUtil()
-        throws StandardException
-    {
-        return (SqlXmlUtil)
-            activation.getPreparedStatement().getSavedObject(sqlXUtilId);
-    }
-
 }
