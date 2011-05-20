@@ -130,7 +130,7 @@ class DDMReader
 	// DSS Length
 	private int dssLength;
 
-	// DSS is larger than 32762 (continuation bit is set) so DSS is continued
+	// DSS is larger than 32672 (continuation bit is set) so DSS is continued
 	private boolean dssIsContinued;
 
 	private boolean terminateChainOnErr;

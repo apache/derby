@@ -1532,8 +1532,8 @@ public class SystemProcedures  {
      * <p>
      * Will be called as 
 	 * SYSCS_IMPORT_DATA (IN SCHEMANAME VARCHAR(128), IN TABLENAME VARCHAR(128),
-	 *                    IN INSERTCOLUMNLIST VARCHAR(32762), IN COLUMNINDEXES VARCHAR(32762),
-	 *                    IN FILENAME VARCHAR(32762), IN COLUMNDELIMITER CHAR(1), 
+	 *                    IN INSERTCOLUMNLIST VARCHAR(32672), IN COLUMNINDEXES VARCHAR(32672),
+	 *                    IN FILENAME VARCHAR(32672), IN COLUMNDELIMITER CHAR(1), 
 	 *                    IN CHARACTERDELIMITER CHAR(1), IN CODESET VARCHAR(128), 
 	 *                    IN REPLACE SMALLINT)
 	 *
@@ -1577,9 +1577,9 @@ public class SystemProcedures  {
      * Will be called as 
      * SYSCS_IMPORT_DATA_LOBS_FROM_EXTFILE(IN SCHEMANAME VARCHAR(128), 
      *               IN TABLENAME VARCHAR(128),
-     *               IN INSERTCOLUMNLIST VARCHAR(32762), 
-     *               IN COLUMNINDEXES VARCHAR(32762),
-     *               IN FILENAME VARCHAR(32762), IN COLUMNDELIMITER CHAR(1), 
+     *               IN INSERTCOLUMNLIST VARCHAR(32672), 
+     *               IN COLUMNINDEXES VARCHAR(32672),
+     *               IN FILENAME VARCHAR(32672), IN COLUMNDELIMITER CHAR(1), 
      *               IN CHARACTERDELIMITER CHAR(1), IN CODESET VARCHAR(128), 
      *               IN REPLACE SMALLINT)
      *
@@ -1618,7 +1618,7 @@ public class SystemProcedures  {
      * <p>
      * Will be called as 
 	 * SYSCS_BULK_INSERT (IN SCHEMANAME VARCHAR(128), IN TABLENAME VARCHAR(128), 
-	 *                    IN VTINAME VARCHAR(32762), IN VTIARG VARCHAR(32762))
+	 *                    IN VTINAME VARCHAR(32672), IN VTIARG VARCHAR(32672))
 	 *
 	 * @exception  StandardException  Standard exception policy.
      **/
