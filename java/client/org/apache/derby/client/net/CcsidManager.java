@@ -21,6 +21,11 @@
 
 package org.apache.derby.client.net;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import org.apache.derby.client.am.Agent;
+import org.apache.derby.client.am.SqlException;
+
 // Performs character conversions as required to send and receive PROTOCOL control data.
 // User data uses the JVM's built in converters, i18n.jar,
 
@@ -57,26 +62,6 @@ public abstract class CcsidManager {
     // @return A new byte array representing the String in a particular ccsid.
     public abstract byte[] convertFromJavaString(String sourceString, org.apache.derby.client.am.Agent agent) throws org.apache.derby.client.am.SqlException;
 
-
-    // Convert a Java String into bytes for a particular ccsid.
-    // The String is converted into a buffer provided by the caller.
-    //
-    // @param sourceString  A Java String to convert.
-    // @param buffer        The buffer to convert the String into.
-    // @param offset        Offset in buffer to start putting output.
-    // @return An int containing the buffer offset after conversion.
-    public abstract int convertFromJavaString(String sourceString,
-                                              byte[] buffer,
-                                              int offset,
-                                              org.apache.derby.client.am.Agent agent) throws org.apache.derby.client.am.SqlException;
-
-    // Convert a byte array representing characters in a particular ccsid into a Java String.
-    //
-    // @param sourceBytes An array of bytes to be converted.
-    // @return String A new Java String Object created after conversion.
-    abstract String convertToJavaString(byte[] sourceBytes);
-
-
     // Convert a byte array representing characters in a particular ccsid into a Java String.
     //
     // @param sourceBytes An array of bytes to be converted.
@@ -85,19 +70,35 @@ public abstract class CcsidManager {
     // @return A new Java String Object created after conversion.
     abstract String convertToJavaString(byte[] sourceBytes, int offset, int numToConvert);
 
-
-    
     /**
-     * 
-     * @return Maximum number of bytes per character
+     * Initialize this instance for encoding a new string. This method resets
+     * any internal state that may be left after earlier calls to
+     * {@link #encode()} on this instance. For example, it may reset the
+     * internal {@code java.nio.charset.CharsetEncoder}, if the implementation
+     * uses one to do the encoding.
      */
-    abstract int maxBytesPerChar();
+    public abstract void startEncoding();
 
     /**
-     * Get length in bytes for string s
-     * @param s The string from which to obtain the length
-     * @return The length of s in bytes
+     * Encode the contents of a {@code CharBuffer} into a {@code ByteBuffer}.
+     * The method will return {@code true} if all the characters were encoded
+     * and copied to the destination. If the receiving byte buffer is too small
+     * to hold the entire encoded representation of the character buffer, the
+     * method will return {@code false}. The caller should then allocate a
+     * larger byte buffer, copy the contents from the old byte buffer to the
+     * new one, and then call this method again to get the remaining characters
+     * encoded.
+     *
+     * @param src buffer holding the characters to encode
+     * @param dest buffer receiving the encoded bytes
+     * @param agent where to report errors
+     * @return {@code true} if all characters were encoded, {@code false} if
+     * the destination buffer is full and there still are more characters to
+     * encode
+     * @throws SqlException if the characters cannot be encoded using this
+     * CCSID manager's character encoding
      */
-    abstract int getByteLength(String s);
+    public abstract boolean encode(
+            CharBuffer src, ByteBuffer dest, Agent agent) throws SqlException;
 }
 

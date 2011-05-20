@@ -21,6 +21,9 @@
 
 package org.apache.derby.client.net;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.SqlException;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.shared.common.reference.SQLState;
@@ -127,41 +130,41 @@ public class EbcdicCcsidManager extends CcsidManager {
     }
 
     public byte[] convertFromJavaString(String sourceString, org.apache.derby.client.am.Agent agent) throws SqlException {
-        byte[] bytes = new byte[sourceString.length()];
-        convertFromJavaString(sourceString, bytes, 0, agent);
-        return bytes;
+        CharBuffer src = CharBuffer.wrap(sourceString);
+        ByteBuffer dest = ByteBuffer.allocate(sourceString.length());
+        startEncoding();
+        encode(src, dest, agent);
+        return dest.array();
     }
 
-    public int convertFromJavaString(String sourceString,
-                                     byte[] buffer,
-                                     int offset,
-                                     org.apache.derby.client.am.Agent agent) throws SqlException {
-        for (int i = 0; i < sourceString.length(); i++) {
-            char c = sourceString.charAt(i);
-            if (c > 0xff)
-            // buffer[offset++] = (byte) 63;
-            {
-                throw new SqlException(agent.logWriter_, 
-                    new ClientMessageId(SQLState.CANT_CONVERT_UNICODE_TO_EBCDIC));
+    public void startEncoding() {
+        // We don't have a CharsetEncoder instance to reset, or any other
+        // internal state associated with earlier encode() calls. Do nothing.
+    }
+
+    public boolean encode(CharBuffer src, ByteBuffer dest, Agent agent)
+            throws SqlException {
+        // Encode as many characters as the destination buffer can hold.
+        int charsToEncode = Math.min(src.remaining(), dest.remaining());
+        for (int i = 0; i < charsToEncode; i++) {
+            char c = src.get();
+            if (c > 0xff) {
+                throw new SqlException(agent.logWriter_,
+                    new ClientMessageId(
+                        SQLState.CANT_CONVERT_UNICODE_TO_EBCDIC));
             } else {
-                buffer[offset++] = (byte) (conversionArrayToEbcdic[c]);
+                dest.put((byte) conversionArrayToEbcdic[c]);
             }
-            ;
-        }
-        return offset;
-    }
-
-    String convertToJavaString(byte[] sourceBytes) {
-        int i = 0;
-        char[] theChars = new char[sourceBytes.length];
-        int num = 0;
-
-        for (i = 0; i < sourceBytes.length; i++) {
-            num = (sourceBytes[i] < 0) ? (sourceBytes[i] + 256) : sourceBytes[i];
-            theChars[i] = (char) conversionArrayToUCS2[num];
         }
 
-        return new String(theChars);
+        if (src.remaining() == 0) {
+            // All characters have been encoded. We're done.
+            return true;
+        } else {
+            // We still have more characters to encode, but no room in
+            // destination buffer.
+            return false;
+        }
     }
 
     String convertToJavaString(byte[] sourceBytes, int offset, int numToConvert) {
@@ -176,18 +179,4 @@ public class EbcdicCcsidManager extends CcsidManager {
         }
         return new String(theChars);
     }
-
-    
-    /* (non-Javadoc)
-     * @see org.apache.derby.client.net.CcsidManager#maxBytesPerChar()
-     */
-    int maxBytesPerChar() {
-        return 1;
-    }
-
-    public int getByteLength(String s) {
-        return s.length();
-    }
-
 }
-

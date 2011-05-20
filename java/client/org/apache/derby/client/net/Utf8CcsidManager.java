@@ -22,6 +22,12 @@
 package org.apache.derby.client.net;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.CoderResult;
 
 import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.ClientMessageId;
@@ -30,6 +36,10 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class Utf8CcsidManager extends CcsidManager {
+
+    private final static String UTF8 = "UTF-8";
+    private final static Charset UTF8_CHARSET = Charset.forName(UTF8);
+    private final CharsetEncoder encoder = UTF8_CHARSET.newEncoder();
 
     public Utf8CcsidManager() {
         super((byte) ' ', // 0x40 is the ebcdic space character
@@ -56,14 +66,27 @@ public class Utf8CcsidManager extends CcsidManager {
     }
     
     public byte[] convertFromJavaString(String sourceString, Agent agent)
-    throws SqlException {
-        byte[] bytes = new byte[getByteLength(sourceString)];
-        convertFromJavaString(sourceString, bytes, 0, agent);
-        return bytes;
-    }
-    
-    public String convertToJavaString(byte[] sourceBytes) {
-        return convertToJavaString(sourceBytes, 0, sourceBytes.length);
+            throws SqlException {
+        try {
+            ByteBuffer buf = encoder.encode(CharBuffer.wrap(sourceString));
+
+            if (buf.limit() == buf.capacity()) {
+                // The length of the encoded representation of the string
+                // matches the length of the returned buffer, so just return
+                // the backing array.
+                return buf.array();
+            }
+
+            // Otherwise, copy the interesting bytes into an array with the
+            // correct length.
+            byte[] bytes = new byte[buf.limit()];
+            buf.get(bytes);
+            return bytes;
+        } catch (CharacterCodingException cce) {
+            throw new SqlException(agent.logWriter_,
+                    new ClientMessageId(SQLState.CANT_CONVERT_UNICODE_TO_UTF8),
+                    cce);
+        }
     }
 
     /**
@@ -71,7 +94,10 @@ public class Utf8CcsidManager extends CcsidManager {
      */
     public String convertToJavaString(byte[] sourceBytes, int offset, int numToConvert) {
         try {
-            return new String(sourceBytes, offset, numToConvert, "UTF-8");
+            // Here we'd rather specify the encoding using a Charset object to
+            // avoid the need to handle UnsupportedEncodingException, but that
+            // constructor wasn't introduced until Java 6.
+            return new String(sourceBytes, offset, numToConvert, UTF8);
         } catch (UnsupportedEncodingException e) {
             // We don't have an agent in this method
             if (SanityManager.DEBUG) {
@@ -81,37 +107,30 @@ public class Utf8CcsidManager extends CcsidManager {
         return null;
     }
 
-    public int convertFromJavaString(String sourceString, byte[] buffer,
-            int offset, Agent agent) throws SqlException {
-        try {
-            byte[] strBytes = sourceString.getBytes("UTF-8"); 
-            
-            for(int i=0; i<strBytes.length; i++) {
-                buffer[offset++] = strBytes[i];
-            }
-        } catch (UnsupportedEncodingException e) {
-            throw new SqlException(agent.logWriter_, 
+    public void startEncoding() {
+        encoder.reset();
+    }
+
+    public boolean encode(CharBuffer src, ByteBuffer dest, Agent agent)
+            throws SqlException {
+        CoderResult result = encoder.encode(src, dest, true);
+        if (result == CoderResult.UNDERFLOW) {
+            // We've exhausted the input buffer, which means we're done if
+            // we just get everything flushed to the destination buffer.
+            result = encoder.flush(dest);
+        }
+
+        if (result == CoderResult.UNDERFLOW) {
+            // Input buffer is exhausted and everything is flushed to the
+            // destination. We're done.
+            return true;
+        } else if (result == CoderResult.OVERFLOW) {
+            // Need more room in the output buffer.
+            return false;
+        } else {
+            // Something in the input buffer couldn't be encoded.
+            throw new SqlException(agent.logWriter_,
                     new ClientMessageId(SQLState.CANT_CONVERT_UNICODE_TO_UTF8));
         }
-        return offset;
     }
-
-    int maxBytesPerChar() {
-        return 4;
-    }
-
-    public int getByteLength(String s) {
-        try {
-            return s.getBytes("UTF-8").length;
-        } catch (UnsupportedEncodingException e) {
-            // We don't have an agent in this method
-            if (SanityManager.DEBUG) {
-                SanityManager.THROWASSERT("Could not obtain byte length of Java String",e);
-            }
-        }
-        return -1;
-    }
-    
-    
-
 }

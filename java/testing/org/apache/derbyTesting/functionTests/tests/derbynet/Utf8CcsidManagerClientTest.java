@@ -21,21 +21,47 @@
 
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.util.Arrays;
 
 import junit.framework.Test;
+import org.apache.derby.client.am.Agent;
+import org.apache.derby.client.am.LogWriter;
 
+import org.apache.derby.client.am.SqlException;
+import org.apache.derby.client.net.NetAgent;
 import org.apache.derby.client.net.Utf8CcsidManager;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class Utf8CcsidManagerClientTest extends BaseTestCase {
+    private static final String CANNOT_CONVERT = "22005";
+
     private Utf8CcsidManager ccsidManager;
+    private Agent agent;
     
-    public Utf8CcsidManagerClientTest(String name) {
+    public Utf8CcsidManagerClientTest(String name) throws Exception {
         super(name);
         
         ccsidManager = new Utf8CcsidManager();
+
+        // Set up a dummy Agent since many of the methods require one for
+        // generating exceptions.
+        PrintWriter pw = new PrintWriter(new OutputStream() {
+            public void write(int b) throws IOException {
+                // Everything goes to /dev/null...
+            }
+        });
+        agent = new NetAgent(null, new LogWriter(pw, 0));
+    }
+
+    protected void tearDown() {
+        ccsidManager = null;
+        agent = null;
     }
 
     /**
@@ -77,7 +103,12 @@ public class Utf8CcsidManagerClientTest extends BaseTestCase {
         buffer[2] = additionalBytes[2];
         
         // Offset 3 bytes and convert the 4 chars in ucs2String
-        ccsidManager.convertFromJavaString(ucs2String, buffer, 3, null);
+        ByteBuffer wrapper = ByteBuffer.wrap(buffer);
+        wrapper.position(3);
+        ccsidManager.startEncoding();
+        boolean success =
+            ccsidManager.encode(CharBuffer.wrap(ucs2String), wrapper, null);
+        assertTrue("Overflow in encode()", success);
             
         assertTrue("UTF-8 conversion isn't equal to bytes (with buffer)",
                 Arrays.equals(additionalBytes, buffer));
@@ -90,21 +121,45 @@ public class Utf8CcsidManagerClientTest extends BaseTestCase {
         // Get the UTF-8 bytes for "Hello World" in Chinese
         byte[] utf8Bytes = new String("\u4f60\u597d\u4e16\u754c").getBytes("UTF-8");
         
-        // Get the UTF-16 string for "Hello World" in Chinese
-        String ucs2String = new String(new String("\u4f60\u597d\u4e16\u754c").getBytes("UTF-16"),"UTF-16");
-        
         // Get the 2nd and 3rd Chinese characters in UTF-16
         String offsetUcs2String = new String(new String("\u597d\u4e16").getBytes("UTF-16"),"UTF-16");
-        
-        // Convert our UTF-8 bytes to UTF-16 using the CcsidManager and compare
-        String convertedString = ccsidManager.convertToJavaString(utf8Bytes);
-        assertEquals(ucs2String, convertedString);
         
         // Convert just the two characters as offset above and compare
         String convertedOffset = ccsidManager.convertToJavaString(utf8Bytes, 3, 6);
         assertEquals(offsetUcs2String, convertedOffset);
     }
-    
+
+    /**
+     * Test encoding of invalid Unicode characters. Expect an exception to
+     * be thrown when encountering a character that cannot be encoded.
+     */
+    public void testInvalidCharacters() {
+        // Codepoints 0xD800 - 0xDFFF arent legal
+        String invalidString = "\uD800";
+
+        ccsidManager.startEncoding();
+        try {
+            ccsidManager.encode(
+                    CharBuffer.wrap(invalidString),
+                    ByteBuffer.allocate(10),
+                    agent);
+            fail("Encoding invalid codepoint should fail");
+        } catch (SqlException sqle) {
+            if (!CANNOT_CONVERT.equals(sqle.getSQLState())) {
+                fail("Expected SQLState " + CANNOT_CONVERT, sqle);
+            }
+        }
+
+        try {
+            ccsidManager.convertFromJavaString(invalidString, agent);
+            fail("Encoding invalid codepoint should fail");
+        } catch (SqlException sqle) {
+            if (!CANNOT_CONVERT.equals(sqle.getSQLState())) {
+                fail("Expected SQLState " + CANNOT_CONVERT, sqle);
+            }
+        }
+    }
+
     public static Test suite() {
         return TestConfiguration.clientServerSuite(Utf8CcsidManagerClientTest.class);
     }

@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 
 
 public class Request {
@@ -1106,48 +1107,51 @@ public class Request {
         /* Grab the current CCSID MGR from the NetAgent */ 
         CcsidManager currentCcsidMgr = netAgent_.getCurrentCcsidManager();
 
-        int stringByteLength = currentCcsidMgr.getByteLength(string);
+        // We don't know the length of the string yet, so set it to 0 for now.
+        // Will be updated later.
+        int lengthPos = buffer.position();
+        writeLengthCodePoint(0, codePoint);
+
+        int stringByteLength = encodeString(string);
         if (stringByteLength > byteLengthLimit) {
             throw new SqlException(netAgent_.logWriter_,
                     new ClientMessageId(sqlState), string);
         }
 
-        writeScalarHeader(codePoint, Math.max(byteMinLength, stringByteLength));
-
-        buffer.position(
-            currentCcsidMgr.convertFromJavaString(
-                string, buffer.array(), buffer.position(), netAgent_));
-
         // pad if we don't reach the byteMinLength limit
         if (stringByteLength < byteMinLength) {
             padBytes(currentCcsidMgr.space_, byteMinLength - stringByteLength);
+            stringByteLength = byteMinLength;
         }
+
+        // Update the length field. The length includes two bytes for the
+        // length field itself and two bytes for the codepoint.
+        buffer.putShort(lengthPos, (short) (stringByteLength + 4));
     }
 
-    
-
-    // this method inserts ddm character data into the buffer and pad's the
-    // data with the ccsid manager's space character if the character data length
-    // is less than paddedLength.
-    // Not: this method is not to be used for String truncation and the string length
-    // must be <= paddedLength.
-    // This method assumes that the String argument can be
-    // converted by the ccsid manager.  This should be fine because usually
-    // there are restrictions on the characters which can be used for ddm
-    // character data. This method also assumes that the string.length() will
-    // be the number of bytes following the conversion.
-    final void writeScalarPaddedString(String string, int paddedLength) throws SqlException {
-        ensureLength(paddedLength);
-        
-        /* Grab the current CCSID MGR from the NetAgent */ 
-        CcsidManager currentCcsidMgr = netAgent_.getCurrentCcsidManager();
-        
-        int stringLength = currentCcsidMgr.getByteLength(string);
-        
-        buffer.position(currentCcsidMgr.convertFromJavaString(
-                string, buffer.array(), buffer.position(), netAgent_));
-
-        padBytes(currentCcsidMgr.space_, paddedLength - stringLength);
+    /**
+     * Encode a string and put it into the buffer. A larger buffer will be
+     * allocated if the current buffer is too small to hold the entire string.
+     *
+     * @param string the string to encode
+     * @return the number of bytes in the encoded representation of the string
+     */
+    private int encodeString(String string) throws SqlException {
+        int startPos = buffer.position();
+        CharBuffer src = CharBuffer.wrap(string);
+        CcsidManager ccsidMgr = netAgent_.getCurrentCcsidManager();
+        ccsidMgr.startEncoding();
+        while (!ccsidMgr.encode(src, buffer, netAgent_)) {
+            // The buffer was too small to hold the entire string. Let's
+            // allocate a larger one. We don't know how much more space we
+            // need, so we just tell ensureLength() that we need more than
+            // what we have, until we manage to encode the entire string.
+            // ensureLength() typically doubles the size of the buffer, so
+            // we shouldn't have to call it many times before we get a large
+            // enough buffer.
+            ensureLength(buffer.remaining() + 1);
+        }
+        return buffer.position() - startPos;
     }
 
     // this method writes a 4 byte length/codepoint pair plus the bytes contained
@@ -1228,6 +1232,7 @@ public class Request {
     }
 
     final void maskOutPassword() {
+        int savedPos = buffer.position();
         try {
             String maskChar = "*";
             // construct a mask using the maskChar.
@@ -1236,14 +1241,16 @@ public class Request {
                 mask.append(maskChar);
             }
             // try to write mask over password.
-            netAgent_.getCurrentCcsidManager().convertFromJavaString(
-                mask.toString(), buffer.array(), passwordStart_, netAgent_);
+            buffer.position(passwordStart_);
+            encodeString(mask.toString());
         } catch (SqlException sqle) {
             // failed to convert mask,
             // them simply replace with 0xFF.
             for (int i = 0; i < passwordLength_; i++) {
                 buffer.put(passwordStart_ + i, (byte) 0xFF);
             }
+        } finally {
+            buffer.position(savedPos);
         }
     }
 
@@ -1457,12 +1464,7 @@ public class Request {
     // ccsid manager or typdef rules.  should this method write ddm character
     // data or fodca data right now it is coded for ddm char data only
     final void writeDDMString(String s) throws SqlException {
-        CcsidManager currentCcsidManager = netAgent_.getCurrentCcsidManager();
-        
-        ensureLength(currentCcsidManager.getByteLength(s));
-        
-        buffer.position(currentCcsidManager.convertFromJavaString(
-                s, buffer.array(), buffer.position(), netAgent_));
+        encodeString(s);
     }
 
     private void buildLengthAndCodePointForLob(int codePoint,

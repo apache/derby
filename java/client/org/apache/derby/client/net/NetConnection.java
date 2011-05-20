@@ -20,6 +20,8 @@
 */
 package org.apache.derby.client.net;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.sql.SQLException;
 import org.apache.derby.client.am.CallableStatement;
 import org.apache.derby.client.am.DatabaseMetaData;
@@ -38,6 +40,7 @@ import org.apache.derby.jdbc.ClientDriver;
 import org.apache.derby.client.ClientPooledConnection;
 
 import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 public class NetConnection extends org.apache.derby.client.am.Connection {
     
@@ -127,8 +130,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     // non unicode ccsids.  this is done when the server doesn't recoginze the
     // unicode ccsids).
     //
-
-    byte[] prddta_;
+    private ByteBuffer prddta_;
 
     // Correlation Token of the source sent to the server in the accrdb.
     // It is saved like the prddta in case it is needed for a connect reflow.
@@ -837,7 +839,7 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         netAgent_.netConnectionRequest_.writeAccessDatabase(databaseName_,
                 false,
                 crrtkn_,
-                prddta_,
+                prddta_.array(),
                 netAgent_.typdef_);
     }
 
@@ -1321,41 +1323,62 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
     }
 
     private void constructPrddta() throws SqlException {
-        int prddtaLen = 1;
-
         if (prddta_ == null) {
-            prddta_ = new byte[NetConfiguration.PRDDTA_MAXSIZE];
+            prddta_ = ByteBuffer.allocate(NetConfiguration.PRDDTA_MAXSIZE);
         } else {
-            java.util.Arrays.fill(prddta_, (byte) 0);
+            prddta_.clear();
+            java.util.Arrays.fill(prddta_.array(), (byte) 0);
         }
+
+        CcsidManager ccsidMgr = netAgent_.getCurrentCcsidManager();
 
         for (int i = 0; i < NetConfiguration.PRDDTA_ACCT_SUFFIX_LEN_BYTE; i++) {
-            prddta_[i] = netAgent_.getCurrentCcsidManager().space_;
+            prddta_.put(i, ccsidMgr.space_);
         }
 
-        prddtaLen = netAgent_.getCurrentCcsidManager().convertFromJavaString(NetConfiguration.PRDID,
-                prddta_,
-                prddtaLen,
-                netAgent_);
+        // Start inserting data right after the length byte.
+        prddta_.position(NetConfiguration.PRDDTA_LEN_BYTE + 1);
 
-        prddtaLen = netAgent_.getCurrentCcsidManager().convertFromJavaString(NetConfiguration.PRDDTA_PLATFORM_ID,
-                prddta_,
-                prddtaLen,
-                netAgent_);
+        // Register the success of the encode operations for verification in
+        // sane mode.
+        boolean success = true;
+
+        ccsidMgr.startEncoding();
+        success &= ccsidMgr.encode(
+                CharBuffer.wrap(NetConfiguration.PRDID), prddta_, agent_);
+
+        ccsidMgr.startEncoding();
+        success &= ccsidMgr.encode(
+                CharBuffer.wrap(NetConfiguration.PRDDTA_PLATFORM_ID),
+                prddta_, agent_);
+
+        int prddtaLen = prddta_.position();
 
         int extnamTruncateLength = Math.min(extnam_.length(), NetConfiguration.PRDDTA_APPL_ID_FIXED_LEN);
-        netAgent_.getCurrentCcsidManager().convertFromJavaString(extnam_.substring(0, extnamTruncateLength),
-                prddta_,
-                prddtaLen,
-                netAgent_);
+        ccsidMgr.startEncoding();
+        success &= ccsidMgr.encode(
+                CharBuffer.wrap(extnam_, 0, extnamTruncateLength),
+                prddta_, agent_);
+
+        if (SanityManager.DEBUG) {
+            // The encode() calls above should all complete without overflow,
+            // since we control the contents of the strings. Verify this in
+            // sane mode so that we notice it if the strings change so that
+            // they go beyond the max size of PRDDTA.
+            SanityManager.ASSERT(success,
+                "PRDID, PRDDTA_PLATFORM_ID and EXTNAM exceeded PRDDTA_MAXSIZE");
+        }
+
         prddtaLen += NetConfiguration.PRDDTA_APPL_ID_FIXED_LEN;
 
         prddtaLen += NetConfiguration.PRDDTA_USER_ID_FIXED_LEN;
 
-        prddta_[NetConfiguration.PRDDTA_ACCT_SUFFIX_LEN_BYTE] = 0;
+        // Mark that we have an empty suffix in PRDDTA_ACCT_SUFFIX_LEN_BYTE.
+        prddta_.put(NetConfiguration.PRDDTA_ACCT_SUFFIX_LEN_BYTE, (byte) 0);
         prddtaLen++;
+
         // the length byte value does not include itself.
-        prddta_[NetConfiguration.PRDDTA_LEN_BYTE] = (byte) (prddtaLen - 1);
+        prddta_.put(NetConfiguration.PRDDTA_LEN_BYTE, (byte) (prddtaLen - 1));
     }
 
     private void initializePublicKeyForEncryption() throws SqlException {

@@ -57,49 +57,59 @@ public class NetPackageRequest extends NetConnectionRequest {
         // Relational Database Name (RDBNAM)
         // RDB Package Identifier (PKGID)
         int maxIdentifierLength = NetConfiguration.PKG_IDENTIFIER_MAX_LEN;
+        CcsidManager ccsidMgr = netAgent_.getCurrentCcsidManager();
+
+        byte[] dbnameBytes = ccsidMgr.convertFromJavaString(
+                netAgent_.netConnection_.databaseName_, netAgent_);
+
+        byte[] collectionToFlowBytes = ccsidMgr.convertFromJavaString(
+                collectionToFlow, netAgent_);
+
+        byte[] pkgNameBytes = ccsidMgr.convertFromJavaString(
+                section.getPackageName(), netAgent_);
 
         boolean scldtalenRequired = false;
         scldtalenRequired = checkPKGNAMlengths(netAgent_.netConnection_.databaseName_,
+                dbnameBytes.length,
                 maxIdentifierLength,
                 NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
 
         if (!scldtalenRequired) {
             scldtalenRequired = checkPKGNAMlengths(collectionToFlow,
+                    collectionToFlowBytes.length,
                     maxIdentifierLength,
                     NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
         }
 
         if (!scldtalenRequired) {
             scldtalenRequired = checkPKGNAMlengths(section.getPackageName(),
+                    pkgNameBytes.length,
                     maxIdentifierLength,
                     NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
         }
 
         // the format is different depending on if an SCLDTALEN is required.
         if (!scldtalenRequired) {
-            writeScalarPaddedString(netAgent_.netConnection_.databaseName_,
-                    NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
-            writeScalarPaddedString(collectionToFlow,
-                    NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
-            writeScalarPaddedString(section.getPackageName(),
-                    NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
+            byte padByte = ccsidMgr.space_;
+            writeScalarPaddedBytes(dbnameBytes,
+                    NetConfiguration.PKG_IDENTIFIER_FIXED_LEN, padByte);
+            writeScalarPaddedBytes(collectionToFlowBytes,
+                    NetConfiguration.PKG_IDENTIFIER_FIXED_LEN, padByte);
+            writeScalarPaddedBytes(pkgNameBytes,
+                    NetConfiguration.PKG_IDENTIFIER_FIXED_LEN, padByte);
         } else {
-            buildSCLDTA(netAgent_.netConnection_.databaseName_, NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
-            buildSCLDTA(collectionToFlow, NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
-            buildSCLDTA(section.getPackageName(), NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
+            buildSCLDTA(dbnameBytes, NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
+            buildSCLDTA(collectionToFlowBytes, NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
+            buildSCLDTA(pkgNameBytes, NetConfiguration.PKG_IDENTIFIER_FIXED_LEN);
         }
     }
 
-    private void buildSCLDTA(String identifier, int minimumLength) throws SqlException {
-        int length = netAgent_.getCurrentCcsidManager().getByteLength(identifier);
-        
-        if (length <= minimumLength) {
-            write2Bytes(minimumLength);
-            writeScalarPaddedString(identifier, minimumLength);
-        } else {
-            write2Bytes(length);
-            writeScalarPaddedString(identifier, length);
-        }
+    private void buildSCLDTA(byte[] identifier, int minimumLength)
+            throws SqlException {
+        int length = Math.max(minimumLength, identifier.length);
+        write2Bytes(length);
+        byte padByte = netAgent_.getCurrentCcsidManager().space_;
+        writeScalarPaddedBytes(identifier, length, padByte);
     }
 
 
@@ -152,9 +162,9 @@ public class NetPackageRequest extends NetConnectionRequest {
     // throws an exception if lengths exceed the maximum.
     // returns a boolean indicating if SLCDTALEN is required.
     private boolean checkPKGNAMlengths(String identifier,
+                                       int length,
                                        int maxIdentifierLength,
                                        int lengthRequiringScldta) throws SqlException {
-        int length = netAgent_.getCurrentCcsidManager().getByteLength(identifier);;
         if (length > maxIdentifierLength) {
             throw new SqlException(netAgent_.logWriter_,
                 new ClientMessageId(SQLState.LANG_IDENTIFIER_TOO_LONG),
