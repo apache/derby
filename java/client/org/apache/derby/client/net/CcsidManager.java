@@ -73,7 +73,7 @@ public abstract class CcsidManager {
     /**
      * Initialize this instance for encoding a new string. This method resets
      * any internal state that may be left after earlier calls to
-     * {@link #encode()} on this instance. For example, it may reset the
+     * {@link #encode} on this instance. For example, it may reset the
      * internal {@code java.nio.charset.CharsetEncoder}, if the implementation
      * uses one to do the encoding.
      */
