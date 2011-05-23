@@ -31,7 +31,6 @@ import org.apache.derby.iapi.services.compiler.LocalField;
 import java.lang.reflect.Modifier;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.SqlXmlUtil;
 
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.JDBC40Translation;
@@ -343,12 +342,6 @@ public class BinaryOperatorNode extends OperatorNode
         }
         else {
             xmlQuery = ((CharConstantNode)leftOperand).getString();
-
-            // Compile the query expression. The compiled query will not be
-            // used, as each activation will need to compile its own version.
-            // But we still do this here to get a compile-time error in case
-            // the query expression has syntax errors.
-            new SqlXmlUtil().compileXQExpr(xmlQuery, operator);
         }
 
         // Right operand must be an XML data value.  NOTE: This

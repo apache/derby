@@ -36,9 +36,8 @@ abstract class OperatorNode extends ValueNode {
     /**
      * <p>
      * Generate code that pushes an SqlXmlUtil instance onto the stack. The
-     * instance will be created and cached in the activation the first time
-     * the code is executed, so that we don't need to create a new instance
-     * for every row.
+     * instance will be created and cached in the activation's constructor, so
+     * that we don't need to create a new instance for every row.
      * </p>
      *
      * <p>
@@ -59,37 +58,31 @@ abstract class OperatorNode extends ValueNode {
 
         // Create a field in which the instance can be cached.
         LocalField sqlXmlUtil = acb.newFieldDeclaration(
-                Modifier.PRIVATE, SqlXmlUtil.class.getName());
+                Modifier.PRIVATE | Modifier.FINAL, SqlXmlUtil.class.getName());
 
-        // Read the cached value.
-        mb.getField(sqlXmlUtil);
+        // Add code that creates the SqlXmlUtil instance in the constructor.
+        MethodBuilder constructor = acb.getConstructor();
+        constructor.pushNewStart(SqlXmlUtil.class.getName());
+        constructor.pushNewComplete(0);
+        constructor.putField(sqlXmlUtil);
 
-        // Check if the cached value is null. If it is, create a new instance.
-        // Otherwise, we're happy with the stack as it is (the cached instance
-        // will be on top of it), and nothing more is needed.
-        mb.dup();
-        mb.conditionalIfNull();
-
-        // The cached value is null. Pop it from the stack so that we can put
-        // a fresh instance there in its place.
-        mb.pop();
-
-        // Create a new instance and cache it in the field. Its value will be
-        // on the top of the stack after this sequence.
-        mb.pushNewStart(SqlXmlUtil.class.getName());
-        mb.pushNewComplete(0);
-        mb.putField(sqlXmlUtil);
-
-        // If a query is specified, compile it.
-        if (xmlQuery != null) {
-            mb.dup();
-            mb.push(xmlQuery);
-            mb.push(xmlOpName);
-            mb.callMethod(
+        // Compile the query, if one is specified.
+        if (xmlQuery == null) {
+            // No query. The SqlXmlUtil instance is still on the stack. Pop it
+            // to restore the initial state of the stack.
+            constructor.pop();
+        } else {
+            // Compile the query. This will consume the SqlXmlUtil instance
+            // and leave the stack in its initial state.
+            constructor.push(xmlQuery);
+            constructor.push(xmlOpName);
+            constructor.callMethod(
                     VMOpcode.INVOKEVIRTUAL, SqlXmlUtil.class.getName(),
                     "compileXQExpr", "void", 2);
         }
 
-        mb.completeConditional();
+        // Read the cached value and push it onto the stack in the method
+        // generated for the operator.
+        mb.getField(sqlXmlUtil);
     }
 }
