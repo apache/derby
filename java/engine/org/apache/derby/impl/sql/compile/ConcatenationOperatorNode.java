@@ -33,10 +33,6 @@ import org.apache.derby.iapi.sql.compile.TypeCompiler;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 
-import org.apache.derby.iapi.services.compiler.MethodBuilder;
-import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.ClassName;
@@ -536,24 +532,6 @@ public class ConcatenationOperatorNode extends BinaryOperatorNode {
                     leftType.getCollationDerivation());
 		}
 		return returnDTD;
-	}
-
-	/*
-	 * for conatenation operator, we generate code as follows field = method(p1,
-	 * p2, field); what we are ensuring here is if field is null then initialize
-	 * it to NULL SQLxxx type. Because of the following, at execution time,
-	 * SQLxxx concatenate method do not have to worry about field coming in as
-	 * null
-	 */
-	protected void initializeResultField(ExpressionClassBuilder acb,
-			MethodBuilder mb, LocalField resultField) throws StandardException {
-		mb.conditionalIfNull();//get the field on the stack and if it is null
-		acb.generateNull(mb, getTypeCompiler(), getTypeServices()
-				.getCollationType());// yes, it is, hence create a NULL SQLxxx
-									 // type object and put that on stack
-		mb.startElseCode(); //no, it is not null
-		mb.getField(resultField); //so put it back on the stack
-		mb.completeConditional(); //complete if else block
 	}
 
 	private static int clobBlobHandling(DataTypeDescriptor clobBlobType,

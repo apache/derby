@@ -145,7 +145,7 @@ public class SQLLongvarchar
 				StringDataValue result)
 		throws StandardException
 	{
-		super.concatenate(leftOperand, rightOperand, result);
+		result = super.concatenate(leftOperand, rightOperand, result);
 
 		//bug 5600 - according to db2 concatenation documentation, for compatibility with previous versions, there is no automatic
 		//escalation of results involving LONG data types to LOB data types. For eg, concatenation of a CHAR(200) value and a

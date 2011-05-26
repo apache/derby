@@ -600,9 +600,6 @@ public class BinaryOperatorNode extends OperatorNode
 			** Call the method for this operator.
 			*/
 			mb.getField(resultField); // third arg
-			//following method is special code for concatenation where if field is null, we want it to be initialized to NULL SQLxxx type object
-			//before generating code "field = method(p1, p2, field);"
-			initializeResultField(acb, mb, resultField);
 
             // Adjust number of arguments for the result field
             numArgs++;
@@ -649,13 +646,6 @@ public class BinaryOperatorNode extends OperatorNode
 
 			mb.putField(resultField);
 		}
-	}
-
-	//following method is no-op here but in concatenation node, this method is used to check if resultField is null,
-	//and if yes, then we want it to be initialized to NULL SQLxxx type object
-	protected void initializeResultField(ExpressionClassBuilder acb, MethodBuilder mb, LocalField resultField)
-	throws StandardException
-	{
 	}
 
 	/**

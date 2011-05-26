@@ -2099,6 +2099,11 @@ readingLoop:
                 StringDataValue result)
         throws StandardException
     {
+        if (result == null)
+        {
+            result = (StringDataValue) getNewNull();
+        }
+
         if (leftOperand.isNull() || leftOperand.getString() == null ||
             rightOperand.isNull() || rightOperand.getString() == null)
         {

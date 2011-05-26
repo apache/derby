@@ -983,6 +983,11 @@ abstract class SQLBinary
 				BitDataValue result)
 		throws StandardException
 	{
+        if (result == null)
+        {
+            result = (BitDataValue) getNewNull();
+        }
+
 		if (left.isNull() || right.isNull())
 		{
 			result.setToNull();
