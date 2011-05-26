@@ -607,26 +607,6 @@ public class UnaryOperatorNode extends OperatorNode
 											MethodBuilder mb)
 									throws StandardException
 	{
-		// For XML operator we do some extra work.
-		boolean xmlGen = (operatorType == XMLPARSE_OP) ||
-			(operatorType == XMLSERIALIZE_OP);
-
-		if (xmlGen) {
-		// We create an execution-time object from which we call
-		// the necessary methods.  We do this for two reasons: 1) this
-		// level of indirection allows us to separate the XML data type
-		// from the required XML implementation classes (esp. JAXP and
-		// Xalan classes)--for more on how this works, see the comments
-		// in SqlXmlUtil.java; and 2) this allows us to create the
-		// required XML objects a single time (which we did at bind time
-		// when we created a new SqlXmlUtil) and then reuse those objects
-		// for each row in the target result set, instead of creating
-		// new objects every time; see SqlXmlUtil.java for more.
-			mb.pushNewStart(
-				"org.apache.derby.impl.sql.execute.SqlXmlExecutor");
-			mb.pushNewComplete(addXmlOpMethodParams(acb, mb));
-		}
-
 		String resultTypeName = 
 			(operatorType == -1)
 				? getTypeCompiler().interfaceName()
@@ -647,25 +627,13 @@ public class UnaryOperatorNode extends OperatorNode
 			LocalField field = acb.newFieldDeclaration(Modifier.PRIVATE, resultTypeName);
 			mb.getField(field);
 
-			/* If we're calling a method on a class (SqlXmlExecutor) instead
-			 * of calling a method on the operand interface, then we invoke
-			 * VIRTUAL; we then have 2 args (the operand and the local field)
-			 * instead of one, i.e:
-			 *
-			 *  SqlXmlExecutor.method(operand, field)
-			 *
-			 * instead of
-			 *
-			 *  <operand>.method(field).
-			 */
-			if (xmlGen) {
-				mb.callMethod(VMOpcode.INVOKEVIRTUAL, null,
-					methodName, resultTypeName, 2);
-			}
-			else {
-				mb.callMethod(VMOpcode.INVOKEINTERFACE,
-					(String) null, methodName, resultTypeName, 1);
-			}
+            int numArgs = 1;
+
+            // XML operators take extra arguments.
+            numArgs += addXmlOpMethodParams(acb, mb, field);
+
+            mb.callMethod(VMOpcode.INVOKEINTERFACE, null,
+                          methodName, resultTypeName, numArgs);
 
 			/*
 			** Store the result of the method call in the field, so we can re-use
@@ -746,11 +714,14 @@ public class UnaryOperatorNode extends OperatorNode
     /**
      * Add some additional arguments to our method call for
      * XML related operations like XMLPARSE and XMLSERIALIZE.
+     *
+     * @param acb the builder for the class in which the method lives
      * @param mb The MethodBuilder that will make the call.
+     * @param resultField the field that contains the previous result
      * @return Number of parameters added.
      */
     protected int addXmlOpMethodParams(ExpressionClassBuilder acb,
-		MethodBuilder mb) throws StandardException
+		MethodBuilder mb, LocalField resultField) throws StandardException
     {
         if ((operatorType != XMLPARSE_OP) && (operatorType != XMLSERIALIZE_OP))
         // nothing to do.
@@ -781,11 +752,25 @@ public class UnaryOperatorNode extends OperatorNode
 
         /* Else we're here for XMLPARSE. */
 
-        // Push the SqlXmlUtil instance as the first argument.
-        pushSqlXmlUtil(acb, mb, null, null);
+        // XMLPARSE is different from other unary operators in that the method
+        // must be called on the result object (the XML value) and not on the
+        // operand (the string value). We must therefore make sure the result
+        // object is not null.
+        MethodBuilder constructor = acb.getConstructor();
+        acb.generateNull(constructor, getTypeCompiler(),
+                         getTypeServices().getCollationType());
+        constructor.setField(resultField);
+
+        // Swap operand and result object so that the method will be called
+        // on the result object.
+        mb.swap();
 
         // Push whether or not we want to preserve whitespace.
         mb.push(((Boolean)additionalArgs[0]).booleanValue());
+
+        // Push the SqlXmlUtil instance as the next argument.
+        pushSqlXmlUtil(acb, mb, null, null);
+
         return 2;
     }
     

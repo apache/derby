@@ -80,10 +80,8 @@ import javax.xml.transform.stream.StreamResult;
  *       query expression a single time per statement, instead of
  *       having to do it for every row against which the query
  *       is evaluated.  An instance of this class is created at
- *       compile time and then passed (using "saved objects")
- *       to the appropriate operator implementation method in
- *       XML.java; see SqlXmlExecutor.java for more about the
- *       role this class plays in "saved object" processing.
+ *       compile time and then passed to the appropriate operator
+ *       implementation method in XML.java.
  *
  *    2. By keeping all XML-specific references in this one class, 
  *       we have a single "point of entry" to the XML objects--namely,
