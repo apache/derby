@@ -51,7 +51,6 @@
       includes="Simple*">
       <classpath>
         <pathelement path="${java14compile.classpath}"/>
-        <pathelement location="${jcc}"/>
       </classpath>
     </javac>
     <javac
@@ -71,7 +70,6 @@
       excludes="nserverdemo/Simple*">
       <classpath>
         <pathelement path="${java14compile.classpath}"/>
-        <pathelement location="${jcc}"/>
       </classpath>
     </javac>
     <!-- "simple" demos under java/demo/ (SimpleApp, SimpleMobileApp) -->
@@ -89,8 +87,8 @@
       srcdir="${derby.demo.src.dir}/simple:${derby.demo.src.dir}/simplemobile"
       destdir="${out.dir}">
       <classpath>
-        <pathelement location="${javasrc.dir};${jcc}"/>
-        <pathelement path="${java14compile.classpath};${jcc}"/>
+        <pathelement location="${javasrc.dir}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
     </javac>
     <javac
@@ -107,8 +105,8 @@
       srcdir="${derby.demo.src.dir}/workingwithderby"
       destdir="${out.dir}">
       <classpath>
-        <pathelement location="${javasrc.dir};${jcc};"/>
-        <pathelement path="${java14compile.classpath};${jcc};"/>
+        <pathelement location="${javasrc.dir}"/>
+        <pathelement path="${java14compile.classpath}"/>
       </classpath>
     </javac>
     <ant target="compile" dir="toursdb"/>
