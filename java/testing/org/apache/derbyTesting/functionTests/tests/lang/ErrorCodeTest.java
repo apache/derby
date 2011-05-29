@@ -25,10 +25,13 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Locale;
+
 import org.apache.derbyTesting.junit.JDBC;
 
 public final class ErrorCodeTest extends BaseJDBCTestCase {
@@ -44,8 +47,10 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
     public static Test suite()
     {
         TestSuite suite = new TestSuite("errorcode Test");
+        
         suite.addTest(TestConfiguration.embeddedSuite(ErrorCodeTest.class));
-        return suite;
+        
+        return new LocaleTestSetup(suite, Locale.ENGLISH);
     }
 
     public void test_errorcode() throws Exception
