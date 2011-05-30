@@ -163,7 +163,7 @@
         <echo message="  jira.user             = ${jira.user}"/>
         <echo message="  jira.password         = ${jira.password}"/>
         <echo message="  jira.filter.id        = ${jira.filter.id}"/>
-        <echo message="                          (digits only)"/>
+        <echo message="                          (digits only, 0 for JQL)"/>
         <echo message="  release.version       = ${release.version}"/>
         <echo message="                          (i.e. 10.7.1.0)"/>
         <echo message="  relnotes.src.reports  = ${relnotes.src.reports}"/>

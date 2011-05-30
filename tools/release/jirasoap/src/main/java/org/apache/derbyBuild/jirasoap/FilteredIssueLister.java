@@ -82,7 +82,9 @@ public class FilteredIssueLister {
 "  o VERSION\n" +
 "      Derby version string, i.e. 10.6.2.1\n" +
 "  o FILTERID\n" +
-"      JIRA id, only digits allowed\n" +
+"      JIRA id, only digits allowed.\n" +
+"      If '0' (zero), a JQL query will be generated instead of using an\n" +
+"      existing (manually created) JIRA filter.\n" +
 "  o ANCESTRY\n" +
 "      if necessary, the release ancestry can be overridden by specifying\n " +
 "      the ancestors by version manually. Valid values:\n" +
@@ -108,6 +110,8 @@ public class FilteredIssueLister {
      * Apache Derby community convention.
      */
     private static final String RELEASE_NOTE_NAME = "releaseNote.html";
+    /** Constant used to choose using JQL over an existing filter. */
+    private static final int GENERATE_JQL = 0;
 
     private PrintStream logOut = new PrintStream(System.out);
     private JiraSoapService jiraSoapService;
@@ -358,20 +362,14 @@ public class FilteredIssueLister {
             out.write("//   " + excludeFixVersions[i].getVersion());
             out.newLine();
         }
-        out.write("// Filter id: " + filterId + ", user id " + user);
-        out.newLine();
-        log("fetching issues from filter (id = " + filterId + ")");
         RemoteIssue[] issues = null;
-        try {
-            issues= jiraSoapService.getIssuesFromFilterWithLimit(
-                auth, Long.toString(filterId), 0, 1000);
-        } catch (org.apache.derbyBuild.jirasoap.RemoteException re) {
-            throw new IllegalArgumentException(
-                    "invalid filter id: " + filterId +
-                    " (" + re.getFaultString() + ")");
+        if (filterId == GENERATE_JQL) {
+            issues = execJiraJQLQuery(out, auth, targetVersion);
+        } else {
+            issues = execJiraFilterQuery(out, auth, filterId);
         }
-        log("persisting issues (filter matched " + issues.length + " issues)");
-        out.write("// Filter issue count: " + issues.length);
+        log("persisting issues (" + issues.length + " candidate issues)");
+        out.write("// Candidate issue count: " + issues.length);
         out.newLine();
         int count = 0;
         int issuesWithReleaseNote = 0;
@@ -541,6 +539,92 @@ public class FilteredIssueLister {
         DerbyVersion[] result = new DerbyVersion[tmp.size()];
         tmp.toArray(result);
         return result;
+    }
+
+    /**
+     * Fetches JIRA issues matched by a predefined filter search.
+     * <p>
+     * The filter must be created manually and before the release notes are
+     * generated.
+     *
+     * @param out output stream
+     * @param auth JIRA authententication token
+     * @param filterId JIRA filter id (digits only)
+     * @return A list of matching issues.
+     * @throws IOException if something goes wrong
+     */
+    private RemoteIssue[] execJiraFilterQuery(BufferedWriter out, String auth,
+                                              long filterId)
+            throws IOException {
+        out.write("// Filter id: " + filterId + ", user id " + user);
+        out.newLine();
+        log("fetching issues from filter (id = " + filterId + ")");
+        try {
+             return jiraSoapService.getIssuesFromFilterWithLimit(
+                auth, Long.toString(filterId), 0, 1000);
+        } catch (org.apache.derbyBuild.jirasoap.RemoteException re) {
+            throw new IllegalArgumentException(
+                    "invalid filter id: " + filterId +
+                    " (" + re.getFaultString() + ")");
+        }
+    }
+
+    /**
+     * Fetches JIRA issues matching a generated JQL (Jira Query Language)
+     * search.
+     *
+     * @param out output stream
+     * @param auth JIRA authententication token
+     * @param targetVersion the target release version
+     * @return A list of matching issues.
+     * @throws IOException if something goes wrong
+     */
+    private RemoteIssue[] execJiraJQLQuery(BufferedWriter out, String auth,
+                                           DerbyVersion targetVersion)
+            throws IOException {
+        // Here we have two scenarions:
+        // a) A single target version number - the release has already been
+        //    made, or there is only one release candidate.
+        // b) Multiple target version numbers - there are multiple release
+        //    candidates, and we want to include issues fixed in all of them.
+        // To simplify code, just build an IN-clause for all scenarios.
+
+        // Identify versions.
+        List rcs = new ArrayList();
+        for (int i=0; i < allVersions.length; i++) {
+            DerbyVersion ver = allVersions[i];
+            if (targetVersion.isSameFixPack(ver) &&
+                    ver.compareTo(targetVersion) < 1) {
+                rcs.add(ver);
+            }
+        }
+        Collections.sort(rcs);
+        Collections.reverse(rcs);
+        Iterator rcIter = rcs.iterator();
+
+        // Build JQL query.
+        String jql = "project = DERBY AND resolution = fixed AND fixversion ";
+        StringBuffer sb = new StringBuffer("in (");
+        while (rcIter.hasNext()) {
+            DerbyVersion rc = (DerbyVersion)rcIter.next();
+            sb.append(rc.getQuotedVersion());
+            sb.append(", ");
+        }
+        sb.deleteCharAt(sb.length() -1).deleteCharAt(sb.length() -1);
+        sb.append(')');
+        jql += sb.toString();
+
+        // Execute the query.
+        out.write("// JQL query: " + jql);
+        out.newLine();
+        log("executing JQL query: " + jql);
+        try {
+             return jiraSoapService.getIssuesFromJqlSearch(auth, jql, 1000);
+        } catch (org.apache.derbyBuild.jirasoap.RemoteException re) {
+            throw new IllegalArgumentException(
+                    "JQL query '" + jql + "' failed (" +
+                    re.getFaultString() + ")");
+        }
     }
 
     /**

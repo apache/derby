@@ -96,6 +96,15 @@ class DerbyVersion
     }
 
     /**
+     * Returns the Derby version string quoted for use in JQL.
+     *
+     * @return Quoted version string, for instance '"10.6.2.1"'.
+     */
+    public String getQuotedVersion() {
+        return "\"" + getVersion() + "\"";
+    }
+
+    /**
      * Returns the release date in milliseconds since the Epoch.
      *
      * @return Release date as milliseconds since the Epoch.

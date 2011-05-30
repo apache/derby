@@ -31,6 +31,7 @@ public class FilteredIssueListerAntWrapper {
     private String user;
     private String password;
     private String releaseVersion;
+    /** JIRA filter id, or 0 (zero) for JQL. */
     private long filterId;
     private String output;
 
@@ -50,6 +51,8 @@ public class FilteredIssueListerAntWrapper {
 
     public void setFilterId(String id)
             throws BuildException {
+        // NOTE: A filter id of 0 (zero) will be treated specially,
+        //       resulting in a JQL query being generated.
         try {
             filterId = Long.parseLong(id);
         } catch (NumberFormatException nfe) {
@@ -67,6 +70,8 @@ public class FilteredIssueListerAntWrapper {
         try {
             FilteredIssueLister issueLister =
                 new FilteredIssueLister(user, password);
+            // NOTE: A filter id of 0 (zero) will be treated specially,
+            //       resulting in a JQL query being generated.
             issueLister.prepareReleaseNotes(
                     releaseVersion, filterId, output, null);
         } catch (Exception e) {
