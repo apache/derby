@@ -65,6 +65,10 @@ public class FilteredIssueListerAntWrapper {
         this.output = output;
     }
 
+    public void setReportDisqualifications(String bool) {
+        System.setProperty("reportDisqualifications", bool);
+    }
+
     public void execute()
             throws BuildException {
         try {

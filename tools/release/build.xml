@@ -137,6 +137,16 @@
             classpath="${basedir}/tools/release/jirasoap/target/JiraSOAP-LATEST-jar-with-dependencies.jar"
         />
 
+        <!-- See if the user wants disqualified issues to be reported. -->
+        <condition property="reportDisqualifications_val" value="true">
+            <contains string="true" substring="${reportDisqualifications}" />
+        </condition>
+        <condition property="reportDisqualifications_val" value="false">
+          <not>
+              <isset property="${reportDisqualifications_val}" />
+          </not>
+        </condition>
+
         <!-- Execute the JIRA SOAP client -->
         <jirasoapclient
             user="${jira.user}"
@@ -144,6 +154,7 @@
             releaseVersion="${release.version}"
             filterId="${jira.filter.id}"
             outputFile="${relnotes.src.buglist}"
+            reportDisqualifications="${reportDisqualifications_val}"
         />
             
      <generateReleaseNotes
@@ -168,6 +179,9 @@
         <echo message="                          (i.e. 10.7.1.0)"/>
         <echo message="  relnotes.src.reports  = ${relnotes.src.reports}"/>
         <echo message="                          (specify a directory)"/>
+        <echo message="*Optional* properties:"/>
+        <echo message="  reportDisqualifications = ${reportDisqualifications}"/>
+        <echo message="                            (true|*false*)"/>
         <fail message="Build aborted due to missing system properties."/>
   </target>
 
