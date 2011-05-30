@@ -24,14 +24,13 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 import junit.framework.*;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.BaseJDBCTestSetup;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.io.*;
 import java.sql.*;
-import javax.sql.*;
 
 import org.apache.derby.iapi.services.io.DerbyIOException;
 import org.apache.derby.impl.jdbc.EmbedSQLException;
@@ -172,6 +171,10 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
         suite.addTest(TestConfiguration.clientServerDecorator(
             baseSuite("PreparedStatementTest:client")));
 
+        // Tests for the client side JDBC statement cache.
+        suite.addTest(TestConfiguration.clientServerDecorator(
+                statementCachingSuite()));
+
         suite.addTest(
                 TestConfiguration.clientServerDecorator(
                 TestConfiguration.connectionXADecorator(
@@ -197,6 +200,28 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
             };
     }
     
+    /**
+     * Returns a suite for tests that need JDBC statement caching to be enabled.
+     */
+    private static Test statementCachingSuite() {
+        TestSuite suite = new TestSuite("JDBC statement caching suite");
+        suite.addTest(new PreparedStatementTest("cpTestIsPoolableHintFalse"));
+        suite.addTest(new PreparedStatementTest("cpTestIsPoolableHintTrue"));
+        return TestConfiguration.connectionCPDecorator(
+            new CleanDatabaseTestSetup(suite) {
+
+            protected void decorateSQL(Statement stmt)
+                    throws SQLException {
+                stmt.execute("create table " + BLOBTBL +
+                        " (sno int, dBlob BLOB(1M))");
+                stmt.execute("create table " + CLOBTBL +
+                        " (sno int, dClob CLOB(1M))");
+                stmt.execute("create table " + LONGVARCHAR  +
+                        " (sno int, dLongVarchar LONG VARCHAR)");
+                 }
+            });
+    }
+
     //--------------------------------------------------------------------------
     //BEGIN THE TEST OF THE METHODS THAT THROW AN UNIMPLEMENTED EXCEPTION IN
     //THIS CLASS
@@ -603,10 +628,76 @@ public class PreparedStatementTest extends BaseJDBCTestCase {
      * @throws SQLException
      *
      */
-    
-    public void testIsPoolable() throws SQLException {
+    public void testIsPoolableDefault() throws SQLException {
         // By default a prepared statement is poolable
         assertTrue("Expected a poolable statement", ps.isPoolable());
+    }
+
+    /**
+     * Tests that the {@code isPoolable}-hint works by exploiting the fact that
+     * the client cannot prepare a statement referring to a deleted table
+     * (unless the statement is already in the statement cache).
+     *
+     * @throws SQLException if something goes wrong...
+     */
+    public void cpTestIsPoolableHintFalse()
+            throws SQLException {
+        getConnection().setAutoCommit(false);
+        // Create a table, insert a row, then create a statement selecting it.
+        Statement stmt = createStatement();
+        stmt.executeUpdate("create table testispoolablehint (id int)");
+        stmt.executeUpdate("insert into testispoolablehint values 1");
+        PreparedStatement ps = prepareStatement(
+                "select * from testispoolablehint");
+        ps.setPoolable(false);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+        // Close statement, which should be discarded.
+        ps.close();
+        // Now delete the table.
+        stmt.executeUpdate("drop table testispoolablehint");
+        stmt.close();
+        // Since there is no cached statement, we'll get exception here.
+        try {
+            ps = prepareStatement("select * from testispoolablehint");
+            fail("Prepared statement not valid, referring non-existing table");
+        } catch (SQLException sqle) {
+            assertSQLState("42X05", sqle);
+        }
+    }
+
+    /**
+     * Tests that the {@code isPoolable}-hint works by exploiting the fact that
+     * the client can prepare a statement referring to a deleted table if JDBC
+     * statement caching is enabled and the statement is already in the cache.
+     *
+     * @throws SQLException if something goes wrong...
+     */
+    public void cpTestIsPoolableHintTrue()
+            throws SQLException {
+        getConnection().setAutoCommit(false);
+        // Create a table, insert a row, then create a statement selecting it.
+        Statement stmt = createStatement();
+        stmt.executeUpdate("create table testispoolablehint (id int)");
+        stmt.executeUpdate("insert into testispoolablehint values 1");
+        PreparedStatement ps = prepareStatement(
+                "select * from testispoolablehint");
+        ps.setPoolable(true);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+        // Put the statement into the cache.
+        ps.close();
+        // Now delete the table and fetch the cached prepared statement.
+        stmt.executeUpdate("drop table testispoolablehint");
+        stmt.close();
+        ps = prepareStatement("select * from testispoolablehint");
+        // If we get this far, there is a big change we have fetched an
+        // invalid statement from the cache, but we won't get the exception
+        // until we try to execute it.
+        try {
+            ps.executeQuery();
+            fail("Prepared statement not valid, referring non-existing table");
+        } catch (SQLException sqle) {
+            assertSQLState("42X05", sqle);
+        }
     }
 
     /**
