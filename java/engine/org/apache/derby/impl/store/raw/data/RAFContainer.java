@@ -1344,67 +1344,93 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                  throw StandardException.newException( SQLState.FILE_CREATE, se, file);
              }
 
-             try {
+             boolean success = false;
+             int maxTries = MAX_INTERRUPT_RETRIES;
+             while (!success) {
+                 success = true;
 
-                 // OK not to force WAL here, in fact, this operation preceeds the
-                 // creation of the log record to ensure sufficient space.
+                 try {
 
-                 dataFactory.writeInProgress();
-                 try
-                 {
-                     fileData = file.getRandomAccessFile( "rw");
-                 }
-                 finally
-                 {
-                     dataFactory.writeFinished();
-                 }
+                     // OK not to force WAL here, in fact, this operation
+                     // preceeds the creation of the log record to ensure
+                     // sufficient space.
 
-                 // This container format specifies that the first page is an
-                 // allocation page and the container information is stored 
-                 // within it.  The allocation page needs to be somewhat 
-                 // formatted because if the system crashed after the create 
-                 // container log operation is written, it needs to be well 
-                 // formed enough to get the container information back out of
-                 // it.
-                 //
-                 // Don't try to go thru the page cache here because the 
-                 // container object cannot be found in the container cache at
-                 // this point yet.  However, if we use the page cache to store
-                 // the first allocation page, then in order to write itself 
-                 // out, it needs to ask the container to do so, which is going
-                 // to create a deadlock.  The allocation page cannot write 
-                 // itself out without going thru the container because it 
-                 // doesn't know where its offset is.  Here we effectively 
-                 // hardwire page 0 at offset 0 of the container file to be 
-                 // the first allocation page.
+                     dataFactory.writeInProgress();
+                     try
+                     {
+                         fileData = file.getRandomAccessFile( "rw");
+                     }
+                     finally
+                     {
+                         dataFactory.writeFinished();
+                     }
 
-                 // create an embryonic page - if this is not a temporary 
-                 // container, synchronously write out the file header.
-                 writeRAFHeader(
-                     actionIdentity, fileData, true, 
-                     (actionIdentity.getSegmentId() != 
+                     // This container format specifies that the first page is
+                     // an allocation page and the container information is
+                     // stored within it.  The allocation page needs to be
+                     // somewhat formatted because if the system crashed after
+                     // the create container log operation is written, it needs
+                     // to be well formed enough to get the container
+                     // information back out of it.
+                     //
+                     // Don't try to go thru the page cache here because the
+                     // container object cannot be found in the container cache
+                     // at this point yet.  However, if we use the page cache
+                     // to store the first allocation page, then in order to
+                     // write itself out, it needs to ask the container to do
+                     // so, which is going to create a deadlock.  The
+                     // allocation page cannot write itself out without going
+                     // thru the container because it doesn't know where its
+                     // offset is.  Here we effectively hardwire page 0 at
+                     // offset 0 of the container file to be the first
+                     // allocation page.
+
+                     // create an embryonic page - if this is not a temporary
+                     // container, synchronously write out the file header.
+                     writeRAFHeader(
+                         actionIdentity, fileData, true,
+                         (actionIdentity.getSegmentId() !=
                           ContainerHandle.TEMPORARY_SEGMENT));
 
-             } catch (SecurityException se) {
+                 } catch (IOException ioe) {
+                     Class clazz = ioe.getClass();
 
-                 // only thrown by the RandomeAccessFile constructor,
-                 // so the file won't exist
-                 throw StandardException.newException( SQLState.FILE_CREATE, se, file);
+                     // test with reflection since NIO is not in Foundation 1.1
+                     if (clazz.getName().equals(
+                             "java.nio.channels.ClosedByInterruptException") ||
+                         clazz.getName().equals( // Java NIO Bug 6979009:
+                             "java.nio.channels.AsynchronousCloseException")) {
 
-             } catch (IOException ioe) {
+                         if (--maxTries > 0) {
+                             success = false;
+                             InterruptStatus.setInterrupted();
+                             closeContainer();
+                             continue;
+                         }
+                     }
 
-                 boolean fileDeleted;
-                 try {
-                     fileDeleted = privRemoveFile(file);
-                 } catch (SecurityException se) {
-                     throw StandardException.newException( SQLState.FILE_CREATE_NO_CLEANUP, ioe, file, se.toString());
+                     boolean fileDeleted;
+                     try {
+                         fileDeleted = privRemoveFile(file);
+                     } catch (SecurityException se) {
+                         throw StandardException.newException(
+                             SQLState.FILE_CREATE_NO_CLEANUP,
+                             ioe,
+                             file,
+                             se.toString());
+                     }
+
+                     if (!fileDeleted) {
+                         throw StandardException.newException(
+                             SQLState.FILE_CREATE_NO_CLEANUP,
+                             ioe,
+                             file,
+                             ioe.toString());
+                     }
+
+                     throw StandardException.newException(
+                         SQLState.FILE_CREATE, ioe, file);
                  }
-
-                 if (!fileDeleted) {
-                     throw StandardException.newException( SQLState.FILE_CREATE_NO_CLEANUP, ioe, file, ioe.toString());
-                 }
-
-                 throw StandardException.newException( SQLState.FILE_CREATE, ioe, file);
              }
 
              canUpdate = true;
