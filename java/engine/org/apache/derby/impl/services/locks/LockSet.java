@@ -413,8 +413,6 @@ forever:	for (;;) {
                             if (wakeupReason ==
                                     Constants.WAITING_LOCK_INTERRUPTED) {
 
-                                Thread.currentThread().interrupt();
-
                                 throw StandardException.
                                     newException(SQLState.CONN_INTERRUPT);
 

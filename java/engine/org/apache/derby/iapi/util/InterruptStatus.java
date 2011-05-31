@@ -273,8 +273,8 @@ public class InterruptStatus {
 
         if (e != null) {
             lcc.setInterruptedException(null);
-            // Set thread's interrupt status flag back on.
-            Thread.currentThread().interrupt();
+            // Set thread's interrupt status flag back on:
+            // see TransactionResourceImpl#wrapInSQLException
 
             throw e;
         }

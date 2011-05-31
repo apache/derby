@@ -390,6 +390,10 @@ public final class TransactionResourceImpl
 
 			StandardException se = (StandardException) thrownException;
 
+            if (SQLState.CONN_INTERRUPT.equals(se.getSQLState())) {
+                Thread.currentThread().interrupt();
+            }
+
             if (se.getCause() == null) {
                 // se is a single, unchained exception. Just convert it to an
                 // SQLException.
