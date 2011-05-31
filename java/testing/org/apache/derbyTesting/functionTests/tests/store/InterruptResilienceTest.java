@@ -662,9 +662,39 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
 
             TestConfiguration.getCurrent().shutdownDatabase();
 
-            // Assert and clear thread's flag:
+            // Assert thread's flag:
             // DERBY-5152: Fails before fix due to lcc going away.
-            assertTrue(Thread.interrupted());
+            assertTrue(Thread.currentThread().isInterrupted());
+
+        } finally {
+            Thread.interrupted(); // clear flag
+        }
+    }
+
+    /**
+     * DERBY-5233: verify that CREATE TABLE (i.e. container creation) survives
+     * interrupts with NIO.
+     */
+    public void testCreateDropInterrupted() throws SQLException {
+
+        if (!usingEmbedded()) {
+            // Only meaningful for embedded.
+            return;
+        }
+
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+
+        try {
+            Thread.currentThread().interrupt();
+
+            s.executeUpdate("create table foo (i int)");
+            s.executeUpdate("insert into foo values 1");
+            s.executeUpdate("drop table foo");
+
+            // Assert thread's flag:
+            assertTrue(Thread.currentThread().isInterrupted());
 
         } finally {
             Thread.interrupted(); // clear flag
