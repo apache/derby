@@ -27,7 +27,7 @@ import java.net.MalformedURLException;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 
-import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
 	This class is used to determine which Java specification Derby will run at.
