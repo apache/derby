@@ -545,4 +545,14 @@ public class SequenceTest extends GeneratedColumnsHelper {
              );
     }
     
+    /**
+     * Verify that the new sequence-related keywords are non-reserved keywords.
+     */
+    public void test_15_5254() throws Exception
+    {
+        Connection conn = openUserConnection(ALPHA);
+
+        goodStatement( conn, "create table t_5254( cycle int, minvalue int, maxvalue int )" );
+        goodStatement( conn, "drop table t_5254" );
+    }
 }
