@@ -14466,6 +14466,7 @@ nonReservedKeyword()  :
 	|   tok = <CS>
 	|	tok = <CURDATE>
 	|	tok = <CURTIME>
+	|	tok = <CYCLE>
 	|	tok = <D>
 	|	tok = <DATA>
 	|	tok = <DATE>
@@ -14502,6 +14503,8 @@ nonReservedKeyword()  :
 	|	tok = <LOCKSIZE>
 	|	tok = <LOGGED>
 	|	tok = <LONG>
+	|	tok = <MAXVALUE>
+	|	tok = <MINVALUE>
 	|	tok = <MESSAGE_LOCALE>
 	|	tok = <METHOD>
 	|	tok = <MOD>
