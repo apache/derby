@@ -2489,7 +2489,7 @@ public final class NetworkServerControlImpl {
 				if (pos < args.length) {
 					setSSLMode(getSSLModeValue(args[pos]));
 				} else {
-					setSSLMode(SSL_OFF);
+					consolePropertyMessage("DRDA_MissingValue.U", "DRDA_SslMode.I");
 				}
 				break;
 
