@@ -23,8 +23,6 @@ package org.apache.derby.iapi.types;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.iapi.services.io.Formatable;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import java.util.Properties;
@@ -33,8 +31,6 @@ import java.util.Collections;
 import java.util.List;
 
 import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
 import java.io.StringReader;
 
 import java.lang.reflect.InvocationTargetException;
@@ -84,10 +80,8 @@ import javax.xml.transform.stream.StreamResult;
  *       query expression a single time per statement, instead of
  *       having to do it for every row against which the query
  *       is evaluated.  An instance of this class is created at
- *       compile time and then passed (using "saved objects")
- *       to the appropriate operator implementation method in
- *       XML.java; see SqlXmlExecutor.java for more about the
- *       role this class plays in "saved object" processing.
+ *       compile time and then passed to the appropriate operator
+ *       implementation method in XML.java.
  *
  *    2. By keeping all XML-specific references in this one class, 
  *       we have a single "point of entry" to the XML objects--namely,
@@ -113,7 +107,7 @@ import javax.xml.transform.stream.StreamResult;
  *       _if_ s/he is trying to access or operate on XML values.
  */
 
-public class SqlXmlUtil implements Formatable
+public class SqlXmlUtil
 {
     // Used to parse a string into an XML value (DOM); checks
     // the well-formedness of the string while parsing.
@@ -801,58 +795,6 @@ public class SqlXmlUtil implements Formatable
                 return (String) TO_PLAIN_STRING.invoke(dec, (Object[]) null);
             }
         }
-    }
-
-    /* ****
-     * Formatable interface implementation
-     * */
-
-    /** 
-     * @see java.io.Externalizable#writeExternal 
-     * 
-     * @exception IOException on error
-     */
-    public void writeExternal(ObjectOutput out) 
-        throws IOException
-    {
-        // query may be null
-        if (query == null)
-        {
-            out.writeBoolean(false);
-        }
-        else
-        {
-            out.writeBoolean(true);
-            out.writeObject(queryExpr);
-            out.writeObject(opName);
-        }
-    }
-
-    /** 
-     * @see java.io.Externalizable#readExternal 
-     *
-     * @exception IOException on error
-     * @exception ClassNotFoundException on error
-     */
-    public void readExternal(ObjectInput in) 
-        throws IOException, ClassNotFoundException
-    {
-        if (in.readBoolean())
-        {
-            queryExpr = (String)in.readObject();
-            opName = (String)in.readObject();
-            recompileQuery = true;
-	    }
-    }
-
-    /**
-     * Get the formatID which corresponds to this class.
-     *
-     * @return	the formatID of this class
-     */
-    public int getTypeFormatId()
-    { 
-        return StoredFormatIds.SQL_XML_UTIL_V01_ID;
     }
 
     /*

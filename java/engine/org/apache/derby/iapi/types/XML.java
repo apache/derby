@@ -598,7 +598,7 @@ public class XML
      * store the _serialized_ version locally and then return
      * this XMLDataValue.
      *
-     * @param text The string value to check.
+     * @param stringValue The string value to check.
      * @param preserveWS Whether or not to preserve
      *  ignorable whitespace.
      * @param sqlxUtil Contains SQL/XML objects and util
@@ -609,9 +609,18 @@ public class XML
      *  value is returned; otherwise, an exception is thrown. 
      * @exception StandardException Thrown on error.
      */
-    public XMLDataValue XMLParse(String text, boolean preserveWS,
-        SqlXmlUtil sqlxUtil) throws StandardException
+    public XMLDataValue XMLParse(
+            StringDataValue stringValue,
+            boolean preserveWS,
+            SqlXmlUtil sqlxUtil)
+        throws StandardException
     {
+        if (stringValue.isNull()) {
+            setToNull();
+            return this;
+        }
+
+        String text = stringValue.getString();
         try {
 
             if (preserveWS) {
@@ -834,10 +843,10 @@ public class XML
      * the received XMLDataValue "result" param (assuming "result" is
      * non-null; else create a new XMLDataValue).
      *
-     * @param result The result of a previous call to this method; null
-     *  if not called yet.
      * @param sqlxUtil Contains SQL/XML objects and util methods that
      *  facilitate execution of XML-related operations
+     * @param result The result of a previous call to this method; null
+     *  if not called yet.
      * @return An XMLDataValue whose content corresponds to the serialized
      *  version of the results from evaluation of the query expression.
      *  Note: this XMLDataValue may not be storable into Derby XML
@@ -845,8 +854,8 @@ public class XML
      * @exception Exception thrown on error (and turned into a
      *  StandardException by the caller).
      */
-    public XMLDataValue XMLQuery(XMLDataValue result,
-        SqlXmlUtil sqlxUtil) throws StandardException
+    public XMLDataValue XMLQuery(SqlXmlUtil sqlxUtil, XMLDataValue result)
+            throws StandardException
     {
         if (this.isNull()) {
         // if the context is null, we return null,
