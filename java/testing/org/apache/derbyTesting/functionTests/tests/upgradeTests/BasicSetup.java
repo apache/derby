@@ -268,7 +268,7 @@ public class BasicSetup extends UpgradeChange {
      * test once the bug is fixed.
      * 
      */
-    public void xtestDropTableAfterUpgradeWithConstraint() throws SQLException {
+    public void testDropTableAfterUpgradeWithConstraint() throws SQLException {
         final int phase = getPhase();
 
         Statement s = createStatement();
@@ -291,18 +291,20 @@ public class BasicSetup extends UpgradeChange {
             /*
              * With 10.0 and early 10.1 releases a duplicate conglomerate entry
              * shows in sys.sysconglomerates for the primary key PK_RS. It can
-             * be seen with this query.Utilities.showResultSet(s.executeQuery(
-             * "select c.constraintname, c.constraintid,  cong.conglomerateid, cong.conglomeratename  from sys.sysconglomerates cong, sys.syskeys k, sys.sysconstraints c where c.constraintname = 'PK_RS' and c.constraintid =k.constraintid and k.conglomerateid = cong.conglomerateid "
-             * ));
-             */
+             * be seen with this query.
+             
+                Utilities.showResultSet(s.executeQuery(
+                        "select c.constraintname, c.constraintid,  cong.conglomerateid, cong.conglomeratename  from sys.sysconglomerates cong, sys.syskeys k, sys.sysconstraints c where c.constraintname = 'PK_RS' and c.constraintid =k.constraintid and k.conglomerateid = cong.conglomerateid "
+              ));
+            */
             break;
         case PH_SOFT_UPGRADE:
             s.executeUpdate("ALTER TABLE S.RS DROP CONSTRAINT FK_RS_TYPEID");
-            s.executeUpdate("ALTER TABLE S.R_TYPE_ID ADD CONSTRAINT "
-                    + "PK_R_TYPE_ID PRIMARY KEY (R_TYPE_ID)");
+            s.executeUpdate("ALTER TABLE S.R_TYPE_ID DROP CONSTRAINT "
+                    + "PK_R_TYPE_ID");
             s.executeUpdate("ALTER TABLE S.RS DROP CONSTRAINT PK_RS");
             s.executeUpdate("DROP TABLE S.RS");
-            s.executeUpdate("DROP TABLE S.R_TYPE");
+            s.executeUpdate("DROP TABLE S.R_TYPE_ID");
             s.executeUpdate("DROP SCHEMA S RESTRICT");
             break;
         case PH_POST_SOFT_UPGRADE:
