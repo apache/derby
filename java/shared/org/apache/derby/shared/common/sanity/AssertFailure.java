@@ -126,6 +126,20 @@ public class AssertFailure extends RuntimeException {
         s.println(threadDump);
     }
 
+    /**
+     * Tells if generating a thread dump is supported in the running JVM.
+     */
+    private boolean supportsThreadDump() {
+        try {
+            // This checks that we are on a jvm >= 1.5 where we
+            // can actually do threaddumps.
+            Thread.class.getMethod("getAllStackTraces", new Class[] {});
+            return true;
+        } catch (NoSuchMethodException nsme) {
+            // Ignore exception
+        }
+        return false;
+    }
 
     /**
      * Dumps stack traces for all the threads if the JVM supports it.
@@ -140,54 +154,57 @@ public class AssertFailure extends RuntimeException {
      */
     private String dumpThreads() {
 
+        if (!supportsThreadDump()) {
+            return "(Skipping thread dump because it is not " +
+                    "supported on JVM 1.4)";
+        }
+            
+        // NOTE: No need to flush with the StringWriter/PrintWriter combination.
         StringWriter out = new StringWriter();
         PrintWriter p = new PrintWriter(out, true);
 
+        // Load the class and method we need with reflection.
+        final Method m;
+        try {
+            Class c = Class.forName(
+                    "org.apache.derby.shared.common.sanity.ThreadDump");
+            m = c.getMethod("getStackDumpString", new Class[] {});
+        } catch (Exception e) {
+            p.println("Failed to load class/method required to generate " +
+                    "a thread dump:");
+            e.printStackTrace(p);
+            return out.toString();
+        }
+
         //Try to get a thread dump and deal with various situations.
         try {
-            //This checks that we are on a jvm >= 1.5 where we
-            //can actually do threaddumps.
-            Thread.class.getMethod("getAllStackTraces", new Class[] {});
-
-            //Then get the thread dump.
-            Class c = Class.
-            forName("org.apache.derby.shared.common.sanity.ThreadDump");
-            final Method m = c.getMethod("getStackDumpString",new Class[] {});
-
-            String dump;
-
-            dump = (String) AccessController.doPrivileged
+            String dump = (String) AccessController.doPrivileged
             (new PrivilegedExceptionAction(){
                 public Object run() throws
-                IllegalArgumentException,
-                IllegalAccessException,
-                InvocationTargetException{
-                    return m.invoke(null, null);
+                        IllegalArgumentException,
+                        IllegalAccessException,
+                        InvocationTargetException {
+                    return m.invoke(null, (Object[])null);
                 }
             }
             );
 
             //Print the dump to the message string. That went OK.
-            p.print("---------------\nStack traces for all " +
-            "live threads:");
+            p.print("---------------\nStack traces for all live threads:");
             p.println("\n" + dump);
             p.println("---------------");
-        } catch (NoSuchMethodException e) {
-            p.println("(Skipping thread dump because it is not " +
-            "supported on JVM 1.4)");
-
-        } catch (Exception e) {
-            if (e instanceof PrivilegedActionException &&
-                e.getCause() instanceof InvocationTargetException &&
-                e.getCause().getCause() instanceof AccessControlException){
+        } catch (PrivilegedActionException pae) {
+            Throwable cause = pae.getCause();
+            if (cause instanceof InvocationTargetException &&
+                cause.getCause() instanceof AccessControlException) {
 
                 p.println("(Skipping thread dump "
-                        + "because of insufficient permissions:\n"
-                        + e.getCause().getCause() + ")\n");
+                    + "because of insufficient permissions:\n"
+                    + cause.getCause() + ")\n");
             } else {
-                p.println("\nAssertFailure tried to do a thread dump, but "
-                        + "there was an error:");
-                e.getCause().printStackTrace(p);
+                p.println("\nAssertFailure tried to do a thread dump, "
+                    + "but there was an error:");
+                cause.printStackTrace(p);
             }
         }
         return out.toString();
