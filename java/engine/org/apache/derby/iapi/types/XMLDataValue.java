@@ -30,7 +30,7 @@ public interface XMLDataValue extends DataValueDescriptor
      * store the _serialized_ version locally and then return
      * this XMLDataValue.
      *
-     * @param stringValue The string value to check.
+     * @param text The string value to check.
      * @param preserveWS Whether or not to preserve
      *  ignorable whitespace.
      * @param sqlxUtil Contains SQL/XML objects and util
@@ -41,11 +41,8 @@ public interface XMLDataValue extends DataValueDescriptor
      *  value returned; otherwise, an exception is thrown. 
      * @exception StandardException Thrown on error.
      */
-    public XMLDataValue XMLParse(
-            StringDataValue stringValue,
-            boolean preserveWS,
-            SqlXmlUtil sqlxUtil)
-        throws StandardException;
+	public XMLDataValue XMLParse(String text, boolean preserveWS,
+		SqlXmlUtil sqlxUtil) throws StandardException;
 
     /**
      * The SQL/XML XMLSerialize operator.
@@ -93,10 +90,10 @@ public interface XMLDataValue extends DataValueDescriptor
      * the received XMLDataValue "result" param (assuming "result" is
      * non-null; else create a new XMLDataValue).
      *
-     * @param sqlxUtil Contains SQL/XML objects and util methods that
-     *  facilitate execution of XML-related operations
      * @param result The result of a previous call to this method; null
      *  if not called yet.
+     * @param sqlxUtil Contains SQL/XML objects and util methods that
+     *  facilitate execution of XML-related operations
      * @return An XMLDataValue whose content corresponds to the serialized
      *  version of the results from evaluation of the query expression.
      *  Note: this XMLDataValue may not be storable into Derby XML
@@ -104,7 +101,7 @@ public interface XMLDataValue extends DataValueDescriptor
      * @exception Exception thrown on error (and turned into a
      *  StandardException by the caller).
      */
-    public XMLDataValue XMLQuery(SqlXmlUtil sqlxUtil, XMLDataValue result)
+    public XMLDataValue XMLQuery(XMLDataValue result, SqlXmlUtil sqlxUtil)
 		throws StandardException;
 
     /* ****

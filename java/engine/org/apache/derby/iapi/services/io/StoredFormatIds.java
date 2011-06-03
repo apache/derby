@@ -506,6 +506,12 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 456);
     
     /**
+        class org.apache.derby.iapi.types.SqlXmlUtil
+    */
+    static public final int SQL_XML_UTIL_V01_ID =
+            (MIN_ID_2 + 464);
+    
+    /**
         class org.apache.derby.iapi.types.JSQLType
      */
     static public final int JSQLTYPEIMPL_ID =

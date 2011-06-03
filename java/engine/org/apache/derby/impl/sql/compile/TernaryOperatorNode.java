@@ -54,7 +54,7 @@ import java.util.Vector;
  *
  */
 
-public class TernaryOperatorNode extends OperatorNode
+public class TernaryOperatorNode extends ValueNode
 {
 	String		operator;
 	String		methodName;
