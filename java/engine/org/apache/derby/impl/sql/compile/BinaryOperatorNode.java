@@ -21,25 +21,16 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 
 import java.lang.reflect.Modifier;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.SqlXmlUtil;
-
-import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.reference.ClassName;
 import org.apache.derby.iapi.reference.JDBC40Translation;
@@ -48,7 +39,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
-import java.sql.Types;
 import java.util.Vector;
 
 /**
@@ -59,7 +49,7 @@ import java.util.Vector;
  *
  */
 
-public class BinaryOperatorNode extends ValueNode
+public class BinaryOperatorNode extends OperatorNode
 {
 	String	operator;
 	String	methodName;
@@ -125,9 +115,8 @@ public class BinaryOperatorNode extends ValueNode
 		{ClassName.StringDataValue, ClassName.XMLDataValue}		// XMLQuery
 	};
 
-	// Class used to compile an XML query expression and/or load/process
-	// XML-specific objects.
-	private SqlXmlUtil sqlxUtil;
+    /** The query expression if the operator is XMLEXISTS or XMLQUERY. */
+    private String xmlQuery;
 
 	/**
 	 * Initializer for a BinaryOperatorNode
@@ -352,11 +341,7 @@ public class BinaryOperatorNode extends ValueNode
                 SQLState.LANG_INVALID_XML_QUERY_EXPRESSION);
         }
         else {
-        // compile the query expression.
-            sqlxUtil = new SqlXmlUtil();
-            sqlxUtil.compileXQExpr(
-                ((CharConstantNode)leftOperand).getString(),
-                (operatorType == XMLEXISTS_OP ? "XMLEXISTS" : "XMLQUERY"));
+            xmlQuery = ((CharConstantNode)leftOperand).getString();
         }
 
         // Right operand must be an XML data value.  NOTE: This
@@ -498,28 +483,14 @@ public class BinaryOperatorNode extends ValueNode
 ** but how?
 */
 
+        // The number of arguments to pass to the method that implements the
+        // operator, depends on the type of the operator.
+        int numArgs;
+
 		// If we're dealing with XMLEXISTS or XMLQUERY, there is some
 		// additional work to be done.
 		boolean xmlGen =
 			(operatorType == XMLQUERY_OP) || (operatorType == XMLEXISTS_OP);
-
-		if (xmlGen) {
-		// We create an execution-time object so that we can retrieve
-		// saved objects (esp. our compiled query expression) from
-		// the activation.  We do this for two reasons: 1) this level
-		// of indirection allows us to separate the XML data type
-		// from the required XML implementation classes (esp. JAXP
-		// and Xalan classes)--for more on how this works, see the
-		// comments in SqlXmlUtil.java; and 2) we can take
-		// the XML query expression, which we've already compiled,
-		// and pass it to the execution-time object for each row,
-		// which means that we only have to compile the query
-		// expression once per SQL statement (instead of once per
-		// row); see SqlXmlExecutor.java for more.
-			mb.pushNewStart(
-				"org.apache.derby.impl.sql.execute.SqlXmlExecutor");
-			mb.pushNewComplete(addXmlOpMethodParams(acb, mb));
-		}
 
 		/*
 		** The receiver is the operand with the higher type precedence.
@@ -558,6 +529,9 @@ public class BinaryOperatorNode extends ValueNode
 			rightOperand.generateExpression(acb, mb);
 			mb.cast(rightInterfaceType); // second arg with cast
 			// stack: left, left, right
+
+            // We've pushed two arguments
+            numArgs = 2;
 		}
 		else
 		{
@@ -581,28 +555,33 @@ public class BinaryOperatorNode extends ValueNode
 			** UNLESS we're generating an XML operator such as XMLEXISTS.
 			** In that case we want to generate
 			** 
-			**  SqlXmlExecutor.method(left, right)"
-			**
-			** and we've already pushed the SqlXmlExecutor object to
-			** the stack.
+			**  <right expression>.method(sqlXmlUtil)
 			*/
 
 			rightOperand.generateExpression(acb, mb);			
 			mb.cast(receiverType); // cast the method instance
 			// stack: right
 			
-			if (!xmlGen) {
+            if (xmlGen) {
+                // Push one argument (the SqlXmlUtil instance)
+                numArgs = 1;
+                pushSqlXmlUtil(acb, mb, xmlQuery, operator);
+                // stack: right,sqlXmlUtil
+            } else {
+                // Push two arguments (left, right)
+                numArgs = 2;
+
 				mb.dup();
 				mb.cast(rightInterfaceType);
 				// stack: right,right
-			}
 			
-			leftOperand.generateExpression(acb, mb);
-			mb.cast(leftInterfaceType); // second arg with cast
-			// stack: right,right,left
-			
-			mb.swap();
-			// stack: right,left,right			
+                leftOperand.generateExpression(acb, mb);
+                mb.cast(leftInterfaceType); // second arg with cast
+                // stack: right,right,left
+
+                mb.swap();
+                // stack: right,left,right
+            }
 		}
 
 		/* Figure out the result type name */
@@ -610,15 +589,13 @@ public class BinaryOperatorNode extends ValueNode
 			? getTypeCompiler().interfaceName()
 			: resultInterfaceType;
 
-		// Boolean return types don't need a result field
-		boolean needField = !getTypeId().isBooleanTypeId();
+        // Boolean return types don't need a result field. For other types,
+        // allocate an object for re-use to hold the result of the operator.
+        LocalField resultField = getTypeId().isBooleanTypeId() ?
+            null : acb.newFieldDeclaration(Modifier.PRIVATE, resultTypeName);
 
-		if (needField) {
-
-			/* Allocate an object for re-use to hold the result of the operator */
-			LocalField resultField =
-				acb.newFieldDeclaration(Modifier.PRIVATE, resultTypeName);
-
+        // Push the result field onto the stack, if there is a result field.
+		if (resultField != null) {
 			/*
 			** Call the method for this operator.
 			*/
@@ -626,6 +603,9 @@ public class BinaryOperatorNode extends ValueNode
 			//following method is special code for concatenation where if field is null, we want it to be initialized to NULL SQLxxx type object
 			//before generating code "field = method(p1, p2, field);"
 			initializeResultField(acb, mb, resultField);
+
+            // Adjust number of arguments for the result field
+            numArgs++;
 
 			/* pass statically calculated scale to decimal divide method to make
 			 * result set scale consistent, beetle 3901
@@ -637,17 +617,15 @@ public class BinaryOperatorNode extends ValueNode
 				operator.equals("/"))
 			{
 				mb.push(getTypeServices().getScale());		// 4th arg
-				mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType, methodName, resultTypeName, 4);
+                numArgs++;
 			}
-			else if (xmlGen) {
-			// This is for an XMLQUERY operation, so invoke the method
-			// on our execution-time object.
-				mb.callMethod(VMOpcode.INVOKEVIRTUAL, null,
-					methodName, resultTypeName, 3);
-			}
-			else
-				mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType, methodName, resultTypeName, 3);
+        }
 
+        mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType,
+                      methodName, resultTypeName, numArgs);
+
+        // Store the result of the method call, if there is a result field.
+        if (resultField != null) {
 			//the need for following if was realized while fixing bug 5704 where decimal*decimal was resulting an overflow value but we were not detecting it
 			if (getTypeId().variableLength())//since result type is numeric variable length, generate setWidth code.
 			{
@@ -670,17 +648,6 @@ public class BinaryOperatorNode extends ValueNode
 			*/
 
 			mb.putField(resultField);
-		} else {
-			if (xmlGen) {
-			// This is for an XMLEXISTS operation, so invoke the method
-			// on our execution-time object.
-				mb.callMethod(VMOpcode.INVOKEVIRTUAL, null,
-					methodName, resultTypeName, 2);
-			}
-			else {
-				mb.callMethod(VMOpcode.INVOKEINTERFACE, receiverType,
-					methodName, resultTypeName, 2);
-			}
 		}
 	}
 
@@ -875,32 +842,4 @@ public class BinaryOperatorNode extends ValueNode
         	       && leftOperand.isEquivalent(other.leftOperand)
         	       && rightOperand.isEquivalent(other.rightOperand);
         }
-
-	/**
-	 * Push the fields necessary to generate an instance of
-	 * SqlXmlExecutor, which will then be used at execution
-	 * time to retrieve the compiled XML query expression,
-	 * along with any other XML-specific objects.
-	 *
-	 * @param acb The ExpressionClassBuilder for the class we're generating
-	 * @param mb  The method the code to place the code
-	 *
-	 * @return The number of items that this method pushed onto
-	 *  the mb's stack.
-	 */
-	private int addXmlOpMethodParams(ExpressionClassBuilder acb,
-		MethodBuilder mb) throws StandardException
-	{
-		// Push activation so that we can get our saved object
-		// (which will hold the compiled XML query expression)
-		// back at execute time.
-		acb.pushThisAsActivation(mb);
-
-		// Push our saved object (the compiled query and XML-specific
-		// objects).
-		mb.push(getCompilerContext().addSavedObject(sqlxUtil));
-
-		// We pushed 2 items to the stack.
-		return 2;
-	}
 }
