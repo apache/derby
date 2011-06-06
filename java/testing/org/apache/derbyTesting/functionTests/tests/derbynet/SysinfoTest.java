@@ -38,6 +38,7 @@ import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 
 /**
 	This tests the sysinfo command
@@ -125,15 +126,19 @@ public class SysinfoTest extends BaseJDBCTestCase {
             suite.addTest(decorateTest());
 
         useProperties = true;
-        Properties props = new Properties();
+        Properties sysprops = new Properties();
         if (!TestConfiguration.loadingFromJars())
-            props.put("sysinfotest.classesdir", findClassDir());
-        props.put("derby.infolog.append","true");
-        props.put("derby.locks.waitTimeout","120");
-        props.put("derby.language.logStatementText","true");
+            sysprops.put("sysinfotest.classesdir", findClassDir());
+        sysprops.put("derby.infolog.append","true");
+        sysprops.put("derby.language.logStatementText","true");
         //#drda property ,test for it in sysinfo output
-        props.put("derby.drda.securityMechanism","USER_ONLY_SECURITY");
-        suite.addTest(new SystemPropertyTestSetup(decorateTest(), props));
+        sysprops.put("derby.drda.securityMechanism","USER_ONLY_SECURITY");
+        Test test = new SystemPropertyTestSetup(decorateTest(), sysprops);
+        Properties prop = new Properties();
+        prop.put("derby.locks.waitTimeout","120");
+        test = new DatabasePropertyTestSetup(test, prop);
+        //suite.addTest(new SystemPropertyTestSetup(decorateTest(), props));
+        suite.addTest(test);
 
         return suite;
     }
