@@ -218,6 +218,11 @@ public class CompatibilityCombinations extends BaseTestCase
     private final static String networkServerControl = "org.apache.derby.drda.NetworkServerControl";
     private       static String specialTestingJar = null;
                                 // None null if using e.g. your own modified tests.
+    /**
+     * Only test the combinations that include the latest version if this
+     * flag is true.
+     */
+    private       static boolean latestOnly;
     private       static String singleClient = null;
                                 // Integer string property specifying which Derby version to use for client.
     private       static String singleClientVM = null;
@@ -477,6 +482,7 @@ public class CompatibilityCombinations extends BaseTestCase
      * The number of combinations can be restricted by specifying the
      * properties
      * <ul>
+     *    <li> test.latestOnly
      *    <li> test.singleServer
      *    <li> test.singleServerVM
      *    <li> test.singleClient
@@ -569,6 +575,16 @@ public class CompatibilityCombinations extends BaseTestCase
                 {
                     int clientVersionLow = 0;
                     int clientVersionHigh = derbyLib.length-1;
+
+                    if (latestOnly && serverVersion != clientVersionHigh)
+                    {
+                        // We only want to test combinations that include the
+                        // latest Derby version (typically trunk). If the
+                        // server is not at the latest version, we only need
+                        // to test it against the latest client version.
+                        clientVersionLow = clientVersionHigh;
+                    }
+
                     if ( singleClient != null )
                     {
                         clientVersionLow = Integer.parseInt(singleClient);
@@ -804,6 +820,7 @@ public class CompatibilityCombinations extends BaseTestCase
      *     <li>test.showSysinfo 
      *     <li>test.serverPort 
      *     <li>test.includeUpgrade 
+     *     <li>test.latestOnly
      *     <li>test.singleClient 
      *     <li>test.singleClientVM 
      *     <li>test.singleServer 
@@ -867,7 +884,11 @@ public class CompatibilityCombinations extends BaseTestCase
 
         includeUpgrade = cp.getProperty("test.includeUpgrade","false").equalsIgnoreCase("true");
         System.out.println("includeUpgrade: " + includeUpgrade);
-      
+
+        latestOnly =
+            cp.getProperty("test.latestOnly", "false").equalsIgnoreCase("true");
+        System.out.println("latestOnly: " + latestOnly);
+
         singleClient = cp.getProperty("test.singleClient",null); // E.g. 5 for derby.version5, see property file
         System.out.println("singleClient: " + singleClient);
         
