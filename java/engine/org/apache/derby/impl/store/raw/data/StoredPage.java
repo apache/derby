@@ -7034,7 +7034,8 @@ public class StoredPage extends CachedPage
     public void logAction(LogInstant instant) throws StandardException
     {
         if (SanityManager.DEBUG) {
-            SanityManager.ASSERT(isLatched());
+            SanityManager.ASSERT(isLatched(), 
+                "logAction() executed on an unlatched page.");
         }
 
         if (rawDataOut == null)
