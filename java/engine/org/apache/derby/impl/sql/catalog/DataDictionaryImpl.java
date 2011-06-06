@@ -4580,6 +4580,9 @@ public final class	DataDictionaryImpl
 	/**
 	 * Get every statement in this database.
 	 * Return the SPSDescriptors in an list.
+     * The returned descriptors don't contain the compiled statement, so it
+     * it safe to call this method during upgrade when it isn't known if the
+     * saved statement can still be deserialized with the new version.
 	 *
 	 * @return the list of descriptors
 	 *
@@ -4592,7 +4595,23 @@ public final class	DataDictionaryImpl
 
 		List list = newSList();
 
+        // DERBY-3870: The compiled plan may not be possible to deserialize
+        // during upgrade. Skip the column that contains the compiled plan to
+        // prevent deserialization errors when reading the rows. We don't care
+        // about the value in that column, since this method is only called
+        // when we want to drop or invalidate rows in SYSSTATEMENTS.
+        FormatableBitSet cols = new FormatableBitSet(
+                ti.getCatalogRowFactory().getHeapColumnCount());
+        for (int i = 0; i < cols.size(); i++) {
+            if (i + 1 == SYSSTATEMENTSRowFactory.SYSSTATEMENTS_CONSTANTSTATE) {
+                cols.clear(i);
+            } else {
+                cols.set(i);
+            }
+        }
+
 		getDescriptorViaHeap(
+                        cols,
 						(ScanQualifier[][]) null,
 						ti,
 						(TupleDescriptor) null,
@@ -4647,6 +4666,7 @@ public final class	DataDictionaryImpl
 		GenericDescriptorList list = new GenericDescriptorList();
 
 		getDescriptorViaHeap(
+                        null,
 						(ScanQualifier[][]) null,
 						ti,
 						(TupleDescriptor) null,
@@ -7039,10 +7059,7 @@ public final class	DataDictionaryImpl
   				false);
 
 		ConglomerateDescriptorList cdl = new ConglomerateDescriptorList();
-		getDescriptorViaHeap(scanQualifier,
-								 ti,
-								 null,
-								 cdl);
+		getDescriptorViaHeap(null, scanQualifier, ti, null, cdl);
 
 		int size = cdl.size();
 		ConglomerateDescriptor[] cda = new ConglomerateDescriptor[size];
@@ -9475,6 +9492,8 @@ public final class	DataDictionaryImpl
 	 * Return a (single or list of) catalog row descriptor(s) from a
 	 * system table where the access a heap scan
 	 *
+     * @param columns                   which columns to fetch from the system
+     *                                  table, or null to fetch all columns
 	 * @param scanQualifiers			qualifiers
 	 * @param ti						The TabInfoImpl to use
 	 * @param parentTupleDescriptor		The parentDescriptor, if applicable.
@@ -9486,6 +9505,7 @@ public final class	DataDictionaryImpl
 	 * @exception StandardException		Thrown on error
 	 */
 	protected TupleDescriptor getDescriptorViaHeap(
+                        FormatableBitSet columns,
 						ScanQualifier [][] scanQualifiers,
 						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
@@ -9513,7 +9533,7 @@ public final class	DataDictionaryImpl
 				0, 							// for read
 				TransactionController.MODE_TABLE,
                 TransactionController.ISOLATION_REPEATABLE_READ,
-				(FormatableBitSet) null,         // all fields as objects
+				columns,
 				(DataValueDescriptor[]) null,		// start position - first row
 				0,      				// startSearchOperation - none
 				scanQualifiers, 		// scanQualifier,

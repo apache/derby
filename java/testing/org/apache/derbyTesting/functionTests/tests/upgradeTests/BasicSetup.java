@@ -29,6 +29,7 @@ import java.util.ArrayList;
 
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.XML;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -43,7 +44,13 @@ public class BasicSetup extends UpgradeChange {
         TestSuite suite = new TestSuite("Upgrade basic setup");
         
         suite.addTestSuite(BasicSetup.class);
-        
+
+        if (XML.classpathMeetsXMLReqs()) {
+            // Only test XML operators if they are supported by the version
+            // we upgrade to.
+            suite.addTest(new BasicSetup("xmlTestTriggerWithXMLOperators"));
+        }
+
         return suite;
     }
 
@@ -772,4 +779,62 @@ public class BasicSetup extends UpgradeChange {
         return buffer.toString();
     }
     //End of helper methods for testExhuastivePermutationOfTriggerColumns
+
+    /**
+     * Test that triggers that use XML operators work after upgrade. The
+     * first fix for DERBY-3870 broke upgrade of such triggers because the
+     * old execution plans failed to deserialize on the new version.
+     */
+    public void xmlTestTriggerWithXMLOperators() throws SQLException {
+        if (!oldAtLeast(10, 3)) {
+            // Before 10.3, the CREATE TRIGGER statement used in the test
+            // failed with a syntax error. Skip the test for older versions.
+            return;
+        }
+
+        Statement s = createStatement();
+
+        if (getPhase() == PH_CREATE) {
+            // Create test tables and a trigger that uses XML operators with
+            // the old version.
+            s.execute("create table d3870_t1(i int, x varchar(100))");
+            s.execute("create table d3870_t2(i int)");
+            try {
+                s.execute("create trigger d3870_tr after insert on d3870_t1 " +
+                          "for each statement insert into d3870_t2 " +
+                          "select i from d3870_t1 where " +
+                          "xmlexists('//a' passing by ref " +
+                          "xmlparse(document x preserve whitespace))");
+            } catch (SQLException sqle) {
+                // The CREATE TRIGGER statement will fail if the XML classpath
+                // requirements aren't satisfied for the old version. That's
+                // OK, but we'll have to skip the test for this combination.
+                assertSQLState("XML00", sqle);
+                return;
+            }
+        } else {
+            // Delete the rows to start the test from a known state in each
+            // of the phases.
+            s.executeUpdate("delete from d3870_t1");
+            s.executeUpdate("delete from d3870_t2");
+        }
+
+        // Check if the trigger exists. It won't exist if the XML requirements
+        // weren't satisfied for the old version. If we don't have the trigger,
+        // we skip the rest of the test.
+        ResultSet rs = s.executeQuery(
+            "select 1 from sys.systriggers where triggername = 'D3870_TR'");
+        boolean hasTrigger = rs.next();
+        rs.close();
+
+        // Verify that the trigger works both before and after upgrade.
+        if (hasTrigger) {
+            s.execute("insert into d3870_t1 values " +
+                      "(1, '<a/>'), (2, '<b/>'), (3, '<c/>')");
+
+            JDBC.assertSingleValueResultSet(
+                    s.executeQuery("select * from d3870_t2"), "1");
+        }
+    }
+
 }
