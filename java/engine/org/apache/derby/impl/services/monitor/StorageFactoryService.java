@@ -391,15 +391,18 @@ final class StorageFactoryService implements PersistentService
         catch( PrivilegedActionException pae) { throw (StandardException) pae.getException();}
 	} // end of saveServiceProperties
 
-	/**
-       Save to a backup file
-       
-		@exception StandardException Properties cannot be saved.
-	*/
+
+    /**
+     * Save service.properties during backup
+     *
+     * @arg serviceName backup location of the service
+     * @arg properties to save
+     *
+     * @exception StandardException Properties cannot be saved.
+     */
 
 	public void saveServiceProperties(final String serviceName, 
-                                      final Properties properties, 
-                                      final boolean replace)
+                                      final Properties properties)
 		throws StandardException {
 
         try
@@ -407,24 +410,13 @@ final class StorageFactoryService implements PersistentService
             AccessController.doPrivileged(
                 new PrivilegedExceptionAction()
                 {
-                    File backupFile = null;
                     public Object run() throws StandardException
                     {
-
+                        // Since this is the backup location, we cannot use
+                        // storageFactory.newStorageFile as in the other
+                        // variant of this method:
                         File servicePropertiesFile = 
                             new File(serviceName, PersistentService.PROPERTIES_NAME);
-                        if (replace) {
-                            backupFile = 
-                                new File(serviceName, PersistentService.PROPERTIES_NAME.concat("old"));
-                            try {
-                                if(!servicePropertiesFile.renameTo(backupFile)) {
-                                    throw StandardException.newException(
-                                     SQLState.UNABLE_TO_RENAME_FILE, servicePropertiesFile, backupFile);
-                                }
-                            } catch (SecurityException se) {
-                                throw Monitor.exceptionStartingModule(se);
-                            }
-                        }
 
                         FileOutputStream fos = null;
                         try {
@@ -447,26 +439,9 @@ final class StorageFactoryService implements PersistentService
                                 fos = null;
                             }
 
-                            if (backupFile != null) {
-                                // need to re-name the old properties file back again
-                                try {
-                                    servicePropertiesFile.delete();
-                                    backupFile.renameTo(servicePropertiesFile);
-                                } catch (SecurityException se) {
-                                }
-                            }
                             throw Monitor.exceptionStartingModule(ioe);
                         }
 		
-		
-                        if (backupFile != null) {
-                            try {
-                                backupFile.delete();
-                                backupFile = null;
-                            } catch (SecurityException se) {
-                                // do nothing
-                            }
-                        }
                         return null;
                     }
                 }

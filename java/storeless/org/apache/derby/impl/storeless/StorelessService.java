@@ -65,7 +65,9 @@ public class StorelessService implements PersistentService {
 		
 	}
 
-	public void saveServiceProperties(String serviceName, Properties properties, boolean replace) throws StandardException {
+    public void saveServiceProperties(String serviceName,
+                                      Properties properties)
+            throws StandardException {
 		// TODO Auto-generated method stub
 		
 	}

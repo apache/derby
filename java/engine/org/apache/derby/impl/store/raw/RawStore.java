@@ -875,7 +875,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                 }
             
                 // save the service properties into the backup.
-                ps.saveServiceProperties(backupcopy.getPath(), prop, false);
+                ps.saveServiceProperties(backupcopy.getPath(), prop);
 
             }
             catch(StandardException se) 

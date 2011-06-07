@@ -142,8 +142,7 @@ public interface PersistentService {
 		@exception StandardException Properties cannot be saved.
 	*/
 	public void saveServiceProperties(String serviceName,
-                                      Properties properties,
-                                      boolean replace)
+                                      Properties properties)
 		throws StandardException;
 
 	/**
