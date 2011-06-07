@@ -1262,6 +1262,12 @@ public class BasicSetup extends UpgradeChange {
             return;
         }
 
+        if (getPhase() == PH_POST_SOFT_UPGRADE && oldSuffersFromDerby4835()) {
+            // DERBY-5263: Executing the trigger will fail after soft upgrade
+            // in all the versions that suffer from DERBY-4835. Skip the test.
+            return;
+        }
+
         Statement s = createStatement();
 
         if (getPhase() == PH_CREATE) {
