@@ -291,8 +291,12 @@ public final class SecurityManagerSetup extends TestSetup {
             classPathSet.setProperty("derbyTesting.jaxpjar", jaxp);
 
 		URL testing = getURL(SecurityManagerSetup.class);
-        URL ppTesting = getURL("org.apache.derby.PackagePrivateTestSuite");
-		
+        URL ppTesting = null;
+        // Only try to load PackagePrivateTestSuite if the running JVM is
+        // Java 1.5 or newer (class version 49 = Java 1.5).
+        if (BaseTestCase.getClassVersionMajor() >= 49) {
+            ppTesting = getURL("org.apache.derby.PackagePrivateTestSuite");
+        }
 		boolean isClasspath = testing.toExternalForm().endsWith("/");
 		if (isClasspath) {
 			classPathSet.setProperty("derbyTesting.codeclasses",
