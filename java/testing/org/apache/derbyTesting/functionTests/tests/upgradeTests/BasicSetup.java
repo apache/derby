@@ -1,6 +1,6 @@
 /*
 
-Derby - Class org.apache.derbyTesting.functionTests.tests.upgradeTests.BasicSetup
+Derby - Class org.apache.dertbyTesting.functionTests.tests.upgradeTests.BasicSetup
 
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -244,5 +244,59 @@ public class BasicSetup extends UpgradeChange {
                 }
             break;
         }
+    }  
+ 
+    
+    /**
+     * DERBY-5249 table created with primary and foreign key can't be dropped
+     * Test currently disabled. Remove the x from the name to enable the 
+     * test once the bug is fixed.
+     * 
+     */
+    public void testDropTableAfterUpgradeWithConstraint() throws SQLException {
+        final int phase = getPhase();
+
+        Statement s = createStatement();
+
+        switch (phase) {
+        case PH_CREATE:
+            s.executeUpdate("CREATE SCHEMA S");
+            s.executeUpdate("CREATE TABLE S.RS (R_TYPE_ID VARCHAR(64) "
+                    + "NOT NULL)");
+            s.executeUpdate("ALTER TABLE S.RS ADD CONSTRAINT PK_RS "
+                    + "PRIMARY KEY (R_TYPE_ID)");
+            s.executeUpdate("CREATE TABLE S.R_TYPE_ID (R_TYPE_ID "
+                    + "VARCHAR(64) NOT NULL)");
+            s.executeUpdate("ALTER TABLE S.R_TYPE_ID ADD CONSTRAINT "
+                    + "PK_R_TYPE_ID PRIMARY KEY (R_TYPE_ID)");
+            s.executeUpdate("ALTER TABLE S.RS ADD CONSTRAINT "
+                    + "FK_RS_TYPEID FOREIGN KEY (R_TYPE_ID) REFERENCES "
+                    + "S.R_TYPE_ID (R_TYPE_ID) ON DELETE CASCADE ON "
+                    + "UPDATE NO ACTION");
+            /*
+             * With 10.0 and early 10.1 releases a duplicate conglomerate entry
+             * shows in sys.sysconglomerates for the primary key PK_RS. It can
+             * be seen with this query.
+             
+                Utilities.showResultSet(s.executeQuery(
+                        "select c.constraintname, c.constraintid,  cong.conglomerateid, cong.conglomeratename  from sys.sysconglomerates cong, sys.syskeys k, sys.sysconstraints c where c.constraintname = 'PK_RS' and c.constraintid =k.constraintid and k.conglomerateid = cong.conglomerateid "
+              ));
+            */
+            break;
+        case PH_SOFT_UPGRADE:
+            s.executeUpdate("ALTER TABLE S.RS DROP CONSTRAINT FK_RS_TYPEID");
+            s.executeUpdate("ALTER TABLE S.R_TYPE_ID DROP CONSTRAINT "
+                    + "PK_R_TYPE_ID");
+            s.executeUpdate("ALTER TABLE S.RS DROP CONSTRAINT PK_RS");
+            s.executeUpdate("DROP TABLE S.RS");
+            s.executeUpdate("DROP TABLE S.R_TYPE_ID");
+            s.executeUpdate("DROP SCHEMA S RESTRICT");
+            break;
+        case PH_POST_SOFT_UPGRADE:
+            break;
+        case PH_HARD_UPGRADE:
+            break;
+        }
+
     }
 }

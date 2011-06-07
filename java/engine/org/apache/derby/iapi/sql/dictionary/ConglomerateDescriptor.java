@@ -598,8 +598,15 @@ public final class ConglomerateDescriptor extends TupleDescriptor
 			}
 
 			// Skip if ignoreThis is true and it describes "this".
+			// DERBY-5249. We need to check both the UUID and the
+			// conglomerateName to see if this is a match, because
+			// databases prior to the DERBY-655 fix may have a 
+			// duplicate conglomerateID
 			if (ignoreThis &&
-				getUUID().equals(descriptors[i].getUUID()))
+				getUUID().equals(descriptors[i].getUUID()) &&
+				getConglomerateName().equals(descriptors[i].
+							getConglomerateName())
+				)
 			{
 				continue;
 			}
