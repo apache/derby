@@ -625,6 +625,36 @@ public abstract class BaseTestCase
     }
    
     /**
+     * Returns the major version of the class specification version supported
+     * by the running JVM.
+     * <ul>
+     *  <li>48 = Java 1.4</li>
+     *  <li>49 = Java 1.5</li>
+     *  <li>50 = Java 1.6</li>
+     *  <li>51 = Java 1.7</li>
+     * </ul>
+     *
+     * @return Major version of class version specification, i.e. 49 for 49.0,
+     *      or -1 if the version can't be obtained for some reason.
+     */
+    public static int getClassVersionMajor() {
+        String tmp = getSystemProperty("java.class.version");
+        if (tmp == null) {
+            println("VM doesn't have property java.class.version");
+            return -1;
+        }
+        // Is String.split safe to use by now?
+        int dot = tmp.indexOf('.');
+        int major = -1;
+        try {
+            major = Integer.parseInt(tmp.substring(0, dot));
+        } catch (NumberFormatException nfe) {
+            // Ignore, return -1.
+        }
+        return major;
+    }
+
+    /**
      * Check if we have old style (before Sun Java 1.7) Solaris interruptible
      * IO. On Sun Java 1.5 >= update 22 and Sun Java 1.6 this can be disabled
      * with Java option {@code -XX:-UseVMInterruptibleIO}. On Sun Java 1.7 it
