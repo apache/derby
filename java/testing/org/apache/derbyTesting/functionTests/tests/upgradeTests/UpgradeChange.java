@@ -111,6 +111,23 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
     }
     
     /**
+     * Get the fixpack number of the old version being upgraded
+     * from.
+     */
+    final int getOldFixPack() {
+        return ((int[]) oldVersion.get())[2];
+    }
+
+    /**
+     * Get the point number of the old version being upgraded
+     * from.
+     */
+    final int getOldPoint() {
+        return ((int[]) oldVersion.get())[3];
+    }
+
+
+    /**     
      * Return true if the old version is equal to or more
      * recent that the passed in major and minor version.
      */
@@ -131,5 +148,18 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
     {
         return (getOldMajor() == requiredMajor)
           && (getOldMinor() == requiredMinor);
-     } 
+    }
+
+    /**
+     * Return true if and only if the old version is equal to the
+     *  passed major, minor, fixpack and point version
+     * specified version.
+     */
+    boolean oldIs(int requiredMajor, int requiredMinor,
+               int requiredFixpack, int requiredPoint) {
+        return (getOldMajor() == requiredMajor)
+        && (getOldMinor() == requiredMinor)
+        && (getOldFixPack() == requiredFixpack)
+        && (getOldPoint() == requiredPoint);     
+    } 
 }

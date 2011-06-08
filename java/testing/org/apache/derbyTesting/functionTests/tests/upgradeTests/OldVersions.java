@@ -51,6 +51,13 @@ public class OldVersions
         {10, 5, 3, 0}, // 10.5.3.0 (August 21, 2009 / SVN 802917)
         {10, 6, 1, 0}, // 10.6.1.0 (May 18, 2010/ SVN 938214)
         {10, 6, 2, 1}, // 10.6.2.1 (Oct 6, 2010/ SVN 999685
+        //Have added 10.7.1.1 here because DERBY-5121 which caused
+        // data corruption is in this release. This was fixed in 
+        // the 10.7 codeline after 10.7.1.1 and we want to make
+        // sure that the fault triggers created in 10.7.1.1 get
+        // fixed when taken to 10.7 codeline. These tests are
+        // part of BasicSetup.java
+        {10, 7, 1, 1}, // 10.7.1.1 (December 14, 2010/ SVN 1040133)
     };
 
     //Constant for special upgrade testing with both upgrade and create 
