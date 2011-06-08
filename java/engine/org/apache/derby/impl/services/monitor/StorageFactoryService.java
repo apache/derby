@@ -395,8 +395,8 @@ final class StorageFactoryService implements PersistentService
     /**
      * Save service.properties during backup
      *
-     * @arg serviceName backup location of the service
-     * @arg properties to save
+     * @param serviceName backup location of the service
+     * @param properties the properties to save
      *
      * @exception StandardException Properties cannot be saved.
      */
