@@ -24,6 +24,7 @@ package org.apache.derby.impl.db;
 import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.db.DatabaseContext;
@@ -55,6 +56,20 @@ final class DatabaseContextImpl extends ContextImpl implements DatabaseContext
 
         popMe();
         
+        if (se.getSeverity() >= ExceptionSeverity.DATABASE_SEVERITY) {
+            // DERBY-5108: Shut down the istat daemon thread before shutting
+            // down the various modules belonging to the database. An active
+            // istat daemon thread at the time of shutdown may result in
+            // containers being reopened after the container cache has been
+            // shut down. On certain platforms, this results in database
+            // files that can't be deleted until the VM exits.
+            DataDictionary dd = db.getDataDictionary();
+            // dd is null if the db is an active slave db (replication)
+            if (dd != null) {
+                dd.disableIndexStatsRefresher();
+            }
+        }
+
         if (se.getSeverity() == ExceptionSeverity.DATABASE_SEVERITY) {
 		    ContextService.getFactory().notifyAllActiveThreads(this);
             // This may be called multiple times, but is short-circuited
