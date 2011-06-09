@@ -207,7 +207,7 @@ class BTreePostCommit implements Serviceable
             this.access_factory.getAndNameTransaction(
                 contextMgr, AccessFactoryGlobals.SYS_TRANS_NAME);
 
-        TransactionManager internal_xact  = tc.getInternalTransaction();
+        TransactionManager  internal_xact  = tc.getInternalTransaction();
 
         if (SanityManager.DEBUG)
         {
@@ -215,7 +215,7 @@ class BTreePostCommit implements Serviceable
                 System.out.println("starting internal xact\n");
         }
 
-        OpenBTree open_btree = null;
+        OpenBTree           open_btree = null;
 
         try
         {
@@ -244,11 +244,8 @@ class BTreePostCommit implements Serviceable
             DataValueDescriptor[] shrink_key = 
                 purgeCommittedDeletes(open_btree, this.page_number);
 
-            // RESOLVE (mikem) - move this call when doing row level locking.
             if (shrink_key != null)
                 doShrink(open_btree, shrink_key);
-
-            open_btree.close();
         }
         catch (StandardException se)
         {
@@ -277,8 +274,6 @@ class BTreePostCommit implements Serviceable
 
                     purgeRowLevelCommittedDeletes(open_btree);
 
-                    open_btree.close();
-
                 }
                 catch (StandardException se2)
                 {
@@ -295,6 +290,15 @@ class BTreePostCommit implements Serviceable
         }
         finally
         {
+            if (open_btree != null)
+                open_btree.close();
+
+            // counting on this commit to release latches associated with
+            // row level purge, that have been left to prevent others from
+            // getting to purged pages before the commit.  If latch is released
+            // early, other transactions could insert on the page which could
+            // prevent undo of the purges in case of a crash before the commit
+            // gets to the disk.
             internal_xact.commit();
             internal_xact.destroy();
         }
@@ -330,8 +334,9 @@ class BTreePostCommit implements Serviceable
      * committed transactions (otherwise we could not have gotten the exclusive
      * table lock).
      * <p>
-     * RESOLVE (mikem) - under row locking this routine must do more work to
-     * determine a deleted row is a committed deleted row.
+     * This routine handles purging committed deletes while holding a table
+     * level exclusive lock.  See purgeRowLevelCommittedDeletes() for row level
+     * purging.
      *
      * @param open_btree The btree already opened.
      * @param pageno The page number of the page to look for committed deletes.
@@ -448,6 +453,12 @@ class BTreePostCommit implements Serviceable
      * If it succeeds, and since this transaction did not delete the row then 
      * the row must have been deleted by a transaction which has committed, so
      * it is safe to purge the row.  It then purges the row from the page.
+     * <p>
+     * The latch on the leaf page containing the purged rows must be kept until
+     * after the transaction has been committed or aborted in order to insure
+     * proper undo of the purges can take place.  Otherwise another transaction
+     * could use the space freed by the purge and then prevent the purge from
+     * being able to undo.
      *
      * @param open_btree The already open btree, which has been locked with IX
      *                   table lock, to use to get latch on page.
@@ -460,70 +471,68 @@ class BTreePostCommit implements Serviceable
     {
         LeafControlRow leaf = null;
 
-        try
+        // The following can fail, returning null, either if it can't get
+        // the latch or somehow the page requested no longer exists.  In 
+        // either case the post commit work will just skip it.
+        leaf = (LeafControlRow) 
+            ControlRow.getNoWait(open_btree, page_number);
+        if (leaf == null)
+            return;
+
+        BTreeLockingPolicy  btree_locking_policy = 
+            open_btree.getLockingPolicy();
+
+        // The number records that can be reclaimed is:
+        // total recs - control row - recs_not_deleted
+        int num_possible_commit_delete = 
+            leaf.page.recordCount() - 1 - leaf.page.nonDeletedRecordCount();
+
+        if (num_possible_commit_delete > 0)
         {
-            // The following can fail, returning null, either if it can't get
-            // the latch or somehow the page requested no longer exists.  In 
-            // either case the post commit work will just skip it.
-            leaf = (LeafControlRow) 
-                ControlRow.getNoWait(open_btree, page_number);
-            if (leaf == null)
-                return;
+            DataValueDescriptor[] scratch_template = 
+                open_btree.getRuntimeMem().get_template(
+                    open_btree.getRawTran());
 
-            BTreeLockingPolicy  btree_locking_policy = 
-                open_btree.getLockingPolicy();
+            Page page   = leaf.page;
 
-            // The number records that can be reclaimed is:
-            // total recs - control row - recs_not_deleted
-            int num_possible_commit_delete = 
-                leaf.page.recordCount() - 1 - leaf.page.nonDeletedRecordCount();
 
-            if (num_possible_commit_delete > 0)
+            // RowLocation column is in last column of template.
+            FetchDescriptor lock_fetch_desc = 
+                RowUtil.getFetchDescriptorConstant(
+                    scratch_template.length - 1);
+
+            // loop backward so that purges which affect the slot table 
+            // don't affect the loop (ie. they only move records we 
+            // have already looked at).
+            for (int slot_no = page.recordCount() - 1; 
+                 slot_no > 0; 
+                 slot_no--) 
             {
-                DataValueDescriptor[] scratch_template = 
-                    open_btree.getRuntimeMem().get_template(
-                        open_btree.getRawTran());
-
-                Page page   = leaf.page;
-
-
-                // RowLocation column is in last column of template.
-                FetchDescriptor lock_fetch_desc = 
-                    RowUtil.getFetchDescriptorConstant(
-                        scratch_template.length - 1);
-
-                // loop backward so that purges which affect the slot table 
-                // don't affect the loop (ie. they only move records we 
-                // have already looked at).
-                for (int slot_no = page.recordCount() - 1; 
-                     slot_no > 0; 
-                     slot_no--) 
+                if (page.isDeletedAtSlot(slot_no))
                 {
-                    if (page.isDeletedAtSlot(slot_no))
+                    // try to get an exclusive lock on the row, if we can 
+                    // then the row is a committed deleted row and it is 
+                    // safe to purge it.
+                    if (btree_locking_policy.lockScanCommittedDeletedRow(
+                            open_btree, leaf, scratch_template, 
+                            lock_fetch_desc, slot_no))
                     {
-                        // try to get an exclusive lock on the row, if we can 
-                        // then the row is a committed deleted row and it is 
-                        // safe to purge it.
-                        if (btree_locking_policy.lockScanCommittedDeletedRow(
-                                open_btree, leaf, scratch_template, 
-                                lock_fetch_desc, slot_no))
-                        {
-                            // the row is a committed deleted row, purge it.
-                            page.purgeAtSlot(slot_no, 1, true);
-                            // Tell scans positioned on this page to reposition
-                            // because the row they are positioned on may have
-                            // disappeared.
-                            page.setRepositionNeeded();
-                        }
+                        // the row is a committed deleted row, purge it.
+                        page.purgeAtSlot(slot_no, 1, true);
+                        // Tell scans positioned on this page to reposition
+                        // because the row they are positioned on may have
+                        // disappeared.
+                        page.setRepositionNeeded();
                     }
                 }
-
             }
+
         }
-        finally
-        {
-            if (leaf != null)
-                leaf.release();
-        }
+
+        // need to maintain latch on leaf until xact is committed.  The
+        // commit will clear the latch as part of releasing all 
+        // locks/latches associated with a transaction.
+
+        return;
     }
 }
