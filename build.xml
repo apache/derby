@@ -1530,7 +1530,7 @@
     	  <attribute name="Sealed" value="false"/>
     	</section>
         <!-- See DERBY-4669. -->
-        <section name="org/apache/derby/iapi/services/sanity/">
+        <section name="org/apache/derby/shared/common/sanity/">
           <attribute name="Sealed" value="false"/>
         </section>
         <section name="org/apache/derby/iapi/tools/i18n/">
@@ -1730,6 +1730,10 @@
       <attribute name="Bundle-SymbolicName" value="derbyclient"/>
       <attribute name="DynamicImport-Package" value="*"/>
       <attribute name="Export-Package" value="org.apache.derby.jdbc"/> 
+      <!-- See DERBY-4669. -->
+      <section name="org/apache/derby/shared/common/sanity/">
+        <attribute name="Sealed" value="false"/>
+      </section>
     </manifest> 
 
     <!-- declare the client driver for autoloading by the JDBC 4 DriverManager -->

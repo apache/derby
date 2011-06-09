@@ -27,7 +27,11 @@ import java.net.MalformedURLException;
 import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
+// As an exception to the rule we import SanityManager from the shared package
+// here, because the JVMInfo class is included in both derby.jar and
+// derbyclient.jar. Pulling in the class from the shared package allows us to
+// unseal the shared package only (leaving iapi.services.sanity sealed).
+import org.apache.derby.shared.common.sanity.SanityManager;
 
 /**
 	This class is used to determine which Java specification Derby will run at.

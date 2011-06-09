@@ -32,7 +32,7 @@ import java.nio.charset.CoderResult;
 import org.apache.derby.client.am.Agent;
 import org.apache.derby.client.am.ClientMessageId;
 import org.apache.derby.client.am.SqlException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.shared.common.sanity.SanityManager;
 import org.apache.derby.shared.common.reference.SQLState;
 
 public class Utf8CcsidManager extends CcsidManager {
