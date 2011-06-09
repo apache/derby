@@ -139,7 +139,11 @@ public class AutomaticIndexStatisticsMultiTest
 
     private void verifyStatistics()
             throws SQLException {
-        IndexStatsUtil stats = new IndexStatsUtil(getConnection());
+        // DERBY-5097: On machines with a single core/CPU the load generated
+        // by the test threads may cause the index statistics daemon worker
+        // thread to be "starved". Add a timeout to give it a chance to do
+        // what it has been told to do.
+        IndexStatsUtil stats = new IndexStatsUtil(getConnection(), 5000);
         IdxStats[] myStats = stats.getStatsTable(TAB, 2);
         for (int i=0; i < myStats.length; i++) {
             IdxStats s = myStats[i];
