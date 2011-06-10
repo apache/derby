@@ -27,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 
+import org.apache.derbyTesting.functionTests.util.streams.LoopingAlphabetStream;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.XML;
@@ -791,6 +792,71 @@ public class BasicSetup extends UpgradeChange {
         }
     }
 
+    //This test creates a table with LOB column and insets large data
+    // into that column. There is a trigger defined on this table
+    // but the trigger does not need access to the LOB column. In 10.8 
+    // and prior releases, even though we don't need the LOB column to
+    // execute the trigger, we still read all the columns from the 
+    // trigger table when the trigger fired. With 10.9, only the columns 
+    // required by the firing triggers are read from the trigger table
+    // and hence for our test here, LOB column will not be materialized. 
+    //In 10.8 and prior releases, the trigger defined in this test can
+    // run into OOM errors depending on how much heap is available to
+    // the upgrade test. But in 10.9 and higher, that won't happen
+    // because LOB is never read into memory for the trigger being
+    // used by this test.
+    public void testTriggersWithLOBcolumns() throws Exception
+    {
+        Statement s = createStatement();
+        ResultSet rs;
+        boolean modeDb2SqlOptional = oldAtLeast(10, 3);
+    	final int lobsize = 50000*1024;
+        
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+    		s.execute("create table table1LOBtest (id int, status smallint, bl blob(2G))");
+    		PreparedStatement ps = prepareStatement(
+    		"insert into table1LOBtest values (?, 0, ?)");
+    		ps.setInt(1, 1);
+            ps.setBinaryStream(2, new LoopingAlphabetStream(lobsize), lobsize);
+            ps.executeUpdate();
+            
+    		s.execute("create table table2LOBtest (id int, updates int default 0)");
+    		ps = prepareStatement(
+    				"insert into table2LOBtest (id) values (?)");
+    		ps.setInt(1, 1);
+            ps.executeUpdate();
+
+            s.execute("create trigger trigger1 after update of status on table1LOBtest referencing " +
+    				"new as n_row for each row " +
+        			(modeDb2SqlOptional?"":"MODE DB2SQL ") +
+    				"update table2LOBtest set updates = updates + 1 where table2LOBtest.id = n_row.id");
+            break;
+            
+        case PH_HARD_UPGRADE:
+            //In 10.8 and prior releases, the trigger defined in this test can
+            // run into OOM errors depending on how much heap is available to
+            // the upgrade test. The reason for this is that 10.8 and prior
+        	// read all the columns from the trigger table whether or not the
+        	// firing triggers needed them. Since the table in this test has a
+        	// LOB column, it can cause 10.8 and prior to run into OOM. But in 
+        	// 10.9 and higher, that won't happen because LOB is never accessed
+        	// by the trigger defined here, it will not be read into memory and
+        	// will not cause OOM. For this reason, there is an IF condition
+        	// below before we issue a triggering sql which could result into
+        	// OOM in 10.8 and prior
+        	if ((getConnection().getMetaData().getDatabaseMajorVersion() >= 10) &&
+        	(getConnection().getMetaData().getDatabaseMinorVersion() >= 9))
+        	{
+        		ps = prepareStatement(
+        				"update table1LOBtest set status = 1 where id = 1");
+        		ps.executeUpdate();
+        	}
+            break;
+        }
+    }
+    
     final   int TEST_COUNT = 0;
     final   int FAILURES = TEST_COUNT + 1;
     final   String  A_COL = "a";
