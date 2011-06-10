@@ -72,25 +72,40 @@ public class DropOnCommit extends ContainerActionOnCommit {
 		@see java.util.Observer#update
 	*/
 	public void update(Observable obj, Object arg) {
+
 		if (SanityManager.DEBUG) {
 			if (arg == null)
-				SanityManager.THROWASSERT("still on observr list " + this);
+				SanityManager.THROWASSERT("still on observer list " + this);
 		}
 
-		if (arg.equals(RawTransaction.COMMIT) || arg.equals(RawTransaction.ABORT)) {
+		if (arg.equals(RawTransaction.COMMIT) || 
+            arg.equals(RawTransaction.ABORT)) {
 
 			RawTransaction xact = (RawTransaction) obj;
 
 			try {
+
 				if (this.isStreamContainer)
-					xact.dropStreamContainer(identity.getSegmentId(), identity.getContainerId());
+					xact.dropStreamContainer(
+                        identity.getSegmentId(), identity.getContainerId());
 				else
 					xact.dropContainer(identity);
+
 			} catch (StandardException se) {
+
 				xact.setObserverException(se);
+
 			}
 
 			obj.deleteObserver(this);
+
+            // DERBY-3993
+            // make sure any observer that may have been added by either
+            // dropContainer() or dropStreamContainer() is also handled.
+            // The calling notifyObservers() call from Xact.doComplete()
+            // may not "see" new observers added during processing of the
+            // initial observer list.
+            xact.notifyObservers(arg);
 		}
 	}
 }
