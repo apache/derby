@@ -35,6 +35,9 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 
 public class AutoIncrementTest extends BaseJDBCTestCase {
+
+    private static  final   String  SEQUENCE_OVERFLOW = "2200H";
+    
 	public AutoIncrementTest(String name)
 	{
 		super (name);
@@ -221,7 +224,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		String[][]expectedRows=new String[][]{{"0","0"},{"1","2"},{"2","4"},{"33","6"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs = s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'AIS'");
-		expectedRows=new String[][]{{"AIS","8","0","2"}};
+		expectedRows=new String[][]{{"AIS","10","0","2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 	}
@@ -378,7 +381,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		expectedRows=new String[][]{{"1","1"},{"2","2"},{"3","3"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select b.tablename, a.autoincrementvalue, a.autoincrementstart, a.autoincrementinc from sys.syscolumns a, sys.systables b where a.referenceid=b.tableid and a.columnname ='S1' and b.tablename = 'TAB1'");
-		expectedRows=new String[][]{{"TAB1","4","1","1"}};
+		expectedRows=new String[][]{{"TAB1","6","1","1"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("create table tab2 (lvl int, s1  bigint generated always as identity)");
 		s.executeUpdate("create trigger tab1_after2 after insert on tab3 referencing new as newrow for each row insert into tab2 (lvl) values 1,2,3");
@@ -490,7 +493,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.execute("insert into lockt1 (x) values (3)");
 		rs=s.executeQuery("select * from lock_table order by tabname, type desc, mode, cnt");
-		expectedRows=new String[][]{{"APP     ","UserTran","TABLE   ","1  ","IX","LOCKT1      ","GRANT","ACTIVE"},{"APP     ","UserTran","ROW     ","1  ","X","LOCKT1      ","GRANT","ACTIVE"},{"APP     ","UserTran","TABLE   ","1  ","IX","SYSCOLUMNS  ","GRANT","ACTIVE"},{"APP     ","UserTran","TABLE   ","1  ","S","SYSCOLUMNS  ","GRANT","ACTIVE"},{"APP     ","UserTran","ROW     ","2  ","X","SYSCOLUMNS  ","GRANT","ACTIVE"}};
+		expectedRows=new String[][]{{"APP     ","UserTran","TABLE   ","1  ","IX","LOCKT1      ","GRANT","ACTIVE"},{"APP     ","UserTran","ROW     ","1  ","X","LOCKT1      ","GRANT","ACTIVE"},{"APP     ","UserTran","TABLE   ","1  ","S","SYSCOLUMNS  ","GRANT","ACTIVE"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		commit();
 		
@@ -596,10 +599,10 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		ResultSet rs;
 		Statement pst=createStatement();
 		Statement s=createStatement();
-		assertStatementError("22003", pst,"insert into ai_over1 (x) values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19)");
-		assertStatementError("22003", pst,"insert into ai_over1 (x) values (1)");		
+		assertStatementError(SEQUENCE_OVERFLOW, pst,"insert into ai_over1 (x) values (1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12),(13),(14),(15),(16),(17),(18),(19)");
+		assertStatementError(SEQUENCE_OVERFLOW, pst,"insert into ai_over1 (x) values (1)");		
 		s.executeUpdate("insert into ai_over2 (x) values (1),(2),(3),(4),(5),(6),(7),(8)");
-		assertStatementError("22003", pst,"insert into ai_over2 (x) values (9),(10)");
+		assertStatementError(SEQUENCE_OVERFLOW, pst,"insert into ai_over2 (x) values (9),(10)");
 		String[][]expectedRows=new String[][]{{"1","-32760"},{"2","-32761"},{"3","-32762"},{"4","-32763"},{"5","-32764"},{"6","-32765"},{"7","-32766"},{"8","-32767"}};
 		rs=s.executeQuery("select * from ai_over2");
 		JDBC.assertFullResultSet(rs,expectedRows);		
@@ -608,12 +611,12 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		rs=s.executeQuery("select * from ai_over3");
 		expectedRows=new String[][]{{"1","2147483646"},{"2","2147483647"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
-		assertStatementError("22003", pst,"insert into ai_over3 (x) select x from ai_over3");			
+		assertStatementError(SEQUENCE_OVERFLOW, pst,"insert into ai_over3 (x) select x from ai_over3");			
 		//bigint overflow check		
-		s.executeUpdate("insert into ai_over4 (x) values (1),(2)");
-		assertStatementError("22003", pst,"insert into ai_over4 (x) values (3)");
+		s.executeUpdate("insert into ai_over4 (x) values (1),(2),(3)");
+		assertStatementError(SEQUENCE_OVERFLOW, pst,"insert into ai_over4 (x) values (4)");
 		rs=s.executeQuery("select * from ai_over4");
-		expectedRows=new String[][]{{"1","9223372036854775805"},{"2","9223372036854775806"}};
+		expectedRows=new String[][]{{"1","9223372036854775805"},{"2","9223372036854775806"},{"3","9223372036854775807"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 	}
@@ -939,7 +942,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		expectedRows=new String[][]{{"2","2"},{"2","9999"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'REC11'");
-		expectedRows=new String[][]{{"REC11","4","2","2"}};
+		expectedRows=new String[][]{{"REC11","12","2","2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		assertStatementError("42837",s,"alter table restartt1 alter column c12 RESTART WITH 2");
 		assertStatementError("42X49",s,"alter table restartt1 alter column rec11 RESTART WITH 2.20");
@@ -974,7 +977,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		assertStatementError("23505",s,"insert into t1lock(c12) values(3)");
 		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'LOCKC11'");
 		//Utilities.showResultSet(rs);
-		expectedRows=new String[][]{{"LOCKC11","2","1","1"}};
+		expectedRows=new String[][]{{"LOCKC11","6","1","1"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 		rs=s.executeQuery("select * from t1lock");

@@ -1718,29 +1718,6 @@ public interface DataDictionary
 		throws StandardException;
 
 	/**
-	 * getSetAutoincrementValue fetches the autoincrement value from 
-	 * SYSCOLUMNS given a row location. If doUpdate is true it updates
-	 * the autoincrement column with the new value.
-	 * the value returned by this routine is the new value and *NOT* the
-	 * value in the system catalogs.
-	 * 
-	 * @param rl		RowLocation of the entry in SYSCOLUMNS.
-	 * @param tc		TransactionController to use.
-	 * @param doUpdate  Write the new value to disk if TRUE.
-	 * @param newValue	A NumberDataValue to use to return incremented value. If
-	 * null, then the caller simply wants the current value fromd disk.
-	 * @param wait		If true, then the caller wants to wait for locks. When
-	 * using a nested user xaction we want to timeout right away if the parent
-	 * holds the lock.
-	 */
-	public NumberDataValue 	getSetAutoincrementValue(RowLocation rl,
-											 TransactionController tc,
-											 boolean doUpdate,
-											 NumberDataValue newValue,
-											 boolean wait)
-		throws StandardException;
-
-	/**
 	 * sets a new value in SYSCOLUMNS for a particular
 	 * autoincrement column.
 	 * 
@@ -1759,21 +1736,22 @@ public interface DataDictionary
 		throws StandardException;
 	
 	/**
-	 * Get the next number from an ANSI/ISO sequence generator
-     * which was created with the CREATE SEQUENCE statement. May
-     * raise an exception if the sequence was defined as NO CYCLE and
-     * the range of the sequence is exhausted. May allocate a range of
-     * sequence numbers and update the CURRENTVALUE column of the
-     * corresponding row in SYSSEQUENCES. This work is done in the
+	 * Get the next number from an identity or sequence generator
+     * which was created with the CREATE TABLE or CREATE SEQUENCE statement. May
+     * raise an exception if the generator was defined as NO CYCLE and
+     * the range of the generator is exhausted. May allocate a range of
+     * numbers and update the current column of the
+     * corresponding row in SYSCOLULMNS or SYSSEQUENCES. This work is done in the
      * execution transaction of the current session.
 	 * 
-	 * @param sequenceUUIDstring String value of the UUID which identifies the sequence
-	 * @param returnValue This is a data value to be stuffed with the next sequence number.
+	 * @param catalogNumber Number of the catalog that manages the values (either SYSCOLUMNS_CATALOG_NUM or SYSSEQUENCES_CATALOG_NUM)
+	 * @param uuidString String value of the UUID which identifies the table or the sequence
+	 * @param returnValue This is a data value to be stuffed with the next number in the range.
      *
-     * @throws StandardException if the sequence does not cycle and its range is exhausted
+     * @throws StandardException if the generator does not cycle and its range is exhausted
 	 */
     public void getCurrentValueAndAdvance
-        ( String sequenceUUIDstring, NumberDataValue returnValue )
+        ( int catalogNumber, String uuidString, NumberDataValue returnValue )
         throws StandardException;
 
 	/**

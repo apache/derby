@@ -251,24 +251,6 @@ public class InsertConstantAction extends WriteCursorConstantAction
 	public long   getAutoincIncrement(int i) { return autoincIncrement[i]; }
 
 	/**
-	 * Does the target table has autoincrement columns.
-	 *
-	 * @return 	True if the table has ai columns
-	 */
-	public boolean hasAutoincrement()
-	{
-		return (autoincRowLocation != null);
-	}
-
-	/**
-	 * gets the row location 
-	 */
-	public RowLocation[] getAutoincRowLocation()
-	{
-		return autoincRowLocation;
-	}
-	
-	/**
 	 * Get the formatID which corresponds to this class.
 	 *
 	 *	@return	the formatID of this class

@@ -454,9 +454,56 @@ public abstract class SequenceUpdater implements Cacheable
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // INNER CLASSES
+    // NESTED CLASSES
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Specific implementation of SequenceUpdater for the sequences managed by
+     * SYSCOLUMNS.
+     * </p>
+     */
+    public static final class SyscolumnsUpdater extends SequenceUpdater
+    {
+        private RowLocation _sequenceRowLocation;
+
+        public SyscolumnsUpdater() { super(); }
+        public SyscolumnsUpdater( DataDictionaryImpl dd ) { super( dd ); }
+    
+        //
+        // SequenceUpdater BEHAVIOR
+        //
+
+        protected SequenceGenerator createSequenceGenerator( TransactionController readOnlyTC )
+            throws StandardException
+        {
+            RowLocation[] rowLocation = new RowLocation[ 1 ];
+            SequenceDescriptor[] sequenceDescriptor = new SequenceDescriptor[ 1 ];
+            
+            _dd.computeIdentityRowLocation( readOnlyTC, _uuidString, rowLocation, sequenceDescriptor );
+            
+            _sequenceRowLocation = rowLocation[ 0 ];
+            
+            SequenceDescriptor isd = sequenceDescriptor[ 0 ];
+            
+            return new SequenceGenerator
+                (
+                 isd.getCurrentValue(),
+                 isd.canCycle(),
+                 isd.getIncrement(),
+                 isd.getMaximumValue(),
+                 isd.getMinimumValue(),
+                 isd.getStartValue(),
+                 isd.getSequenceName()
+                 );
+        }
+
+        protected boolean updateCurrentValueOnDisk( TransactionController tc, Long oldValue, Long newValue, boolean wait ) throws StandardException
+        {
+            return _dd.updateCurrentIdentityValue( tc, _sequenceRowLocation, wait, oldValue, newValue );
+        }
+    }
 
     /**
      * <p>
