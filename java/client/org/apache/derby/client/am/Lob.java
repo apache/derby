@@ -259,8 +259,8 @@ public abstract class Lob implements UnitOfWorkListener {
             throw new SqlException(null,
                         new ClientMessageId(
                             SQLState.LANG_STREAMING_COLUMN_I_O_EXCEPTION),
-                            ioe,
-                            typeDesc
+                            typeDesc,
+                            ioe
                     );
         }
     }
