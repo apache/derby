@@ -118,42 +118,15 @@ final class PhaseChanger extends BaseTestSetup {
     }
     
     /**
-     * Shutdown the database(s) and reset the class loader.
-     * @throws InterruptedException 
+     * Shutdown the database engine and reset the class loader.
+     * @throws SQLException if the engine couldn't be stopped
      */
-    protected void tearDown() throws InterruptedException
+    protected void tearDown() throws SQLException
     {
         if ( trace ) BaseTestCase.traceit(" Test upgrade done.");
-        if (phase != UpgradeChange.PH_POST_HARD_UPGRADE) {
-            DataSource ds = JDBCDataSource.getDataSource();
-            JDBCDataSource.shutdownDatabase(ds);
+        DataSource ds = JDBCDataSource.getDataSource();
+        JDBCDataSource.shutEngine(ds);
 
-            for (int i = 0; i < UpgradeRun.ADDITIONAL_DBS.length; i++)
-            {
-                ds = JDBCDataSource.getDataSourceLogical(
-                    UpgradeRun.ADDITIONAL_DBS[i].logicalName);
-
-                if (UpgradeRun.ADDITIONAL_DBS[i].shutDown) {
-                    boolean shutdown = true;
-                    try {
-                        ds.getConnection().close();
-                    } catch (SQLException e) {
-                        // if the database was never created
-                        // don't bother shutting it down
-                        String sqlState = e.getSQLState();
-                        if ("XJ004".equals(sqlState) ||
-                                "XJ040".equals(sqlState)) {
-                            shutdown = false;
-                        }
-                    }
-
-                    if (shutdown)
-                        JDBCDataSource.shutdownDatabase(ds);
-                } // else done by test
-            }
-        }
-        
-       
         if (loader != null)
             UpgradeClassLoader.setThreadLoader(previousLoader);       
         loader = null;
