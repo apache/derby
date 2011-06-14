@@ -179,15 +179,7 @@ public abstract class Lob implements UnitOfWorkListener {
         }
     }
 
-    void completeLocalRollback() {
-        ;
-    }
 
-    void completeLocalCommit() {
-        ;
-    }
-
-    
     /**
      * Method to be implemented by subclasses, so that
      * #materializedStream(InputStream, String) can be called with subclass
