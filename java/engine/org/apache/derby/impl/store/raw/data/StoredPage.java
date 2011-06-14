@@ -6974,14 +6974,15 @@ public class StoredPage extends CachedPage
 	 * methods that is called underneath a page action
 	 */
 
-	/*
-	 * update page version and instance due to actions by a log record
-	 */
-	public void logAction(LogInstant instant) throws StandardException
-	{
-		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(isLatched());
-		}
+    /*
+     * update page version and instance due to actions by a log record
+     */
+    public void logAction(LogInstant instant) throws StandardException
+    {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(isLatched(), 
+                "logAction() executed on an unlatched page.");
+        }
 
 		if (rawDataOut == null)
 			createOutStreams();

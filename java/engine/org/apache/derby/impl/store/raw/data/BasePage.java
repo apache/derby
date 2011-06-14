@@ -1350,10 +1350,11 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	*/
 	public void unlatch() {
 		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(isLatched());
+			SanityManager.ASSERT(isLatched(), 
+                "unlatch() attempted on page that is not latched.");
 		}
 
-	   releaseExclusive();
+        releaseExclusive();
 	}
 
 	/**
@@ -1374,7 +1375,8 @@ abstract class BasePage implements Page, Observer, TypedFormat
 	/** @see Page#recordCount */
 	public final int recordCount() {
 		if (SanityManager.DEBUG) {
-			SanityManager.ASSERT(isLatched());
+			SanityManager.ASSERT(
+                isLatched(), "page not latched on call to recordCount()");
 		}
 
 		return recordCount;
@@ -1415,9 +1417,14 @@ abstract class BasePage implements Page, Observer, TypedFormat
 						delCount++;
 				}
 				if (delCount != deletedCount)
-					SanityManager.THROWASSERT("incorrect deleted row count.  Should be: "
-						+ delCount + ", instead got: " + deletedCount
-						+ ", maxSlot = " + maxSlot + ", recordCount = " + recordCount);
+                {
+					SanityManager.THROWASSERT(
+                        "incorrect deleted row count.  Should be: " + delCount +
+                        ", instead got: " + deletedCount + 
+                        ", maxSlot = " + maxSlot + 
+                        ", recordCount = " + recordCount +
+                        "\npage = " + this);
+                }
 			}
 
 			return (recordCount - deletedCount);
