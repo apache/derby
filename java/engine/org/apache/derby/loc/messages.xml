@@ -607,7 +607,7 @@ Guide.
 
             <msg>
                 <name>22003.S.4</name>
-                <text>The length ({0}) exceeds the maximum length for the data type ({1}).</text>
+                <text>The length ({0}) exceeds the maximum length ({1}) for the data type.</text>
                 <arg>number</arg>
                 <arg>datatypeName</arg>
             </msg>
