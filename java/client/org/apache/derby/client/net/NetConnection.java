@@ -1628,54 +1628,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         return new org.apache.derby.client.am.SectionManager(collection, agent, databaseName);
     }
 
-    protected int getSocketAndInputOutputStreams(String server, int port, int clientSSLMode) {
-        try {
-            netAgent_.socket_ = (java.net.Socket) java.security.AccessController.doPrivileged(new OpenSocketAction(server, port, clientSSLMode));
-        } catch (java.security.PrivilegedActionException e) {
-            Exception openSocketException = e.getException();
-            if (netAgent_.loggingEnabled()) {
-                netAgent_.logWriter_.tracepoint("[net]", 101, "Client Re-route: " + openSocketException.getClass().getName() + " : " + openSocketException.getMessage());
-            }
-            return -1;
-        }
-
-        try {
-            netAgent_.rawSocketOutputStream_ = netAgent_.socket_.getOutputStream();
-            netAgent_.rawSocketInputStream_ = netAgent_.socket_.getInputStream();
-        } catch (java.io.IOException e) {
-            if (netAgent_.loggingEnabled()) {
-                netAgent_.logWriter_.tracepoint("[net]", 103, "Client Re-route: java.io.IOException " + e.getMessage());
-            }
-            try {
-                netAgent_.socket_.close();
-            } catch (java.io.IOException doNothing) {
-            }
-            return -1;
-        }
-        return 0;
-    }
-
-    protected int checkAlternateServerHasEqualOrHigherProductLevel(ProductLevel orgLvl, int orgServerType) {
-        if (orgLvl == null && orgServerType == 0) {
-            return 0;
-        }
-        ProductLevel alternateServerProductLvl =
-                netAgent_.netConnection_.databaseMetaData_.productLevel_;
-        boolean alternateServerIsEqualOrHigherToOriginalServer =
-                (alternateServerProductLvl.greaterThanOrEqualTo
-                (orgLvl.versionLevel_,
-                        orgLvl.releaseLevel_,
-                        orgLvl.modificationLevel_)) ? true : false;
-        // write an entry to the trace
-        if (!alternateServerIsEqualOrHigherToOriginalServer &&
-                netAgent_.loggingEnabled()) {
-            netAgent_.logWriter_.tracepoint("[net]",
-                    99,
-                    "Client Re-route failed because the alternate server is on a lower product level than the origianl server.");
-        }
-        return (alternateServerIsEqualOrHigherToOriginalServer) ? 0 : -1;
-    }
-
     public boolean willAutoCommitGenerateFlow() {
         // this logic must be in sync with writeCommit() logic
         if (!autoCommit_) {
