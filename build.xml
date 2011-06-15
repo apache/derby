@@ -2217,15 +2217,92 @@
 <!--                         Junit utility targets                       -->
 <!-- =================================================================== -->
 
-  <target name="junit-init">
+  <!-- Basic initialization for Junit tests (doesn't configure classpath). -->
+  <target name="junit-init-nocp">
     <tstamp prefix="derby.junit">
       <format property="standardtime" pattern="yyyy-MM-dd hh:mm aa zzz"/>
     </tstamp>
     <property name="derby.junit.jvm" value="java"/>
     <property name="derby.junit.timestamp" value="${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
     <mkdir dir="junit_${derby.junit.timestamp}/testout"/>
-    <property name="derby.junit.timestamp" value="${derby.junit.DSTAMP}_${derby.junit.TSTAMP}"/>
   </target>
+
+  <target name="junit-init" depends="junit-init-nocp">
+    <!-- Set up the default classpath to use with JUnit tests. junit tasks
+         should include the following entries in the order specified in 
+         their nested classpath structure:
+                <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
+                <pathelement path="${derby.junit.classpath}"/>
+
+         The preferences:
+           1) User-specified derby.junit.classpath
+           2) Jars (insane preferred over sane)
+           3) classes-directory
+
+         Note also that the user's CLASSPATH environment variable is appended
+         to the JUnit classpath, but in most cases Derby classes here will be
+         shadowed by one of the above entries. It is recommended to not have
+         any Derby classes in the CLASSPATH environment variable.
+     -->
+
+    <!-- See if the jars have been built
+         (skipped if derby.junit.classpath is set) -->
+    <condition property="tmp.jars" value="${jarsdist.dir}/insane">
+        <and>
+            <available file="${jarsdist.dir}/insane/"/>
+            <not>
+                <isset property="derby.junit.classpath"/>
+            </not>
+        </and>
+    </condition>
+    <condition property="tmp.jars" value="${jarsdist.dir}/sane">
+        <and>
+            <available file="${jarsdist.dir}/sane/"/>
+            <not>
+                <isset property="derby.junit.classpath"/>
+            </not>
+        </and>
+    </condition>
+
+    <!-- Use classes-directory if not using jars and not overriden by user -->
+    <condition property="derby.junit.classpath" value="${basedir}/classes">
+        <not>
+            <or>
+                <isset property="derby.junit.classpath"/>
+                <isset property="tmp.jars"/>
+            </or>
+        </not>
+    </condition>
+
+    <!-- Property to trigger informational message. -->
+    <condition property="emit.junit.lowmem.jars">
+        <isset property="tmp.jars"/>
+    </condition>
+
+    <!-- We have to set this to something, so point it to a src dir that
+         always exists (with no jars). -->
+    <condition property="derby.junit.test.jars" value="${basedir}/java/build">
+        <not>
+            <isset property="tmp.jars"/>
+        </not>
+    </condition>
+    <condition property="derby.junit.test.jars" value="${tmp.jars}">
+        <isset property="tmp.jars"/>
+    </condition>
+
+    <antcall target="emit-junit-classpath-jars"/>
+    <antcall target="emit-junit-classpath"/>
+  </target>
+
+  <target name='emit-junit-classpath-jars' if='emit.junit.lowmem.jars'>
+        <echo message="Running with jars: ${derby.junit.test.jars}" level='info'/>
+        <echo message="CLASSPATH (environment variable): ${env.CLASSPATH}" level='info'/>
+  </target>
+
+  <target name='emit-junit-classpath' unless='emit.junit.lowmem.jars'>
+        <echo message="Running with classes or user specified classpath: ${derby.junit.classpath}" level='info'/>
+        <echo message="CLASSPATH (environment variable): ${env.CLASSPATH}" level='info'/>
+   </target>
 
   <target name="junit-sysinfo" depends="junit-init">
     <java classname="org.apache.derby.tools.sysinfo"
@@ -2254,11 +2331,6 @@
 	   -->
 	
   <target name="junit-core" depends="junit-init">
-    <condition property="derby.junit.classpath" value="">
-      <not>
-        <isset property="derby.junit.classpath"/>
-      </not>
-    </condition>
     <condition property="derbyTesting.oldReleasePath" value="">
       <not>
         <isset property="derbyTesting.oldReleasePath"/>
@@ -2315,6 +2387,7 @@
 	todir="junit_${derby.junit.timestamp}"/>
 
       <classpath>
+            <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
      	    <pathelement path="${derby.junit.classpath}"/>
             <!-- ant 1.7 finds junit.jar if it is on the classpath of the <junit> task -->
             <pathelement location="${javatools.dir}/junit.jar"/>
@@ -2329,11 +2402,6 @@
     and Derby works with the test.
   -->
   <target name="junit-system-mini" depends="junit-init">
-        <condition property="derby.junit.classpath" value="">
-          <not>
-            <isset property="derby.junit.classpath"/>
-          </not>
-        </condition>
         <!--
              Specifying max heap size (maxmemory) for JVMs spawned by this
              target, since the default max heap size on most systems is
@@ -2352,6 +2420,7 @@
     <test name="org.apache.derbyTesting.system.oe.test.OETest"
         todir="junit_${derby.junit.timestamp}"/>
           <classpath>
+               <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
                <pathelement path="${derby.junit.classpath}"/>
                <pathelement location="${javatools.dir}/junit.jar"/>
           </classpath>
@@ -2367,11 +2436,6 @@
     This target is called by junit-jdbc after reading the VM level.
   -->
   <target name="junit-jdbc4-workhorse" if="vmLevelIsAtLeast1.6" depends="junit-init">
-    <condition property="derby.junit.classpath" value="">
-      <not>
-        <isset property="derby.junit.classpath"/>
-      </not>
-    </condition>
   	 <junit printsummary="on"
            fork="yes" forkmode="perTest"
            showoutput="yes"
@@ -2384,6 +2448,7 @@
       <test name="org.apache.derbyTesting.functionTests.tests.jdbc4._Suite"
       	todir="junit_${derby.junit.timestamp}"/>
         <classpath>
+            <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
        	    <pathelement path="${derby.junit.classpath}"/>
             <pathelement location="${javatools.dir}/junit.jar"/>
         </classpath>
@@ -2393,11 +2458,6 @@
 	  
   <!-- low memory suite runs with 16MB heap  -->
   <target name="junit-lowmem"  depends="checkVMLevel,junit-init" if="vmLevelIsAtLeast1.5">
-    <condition property="derby.junit.classpath" value="">
-      <not>
-        <isset property="derby.junit.classpath"/>
-      </not>
-    </condition>
   	 <junit printsummary="on"
            fork="yes" forkmode="perTest"
            jvm="${derby.junit.jvm}" maxmemory="16m"
@@ -2411,6 +2471,7 @@
       <test name="org.apache.derbyTesting.functionTests.tests.memory._Suite"
       	todir="junit_${derby.junit.timestamp}"/>
         <classpath>
+            <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
        	    <pathelement path="${derby.junit.classpath}"/>
             <pathelement location="${javatools.dir}/junit.jar"/>
         </classpath>
@@ -2432,6 +2493,7 @@
               todir="junit_${derby.junit.timestamp}"/>
 
         <classpath>
+            <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
             <pathelement path="${derby.junit.classpath}"/>
             <pathelement location="${javatools.dir}/junit.jar"/>
         </classpath>
@@ -2439,7 +2501,7 @@
   </target>
 
   <!-- Run the package private tests against the classes directories. -->
-  <target name="junit-pptesting" depends="junit-init">
+  <target name="junit-pptesting" depends="junit-init-nocp">
     <junit  printsummary="on"
             fork="yes" forkmode="once"
             showoutput="yes"
@@ -2462,11 +2524,6 @@
 
   <!-- Run a single junit test or suite -->
   <target name="junit-single" depends="junit-init">
-    <condition property="derby.junit.classpath" value="">
-      <not>
-        <isset property="derby.junit.classpath"/>
-      </not>
-    </condition>
     <condition property="noTestclassSet" value="">
       <not>
         <isset property="derby.junit.testclass"/>
@@ -2488,6 +2545,7 @@
       <test name="${derby.junit.testclass}" todir="junit_${derby.junit.timestamp}"/>
 
       <classpath>
+            <fileset dir="${derby.junit.test.jars}" includes="*.jar"/>
      	    <pathelement path="${derby.junit.classpath}"/>
             <pathelement location="${javatools.dir}/junit.jar"/>
       </classpath>
