@@ -44,7 +44,7 @@ import org.apache.derby.iapi.store.access.xa.XAResourceManager;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.impl.jdbc.EmbedConnection;
 import org.apache.derby.impl.jdbc.TransactionResourceImpl;
-import org.apache.derby.shared.common.sanity.SanityManager;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.reference.Property;
 
