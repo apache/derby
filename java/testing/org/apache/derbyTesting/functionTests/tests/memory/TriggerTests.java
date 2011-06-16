@@ -241,9 +241,27 @@ public class TriggerTests extends BaseJDBCTestCase {
 	 * @throws SQLException
 	 */
 	public void basicSetup() throws SQLException{
-        dropTable("TABLE1");
-        dropTable("TABLE2");
-        dropTable("TABLE3");
+		try {
+	        dropTable("TABLE1");
+	        dropTable("TABLE2");
+	        dropTable("TABLE3");
+		} catch (SQLException sqle) {
+			//DERBY-5279 Adding following code to catch any exception other 
+			// than table does not exist. If the caught error is derby
+			// lock time out then we want to know what is the lock out
+			// property set to. It should be set to default which is
+			// 60 but it is possible that some other test has changed
+			// that setting and forgot to revert it back to default
+			// before that test finished. The information about
+			// lock timeout will help us resolve DERBY-5279
+            assertSQLState("40XL1", sqle);	
+            //if we come here, then it means that we got lock timeout error
+            // In such a case, we want to see what is the current lock timeout
+            // setting when this test is getting run. The assetEquals following
+            // will always fails because we are comparing 1=2. We are doing
+            // this so that the lock out property will get printed.
+            assertEquals("lock timeout is set to " + getDatabaseProperty("derby.locks.deadlockTimeout"), "1", "2");
+		}
 
         Statement s = createStatement();
 		try {
