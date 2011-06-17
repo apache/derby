@@ -359,6 +359,13 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
         }
         commit();
 
+        // Object used for synchronization between the main thread and the
+        // helper thread. The main thread should increment the value to tell
+        // the helper thread that it's ready to start the index scan. The
+        // helper thread should increment it to tell the main thread that it
+        // has locked row 40 and is ready to insert more values.
+        final int[] syncObject = new int[1];
+
         // Lock a row on the first page in a different thread to stop the
         // index scan. Then split the first leaf by inserting many values
         // less than zero.
@@ -368,11 +375,24 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
                 Statement s = conn.createStatement();
                 s.executeUpdate("update t set x = x where x = 40");
                 s.close();
-                // Give the index scan time to start and position on
-                // the row we have locked. (Give it two seconds, since the
-                // main thread sleeps for one second first before it starts
-                // the index scan.)
-                Thread.sleep(2000);
+
+                synchronized (syncObject) {
+                    // Tell the main thread that we've locked the row and that
+                    // it can go ahead with the index scan.
+                    syncObject[0]++;
+                    syncObject.notifyAll();
+
+                    // Wait here until the main thread is actually ready to
+                    // start the scan.
+                    while (syncObject[0] < 2) {
+                        syncObject.wait();
+                    }
+                }
+
+                // The main thread is ready to start the index scan. Give it a
+                // second to get to the row we have locked.
+                Thread.sleep(1000L);
+
                 // Split the first leaf
                 PreparedStatement ps = conn.prepareStatement(
                         "insert into t values ?");
@@ -385,13 +405,24 @@ public class IndexSplitDeadlockTest extends BaseJDBCTestCase {
             }
         });
 
-        // Give the other thread time to obtain the lock
-        Thread.sleep(1000);
+        // Prepare the index scan.
+        PreparedStatement scan = prepareStatement(
+                "select * from t --DERBY-PROPERTIES constraint=C");
+
+        synchronized (syncObject) {
+            // Tell the helper thread we're ready to start the scan.
+            syncObject[0]++;
+            syncObject.notifyAll();
+
+            // Wait until the helper thread has obtained the lock.
+            while (syncObject[0] < 2) {
+                syncObject.wait();
+            }
+        }
 
         // Perform an index scan. Will be blocked for a while when fetching
-        // the row where x=100, but should be able to resume the scan.
-        ResultSet rs = s.executeQuery(
-                "select * from t --DERBY-PROPERTIES constraint=C");
+        // the row where x=40, but should be able to resume the scan.
+        ResultSet rs = scan.executeQuery();
         for (int i = 0; i < 300; i++) {
             assertTrue(rs.next());
             assertEquals(i, rs.getInt(1));
