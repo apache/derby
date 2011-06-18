@@ -20,12 +20,16 @@
 
 package org.apache.derbyTesting.functionTests.tests.tools;
 
+import java.util.Locale;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.LocaleTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
  *	Test that runs the importExportThruIJ.sql script and compares the output 
@@ -39,7 +43,7 @@ public final class ImportExportIJTest extends ScriptTestCase {
 	 * @param script - the name of the script
 	 */
 	private ImportExportIJTest(String script) {
-		super(script);
+		super(script, true);
 	}
 
 	
@@ -73,7 +77,12 @@ public final class ImportExportIJTest extends ScriptTestCase {
             "functionTests/testData/ImportExport/derby-2193-linenumber.txt"
             }
         );
-        return tst;
-//		return suite;
+
+        // This test should run in English locale since it compares error
+        // messages against a canon based on the English message text. Also,
+        // run the test in a fresh database, since the language of the message
+        // text is determined when the database is created.
+        tst = TestConfiguration.singleUseDatabaseDecorator(tst);
+        return new LocaleTestSetup(tst, Locale.ENGLISH);
 	}
 }
