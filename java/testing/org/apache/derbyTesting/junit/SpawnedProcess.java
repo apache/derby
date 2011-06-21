@@ -41,7 +41,8 @@ public final class SpawnedProcess {
 
     private final ByteArrayOutputStream out;
 
-    public SpawnedProcess(Process javaProcess, String name) {
+    public SpawnedProcess(Process javaProcess, String name) 
+                    throws InterruptedException {
         this.javaProcess = javaProcess;
         this.name = name;
 
@@ -192,7 +193,7 @@ public final class SpawnedProcess {
     }
 
     private ByteArrayOutputStream streamSaver(final InputStream in,
-            final String name) {
+            final String name) throws InterruptedException {
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream() {
             public void reset() {
@@ -221,8 +222,8 @@ public final class SpawnedProcess {
 
         }, name);
         streamReader.setDaemon(true);
-        streamReader.setPriority(Thread.MIN_PRIORITY);
         streamReader.start();
+        streamReader.join(500);
 
         return out;
 
