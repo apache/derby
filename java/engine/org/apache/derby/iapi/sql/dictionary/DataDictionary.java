@@ -217,6 +217,13 @@ public interface DataDictionary
 	public void clearCaches() throws StandardException;
 
 	/**
+	 * Clear all of the sequence number generators.
+	 *
+	 * @exception StandardException Standard Derby error policy
+	 */
+	public void clearSequenceCaches() throws StandardException;
+
+	/**
 	 * Inform this DataDictionary that we are about to start reading it.  This
 	 * means using the various get methods in the DataDictionary.
 	 * Generally, this is done during query compilation.

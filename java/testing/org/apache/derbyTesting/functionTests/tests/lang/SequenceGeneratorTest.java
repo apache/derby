@@ -417,13 +417,11 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
 
         getTestConfiguration().shutdownDatabase();
         conn = openUserConnection( TEST_DBO );
-        seq_04_value = (int) seq_04_upperBound;
         seq_04_upperBound = seq_04_value + ALLOCATION_COUNT;
         vetBumping( conn, TEST_DBO, "SEQ_04", seq_04_value++, seq_04_upperBound );
 
         getTestConfiguration().shutdownDatabase();
         conn = openUserConnection( TEST_DBO );
-        seq_04_value = (int) seq_04_upperBound;
         seq_04_upperBound = seq_04_value + ALLOCATION_COUNT;
         vetBumping( conn, TEST_DBO, "SEQ_04", seq_04_value++, seq_04_upperBound );
     }

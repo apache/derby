@@ -8833,11 +8833,7 @@ public final class	DataDictionaryImpl
 		OIDTdCache.cleanAll();
 		OIDTdCache.ageOut();
 
-		sequenceGeneratorCache.cleanAll();
-		sequenceGeneratorCache.ageOut();
-
-		idGeneratorCache.cleanAll();
-		idGeneratorCache.ageOut();
+        clearSequenceCaches();
 
 		if (spsNameCache != null)
 		{
@@ -8848,6 +8844,19 @@ public final class	DataDictionaryImpl
 			// spsTextHash.clear();
 		}
 	}
+
+    /**
+       Flush sequence caches to disk so that we don't leak unused, pre-allocated numbers.
+    */
+    public void    clearSequenceCaches() throws StandardException
+    {
+		sequenceGeneratorCache.cleanAll();
+		sequenceGeneratorCache.ageOut();
+
+		idGeneratorCache.cleanAll();
+		idGeneratorCache.ageOut();
+    }
+    
 
 	/**
 		Add the required entries to the data dictionary for a System table.

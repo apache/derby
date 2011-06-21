@@ -79,6 +79,11 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
 	}
 
+	public void clearSequenceCaches() throws StandardException {
+		// TODO Auto-generated method stub
+
+	}
+
 	public int startReading(LanguageConnectionContext lcc)
 			throws StandardException {
 		// TODO Auto-generated method stub
