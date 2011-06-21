@@ -15,7 +15,6 @@
   See the License for the specific language governing permissions and
   limitations under the License.
 -->
-
 <project xmlns="http://www.netbeans.org/ns/project/1">
     <type>org.netbeans.modules.ant.freeform</type>
     <configuration>
@@ -33,6 +32,11 @@
                 <source-folder>
                     <label>trunk</label>
                     <location>${project.dir}</location>
+                </source-folder>
+                <source-folder>
+                    <label>derby</label>
+                    <location>.</location>
+                    <encoding>UTF-8</encoding>
                 </source-folder>
                 <source-folder>
                     <label>java/build</label>
@@ -111,11 +115,21 @@
                     <target>clobber</target>
                     <target>all</target>
                 </action>
-                <action name="debug">
+                <action name="debug-ij">
                     <script>nbproject/ide-file-targets.xml</script>
-                    <target>debug-nb</target>
+                    <target>debug-ij</target>
+                </action>
+                <action name="debug-server">
+                    <script>nbproject/ide-file-targets.xml</script>
+                    <target>debug-server</target>
                 </action>
             </ide-actions>
+            <export>
+                <type>folder</type>
+                <location>${project.dir}/classes</location>
+                <script>${ant.script}</script>
+                <build-target>all</build-target>
+            </export>
             <view>
                 <items>
                     <source-folder style="packages">
@@ -164,12 +178,13 @@
                     <ide-action name="clean"/>
                     <ide-action name="javadoc"/>
                     <ide-action name="test"/>
-                    <ide-action name="debug"/>
+                    <ide-action name="debug-ij"/>
+                    <ide-action name="debug-server"/>
                 </context-menu>
             </view>
             <subprojects/>
         </general-data>
-        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/1">
+        <java-data xmlns="http://www.netbeans.org/ns/freeform-project-java/2">
             <compilation-unit>
                 <package-root>${project.dir}/java/build</package-root>
                 <package-root>${project.dir}/java/client</package-root>
@@ -181,6 +196,8 @@
                 <package-root>${project.dir}/java/testing</package-root>
                 <package-root>${project.dir}/java/tools</package-root>
                 <classpath mode="compile">${project.dir}/tools/java/geronimo-spec-servlet-2.4-rc4.jar:${project.dir}/tools/java/jakarta-oro-2.0.8.jar:${project.dir}/tools/java/javacc.jar:${project.dir}/tools/java/junit.jar:${ant.core.lib}:${project.dir}/classes/stubs/felix</classpath>
+                <built-to>${project.dir}/classes</built-to>
+                <javadoc-built-to>${project.dir}/javadoc</javadoc-built-to>
                 <source-level>1.5</source-level>
             </compilation-unit>
         </java-data>
