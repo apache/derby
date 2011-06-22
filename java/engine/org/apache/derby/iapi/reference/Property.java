@@ -636,6 +636,15 @@ public interface Property {
 	int		LANG_IDGEN_CACHE_SIZE_DEFAULT =32;
 
 	/**
+	 * Name of the implementation of SequencePreallocator which is used
+     * to tune how many values Derby pre-allocates for identity columns
+     * and sequences. Database.  Static.
+	 * <p>
+	 * Externally visible.
+	 */
+	String	LANG_SEQUENCE_PREALLOCATOR = "derby.language.sequence.preallocator";
+    
+	/**
 	  derby.language.stalePlanCheckInterval
 
 	  <P>

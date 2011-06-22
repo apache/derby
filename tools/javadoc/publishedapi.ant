@@ -31,6 +31,10 @@
 
 org/apache/derby/authentication/UserAuthenticator.java
 
+# package: org.apache.derby.catalog
+
+org/apache/derby/catalog/SequencePreallocator.java
+
 # package: org.apache.derby.drda
 
 org/apache/derby/drda/NetServlet.java

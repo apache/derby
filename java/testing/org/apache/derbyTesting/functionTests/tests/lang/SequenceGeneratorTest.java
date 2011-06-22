@@ -41,7 +41,9 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 
 import org.apache.derby.impl.sql.catalog.SequenceGenerator;
+import org.apache.derby.impl.sql.catalog.SequenceRange;
 import org.apache.derby.impl.sql.catalog.SequenceUpdater;
+import org.apache.derby.catalog.SequencePreallocator;
 import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.iapi.store.access.TransactionController;
 
@@ -60,11 +62,14 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
 
     // number of pre-allocated values in a sequence generator
     private static final long ALLOCATION_COUNT = 5L;
+    private static final int TWEAKED_ALLOCATION_COUNT = 7;
 
     private static  final   String      TEST_DBO = "TEST_DBO";
     private static  final   String      RUTH = "RUTH";
     private static  final   String      ALICE = "ALICE";
     private static  final   String[]    LEGAL_USERS = { TEST_DBO, ALICE, RUTH  };
+
+    private static  final   String      MISSING_ALLOCATOR = "X0Y85";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -536,6 +541,49 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         expectCompilationError( OBJECT_DOES_NOT_EXIST, "values ( next value for seq_07 )\n" );
     }
     
+    /**
+     * <p>
+     * Test user-written range allocators.
+     * </p>
+     */
+    public void test_08_userWrittenAllocators() throws Exception
+    {
+        Connection  conn = openUserConnection( TEST_DBO );
+        String  className;
+
+        goodStatement( conn, "create sequence seq_08\n" );
+
+        className = getClass().getName() + "$" + "UnknownClass";
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '" + className + "')"
+             );
+        expectExecutionError( conn, MISSING_ALLOCATOR, "values ( next value for seq_08 )" );
+
+        className = getClass().getName() + "$" + "BadAllocator";
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '" + className + "')"
+             );
+        expectExecutionError( conn, MISSING_ALLOCATOR, "values ( next value for seq_08 )" );
+
+        className = getClass().getName() + "$" + "LegalAllocator";
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '" + className + "')"
+             );
+        vetBumping( conn, TEST_DBO, "SEQ_08", Integer.MIN_VALUE, Integer.MIN_VALUE + TWEAKED_ALLOCATION_COUNT );
+
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', null )"
+             );
+    }
+        
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -589,7 +637,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // INNER CLASSES
+    // NESTED CLASSES
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -622,7 +670,9 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
                  maxValue,
                  minValue,
                  restartValue,
-                 "DUMMY_SEQUENCE"
+                 "DUMMY_SCHEMA",
+                 "DUMMY_SEQUENCE",
+                 new SequenceRange()
                  );
         }
         
@@ -656,6 +706,17 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         // overridden to avoid a null pointer exception when we don't have a language context
         protected int getLockTimeout() { return 1000; }
     
+    }
+
+    // Illegal preallocator, which does not implement the correct interface
+    public  static  final   class   BadAllocator {}
+
+    // Legal preallocator, which preallocates a fixed size range
+    public  static final   class   LegalAllocator  implements  SequencePreallocator
+    {
+        public  LegalAllocator() {}
+        
+        public  int nextRangeSize( String s, String n ) { return TWEAKED_ALLOCATION_COUNT; }
     }
 
 }

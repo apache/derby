@@ -719,8 +719,8 @@ public interface SQLState {
 	String LANG_INVALID_TRIM_SET                                       = "22027";
     String LANG_STRING_TOO_LONG                                        = "22028";
 	String LANG_ESCAPE_IS_NULL                                  	   = "22501";
-	String LANG_INVALID_ROW_COUNT_OFFSET                               = "2201X";
 	String LANG_INVALID_ROW_COUNT_FIRST                                = "2201W";
+	String LANG_INVALID_ROW_COUNT_OFFSET                               = "2201X";
 	String LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL                         = "2201Z";
 
 	/*
@@ -1369,6 +1369,7 @@ public interface SQLState {
 	String LANG_NULL_DATA_IN_NON_NULL_COLUMN               	   	   	   = "X0Y80.S";
     String LANG_IGNORE_MISSING_INDEX_ROW_DURING_DELETE                 = "X0Y83.S";
     String LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE                 = "X0Y84.S";
+	String LANG_UNKNOWN_SEQUENCE_PREALLOCATOR                                = "X0Y85.S";
 
 
 	// TEMPORARY EXECUTION RESTRICTIONS

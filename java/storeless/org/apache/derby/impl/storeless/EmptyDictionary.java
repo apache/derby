@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.impl.storeless.EmptyDictionary
+   Derby - Class org.apache.derby.impl.storeless.EmptyDictionary
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with

@@ -20,13 +20,16 @@
  */
 package org.apache.derby.impl.sql.catalog;
 
+import org.apache.derby.catalog.SequencePreallocator;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
@@ -434,6 +437,28 @@ public abstract class SequenceUpdater implements Cacheable
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /** Make a new range allocator (called when the generator is instantiated) */
+    protected SequencePreallocator  makePreallocator( TransactionController tc )
+        throws StandardException
+    {
+        String  propertyName = Property.LANG_SEQUENCE_PREALLOCATOR;
+        String  className = PropertyUtil.getServiceProperty( tc, propertyName );
+
+        if ( className == null ) { return new SequenceRange(); }
+
+        try {
+            return (SequencePreallocator) Class.forName( className ).newInstance();
+        }
+        catch (ClassNotFoundException e) { throw missingAllocator( propertyName, className, e ); }
+        catch (ClassCastException e) { throw missingAllocator( propertyName, className, e ); }
+        catch (InstantiationException e) { throw missingAllocator( propertyName, className, e ); }
+        catch (IllegalAccessException e) { throw missingAllocator( propertyName, className, e ); }
+    }
+    private StandardException   missingAllocator( String propertyName, String className, Exception e )
+    {
+        return StandardException.newException( SQLState.LANG_UNKNOWN_SEQUENCE_PREALLOCATOR, e, propertyName, className );
+    }
+    
     /** Get the time we wait for a lock, in milliseconds--overridden by unit tests */
     protected int getLockTimeout()
     {
@@ -495,7 +520,9 @@ public abstract class SequenceUpdater implements Cacheable
                  isd.getMaximumValue(),
                  isd.getMinimumValue(),
                  isd.getStartValue(),
-                 isd.getSequenceName()
+                 isd.getSchemaDescriptor().getSchemaName(),
+                 isd.getSequenceName(),
+                 makePreallocator( readOnlyTC )
                  );
         }
 
@@ -542,7 +569,9 @@ public abstract class SequenceUpdater implements Cacheable
                  isd.getMaximumValue(),
                  isd.getMinimumValue(),
                  isd.getStartValue(),
-                 isd.getSequenceName()
+                 isd.getSchemaDescriptor().getSchemaName(),
+                 isd.getSequenceName(),
+                 makePreallocator( readOnlyTC )
                  );
         }
 
