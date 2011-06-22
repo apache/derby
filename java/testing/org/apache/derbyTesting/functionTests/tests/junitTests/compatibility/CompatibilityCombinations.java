@@ -237,6 +237,9 @@ public class CompatibilityCombinations extends BaseTestCase
     private static boolean includeUpgrade = false;
     
     private static long SLEEP_TIME_MILLIS = 5000L;
+
+    /** The process in which the network server is running. */
+    private Process serverProc;
     
     /**
      * Creates a new instance of CompatibilityCombinations
@@ -729,6 +732,7 @@ public class CompatibilityCombinations extends BaseTestCase
             Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
             PrintWriter out = new PrintWriter(new FileWriter(workingDirName+PS+combinationName));
             String result = testOutput(proc, out); // Scans test report for OK and Time...
+            proc.waitFor();
             if ( result.indexOf(" OK ") != -1 ) testOK = true;
             result= combinationName+":" + result;
             summaryFile.println(result);
@@ -1024,12 +1028,11 @@ public class CompatibilityCombinations extends BaseTestCase
             {
                 public void run()
                 {
-                    Process proc = null;
                     try
                     {
                         DEBUG("************** In run().");
-                        proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
-                        // proc = Runtime.getRuntime().exec(commandElements,envElements,workingDir);
+                        serverProc = Runtime.getRuntime().
+                                exec(fullCmd, envElements, workingDir);
                         DEBUG("************** Done exec().");
                     }
                     catch (Exception ex)
@@ -1118,15 +1121,8 @@ public class CompatibilityCombinations extends BaseTestCase
         
         if ( removeDBfiles )
         {
-            File databaseDir = new File(fullPath);
-            if ( deleteDir(databaseDir) )
-            {
-                DEBUG("Successfully deleted database dir '" + fullPath +"'");
-            }
-            else
-            {
-                DEBUG("Failed deleting database dir '" + fullPath +"'");
-            }
+            DEBUG("Deleting database dir '" + fullPath + "'");
+            BaseTestCase.removeDirectory(fullPath);
         }
         else
         {
@@ -1152,9 +1148,8 @@ public class CompatibilityCombinations extends BaseTestCase
         try
         {
             Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
-            proc.waitFor();
             processDEBUGOutput(proc);
-                        
+            proc.waitFor();
         }
         catch (Exception ex)
         {
@@ -1275,9 +1270,14 @@ public class CompatibilityCombinations extends BaseTestCase
                 );
             try
             {
+                // Tell the server to stop.
                 Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
                 processDEBUGOutput(proc);
-                
+                proc.waitFor();
+
+                // Now wait for it to actually stop.
+                serverProc.waitFor();
+                serverProc = null;
             }
             catch (Exception ex)
             {
@@ -1348,7 +1348,7 @@ public class CompatibilityCombinations extends BaseTestCase
         {
             Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
             processOutput(proc, out);
-            
+            proc.waitFor();
         }
         catch (Exception ex)
         {
@@ -1408,7 +1408,7 @@ public class CompatibilityCombinations extends BaseTestCase
         {
             Process proc = Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
             processOutput(proc, out);
-            
+            proc.waitFor();
         }
         catch (Exception ex)
         {
@@ -1419,25 +1419,6 @@ public class CompatibilityCombinations extends BaseTestCase
         DEBUG("");
     }
     
-    
-    private static boolean deleteDir(File dir)
-    {
-        if (dir.isDirectory())
-        {
-            String[] children = dir.list();
-            for (int i=0; i<children.length; i++)
-          {
-                boolean success = deleteDir(new File(dir, children[i]));
-                if (!success)
-                {
-                    return false;
-                }
-            }
-        }
-        
-        // The directory is now empty so delete it
-        return dir.delete();
-    }
     /////////////////////
     
   private static void processOutput(Process proc, PrintWriter out)
