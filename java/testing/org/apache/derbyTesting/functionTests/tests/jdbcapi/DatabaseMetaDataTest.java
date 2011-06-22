@@ -5018,6 +5018,54 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         DriverManager.getConnection(
         "jdbc:default:connection").getMetaData().isReadOnly();
     }
+
+    /**
+     * getColumns() used to fail with a truncation error if an auto-increment
+     * column had a start value or an increment that was very large (that is,
+     * when its CHAR representation exceeded 12 characters). DERBY-5274.
+     */
+    public void testGetColumns_DERBY5274() throws SQLException {
+        // Disable auto-commit to allow easy cleanup.
+        setAutoCommit(false);
+
+        Statement s = createStatement();
+
+        // Create a test table with an identity column whose start value and
+        // increment are very large.
+        final long bignum = 648518346341351400L;
+        s.execute("create table derby5274(x bigint not null " +
+                  "generated always as identity (" +
+                  "start with " + bignum + ", increment by " + bignum + "))");
+
+        // Expected values for various columns in the meta-data.
+        String[][] expected = {
+            {"TABLE_SCHEM", "APP"},
+            {"TABLE_NAME", "DERBY5274"},
+            {"COLUMN_NAME", "X"},
+            {"COLUMN_DEF",
+                "AUTOINCREMENT: start " + bignum + " increment " + bignum},
+            {"IS_NULLABLE", "NO"},
+        };
+
+        // Get meta-data for the column in the test table. This used to fail
+        // with a truncation error before DERBY-5274.
+        ResultSet rs = getDMD().getColumns(null, null, "DERBY5274", null);
+
+        // Verify that the returned meta-data looks right.
+        assertTrue("No columns found", rs.next());
+        for (int i = 0; i < expected.length; i++) {
+            String label = expected[i][0];
+            String expectedVal = expected[i][1];
+            assertEquals(label, expectedVal, rs.getString(label));
+        }
+
+        // There's only one column in the test table, so there should be no
+        // more rows in the meta-data.
+        JDBC.assertEmpty(rs);
+
+        // Clean up.
+        rollback();
+    }
     
     /**
      *  dummy method to test getProcedureColumns
