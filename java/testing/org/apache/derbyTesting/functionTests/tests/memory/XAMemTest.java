@@ -30,9 +30,11 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.J2EEDataSource;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.XATestUtil;
 
@@ -86,6 +88,10 @@ public class XAMemTest
     }
 
     public static Test suite() {
-        return TestConfiguration.defaultSuite(XAMemTest.class);
+        if (JDBC.vmSupportsJDBC3()) {
+            return TestConfiguration.defaultSuite(XAMemTest.class);
+        }
+
+        return new TestSuite("XAMemTest skipped - XADataSource not available");
     }
 }
