@@ -49,7 +49,6 @@ import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
 import java.sql.Connection;
 import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.ArrayList;
@@ -1004,8 +1003,7 @@ public final class NetworkServerControlImpl {
 					}
 
 					// start the server.
-					Class.forName(CLOUDSCAPE_DRIVER).newInstance();
-					cloudscapeDriver = DriverManager.getDriver(Attribute.PROTOCOL);
+					cloudscapeDriver = (Driver) Class.forName(CLOUDSCAPE_DRIVER).newInstance();
 
 				}
 				catch (Exception e) {
@@ -3827,7 +3825,7 @@ public final class NetworkServerControlImpl {
 	 	try {
 			//Note, we add database to the url so that we can allow additional
 			//url attributes
-			Connection conn = DriverManager.getConnection(Attribute.PROTOCOL+database, p);
+			Connection conn = getDriver().connect(Attribute.PROTOCOL+database, p);
 			// send warnings
 			SQLWarning warn = conn.getWarnings();
 			if (warn != null)
