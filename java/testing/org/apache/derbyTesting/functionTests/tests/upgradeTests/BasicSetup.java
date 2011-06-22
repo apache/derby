@@ -805,7 +805,7 @@ public class BasicSetup extends UpgradeChange {
     // the upgrade test. But in 10.9 and higher, that won't happen
     // because LOB is never read into memory for the trigger being
     // used by this test.
-    public void testTriggersWithLOBcolumns() throws Exception
+    public void atestTriggersWithLOBcolumns() throws Exception
     {
         Statement s = createStatement();
         ResultSet rs;
