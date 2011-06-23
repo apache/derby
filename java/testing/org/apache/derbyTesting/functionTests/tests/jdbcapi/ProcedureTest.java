@@ -641,6 +641,40 @@ public class ProcedureTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test that a statement severity error inside a procedure doesn't kill
+     * the top-level statement that executes the stored procedure. Regression
+     * test case for DERBY-5280.
+     */
+    public void testStatementSeverityErrorInProcedure() throws SQLException {
+        Statement s = createStatement();
+        s.execute("create procedure proc_5280() language java " +
+                  "parameter style java external name '" +
+                  getClass().getName() + ".proc_5280' reads sql data");
+        s.execute("call proc_5280()");
+    }
+
+    /**
+     * Procedure that drops a non-existent table and ignores the exception
+     * thrown because of it. Used by the regression test case for DERBY-5280.
+     */
+    public static void proc_5280() throws SQLException {
+        Connection c = DriverManager.getConnection("jdbc:default:connection");
+        Statement s = c.createStatement();
+
+        // Drop a non-existent table and verify that it fails with the
+        // expected exception. Ignore the exception.
+        try {
+            s.execute("drop table this_table_does_not_exist");
+            fail("dropping non-existent table should fail");
+        } catch (SQLException sqle) {
+            assertSQLState("42Y55", sqle);
+        }
+
+        // The statement should still work.
+        JDBC.assertSingleValueResultSet(s.executeQuery("values 1"), "1");
+    }
+
+    /**
      * Test that INOUT args are preserved over procedure invocations.
      * See DERBY-2515.
      */
