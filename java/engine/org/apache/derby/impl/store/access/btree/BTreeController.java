@@ -109,7 +109,11 @@ public class BTreeController extends OpenBTree implements ConglomerateController
      * it would be a waste to merge the page only to split it again to allow
      * the insert of the row causing the split.
      *
-	 * @return true if at least one row was purged.
+	 * @return true if at least one row was purged.  If true, then the routine
+     *              will leave the page latched, and the caller will release
+     *              the latch by committing or aborting the transaction.  The
+     *              latch must be held to end transaction to insure space on
+     *              the page remains available for a undo of the purge.
      *
      * @param open_btree The already open btree to use to get latch on page.
      * @param pageno     The page number of the leaf to attempt the reclaim on.
@@ -187,14 +191,23 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         }
         finally
         {
-            if (controlRow != null) {
-                if (purged_at_least_one_row) {
+            if (controlRow != null) 
+            {
+                if (purged_at_least_one_row) 
+                {
                     // Set a hint in the page that scans positioned on it
                     // need to reposition because rows have disappeared from
-                    // the page.
+                    // the page.  If at least one row has been purged, then
+                    // do not release the latch.  Purge requires latch to 
+                    // be held until commit, where it will be released after
+                    // the commit log record has been logged.
                     controlRow.page.setRepositionNeeded();
                 }
-                controlRow.release();
+                else
+                {
+                    // Ok to release latch if no purging has happened.
+                    controlRow.release();
+                }
             }
         }
 
@@ -308,6 +321,12 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                 // don't split if we reclaim any rows.
                 do_split = !reclaim_deleted_rows(split_open_btree, leaf_pageno);
 
+                // on return if !do_split then the latch on leaf_pageno is held
+                // and will be released by the committing or aborting the 
+                // transaction.  If a purge has been done, no other action on
+                // the page should be attempted (ie. a split) before committing
+                // the purges.
+
                 split_open_btree.close();
             }
         }
@@ -315,6 +334,9 @@ public class BTreeController extends OpenBTree implements ConglomerateController
         long new_leaf_pageno = leaf_pageno; 
         if (do_split)
         {
+            // no space was reclaimed from deleted rows, so do split to allow
+            // space for a subsequent insert.
+
             split_open_btree = new OpenBTree();
             split_open_btree.init(
                 this.init_open_user_scans, 

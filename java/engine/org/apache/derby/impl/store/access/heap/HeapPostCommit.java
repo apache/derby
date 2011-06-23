@@ -222,7 +222,10 @@ class HeapPostCommit implements Serviceable
             {
                 // If no purge happened on the page and the page is not
                 // removed, feel free to unlatch it.  Otherwise, let
-                // transaction commit take care of it.
+                // transaction commit take care of it.  The latch must be
+                // held until end transaction in order to insure no other
+                // transaction uses the space freed by the purge, which
+                // would cause a subquent undo of the purge to fail.
 				if (!purgingDone)
                 {
                     page.unlatch();
