@@ -208,7 +208,11 @@ class HeapCompressScan
                     // At this point assume table level lock, and that this
                     // transcation did not delete the row, so any
                     // deleted row must be a committed deleted row which can
-                    // be purged.
+                    // be purged.  Usually latches on purged pages must
+                    // be held until end transaction to prevent other 
+                    // transactions from using space necessary for a possible
+                    // undo of the purge, but in this case a table level
+                    // lock is held and will insure correct undo behavior.
                     scan_position.current_page.purgeAtSlot(
                         scan_position.current_slot, 1, false);
 
