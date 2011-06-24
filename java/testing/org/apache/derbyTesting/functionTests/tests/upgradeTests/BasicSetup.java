@@ -1378,5 +1378,79 @@ public class BasicSetup extends UpgradeChange {
                     s.executeQuery("select * from d3870_t2"), "1");
         }
     }
+    
+    /**
+     * DERBY-5289 Upgrade could fail during upgrade with triggers due to 
+     * failure reading serializable or SQLData object
+     * @throws SQLException
+     */
+    public void testDERBY5289TriggerUpgradeFormat() throws SQLException {
+        // if the old version suffers from DERBY-4835 we 
+        // cannot run this test because the database won't boot
+        // on soft upgrade and none of the fixtures will run.
+        if (oldSuffersFromDerby4835())
+            return;
+        Statement s = createStatement();
+        switch (getPhase())
+        {
+            case PH_CREATE:
+                s.executeUpdate("CREATE TABLE D5289TABLE1 (COL1 VARCHAR(5))");
+                s.executeUpdate("CREATE TABLE D5289TABLE2 (COL2 VARCHAR(5))");
+                s.executeUpdate("CREATE TABLE D5289TABLE3 (COL3 VARCHAR(5))");
+                s.executeUpdate("CREATE TRIGGER D5289T1_UPDATED AFTER UPDATE " +
+                        "ON D5289TABLE1 REFERENCING OLD AS OLD NEW AS NEW FOR " +
+                        "EACH ROW MODE DB2SQL UPDATE D5289TABLE2 SET COL2 = NEW.COL1 WHERE " +
+                        "COL2 = OLD.COL1");
+                s.executeUpdate("CREATE TRIGGER D5289T2_UPDATED AFTER UPDATE " + 
+                        "ON D5289TABLE2 REFERENCING NEW AS NEW FOR EACH " +
+                        "ROW MODE DB2SQL INSERT INTO D5289TABLE3(COL3) VALUES('ccc')");
+                s.executeUpdate("insert into D5289TABLE1(COL1) values ('aaa') ");
+                s.executeUpdate("insert into D5289TABLE2(COL2) values ('aaa') ");
+                s.executeUpdate("UPDATE D5289TABLE1 SET COL1 = 'bbb'");
+                assertDERBY5289ResultsAndDelete();
+                break;
+            case PH_SOFT_UPGRADE:   
+                s.executeUpdate("insert into D5289TABLE1(COL1) values ('aaa')");
+                s.executeUpdate("insert into D5289TABLE2(COL2) values ('aaa')");
+                s.executeUpdate("UPDATE D5289TABLE1 SET COL1 = 'bbb'");
+                assertDERBY5289ResultsAndDelete();                
+                break;
+            case PH_POST_SOFT_UPGRADE:
+                // If old version suffers from DERBY-5289, we can't run this part of the 
+                // DERBY-5289 won't go in until 10.8.2.0
+                if (! oldLessThan(10,8,2,0)) {
+                    s.executeUpdate("insert into D5289TABLE1(COL1) values ('aaa')");
+                    s.executeUpdate("insert into D5289TABLE2(COL2) values ('aaa') ");
+                    s.executeUpdate("UPDATE D5289TABLE1 SET COL1 = 'bbb'");
+                    assertDERBY5289ResultsAndDelete();
+                }
+                break;
+            case PH_HARD_UPGRADE:
+                s.executeUpdate("insert into D5289TABLE1(COL1) values ('aaa')");
+                s.executeUpdate("insert into D5289TABLE2(COL2) values ('aaa') ");
+                s.executeUpdate("UPDATE D5289TABLE1 SET COL1 = 'bbb'");
+                assertDERBY5289ResultsAndDelete();
+                break;
+        }
+    }
 
+    /**
+     * Private helper method for fixture testDERBY5289TriggerUpgradeFormat
+     * to check and cleanup date in each phase.
+     * 
+     * @throws SQLException
+     */
+    private void assertDERBY5289ResultsAndDelete() throws SQLException {
+        Statement s = createStatement();
+        JDBC.assertFullResultSet(s.executeQuery("SELECT * FROM D5289TABLE1"), 
+                new String[][] {{"bbb"}});        
+        JDBC.assertFullResultSet(s.executeQuery("SELECT * FROM D5289TABLE2"),
+                new String[][] {{"bbb"}});
+        JDBC.assertFullResultSet(s.executeQuery("SELECT * FROM D5289TABLE3"), 
+                new String[][] {{"ccc"}});
+        s.executeUpdate("DELETE FROM D5289TABLE1");
+        s.executeUpdate("DELETE FROM D5289TABLE2");
+        s.executeUpdate("DELETE FROM D5289TABLE3");
+        commit();  
+    }
 }
