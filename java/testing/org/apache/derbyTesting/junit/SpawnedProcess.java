@@ -37,17 +37,17 @@ public final class SpawnedProcess {
 
     private final Process javaProcess;
 
-    private final ByteArrayOutputStream err;
+    private final StreamSaver errSaver;
 
-    private final ByteArrayOutputStream out;
+    private final StreamSaver outSaver;
 
     public SpawnedProcess(Process javaProcess, String name) {
         this.javaProcess = javaProcess;
         this.name = name;
 
-        err = streamSaver(javaProcess.getErrorStream(), name
+        errSaver = streamSaver(javaProcess.getErrorStream(), name
                 .concat(":System.err"));
-        out = streamSaver(javaProcess.getInputStream(), name
+        outSaver = streamSaver(javaProcess.getInputStream(), name
                 .concat(":System.out"));
     }
 
@@ -59,14 +59,22 @@ public final class SpawnedProcess {
     }
     
     /**
+     * <p>
      * Get the full server output (stdout) as a string using the default
-     * encoding which is assumed is how it was orginally
-     * written.
+     * encoding which is assumed is how it was originally written.
+     * </p>
+     *
+     * <p>
+     * This method should only be called after the process has completed.
+     * That is, {@link #complete(boolean)} should be called first.
+     * </p>
      */
     public String getFullServerOutput() throws Exception {
-        Thread.sleep(500);
+        // First wait until we've read all the output.
+        outSaver.thread.join();
+
         synchronized (this) {
-            return out.toString(); 
+            return outSaver.stream.toString();
         }
     }
     
@@ -84,7 +92,7 @@ public final class SpawnedProcess {
     {
         byte[] fullData;
         synchronized (this) {
-            fullData = out.toByteArray();
+            fullData = outSaver.stream.toByteArray();
         }
         
         String output = new String(fullData, stdOutReadOffset,
@@ -110,7 +118,10 @@ public final class SpawnedProcess {
         } catch (IllegalThreadStateException e) {
             sb.append("running");
         }
-        
+
+        ByteArrayOutputStream err = errSaver.stream;
+        ByteArrayOutputStream out = outSaver.stream;
+
         synchronized (this) {
             if (err.size() != 0)
             {
@@ -127,7 +138,7 @@ public final class SpawnedProcess {
     }
 
     /**
-     * Complete the method.
+     * Complete the process.
      * @param destroy True to destroy it, false to wait for it to complete.
      */
     public int complete(boolean destroy) throws InterruptedException, IOException {
@@ -135,10 +146,15 @@ public final class SpawnedProcess {
             javaProcess.destroy();
 
         int exitCode = javaProcess.waitFor();
-        Thread.sleep(500);
+
+        // The process has completed. Wait until we've read all output.
+        outSaver.thread.join();
+        errSaver.thread.join();
+
         synchronized (this) {
 
             // Always write the error
+            ByteArrayOutputStream err = errSaver.stream;
             if (err.size() != 0) {
                 System.err.println("START-SPAWNED:" + name + " ERROR OUTPUT:");
                 err.writeTo(System.err);
@@ -147,6 +163,7 @@ public final class SpawnedProcess {
 
             // Only write the error if it appeared the server
             // failed in some way.
+            ByteArrayOutputStream out = outSaver.stream;
             if ((destroy || exitCode != 0) && out.size() != 0) {
                 System.out.println("START-SPAWNED:" + name
                         + " STANDARD OUTPUT: exit code=" + exitCode);
@@ -159,7 +176,21 @@ public final class SpawnedProcess {
         return exitCode;
     }
 
-    private ByteArrayOutputStream streamSaver(final InputStream in,
+    /**
+     * Class holding references to a stream that receives the output from a
+     * process and a thread that reads the process output and passes it on
+     * to the stream.
+     */
+    private static class StreamSaver {
+        final ByteArrayOutputStream stream;
+        final Thread thread;
+        StreamSaver(ByteArrayOutputStream stream, Thread thread) {
+            this.stream = stream;
+            this.thread = thread;
+        }
+    }
+
+    private StreamSaver streamSaver(final InputStream in,
             final String name) {
 
         final ByteArrayOutputStream out = new ByteArrayOutputStream() {
@@ -189,10 +220,8 @@ public final class SpawnedProcess {
 
         }, name);
         streamReader.setDaemon(true);
-        streamReader.setPriority(Thread.MIN_PRIORITY);
         streamReader.start();
 
-        return out;
-
+        return new StreamSaver(out, streamReader);
     }
 }
