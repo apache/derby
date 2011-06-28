@@ -3724,8 +3724,24 @@ public final class	DataDictionaryImpl
 		TabInfoImpl					ti = getNonCoreTI(SYSSTATEMENTS_CATALOG_NUM);
 
 		List list = newSList();
+        // DERBY-5289 uses partial fix from
+        // DERBY-3870: The compiled plan may not be possible to deserialize 
+        // during upgrade. Skip the column that contains the compiled plan to 
+        // prevent deserialization errors when reading the rows. We don't care 
+        // about the value in that column, since this method is only called 
+        // when we want to drop or invalidate rows in SYSSTATEMENTS. 
+        FormatableBitSet cols = new FormatableBitSet( 
+                ti.getCatalogRowFactory().getHeapColumnCount()); 
+        for (int i = 0; i < cols.size(); i++) { 
+            if (i + 1 == SYSSTATEMENTSRowFactory.SYSSTATEMENTS_CONSTANTSTATE) { 
+                cols.clear(i); 
+            } else { 
+                cols.set(i); 
+            } 
+        } 
 
 		getDescriptorViaHeap(
+                cols,
 						(ScanQualifier[][]) null,
 						ti,
 						(TupleDescriptor) null,
@@ -3780,6 +3796,7 @@ public final class	DataDictionaryImpl
 		GenericDescriptorList list = new GenericDescriptorList();
 
 		getDescriptorViaHeap(
+                null,
 						(ScanQualifier[][]) null,
 						ti,
 						(TupleDescriptor) null,
@@ -5851,7 +5868,7 @@ public final class	DataDictionaryImpl
   				false);
 
 		ConglomerateDescriptorList cdl = new ConglomerateDescriptorList();
-		getDescriptorViaHeap(scanQualifier,
+		getDescriptorViaHeap(null, scanQualifier,
 								 ti,
 								 null,
 								 cdl);
@@ -8108,6 +8125,7 @@ public final class	DataDictionaryImpl
 	 * @exception StandardException		Thrown on error
 	 */
 	protected TupleDescriptor getDescriptorViaHeap(
+            FormatableBitSet columns,
 						ScanQualifier [][] scanQualifiers,
 						TabInfoImpl ti,
 						TupleDescriptor parentTupleDescriptor,
@@ -8135,7 +8153,7 @@ public final class	DataDictionaryImpl
 				0, 							// for read
 				TransactionController.MODE_TABLE,
                 TransactionController.ISOLATION_REPEATABLE_READ,
-				(FormatableBitSet) null,         // all fields as objects
+				columns,
 				(DataValueDescriptor[]) null,		// start position - first row
 				0,      				// startSearchOperation - none
 				scanQualifiers, 		// scanQualifier,
