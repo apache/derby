@@ -123,6 +123,24 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
             return true;
         return false;
     } 
+
+    /**
+     * Return true if and only if the old version is less than the
+     * specified version.
+     */
+    boolean oldLessThan(int major, int minor, int fixpack, int point) {
+        int[] old = (int[]) oldVersion.get();
+        int[] version = new int[]{major, minor, fixpack, point};
+
+        for (int i = 0; i < old.length; i++) {
+            if (old[i] < version[i]) return true;
+            if (old[i] > version[i]) return false;
+        }
+
+        // Old version matches exactly. That is, not less than.
+        return false;
+    }
+
     /**
      * Return true if the old version is equal
      *  the passed in major and minor version.
