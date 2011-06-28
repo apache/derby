@@ -13764,12 +13764,13 @@ public final class	DataDictionaryImpl
 
     /** {@inheritDoc} */
     public void disableIndexStatsRefresher() {
-        indexStatsUpdateDisabled = true;
-        // NOTE: This will stop the automatic updates of index statistics,
-        //       but users can still do this explicitly (i.e. by invoking
-        //       the SYSCS_UTIL.SYSCS_UPDATE_STATISTICS system procedure).
-        // Set at boot time, we expect it to be non-null.
-        indexRefresher.stop();
+        if (!indexStatsUpdateDisabled) {
+            indexStatsUpdateDisabled = true;
+            // NOTE: This will stop the automatic updates of index statistics,
+            //       but users can still do this explicitly (i.e. by invoking
+            //       the SYSCS_UTIL.SYSCS_UPDATE_STATISTICS system procedure).
+            indexRefresher.stop();
+        }
     }
 
     /** {@inheritDoc} */

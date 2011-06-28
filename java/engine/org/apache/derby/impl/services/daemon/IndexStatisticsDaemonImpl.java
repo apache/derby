@@ -1032,9 +1032,15 @@ public class IndexStatisticsDaemonImpl
         // timings[x] = [conglomId, start, end]
         StringBuffer sb = new StringBuffer("scan durations (");
         for (int i=0; i < timings.length && timings[i][0] > 0; i++) {
-            long duration = timings[i][2] - timings[i][1];
-            sb.append('c').append(timings[i][0]).append('=').append(duration).
-                    append("ms,");
+            sb.append('c').append(timings[i][0]).append('=');
+            // Handle corner-case where the scans are aborted due to the
+            // index statistics daemon being shut down under us.
+            if (timings[i][2] == 0) {
+                sb.append("ABORTED,");   
+            } else {
+                long duration = timings[i][2] - timings[i][1];
+                sb.append(duration).append("ms,");
+            }
         }
         sb.deleteCharAt(sb.length() -1).append(")");
         return sb.toString();
