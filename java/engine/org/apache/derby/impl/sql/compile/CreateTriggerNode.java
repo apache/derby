@@ -22,6 +22,8 @@
 package	org.apache.derby.impl.sql.compile;
 
 import java.sql.Timestamp;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -454,6 +456,20 @@ public class CreateTriggerNode extends DDLStatementNode
 		return (isSessionSchema(triggerTableDescriptor.getSchemaName()) || actionNode.referencesSessionSchema());
 	}
 
+    /**
+     * Comparator that can be used for sorting lists of FromBaseTables
+     * on the position they have in the SQL query string.
+     */
+    private static final Comparator OFFSET_COMPARATOR = new Comparator() {
+        public int compare(Object o1, Object o2) {
+            // Return negative int, zero, or positive int if the offset of the
+            // first table is less than, equal to, or greater than the offset
+            // of the second table.
+            return ((FromBaseTable) o1).getTableNameField().getBeginOffset() -
+                    ((FromBaseTable) o2).getTableNameField().getBeginOffset();
+        }
+    };
+
 	/*
 	** BIND OLD/NEW TRANSITION TABLES/VARIABLES AND collect TRIGGER ACTION
 	** COLUMNS referenced through REFERECING CLAUSE in CREATE TRIGGER statement
@@ -587,11 +603,11 @@ public class CreateTriggerNode extends DDLStatementNode
 			*/
 			CollectNodesVisitor visitor = new CollectNodesVisitor(FromBaseTable.class);
 			actionNode.accept(visitor);
-			Vector refs = visitor.getList();
-			QueryTreeNode[] tabs = sortRefs(refs, false);
-			for (int i = 0; i < tabs.length; i++)
+			Vector tabs = visitor.getList();
+			Collections.sort(tabs, OFFSET_COMPARATOR);
+			for (int i = 0; i < tabs.size(); i++)
 			{
-				FromBaseTable fromTable = (FromBaseTable) tabs[i];
+				FromBaseTable fromTable = (FromBaseTable) tabs.get(i);
 				String refTableName = fromTable.getTableName().getTableName();
 				String baseTableName = fromTable.getBaseTableName();
 				if ((baseTableName == null) ||
@@ -682,43 +698,6 @@ public class CreateTriggerNode extends DDLStatementNode
 			return tempArrayOfNeededColumns;
 		} else
 			return null;
-	}
-
-	/*
-	** Sort the refs into array.
-	*/
-	private QueryTreeNode[] sortRefs(Vector refs, boolean isRow)
-	{
-		int size = refs.size();
-		QueryTreeNode[] sorted = (QueryTreeNode[]) refs.toArray(new QueryTreeNode[size]);
-		int i = 0;
-		/* bubble sort
-		 */
-		QueryTreeNode temp;
-		for (i = 0; i < size - 1; i++)
-		{
-			temp = null;
-			for (int j = 0; j < size - i - 1; j++)
-			{
-				if ((isRow && 
-					 sorted[j].getBeginOffset() > 
-					 sorted[j+1].getBeginOffset()
-					) ||
-					(!isRow &&
-					 ((FromBaseTable) sorted[j]).getTableNameField().getBeginOffset() > 
-					 ((FromBaseTable) sorted[j+1]).getTableNameField().getBeginOffset()
-					))
-				{
-					temp = sorted[j];
-					sorted[j] = sorted[j+1];
-					sorted[j+1] = temp;
-				}
-			}
-			if (temp == null)		// sorted
-				break;
-		}
-
-		return sorted;
 	}
 
     /*

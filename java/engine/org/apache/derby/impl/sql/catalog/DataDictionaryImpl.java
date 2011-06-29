@@ -155,6 +155,8 @@ import org.apache.derby.iapi.util.IdUtil;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.HashMap;
@@ -4684,6 +4686,20 @@ public final class	DataDictionaryImpl
 		return list;
 	}
 
+    /**
+     * Comparator that can be used for sorting lists of column references
+     * on the position they have in the SQL query string.
+     */
+    private static final Comparator OFFSET_COMPARATOR = new Comparator() {
+        public int compare(Object o1, Object o2) {
+            // Return negative int, zero, or positive int if the first column
+            // reference has an offset which is smaller than, equal to, or
+            // greater than the offset of the second column reference.
+            return ((ColumnReference) o1).getBeginOffset() -
+                    ((ColumnReference) o2).getBeginOffset();
+        }
+    };
+
 	/**
 	 * Get the trigger action string associated with the trigger after the
 	 * references to old/new transition tables/variables in trigger action
@@ -4818,7 +4834,7 @@ public final class	DataDictionaryImpl
 		Vector refs = visitor.getList();
 		/* we need to sort on position in string, beetle 4324
 		 */
-		QueryTreeNode[] cols = sortRefs(refs, true);
+		Collections.sort(refs, OFFSET_COMPARATOR);
 		
 		if (createTriggerTime) {
 			//The purpose of following array(triggerActionColsOnly) is to
@@ -4876,9 +4892,9 @@ public final class	DataDictionaryImpl
 			//in next version of 10.7 and 10.8. In 10.9, DERBY-1482 was
 			//reimplemented correctly and we started doing the collection and
 			//usage of trigger action columns again in 10.9
-			for (int i = 0; i < cols.length; i++)
+			for (int i = 0; i < refs.size(); i++)
 			{
-				ColumnReference ref = (ColumnReference) cols[i];
+				ColumnReference ref = (ColumnReference) refs.get(i);
 				/*
 				** Only occurrences of those OLD/NEW transition tables/variables 
 				** are of interest here.  There may be intermediate nodes in the 
@@ -4992,9 +5008,9 @@ public final class	DataDictionaryImpl
 		// turns into
 		//	DELETE FROM t WHERE c in 
 		//		(SELECT c FROM new TriggerOldTransitionTable OLD)
-		for (int i = 0; i < cols.length; i++)
+		for (int i = 0; i < refs.size(); i++)
 		{
-			ColumnReference ref = (ColumnReference) cols[i];				
+			ColumnReference ref = (ColumnReference) refs.get(i);
 			/*
 			** Only occurrences of those OLD/NEW transition tables/variables 
 			** are of interest here.  There may be intermediate nodes in the 
@@ -5264,43 +5280,6 @@ public final class	DataDictionaryImpl
 
 	        return methodCall.toString();
 	    }
-	}
-
-	/*
-	** Sort the refs into array.
-	*/
-	private QueryTreeNode[] sortRefs(Vector refs, boolean isRow)
-	{
-		int size = refs.size();
-		QueryTreeNode[] sorted = (QueryTreeNode[])refs.toArray(new QueryTreeNode[size]);
-		int i = 0;
-		/* bubble sort
-		 */
-		QueryTreeNode temp;
-		for (i = 0; i < size - 1; i++)
-		{
-			temp = null;
-			for (int j = 0; j < size - i - 1; j++)
-			{
-				if ((isRow && 
-					 sorted[j].getBeginOffset() > 
-					 sorted[j+1].getBeginOffset()
-					) ||
-					(!isRow &&
-					 ((FromBaseTable) sorted[j]).getTableNameField().getBeginOffset() > 
-					 ((FromBaseTable) sorted[j+1]).getTableNameField().getBeginOffset()
-					))
-				{
-					temp = sorted[j];
-					sorted[j] = sorted[j+1];
-					sorted[j+1] = temp;
-				}
-			}
-			if (temp == null)		// sorted
-				break;
-		}
-
-		return sorted;
 	}
 
 	/**
