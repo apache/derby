@@ -20,7 +20,7 @@
     <property name="ant.script" value="${project.dir}/build.xml"/>
     <target name="debug-ij">
         <path id="cp">
-            <pathelement location="${project.dir}/classes"/>
+            <pathelement location="${project.dir}/jars/sane/derbyrun.jar"/>
         </path>
         <nbjpdastart addressproperty="jpda.address" name="derby" transport="dt_socket">
             <classpath refid="cp"/>
@@ -33,7 +33,7 @@
     </target>
     <target name="debug-server">
         <path id="cp">
-            <pathelement location="${project.dir}/classes"/>
+            <pathelement location="${project.dir}/jars/sane/derbynet.jar"/>
         </path>
         <nbjpdastart addressproperty="jpda.address" name="derby" transport="dt_socket">
             <classpath refid="cp"/>
@@ -43,8 +43,6 @@
             <jvmarg value="-Xdebug"/>
             <jvmarg value="-Xrunjdwp:transport=dt_socket,address=${jpda.address}"/>
             <arg value="start"/>
-            <!-- Default security policy doesn't allow running from classes. -->
-            <arg value="-noSecurityManager"/>
         </java>
     </target>
 </project>

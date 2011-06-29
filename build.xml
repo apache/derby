@@ -2129,6 +2129,14 @@
 
 
 <!-- =================================================================== -->
+<!--       IDE build targets used by the projects under tools/ide/       -->
+<!-- =================================================================== -->
+
+  <!-- Target used by NetBeans to build all code modules and all jars. -->
+  <target name="nb-buildall" depends="all,buildjarsclean"/>
+
+
+<!-- =================================================================== -->
 <!--                         Nightly build targets                       -->
 <!-- =================================================================== -->
 
