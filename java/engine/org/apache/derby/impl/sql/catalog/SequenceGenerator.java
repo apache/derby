@@ -20,6 +20,7 @@
  */
 package org.apache.derby.impl.sql.catalog;
 
+import org.apache.derby.catalog.SequencePreallocator;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.cache.Cacheable;
@@ -111,14 +112,6 @@ public class SequenceGenerator
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /**
-     * Default number of values to pre-allocate. In the future, we may want to provide
-     * something more sophisticated. For instance, we might want to make Derby tune
-     * this number per sequence generator or give the user the power to override Derby's
-     * decision.
-     */
-    public static final int DEFAULT_PREALLOCATION_COUNT = 5;
-
     /** If pre-allocation drops below this level, then we need to grab another chunk of numbers */
     private static final int PREALLOCATION_THRESHHOLD = 1;
 
@@ -168,8 +161,14 @@ public class SequenceGenerator
     // This is where we restart the sequence if we wrap around.
     private final long _RESTART_VALUE;
 
-    // Name of the sequence (for error messages).
+    // Name of the schema that the sequence lives in.
+    private final String _SCHEMA_NAME;
+
+    // Name of the sequence.
     private final String _SEQUENCE_NAME;
+
+    // Logic to determine how many values to pre-allocate
+    private final   SequencePreallocator    _PREALLOCATOR;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -183,12 +182,6 @@ public class SequenceGenerator
     // This is the next value which the generator will hand out.
     private long _currentValue;
 
-    // This is the number of values to pre-allocate per chunk. Right now this
-    // is a constant which we figure out when we initialize the generator.
-    // However, this number could change over time if, for instance, Derby
-    // tunes it on the fly.
-    private long _valuesPerAllocation;
-    
     // This is the remaining number of values which were pre-allocated on disk
     // by bumping the contents of SYSSEQUENCES.CURRENTVALUE.
     private long _remainingPreallocatedValues;
@@ -209,7 +202,9 @@ public class SequenceGenerator
          long maxValue,
          long minValue,
          long restartValue,
-         String sequenceName
+         String schemaName,
+         String sequenceName,
+         SequencePreallocator   sequencePreallocator
          )
     {
         if ( currentValue == null )
@@ -229,14 +224,14 @@ public class SequenceGenerator
         _MIN_VALUE = minValue;
         _RESTART_VALUE = restartValue;
         _STEP_INCREASES = ( _INCREMENT > 0 );
+        _SCHEMA_NAME = schemaName;
         _SEQUENCE_NAME = sequenceName;
+        _PREALLOCATOR = sequencePreallocator;
 
         //
         // Next call to getCurrentValueAndAdvance() will cause  us to ask our caller to allocate a new range of values.
         //
         _remainingPreallocatedValues = 1L;
-
-        _valuesPerAllocation = computePreAllocationCount();
     }
     
     ///////////////////////////////////////////////////////////////////////////////////
@@ -245,6 +240,15 @@ public class SequenceGenerator
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * <p>
+     * Get the name of the schema of this sequence generator. Technically, this doesn't need to be
+     * synchronized. But it is simpler to just maintain a rule that all public methods
+     * should be synchronized.
+     * </p>
+     */
+    public synchronized String getSchemaName() { return _SCHEMA_NAME; }
+    
     /**
      * <p>
      * Get the name of this sequence generator. Technically, this doesn't need to be
@@ -299,7 +303,7 @@ public class SequenceGenerator
         if ( _isExhausted )
         {
             throw StandardException.newException
-                ( SQLState.LANG_SEQUENCE_GENERATOR_EXHAUSTED, _SEQUENCE_NAME );
+                ( SQLState.LANG_SEQUENCE_GENERATOR_EXHAUSTED, _SCHEMA_NAME, _SEQUENCE_NAME );
         }
 
         long retval[] = new long[ CVAA_LENGTH ];
@@ -403,6 +407,8 @@ public class SequenceGenerator
      */
     private void computeNewAllocation( long oldCurrentValue, long[] retval ) throws StandardException
     {
+        int preferredValuesPerAllocation = computePreAllocationCount();
+        
         //
         // The values are growing toward one of the endpoints of the legal range,
         // either the largest legal value or the smallest legal value. First find out
@@ -414,10 +420,10 @@ public class SequenceGenerator
         long newValueOnDisk;
         long valuesToAllocate;
 
-        if ( remainingLegalValues >= _valuesPerAllocation )
+        if ( remainingLegalValues >= preferredValuesPerAllocation )
         {
-            newValueOnDisk = oldCurrentValue + ( _valuesPerAllocation * _INCREMENT );
-            valuesToAllocate = _valuesPerAllocation;
+            newValueOnDisk = oldCurrentValue + ( preferredValuesPerAllocation * _INCREMENT );
+            valuesToAllocate = preferredValuesPerAllocation;
         }
         else
         {
@@ -425,13 +431,13 @@ public class SequenceGenerator
 
             if ( _CAN_CYCLE )
             {
-                long spillOverValues = _valuesPerAllocation - remainingLegalValues;
+                long spillOverValues = preferredValuesPerAllocation - remainingLegalValues;
 
                 // account for the fact that the restart value itself is a legal value
                 spillOverValues--;
 
                 newValueOnDisk = _RESTART_VALUE + ( spillOverValues * _INCREMENT );
-                valuesToAllocate = _valuesPerAllocation;
+                valuesToAllocate = preferredValuesPerAllocation;
             }
             else
             {
@@ -490,8 +496,10 @@ public class SequenceGenerator
      */
     private int computePreAllocationCount()
     {
-        int happyResult = DEFAULT_PREALLOCATION_COUNT;
+        int happyResult = _PREALLOCATOR.nextRangeSize(  _SCHEMA_NAME, _SEQUENCE_NAME );
         int unhappyResult = PREALLOCATION_THRESHHOLD;
+
+        if ( happyResult < unhappyResult ) { return unhappyResult; }
 
         double min = _MIN_VALUE;
         double max = _MAX_VALUE;

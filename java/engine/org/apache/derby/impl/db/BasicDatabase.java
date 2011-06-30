@@ -241,6 +241,14 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
     }
 
 	public void stop() {
+        try {
+            // on orderly shutdown, try not to leak unused numbers from the sequence generators.
+            dd.clearSequenceCaches();
+        }
+        catch (Throwable t)
+        {
+            t.printStackTrace(Monitor.getStream().getPrintWriter());
+        }
 		active = false;
 	}
 

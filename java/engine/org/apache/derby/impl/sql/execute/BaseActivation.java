@@ -670,22 +670,23 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 	}
 
 	/**
-	 * Called by generated code to get the next number in an ANSI/ISO sequence
-     * and advance the sequence. Raises an exception if the sequence was declared
+	 * Called by generated code to get the next number in an identity or sequence generator
+     * and advance the generator. Raises an exception if the generator was declared
      * NO CYCLE and its range is exhausted.
 	 *
-     * @param sequenceUUIDstring The string value of the sequence's UUID
+     * @param catalogNumber SYSCOLUMNS_CATALOG_NUM or SYSSEQUENCES_CATALOG_NUM, depending on the kind of generator
+     * @param uuidString The string value of the generator's uuid (table uuid for identity generators and sequence uuid for sequence generators)
      * @param typeFormatID The format id of the data type to be returned. E.g., StoredFormatIds.SQL_INTEGER_ID.
      *
 	 * @return The next number in the sequence
 	 */
 	protected NumberDataValue getCurrentValueAndAdvance
-        ( String sequenceUUIDstring, int typeFormatID )
+        ( int catalogNumber, String uuidString, int typeFormatID )
 	       throws StandardException
 	{
         NumberDataValue ndv = (NumberDataValue) getDataValueFactory().getNull( typeFormatID, StringDataValue.COLLATION_TYPE_UCS_BASIC );
 
-        lcc.getDataDictionary().getCurrentValueAndAdvance( sequenceUUIDstring, ndv );
+        lcc.getDataDictionary().getCurrentValueAndAdvance( catalogNumber, uuidString, ndv );
 
         return ndv;
 	}

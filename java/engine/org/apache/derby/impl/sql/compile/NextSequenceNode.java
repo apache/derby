@@ -28,6 +28,7 @@ import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.compiler.LocalField;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
+import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
@@ -133,6 +134,7 @@ public class NextSequenceNode extends ValueNode {
         int dataTypeFormatID = sequenceDescriptor.getDataType().getNull().getTypeFormatId();
         
 		mb.pushThis();
+		mb.push( DataDictionary.SYSSEQUENCES_CATALOG_NUM );
 		mb.push( sequenceUUIDstring );
 		mb.push( dataTypeFormatID );
 		mb.callMethod
@@ -141,7 +143,7 @@ public class NextSequenceNode extends ValueNode {
              ClassName.BaseActivation,
              "getCurrentValueAndAdvance",
              ClassName.NumberDataValue,
-             2
+             3
              );
     }
 

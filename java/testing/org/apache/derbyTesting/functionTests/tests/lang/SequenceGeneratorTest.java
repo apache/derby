@@ -41,7 +41,9 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 
 import org.apache.derby.impl.sql.catalog.SequenceGenerator;
+import org.apache.derby.impl.sql.catalog.SequenceRange;
 import org.apache.derby.impl.sql.catalog.SequenceUpdater;
+import org.apache.derby.catalog.SequencePreallocator;
 import org.apache.derby.iapi.types.SQLLongint;
 import org.apache.derby.iapi.store.access.TransactionController;
 
@@ -59,12 +61,15 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
     ///////////////////////////////////////////////////////////////////////////////////
 
     // number of pre-allocated values in a sequence generator
-    private static final long ALLOCATION_COUNT = 5L;
+    private static final long ALLOCATION_COUNT = 20L;
+    private static final int TWEAKED_ALLOCATION_COUNT = 7;
 
     private static  final   String      TEST_DBO = "TEST_DBO";
     private static  final   String      RUTH = "RUTH";
     private static  final   String      ALICE = "ALICE";
     private static  final   String[]    LEGAL_USERS = { TEST_DBO, ALICE, RUTH  };
+
+    private static  final   String      MISSING_ALLOCATOR = "X0Y85";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -185,12 +190,16 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
 
         assertEquals( -2147483648L, updater.getValueOnDisk().longValue() );
 
-        vetBumping( updater, -2147483648L, -2147483643L );
-        vetBumping( updater, -2147483647L, -2147483643L );
-        vetBumping( updater, -2147483646L, -2147483643L );
-        vetBumping( updater, -2147483645L, -2147483643L );
-        vetBumping( updater, -2147483644L, -2147483643L );
-        vetBumping( updater, -2147483643L, -2147483638L );
+        long        initialValue = (long) Integer.MIN_VALUE;
+        long        expectedValueOnDisk = initialValue + ALLOCATION_COUNT;
+
+        for ( long i = 0; i < ALLOCATION_COUNT; i++ )
+        {
+            vetBumping( updater, initialValue + i, expectedValueOnDisk );
+        }
+        expectedValueOnDisk += ALLOCATION_COUNT;
+
+        vetBumping( updater, initialValue + ALLOCATION_COUNT, expectedValueOnDisk );
 
         vetBoundaries( Short.MAX_VALUE, Short.MIN_VALUE );
         vetBoundaries( Integer.MAX_VALUE, Integer.MIN_VALUE );
@@ -333,7 +342,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         long actualValueOnDisk = updater.getValueOnDisk().longValue();
         
         println( "Expected value = " + expectedValue + " vs actual value = " + actualValue );
-        println( "    Expected value on disk = " + expectedValue + " vs actual value on disk = " + actualValueOnDisk );
+        println( "    Expected value on disk = " + expectedValueOnDisk + " vs actual value on disk = " + actualValueOnDisk );
         
         assertEquals( expectedValue, actualValue );
         assertEquals( expectedValueOnDisk, actualValueOnDisk );
@@ -417,13 +426,11 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
 
         getTestConfiguration().shutdownDatabase();
         conn = openUserConnection( TEST_DBO );
-        seq_04_value = (int) seq_04_upperBound;
         seq_04_upperBound = seq_04_value + ALLOCATION_COUNT;
         vetBumping( conn, TEST_DBO, "SEQ_04", seq_04_value++, seq_04_upperBound );
 
         getTestConfiguration().shutdownDatabase();
         conn = openUserConnection( TEST_DBO );
-        seq_04_value = (int) seq_04_upperBound;
         seq_04_upperBound = seq_04_value + ALLOCATION_COUNT;
         vetBumping( conn, TEST_DBO, "SEQ_04", seq_04_value++, seq_04_upperBound );
     }
@@ -538,6 +545,115 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         expectCompilationError( OBJECT_DOES_NOT_EXIST, "values ( next value for seq_07 )\n" );
     }
     
+    /**
+     * <p>
+     * Test user-written range allocators.
+     * </p>
+     */
+    public void test_08_userWrittenAllocators() throws Exception
+    {
+        Connection  conn = openUserConnection( TEST_DBO );
+        String  className;
+
+        goodStatement( conn, "create sequence seq_08\n" );
+
+        className = getClass().getName() + "$" + "UnknownClass";
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '" + className + "')"
+             );
+        expectExecutionError( conn, MISSING_ALLOCATOR, "values ( next value for seq_08 )" );
+
+        className = getClass().getName() + "$" + "BadAllocator";
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '" + className + "')"
+             );
+        expectExecutionError( conn, MISSING_ALLOCATOR, "values ( next value for seq_08 )" );
+
+        className = getClass().getName() + "$" + "LegalAllocator";
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '" + className + "')"
+             );
+        vetBumping( conn, TEST_DBO, "SEQ_08", Integer.MIN_VALUE, Integer.MIN_VALUE + TWEAKED_ALLOCATION_COUNT );
+
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', null )"
+             );
+    }
+        
+    /**
+     * <p>
+     * Test overriding the default length of sequence/identity ranges.
+     * </p>
+     */
+    public void test_09_defaultRangeSize() throws Exception
+    {
+        Connection  conn = openUserConnection( TEST_DBO );
+        long    number;
+
+        goodStatement( conn, "create sequence seq_09_01\n" );
+        number = 30L;
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '" + number + "')"
+             );
+        vetBumping( conn, TEST_DBO, "SEQ_09_01", Integer.MIN_VALUE, Integer.MIN_VALUE + number );
+
+        // 0 results in the usual default
+        goodStatement( conn, "create sequence seq_09_02\n" );
+        number = 0L;
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '" + number + "')"
+             );
+        vetBumping( conn, TEST_DBO, "SEQ_09_02", Integer.MIN_VALUE, Integer.MIN_VALUE + ALLOCATION_COUNT );
+
+        // negative numbers result in Missing Allocator exception
+        goodStatement( conn, "create sequence seq_09_03\n" );
+        number = -1L;
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '" + number + "')"
+             );
+        expectExecutionError( conn, MISSING_ALLOCATOR, "values ( next value for seq_09_03 )" );
+
+        // If the value doesn't fit in an int, we also get a Missing Allocator exception
+        goodStatement( conn, "create sequence seq_09_04\n" );
+        number = Long.MAX_VALUE - 1L;
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '" + number + "')"
+             );
+        expectExecutionError( conn, MISSING_ALLOCATOR, "values ( next value for seq_09_04 )" );
+        
+        // out of range values will stifle preallocation
+        goodStatement( conn, "create sequence seq_09_05 as smallint\n" );
+        number = ((long) 3 * Short.MAX_VALUE);
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', '" + number + "')"
+             );
+        vetBumping( conn, TEST_DBO, "SEQ_09_05", Short.MIN_VALUE, Short.MIN_VALUE + 1 );
+
+        goodStatement
+            (
+             conn,
+             "call syscs_util.syscs_set_database_property( 'derby.language.sequence.preallocator', null )"
+             );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
@@ -591,7 +707,7 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // INNER CLASSES
+    // NESTED CLASSES
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -624,7 +740,9 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
                  maxValue,
                  minValue,
                  restartValue,
-                 "DUMMY_SEQUENCE"
+                 "DUMMY_SCHEMA",
+                 "DUMMY_SEQUENCE",
+                 new SequenceRange()
                  );
         }
         
@@ -658,6 +776,17 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
         // overridden to avoid a null pointer exception when we don't have a language context
         protected int getLockTimeout() { return 1000; }
     
+    }
+
+    // Illegal preallocator, which does not implement the correct interface
+    public  static  final   class   BadAllocator {}
+
+    // Legal preallocator, which preallocates a fixed size range
+    public  static final   class   LegalAllocator  implements  SequencePreallocator
+    {
+        public  LegalAllocator() {}
+        
+        public  int nextRangeSize( String s, String n ) { return TWEAKED_ALLOCATION_COUNT; }
     }
 
 }

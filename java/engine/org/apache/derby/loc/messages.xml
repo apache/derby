@@ -674,7 +674,8 @@ Guide.
 
             <msg>
                 <name>2200H.S</name>
-                <text>Sequence generator '{0}' does not cycle. No more values can be obtained from this sequence generator.</text>
+                <text>Sequence generator '{0}.{1}' does not cycle. No more values can be obtained from this sequence generator.</text>
+                <arg>schemaName</arg>
                 <arg>sequenceName</arg>
             </msg>
 
@@ -3431,6 +3432,13 @@ Guide.
                 <name>X0Y84.S</name>
                 <text>Too much contention on sequence {0}.</text>
                 <arg>sequenceName</arg>
+            </msg>
+
+            <msg>
+                <name>X0Y85.S</name>
+                <text>The Derby property '{0}' identifies a class which cannot be instantiated: '{1}'. See the next exception for details.</text>
+                <arg>propertyName</arg>
+                <arg>className</arg>
             </msg>
 
         </family>

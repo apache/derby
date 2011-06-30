@@ -20,13 +20,16 @@
  */
 package org.apache.derby.impl.sql.catalog;
 
+import org.apache.derby.catalog.SequencePreallocator;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
@@ -434,6 +437,47 @@ public abstract class SequenceUpdater implements Cacheable
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    /** Make a new range allocator (called when the generator is instantiated) */
+    protected SequencePreallocator  makePreallocator( TransactionController tc )
+        throws StandardException
+    {
+        String  propertyName = Property.LANG_SEQUENCE_PREALLOCATOR;
+        String  className = PropertyUtil.getServiceProperty( tc, propertyName );
+
+        if ( className == null ) { return new SequenceRange(); }
+
+        try {
+            // If the property value was a number rather than a class name, then
+            // use that as the default size for preallocated ranges.
+            if ( isNumber( className ) )
+            {
+                return new SequenceRange( Integer.parseInt( className ) );
+            }
+            
+            return (SequencePreallocator) Class.forName( className ).newInstance();
+        }
+        catch (ClassNotFoundException e) { throw missingAllocator( propertyName, className, e ); }
+        catch (ClassCastException e) { throw missingAllocator( propertyName, className, e ); }
+        catch (InstantiationException e) { throw missingAllocator( propertyName, className, e ); }
+        catch (IllegalAccessException e) { throw missingAllocator( propertyName, className, e ); }
+        catch (NumberFormatException e) { throw missingAllocator( propertyName, className, e ); }
+    }
+    private StandardException   missingAllocator( String propertyName, String className, Exception e )
+    {
+        return StandardException.newException( SQLState.LANG_UNKNOWN_SEQUENCE_PREALLOCATOR, e, propertyName, className );
+    }
+    private boolean isNumber( String text )
+    {
+        int length = text.length();
+
+        for ( int i = 0; i < length; i++ )
+        {
+            if ( !Character.isDigit( text.charAt( i ) ) ) { return false; }
+        }
+
+        return true;
+    }
+    
     /** Get the time we wait for a lock, in milliseconds--overridden by unit tests */
     protected int getLockTimeout()
     {
@@ -454,9 +498,58 @@ public abstract class SequenceUpdater implements Cacheable
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // INNER CLASSES
+    // NESTED CLASSES
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * <p>
+     * Specific implementation of SequenceUpdater for the sequences managed by
+     * SYSCOLUMNS.
+     * </p>
+     */
+    public static final class SyscolumnsUpdater extends SequenceUpdater
+    {
+        private RowLocation _sequenceRowLocation;
+
+        public SyscolumnsUpdater() { super(); }
+        public SyscolumnsUpdater( DataDictionaryImpl dd ) { super( dd ); }
+    
+        //
+        // SequenceUpdater BEHAVIOR
+        //
+
+        protected SequenceGenerator createSequenceGenerator( TransactionController readOnlyTC )
+            throws StandardException
+        {
+            RowLocation[] rowLocation = new RowLocation[ 1 ];
+            SequenceDescriptor[] sequenceDescriptor = new SequenceDescriptor[ 1 ];
+            
+            _dd.computeIdentityRowLocation( readOnlyTC, _uuidString, rowLocation, sequenceDescriptor );
+            
+            _sequenceRowLocation = rowLocation[ 0 ];
+            
+            SequenceDescriptor isd = sequenceDescriptor[ 0 ];
+            
+            return new SequenceGenerator
+                (
+                 isd.getCurrentValue(),
+                 isd.canCycle(),
+                 isd.getIncrement(),
+                 isd.getMaximumValue(),
+                 isd.getMinimumValue(),
+                 isd.getStartValue(),
+                 isd.getSchemaDescriptor().getSchemaName(),
+                 isd.getSequenceName(),
+                 makePreallocator( readOnlyTC )
+                 );
+        }
+
+        protected boolean updateCurrentValueOnDisk( TransactionController tc, Long oldValue, Long newValue, boolean wait ) throws StandardException
+        {
+            return _dd.updateCurrentIdentityValue( tc, _sequenceRowLocation, wait, oldValue, newValue );
+        }
+    }
 
     /**
      * <p>
@@ -495,7 +588,9 @@ public abstract class SequenceUpdater implements Cacheable
                  isd.getMaximumValue(),
                  isd.getMinimumValue(),
                  isd.getStartValue(),
-                 isd.getSequenceName()
+                 isd.getSchemaDescriptor().getSchemaName(),
+                 isd.getSequenceName(),
+                 makePreallocator( readOnlyTC )
                  );
         }
 
