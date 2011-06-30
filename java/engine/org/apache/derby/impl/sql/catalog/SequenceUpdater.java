@@ -447,16 +447,35 @@ public abstract class SequenceUpdater implements Cacheable
         if ( className == null ) { return new SequenceRange(); }
 
         try {
+            // If the property value was a number rather than a class name, then
+            // use that as the default size for preallocated ranges.
+            if ( isNumber( className ) )
+            {
+                return new SequenceRange( Integer.parseInt( className ) );
+            }
+            
             return (SequencePreallocator) Class.forName( className ).newInstance();
         }
         catch (ClassNotFoundException e) { throw missingAllocator( propertyName, className, e ); }
         catch (ClassCastException e) { throw missingAllocator( propertyName, className, e ); }
         catch (InstantiationException e) { throw missingAllocator( propertyName, className, e ); }
         catch (IllegalAccessException e) { throw missingAllocator( propertyName, className, e ); }
+        catch (NumberFormatException e) { throw missingAllocator( propertyName, className, e ); }
     }
     private StandardException   missingAllocator( String propertyName, String className, Exception e )
     {
         return StandardException.newException( SQLState.LANG_UNKNOWN_SEQUENCE_PREALLOCATOR, e, propertyName, className );
+    }
+    private boolean isNumber( String text )
+    {
+        int length = text.length();
+
+        for ( int i = 0; i < length; i++ )
+        {
+            if ( !Character.isDigit( text.charAt( i ) ) ) { return false; }
+        }
+
+        return true;
     }
     
     /** Get the time we wait for a lock, in milliseconds--overridden by unit tests */

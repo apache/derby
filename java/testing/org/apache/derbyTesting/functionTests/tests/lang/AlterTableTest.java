@@ -3006,7 +3006,7 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "where c.referenceid = t.tableid and t.tablename='D3175'");
         JDBC.assertUnorderedResultSet(rs, new String[][]{
                     {"X", "1", "VARCHAR(12)", null, null, null, null, "D3175", "T", "R"},
-                    {"ID", "2", "INTEGER NOT NULL", "GENERATED_BY_DEFAULT", "7", "1", "1", "D3175", "T", "R"}
+                    {"ID", "2", "INTEGER NOT NULL", "GENERATED_BY_DEFAULT", "22", "1", "1", "D3175", "T", "R"}
                 });
     }
 

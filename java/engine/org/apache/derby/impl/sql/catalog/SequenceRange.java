@@ -38,18 +38,18 @@ public  class   SequenceRange   implements  SequencePreallocator
     ///////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Default number of values to pre-allocate. In the future, we may want to provide
-     * something more sophisticated. For instance, we might want to make Derby tune
-     * this number per sequence generator or give the user the power to override Derby's
-     * decision.
+     * Default number of values to pre-allocate. This is the size of the preallocation range
+     * used by other databases. See DERBY-4437.
      */
-    private static final int DEFAULT_PREALLOCATION_COUNT = 5;
+    private static final int DEFAULT_PREALLOCATION_COUNT = 20;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE
     //
     ///////////////////////////////////////////////////////////////////////////////////
+
+    private int _rangeSize;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -58,7 +58,17 @@ public  class   SequenceRange   implements  SequencePreallocator
     ///////////////////////////////////////////////////////////////////////////////////
 
     /** <p>0-arg constructore needed to satisfy the SequencePreallocator contract.</p> */
-    public  SequenceRange() {}
+    public  SequenceRange()
+    {
+        this( DEFAULT_PREALLOCATION_COUNT );
+    }
+
+    public  SequenceRange( int rangeSize )
+    {
+        if ( rangeSize <= 0 ) { rangeSize = DEFAULT_PREALLOCATION_COUNT; }
+        
+        _rangeSize = rangeSize;
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -72,7 +82,7 @@ public  class   SequenceRange   implements  SequencePreallocator
          String sequenceName
          )
     {
-        return DEFAULT_PREALLOCATION_COUNT;
+        return _rangeSize;
     }
 
 

@@ -226,7 +226,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		String[][]expectedRows=new String[][]{{"0","0"},{"1","2"},{"2","4"},{"33","6"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs = s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'AIS'");
-		expectedRows=new String[][]{{"AIS","10","0","2"}};
+		expectedRows=new String[][]{{"AIS","40","0","2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 	}
@@ -383,7 +383,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		expectedRows=new String[][]{{"1","1"},{"2","2"},{"3","3"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select b.tablename, a.autoincrementvalue, a.autoincrementstart, a.autoincrementinc from sys.syscolumns a, sys.systables b where a.referenceid=b.tableid and a.columnname ='S1' and b.tablename = 'TAB1'");
-		expectedRows=new String[][]{{"TAB1","6","1","1"}};
+		expectedRows=new String[][]{{"TAB1","21","1","1"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		s.executeUpdate("create table tab2 (lvl int, s1  bigint generated always as identity)");
 		s.executeUpdate("create trigger tab1_after2 after insert on tab3 referencing new as newrow for each row insert into tab2 (lvl) values 1,2,3");
@@ -944,7 +944,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		expectedRows=new String[][]{{"2","2"},{"2","9999"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'REC11'");
-		expectedRows=new String[][]{{"REC11","12","2","2"}};
+		expectedRows=new String[][]{{"REC11","42","2","2"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 		assertStatementError("42837",s,"alter table restartt1 alter column c12 RESTART WITH 2");
 		assertStatementError("42X49",s,"alter table restartt1 alter column rec11 RESTART WITH 2.20");
@@ -979,7 +979,7 @@ public class AutoIncrementTest extends BaseJDBCTestCase {
 		assertStatementError("23505",s,"insert into t1lock(c12) values(3)");
 		rs=s.executeQuery("select COLUMNNAME, AUTOINCREMENTVALUE, AUTOINCREMENTSTART, AUTOINCREMENTINC from sys.syscolumns where COLUMNNAME = 'LOCKC11'");
 		//Utilities.showResultSet(rs);
-		expectedRows=new String[][]{{"LOCKC11","6","1","1"}};
+		expectedRows=new String[][]{{"LOCKC11","21","1","1"}};
 		JDBC.assertFullResultSet(rs,expectedRows);
 
 		rs=s.executeQuery("select * from t1lock");
