@@ -9,7 +9,6 @@
 # stress/stress.multi - exits suite
 # following fail for various reasons, many related to not being able to connect:
 #  lang/wisconsin.java
-#  jdbcapi/derbyStress.java
 #  jdbcapi/maxfieldsize.java
 #
 jdbcapi/HoldabilityTest.junit
@@ -19,5 +18,4 @@ derbynet/dblook_test_net.java
 derbynet/dblook_test_net_territory.java
 stress/stress.multi
 lang/wisconsin.java
-jdbcapi/derbyStress.java
 jdbcapi/maxfieldsize.java
