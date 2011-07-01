@@ -178,5 +178,21 @@ abstract class UpgradeChange extends BaseJDBCTestCase {
     {
         return (getOldMajor() == requiredMajor)
           && (getOldMinor() == requiredMinor);
-     } 
+     }
+    
+    /**
+     * Pretty-print the phase.
+     */
+    String  getPhaseString()
+    {
+        return PHASES[ getPhase() ];
+    }
+
+    /**
+     * Pretty-print the original version number.
+     */
+    String  getOldVersionString()
+    {
+        return "( " + getOldMajor() + ", " + getOldMinor() + ", " + getOldFixPack() + ", " + getOldPoint() + " )";
+    }
 }
