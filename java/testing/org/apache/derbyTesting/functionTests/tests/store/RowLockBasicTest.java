@@ -1,3 +1,22 @@
+/*
+   Derby - Class org.apache.derbyTesting.functionTests.tests.store.RowLockBasicTest
+
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+ */
 package org.apache.derbyTesting.functionTests.tests.store;
 
 import java.sql.Connection;
@@ -11,10 +30,18 @@ import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
+/**
+ * Very basic single user testing of row locking, verify that the right locks
+ * are obtained for simple operations.  This test only looks at table and
+ * row logical locks, it does not verify physical latches or lock ordering.
+ * The basic methodology is:
+ *       start transaction
+ *       simple operation
+ *       print lock table which should match the master
+ *       end transation 
+ *
+ */
 public class RowLockBasicTest extends BaseJDBCTestCase {
-
-    private int isolation;
-
     public RowLockBasicTest(String name) {
         super(name);
     }
@@ -23,9 +50,7 @@ public class RowLockBasicTest extends BaseJDBCTestCase {
         return TestConfiguration.defaultSuite(RowLockBasicTest.class);
     }
     
-    protected void setUp() {
-        try {
-            isolation = getConnection().getTransactionIsolation();
+    protected void setUp() throws SQLException {
             getConnection().setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
             Statement s = createStatement();
             s.execute("CREATE FUNCTION  PADSTRING (DATA VARCHAR(32000), "
@@ -44,11 +69,8 @@ public class RowLockBasicTest extends BaseJDBCTestCase {
             getConnection().setAutoCommit(false);
             
             dropTable("a");
-        } catch (SQLException se) {
-            se.printStackTrace();
-            //ignore
-        }
     }
+    
     private void createLockTableQueryEntries(Statement s) throws SQLException {
         s.execute("create view lock_table as "
                 + "select "
@@ -103,7 +125,7 @@ public class RowLockBasicTest extends BaseJDBCTestCase {
                 + "syscs_diag.transaction_table");        
     }
 
-    public void tearDown() throws SQLException {
+    public void tearDown() throws Exception {
         Statement st = createStatement();
         st.executeUpdate("DROP FUNCTION PADSTRING");
         
@@ -115,7 +137,8 @@ public class RowLockBasicTest extends BaseJDBCTestCase {
         st.close();
         dropTable("a");
         commit();
-        getConnection().setTransactionIsolation(isolation);
+        
+        super.tearDown();
     }
     
     public void testInsertIntoHeap() throws SQLException {
