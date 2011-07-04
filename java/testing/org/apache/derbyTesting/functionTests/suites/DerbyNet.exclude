@@ -4,6 +4,4 @@
 # 			see DERBY-326 and DERBY-550 issues
 jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/SetQueryTimeoutTest.java
-# excluding jdbcapi/derbyStress.java - jcc runs out of memory with this test
-jdbcapi/derbyStress.java
 largedata/LobLimits.java
