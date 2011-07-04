@@ -122,6 +122,7 @@ public class PropertySetter extends Task
     private static  final   String  JDK_APPLE = "Apple ";
     private static  final   String  JDK_IBM = "IBM Corporation";
     private static  final   String  JDK_SUN = "Sun Microsystems Inc.";
+    private static  final   String  JDK_ORACLE = "Oracle Corporation";
 
     private static  final   String  APPLE_CLASSES_DIR = "Classes";
     private static  final   String  APPLE_COMMANDS_DIR = "Commands";
@@ -305,7 +306,7 @@ public class PropertySetter extends Task
 
             if (  jdkVendor.startsWith( JDK_APPLE ) ) { setForAppleJDKs(); }
             else if ( usingIBMjdk( jdkVendor ) ) { setForIbmJDKs(); }
-            else if ( JDK_SUN.equals( jdkVendor ) ) { setForSunJDKs(); }
+            else if ( usingOracleJDK( jdkVendor ) ) { setForOracleJDKs(); }
             else {
                 // We don't know anything about this vendor. Print a warning
                 // message and try to continue.
@@ -400,17 +401,17 @@ public class PropertySetter extends Task
     
     /////////////////////////////////////////////////////////////////////////
     //
-    //  SET PROPERTIES FOR Sun JDKs
+    //  SET PROPERTIES FOR Oracle JDKs
     //
     /////////////////////////////////////////////////////////////////////////
 
     /**
      * <p>
-     * Set the properties needed to compile using the Sun JDKs. This
+     * Set the properties needed to compile using the Oracle JDKs. This
      * has been tested on Linux and SunOS.
      * </p>
      */
-    private void    setForSunJDKs()
+    private void setForOracleJDKs()
         throws Exception
     {
         setForMostJDKsJARInspection("1.4", "1.5", "1.6");
@@ -1180,7 +1181,15 @@ public class PropertySetter extends Task
     {
         return JDK_IBM.equals( jdkVendor );
     }
-    
+
+    /**
+     * Return true if we are using an Oracle JDK.
+     */
+    private static boolean usingOracleJDK(String vendor)
+    {
+        return JDK_SUN.equals(vendor) || JDK_ORACLE.equals(vendor);
+    }
+
     /**
      * <p>
      * Get a property value. Returns null if the property is not set.
