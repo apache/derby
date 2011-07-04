@@ -2778,18 +2778,6 @@ public class ResultColumnList extends QueryTreeNodeVector
 				((ResultColumn) elementAt(index)).markUpdatableByCursor();
 		}
 	}
-
-	/** 
-	 * @see QueryTreeNode#disablePrivilegeCollection
-	 */
-	public void disablePrivilegeCollection()
-	{
-		super.disablePrivilegeCollection();
-
-		int size = size();
-		for (int index = 0; index < size; index++)
-			((ResultColumn) elementAt(index)).disablePrivilegeCollection();			
-	}
 	
 	/**
 	 * Verify that all of the column names in this list are contained

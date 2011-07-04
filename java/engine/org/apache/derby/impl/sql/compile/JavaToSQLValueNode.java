@@ -210,16 +210,6 @@ public class JavaToSQLValueNode extends ValueNode
 		return javaNode;
 	}
 
-	/** 
-	 * @see QueryTreeNode#disablePrivilegeCollection
-	 */
-	public void disablePrivilegeCollection()
-	{
-		super.disablePrivilegeCollection();
-		if (javaNode != null)
-			javaNode.disablePrivilegeCollection();
-	}
-
 	/**
 	 * Bind this expression.  This means binding the sub-expressions,
 	 * as well as figuring out what the return type is for this expression.

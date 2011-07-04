@@ -29,6 +29,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.sql.compile.Visitor;
 
 import org.apache.derby.iapi.util.JBitSet;
 
@@ -658,15 +659,6 @@ public class FromSubquery extends FromTable
 		return rcList;
 	}
 
-	/** 
-	 * @see QueryTreeNode#disablePrivilegeCollection
-	 */
-	public void disablePrivilegeCollection()
-	{
-		super.disablePrivilegeCollection();
-		subquery.disablePrivilegeCollection();
-	}
-
 	/**
 	 * Search to see if a query references the specifed table name.
 	 *
@@ -730,4 +722,27 @@ public class FromSubquery extends FromTable
 	public void setOrigCompilationSchema(SchemaDescriptor sd) {
 		origCompilationSchema = sd;
 	}
+
+    /**
+     * @see QueryTreeNode#acceptChildren
+     */
+    void acceptChildren(Visitor v)
+        throws StandardException
+    {
+        super.acceptChildren(v);
+
+        subquery.accept(v);
+
+        if (orderByList != null) {
+            orderByList.accept(v);
+        }
+
+        if (offset != null) {
+            offset.accept(v);
+        }
+
+        if (fetchFirst != null) {
+            fetchFirst.accept(v);
+        }
+    }
 }
