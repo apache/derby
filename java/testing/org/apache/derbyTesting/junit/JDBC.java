@@ -1316,28 +1316,27 @@ public class JDBC {
         for (int i = 0; i < expectedRows.length; i++) {
             Assert.assertEquals("Different column count in expectedRows",
                                 expectedRows[0].length, expectedRows[i].length);
-            if (asTrimmedStrings) {
-                ArrayList row = new ArrayList(expectedRows[i].length);
-                for (int j = 0; j < expectedRows[i].length; j++) {
-                    String val = (String) expectedRows[i][j];
-                    row.add(val == null ? null : val.trim());
-                }
-                expected.add(row);
-            } else {
-                expected.add(Arrays.asList(expectedRows[i]));
+            ArrayList row = new ArrayList(expectedRows[i].length);
+
+            for (int j = 0; j < expectedRows[i].length; j++) {
+                String val = (String) expectedRows[i][j];
+                row.add(asTrimmedStrings ?
+                        (val == null ? null : val.trim()) :
+                        val);
             }
+            expected.add(row);
         }
 
         ArrayList actual = new ArrayList(expectedRows.length);
         while (rs.next()) {
             ArrayList row = new ArrayList(expectedRows[0].length);
             for (int i = 1; i <= expectedRows[0].length; i++) {
-                if (asTrimmedStrings) {
-                    String s = rs.getString(i);
-                    row.add(s == null ? null : s.trim());
-                } else {
-                    row.add(rs.getObject(i));
-                }
+                String s = rs.getString(i);
+
+                row.add(asTrimmedStrings ?
+                        (s == null ? null : s.trim()) :
+                        s);
+
                 if (rs.wasNull())
                     assertResultColumnNullable(rsmd, i);
             }
@@ -1347,7 +1346,6 @@ public class JDBC {
 
         Assert.assertEquals("Unexpected row count",
                             expectedRows.length, actual.size());
-
         Assert.assertTrue("Missing rows in ResultSet",
                           actual.containsAll(expected));
 
