@@ -24,7 +24,6 @@ package	org.apache.derby.impl.sql.compile;
 
 import org.apache.derby.iapi.sql.compile.CostEstimate;
 import org.apache.derby.iapi.sql.compile.Optimizer;
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
@@ -34,8 +33,6 @@ import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
-import org.apache.derby.iapi.types.TypeId;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
 
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.reference.SQLState;
@@ -2260,17 +2257,6 @@ public class SelectNode extends ResultSetNode
 			return true;
 		}
 		return false;
-	}
-
-	/** 
-	 * @see QueryTreeNode#disablePrivilegeCollection
-	 */
-	public void disablePrivilegeCollection()
-	{
-		super.disablePrivilegeCollection();
-		int fromListSize = fromList.size();
-		for( int i = 0; i < fromListSize; i++)
-			((FromTable) fromList.elementAt(i)).disablePrivilegeCollection();
 	}
 
 	/**

@@ -547,16 +547,16 @@ public abstract class QueryTreeNode implements Visitable
 	}
 
 	/**
-	 * Triggers, constraints and views get executed with their definer's
-	 * privileges and they can exist in the system only if their definers'
-	 * still have all the privileges to creeate them. Based on this, any
+     * Triggers, constraints and views get executed with their definers'
+     * privileges and they can exist in the system only if their definers
+     * still have all the privileges to create them. Based on this, any
 	 * time a trigger/view/constraint is executing, we do not need to waste
 	 * time in checking if the definer still has the right set of privileges.
-	 * At compile time, we wil make sure that we do not collect the privilege
+     * At compile time, we will make sure that we do not collect the privilege
 	 * requirement for objects accessed with definer privileges by calling the
 	 * following method. 
 	 */
-	public void disablePrivilegeCollection()
+	final void disablePrivilegeCollection()
 	{
 		isPrivilegeCollectionRequired = false;
 	}

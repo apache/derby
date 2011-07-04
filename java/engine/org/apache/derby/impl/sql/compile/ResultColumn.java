@@ -1361,16 +1361,6 @@ public class ResultColumn extends ValueNode
 		return updatableByCursor;
 	}
 
-	/** 
-	 * @see QueryTreeNode#disablePrivilegeCollection
-	 */
-	public void disablePrivilegeCollection()
-	{
-		super.disablePrivilegeCollection();
-		if (expression != null)
-			expression.disablePrivilegeCollection();
-	}
-
 	/**
 	 * Make a copy of this ResultColumn in a new ResultColumn
 	 *

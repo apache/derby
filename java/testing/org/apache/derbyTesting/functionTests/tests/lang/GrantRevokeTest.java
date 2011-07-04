@@ -134,6 +134,50 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
 	    	        "  language java parameter style java" +
 	    	        "  external name 'org.apache.derbyTesting.functionTests.tests.lang.GrantRevokeTest.s1P1'" +
 	    	        "  no sql called on null input");
+
+
+               // DERBY-5292: Definer's rights in views
+               s.execute("create schema appl");
+               s.execute(
+                   "CREATE TABLE appl.\"TBL_Tasks\"" +
+                   "(\"TaskID\" integer NOT NULL " +
+                   "                    GENERATED ALWAYS AS IDENTITY," +
+                   " \"Task\" varchar(64) NOT NULL," +
+                   " \"AssignedTo\" varchar(64) NOT NULL," +
+                   "CONSTRAINT \"PK_Tasks\" PRIMARY KEY (\"TaskID\"))");
+               s.execute(
+                   "CREATE TABLE appl.\"TBL_Priorities\"" +
+                   "(\"TaskID\" integer NOT NULL," +
+                   " \"Priority\" integer NOT NULL," +
+                   " \"SeqNbr\" integer NOT NULL," +
+                   "CONSTRAINT \"PK_Priorities\" PRIMARY KEY " +
+                   "  (\"TaskID\", \"Priority\"))");
+               s.execute(
+                   "CREATE VIEW appl.\"VW_MyTasks\" AS " +
+                   "    SELECT * FROM appl.\"TBL_Tasks\" " +
+                   "WHERE \"AssignedTo\" = SESSION_USER");
+               s.execute(
+                   "CREATE VIEW appl.\"VW_MyPriorityTasks\" AS " +
+                   "    SELECT t.\"TaskID\", t.\"Task\", p.\"Priority\"" +
+                   "    FROM appl.\"TBL_Tasks\" AS t," +
+                   "         appl.\"TBL_Priorities\" AS p " +
+                   "    WHERE p.\"TaskID\" = t.\"TaskID\" " +
+                   "          AND t.\"AssignedTo\" = SESSION_USER");
+               s.execute(
+                   "CREATE VIEW appl.\"VW2_MyPriorityTasks\" AS " +
+                   "    SELECT t.\"TaskID\", t.\"Task\", p.\"Priority\" " +
+                   "    FROM appl.\"TBL_Tasks\" AS t INNER JOIN " +
+                   "         appl.\"TBL_Priorities\" AS p ON " +
+                   "         p.\"TaskID\" = t.\"TaskID\" " +
+                   "    WHERE t.\"AssignedTo\" = SESSION_USER");
+               s.execute(
+                   "CREATE VIEW appl.\"VW3_MyPriorityTasks\" AS " +
+                   "    SELECT t.\"TaskID\", t.\"Task\" " +
+                   "    FROM appl.\"TBL_Tasks\" AS t " +
+                   "    WHERE t.\"AssignedTo\" = SESSION_USER " +
+                   "    AND EXISTS " +
+                   "        (SELECT * FROM appl.\"TBL_Priorities\" AS p " +
+                   "         WHERE p.\"TaskID\" = t.\"TaskID\")");
 	    	}
 	    };
 		Test test = DatabasePropertyTestSetup.builtinAuthentication(
@@ -758,7 +802,30 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         assertAllPrivileges(false, users[2], "S1", "T1", null);
         
     }
-    
+
+    /**
+     * DERBY-5292
+     */
+    public void testViewDefinersRights () throws Exception {
+
+        grant("select", "appl", "\"VW_MyTasks\"", users[1]);
+        grant("select", "appl", "\"VW_MyPriorityTasks\"", users[1]);
+        grant("select", "appl", "\"VW2_MyPriorityTasks\"", users[1]);
+        grant("select", "appl", "\"VW3_MyPriorityTasks\"", users[1]);
+
+        // OK before fix
+        assertSelectPrivilege(
+            true, users[1], "appl", "\"VW_MyTasks\"", null);
+        assertSelectPrivilege(
+            true, users[1], "appl", "\"VW_MyPriorityTasks\"", null);
+
+        // Failed before fix
+        assertSelectPrivilege(
+            true, users[1], "appl", "\"VW2_MyPriorityTasks\"", null);
+        assertSelectPrivilege(
+            true, users[1], "appl", "\"VW3_MyPriorityTasks\"", null);
+    }
+
     /* End testcases from grantRevokeDDL */
     
     /* Begin utility methods specific to grant / revoke */
@@ -1346,9 +1413,10 @@ public class GrantRevokeTest extends BaseJDBCTestCase {
         
     	Connection c = openUserConnection(user);
     	DatabaseMetaData dm = c.getMetaData();
-    	ResultSet rs = dm.getTablePrivileges(null, schema.toUpperCase(), table.toUpperCase());
+        schema = JDBC.identifierToCNF(schema);
+        table  = JDBC.identifierToCNF(table);
+        ResultSet rs = dm.getTablePrivileges(null, schema, table);
      	boolean found = false;
-    	
     	// check getTablePrivileges
     	if (columns == null) {
         	while (rs.next())

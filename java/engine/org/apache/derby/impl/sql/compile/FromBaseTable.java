@@ -75,14 +75,12 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.impl.sql.compile.FromSubquery;
 
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -2304,7 +2302,15 @@ public class FromBaseTable extends FromTable
 				//Following call is marking the query to run with definer 
 				//privileges. This marking will make sure that we do not collect
 				//any privilege requirement for it.
-				fsq.disablePrivilegeCollection();
+                CollectNodesVisitor cnv =
+                    new CollectNodesVisitor(QueryTreeNode.class, null);
+
+                fsq.accept(cnv);
+
+                for (Iterator it = cnv.getList().iterator(); it.hasNext(); ) {
+                    ((QueryTreeNode)it.next()).disablePrivilegeCollection();
+                }
+
 				fsq.setOrigTableName(this.getOrigTableName());
 
 				// since we reset the compilation schema when we return, we
