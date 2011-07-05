@@ -14,8 +14,7 @@ ij> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
-connect 'jdbc:derby:wombat;create=true';
-ij> -- test maximum display width
+-- test maximum display width
 values cast('1' as varchar(512));
 1                                                                                                                               
 --------------------------------------------------------------------------------------------------------------------------------

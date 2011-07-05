@@ -14,8 +14,6 @@
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
-connect 'jdbc:derby:wombat;create=true';
-
 -- test maximum display width
 values cast('1' as varchar(512));
 maximumdisplaywidth 40;

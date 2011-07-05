@@ -58,6 +58,7 @@ public class _Suite extends BaseTestCase {
         suite.addTest(IjConnNameTest.suite());
         suite.addTest(RollBackWrappingWhenFailOnImportTest.suite());
         suite.addTest(ConnectWrongSubprotocolTest.suite());
+        suite.addTest(ij4Test.suite());
         
         // SysinfoAPITest currently fails when run against jars, so is
         // disabled. Only the first jar file on the classpath properly
