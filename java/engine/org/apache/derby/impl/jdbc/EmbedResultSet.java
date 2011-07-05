@@ -21,6 +21,8 @@
 
 package org.apache.derby.impl.jdbc;
 
+import java.io.ByteArrayInputStream;
+
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
@@ -50,7 +52,6 @@ import org.apache.derby.iapi.sql.ResultDescription;
 import org.apache.derby.iapi.services.io.StreamStorable;
 
 import org.apache.derby.iapi.services.io.LimitInputStream;
-import org.apache.derby.iapi.services.io.NewByteArrayInputStream;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.reference.SQLState;
 
@@ -77,6 +78,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 
 import org.apache.derby.iapi.jdbc.CharacterStreamDescriptor;
+import org.apache.derby.iapi.services.io.CloseFilterInputStream;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.util.IdUtil;
@@ -1271,7 +1273,7 @@ public abstract class EmbedResultSet extends ConnectionChild
             if (dvd.hasStream()) {
                 stream = new BinaryToRawStream(dvd.getStream(), dvd);
             } else {
-                stream = new NewByteArrayInputStream(dvd.getBytes());
+                stream = new ByteArrayInputStream(dvd.getBytes());
             }
 
             if (lmfs > 0)
@@ -1281,7 +1283,9 @@ public abstract class EmbedResultSet extends ConnectionChild
                 limitResultIn.setLimit(lmfs);
                 stream = limitResultIn;
             }
-			currentStream = stream;
+            // Wrap in a stream throwing exception on invocations when closed.
+            stream = new CloseFilterInputStream(stream);
+            currentStream = stream;
 			return stream;
 
 		} catch (Throwable t) {

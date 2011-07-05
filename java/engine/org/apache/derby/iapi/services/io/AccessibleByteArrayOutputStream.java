@@ -21,6 +21,7 @@
 
 package org.apache.derby.iapi.services.io;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,7 +84,7 @@ public class AccessibleByteArrayOutputStream extends ByteArrayOutputStream {
      */
     public InputStream getInputStream()
     {
-        return new NewByteArrayInputStream(buf, 0, count);
+        return new ByteArrayInputStream(buf, 0, count);
     }
     
     /**

@@ -30,7 +30,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Calendar;
-import org.apache.derby.client.am.SQLExceptionFactory;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -49,7 +48,8 @@ public abstract class ResultSet implements java.sql.ResultSet,
 
     public Section generatedSection_ = null;
 
-	private CloseFilterInputStream is_;
+    private CloseFilterInputStream currentStream;
+    private Reader currentReader;
 
     //---------------------navigational cheat-links-------------------------------
     // Cheat-links are for convenience only, and are not part of the conceptual model.
@@ -439,7 +439,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         if (!openOnClient_) {
             return;
         }
-        closeCloseFilterInputStream();
+        closeOpenStreams();
         // See if there are open locators on the current row, if valid.
         if (isValidCursorPosition_ && !isOnInsertRow_) {
             lobState.checkCurrentRow(cursor_);
@@ -576,7 +576,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public boolean getBoolean(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBoolean", column);
@@ -610,7 +610,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public byte getByte(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getByte", column);
@@ -644,7 +644,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public short getShort(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getShort", column);
@@ -678,7 +678,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public int getInt(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getInt", column);
@@ -712,7 +712,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public long getLong(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getLong", column);
@@ -746,7 +746,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public float getFloat(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getFloat", column);
@@ -780,7 +780,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public double getDouble(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDouble", column);
@@ -815,7 +815,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public java.math.BigDecimal getBigDecimal(int column, int scale) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceDeprecatedEntry(this, "getBigDecimal", column, scale);
@@ -847,7 +847,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         try
         {
 
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBigDecimal", column);
@@ -877,7 +877,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public java.sql.Date getDate(int column, Calendar cal) throws SQLException {
 	    try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getDate", column);
@@ -920,7 +920,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public java.sql.Time getTime(int column, Calendar cal) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getTime", column, cal);
@@ -964,7 +964,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
             throws SQLException {
 	    try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(
@@ -1056,7 +1056,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public String getString(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getString", column);
@@ -1084,7 +1084,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public byte[] getBytes(int column) throws SQLException {
 	    try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBytes", column);
@@ -1112,7 +1112,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public java.io.InputStream getBinaryStream(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBinaryStream", column);
@@ -1143,7 +1143,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public java.io.InputStream getAsciiStream(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getAsciiStream", column);
@@ -1194,7 +1194,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public java.io.Reader getCharacterStream(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getCharacterStream", column);
@@ -1214,6 +1214,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
                 agent_.logWriter_.traceExit(this, "getCharacterStream", result);
             }
             setWasNull(column);  // Placed close to the return to minimize risk of thread interference
+            currentReader = result;
             return result;
         }
         catch ( SqlException se )
@@ -1226,7 +1227,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public java.sql.Blob getBlob(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getBlob", column);
@@ -1256,7 +1257,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public java.sql.Clob getClob(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getClob", column);
@@ -1286,7 +1287,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public java.sql.Ref getRef(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getRef", column);
@@ -1313,7 +1314,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public java.sql.Array getArray(int column) throws SQLException {
 	    try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getArray", column);
@@ -1340,7 +1341,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public Object getObject(int column) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getObject", column);
@@ -1374,7 +1375,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
     public Object getObject(int column, java.util.Map map) throws SQLException {
         try
         {
-            closeCloseFilterInputStream();
+            closeOpenStreams();
 
             if (agent_.loggingEnabled()) {
                 agent_.logWriter_.traceEntry(this, "getObject", column, map);
@@ -5433,35 +5434,50 @@ public abstract class ResultSet implements java.sql.ResultSet,
 			return null;
 		}
 
-		if( is_ == is ){
-			return is_;
+		if( currentStream == is ){
+			return currentStream;
 		}
 		
-		closeCloseFilterInputStream();
+		closeOpenStreams();
 		
-		is_ = new CloseFilterInputStream(is);
+		currentStream = new CloseFilterInputStream(is);
 		
-		return is_;
+		return currentStream;
 		
 	}
 	
 	
-	private void closeCloseFilterInputStream() throws SqlException {
-		
-		if(is_ != null){
-			try{
-				is_.close();
-				
-			}catch(IOException e){				
-				throw new SqlException(agent_.logWriter_ ,
-                    new ClientMessageId(SQLState.JAVA_EXCEPTION), 
-                    "java.io.IOException", e.getMessage(), e);
-			}
-			
-			is_ = null;
-			
-		}
-	}
+    /**
+     * Closes the current stream, if there is one.
+     * <p>
+     * Note that streams are implicitly closed when the next value is fetched.
+     *
+     * @throws SqlException if closing the stream fails
+     */
+    private void closeOpenStreams() throws SqlException {
+        // There will be zero or one stream to close (both cannot be current).
+        if (currentStream != null) {
+            try {
+                currentStream.close();
+            } catch (IOException ioe) {                
+                throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId(SQLState.JAVA_EXCEPTION), 
+                        "java.io.IOException", ioe.getMessage(), ioe);
+            }
+            currentStream = null;
+        }
+
+        if (currentReader != null) {
+            try {
+                currentReader.close();
+            } catch (IOException ioe) {                
+                throw new SqlException(agent_.logWriter_,
+                        new ClientMessageId(SQLState.JAVA_EXCEPTION), 
+                        "java.io.IOException", ioe.getMessage(), ioe);
+            }
+            currentReader = null;
+        }
+    }
     
     
     /**
