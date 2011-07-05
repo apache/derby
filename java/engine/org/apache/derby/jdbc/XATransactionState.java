@@ -90,17 +90,29 @@ final class XATransactionState extends ContextImpl {
 
 
     /** The implementation of TimerTask to cancel a global transaction. */
-    private class CancelXATransactionTask extends TimerTask {
+    private static class CancelXATransactionTask extends TimerTask {
 
-        /** Creates the cancelation object to be passed to a timer. */
-        public CancelXATransactionTask() {
-            XATransactionState.this.timeoutTask = this;
+        private XATransactionState xaState; 
+
+        /**
+         * Creates the cancellation task to be passed to a timer.
+         *
+         * @param xaState the XA state object for the transaction to cancel
+         */
+        public CancelXATransactionTask(XATransactionState xaState) {
+            this.xaState = xaState;
+        }
+        
+        public boolean cancel() {
+            // nullify reference to reduce memory footprint of canceled tasks
+            xaState = null;
+            return super.cancel();
         }
 
         /** Runs the cancel task of the global transaction */
         public void run() {
             try {
-                XATransactionState.this.cancel(MessageId.CONN_XA_TRANSACTION_TIMED_OUT);
+                xaState.cancel(MessageId.CONN_XA_TRANSACTION_TIMED_OUT);
             } catch (Throwable th) {
                 Monitor.logThrowable(th);
             }
@@ -313,10 +325,10 @@ final class XATransactionState extends ContextImpl {
         // schedule a time out task if the timeout was specified
         if (timeoutMillis > 0) {
             // take care of the transaction timeout
-            TimerTask cancelTask = new CancelXATransactionTask();
             TimerFactory timerFactory = Monitor.getMonitor().getTimerFactory();
             Timer timer = timerFactory.getCancellationTimer();
-            timer.schedule(cancelTask, timeoutMillis);
+            timeoutTask = new CancelXATransactionTask(this);
+            timer.schedule(timeoutTask, timeoutMillis);
         } else {
             timeoutTask = null;
         }
@@ -354,6 +366,7 @@ final class XATransactionState extends ContextImpl {
     synchronized void xa_finalize() {
         if (timeoutTask != null) {
             timeoutTask.cancel();
+            timeoutTask = null;
         }
         performTimeoutRollback = false;
     }
