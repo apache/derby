@@ -180,7 +180,7 @@ public class BaseColumnNode extends ValueNode
 		if (isSameNodeType(o)) 
 		{
 			BaseColumnNode other = (BaseColumnNode)o;
-			return other.tableName.equals(other.tableName) 
+			return other.tableName.equals(tableName)
 			&& other.columnName.equals(columnName);
 		} 
 		return false;
