@@ -495,7 +495,8 @@ class ij {
 	}
 
 	private boolean getExpect() {
-		return Boolean.getBoolean("ij.expect");
+		String s = util.getSystemProperty("ij.expect");
+		return Boolean.valueOf(s).booleanValue();
 	}
 
 	private	ijResult	addSession
