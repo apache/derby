@@ -21,6 +21,7 @@ values cast('1' as varchar(512));
 maximumdisplaywidth 400;
 values cast('1' as varchar(512));
 
+maximumdisplaywidth 128;
 -- and, the exit command:
 exit;
 
