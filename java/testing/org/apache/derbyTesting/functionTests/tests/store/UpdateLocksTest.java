@@ -7581,37 +7581,40 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
 
     }
 
-    private void show(ResultSet rs, boolean unPadded) throws SQLException {
-        System.err.println("Isolation:" +
-                           rs.getStatement().
-                           getConnection().
-                           getTransactionIsolation());
-        System.err.println("UnPadded == " + unPadded);
-        System.err.println("        JDBC.assertUnorderedResultSet(\n" +
-                           "            ltrs,\n" +
-                           "            new String[][]{");
-        int rowNo = 0;
-        while (rs.next()) {
-            if (rowNo++ != 0) {
-                System.err.print(",\n");
-            }
-
-            System.err.print(
-                "                {\"" +
-                rs.getString(1).trim() + "\", \"" +
-                rs.getString(2).trim() + "\", \"" +
-                rs.getString(3).trim() + "\", \"" +
-                rs.getString(4).trim() + "\", \"" +
-                rs.getString(5).trim() + "\", \"" +
-                rs.getString(6).trim() + "\", \"" +
-                rs.getString(7).trim() + "\", \"" +
-                rs.getString(8).trim() + "\", \"" +
-                rs.getString(9).trim() + "\"}");
-        }
-
-        System.err.print("};\n");
-        rs.close();
-    }
+    // /**
+    //  * Useful for debugging result sets if the test fails.
+    //  */
+    // private void show(ResultSet rs, boolean unPadded) throws SQLException {
+    //     System.err.println("Isolation:" +
+    //                        rs.getStatement().
+    //                        getConnection().
+    //                        getTransactionIsolation());
+    //     System.err.println("UnPadded == " + unPadded);
+    //     System.err.println("        JDBC.assertUnorderedResultSet(\n" +
+    //                        "            ltrs,\n" +
+    //                        "            new String[][]{");
+    //     int rowNo = 0;
+    //     while (rs.next()) {
+    //         if (rowNo++ != 0) {
+    //             System.err.print(",\n");
+    //         }
+    //
+    //         System.err.print(
+    //             "                {\"" +
+    //             rs.getString(1).trim() + "\", \"" +
+    //             rs.getString(2).trim() + "\", \"" +
+    //             rs.getString(3).trim() + "\", \"" +
+    //             rs.getString(4).trim() + "\", \"" +
+    //             rs.getString(5).trim() + "\", \"" +
+    //             rs.getString(6).trim() + "\", \"" +
+    //             rs.getString(7).trim() + "\", \"" +
+    //             rs.getString(8).trim() + "\", \"" +
+    //             rs.getString(9).trim() + "\"}");
+    //     }
+    //
+    //     System.err.print("};\n");
+    //     rs.close();
+    // }
 
     private static String pad2(String s, int i) {
         if (i == 0) {
