@@ -19,7 +19,6 @@
  */
 package org.apache.derbyTesting.functionTests.tests.store;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -32,7 +31,6 @@ import java.util.Arrays;
 
 import junit.framework.Test;
 
-import org.apache.derbyTesting.functionTests.util.Formatters;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
@@ -92,8 +90,6 @@ public class UpdateLocksTest extends BaseJDBCTestCase {
              * Creates the views and procedures used by the test cases.
              */
             protected void decorateSQL(Statement s) throws SQLException {
-                Connection conn = s.getConnection();
-
                 s.executeUpdate(
                     "create function PADSTRING (data varchar(32000), " +
                     "                           length integer) " +
