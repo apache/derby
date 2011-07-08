@@ -266,7 +266,8 @@ public final class LocalizedResource  implements java.security.PrivilegedAction 
 	 */
 	public LocalizedOutput getNewEncodedOutput(OutputStream o,
 			String encoding) throws UnsupportedEncodingException{
-		return new LocalizedOutput(o, encoding);
+	    out = new LocalizedOutput(o, encoding);
+	    return out;
 	}
 	public String getTextMessage(String key ) {
         return getTextMessage(key, new Object[0]);
