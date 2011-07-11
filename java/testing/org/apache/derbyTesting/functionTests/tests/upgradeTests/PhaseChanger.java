@@ -20,17 +20,16 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
-import java.io.PrintStream;
-import java.security.AccessController;
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseTestSetup;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -121,11 +120,20 @@ final class PhaseChanger extends BaseTestSetup {
      * Shutdown the database engine and reset the class loader.
      * @throws SQLException if the engine couldn't be stopped
      */
-    protected void tearDown() throws SQLException
+    protected void tearDown() throws Exception
     {
         if ( trace ) BaseTestCase.traceit(" Test upgrade done.");
         DataSource ds = JDBCDataSource.getDataSource();
         JDBCDataSource.shutEngine(ds);
+
+        // When we're done with the old driver, make sure it's deregistered
+        // from the DriverManager (if running on a platform that has the
+        // DriverManager class). The shutEngine() should also deregister the
+        // driver, but on some versions it doesn't (DERBY-2905, DERBY-5316).
+        if (phase == UpgradeChange.PH_POST_HARD_UPGRADE &&
+                JDBC.vmSupportsJDBC3()) {
+            deregisterDriver();
+        }
 
         if (loader != null)
             UpgradeClassLoader.setThreadLoader(previousLoader);       
@@ -135,5 +143,19 @@ final class PhaseChanger extends BaseTestSetup {
         UpgradeChange.phase.set(null);
         UpgradeChange.oldVersion.set(null);
     }
-    
+
+    /**
+     * Deregister all JDBC drivers in the class loader associated with this
+     * version.
+     */
+    private void deregisterDriver() throws Exception {
+        // DriverManager only allows deregistering of drivers from classes
+        // that live in a class loader that is able to load the driver. So
+        // create an instance of DriverUnloader in the old driver's class
+        // loader.
+        Class unloader = Class.forName(
+                DriverUnloader.class.getName(), true, loader);
+        Method m = unloader.getMethod("unload", (Class[]) null);
+        m.invoke(null, (Object[]) null);
+    }
 }

@@ -20,19 +20,16 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
-import java.util.Properties;
 
-import junit.extensions.TestSetup;
 import junit.framework.Assert;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 
@@ -237,9 +234,46 @@ public class UpgradeClassLoader
         
         // Specify null for parent class loader to avoid mixing up 
         // jars specified in the system classpath
-        return new URLClassLoader(url, null);       
+        ClassLoader oldVersionLoader = new URLClassLoader(url, null);
+
+        // DERBY-5316: We need to unload the JDBC driver when done with it,
+        // but that can only be done if the DriverUnloader class lives in a
+        // class-loader which is able to load the driver class.
+        return new ClassLoader(oldVersionLoader) {
+            protected Class findClass(String name)
+                    throws ClassNotFoundException {
+                if (name.equals(DriverUnloader.class.getName())) {
+                    try {
+                        byte[] b = fetchDriverUnloaderBytes();
+                        return defineClass(name, b, 0, b.length);
+                    } catch (IOException ioe) {
+                        throw new ClassNotFoundException(name, ioe);
+                    }
+                }
+                throw new ClassNotFoundException(name);
+            }
+        };
     }
-    
+
+    /**
+     * Get a byte array with the contents of the class file for the
+     * {@code DriverUnloader} class.
+     */
+    private static byte[] fetchDriverUnloaderBytes() throws IOException {
+        InputStream in =
+            DriverUnloader.class.getResourceAsStream("DriverUnloader.class");
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[4096];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            return out.toByteArray();
+        } finally {
+            in.close();
+        }
+    }
 }
 
     
