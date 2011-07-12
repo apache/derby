@@ -127,18 +127,16 @@ final class PhaseChanger extends BaseTestSetup {
         DataSource ds = JDBCDataSource.getDataSource();
         JDBCDataSource.shutEngine(ds);
 
-        // When we're done with the old driver, make sure it's deregistered
-        // from the DriverManager (if running on a platform that has the
-        // DriverManager class). The shutEngine() should also deregister the
-        // driver, but on some versions it doesn't (DERBY-2905, DERBY-5316).
-        if (phase == UpgradeChange.PH_POST_HARD_UPGRADE &&
-                JDBC.vmSupportsJDBC3()) {
-            deregisterDriver();
-        }
-
-        // Workaround for DERBY-4895, which prevented the engine classes from
-        // being garbage collected.
+        // When shutting down the old engine for good, make sure that it's
+        // made eligible for garbage collection by working around bugs in
+        // some of the old versions.
         if (phase == UpgradeChange.PH_POST_HARD_UPGRADE) {
+            // Workaround for DERBY-2905. Some versions don't deregister the
+            // JDBC driver when shutting down the engine.
+            deregisterDriver();
+
+            // Workaround for DERBY-4895, which prevented the engine classes
+            // from being garbage collected.
             clearDerby4895ThreadLocal();
         }
 
@@ -152,18 +150,31 @@ final class PhaseChanger extends BaseTestSetup {
     }
 
     /**
-     * Deregister all JDBC drivers in the class loader associated with this
-     * version.
+     * Make sure the JDBC driver in the class loader associated with this
+     * version is deregistered. This is a workaround for DERBY-2905, which
+     * affected Derby 10.2 - 10.7, and it is needed to make the old engine
+     * classes eligible for garbage collection.
      */
     private void deregisterDriver() throws Exception {
-        // DriverManager only allows deregistering of drivers from classes
-        // that live in a class loader that is able to load the driver. So
-        // create an instance of DriverUnloader in the old driver's class
-        // loader.
-        Class unloader = Class.forName(
-                DriverUnloader.class.getName(), true, loader);
-        Method m = unloader.getMethod("unload", (Class[]) null);
-        m.invoke(null, (Object[]) null);
+        boolean isAffectedVersion =
+                UpgradeRun.lessThan(new int[] {10,2,0,0}, version) &&
+                UpgradeRun.lessThan(version, new int[] {10,8,0,0});
+
+        if (JDBC.vmSupportsJDBC3()) {
+            // DriverManager only allows deregistering of drivers from classes
+            // that live in a class loader that is able to load the driver. So
+            // create an instance of DriverUnloader in the old driver's class
+            // loader.
+            Class unloader = Class.forName(
+                    DriverUnloader.class.getName(), true, loader);
+            Method m = unloader.getMethod("unload", (Class[]) null);
+            Boolean res = (Boolean) m.invoke(null, (Object[]) null);
+
+            // Check that there weren't any drivers to unload except in the
+            // versions affected by DERBY-2905.
+            assertEquals("Unexpected result from driver unloading",
+                         isAffectedVersion, res.booleanValue());
+        }
     }
 
     /**

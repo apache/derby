@@ -33,13 +33,21 @@ import java.util.Enumeration;
  */
 public class DriverUnloader {
     /**
-     * Deregister all JDBC drivers accessible from the class loader in which
+     * Deregister all Derby drivers accessible from the class loader in which
      * this class lives.
+     *
+     * @return {@code true} if a driver was unloaded, {@code false} otherwise
      */
-    public static void unload() throws SQLException {
+    public static boolean unload() throws SQLException {
+        boolean ret = false;
         Enumeration e = DriverManager.getDrivers();
         while (e.hasMoreElements()) {
-            DriverManager.deregisterDriver((Driver) e.nextElement());
+            Driver driver = (Driver) e.nextElement();
+            if (driver.getClass().getName().startsWith("org.apache.derby.")) {
+                DriverManager.deregisterDriver(driver);
+                ret = true;
+            }
         }
+        return ret;
     }
 }
