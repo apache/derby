@@ -53,7 +53,7 @@ public final class ToolScripts extends ScriptTestCase {
      *
      */
     private static final String[] CLIENT_AND_EMBEDDED_TESTS = {
-        "ij4", "ij7", "URLCheck"
+        "ij4", "ij6", "ij7", "URLCheck"
     };
 
     /**
