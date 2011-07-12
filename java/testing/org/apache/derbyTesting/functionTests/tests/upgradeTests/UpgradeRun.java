@@ -245,7 +245,7 @@ class UpgradeRun extends UpgradeClassLoader
      * Return true if and only if the left version is less than the
      * right version.
      */
-    private static boolean lessThan( int[] left, int[] right )
+    static boolean lessThan( int[] left, int[] right )
     {
         for (int i = 0; i < left.length; i++)
         {

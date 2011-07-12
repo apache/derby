@@ -20,6 +20,7 @@ limitations under the License.
 */
 package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 
@@ -135,6 +136,12 @@ final class PhaseChanger extends BaseTestSetup {
             deregisterDriver();
         }
 
+        // Workaround for DERBY-4895, which prevented the engine classes from
+        // being garbage collected.
+        if (phase == UpgradeChange.PH_POST_HARD_UPGRADE) {
+            clearDerby4895ThreadLocal();
+        }
+
         if (loader != null)
             UpgradeClassLoader.setThreadLoader(previousLoader);       
         loader = null;
@@ -157,5 +164,31 @@ final class PhaseChanger extends BaseTestSetup {
                 DriverUnloader.class.getName(), true, loader);
         Method m = unloader.getMethod("unload", (Class[]) null);
         m.invoke(null, (Object[]) null);
+    }
+
+    /**
+     * Clear a static ThreadLocal field in TableDescriptor so that the engine
+     * classes can be garbage collected when they are no longer used. This is
+     * a workaround for DERBY-4895, which affects Derby 10.5 and 10.6.
+     */
+    private void clearDerby4895ThreadLocal() throws Exception {
+        boolean isAffectedVersion =
+            (UpgradeRun.lessThan(new int[] {10,5,0,0}, version) &&
+             UpgradeRun.lessThan(version, new int[] {10,5,3,2}))
+            ||
+            (UpgradeRun.lessThan(new int[] {10,6,0,0}, version) &&
+             UpgradeRun.lessThan(version, new int[] {10,6,2,3}));
+
+        if (!isAffectedVersion) {
+            // Nothing to work around in this version.
+            return;
+        }
+
+        Class td = Class.forName(
+                "org.apache.derby.iapi.sql.dictionary.TableDescriptor",
+                true, loader);
+        Field f = td.getDeclaredField("referencedColumnMap");
+        f.setAccessible(true);
+        f.set(null, null);
     }
 }
