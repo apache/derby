@@ -689,7 +689,7 @@ public class SubqueryNode extends ValueNode
                       offset == null &&
                       fetchFirst == null &&
 					  !isWhereExistsAnyInWithWhereSubquery() &&
-					  parentComparisonOperator instanceof BinaryComparisonOperatorNode;
+                      parentComparisonOperator != null;
 
 		if (flattenable)
 		{
@@ -791,7 +791,7 @@ public class SubqueryNode extends ValueNode
 				 * of the comparison in case we pull the comparison into
 				 * the flattened subquery.
 				 */
-				if (parentComparisonOperator instanceof BinaryComparisonOperatorNode)
+                if (parentComparisonOperator != null)
 				{
 					leftOperand = parentComparisonOperator.getLeftOperand();
 				}

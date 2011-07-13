@@ -718,17 +718,15 @@ public class XML
             // passed collation type in determining whether we should
             // generate SQLChar vs CollatorSQLChar for instance. Keep in mind
             // that collation applies only to character string types.
-    		if (result instanceof StringDataValue) {
-    			try {
-    				RuleBasedCollator rbs = ConnectionUtil.getCurrentLCC().getDataValueFactory().
-    				getCharacterCollator(targetCollationType);
-    				result = ((StringDataValue)result).getValue(rbs);
-    			}
-    			catch( java.sql.SQLException sqle)
-    			{
-    				throw StandardException.plainWrapException( sqle);
-    			}
-    		}
+            try {
+                RuleBasedCollator rbs = ConnectionUtil.getCurrentLCC().getDataValueFactory().
+                getCharacterCollator(targetCollationType);
+                result = ((StringDataValue)result).getValue(rbs);
+            }
+            catch( java.sql.SQLException sqle)
+            {
+                throw StandardException.plainWrapException( sqle);
+            }
         }
 
         // Else we're reusing a StringDataValue.  We only reuse

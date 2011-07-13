@@ -290,8 +290,7 @@ public class TableElementList extends QueryTreeNodeVector
 			}
 
 			/* Make sure that there are no duplicate constraint names in the list */
-			if (cdn instanceof ConstraintDefinitionNode)
-				checkForDuplicateConstraintNames(ddlStmt, constraintHT, cdn.getConstraintMoniker());
+            checkForDuplicateConstraintNames(ddlStmt, constraintHT, cdn.getConstraintMoniker());
 
 			/* Make sure that the constraint we are trying to drop exists */
 			if (cdn.getConstraintType() == DataDictionary.DROP_CONSTRAINT)

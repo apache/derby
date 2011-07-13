@@ -384,13 +384,17 @@ class MergeSort implements Sort
 	 * Methods of MergeSort.  Arranged alphabetically.
 	 */
 
-	/**
-	Check the column ordering against the template, making
-	sure that each column is present in the template,
-	implements Orderable, and is not mentioned more than
-	once.  Intended to be called as part of a sanity check.
-	**/
-	protected boolean checkColumnOrdering(
+    /**
+     * Check the column ordering against the template, making sure that each
+     * column is present in the template, is not mentioned more than once, and
+     * that the columns isn't {@code null}.
+     * <p>
+     * Intended to be called as part of a sanity check. All columns are
+     * orderable, since {@code DataValueDescriptor} extends {@code Orderable}.
+     *
+     * @return {@code true} if the ordering is valid, {@code false} if not.
+     */
+    private boolean checkColumnOrdering(
     DataValueDescriptor[]   template, 
     ColumnOrdering          columnOrdering[])
 	{
@@ -415,7 +419,7 @@ class MergeSort implements Sort
 			Object columnVal = 
                 RowUtil.getColumn(template, (FormatableBitSet) null, colid);
 
-			if (!(columnVal instanceof Orderable))
+            if (columnVal == null)
 				return false;
 		}
 
@@ -518,11 +522,7 @@ class MergeSort implements Sort
         if (SanityManager.DEBUG)
         {
     		SanityManager.ASSERT(state == STATE_CLOSED);
-    	}
-
-		// Make sure the column ordering makes sense
-        if (SanityManager.DEBUG)
-        {
+            // Make sure the column ordering makes sense
     		SanityManager.ASSERT(checkColumnOrdering(template, columnOrdering),
 	    		"column ordering error");
 	    }
