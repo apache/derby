@@ -108,14 +108,6 @@ public class StandardException extends Exception
 
 	/*
 	** End of constructors
-	*/
-	/**
-	 * Sets the arguments for this exception.
-	 */
-	private final void setArguments(Object[] arguments)
-	{
-		this.arguments = arguments;
-	}
 
 	/**
 	 * Returns the arguments for this exception,

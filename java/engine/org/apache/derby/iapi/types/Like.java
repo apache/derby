@@ -342,34 +342,6 @@ public class Like {
 		else return null; // still have strings to match, not done
 	}
 
-	/**
-	 * matchSpecial
-	 *
-	 *	check the pattern against the various special character arrays.
-	 *  The array can be anyStringInts, anyCharInts or anyEscChars (always 1)
-	 */
-
-	private static boolean matchSpecial(int[] pat, int patStart, int patEnd, int[] specialInts)
-	{
-		//
-		// multi-collation units per char can exceed the pattern length
-		// and we fall around the 2nd if statement and falsely return true.
-		//
-		if (specialInts.length > patEnd - patStart)
-		    return false;
-		if (specialInts.length <= patEnd - patStart)
-		{
-			for (int index = 0; index < specialInts.length; index++)
-			{
-				if (pat[patStart + index] != specialInts[index])
-				{
-					return false; // more to match
-				}
-			}
-		}
-		return true;
-	}
-
 	/*
 		Most typical interface for character string types with UCS_BASIC and 
 		territory based collation.

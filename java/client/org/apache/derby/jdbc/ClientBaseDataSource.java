@@ -696,13 +696,6 @@ public abstract class ClientBaseDataSource implements Serializable, Referenceabl
         return defaultString;
     }
 
-    private static short parseShort(String shortString, short defaultShort) {
-        if (shortString != null) {
-            return Short.parseShort(shortString);
-        }
-        return defaultShort;
-    }
-
     private static int parseInt(String intString, int defaultInt) {
         if (intString != null) {
             return Integer.parseInt(intString);

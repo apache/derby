@@ -569,24 +569,6 @@ public final class SQLBoolean
 
 	}
 
-	private void setValueCore(Number theValue)
-	{
-		if (SanityManager.DEBUG)
-			SanityManager.ASSERT( ! immutable,
-						"Attempt to set the value of an immutable SQLBoolean");
-
-		if (theValue == null)
-		{
-			isnull = true;
-			value = false;
-		}
-		else
-		{
-			value = (theValue.intValue() != 0);
-			isnull = false;
-		}
-	}
-
 	/**
 	 * @see DataValueDescriptor#setValue
 	 */	

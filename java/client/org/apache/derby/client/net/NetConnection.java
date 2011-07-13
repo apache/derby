@@ -747,15 +747,6 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
         agent_.endReadChain();
     }
 
-    private void flowServerAttributesAndSeedExchange(int securityMechanism,
-                                                     byte[] sourceSeed) throws SqlException {
-        agent_.beginWriteChainOutsideUOW();
-        writeServerAttributesAndSeedExchange(sourceSeed);
-        agent_.flowOutsideUOW();
-        readServerAttributesAndSeedExchange();
-        agent_.endReadChain();
-    }
-
     private void flowSecurityCheckAndAccessRdb(int securityMechanism,
                                                String user,
                                                String password,
@@ -807,22 +798,9 @@ public class NetConnection extends org.apache.derby.client.am.Connection {
                 publicKey);
     }
 
-    private void writeServerAttributesAndSeedExchange(byte[] sourceSeed)
-                                                        throws SqlException {
-        
-        // For now, we're just calling our cousin method to do the job
-        writeServerAttributesAndKeyExchange(NetConfiguration.SECMEC_USRSSBPWD,
-                                            sourceSeed);
-    }
-
     private void readServerAttributesAndKeyExchange(int securityMechanism) throws SqlException {
         netAgent_.netConnectionReply_.readExchangeServerAttributes(this);
         netAgent_.netConnectionReply_.readAccessSecurity(this, securityMechanism);
-    }
-
-    private void readServerAttributesAndSeedExchange() throws SqlException {
-        // For now, we're just calling our cousin method to do the job
-        readServerAttributesAndKeyExchange(NetConfiguration.SECMEC_USRSSBPWD);
     }
 
     private void writeSecurityCheckAndAccessRdb(int securityMechanism,

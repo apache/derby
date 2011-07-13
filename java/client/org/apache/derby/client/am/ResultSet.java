@@ -532,13 +532,6 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    // precondition: transaction state allows for auto commit to generate flow
-    private void writeAutoCommitIfNotAutoCommitted() throws SqlException {
-        if (connection_.autoCommit_ && !autoCommitted_) {
-            connection_.writeAutoCommit();
-        }
-    }
-
     private void readAutoCommitIfNotAutoCommitted() throws SqlException {
         if (connection_.autoCommit_ && !autoCommitted_) {
             connection_.readAutoCommit();

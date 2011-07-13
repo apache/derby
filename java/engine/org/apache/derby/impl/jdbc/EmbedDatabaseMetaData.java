@@ -3718,26 +3718,6 @@ public class EmbedDatabaseMetaData extends ConnectionChild
 	}
 
 	/**
-	  *	Gets the constant action factory 
-	  *
-	  *	@return	the constant action factory.
-	  *
-	  * @exception StandardException		Thrown on failur4e
-	  */
-	private GenericConstantActionFactory	getGenericConstantActionFactory()
-		throws StandardException
-	{
-		if ( constantActionFactory == null )
-		{
-			GenericExecutionFactory	execFactory = (GenericExecutionFactory)
-				getLanguageConnectionContext().getLanguageConnectionFactory().getExecutionFactory();
-			constantActionFactory = execFactory.getConstantActionFactory();
-		}
-
-		return	constantActionFactory;
-	}
-
-	/**
 	  *	Gets the LanguageConnectionContext for this connection.
 	  *
 	  *	@return	the lcc for this connection

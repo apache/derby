@@ -390,14 +390,6 @@ public class RowUtil
         return(ret_row);
     }
 
-
-    private static void newRowFromClassInfoTemplateError()
-    {
-        if (SanityManager.DEBUG)
-            SanityManager.THROWASSERT(
-                "unexpected error in newRowFromClassInfoTemplate()");
-    }
-
     /**
      * Generate an "empty" row from an array of DataValueDescriptor objects.
      * <p>

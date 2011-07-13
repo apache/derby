@@ -534,22 +534,6 @@ public class ClassHolder {
 		return addIndexReference(VMDescriptor.CONSTANT_String, valueIndex, 0);
 	}
 
-	/**
-		Add a string entry
-	*/
-	private int addCodeUtf8(String value) {
-		CONSTANT_Utf8_info sutf = addUtf8Entry(value);
-		int index = sutf.setAsCode();
-		if (index == 0) {
-			// code string is already being used as string
-			CONSTANT_Utf8_info eutf = addExtraUtf8(value);
-			eutf.setAsCode(); // ensure the replace will happen
-			index = eutf.getIndex();
-			sutf.setAlternative(index);
-		}
-
-		return index;
-	}
  	protected void cptPut(ClassFormatOutput out) throws IOException {
 
 		for (Enumeration e = cptEntries.elements(); e.hasMoreElements(); ) {

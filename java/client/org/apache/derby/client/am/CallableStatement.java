@@ -167,15 +167,6 @@ public class CallableStatement extends PreparedStatement
         registerOutParameterX(parameterIndex, jdbcType, scale);
     }
 
-    private int guessScaleForDecimalOrNumeric(int parameterIndex) {
-        // Types.DECIMAL with no supplied scale will use the scale supplied by the setter method if input BigDecimal is not null
-        if (parameterMetaData_.types_[parameterIndex - 1] == Types.DECIMAL &&
-                parameters_[parameterIndex - 1] != null) {
-            return parameterMetaData_.sqlScale_[parameterIndex - 1];
-        }
-        return 8; // default to scale of 8 if not specified
-    }
-
     public void registerOutParameter(int parameterIndex, int jdbcType, int scale) throws SQLException {
         try
         {

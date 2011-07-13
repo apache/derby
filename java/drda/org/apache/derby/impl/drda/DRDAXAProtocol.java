@@ -210,18 +210,6 @@ class DRDAXAProtocol {
 		return new DRDAXid(formatId, gtrid, bqual);
 	}
 
-
-	/** 
-	 *  parse XIDSHR
-	 *
-	 * @return XIDSHR value
-	 * @throws DRDAProtocolException
-	 */
-	private int parseXIDSHR() throws DRDAProtocolException
-	{
-		return reader.readUnsignedByte();
-	}
-
 	/** 
 	 *  parse XAFlags 
 	 *

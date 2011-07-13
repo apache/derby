@@ -8922,20 +8922,6 @@ class DRDAConnThread extends Thread {
         return 0; // SECMEC_USRSSBPWD is supported
     }
     
-    private static int peekStream(EXTDTAInputStream is) throws IOException{
-	
-	is.mark(1);
-
-	try{
-	    return is.read();
-	    
-	}finally{
-	    is.reset();
-	}
-	
-    }
-    
-    
     private static void closeStream(InputStream stream){
 	
 	try{

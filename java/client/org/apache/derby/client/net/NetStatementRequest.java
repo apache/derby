@@ -42,7 +42,6 @@ import org.apache.derby.shared.common.reference.SQLState;
 
 public class NetStatementRequest extends NetPackageRequest implements StatementRequestInterface {
     java.util.ArrayList extdtaPositions_ = null; // Integers: build EXTDTA for column i
-    int overrideLid_ = FdocaConstants.FIRST_OVERRIDE_LID;
 
     // promototed parameters hold parameters that are promotoed to a different
     // data type because they are too large to represent in PROTOCOL otherwise.
@@ -1836,10 +1835,6 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
         }
     }
 
-    private int getNextOverrideLid() {
-        return overrideLid_++;
-    }
-    
     private void setFDODTALob(int securityMechanism,
                               Lob lob,
                               int[][] protocolTypesAndLengths,

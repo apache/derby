@@ -430,28 +430,6 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         return i;
     }
 
-    // Reads 8-bytes from the dataBuffer from the current position.
-    // If position is already at the end of the buffer, send CNTQRY to get more 
-    // data.
-    private long readFdocaLong() throws 
-            org.apache.derby.client.am.DisconnectException, SqlException {
-        if ((position_ + 8) > lastValidBytePosition_) {
-            // Check for ENDQRYRM, throw SqlException if already received one.
-            checkAndThrowReceivedEndqryrm();
-
-            // Send CNTQRY to complete the row/rowset.
-            int lastValidByteBeforeFetch = completeSplitRow();
-
-            // if lastValidBytePosition_ has not changed, and an ENDQRYRM was 
-            // received, throw a SqlException for the ENDQRYRM.
-            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
-        }
-
-        long i = SignedBinary.getLong(dataBuffer_, position_);
-        position_ += 8;
-        return i;
-    }
-        
     // Reads 1-byte from the dataBuffer from the current position.
     // If position is already at the end of the buffer, send CNTQRY to get more data.
     private int readFdocaOneByte() throws org.apache.derby.client.am.DisconnectException, SqlException {

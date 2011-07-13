@@ -2409,39 +2409,6 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
         return numColumns;
     }
 
-
-    private String parseSQLSTT() throws DisconnectException {
-        parseLengthAndMatchCodePoint(CodePoint.SQLSTT);
-        return parseSQLSTTGRP();
-    }
-
-    private String parseSQLSTTGRP() throws DisconnectException {
-        int mixedNullInd = readUnsignedByte();
-        int singleNullInd = 0;
-        String sqlsttString = null;
-        int stringLength = 0;
-
-        if (mixedNullInd == CodePoint.NULLDATA) {
-            singleNullInd = readUnsignedByte();
-            if (singleNullInd == CodePoint.NULLDATA) {
-                // throw DTAMCHRM
-                doDtamchrmSemantics();
-            }
-            // read 4-byte length
-            stringLength = readInt();
-            // read sqlstt string
-            sqlsttString = readString(stringLength, netAgent_.targetTypdef_.getCcsidSbcEncoding());
-        } else {
-            // read 4-byte length
-            stringLength = readInt();
-            // read sqlstt string
-            sqlsttString = readString(stringLength, netAgent_.targetTypdef_.getCcsidMbcEncoding());
-            // read null indicator
-            singleNullInd = readUnsignedByte();
-        }
-        return sqlsttString;
-    }
-
     public void readSetSpecialRegister(StatementCallbackInterface statement) throws DisconnectException {
         startSameIdChainParse();
         parseEXCSQLSETreply(statement);
