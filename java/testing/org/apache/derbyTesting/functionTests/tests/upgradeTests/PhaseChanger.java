@@ -124,6 +124,13 @@ final class PhaseChanger extends BaseTestSetup {
     protected void tearDown() throws Exception
     {
         if ( trace ) BaseTestCase.traceit(" Test upgrade done.");
+
+        // Get a handle to the old engine's ContextService if this version is
+        // affected by DERBY-23. The actual workaround for DERBY-23 must be
+        // done after the engine has been shut down, but we fetch the handle
+        // to the service before shutdown, while it's still easily available.
+        Object contextService = getDerby23ContextService();
+
         DataSource ds = JDBCDataSource.getDataSource();
         JDBCDataSource.shutEngine(ds);
 
@@ -139,6 +146,11 @@ final class PhaseChanger extends BaseTestSetup {
             // from being garbage collected.
             clearDerby4895ThreadLocal();
         }
+
+        // Workaround for DERBY-23, continued. If this is one of the affected
+        // versions, clear the fields that prevent the engine from being
+        // garbage collected.
+        clearDerby23ThreadLocals(contextService);
 
         if (loader != null)
             UpgradeClassLoader.setThreadLoader(previousLoader);       
@@ -198,8 +210,59 @@ final class PhaseChanger extends BaseTestSetup {
         Class td = Class.forName(
                 "org.apache.derby.iapi.sql.dictionary.TableDescriptor",
                 true, loader);
-        Field f = td.getDeclaredField("referencedColumnMap");
+        clearField(td, "referencedColumnMap", null);
+    }
+
+    /**
+     * Clear a field that is possibly private or final.
+     *
+     * @param cls the class in which the field lives
+     * @param name the name of the field to clear
+     * @param instance the instance whose field should be cleared,
+     *                 or null if the field is static
+     */
+    private static void clearField(Class cls, String name, Object instance)
+            throws Exception {
+        Field f = cls.getDeclaredField(name);
         f.setAccessible(true);
-        f.set(null, null);
+        f.set(instance, null);
+    }
+
+    /**
+     * Get a handle to the ContextService in the old engine if the version
+     * is affected by DERBY-23.
+     *
+     * @return the ContextService, if this version is affected by DERBY-23,
+     * or null otherwise
+     */
+    private Object getDerby23ContextService() throws Exception {
+        if (loader != null &&
+                UpgradeRun.lessThan(version, new int[] {10,2,1,6})) {
+            Class cls = Class.forName(
+                    "org.apache.derby.iapi.services.context.ContextService",
+                    true, loader);
+            Field f = cls.getDeclaredField("factory");
+            f.setAccessible(true);
+            return f.get(null);
+        }
+
+        return null;
+    }
+
+    /**
+     * Clear some fields in ContextService to allow the engine to be garbage
+     * collected. This is a workaround for DERBY-23.
+     *
+     * @param contextService the context service for an engine that has been
+     * shut down, or null if this version of the engine doesn't suffer from
+     * DERBY-23
+     */
+    private void clearDerby23ThreadLocals(Object contextService)
+            throws Exception {
+        if (contextService != null) {
+            Class cls = contextService.getClass();
+            clearField(cls, "threadContextList", contextService);
+            clearField(cls, "allContexts", contextService);
+        }
     }
 }
