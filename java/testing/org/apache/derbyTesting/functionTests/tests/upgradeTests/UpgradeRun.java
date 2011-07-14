@@ -65,7 +65,7 @@ class UpgradeRun extends UpgradeClassLoader
      * which need sqlAuthorization (specified by test). This thwarts
      * normal shutdown since credentials are required so shutdown is
      * done in test, not by the tearDown methods. See
-     * Changes10_4#testSQLRoles for example.
+     * Changes10_5#testSQLRoles for example.
      */
 
     static final AdditionalDb[] ADDITIONAL_DBS = {
