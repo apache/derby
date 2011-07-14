@@ -347,7 +347,6 @@ class CreateTriggerConstantAction extends DDLSingleTableConstantAction
 		}
 		dm.addDependency(triggerd, actionspsd, lcc.getContextManager());
 		dm.addDependency(triggerd, triggerTable, lcc.getContextManager());
-		dm.addDependency(actionspsd, triggerTable, lcc.getContextManager());
 		//store trigger's dependency on various privileges in the dependeny system
 		storeViewTriggerDependenciesOnPrivileges(activation, triggerd);		
 	}

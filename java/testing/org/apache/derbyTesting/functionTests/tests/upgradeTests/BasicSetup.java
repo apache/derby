@@ -32,6 +32,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.XML;
 
+import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -387,6 +388,119 @@ public class BasicSetup extends UpgradeChange {
         }
     }
 
+    //Make sure that the rows lost from sysdepends with earlier release
+    // are restored when the db is in soft upgrade mode or when it has
+    // been hard upgraded to this release. DERBY-5120
+    public void preapreFortDERBY5120() throws Exception
+    {
+        Statement s = createStatement();
+        boolean modeDb2SqlOptional = oldAtLeast(10, 3);
+
+        dropTable("ATDC_BKUP2");
+        dropTable("ATDC_BKUP1");
+        dropTable("ATDC_TAB1");
+        s.execute("create table ATDC_TAB1(c11 int, c12 int)");
+        s.execute("insert into ATDC_TAB1 values (1,11)");
+        s.execute("create table ATDC_BKUP1(c111 int, c112 int)");
+        s.execute("create table ATDC_BKUP2(c211 int, c212 int)");
+        //Three rows will be added in sysdepends for following trigger
+        s.execute("create trigger ATDC_TAB1_TRG1 after update "+
+           		"of C11 on ATDC_TAB1 REFERENCING old_table as old " +
+           		"for each statement " + 
+       			(modeDb2SqlOptional?"":"MODE DB2SQL ") +
+                "insert into ATDC_BKUP1 select * from old");
+        //Three rows will be added in sysdepends for following trigger
+        s.execute("create trigger ATDC_TAB1_TRG2 after update " + 
+                "on ATDC_TAB1 for each row " + 
+     			(modeDb2SqlOptional?"":"MODE DB2SQL ") +
+                "values(1,2)");
+    }
+
+    //Make sure that the rows lost from sysdepends with earlier release
+    // are restored when the db is in soft upgrade mode or when it has
+    // been hard upgraded to this release. DERBY-5120
+    public void testDERBY5120NumRowsInSydependsForTrigger() throws Exception
+    {
+        //During the upgrade time, the clearing of stored statements(including 
+        // trigger action spses) happened conditionally before DERBY-4835 was 
+        // fixed. DERBY-4835 made changes so that the stored statements get 
+        // marked invalid unconditionally during the upgrade phase. But these
+        // changes for DERBY-4835 did not make into 10.5.1.1, 10.5.3.0, 
+        // 10.6.1.0 and 10.6.2.1. Because of this missing fix, trigger 
+        // action spses do not get marked invalid when the database is taken 
+        // after soft upgrade back to the original db release(if the original 
+        // db release is one of the releases mentioned above). Following test 
+        // relies on trigger action spses getting invalid during upgrade phase 
+        // and getting recompiled when they are fired next time around thus 
+        // altering the number of rows in sysdepends. Because of this, I have
+        // disabled this test for those 4 releases.
+        if (oldIs(10,5,1,1) || oldIs(10,5,3,0) ||
+        	oldIs(10,6,1,0) || oldIs(10,6,2,1))
+            		return;
+    
+        Statement s = createStatement();
+        int sysdependsRowCountBeforeCreateTrigger;
+        boolean modeDb2SqlOptional = oldAtLeast(10, 3);
+        
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+        	preapreFortDERBY5120();
+            //Following update will recpmpile the first trigger since it was
+            // marked invalid during the creation of the 2nd trigger. But
+            // as part of recompiling, we accidentally erase the dependency
+            // between trigger action sps and trigger table
+            s.execute("update ATDC_TAB1 set c11=11");
+            s.executeUpdate("alter table ATDC_TAB1 add column c113 int");
+            s.execute("update ATDC_TAB1 set c11=11");
+        	break;
+
+        case PH_SOFT_UPGRADE:
+        case PH_HARD_UPGRADE:
+        	//During soft/hard upgrade, the sps regeneration in 10.9 has 
+        	// been fixed and hence we won't loose the dependency between 
+        	// trigger action sps and trigger table. During upgrade process, 
+        	// all the spses get marked invalid and hence they will be 
+        	// regenerated during the next time they get fired.
+            assertStatementError("42802", s, " update ATDC_TAB1 set c11=2");
+        	break;
+        	
+        case PH_POST_SOFT_UPGRADE:
+        	//During the path back to original release, all the spses get
+        	// marked invalid and hence they will be regenerated during 
+        	// the next time they get fired. This regeneration will cause
+        	// the dependency between trigger action sps and trigger table
+        	// be dropped.
+            assertStatementError("42802", s, " update ATDC_TAB1 set c11=2");
+
+        	preapreFortDERBY5120();
+            s.execute("update ATDC_TAB1 set c12=11");
+            s.executeUpdate("alter table ATDC_TAB1 add column c113 int");
+            s.execute("update ATDC_TAB1 set c12=11");
+        	break;
+
+        case PH_POST_HARD_UPGRADE:
+        	//We are now in trunk which has DERBY-5120 fixed and hence
+        	// dependencies between trigger action sps and trigger table
+        	// will not be lost
+            assertStatementError("42802", s, " update ATDC_TAB1 set c11=2");
+
+        	preapreFortDERBY5120();
+            s.execute("update ATDC_TAB1 set c12=11");
+            s.executeUpdate("alter table ATDC_TAB1 add column c113 int");
+            assertStatementError("42802", s, " update ATDC_TAB1 set c11=2");
+        	break;
+        }
+    }
+
+    //Get a count of number of rows in SYS.SYSDEPENDS
+    private int numberOfRowsInSysdepends(Statement st)
+    		throws SQLException {
+    	ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM SYS.SYSDEPENDS");
+    	rs.next();
+    	return(rs.getInt(1));
+    }
+    
     /**
      * Changes made for DERBY-1482 caused corruption which is being logged 
      *  under DERBY-5121. The issue is that the generated trigger action

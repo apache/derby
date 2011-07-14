@@ -418,6 +418,10 @@ public class SPSDescriptor extends TupleDescriptor
 											false,	// persistent only
 											cm,
 											tc);
+			//If this sps is for a trigger action, then add the depenency
+			// between this sps and the trigger table DERBY-5120
+			if (triggerTable != null) 
+				dm.addDependency(this, triggerTable, lcc.getContextManager());
 		}
 
 		// mark it as valid
