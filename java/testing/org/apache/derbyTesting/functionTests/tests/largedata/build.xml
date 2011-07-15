@@ -16,79 +16,30 @@
   limitations under the License.
 -->
 
-<!-- ==================================================================== -->
-<!--                       Derby build file                          -->
-<!-- ==================================================================== -->
+<project default="largedatatests" basedir="../../../../../../..">
 
-<project default="FTOtestsubdir" basedir="../../../../../../../.." >
-
-<!-- ==================================================================== -->
-<!--                           Set properties                             -->
-<!-- ==================================================================== -->
+<!-- Properties -->
 
   <!-- User settings -->
   <property file="${user.home}/ant.properties"/>
-
   <!-- Set property lib dir -->
-  <property name="properties.dir" value="tools/ant/properties" />
-
+  <property name="properties.dir" value="tools/ant/properties"/>
   <!-- Significant dirs -->
   <property file="${properties.dir}/dirs.properties"/>
   <property file="${properties.dir}/derbytesting.properties"/>
-
+  <property file="${user.home}/properties/derbytesting.properties"/>
+  <property file="${ant.home}/properties/derbytesting.properties"/>
   <!-- Compiler settings -->
-  <property file="${properties.dir}/sane${sanity}.properties"/>
-  <property file="${properties.dir}/defaultcompiler.properties"/>
   <property file="${properties.dir}/${build.compiler}.properties"/>
-
-  <!-- Parser properties -->
-  <!--property file="${properties.dir}/parser.properties"/-->
-
   <!-- Compile-time classpath properties files -->
   <property file="${properties.dir}/extrapath.properties"/>
-  <property file="${properties.dir}/compilepath.properties"/>
+  <property file="${properties.dir}/derbytesting.properties"/> 
+  <property file="${properties.dir}/compilepath.properties"/> 
+  
+<!-- Targets -->
 
-  <!-- Release and Version info -->
-  <property file="${properties.dir}/release.properties"/>
-
-  <!-- derby testing specific properties files -->
-  <property file="${ant.home}/properties/derbytesting.properties"/>
-  <property file="${user.home}/properties/derbytesting.properties"/>
-  <property name="this.dir" value="${derby.testing.functest.dir}/tests/largedata"/>
-
-<!--             ============ Begin Targets ==============                -->
- 
-  <target name="FTOtestsubdir" depends="compilet1,compilet2,copyfiles"/>
-
-  <!-- mkdir / init target may not be necessary, just here for reference... -->
-  <target name="init">
-    <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/largedata"/>
-  </target>
-
-  <target name="compilet1">
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}" 
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <!--pathelement location="${oro}"/-->
-        <pathelement path="${compile.classpath}"/>
-      </classpath>
-      <include name="${this.dir}/*.java"/>
-      <exclude name="${this.dir}/LobLimits.java"/>
-    </javac>
-  </target>
-
-  <target name="compilet2">
+  <target name="largedatatests" 
+          description="Build Derby largedata tests">
     <javac
       source="1.4"
       target="1.4"
@@ -104,22 +55,11 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${junit}"/>
       </classpath>
-      <include name="${this.dir}/LobLimits.java"/>
+      <include name="${derby.testing.functest.dir}/tests/largedata/*.java"/>
     </javac>
   </target>
-
-  <target name="copyfiles">
-    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/largedata">
-      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/largedata" 
-        includesfile="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/largedata/copyfiles.ant"/>  
-    </copy>
-  </target> 
-
-
-<!--             ============= End Targets ==============                -->
-
-<!--             ============= End Project ==============                -->
-
+  
 </project>
 

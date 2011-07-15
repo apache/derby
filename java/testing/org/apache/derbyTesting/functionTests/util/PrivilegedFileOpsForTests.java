@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -140,6 +141,27 @@ public class PrivilegedFileOpsForTests {
     }
 
     /**
+     * Delete a file
+     *
+     * @return {@code true} if file was deleted, {@code false} otherwise
+     * @throws SecurityException if the required permissions to read the file,
+     *      or the path it is in, are missing
+     * @see File#delete
+     */
+    public static boolean delete(final File file)
+            throws SecurityException {
+        if (file == null) {
+            throw new IllegalArgumentException("file cannot be <null>");
+        }
+        return ((Boolean)AccessController.doPrivileged(
+                    new PrivilegedAction() {
+                        public Object run() {
+                            return Boolean.valueOf(file.delete());
+                        }
+                    })).booleanValue();
+    }
+
+    /**
      * Obtains a reader for the specified file.
      *
      * @param file the file to obtain a reader for
@@ -163,6 +185,34 @@ public class PrivilegedFileOpsForTests {
                     });
         } catch (PrivilegedActionException pae) {
             throw (FileNotFoundException)pae.getCause();
+        }
+    }
+
+    /**
+     * Obtains a writer for the specified file.
+     *
+     * @param file the file to obtain a writer for
+     * @return An writer for the specified file.
+     * @throws IOException 
+     * @throws IOException if the file cannot be opened
+     * @throws SecurityException if the required permissions to write to the file,
+     *      or the path it is in, are missing
+     */
+    public static FileWriter getFileWriter(final File file)
+            throws IOException {
+        if (file == null) {
+            throw new IllegalArgumentException("file cannot be <null>");
+        }
+        try {
+            return (FileWriter)AccessController.doPrivileged(
+                    new PrivilegedExceptionAction() {
+                        public Object run()
+                                throws IOException {
+                            return new FileWriter(file);
+                        }
+                    });
+        } catch (PrivilegedActionException pae) {
+            throw (IOException)pae.getCause();
         }
     }
 
@@ -411,4 +461,6 @@ public class PrivilegedFileOpsForTests {
             }
         });
     }
-}
+    
+
+ }
