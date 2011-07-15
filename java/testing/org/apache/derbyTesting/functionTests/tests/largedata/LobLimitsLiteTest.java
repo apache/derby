@@ -29,6 +29,7 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.TestConfiguration;
 
 
 
@@ -52,7 +53,7 @@ public class LobLimitsLiteTest extends LobLimitsTest {
     
     public static Test suite() {
         // Right now run just with embeddded.
-        Test suite = new CleanDatabaseTestSetup(
+        Test test = new CleanDatabaseTestSetup(
                 new TestSuite(LobLimitsTest.class)) {
                     protected void decorateSQL(Statement s)
                             throws SQLException {
@@ -60,7 +61,12 @@ public class LobLimitsLiteTest extends LobLimitsTest {
                     }
                 };
                 
-        return new SupportFilesSetup(suite);
+        test = new SupportFilesSetup(test);
+        TestSuite suite = new TestSuite("LobLimitsLiteTest");
+        suite.addTest(test);
+        suite.addTest(TestConfiguration.clientServerDecorator(test));
+        return suite;
+        
     }
 
 }

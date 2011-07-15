@@ -137,8 +137,6 @@ public class LobLimitsTest extends BaseJDBCTestCase {
 
     /**
      * tests specific for blobs
-     * 
-     * @param conn
      * @throws Exception
      */
     public void testBlob() throws Exception {
@@ -233,9 +231,17 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             insertBlob_SetBlob("BlobTest #7 (setBlob with 4Gb blob", conn,
                     insertBlob, _4GbBlob,
                     _4GB, 0, 1, 0);
+            fail("Inserting 4BG blob should have thrown exception");
         } catch (SQLException sqle) {
             // DERBY DOES NOT SUPPORT INSERT OF 4GB BLOB
-            assertSQLState("22003", sqle);
+            if (usingDerbyNetClient()) {
+                // DERBY-5338 client gives wrong SQLState and protocol error
+                // inserting a 4GB clob. Should be 22003
+                assertSQLState("XN015",sqle);
+            } else {
+                assertSQLState("22003", sqle);
+            }
+            conn.commit();
         }
         // ADD NEW TESTS HERE
     }
@@ -341,22 +347,26 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         // insert should throw an error
         writeToFile(CHARDATAFILE, new RandomCharReaderT(new java.util.Random(),
                 MORE_DATA_THAN_COL_WIDTH));
-
-        try {
-            insertClob2("ClobTest #9.1 ", conn, insertClob2,
-                    MORE_DATA_THAN_COL_WIDTH, 4, 1,
-                       MORE_DATA_THAN_COL_WIDTH, CHARDATAFILE);
-        } catch (SQLException sqle) {
-            assertSQLState("XSDA4", sqle);
+        // DERBY-5341 : Client allows clob larger than
+        // column width to be inserted.
+        if (!usingDerbyNetClient()) {
+            try {
+                insertClob2("ClobTest #9.1 ", conn, insertClob2,
+                        MORE_DATA_THAN_COL_WIDTH, 4, 1,
+                        MORE_DATA_THAN_COL_WIDTH, CHARDATAFILE);
+                fail("ClobTest #9.1 " + "should have thrown XSDA4");
+            } catch (SQLException sqle) {
+                assertSQLState("XSDA4", sqle);
+            }
         }
         // no row must be retrieved.
         selectClob2("ClobTest #9.2 ", conn, selectClob2, BIG_LOB_SZ, 4, 0,
                    CHARDATAFILE);
-
         try {
             insertClob2("ClobTest #10 ", conn, insertClob2,
                     MORE_DATA_THAN_COL_WIDTH, 4, 1,
                        MORE_DATA_THAN_COL_WIDTH + 1, CHARDATAFILE);
+            fail("ClobTest #10. Should have thrown XSDA4");
         } catch (SQLException sqle) {
             // NEGATIVE TEST - Expected Exception: truncation of non-blanks not
             // allowed and
@@ -368,6 +378,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             insertClob2("ClobTest #11 ", conn, insertClob2,
                     MORE_DATA_THAN_COL_WIDTH, 4, 1,
                        MORE_DATA_THAN_COL_WIDTH - 1, CHARDATAFILE);
+            fail("ClobTest #11. Should have thrown XSDA4");
         } catch (SQLException sqle) {
             // NEGATIVE TEST - Expected Exception: truncation of non-blanks not
             // allowed and
@@ -380,6 +391,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             // give -ve streamlength
             insertClob_SetCharacterStream("ClobTest #12.1", conn, insertClob,
                     BIG_LOB_SZ, 4, 1, -1);
+            fail("ClobTest #12. Should have thrown XJ025");
         } catch (SQLException sqle) {
             assertSQLState("XJ025", sqle);
         }
@@ -400,9 +412,16 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             insertClob_SetClob("ClobTest #13 (setClob with 4Gb clob", conn,
                     insertClob, _4GBClob,
                     _4GB, 0, 1, 0);
+            fail("ClobTest #13. Should have thrown 22033");
         } catch (SQLException sqle) {
-            // DERBY DOES NOT SUPPORT INSERT OF 4GB CLOB
-            assertSQLState("22003", sqle);
+         // DERBY DOES NOT SUPPORT INSERT OF 4GB CLOB
+            if (usingDerbyNetClient()) {
+                // DERBY-5338 client gives wrong SQLState and protocol error
+                // inserting a 4GB clob. Should be 22003
+                assertSQLState("XN015",sqle);
+            } else {
+                assertSQLState("22003", sqle);
+            }
         }
 
         // ADD NEW TESTS HERE
@@ -419,6 +438,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         try {
             insertClob2(msg, conn, insertClob2, BIG_LOB_SZ, 4, 1,
                     (NUM_TRAILING_SPACES + BIG_LOB_SZ - 1), CHARDATAFILE);
+            fail(msg +". Should have thrown XSDA4");
         } catch (SQLException sqle) {
             // EXPECTED EXCEPTION - stream has trailing spaces,but stream
             // length is 1 less than actual length of stream
@@ -428,6 +448,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         try {
             insertClob2(msg, conn, insertClob2, BIG_LOB_SZ, 5, 1,
                     (NUM_TRAILING_SPACES + BIG_LOB_SZ + 1), CHARDATAFILE);
+            fail(msg + ". Should have thrown XSDA4");
         } catch (SQLException sqle) {
             // EXPECTED EXCEPTION - stream has trailing spaces,but stream
             // length is 1 greater than actual length of stream
@@ -1060,16 +1081,21 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         long dlen = rs.getLong(2);
         assertEquals("FAIL - MISMATCH LENGTHS GOT " + l + " expected "
                 + dlen + " for row in CLOBTBL with ID=" + id, dlen, l);
+        // DERBY-5317 cannot use setCharacterStream with value from
+        // Clob.getCharacterStream because server will try to stream
+        // lob to and from server at the same time. setClob can be
+        // used as a work around.
+        if (!usingDerbyNetClient()) {
+            PreparedStatement psUpd =
+                    conn.prepareStatement("update CLOBTBL set content=?, " +
+                            "dlen =? where id = ?");
+            psUpd.setCharacterStream(1, value.getCharacterStream(), (int) l);
+            psUpd.setLong(2, l);
+            psUpd.setInt(3, updateId);
 
-        PreparedStatement psUpd =
-                conn.prepareStatement("update CLOBTBL set content=?,dlen =? " +
-                        " where id = ?");
-        psUpd.setCharacterStream(1, value.getCharacterStream(), (int) l);
-        psUpd.setLong(2, l);
-        psUpd.setInt(3, updateId);
-
-        assertEquals(1, psUpd.executeUpdate());
-
+            assertEquals(1, psUpd.executeUpdate());
+            psUpd.close();
+        }
         conn.commit();
 
         // now select and verify that update went through ok.
@@ -1087,7 +1113,6 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         conn.commit();
         rs.close();
         rs2.close();
-        psUpd.close();
         println("========================================");
     }
 
