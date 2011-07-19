@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.upgradeTests;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
+import java.util.Set;
 
 import javax.sql.DataSource;
 
@@ -261,8 +262,36 @@ final class PhaseChanger extends BaseTestSetup {
             throws Exception {
         if (contextService != null) {
             Class cls = contextService.getClass();
-            clearField(cls, "threadContextList", contextService);
-            clearField(cls, "allContexts", contextService);
+
+            // DERBY-5343: Ideally, we'd just set the two fields to null
+            // like this:
+            //
+            //     clearField(cls, "threadContextList", contextService);
+            //     clearField(cls, "allContexts", contextService);
+            //
+            // However, the fields are final in the versions that suffer from
+            // DERBY-23, and Java versions prior to Java 5 don't allow us to
+            // modify final fields. So let's take a different approach to make
+            // it work on Java 1.4.2 and Foundation Profile 1.1 as well.
+
+            // The field threadContextList is a ThreadLocal. Clear it in the
+            // current thread. Assuming all other threads that have accessed
+            // the database engine (background threads and any helper threads
+            // started by the test cases) are stopped and made eligible for
+            // garbage collection, this should be a sufficient replacement for
+            // setting the field to null.
+            Field tclField = cls.getDeclaredField("threadContextList");
+            tclField.setAccessible(true);
+            ThreadLocal tcl = (ThreadLocal) tclField.get(contextService);
+            tcl.set(null);
+
+            // The field allContexts is a HashSet. Calling clear() should be
+            // equivalent to setting it to null in terms of making its elements
+            // eligible for garbage collection.
+            Field acField = cls.getDeclaredField("allContexts");
+            acField.setAccessible(true);
+            Set ac = (Set) acField.get(contextService);
+            ac.clear();
         }
     }
 }
