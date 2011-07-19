@@ -74,16 +74,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
     private static final int STUBBIFY_ACTION = 5;
 	private static final int BACKUP_CONTAINER_ACTION = 6;
     private static final int GET_RANDOM_ACCESS_FILE_ACTION = 7;
+    private static final int REOPEN_CONTAINER_ACTION = 8;
     private ContainerKey actionIdentity;
-
-    /**
-     * Identity of this container. Make it visible to RAFContainer4, which may
-     * need to reopen the container after interrupts due to a NIO channel being
-     * closed by the interrupt.
-     */
-    protected ContainerKey currentIdentity;
-    private boolean reopen;
-
     private boolean actionStub;
     private boolean actionErrorOK;
     private boolean actionTryAlternatePath;
@@ -811,7 +803,6 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         try
         {
             AccessController.doPrivileged( this);
-            currentIdentity = newIdentity;
         }
         catch( PrivilegedActionException pae){ throw (StandardException) pae.getException();}
         finally{ actionIdentity = null; }
@@ -849,45 +840,16 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 		return true;
     } // end of privRemoveFile
 
-    protected ContainerKey idAPriori = null;
 
     synchronized boolean openContainer(ContainerKey newIdentity)
             throws StandardException {
-        return openContainerMinion(newIdentity, false);
-    }
-
-    synchronized boolean reopenContainer(ContainerKey newIdentity)
-            throws StandardException {
-        return openContainerMinion(newIdentity, true);
-    }
-
-    private boolean openContainerMinion(
-        ContainerKey newIdentity,
-        boolean doReopen) throws StandardException
-    {
         actionCode = OPEN_CONTAINER_ACTION;
-        reopen = doReopen;
         actionIdentity = newIdentity;
-        boolean success = false;
-        idAPriori = currentIdentity;
-
         try
         {
-            currentIdentity = newIdentity;
-            // NIO: We need to set currentIdentity before we try to open, in
-            // case we need its value to perform a recovery in the case of an
-            // interrupt during readEmbryonicPage as part of
-            // OPEN_CONTAINER_ACTION.  Note that this gives a recursive call to
-            // openContainer.
-            //
-            // If we don't succeed in opening, we reset currentIdentity to its
-            // a priori value.
-
-            success = AccessController.doPrivileged(this) != null;
-            idAPriori = currentIdentity;
-            return success;
+            return AccessController.doPrivileged( this) != null;
         }
-        catch( PrivilegedActionException pae) { 
+        catch( PrivilegedActionException pae) {
             closeContainer();
             throw (StandardException) pae.getException();
         }
@@ -897,11 +859,33 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         }
         finally
         {
-            if (!success) {
-                currentIdentity = idAPriori;
-            }
+            actionIdentity = null;
+        }
+    }
 
-            actionIdentity = null; 
+    /**
+     * Only used by RAFContainer4 (NIO) to reopen RAF when its channel gets
+     * closed due to interrupts.
+     *
+     * @param currentIdentity
+     * @throws StandardException standard exception policy
+     */
+    protected synchronized void reopenContainer(ContainerKey currentIdentity)
+            throws StandardException {
+
+        actionCode = REOPEN_CONTAINER_ACTION;
+        actionIdentity = currentIdentity;
+
+        try {
+            AccessController.doPrivileged(this);
+        } catch (PrivilegedActionException pae) {
+            closeContainer();
+            throw (StandardException) pae.getException();
+        } catch (RuntimeException e) {
+            closeContainer();
+            throw e;
+        } finally {
+            actionIdentity = null;
         }
     }
 
@@ -1475,15 +1459,9 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
                  fileData = file.getRandomAccessFile(canUpdate ? "rw" : "r");
 
-                 if (!reopen) {
-                     // under reopen: can give race condition or if we
-                     // synchronize access, deadlock, so skip, we know
-                     // what's there anyway.
-                     readHeader(getEmbryonicPage(fileData,
-                                                 FIRST_ALLOC_PAGE_OFFSET));
-                 }
-
-
+                 readHeader(getEmbryonicPage(fileData,
+                                             FIRST_ALLOC_PAGE_OFFSET));
+                 
                  if (SanityManager.DEBUG)
                  {
                      if (isStub)
@@ -1558,6 +1536,31 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
              return this;
          } // end of case OPEN_CONTAINER_ACTION
+         case REOPEN_CONTAINER_ACTION:
+         {
+             StorageFile file =
+                 privGetFileName( actionIdentity, false, true, true);
+
+             synchronized (this) {
+                 try {
+                     fileData =
+                         file.getRandomAccessFile(canUpdate ? "rw" : "r");
+                 } catch (FileNotFoundException ioe) {
+                     throw dataFactory.
+                         markCorrupt(
+                             StandardException.newException(
+                                 SQLState.FILE_CONTAINER_EXCEPTION,
+                                 ioe,
+                                 (getIdentity() != null ?
+                                  getIdentity().toString() :
+                                  "unknown"),
+                                 "read",
+                                 fileName));
+                 }
+             }
+
+             return this;
+         }
 
          case STUBBIFY_ACTION:
          {
