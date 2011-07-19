@@ -38,7 +38,7 @@
   
 <!-- Targets -->
 
-  <target name="largedatatests" 
+  <target name="largedatatests"  depends="copyfiles" 
           description="Build Derby largedata tests">
     <javac
       source="1.4"
@@ -60,6 +60,12 @@
       <include name="${derby.testing.functest.dir}/tests/largedata/*.java"/>
     </javac>
   </target>
-  
+
+  <target name="copyfiles">
+    <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/largedata">
+      <fileset dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/largedata" 
+        includes="*.sql,*.properties,*.subsql,*.policy,*.jar,*.dat,*.tstlog,xmlTestFiles/*"/>  
+    </copy>
+  </target>   
 </project>
 

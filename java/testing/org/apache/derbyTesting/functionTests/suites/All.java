@@ -49,6 +49,9 @@ public class All extends BaseTestCase {
         
         // All package tests
         suite.addTest(AllPackages.suite());
+        // For the largedata test, just run the lite version of the test as
+        // the full test is too big.
+        suite.addTest(org.apache.derbyTesting.functionTests.tests.largedata._Suite.suiteLite());
         
         return suite;
     }
