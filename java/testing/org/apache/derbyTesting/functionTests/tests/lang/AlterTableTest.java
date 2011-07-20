@@ -1791,6 +1791,75 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "rename column renc_schema_2.renc_8.b to b2");
     }
 
+    // DERBY-5120 Make sure that sysdepends will catch trigger
+    //  table changes and cause the triggers defined on that
+    //  table to recompile when they fire next time
+    public void testAlterTableAndSysdepends() throws Exception {
+        Statement st = createStatement();
+        createTableAndInsertData(st, "Derby5120_tab", "C11", "C12");
+        createTableAndInsertData(st, "Derby5120_tab_bkup1", "C111", "C112");
+        createTableAndInsertData(st, "Derby5120_tab_bkup2", "C211", "C212");
+        
+        int sysdependsRowCountBeforeTestStart;
+
+        sysdependsRowCountBeforeTestStart = numberOfRowsInSysdepends(st);
+        //Following trigger will add 5 rows to sysdepends. Trigger creation
+        // will send CREATE TRIGGER invalidation to trigger table but there
+        // are no other persistent dependents on trigger table at this point.
+        st.executeUpdate(
+                " create trigger Derby5120_tr1 " +
+                "after update of c11 on Derby5120_tab referencing  " +
+                "old_table as old for each statement insert into " +
+                "Derby5120_tab_bkup1 select * from old");
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+5);
+
+        //Following trigger will add 5 rows to sysdepends. Trigger creation
+        // will send CREATE TRIGGER invalidation to trigger table which will
+        // invalidate trigger created earlier (Derby5120_tr1). Because of
+        // this, when Derby5120_tr1 trigger fires next, it will be recompiled.
+        st.executeUpdate(
+                " create trigger Derby5120_tr2 " +
+                "after update of c11 on Derby5120_tab referencing  " +
+                "old as oldrow for each row insert into  " +
+                "Derby5120_tab_bkup2(c211) values (oldrow.c11)");
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+10);
+
+        //Following will fire the 2 triggers created above. During the firing,
+        // we will find that Derby5120_tr1 has been marked invalid. As a result
+        // we will recompile it's trigger action.
+        st.executeUpdate("update Derby5120_tab set c11=2");
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+10);
+
+        //Following alter table on trigger table will mark the two triggers 
+        // created above invalid. As a result, when they are fired next
+        // time, their trigger action sps will be regenerated.
+        st.executeUpdate("alter table Derby5120_tab add column c113 int");
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+10);
+
+        //Following will cause the 2 triggers to fire because they were marked
+        // invalid by alter table. During the trigger action sps regeneration
+        // of Derby5120_tr1, we will find that the trigger action sql is not
+        // valid anymore because trigger table now has 3 columns where as
+        // Derby5120_tab_bkup1 has only 2 columns and hence trigger action
+        // sps will not be able to do insert into Derby5120_tab_bkup1 select *
+        // from trigger table
+        assertStatementError("42802", st, " update Derby5120_tab set c11=2");
+
+        //Drop the errorneous trigger
+        st.executeUpdate("drop trigger Derby5120_tr1");
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS will be less",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+5);
+
+        //Following update will succeed this time
+        st.executeUpdate("update Derby5120_tab set c11=2");
+        Assert.assertEquals("# of rows in SYS.SYSDEPENDS should not change",
+        		numberOfRowsInSysdepends(st),sysdependsRowCountBeforeTestStart+5);
+    }
+
     // alter table tests for ALTER TABLE DROP COLUMN. The 
     // overall syntax is:    ALTER TABLE tablename DROP [ 
     // COLUMN ] columnname [ CASCADE | RESTRICT ]

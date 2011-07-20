@@ -1837,9 +1837,6 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				// need a current dependent for bind
 				newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement());
 				stmtnode.bindStatement();
-				//Register the dependency between trigger table and trigger 
-				// action SPS
-				dm.addDependency(triggerActionSPSD, td, lcc.getContextManager());
 			} catch (StandardException se)
 			{
 				if (se.getMessageId().equals(SQLState.LANG_COLUMN_NOT_FOUND))
