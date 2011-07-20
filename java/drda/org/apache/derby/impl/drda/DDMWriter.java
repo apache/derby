@@ -1208,7 +1208,11 @@ class DDMWriter
 
 		// encode the string
 		CharBuffer input = CharBuffer.wrap(s);
+		encoder.reset();
 		CoderResult res = encoder.encode(input, buffer, true);
+		if (res == CoderResult.UNDERFLOW) {
+			res = encoder.flush(buffer);
+		}
 		if (SanityManager.DEBUG) {
 			// UNDERFLOW is returned if the entire string was encoded, OVERFLOW
 			// is returned if the string was truncated at LONGVARCHAR_MAX_LEN
@@ -1235,7 +1239,11 @@ class DDMWriter
 	{
 		ensureLength(maxEncodedLength(s));
 		CharBuffer input = CharBuffer.wrap(s);
+		encoder.reset();
 		CoderResult res = encoder.encode(input, buffer, true);
+		if (res == CoderResult.UNDERFLOW) {
+			res = encoder.flush(buffer);
+		}
 		if (SanityManager.DEBUG) {
 			SanityManager.ASSERT(res == CoderResult.UNDERFLOW,
 								 "CharBuffer was not exhausted: res = " + res);
