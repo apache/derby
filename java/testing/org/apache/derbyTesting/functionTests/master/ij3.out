@@ -1,4 +1,4 @@
-ij> --
+ij(CONNECTION1)> --
 --   Licensed to the Apache Software Foundation (ASF) under one or more
 --   contributor license agreements.  See the NOTICE file distributed with
 --   this work for additional information regarding copyright ownership.
@@ -16,9 +16,10 @@ ij> --
 --
 -- this test shows that ij can detect the driver from the URL.
 -- the ij.properties file sets ij.database and nothing else.
+
 values 'PASS';
 1   
 ----
 PASS
-ij> -- this test also exercises the shutdown on exit code
+ij(CONNECTION1)> -- this test also exercises the shutdown on exit code
 exit;
