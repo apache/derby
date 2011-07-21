@@ -21,14 +21,9 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.largedata;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 
@@ -52,16 +47,7 @@ public class LobLimitsLiteTest extends LobLimitsTest {
     static final int _100K = 1024 *100;
     
     public static Test suite() {
-        // Right now run just with embeddded.
-        Test test = new CleanDatabaseTestSetup(
-                new TestSuite(LobLimitsTest.class)) {
-                    protected void decorateSQL(Statement s)
-                            throws SQLException {
-                        setupTables(s,_1MB, _100K);
-                    }
-                };
-                
-        test = new SupportFilesSetup(test);
+        Test test = LobLimitsTest.baseSuite(_1MB, _100K);
         TestSuite suite = new TestSuite("LobLimitsLiteTest");
         suite.addTest(test);
         suite.addTest(TestConfiguration.clientServerDecorator(test));

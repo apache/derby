@@ -39,7 +39,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -124,11 +123,24 @@ public class LobLimitsTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         // Right now run just with embeddded.
+        return baseSuite(_2GB, _100MB);
+    }
+
+    /**
+     * Create an instance of the {@code LobLimitsTest} suite.
+     *
+     * @param biggestSize the size of the biggest LOB to test
+     * @param bigSize the size of a typical big LOB to test
+     * @return a test suite
+     */
+    static Test baseSuite(final int biggestSize, final int bigSize) {
+        // Some of the test cases depend on certain other test cases to run
+        // first, so force the test cases to run in lexicographical order.
         Test suite = new CleanDatabaseTestSetup(
-                new TestSuite(LobLimitsTest.class)) {
+                TestConfiguration.orderedSuite(LobLimitsTest.class)) {
             protected void decorateSQL(Statement s)
                            throws SQLException {
-                setupTables(s, _2GB, _100MB);
+                setupTables(s, biggestSize, bigSize);
             }
         };
 
@@ -139,7 +151,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * tests specific for blobs
      * @throws Exception
      */
-    public void testBlob() throws Exception {
+    public void test_01_Blob() throws Exception {
         Connection conn = getConnection();
         conn.setAutoCommit(false);
         PreparedStatement insertBlob =
@@ -216,7 +228,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         deleteTable(conn, deleteBlob, 3);
     }
 
-    public void testBlobNegative() throws SQLException {
+    public void test_02_BlobNegative() throws SQLException {
         // Negative Test, use setBlob api to insert a 4GB blob.
         Connection conn = getConnection();
         conn.setAutoCommit(false);
@@ -251,7 +263,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * 
      * @throws Exception
      */
-    public void testClob1() throws Exception {
+    public void test_03_Clob1() throws Exception {
         Connection conn = getConnection();
         setAutoCommit(false);
         PreparedStatement insertClob =
@@ -277,7 +289,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
     /**
      * @throws Exception
      */
-    public void testClob2() throws Exception {
+    public void test_04_Clob2() throws Exception {
         Connection conn = getConnection();
         conn.setAutoCommit(false);
         PreparedStatement selectClob =
@@ -326,7 +338,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
 
     }
 
-    public void testClobNegative() throws Exception {
+    public void test_05_ClobNegative() throws Exception {
         Connection conn = getConnection();
         conn.setAutoCommit(false);
         PreparedStatement insertClob =
