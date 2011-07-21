@@ -47,11 +47,4 @@ public class _Suite extends BaseJDBCTestCase {
     }
     
     
-    /**
-     * Just the lite test for running with suites.All
-     */
-    public static Test suiteLite() {
-        return LobLimitsLiteTest.suite();
-    }
-    
 }
