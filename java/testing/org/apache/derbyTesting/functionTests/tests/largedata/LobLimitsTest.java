@@ -32,7 +32,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,6 +44,7 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
+import org.apache.derbyTesting.junit.JDBC;
 
 /**
  * This test is part of the "largedata" suite because this test tests data for
@@ -104,8 +104,6 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         setMORE_DATA_THAN_COL_WIDTH(biglobsz + 1);
         println("BIGGEST_LOB_SZ=" + BIGGEST_LOB_SZ + " BIG_LOB_SZ="
                 + BIG_LOB_SZ);
-        Connection conn = s.getConnection();
-        conn.setAutoCommit(true);
         s.execute("CREATE TABLE BLOBTBL (ID INT NOT NULL PRIMARY KEY, "
                 + "POS BIGINT, DLEN BIGINT, CONTENT BLOB(2G))");
         s.execute("CREATE TABLE CLOBTBL (ID INT NOT NULL PRIMARY KEY,"
@@ -152,8 +150,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     public void test_01_Blob() throws Exception {
-        Connection conn = getConnection();
-        conn.setAutoCommit(false);
+        setAutoCommit(false);
         PreparedStatement insertBlob =
                 prepareStatement("INSERT INTO BLOBTBL values (?,?,?,?)");
         PreparedStatement selectBlob =
@@ -162,10 +159,6 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                 prepareStatement("INSERT INTO BLOBTBL2 values (?,?,?,?)");
         PreparedStatement selectBlob2 =
                 prepareStatement("SELECT CONTENT,DLEN FROM BLOBTBL2 WHERE ID = ?");
-        PreparedStatement deleteBlob2 =
-                prepareStatement("DELETE FROM BLOBTBL2");
-        PreparedStatement deleteBlob =
-                conn.prepareStatement("DELETE FROM BLOBTBL");
         // Test - 2Gb blob ( actually it is 2gb -1)
         // Note with setBinaryStream interface the maximum size for the
         // stream, can be max value for an int.
@@ -173,23 +166,22 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         // maximum size of 2gb -1
 
         // first do insert blob of 2g, 2 rows
-        insertBlob_SetBinaryStream("BlobTest #1", conn, insertBlob,
+        insertBlob_SetBinaryStream("BlobTest #1", insertBlob,
                 BIGGEST_LOB_SZ,
                    0, 2, BIGGEST_LOB_SZ);
         // do a select to see if the inserts in test above went ok
-        selectBlob("BlobTest #2", conn, selectBlob, BIGGEST_LOB_SZ, 0, 1);
-        selectBlob("BlobTest #3", conn, selectBlob, BIGGEST_LOB_SZ, 1, 1);
+        selectBlob("BlobTest #2", selectBlob, BIGGEST_LOB_SZ, 0, 1);
+        selectBlob("BlobTest #3", selectBlob, BIGGEST_LOB_SZ, 1, 1);
 
         // now do a select of one of the 2gb rows and update another 2g row
         // using the setBlob api, updated blob is of length 2gb
         // Fix for Bug entry -DERBY-599[setBlob should not materialize blob
         // into memory]
-        selectUpdateBlob("BlobTest #4", conn, selectBlob, BIGGEST_LOB_SZ, 0, 1,
-                1);
+        selectUpdateBlob("BlobTest #4", selectBlob, BIGGEST_LOB_SZ, 0, 1);
         // select row from blobtbl and then do insert into the blobtbl
         // using setBlob
-        selectInsertBlob("BlobTest #4.1", conn, selectBlob, insertBlob,
-                BIGGEST_LOB_SZ, 0, 3, 1);
+        selectInsertBlob("BlobTest #4.1", selectBlob, insertBlob,
+                BIGGEST_LOB_SZ, 0, 3);
 
         // Test - generate random data, write to a file, use it to insert
         // data into blob and then read back and compare if all is ok
@@ -210,28 +202,27 @@ public class LobLimitsTest extends BaseJDBCTestCase {
 
         fos.flush();
         fos.close();
-        insertBlob2("BlobTest #5.1 ", conn, insertBlob2, BIG_LOB_SZ, 0, 1,
+        insertBlob2("BlobTest #5.1 ", insertBlob2, BIG_LOB_SZ, 0, 1,
                    BIG_LOB_SZ, DATAFILE);
-        selectBlob2("BlobTest #5.2 ", conn, selectBlob2, BIG_LOB_SZ, 0, 1,
+        selectBlob2("BlobTest #5.2 ", selectBlob2, BIG_LOB_SZ, 0, 1,
                    DATAFILE);
 
         // update the 2gb row in blobtbl with the 100mb data and compare if the
         // update
         // went ok.
-        selectUpdateBlob2("BlobTest #6", conn, selectBlob2, selectBlob,
-                BIG_LOB_SZ, 0, 1, 1, DATAFILE);
+        selectUpdateBlob2("BlobTest #6", selectBlob2, selectBlob,
+                BIG_LOB_SZ, 0, 1, DATAFILE);
 
-        deleteTable(conn, deleteBlob2, 1);
+        deleteTable("BLOBTBL2", 1);
 
-        conn.commit();
+        commit();
 
-        deleteTable(conn, deleteBlob, 3);
+        deleteTable("BLOBTBL", 3);
     }
 
     public void test_02_BlobNegative() throws SQLException {
         // Negative Test, use setBlob api to insert a 4GB blob.
-        Connection conn = getConnection();
-        conn.setAutoCommit(false);
+        setAutoCommit(false);
         PreparedStatement insertBlob =
                 prepareStatement("INSERT INTO BLOBTBL values (?,?,?,?)");
 
@@ -240,7 +231,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                         _4GB), _4GB);
 
         try {
-            insertBlob_SetBlob("BlobTest #7 (setBlob with 4Gb blob", conn,
+            insertBlob_SetBlob("BlobTest #7 (setBlob with 4Gb blob",
                     insertBlob, _4GbBlob,
                     _4GB, 0, 1, 0);
             fail("Inserting 4BG blob should have thrown exception");
@@ -253,7 +244,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             } else {
                 assertSQLState("22003", sqle);
             }
-            conn.commit();
+            commit();
         }
         // ADD NEW TESTS HERE
     }
@@ -264,7 +255,6 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     public void test_03_Clob1() throws Exception {
-        Connection conn = getConnection();
         setAutoCommit(false);
         PreparedStatement insertClob =
                 prepareStatement("INSERT INTO CLOBTBL values (?,?,?,?)");
@@ -275,14 +265,13 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         // Note with setCharacterStream interface the maximum size for the
         // stream has to be max value for a int which is (2GB -1 )
         // first do insert clob of 2g, 2 rows
-        insertClob_SetCharacterStream("ClobTest #1", conn, insertClob,
+        insertClob_SetCharacterStream("ClobTest #1", insertClob,
                 BIGGEST_LOB_SZ, 0, 2, BIGGEST_LOB_SZ);
         // do a select to see if the inserts in test above went ok
-        selectClob("ClobTest #2", conn, selectClob, BIGGEST_LOB_SZ, 0, 1);
-        selectClob("ClobTest #3", conn, selectClob, BIGGEST_LOB_SZ, 0, 1);
+        selectClob("ClobTest #2", selectClob, BIGGEST_LOB_SZ, 0, 1);
+        selectClob("ClobTest #3", selectClob, BIGGEST_LOB_SZ, 0, 1);
         // do a select and then update a row of 2gb size: uses getClob
-        selectUpdateClob("ClobTest #4", conn, selectClob, BIGGEST_LOB_SZ, 0, 1,
-                1);
+        selectUpdateClob("ClobTest #4", selectClob, BIGGEST_LOB_SZ, 0, 1);
 
     }
 
@@ -290,8 +279,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @throws Exception
      */
     public void test_04_Clob2() throws Exception {
-        Connection conn = getConnection();
-        conn.setAutoCommit(false);
+        setAutoCommit(false);
         PreparedStatement selectClob =
                 prepareStatement("SELECT CONTENT,DLEN FROM CLOBTBL WHERE ID = ?");
         PreparedStatement insertClob2 =
@@ -299,27 +287,26 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         PreparedStatement selectClob2 =
                 prepareStatement("SELECT CONTENT,DLEN FROM CLOBTBL2 WHERE ID = ?");
 
-        setAutoCommit(false);
         // Test - generate random data, write to a file, use it to insert
         // data into clob and then read back and compare if all is ok
         // currently in fvt ( derbyall), tests check for substrings etc and
         // for small amounts of data. This test will test for 100mb of clob data
         writeToFile(CHARDATAFILE, new RandomCharReaderT(new java.util.Random(),
                 BIG_LOB_SZ));
-        insertClob2("ClobTest #5.1 ", conn, insertClob2, BIG_LOB_SZ, 0, 1,
+        insertClob2("ClobTest #5.1 ", insertClob2, BIG_LOB_SZ, 0, 1,
                    BIG_LOB_SZ, CHARDATAFILE);
-        selectClob2("ClobTest #5.2 ", conn, selectClob2, BIG_LOB_SZ, 0, 1,
+        selectClob2("ClobTest #5.2 ", selectClob2, BIG_LOB_SZ, 0, 1,
                    CHARDATAFILE);
 
         // Disabled for now, this will materialize, will open
         // jira for it.
-        // updateClob2("ClobTest #8.1",conn,selectClob,BIG_LOB_SZ,0,0,10,1,CHARDATAFILE);
+        // updateClob2("ClobTest #8.1",selectClob,BIG_LOB_SZ,0,0,10,CHARDATAFILE);
 
         // update the 2gb row in clobtbl with the 100mb data and compare if the
         // update
         // went ok.
-        selectUpdateClob2("ClobTest #8.2", conn, selectClob2, selectClob,
-                BIG_LOB_SZ, 0, 1, 1, CHARDATAFILE);
+        selectUpdateClob2("ClobTest #8.2", selectClob2, selectClob,
+                BIG_LOB_SZ, 0, 1, CHARDATAFILE);
 
         // test for trailing space truncation
         // insert 100mb+33k of data which has 33k of trailing space,
@@ -330,17 +317,16 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         // in the verification process after inserts and updates.
         writeToFile(CHARDATAFILE, new RandomCharReaderT(new java.util.Random(),
                    (NUM_TRAILING_SPACES + BIG_LOB_SZ), NUM_TRAILING_SPACES));
-        insertClob2("ClobTest #6.1 ", conn, insertClob2, BIG_LOB_SZ, 3, 1,
+        insertClob2("ClobTest #6.1 ", insertClob2, BIG_LOB_SZ, 3, 1,
                    (NUM_TRAILING_SPACES + BIG_LOB_SZ), CHARDATAFILE);
         // select will retrieve data and verify the data inserted.
-        selectClob2("ClobTest #6.2 ", conn, selectClob2, BIG_LOB_SZ, 3, 1,
+        selectClob2("ClobTest #6.2 ", selectClob2, BIG_LOB_SZ, 3, 1,
                    CHARDATAFILE);
 
     }
 
     public void test_05_ClobNegative() throws Exception {
-        Connection conn = getConnection();
-        conn.setAutoCommit(false);
+        setAutoCommit(false);
         PreparedStatement insertClob =
                 prepareStatement("INSERT INTO CLOBTBL values (?,?,?,?)");
         PreparedStatement selectClob =
@@ -349,11 +335,8 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                 prepareStatement("INSERT INTO CLOBTBL2 values (?,?,?,?)");
         PreparedStatement selectClob2 =
                 prepareStatement("SELECT CONTENT,DLEN FROM CLOBTBL2 WHERE ID = ?");
-        PreparedStatement deleteClob2 =
-                prepareStatement("DELETE  from CLOBTBL2");
-        PreparedStatement deleteClob = prepareStatement("DELETE  from CLOBTBL");
 
-        negativeSpaceTruncationTest("ClobTest #7", conn);
+        negativeSpaceTruncationTest("ClobTest #7");
 
         // Test - for stream contains a trailing non-space character
         // insert should throw an error
@@ -363,7 +346,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         // column width to be inserted.
         if (!usingDerbyNetClient()) {
             try {
-                insertClob2("ClobTest #9.1 ", conn, insertClob2,
+                insertClob2("ClobTest #9.1 ", insertClob2,
                         MORE_DATA_THAN_COL_WIDTH, 4, 1,
                         MORE_DATA_THAN_COL_WIDTH, CHARDATAFILE);
                 fail("ClobTest #9.1 " + "should have thrown XSDA4");
@@ -372,10 +355,10 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             }
         }
         // no row must be retrieved.
-        selectClob2("ClobTest #9.2 ", conn, selectClob2, BIG_LOB_SZ, 4, 0,
+        selectClob2("ClobTest #9.2 ", selectClob2, BIG_LOB_SZ, 4, 0,
                    CHARDATAFILE);
         try {
-            insertClob2("ClobTest #10 ", conn, insertClob2,
+            insertClob2("ClobTest #10 ", insertClob2,
                     MORE_DATA_THAN_COL_WIDTH, 4, 1,
                        MORE_DATA_THAN_COL_WIDTH + 1, CHARDATAFILE);
             fail("ClobTest #10. Should have thrown XSDA4");
@@ -387,7 +370,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         }
 
         try {
-            insertClob2("ClobTest #11 ", conn, insertClob2,
+            insertClob2("ClobTest #11 ", insertClob2,
                     MORE_DATA_THAN_COL_WIDTH, 4, 1,
                        MORE_DATA_THAN_COL_WIDTH - 1, CHARDATAFILE);
             fail("ClobTest #11. Should have thrown XSDA4");
@@ -397,20 +380,20 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             // stream length is one less than actual length of the stream
             assertSQLState("XSDA4", sqle);
         }
-        deleteTable(conn, deleteClob2, 2);
+        deleteTable("CLOBTBL2", 2);
 
         try {
             // give -ve streamlength
-            insertClob_SetCharacterStream("ClobTest #12.1", conn, insertClob,
+            insertClob_SetCharacterStream("ClobTest #12.1", insertClob,
                     BIG_LOB_SZ, 4, 1, -1);
             fail("ClobTest #12. Should have thrown XJ025");
         } catch (SQLException sqle) {
             assertSQLState("XJ025", sqle);
         }
 
-        selectClob("ClobTest #12.2", conn, selectClob, BIG_LOB_SZ, 4, 0);
+        selectClob("ClobTest #12.2", selectClob, BIG_LOB_SZ, 4, 0);
 
-        deleteTable(conn, deleteClob, 2);
+        deleteTable("CLOBTBL", 2);
 
         // Negative tests use the setClob API to insert a 4GB clob
 
@@ -421,7 +404,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                         _4GB), _4GB);
 
         try {
-            insertClob_SetClob("ClobTest #13 (setClob with 4Gb clob", conn,
+            insertClob_SetClob("ClobTest #13 (setClob with 4Gb clob",
                     insertClob, _4GBClob,
                     _4GB, 0, 1, 0);
             fail("ClobTest #13. Should have thrown 22033");
@@ -439,16 +422,16 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         // ADD NEW TESTS HERE
     }
 
-    private static void negativeSpaceTruncationTest(String msg, Connection conn)
+    private void negativeSpaceTruncationTest(String msg)
             throws Exception {
-        PreparedStatement insertClob2 = conn
-                .prepareStatement("INSERT INTO CLOBTBL2 values (?,?,?,?)");
+        PreparedStatement insertClob2 =
+                prepareStatement("INSERT INTO CLOBTBL2 values (?,?,?,?)");
 
         // Negative test, stream has trailing spaces but the stream length is
         // one
         // more than the actual length of the stream
         try {
-            insertClob2(msg, conn, insertClob2, BIG_LOB_SZ, 4, 1,
+            insertClob2(msg, insertClob2, BIG_LOB_SZ, 4, 1,
                     (NUM_TRAILING_SPACES + BIG_LOB_SZ - 1), CHARDATAFILE);
             fail(msg +". Should have thrown XSDA4");
         } catch (SQLException sqle) {
@@ -458,7 +441,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         }
 
         try {
-            insertClob2(msg, conn, insertClob2, BIG_LOB_SZ, 5, 1,
+            insertClob2(msg, insertClob2, BIG_LOB_SZ, 5, 1,
                     (NUM_TRAILING_SPACES + BIG_LOB_SZ + 1), CHARDATAFILE);
             fail(msg + ". Should have thrown XSDA4");
         } catch (SQLException sqle) {
@@ -476,14 +459,12 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param rows insert rows number of rows
      * @param streamLength stream length passed to setBinaryStream(,,length)
      */
-    private static void insertBlob_SetBinaryStream(String testId,
-            Connection conn, PreparedStatement ps, int bloblen, int start,
+    private void insertBlob_SetBinaryStream(String testId, PreparedStatement ps, int bloblen, int start,
             int rows, int streamLength) throws SQLException {
         println("========================================");
         println("START " + testId + "insertBlob of size = "
                 + bloblen);
-        long ST = 0;
-        ST = System.currentTimeMillis();
+        long ST = System.currentTimeMillis();
 
         int count = 0;
         java.util.Random random = new java.util.Random();
@@ -495,7 +476,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                     streamLength);
             count += ps.executeUpdate();
         }
-        conn.commit();
+        commit();
         println("Insert Blob (" + bloblen + ")" + " rows= "
                    + count + " = " + (long) (System.currentTimeMillis() - ST));
         verifyTest(count, rows, " Rows inserted with blob of size (" + bloblen
@@ -513,7 +494,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param rows insert rows number of rows
      * @param expectedRows rows expected to be inserted
      */
-    private static void insertBlob_SetBlob(String testId, Connection conn,
+    private void insertBlob_SetBlob(String testId,
             PreparedStatement ps, java.sql.Blob blob, long bloblen, int start,
             int rows, int expectedRows) throws SQLException {
         println("========================================");
@@ -528,7 +509,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             ps.setBlob(4, blob);
             count += ps.executeUpdate();
         }
-        conn.commit();
+        commit();
         println("Insert Blob (" + bloblen + ")" + " rows= "
                         + count + " = "
                         + (long) (System.currentTimeMillis() - ST));
@@ -546,20 +527,18 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param id id of the row to retrieve
      * @param expectedRows number of rows expected to match id
      */
-    private static void selectBlob(String testId, Connection conn,
+    private void selectBlob(String testId,
             PreparedStatement ps, int bloblen, int id, int expectedRows)
             throws SQLException {
         println("========================================");
         println("START " + testId + " - SELECT BLOB of size = "
                 + bloblen);
 
-        long ST = 0;
-        ResultSet rs = null;
-        ST = System.currentTimeMillis();
+        long ST = System.currentTimeMillis();
 
         int count = 0;
         ps.setInt(1, id);
-        rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
 
         while (rs.next()) {
             count++;
@@ -570,7 +549,9 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                        + " expected " + dlen + " for row in BLOBTBL with ID="
                        + id, dlen, l);
         }
-        conn.commit();
+
+        rs.close();
+        commit();
 
         verifyTest(count, expectedRows,
                 "Matched rows selected with blob of size(" + bloblen + ") =");
@@ -590,22 +571,18 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param file filename to match retrieved data against
      */
 
-    private static void insertBlob2(String testId, Connection conn,
+    private void insertBlob2(String testId,
             PreparedStatement ps, int bloblen, int start, int rows,
             int streamLength, String file) throws Exception {
         println("========================================");
         println("START " + testId + "insert Blob of size = "
                 + bloblen);
         int count = 0;
-        java.util.Random random = new java.util.Random();
-        FileInputStream fis = null;
-
-        long ST = 0;
-
-        ST = System.currentTimeMillis();
+        long ST = System.currentTimeMillis();
 
         for (int i = start; i < start + rows; i++) {
-            fis = PrivilegedFileOpsForTests.getFileInputStream(new File(file));
+            FileInputStream fis =
+                PrivilegedFileOpsForTests.getFileInputStream(new File(file));
             ps.setInt(1, i);
             ps.setInt(2, 0);
             ps.setLong(4, bloblen);
@@ -613,7 +590,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             count += ps.executeUpdate();
             fis.close();
         }
-        conn.commit();
+        commit();
         println("Insert Blob (" + bloblen + ")" + " rows= "
                    + count + " = " + (long) (System.currentTimeMillis() - ST));
         verifyTest(count, rows, " Rows inserted with blob of size (" + bloblen
@@ -630,20 +607,18 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param expectedRows number of rows expected to match id
      * @param file name of the file,against which the retrieved data is compared
      */
-    private static void selectBlob2(String testId, Connection conn,
+    private void selectBlob2(String testId,
             PreparedStatement ps, int bloblen, int id, int expectedRows,
             String file) throws Exception {
         println("========================================");
         println("START " + testId + " - SELECT BLOB of size = "
                 + bloblen);
 
-        long ST = 0;
-        ResultSet rs = null;
-        ST = System.currentTimeMillis();
+        long ST = System.currentTimeMillis();
 
         int count = 0;
         ps.setInt(1, id);
-        rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
 
         while (rs.next()) {
             count++;
@@ -656,7 +631,9 @@ public class LobLimitsTest extends BaseJDBCTestCase {
 
             compareBlobToFile(value.getBinaryStream(), file);
         }
-        conn.commit();
+
+        rs.close();
+        commit();
 
         verifyTest(count, expectedRows,
                 "Matched rows selected with blob of size(" + bloblen + ") =");
@@ -676,19 +653,16 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param bloblen updating value is of length bloblen
      * @param id id of the row retrieved, for the update
      * @param updateId id of the row that is updated
-     * @param expectedRows to be updated
      */
-    private static void selectUpdateBlob(String testId, Connection conn,
-            PreparedStatement ps, int bloblen, int id, int updateId,
-            int expectedRows) throws Exception {
+    private void selectUpdateBlob(String testId,
+            PreparedStatement ps, int bloblen, int id, int updateId)
+            throws Exception {
         println("========================================");
         println("START " + testId + " - select and then update blob of size= "
                 + bloblen + " - Uses getBlob api");
 
-        ResultSet rs = null;
-
         ps.setInt(1, id);
-        rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
         rs.next();
         Blob value = rs.getBlob(1);
         long l = value.length();
@@ -698,14 +672,14 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                            dlen, l);
 
         PreparedStatement psUpd =
-                conn.prepareStatement("update BLOBTBL set content=?,dlen =?" +
+                prepareStatement("update BLOBTBL set content=?,dlen =?" +
                         "where id = ?");
         psUpd.setBlob(1, value);
         psUpd.setLong(2, l);
         psUpd.setInt(3, updateId);
 
         println("Rows Updated = " + psUpd.executeUpdate());
-        conn.commit();
+        commit();
 
         // now select and verify that update went through ok.
         ps.setInt(1, updateId);
@@ -718,11 +692,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                         + updatedValue.length(),
                    l, updatedValue.length());
 
+        commit();
+
         // close resultsets
-        conn.commit();
         rs.close();
         rs2.close();
-        psUpd.close();
         println("========================================");
     }
 
@@ -735,21 +709,17 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param bloblen updating value is of length bloblen
      * @param id id of the row retrieved, for the update
      * @param insertId id of the row that is inserted
-     * @param expectedRows to be updated
      */
-    private static void selectInsertBlob(String testId, Connection conn,
+    private void selectInsertBlob(String testId,
             PreparedStatement ps, PreparedStatement ins, int bloblen, int id,
-            int insertId,
-            int expectedRows) throws Exception {
+            int insertId) throws Exception {
         println("========================================");
         println("START " + testId + " - select and then insert blob of size= "
                 + bloblen
                 + " - Uses getBlob api to do select and setBlob for insert");
 
-        ResultSet rs = null;
-
         ps.setInt(1, id);
-        rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
         rs.next();
         Blob value = rs.getBlob(1);
         long l = value.length();
@@ -763,8 +733,8 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         ins.setBlob(4, value);
 
         // assert one row updated
-        assertEquals(1, ins.executeUpdate());
-        conn.commit();
+        assertUpdateCount(ins, 1);
+        commit();
 
         // now select and verify that update went through ok.
         ps.setInt(1, insertId);
@@ -776,8 +746,10 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                         "expected length = " + l + " found = "
                         + insertedValue.length(),
                 l, insertedValue.length());
+
+        commit();
+
         // close resultsets
-        conn.commit();
         rs.close();
         rs2.close();
         println("========================================");
@@ -791,22 +763,18 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param bloblen updating value is of length bloblen
      * @param id id of the row retrieved, for the update
      * @param updateId id of the row that is updated
-     * @param expectedRows to be updated
      * @param file name of the file,against which the updated data is compared
      */
-    private static void selectUpdateBlob2(String testId, Connection conn,
+    private void selectUpdateBlob2(String testId,
             PreparedStatement ps, PreparedStatement sel, int bloblen, int id,
-            int updateId,
-            int expectedRows, String file) throws Exception {
+            int updateId, String file) throws Exception {
         println("========================================");
         println("START " + testId + " - select and then update blob of size= "
                 + bloblen + " - Uses getBlob and setBlob  api");
 
-        ResultSet rs = null;
-
         // retrieve row from blobtbl2
         ps.setInt(1, id);
-        rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
         rs.next();
         Blob value = rs.getBlob(1);
         long l = value.length();
@@ -815,14 +783,14 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                 + dlen + " for row in BLOBTBL2 with ID=" + id, dlen, l);
 
         PreparedStatement psUpd =
-                conn.prepareStatement("update BLOBTBL set content=?,dlen =?" +
+                prepareStatement("update BLOBTBL set content=?,dlen =?" +
                         " where id = ?");
         psUpd.setBlob(1, value);
         psUpd.setLong(2, l);
         psUpd.setInt(3, updateId);
         // assert 1 row updated
-        assertEquals(1, psUpd.executeUpdate());
-        conn.commit();
+        assertUpdateCount(psUpd, 1);
+        commit();
 
         // now select and verify that update went through ok.
         sel.setInt(1, updateId);
@@ -835,11 +803,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                 .length());
         compareBlobToFile(updatedValue.getBinaryStream(), file);
 
+        commit();
+
         // close resultsets
-        conn.commit();
         rs.close();
         rs2.close();
-        psUpd.close();
         println("========================================");
 
     }
@@ -859,10 +827,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         } while (l != -1 && b != -1);
     }
 
-    private static void deleteTable(Connection conn, PreparedStatement ps,
+    private void deleteTable(String table,
             int expectedRows) throws SQLException {
-        int count = ps.executeUpdate();
-        conn.commit();
+        int count = createStatement().executeUpdate(
+                "DELETE FROM " + JDBC.escape(table));
+        commit();
         verifyTest(count, expectedRows, "Rows deleted =");
     }
 
@@ -875,17 +844,15 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param streamLength stream length passed to
      *            setCharacterStream(...,length)
      */
-    private static void insertClob_SetCharacterStream(String testId,
-            Connection conn, PreparedStatement ps, int cloblen, int start,
+    private void insertClob_SetCharacterStream(String testId, PreparedStatement ps, int cloblen, int start,
             int rows, int streamLength) throws SQLException {
         println("========================================");
         println("START " + testId + "  -insertClob of size = "
                 + cloblen);
 
-        long ST = 0;
         java.util.Random random = new java.util.Random();
         int count = 0;
-        ST = System.currentTimeMillis();
+        long ST = System.currentTimeMillis();
 
         for (int i = start; i < start + rows; i++) {
             ps.setInt(1, i);
@@ -895,7 +862,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                     streamLength);
             count += ps.executeUpdate();
         }
-        conn.commit();
+        commit();
         println("Insert Clob (" + cloblen + ")" + " rows= "
                    + count + " = " + (long) (System.currentTimeMillis() - ST));
         verifyTest(count, rows, "Rows inserted with clob of size (" + cloblen
@@ -913,13 +880,12 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param rows insert rows number of rows
      * @param expectedRows rows expected to be inserted
      */
-    private static void insertClob_SetClob(String testId, Connection conn,
+    private void insertClob_SetClob(String testId,
             PreparedStatement ps, java.sql.Clob clob, long cloblen, int start,
             int rows, int expectedRows) throws SQLException {
         println("========================================");
         println("START " + testId + "insertClob of size = " + cloblen);
-        long ST = 0;
-        ST = System.currentTimeMillis();
+        long ST = System.currentTimeMillis();
         int count = 0;
 
         for (int i = start; i < start + rows; i++) {
@@ -929,7 +895,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
             ps.setClob(4, clob);
             count += ps.executeUpdate();
         }
-        conn.commit();
+        commit();
         println("Insert Clob (" + cloblen + ")" + " rows= " + count + " = "
                 + (long) (System.currentTimeMillis() - ST));
 
@@ -946,20 +912,18 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param id id of the row to retrieve
      * @param expectedRows number of rows expected to match id
      */
-    private static void selectClob(String testId, Connection conn,
+    private void selectClob(String testId,
             PreparedStatement ps, int cloblen, int id, int expectedRows)
             throws SQLException {
         println("========================================");
         println("START " + testId + " - SELECT CLOB of size = "
                 + cloblen);
 
-        long ST = 0;
         int count = 0;
-        ResultSet rs = null;
-        ST = System.currentTimeMillis();
+        long ST = System.currentTimeMillis();
 
         ps.setInt(1, id);
-        rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
         while (rs.next()) {
             count++;
             Clob value = rs.getClob(1);
@@ -969,7 +933,8 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                     + " expected " + dlen + " for row in CLOBTBL with ID="
                     + id, l, dlen);
         }
-        conn.commit();
+        rs.close();
+        commit();
 
         println("Select Clob (" + cloblen + ")" + " rows= "
                 + expectedRows + " = "
@@ -991,32 +956,30 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      *            setCharacterStream(pos,reader,streamLength)
      * @param file name of the file that has data to be inserted
      */
-    private static void insertClob2(String testId, Connection conn,
+    private void insertClob2(String testId,
             PreparedStatement ps, int cloblen, int start, int rows,
             int streamLength, String file) throws Exception {
         println("========================================");
         println("START " + testId + "insert Clob of size = "
                 + cloblen);
         int count = 0;
-        FileReader reader = null;
-        long ST = 0;
-        ST = System.currentTimeMillis();
-        try {
-            for (int i = start; i < start + rows; i++) {
-                reader = PrivilegedFileOpsForTests
+        long ST = System.currentTimeMillis();
+        for (int i = start; i < start + rows; i++) {
+            FileReader reader = PrivilegedFileOpsForTests
                         .getFileReader(new File(file));
+            try {
                 println("Got reader for file " + file + " " + reader);
                 ps.setInt(1, i);
                 ps.setInt(2, 0);
                 ps.setLong(4, cloblen);
                 ps.setCharacterStream(3, reader, streamLength);
                 count += ps.executeUpdate();
+            } finally {
+                reader.close();
+                println("Closed reader for file " + file + " " + reader);
             }
-        } finally {
-            reader.close();
-            println("Closed reader for file " + file + " " + reader);
         }
-        conn.commit();
+        commit();
 
         println("Insert Clob (" + cloblen + ")" + " rows= "
                    + count + " = " + (long) (System.currentTimeMillis() - ST));
@@ -1034,21 +997,18 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * @param expectedRows number of rows expected to match id
      * @param file filename to compare the retrieved data against
      */
-    private static void selectClob2(String testId, Connection conn,
+    private void selectClob2(String testId,
             PreparedStatement ps, int cloblen, int id, int expectedRows,
-            String file) throws SQLException, Exception {
+            String file) throws Exception {
         println("========================================");
         println("START " + testId + " - SELECT CLOB of size = "
                 + cloblen);
 
-        long ST = 0;
-        ResultSet rs = null;
-
-        ST = System.currentTimeMillis();
+        long ST = System.currentTimeMillis();
 
         int count = 0;
         ps.setInt(1, id);
-        rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
 
         while (rs.next()) {
             count++;
@@ -1060,7 +1020,9 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                     + id, l, cloblen);
             compareClobToFile(value.getCharacterStream(), file, cloblen);
         }
-        conn.commit();
+
+        rs.close();
+        commit();
 
         verifyTest(count, expectedRows,
                 "Matched rows selected with clob of size(" + cloblen + ") =");
@@ -1076,17 +1038,14 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * clobtbl and then update a row in clobtbl and verify updated data in
      * clobtbl
      */
-    private static void selectUpdateClob(String testId, Connection conn,
-            PreparedStatement ps, int cloblen, int id, int updateId,
-            int expectedRows) throws Exception {
+    private void selectUpdateClob(String testId,
+            PreparedStatement ps, int cloblen, int id, int updateId) throws Exception {
         println("========================================");
         println("START " + testId + " - select and then update clob of size= "
                 + cloblen + " - Uses setClob api");
 
-        ResultSet rs = null;
-
         ps.setInt(1, id);
-        rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
         rs.next();
         Clob value = rs.getClob(1);
         long l = value.length();
@@ -1099,16 +1058,15 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         // used as a work around.
         if (!usingDerbyNetClient()) {
             PreparedStatement psUpd =
-                    conn.prepareStatement("update CLOBTBL set content=?, " +
+                    prepareStatement("update CLOBTBL set content=?, " +
                             "dlen =? where id = ?");
             psUpd.setCharacterStream(1, value.getCharacterStream(), (int) l);
             psUpd.setLong(2, l);
             psUpd.setInt(3, updateId);
 
-            assertEquals(1, psUpd.executeUpdate());
-            psUpd.close();
+            assertUpdateCount(psUpd, 1);
         }
-        conn.commit();
+        commit();
 
         // now select and verify that update went through ok.
         ps.setInt(1, updateId);
@@ -1121,8 +1079,9 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                         + updatedValue.length(), l,
                 updatedValue.length());
 
+        commit();
+
         // close resultsets
-        conn.commit();
         rs.close();
         rs2.close();
         println("========================================");
@@ -1133,19 +1092,16 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * updated data. select row from clobtbl2 and then update a row in clobtbl
      * and verify updated data in clobtbl against the data in the original file
      */
-    private static void selectUpdateClob2(String testId, Connection conn,
+    private void selectUpdateClob2(String testId,
             PreparedStatement ps, PreparedStatement sel, int cloblen, int id,
-            int updateId,
-            int expectedRows, String file) throws Exception {
+            int updateId, String file) throws Exception {
         println("========================================");
         println("START " + testId + " - select and then update clob of size= "
                 + cloblen + " - Uses setClob api");
 
-        ResultSet rs = null;
-
         // retrieve row from clobtbl2
         ps.setInt(1, id);
-        rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
         rs.next();
         Clob value = rs.getClob(1);
         long l = value.length();
@@ -1154,16 +1110,14 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                 + dlen + " for row in CLOBTBL2 with ID=" + id, dlen, l);
 
         PreparedStatement psUpd =
-                conn
-                        .prepareStatement("update CLOBTBL set content=?,dlen =? "
-                                +
+               prepareStatement("update CLOBTBL set content=?,dlen =? " +
                                 "where id = ?");
         psUpd.setClob(1, value);
         psUpd.setLong(2, l);
         psUpd.setInt(3, updateId);
 
-        assertEquals(1, psUpd.executeUpdate());
-        conn.commit();
+        assertUpdateCount(psUpd, 1);
+        commit();
 
         // now select and verify that update went through ok.
         sel.setInt(1, updateId);
@@ -1174,12 +1128,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                    updatedValue.length() + ",expected = " + l, l, updatedValue
                 .length());
         compareClobToFile(updatedValue.getCharacterStream(), file, (int) l);
+        commit();
 
         // close resultsets
-        conn.commit();
         rs.close();
         rs2.close();
-        psUpd.close();
         println("========================================");
 
     }
@@ -1192,35 +1145,32 @@ public class LobLimitsTest extends BaseJDBCTestCase {
      * 
      * @param updateRowId id of the row that needs to be updated
      */
-    private static void updateClob2(String testId, Connection conn,
+    private void updateClob2(String testId,
             PreparedStatement sel,
-            int cloblen, int id, int updateRowId, int updateIdVal,
-            int expectedRows, String file) throws Exception {
-        System.out.println("========================================");
-        System.out.println("START " + testId
+            int cloblen, int id, int updateRowId, int updateIdVal, String file)
+            throws Exception {
+        println("========================================");
+        println("START " + testId
                 + " - select and then update clob of size= "
                 + cloblen + " - Uses updateClob api");
 
         PreparedStatement ps1 =
-                conn
-                        .prepareStatement("SELECT * FROM CLOBTBL FOR UPDATE",
+                        prepareStatement("SELECT * FROM CLOBTBL FOR UPDATE",
                                 ResultSet.TYPE_FORWARD_ONLY,
                                 ResultSet.CONCUR_UPDATABLE);
         PreparedStatement ps =
-                conn.prepareStatement("SELECT CONTENT,DLEN FROM CLOBTBL2 " +
+                prepareStatement("SELECT CONTENT,DLEN FROM CLOBTBL2 " +
                         "where ID =?");
 
-        ResultSet rs = null;
         ps.setInt(1, id);
         // retrieve row from clobtbl2
-        rs = ps.executeQuery();
+        ResultSet rs = ps.executeQuery();
         rs.next();
         Clob value = rs.getClob(1);
         long l = value.length();
         long dlen = rs.getLong(2);
         if (dlen != l) {
-            System.out
-                    .println("FAIL - MISMATCH LENGTHS GOT " + l + " expected "
+            println("FAIL - MISMATCH LENGTHS GOT " + l + " expected "
                             + dlen + " for row in CLOBTBL2 with ID=" + id);
         }
 
@@ -1235,12 +1185,12 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                 break;
             }
         }
+
+        commit();
+
         // close resultsets
-        conn.commit();
         rs.close();
         rs1.close();
-        ps1.close();
-        ps.close();
 
         // verify
         // now select and verify that update went through ok.
@@ -1250,15 +1200,14 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         Clob updatedValue = rs2.getClob(1);
 
         if (updatedValue.length() != l) {
-            System.out
-                    .println("FAIL - MISMATCH length of updated clob value ," +
+            println("FAIL - MISMATCH length of updated clob value ," +
                             "found="
                             +
                             updatedValue.length() + ",expected = " + l);
         } else
             compareClobToFile(updatedValue.getCharacterStream(), file, (int) l);
 
-        System.out.println("========================================");
+        println("========================================");
 
     }
 
