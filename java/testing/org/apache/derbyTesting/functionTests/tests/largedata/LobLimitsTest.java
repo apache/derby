@@ -297,11 +297,15 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                    BIG_LOB_SZ, CHARDATAFILE);
         selectClob2("ClobTest #5.2 ", selectClob2, BIG_LOB_SZ, 0, 1,
                    CHARDATAFILE);
-
-        // Disabled for now, this will materialize, will open
-        // jira for it.
-        // updateClob2("ClobTest #8.1",selectClob,BIG_LOB_SZ,0,0,10,CHARDATAFILE);
-
+        // DERBY-5344 updateClob2 test in LobLimitsTest gets OutOfMemoryError 
+        // on updateRow with embedded
+        // Disabled for embedded for the big test for now, this will materialize.
+        // As part of DERBY-1903 / DERBY-5344, the test was enabled for 
+        // client. That issue will have reference to the materialization bug when 
+        // it is found or filed.
+        if (!(usingEmbedded()  && BIGGEST_LOB_SZ  == _2GB)) {
+            updateClob2("ClobTest #8.1",selectClob,BIG_LOB_SZ,0,0,10,CHARDATAFILE);
+        }
         // update the 2gb row in clobtbl with the 100mb data and compare if the
         // update
         // went ok.
@@ -1191,6 +1195,11 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         ResultSet rs2 = sel.executeQuery();
         rs2.next();
         Clob updatedValue = rs2.getClob(1);
+        assertEquals("FAIL - MISMATCH length of updated clob value ," +
+                "found=" + 
+                updatedValue.length() + ",expected = " + l,
+                l, updatedValue.length());
+        compareClobToFile(updatedValue.getCharacterStream(), file, (int) l);
 
         if (updatedValue.length() != l) {
             println("FAIL - MISMATCH length of updated clob value ," +
