@@ -817,14 +817,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
         FileInputStream file =
                 PrivilegedFileOpsForTests
                         .getFileInputStream(new File(filename));
-        int l = 0;
-        int b = 0;
-        do {
-            l = lobstream.read();
-            b = file.read();
-            assertEquals("FAIL -- MISMATCH in data stored (" + l + ") versus" +
-                    "data retrieved from file(" + b + "). ", b, l);
-        } while (l != -1 && b != -1);
+        assertEquals(file, lobstream);
     }
 
     private void deleteTable(String table,
