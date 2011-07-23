@@ -1,0 +1,10 @@
+*~
+/classes*/
+/jars/
+/generated/
+/tools/java/junit.jar
+/changenumber.properties
+/tools/ide/netbeans/derby.log
+/tools/ide/netbeans/nbproject/private/
+/junit_*/
+/javadoc/
