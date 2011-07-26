@@ -622,10 +622,6 @@ class RAFContainer4 extends RAFContainer {
                     threadsInPageIO,
                     hashCode());
 
-                // Recovery is in progress, wait for another
-                // interrupted thread to clean up, i.e. act as if we
-                // had seen ClosedChannelException.
-
                 awaitRestoreChannel(e, stealthMode);
                 if (retries-- == 0) {
                     throw StandardException.newException(
@@ -1089,10 +1085,68 @@ class RAFContainer4 extends RAFContainer {
             throws IOException, StandardException
     {
         FileChannel ioChannel = getChannel(file);
-        if (ioChannel != null) {
-            writeFull(ByteBuffer.wrap(bytes), ioChannel, offset);
-        } else {
+
+        if (ioChannel == null) {
             super.writeAtOffset(file, bytes, offset);
+            return;
+        }
+
+        ourChannel = ioChannel;
+
+        boolean success = false;
+        boolean stealthMode = true;
+
+        while (!success) {
+
+            synchronized (this) {
+                // don't use ourChannel directly, could need re-initilization
+                // after interrupt and container reopening:
+                ioChannel = getChannel();
+            }
+
+            try {
+                writeFull(ByteBuffer.wrap(bytes), ioChannel, offset);
+                success = true;
+            //} catch (ClosedByInterruptException e) {
+            // Java NIO Bug 6979009:
+            // http://bugs.sun.com/view_bug.do?bug_id=6979009
+            // Sometimes NIO throws AsynchronousCloseException instead of
+            // ClosedByInterruptException
+            } catch (AsynchronousCloseException e) {
+                // Subsumes ClosedByInterruptException
+
+                // The interrupted thread may or may not get back here
+                // before other concurrent writers that will see
+                // ClosedChannelException, we have logic to handle that.
+
+                if (Thread.currentThread().isInterrupted()) {
+                    // Normal case
+                    if (recoverContainerAfterInterrupt(
+                                e.toString(),
+                                stealthMode)) {
+                        continue; // do I/O over again
+                    }
+                }
+                // Recovery is in progress, wait for another
+                // interrupted thread to clean up, i.e. act as if we
+                // had seen ClosedChannelException.
+
+                // stealthMode == true, so this will throw
+                // InterruptDetectedException
+                awaitRestoreChannel(e, stealthMode);
+            } catch (ClosedChannelException e) {
+                // We are not the thread that first saw the channel interrupt,
+                // so no recovery attempt.
+
+                InterruptStatus.noteAndClearInterrupt(
+                    "writeAtOffset in ClosedChannelException",
+                    threadsInPageIO,
+                    hashCode());
+
+                // stealthMode == true, so this will throw
+                // InterruptDetectedException
+                awaitRestoreChannel(e, stealthMode);
+            }
         }
     }
 
