@@ -33,6 +33,7 @@ import org.apache.derby.iapi.error.StandardException;
 
 import java.util.Vector;
 import java.util.List;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
 	A BasicDaemon is a background worker thread which does asynchronous I/O and
@@ -441,7 +442,7 @@ public class BasicDaemon implements DaemonService, Runnable
 				}
 				catch (InterruptedException ie)				
 				{
-					// someone interrrupt us, done running
+                    InterruptStatus.setInterrupted();
 				}
 			}
 		}
@@ -522,8 +523,8 @@ public class BasicDaemon implements DaemonService, Runnable
 						wait();
 					}catch (InterruptedException ie)
 					{
-						// someone interrupt us, see what's going on
-					}
+                        InterruptStatus.setInterrupted();
+                    }
 				}
 			}
 		}
