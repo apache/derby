@@ -83,8 +83,6 @@ class RAFContainer4 extends RAFContainer {
 
     // channelCleanupMonitor protects next three state variables:
 
-    private Thread threadDoingRestore = null;
-
     // volatile on threadsInPageIO, is just to ensure that we get a correct
     // value for debugging: we can't always use channelCleanupMonitor
     // then. Otherwise protected by channelCleanupMonitor. Debugging value not
@@ -166,6 +164,8 @@ class RAFContainer4 extends RAFContainer {
         return ourChannel;
     }
 
+    private ContainerKey currentIdentity;
+
     /*
      * Wrapping methods that retrieve the FileChannel from RAFContainer's
      * fileData after calling the real methods in RAFContainer.
@@ -183,6 +183,7 @@ class RAFContainer4 extends RAFContainer {
             SanityManager.ASSERT(ourChannel == null, "ourChannel isn't null");
         }
 
+        currentIdentity = newIdentity;
         return super.openContainer(newIdentity);
     }
 
@@ -199,7 +200,22 @@ class RAFContainer4 extends RAFContainer {
             SanityManager.ASSERT(fileData == null, "fileData isn't null");
             SanityManager.ASSERT(ourChannel == null, "ourChannel isn't null");
         }
+
+        currentIdentity = newIdentity;
         super.createContainer(newIdentity);
+    }
+
+    /**
+     * When the existing channel ({@code ourChannel}) has been closed due to
+     * interrupt, we need to reopen the underlying RAF to get a fresh channel
+     * so we can resume IO.
+     */
+    private void reopen() throws StandardException {
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(!ourChannel.isOpen());
+        }
+        ourChannel = null;
+        reopenContainer(currentIdentity);
     }
 
     /**
@@ -311,14 +327,6 @@ class RAFContainer4 extends RAFContainer {
                 int retries = MAX_INTERRUPT_RETRIES;
 
                 while (restoreChannelInProgress) {
-                    if (Thread.currentThread() == threadDoingRestore) {
-                        // Reopening the container will do readEmbryonicPage
-                        // (i.e. ReadPage is called recursively from
-                        // recoverContainerAfterInterrupt), so now let's make
-                        // sure we don't get stuck waiting for ourselves ;-)
-                        break;
-                    }
-
                     if (retries-- == 0) {
                         throw StandardException.newException(
                             SQLState.FILE_IO_INTERRUPTED);
@@ -842,7 +850,6 @@ class RAFContainer4 extends RAFContainer {
             // in writePage above. Any concurrent threads already inside will
             // also wait till we're done, see below
             restoreChannelInProgress = true;
-            threadDoingRestore = Thread.currentThread();
         }
 
         // Wait till other concurrent threads hit the wall
@@ -860,7 +867,6 @@ class RAFContainer4 extends RAFContainer {
 
                 if (retries-- == 0) {
                     // Clean up state and throw
-                    threadDoingRestore = null;
                     restoreChannelInProgress = false;
                     channelCleanupMonitor.notifyAll();
 
@@ -895,13 +901,7 @@ class RAFContainer4 extends RAFContainer {
                 while (true) {
                     synchronized(this) {
                         try {
-                            closeContainer();
-                            reopenContainer(currentIdentity);
-                        } catch (InterruptDetectedException e) {
-                            // Interrupted again?
-                            debugTrace("interrupted during recovery's " +
-                                       "readEmbryonicPage");
-                            continue;
+                            reopen();
                         } catch (Exception newE) {
                             // Something else failed - shutdown happening?
                             synchronized(giveUpIOm) {
@@ -934,7 +934,6 @@ class RAFContainer4 extends RAFContainer {
                 // Recovery work done (or failed), now set other threads free
                 // to retry or give up as the case may be, cf. giveUpIO.
                 restoreChannelInProgress = false;
-                threadDoingRestore = null;
                 channelCleanupMonitor.notifyAll();
             }
         } // end channelCleanupMonitor region
