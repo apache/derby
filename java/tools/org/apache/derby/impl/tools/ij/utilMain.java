@@ -239,23 +239,7 @@ public class utilMain implements java.security.PrivilegedAction {
 			}
 			firstRun = false;
 
-      		//check if the property is set to not show select count and set the static variable
-      		//accordingly. 
-    		boolean showNoCountForSelect = Boolean.valueOf(util.getSystemProperty("ij.showNoCountForSelect")).booleanValue();
-      		JDBCDisplayUtil.showSelectCount = !showNoCountForSelect;
-
-      		//check if the property is set to not show initial connections and accordingly set the
-      		//static variable.
-    		boolean showNoConnectionsAtStart = Boolean.valueOf(util.getSystemProperty("ij.showNoConnectionsAtStart")).booleanValue();
-
-    		if (!(showNoConnectionsAtStart)) {
-         		try {
-           			ijResult result = ijParser.showConnectionsMethod(true);
- 					displayResult(out,result,connEnv[currCE].getConnection());
-         		} catch (SQLException ex) {
-           			handleSQLException(out,ex);
-         		}
-      		}
+			supportIJProperties(connEnv[currCE]);
     	}
 		this.out = out;
 		runScriptGuts();
@@ -272,14 +256,36 @@ public class utilMain implements java.security.PrivilegedAction {
 	public int goScript(Connection conn,
 			LocalizedInput in)
 	{
-		JDBCDisplayUtil.showSelectCount = false;
-		connEnv[0].addSession(conn, (String) null);
+	    connEnv[0].addSession(conn, (String) null);
+        ijParser.setConnection(connEnv[0], (numConnections > 1));
+	    supportIJProperties(connEnv[0]);   
+	    		
 		fileInput = initialFileInput = !in.isStandardInput();
 		commandGrabber[0].ReInit(in);
 		return runScriptGuts();
 	}
 	
-	/**
+	private void supportIJProperties(ConnectionEnv env) {
+	  //check if the property is set to not show select count and set the static variable
+        //accordingly. 
+        boolean showNoCountForSelect = Boolean.valueOf(util.getSystemProperty("ij.showNoCountForSelect")).booleanValue();
+        JDBCDisplayUtil.showSelectCount = !showNoCountForSelect;
+
+        //check if the property is set to not show initial connections and accordingly set the
+        //static variable.
+        boolean showNoConnectionsAtStart = Boolean.valueOf(util.getSystemProperty("ij.showNoConnectionsAtStart")).booleanValue();
+
+        if (!(showNoConnectionsAtStart)) {
+            try {
+                ijResult result = ijParser.showConnectionsMethod(true);
+                displayResult(out,result,env.getConnection());
+            } catch (SQLException ex) {
+                handleSQLException(out,ex);
+            }
+        }        
+    }
+
+    /**
 	 * Run the guts of the script. Split out to allow
 	 * calling from the full ij and the minimal goScript.
      * @return The number of errors seen in the script.

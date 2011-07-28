@@ -26,6 +26,7 @@ import java.sql.Connection;
 import java.util.Locale;
 
 import org.apache.derby.iapi.tools.i18n.LocalizedResource;
+import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.Derby;
 
 import junit.framework.Test;
@@ -206,6 +207,8 @@ public abstract class ScriptTestCase extends CanonTestCase {
      * Set up the new locale for the test
      */
     protected void setUp() {
+        BaseTestCase.setSystemProperty("ij.showNoConnectionsAtStart", "true");
+        BaseTestCase.setSystemProperty("ij.showNoCountForSelect", "true");
         oldLocale = Locale.getDefault();
 
         AccessController.doPrivileged(new java.security.PrivilegedAction() {
