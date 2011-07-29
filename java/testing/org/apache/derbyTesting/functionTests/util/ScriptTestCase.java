@@ -96,7 +96,8 @@ public abstract class ScriptTestCase extends CanonTestCase {
             String inputEnc, String outputEnc, String user)
     {
         super(script, outputEnc);
-
+        setSystemProperty("ij.showNoConnectionsAtStart", "true");
+        setSystemProperty("ij.showNoCountForSelect", "true");
         inputEncoding = (inputEnc == null) ? DEFAULT_ENCODING : inputEnc;
 
 		this.user = user;
@@ -207,8 +208,6 @@ public abstract class ScriptTestCase extends CanonTestCase {
      * Set up the new locale for the test
      */
     protected void setUp() {
-        BaseTestCase.setSystemProperty("ij.showNoConnectionsAtStart", "true");
-        BaseTestCase.setSystemProperty("ij.showNoCountForSelect", "true");
         oldLocale = Locale.getDefault();
 
         AccessController.doPrivileged(new java.security.PrivilegedAction() {

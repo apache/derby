@@ -121,9 +121,8 @@ public class SystemPropertyTestSetup extends TestSetup {
                 // set, might need to be changed.
                 change = !old.equals(value);
                 
-                // If we are not processing the oldValues
-                // then store in the oldValues. Reference equality is ok here.
-    			if (change && (values != oldValues))
+                //Reference equality is ok here.
+    			if (values != oldValues)
     			   oldValues.setProperty(key, old);
     		}
     		else {
