@@ -108,6 +108,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
                 "testLoadDerbyClassIndirectly",
                 "testIndirectLoading",
                 "testTableFunctionInJar",
+                "test_5352",
             };
             
             for (int i = 0; i < orderedTests.length; i++)
@@ -1044,7 +1045,7 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
              "language java\n" +
              "parameter style DERBY_JDBC_RESULT_SET\n" +
              "reads sql data\n" +
-             "external name 'DummyVTI2.dummyVTI'\n"
+             "external name 'MissingClass.dummyVTI'\n"
              );
 
         // invoke the scalar function
@@ -1078,7 +1079,63 @@ public class DatabaseClassLoadingTest extends BaseJDBCTestCase {
         } catch (SQLException e) {
             assertSQLState("XJ001", e);
         }
+
+        // drop the useless function
+        s.executeUpdate( "drop function dummyVTI2\n" );
+
+        setDBClasspath(null);
         
+        s.close();
+    }
+    
+    /**
+     * Test that restricted table functions can be invoked from inside jar files stored in
+     * the database.
+     */
+    public void test_5352() throws SQLException, MalformedURLException
+    {
+        // skip this test if vm is pre Java 5. This is because the jar file was
+        // compiled by a modern compiler and the jar file won't load on
+        // old vms.
+        if ( JVMInfo.J2ME || (JVMInfo.JDK_ID < JVMInfo.J2SE_15 ) ) { return; }
+        
+        String jarName = "EMC.DUMMY_VTI2";
+
+        installJar("dummy_vti.jar", jarName );
+
+        setDBClasspath( jarName );
+
+        Statement s = createStatement();
+
+        // register the table function
+        s.executeUpdate
+            (
+             "create function dummyVTI2( allowsRestriction boolean )\n" +
+             "returns table( a int )\n" +
+             "language java\n" +
+             "parameter style DERBY_JDBC_RESULT_SET\n" +
+             "no sql\n" +
+             "external name 'DummyVTI2.dummyVTI2'\n"
+             );
+        
+        // invoke the table function
+        JDBC.assertFullResultSet
+            (
+                s.executeQuery
+                (
+                 "select * from table( dummyVTI2( true ) ) s where a = 1"
+                 ),
+                new String[][]
+                {
+                    { "1" }
+                }
+             );
+
+        // verify that the RestrictedVTI machinery is really invoked
+        assertStatementError( "XYZZY", s, "select * from table( dummyVTI2( false ) ) s where a = 1" );
+        
+        s.executeUpdate( "drop function dummyVTI2\n" );
+
         setDBClasspath(null);
         
         s.close();
