@@ -769,7 +769,25 @@ public final class NetworkServerControlImpl {
 				{Integer.toString(portNumber), att_srvclsnm, versionString});
 			break;
 		}
-		
+
+        // First, register any MBeans. We do this before we start accepting
+        // connections from the clients to ease testing of JMX (DERBY-3689).
+        // This way we know that once we can connect to the network server,
+        // the MBeans will be available.
+        ManagementService mgmtService = ((ManagementService)
+                Monitor.getSystemModule(Module.JMX));
+
+        final Object versionMBean = mgmtService.registerMBean(
+                           new Version(
+                                   getNetProductVersionHolder(),
+                                   SystemPermission.SERVER),
+                           VersionMBean.class,
+                           "type=Version,jar=derbynet.jar");
+        final Object networkServerMBean = mgmtService.registerMBean(
+                            new NetworkServerMBeanImpl(this),
+                            NetworkServerMBean.class,
+                            "type=NetworkServer");
+
 		// We accept clients on a separate thread so we don't run into a problem
 		// blocking on the accept when trying to process a shutdown
 		final ClientThread clientThread =	 
@@ -783,22 +801,7 @@ public final class NetworkServerControlImpl {
 								}
 							);
 		clientThread.start();
-        
-        // Now that we are up and running, register any MBeans
-        ManagementService mgmtService = ((ManagementService)
-                Monitor.getSystemModule(Module.JMX));
-        
-        final Object versionMBean = mgmtService.registerMBean(
-                           new Version(
-                                   getNetProductVersionHolder(),
-                                   SystemPermission.SERVER),
-                           VersionMBean.class,
-                           "type=Version,jar=derbynet.jar");
-        final Object networkServerMBean = mgmtService.registerMBean(
-                            new NetworkServerMBeanImpl(this),
-                            NetworkServerMBean.class,
-                            "type=NetworkServer");
-                			
+
 		try {
 			// wait until we are told to shutdown or someone sends an InterruptedException
 	        synchronized(shutdownSync) {
