@@ -14,7 +14,9 @@ ij> --
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
+
 -- this test shows some ij abilities against an active database
+
 create table t (i int);
 0 rows inserted/updated/deleted
 ij> insert into t values (3), (4);
@@ -163,24 +165,25 @@ ij> drop table t;
 0 rows inserted/updated/deleted
 ij> -- show multiconnect ability; db name is wombat, reuse it...
 -- assumes ij.protocol is appropriately set...
+
 connect 'wombat' as wombat;
 ij(WOMBAT)> show connections;
-CONNECTION0 - 	jdbc:derby:wombat
+CONNECTION0 - 	jdbc:derby:wombat1
 WOMBAT* - 	jdbc:derby:wombat
 * = current connection
 ij(WOMBAT)> set connection connection0;
 ij(CONNECTION0)> show connections;
-CONNECTION0* - 	jdbc:derby:wombat
+CONNECTION0* - 	jdbc:derby:wombat1
 WOMBAT - 	jdbc:derby:wombat
 * = current connection
 ij(CONNECTION0)> set connection wombat;
 ij(WOMBAT)> disconnect;
 ij> show connections;
-CONNECTION0 - 	jdbc:derby:wombat
+CONNECTION0 - 	jdbc:derby:wombat1
 No current connection
 ij> set connection connection0;
 ij> show connections;
-CONNECTION0* - 	jdbc:derby:wombat
+CONNECTION0* - 	jdbc:derby:wombat1
 * = current connection
 ij> -- DERBY-3408: Unknown command error should suggest referring to server docs:
 show schema;

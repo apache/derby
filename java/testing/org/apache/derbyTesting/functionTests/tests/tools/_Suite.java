@@ -51,6 +51,7 @@ public class _Suite extends BaseTestCase {
         suite.addTest(ImportExportLobTest.suite());
         suite.addTest(ImportExportProcedureTest.suite());
         suite.addTest(ImportExportIJTest.suite());
+        suite.addTest(ij2Test.suite());
         suite.addTest(ToolScripts.suite());
         suite.addTest(SysinfoCPCheckTest.suite());
         suite.addTest(SysinfoLocaleTest.suite());
@@ -58,6 +59,7 @@ public class _Suite extends BaseTestCase {
         suite.addTest(IjConnNameTest.suite());
         suite.addTest(RollBackWrappingWhenFailOnImportTest.suite());
         suite.addTest(ConnectWrongSubprotocolTest.suite());
+        
         suite.addTest(ij3Test.suite());
         suite.addTest(ij5Test.suite());
         

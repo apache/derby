@@ -52,6 +52,7 @@ public final class ImportExportIJTest extends ScriptTestCase {
 	 */
 	public static Test suite() {
 		TestSuite suite = new TestSuite("importExportIJ");
+		
         // only run with embedded
         // network server makes slightly different output
         // ('statement executed' instead of '# rows inserted/deteled', etc.)
@@ -60,9 +61,18 @@ public final class ImportExportIJTest extends ScriptTestCase {
         // server side, and import would be looking on the client.
         // Also, running client & embedded would require some cleanup magic to
         // remove the exported files (see e.g. ImportExportTest).
-        suite.addTest(new CleanDatabaseTestSetup(
-                        new ImportExportIJTest("importExportIJ")));
-        Test tst = new SupportFilesSetup(suite, new String[] {
+		Test test = new ImportExportIJTest("importExportIJ");
+		
+        // This test should run in English locale since it compares error
+        // messages against a canon based on the English message text. Also,
+        // run the test in a fresh database, since the language of the message
+        // text is determined when the database is created.        
+        test = new LocaleTestSetup(test, Locale.ENGLISH);	
+        test = TestConfiguration.singleUseDatabaseDecorator(test);
+		
+		suite.addTest(new CleanDatabaseTestSetup(test));
+
+        return new SupportFilesSetup(suite, new String[] {
             "functionTests/testData/ImportExport/TwoLineBadEOF.dat",
             "functionTests/testData/ImportExport/NoEOR.dat",
             "functionTests/testData/ImportExport/Access1.txt",
@@ -77,12 +87,5 @@ public final class ImportExportIJTest extends ScriptTestCase {
             "functionTests/testData/ImportExport/derby-2193-linenumber.txt"
             }
         );
-
-        // This test should run in English locale since it compares error
-        // messages against a canon based on the English message text. Also,
-        // run the test in a fresh database, since the language of the message
-        // text is determined when the database is created.
-        tst = TestConfiguration.singleUseDatabaseDecorator(tst);
-        return new LocaleTestSetup(tst, Locale.ENGLISH);
 	}
 }
