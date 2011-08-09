@@ -51,22 +51,22 @@ public class NetServlet extends HttpServlet {
 	private final static int MAX_CONNECT_TRYS = 20;
 	private final static String SERVLET_PROP_MESSAGES =  "org.apache.derby.loc.drda.servlet";
 	private final static String SERVLET_ADDRESS = "derbynet";
+	private final static String[] knownLang =
+    { "cs","en","es","de_DE","fr","hu","it", "ja_JP","ko_KR","pl","pt_BR","ru","zh_CN","zh_TW" };
 
-	private String formHeader = null;
+    // set at initialization
 	private String host = "localhost";
-	private int portNumber=1527;
-	private String tracingDirectory;
-	private boolean logStatus= false;	/* Logging off */
-	private boolean traceStatus = false;	/* Tracing off */
-	private String[] knownLang = {"cs","en","es","de_DE","fr","hu","it",
-			"ja_JP","ko_KR","pl","pt_BR","ru","zh_CN","zh_TW"};
-	private String locale;
+	private int portNumber = 1527;
+
+    // can be overridden by trips through doGet()
+	private volatile String tracingDirectory;
+	private volatile boolean logStatus= false;	/* Logging off */
+	private volatile boolean traceStatus = false;	/* Tracing off */
 
 	private final static int NOT_GIVEN = -2;
 	private final static int INVALID = -3;
 
 	private NetworkServerControl server;
-	private PrintWriter out;
 
 	// for doPri block
 	private Runnable service;
@@ -123,7 +123,7 @@ public class NetServlet extends HttpServlet {
 			if (start)
 			{
                 LocalizedResource langUtil = new LocalizedResource(null,null,SERVLET_PROP_MESSAGES);
-				runServer(langUtil, null, null);
+				runServer(langUtil, null, null, null);
 				return;
 			}
 		}
@@ -150,9 +150,12 @@ public class NetServlet extends HttpServlet {
 		String setParamMessage;
 		String setParamMessage2;
 		String netParamMessage;
+        String formHeader = null;
+
 		LocalizedResource langUtil;
+        String locale[] = new String[ 1 ];
 		
-		langUtil = getCurrentAppUI(request);
+		langUtil = getCurrentAppUI(request, locale);
 		response.setContentType("text/html; charset=UTF-8");
 		
 		//prevent caching of the servlet since contents can change - beetle 4649
@@ -161,8 +164,8 @@ public class NetServlet extends HttpServlet {
 		formHeader = "<form enctype='multipart/form-data; charset=UTF-8' action='" +
 			request.getRequestURI() +" '>";
 
-		out = new PrintWriter(new
- 			OutputStreamWriter(response.getOutputStream(), "UTF8"),true);
+        PrintWriter out = new PrintWriter
+            ( new OutputStreamWriter(response.getOutputStream(), "UTF8"),true );
 		
 		//inialize messages
 		logOnMessage = escapeSingleQuotes(langUtil.getTextMessage("SRV_LogOn"));
@@ -180,17 +183,17 @@ public class NetServlet extends HttpServlet {
 		setParamMessage2 = escapeSingleQuotes(langUtil.getTextMessage("SRV_SetParam2"));
 		netParamMessage = escapeSingleQuotes(langUtil.getTextMessage("SRV_NetParam"));
 
-		printBanner(langUtil);
+		printBanner(langUtil, out);
 		// set up a server we can use
 		if (server == null) {
 			try {
 				server = new NetworkServerControl();
 			}catch (Exception e) {
-				printErrorForm(langUtil, request, e, returnMessage);
+				printErrorForm(langUtil, request, e, returnMessage, out);
 				return;
 			}
 		}
-		server.setClientLocale(locale);
+		server.setClientLocale( locale[ 0 ] );
 		String form = getForm(request);
 		String doAction = getDoAction(request);
 		// if doAction is set, use it to determine form
@@ -213,13 +216,13 @@ public class NetServlet extends HttpServlet {
 		else if (form.equals(startMessage))
 		{
 			if (!serverStatus)  {
-				runServer(langUtil, request, returnMessage);
+				runServer(langUtil, request, returnMessage, out);
 			}
 		}
 		else if (form.equals(stopMessage))
 		{
 			if (serverStatus)   {
-				shutdownServer(langUtil, request, returnMessage);
+				shutdownServer(langUtil, request, returnMessage, out);
 			}
 			setDefaults();
 					
@@ -248,25 +251,25 @@ public class NetServlet extends HttpServlet {
 			String traceButton = getTrace(request);
 			if (logButton !=  null && logButton.equals(logOnMessage))
 			{
-				if (logging(langUtil, true, request, returnMessage))
+				if (logging(langUtil, true, request, returnMessage, out))
 					logStatus = true;
 			}
 			if (logButton !=  null && logButton.equals(logOffMessage))
 			{
-				if (logging(langUtil, false, request, returnMessage))
+				if (logging(langUtil, false, request, returnMessage, out))
 					logStatus = false;
 			}
 			if (traceButton !=  null && traceButton.equals(traceOnMessage))
 			{
-				if (traceAll(langUtil, true, request, returnMessage))
+				if (traceAll(langUtil, true, request, returnMessage, out))
 					traceStatus = true;
 			}
 			if (traceButton !=  null && traceButton.equals(traceOffMessage))
 			{
-				if (traceAll(langUtil, false, request, returnMessage))
+				if (traceAll(langUtil, false, request, returnMessage, out))
 					traceStatus = false;
 			}
-			displayCurrentStatus(request, langUtil, returnMessage);
+			displayCurrentStatus(request, langUtil, returnMessage, out);
 			out.println( "<h4>"+langUtil.getTextMessage("SRV_StopButton")+"</h4>" );
 			out.println( "<INPUT type=submit name=form value='"+ stopMessage + "'>" );
 
@@ -300,7 +303,7 @@ public class NetServlet extends HttpServlet {
 		else if (form.equals(stopMessage))
 		{
 
-			printAsContentHeader(langUtil.getTextMessage("SRV_NotStarted"));
+			printAsContentHeader(langUtil.getTextMessage("SRV_NotStarted"), out);
 			String logButton = getLogging(request);
 			String traceButton =  getTrace(request);
 			if (logButton !=  null && logButton.equals(logOnMessage))
@@ -348,14 +351,14 @@ public class NetServlet extends HttpServlet {
 						printErrorForm(langUtil, request,
 							langUtil.getTextMessage("SRV_InvalidVal",
 							sessionid, langUtil.getTextMessage("SRV_SessionID")),
-							returnMessage);
+                                       returnMessage, out);
 						return;
 					}
 					Properties p = null;
 					try {
 						p = server.getCurrentProperties();
 					} catch (Exception e) {
-						printErrorForm(langUtil, request, e, returnMessage);
+						printErrorForm(langUtil, request, e, returnMessage, out);
 						return;
 					}
 					// if it's on, turn it off, if its off, turn it on
@@ -364,7 +367,7 @@ public class NetServlet extends HttpServlet {
 						val = false;
 					else
 						val = true;
-					if (traceSession(langUtil, val, session, request, returnMessage))
+					if (traceSession(langUtil, val, session, request, returnMessage, out))
 					{
 						if (val)
 							out.println( "<h4>"+langUtil.getTextMessage("SRV_StatusTraceNoOn", sessionid)+"</h4>");
@@ -376,7 +379,7 @@ public class NetServlet extends HttpServlet {
 						
 				}
 			}
-			printAsContentHeader(langUtil.getTextMessage("SRV_TraceSessButton"));
+			printAsContentHeader(langUtil.getTextMessage("SRV_TraceSessButton"), out);
 			out.println( "<h4>" + getHtmlLabelledMessageInstance(langUtil,
 				"SRV_SessionID", "sessionId") + "</h4>");
 			out.println( "<INPUT type=text name=sessionid size=10 maxlength=10 " +
@@ -389,14 +392,14 @@ public class NetServlet extends HttpServlet {
 		{
 			boolean set = false;
 			String traceDirectory = null;
-			printAsContentHeader(traceDirMessage);
+			printAsContentHeader(traceDirMessage, out);
 			if (doAction != null)
 			{
 				if (doAction.equals(traceDirMessage))
 				{
 					traceDirectory = getParam(request, "tracedirectory");
 					if (traceDirectory(langUtil, traceDirectory, request,
-							returnMessage) )
+                                       returnMessage, out) )
 						set = true;
 					else
 						return;
@@ -432,16 +435,16 @@ public class NetServlet extends HttpServlet {
 				val = p.getProperty(Property.DRDA_PROP_TIMESLICE);
 				timeSlice= (new Integer(val)).intValue();
 			} catch (Exception e) {
-				printErrorForm(langUtil, request, e, returnMessage);
+				printErrorForm(langUtil, request, e, returnMessage, out);
 				return;
 			}
 			if (doAction != null && doAction.equals(netParamMessage))
 			{
 				int newMaxThreads = getIntParameter(request, "newmaxthreads", 
-					"SRV_NewMaxThreads", langUtil, returnMessage);
+					"SRV_NewMaxThreads", langUtil, returnMessage, out);
 				int newTimeSlice = (newMaxThreads == INVALID) ? NOT_GIVEN :
 					getIntParameter(request, "newtimeslice", "SRV_NewTimeSlice", langUtil, 
-						returnMessage);
+						returnMessage, out);
 				if ((newMaxThreads == INVALID) || (newTimeSlice == INVALID))
 					return;
 				else if (!(newMaxThreads == NOT_GIVEN && newTimeSlice == NOT_GIVEN))
@@ -451,13 +454,13 @@ public class NetServlet extends HttpServlet {
 					if (newTimeSlice != NOT_GIVEN)
 						timeSlice = newTimeSlice;
 					if (!setNetParam(langUtil, maxThreads, timeSlice, request,
-							returnMessage))
+							returnMessage, out))
 						return;
 				}
 			}
 			
 			out.println(formHeader);
-			printAsContentHeader(netParamMessage);
+			printAsContentHeader(netParamMessage, out);
 			out.println( "<h4>"+langUtil.getTextMessage("SRV_MaxThreads", new Integer(maxThreads).toString()) +"</h4>");
 			out.println( "<h4>"+langUtil.getTextMessage("SRV_TimeSlice", new Integer(timeSlice).toString()) +"</h4>");
 			out.println( "<h4> </h4>");
@@ -533,11 +536,12 @@ public class NetServlet extends HttpServlet {
 	 * @param localUtil LocalizedResource to use to translate messages
 	 * @param request HttpServetRequest for error forms
 	 * @param returnMessage	localized continue message for continue button on error form	
+	 * @param out Form PrintWriter
 	 * @exception ServletException throws an exception if error in starting the 
 	 * 		Network Server during initialization
 	 */
-	private void runServer(LocalizedResource localUtil, HttpServletRequest request,
-		String returnMessage)
+	private void runServer
+        ( LocalizedResource localUtil, HttpServletRequest request, String returnMessage, PrintWriter out )
 		throws ServletException
 	{
 		service = new Runnable() {
@@ -599,7 +603,7 @@ public class NetServlet extends HttpServlet {
 				server.trace(true);
 		}catch (Exception e) {
 			if (out != null)
-				printErrorForm(localUtil, request, e, returnMessage);
+				printErrorForm(localUtil, request, e, returnMessage, out);
 			else
 				throw new ServletException(e.getMessage());
 		}
@@ -611,11 +615,18 @@ public class NetServlet extends HttpServlet {
 	 * @param request HttpServetRequest for error forms
 	 * @param e		Exception to be displayed
 	 * @param returnMessage	localized continue message for continue button on error form
+	 * @param out Form PrintWriter
 	 */
-	private void printErrorForm(LocalizedResource localUtil, HttpServletRequest request,
-		Exception e, String returnMessage)
+	private void printErrorForm
+        (
+         LocalizedResource localUtil,
+         HttpServletRequest request,
+         Exception e,
+         String returnMessage,
+         PrintWriter out
+         )
 	{
-		printAsContentHeader(localUtil.getTextMessage("SRV_NetworkServerError"));
+		printAsContentHeader(localUtil.getTextMessage("SRV_NetworkServerError"), out);
 		out.println( "<h4>"+localUtil.getTextMessage("SRV_Message", e.getMessage()) + "</h4>" );
 		out.println( "<INPUT type=submit name=form value='"+returnMessage+"'>" );
 		out.println( "</html>" );
@@ -627,12 +638,19 @@ public class NetServlet extends HttpServlet {
 	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param request HttpServetRequest for error forms
 	 * @param msg	String to be displayed
+	 * @param out Form PrintWriter
 	 * @param returnMessage	localized continue message for continue button on error form
 	 */
-	private void printErrorForm(LocalizedResource localUtil, HttpServletRequest request,
-		String msg, String returnMessage)
+	private void printErrorForm
+        (
+         LocalizedResource localUtil,
+         HttpServletRequest request,
+         String msg,
+         String returnMessage,
+         PrintWriter out
+         )
 	{
-		printAsContentHeader(localUtil.getTextMessage("SRV_NetworkServerError"));
+		printAsContentHeader(localUtil.getTextMessage("SRV_NetworkServerError"), out);
 		out.println( "<h4>"+localUtil.getTextMessage("SRV_Message", msg) + "</h4>" );
 		out.println( "<INPUT type=submit name=form value='"+returnMessage+"'>" );
 		out.println( "</html>" ); 
@@ -644,13 +662,19 @@ public class NetServlet extends HttpServlet {
 	 * @param request	HttpServetRequest for  forms
 	 * @param localUtil		LocalizedResource to use for localizing messages
 	 * @param returnMessage	localized continue message for continue button on error form	
+	 * @param out Form PrintWriter
 	 */
-	private void displayCurrentStatus(HttpServletRequest request,
-		LocalizedResource localUtil, String returnMessage)
+	private void displayCurrentStatus
+        (
+         HttpServletRequest request,
+         LocalizedResource localUtil,
+         String returnMessage,
+         PrintWriter out
+         )
 	{
 		try {
 
-			printAsContentHeader(localUtil.getTextMessage("SRV_Started"));
+			printAsContentHeader(localUtil.getTextMessage("SRV_Started"), out);
 			Properties p = server.getCurrentProperties();
 			String val = p.getProperty(Property.DRDA_PROP_LOGCONNECTIONS);
 			if (val.equals("true"))
@@ -675,7 +699,7 @@ public class NetServlet extends HttpServlet {
 			
 		}
 		catch (Exception e) {
-			printErrorForm(localUtil, request, e, returnMessage);
+			printErrorForm(localUtil, request, e, returnMessage, out);
 		}
 	}
 	/**
@@ -698,10 +722,16 @@ public class NetServlet extends HttpServlet {
 	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param request HttpServetRequest for  forms
 	 * @param returnMessage	localized continue message for continue button on error form	
+	 * @param out Form PrintWriter
 	 * @return true if succeeded; false; otherwise
 	 */
-	private boolean shutdownServer(LocalizedResource localUtil,
-		HttpServletRequest request, String returnMessage)
+	private boolean shutdownServer
+        (
+         LocalizedResource localUtil,
+         HttpServletRequest request,
+         String returnMessage,
+         PrintWriter out
+         )
 	{
 		boolean retval = false;
 		try {
@@ -709,7 +739,7 @@ public class NetServlet extends HttpServlet {
 			retval = true;
 		} catch (Exception e) 
 		{
-			printErrorForm(localUtil, request, e, returnMessage);
+			printErrorForm(localUtil, request, e, returnMessage, out);
 		}
 		return retval;
 	}
@@ -719,10 +749,17 @@ public class NetServlet extends HttpServlet {
 	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param request HttpServetRequest for  forms
 	 * @param returnMessage	localized continue message for continue button on error form	
+	 * @param out Form PrintWriter
 	 * @return true if succeeded; false; otherwise
 	 */
-	private boolean logging(LocalizedResource localUtil, boolean val,
-		HttpServletRequest request, String returnMessage)
+	private boolean logging
+        (
+         LocalizedResource localUtil,
+         boolean val,
+         HttpServletRequest request,
+         String returnMessage,
+         PrintWriter out
+         )
 	{
 		boolean retval = false;
 		try {
@@ -730,7 +767,7 @@ public class NetServlet extends HttpServlet {
 			retval = true;
 		} catch (Exception e) 
 		{
-			printErrorForm(localUtil, request, e, returnMessage);
+			printErrorForm(localUtil, request, e, returnMessage, out);
 		}
 		return retval;
 	}
@@ -741,10 +778,17 @@ public class NetServlet extends HttpServlet {
 	 * @param val	if true, turn tracing on, if false turn it off
 	 * @param request HttpServetRequest for  forms
 	 * @param returnMessage	localized continue message for continue button on error form	
+	 * @param out Form PrintWriter
 	 * @return true if succeeded; false; otherwise
 	 */
-	private boolean traceAll(LocalizedResource localUtil, boolean val,
-		HttpServletRequest request, String returnMessage)
+	private boolean traceAll
+        (
+         LocalizedResource localUtil,
+         boolean val,
+         HttpServletRequest request,
+         String returnMessage,
+         PrintWriter out
+         )
 	{
 		boolean retval = false;
 		try {
@@ -752,7 +796,7 @@ public class NetServlet extends HttpServlet {
 			retval = true;
 		} catch (Exception e) 
 		{
-			printErrorForm(localUtil, request, e, returnMessage);
+			printErrorForm(localUtil, request, e, returnMessage, out);
 		}
 		return retval;
 	}
@@ -764,10 +808,18 @@ public class NetServlet extends HttpServlet {
 	 * @param session	session to trace
 	 * @param request HttpServetRequest for  forms
 	 * @param returnMessage	localized continue message for continue button on error form	
+	 * @param out Form PrintWriter
 	 * @return true if succeeded; false; otherwise
 	 */
-	private boolean traceSession(LocalizedResource localUtil, boolean val, int session,
-		HttpServletRequest request, String returnMessage)
+	private boolean traceSession
+        (
+         LocalizedResource localUtil,
+         boolean val,
+         int session,
+         HttpServletRequest request,
+         String returnMessage,
+         PrintWriter out
+         )
 	{
 		boolean retval = false;
 		try {
@@ -775,7 +827,7 @@ public class NetServlet extends HttpServlet {
 			retval = true;
 		} catch (Exception e) 
 		{
-			printErrorForm(localUtil, request, e, returnMessage);
+			printErrorForm(localUtil, request, e, returnMessage, out);
 		}
 		return retval;
 	}
@@ -786,19 +838,25 @@ public class NetServlet extends HttpServlet {
 	 * @param localUtil	LocalizedResource to use to translate messages
 	 * @param traceDirectory	directory for trace files
 	 * @param request 			HttpServetRequest for  forms
-	 * @param returnMessage		localized continue message for continue 
-	 *							button on error form	
+	 * @param returnMessage		localized continue message for continue button on error form	
+	 * @param out Form PrintWriter
 	 * @return true if succeeded; false; otherwise
 	 */
-	private boolean traceDirectory(LocalizedResource localUtil, String traceDirectory,
-		HttpServletRequest request, String returnMessage)
+	private boolean traceDirectory
+        (
+         LocalizedResource localUtil,
+         String traceDirectory,
+         HttpServletRequest request,
+         String returnMessage,
+         PrintWriter out
+         )
 	{
 		boolean retval = false;
 
 		if ((traceDirectory == null) || traceDirectory.equals("")) {
 			printErrorForm(localUtil, request,
 				localUtil.getTextMessage("SRV_MissingParam",
-				localUtil.getTextMessage("SRV_TraceDir")), returnMessage);
+                                         localUtil.getTextMessage("SRV_TraceDir")), returnMessage, out);
 
 			return retval;
 		}
@@ -809,7 +867,7 @@ public class NetServlet extends HttpServlet {
 			retval = true;
 		} catch (Exception e) 
 		{
-			printErrorForm(localUtil, request, e, returnMessage);
+			printErrorForm(localUtil, request, e, returnMessage, out);
 		}
 		return retval;
 	}
@@ -821,12 +879,19 @@ public class NetServlet extends HttpServlet {
 	 * @param max				maximum number of threads
 	 * @param slice				time slice for each connection
 	 * @param request 			HttpServetRequest for  forms
-	 * @param returnMessage		localized continue message for continue 
-	 *							button on error form	
+	 * @param returnMessage		localized continue message for continue button on error form	
+	 * @param out Form PrintWriter
 	 * @return true if succeeded; false; otherwise
 	 */
-	private boolean setNetParam(LocalizedResource localUtil, int max, int slice,
-		HttpServletRequest request, String returnMessage)
+	private boolean setNetParam
+        (
+         LocalizedResource localUtil,
+         int max,
+         int slice,
+         HttpServletRequest request,
+         String returnMessage,
+         PrintWriter out
+         )
 	{
 		boolean retval = false;
 
@@ -836,7 +901,7 @@ public class NetServlet extends HttpServlet {
 			retval = true;
 		} catch (Exception e) 
 		{
-			printErrorForm(localUtil, request, e, returnMessage);
+			printErrorForm(localUtil, request, e, returnMessage, out);
 		}
 		return retval;
 	}
@@ -857,11 +922,18 @@ public class NetServlet extends HttpServlet {
 	 * @param name				parameter name
 	 * @param fieldKey			Key for the name of the field we're reading.
 	 * @param localUtil				LocalizedResource to use in localizing messages
-	 * @param returnMessage		localized continue message for continue 
-	 *							button on error form	
+	 * @param returnMessage		localized continue message for continue button on error form	
+	 * @param out Form PrintWriter
 	 */
-	private int getIntParameter(HttpServletRequest request,
-			String name, String fieldKey, LocalizedResource localUtil, String returnMessage)
+	private int getIntParameter
+        (
+         HttpServletRequest request,
+         String name,
+         String fieldKey,
+         LocalizedResource localUtil,
+         String returnMessage,
+         PrintWriter out
+         )
 	{
 		String val = request.getParameter(name);
 		int retval;
@@ -871,13 +943,13 @@ public class NetServlet extends HttpServlet {
 		 	retval = (new Integer(val)).intValue();
 		} catch (Exception e) {
 			printErrorForm(localUtil, request,localUtil.getTextMessage("SRV_InvalidVal",
-				val, localUtil.getTextMessage(fieldKey)), returnMessage);
+                val, localUtil.getTextMessage(fieldKey)), returnMessage, out);
 			return INVALID;
 		}
 		if (retval < 0) {
 		// negative integers not allowed for the parameters we're getting.
 			printErrorForm(localUtil, request, localUtil.getTextMessage("SRV_InvalidVal",
-				val, localUtil.getTextMessage(fieldKey)), returnMessage);
+                 val, localUtil.getTextMessage(fieldKey)), returnMessage, out);
 			return INVALID;
 		}
 		return retval;
@@ -885,7 +957,7 @@ public class NetServlet extends HttpServlet {
 	/**
 	 * Print Derby Network Server banner
 	 */
-	private void printBanner(LocalizedResource localUtil)
+	private void printBanner(LocalizedResource localUtil, PrintWriter out)
 	{
 		out.println("<a href=\"#navskip\">[ " +
 		localUtil.getTextMessage("SRV_SkipToContent") + " ]</a>");
@@ -905,15 +977,16 @@ public class NetServlet extends HttpServlet {
 	 *		English otherwise if browsers preferences can't be found
 	 *
 	 * @param request 			HttpServetRequest for forms
+	 * @param locale                Name of locale (return arg)
 	 * @return the appUI which fits the browsers preferences
 	 */
-	private LocalizedResource getCurrentAppUI(HttpServletRequest request)
+	private LocalizedResource getCurrentAppUI(HttpServletRequest request, String[] locale )
 	{
 		LocalizedResource localUtil;
 		String acceptLanguage = request.getHeader("Accept-Language");
 		localUtil = new LocalizedResource(null,null,SERVLET_PROP_MESSAGES);
 		// if no language specified use one set by derby.locale, derby.codeset
-		locale = null;
+		locale[ 0 ] = null;
 		if (acceptLanguage == null)
 		{
 			return localUtil;
@@ -931,7 +1004,7 @@ public class NetServlet extends HttpServlet {
 			{
 				localUtil.init(null, lang, SERVLET_PROP_MESSAGES);
 				// locale will be passed to server, server routines will get set appropriately
-				locale = lang;
+				locale[ 0 ] = lang;
 				return localUtil;
 			}
 		}
@@ -1016,8 +1089,9 @@ public class NetServlet extends HttpServlet {
 	/**
 	 * Print the received string as a header.
 	 * @param str The string to be printed as a header.
+	 * @param out Form PrintWriter
 	 */
-	private void printAsContentHeader(String str) {
+	private void printAsContentHeader(String str, PrintWriter out) {
 
 		out.println("<a name=\"navskip\"></a><h2>" + str + "</h2>");
 		return;
