@@ -16,7 +16,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  
 See the License for the specific language governing permissions and  
 limitations under the License.
--->
+--> 
 
 
 <!-- 
@@ -4102,11 +4102,6 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>The statement has been cancelled or timed out.</text>
             </msg>
 
-            <msg>
-                <name>XCL53</name>
-                <text>Stream is closed</text>
-            </msg>
-
         </family>
 
 
@@ -4703,11 +4698,6 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <text>Length of BLOB/CLOB, {0}, is too large.  The length cannot exceed {1}.</text>
                 <arg>number</arg>
                 <arg>number</arg>
-            </msg>
-
-            <msg>
-                <name>XJ094.S</name>
-                <text>This object is already closed.</text>
             </msg>
 
             <msg>

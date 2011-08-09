@@ -25,6 +25,7 @@ package org.apache.derby.impl.jdbc;
 import java.io.IOException;
 import java.io.OutputStream;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.error.ExceptionUtil;
@@ -63,8 +64,7 @@ public class LOBOutputStream extends OutputStream {
     public void write(int b) throws IOException {
         if (closed)
             throw new IOException (
-                    MessageService.getTextMessage(
-                        SQLState.LANG_STREAM_CLOSED));
+                    MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         try {
             pos = control.write(b, pos);
         } catch (StandardException se) {
@@ -103,8 +103,7 @@ public class LOBOutputStream extends OutputStream {
     public void write(byte[] b, int off, int len) throws IOException {
         if (closed)
             throw new IOException (
-                    MessageService.getTextMessage(
-                        SQLState.LANG_STREAM_CLOSED));
+                    MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         try {
             pos = control.write(b, off, len, pos);
         } catch (StandardException se) {

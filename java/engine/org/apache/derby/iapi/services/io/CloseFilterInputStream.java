@@ -36,7 +36,7 @@ public class CloseFilterInputStream
 
     /** Message, modeled after CloseFilterInputStream in the client. */
     private static final String MESSAGE =
-            MessageService.getTextMessage(MessageId.CONN_ALREADY_CLOSED); 
+            MessageService.getTextMessage(MessageId.OBJECT_CLOSED); 
     
     /** Tells if this stream has been closed. */
     private boolean closed;

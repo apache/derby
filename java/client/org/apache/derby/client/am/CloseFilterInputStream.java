@@ -31,7 +31,7 @@ class CloseFilterInputStream extends FilterInputStream {
 	
 	private static final String ALREADY_CLOSED_ERR_MESSAGE = 
             SqlException.getMessageUtil().getTextMessage(
-                MessageId.CONN_ALREADY_CLOSED);
+                MessageId.OBJECT_CLOSED);
 	
 	private boolean closed;
 	

@@ -23,12 +23,9 @@
 package org.apache.derby.impl.jdbc;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.Writer;
 import java.sql.SQLException;
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.services.i18n.MessageService;
 
 /**
@@ -67,7 +64,7 @@ final class ClobUtf8Writer extends Writer {
     public void flush() throws IOException {
         if (closed)
             throw new IOException (
-                MessageService.getTextMessage (SQLState.LANG_STREAM_CLOSED));
+                MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         // A no-op.
         // Flushing is currently the responsibility of the underlying stream(s).
     }
@@ -95,7 +92,7 @@ final class ClobUtf8Writer extends Writer {
     public void write(char[] cbuf, int off, int len) throws IOException {
         if (closed)
             throw new IOException (
-                MessageService.getTextMessage (SQLState.LANG_STREAM_CLOSED));
+                MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         try {
             long ret = control.insertString (String.copyValueOf (
                                                     cbuf, off, len), 

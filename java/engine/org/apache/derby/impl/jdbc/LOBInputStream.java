@@ -26,6 +26,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -119,7 +120,7 @@ public class LOBInputStream
     public int read(byte[] b, int off, int len) throws IOException {
         if (closed)
             throw new IOException (
-                   MessageService.getTextMessage(SQLState.LANG_STREAM_CLOSED));
+                   MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         try {
             int ret = control.read(b, off, len, pos);
             if (ret != -1) {
@@ -171,7 +172,7 @@ public class LOBInputStream
     public int read() throws IOException {
         if (closed)
             throw new IOException (
-                   MessageService.getTextMessage (SQLState.LANG_STREAM_CLOSED));
+                   MessageService.getTextMessage(MessageId.OBJECT_CLOSED));
         try {
             int ret = control.read(pos);
             if (ret != -1)

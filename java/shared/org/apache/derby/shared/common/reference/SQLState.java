@@ -1431,9 +1431,6 @@ public interface SQLState {
 
     String LANG_STATEMENT_CANCELLED_OR_TIMED_OUT                       = "XCL52.S";
 
-    //lob stream error
-    String LANG_STREAM_CLOSED                                     = "XCL53";
-
     /*
 	** Language errors that match DB2
 	*/
@@ -1549,7 +1546,6 @@ public interface SQLState {
     String CALENDAR_IS_NULL = "XJ090.S";
     String PARAM_NOT_OUT_OR_INOUT = "XJ091.S";
     String BLOB_TOO_LARGE_FOR_CLIENT  = "XJ093.S";
-    String OBJECT_ALREADY_CLOSED = "XJ094.S";
     String ERROR_PRIVILEGED_ACTION = "XJ095.S";
     String MISSING_RESOURCE_BUNDLE = "XJ096.S";
     String SAVEPOINT_NOT_CREATED_BY_CONNECTION = "XJ097.S";

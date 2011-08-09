@@ -136,7 +136,7 @@ public interface MessageId {
     String CONN_NETWORK_SERVER_CLASS_LOAD   = "J101"; // Cannot load the network server constructor
     String CONN_NETWORK_SERVER_START_EXCEPTION = "J102";
     String CONN_NETWORK_SERVER_SHUTDOWN_EXCEPTION = "J103";
-    String CONN_ALREADY_CLOSED                              = "J104";
+    String OBJECT_CLOSED                                    = "J104";
     String CONN_PRECISION_TOO_LARGE                         = "J105";   
     //  following only used in text we print out - see client.am.SqlException:
     String BATCH_POSITION_ID                                = "J107";
