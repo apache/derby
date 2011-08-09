@@ -14,7 +14,7 @@
 --   See the License for the specific language governing permissions and
 --   limitations under the License.
 --
--- assumes the connection connOne is set up already
+-- assumes the connection connection0 is set up already
 -- 1)at the startup time, it will list all the connections
 -- 2)select will now display number of rows selected
 

@@ -61,7 +61,6 @@ public class _Suite extends BaseTestCase {
         suite.addTest(ConnectWrongSubprotocolTest.suite());
         
         suite.addTest(ij3Test.suite());
-        suite.addTest(ij5Test.suite());
         
         // SysinfoAPITest currently fails when run against jars, so is
         // disabled. Only the first jar file on the classpath properly
@@ -70,6 +69,12 @@ public class _Suite extends BaseTestCase {
         //
         //suite.addTest(SysinfoAPITest.suite());
 
+        // tests that do not run with JSR169
+        if (JDBC.vmSupportsJDBC3())  
+        {
+            suite.addTest(ij5Test.suite());            
+        }
+        
         // Tests that are compiled using 1.4 target need to
         // be added this way, otherwise creating the suite
         // will throw an invalid class version error

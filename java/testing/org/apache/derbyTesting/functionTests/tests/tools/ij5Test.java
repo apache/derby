@@ -24,6 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.tools;
 import java.util.Properties;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -38,6 +39,14 @@ public class ij5Test extends ScriptTestCase {
     
     public static Test suite() {        
         Properties props = new Properties();
+
+        // With JSR169 environments, we would need to set ij.dataSource and
+        // provide the database name, but this would make an extra connection. 
+        // And as we're trying to test ij.showNoConnectionsAtStart=false, 
+        // we cannot get the same output with non-JSR-169 platforms. So,
+        // return an empty suite (i.e. don't run with JSR 169).
+        if (JDBC.vmSupportsJSR169())
+            return new TestSuite("empty: cannot obtain expected output with JSR169");
         
         props.setProperty("ij.showNoConnectionsAtStart", "false");
         props.setProperty("ij.showNoCountForSelect", "false");
