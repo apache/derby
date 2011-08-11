@@ -105,27 +105,6 @@ insert into t values('hello');
 select cast(c as varchar(20)) from t;
 drop table t;
 
--- show multiconnect ability; db name is wombat, reuse it...
--- assumes ij.protocol is appropriately set...
-
-connect 'wombat' as wombat;
-
-show connections;
-
-set connection connection0;
-
-show connections;
-
-set connection wombat;
-
-disconnect;
-
-show connections;
-
-set connection connection0;
-
-show connections;
-
 -- DERBY-3408: Unknown command error should suggest referring to server docs:
 show schema;
 xxx;

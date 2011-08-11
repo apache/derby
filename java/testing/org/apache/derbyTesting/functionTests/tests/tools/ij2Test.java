@@ -25,6 +25,7 @@ import java.util.Locale;
 import java.util.Properties;
 
 import junit.framework.Test;
+import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
@@ -41,9 +42,6 @@ public class ij2Test extends ScriptTestCase {
     
     public static Test suite() {        
         Properties props = new Properties();
-        
-        props.setProperty("derby.infolog.append", "true");        
-        props.setProperty("ij.protocol", "jdbc:derby:");
 
         // When running on JSR-169 platforms, we need to use a data source
         // instead of a JDBC URL since DriverManager isn't available.
@@ -54,11 +52,28 @@ public class ij2Test extends ScriptTestCase {
             props.setProperty("ij.dataSource.createDatabase", "create");
         }
 
+        props.setProperty("derby.infolog.append", "true");  
+        props.setProperty("ij.protocol", "jdbc:derby:");
+        props.setProperty("ij.database", "wombat;create=true");
+
         Test test = new SystemPropertyTestSetup(new ij2Test("ij2"), props);
         test = new LocaleTestSetup(test, Locale.ENGLISH);   
         test = TestConfiguration.singleUseDatabaseDecorator(test, "wombat1");
         test = new CleanDatabaseTestSetup(test);
-        
-        return getIJConfig(test); 
+
+        TestSuite suite = new TestSuite("ij2Scripts");
+        suite.addTest(test);
+
+        if (JDBC.vmSupportsJDBC3()) {
+            props.setProperty("ij.protocol", "jdbc:derby:");
+            props.setProperty("ij.showNoConnectionsAtStart", "true");
+            
+            Test testb = new SystemPropertyTestSetup(new ij2Test("ij2b"), props);
+            testb = new LocaleTestSetup(testb, Locale.ENGLISH);   
+            testb = TestConfiguration.singleUseDatabaseDecorator(testb, "wombat1");
+            testb = new CleanDatabaseTestSetup(testb);
+            suite.addTest(testb);
+        }
+        return getIJConfig(suite); 
     }   
 }
