@@ -174,7 +174,7 @@ public class PrivilegedFileOpsForTests {
      * If source does not exist this will be a noop.
      * 
      * @param source  Source file or directory to copy
-     * @param target  Target file or directory to copy
+     * @param target  Target file or directory to copy to
      * @throws IOException
      * @throws SecurityException
      */    
