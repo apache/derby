@@ -22,11 +22,9 @@
 package org.apache.derbyBuild;
 
 import org.apache.derby.iapi.services.classfile.*;
-import org.apache.derby.iapi.util.ByteArray;
+import org.apache.derby.iapi.services.sanity.SanityManager;
 import java.util.*;
 import java.util.zip.*;
-import java.io.*;
-
 import java.io.*;
 
 /**
@@ -460,6 +458,13 @@ public class classlister {
 		    return;
 		}
 
+        if (!SanityManager.DEBUG &&
+            className.matches("^org\\.apache\\.derby\\..*\\.sanity\\..*"))
+        {
+            // Don't include sanity classes in insane builds.
+            return;
+        }
+
         if (ignoreWebLogic)
         {
             if (className.startsWith("weblogic."))
@@ -577,7 +582,7 @@ public class classlister {
 					continue;
 				}
 
-				if (!org.apache.derby.iapi.services.sanity.SanityManager.DEBUG) {
+				if (!SanityManager.DEBUG) {
 					if (x.indexOf("SanityManager") != -1) {
 
 						boolean printSanityWarning = true;
