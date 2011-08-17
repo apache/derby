@@ -1,5 +1,3 @@
-# excluding TestErrorStreamTarget.java since it's not relevant for clients
-# excluding largedata/LobLimits.java to run with the network server because currently lobs are materialized and this test tests for 2G lobs.
-# 			see DERBY-326 and DERBY-550 issues
-#
-largedata/LobLimits.java
+#Tests to exclude from client framework in old harnesss. 
+#After the conversion of LobLimits, there are none, 
+#but need to keep this file around because the harness looks for it.

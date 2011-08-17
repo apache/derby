@@ -4,4 +4,4 @@
 # 			see DERBY-326 and DERBY-550 issues
 jdbcapi/rsgetXXXcolumnNames.java
 jdbcapi/SetQueryTimeoutTest.java
-largedata/LobLimits.java
+
