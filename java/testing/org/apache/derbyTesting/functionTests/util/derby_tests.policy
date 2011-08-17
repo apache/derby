@@ -211,6 +211,7 @@ grant codeBase "${derbyTesting.codejar}derbytools.jar" {
   // ij needs permission to read the sql files in this jar
   permission java.io.FilePermission "${derbyTesting.testjarpath}", "read";
   
+
 };
 
 //
@@ -224,6 +225,9 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   
   // Access all files under ${user.dir}to write the test directory structure
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
+
+  // Tests need to be able to exec a java program.
+  permission java.io.FilePermission "${java.home}${/}-" "execute";	
 
   // When running with useprocess=false need to install and uninstall
   // the security manager and allow setIO to change the system err and out
@@ -297,7 +301,10 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // Access all files under ${user.dir}to write the test directory structure
   // Also covers extin, extout and extinout locations
   permission java.io.FilePermission "${user.dir}${/}-", "read,write,delete"; 
-    
+   
+  // Tests need to be able to exec a java program.
+  permission java.io.FilePermission "${java.home}${/}-" "execute";
+ 
   // These permissions are needed to load the JCE for encryption with Sun and IBM JDK131.
   // JDK14 has the JCE  preloaded
   permission java.security.SecurityPermission "insertProvider.SunJCE";

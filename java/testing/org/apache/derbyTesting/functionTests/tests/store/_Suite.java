@@ -24,7 +24,7 @@ package org.apache.derbyTesting.functionTests.tests.store;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 
-import junit.framework.Test; 
+import junit.framework.Test;  
 import junit.framework.TestSuite;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -51,7 +51,7 @@ public class _Suite extends BaseTestCase  {
     public static Test suite() {
 
         TestSuite suite = new TestSuite("store");
-        
+
         suite.addTest(BootAllTest.suite());
         suite.addTest(ClassLoaderBootTest.suite());
         suite.addTest(StreamingColumnTest.suite());
@@ -76,7 +76,8 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(MadhareTest.suite());
         suite.addTest(LongColumnTest.suite());
         suite.addTest(RowLockBasicTest.suite());
-        
+        suite.addTest(RecoveryTest.suite());
+
         /* Tests that only run in sane builds */
         if (SanityManager.DEBUG) {
             suite.addTest(HoldCursorExternalSortJDBC30Test.suite());
@@ -91,7 +92,7 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(EncryptionKeyDESTest.suite());
             suite.addTest(EncryptionAESTest.suite());
         }
-        
+
         return suite;
     }
 }

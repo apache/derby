@@ -506,9 +506,12 @@ public abstract class BaseTestCase
 	    Process pr = execJavaCmd(cmd);
 	    String output = readProcessOutput(pr);
 	    int exitValue = pr.exitValue();
+	    String expectedStrings = "";
+	    for (int i = 0; i < expectedString.length; i++) 
+	        expectedStrings += "\t[" +i + "]" + expectedString[i] +  "\n";
 	    Assert.assertEquals("expectedExitValue:" + expectedExitValue +
 	            " does not match exitValue:" + exitValue +"\n" +
-	            "expected output:" + expectedString + 
+	            "expected output strings:\n" + expectedStrings + 
 	            " actual output:" + output,
 	            expectedExitValue, exitValue);
 	    if (expectedString != null) {
@@ -801,5 +804,20 @@ public abstract class BaseTestCase
         AssertionFailedError ae = new AssertionFailedError(msg);
         ae.initCause(t);
         throw ae;
+    }
+    
+    /**
+     * assert a method from an executing test
+     * 
+     * @param testLaunchMethod
+     *            complete pathname of the method to be executed
+     * @throws Exception
+     */
+    public static void assertLaunchedJUnitTestMethod(String testLaunchMethod)
+            throws Exception 
+    {
+        String[] cmd = new String[] { "junit.textui.TestRunner", "-m",
+        testLaunchMethod };
+        assertExecJavaCmdAsExpected(new String[] { "OK (1 test)" }, cmd, 0);
     }
 } // End class BaseTestCase
