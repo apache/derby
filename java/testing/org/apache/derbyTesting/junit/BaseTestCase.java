@@ -732,38 +732,53 @@ public abstract class BaseTestCase
     * This will block until the process terminates.
     * 
     * @param pr a running process
-    * @return output of the process
+    * @return output of the process, both STDOUT and STDERR
     * @throws InterruptedException
     */
    public static String readProcessOutput(Process pr) throws InterruptedException {
 		InputStream is = pr.getInputStream();
+		InputStream es = pr.getErrorStream();
 		if (is == null) {
 			fail("Unexpectedly receiving no text from the process");
 		}
-
 		String output = "";
 		try {
-		    char[] ca = new char[1024];
-		    // Create an InputStreamReader with default encoding; we're hoping
-		    // this to be en. If not, we may not match the expected string.
-		    InputStreamReader inStream;
-		    inStream = new InputStreamReader(is);
+		      output += "<STDOUT> " + inputStreamToString(is) + "<END STDOUT>\n";
+		      output += "<STDERR>" + inputStreamToString(es) + "<END STDERR>\n";
 
-		    // keep reading from the stream until all done
-		    int charsRead;
-		    while ((charsRead = inStream.read(ca, 0, ca.length)) != -1)
-		    {
-		        output = output + new String(ca, 0, charsRead);
-		    }
 		} catch (Exception e) {
 		    fail("Exception accessing inputstream from process", e);
 		}
-
+		
 		// wait until the process exits
 		pr.waitFor();
 		
 		return output;
 	}
+   
+    /**
+     * Read contents of an input stream to a String
+     * 
+     * @param is
+     * @return String with input stream contents
+     * @throws IOException
+     */
+    private static String inputStreamToString(InputStream is) throws IOException {
+
+        String isout = "";
+        char[] ca = new char[1024];
+        // Create an InputStreamReader with default encoding; we're hoping
+        // this to be en.
+        InputStreamReader inStream;
+        inStream = new InputStreamReader(is);
+
+        // keep reading from the stream until all done
+        int charsRead;
+        while ((charsRead = inStream.read(ca, 0, ca.length)) != -1) {
+            isout = isout + new String(ca, 0, charsRead);
+        }
+        return isout;
+    }
    
     /**
      * Remove the directory and its contents.
