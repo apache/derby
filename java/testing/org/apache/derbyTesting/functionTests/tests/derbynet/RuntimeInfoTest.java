@@ -59,6 +59,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 
     private static Locale englishLocale = new Locale("en","US");
 	private static Locale germanLocale = new Locale("de","DE");
+	private static String stdout_err_tags = "<[^<>]*STD.*>";
 	
 	/**
 	 * Constructor
@@ -198,6 +199,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
 	
 	/**
      * Replace memory values in the output string
+     * Removes output tags for STDOUT and STDERR from readProcessOutput
      * Also trims the string to make it easier to compare.
      * 
      * @param s the string to remove lines from
@@ -207,6 +209,7 @@ public class RuntimeInfoTest extends BaseJDBCTestCase {
     	String searchString = ((HashMap)outputs.get(Locale.getDefault())).get("sedMemorySearch").toString();
     	String replaceString = ((HashMap)outputs.get(Locale.getDefault())).get("sedMemoryReplace").toString();
 		s = s.replaceAll(searchString, replaceString);
+		s = s.replaceAll(stdout_err_tags, "");
 		s = s.trim();
 		return s;
     }
