@@ -88,7 +88,12 @@ public class AllPackages extends BaseTestCase {
         ArrayList classes = new ArrayList();
 
         classes.add(org.apache.derbyTesting.functionTests.tests.derbynet._Suite.class);
-        classes.add(org.apache.derbyTesting.functionTests.tests.lang._Suite.class);
+        classes.add(org.apache.derbyTesting.functionTests.tests.lang._Suite.class); 
+        // DERBY-1903
+        // For the largedata test, just run the lite version of the test as
+        // the full test is too big.
+        classes.add(
+             org.apache.derbyTesting.functionTests.tests.largedata.LobLimitsLiteTest.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.jdbcapi._Suite.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.store._Suite.class);
         classes.add(org.apache.derbyTesting.functionTests.tests.tools._Suite.class);
