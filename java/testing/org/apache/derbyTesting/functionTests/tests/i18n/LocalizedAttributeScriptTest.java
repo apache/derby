@@ -24,7 +24,6 @@ import java.io.File;
 import java.security.AccessController;
 import java.util.Properties;
 
-import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
@@ -171,15 +170,6 @@ public final class LocalizedAttributeScriptTest extends ScriptTestCase {
                 //assertTrue(dir.getPath(), dir.delete());
             }
         });
-        LocalizedResource.resetLocalizedResourceCache();
         super.tearDown();
     }    
-    
-    /**
-     * Set up the test environment.
-     */
-    protected void setUp() {
-        super.setUp();
-        LocalizedResource.resetLocalizedResourceCache();
-    }
 }

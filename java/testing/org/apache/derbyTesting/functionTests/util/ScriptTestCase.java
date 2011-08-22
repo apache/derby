@@ -25,6 +25,7 @@ import java.security.AccessController;
 import java.sql.Connection;
 import java.util.Locale;
 
+import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derbyTesting.junit.Derby;
 
 import junit.framework.Test;
@@ -213,6 +214,10 @@ public abstract class ScriptTestCase extends CanonTestCase {
                 return null;
             }
         });
+
+        // Reset IJ's locale to allow it to pick up the new locale from
+        // the environment.
+        LocalizedResource.resetLocalizedResourceCache();
     }
 
     /**
@@ -227,5 +232,8 @@ public abstract class ScriptTestCase extends CanonTestCase {
                 return null;
             }
         });
+
+        // Forget the locale used by this test.
+        LocalizedResource.resetLocalizedResourceCache();
     }
 }

@@ -50,12 +50,7 @@ public class _Suite extends BaseTestCase  {
 	public static Test suite() {
 
 		TestSuite suite = new TestSuite("i18n");
-        
-        // First ensure that we are running in english locale; the output
-        // master has been created in that locale, and thus, running in any
-        // other locale will fail.
-        if (!getSystemProperty("user.language").equalsIgnoreCase("en"))
-            return suite;
+
         // Also, both these tests won't run with JSR169.
         if (JDBC.vmSupportsJSR169())
             return suite;

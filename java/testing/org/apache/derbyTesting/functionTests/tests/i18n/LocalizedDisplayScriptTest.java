@@ -23,7 +23,6 @@ package org.apache.derbyTesting.functionTests.tests.i18n;
 import java.util.Properties;
 import java.util.TimeZone;
 
-import org.apache.derby.iapi.tools.i18n.LocalizedResource;
 import org.apache.derbyTesting.functionTests.util.ScriptTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
@@ -125,12 +124,10 @@ public final class LocalizedDisplayScriptTest extends ScriptTestCase {
         // and so cause errors. Thus, run this with timezone PST.
         defaultTimeZone = TimeZone.getDefault(); 
         TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles")); 
-        LocalizedResource.resetLocalizedResourceCache();
     }
     
     public void tearDown() throws Exception {
         TimeZone.setDefault(defaultTimeZone); 
-        LocalizedResource.resetLocalizedResourceCache();
         super.tearDown();
     }    
 }
