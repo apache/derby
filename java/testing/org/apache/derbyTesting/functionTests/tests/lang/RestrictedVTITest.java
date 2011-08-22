@@ -170,6 +170,59 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
                  ".integerListSpecialColNames'\n"
                  );
         }
+        if ( !routineExists( conn, "MAKEBLOB5370" ) )
+        {
+            goodStatement
+                (
+                 conn,
+                 "create function makeBlob5370( ) returns blob\n" +
+                 "language java parameter style java no sql deterministic\n" +
+                 "external name 'org.apache.derbyTesting.functionTests.tests.lang.BooleanValuesTest.makeSimpleBlob'\n"
+                 );
+        }
+        if ( !routineExists( conn, "LASTQUERY5370" ) )
+        {
+            goodStatement
+                (
+                 conn,
+                 "create function lastQuery5370() returns varchar( 32672 )\n" +
+                 "language java parameter style java no sql\n" +
+                 "external name 'org.apache.derbyTesting.functionTests.tests.lang.RestrictedTableVTI.getLastQuery'\n"
+                 );
+        }
+        if ( !routineExists( conn, "RESTRICTED5370" ) )
+        {
+            goodStatement
+                (
+                 conn,
+                 "create function restricted5370( schemaName varchar( 32672 ), tableName varchar( 32672 ) )\n" +
+                 "returns table\n" +
+                 "(\n" +
+                 "    key_col int,\n" +
+                 "    boolean_col  BOOLEAN,\n" +
+                 "    bigint_col  BIGINT,\n" +
+                 "    blob_col  BLOB(2147483647),\n" +
+                 "    char_col  CHAR(10),\n" +
+                 "    char_for_bit_data_col  CHAR (10) FOR BIT DATA,\n" +
+                 "    clob_col  CLOB,\n" +
+                 "    date_col  DATE,\n" +
+                 "    decimal_col  DECIMAL(5,2),\n" +
+                 "    real_col  REAL,\n" +
+                 "    double_col  DOUBLE,\n" +
+                 "    int_col  INTEGER,\n" +
+                 "    long_varchar_col  LONG VARCHAR,\n" +
+                 "    long_varchar_for_bit_data_col  LONG VARCHAR FOR BIT DATA,\n" +
+                 "    numeric_col  NUMERIC(5,2), \n" +
+                 "    smallint_col  SMALLINT,\n" +
+                 "    time_col  TIME,\n" +
+                 "    timestamp_col  TIMESTAMP,\n" +
+                 "    varchar_col  VARCHAR(10),\n" +
+                 "    varchar_for_bit_data_col  VARCHAR (10) FOR BIT DATA\n" +
+                 ")\n" +
+                 "language java parameter style derby_jdbc_result_set reads sql data\n" +
+                 "external name 'org.apache.derbyTesting.functionTests.tests.lang.RestrictedTableVTI.readTable'\n"
+                 );
+        }
         if ( !tableExists( conn, "T_4357_1" ) )
         {
             goodStatement
@@ -181,6 +234,130 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
                 (
                  conn,
                  "insert into t_4357_1( a ) values cast( null as int), ( 1 ), ( 100 ), ( 1000 ), ( 10000)\n"
+                 );
+        }
+        if ( !tableExists( conn, "T_5370" ) )
+        {
+            goodStatement
+                (
+                 conn,
+                 "create table t_5370\n" +
+                 "(\n" +
+                 "    key_col int,\n" +
+                 "    boolean_col  BOOLEAN,\n" +
+                 "    bigint_col  BIGINT,\n" +
+                 "    blob_col  BLOB(2147483647),\n" +
+                 "    char_col  CHAR(10),\n" +
+                 "    char_for_bit_data_col  CHAR (10) FOR BIT DATA,\n" +
+                 "    clob_col  CLOB,\n" +
+                 "    date_col  DATE,\n" +
+                 "    decimal_col  DECIMAL(5,2),\n" +
+                 "    real_col  REAL,\n" +
+                 "    double_col  DOUBLE,\n" +
+                 "    int_col  INTEGER,\n" +
+                 "    long_varchar_col  LONG VARCHAR,\n" +
+                 "    long_varchar_for_bit_data_col  LONG VARCHAR FOR BIT DATA,\n" +
+                 "    numeric_col  NUMERIC(5,2), \n" +
+                 "    smallint_col  SMALLINT,\n" +
+                 "    time_col  TIME,\n" +
+                 "    timestamp_col  TIMESTAMP,\n" +
+                 "    varchar_col  VARCHAR(10),\n" +
+                 "    varchar_for_bit_data_col  VARCHAR (10) FOR BIT DATA\n" +
+                 ")\n"
+                 );
+            goodStatement
+                (
+                 conn,
+                 "insert into t_5370\n" +
+                 "(\n" +
+                 "    key_col,\n" +
+                 "    boolean_col,\n" +
+                 "    bigint_col,\n" +
+                 "    blob_col,\n" +
+                 "    char_col,\n" +
+                 "    char_for_bit_data_col,\n" +
+                 "    clob_col,\n" +
+                 "    date_col,\n" +
+                 "    decimal_col,\n" +
+                 "    real_col,\n" +
+                 "    double_col,\n" +
+                 "    int_col,\n" +
+                 "    long_varchar_col,\n" +
+                 "    long_varchar_for_bit_data_col,\n" +
+                 "    numeric_col, \n" +
+                 "    smallint_col,\n" +
+                 "    time_col,\n" +
+                 "    timestamp_col,\n" +
+                 "    varchar_col,\n" +
+                 "    varchar_for_bit_data_col\n" +
+                 ")\n" +
+                 "values\n" +
+                 "(\n" +
+                 "    0,\n" +
+                 "    false,\n" +
+                 "    0,\n" +
+                 "    makeBlob5370(),\n" +
+                 "    '0',\n" +
+                 "    X'DE',\n" +
+                 "    '0',\n" +
+                 "    date('1994-02-23'),\n" +
+                 "    0.00,\n" +
+                 "    0.0,\n" +
+                 "    0.0,\n" +
+                 "    0,\n" +
+                 "    '0',\n" +
+                 "    X'DE',\n" +
+                 "    0.00, \n" +
+                 "    0,\n" +
+                 "    time('15:09:02'),\n" +
+                 "    timestamp('1962-09-23 03:23:34.234'),\n" +
+                 "    '0',\n" +
+                 "    X'DE'\n" +
+                 "),\n" +
+                 "(\n" +
+                 "    1,\n" +
+                 "    true,\n" +
+                 "    1,\n" +
+                 "    makeBlob5370(),\n" +
+                 "    '1',\n" +
+                 "    X'DD',\n" +
+                 "    '1',\n" +
+                 "    date('1994-02-24'),\n" +
+                 "    1.00,\n" +
+                 "    1.0,\n" +
+                 "    1.0,\n" +
+                 "    1,\n" +
+                 "    '1',\n" +
+                 "    X'DE',\n" +
+                 "    1.00, \n" +
+                 "    1,\n" +
+                 "    time('15:09:03'),\n" +
+                 "    timestamp('1963-09-23 03:23:34.234'),\n" +
+                 "    '1',\n" +
+                 "    X'DD'\n" +
+                 "),\n" +
+                 "(\n" +
+                 "    2,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null,\n" +
+                 "    null\n" +
+                 ")\n"
                  );
         }
     }
@@ -778,6 +955,110 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
         JDBC.assertUnorderedResultSet(rs, expectedRows);
     }
 
+    /**
+     * Verify that Restriction.toSQL() returns usable SQL for all of the
+     * comparable types.
+     */
+    public void test_11_5370() throws Exception
+    {
+        Connection conn = getConnection();
+
+        // if this fails, then we need to add a new data type to this test
+        vetDatatypeCount( conn, 22 );
+        
+        // comparable types
+        vet5370positive( conn, "BOOLEAN_COL", "false", "false" );
+        vet5370positive( conn, "BIGINT_COL", "0", "0" );
+        vet5370positive( conn, "CHAR_COL", "'0'", "0         " );
+        vet5370positive( conn, "CHAR_FOR_BIT_DATA_COL", "X'de'", "de202020202020202020" );
+        vet5370positive( conn, "DATE_COL", "DATE('1994-02-23')", "1994-02-23" );
+        vet5370positive( conn, "DECIMAL_COL", "0.00", "0.00" );
+        vet5370positive( conn, "REAL_COL", "0.0", "0.0" );
+        vet5370positive( conn, "DOUBLE_COL", "0.0", "0.0" );
+        vet5370positive( conn, "INT_COL", "0", "0" );
+        vet5370positive( conn, "NUMERIC_COL", "0.00", "0.00" );
+        vet5370positive( conn, "SMALLINT_COL", "0", "0" );
+        vet5370positive( conn, "TIME_COL", "TIME('15:09:02')", "15:09:02" );
+        vet5370positive( conn, "TIMESTAMP_COL", "TIMESTAMP('1962-09-23 03:23:34.234')", "1962-09-23 03:23:34.234" );
+        vet5370positive( conn, "VARCHAR_COL", "'0'", "0" );
+        vet5370positive( conn, "VARCHAR_FOR_BIT_DATA_COL", "X'de'", "de" );
+
+        //
+        // The following all fail. If these comparisons start working, then this
+        // test should be revisited to make sure that Restriction.toSQL() handles
+        // the types which used to not be comparable.
+        //
+        vet5370negative( "BLOB_COL", "makeBlob5370()" );
+        vet5370negative( "CLOB_COL", "'0'" );
+        vet5370negative( "LONG_VARCHAR_COL", "'0'" );
+        vet5370negative( "LONG_VARCHAR_FOR_BIT_DATA_COL", "X'de'" );
+    }
+    private void    vet5370positive
+        (
+         Connection conn,
+         String columnName,
+         String columnValue,
+         String expectedValue
+         )
+        throws Exception
+    {
+        assertResults
+            (
+             conn,
+             "select " + columnName + " from table( restricted5370( 'APP', 'T_5370' ) ) s\n" +
+             "where " + columnName + " = " + columnValue,
+             new String[][] { new String[] { expectedValue } },
+             false
+             );
+
+        assertResults
+            (
+             conn,
+             "values( lastQuery5370() )",
+             new String[][]
+             {
+                 new String[]
+                 {
+                     "select " + doubleQuote( columnName ) + "\n" +
+                     "from " + doubleQuote( "APP" ) + "." + doubleQuote( "T_5370" ) + "\n" +
+                     "where " + doubleQuote( columnName ) + " = " + columnValue
+                 }
+             },
+             false
+             );
+    }
+    private static  String  doubleQuote( String text )  { return '"' + text + '"'; }
+    private void    vet5370negative
+        (
+         String columnName,
+         String columnValue
+         )
+        throws Exception
+    {
+        expectCompilationError
+            (
+             "42818",
+             "select " + columnName + " from table( restricted5370( 'APP', 'T_5370' ) ) s\n" +
+             "where " + columnName + " = " + columnValue
+             );
+
+    }
+    private int vetDatatypeCount( Connection conn, int expectedTypeCount ) throws Exception
+    {
+        //
+        // If this fails, it means that we need to add another datatype to
+        //
+        
+        ResultSet rs = conn.getMetaData().getTypeInfo();
+        int actualTypeCount = 0;
+        while ( rs.next() ) { actualTypeCount++; }
+        rs.close();
+
+        assertEquals( expectedTypeCount, actualTypeCount );
+
+        return actualTypeCount;
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // SQL ROUTINES
