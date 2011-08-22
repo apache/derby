@@ -235,9 +235,26 @@ public abstract class Restriction implements Serializable
 
             buffer.append( IdUtil.normalToDelimited( _columnName ) );
             buffer.append( " " + OPERATOR_SYMBOLS[ _comparisonOperator ] + " " );
-            if ( _constantOperand != null ) { buffer.append( _constantOperand ); }
+            if ( _constantOperand != null ) { buffer.append( toEscapedString( _constantOperand ) ); }
 
             return buffer.toString();
+        }
+
+        protected String toEscapedString(Object o) {
+            if (o instanceof java.sql.Timestamp) {
+                return "TIMESTAMP('" + o.toString() + "')";
+            } else if (o instanceof java.sql.Date) {
+                return "DATE('" + o.toString() + "')";
+            } else if (o instanceof java.sql.Time) {
+                return "TIME('" + o.toString() + "')";
+            } else if (o instanceof String) {
+                return "\'" + o.toString() + "\'";
+            } else if (o instanceof byte[]) {
+                byte[] b = (byte[]) o;
+                return "X\'" + org.apache.derby.iapi.util.StringUtil.toHexString(b, 0, b.length) + "\'" ;
+            } else {
+                return o.toString();
+            }
         }
     }
     
