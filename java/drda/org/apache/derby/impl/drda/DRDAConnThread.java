@@ -321,6 +321,8 @@ class DRDAConnThread extends Thread {
             } catch (Error error) {
                 // Do as little as possible, but try to cut loose the client
                 // to avoid that it hangs in a socket read-call.
+                // TODO: Could make use of Throwable.addSuppressed here when
+                //       compiled as Java 7 (or newer).
                 try {
                     closeSession();
                 } catch (Throwable t) {
@@ -331,6 +333,8 @@ class DRDAConnThread extends Thread {
                         // Ignore, we're in deeper trouble already.
                     } 
                 } finally {
+                    // Rethrow the original error, ignore errors that happened
+                    // when trying to close the socket to the client.
                     throw error;
                 }
             }
