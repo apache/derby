@@ -963,6 +963,14 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
     {
         Connection conn = getConnection();
 
+        //
+        // The table function used by this test extends VTITemplate, an
+        // implementation of the JDBC 3.0 ResultSet. This table function will
+        // not run on JSR169 because the JDBC 3.0 ResultSet pulls in classes
+        // which don't exist in the JSR169 java.sql package (e.g., java.sql.Ref).
+        //
+        if ( JDBC.vmSupportsJSR169() ) { return; }
+
         // if this fails, then we need to add a new data type to this test
         vetDatatypeCount( conn, 22 );
         
