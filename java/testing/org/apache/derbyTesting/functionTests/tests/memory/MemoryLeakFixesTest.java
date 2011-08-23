@@ -21,14 +21,19 @@ limitations under the License.
 
 package org.apache.derbyTesting.functionTests.tests.memory;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
+import javax.sql.DataSource;
 import junit.framework.Test;
 
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -155,6 +160,87 @@ public class MemoryLeakFixesTest extends BaseJDBCTestCase {
           s.close();
           conn.close();
        }
+
+    /**
+     * Tests that the memory usage dosen't increase for each database that is
+     * created.
+     * <p>
+     * The tests is primarily written to ensure that the automatic index
+     * statistics daemon doesn't cause memory leakage. One one database is
+     * active/booted at a time.
+     * <p>
+     * See DERBY-5336.
+     *
+     * @throws SQLException if something goes wrong
+     */
+    public void testRepeatedDatabaseCreationWithAutoStats()
+            throws SQLException {
+        final String DB_NAME = "derby-memory-test";
+        final File DB_DIR = new File("system", DB_NAME);
+        DataSource ds = JDBCDataSource.getDataSource(DB_NAME);
+    
+        // using -Xmx32M typically causes the out of memory error to appear
+        // within 20 iterations;  this program was run on Windows 7 64-bit using
+        // jdk1.6.0_26
+        int iter = 0;
+        while (iter < 50) {
+            
+            traceit("-- " + iter++);
+            
+            // remove database directory so we can start fresh each time;
+            // the memory leak also manifests when a different directory is
+            // used each time through, i.e. it is not required that the
+            // database be created in the same location over and over
+            if (PrivilegedFileOpsForTests.exists(DB_DIR)) {
+                assertDirectoryDeleted(DB_DIR);
+            }
+            
+            // create the database
+            JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+            Connection conn = ds.getConnection();
+            JDBCDataSource.clearStringBeanProperty(ds, "createDatabase");
+            
+            // we'll use this one statement the whole time this db is open
+            Statement s = conn.createStatement();
+            
+            // create a simple schema; the presence of the index is important
+            // somehow as the memory leak does not appear without it
+            s.executeUpdate("CREATE TABLE TEST (CINT INT)");
+            s.executeUpdate("CREATE INDEX NDX ON TEST (CINT)");
+            
+            // perform some updates and queries; it seems that the number of
+            // iterations here is important and that there is a threshold that
+            // must be crossed; e.g. in my tests the memory leak would not
+            // manifest with 105 iterations but it would with 106 iterations
+            for (int i = 0; i < 500; i++) {
+                
+                // both update and query are important; removing either one
+                // causes the memory leak not to appear;  the order in which
+                // they are executed, however, does not seem to be important
+                s.executeUpdate("INSERT INTO TEST VALUES(" + i + ")");
+                s.executeQuery("SELECT * FROM TEST WHERE CINT=" + i).close();
+                
+            }
+            
+            // done with statement and connection
+            s.close();
+            conn.close();
+            
+            // shutdown this database, but not entire derby engine
+            JDBCDataSource.setBeanProperty(ds, "shutdownDatabase", "shutdown");
+            try {
+                ds.getConnection();
+            } catch (SQLException e) {
+                assertSQLState("08006", e);
+            } finally {
+                JDBCDataSource.clearStringBeanProperty(ds, "shutdownDatabase");
+            }
+        }
+
+        // extra sanity check making sure that the database was created in the
+        // location we assumed
+        assertTrue(PrivilegedFileOpsForTests.exists(DB_DIR));
+    }
 
     /**
      * runFinalizerIfNeeded is called periodically for DERBY-4200. With the IBM

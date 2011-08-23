@@ -913,6 +913,10 @@ public class IndexStatisticsDaemonImpl
                 threadToWaitFor = runningThread;
                 runningThread = null;
                 queue.clear();
+                // DERBY-5336: Trigger cleanup code to remove the context
+                //             from the context service. This pattern was
+                //             copied from BasicDaemon.
+                ctxMgr.cleanupOnError(StandardException.normalClose(), false);
             }
 
         }
