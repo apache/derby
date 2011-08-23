@@ -318,7 +318,22 @@ class DRDAConnThread extends Thread {
 				{
 					handleException(e);
 				}
-			}
+            } catch (Error error) {
+                // Do as little as possible, but try to cut loose the client
+                // to avoid that it hangs in a socket read-call.
+                try {
+                    closeSession();
+                } catch (Throwable t) {
+                    // One last attempt...
+                    try {
+                        session.clientSocket.close();
+                    } catch (IOException ioe) {
+                        // Ignore, we're in deeper trouble already.
+                    } 
+                } finally {
+                    throw error;
+                }
+            }
 		}
 		if (SanityManager.DEBUG)
 			trace("Ending connection thread");
