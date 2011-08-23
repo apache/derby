@@ -189,18 +189,15 @@ public class NetConnectionReply extends Reply
     private void parseRDBCMMreply(ConnectionCallbackInterface connection) throws DisconnectException {
         int peekCP = parseTypdefsOrMgrlvlovrs();
 
-        if (peekCP != CodePoint.ENDUOWRM && peekCP != CodePoint.SQLCARD) {
+        parseENDUOWRM(connection);
+        peekCP = parseTypdefsOrMgrlvlovrs();
+
+        if (peekCP == CodePoint.SQLCARD) {
+            NetSqlca netSqlca = parseSQLCARD(null);
+            connection.completeSqlca(netSqlca);
+        } else {
             parseCommitError(connection);
-            return;
         }
-
-        if (peekCP == CodePoint.ENDUOWRM) {
-            parseENDUOWRM(connection);
-            peekCP = parseTypdefsOrMgrlvlovrs();
-        }
-
-        NetSqlca netSqlca = parseSQLCARD(null);
-        connection.completeSqlca(netSqlca);
     }
 
     // Parse the reply for the RDB Rollback Unit of Work Command.
@@ -208,16 +205,16 @@ public class NetConnectionReply extends Reply
     // for the rdbrllbck command.
     private void parseRDBRLLBCKreply(ConnectionCallbackInterface connection) throws DisconnectException {
         int peekCP = parseTypdefsOrMgrlvlovrs();
-        if (peekCP != CodePoint.ENDUOWRM) {
-            parseRollbackError();
-            return;
-        }
 
         parseENDUOWRM(connection);
         peekCP = parseTypdefsOrMgrlvlovrs();
 
-        NetSqlca netSqlca = parseSQLCARD(null);
-        connection.completeSqlca(netSqlca);
+        if (peekCP == CodePoint.SQLCARD) {
+            NetSqlca netSqlca = parseSQLCARD(null);
+            connection.completeSqlca(netSqlca);
+        } else {
+            parseRollbackError();
+        }
     }
 
     // Parse the reply for the Exchange Server Attributes Command.
@@ -878,11 +875,16 @@ public class NetConnectionReply extends Reply
 
         netAgent_.setSvrcod(svrcod);
         NetSqlca netSqlca = parseSQLCARD(null); 
-        netAgent_.netConnection_.completeSqlca(netSqlca); 
-        agent_.accumulateChainBreakingReadExceptionAndThrow(new DisconnectException(agent_,
-            new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
-            msgutil_.getTextMessage(MessageId.CONN_DRDA_CMDCHKRM),
-            new Exception(netSqlca.getSqlErrmc()))); 
+        netAgent_.netConnection_.completeSqlca(netSqlca);
+
+        agent_.accumulateChainBreakingReadExceptionAndThrow(
+            new DisconnectException(
+                agent_,
+                new ClientMessageId(SQLState.DRDA_CONNECTION_TERMINATED),
+                msgutil_.getTextMessage(
+                    MessageId.CONN_DRDA_CMDCHKRM),
+                new SqlException(agent_.logWriter_,
+                                 netSqlca)));
     }
 
 
