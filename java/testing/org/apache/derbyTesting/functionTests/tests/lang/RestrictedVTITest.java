@@ -957,9 +957,9 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
 
     /**
      * Verify that Restriction.toSQL() returns usable SQL for all of the
-     * comparable types.
+     * comparable types. See DERBY-5369 and DERBY-5370.
      */
-    public void test_11_5370() throws Exception
+    public void test_11_5369_5370() throws Exception
     {
         Connection conn = getConnection();
 
@@ -975,21 +975,21 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
         vetDatatypeCount( conn, 22 );
         
         // comparable types
-        vet5370positive( conn, "BOOLEAN_COL", "false", "false" );
-        vet5370positive( conn, "BIGINT_COL", "0", "0" );
-        vet5370positive( conn, "CHAR_COL", "'0'", "0         " );
-        vet5370positive( conn, "CHAR_FOR_BIT_DATA_COL", "X'de'", "de202020202020202020" );
-        vet5370positive( conn, "DATE_COL", "DATE('1994-02-23')", "1994-02-23" );
-        vet5370positive( conn, "DECIMAL_COL", "0.00", "0.00" );
-        vet5370positive( conn, "REAL_COL", "0.0", "0.0" );
-        vet5370positive( conn, "DOUBLE_COL", "0.0", "0.0" );
-        vet5370positive( conn, "INT_COL", "0", "0" );
-        vet5370positive( conn, "NUMERIC_COL", "0.00", "0.00" );
-        vet5370positive( conn, "SMALLINT_COL", "0", "0" );
-        vet5370positive( conn, "TIME_COL", "TIME('15:09:02')", "15:09:02" );
-        vet5370positive( conn, "TIMESTAMP_COL", "TIMESTAMP('1962-09-23 03:23:34.234')", "1962-09-23 03:23:34.234" );
-        vet5370positive( conn, "VARCHAR_COL", "'0'", "0" );
-        vet5370positive( conn, "VARCHAR_FOR_BIT_DATA_COL", "X'de'", "de" );
+        vet5370positive( conn, "BOOLEAN_COL", "false", "false", "true" );
+        vet5370positive( conn, "BIGINT_COL", "0", "0", "1" );
+        vet5370positive( conn, "CHAR_COL", "'0'", "0         ", "1         " );
+        vet5370positive( conn, "CHAR_FOR_BIT_DATA_COL", "X'de'", "de202020202020202020", "dd202020202020202020" );
+        vet5370positive( conn, "DATE_COL", "DATE('1994-02-23')", "1994-02-23", "1994-02-24" );
+        vet5370positive( conn, "DECIMAL_COL", "0.00", "0.00", "1.00" );
+        vet5370positive( conn, "REAL_COL", "0.0", "0.0", "1.0" );
+        vet5370positive( conn, "DOUBLE_COL", "0.0", "0.0", "1.0" );
+        vet5370positive( conn, "INT_COL", "0", "0", "1" );
+        vet5370positive( conn, "NUMERIC_COL", "0.00", "0.00", "1.00" );
+        vet5370positive( conn, "SMALLINT_COL", "0", "0", "1" );
+        vet5370positive( conn, "TIME_COL", "TIME('15:09:02')", "15:09:02", "15:09:03" );
+        vet5370positive( conn, "TIMESTAMP_COL", "TIMESTAMP('1962-09-23 03:23:34.234')", "1962-09-23 03:23:34.234", "1963-09-23 03:23:34.234" );
+        vet5370positive( conn, "VARCHAR_COL", "'0'", "0", "1" );
+        vet5370positive( conn, "VARCHAR_FOR_BIT_DATA_COL", "X'de'", "de", "dd" );
 
         //
         // The following all fail. If these comparisons start working, then this
@@ -1006,7 +1006,8 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
          Connection conn,
          String columnName,
          String columnValue,
-         String expectedValue
+         String expectedValue,
+         String negatedValue
          )
         throws Exception
     {
@@ -1030,6 +1031,31 @@ public class RestrictedVTITest  extends GeneratedColumnsHelper
                      "select " + doubleQuote( columnName ) + "\n" +
                      "from " + doubleQuote( "APP" ) + "." + doubleQuote( "T_5370" ) + "\n" +
                      "where " + doubleQuote( columnName ) + " = " + columnValue
+                 }
+             },
+             false
+             );
+        
+        assertResults
+            (
+             conn,
+             "select " + columnName + " from table( restricted5370( 'APP', 'T_5370' ) ) s\n" +
+             "where " + columnName + " != " + columnValue,
+             new String[][] { new String[] { negatedValue } },
+             false
+             );
+
+        assertResults
+            (
+             conn,
+             "values( lastQuery5370() )",
+             new String[][]
+             {
+                 new String[]
+                 {
+                     "select " + doubleQuote( columnName ) + "\n" +
+                     "from " + doubleQuote( "APP" ) + "." + doubleQuote( "T_5370" ) + "\n" +
+                     "where " + doubleQuote( columnName ) + " != " + columnValue
                  }
              },
              false
