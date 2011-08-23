@@ -1471,8 +1471,8 @@ public class FromVTI extends FromTable implements VTIEnvironment
         case RelationalOperator.LESS_THAN_RELOP:      return Restriction.ColumnQualifier.ORDER_OP_LESSTHAN;
         case RelationalOperator.IS_NULL_RELOP:        return Restriction.ColumnQualifier.ORDER_OP_ISNULL;
         case RelationalOperator.IS_NOT_NULL_RELOP:    return Restriction.ColumnQualifier.ORDER_OP_ISNOTNULL;
+        case RelationalOperator.NOT_EQUALS_RELOP:     return Restriction.ColumnQualifier.ORDER_OP_NOT_EQUALS;
 
-        case RelationalOperator.NOT_EQUALS_RELOP:
         default:
             if ( SanityManager.DEBUG )
             {
