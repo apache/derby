@@ -46,6 +46,7 @@ import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 
 import java.security.PrivilegedActionException;
+import java.util.ArrayList;
 
 
 /**
@@ -537,15 +538,16 @@ public abstract class BaseTestCase
 	 * @throws IOException
 	 */
 	public static Process execJavaCmd(String[] cmd) throws IOException {
-	    int totalSize = 3 + cmd.length;
-	    String[] tcmd = new String[totalSize];
-	    tcmd[0] = getJavaExecutableName();
-	    tcmd[1] = "-classpath";
-	    tcmd[2] = BaseTestCase.getSystemProperty("java.class.path");
-
-	    System.arraycopy(cmd, 0, tcmd, 3, cmd.length);
-
-	    final String[] command = tcmd;
+	    ArrayList cmdlist = new ArrayList();
+	    cmdlist.add(getJavaExecutableName());
+	    if (isJ9Platform())
+	        cmdlist.add("-jcl:foun11");
+	    cmdlist.add("-classpath");
+	    cmdlist.add(getSystemProperty("java.class.path"));
+	    for (int i =0; i < cmd.length;i++) {
+	        cmdlist.add(cmd[i]);
+	    }
+	    final String[] command = (String[]) cmdlist.toArray(cmd);
 	    println("execute java command:");
 	    for (int i = 0; i < command.length; i++) {
 	        println("command[" + i + "]" + command[i]);

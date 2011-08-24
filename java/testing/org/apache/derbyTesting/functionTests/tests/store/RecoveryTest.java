@@ -51,9 +51,6 @@ public final class RecoveryTest extends BaseJDBCTestCase
     {
         // Add the test case into the test suite
         TestSuite suite = new TestSuite("RecoveryTest");
-        //DERBY-4647 exec does not work on weme
-        if (BaseTestCase.isJ9Platform())
-            return suite;
         suite.addTest(decorateTest());
         return suite;
     }
