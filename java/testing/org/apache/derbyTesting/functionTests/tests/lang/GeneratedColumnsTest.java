@@ -5490,7 +5490,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
          "parameter style java\n" +
          "deterministic\n" +
          "no sql\n" +
-         "external name 'java.lang.Integer.signum'\n"
+         "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.signum'\n"
         );
 
         goodStatement
@@ -5655,6 +5655,13 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
     public static   int readMinusCounter()
     {
         return _minusCounter;
+    }
+
+    public static   int signum( int i )
+    {
+        if ( i > 0 ) { return 1; }
+        else if ( i == 0 ) { return 0; }
+        else { return -1; }
     }
 
     public  static  void    clearTriggerReports()
