@@ -45,7 +45,6 @@ currently test the following combinations:
 
     <TR><TD>Derby 10.1</TD></TR>
     <TR><TD>Derby 10.2</TD></TR>
-    <TR><TD>DB2JCC 2.4</TD></TR>
 
   </TBODY>
 </TABLE>
@@ -66,9 +65,9 @@ currently test the following combinations:
 <TABLE border="2">
   <TBODY>
 
-    <TR><TD>jdk1.3</TD></TR>
     <TR><TD>jdk1.4</TD></TR>
     <TR><TD>jdk1.5</TD></TR>
+    <TR><TD>jdk1.6</TD></TR>
 
   </TBODY>
 </TABLE>
@@ -242,14 +241,6 @@ test.securityOption=noSecurityManager
 ##
 
 junit_jar=/usr/share/lib/java/junit.jar
-
-##
-## Specify where to find the DB2JCC jar files. This property is only
-## required if you test Derby 10.0.2.1, which doesn't have its own
-## network client driver.
-##
-
-db2jcc_lib=/opt/db2jcc/lib
 
 ##
 ## Optional properties to limit the number of combinations to test.

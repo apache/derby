@@ -34,7 +34,6 @@
 	This script assumes that you have set the following variables
 	in the ant.properties file in your user home directory:
 
-	j13lib          The library directory of your 1.3 JRE
 	j14lib          The library directory of your 1.4 JRE
 	jdk15           The JAVA_HOME of your 1.5 vm.
     jdk16           The JAVA_HOME of your 1.6 vm.
@@ -55,8 +54,6 @@
        10.5.3.0_lib    Directory containing the released 10.5.3.0 jars.
        10.6.1.0_lib    Directory containing the released 10.6.1.0 jars.
        trunk_lib       Directory containing jars built from the development mainline (trunk).
-
-	db2jcc_lib      Directory containing the db2jcc jars (see trunk/java/testing/README.htm).
 
 	The basic loop runs as follows:
 
@@ -102,11 +99,9 @@
   <property name="summaryFile" value="${outDir}/SUMMARY_COMPAT.txt"/>
   <property name="databaseName" value="compatDB"/>
 
-  <property name="JCE_JAR" value="${jce1_2_1}"/>
-  <property name="TEST_JARS" value="${trunk_lib}/derbyTesting.jar;${junit};${JCE_JAR}"/>
+  <property name="TEST_JARS" value="${trunk_lib}/derbyTesting.jar;${junit}"/>
 
   <!-- legal values of serverVM and clientVM -->
-  <property name="VM_1.3" value="${j13lib}/../bin/java"/>
   <property name="VM_1.4" value="${j14lib}/../bin/java"/>
   <property name="VM_1.5" value="${jdk15}/bin/java"/>
   <property name="VM_1.6" value="${jdk16}/bin/java"/>
@@ -130,7 +125,6 @@
   <property name="SERVER_TRUNK" value="${trunk_lib}/derby.jar;${trunk_lib}/derbynet.jar;${TEST_JARS}"/>
 
   <!-- legal values of clientClasspath -->
-  <property name="CLIENT_DB2JCC" value="${db2jcc_lib}/db2jcc.jar;${db2jcc_lib}/db2jcc_license_c.jar"/>
   <property name="CLIENT_10.1.1.0" value="${10.1.1.0_lib}/derbyclient.jar"/>
   <property name="CLIENT_10.1.2.1" value="${10.1.2.1_lib}/derbyclient.jar"/>
   <property name="CLIENT_10.1.3.1" value="${10.1.3.1_lib}/derbyclient.jar"/>
@@ -149,7 +143,7 @@
 
   <property name="FULL_TRUNK" value="${SERVER_TRUNK};${CLIENT_TRUNK}"/>
 
-  <property name="CLASSPATH_TRUNK" value="${basedir}/classes;${compile.classpath};${jce1_2_1}"/>
+  <property name="CLASSPATH_TRUNK" value="${basedir}/classes;${compile.classpath}"/>
 
   <property name="VM_DEFAULT" value="${VM_1.4}"/>
 
@@ -200,13 +194,6 @@
     <antcall target="embeddedTrunk"/>
 
 	<!-- Now loop through server VMs -->
-
-        <!-- JVM 1.3 in client/server mode is not supported on trunk/10.3
-	<antcall target="_forServerVM">
-	  <param name="fsvVM" value="${VM_1.3}"/>
-	  <param name="fsvName" value="serverVM-1.3"/>
-    </antcall>
-        -->
 
 	<antcall target="_forServerVM">
 	  <param name="fsvVM" value="${VM_1.4}"/>
@@ -461,13 +448,6 @@
 
 	<!-- Now loop through client VMs -->
 
-    <!-- JVM 1.3 in client/server mode is not supported on trunk/10.3
-	<antcall target="_forClientVM">
-	  <param name="fcvVM" value="${VM_1.3}"/>
-	  <param name="fcvName" value="${fsvnName}_clientVM-1.3"/>
-    </antcall>
-        -->
-
 	<antcall target="_forClientVM">
 	  <param name="fcvVM" value="${VM_1.4}"/>
 	  <param name="fcvName" value="${fsvnName}_clientVM-1.4"/>
@@ -581,12 +561,6 @@
 	  <param name="fcvnName" value="${fcvName}_clientDerby10.1.1.0"/>
     </antcall>
 
-    <antcall target="_forClientVersion">
-	  <param name="fcvnVM" value="${fcvVM}"/>
-	  <param name="fcvnCP" value="${CLIENT_DB2JCC}"/>
-	  <param name="fcvnName" value="${fcvName}_clientDB2JCC"/>
-    </antcall>
-
   </target>
 
   <!--
@@ -640,7 +614,7 @@
 	  resultproperty="testStatus"
 	>
 	  <arg value="-cp"/>
-	  <arg path="${otClasspath}:${TEST_JARS}:${javatools.dir}/jdbc2_0-stdext.jar"/>
+	  <arg path="${otClasspath}:${TEST_JARS}"/>
 
 	  <arg value="-Ddrb.tests.debug=${drb.tests.debug}"/>
 
@@ -747,7 +721,7 @@
   <target name="_recreateDatabase">
 
 	<antcall target="_recreateDatabaseGuts">
-	  <param name="codeline" value="${CLIENT_DB2JCC}"/>
+	  <param name="codeline" value="${CLIENT_10.1.1.0}"/>
     </antcall>
 
   </target>
@@ -860,23 +834,6 @@ ${summaryMessage}
     <antcall target="_vetClient"> <param name="vcLib" value="${10.5.3.0_lib}"/> </antcall>
     <antcall target="_vetClient"> <param name="vcLib" value="${10.6.1.0_lib}"/> </antcall>
     <antcall target="_vetClient"> <param name="vcLib" value="${trunk_lib}"/> </antcall>
-
-    <antcall target="_vetDb2Client"/>
-
-  </target>
-
-  <!-- Check that required db2 client jars are visible -->
-  <target name="_vetDb2Client">
-
-    <antcall target="_vetJar">
-	  <param name="vjLib" value="${db2jcc_lib}"/>
-	  <param name="vjJar" value="db2jcc.jar"/>
-    </antcall>
-
-    <antcall target="_vetJar">
-	  <param name="vjLib" value="${db2jcc_lib}"/>
-	  <param name="vjJar" value="db2jcc_license_c.jar"/>
-    </antcall>
 
   </target>
 

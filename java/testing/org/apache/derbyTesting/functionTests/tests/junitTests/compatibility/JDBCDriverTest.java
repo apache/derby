@@ -60,8 +60,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 
 	//
 	// This table declares the datatypes supported by Derby and the earliest
-	// versions of the Derby and the db2jcc client which support these
-	// datatypes.
+	// versions of the Derby client which support these datatypes.
 	//
 	// If you add a type to this table, make sure you add a corresponding
 	// column to the following row table. Also add a corresponding row to the
@@ -72,47 +71,47 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		// 10.0 types
 		
 		new TypeDescriptor
-		( Types.BIGINT,			"bigint",						IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.BIGINT,			"bigint",	DRB_10_0),
 		new TypeDescriptor
-		( Types.BLOB,			"blob",							IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.BLOB,			"blob",	DRB_10_0),
 		new TypeDescriptor
-		( Types.CHAR,			"char(5)",						IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.CHAR,			"char(5)",	DRB_10_0),
 		new TypeDescriptor
-		( Types.BINARY,			"char(5) for bit data",			IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.BINARY,			"char(5) for bit data",	DRB_10_0),
 		new TypeDescriptor
-		( Types.CLOB,			"clob",							IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.CLOB,			"clob",	DRB_10_0),
 		new TypeDescriptor
-		( Types.DATE,			"date",							IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.DATE,			"date",	DRB_10_0),
 		new TypeDescriptor
-		( Types.DECIMAL,		"decimal",						IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.DECIMAL,		"decimal",	DRB_10_0),
 		new TypeDescriptor
-		( Types.DOUBLE,			"double",						IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.DOUBLE,			"double",	DRB_10_0),
 		new TypeDescriptor
-		( Types.DOUBLE,			"double precision",				IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.DOUBLE,			"double precision",	DRB_10_0),
 		new TypeDescriptor
-		( Types.REAL,			"float(23)",					IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.REAL,			"float(23)",	DRB_10_0),
 		new TypeDescriptor
-		( Types.DOUBLE,			"float",						IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.DOUBLE,			"float",	DRB_10_0),
 		new TypeDescriptor
-		( Types.INTEGER,		"integer",						IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.INTEGER,		"integer",	DRB_10_0),
 		new TypeDescriptor
-		( Types.LONGVARCHAR,	"long varchar",					IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.LONGVARCHAR,	"long varchar",	DRB_10_0),
 		new TypeDescriptor
-		( Types.LONGVARBINARY,	"long varchar for bit data",	IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.LONGVARBINARY,	"long varchar for bit data",	DRB_10_0),
 		new TypeDescriptor
-		( Types.NUMERIC,		"numeric",						IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.NUMERIC,		"numeric",	DRB_10_0),
 		new TypeDescriptor
-		( Types.REAL,			"real",							IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.REAL,			"real",	DRB_10_0),
 		new TypeDescriptor
-		( Types.SMALLINT,		"smallint",						IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.SMALLINT,		"smallint",	DRB_10_0),
 		new TypeDescriptor
-		( Types.TIME,			"time",							IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.TIME,			"time",	DRB_10_0),
 		new TypeDescriptor
-		( Types.TIMESTAMP,		"timestamp",					IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.TIMESTAMP,		"timestamp",	DRB_10_0),
 		new TypeDescriptor
-		( Types.VARCHAR,		"varchar(5)",					IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.VARCHAR,		"varchar(5)",	DRB_10_0),
 		new TypeDescriptor
-		( Types.VARBINARY,		"varchar(5) for bit data",		IBM_2_4,	DRB_10_0,	VM_1_3 ),
+		( Types.VARBINARY,		"varchar(5) for bit data",	DRB_10_0),
 	};
 
 	//
@@ -671,47 +670,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 
 			println( buffer.toString() );
 			
-			assertEquals( columnName, ddmdTypeKludge( typeDesc.getJdbcType() ), actualJdbcType );
-		}
-
-		close( rs );
-	}
-
-	//
-	// Verify that we get the correct DatabaseMetaData for a procedure
-	//
-	private	void	checkProcMetadata( Connection conn, String procName, TypeDescriptor[] signature )
-		throws Exception
-	{
-		String				normalizedSchema = DEFAULT_USER_NAME.toUpperCase();
-		String				normalizedProc = procName.toUpperCase();
-		DatabaseMetaData	dbmd = conn.getMetaData();
-
-		ResultSet			rs = dbmd.getProcedureColumns
-			( null, normalizedSchema, normalizedProc, "%" );
-
-		println( "Pawing through database metadata for " + normalizedSchema + '.' + normalizedProc );
-
-		while( rs.next() )
-		{
-			String			columnName = rs.getString( "COLUMN_NAME" );
-			int				actualJdbcType = rs.getInt( "DATA_TYPE" );
-			TypeDescriptor	typeDesc = getType( signature, columnName );
-
-			if ( columnName.equals( KEY_COLUMN ) ) { continue; }
-
-			StringBuffer	buffer = new StringBuffer();
-
-			buffer.append( "[ " );
-			buffer.append( rs.getString( "COLUMN_NAME" ) );
-			buffer.append( ",\t" );
-			buffer.append( "type( " + rs.getInt( "DATA_TYPE" ) + " ),\t" );
-			buffer.append( rs.getString( "TYPE_NAME" ) );
-			buffer.append( " ]" );
-
-			println( buffer.toString() );
-			
-			assertEquals( columnName, ddmdTypeKludge( typeDesc.getJdbcType() ), actualJdbcType );
+			assertEquals( columnName, typeDesc.getJdbcType(), actualJdbcType );
 		}
 
 		close( rs );
@@ -1004,31 +963,14 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	private	int	rsmdTypeKludge( int originalJDbcType )
 	{
 		// The embedded client does the right thing.
-		if ( usingEmbeddedClient() && getServerVMVersion().atLeast( VM_1_4 ) ) { return originalJDbcType; }
+		if ( usingEmbeddedClient() ) { return originalJDbcType; }
 		
 		switch( originalJDbcType )
 		{
 			//This kludge compensates for the fact that the DRDA clients report
 			// that NUMERIC columns are DECIMAL. See bug 584.
 			case Types.NUMERIC:
-				if ( usingEmbeddedClient() )	{ return originalJDbcType; }
-				else { return Types.DECIMAL; }
-
-		    default:			return originalJDbcType;
-		}
-	}
-
-	//
-	// This kludge compensates for the fact that servers return
-	// different jdbc types depending on their vm.
-	//
-	private	int	ddmdTypeKludge( int originalJDbcType )
-	{
-		switch( originalJDbcType )
-		{
-			case JDBC_BOOLEAN:
-				if ( getServerVMVersion().atLeast( VM_1_4 ) ) { return originalJDbcType; }
-				else { return Types.BIT; }
+				return Types.DECIMAL;
 
 		    default:			return originalJDbcType;
 		}
@@ -1087,23 +1029,6 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 		if ( _types.size() == 0 ) { buildTypeMap(); }
 		
 		return (TypeDescriptor) _types.get( typeName );
-	}
-
-	//
-	// Lookup TypeDescriptors by column name in an array of types
-	//
-	private	TypeDescriptor	getType( TypeDescriptor[] types, String typeName )
-	{
-		int		count = types.length;
-
-		for ( int i = 0; i < count; i++ )
-		{
-			TypeDescriptor	type = types[ i ];
-
-			if ( type.getDerbyTypeName().equals( typeName ) ) { return type; }
-		}
-		
-		return null;
 	}
 
 	//
@@ -1315,10 +1240,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	// return true if the client supports this datatype
 	private	boolean	clientSupports( TypeDescriptor type )
 	{
-		Version		firstSupportedVersion;
-
-		if ( usingDB2Client() ) { firstSupportedVersion = type.getDb2jccVersion(); }
-		else { firstSupportedVersion = type.getDerbyVersion(); }
+		Version firstSupportedVersion = type.getDerbyVersion();
 
 		if ( firstSupportedVersion == null ) { return false; }
 		else { return getDriverVersion().atLeast( firstSupportedVersion ); }
@@ -1352,38 +1274,30 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
 	/**
 	 * <p>
 	 * This helper class describes a legal datatype and the version of Derby
-	 * and db2jcc where the datatype first appears.
+	 * where the datatype first appears.
 	 * </p>
 	 */
 	public	static	final	class	TypeDescriptor
 	{
 		private	int		_jdbcType;
 		private	String	_derbyTypeName;
-		private	Version	_db2jccVersion;		// first db2jcc version which supports this type
 		private	Version	_derbyVersion;		// first derby version which supports this type
-		private	Version	_vmVersion;			// first vm (jdbc) version which supports this type
 
 		public	TypeDescriptor
 		(
 		    int		jdbcType,
 			String	derbyTypeName,
-			Version	db2jccVersion,
-			Version	derbyVersion,
-			Version	vmVersion
+			Version	derbyVersion
 		)
 		{
 			_jdbcType = jdbcType;
 			_derbyTypeName = derbyTypeName;
-			_db2jccVersion = db2jccVersion;
 			_derbyVersion = derbyVersion;
-			_vmVersion = vmVersion;
 		}
 
 		public	int		getJdbcType() 					{ return _jdbcType; }
 		public	String	getDerbyTypeName()				{ return _derbyTypeName; }
-		public	Version	getDb2jccVersion()				{ return _db2jccVersion; }
 		public	Version	getDerbyVersion()				{ return _derbyVersion; }
-		public	Version	getVMVersion()					{ return _vmVersion; }
 	}
 
 	/**

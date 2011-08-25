@@ -36,8 +36,6 @@ import java.util.*;
 
 import junit.framework.*;
 
-import org.apache.derby.tools.ij;
-
 public	class	DerbyJUnitTest	extends	TestCase
 {
 	/////////////////////////////////////////////////////////////
@@ -70,11 +68,10 @@ public	class	DerbyJUnitTest	extends	TestCase
 	//
 	// These are properties for the Derby connection URL.
 	//
-	private	static	final			String	SERVER_URL = "jdbc:derby://localhost:1527/";
 	private	static	final			String	CREATE_PROPERTY = "create=true";
 
 	//
-	// Indexes into the array of client-specific strings. E.g., DB2JCC_CLIENT,
+	// Indexes into the array of client-specific strings. E.g.,
 	// DERBY_CLIENT, and EMBEDDED_CLIENT.
 	//
 	public	static	final			int		DATABASE_URL = 0;
@@ -82,12 +79,6 @@ public	class	DerbyJUnitTest	extends	TestCase
 	public	static	final			int		FRAMEWORK_NAME = DRIVER_NAME + 1;
 
 	// indexed by DATABASE_URL and DRIVER_NAME
-	private	static	final	String[]	DB2JCC_CLIENT =
-	{
-		"jdbc:derby:net://localhost:1527/",
-		"com.ibm.db2.jcc.DB2Driver",
-		"DerbyNet"
-	};
 	private	static	final	String[]	DERBY_CLIENT =
 	{
 		"jdbc:derby://localhost:1527/",
@@ -103,7 +94,6 @@ public	class	DerbyJUnitTest	extends	TestCase
 
 	public	static	final	String[][]	LEGAL_CLIENTS =
 	{
-		DB2JCC_CLIENT,
 		DERBY_CLIENT,
 		EMBEDDED_CLIENT
 	};
@@ -121,7 +111,6 @@ public	class	DerbyJUnitTest	extends	TestCase
 	private	static	String		_databaseName;			// sandbox for tests
 	private	static	String[]	_defaultClientSettings;	// one of the clients in
 														// LEGAL_CLIENTS
-	private	static	boolean		_initializedForTestHarness;
 
 	/////////////////////////////////////////////////////////////
 	//
@@ -144,46 +133,6 @@ public	class	DerbyJUnitTest	extends	TestCase
 
 	/**
 	 * <p>
-	 * Run under the old harness.
-	 * </p>
-	 */
-	public	static	void	runUnderOldHarness( String[] args, Test suite )
-		throws Exception
-	{
-		int			exitStatus = FAILURE_EXIT;
-
-		initializeForOldHarness( args );
-
-		TestResult	result = junit.textui.TestRunner.run( suite );
-			
-		exitStatus = result.errorCount() + result.failureCount();
-
-		Runtime.getRuntime().exit( exitStatus );
-	}
-
-	/**
-	 * <p>
-	 * Initialize a test suite to run under the old test harness.
-	 * </p>
-	 */
-	public	static	void	initializeForOldHarness( String[] args )
-		throws Exception
-	{
-		if ( _initializedForTestHarness ) { return; }
-		
-		parseDebug();
-		setDatabaseName( DEFAULT_DATABASE_NAME );
-		findClientFromProperties();
-		
-		// create database
-		ij.getPropertyArg( args );
-		Connection conn = ij.startJBMS();
-
-		_initializedForTestHarness = true;
-	}
-
-	/**
-	 * <p>
 	 * Return true if we're using the embedded driver.
 	 * </p>
 	 */
@@ -195,13 +144,6 @@ public	class	DerbyJUnitTest	extends	TestCase
 	 * </p>
 	 */
 	public	boolean	usingDerbyClient() { return ( _defaultClientSettings == DERBY_CLIENT ); }
-
-	/**
-	 * <p>
-	 * Return true if we're using the db2 client
-	 * </p>
-	 */
-	public	boolean	usingDB2Client() { return ( _defaultClientSettings == DB2JCC_CLIENT ); }
 
 	/**
 	 * <p>
@@ -279,44 +221,6 @@ public	class	DerbyJUnitTest	extends	TestCase
 			if ( t instanceof SQLException )	{ t = ((SQLException) t).getNextException(); }
 			else { break; }
 		}
-	}
-
-	/**
-	 * <p>
-	 * Determine the client to use based on system properties.
-	 * </p>
-	 */
-	public	static	void	findClientFromProperties()
-		throws Exception
-	{
-		Properties		systemProps = System.getProperties();
-		String			frameworkName = systemProps.getProperty
-			( "framework", EMBEDDED_CLIENT[ FRAMEWORK_NAME ] );
-		int				count = LEGAL_CLIENTS.length;
-
-		for ( int i = 0; i < count; i++ )
-		{
-			String[]	candidate = LEGAL_CLIENTS[ i ];
-
-			if ( candidate[ FRAMEWORK_NAME ].equals( frameworkName ) )
-			{
-				_defaultClientSettings = candidate;
-				return;
-			}
-		}
-
-		throw new Exception( "Unrecognized framework: " + frameworkName );
-	}
-
-	/**
-	 * <p>
-	 * Return a meaningful exit status so that calling scripts can take
-	 * evasive action.
-	 * </p>
-	 */
-	public	void	exit( int exitStatus )
-	{
-		Runtime.getRuntime().exit( exitStatus );
 	}
 
 	/////////////////////////////////////////////////////////////

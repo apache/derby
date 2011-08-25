@@ -25,7 +25,6 @@ import org.apache.derbyTesting.junit.BaseTestCase;
 
 import org.apache.derby.drda.NetworkServerControl;
 
-import java.sql.*;
 import java.io.*;
 import java.util.*;
 
@@ -83,7 +82,6 @@ import junit.framework.TestSuite;
  * # 'jvm.versions' tells how many. 'jvm.N=<descriptive_name>' defines 
  * # names of properties giving the full path to the actual jvms. 
  * jvm.versions=3
- * # jvm.0=j13lib
  * jvm.0=j14lib
  * jvm.1=j15lib
  * jvm.2=j16lib
@@ -128,10 +126,6 @@ import junit.framework.TestSuite;
  * test.securityOption=noSecurityManager
  * 
  * #-----------------------------
- * # Driver to use for 10.0.2.1(incubator version - no Derby provided driver):
- * db2jcc_lib=/usr/local/share/java/db2jcc/lib
- * 
- * #-----------------------------
  * # Use a special testing jar? Optional
  * # E.g. your own experimental:
  * # test.derbyTestingJar=/home/testuser/Derby/testSandbox/trunk/jars/insane/derbyTesting.jar
@@ -157,8 +151,6 @@ import junit.framework.TestSuite;
  * ##############################
  * # Utilities...
  * junit_jar=/usr/local/share/java/junit3.8.2/junit.jar
- * jce_jar=/usr/local/share/java/jce1.2.2/lib/jce1_2_2.jar
- * jdbc2_0_stdext_jar=/usr/local/share/java/jdbc2.0-stdext/jdbc2_0-stdext.jar
  * 
  * ##############################
  *        
@@ -196,13 +188,9 @@ public class CompatibilityCombinations extends BaseTestCase
     private final static int DERBYMAX_JAR = DERBYTESTING_JAR;
     
     private       static String[][] derbyLib = null; // Size: [derbyVerLibs.length()][DERBYMAX_JAR]
-    private       static String db2jcc_lib = null; // Path for db2jcc library.
-    private       static String CLIENT_DB2JCC = null; // Path for db2jcc.jar and db2jcc_license_c.jar (in db2jcc_lib)
     private       static String junit_jar = null; // Path for JUnit jar
-    private       static String jce_jar = null; // Path for jce_jar
-    private       static String jdbc2_0_stdext_jar = null; // Path for jdbc2_0-stdext.jar
     
-    private       static String test_jars = null; // Path for derbyTesting.jar:junit_jar:jce_jar
+    private       static String test_jars = null; // Path for derbyTesting.jar:junit_jar
     
     private       static String serverHost = "localhost"; // Currently only handles localhost!
     private       static int serverPort = 1527; // Since  CompatibilitySuite and JDBCDriverTest only handles default..
@@ -360,7 +348,6 @@ public class CompatibilityCombinations extends BaseTestCase
         {
             
             String creatorJvm = VM_Ids[serverVM]+JVMloc;   // Create db using server VM
-              // Original ant testScript uses CLIENT_DB2JCC:
             String derbyCreatorJar = derbyLib[trunkVersion][DERBY_JAR] // and trunk Derby version.
                     +":"+derbyLib[trunkVersion][DERBYNET_JAR];
 
@@ -368,7 +355,6 @@ public class CompatibilityCombinations extends BaseTestCase
             String creatorClassPath = derbyCreatorJar
                     +":"+derbyTestingJar
                     +":"+junit_jar
-                    +":"+jce_jar
                     ;
             recreateDB(trunkVersion
                     , creatorJvm
@@ -397,8 +383,9 @@ public class CompatibilityCombinations extends BaseTestCase
                     String derbyClientJar = derbyCreatorJar;
                     if ( derbyVersionNames[clientVersion].equalsIgnoreCase("10.0.2.1") ) // Has no own client
                     {
-                        derbyClientJar = CLIENT_DB2JCC;
-                        clientName = "10.0.DB2JCC"; // Pre-pend 10.0. to get a "natural" sorting of log files...
+                        // Skip client testing of this version since there
+                        // is no client.
+                        continue;
                     }
                     DEBUG("derbyClientJar: "+derbyClientJar);
                     String clientJvm = VM_Ids[clientVM]+JVMloc;
@@ -406,8 +393,6 @@ public class CompatibilityCombinations extends BaseTestCase
                     String clientClassPath = derbyClientJar
                             +":"+derbyTestingJar
                             +":"+junit_jar
-                            +":"+jce_jar
-                            +":"+jdbc2_0_stdext_jar
                             ;
                     String combinationName =
                             "Embedded_"+derbyVersionNames[trunkVersion]+"VM"+vmNames[serverVM]
@@ -539,17 +524,19 @@ public class CompatibilityCombinations extends BaseTestCase
                 startServer(serverVM, serverVersion);
                 
                 String creatorJvm = VM_Ids[serverVM]+JVMloc;   // Create db using server VM
-                // Original ant testScript uses CLIENT_DB2JCC:
                 String derbyCreatorJar = derbyLib[0][DERBYCLIENT_JAR]; // and first(lowest) Derby version.
                 if ( derbyVersionNames[0].equalsIgnoreCase("10.0.2.1") ) // Has no own client
                 {
-                  derbyCreatorJar = CLIENT_DB2JCC;
+                    // Pick the next Derby version in case we don't have
+                    // a client driver for the lowest version.
+                    if (derbyLib.length > 1) {
+                        derbyCreatorJar = derbyLib[1][DERBYCLIENT_JAR];
+                    }
                 }
                 DEBUG("derbyCreatorJar: "+derbyCreatorJar);
                 String creatorClassPath = derbyCreatorJar
                         +":"+derbyTestingJar
                         +":"+junit_jar
-                        +":"+jce_jar
                         ;
                 boolean deleteDatabaseFiles = !includeUpgrade;
                 if ( serverVersion == 0 ) deleteDatabaseFiles = true; // Always remove when starting from the initial Derby version.
@@ -592,23 +579,23 @@ public class CompatibilityCombinations extends BaseTestCase
                     }
                     for (int clientVersion=clientVersionLow;clientVersion<=clientVersionHigh;clientVersion++ )
                     {
-                        noOfCombinations++;
-                        
                       String clientName = derbyVersionNames[clientVersion];
                         String derbyClientJar = derbyLib[clientVersion][DERBYCLIENT_JAR];
                         if ( derbyVersionNames[clientVersion].equalsIgnoreCase("10.0.2.1") ) // Has no own client
                         {
-                            derbyClientJar = CLIENT_DB2JCC; // or derbynet
-                            clientName = "10.0.DB2JCC"; // Pre-pend 10.0. to get a "natural" sorting of log files...
+                            // Skip this combination since we don't have a
+                            // client driver.
+                            continue;
                         }
+
+                        noOfCombinations++;
+
                         DEBUG("derbyClientJar: "+derbyClientJar);
                         String clientJvm = VM_Ids[clientVM]+JVMloc;
                         
                         String clientClassPath = derbyClientJar
                                 +":"+derbyTestingJar
                                 +":"+junit_jar
-                                +":"+jce_jar
-                                +":"+jdbc2_0_stdext_jar
                                 ;
                         String combinationName =
                                 "ServerVM-"+vmNames[serverVM]+"_server"+derbyVersionNames[serverVersion]
@@ -838,10 +825,7 @@ public class CompatibilityCombinations extends BaseTestCase
      *         <li>derbyVersionNames[v] 
      *         <li>derbyVersionNames[v]+"_SA"
      *         </ul>
-     *     <li>db2jcc_lib 
      *     <li>junit_jar 
-     *     <li>jce_jar 
-     *     <li>jdbc2_0_stdext_jar
      * </ul>
    * @throws java.io.IOException .
      */
@@ -961,17 +945,8 @@ public class CompatibilityCombinations extends BaseTestCase
             derbyLib[drbV][DERBYNET_JAR] =     derbyVerLibs[drbV] + PS+"derbynet.jar";
         }
         
-        db2jcc_lib = cp.getProperty("db2jcc_lib");
-        System.out.println("db2jcc_lib: " + db2jcc_lib);
-        CLIENT_DB2JCC=db2jcc_lib+PS+"db2jcc.jar"
-                +":"+db2jcc_lib+PS+"db2jcc_license_c.jar";
-        
         junit_jar = cp.getProperty("junit_jar");
         System.out.println("junit_jar: " + junit_jar);
-        jce_jar = cp.getProperty("jce_jar");
-        System.out.println("jce_jar: " + jce_jar);
-        jdbc2_0_stdext_jar = cp.getProperty("jdbc2_0_stdext_jar");
-        System.out.println("jdbc2_0_stdext_jar: " + jdbc2_0_stdext_jar);
       
         int currentTestVersion = derbyVerLibs.length -1; // Always use test from newest/highest version.
         
@@ -980,7 +955,6 @@ public class CompatibilityCombinations extends BaseTestCase
         
         test_jars = derbyTestingJar
                 + ":" + junit_jar
-                + ":" + jce_jar
                 ;
         System.out.println("test_jars: " + test_jars);
         System.out.println("--------------------------------------------------------");
