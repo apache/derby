@@ -89,7 +89,7 @@ public class ErrorLogReader extends VTITemplate
 
 	// Variables for current row
 	private String line;
-	private int gmtIndex;
+	private int endTimestampIndex;
 	private int threadIndex;
 	private int xidIndex;
 	private int lccidIndex;
@@ -97,7 +97,7 @@ public class ErrorLogReader extends VTITemplate
 	private int drdaidIndex;
 
 
-	private static final String GMT_STRING = " GMT";
+	private static final String END_TIMESTAMP = " Thread";
 	private static final String PARAMETERS_STRING = "Parameters:";
 	private static final String BEGIN_THREAD_STRING = "[";
 	private static final String END_THREAD_STRING = "]";
@@ -178,7 +178,7 @@ public class ErrorLogReader extends VTITemplate
 				return false;
 			}
 
-			gmtIndex = line.indexOf(GMT_STRING);
+            endTimestampIndex = line.indexOf( END_TIMESTAMP );
 			threadIndex = line.indexOf(BEGIN_THREAD_STRING);
 			xidIndex = line.indexOf(BEGIN_XID_STRING);
 			lccidIndex = line.indexOf(BEGIN_XID_STRING, xidIndex + 1);
@@ -191,7 +191,7 @@ public class ErrorLogReader extends VTITemplate
 				continue;
 			}
 
-			if (gmtIndex != -1 && threadIndex != -1  && xidIndex != -1 && 
+			if (endTimestampIndex != -1 && threadIndex != -1  && xidIndex != -1 && 
 				databaseIndex != -1)
 			{
 				return true;
@@ -234,7 +234,7 @@ public class ErrorLogReader extends VTITemplate
 		switch (columnNumber)
 		{
 			case 1:
-				return line.substring(0, gmtIndex);
+				return line.substring(0, endTimestampIndex);
 
 			case 2:
 				return line.substring(threadIndex + 1, line.indexOf(END_THREAD_STRING));
@@ -314,7 +314,7 @@ public class ErrorLogReader extends VTITemplate
 	/* MetaData
 	 */
 	
-	// column1: TS varchar(26) not null
+	// column1: TS varchar(29) not null
 	// column2: THREADID varchar(40) not null
 	// column3: XID  varchar(15) not null
 	// column4: LCCID  varchar(15) not null
@@ -322,7 +322,7 @@ public class ErrorLogReader extends VTITemplate
 	// column6: DRDAID varchar(50) nullable
 	// column5: LOGTEXT VARCHAR(max) not null
 	private static final ResultColumnDescriptor[] columnInfo = {
-		EmbedResultSetMetaData.getResultColumnDescriptor("TS", Types.VARCHAR, false, 26),
+		EmbedResultSetMetaData.getResultColumnDescriptor("TS", Types.VARCHAR, false, 29),
 		EmbedResultSetMetaData.getResultColumnDescriptor("THREADID", Types.VARCHAR, false, 40),
 		EmbedResultSetMetaData.getResultColumnDescriptor("XID", Types.VARCHAR, false, 15),
 		EmbedResultSetMetaData.getResultColumnDescriptor("LCCID", Types.VARCHAR, false, 15),
