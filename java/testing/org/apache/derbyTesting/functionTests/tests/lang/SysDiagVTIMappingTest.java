@@ -26,6 +26,7 @@ import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
+import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 import java.sql.ResultSet;
@@ -33,6 +34,9 @@ import java.sql.Statement;
 import java.sql.CallableStatement;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Properties;
 
 public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
 
@@ -50,10 +54,18 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
     public static Test suite()
     {
         TestSuite suite = new TestSuite("Diagnostic VTI Table Mappings");
-        suite.addTest(TestConfiguration.
-            defaultSuite(SysDiagVTIMappingTest.class));
 
-        /* Some of the VTIs that are tested in this class require a derby.log
+        Test    defaultSetup = TestConfiguration.defaultSuite( SysDiagVTIMappingTest.class );
+
+        // turn on statement logging so there will be something in the error log
+        // to run these vtis against
+        Properties sysprops = new Properties();
+        sysprops.put( "derby.language.logStatementText", "true" );
+        Test    verboseTest = new SystemPropertyTestSetup ( defaultSetup, sysprops );
+
+        suite.addTest( verboseTest );
+
+         /* Some of the VTIs that are tested in this class require a derby.log
          * file.  We have a test log file stored in the tests/lang directory,
          * and since the VTIs are going to try to read it, the test log file
          * must be in a directory for which Derby has read access.  By
@@ -393,7 +405,7 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, expColNames);
         String [][] expRS = new String [][]
         {
-            {"2006-12-15 16:14:58.280", "main,5,main", "1111", "0",
+            {"2006-12-15 16:14:58.280 GMT", "main,5,main", "1111", "0",
                 "(DATABASE = ugh), (DRDAID = null), Cleanup action starting",
                 "0"}
         };
@@ -413,7 +425,7 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, expColNames);
         expRS = new String [][]
         {
-            {"2006-12-15 16:14:58.280", "main,5,main", "1111", "0",
+            {"2006-12-15 16:14:58.280 GMT", "main,5,main", "1111", "0",
                 "(DATABASE = ugh), (DRDAID = null), Cleanup action starting",
                 "0"}
         };
@@ -450,9 +462,9 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, expColNames);
         String [][] expRS = new String [][]
         {
-            {"2006-12-15 16:14:58.280", "main,5,main", "1111", "0", "ugh",
+            {"2006-12-15 16:14:58.280 GMT", "main,5,main", "1111", "0", "ugh",
                 "null", "Cleanup action starting"},
-            {"2006-12-15 16:14:58.280", "main,5,main", "1111", "0", "ugh",
+            {"2006-12-15 16:14:58.280 GMT", "main,5,main", "1111", "0", "ugh",
                 "null", "Failed Statement is: select * from oops"}
         };
         
@@ -471,9 +483,9 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
         JDBC.assertColumnNames(rs, expColNames);
         expRS = new String [][]
         {
-            {"2006-12-15 16:14:58.280", "main,5,main", "1111", "0", "ugh",
+            {"2006-12-15 16:14:58.280 GMT", "main,5,main", "1111", "0", "ugh",
                 "null", "Cleanup action starting"},
-            {"2006-12-15 16:14:58.280", "main,5,main", "1111", "0", "ugh",
+            {"2006-12-15 16:14:58.280 GMT", "main,5,main", "1111", "0", "ugh",
                 "null", "Failed Statement is: select * from oops"}
         };
 
@@ -701,6 +713,37 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
 
         rs.close();
         st.close();
+    }
+
+    /**
+     * Test date formatting in the vtis which read the error log. This attempts
+     * to keep us from breaking these vtis if the format of logged timestamps
+     * changes. See DERBY-5391.
+     */
+    public  void    test_5391() throws Exception
+    {
+        Statement   st = createStatement();
+
+        ResultSet   rs1 = st.executeQuery( "select * from table (syscs_diag.error_log_reader( )) as t1" );
+        vetTimestamp( rs1 );
+        rs1.close();
+
+        ResultSet   rs2 = st.executeQuery( "select * from table (syscs_diag.statement_duration()) as t1" );
+        vetTimestamp( rs2 );
+        rs2.close();
+
+        st.close();
+    }
+    private void    vetTimestamp( ResultSet rs ) throws Exception
+    {
+        assertTrue( rs.next() );
+
+        String  timestampString = rs.getString( 1 ).trim();
+
+        SimpleDateFormat    sdf = new SimpleDateFormat( "EEE MMM dd HH:mm:ss zzz yyyy" );
+        Timestamp   timestamp = new Timestamp( sdf.parse( timestampString ).getTime() );
+
+        println( timestamp.toString() );
     }
 
     /* All statements in this method should fail because a VTI table-

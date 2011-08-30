@@ -26,7 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
-
+import java.text.SimpleDateFormat;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -86,13 +86,13 @@ public class StatementDuration extends VTITemplate
 
 	// Variables for current row
 	private String line;
-	private int gmtIndex;
+	private int endTimestampIndex;
 	private int threadIndex;
 	private int xidIndex;
 	private int lccidIndex;
 	private String[] currentRow;
 
-	private static final String GMT_STRING = " GMT";
+	private static final String END_TIMESTAMP = " Thread";
 	private static final String BEGIN_THREAD_STRING = "[";
 	private static final String END_THREAD_STRING = "]";
 	private static final String BEGIN_XID_STRING = "= ";
@@ -170,12 +170,12 @@ public class StatementDuration extends VTITemplate
 				return false;
 			}
 
-			gmtIndex = line.indexOf(GMT_STRING);
+            endTimestampIndex = line.indexOf( END_TIMESTAMP );
 			threadIndex = line.indexOf(BEGIN_THREAD_STRING);
 			xidIndex = line.indexOf(BEGIN_XID_STRING);
 			lccidIndex = line.indexOf(BEGIN_XID_STRING, xidIndex + 1);
 
-			if (gmtIndex != -1 && threadIndex != -1)
+			if (endTimestampIndex != -1 && threadIndex != -1 && xidIndex != -1)
 			{
 				/* Build a row */
 				String[] newRow = new String[6];
@@ -198,9 +198,9 @@ public class StatementDuration extends VTITemplate
 				currentRow = (String[]) previousRow;
 				
 				/* Figure out the duration. */
-				Timestamp endTs = Timestamp.valueOf(newRow[0]);
+				Timestamp endTs = stringToTimestamp( newRow[0] );
 				long end = endTs.getTime() + endTs.getNanos() / 1000000;
-				Timestamp startTs = Timestamp.valueOf(currentRow[0]);
+				Timestamp startTs = stringToTimestamp( currentRow[0] );
 				long start = startTs.getTime() + startTs.getNanos() / 1000000;
 				currentRow[5] = Long.toString(end - start);
 
@@ -208,6 +208,47 @@ public class StatementDuration extends VTITemplate
 			}
 		}
 	}
+    // Turn a string into a Timestamp
+    private Timestamp   stringToTimestamp( String raw ) throws SQLException
+    {
+        //
+        // We have to handle two timestamp formats.
+        //
+        // 1) Logged timestamps look like this before 10.7 and the fix introduced by DERBY-4752:
+        //
+        //     2006-12-15 16:14:58.280 GMT
+        //
+        // 2) From 10.7 onward, logged timestamps look like this:
+        //
+        //     Fri Aug 26 09:28:00 PDT 2011
+        //
+        String  trimmed = raw.trim();
+
+        // if we're dealing with a pre-10.7 timestamp
+        if ( !Character.isDigit( trimmed.charAt( trimmed.length() -1 ) ) )
+        {
+            // strip off the trailing timezone, which Timestamp does not expect
+
+            trimmed = trimmed.substring( 0, trimmed.length() - 4 );
+            
+            return Timestamp.valueOf( trimmed );
+        }
+        else
+        {
+            //
+            // From 10.7 onward, the logged timestamp was formatted by Date.toString().
+            //
+            SimpleDateFormat    sdf = new SimpleDateFormat( "EEE MMM dd HH:mm:ss zzz yyyy" );
+
+            try {
+                return new Timestamp( sdf.parse( trimmed ).getTime() );
+            }
+            catch (Exception e)
+            {
+                throw new SQLException( e.getMessage() );
+            }
+        }
+    }
 
 	/**
 		@see java.sql.ResultSet#close
@@ -250,7 +291,7 @@ public class StatementDuration extends VTITemplate
 		switch (columnNumber)
 		{
 			case 1:
-				return line.substring(0, gmtIndex);
+				return line.substring(0, endTimestampIndex);
 
 			case 2:
 				return line.substring(threadIndex + 1, line.indexOf(END_THREAD_STRING));
@@ -331,7 +372,7 @@ public class StatementDuration extends VTITemplate
 	*/
 	private static final ResultColumnDescriptor[] columnInfo = {
 
-		EmbedResultSetMetaData.getResultColumnDescriptor("TS",        Types.VARCHAR, false, 26),
+		EmbedResultSetMetaData.getResultColumnDescriptor("TS",        Types.VARCHAR, false, 29),
 		EmbedResultSetMetaData.getResultColumnDescriptor("THREADID",  Types.VARCHAR, false, 80),
 		EmbedResultSetMetaData.getResultColumnDescriptor("XID",       Types.VARCHAR, false, 15),
 		EmbedResultSetMetaData.getResultColumnDescriptor("LCCID",     Types.VARCHAR, false, 10),
