@@ -93,12 +93,6 @@ public class BootLockTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
         TestSuite suite = new TestSuite("BootLockTest");
-
-        if (BaseTestCase.isJ9Platform()) {
-            // forking currently not working, cf. DERBY-4179.
-            return suite;
-        }
-
         suite.addTest(decorateTest());
         return suite;
     }
@@ -113,7 +107,8 @@ public class BootLockTest extends BaseJDBCTestCase {
 
         Test test = new TestSuite(BootLockTest.class);
 
-        if (JDBC.vmSupportsJSR169()) {
+        if (JDBC.vmSupportsJSR169() && !isJ9Platform()) {
+            // PhoneME requires forceDatabaseLock
             Properties props = new Properties();
             props.setProperty("derby.database.forceDatabaseLock", "true");
             test = new SystemPropertyTestSetup(test, props, true);
@@ -140,7 +135,8 @@ public class BootLockTest extends BaseJDBCTestCase {
             Connection c = getConnection();
             fail("Dual boot not detected: check BootLockMinion.log");
         } catch (SQLException e) {
-            if (JDBC.vmSupportsJSR169()) {
+            if (JDBC.vmSupportsJSR169() && !isJ9Platform()) {
+                // For PhoneME force database lock required
                 assertSQLState(
                         "Dual boot not detected: check BootLockMinion.log",
                         DATA_MULTIPLE_JBMS_FORCE_LOCK,
