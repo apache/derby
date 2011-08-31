@@ -21,6 +21,7 @@
 
 package org.apache.derby.diag;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.store.access.TransactionInfo;
@@ -86,6 +87,11 @@ public class TransactionTable extends VTITemplate implements VTICosting {
 	int currentRow;
 	private boolean wasNull;
 
+    public  TransactionTable()    throws StandardException
+    {
+        DiagUtil.checkAccess();
+    }
+    
 	/**
 		@see java.sql.ResultSet#getMetaData
 	 */

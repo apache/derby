@@ -29,10 +29,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Vector;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.Limits;
 import org.apache.derby.iapi.services.cache.CacheManager;
+import org.apache.derby.iapi.services.context.ContextService;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
-import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
@@ -73,10 +74,13 @@ public final class StatementCache extends VTITemplate {
 	private GenericPreparedStatement currentPs;
 	private boolean wasNull;
 
-	public StatementCache() throws SQLException {
+	public StatementCache() throws StandardException {
 
-		LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+        DiagUtil.checkAccess();
         
+        LanguageConnectionContext lcc = (LanguageConnectionContext)
+            ContextService.getContextOrNull(LanguageConnectionContext.CONTEXT_ID);
+
         CacheManager statementCache =
             lcc.getLanguageConnectionFactory().getStatementCache();
 
