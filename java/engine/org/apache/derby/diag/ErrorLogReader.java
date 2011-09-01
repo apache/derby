@@ -26,6 +26,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 
 import java.util.Hashtable;
 import java.util.Enumeration;
@@ -35,8 +37,10 @@ import java.sql.SQLException;
 import java.sql.Types;
 import org.apache.derby.vti.VTITemplate;
 import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.util.StringUtil;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
 
@@ -117,9 +121,20 @@ public class ErrorLogReader extends VTITemplate
 		ErrorLogReader('filename') will access the specified
 		file name.
 	 */
-	public ErrorLogReader()
+	public ErrorLogReader() throws StandardException
 	{
-		String home = System.getProperty("derby.system.home");
+        DiagUtil.checkAccess();
+
+        final String home = (String)AccessController.doPrivileged
+            (
+             new PrivilegedAction()
+             {
+                 public Object run()
+                 {
+                     return System.getProperty( Property.SYSTEM_HOME_PROPERTY );
+                 }
+             }
+             );
 
 		inputFileName = "derby.log";
 
@@ -129,8 +144,10 @@ public class ErrorLogReader extends VTITemplate
 		}
 	}
 
-	public ErrorLogReader(String inputFileName)
+	public ErrorLogReader(String inputFileName) throws StandardException
 	{
+        DiagUtil.checkAccess();
+
 		this.inputFileName = inputFileName;
 	}
 

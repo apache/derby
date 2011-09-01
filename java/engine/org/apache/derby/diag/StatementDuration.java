@@ -26,7 +26,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
-
+import java.security.PrivilegedAction;
+import java.security.AccessController;
+import java.text.SimpleDateFormat;
 import java.util.Hashtable;
 import java.util.Enumeration;
 import java.util.Properties;
@@ -35,9 +37,11 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
 import org.apache.derby.vti.VTITemplate;
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.impl.jdbc.EmbedResultSetMetaData;
 import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.util.StringUtil;
 
 /**
@@ -107,9 +111,20 @@ public class StatementDuration extends VTITemplate
 		StatementDuration('filename') will access the specified
 		file name.
 	 */
-	public StatementDuration()
+	public StatementDuration()  throws StandardException
 	{
-		String home = System.getProperty("derby.system.home");
+        DiagUtil.checkAccess();
+
+        final String home = (String)AccessController.doPrivileged
+            (
+             new PrivilegedAction()
+             {
+                 public Object run()
+                 {
+                     return System.getProperty( Property.SYSTEM_HOME_PROPERTY );
+                 }
+             }
+             );
 
 		inputFileName = "derby.log";
 
@@ -119,8 +134,10 @@ public class StatementDuration extends VTITemplate
 		}
 	}
 
-	public StatementDuration(String inputFileName)
+	public StatementDuration(String inputFileName)  throws StandardException
 	{
+        DiagUtil.checkAccess();
+
 		this.inputFileName = inputFileName;
 	}
 
