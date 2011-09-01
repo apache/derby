@@ -216,6 +216,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(SequenceTest.suite());
         suite.addTest(SequencePermsTest.suite());
         suite.addTest(SequenceGeneratorTest.suite());
+        suite.addTest(DBOAccessTest.suite());
         suite.addTest(OLAPTest.suite());
         suite.addTest(OrderByAndOffsetFetchInSubqueries.suite());
         suite.addTest(Derby5005Test.suite());
