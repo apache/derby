@@ -1288,9 +1288,16 @@ public class PrepareStatementTest extends BaseJDBCTestCase
      */
     private static String makeString(int length)
     {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < length; ++i) buf.append("X");
-        return buf.toString();
+        return makeString(length, 'X');
+    }
+
+    /**
+     * Return a string of the given length filled with the specified character.
+     */
+    private static String makeString(int length, char ch) {
+        char[] buf = new char[length];
+        Arrays.fill(buf, ch);
+        return new String(buf);
     }
 
     /**
@@ -1319,4 +1326,62 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         rs.close();
     }
 
+    /**
+     * Verify that string values aren't truncated when their UTF-8 encoded
+     * representation exceeds 32KB. DERBY-5236.
+     */
+    public void testLongColumn() throws Exception {
+        PreparedStatement ps = prepareStatement(
+                "values cast(? as varchar(32672))");
+
+        String s1 = makeString(20000, '\u4e10');
+        ps.setString(1, s1);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), s1);
+
+        // 64K-1 bytes, should be OK.
+        String s2 =
+                s1 + makeString(64 * 1024 - s1.getBytes("UTF-8").length - 1);
+        ps.setString(1, s2);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), s2);
+
+        // 64K bytes, will be truncated to 64K-1 by the client driver because
+        // of limitation in the protocol.
+        String s3 = s2 + 'X';
+        ps.setString(1, s3);
+        if (usingDerbyNetClient()) {
+            String expected = s3.substring(0, s3.length() - 1);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), expected);
+        } else {
+            // Embedded is OK. No truncation.
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), s3);
+        }
+
+        // 64K+1 bytes, will be truncated by the client driver because of
+        // limitation in the protocol. Should be truncated to to 64K-2 to
+        // match the character boundary.
+        String s4 = s3.substring(0, s3.length() - 2) + '\u4e10';
+        ps.setString(1, s4);
+        if (usingDerbyNetClient()) {
+            String expected = s4.substring(0, s4.length() - 1);
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), expected);
+        } else {
+            // Embedded is OK. No truncation.
+            JDBC.assertSingleValueResultSet(ps.executeQuery(), s4);
+        }
+
+        // Try two columns at 64K+1 bytes. Expect same result as above.
+        PreparedStatement ps2 = prepareStatement(
+                "values (cast(? as varchar(32672)), " +
+                "cast(? as varchar(32672)))");
+        ps2.setString(1, s4);
+        ps2.setString(2, s4);
+        if (usingDerbyNetClient()) {
+            String expected = s4.substring(0, s4.length() - 1);
+            String[][] expectedRow = {{expected, expected}};
+            JDBC.assertFullResultSet(ps2.executeQuery(), expectedRow);
+        } else {
+            String[][] expectedRow = {{s4, s4}};
+            JDBC.assertFullResultSet(ps2.executeQuery(), expectedRow);
+        }
+    }
 }

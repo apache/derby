@@ -58,6 +58,12 @@ class DDMWriter
 	// Default buffer size
 	private final static int DEFAULT_BUFFER_SIZE = 32767;
 
+    /**
+     * The maximum length in bytes for strings sent by {@code writeLDString()},
+     * which is the maximum unsigned integer value that fits in two bytes.
+     */
+    private final static int MAX_VARCHAR_BYTE_LENGTH = 0xFFFF;
+
 	/**
 	 * Output buffer.
 	 */
@@ -1193,40 +1199,50 @@ class DDMWriter
 		// actual writing of the length is delayed until we have encoded the
 		// string.
 		final int lengthPos = buffer.position();
-		// Position on which to start writing the string (right after length,
-		// which is 2 bytes long).
-		final int stringPos = lengthPos + 2;
-		// don't send more than LONGVARCHAR_MAX_LEN bytes
-		final int maxStrLen =
-			Math.min(maxEncodedLength(s), FdocaConstants.LONGVARCHAR_MAX_LEN);
 
-		ensureLength(2 + maxStrLen);
+        // Reserve two bytes for the length field and move the position to
+        // where the string should be inserted.
+        ensureLength(2);
+        final int stringPos = lengthPos + 2;
+        buffer.position(stringPos);
 
-		// limit the writable area of the output buffer
-		buffer.position(stringPos);
-		buffer.limit(stringPos + maxStrLen);
+        // Write the string.
+        writeString(s);
 
-		// encode the string
-		CharBuffer input = CharBuffer.wrap(s);
-		encoder.reset();
-		CoderResult res = encoder.encode(input, buffer, true);
-		if (res == CoderResult.UNDERFLOW) {
-			res = encoder.flush(buffer);
-		}
-		if (SanityManager.DEBUG) {
-			// UNDERFLOW is returned if the entire string was encoded, OVERFLOW
-			// is returned if the string was truncated at LONGVARCHAR_MAX_LEN
-			SanityManager.ASSERT(
-				res == CoderResult.UNDERFLOW || res == CoderResult.OVERFLOW,
-				"Unexpected coder result: " + res);
-		}
+        int byteLength = buffer.position() - stringPos;
 
-		// write the length in bytes
-		buffer.putShort(lengthPos, (short) (maxStrLen - buffer.remaining()));
+        // If the byte representation of the string is too long, it needs to
+        // be truncated.
+        if (byteLength > MAX_VARCHAR_BYTE_LENGTH) {
+            // Truncate the string down to the maximum byte length.
+            byteLength = MAX_VARCHAR_BYTE_LENGTH;
+            // Align with character boundaries so that we don't send over
+            // half a character.
+            while (isContinuationByte(buffer.get(stringPos + byteLength))) {
+                byteLength--;
+            }
+            // Set the buffer position right after the truncated string.
+            buffer.position(stringPos + byteLength);
+        }
 
-		// remove the limit on the output buffer
-		buffer.limit(buffer.capacity());
+        // Go back and write the length in bytes.
+        buffer.putShort(lengthPos, (short) byteLength);
 	}
+
+    /**
+     * Check if a byte value represents a continuation byte in a UTF-8 byte
+     * sequence. Continuation bytes in UTF-8 always match the bit pattern
+     * {@code 10xxxxxx}.
+     *
+     * @param b the byte to check
+     * @return {@code true} if {@code b} is a continuation byte, or
+     * {@code false} if it is the first byte in a UTF-8 sequence
+     */
+    private static boolean isContinuationByte(byte b) {
+        // Check the values of the two most significant bits. If they are
+        // 10xxxxxx, it's a continuation byte.
+        return (b & 0xC0) == 0x80;
+    }
 
 	/**
 	 * Write string with default encoding
