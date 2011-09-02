@@ -63,26 +63,6 @@ public class VFMemoryStorageFactory
      */
     private static final DataStore DUMMY_STORE = new DataStore("::DUMMY::");
 
-    /**
-     * TODO: Remove this method once the new mechanism has been added.
-     * Deletes the database if it exists.
-     *
-     * @param dbName the database name
-     * @return {@code true} if the database was deleted, {@code false} otherwise
-     */
-    public static boolean purgeDatabase(final String dbName) {
-        // TODO: Should we check if the database is booted / active?
-        synchronized (DATABASES) {
-            DataStore store = (DataStore)DATABASES.remove(dbName);
-            if (store != null) {
-                // Delete everything.
-                store.purge();
-                return true;
-            }
-            return false;
-        }
-    }
-
     /** The canonical (unique) name of the database (absolute path). */
     private String canonicalName;
     /** The data directory of the database. */
@@ -329,7 +309,6 @@ public class VFMemoryStorageFactory
      */
     public void sync(OutputStream stream, boolean metaData) {
         // Does nothing, data is stored only in memory.
-        // TODO: Are there any streams that needs to be flushed?
     }
 
     public boolean supportsWriteSync() {
@@ -347,7 +326,7 @@ public class VFMemoryStorageFactory
      * @throws NullPointerException if {@code file} is {@code null}
      */
     private String normalizePath(String dir, String file) {
-        if (dir == null || dir.equals("")) {
+        if (dir == null || dir.length() == 0) {
             dir = dataDirectory.getPath();
         } else if (!new File(dir).isAbsolute()) {
             dir = new File(dataDirectory.getPath(), dir).getPath();
@@ -364,7 +343,7 @@ public class VFMemoryStorageFactory
      * @return A path.
      */
     private String normalizePath(String path) {
-        if (path == null || path.equals("")) {
+        if (path == null || path.length() == 0) {
             return dataDirectory.getPath();
         } else if (new File(path).isAbsolute()) {
             return path;
