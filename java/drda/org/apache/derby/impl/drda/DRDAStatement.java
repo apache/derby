@@ -678,7 +678,7 @@ class DRDAStatement
 		try {
 			drdaParamState_.drainStreamedParameter();
 		} catch (IOException e) { 
-			Util.javaException(e);
+			throw Util.javaException(e);
 		}
 		// java.sql.Statement says any result sets that are opened
 		// when the statement is re-executed must be closed; this

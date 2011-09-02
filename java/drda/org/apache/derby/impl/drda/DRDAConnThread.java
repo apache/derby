@@ -8950,18 +8950,21 @@ class DRDAConnThread extends Thread {
 	
     }
     
-    
-    private static void closeStream(InputStream stream){
-	
-	try{
-	    if (stream != null)
-		stream.close();
-	    
-	} catch (IOException e) {
-	    Util.javaException(e);
-	    
-	}
-	
+    /**
+     * Close a stream.
+     *
+     * @param stream the stream to close (possibly {@code null})
+     * @throws SQLException wrapped around an {@code IOException} if closing
+     * the stream failed
+     */
+    private static void closeStream(InputStream stream) throws SQLException {
+        try {
+            if (stream != null) {
+                stream.close();
+            }
+        } catch (IOException e) {
+            throw Util.javaException(e);
+        }
     }
     
     
