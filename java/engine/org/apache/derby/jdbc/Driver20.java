@@ -134,7 +134,7 @@ public abstract class Driver20 extends InternalDriver implements Driver {
 		boolean encryptDB = Boolean.valueOf(finfo.getProperty(Attribute.DATA_ENCRYPTION)).booleanValue();		
 		String encryptpassword = finfo.getProperty(Attribute.BOOT_PASSWORD);
 
-		if (dbname.length() == 0 || (encryptDB = true && encryptpassword == null)) {
+		if (dbname.length() == 0 || (encryptDB && encryptpassword == null)) {
 
 			// with no database name we can have shutdown or a database name
 
