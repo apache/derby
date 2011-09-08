@@ -654,6 +654,33 @@ public class SequenceGeneratorTest  extends GeneratedColumnsHelper
              );
     }
     
+    /**
+     * <p>
+     * Test that sequence values are not leaked during an orderly system shutdown.
+     * See DERBY-5398.
+     * </p>
+     */
+    public void test_10_5398() throws Exception
+    {
+        Connection  conn = openUserConnection( TEST_DBO );
+
+        goodStatement( conn, "create sequence seq_10\n" );
+
+        int seq_10_value = Integer.MIN_VALUE;
+        long seq_10_upperBound;
+
+        seq_10_upperBound = seq_10_value + ALLOCATION_COUNT;
+        vetBumping( conn, TEST_DBO, "SEQ_10", seq_10_value++, seq_10_upperBound );
+
+        // bring down the engine, then reboot the database
+        getTestConfiguration().shutdownEngine();
+        conn = openUserConnection( TEST_DBO );
+
+        // verify that we did not leak any values
+        seq_10_upperBound = seq_10_value + ALLOCATION_COUNT;
+        vetBumping( conn, TEST_DBO, "SEQ_10", seq_10_value++, seq_10_upperBound );
+    }
+    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS

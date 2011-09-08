@@ -29,10 +29,13 @@ import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheManager;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
+import org.apache.derby.iapi.store.access.AccessFactory;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.RowLocation;
@@ -195,10 +198,24 @@ public abstract class SequenceUpdater implements Cacheable
         //
         // Flush current value to disk. This prevents us from leaking values when DDL
         // is performed. The metadata caches are invalidated and cleared when DDL is performed.
+        // We flush the current value to disk on database shutdown also.
         //
         if ( _sequenceGenerator != null )
         {
-            updateCurrentValueOnDisk( null, peekAtCurrentValue() );
+            boolean gapClosed = updateCurrentValueOnDisk( null, peekAtCurrentValue() );
+
+            // log an error message if we failed to flush the preallocated values.
+            if ( !gapClosed )
+            {
+                String  errorMessage = MessageService.getTextMessage
+                    (
+                     SQLState.LANG_CANT_FLUSH_PREALLOCATOR,
+                     _sequenceGenerator.getSchemaName(),
+                     _sequenceGenerator.getName()
+                     );
+
+                Monitor.getStream().println( errorMessage );
+            }
         }
 
         _uuidString = null;
@@ -400,7 +417,33 @@ public abstract class SequenceUpdater implements Cacheable
      */
     public boolean updateCurrentValueOnDisk( Long oldValue, Long newValue ) throws StandardException
     {
-        TransactionController executionTransaction = getLCC().getTransactionExecute();
+        LanguageConnectionContext   lcc = getLCC();
+
+        //
+        // Not having an LCC should mean that we are in the middle of engine
+        // shutdown. We get here only to flush the current value to disk so that
+        // we don't leak unused sequence numbers. See DERBY-5398.
+        //
+        if ( lcc == null )
+        {
+            if (SanityManager.DEBUG)
+            {
+				SanityManager.ASSERT( oldValue == null, "We should be flushing unused sequence values here." );
+			}
+            
+            ContextService csf = ContextService.getFactory();
+            ContextManager cm = csf.getCurrentContextManager();
+            AccessFactory af = _dd.af;
+            TransactionController   dummyTransaction = af.getTransaction( cm );
+
+            boolean retval = updateCurrentValueOnDisk( dummyTransaction, oldValue, newValue, false );
+            dummyTransaction.commit();
+            dummyTransaction.destroy();
+
+            return retval;
+		}
+
+        TransactionController executionTransaction = lcc.getTransactionExecute();
         TransactionController nestedTransaction = null;
 
         try {
