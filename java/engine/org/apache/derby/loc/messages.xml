@@ -3446,6 +3446,13 @@ Guide.
                 <arg>className</arg>
             </msg>
 
+            <msg>
+                <name>X0Y86.S</name>
+                <text>Derby could not obtain the locks needed to release the unused, preallocated values for the sequence '{0}'.'{1}'. As a result, unexpected gaps may appear in this sequence.</text>
+                <arg>schemaName</arg>
+                <arg>sequenceName</arg>
+            </msg>
+
         </family>
 
 
