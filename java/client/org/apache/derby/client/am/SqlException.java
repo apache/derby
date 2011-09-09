@@ -22,7 +22,6 @@
 package org.apache.derby.client.am;
 
 import java.sql.SQLException;
-import java.util.TreeMap;
 
 import org.apache.derby.shared.common.i18n.MessageUtil;
 import org.apache.derby.shared.common.error.ExceptionUtil;
@@ -281,6 +280,13 @@ public class SqlException extends Exception implements Diagnosable {
         this.sqlca_ = sqlca;
         messageNumber_ = number;
         sqlstate_ = sqlca.getSqlState(number);
+
+        // If the SQLState indicates that this is a java.sql.DataTruncation
+        // type of exception, generate one right away.
+        if (SQLState.DATA_TRUNCATION_READ.equals(sqlstate_)) {
+            wrappedException_ = sqlca.getDataTruncation();
+        }
+
         int nextMsg = number + 1;
         if (chain && (sqlca.numberOfMessages() > nextMsg)) {
             setThrowable(new SqlException(sqlca, nextMsg, true));

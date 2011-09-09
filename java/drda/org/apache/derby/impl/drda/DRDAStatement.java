@@ -39,6 +39,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 import java.lang.reflect.Array;
 
+import java.sql.DataTruncation;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
 import org.apache.derby.iapi.jdbc.BrokeredPreparedStatement;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
@@ -101,6 +102,12 @@ class DRDAStatement
 	private Hashtable resultSetTable;     // Hashtable with resultsets            
 	private ArrayList resultSetKeyList;  // ordered list of hash keys
 	private int numResultSets = 0;  
+
+    /**
+     * A chain of warnings indicating whether some of the data values returned
+     * by this statement had to be truncated before being sent to the client.
+     */
+    private DataTruncation truncationWarnings;
 
 	/** This class is used to keep track of the statement's parameters
 	 * as they are received from the client. It uses arrays to track
@@ -342,6 +349,33 @@ class DRDAStatement
 	{
 		return stmt;
 	}
+
+    /**
+     * Add a warning about data having been truncated.
+     * @param w the warning to add
+     */
+    protected void addTruncationWarning(DataTruncation w) {
+        if (truncationWarnings == null) {
+            truncationWarnings = w;
+        } else {
+            truncationWarnings.setNextWarning(w);
+        }
+    }
+
+    /**
+     * Get the chain of truncation warnings added to this statement.
+     * @return chain of truncation warnings, possibly {@code null}
+     */
+    protected DataTruncation getTruncationWarnings() {
+        return truncationWarnings;
+    }
+
+    /**
+     * Clear the chain of truncation warnings for this statement.
+     */
+    protected void clearTruncationWarnings() {
+        truncationWarnings = null;
+    }
 
 	/**Set resultSet defaults to match 
 	 * the statement defaults sent on EXCSQLSTT
@@ -1033,6 +1067,7 @@ class DRDAStatement
 		ps = null;
 		stmtPmeta = null;
 		stmt = null;
+        truncationWarnings = null;
 		rslsetflg = null;
 		procName = null;
 		outputTypes = null;
@@ -1071,6 +1106,7 @@ class DRDAStatement
 		outputTypes = null;
 		outputExpected = false;
 		stmt = null;
+        truncationWarnings = null;
 		
 		currentDrdaRs.reset();
 		resultSetTable = null;

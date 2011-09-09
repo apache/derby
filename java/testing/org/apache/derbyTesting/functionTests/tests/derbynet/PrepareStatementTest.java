@@ -22,13 +22,17 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.sql.BatchUpdateException;
+import java.sql.CallableStatement;
+import java.sql.DataTruncation;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 
 import java.math.BigDecimal;
 import java.io.ByteArrayInputStream;
@@ -1350,7 +1354,15 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         ps.setString(1, s3);
         if (usingDerbyNetClient()) {
             String expected = s3.substring(0, s3.length() - 1);
-            JDBC.assertSingleValueResultSet(ps.executeQuery(), expected);
+            ResultSet rs = ps.executeQuery();
+            assertTrue("Empty result", rs.next());
+            assertDataTruncation(
+                    new String[] { expected },
+                    new String[] { rs.getString(1) },
+                    1, false, true, s3.length(), expected.length(),
+                    rs.getWarnings());
+            assertFalse("Too many rows", rs.next());
+            rs.close();
         } else {
             // Embedded is OK. No truncation.
             JDBC.assertSingleValueResultSet(ps.executeQuery(), s3);
@@ -1363,7 +1375,15 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         ps.setString(1, s4);
         if (usingDerbyNetClient()) {
             String expected = s4.substring(0, s4.length() - 1);
-            JDBC.assertSingleValueResultSet(ps.executeQuery(), expected);
+            ResultSet rs = ps.executeQuery();
+            assertTrue("Empty result", rs.next());
+            assertDataTruncation(
+                    new String[] { expected },
+                    new String[] { rs.getString(1) },
+                    1, false, true, s4.length(), expected.length(),
+                    rs.getWarnings());
+            assertFalse("Too many rows", rs.next());
+            rs.close();
         } else {
             // Embedded is OK. No truncation.
             JDBC.assertSingleValueResultSet(ps.executeQuery(), s4);
@@ -1377,11 +1397,91 @@ public class PrepareStatementTest extends BaseJDBCTestCase
         ps2.setString(2, s4);
         if (usingDerbyNetClient()) {
             String expected = s4.substring(0, s4.length() - 1);
-            String[][] expectedRow = {{expected, expected}};
-            JDBC.assertFullResultSet(ps2.executeQuery(), expectedRow);
+            ResultSet rs = ps2.executeQuery();
+            assertTrue("Empty result", rs.next());
+            // We should actually have received two warnings here, but the
+            // network client driver currently only supports one warning.
+            assertDataTruncation(
+                    new String[] { expected, expected },
+                    new String[] { rs.getString(1), rs.getString(2) },
+                    1, false, true, s4.length(), expected.length(),
+                    rs.getWarnings());
+            assertFalse("Too many rows", rs.next());
+            rs.close();
         } else {
             String[][] expectedRow = {{s4, s4}};
             JDBC.assertFullResultSet(ps2.executeQuery(), expectedRow);
+        }
+
+        // Now test 64KB in a procedure call. Will be truncated to 64KB-1 on
+        // the network client.
+        Statement s = createStatement();
+        s.execute("create procedure derby_5236_proc" +
+                  "(in x varchar(32672), out y varchar(32672))" +
+                  "language java parameter style java external name '" +
+                  getClass().getName() + ".copyString'");
+        CallableStatement cs = prepareCall("call derby_5236_proc(?,?)");
+        cs.setString(1, s3);
+        cs.registerOutParameter(2, Types.VARCHAR);
+        cs.execute();
+        if (usingDerbyNetClient()) {
+            assertDataTruncation(
+                    new String[] { s3.substring(0, s3.length() - 1) },
+                    new String[] { cs.getString(2) },
+                    2, true, true, s3.length(), s3.length() - 1,
+                    cs.getWarnings());
+        } else {
+            assertEquals(s3, cs.getString(2));
+        }
+    }
+
+    /**
+     * Copy a string value from {@code in} to {@code out[0}}. Used as a
+     * stored procedure in {@link #testLongColumn()}.
+     *
+     * @param in stored procedure input parameter
+     * @param out stored procedure output parameter
+     */
+    public static void copyString(String in, String[] out) {
+        out[0] = in;
+    }
+
+    /**
+     * Assert that data returned from the server was truncated, and that the
+     * proper warning came with the result.
+     *
+     * @param expectedRow the expected values
+     * @param actualRow   the actual values returned
+     * @param index       the expected column/parameter index in the warning
+     * @param parameter   whether the values came from a procedure parameter
+     * @param read        whether the values came from a read operation
+     * @param dataSize    the expected full size of the truncated value
+     * @param transferSize the expected size of the value after truncation
+     * @param warning     the received warning
+     */
+    private static void assertDataTruncation(
+            String[] expectedRow, String[] actualRow,
+            int index, boolean parameter, boolean read,
+            int dataSize, int transferSize, SQLWarning warning) {
+        assertEquals("Wrong number of columns",
+                     expectedRow.length, actualRow.length);
+        assertNotNull("Expected data truncation warning", warning);
+        for (int i = 0; i < expectedRow.length; i++) {
+            assertEquals("column #" + (i + 1), expectedRow[i], actualRow[i]);
+
+            if (warning instanceof DataTruncation) {
+                DataTruncation dt = (DataTruncation) warning;
+                assertEquals("index", index, dt.getIndex());
+                assertEquals("parameter", parameter, dt.getParameter());
+                assertEquals("read", read, dt.getRead());
+                assertEquals("dataSize", dataSize, dt.getDataSize());
+                assertEquals("transferSize", transferSize, dt.getTransferSize());
+            } else {
+                fail("Unexpected warning", warning);
+            }
+
+            assertNull("Chained warnings not expected on network client",
+                       warning.getNextWarning());
         }
     }
 }

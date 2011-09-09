@@ -668,6 +668,8 @@ public interface SQLState {
 
 	String LANG_TOO_MANY_DYNAMIC_RESULTS_RETURNED					   = "0100E";
 
+    // State used by java.sql.DataTruncation for truncation in read operations.
+    String DATA_TRUNCATION_READ = "01004";
 
 	// Invalid role specification: standard says class 0P, no subclass.
 	String ROLE_INVALID_SPECIFICATION                                  = "0P000";

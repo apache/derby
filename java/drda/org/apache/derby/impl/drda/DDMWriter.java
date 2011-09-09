@@ -32,6 +32,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
 import java.nio.charset.CodingErrorAction;
+import java.sql.DataTruncation;
 import java.sql.SQLException;
 import java.util.Arrays;
 
@@ -181,6 +182,35 @@ class DDMWriter
 		isDRDAProtocol = true;
 		this.dssTrace = dssTrace;
 	}
+
+    /**
+     * Get the current position in the output buffer.
+     * @return current position
+     */
+    protected int getBufferPosition() {
+        return buffer.position();
+    }
+
+    /**
+     * Change the current position in the output buffer.
+     * @param position new position
+     */
+    protected void setBufferPosition(int position) {
+        buffer.position(position);
+    }
+
+    /**
+     * Get a copy of a subsequence of the output buffer, starting at the
+     * specified position and ending at the current buffer position.
+     *
+     * @param startPos the position of the first byte to copy
+     * @return all bytes from {@code startPos} up to the current position
+     */
+    protected byte[] getBufferContents(int startPos) {
+        byte[] bytes = new byte[buffer.position() - startPos];
+        System.arraycopy(buffer.array(), startPos, bytes, 0, bytes.length);
+        return bytes;
+    }
 
 	/**
 	 * set protocol to CMD protocol
@@ -1120,7 +1150,7 @@ class DDMWriter
 	 */
 	protected void writeLDString(String s) throws DRDAProtocolException
 	{
-		writeLDString(s,0);
+		writeLDString(s, 0, null, false);
 	}
 
 	/**
@@ -1191,9 +1221,15 @@ class DDMWriter
 	 *
 	 * @param s              value to be written with integer
 	 * @param index          column index to put in warning
+     * @param stmt           the executing statement (null if not invoked as
+     *                       part of statement execution)
+     * @param isParameter    true if the value written is for an output
+     *                       parameter in a procedure call
 	 * @exception DRDAProtocolException
 	 */
-	protected void writeLDString(String s, int index) throws DRDAProtocolException
+	protected void writeLDString(String s, int index, DRDAStatement stmt,
+                                 boolean isParameter)
+            throws DRDAProtocolException
 	{
 		// Position on which to write the length of the string (in bytes). The
 		// actual writing of the length is delayed until we have encoded the
@@ -1221,8 +1257,29 @@ class DDMWriter
             while (isContinuationByte(buffer.get(stringPos + byteLength))) {
                 byteLength--;
             }
+
+            // Check how many chars that were truncated.
+            int truncatedChars = 0;
+            for (int i = stringPos + byteLength; i < buffer.position(); i++) {
+                if (!isContinuationByte(buffer.get(i))) {
+                    truncatedChars++;
+                }
+            }
+
             // Set the buffer position right after the truncated string.
             buffer.position(stringPos + byteLength);
+
+            // If invoked as part of statement execution, add a warning about
+            // the string being truncated.
+            if (stmt != null) {
+                DataTruncation dt = new DataTruncation(
+                        index,
+                        isParameter,
+                        true,  // this is a warning for a read operation
+                        s.length(),                   // dataSize
+                        s.length() - truncatedChars); // transferSize
+                stmt.addTruncationWarning(dt);
+            }
         }
 
         // Go back and write the length in bytes.
