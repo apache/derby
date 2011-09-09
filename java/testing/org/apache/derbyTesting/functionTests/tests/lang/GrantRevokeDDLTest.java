@@ -10361,5 +10361,206 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         st_mamta1.execute("drop view v_4502");
         st_mamta1.execute("drop schema mamta1 restrict");
     }
+
+    // DERBY-5044 During alter table drop column, we recompile all the 
+    //  dependent trigger's action plans to see if they are dependent
+    //  on the column being dropped. The database may have been created
+    //  with authorization on and hence different actions might require
+    //  relevant privileges. This test will ensure that during the
+    //  recompile of trigger action, we will not loose the privilege
+    //  requirements for the triggers
+    public void testAlterTablePrivilegesIntace() throws Exception {
+        Statement st = createStatement();
+        ResultSet rs = null;
+        
+        Connection user1Connection = openUserConnection("user1");
+        Statement st_user1Connection = user1Connection.createStatement();
+        
+        st = createStatement();
+        
+        st_user1Connection.executeUpdate(
+        		"create table user1.t11 (c111 int, c112 int, c113 int)");
+        st_user1Connection.executeUpdate(
+        		"create table user1.t12 (c121 int, c122 int)");
+        st_user1Connection.executeUpdate(
+        		"create table user1.t13 (c131 int, c132 int)");        
+        st_user1Connection.executeUpdate(
+                " insert into user1.t11 values(1,2,3)");
+        st_user1Connection.executeUpdate(
+                " grant trigger on user1.t12 to user2");
+        st_user1Connection.executeUpdate(
+                " grant update(c112, c113) on user1.t11 to user2");
+        st_user1Connection.executeUpdate(
+                " grant select on user1.t11 to user2");
+        st_user1Connection.executeUpdate(
+                " grant insert on user1.t13 to user2");
+
+        Connection user2Connection = openUserConnection("user2");
+        Statement st_user2Connection = user2Connection.createStatement();
+        st_user2Connection.executeUpdate(
+                "create trigger tr1t12 after insert on user1.t12 " +
+                "for each row mode db2sql " +
+                "update user1.t11 set c112=222");
+        st_user2Connection.executeUpdate(
+                "create trigger tr2t12 after insert on user1.t12 " +
+                "for each row mode db2sql " +
+                "insert into user1.t13(c131, c132) " +
+                "select c111, c113 from user1.t11");
+
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t11"),
+                new String[][]{{"1","2","3"}});
+        JDBC.assertEmpty(st_user1Connection.executeQuery(
+                " select * from user1.t13"));
+		st_user1Connection.executeUpdate(" insert into user1.t12 values(91,91)");
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t11"),
+                new String[][]{{"1","222","3"}});
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t13"),
+                new String[][]{{"1","3"}});
+        st_user1Connection.executeUpdate(
+                "delete from user1.t11");        
+        st_user1Connection.executeUpdate(
+                "delete from user1.t13");        
+        st_user1Connection.executeUpdate(
+                " insert into user1.t11 values(1,2,3)");
+  
+        assertStatementError("X0Y25", st_user1Connection,
+                "alter table t11 drop column c112 restrict");
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t11"),
+                new String[][]{{"1","2","3"}});
+        JDBC.assertEmpty(st_user1Connection.executeQuery(
+                " select * from user1.t13"));
+		st_user1Connection.executeUpdate(" insert into user1.t12 values(92,92)");
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t11"),
+                new String[][]{{"1","222","3"}});
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t13"),
+                new String[][]{{"1","3"}});
+        st_user1Connection.executeUpdate(
+                "delete from user1.t11");        
+        st_user1Connection.executeUpdate(
+                "delete from user1.t13");        
+        st_user1Connection.executeUpdate(
+                " insert into user1.t11 values(1,2,3)");
+        
+        st_user1Connection.executeUpdate("alter table t11 drop column c112");
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t11"),
+                new String[][]{{"1","3"}});
+        JDBC.assertEmpty(st_user1Connection.executeQuery(
+                " select * from user1.t13"));
+		st_user1Connection.executeUpdate(" insert into user1.t12 values(93,93)");
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t11"),
+                new String[][]{{"1","3"}});
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t13"),
+                new String[][]{{"1","3"}});
+        st_user1Connection.executeUpdate(
+                "delete from user1.t11");        
+        st_user1Connection.executeUpdate(
+                "delete from user1.t13");        
+        st_user1Connection.executeUpdate(
+                " insert into user1.t11 values(1,3)");
+        
+        st_user1Connection.executeUpdate(
+        		"revoke insert on table user1.t13 from user2");
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t11"),
+                new String[][]{{"1","3"}});
+        JDBC.assertEmpty(st_user1Connection.executeQuery(
+                " select * from user1.t13"));
+		st_user1Connection.executeUpdate(" insert into user1.t12 values(94,94)");
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t11"),
+                new String[][]{{"1","3"}});
+        JDBC.assertEmpty(st_user1Connection.executeQuery(
+        		" select * from user1.t13"));
+        st_user1Connection.executeUpdate(
+        		"drop table user1.t11");
+        st_user1Connection.executeUpdate(
+        		"drop table user1.t12");
+        st_user1Connection.executeUpdate(
+        		"drop table user1.t13");
+    }
+
+    // DERBY-5044 During alter table drop column, we recompile all the 
+    //  dependent trigger's action plans to see if they are dependent
+    //  on the column being dropped. Some of these triggers may have
+    //  been created by a user different than one doing the alter table.
+    //  The test below shows that we are able to handle such a case
+    //  and able to detect trigger dependencies even if they are created
+    //  by a different user
+    public void testAlterTableWithPrivileges() throws Exception {
+        Statement st = createStatement();
+        ResultSet rs = null;
+        
+        Connection user1Connection = openUserConnection("user1");
+        Statement st_user1Connection = user1Connection.createStatement();
+        
+        st = createStatement();
+        
+        st_user1Connection.executeUpdate(
+        		"create table user1.t11 (c111 int, c112 int)");
+        st_user1Connection.executeUpdate(
+        		"create table user1.t12 (c121 int, c122 int)");
+        
+        Connection user2Connection = openUserConnection("user2");
+        Statement st_user2Connection = user2Connection.createStatement();
+  
+        // following create trigger fails because it is getting created on 
+        //  non-granted object
+        assertStatementError("42500", st_user2Connection,
+            "create trigger tr1t12 after insert on user1.t12 for each row " +
+            "mode db2sql insert into user1.t11(c112) values (1)");
+        
+        st_user1Connection.executeUpdate(
+        		" grant insert on user1.t11 to user2");
+        st_user1Connection.executeUpdate(
+        		" grant trigger on user1.t12 to user2");
+        
+        // following create trigger should pass because user2 now has necessary
+        //  privileges
+        st_user2Connection.executeUpdate(
+                "create trigger tr1t12 after insert on user1.t12 " +
+                "for each row mode db2sql " +
+                "insert into user1.t11(c112) values (1)");
+        
+        st_user1Connection.executeUpdate(
+                " insert into user1.t12 values(91,91)");
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t11"),
+                new String[][]{{null, "1"}});
+        
+        // following should fail because there is a dependent trigger on 
+        //  t11.c112 and drop column is getting done in restrict mode
+        assertStatementError("X0Y25", st_user1Connection,
+                "alter table t11 drop column c112 restrict");
+        st_user1Connection.executeUpdate(
+                " insert into user1.t12 values(92,92)");
+        JDBC.assertFullResultSet(
+                st_user1Connection.executeQuery(" select * from user1.t11"),
+                new String[][]{{null, "1"}, {null,"1"}});
+        // following should pass because drop column is getting done in 
+        //  cascade mode and so the dependent trigger will be dropped
+        st_user1Connection.executeUpdate(
+                "alter table t11 drop column c112");        
+        //No new row will be inserted into user1.t11 because the trigger has
+        //  been dropped
+        st_user1Connection.executeUpdate(
+                " insert into user1.t12 values(93,93)");
+        JDBC.assertFullResultSet(
+        		st_user1Connection.executeQuery(" select * from user1.t11"),
+                new String[][]{{null}, {null}});
+        st_user1Connection.executeUpdate(
+                "drop table user1.t11");
+        st_user1Connection.executeUpdate(
+                "drop table user1.t12");
+    }
+
     
 }
