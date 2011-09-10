@@ -1245,13 +1245,29 @@ class DDMWriter
         // Write the string.
         writeString(s);
 
+        // Find out how long strings the client supports, and possibly
+        // truncate the string before sending it.
+
+        int maxByteLength = MAX_VARCHAR_BYTE_LENGTH;
+        boolean warnOnTruncation = true;
+
+        AppRequester appRequester = agent.getSession().appRequester;
+        if (appRequester != null && !appRequester.supportsLongerLDStrings()) {
+            // The client suffers from DERBY-5236, and it doesn't support
+            // receiving as long strings as newer clients do. It also doesn't
+            // know exactly what to do with a DataTruncation warning, so skip
+            // sending it to old clients.
+            maxByteLength = FdocaConstants.LONGVARCHAR_MAX_LEN;
+            warnOnTruncation = false;
+        }
+
         int byteLength = buffer.position() - stringPos;
 
         // If the byte representation of the string is too long, it needs to
         // be truncated.
-        if (byteLength > MAX_VARCHAR_BYTE_LENGTH) {
+        if (byteLength > maxByteLength) {
             // Truncate the string down to the maximum byte length.
-            byteLength = MAX_VARCHAR_BYTE_LENGTH;
+            byteLength = maxByteLength;
             // Align with character boundaries so that we don't send over
             // half a character.
             while (isContinuationByte(buffer.get(stringPos + byteLength))) {
@@ -1269,9 +1285,10 @@ class DDMWriter
             // Set the buffer position right after the truncated string.
             buffer.position(stringPos + byteLength);
 
-            // If invoked as part of statement execution, add a warning about
+            // If invoked as part of statement execution, and the client
+            // supports receiving DataTruncation warnings, add a warning about
             // the string being truncated.
-            if (stmt != null) {
+            if (warnOnTruncation && stmt != null) {
                 DataTruncation dt = new DataTruncation(
                         index,
                         isParameter,

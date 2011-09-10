@@ -331,6 +331,16 @@ class AppRequester
 	}
 
     /**
+     * Return true if the client contains the fix for DERBY-5236, which allows
+     * DDMWriter.writeLDString() to write strings that need up to 64K-1 bytes
+     * when represented in UTF-8. Otherwise, writeLDString() should use the
+     * old maximum length, which is 32700 bytes.
+     */
+    protected boolean supportsLongerLDStrings() {
+        return clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 8, 2);
+    }
+
+    /**
      * The timestamp length may be truncated for old versions of Derby.
      * See DERBY-2602.
      */
