@@ -337,7 +337,12 @@ class AppRequester
      * old maximum length, which is 32700 bytes.
      */
     protected boolean supportsLongerLDStrings() {
-        return clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 8, 2);
+        // The fix for DERBY-5236 went into the 10.8 branch after the first
+        // release off that branch. The DRDA maintenance version was bumped
+        // to 1 when the fix went in (the third argument in the call to
+        // greaterThanOrEqualTo() refers to that maintenance version, not to
+        // the third digit of the product's version number).
+        return clientType == DNC_CLIENT && greaterThanOrEqualTo(10, 8, 1);
     }
 
     /**
