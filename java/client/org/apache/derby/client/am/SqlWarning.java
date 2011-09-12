@@ -92,6 +92,10 @@ public class SqlWarning extends SqlException implements Diagnosable {
      */
     public SQLWarning getSQLWarning()
     {
+        if (wrappedException_ != null) {
+            return (SQLWarning) wrappedException_;
+        }
+
         SQLWarning sqlw = new SQLWarning(getMessage(), getSQLState(), 
             getErrorCode());
 

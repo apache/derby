@@ -30,8 +30,6 @@ import java.util.ResourceBundle;
 import java.util.Locale;
 import java.util.Iterator;
 
-import java.lang.Exception;
-
 
 /**
  * This class does everything we can to validate that the messages_en.properties
@@ -170,8 +168,11 @@ public class MessageBundleTest {
                 // messages.xml:
                 // XCL32: will never be exposed to users (see DERBY-1414)
                 // XSAX1: shared SQLState explains; not exposed to users. 
+                // 01004: automatically assigned by java.sql.DataTruncation and
+                //        never used to generate a message
                 if (!(sqlStateId.equalsIgnoreCase("XCL32.S") ||
-                    sqlStateId.equalsIgnoreCase("XSAX1"))) {
+                      sqlStateId.equalsIgnoreCase("XSAX1")   ||
+                      sqlStateId.equalsIgnoreCase("01004"))) {
                 // Don't fail out on the first one, we want to catch
                 // all of them.  Just note there was a failure and continue
                     failbuild=true;

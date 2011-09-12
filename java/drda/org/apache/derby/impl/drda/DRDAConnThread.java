@@ -31,6 +31,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
+import java.sql.DataTruncation;
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -6175,6 +6176,8 @@ class DRDAConnThread extends Thread {
 		
 		if (se instanceof EmbedSQLException  && ! severe)
 			sqlerrmc = buildTokenizedSqlerrmc(se);
+        else if (se instanceof DataTruncation)
+            sqlerrmc = buildDataTruncationSqlerrmc((DataTruncation) se);
 		else {
 			// If this is not an EmbedSQLException or is a severe excecption where
 			// we have no hope of succussfully calling the SYSIBM.SQLCAMESSAGE send
@@ -6260,6 +6263,21 @@ class DRDAConnThread extends Thread {
 		return sqlerrmc;
 	}
 
+    /**
+     * Build the SQLERRMC for a {@code java.sql.DataTruncation} warning.
+     * Serialize all the fields of the {@code DataTruncation} instance in the
+     * order in which they appear in the parameter list of the constructor.
+     *
+     * @param dt the {@code DataTruncation} instance to serialize
+     * @return the SQLERRMC string with all fields of the warning
+     */
+    private String buildDataTruncationSqlerrmc(DataTruncation dt) {
+        return dt.getIndex() + SQLERRMC_TOKEN_DELIMITER +
+               dt.getParameter() + SQLERRMC_TOKEN_DELIMITER +
+               dt.getRead() + SQLERRMC_TOKEN_DELIMITER +
+               dt.getDataSize() + SQLERRMC_TOKEN_DELIMITER +
+               dt.getTransferSize();
+    }
 	
 	/**
 	 * Write SQLCAXGRP
@@ -7078,10 +7096,18 @@ class DRDAConnThread extends Thread {
 				}
 			}
 
+            // Save the position where we start writing the warnings in case
+            // we need to add more warnings later.
+            final int sqlcagrpStart = writer.getBufferPosition();
+
 			if (sqlw == null)
                 writeSQLCAGRP(nullSQLState, 0, -1, -1);
 			else
 				writeSQLCAGRP(sqlw, sqlw.getErrorCode(), 1, -1);
+
+            // Save the position right after the warnings so we know where to
+            // insert more warnings later.
+            final int sqlcagrpEnd = writer.getBufferPosition();
 
 			// if we were asked not to return data, mark QRYDTA null; do not
 			// return yet, need to make rowCount right
@@ -7121,8 +7147,8 @@ class DRDAConnThread extends Thread {
 						case  DRDAConstants.DRDA_TYPE_NLOBCMIXED:
 							EXTDTAInputStream extdtaStream=  
 								EXTDTAInputStream.getEXTDTAStream(rs, i, drdaType);
-							writeFdocaVal(i,extdtaStream, drdaType,
-										  precision,scale,extdtaStream.isNull(),stmt);
+                            writeFdocaVal(i, extdtaStream, drdaType, precision,
+                                    scale, extdtaStream.isNull(), stmt, false);
 							break;
 						case DRDAConstants.DRDA_TYPE_NINTEGER:
 							int ival = rs.getInt(i);
@@ -7178,12 +7204,14 @@ class DRDAConnThread extends Thread {
 							if (SanityManager.DEBUG)
 								trace("====== writing char/varchar/mix :"+ valStr + ":");
 							writeFdocaVal(i, valStr, drdaType,
-										  precision,scale,rs.wasNull(),stmt);
+										  precision, scale, rs.wasNull(),
+                                          stmt, false);
 							break;
 						default:
                             val = getObjectForWriteFdoca(rs, i, drdaType);
                             writeFdocaVal(i, val, drdaType,
-										  precision,scale,rs.wasNull(),stmt);
+										  precision, scale, rs.wasNull(),
+                                          stmt, false);
 					}
 				}
 				else
@@ -7204,13 +7232,33 @@ class DRDAConnThread extends Thread {
                         val = getObjectForWriteFdoca(
                                 (CallableStatement) stmt.ps, i, drdaType);
 						valNull = (val == null);
-						writeFdocaVal(i,val,drdaType,precision, scale, valNull,stmt);
+						writeFdocaVal(i, val, drdaType, precision, scale,
+                                      valNull, stmt, true);
 					}
 					else
-						writeFdocaVal(i,null,drdaType,precision,scale,true,stmt);
+						writeFdocaVal(i, null, drdaType, precision, scale,
+                                      true, stmt, true);
 
 				}
 			}
+
+            DataTruncation truncated = stmt.getTruncationWarnings();
+            if (truncated != null) {
+                // Some of the data was truncated, so we need to add a
+                // truncation warning. Save a copy of the row data, then move
+                // back to the SQLCAGRP section and overwrite it with the new
+                // warnings, and finally re-insert the row data after the new
+                // SQLCAGRP section.
+                byte[] data = writer.getBufferContents(sqlcagrpEnd);
+                writer.setBufferPosition(sqlcagrpStart);
+                if (sqlw != null) {
+                    truncated.setNextWarning(sqlw);
+                }
+                writeSQLCAGRP(truncated, CodePoint.SVRCOD_WARNING, 1, -1);
+                writer.writeBytes(data);
+                stmt.clearTruncationWarnings();
+            }
+
 			// does all this fit in one QRYDTA
 			if (writer.getDSSLength() > blksize)
 			{
@@ -7871,6 +7919,7 @@ class DRDAConnThread extends Thread {
    * @param drdaType  FD:OCA DRDA Type from FdocaConstants
    * @param precision Precision
    * @param stmt       Statement being processed
+   * @param isParam   True when writing a value for a procedure parameter
    *
    * @exception DRDAProtocolException  
    * 
@@ -7881,8 +7930,8 @@ class DRDAConnThread extends Thread {
 
 	protected void writeFdocaVal(int index, Object val, int drdaType,
 								 int precision, int scale, boolean valNull,
-								 
-								 DRDAStatement stmt) throws DRDAProtocolException, SQLException
+								 DRDAStatement stmt, boolean isParam)
+            throws DRDAProtocolException, SQLException
 	{
 		writeNullability(drdaType,valNull);
 
@@ -7945,7 +7994,7 @@ class DRDAConnThread extends Thread {
 				case DRDAConstants.DRDA_TYPE_NLONGMIX:
 					//WriteLDString and generate warning if truncated
 					// which will be picked up by checkWarning()
-					writer.writeLDString(val.toString(), index);
+					writer.writeLDString(val.toString(), index, stmt, isParam);
 					break;
 				case DRDAConstants.DRDA_TYPE_NLOBBYTES:
 				case DRDAConstants.DRDA_TYPE_NLOBCMIXED:
@@ -7981,7 +8030,7 @@ class DRDAConnThread extends Thread {
 				default:
 					if (SanityManager.DEBUG) 
 						trace("ndrdaType is: "+ndrdaType);
-					writer.writeLDString(val.toString(), index);
+					writer.writeLDString(val.toString(), index, stmt, isParam);
 			}
 		}
 	}

@@ -21,6 +21,7 @@
 
 package org.apache.derby.client.am;
 
+import java.sql.DataTruncation;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.client.net.Typdef;
 
@@ -57,6 +58,9 @@ public abstract class Sqlca {
      * @see org.apache.derby.catalog.SystemProcedures#SQLERRMC_MESSAGE_DELIMITER
      */
     private static final String sqlErrmcDelimiter__ = "\u0014\u0014\u0014";
+
+    /** Token delimiter for SQLERRMC. */
+    private final static String SQLERRMC_TOKEN_DELIMITER = "\u0014";
 
     // JDK stack trace calls e.getMessage(), so we must set some state on the sqlca that says return tokens only.
     private boolean returnTokensOnlyInMessageText_ = false;
@@ -365,6 +369,25 @@ public abstract class Sqlca {
         }
         return false;
     }
+
+    /**
+     * Get a {@code java.sql.DataTruncation} warning based on the information
+     * in this SQLCA.
+     *
+     * @return a {@code java.sql.DataTruncation} instance
+     */
+    DataTruncation getDataTruncation() {
+        // The network server has serialized all the parameters needed by
+        // the constructor in the SQLERRMC field.
+        String[] tokens = getSqlErrmc().split(SQLERRMC_TOKEN_DELIMITER);
+        return new DataTruncation(
+                Integer.parseInt(tokens[0]),                // index
+                Boolean.valueOf(tokens[1]).booleanValue(),  // parameter
+                Boolean.valueOf(tokens[2]).booleanValue(),  // read
+                Integer.parseInt(tokens[3]),                // dataSize
+                Integer.parseInt(tokens[4]));               // transferSize
+    }
+
     // ------------------- helper methods ----------------------------------------
 
     private void processSqlErrmcTokens(byte[] tokenBytes) {

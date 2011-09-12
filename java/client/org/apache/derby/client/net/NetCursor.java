@@ -413,18 +413,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
 
 
     private int readFdocaInt() throws org.apache.derby.client.am.DisconnectException, SqlException {
-        if ((position_ + 4) > lastValidBytePosition_) {
-            // Check for ENDQRYRM, throw SqlException if already received one.
-            checkAndThrowReceivedEndqryrm();
-
-            // Send CNTQRY to complete the row/rowset.
-            int lastValidByteBeforeFetch = completeSplitRow();
-
-            // if lastValidBytePosition_ has not changed, and an ENDQRYRM was received,
-            // throw a SqlException for the ENDQRYRM.
-            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
-        }
-
+        checkForSplitRowAndComplete(4);
         int i = SignedBinary.getInt(dataBuffer_, position_);
         position_ += 4;
         return i;
@@ -433,38 +422,14 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     // Reads 1-byte from the dataBuffer from the current position.
     // If position is already at the end of the buffer, send CNTQRY to get more data.
     private int readFdocaOneByte() throws org.apache.derby.client.am.DisconnectException, SqlException {
-        // For singleton select, the complete row always comes back, even if multiple query blocks are required,
-        // so there is no need to drive a flowFetch (continue query) request for singleton select.
-        if (position_ == lastValidBytePosition_) {
-            // Check for ENDQRYRM, throw SqlException if already received one.
-            checkAndThrowReceivedEndqryrm();
-
-            // Send CNTQRY to complete the row/rowset.
-            int lastValidByteBeforeFetch = completeSplitRow();
-
-            // if lastValidBytePosition_ has not changed, and an ENDQRYRM was received,
-            // throw a SqlException for the ENDQRYRM.
-            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
-        }
+        checkForSplitRowAndComplete(1);
         return dataBuffer_[position_++] & 0xff;
     }
 
     // Reads 1-byte from the dataBuffer from the current position.
     // If position is already at the end of the buffer, send CNTQRY to get more data.
     private int readFdocaOneByte(int index) throws org.apache.derby.client.am.DisconnectException, SqlException {
-        // For singleton select, the complete row always comes back, even if multiple query blocks are required,
-        // so there is no need to drive a flowFetch (continue query) request for singleton select.
-        if (position_ == lastValidBytePosition_) {
-            // Check for ENDQRYRM, throw SqlException if already received one.
-            checkAndThrowReceivedEndqryrm();
-
-            // Send CNTQRY to complete the row/rowset.
-            int lastValidByteBeforeFetch = completeSplitRow(index);
-
-            // if lastValidBytePosition_ has not changed, and an ENDQRYRM was received,
-            // throw a SqlException for the ENDQRYRM.
-            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
-        }
+        checkForSplitRowAndComplete(1, index);
         return dataBuffer_[position_++] & 0xff;
     }
 
@@ -473,26 +438,11 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     // If current position plus length goes past the lastValidBytePosition, send
     // CNTQRY to get more data.
     private byte[] readFdocaBytes(int length) throws org.apache.derby.client.am.DisconnectException, SqlException {
+        checkForSplitRowAndComplete(length);
+
         byte[] b = new byte[length];
-        ;
-
-        // For singleton select, the complete row always comes back, even if multiple query blocks are required,
-        // so there is no need to drive a flowFetch (continue query) request for singleton select.
-        if ((position_ + length) > lastValidBytePosition_) {
-            // Check for ENDQRYRM, throw SqlException if already received one.
-            checkAndThrowReceivedEndqryrm();
-
-            // Send CNTQRY to complete the row/rowset.
-            int lastValidByteBeforeFetch = completeSplitRow();
-
-            // if lastValidBytePosition_ has not changed, and an ENDQRYRM was received,
-            // throw a SqlException for the ENDQRYRM.
-            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
-        }
-
-        for (int i = 0; i < length; i++) {
-            b[i] = dataBuffer_[position_++];
-        }
+        System.arraycopy(dataBuffer_, position_, b, 0, length);
+        position_ += length;
 
         return b;
     }
@@ -501,40 +451,14 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     // returns an integer constructed from the 2-bytes.  If current position plus
     // 2 bytes goes past the lastValidBytePosition, send CNTQRY to get more data.
     private int readFdocaTwoByteLength() throws org.apache.derby.client.am.DisconnectException, SqlException {
-        // For singleton select, the complete row always comes back, even if multiple query blocks are required,
-        // so there is no need to drive a flowFetch (continue query) request for singleton select.
-        if ((position_ + 2) > lastValidBytePosition_) {
-            // Check for ENDQRYRM, throw SqlException if already received one.
-            checkAndThrowReceivedEndqryrm();
-
-            // Send CNTQRY to complete the row/rowset.
-            int lastValidByteBeforeFetch = completeSplitRow();
-
-            // if lastValidBytePosition_ has not changed, and an ENDQRYRM was received,
-            // throw a SqlException for the ENDQRYRM.
-            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
-        }
-
+        checkForSplitRowAndComplete(2);
         return
                 ((dataBuffer_[position_++] & 0xff) << 8) +
                 ((dataBuffer_[position_++] & 0xff) << 0);
     }
 
     private int readFdocaTwoByteLength(int index) throws org.apache.derby.client.am.DisconnectException, SqlException {
-        // For singleton select, the complete row always comes back, even if multiple query blocks are required,
-        // so there is no need to drive a flowFetch (continue query) request for singleton select.
-        if ((position_ + 2) > lastValidBytePosition_) {
-            // Check for ENDQRYRM, throw SqlException if already received one.
-            checkAndThrowReceivedEndqryrm();
-
-            // Send CNTQRY to complete the row/rowset.
-            int lastValidByteBeforeFetch = completeSplitRow(index);
-
-            // if lastValidBytePosition_ has not changed, and an ENDQRYRM was received,
-            // throw a SqlException for the ENDQRYRM.
-            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
-        }
-
+        checkForSplitRowAndComplete(2, index);
         return
                 ((dataBuffer_[position_++] & 0xff) << 8) +
                 ((dataBuffer_[position_++] & 0xff) << 0);
@@ -545,38 +469,13 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
     // length - number of bytes to skip
     // returns the number of bytes skipped
     private int skipFdocaBytes(int length) throws org.apache.derby.client.am.DisconnectException, SqlException {
-        // For singleton select, the complete row always comes back, even if multiple query blocks are required,
-        // so there is no need to drive a flowFetch (continue query) request for singleton select.
-        if ((position_ + length) > lastValidBytePosition_) {
-            // Check for ENDQRYRM, throw SqlException if already received one.
-            checkAndThrowReceivedEndqryrm();
-
-            // Send CNTQRY to complete the row/rowset.
-            int lastValidByteBeforeFetch = completeSplitRow();
-
-            // if lastValidBytePosition_ has not changed, and an ENDQRYRM was received,
-            // throw a SqlException for the ENDQRYRM.
-            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
-        }
+        checkForSplitRowAndComplete(length);
         position_ += length;
         return length;
     }
 
     private int skipFdocaBytes(int length, int index) throws org.apache.derby.client.am.DisconnectException, SqlException {
-        // For singleton select, the complete row always comes back, even if multiple query blocks are required,
-        // so there is no need to drive a flowFetch (continue query) request for singleton select.
-        if ((position_ + length) > lastValidBytePosition_) {
-            // Check for ENDQRYRM, throw SqlException if already received one.
-            checkAndThrowReceivedEndqryrm();
-
-            // Send CNTQRY to complete the row/rowset.
-            int lastValidByteBeforeFetch = completeSplitRow(index);
-
-            // if lastValidBytePosition_ has not changed, and an ENDQRYRM was received,
-            // throw a SqlException for the ENDQRYRM.
-            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
-        }
-
+        checkForSplitRowAndComplete(length, index);
         position_ += length;
         return length;
     }
@@ -603,6 +502,11 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         lastValidBytePosition_ = length;
     }
 
+    /**
+     * Adjust column offsets after fetching the next part of a split row.
+     * @param index the index of the column that was split, or -1 when not
+     * fetching column data
+     */
     private void adjustColumnOffsetsForColumnsPreviouslyCalculated(int index) {
         for (int j = 0; j <= index; j++) {
             columnDataPosition_[j] -= currentRowPosition_;
@@ -971,19 +875,7 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
             return null;
         }
 
-        // For singleton select, the complete row always comes back, even if multiple query blocks are required,
-        // so there is no need to drive a flowFetch (continue query) request for singleton select.
-        if ((position_ + length) > lastValidBytePosition_) {
-            // Check for ENDQRYRM, throw SqlException if already received one.
-            checkAndThrowReceivedEndqryrm();
-
-            // Send CNTQRY to complete the row/rowset.
-            int lastValidByteBeforeFetch = completeSplitRow();
-
-            // if lastValidBytePosition_ has not changed, and an ENDQRYRM was received,
-            // throw a SqlException for the ENDQRYRM.
-            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
-        }
+        checkForSplitRowAndComplete(length);
 
         String s = null;
 
@@ -1239,6 +1131,43 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         extdtaData_ = null;
     }
 
+    /**
+     * Check if the data we want crosses a row split, and fetch more data
+     * if necessary.
+     *
+     * @param length the length in bytes of the data needed
+     * @param index the index of the column to be fetched, or -1 when not
+     * fetching column data
+     */
+    private void checkForSplitRowAndComplete(int length, int index)
+            throws SqlException {
+        // For singleton select, the complete row always comes back, even if
+        // multiple query blocks are required, so there is no need to drive a
+        // flowFetch (continue query) request for singleton select.
+        while ((position_ + length) > lastValidBytePosition_) {
+            // Check for ENDQRYRM, throw SqlException if already received one.
+            checkAndThrowReceivedEndqryrm();
+
+            // Send CNTQRY to complete the row/rowset.
+            int lastValidByteBeforeFetch = completeSplitRow(index);
+
+            // If lastValidBytePosition_ has not changed, and an ENDQRYRM was
+            // received, throw a SqlException for the ENDQRYRM.
+            checkAndThrowReceivedEndqryrm(lastValidByteBeforeFetch);
+        }
+    }
+
+    /**
+     * Check if the data we want crosses a row split, and fetch more data
+     * if necessary. This method is not for column data; use
+     * {@link #checkForSplitRowAndComplete(int, int)} for that.
+     *
+     * @param length the length in bytes of the data needed
+     */
+    private void checkForSplitRowAndComplete(int length) throws SqlException {
+        checkForSplitRowAndComplete(length, -1);
+    }
+
     // It is possible for the driver to have received an QRYDTA(with incomplete row)+ENDQRYRM+SQLCARD.
     // This means some error has occurred on the server and the server is terminating the query.
     // Before sending a CNTQRY to retrieve the rest of the split row, check if an ENDQRYRM has already
@@ -1274,21 +1203,14 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         checkAndThrowReceivedEndqryrm();
     }
 
-    private int completeSplitRow() throws DisconnectException, SqlException {
-        int lastValidBytePositionBeforeFetch = 0;
-        if (netResultSet_ != null && netResultSet_.scrollable_) {
-            lastValidBytePositionBeforeFetch = lastValidBytePosition_;
-            netResultSet_.flowFetchToCompleteRowset();
-        } else {
-            // Shift partial row to the beginning of the dataBuffer
-            shiftPartialRowToBeginning();
-            resetCurrentRowPosition();
-            lastValidBytePositionBeforeFetch = lastValidBytePosition_;
-            netResultSet_.flowFetch();
-        }
-        return lastValidBytePositionBeforeFetch;
-    }
-
+    /**
+     * Fetch more data for a row that has been split up.
+     *
+     * @param index the index of the column that was split, or -1 when not
+     * fetching column data
+     * @return the value of {@code lastValidBytePosition_} before more data
+     * was fetched
+     */
     private int completeSplitRow(int index) throws DisconnectException, SqlException {
         int lastValidBytePositionBeforeFetch = 0;
         if (netResultSet_ != null && netResultSet_.scrollable_) {
