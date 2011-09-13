@@ -2049,7 +2049,7 @@
 
      <ant dir="${docs.root}" target="clobber"/>
 
-     <exec executable="ant" dir="${docs.root}">
+     <exec executable="ant.bat" dir="${docs.root}">
        <env key="ANT_OPTS" value="-Xmx512m"/>
        <env key="CLASSPATH" path="${docs.root}/lib/fop.jar"/>
        <arg value="-Drelease.id.short=${eversion}"/>
