@@ -10370,13 +10370,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
     //  recompile of trigger action, we will not loose the privilege
     //  requirements for the triggers
     public void testAlterTablePrivilegesIntace() throws Exception {
-        Statement st = createStatement();
-        ResultSet rs = null;
-        
         Connection user1Connection = openUserConnection("user1");
         Statement st_user1Connection = user1Connection.createStatement();
-        
-        st = createStatement();
         
         st_user1Connection.executeUpdate(
         		"create table user1.t11 (c111 int, c112 int, c113 int)");
@@ -10486,6 +10481,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         		"drop table user1.t12");
         st_user1Connection.executeUpdate(
         		"drop table user1.t13");
+
+        st_user1Connection.executeUpdate("drop schema user1 restrict");
+        st_user2Connection.executeUpdate("drop schema user2 restrict");
     }
 
     // DERBY-5044 During alter table drop column, we recompile all the 
@@ -10496,13 +10494,8 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
     //  and able to detect trigger dependencies even if they are created
     //  by a different user
     public void testAlterTableWithPrivileges() throws Exception {
-        Statement st = createStatement();
-        ResultSet rs = null;
-        
         Connection user1Connection = openUserConnection("user1");
         Statement st_user1Connection = user1Connection.createStatement();
-        
-        st = createStatement();
         
         st_user1Connection.executeUpdate(
         		"create table user1.t11 (c111 int, c112 int)");
@@ -10560,6 +10553,9 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
                 "drop table user1.t11");
         st_user1Connection.executeUpdate(
                 "drop table user1.t12");
+
+        st_user1Connection.executeUpdate("drop schema user1 restrict");
+        st_user2Connection.executeUpdate("drop schema user2 restrict");
     }
 
     
