@@ -457,11 +457,11 @@ public class BasicSetup extends UpgradeChange {
 
         case PH_SOFT_UPGRADE:
         case PH_HARD_UPGRADE:
-        	//During soft/hard upgrade, the sps regeneration in 10.9 has 
-        	// been fixed and hence we won't loose the dependency between 
-        	// trigger action sps and trigger table. During upgrade process, 
-        	// all the spses get marked invalid and hence they will be 
-        	// regenerated during the next time they get fired.
+        	//During soft/hard upgrade, the sps regeneration has been 
+        	// fixed and hence we won't loose the dependency between 
+        	// trigger action sps and trigger table. During upgrade 
+        	// process, all the spses get marked invalid and hence they 
+        	// will be regenerated during the next time they get fired.
             assertStatementError("42802", s, " update ATDC_TAB1 set c11=2");
         	break;
         	
@@ -547,9 +547,9 @@ public class BasicSetup extends UpgradeChange {
             // how ALTER TABLE DROP COLUMN behaves.
         case PH_CREATE: 
             //Repeat the whole test in soft upgrade mode. It will work fine
-            // because both DERBY-5120 and DERBY-5044 are fixed in 10.9. As a
-            // result, ALTER TABLE DROP COLUMN will detect dependency of 
-            // TAB1_TRG1 on column getting dropped and hence will drop trigger 
+            // because both DERBY-5120 and DERBY-5044 are fixed. As a result,
+            // ALTER TABLE DROP COLUMN will detect dependency of TAB1_TRG1 
+            // on column getting dropped and hence will drop trigger 
             // TAB1_TRG1.
         	//Setup data for the test
         	preapreForDERBY5044_And_DERBY5120();
@@ -568,10 +568,9 @@ public class BasicSetup extends UpgradeChange {
         }
     }
 
-    //DERBY-5120 and DERBY-5044 are both in 10.9. (DERBY-5044 is also in
-    // earlier releases but not DERBY-5120). ALTER TABLE DROP COLUMN will
-    // detect the trigger dependency in this test only in a release with
-    // both DERBY-5120 and DERBY-5044 fixes.
+    //Test for combination of DERBY-5120 and DERBY-5044. ALTER TABLE DROP 
+    // COLUMN will detect the trigger dependency in this test only in a 
+    // release with both DERBY-5120 and DERBY-5044 fixes.
     private void dropColumn_triggersql_DERBY5044_And_DERBY5120(
     		Statement s) throws Exception
     {
@@ -608,7 +607,7 @@ public class BasicSetup extends UpgradeChange {
         case PH_SOFT_UPGRADE:
         case PH_HARD_UPGRADE:
         case PH_POST_HARD_UPGRADE:
-        	//Because 10.9 has fix for DERBY-5120 and DERBY-5044, following 
+        	//Because both DERBY-5120 and DERBY-5044 are fixed, following 
         	// will drop trigger TAB1_TRG1 which is dependent on the column 
         	// being dropped.
             s.executeUpdate("alter table BKUP1_5044_5120 drop column c112");
