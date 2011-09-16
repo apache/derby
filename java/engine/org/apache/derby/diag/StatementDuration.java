@@ -36,6 +36,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Locale;
 import org.apache.derby.vti.VTITemplate;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
@@ -253,9 +254,12 @@ public class StatementDuration extends VTITemplate
         else
         {
             //
-            // From 10.7 onward, the logged timestamp was formatted by Date.toString().
+            // From 10.7 onward, the logged timestamp was formatted by
+            // Date.toString(), which is always formatted using the pattern
+            // specified below, and always in US locale.
             //
-            SimpleDateFormat    sdf = new SimpleDateFormat( "EEE MMM dd HH:mm:ss zzz yyyy" );
+            SimpleDateFormat sdf =
+                new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
 
             try {
                 return new Timestamp( sdf.parse( trimmed ).getTime() );
