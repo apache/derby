@@ -36,6 +36,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 import java.util.Properties;
 
 public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
@@ -740,7 +741,8 @@ public final class SysDiagVTIMappingTest extends BaseJDBCTestCase {
 
         String  timestampString = rs.getString( 1 ).trim();
 
-        SimpleDateFormat    sdf = new SimpleDateFormat( "EEE MMM dd HH:mm:ss zzz yyyy" );
+        SimpleDateFormat sdf =
+            new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US);
         Timestamp   timestamp = new Timestamp( sdf.parse( timestampString ).getTime() );
 
         println( timestamp.toString() );
