@@ -607,6 +607,16 @@ public abstract class BaseTestCase
     }
 
     /**
+     * Check if the VM is phoneME.
+     *
+     * @return true if it is phoneME
+     */
+    public static boolean isPhoneME() {
+        return getSystemProperty("java.vm.name").equals("CVM") &&
+                getSystemProperty("java.vm.version").startsWith("phoneme");
+    }
+
+    /**
      * Determine if there is a platform match with os.name.
      * This method uses an exact equals. Other methods might be useful
      * later for starts with.
