@@ -169,8 +169,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(LangHarnessJavaTest.suite());
         		
         suite.addTest(ResultSetsFromPreparedStatementTest.suite());
-        if (!( System.getProperty("java.vm.name").equals("CVM")
-            && System.getProperty("java.vm.version").startsWith("phoneme") ) )
+        if (!isPhoneME())
         { // Disable temporarily until CVM/phoneME is fixed.. See DERBY-4290)
         suite.addTest(OrderByAndSortAvoidance.suite());
         }
