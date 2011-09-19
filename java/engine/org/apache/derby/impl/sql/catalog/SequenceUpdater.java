@@ -290,6 +290,9 @@ public abstract class SequenceUpdater implements Cacheable
             }
             finally
             {
+                // if we failed to get a generator, we have no identity. see DERBY-5389.
+                if ( _sequenceGenerator == null ) { _uuidString = null; }
+            
                 subTransaction.commit();
                 subTransaction.destroy();
             }
