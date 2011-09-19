@@ -1524,7 +1524,7 @@ public abstract class BaseJDBCTestCase
         }
         sb.deleteCharAt(sb.length() -1).deleteCharAt(sb.length() -1);
         fail("Failed to delete " + fl.length + " files (root=" +
-                PrivilegedFileOpsForTests.getAbsolutePath(dir) + ": " +
+                PrivilegedFileOpsForTests.getAbsolutePath(dir) + "): " +
                 sb.toString());
     }
 } // End class BaseJDBCTestCase
