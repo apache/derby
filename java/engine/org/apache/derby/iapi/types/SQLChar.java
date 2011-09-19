@@ -72,7 +72,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.RuleBasedCollator;
 import java.text.CollationKey;
-import java.text.DateFormat;
 import java.util.Locale;
 import java.util.Calendar;
 
@@ -2966,42 +2965,6 @@ readingLoop:
         }
 
         return localeFinder;
-    }
-
-    protected DateFormat getDateFormat() throws StandardException {
-        return getLocaleFinder().getDateFormat();
-    }
-    protected DateFormat getTimeFormat() throws StandardException {
-        return getLocaleFinder().getTimeFormat();
-    }
-    protected DateFormat getTimestampFormat() throws StandardException {
-        return getLocaleFinder().getTimestampFormat();
-    }
-
-    protected DateFormat getDateFormat( Calendar cal) 
-        throws StandardException {
-        return setDateFormatCalendar( getLocaleFinder().getDateFormat(), cal);
-    }
-    protected DateFormat getTimeFormat( Calendar cal) 
-        throws StandardException {
-        return setDateFormatCalendar( getLocaleFinder().getTimeFormat(), cal);
-    }
-    protected DateFormat getTimestampFormat( Calendar cal) 
-        throws StandardException {
-        return setDateFormatCalendar(
-                getLocaleFinder().getTimestampFormat(), cal);
-    }
-
-    private DateFormat setDateFormatCalendar( DateFormat df, Calendar cal)
-    {
-        if( cal != null && df.getTimeZone() != cal.getTimeZone())
-        {
-            // The DateFormat returned by getDateFormat may be cached and used
-            // by other threads.  Therefore we cannot change its calendar.
-            df = (DateFormat) df.clone();
-            df.setCalendar( cal);
-        }
-        return df;
     }
 
     public int estimateMemoryUsage()
