@@ -185,7 +185,7 @@ public class MemoryLeakFixesTest extends BaseJDBCTestCase {
         int iter = 0;
         while (iter < 50) {
             
-            traceit("-- " + iter++);
+            println("-- " + iter++);
             
             // remove database directory so we can start fresh each time;
             // the memory leak also manifests when a different directory is
