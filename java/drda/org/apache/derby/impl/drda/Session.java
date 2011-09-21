@@ -109,6 +109,7 @@ class Session
 			sessionInput.close();
 			sessionOutput.close();
 			clientSocket.close();
+			setTraceOff();
 			if (dbtable != null)
 				for (Enumeration e = dbtable.elements() ; e.hasMoreElements() ;) 
 				{
