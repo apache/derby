@@ -3435,7 +3435,7 @@ Guide.
 
             <msg>
                 <name>X0Y84.S</name>
-                <text>Too much contention on sequence {0}.</text>
+                <text>Too much contention on sequence {0}. To avoid this error, try adjusting derby.locks.waitTimeout and/or derby.language.sequence.preallocator. See the Derby Reference Manual for more information on these properties.</text>
                 <arg>sequenceName</arg>
             </msg>
 
