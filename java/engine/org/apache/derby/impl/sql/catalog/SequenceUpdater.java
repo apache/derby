@@ -155,7 +155,7 @@ public abstract class SequenceUpdater implements Cacheable
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // ABSTRACT BEHAVIOR TO BE IMPLEMENTED BY CHILDREN
+    // ABSTRACT OR OVERRIDABLE BEHAVIOR TO BE IMPLEMENTED BY CHILDREN
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -186,6 +186,19 @@ public abstract class SequenceUpdater implements Cacheable
      * @throws StandardException May throw an exception if a lock can't be obtained.
      */
     abstract protected boolean updateCurrentValueOnDisk( TransactionController tc, Long oldValue, Long newValue, boolean wait ) throws StandardException;
+    
+    /**
+     * <p>
+     * Create an exception to state that there is too much contention on the generator.
+     * For backward compatibility reasons, different messages are needed by sequences
+     * and identities. See DERBY-5426.
+     * </p>
+     */
+    protected   StandardException   tooMuchContentionException()
+    {
+        return StandardException.newException
+            ( SQLState.LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE, _sequenceGenerator.getName() );
+    }
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -322,10 +335,10 @@ public abstract class SequenceUpdater implements Cacheable
         ( NumberDataValue returnValue ) throws StandardException
     {
         Long startTime = null;
-        
+
         //
-        // We try to get a sequence number. We try a couple times in case we find
-        // ourselves in a race with another session which is draining numbers from
+        // We try to get a sequence number. We try until we've exceeded the lock timeout
+        // in case we find ourselves in a race with another session which is draining numbers from
         // the same sequence generator.
         //
         while ( true )
@@ -377,18 +390,16 @@ public abstract class SequenceUpdater implements Cacheable
                 ( (System.currentTimeMillis() - startTime.longValue()) > _lockTimeoutInMillis )
                 )
             {
-                break;
+                //
+                // If we get here, then we exhausted our retry attempts. This might be a sign
+                // that we need to increase the number of sequence numbers which we
+                // allocate. There's an opportunity for Derby to tune itself here.
+                //
+                throw tooMuchContentionException();
             }
             
         } // end of retry loop
 
-        //
-        // If we get here, then we exhausted our retry attempts. This might be a sign
-        // that we need to increase the number of sequence numbers which we
-        // allocate. There's an opportunity for Derby to tune itself here.
-        //
-        throw StandardException.newException
-            ( SQLState.LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE, _sequenceGenerator.getName() );
     }
 
     /**
@@ -594,6 +605,17 @@ public abstract class SequenceUpdater implements Cacheable
         protected boolean updateCurrentValueOnDisk( TransactionController tc, Long oldValue, Long newValue, boolean wait ) throws StandardException
         {
             return _dd.updateCurrentIdentityValue( tc, _sequenceRowLocation, wait, oldValue, newValue );
+        }
+
+        /**
+         * Wrap the "too much contention" exception in a "lock timeout" exception in
+         * order to preserve the old error behavior of identity columns. See DERBY-5426.
+         */
+        protected   StandardException   tooMuchContentionException()
+        {
+            StandardException   tooMuchContention = super.tooMuchContentionException();
+
+            return StandardException.newException( SQLState.LOCK_TIMEOUT, tooMuchContention );
         }
     }
 
