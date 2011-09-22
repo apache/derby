@@ -42,7 +42,6 @@ import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
-import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 import org.apache.derby.iapi.store.access.conglomerate.ScanManager;
 import org.apache.derby.iapi.store.access.conglomerate.TransactionManager;
 
@@ -190,6 +189,11 @@ public class Heap
     The array of collation id's for each column in the template.
     **/
     protected int[]   collation_ids;
+    /**
+     * Tells if there is at least one column in the conglomerate whose collation
+     * isn't StringDataValue.COLLATION_TYPE_UCS_BASIC.
+     */
+    private boolean hasCollatedTypes;
 
     private static final int BASE_MEMORY_USAGE = ClassSize.estimateBaseFromCatalog( Heap.class);
     private static final int CONTAINER_KEY_MEMORY_USAGE = ClassSize.estimateBaseFromCatalog( ContainerKey.class);
@@ -305,6 +309,7 @@ public class Heap
         collation_ids = 
             ConglomerateUtil.createCollationIds(
                 format_ids.length, collationIds);
+        hasCollatedTypes = hasCollatedColumns(collation_ids);
 
         // need to open the container and insert the row.  Since we are
         // creating it no need to bother with locking since no one can get
@@ -580,7 +585,8 @@ public class Heap
     public DynamicCompiledOpenConglomInfo getDynamicCompiledConglomInfo()
 		throws StandardException
     {
-        return(new OpenConglomerateScratchSpace(format_ids, collation_ids));
+        return(new OpenConglomerateScratchSpace(
+                format_ids, collation_ids, hasCollatedTypes));
     }
 
     /**
@@ -1202,6 +1208,9 @@ public class Heap
 
         // In memory maintain a collation id per column in the template.
         collation_ids = new int[format_ids.length];
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(!hasCollatedTypes);
+        }
 
         // initialize all the entries to COLLATION_TYPE_UCS_BASIC, 
         // and then reset as necessary.  For version ACCESS_HEAP_V2_ID,
@@ -1213,7 +1222,8 @@ public class Heap
         {
             // current format id, read collation info from disk
 
-            ConglomerateUtil.readCollationIdArray(collation_ids, in);
+            hasCollatedTypes =
+                    ConglomerateUtil.readCollationIdArray(collation_ids, in);
         }
         else if (conglom_format_id != StoredFormatIds.ACCESS_HEAP_V2_ID)
         {

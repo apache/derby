@@ -57,8 +57,6 @@ import java.io.ObjectInput;
 
 import java.util.Properties;
 
-import org.apache.derby.iapi.services.io.ArrayUtil;
-
 /**
 
   A b-tree object corresponds to an instance of a b-tree conglomerate.  It 
@@ -192,6 +190,11 @@ public abstract class BTree extends GenericConglomerate
     The array of collation id's for each column in the template.
     **/
     protected int[]   collation_ids;
+    /**
+     * Tells if there is at least one column in the conglomerate whose collation
+     * isn't StringDataValue.COLLATION_TYPE_UCS_BASIC.
+     */
+    protected boolean hasCollatedTypes;
 
 
 	/*
@@ -586,7 +589,8 @@ public abstract class BTree extends GenericConglomerate
     public DynamicCompiledOpenConglomInfo getDynamicCompiledConglomInfo()
 		throws StandardException
     {
-        return(new OpenConglomerateScratchSpace(format_ids, collation_ids));
+        return(new OpenConglomerateScratchSpace(
+                format_ids, collation_ids, hasCollatedTypes));
     }
 
 

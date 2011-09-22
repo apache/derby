@@ -28,7 +28,6 @@ import org.apache.derby.iapi.services.io.CompressedNumber;
 import org.apache.derby.iapi.services.io.Formatable;
 import org.apache.derby.iapi.services.io.FormatIdUtil;
 
-import org.apache.derby.iapi.store.access.ColumnOrdering;
 import org.apache.derby.iapi.store.access.RowUtil;
 
 import org.apache.derby.iapi.store.raw.FetchDescriptor;
@@ -310,9 +309,11 @@ public final class ConglomerateUtil
      *                           the sparse array from the stream.
      *                           
      * @param in                 The stream to read the collation info from.
+     * @return {@code true} if at least one column has a different collation
+     *      than UCS BASIC, {@code false} otherwise.
      *
      **/
-    public static void readCollationIdArray(
+    public static boolean readCollationIdArray(
     int[]           collation_id_array,
     ObjectInput     in)
         throws IOException
@@ -332,6 +333,7 @@ public final class ConglomerateUtil
             int array_index = CompressedNumber.readInt(in);
             collation_id_array[array_index] = CompressedNumber.readInt(in);
         }
+        return num_compressed_entries > 0;
 	}
 
 	/**

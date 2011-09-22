@@ -51,7 +51,6 @@ import org.apache.derby.iapi.types.RowLocation;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
-import org.apache.derby.impl.store.access.conglomerate.TemplateRow;
 
 /**
 
@@ -845,17 +844,44 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                             insert_slot, false, this.btree_undo);
 
                         boolean update_succeeded = true;
-
                         try 
                         {
-                            int rowloc_index = 
-                                this.getConglomerate().nKeyFields - 1;
-                            targetleaf.page.updateFieldAtSlot(
-                                insert_slot, rowloc_index, 
-                                (DataValueDescriptor) RowUtil.getColumn(
-                                    rowToInsert, 
-                                    (FormatableBitSet) null, rowloc_index),
-                                this.btree_undo);
+                            if (runtime_mem.hasCollatedTypes())
+                            {
+                                // See DERBY-5367.
+                                // There are types in the BTree with a 
+                                // collation different than UCS BASIC, we
+                                // update all fields to make sure they hold
+                                // the correct values.
+                                // NOTE: We could optimize here by only
+                                // updating the fields that actually hold
+                                // collated types.
+                                int rowsToUpdate = getConglomerate().nKeyFields;
+                                for (int i=0; i < rowsToUpdate; i++) {
+                                targetleaf.page.updateFieldAtSlot(
+                                    insert_slot, i, 
+                                    (DataValueDescriptor) RowUtil.getColumn(
+                                        rowToInsert, 
+                                        (FormatableBitSet) null, i),
+                                    this.btree_undo);
+                                }
+                            }
+                            else
+                            {
+                                // There are no collated types in the BTree,
+                                // which means that the values currently
+                                // stored in the undeleted row are correct.
+                                // We simply update the row location to point
+                                // to the correct row in the heap.
+                                int rowloc_index =
+                                        this.getConglomerate().nKeyFields - 1;
+                                targetleaf.page.updateFieldAtSlot(
+                                    insert_slot, rowloc_index, 
+                                    (DataValueDescriptor) RowUtil.getColumn(
+                                        rowToInsert, 
+                                        (FormatableBitSet) null, rowloc_index),
+                                    this.btree_undo);
+                            }
                         }
                         catch (StandardException se)
                         {

@@ -34,24 +34,16 @@ import java.text.RuleBasedCollator;
 import java.util.Locale;
 import java.util.Properties; 
 
-import javax.sql.DataSource;
-
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.Decorator;
 import org.apache.derbyTesting.junit.JDBC;
-import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
-import org.apache.derbyTesting.junit.SQLUtilities;
 import org.apache.derbyTesting.junit.TestConfiguration;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
-
 
 /**
 Junit test targeted at testing language based Collation.
@@ -93,6 +85,10 @@ T24: (DONE) DERBY-2669 If no territory attribute is specified at create
             database time, then create collated db based on default territory
             of Database.
 
+
+<p>
+NOTE: The prefix "ci_test" is used for tests that require a case insensitive
+      collation order.
 
 **/
 
@@ -900,6 +896,55 @@ public class CollationTest2 extends BaseJDBCTestCase
         Assert.assertTrue("catch bug where no rows are returned.", rowCount > 0);
 
         dropTable();
+    }
+
+    /**
+     * Tests that DERBY-5367 is fixed, a bug where updating the index in a
+     * database with a case insensitive collation resulted in data corruption.
+     * <p>
+     * The bug tested is where a deleted row with an incorrect key value in
+     * the index is undeleted as an optimized insert. In this case it was
+     * caused by the a case insensitive collation order, but other collation
+     * rules could cause this to happen as well.
+     */
+    public void ci_testDerby5367()
+            throws SQLException {
+        assertFalse(isDatabaseBasicCollation());
+        setAutoCommit(true);
+        String TABLE = "DERBY_5367";
+        Statement stmt = createStatement();
+        stmt.executeUpdate("create table " + TABLE + "(" +
+                "VAL varchar(10) not null unique)");
+        
+        // Run first time when the congloms were newly created.
+        runDerby5367TestCode(TABLE);
+
+        // Shut down the database, reboot. This will trigger the code to
+        // read the congloms from disk.
+        TestConfiguration.getCurrent().shutdownDatabase();
+        getConnection();
+
+        // Run second time, read congloms from disk.
+        runDerby5367TestCode(TABLE);
+        dropTable(TABLE);
+    }
+
+    /** Runs the core code for the DERBY-5367 test. */
+    private void runDerby5367TestCode(String table)
+            throws SQLException {
+        PreparedStatement sel = prepareStatement("select val from " + table +
+                " where val = 'Test'");
+        PreparedStatement ins = prepareStatement("insert into " + table +
+                " values ?");
+        ins.setString(1, "Test");
+        ins.executeUpdate();
+        JDBC.assertFullResultSet(sel.executeQuery(), new String[][] {{"Test"}});
+        Statement stmt = createStatement();
+        stmt.executeUpdate("delete from " + table + " where val = 'Test'");
+        ins.setString(1, "test");
+        ins.executeUpdate();
+        JDBC.assertFullResultSet(sel.executeQuery(), new String[][] {{"test"}});
+        stmt.executeUpdate("delete from " + table);
     }
 
     /**************************************************************************
@@ -1920,6 +1965,7 @@ public class CollationTest2 extends BaseJDBCTestCase
         TestSuite suite = new TestSuite("CollationTest2");
         suite.addTest(new CollationTest2("testDefaultCollation"));
         suite.addTest(collatedTest("en", "testEnglishCollation"));
+        suite.addTest(caseInsensitiveCollationSuite());
         
         // Only add tests for other locales if they are in fact supported 
         // by the jvm.
@@ -1960,5 +2006,18 @@ public class CollationTest2 extends BaseJDBCTestCase
     {
         return Decorator.territoryCollatedDatabase(
                 new CollationTest2(fixture), locale);
+    }
+
+    /**
+     * Returns a suite of tests running with a collation strength resulting
+     * in case insensitivity.
+     *
+     * @return A suite of tests.
+     */
+    private static Test caseInsensitiveCollationSuite() {
+        TestSuite suite = new TestSuite("Case insensitive specific tests");
+        suite.addTest(new CollationTest2("ci_testDerby5367")); 
+        return Decorator.territoryCollatedCaseInsensitiveDatabase(
+                suite, "en_US");
     }
 }

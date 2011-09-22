@@ -29,12 +29,9 @@ import java.util.Properties;
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
-import org.apache.derby.iapi.services.io.FormatableBitSet;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.store.raw.Page;
-import org.apache.derby.impl.store.access.btree.ControlRow;
 
 import org.apache.derby.impl.store.access.conglomerate.ConglomerateUtil;
 import org.apache.derby.iapi.store.access.conglomerate.LogicalUndo;
@@ -66,7 +63,6 @@ import org.apache.derby.impl.store.access.btree.OpenBTree;
 
 import org.apache.derby.iapi.services.cache.ClassSize;
 
-import org.apache.derby.iapi.services.io.CompressedNumber;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 
@@ -596,6 +592,7 @@ public class B2I extends BTree
         // conglom state.
         collation_ids = 
             ConglomerateUtil.createCollationIds(template.length, collationIds);
+        hasCollatedTypes = hasCollatedColumns(collation_ids);
 
 		// Do the generic part of creating the b-tree.
 		super.create(
@@ -1156,6 +1153,9 @@ public class B2I extends BTree
         
         // In memory maintain a collation id per column in the template.
         collation_ids = new int[format_ids.length];
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(!hasCollatedTypes);
+        }
 
         // initialize all the entries to COLLATION_TYPE_UCS_BASIC, 
         // and then reset as necessary.  For version ACCESS_B2I_V3_ID,
@@ -1181,7 +1181,8 @@ public class B2I extends BTree
                     "length = " + collation_ids.length);
             }
 
-            ConglomerateUtil.readCollationIdArray(collation_ids, in);
+            hasCollatedTypes =
+                    ConglomerateUtil.readCollationIdArray(collation_ids, in);
         }
         else if (conglom_format_id != StoredFormatIds.ACCESS_B2I_V3_ID)
         {
