@@ -30,8 +30,8 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.conglomerate.Conglomerate;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
-
 import org.apache.derby.iapi.types.DataType;
+import org.apache.derby.iapi.types.StringDataValue;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -210,4 +210,20 @@ public abstract class GenericConglomerate
         throw(StandardException.newException(
                 SQLState.HEAP_UNIMPLEMENTED_FEATURE));
 	}
+
+    /**
+     * Tells if there are columns with collations (other than UCS BASIC) in the
+     * given list of collation ids.
+     *
+     * @param collationIds collation ids for the conglomerate columns
+     * @return {@code true} if a collation other than UCS BASIC was found.
+     */
+    public static boolean hasCollatedColumns(int[] collationIds) {
+        for (int i=0; i < collationIds.length; i++) {
+            if (collationIds[i] != StringDataValue.COLLATION_TYPE_UCS_BASIC) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

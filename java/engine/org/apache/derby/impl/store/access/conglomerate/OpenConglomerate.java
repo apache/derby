@@ -876,7 +876,8 @@ public abstract class OpenConglomerate
         this.runtime_mem    = 
             (dynamic_info != null ? 
              ((OpenConglomerateScratchSpace) dynamic_info) : 
-             new OpenConglomerateScratchSpace(format_ids, collation_ids));
+             ((OpenConglomerateScratchSpace)
+                conglomerate.getDynamicCompiledConglomInfo()));
 
         // Is this an open for update or read?  This will
 		// be passed down to the raw store fetch methods, which allows

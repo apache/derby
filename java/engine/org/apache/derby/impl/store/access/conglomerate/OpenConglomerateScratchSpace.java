@@ -32,6 +32,8 @@ import org.apache.derby.iapi.types.DataValueDescriptor;
 
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 
+import org.apache.derby.iapi.services.sanity.SanityManager;
+
 /**
 
 A utility class to store and use temporary scratch space associated with
@@ -74,8 +76,15 @@ public class OpenConglomerateScratchSpace
     /**
      * A complete array of format id's and collation_ids for this conglomerate.
      **/
-    private int[]                   format_ids;
-    private int[]                   collation_ids;
+    private final int[] format_ids;
+    private final int[] collation_ids;
+    /**
+     * Tells if there is at least one type in the conglomerate whose collation
+     * isn't StringDataValue.COLLATION_TYPE_UCS_BASIC. This can be determined
+     * by looking at the collation ids, but now the caller is passing in the
+     * value to avoid having to look at all the collation ids multiple times.
+     */
+    private final boolean hasCollatedTypes;
 
 
     /**
@@ -96,13 +105,21 @@ public class OpenConglomerateScratchSpace
      *
      * @param format_ids format identifiers for columns in the row
      * @param collation_ids collation identifiers for the columns in the row
+     * @param hasCollatedTypes whether there is at least one collated type with
+     *      a collation other than UCS BASIC in the conglomerate
      */
     public OpenConglomerateScratchSpace(
     int[]   format_ids,
-    int[]   collation_ids)
+    int[]   collation_ids,
+    boolean hasCollatedTypes)
     {
         this.format_ids     = format_ids;
         this.collation_ids  = collation_ids;
+        this.hasCollatedTypes = hasCollatedTypes;
+        if (SanityManager.DEBUG) {
+            SanityManager.ASSERT(GenericConglomerate.hasCollatedColumns(
+                        collation_ids) == hasCollatedTypes);
+        }
     }
 
     /**************************************************************************
@@ -219,5 +236,16 @@ public class OpenConglomerateScratchSpace
         }
 
         return(scratch_row_position);
+    }
+    
+    /**
+     * Tells if there is at least one column with a collation different
+     * than UCS BASIC in the conglomerate.
+     *
+     * @return {@code true} if there is at least one column with a collation
+     *      different than UCS BASIC.
+     */
+    public boolean hasCollatedTypes() {
+        return hasCollatedTypes;
     }
 }

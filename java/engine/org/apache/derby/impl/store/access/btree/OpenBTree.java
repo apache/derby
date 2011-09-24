@@ -34,7 +34,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.SpaceInfo;
 import org.apache.derby.iapi.store.raw.ContainerHandle;
 import org.apache.derby.iapi.store.raw.LockingPolicy;
-import org.apache.derby.iapi.store.raw.RecordHandle;
 import org.apache.derby.iapi.store.raw.Transaction;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -91,7 +90,6 @@ public class OpenBTree
     **/
     protected int                           init_lock_level;
 
-    private DynamicCompiledOpenConglomInfo  init_dynamic_info;
     private boolean                         init_hold;
 
     /**
@@ -414,8 +412,6 @@ public class OpenBTree
         // Isolation level of this btree.
         init_lock_level     = lock_level;
 
-        init_dynamic_info   = dynamic_info;
-
         init_hold           = hold;
 
 
@@ -429,9 +425,8 @@ public class OpenBTree
         this.runtime_mem    = 
             (dynamic_info != null ? 
              ((OpenConglomerateScratchSpace) dynamic_info) : 
-             new OpenConglomerateScratchSpace(
-                 conglomerate.format_ids, 
-                 conglomerate.collation_ids));
+              (OpenConglomerateScratchSpace)
+                conglomerate.getDynamicCompiledConglomInfo());
 
 	}
 
