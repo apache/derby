@@ -147,6 +147,8 @@ public class GenericPreparedStatement
 	// true if the statement is being compiled.
 	boolean compilingStatement;
 
+    /** True if the statement was invalidated while it was being compiled. */
+    private boolean invalidatedWhileCompiling;
 
 	////////////////////////////////////////////////
 	// STATE that is not copied by getClone()
@@ -406,7 +408,47 @@ recompileOutOfDatePlan:
 			// to execute.  That exception will be caught by the executeSPS()
 			// method of the GenericTriggerExecutor class, and at that time
 			// the SPS action will be recompiled correctly.
-				rePrepare(lccToUse);
+
+                final int depth = lccToUse.getStatementDepth();
+                try {
+                    rePrepare(lccToUse);
+                } finally {
+                    boolean recompile = false;
+
+                    // Check if the statement was invalidated while it was
+                    // compiled. The compiled version of the statement may or
+                    // not be up to date anymore, so we recompile the statement
+                    // if this happens. Note that this is checked in a finally
+                    // block, so we also retry if an exception was thrown. The
+                    // exception was probably thrown because of the changes
+                    // that invalidated the statement. If not, recompiling
+                    // will also fail, and the exception will be exposed to
+                    // the caller.
+                    //
+                    // invalidatedWhileCompiling and isValid are protected by
+                    // synchronization on "this".
+                    synchronized (this) {
+                        if (invalidatedWhileCompiling) {
+                            isValid = false;
+                            invalidatedWhileCompiling = false;
+                            recompile = true;
+                        }
+                    }
+
+                    if (recompile) {
+                        // A new statement context is pushed while compiling.
+                        // Typically, this context is popped by an error
+                        // handler at a higher level. But since we retry the
+                        // compilation, the error handler won't be invoked, so
+                        // the stack must be reset to its original state first.
+                        while (lccToUse.getStatementDepth() > depth) {
+                            lccToUse.popStatementContext(
+                                    lccToUse.getStatementContext(), null);
+                        }
+
+                        continue recompileOutOfDatePlan;
+                    }
+                }
 			}
 
 			StatementContext statementContext = lccToUse.pushStatementContext(
@@ -785,7 +827,16 @@ recompileOutOfDatePlan:
 		synchronized (this) {
 
 			if (compilingStatement)
+            {
+                // Since the statement is in the process of being compiled,
+                // and at the end of the compilation it will set isValid to
+                // true and overwrite whatever we set it to here, set another
+                // flag to indicate that an invalidation was requested. A
+                // re-compilation will be triggered if this flag is set, but
+                // not until the current compilation is done.
+                invalidatedWhileCompiling = true;
 				return;
+            }
 
 			alreadyInvalid = !isValid;
 		
