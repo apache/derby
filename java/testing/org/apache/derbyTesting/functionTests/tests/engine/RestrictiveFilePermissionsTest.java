@@ -538,9 +538,9 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
      * we have no way in Java of checking the results in a portable way. So, if
      * we do not have at least Java 7, this method will be a no-op.
      *
-     * @param the current test
+     * @param test the current test
      * @param file (or directory) for which we want to check permissions
-     * @param NEGATIVE or POSITIVE
+     * @param expectedOutcome NEGATIVE or POSITIVE
      * @see #checkAccessToOwner(BaseJDBCTestCase, File, boolean, int)
      */
 
@@ -554,7 +554,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
 
 
     /**
-     * Same as {@link #checkAccessToOwner(BaseJDBCTestCase, File)
+     * Same as {@link #checkAccessToOwner(BaseJDBCTestCase, File, int)
      * checkAccessToOwner}, but if {@code doContents} is true, also check files
      * directly contained in this file qua directory (not recursively).
      *
