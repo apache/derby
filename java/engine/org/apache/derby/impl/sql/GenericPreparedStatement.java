@@ -416,7 +416,7 @@ recompileOutOfDatePlan:
                     boolean recompile = false;
 
                     // Check if the statement was invalidated while it was
-                    // compiled. The compiled version of the statement may or
+                    // compiled. If so, the newly compiled plan may or may
                     // not be up to date anymore, so we recompile the statement
                     // if this happens. Note that this is checked in a finally
                     // block, so we also retry if an exception was thrown. The
