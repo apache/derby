@@ -156,6 +156,7 @@ public class VFMemoryStorageFactory
         // This check is also used by BaseStorageFactory.
         if (uniqueName != null && tempDir != null && !tempDir.exists()) {
             tempDir.mkdirs();
+            tempDir.limitAccessToOwner(); // nop, but follow pattern
         }
     }
 

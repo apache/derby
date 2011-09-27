@@ -57,11 +57,8 @@ import org.apache.derby.io.StorageFactory;
 import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.iapi.store.access.DatabaseInstant;
-import org.apache.derby.catalog.UUID;
-import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.io.FileUtil;
 import org.apache.derby.iapi.util.ReuseFactory;
-import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.MessageId;
@@ -69,17 +66,14 @@ import org.apache.derby.iapi.reference.Property;
 
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
 import java.security.SecureRandom;
 
 import java.util.Date;
 import java.util.Properties;
 import java.io.Serializable;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 import java.net.MalformedURLException;
@@ -2200,6 +2194,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     }
 
 	protected boolean privCopyDirectory(StorageFile from, File to)
+            throws StandardException
 	{
 		return privCopyDirectory(from, to, (byte[])null, 
                                  (String[])null, true);
@@ -2426,6 +2421,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
                                                    byte[] buffer, 
                                                    String[] filter,
                                                    boolean copySubdirs)
+            throws StandardException
     {
         actionCode = COPY_STORAGE_DIRECTORY_TO_REGULAR_ACTION;
         actionStorageFile = from;
@@ -2439,7 +2435,9 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             Object ret = AccessController.doPrivileged( this);
             return ((Boolean) ret).booleanValue();
         }
-        catch( PrivilegedActionException pae) { return false;} // does not throw an exception
+        catch( PrivilegedActionException pae) {
+            throw (StandardException)pae.getCause();
+        }
         finally
         {
             actionStorageFile = null;
@@ -2494,6 +2492,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
     }
 
     private synchronized boolean privCopyFile( StorageFile from, File to)
+            throws StandardException
     {
         actionCode = COPY_STORAGE_FILE_TO_REGULAR_ACTION;
         actionStorageFile = from;
@@ -2504,7 +2503,9 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
             Object ret = AccessController.doPrivileged( this);
             return ((Boolean) ret).booleanValue();
         }
-        catch( PrivilegedActionException pae) { return false;} // does not throw an exception
+        catch( PrivilegedActionException pae) {
+            throw (StandardException)pae.getCause();
+        }
         finally
         {
             actionStorageFile = null;
@@ -2576,7 +2577,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         {
             return (String) AccessController.doPrivileged( this);
         }
-        catch( PrivilegedActionException pae) { 
+        catch( PrivilegedActionException pae) {
             return null;
         } // does not throw an exception
         catch(SecurityException se) {
@@ -2600,7 +2601,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
         {
             return (String) AccessController.doPrivileged( this);
         }
-        catch( PrivilegedActionException pae) { 
+        catch( PrivilegedActionException pae) {
             return null;
         } // does not throw an exception
         catch(SecurityException se) { 
@@ -2616,7 +2617,7 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
 
     // PrivilegedExceptionAction method
-    public final Object run() throws IOException
+    public final Object run() throws IOException, StandardException
     {
         switch(actionCode)
         {
@@ -2638,7 +2639,11 @@ public final class RawStore implements RawStoreFactory, ModuleControl, ModuleSup
 
         case REGULAR_FILE_MKDIRS_ACTION:
             // SECURITY PERMISSION - OP4
-            return ReuseFactory.getBoolean(actionRegularFile.mkdirs());
+            boolean created = actionRegularFile.mkdirs();
+
+            FileUtil.limitAccessToOwner(actionRegularFile);
+
+            return ReuseFactory.getBoolean(created);
 
         case REGULAR_FILE_IS_DIRECTORY_ACTION:
             // SECURITY PERMISSION - MP1

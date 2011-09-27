@@ -56,6 +56,7 @@ public abstract class JVMInfo
 	public static final int J2SE_142 = 5;
 	public static final int J2SE_15 = 6; // aka J2SE 5.0
 	public static final int J2SE_16 = 7; // Java SE 6, not J2SE
+    public static final int J2SE_17 = 8; // Java SE 7
 
 	public static final boolean J2ME;
 
@@ -131,6 +132,10 @@ public abstract class JVMInfo
 			{
 				id = J2SE_16;
 			}
+            else if (javaVersion.equals("1.7"))
+            {
+                id = J2SE_17;
+            }
 			else
 			{
 				// aussme our lowest support unless the java spec
@@ -139,8 +144,8 @@ public abstract class JVMInfo
 
 				try {
 
-					if (Float.parseFloat(javaVersion) > 1.6f)
-						id = J2SE_16;
+                    if (Float.parseFloat(javaVersion) > 1.7f)
+                        id = J2SE_17;
 				} catch (NumberFormatException nfe) {
 				}
 			}

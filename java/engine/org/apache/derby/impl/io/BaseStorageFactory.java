@@ -257,6 +257,7 @@ abstract class BaseStorageFactory implements StorageFactory
         tempDir.deleteAll();
 
         tempDir.mkdirs();
+        tempDir.limitAccessToOwner();
         tempDirPath = tempDir.getPath();
     } // end of createTempDir
 

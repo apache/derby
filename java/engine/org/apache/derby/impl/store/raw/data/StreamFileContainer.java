@@ -1178,7 +1178,9 @@ public class StreamFileContainer implements TypedFormat, PrivilegedExceptionActi
         case STORAGE_FILE_DELETE_ACTION:
             return ReuseFactory.getBoolean(actionStorageFile.delete());
         case STORAGE_FILE_MKDIRS_ACTION:
-            return ReuseFactory.getBoolean(actionStorageFile.mkdirs());
+            boolean created = actionStorageFile.mkdirs();
+            actionStorageFile.limitAccessToOwner();
+            return ReuseFactory.getBoolean(created);
         case STORAGE_FILE_GET_OUTPUT_STREAM_ACTION:
             return actionStorageFile.getOutputStream();
         case STORAGE_FILE_GET_INPUT_STREAM_ACTION:

@@ -117,6 +117,9 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
 
   // This permission is needed to call the Connection.abort(Executor) method added by JDBC 4.1
   permission java.sql.SQLPermission "callAbort";
+
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
 };
 
 //
@@ -318,6 +321,9 @@ grant codeBase "${derbyTesting.codeclasses}" {
   permission org.apache.derby.security.SystemPermission "jmx", "control";
   permission org.apache.derby.security.SystemPermission "engine", "monitor";
   permission org.apache.derby.security.SystemPermission "server", "control,monitor";
+
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

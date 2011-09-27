@@ -36,6 +36,10 @@ import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.AccessControlException;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.services.io.FileUtil;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * This class provides a disk based implementation of the StorageFile interface. It is used by the
@@ -91,20 +95,6 @@ class DirFile extends File implements StorageFile
     }
     
     /**
-     * Get the name of the directory of temporary files.
-     *
-     * @return The abstract name of the temp directory;
-     */
-    static StorageFile getTempDir() throws IOException
-    {
-        File temp = File.createTempFile("derby", "tmp");
-        StorageFile parent = new DirFile( temp.getParent());
-        temp.delete();
-
-		return parent;
-	} // End of getTempDir
-
-    /**
      * Creates an output stream from a file name.
      *
      * @return an output stream suitable for writing to the file.
@@ -115,7 +105,14 @@ class DirFile extends File implements StorageFile
      */
     public OutputStream getOutputStream( ) throws FileNotFoundException
     {
-        return new FileOutputStream( (File) this);
+        boolean exists = exists();
+        OutputStream result = new FileOutputStream(this);
+
+        if (!exists) {
+            FileUtil.limitAccessToOwner(this);
+        }
+
+        return result;
     }
     
     /**
@@ -133,7 +130,14 @@ class DirFile extends File implements StorageFile
      */
     public OutputStream getOutputStream( final boolean append) throws FileNotFoundException
     {
-        return new FileOutputStream( getPath(), append);
+        boolean exists = exists();
+        OutputStream result = new FileOutputStream( getPath(), append);
+
+        if (!exists) {
+            FileUtil.limitAccessToOwner(this);
+        }
+
+        return result;
     }
 
     /**
@@ -157,7 +161,7 @@ class DirFile extends File implements StorageFile
      *    EXCLUSIVE_FILE_LOCK if the lock was successfully acquired.<br>
      *    NO_FILE_LOCK_SUPPORT if the system does not support exclusive locks.<br>
      */
-    public synchronized int getExclusiveFileLock()
+    public synchronized int getExclusiveFileLock() throws StandardException
 	{
 		if (exists())
 		{
@@ -167,6 +171,7 @@ class DirFile extends File implements StorageFile
         {
 			//Just create an empty file
 			RandomAccessFile lockFileOpen = new RandomAccessFile( (File) this, "rw");
+            limitAccessToOwner();
 			lockFileOpen.getFD().sync( );
 			lockFileOpen.close();
 		}catch(IOException ioe)
@@ -273,4 +278,8 @@ class DirFile extends File implements StorageFile
 		
 		return toURL();
 	}
+
+    public void limitAccessToOwner() {
+        FileUtil.limitAccessToOwner(this);
+    }
 }

@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.net.MalformedURLException;
+import org.apache.derby.iapi.error.StandardException;
 
 /**
  * This interface abstracts file naming. Any method in this interface
@@ -253,7 +254,7 @@ public interface StorageFile
      *    EXCLUSIVE_FILE_LOCK if the lock was successfully acquired.<br>
      *    NO_FILE_LOCK_SUPPORT if the system does not support exclusive locks.<br>
      */
-    public int getExclusiveFileLock();
+    public int getExclusiveFileLock() throws StandardException;
 
 	/**
      * Release the resource associated with an earlier acquired exclusive lock
@@ -291,4 +292,12 @@ public interface StorageFile
      * @see <a href="http://java.sun.com/j2se/1.4.2/docs/api/java/io/RandomAccessFile.html">java.io.RandomAccessFile</a>
      */
     public StorageRandomAccessFile getRandomAccessFile( String mode) throws FileNotFoundException;
+
+    /**
+     * Use when creating a new file. By default, a file created in an
+     * underlying file system, if applicable, will have read and write access
+     * for the file owner unless the property {@code
+     * derby.useDefaultFilePermissions} is set to {@code true}.
+     */
+    public void limitAccessToOwner();
 }

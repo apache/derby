@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.io.StorageFile;
 import org.apache.derby.io.StorageRandomAccessFile;
 
@@ -319,7 +320,7 @@ public class VirtualFile
         return entry.getInputStream();
     }
 
-    public int getExclusiveFileLock() {
+    public int getExclusiveFileLock() throws StandardException {
         // Just return success.
         // Since the databases created by this storeage factory can only be
         // accessed by the JVM in which it is running, there is no need to
@@ -386,4 +387,6 @@ public class VirtualFile
     private DataStoreEntry getEntry() {
        return dStore.getEntry(path);
     }
+
+    public void limitAccessToOwner() {};
 }

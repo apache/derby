@@ -2998,23 +2998,23 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
         }
         // </SLAVE REPLICATION CODE>
 
-		long instant = LogCounter.makeLogInstantAsLong(filenumber,
-													   LOG_FILE_HEADER_SIZE);
-		return getLogFileAtPosition(instant);
-	}
+        long instant = LogCounter.makeLogInstantAsLong(filenumber,
+                                                       LOG_FILE_HEADER_SIZE);
+        return getLogFileAtPosition(instant);
+    }
 
 
-	/**
-		Get a read-only handle to the log file positioned at the stated position
+    /**
+        Get a read-only handle to the log file positioned at the stated position
 
-		<P> MT- read only
+        <P> MT- read only
 
-		@return null if file does not exist or of the wrong format
-		@exception IOException cannot access the log at the new position.
-		@exception StandardException Standard Derby error policy
-	*/
-	protected StorageRandomAccessFile getLogFileAtPosition(long logInstant)
-		 throws IOException, StandardException
+        @return null if file does not exist or of the wrong format
+        @exception IOException cannot access the log at the new position.
+        @exception StandardException Standard Derby error policy
+    */
+    protected StorageRandomAccessFile getLogFileAtPosition(long logInstant)
+         throws IOException, StandardException
 	{
 		checkCorrupt();
 
@@ -5697,6 +5697,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 
 	private synchronized boolean privCopyFile(StorageFile from, File to)
+            throws StandardException
 	{
 		action = 6;
 		activeFile = from;
@@ -5707,8 +5708,12 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		}
         catch (java.security.PrivilegedActionException pae)
         {
+            if (pae.getCause() instanceof StandardException) {
+                throw (StandardException)pae.getCause();
+            }
+
             return false;
-        }	
+        }
 	}
 
 	private synchronized boolean privCopyFile(File from, StorageFile to)
@@ -5757,7 +5762,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 	
 
-	public final Object run() throws IOException {
+    public final Object run() throws IOException, StandardException {
 		switch (action) {
 		case 0:
 			// SECURITY PERMISSION - MP1
@@ -5768,13 +5773,26 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		case 2:
 			// SECURITY PERMISSION - MP1 and/or OP4
 			// dependening on the value of activePerms
-			return activeFile.getRandomAccessFile(activePerms);
+            boolean exists = activeFile.exists();
+            Object result = activeFile.getRandomAccessFile(activePerms);
+
+            if (!exists) {
+                activeFile.limitAccessToOwner();
+            }
+
+            return result;
 		case 3:
 			// SECURITY PERMISSION - OP4
 			return ReuseFactory.getBoolean(activeFile.canWrite());
 		case 4:
 			// SECURITY PERMISSION - OP4
-			return ReuseFactory.getBoolean(activeFile.mkdirs());
+            boolean created = activeFile.mkdirs();
+
+            if (created) {
+                activeFile.limitAccessToOwner();
+            }
+
+            return ReuseFactory.getBoolean(created);
 		case 5:
 			// SECURITY PERMISSION - MP1
 			return activeFile.list();

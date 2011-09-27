@@ -85,6 +85,9 @@ grant codeBase "${derby.install.url}derby.jar"
   // Note that this permission must also be granted to outer (application) code domains.
   //
   permission java.sql.SQLPermission "callAbort";
+
+  // Needed by file permissions restriction system:
+  permission java.lang.RuntimePermission "accessUserInformation";
 };
 
 grant codeBase "${derby.install.url}derbynet.jar"
@@ -107,6 +110,9 @@ grant codeBase "${derby.install.url}derbynet.jar"
 // Needed for server tracing.
 //
   permission java.io.FilePermission "${derby.drda.traceDirectory}${/}-", "read,write,delete";
+  // Needed by file permissions restriction system:
+  permission java.lang.RuntimePermission "accessUserInformation";
+  permission java.util.PropertyPermission "derby.__serverStartedFromCmdLine", "read, write";
 
 //
 // JMX: Uncomment this permission to allow the ping operation of the 

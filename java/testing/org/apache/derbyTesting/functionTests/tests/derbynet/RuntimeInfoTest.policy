@@ -133,6 +133,9 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
   // traces upon failure.
   permission java.lang.RuntimePermission "getStackTrace";
   permission java.lang.RuntimePermission "modifyThreadGroup";
+
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
 };
 
 //
@@ -322,6 +325,9 @@ grant codeBase "${derbyTesting.codeclasses}" {
   permission org.apache.derby.security.SystemPermission "jmx", "control";
   permission org.apache.derby.security.SystemPermission "engine", "monitor";
   permission org.apache.derby.security.SystemPermission "server", "control,monitor";
+
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

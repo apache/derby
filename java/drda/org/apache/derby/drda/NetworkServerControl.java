@@ -302,6 +302,11 @@ public class NetworkServerControl{
             
             int     command = server.parseArgs( args );
 
+            if (command == NetworkServerControlImpl.COMMAND_START) {
+                System.setProperty(Property.SERVER_STARTED_FROM_CMD_LINE,
+                                   "true");
+            }
+
             //
             // In order to run secure-by-default, we install a security manager
             // if one isn't already installed. This feature is described by DERBY-2196.

@@ -56,6 +56,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedExceptionAction;
 import java.security.PrivilegedActionException;
+import org.apache.derby.iapi.services.io.FileUtil;
 
 /**
  * This class implements the PersistentService interface using a StorageFactory class.
@@ -91,10 +92,14 @@ final class StorageFactoryService implements PersistentService
                             home = relativeRoot.getPath();
                             canonicalHome = relativeRoot.getCanonicalPath();
                             rootStorageFactory = getStorageFactoryInstance( true, null, null, null);
+
                             if( home != null)
                             {
                                 StorageFile rootDir = rootStorageFactory.newStorageFile( null);
-                                rootDir.mkdirs();
+                                boolean created = rootDir.mkdirs();
+                                if (created) {
+                                    rootDir.limitAccessToOwner();
+                                }
                             }
                             return null;
                         }
@@ -422,6 +427,8 @@ final class StorageFactoryService implements PersistentService
                         try {
 
                             fos = new FileOutputStream(servicePropertiesFile);
+                            FileUtil.limitAccessToOwner(servicePropertiesFile);
+
                             properties.store(fos, 
                                              serviceName + 
                                              MessageService.getTextMessage(
@@ -430,7 +437,6 @@ final class StorageFactoryService implements PersistentService
                             fos.close();
                             fos = null;
                         } catch (IOException ioe) {
-
                             if (fos != null) {
                                 try {
                                     fos.close();
@@ -643,6 +649,8 @@ final class StorageFactoryService implements PersistentService
 
                             if (serviceDirectory.mkdirs())
                             {
+                                serviceDirectory.limitAccessToOwner();
+
                                 try
                                 {
                                     return storageFactory.getCanonicalName();

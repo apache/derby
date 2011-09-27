@@ -43,11 +43,12 @@ public class _Suite extends BaseTestCase  {
         super(name);
     }
 
-    public static Test suite() {
+    public static Test suite() throws Exception {
         TestSuite suite = new TestSuite("engine");
 
         suite.addTest(ErrorStreamTest.suite());
         suite.addTest(LockInterruptTest.suite());
+        suite.addTest(RestrictiveFilePermissionsTest.suite());
         suite.addTest(ModuleLoadingTest.suite());
 
         return suite;

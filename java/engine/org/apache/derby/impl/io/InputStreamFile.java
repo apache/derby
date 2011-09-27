@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.apache.derby.iapi.error.StandardException;
 
 /**
  * This class provides the base for read-only stream implementations of the StorageFile interface. It is used with the
@@ -369,7 +370,7 @@ abstract class InputStreamFile implements StorageFile
      *    EXCLUSIVE_FILE_LOCK if the lock was successfully acquired.<br>
      *    NO_FILE_LOCK_SUPPORT if the system does not support exclusive locks.<br>
      */
-    public int getExclusiveFileLock()
+    public int getExclusiveFileLock() throws StandardException
     {
         return NO_FILE_LOCK_SUPPORT;
     }
@@ -427,4 +428,6 @@ abstract class InputStreamFile implements StorageFile
 	public URL getURL() throws MalformedURLException {
 		throw new MalformedURLException(toString());
 	}
+
+    public void limitAccessToOwner() {};
 }

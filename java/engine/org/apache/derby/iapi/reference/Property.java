@@ -1086,4 +1086,28 @@ public interface Property {
 	public static final String STORAGE_LOG_NOT_SYNCED = 
         "db2j.storage.logNotSynced";
 
+
+    /**
+     * derby.storage.useDefaultFilePermissions = {false,true}
+     * <p/>
+     * When set to true, the store system will not limit file permissions of
+     * files created by Derby to owner, but rely on the current OS default.  On
+     * Unix, this is determined by {@code umask(1)}. Only relevant for JVM >=
+     * 6.
+     * <p/>
+     * The default value is {@code true} on embedded, but {@code false} on the
+     * Network server if started from command line, otherwise it is true for
+     * the server, too (i.e. started via API).
+     */
+    String STORAGE_USE_DEFAULT_FILE_PERMISSIONS =
+        "derby.storage.useDefaultFilePermissions";
+
+    /**
+     * Internal. True if the network server was started from the command line
+     * (not from API).  Used to determine whether to narrow file permissions
+     * iff {@code derby.storage.useDefaultFilePermissions} isn't specified.
+     * <B>INTERNAL USE ONLY</B>
+     */
+    String SERVER_STARTED_FROM_CMD_LINE =
+            "derby.__serverStartedFromCmdLine";
 }

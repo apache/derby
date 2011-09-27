@@ -34,6 +34,9 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
+import java.security.AccessControlException;
+import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.shared.common.reference.SQLState;
 
 /**
  * This class implements the StorageFile interface using features of Java 1.4 not available in earlier
@@ -115,7 +118,7 @@ class DirFile4 extends DirFile
         return new FileOutputStream( (File) this, append);
     }
 
-    public synchronized int getExclusiveFileLock()
+    public synchronized int getExclusiveFileLock() throws StandardException
     {
 		boolean validExclusiveLock = false;
 		int status;
@@ -152,6 +155,7 @@ class DirFile4 extends DirFile
 			if(validExclusiveLock)
 			{
 				lockFileOpen = new RandomAccessFile((File) this, "rw");
+                limitAccessToOwner(); // tamper-proof..
 				lockFileChannel = lockFileOpen.getChannel();
 				dbLock =lockFileChannel.tryLock();
 				if(dbLock == null)
@@ -176,7 +180,7 @@ class DirFile4 extends DirFile
 		
 		}catch(IOException ioe)
 		{
-			// do nothing - it may be read only medium, who knows what the
+            // do nothing - it may be read only medium, who knows what the
 			// problem is
 
 			//release all the possible resource we created in this functions.

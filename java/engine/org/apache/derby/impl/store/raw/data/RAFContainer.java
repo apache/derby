@@ -780,6 +780,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                                     directory);
                             }
                         }
+
+                        directory.limitAccessToOwner();
                     }
                 }
             }
@@ -1092,6 +1094,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
 
                     backupFile = new File(backupLocation , file.getName());
                     backupRaf  = new RandomAccessFile(backupFile,  "rw");
+                    FileUtil.limitAccessToOwner(backupFile);
 
                     byte[] encryptionBuf = null;
                     if (dataFactory.databaseEncrypted()) {
@@ -1338,6 +1341,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                  try
                      {
                          fileData = file.getRandomAccessFile( "rw");
+                         file.limitAccessToOwner();
                      }
                  finally
                      {
@@ -1576,6 +1580,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                  {
                      // write the header to the stub
                      stubData = stub.getRandomAccessFile( "rw");
+                     stub.limitAccessToOwner();
 
                      writeRAFHeader(
                         actionIdentity,
@@ -1654,7 +1659,14 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
          case GET_RANDOM_ACCESS_FILE_ACTION: {
              try
              {
-                 return actionFile.getRandomAccessFile("rw");
+                 boolean exists = actionFile.exists();
+                 Object result = actionFile.getRandomAccessFile("rw");
+
+                 if (!exists) {
+                     actionFile.limitAccessToOwner();
+                 }
+
+                 return result;
              }
              catch (FileNotFoundException fnfe)
              {

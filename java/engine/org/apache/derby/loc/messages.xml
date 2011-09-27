@@ -8191,6 +8191,11 @@ Shutting down instance {0} on database directory {1} with class loader {2} </tex
 # ********************************************************************</text>
             </msg>
 
+            <msg>
+                <name>N001</name>
+                <text>caused by</text>
+            </msg>
+
         </family>
 
     </section>

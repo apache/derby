@@ -25,9 +25,7 @@ import org.apache.derby.iapi.services.stream.InfoStreams;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.stream.PrintWriterGetHeader;
 
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.monitor.ModuleControl;
-import org.apache.derby.iapi.services.monitor.ModuleSupportable;
 import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.reference.Property;
@@ -47,6 +45,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Member;
 import java.lang.reflect.InvocationTargetException;
+import org.apache.derby.iapi.services.i18n.MessageService;
+import org.apache.derby.iapi.services.io.FileUtil;
+import org.apache.derby.shared.common.reference.MessageId;
 
 /**
  *
@@ -195,6 +196,7 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction
 				fos = new FileOutputStream(streamFile.getPath(), true);
 			else
 				fos = new FileOutputStream(streamFile);
+            FileUtil.limitAccessToOwner(streamFile);
 		} catch (IOException ioe) {
 			return useDefaultStream(header, ioe);
 		} catch (SecurityException se) {
@@ -340,7 +342,16 @@ implements InfoStreams, ModuleControl, java.security.PrivilegedAction
 	private HeaderPrintWriter useDefaultStream(PrintWriterGetHeader header, Throwable t) {
 
 		HeaderPrintWriter hpw = useDefaultStream(header);
-		hpw.printlnWithHeader(t.toString());
+
+        while (t != null) {
+            Throwable causedBy = t.getCause();
+            String causedByStr =
+                MessageService.getTextMessage(MessageId.CAUSED_BY);
+            hpw.printlnWithHeader(
+                t.toString() + (causedBy != null ? " " + causedByStr : ""));
+            t = causedBy;
+        }
+
 		return hpw;
 	}
 

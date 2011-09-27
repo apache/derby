@@ -82,10 +82,12 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.net.URL;
 
+import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.CodeSource;
 import java.security.PrivilegedAction;
@@ -1916,6 +1918,7 @@ public class BaseDataFileFactory
             // SECURITY PERMISSION MP1
             // SECURITY PERMISSION OP5
             fileLockOnDB = fileLock.getRandomAccessFile( "rw");
+            fileLock.limitAccessToOwner();
 
             // write it out for future reference
             fileLockOnDB.writeUTF(myUUID.toString()); 
@@ -2005,6 +2008,7 @@ public class BaseDataFileFactory
                 if(fileLockOnDB != null)
                     fileLockOnDB.close();
                 fileLockOnDB = fileLock.getRandomAccessFile( "rw");
+                fileLock.limitAccessToOwner();
 
                 // write it out for future reference
                 fileLockOnDB.writeUTF(myUUID.toString()); 

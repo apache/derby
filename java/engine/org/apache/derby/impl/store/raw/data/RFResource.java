@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.store.raw.data;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -89,12 +90,21 @@ class RFResource implements FileResource {
             tran.blockBackup(true);
 
 			StorageFile directory = file.getParentDir();
+            StorageFile parentDir = directory.getParentDir();
+            boolean pdExisted = parentDir.exists();
+
             if (!directory.exists())
 			{
                 if (!directory.mkdirs())
                 {
 					throw StandardException.newException(
                             SQLState.FILE_CANNOT_CREATE_SEGMENT, directory);
+                }
+
+                directory.limitAccessToOwner();
+
+                if (!pdExisted) {
+                    parentDir.limitAccessToOwner();
                 }
 			}
 

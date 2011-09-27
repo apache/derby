@@ -136,6 +136,7 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 				}
 			} else if (!lite) {
 
+                boolean created = false;
 				try {
 					// SECURITY PERMISSION - OP2b
                     // Attempt to create just the folder initially
@@ -151,10 +152,14 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
                     // and mkdirs() retains existing (pre10.3) behaviour
                     // but avoids requiring read permission on the parent
                     // directory if it exists.
-					boolean created = home.mkdir() || home.mkdirs();
+                    created = home.mkdir() || home.mkdirs();
 				} catch (SecurityException se) {
 					return false;
 				}
+
+                if (created) {
+                    FileUtil.limitAccessToOwner(home);
+                }
 			}
 		}
 

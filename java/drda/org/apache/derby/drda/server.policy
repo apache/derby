@@ -98,6 +98,9 @@ grant codeBase "${derby.install.url}derby.jar"
   // Note that this permission must also be granted to outer (application) code domains.
   //
   permission java.sql.SQLPermission "callAbort";
+
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
 };
 
 grant codeBase "${derby.install.url}derbynet.jar"
@@ -120,6 +123,8 @@ grant codeBase "${derby.install.url}derbynet.jar"
 // Needed for server tracing.
 //
   permission java.io.FilePermission "${derby.drda.traceDirectory}${/}-", "read,write,delete";
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
   
   // Needed for NetworkServerMBean access (see JMX section above)
   permission org.apache.derby.security.SystemPermission "server", "control,monitor";

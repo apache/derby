@@ -105,7 +105,10 @@ final class ExportWriteData extends ExportWriteDataAbstract
     FileOutputStream lobOutputStream = null;
 
     try {
+        File outputFile = new File(outputFileName);
         anOutputStream = new FileOutputStream(outputFileName);
+        FileUtil.limitAccessToOwner(outputFile);
+
         buffered = new BufferedOutputStream(anOutputStream);
     
         aStream = dataCodeset == null ?
@@ -129,6 +132,8 @@ final class ExportWriteData extends ExportWriteDataAbstract
             }
 
             lobOutputStream = new FileOutputStream(lobsFile);
+            FileUtil.limitAccessToOwner(lobsFile);
+
             lobOutBinaryStream = new BufferedOutputStream(lobOutputStream);
 
             // helper stream to convert char data to binary, after conversion

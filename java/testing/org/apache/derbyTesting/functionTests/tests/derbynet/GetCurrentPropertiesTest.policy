@@ -88,6 +88,8 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   // might not be unregistered from the MBean server. See DERBY-3561.
   permission javax.management.MBeanPermission "org.apache.derby.*#[org.apache.derby:*]","unregisterMBean";
 
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
 };
 
 //
@@ -108,6 +110,10 @@ grant codeBase "${derbyTesting.codejar}derbynet.jar" {
   // For testPropertiesAfterConnection and testPropertiesTraceOn
   permission java.io.FilePermission "${derby.system.home}${/}-", "write"; 
 
+  // Set be able to restrict visibility on trace files
+  permission java.io.FilePermission "${user.dir}${/}system${/}-", "read";
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
 };
 
 //
@@ -223,6 +229,10 @@ grant codeBase "${derbyTesting.codeclasses}" {
   // streams. Currently the nist suite runs with useprocess=false.
   permission java.lang.RuntimePermission "setSecurityManager";
   permission java.lang.RuntimePermission "setIO"; 
+
+  // Needed by FileUtil#limitAccessToOwner
+  permission java.lang.RuntimePermission "accessUserInformation";
+
 };
 
 // JUnit jar file tries to read junit.properties in the user's

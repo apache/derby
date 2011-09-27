@@ -208,6 +208,11 @@ public interface MessageId {
     String SERVICE_PROPERTIES_DONT_EDIT = "M001"; // Tell user not to edit service.properties
 
     /*
+     * Misc
+     */
+    String CAUSED_BY = "N001";
+
+    /*
      * Replication
      */
     String REPLICATION_ERROR_BEGIN                       = "R001";

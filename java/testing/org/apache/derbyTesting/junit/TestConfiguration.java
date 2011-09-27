@@ -710,7 +710,7 @@ public final class TestConfiguration {
      * name.  This decorator expects the database file to be local so it can be
      * removed.
      * @param test Test to be decorated
-     * @param dbName We sometimes need to know outside to be able topass it on
+     * @param dbName We sometimes need to know outside to be able to pass it on
      *               to other VMs/processes.
      * @return decorated test.
      */
@@ -1046,7 +1046,7 @@ public final class TestConfiguration {
         this.userName = DEFAULT_USER_NAME;
         this.userPassword = DEFAULT_USER_PASSWORD;
         this.connectionAttributes = new Properties();
-        this.hostName = null;
+        this.hostName = DEFAULT_HOSTNAME;
         this.port = basePort;
         this.isVerbose = Boolean.valueOf(
             getSystemProperties().getProperty(KEY_VERBOSE)).

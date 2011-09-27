@@ -24,10 +24,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import org.apache.derby.iapi.services.io.FileUtil;
 
 // Generic process and error tracing encapsulation.
 // This class also traces a DRDA communications buffer.
@@ -182,10 +184,23 @@ public class DssTrace
             for (int attempt=0; attempt <2; attempt++) {
                 try {             	
                     // The writer will be buffered for effeciency.
-                    comBufferWriter =  ((PrintWriter)AccessController.doPrivileged(
+                    comBufferWriter =
+                        ((PrintWriter)AccessController.doPrivileged(
                             new PrivilegedExceptionAction() {
-                                public Object run() throws SecurityException, IOException {
-                                    return new  PrintWriter (new java.io.BufferedWriter (new java.io.FileWriter (fileName), 4096));
+                                public Object run()
+                                        throws SecurityException, IOException {
+                                    File f = new File(fileName);
+                                    boolean exists = f.exists();
+                                    PrintWriter pw =
+                                        new PrintWriter(
+                                            new java.io.BufferedWriter(
+                                                new java.io.FileWriter(
+                                                    fileName),
+                                                4096));
+                                    if (!exists) {
+                                        FileUtil.limitAccessToOwner(f);
+                                    }
+                                    return pw;
                                 }
                             }));
                     // If we successfully made the file. break out here and don't retry
@@ -213,7 +228,13 @@ public class DssTrace
                                             // has been granted.
                                             boolean created = traceDirectory.mkdir();
                                             if (!created) {
-                                                traceDirectory.mkdirs();
+                                                created =
+                                                        traceDirectory.mkdirs();
+                                            }
+
+                                            if (created) {
+                                                FileUtil.limitAccessToOwner(
+                                                        traceDirectory);
                                             }
                                             return null;
                                         }

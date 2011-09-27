@@ -25,13 +25,11 @@ import org.apache.derby.io.StorageRandomAccessFile;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
-import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.apache.derby.iapi.error.StandardException;
 
 /**
  * This class provides proxy implementation of the StorageFile interface. It is
@@ -322,7 +320,7 @@ class CorruptFile implements StorageFile {
      *         <br> NO_FILE_LOCK_SUPPORT if the system does not support 
      *         exclusive locks.<br>
      */
-    public synchronized int getExclusiveFileLock()
+    public synchronized int getExclusiveFileLock() throws StandardException
 	{
 		return realFile.getExclusiveFileLock();
 
@@ -383,4 +381,9 @@ class CorruptFile implements StorageFile {
 	public URL getURL() throws MalformedURLException {
 		throw new MalformedURLException(toString());
 	}
+
+    public void limitAccessToOwner() {
+        realFile.limitAccessToOwner();
+    }
+
 }
