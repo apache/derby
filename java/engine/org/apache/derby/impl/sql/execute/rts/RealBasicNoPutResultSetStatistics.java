@@ -21,26 +21,20 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import org.apache.derby.catalog.UUID;
+import org.apache.derby.iapi.reference.SQLState;
+import org.apache.derby.iapi.services.context.ContextService;
+import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
 import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;
 import org.apache.derby.impl.sql.execute.xplain.XPLAINUtil;
 
-import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.services.io.Formatable;
-
-import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.reference.SQLState;
-
-import org.apache.derby.iapi.services.io.FormatableHashtable;
-
-import java.util.Vector;
-
-import java.io.ObjectOutput;
-import java.io.ObjectInput;
-import java.io.IOException;
 
 import java.text.DecimalFormat;
+import java.util.Locale;
+import java.util.Vector;
 
 
 /**
@@ -135,39 +129,11 @@ abstract class RealBasicNoPutResultSetStatistics
 	protected final String dumpEstimatedCosts(String subIndent)
 	{
 		return	subIndent +
-				MessageService.getTextMessage(SQLState.RTS_OPT_EST_RC) +
-					": " +
-				formatDouble(optimizerEstimatedRowCount) + "\n" +
+            MessageService.getTextMessage(SQLState.RTS_OPT_EST_RC,
+                new Double(optimizerEstimatedRowCount)) + "\n" +
 				subIndent +
-				MessageService.getTextMessage(SQLState.RTS_OPT_EST_COST) +
-					": " +
-				formatDouble(optimizerEstimatedCost) + "\n";
-	}
-
-	/**
-	 * Format a double as a String with leading spaces and two digits
-	 * after the decimal.
-	 */
-	private static DecimalFormat df = null;
-	private String formatDouble(double toFormat)
-	{
-		if (df == null)
-		{
-			// RESOLVE: This really should use the database locale to
-			// format the number.
-			df = new DecimalFormat("###########0.00");
-			df.setMinimumIntegerDigits(1);
-		}
-
-		String retval = df.format(toFormat);
-
-		if (retval.length() < 15)
-		{
-			retval =
-				"               ".substring(0, 15 - retval.length()) + retval;
-		}
-
-		return retval;
+            MessageService.getTextMessage(SQLState.RTS_OPT_EST_COST,
+                 new Double(optimizerEstimatedCost));
 	}
 
 	/**

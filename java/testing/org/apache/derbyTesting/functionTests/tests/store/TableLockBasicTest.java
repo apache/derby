@@ -536,8 +536,8 @@ public class TableLockBasicTest extends BaseJDBCTestCase {
                     + "		null\n"
                     + "	qualifiers:\n"
                     + "		None\n"
-                    + "	optimizer estimated row count:            6.00\n"
-                    + "	optimizer estimated cost:          100.40"
+                    + "	optimizer estimated row count: 6.00\n"
+                    + "	optimizer estimated cost: 100.40"
                 },
         });
 
@@ -599,8 +599,8 @@ public class TableLockBasicTest extends BaseJDBCTestCase {
                     + "		null\n"
                     + "	qualifiers:\n"
                     + "		None\n"
-                    + "	optimizer estimated row count:            6.00\n"
-                    + "	optimizer estimated cost:          100.40"
+                    + "	optimizer estimated row count: 6.00\n"
+                    + "	optimizer estimated cost: 100.40"
                 }
         }        
         );
@@ -648,8 +648,8 @@ public class TableLockBasicTest extends BaseJDBCTestCase {
                     + "		null\n"
                     + "	qualifiers:\n"
                     + "		None\n"
-                    + "	optimizer estimated row count:            6.00\n"
-                    + "	optimizer estimated cost:          100.40"
+                    + "	optimizer estimated row count: 6.00\n"
+                    + "	optimizer estimated cost: 100.40"
                 }
         }        
         );
@@ -696,8 +696,8 @@ public class TableLockBasicTest extends BaseJDBCTestCase {
                     + "		null\n"
                     + "	qualifiers:\n"
                     + "		None\n"
-                    + "	optimizer estimated row count:            6.00\n"
-                    + "	optimizer estimated cost:          100.40"
+                    + "	optimizer estimated row count: 6.00\n"
+                    + "	optimizer estimated cost: 100.40"
                 }
         }        
         );
@@ -745,8 +745,8 @@ public class TableLockBasicTest extends BaseJDBCTestCase {
                     + "		null\n"
                     + "	qualifiers:\n"
                     + "		None\n"
-                    + "	optimizer estimated row count:            6.00\n"
-                    + "	optimizer estimated cost:          100.40"
+                    + "	optimizer estimated row count: 6.00\n"
+                    + "	optimizer estimated cost: 100.40"
                 }
         }        
         );
@@ -794,8 +794,8 @@ public class TableLockBasicTest extends BaseJDBCTestCase {
                     + "		null\n"
                     + "	qualifiers:\n"
                     + "		None\n"
-                    + "	optimizer estimated row count:            6.00\n"
-                    + "	optimizer estimated cost:          100.40"
+                    + "	optimizer estimated row count: 6.00\n"
+                    + "	optimizer estimated cost: 100.40"
                 }
         }        
         );
@@ -843,8 +843,8 @@ public class TableLockBasicTest extends BaseJDBCTestCase {
                     + "		null\n"
                     + "	qualifiers:\n"
                     + "		None\n"
-                    + "	optimizer estimated row count:            6.00\n"
-                    + "	optimizer estimated cost:          100.40"
+                    + "	optimizer estimated row count: 6.00\n"
+                    + "	optimizer estimated cost: 100.40"
                 }
         }        
         );

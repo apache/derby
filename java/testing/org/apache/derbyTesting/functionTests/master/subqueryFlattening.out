@@ -7138,7 +7138,33 @@ Attached subqueries:
 																close time (milliseconds) = 0
 													Right result set:
 														Row ResultSet:
-								
+														Number of opens = 3
+														Rows returned = 3
+															constructor time (milliseconds) = 0
+															open time (milliseconds) = 0
+															next time (milliseconds) = 0
+															close time (milliseconds) = 0
+												Right result set:
+													Row ResultSet:
+													Number of opens = 3
+													Rows returned = 3
+														constructor time (milliseconds) = 0
+														open time (milliseconds) = 0
+														next time (milliseconds) = 0
+														close time (milliseconds) = 0
+											Right result set:
+												Row ResultSet:
+												Number of opens = 3
+												Rows returned = 3
+													constructor time (milliseconds) = 0
+													open time (milliseconds) = 0
+													next time (milliseconds) = 0
+													close time (milliseconds) = 0
+										Right result set:
+											Row ResultSet:
+											Number of opens = 3
+											Rows returned = 3
+												constructor time (m
 ij> select * from t1 where exists (select * from t2 where t1.c1=t2.c1 and t2.c1 not in (select t3.c1 from t3, t4));
 C1         
 -----------
@@ -7693,7 +7719,33 @@ Attached subqueries:
 																close time (milliseconds) = 0
 													Right result set:
 														Row ResultSet:
-												
+														Number of opens = 3
+														Rows returned = 3
+															constructor time (milliseconds) = 0
+															open time (milliseconds) = 0
+															next time (milliseconds) = 0
+															close time (milliseconds) = 0
+												Right result set:
+													Row ResultSet:
+													Number of opens = 3
+													Rows returned = 3
+														constructor time (milliseconds) = 0
+														open time (milliseconds) = 0
+														next time (milliseconds) = 0
+														close time (milliseconds) = 0
+											Right result set:
+												Row ResultSet:
+												Number of opens = 3
+												Rows returned = 3
+													constructor time (milliseconds) = 0
+													open time (milliseconds) = 0
+													next time (milliseconds) = 0
+													close time (milliseconds) = 0
+										Right result set:
+											Row ResultSet:
+											Number of opens = 3
+											Rows returned = 3
+												constructor time (milli
 ij> drop table colls;
 0 rows inserted/updated/deleted
 ij> drop table docs;
