@@ -33,7 +33,6 @@ import org.w3c.dom.*;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
-import org.apache.tools.ant.taskdefs.Echo;
 
 
 /**
@@ -659,14 +658,16 @@ public class MessageBuilder extends Task
     {
         int             count = rawArgs.length;
         String[]    cookedArgs = new String[ count ];
+        MessageFormat format = new MessageFormat(message);
 
         // add xml angle brackets around the args
         for ( int i = 0; i < count; i++ )
         {
             cookedArgs[ i ] = "<varname>&lt;" + rawArgs[ i ] + "&gt;</varname>";
+            format.setFormatByArgumentIndex(i, null); // use plain string format
         }
 
-        return MessageFormat.format( message, cookedArgs );
+        return format.format(cookedArgs);
     }
 
     /////////////////////////////////////////////////////////////////////////

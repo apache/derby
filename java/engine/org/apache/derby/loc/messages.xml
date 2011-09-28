@@ -6432,12 +6432,14 @@ MessageId.java.
 
             <msg>
                 <name>43X07.U</name>
-                <text>optimizer estimated row count</text>
+                <text>optimizer estimated row count: {0,number,###########0.00}</text>
+                <arg>number</arg>
             </msg>
 
             <msg>
                 <name>43X08.U</name>
-                <text>optimizer estimated cost</text>
+                <text>optimizer estimated cost: {0,number,###########0.00}</text>
+                <arg>number</arg>
             </msg>
 
             <msg>
