@@ -48,7 +48,9 @@ public class _Suite extends BaseTestCase  {
 
         suite.addTest(ErrorStreamTest.suite());
         suite.addTest(LockInterruptTest.suite());
-        suite.addTest(RestrictiveFilePermissionsTest.suite());
+        // for now disable on IBM 1.7 DERBY-5434
+        if (!(isIBMJVM() && isJava7()))
+            suite.addTest(RestrictiveFilePermissionsTest.suite());
         suite.addTest(ModuleLoadingTest.suite());
 
         return suite;

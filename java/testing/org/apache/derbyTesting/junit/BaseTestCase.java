@@ -639,6 +639,9 @@ public abstract class BaseTestCase
         return getSystemProperty("java.version").startsWith("1.5");
     }
    
+    public static final boolean isJava7() {
+        return getSystemProperty("java.version").startsWith("1.7");
+    }
     /**
      * Returns the major version of the class specification version supported
      * by the running JVM.
