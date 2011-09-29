@@ -333,7 +333,7 @@ public class NetworkServerControl{
 			)
 			{
 				if (server != null)
-					server.consoleExceptionPrint(e);
+					server.consoleExceptionPrintTrace(e);
 				else
 					e.printStackTrace();  // default output stream is System.out
 			}
