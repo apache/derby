@@ -25,6 +25,8 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Inet6Address;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -303,8 +305,18 @@ public class NetworkServerControl{
             int     command = server.parseArgs( args );
 
             if (command == NetworkServerControlImpl.COMMAND_START) {
-                System.setProperty(Property.SERVER_STARTED_FROM_CMD_LINE,
-                                   "true");
+                try {
+                    AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                            public Object run() throws Exception {
+                                System.setProperty(
+                                    Property.SERVER_STARTED_FROM_CMD_LINE,
+                                    "true");
+                                return null;
+                            }});
+                } catch (Exception e) {
+                    server.consoleExceptionPrintTrace(e);
+                    System.exit(1);
+                }
             }
 
             //
