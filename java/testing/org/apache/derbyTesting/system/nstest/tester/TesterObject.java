@@ -230,74 +230,76 @@ public class TesterObject {
 			s.close();
 		}
 
-		// Now work over the returned ResultSet and keep track of number of rows
-		// returned
-		// We execute the getXXX methods on each of the selected columns so that
-		// data flow out
-		// from the network server is also tested.
-		try {
-			while (rSet.next()) {
-				// get value of column id
-				int id1 = rSet.getInt(1);
+		if (rSet != null) {
+		    // Now work over the returned ResultSet and keep track of number of rows
+		    // returned
+		    // We execute the getXXX methods on each of the selected columns so that
+		    // data flow out
+		    // from the network server is also tested.
+		    try {
+		        while (rSet.next()) {
+		            // get value of column id
+		            int id1 = rSet.getInt(1);
 
-				// get value of column t_char
-				String str1 = rSet.getString(2);
+		            // get value of column t_char
+		            String str1 = rSet.getString(2);
 
-				// get value of column t_date
-				Date dt = rSet.getDate(3);
+		            // get value of column t_date
+		            Date dt = rSet.getDate(3);
 
-				// get value of column t_decimal
-				double doub1 = rSet.getDouble(4);
+		            // get value of column t_decimal
+		            double doub1 = rSet.getDouble(4);
 
-				// get value of column t_decimal_nn
-				double doub2 = rSet.getDouble(5);
+		            // get value of column t_decimal_nn
+		            double doub2 = rSet.getDouble(5);
 
-				// get value of column t_double
-				double doub3 = rSet.getDouble(6);
+		            // get value of column t_double
+		            double doub3 = rSet.getDouble(6);
 
-				// get value of column t_float
-				float flt1 = rSet.getFloat(7);
+		            // get value of column t_float
+		            float flt1 = rSet.getFloat(7);
 
-				// get value of column t_int
-				int id2 = rSet.getInt(8);
+		            // get value of column t_int
+		            int id2 = rSet.getInt(8);
 
-				// get value of column t_longint
-				long lg1 = rSet.getLong(9);
+		            // get value of column t_longint
+		            long lg1 = rSet.getLong(9);
 
-				// get value of column t_numeric_large
-				double doub4 = rSet.getDouble(10);
+		            // get value of column t_numeric_large
+		            double doub4 = rSet.getDouble(10);
 
-				// get value of column t_real
-				float flt2 = rSet.getFloat(11);
+		            // get value of column t_real
+		            float flt2 = rSet.getFloat(11);
 
-				// get value of column t_smallint
-				int id3 = rSet.getInt(12);
+		            // get value of column t_smallint
+		            int id3 = rSet.getInt(12);
 
-				// get value of column t_time
-				Time tm = rSet.getTime(13);
+		            // get value of column t_time
+		            Time tm = rSet.getTime(13);
 
-				// get value of column t_timestamp
-				Timestamp tstmp = rSet.getTimestamp(14);
+		            // get value of column t_timestamp
+		            Timestamp tstmp = rSet.getTimestamp(14);
 
-				// get value of column t_varchar
-				String str2 = rSet.getString(15);
+		            // get value of column t_varchar
+		            String str2 = rSet.getString(15);
 
-				// get value of column serialkey
-				long lg2 = rSet.getLong(16);
+		            // get value of column serialkey
+		            long lg2 = rSet.getLong(16);
 
-				numRowsSelected++;
-			}
-			NsTest.addStats(NsTest.SELECT, 1);
-			System.out.println(this.thread_id + " selected " + numRowsSelected
-					+ " rows");
-		} catch (Exception e) {
-			System.out
-			.println("FAIL: doSelectOperation() had problems working over the ResultSet");
-			NsTest.addStats(NsTest.FAILED_SELECT, 1);
-			printException("processing ResultSet during row data retrieval", e);
-			rSet.close();
-			s.close();
-			System.out.println("Closed the select statement");
+		            numRowsSelected++;
+		        }
+		        NsTest.addStats(NsTest.SELECT, 1);
+		        System.out.println(this.thread_id + " selected " + numRowsSelected
+		                + " rows");
+		    } catch (Exception e) {
+		        System.out
+		        .println("FAIL: doSelectOperation() had problems working over the ResultSet");
+		        NsTest.addStats(NsTest.FAILED_SELECT, 1);
+		        printException("processing ResultSet during row data retrieval", e);
+		        rSet.close();
+		        s.close();
+		        System.out.println("Closed the select statement");
+		    }
 		}
 
 		// close the ResultSet and statement and release it's resources.
