@@ -220,7 +220,7 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
   private static void reportDerby (java.io.PrintWriter localAW) {
 
-	  localAW.println("JRE - JDBC: " + org.apache.derby.iapi.services.info.JVMInfo.derbyVMLevel());
+	  localAW.println("JRE - JDBC: " + derbyVMLevel());
 
 	  String classpath = null;
 
@@ -260,8 +260,8 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
 
   } // end of reportDerby
-
-  /**
+  
+/**
     Writes out the relevant info about the Java environment to
     the specified AppStreamWriter.
 
@@ -1252,6 +1252,63 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
         }
         return result;
     }
+
+    /**
+     * Return VM and JDBC version for sysinfo This has to be in this class and
+     * NOT use org.apache.derby.iapi.services.info. ! Some code is repeated here
+     * to avoid JVMInfo being in multiple jars DERBY-1046 DERBY-5431. For now
+     * changes made here probably also be made in JVMInfo.
+     * 
+     * @return Derby's understanding of the virtual machine's environment.
+     */
+    private static String derbyVMLevel() {
+
+        // For sysinfo assuming java.specification.version is set because it
+        // was mandatory as of 1.4.2. This method is not as extensive as the
+        // initialization in JVMInfo and makes such assumptions. If any
+        // exception
+        // occurs we skip this line of sysinfo.
+        try {
+            String javaVersion =
+                System.getProperty("java.specification.version", "1.4");
+            String javaSpec =
+                System.getProperty("java.specification.name", "-");
+
+            boolean isJ2ME = javaSpec.startsWith("J2ME") || // recognize IBM
+            // WCTME
+            javaSpec.startsWith("CDC") || // Oracle Java ME Embedded
+            // Client
+            (
+                    (javaSpec.indexOf("Profile") > -1) && // recognize phoneME
+                    (javaSpec.indexOf("Specification") > -1)
+            );
+            
+            if (isJ2ME) {
+                return "J2ME - JDBC for CDC/FP 1.1";
+            }
+            else if (javaVersion.equals("1.4")) {
+                // 1.4.2 is the minimum we support so assume that
+                // if it is not J2ME it is 1.4.2
+                return "J2SE 1.4.2 - JDBC 3.0";
+            }
+            else if (javaVersion.equals("1.5")) {
+                return "J2SE 5.0 - JDBC 3.0";
+            }
+            else if (javaVersion.equals("1.6")) {
+                return "Java SE 6 - JDBC 4.0";
+            }
+            else if (javaVersion.equals("1.7")) {
+                // We don't have full JDBC 4.1 support yet, so still print JDBC
+                // 4.0
+                return "Java SE 7 - JDBC 4.0";
+            }
+            else
+                return "?-?";
+        } catch (Exception e) {
+            return "?-?: " + e.getMessage();
+        }
+    }
+
 
 } // end of class Main
 
