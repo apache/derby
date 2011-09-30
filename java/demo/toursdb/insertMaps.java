@@ -37,32 +37,21 @@ import java.sql.SQLException;
 public class insertMaps {
 
 	public static final String CSdriver = new String("org.apache.derby.jdbc.EmbeddedDriver");
-	public static final String dbURLCS = new String("jdbc:derby:toursDB");
+	public static final String dbURLCS = new String("jdbc:derby:toursdb");
 
 	public static void main(String[] args) throws Exception {
 
-		try {
-			Connection connCS = null;
-
-			System.out.println("Loading the Derby jdbc driver...");
-			Class.forName(CSdriver).newInstance();
+		System.out.println("Loading the Derby jdbc driver...");
+		Class.forName(CSdriver).newInstance();
 	
-			System.out.println("Getting Derby database connection...");
-			connCS = DriverManager.getConnection(dbURLCS);
-			System.out.println("Successfully got the Derby database connection...");
+		System.out.println("Getting Derby database connection...");
+		Connection connCS = DriverManager.getConnection(dbURLCS);
+		System.out.println("Successfully got the Derby database connection...");
 
-			System.out.println("Inserted " + insertRows(null,connCS) + " rows into the ToursDB");
+		System.out.println("Inserted " + insertRows(null, connCS) +
+						   " rows into the ToursDB");
 
-			connCS.close();
-
-		} catch (SQLException e) {
-			System.out.println ("FAIL -- unexpected exception: " + e.toString());
-			e.printStackTrace();
-		} catch (Exception e) {
-			System.out.println ("FAIL -- unexpected exception: " + e.toString());
-			e.printStackTrace();
-		}
-
+		connCS.close();
 	}
 	
 	public static int insertRows(String path, Connection conn) 

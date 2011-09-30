@@ -89,11 +89,12 @@
     <java classname="toursdb.insertMaps"
           output="${generated.toursdb.dir}/toursdb.out" append="true"
           failonerror="true"
-          dir="${generated.toursdb.dir}" fork="true">
+          dir="${derby.demo.src.dir}/toursdb" fork="true">
       <classpath>
         <pathelement path="${out.dir}"/>
         <pathelement path="${compile.classpath}"/>
       </classpath>
+      <sysproperty key="derby.system.home" value="${generated.toursdb.dir}"/>
     </java>
     <java classname="org.apache.derby.tools.ij"
           output="${generated.toursdb.dir}/toursdb.out" append="true"
