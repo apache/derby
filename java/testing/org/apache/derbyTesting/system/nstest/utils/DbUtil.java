@@ -226,16 +226,7 @@ public class DbUtil {
 			// ps.close();
 		}
 		
-		if (ps != null) {
-			try {
-				ps.close();
-				
-			} catch (Exception e) {
-				printException(
-						"closing insert stmt in dbUtil when there was a problem creating it",
-						e);
-			}
-		}
+	
 		return rowsAdded;
 	}
 	
@@ -256,8 +247,6 @@ public class DbUtil {
 		if (skey == 0) { // means we did not find a row
 			System.out.println(thread_id
 					+ " could not find a row to update or there was an error.");
-			if (ps2 != null)
-				ps2.close();
 			return rowsUpdated;
 		}
 		
@@ -272,7 +261,6 @@ public class DbUtil {
 					+ " = ? " + " where serialkey = " + skey);
 			
 		} catch (Exception e) {
-			ps2.close();
 			printException(
 					"closing update prepared stmt in dbUtil.update_one_row() ",
 					e);
@@ -385,7 +373,6 @@ public class DbUtil {
 					+ " " + sqe.getMessage());
 			sqe.printStackTrace();
 		} catch (Exception e) {
-			ps2.close();
 			printException("Error in update_one_row()", e);
 			e.printStackTrace();
 		} finally {
@@ -400,14 +387,7 @@ public class DbUtil {
 			System.out
 			.println(thread_id + " update failed, no such row exists");
 		
-		if (ps2 != null) {
-			try {
-				ps2.close();
-				
-			} catch (Exception e) {
-				printException("closing update stmt after work is done", e);
-			}
-		}
+	
 		return rowsUpdated;
 	}
 	
@@ -432,8 +412,6 @@ public class DbUtil {
 			System.out
 			.println("Unexpected error preparing the statement in delete_one()");
 			printException("delete_one_row prepare ", e);
-			if (ps != null)
-				ps.close();
 			return rowsDeleted;
 		}
 		
@@ -443,7 +421,6 @@ public class DbUtil {
 		if (skey == 0) { // means we did not find a row
 			System.out.println(thread_id
 					+ " could not find a row to delete or there was an error.");
-			ps.close();
 			return rowsDeleted;
 		}
 		
@@ -453,7 +430,6 @@ public class DbUtil {
 		} catch (Exception e) {
 			System.out
 			.println("Error in delete_one(): either with setLong() or executeUpdate");
-			ps.close();
 			printException("failure to execute delete stmt", e);
 		} finally {
 			conn
@@ -468,16 +444,6 @@ public class DbUtil {
 			System.out.println(thread_id + " delete for serialkey " + skey
 					+ " failed, no such row exists.");
 		
-		if (ps != null) {
-			try {
-				ps.close();
-			} catch (Exception e) {
-				System.out
-				.println("Error in closing prepared statement of delete_one()");
-				printException("failure to close delete stmt after work done",
-						e);
-			}
-		}
 		return rowsDeleted;
 	}// end of method delete_one()
 	
@@ -499,8 +465,6 @@ public class DbUtil {
 			ps = conn
 			.prepareStatement("select max(serialkey) from nstesttab where serialkey > ?");
 		} catch (Exception e) {
-			if (ps != null)
-				ps.close();
 			System.out
 			.println("Unexpected error creating the select prepared statement in pick_one()");
 			printException("failure to prepare select stmt in pick_one()", e);
@@ -543,22 +507,11 @@ public class DbUtil {
 			sqe.printStackTrace();
 		}
 		
-		if (ps != null) {
-			try {
-				ps.close();
-				
-			} catch (Exception e) {
-				System.out
-				.println("Error in closing prepared statement of pick_one()");
-				printException(
-						"failure closing select stmt in pick_one after work is done",
-						e);
-			}
-		}
+	
 		
 		return rowToReturn;
 		
-	}// end of method pick_one(...)
+	}//of method pick_one(...)
 	
 	// ** This method abstracts exception message printing for all exception
 	// messages. You may want to change
