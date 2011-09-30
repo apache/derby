@@ -220,8 +220,6 @@ public static void getMainInfo (java.io.PrintWriter aw, boolean pause) {
 
   private static void reportDerby (java.io.PrintWriter localAW) {
 
-	  localAW.println("JRE - JDBC: " + org.apache.derby.iapi.services.info.JVMInfo.derbyVMLevel());
-
 	  String classpath = null;
 
       try {

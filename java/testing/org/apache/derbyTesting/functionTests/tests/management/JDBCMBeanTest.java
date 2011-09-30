@@ -22,12 +22,15 @@
 package org.apache.derbyTesting.functionTests.tests.management;
 
 import java.io.BufferedReader;
+import java.sql.DatabaseMetaData;
 import java.sql.Driver;
 import java.util.Hashtable;
 import javax.management.ObjectName;
 import junit.framework.Test;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derbyTesting.junit.Utilities;
 
 
@@ -93,23 +96,19 @@ public class JDBCMBeanTest extends MBeanTest {
     }
     
     public void testAttributeDriverLevel() throws Exception {
-        String expected = "[Unable to get driver level from sysinfo]";
-        // Get the expected value from sysinfo
-        BufferedReader sysinfoOutput = Utilities.getSysinfoFromServer();
-        String line = null;
-        while ((line = sysinfoOutput.readLine()) != null) {
-            /* Looking for:
-             *--------- Derby Information --------
-             *JRE - JDBC: J2SE 5.0 - JDBC 3.0
-             *            ^^^^^^^^^^^^^^^^^^^
-             * (actual JRE/JDBC values may vary)*/
-            if (line.matches("^JRE - JDBC: .*")) {
-                expected = line.substring(line.indexOf(": ") + 2);
-            }
-        }
-        
-        // test the attribute value against the expected value
-        assertStringAttribute(expected,getJdbcMBeanObjectName(), "DriverLevel");
+        // get JDBC version from DatabaseMetaData for comparison
+        DatabaseMetaData dmd = getConnection().getMetaData();
+        String JDBCVersion = "" + dmd.getJDBCMajorVersion() + 
+            dmd.getJDBCMajorVersion() + "." +
+            dmd.getJDBCMinorVersion();
+        println("DatabaseMetaDataJDBCLevel = " + JDBCVersion);
+        ObjectName driverLevel = getJdbcMBeanObjectName();
+        String driverLevelString = driverLevel.toString();
+        println("MBean driverLevel  = " + driverLevelString);
+       
+        assert(driverLevelString.indexOf('?') == -1);
+        assert(driverLevelString.matches("^JRE - JDBC: " + JDBCVersion + ".*"));
+
     }
     
     /**

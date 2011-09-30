@@ -510,45 +510,49 @@ class xaHelper implements xaAbstractHelper
 		// if we new it directly, then it will the tools.jar file to bloat.
 		try
 		{
-			if (isJCC)
-				return (XADataSource) 
-					(Class.forName("com.ibm.db2.jcc.DB2XADataSource").newInstance());
-			else if (isNetClient){
-                            if (JVMInfo.JDK_ID >= JVMInfo.J2SE_16) {
-                                //running under jdk1.6 or higher 
-                                // try instantiating EmbeddedXADataSource40
-                                try {
-                                    return (XADataSource)(Class.forName(
-                                        "org.apache.derby.jdbc." +
-                                        "ClientXADataSource40").newInstance());                                        
-                                }
-                                catch (ClassNotFoundException e) {
-                                    //probably it was not compiled with jdbc4.0
-                                    //support go ahead with EmbeddedXADataSource
-                                }
-                            }
-                            return (XADataSource) (Class.forName(
-                                    "org.apache.derby.jdbc.ClientXADataSource"
-                                    ).newInstance());
-                        }
-			else {
-                            if (JVMInfo.JDK_ID >= JVMInfo.J2SE_16) {
-                                //running under jdk1.6 or higher 
-                                // try instantiating EmbeddedXADataSource40
-                                try {
-                                    return (XADataSource)(Class.forName(
-                                        "org.apache.derby.jdbc." +
-                                        "EmbeddedXADataSource40").newInstance());                                        
-                                }
-                                catch (ClassNotFoundException e) {
-                                    //probably it was not compiled with jdbc4.0
-                                    //support go ahead with EmbeddedXADataSource
-                                }
-                            }
-                            return (XADataSource)(Class.forName("org.apache.derby.jdbc.EmbeddedXADataSource").newInstance());
-                        }
-		}
-		catch(ClassNotFoundException cnfe) {
+		    
+            if (isJCC)
+               return (XADataSource) 
+                (Class.forName("com.ibm.db2.jcc.DB2XADataSource").newInstance());
+            else if (isNetClient){
+                //running under jdk1.6 or higher 
+                // try instantiating EmbeddedXADataSource40
+                try {
+                    return (XADataSource)(Class.forName(
+                            "org.apache.derby.jdbc." +
+                    "ClientXADataSource40").newInstance());                                        
+                }
+                catch (ClassNotFoundException e) {
+                    //probably it was not compiled with jdbc4.0
+                    //support go ahead with ClientXADataSource
+                }
+                catch (UnsupportedClassVersionError ue) { 
+                    // ClientXADataSource
+                }
+                return (XADataSource) (Class.forName(
+                        "org.apache.derby.jdbc.ClientXADataSource"
+                ).newInstance());
+            }
+            else {
+                //running under jdk1.6 or higher 
+                // try instantiating EmbeddedXADataSource40
+                try {
+                    return (XADataSource)(Class.forName(
+                            "org.apache.derby.jdbc." +
+                    "EmbeddedXADataSource40").newInstance());                                        
+                }
+                catch (ClassNotFoundException e) {
+                    //probably it was not compiled with jdbc4.0
+                    //support go ahead with EmbeddedXADataSource
+                }
+                catch (UnsupportedClassVersionError ue) {
+                    // not jdk 16 or higher. Go ahead with
+                    // EmbeddedXADataSource
+                }
+                return (XADataSource)(Class.forName("org.apache.derby.jdbc.EmbeddedXADataSource").newInstance());
+            }
+        }
+        catch(ClassNotFoundException cnfe) {
 			throw new ijException(LocalizedResource.getMessage("IJ_XAClass"));
 		}
 		catch (InstantiationException e) { }
