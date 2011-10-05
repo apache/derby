@@ -29,6 +29,7 @@ import java.security.AccessController;
 import java.security.PrivilegedExceptionAction;
 import java.util.Properties;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 
 import org.apache.derby.impl.drda.NetworkServerControlImpl;
@@ -304,7 +305,9 @@ public class NetworkServerControl{
             
             int     command = server.parseArgs( args );
 
-            if (command == NetworkServerControlImpl.COMMAND_START) {
+            // Java 7 and above: file permission restriction
+            if (command == NetworkServerControlImpl.COMMAND_START &&
+                    JVMInfo.JDK_ID >= JVMInfo.J2SE_17) {
                 try {
                     AccessController.doPrivileged(new PrivilegedExceptionAction() {
                             public Object run() throws Exception {

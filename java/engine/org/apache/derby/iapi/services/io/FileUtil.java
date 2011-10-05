@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import org.apache.derby.iapi.reference.Property;
+import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.shared.common.sanity.SanityManager;
 
@@ -654,9 +655,13 @@ nextFile:	for (int i = 0; i < list.length; i++) {
             }
         } else {
             // The property has not been specified. Only proceed if we are
-            // running with the network server started from the command line.
-            if ( !PropertyUtil.getSystemBoolean(
-                    Property.SERVER_STARTED_FROM_CMD_LINE, false)) {
+            // running with the network server started from the command line
+            // *and* at Java 7 or above
+            if (JVMInfo.JDK_ID >= JVMInfo.J2SE_17 && 
+                    (PropertyUtil.getSystemBoolean(
+                        Property.SERVER_STARTED_FROM_CMD_LINE, false)) ) {
+                // proceed
+            } else {
                 return;
             }
         }
