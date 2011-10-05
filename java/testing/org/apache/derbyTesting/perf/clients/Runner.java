@@ -93,7 +93,10 @@ public class Runner {
         if (init) {
             DBFiller filler = getDBFiller();
             Connection conn = DriverManager.getConnection(url, user, password);
-            System.out.println("initializing database...");
+            System.out.print("initializing database for ");
+            System.out.println((Runner.getLoadOpt( "identityTest", 0 ) == 1)?
+            				"identity column testing...":
+            				"sequence generator testing...");
             filler.fill(conn);
             conn.close();
         }
@@ -250,6 +253,9 @@ public class Runner {
 "            - tablesPerGenerator: number of tables to create per sequence\n" +
 "            - insertsPerTransaction: number of inserts to perform per transaction\n" +
 "            - debugging: 1 means print debug chatter, 0 means do not print the chatter\n" +
+"            - identityTest: 1 means do identity column testing, any other number \n" +
+"                    means do sequence generator testing. If no identityTest is specified \n" +
+"                    then sequence generator testing will be done by default \n" +
 "  -load_opts: comma-separated list of load-specific options\n" +
 "  -gen: load generator, default: b2b, valid types:\n" +
 "      * b2b - clients perform operations back-to-back\n" +
@@ -259,7 +265,6 @@ public class Runner {
 "         load generator is \"poisson\", default: 100\n" +
 "  -wt: warmup time in seconds, default: 30\n" +
 "  -rt: time in seconds to collect results, default: 60";
-
     /**
      * Print the usage string.
      *
