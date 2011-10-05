@@ -543,7 +543,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
      *
      * @param file (or directory) for which we want to check permissions
      * @param expectedOutcome NEGATIVE or POSITIVE
-     * @see #checkAccessToOwner(BaseJDBCTestCase, File, boolean, int)
+     * @see #checkAccessToOwner(File, boolean, int)
      */
 
     public static void checkAccessToOwner(
@@ -555,9 +555,9 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
 
 
     /**
-     * Same as {@link #checkAccessToOwner(BaseJDBCTestCase, File, int)
-     * checkAccessToOwner}, but if {@code doContents} is true, also check files
-     * directly contained in this file qua directory (not recursively).
+     * Same as {@link #checkAccessToOwner(File, int) checkAccessToOwner}, but
+     * if {@code doContents} is true, also check files directly contained in
+     * this file qua directory (not recursively).
      *
      * @param file ((or directory) for which we want to check permissions
      * @param doContents if a directory, an error to call with true if not
