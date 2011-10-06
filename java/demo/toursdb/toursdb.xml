@@ -70,16 +70,6 @@
         <pathelement path=".."/>
       </classpath>
     </java>
-    <java classname="org.apache.derby.tools.ij"
-          output="toursdb.out" append="true"
-          failonerror="true"
-          dir="." fork="true">
-      <classpath>
-        <pathelement path="${lib.dir}/derby.jar"/>
-        <pathelement path="${lib.dir}/derbytools.jar"/>
-      </classpath>
-      <arg value="disconnect.sql"/>
-    </java>
   </target>
 
   <target name="jarup"> 

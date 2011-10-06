@@ -52,6 +52,17 @@ public class insertMaps {
 						   " rows into the ToursDB");
 
 		connCS.close();
+
+		// Shut down the database cleanly before exiting.
+		try {
+			DriverManager.getConnection(dbURLCS + ";shutdown=true");
+		} catch (SQLException sqle) {
+			// Database shutdown is expected to raise SQLState 08006.
+			// Report any other exception.
+			if (!"08006".equals(sqle.getSQLState())) {
+				throw sqle;
+			}
+		}
 	}
 	
 	public static int insertRows(String path, Connection conn) 
