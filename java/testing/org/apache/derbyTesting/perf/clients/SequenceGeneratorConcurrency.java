@@ -32,7 +32,7 @@ import java.util.Random;
 
 /**
  * <p>
- * Machinery to test the concurrency of sequence generators.
+ * Machinery to test the concurrency of sequence/identity generators.
  * </p>
  */
 public class SequenceGeneratorConcurrency
@@ -53,6 +53,7 @@ public class SequenceGeneratorConcurrency
         private int _numberOfGenerators;
         private int _tablesPerGenerator;
         private int _insertsPerTransaction;
+        private boolean _runIdentityTest;
         private boolean _debugging;
 
         public LoadOptions()
@@ -60,6 +61,8 @@ public class SequenceGeneratorConcurrency
             _numberOfGenerators = Runner.getLoadOpt( "numberOfGenerators", 1 );
             _tablesPerGenerator = Runner.getLoadOpt( "tablesPerGenerator", 1 );
             _insertsPerTransaction = Runner.getLoadOpt( "insertsPerTransaction", 1 );
+            //If no identityTest is specified, then do sequence testing.
+            _runIdentityTest = ( Runner.getLoadOpt( "identityTest", 0 ) == 1);
             _debugging = ( Runner.getLoadOpt( "debugging", 0 ) == 1 );
         }
 
@@ -75,6 +78,9 @@ public class SequenceGeneratorConcurrency
         /** Return whether we are in debugging mode */
         public boolean debugging() { return _debugging; }
 
+        /** Return whether we are doing identity column testing */
+        public boolean runIdentityTest() { return _runIdentityTest; }
+
         public String toString()
         {
             StringBuffer buffer = new StringBuffer();
@@ -83,6 +89,7 @@ public class SequenceGeneratorConcurrency
             buffer.append( " generators = " + _numberOfGenerators );
             buffer.append( ", tablesPerGenerator = " + _tablesPerGenerator );
             buffer.append( ", insertsPerTransaction = " + _insertsPerTransaction );
+            buffer.append( ", identityTest = " + _runIdentityTest );
             buffer.append( ", debugging = " + _debugging );
             buffer.append( " )" );
 
@@ -115,14 +122,19 @@ public class SequenceGeneratorConcurrency
         {
             int numberOfGenerators = _loadOptions.getNumberOfGenerators();
             int tablesPerGenerator = _loadOptions.getTablesPerGenerator();
+            boolean runIdentityTest = _loadOptions.runIdentityTest();
 
             for ( int sequence = 0; sequence < numberOfGenerators; sequence++ )
             {
-                runDDL( conn, "create sequence " + makeSequenceName( sequence ) );
+            	if (!runIdentityTest)
+                    runDDL( conn, "create sequence " + makeSequenceName( sequence ) );
 
                 for ( int table = 1; table <= tablesPerGenerator; table++ )
                 {
-                    runDDL( conn, "create table " + makeTableName( sequence, table ) + "( a int )" );
+                	if (runIdentityTest)
+                        runDDL( conn, "create table " + makeTableName( sequence, table ) + "( a int, b int generated always as identity)" );
+                	else
+                        runDDL( conn, "create table " + makeTableName( sequence, table ) + "( a int )" );
                 }
             }
         }
@@ -183,6 +195,7 @@ public class SequenceGeneratorConcurrency
             int numberOfGenerators = _loadOptions.getNumberOfGenerators();
             int tablesPerGenerator = _loadOptions.getTablesPerGenerator();
             boolean debugging = _loadOptions.debugging();
+            boolean runIdentityTest = _loadOptions.runIdentityTest();
 
             for ( int sequence = 0; sequence < numberOfGenerators; sequence++ )
             {
@@ -195,8 +208,18 @@ public class SequenceGeneratorConcurrency
                     PreparedStatement ps;
                     String valuesClause = "values ( next value for " + sequenceName + " )";
 
-                    if ( table == 0 ) { ps = prepareStatement( _conn, debugging, valuesClause ); }
-                    else { ps = prepareStatement( _conn, debugging, "insert into " + tableName + "( a ) " + valuesClause ); }
+                    if ( table == 0 ){
+                    	if(!runIdentityTest) 
+                        	ps = prepareStatement( _conn, debugging, valuesClause );
+                    	else
+                        	ps = prepareStatement( _conn, debugging, "values (1)" );
+                    }
+                    else { 
+                    	if(!runIdentityTest) 
+                            ps = prepareStatement( _conn, debugging, "insert into " + tableName + "( a ) " + valuesClause ); 
+                    	else
+                        	ps = prepareStatement( _conn, debugging, "insert into " + tableName + "( a ) values(1)"); 
+                	}
                     
                     _psArray[ sequence ][ table ] = ps;
                 }
