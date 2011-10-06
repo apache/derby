@@ -20,10 +20,8 @@
  */
 package org.apache.derby.impl.sql.catalog;
 
-import org.apache.derby.catalog.SequencePreallocator;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.cache.Cacheable;
 import org.apache.derby.iapi.services.cache.CacheManager;
@@ -155,7 +153,7 @@ public abstract class SequenceUpdater implements Cacheable
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // ABSTRACT OR OVERRIDABLE BEHAVIOR TO BE IMPLEMENTED BY CHILDREN
+    // ABSTRACT BEHAVIOR TO BE IMPLEMENTED BY CHILDREN
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
@@ -187,19 +185,6 @@ public abstract class SequenceUpdater implements Cacheable
      */
     abstract protected boolean updateCurrentValueOnDisk( TransactionController tc, Long oldValue, Long newValue, boolean wait ) throws StandardException;
     
-    /**
-     * <p>
-     * Create an exception to state that there is too much contention on the generator.
-     * For backward compatibility reasons, different messages are needed by sequences
-     * and identities. See DERBY-5426.
-     * </p>
-     */
-    protected   StandardException   tooMuchContentionException()
-    {
-        return StandardException.newException
-            ( SQLState.LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE, _sequenceGenerator.getName() );
-    }
-    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // Cacheable BEHAVIOR
@@ -223,7 +208,6 @@ public abstract class SequenceUpdater implements Cacheable
                 String  errorMessage = MessageService.getTextMessage
                     (
                      SQLState.LANG_CANT_FLUSH_PREALLOCATOR,
-                     _sequenceGenerator.getSchemaName(),
                      _sequenceGenerator.getName()
                      );
 
@@ -335,10 +319,10 @@ public abstract class SequenceUpdater implements Cacheable
         ( NumberDataValue returnValue ) throws StandardException
     {
         Long startTime = null;
-
+        
         //
-        // We try to get a sequence number. We try until we've exceeded the lock timeout
-        // in case we find ourselves in a race with another session which is draining numbers from
+        // We try to get a sequence number. We try a couple times in case we find
+        // ourselves in a race with another session which is draining numbers from
         // the same sequence generator.
         //
         while ( true )
@@ -390,16 +374,18 @@ public abstract class SequenceUpdater implements Cacheable
                 ( (System.currentTimeMillis() - startTime.longValue()) > _lockTimeoutInMillis )
                 )
             {
-                //
-                // If we get here, then we exhausted our retry attempts. This might be a sign
-                // that we need to increase the number of sequence numbers which we
-                // allocate. There's an opportunity for Derby to tune itself here.
-                //
-                throw tooMuchContentionException();
+                break;
             }
             
         } // end of retry loop
 
+        //
+        // If we get here, then we exhausted our retry attempts. This might be a sign
+        // that we need to increase the number of sequence numbers which we
+        // allocate. There's an opportunity for Derby to tune itself here.
+        //
+        throw StandardException.newException
+            ( SQLState.LANG_TOO_MUCH_CONTENTION_ON_SEQUENCE, _sequenceGenerator.getName() );
     }
 
     /**
@@ -494,47 +480,6 @@ public abstract class SequenceUpdater implements Cacheable
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /** Make a new range allocator (called when the generator is instantiated) */
-    protected SequencePreallocator  makePreallocator( TransactionController tc )
-        throws StandardException
-    {
-        String  propertyName = Property.LANG_SEQUENCE_PREALLOCATOR;
-        String  className = PropertyUtil.getServiceProperty( tc, propertyName );
-
-        if ( className == null ) { return new SequenceRange(); }
-
-        try {
-            // If the property value was a number rather than a class name, then
-            // use that as the default size for preallocated ranges.
-            if ( isNumber( className ) )
-            {
-                return new SequenceRange( Integer.parseInt( className ) );
-            }
-            
-            return (SequencePreallocator) Class.forName( className ).newInstance();
-        }
-        catch (ClassNotFoundException e) { throw missingAllocator( propertyName, className, e ); }
-        catch (ClassCastException e) { throw missingAllocator( propertyName, className, e ); }
-        catch (InstantiationException e) { throw missingAllocator( propertyName, className, e ); }
-        catch (IllegalAccessException e) { throw missingAllocator( propertyName, className, e ); }
-        catch (NumberFormatException e) { throw missingAllocator( propertyName, className, e ); }
-    }
-    private StandardException   missingAllocator( String propertyName, String className, Exception e )
-    {
-        return StandardException.newException( SQLState.LANG_UNKNOWN_SEQUENCE_PREALLOCATOR, e, propertyName, className );
-    }
-    private boolean isNumber( String text )
-    {
-        int length = text.length();
-
-        for ( int i = 0; i < length; i++ )
-        {
-            if ( !Character.isDigit( text.charAt( i ) ) ) { return false; }
-        }
-
-        return true;
-    }
-    
     /** Get the time we wait for a lock, in milliseconds--overridden by unit tests */
     protected int getLockTimeout()
     {
@@ -555,69 +500,9 @@ public abstract class SequenceUpdater implements Cacheable
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
-    // NESTED CLASSES
+    // INNER CLASSES
     //
     ///////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * <p>
-     * Specific implementation of SequenceUpdater for the sequences managed by
-     * SYSCOLUMNS.
-     * </p>
-     */
-    public static final class SyscolumnsUpdater extends SequenceUpdater
-    {
-        private RowLocation _sequenceRowLocation;
-
-        public SyscolumnsUpdater() { super(); }
-        public SyscolumnsUpdater( DataDictionaryImpl dd ) { super( dd ); }
-    
-        //
-        // SequenceUpdater BEHAVIOR
-        //
-
-        protected SequenceGenerator createSequenceGenerator( TransactionController readOnlyTC )
-            throws StandardException
-        {
-            RowLocation[] rowLocation = new RowLocation[ 1 ];
-            SequenceDescriptor[] sequenceDescriptor = new SequenceDescriptor[ 1 ];
-            
-            _dd.computeIdentityRowLocation( readOnlyTC, _uuidString, rowLocation, sequenceDescriptor );
-            
-            _sequenceRowLocation = rowLocation[ 0 ];
-            
-            SequenceDescriptor isd = sequenceDescriptor[ 0 ];
-            
-            return new SequenceGenerator
-                (
-                 isd.getCurrentValue(),
-                 isd.canCycle(),
-                 isd.getIncrement(),
-                 isd.getMaximumValue(),
-                 isd.getMinimumValue(),
-                 isd.getStartValue(),
-                 isd.getSchemaDescriptor().getSchemaName(),
-                 isd.getSequenceName(),
-                 makePreallocator( readOnlyTC )
-                 );
-        }
-
-        protected boolean updateCurrentValueOnDisk( TransactionController tc, Long oldValue, Long newValue, boolean wait ) throws StandardException
-        {
-            return _dd.updateCurrentIdentityValue( tc, _sequenceRowLocation, wait, oldValue, newValue );
-        }
-
-        /**
-         * Wrap the "too much contention" exception in a "lock timeout" exception in
-         * order to preserve the old error behavior of identity columns. See DERBY-5426.
-         */
-        protected   StandardException   tooMuchContentionException()
-        {
-            StandardException   tooMuchContention = super.tooMuchContentionException();
-
-            return StandardException.newException( SQLState.LOCK_TIMEOUT, tooMuchContention );
-        }
-    }
 
     /**
      * <p>
@@ -656,9 +541,7 @@ public abstract class SequenceUpdater implements Cacheable
                  isd.getMaximumValue(),
                  isd.getMinimumValue(),
                  isd.getStartValue(),
-                 isd.getSchemaDescriptor().getSchemaName(),
-                 isd.getSequenceName(),
-                 makePreallocator( readOnlyTC )
+                 isd.getSequenceName()
                  );
         }
 

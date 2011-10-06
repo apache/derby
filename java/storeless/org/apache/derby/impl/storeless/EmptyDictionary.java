@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.impl.storeless.EmptyDictionary
+   Derby - Class org.apache.impl.storeless.EmptyDictionary
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -75,11 +75,6 @@ import org.apache.derby.impl.sql.compile.StatementNode;
 public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
 	public void clearCaches() throws StandardException {
-		// TODO Auto-generated method stub
-
-	}
-
-	public void clearSequenceCaches() throws StandardException {
 		// TODO Auto-generated method stub
 
 	}
@@ -707,7 +702,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 	}
 
     public void getCurrentValueAndAdvance
-        ( int catalogNumber, String uuidString, NumberDataValue returnValue )
+        ( String sequenceUUIDstring, NumberDataValue returnValue )
         throws StandardException
     {
 		// TODO Auto-generated method stub
@@ -715,6 +710,13 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
     
 	public RowLocation getRowLocationTemplate(LanguageConnectionContext lcc,
 			TableDescriptor td) throws StandardException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public NumberDataValue getSetAutoincrementValue(RowLocation rl,
+			TransactionController tc, boolean doUpdate,
+			NumberDataValue newValue, boolean wait) throws StandardException {
 		// TODO Auto-generated method stub
 		return null;
 	}

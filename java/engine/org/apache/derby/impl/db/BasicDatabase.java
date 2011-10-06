@@ -241,17 +241,6 @@ public class BasicDatabase implements ModuleControl, ModuleSupportable, Property
     }
 
 	public void stop() {
-        // The data dictionary is not available if this database has the
-        // role as an active replication slave database.
-        if (dd != null) {
-            try {
-                // on orderly shutdown, try not to leak unused numbers from
-                // the sequence generators.
-                dd.clearSequenceCaches();
-            } catch (StandardException se) {
-                se.printStackTrace(Monitor.getStream().getPrintWriter());
-            }
-        }
 		active = false;
 	}
 

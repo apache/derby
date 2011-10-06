@@ -349,18 +349,19 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		// Is this a bulkInsert or regular insert?
 		String insertMode = constants.getProperty("insertMode");
 
-		if ( hasAutoincrement() )
+                RowLocation[] rla;
+
+		if ((rla = constants.getAutoincRowLocation()) != null)
 		{
-            int cacheLength = resultDescription.getColumnCount();
-			aiCache = new NumberDataValue[ cacheLength ];
-			for (int i = 0; i < cacheLength; i++)
+			aiCache = 
+				new NumberDataValue[rla.length];
+			for (int i = 0; i < resultDescription.getColumnCount(); i++)
 			{
+				if (rla[i] == null)
+					continue;
 				ResultColumnDescriptor rcd = 
 					resultDescription.getColumnDescriptor(i + 1);
-                if ( rcd.getType().getTypeId().isNumericTypeId() )
-                {
-                    aiCache[i] = (NumberDataValue)rcd.getType().getNull();
-                }
+				aiCache[i] = (NumberDataValue)rcd.getType().getNull();
 			}
 		}
 
@@ -390,18 +391,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 		//System.out.println("new InsertResultSet " + sourceResultSet.getClass());
 	}
-
-    /**
-     * Return true if the table has an autoincrement column.
-     */
-    private boolean hasAutoincrement()  throws StandardException
-    {
-        // Global temporary tables don't have table descriptors but they
-        // don't have identity columns either
-        TableDescriptor tabdesc = getTableDescriptor();
-        if ( tabdesc == null ) { return false; }
-        else { return tabdesc.tableHasAutoincrement(); }
-    }
 	
 	/**
 		@exception StandardException Standard Derby error policy
@@ -592,28 +581,6 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 		}
 	}
 
-    /**
-     * Get the table descriptor if it hasn't already been looked up.
-     */
-    private TableDescriptor getTableDescriptor()
-        throws StandardException
-    {
-        if ( td == null ) { td = getDataDictionary().getTableDescriptor(constants.targetUUID); }
-
-        return td;
-    }
-    
-    /**
-     * Get the data dictionary if it hasn't already been looked up.
-     */
-    private DataDictionary getDataDictionary()
-        throws StandardException
-    {
-        if ( dd == null ) { dd = lcc.getDataDictionary(); }
-
-        return dd;
-    }
-    
 	/**
 	 * If user didn't provide columns list for auto-generated columns, then only include
 	 * columns with auto-generated values in the resultset. Those columns would be ones
@@ -798,9 +765,9 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 				}
 				else
 				{
-                    dvd = (NumberDataValue) aiCache[ index ].getNewNull();
-                    dd.getCurrentValueAndAdvance
-                        ( DataDictionary.SYSCOLUMNS_CATALOG_NUM, getTableDescriptor().getUUID().toString(), dvd );
+					dvd = dd.getSetAutoincrementValue(
+						    constants.autoincRowLocation[index],
+							tc, false, aiCache[index], true);
 					startValue = dvd.getLong();
 				}
 				lcc.autoincrementCreateCounter(td.getSchemaName(),
@@ -819,12 +786,77 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 
 		else
 		{
-			NumberDataValue newValue = aiCache[ index ];
+			NumberDataValue newValue;
+			TransactionController nestedTC = null, tcToUse = tc;
 
-            dd.getCurrentValueAndAdvance
-                ( DataDictionary.SYSCOLUMNS_CATALOG_NUM, getTableDescriptor().getUUID().toString(), newValue );
+			try
+			{
+				nestedTC = tc.startNestedUserTransaction(false);
+				tcToUse = nestedTC;
+			}
 
-			if (setIdentity) { identityVal = newValue.getLong(); }
+			catch (StandardException se)
+			{
+				// If I cannot start a Nested User Transaction use the parent
+				// transaction to do all the work.
+				tcToUse = tc;
+			}
+
+			try 
+			{
+				/* If tcToUse == tc, then we are using parent xaction-- this
+				   can happen if for some reason we couldn't start a nested
+				   transaction
+				*/
+				newValue = dd.getSetAutoincrementValue(
+						   constants.autoincRowLocation[index],
+						   tcToUse, true, aiCache[index], (tcToUse == tc));
+			}
+
+			catch (StandardException se)
+			{
+				if (tcToUse == tc)
+				{
+					/* we've using the parent xaction and we've timed out; just
+					   throw an error and exit.
+					*/
+					throw se;
+				}
+
+				if (se.getMessageId().equals(SQLState.LOCK_TIMEOUT))
+				{
+					// if we couldn't do this with a nested xaction, retry with
+					// parent-- we need to wait this time!
+					newValue = dd.getSetAutoincrementValue(
+									constants.autoincRowLocation[index],
+									tc, true, aiCache[index], true);
+				}
+				else if (se.getMessageId().equals(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE))
+				{
+					// if we got an overflow error, throw a more meaningful
+					// error message
+					throw StandardException.newException(
+												 SQLState.LANG_AI_OVERFLOW,
+												 se,
+												 constants.getTableName(),
+												 constants.getColumnName(index));
+				}
+				else throw se;
+			}
+			finally 
+			{
+				// no matter what, commit the nested transaction; if something
+				// bad happened in the child xaction lets not abort the parent
+				// here.
+				if (nestedTC != null)
+				{
+					nestedTC.commit();
+					nestedTC.destroy();
+				}
+			}
+			aiCache[index] = newValue;
+			if (setIdentity)
+				identityVal = newValue.getLong();
 		}
 
 		return aiCache[index];
@@ -857,7 +889,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 	private void normalInsertCore(LanguageConnectionContext lcc, boolean firstExecute)
 		throws StandardException
 	{
-		boolean setUserIdentity = hasAutoincrement() && isSingleRowResultSet();
+		boolean setUserIdentity = constants.hasAutoincrement() && isSingleRowResultSet();
 		boolean	firstDeferredRow = true;
 		ExecRow	deferredRowBuffer = null;
                 long user_autoinc=0;

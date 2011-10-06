@@ -195,8 +195,6 @@ class UpgradeRun extends UpgradeClassLoader
                 	suite.addTest(Changes10_6.suite(phase));
                 if (oldMinor < 7)
                 	suite.addTest(Changes10_7.suite(phase));
-                if ( lessThan( version, new int[] { 10, 8, 1, 6 } ) )
-                { suite.addTest(Changes10_8_2.suite(phase)); }
             }
             
             // Add DatabaseMetaData tests. Since metadata
@@ -239,21 +237,6 @@ class UpgradeRun extends UpgradeClassLoader
         return TestConfiguration.connectionDSDecorator(suite);
     }
     
-    /**
-     * Return true if and only if the left version is less than the
-     * right version.
-     */
-    private static boolean lessThan( int[] left, int[] right )
-    {
-        for (int i = 0; i < left.length; i++)
-        {
-            if ( left[ i ] < right[ i ] ) return true;
-            if ( left[ i ] > right[ i ] ) return false;
-        }
-
-        // Versions match exactly. That is, not less than.
-        return false;
-    } 
     
     /**
      * When running against certains old releases in Java SE 6
