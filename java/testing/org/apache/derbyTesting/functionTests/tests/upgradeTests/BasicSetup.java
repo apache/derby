@@ -456,11 +456,11 @@ public class BasicSetup extends UpgradeChange {
 
         case PH_SOFT_UPGRADE:
         case PH_HARD_UPGRADE:
-        	//During soft/hard upgrade, the sps regeneration in 10.9 has 
-        	// been fixed and hence we won't loose the dependency between 
-        	// trigger action sps and trigger table. During upgrade process, 
-        	// all the spses get marked invalid and hence they will be 
-        	// regenerated during the next time they get fired.
+        	//During soft/hard upgrade, the sps regeneration has been 
+        	// fixed and hence we won't loose the dependency between 
+        	// trigger action sps and trigger table. During upgrade 
+        	// process, all the spses get marked invalid and hence they 
+        	// will be regenerated during the next time they get fired.
             assertStatementError("42802", s, " update ATDC_TAB1 set c11=2");
         	break;
         	
@@ -498,6 +498,353 @@ public class BasicSetup extends UpgradeChange {
     	ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM SYS.SYSDEPENDS");
     	rs.next();
     	return(rs.getInt(1));
+    }
+    
+    /**
+     * Following test is for checking the upgrade scenario for DERBY-5044
+     *  and DERBY-5120.
+     */
+    public void testDERBY5044_And_DERBY5120_DropColumn() throws Exception {
+    	// ALTER TABLE DROP COLUMN was introduced in 10.3 so no point running
+    	// this test with earlier releases
+    	if (!oldAtLeast(10, 3)) return;
+
+        //During the upgrade time, the clearing of stored statements(including 
+        // trigger action spses) happened conditionally before DERBY-4835 was 
+        // fixed. DERBY-4835 made changes so that the stored statements get 
+        // marked invalid unconditionally during the upgrade phase. But these
+        // changes for DERBY-4835 did not make into 10.5.1.1, 10.5.3.0, 
+        // 10.6.1.0 and 10.6.2.1. Because of this missing fix, trigger 
+        // action spses do not get marked invalid when the database is taken 
+        // after soft upgrade back to the original db release(if the original 
+        // db release is one of the releases mentioned above). Following test 
+        // relies on trigger action spses getting invalid during upgrade phase 
+        // and getting recompiled when they are fired next time around thus 
+        // altering the number of rows in sysdepends. Because of this, I have
+        // disabled this test for those 4 releases.
+        if (oldIs(10,5,1,1) || oldIs(10,5,3,0) ||
+        	oldIs(10,6,1,0) || oldIs(10,6,2,1))
+            		return;
+    
+    	Statement s = createStatement();
+    	ResultSet rs;
+        
+        switch ( getPhase() )
+        {
+        case PH_SOFT_UPGRADE:
+        case PH_HARD_UPGRADE:
+        case PH_POST_HARD_UPGRADE:
+        case PH_POST_SOFT_UPGRADE:
+        	//Run the results on the data setup by the earlier upgrade phase.
+        	// For the CREATE phase, we won't do this because CREATE is the
+        	// first phase and hence there won't be any data setup already.
+        	//For all the other phases, we want to know how the change in
+        	// phase affects the behavior of ALTER TABLE DROP COLUMN
+            dropColumn_triggersql_DERBY5044_And_DERBY5120(s);
+            //After the above testing, go to the following code where we
+            // set up the data all over again in the current phase and see
+            // how ALTER TABLE DROP COLUMN behaves.
+        case PH_CREATE: 
+            //Repeat the whole test in soft upgrade mode. It will work fine
+            // because both DERBY-5120 and DERBY-5044 are fixed. As a result,
+            // ALTER TABLE DROP COLUMN will detect dependency of TAB1_TRG1 
+            // on column getting dropped and hence will drop trigger 
+            // TAB1_TRG1.
+        	//Setup data for the test
+        	preapreForDERBY5044_And_DERBY5120();
+           	//Execute a sql which will fire the relevant triggers. 
+            triggersql_for_DERBY5044_And_DERBY5120(s);
+            dropColumn_triggersql_DERBY5044_And_DERBY5120(s);
+
+            //Recreate the test data so we can test ALTER TABLE DROP COLUMN
+            // behavior in the next phase for the data setup by this phase.
+            preapreForDERBY5044_And_DERBY5120();
+        	triggersql_for_DERBY5044_And_DERBY5120(s);
+
+        	//Now, take this data to the next upgrade phase and check
+            // ALTER TABLE DROP COLUMN behavior
+            break;
+        }
+    }
+
+    //Test for combination of DERBY-5120 and DERBY-5044. ALTER TABLE DROP 
+    // COLUMN will detect the trigger dependency in this test only in a 
+    // release with both DERBY-5120 and DERBY-5044 fixes.
+    private void dropColumn_triggersql_DERBY5044_And_DERBY5120(
+    		Statement s) throws Exception
+    {
+    	ResultSet rs;
+
+    	//If we are in soft/hard/post-hard upgrade mode, then ALTER TABLE
+    	// DROP COLUMN will find out that trigger TAB1_TRG1 is dependent 
+    	// on the column being dropped. But this won't be detected in 
+    	// create/post-softupgrade modes because of missing fixes for
+    	// DERBY-5120 and DERBY-5044.
+        switch ( getPhase() )
+        {
+        case PH_CREATE: 
+        case PH_POST_SOFT_UPGRADE:
+        	//For the CREATE and PH_POST_SOFT_UPGRADE upgrade phases, 
+        	// ALTER TABLE DROP COLUMN will not detect that trigger 
+        	// TAB1_TRG1 depends on the column being dropped. This is 
+        	// because of DERBY-5120 and DERBY-5044
+        	s.executeUpdate("alter table BKUP1_5044_5120 drop column c112");
+            //Since ALTER TABLE DROP COLUMN did not drop dependent trigger,
+            // following UPDATE sql will fail because trigger TAB1_TRG1 will
+        	// get fired. Trigger TAB1_TRG1 will fail because it is expecting 
+            // more column in BKUP1_5044_5120 than are actually available
+            assertStatementError("42802", s, " update TAB1_5044_5120 set c11=999");
+            //Confirm the behavior mentioned by looking at the table data
+        	rs = s.executeQuery("select * from TAB1_5044_5120");
+            JDBC.assertFullResultSet(rs,
+               		new String[][]{{"99","11"}});        		
+            //No row in BKUP1_5044_5120 because update failed
+        	rs = s.executeQuery("select * from BKUP1_5044_5120");
+            JDBC.assertEmpty(rs);
+        	break;
+
+        case PH_SOFT_UPGRADE:
+        case PH_HARD_UPGRADE:
+        case PH_POST_HARD_UPGRADE:
+        	//Because both DERBY-5120 and DERBY-5044 are fixed, following 
+        	// will drop trigger TAB1_TRG1 which is dependent on the column 
+        	// being dropped.
+            s.executeUpdate("alter table BKUP1_5044_5120 drop column c112");
+            //Following triggering sql will not fail because trigger TAB1_TRG1
+            // doesn't exist anymore
+        	s.executeUpdate("update TAB1_5044_5120 set c11=999");
+            //Confirm the behavior mentioned by looking at the table data
+        	rs = s.executeQuery("select * from TAB1_5044_5120");
+            JDBC.assertFullResultSet(rs,
+               		new String[][]{{"999","11"}});        		
+            //No row in BKUP1_5044_5120 because trigger which insetts data in
+            // this table got dropped as a result of ALTER TABLE DROP COLUMN
+        	rs = s.executeQuery("select * from BKUP1_5044_5120");
+            JDBC.assertEmpty(rs);
+            break;
+        }
+    }
+
+    //Prepare tables and data for DERBY-5120 and DERBY-5044
+    private void preapreForDERBY5044_And_DERBY5120() throws Exception
+    {
+        Statement s = createStatement();
+        boolean modeDb2SqlOptional = oldAtLeast(10, 3);
+
+        dropTable("BKUP1_5044_5120");
+        dropTable("TAB1_5044_5120");
+        s.execute("create table TAB1_5044_5120(c11 int, c12 int)");
+        s.execute("insert into TAB1_5044_5120 values (1,11)");
+        s.execute("create table BKUP1_5044_5120(c111 int, c112 int)");
+        s.execute("create trigger TAB1_TRG1 after update "+
+           		"of C11 on TAB1_5044_5120 REFERENCING old_table as old " +
+           		"for each statement " + 
+       			(modeDb2SqlOptional?"":"MODE DB2SQL ") +
+                "insert into BKUP1_5044_5120 select * from old");
+        //Even though following trigger really doesn't do anything meaninful,
+        // we still need it to make DERBY-5120 kick-in. Do not remove this
+        // trigger. Creation of following trigger is going to mark the
+        // earlier trigger invalid and we need that to make sure DERBY-5120
+        // scenario kicks in
+        s.execute("create trigger TAB1_TRG2 after update " + 
+                "on TAB1_5044_5120 for each row " + 
+     			(modeDb2SqlOptional?"":"MODE DB2SQL ") +
+                "values(1,2)");
+    }
+
+    //Execute the trigger which will fire the triggers. Check the data
+    // to make sure that the triggers fired correctly.
+    private void triggersql_for_DERBY5044_And_DERBY5120(
+    		Statement s) throws Exception
+	{
+    	ResultSet rs;
+    	
+    	//Confirm the data and the number of rows in the tables which
+    	// will be touched by the triggering sql and firing trigger
+    	rs = s.executeQuery("select * from TAB1_5044_5120");
+        JDBC.assertFullResultSet(rs,
+           		new String[][]{{"1","11"}});        		
+    	rs = s.executeQuery("select * from BKUP1_5044_5120");
+        JDBC.assertEmpty(rs);
+        //Following triggering sql will fire triggers
+    	s.executeUpdate("update TAB1_5044_5120 set c11=99");
+    	//The content of following table changed by the triggering sql
+    	rs = s.executeQuery("select * from TAB1_5044_5120");
+        JDBC.assertFullResultSet(rs,
+           		new String[][]{{"99","11"}});        		
+        //The firing trigger inserted row into BKUP1_5044_5120
+    	rs = s.executeQuery("select * from BKUP1_5044_5120");
+        JDBC.assertFullResultSet(rs,
+           		new String[][]{{"1","11"}});
+        //Clean data for next test
+    	s.executeUpdate("delete from BKUP1_5044_5120");
+	}
+    
+    /**
+     * DERBY-5044(ALTER TABLE DROP COLUMN will not detect triggers defined 
+     *  on other tables with their trigger action using the column being 
+     *  dropped)
+     *  
+     * ALTER TABLE DROP COLUMN should detect triggers defined on other table
+     *  but using the table being altered in their trigger action. If the 
+     *  column getting dropped is used in such a trigger, then ALTER TABLE
+     *  DROP COLUMN .. RESTRICT should fail and ALTER TABLE DROP COLUMN ..
+     *  CASCADE should drop such triggers.
+     */
+    public void testDERBY5044AlterTableDropColumn() throws Exception {
+    	// ALTER TABLE DROP COLUMN was introduced in 10.3 so no point running
+    	// this test with earlier releases
+    	if (!oldAtLeast(10, 3)) return;
+
+    	Statement s = createStatement();
+    	ResultSet rs;
+        
+        switch ( getPhase() )
+        {
+        case PH_CREATE: 
+        case PH_POST_SOFT_UPGRADE:
+        	//Get data ready for the test
+        	preapreFortDERBY5044();
+        	//After the setup, verify the number of rows in the tables who
+        	// will be impacted by subsequent trigger firing.
+        	rs = s.executeQuery("select * from ATDC_13_TAB1_BACKUP");
+            JDBC.assertFullResultSet(rs,
+               		new String[][]{{"1","11"}});        		
+        	rs = s.executeQuery("select * from ATDC_13_TAB2");
+            JDBC.assertFullResultSet(rs,
+               		new String[][]{{"1","11"}});
+
+            //Following will fire 2 triggers which will delete rows from
+            // the two tables whose row count we checked earlier.
+            s.executeUpdate("update ATDC_13_TAB1 set c12=999");
+            //There should be no data in the following tables as a result
+            // of triggers which were fired by the UPDATE sql above
+        	rs = s.executeQuery("select * from ATDC_13_TAB1_BACKUP");
+            JDBC.assertEmpty(rs);
+        	rs = s.executeQuery("select * from ATDC_13_TAB2");
+            JDBC.assertEmpty(rs);
+            //Reload the data for the next test
+            s.execute("insert into ATDC_13_TAB1_BACKUP values (1,11)");
+            s.execute("insert into ATDC_13_TAB2 values (1,11)");
+
+            //Following does not detect that column c22 is getting used by
+        	// trigger ATDC_13_TAB1_trg2 defined on ATDC_13_TAB1
+            s.executeUpdate("alter table ATDC_13_TAB2 drop column c22 " +
+            		"restrict");
+            //Following will fail because trigger ATDC_13_TAB1_trg2 will be
+            // fired and it will detect that column ATDC_13_TAB2.c22 getting
+            // used in it's trigger action does not exist anymore
+            assertStatementError("42X04", s,
+               		"update ATDC_13_TAB1 set c12=999");
+            //The number of rows in the tables above didn't change because 
+            // UPDATE sql above failed and hence triggers didn't fire.
+        	rs = s.executeQuery("select * from ATDC_13_TAB1_BACKUP");
+            JDBC.assertFullResultSet(rs,
+               		new String[][]{{"1","11"}});        		
+        	rs = s.executeQuery("select * from ATDC_13_TAB2");
+            JDBC.assertFullResultSet(rs,
+               		new String[][]{{"1"}});
+        	break;
+
+        case PH_SOFT_UPGRADE:
+        case PH_HARD_UPGRADE:
+        case PH_POST_HARD_UPGRADE:
+        	//Get data ready for the test
+        	preapreFortDERBY5044();
+        	//After the setup, verify the number of rows in the tables who
+        	// will be impacted by subsequent trigger firing.
+        	rs = s.executeQuery("select * from ATDC_13_TAB1_BACKUP");
+            JDBC.assertFullResultSet(rs,
+               		new String[][]{{"1","11"}});        		
+        	rs = s.executeQuery("select * from ATDC_13_TAB2");
+            JDBC.assertFullResultSet(rs,
+               		new String[][]{{"1","11"}});
+
+            //Following will fire 2 triggers which will delete rows from
+            // the two tables whose row count we checked earlier.
+        	s.executeUpdate("update ATDC_13_TAB1 set c12=999");
+            //There should be no data in the following tables as a result
+            // of triggers which were fired by the UPDATE sql above
+        	rs = s.executeQuery("select * from ATDC_13_TAB1_BACKUP");
+            JDBC.assertEmpty(rs);  
+        	rs = s.executeQuery("select * from ATDC_13_TAB2");
+            JDBC.assertEmpty(rs);  
+            //Reload the data for the next test
+            s.execute("insert into ATDC_13_TAB1_BACKUP values (1,11)");
+            s.execute("insert into ATDC_13_TAB2 values (1,11)");
+
+            //With the fix DERBY-5044, following ALTER TABLE DROP COLUMN 
+            // will detect that trigger ATDC_13_TAB1_trg2 is using
+            // the column being dropped and hence ALTER TABLE will fail.
+            assertStatementError("X0Y25", s,
+            		"alter table ATDC_13_TAB2 drop column c22 restrict");
+        	//Verify the number of rows in the tables who will be impacted 
+            // by subsequent trigger firing.
+        	rs = s.executeQuery("select * from ATDC_13_TAB1_BACKUP");
+            JDBC.assertFullResultSet(rs,
+               		new String[][]{{"1","11"}});        		
+        	rs = s.executeQuery("select * from ATDC_13_TAB2");
+            JDBC.assertFullResultSet(rs,
+               		new String[][]{{"1","11"}});
+            //Following will fire 2 triggers which will delete rows from
+            // the two tables whose row count we checked earlier.
+        	s.executeUpdate("update ATDC_13_TAB1 set c12=999");
+            //There should be no data in the following tables as a result
+            // of triggers which were fired by the UPDATE sql above
+        	rs = s.executeQuery("select * from ATDC_13_TAB1_BACKUP");
+            JDBC.assertEmpty(rs);  
+        	rs = s.executeQuery("select * from ATDC_13_TAB2");
+            JDBC.assertEmpty(rs);  
+            s.execute("insert into ATDC_13_TAB1_BACKUP values (1,11)");
+            s.execute("insert into ATDC_13_TAB2 values (1,11)");
+            
+            //This time, issue ALTER TABLE DROP COLUMN in CASCADE mode.
+            // This should drop the dependent trigger ATDC_13_TAB1_trg2
+            s.executeUpdate("alter table ATDC_13_TAB2 drop column c22 ");
+            //Verify that trigger ATDC_13_TAB1_trg2 got dropped by issuing
+            // the trigger sql which would normally cause firing of 
+            // ATDC_13_TAB1_trg2.
+        	s.executeUpdate("update ATDC_13_TAB1 set c12=999");
+        	//sql above caused ATDC_13_TAB1_trg1 to fire which will delete
+        	// row from ATDC_13_TAB1_BACKUP
+        	rs = s.executeQuery("select * from ATDC_13_TAB1_BACKUP");
+            JDBC.assertEmpty(rs);  
+            //But the row from ATDC_13_TAB2 will not be deleted because
+            // trigger ATDC_13_TAB1_trg2 does not exist anymore. Notice
+            // though that ATDC_13_TAB2 now has only one column rather than 2
+        	rs = s.executeQuery("select * from ATDC_13_TAB2");
+            JDBC.assertFullResultSet(rs,
+               		new String[][]{{"1"}});
+        	break;
+        }
+    }
+
+    public void preapreFortDERBY5044() throws Exception
+    {
+        Statement s = createStatement();
+        boolean modeDb2SqlOptional = oldAtLeast(10, 3);
+
+        dropTable("ATDC_13_TAB1");
+        dropTable("ATDC_13_TAB1_BACKUP");
+        dropTable("ATDC_13_TAB2");
+        s.execute("create table ATDC_13_TAB1(c11 int, c12 int)");
+        s.execute("insert into ATDC_13_TAB1 values (1,11)");
+        s.execute("create table ATDC_13_TAB1_BACKUP(c11 int, c12 int)");
+        s.execute("insert into ATDC_13_TAB1_BACKUP values (1,11)");
+        s.execute("create table ATDC_13_TAB2(c21 int, c22 int)");
+        s.execute("insert into ATDC_13_TAB2 values (1,11)");
+        s.executeUpdate(
+                " create trigger ATDC_13_TAB1_trg1 after update " +
+                "on ATDC_13_TAB1 for each row " +
+    			(modeDb2SqlOptional?"":"MODE DB2SQL ") +
+                "DELETE FROM ATDC_13_TAB1_BACKUP " +
+                "WHERE C12>=1");
+        s.executeUpdate(
+                " create trigger ATDC_13_TAB1_trg2 after update " +
+                "on ATDC_13_TAB1 for each row " +
+    			(modeDb2SqlOptional?"":"MODE DB2SQL ") +
+                "DELETE FROM ATDC_13_TAB2 WHERE "+
+                "C22 IN (values(11))");
     }
     
     /**

@@ -29,6 +29,7 @@ import java.util.Properties;
 import java.util.Vector;
 
 import org.apache.derby.catalog.DefaultInfo;
+import org.apache.derby.catalog.Dependable;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.catalog.UUID;
@@ -1672,38 +1673,82 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 		dd.addDescriptorArray(cdlArray, td,
 							  DataDictionary.SYSCOLUMNS_CATALOG_NUM, false, tc);
 
-		List deps = dd.getProvidersDescriptorList(td.getObjectID().toString());
-		for (Iterator depsIterator = deps.listIterator(); 
-             depsIterator.hasNext();)
-		{
-			DependencyDescriptor depDesc = 
-                (DependencyDescriptor) depsIterator.next();
+		// By this time, the column has been removed from the table descriptor.
+		// Now, go through all the triggers and regenerate their trigger action
+		// SPS and rebind the generated trigger action sql. If the trigger  
+		// action is using the dropped column, it will get detected here. If 
+		// not, then we will have generated the internal trigger action sql
+		// which matches the trigger action sql provided by the user.
+		//
+		// eg of positive test case
+		// create table atdc_16_tab1 (a1 integer, b1 integer, c1 integer);
+		// create table atdc_16_tab2 (a2 integer, b2 integer, c2 integer);
+		// create trigger atdc_16_trigger_1 
+		//    after update of b1 on atdc_16_tab1
+		//    REFERENCING NEW AS newt
+		//    for each row 
+		//    update atdc_16_tab2 set c2 = newt.c1
+		// The internal representation for the trigger action before the column
+		// is dropped is as follows
+		// 	 update atdc_16_tab2 set c2 = 
+		//   org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().
+		//   getONewRow().getInt(3)
+		// After the drop column shown as below
+		//   alter table DERBY4998_SOFT_UPGRADE_RESTRICT drop column c11
+		// The above internal representation of tigger action sql is not 
+		// correct anymore because column position of c1 in atdc_16_tab1 has 
+		// now changed from 3 to 2. Following while loop will regenerate it and
+		// change it to as follows
+		// 	 update atdc_16_tab2 set c2 = 
+		//   org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().
+		//   getONewRow().getInt(2)
+		//
+		// We could not do this before the actual column drop, because the 
+		// rebind would have still found the column being dropped in the
+		// table descriptor and hence use of such a column in the trigger
+		// action rebind would not have been caught.
 
-			DependableFinder finder = depDesc.getProviderFinder();
-			if (finder instanceof DDColumnDependableFinder)
+		//For the table on which ALTER TABLE is getting performed, find out
+		// all the SPSDescriptors that use that table as a provider. We are
+		// looking for SPSDescriptors that have been created internally for
+		// trigger action SPSes. Through those SPSDescriptors, we will be
+		// able to get to the triggers dependent on the table being altered
+		//Following will get all the dependent objects that are using
+		// ALTER TABLE table as provider
+		List depsOnAlterTableList = dd.getProvidersDescriptorList(td.getObjectID().toString());
+		for (Iterator depsOnAlterTableIterator = depsOnAlterTableList.listIterator(); 
+			depsOnAlterTableIterator.hasNext();)
+		{
+			//Go through all the dependent objects on the table being altered 
+			DependencyDescriptor depOnAlterTableDesc = 
+				(DependencyDescriptor) depsOnAlterTableIterator.next();
+			DependableFinder dependent = depOnAlterTableDesc.getDependentFinder();
+			//For the given dependent, we are only interested in it if it is a
+			// stored prepared statement.
+			if (dependent.getSQLObjectType().equals(Dependable.STORED_PREPARED_STATEMENT))
 			{
-				DDColumnDependableFinder colFinder = 
-                    (DDColumnDependableFinder) finder;
-				FormatableBitSet oldColumnBitMap = 
-                    new FormatableBitSet(colFinder.getColumnBitMap());
-				FormatableBitSet newColumnBitMap = 
-                    new FormatableBitSet(oldColumnBitMap);
-				newColumnBitMap.clear();
-				int bitLen = oldColumnBitMap.getLength();
-				for (int i = 0; i < bitLen; i++)
+				//Look for all the dependent objects that are using this 
+				// stored prepared statement as provider. We are only 
+				// interested in dependents that are triggers.
+				List depsTrigger = dd.getProvidersDescriptorList(depOnAlterTableDesc.getUUID().toString());
+				for (Iterator depsTriggerIterator = depsTrigger.listIterator();
+					depsTriggerIterator.hasNext();)
 				{
-					if (i < droppedColumnPosition && oldColumnBitMap.isSet(i))
-						newColumnBitMap.set(i);
-					if (i > droppedColumnPosition && oldColumnBitMap.isSet(i))
-						newColumnBitMap.set(i - 1);
+					DependencyDescriptor depsTriggerDesc = 
+						(DependencyDescriptor) depsTriggerIterator.next();
+					DependableFinder providerIsTrigger = depsTriggerDesc.getDependentFinder();
+					//For the given dependent, we are only interested in it if
+					// it is a trigger
+					if (providerIsTrigger.getSQLObjectType().equals(Dependable.TRIGGER)) {
+						//Drop and recreate the trigger after regenerating 
+						// it's trigger action plan. If the trigger action
+						// depends on the column being dropped, it will be
+						// caught here.
+						TriggerDescriptor trdToBeDropped  = dd.getTriggerDescriptor(depsTriggerDesc.getUUID());
+						columnDroppedAndTriggerDependencies(trdToBeDropped,
+								cascade, columnName);
+					}
 				}
-				if (newColumnBitMap.equals(oldColumnBitMap))
-					continue;
-				dd.dropStoredDependency(depDesc, tc);
-				colFinder.setColumnBitMap(newColumnBitMap.getByteArray());
-				dd.addDescriptor(depDesc, null,
-								 DataDictionary.SYSDEPENDS_CATALOG_NUM,
-								 true, tc);
 			}
 		}
 		// Adjust the column permissions rows in SYSCOLPERMS to reflect the
@@ -1714,174 +1759,172 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
         // list in case we were called recursively in order to cascade-drop a
         // dependent generated column.
         tab_cdl.remove( td.getColumnDescriptor( columnName ) );
+	}
+    
+	// For the trigger, get the trigger action sql provided by the user
+	// in the create trigger sql. This sql is saved in the system
+	// table. Since a column has been dropped from the trigger table,
+	// the trigger action sql may not be valid anymore. To establish
+	// that, we need to regenerate the internal representation of that 
+	// sql and bind it again.
+	private void columnDroppedAndTriggerDependencies(TriggerDescriptor trd,
+			boolean cascade, String columnName)
+	throws StandardException {
+		dd.dropTriggerDescriptor(trd, tc);
 
-        // By this time, the column has been removed from the table descriptor.
-        // Now, go through all the triggers and regenerate their trigger action
-        // SPS and rebind the generated trigger action sql. If the trigger  
-        // action is using the dropped column, it will get detected here. If 
-        // not, then we will have generated the internal trigger action sql
-        // which matches the trigger action sql provided by the user.
-        //
-        // eg of positive test case
-        // create table atdc_16_tab1 (a1 integer, b1 integer, c1 integer);
-        // create table atdc_16_tab2 (a2 integer, b2 integer, c2 integer);
-        // create trigger atdc_16_trigger_1 
-        //    after update of b1 on atdc_16_tab1
-        //    REFERENCING NEW AS newt
-        //    for each row 
-        //    update atdc_16_tab2 set c2 = newt.c1
-        // The internal representation for the trigger action before the column
-        // is dropped is as follows
-        // 	 update atdc_16_tab2 set c2 = 
-        //   org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().
-        //   getONewRow().getInt(3)
-        // After the drop column shown as below
-        //   alter table DERBY4998_SOFT_UPGRADE_RESTRICT drop column c11
-        // The above internal representation of tigger action sql is not 
-        // correct anymore because column position of c1 in atdc_16_tab1 has 
-        // now changed from 3 to 2. Following while loop will regenerate it and
-        // change it to as follows
-        // 	 update atdc_16_tab2 set c2 = 
-        //   org.apache.derby.iapi.db.Factory::getTriggerExecutionContext().
-        //   getONewRow().getInt(2)
-        //
-        // We could not do this before the actual column drop, because the 
-        // rebind would have still found the column being dropped in the
-        // table descriptor and hence use of such a column in the trigger
-        // action rebind would not have been caught.
-		GenericDescriptorList tdlAfterColumnDrop = dd.getTriggerDescriptors(td);
-		Enumeration descsAfterColumnDrop = tdlAfterColumnDrop.elements();
-		while (descsAfterColumnDrop.hasMoreElements())
-		{
-			TriggerDescriptor trd = (TriggerDescriptor) descsAfterColumnDrop.nextElement();
-			dd.dropTriggerDescriptor(trd, tc);
+		// Here we get the trigger action sql and use the parser to build
+		// the parse tree for it.
+		SchemaDescriptor compSchema;
+		compSchema = dd.getSchemaDescriptor(trd.getSchemaDescriptor().getUUID(), null);
+		CompilerContext newCC = lcc.pushCompilerContext(compSchema);
+		Parser	pa = newCC.getParser();
+		StatementNode stmtnode = (StatementNode)pa.parseStatement(trd.getTriggerDefinition());
+		lcc.popCompilerContext(newCC);
+		// Do not delete following. We use this in finally clause to 
+		// determine if the CompilerContext needs to be popped.
+		newCC = null;
+		
+		try {
+			// We are interested in ColumnReference classes in the parse tree
+			CollectNodesVisitor visitor = new CollectNodesVisitor(ColumnReference.class);
+			stmtnode.accept(visitor);
+			Vector refs = visitor.getList();
 			
-			// For the trigger, get the trigger action sql provided by the user
-			// in the create trigger sql. This sql is saved in the system
-			// table. Since a column has been dropped from the trigger table,
-			// the trigger action sql may not be valid anymore. To establish
-			// that, we need to regenerate the internal representation of that 
-			// sql and bind it again.
-
-			// Here we get the trigger action sql and use the parser to build
-			// the parse tree for it.
-			SchemaDescriptor compSchema;
-			compSchema = dd.getSchemaDescriptor(trd.getSchemaDescriptor().getUUID(), null);
-			CompilerContext newCC = lcc.pushCompilerContext(compSchema);
-			Parser	pa = newCC.getParser();
-			StatementNode stmtnode = (StatementNode)pa.parseStatement(trd.getTriggerDefinition());
-			lcc.popCompilerContext(newCC);
-			// Do not delete following. We use this in finally clause to 
-			// determine if the CompilerContext needs to be popped.
-			newCC = null;
-			
-			try {
-				// We are interested in ColumnReference classes in the parse tree
-				CollectNodesVisitor visitor = new CollectNodesVisitor(ColumnReference.class);
-				stmtnode.accept(visitor);
-				Vector refs = visitor.getList();
-				
-				// Regenerate the internal representation for the trigger action 
-				// sql using the ColumnReference classes in the parse tree. It
-				// will catch dropped column getting used in trigger action sql
-				// through the REFERENCING clause(this can happen only for the
-				// the triggers created prior to 10.7. Trigger created with
-				// 10.7 and higher keep track of trigger action column used
-				// through the REFERENCING clause in system table and hence
-				// use of dropped column will be detected earlier in this 
-				// method for such triggers).
-				//
-				// We might catch errors like following during this step.
-				// Say that following pre-10.7 trigger exists in the system and
-				// user is dropping column c11. During the regeneration of the
-				// internal trigger action sql format, we will catch that 
-				// column oldt.c11 does not exist anymore
-				// CREATE TRIGGER DERBY4998_SOFT_UPGRADE_RESTRICT_tr1 
-				//    AFTER UPDATE OF c12 
-				//    ON DERBY4998_SOFT_UPGRADE_RESTRICT REFERENCING OLD AS oldt
-				//    FOR EACH ROW 
-				//    SELECT oldt.c11 from DERBY4998_SOFT_UPGRADE_RESTRICT
-
-				SPSDescriptor triggerActionSPSD = trd.getActionSPS(lcc);
-				int[] referencedColsInTriggerAction = new int[td.getNumberOfColumns()];
-				java.util.Arrays.fill(referencedColsInTriggerAction, -1);
-				triggerActionSPSD.setText(dd.getTriggerActionString(stmtnode, 
-					trd.getOldReferencingName(),
-					trd.getNewReferencingName(),
-					trd.getTriggerDefinition(),
-					trd.getReferencedCols(),
-					referencedColsInTriggerAction,
-					0,
-					trd.getTableDescriptor(),
-					trd.getTriggerEventMask(),
-					true
-					));
-				
-				// Now that we have the internal format of the trigger action sql, 
-				// bind that sql to make sure that we are not using colunm being
-				// dropped in the trigger action sql directly (ie not through
-				// REFERENCING clause.
-				// eg
-				// create table atdc_12 (a integer, b integer);
-				// create trigger atdc_12_trigger_1 after update of a 
-				//     on atdc_12 for each row select a,b from atdc_12
-				// Drop one of the columns used in the trigger action
-				//   alter table atdc_12 drop column b
-				// Following rebinding of the trigger action sql will catch the use
-				// of column b in trigger atdc_12_trigger_1
-				compSchema = dd.getSchemaDescriptor(trd.getSchemaDescriptor().getUUID(), null);
-				newCC = lcc.pushCompilerContext(compSchema);
-			    newCC.setReliability(CompilerContext.INTERNAL_SQL_LEGAL);
-				pa = newCC.getParser();
-				stmtnode = (StatementNode)pa.parseStatement(triggerActionSPSD.getText());
-				// need a current dependent for bind
-				newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement());
-				stmtnode.bindStatement();
-			} catch (StandardException se)
-			{
-				if (se.getMessageId().equals(SQLState.LANG_COLUMN_NOT_FOUND))
-				{
-					if (cascade)
-					{
-                        trd.drop(lcc);
-						activation.addWarning(
-							StandardException.newWarning(
-                                SQLState.LANG_TRIGGER_DROPPED, 
-                                trd.getName(), td.getName()));
-						continue;
-					}
-					else
-					{	// we'd better give an error if don't drop it,
-						throw StandardException.newException(
-                            SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
-                            dm.getActionString(DependencyManager.DROP_COLUMN),
-                            columnName, "TRIGGER",
-                            trd.getName() );
-					}
-				} else
-					throw se;
-			}
-			finally
-			{
-				if (newCC != null)
-					lcc.popCompilerContext(newCC);
-			}
-			
-			// If we are here, then it means that the column being dropped
-			// is not getting used in the trigger action. 
+			// Regenerate the internal representation for the trigger action 
+			// sql using the ColumnReference classes in the parse tree. It
+			// will catch dropped column getting used in trigger action sql
+			// through the REFERENCING clause(this can happen only for the
+			// the triggers created prior to 10.7. Trigger created with
+			// 10.7 and higher keep track of trigger action column used
+			// through the REFERENCING clause in system table and hence
+			// use of dropped column will be detected earlier in this 
+			// method for such triggers).
 			//
-			// We have recreated the trigger action SPS and recollected the 
-			// column positions for trigger columns and trigger action columns
-			// getting accessed through REFERENCING clause because
-			// drop column can affect the column positioning of existing
-			// columns in the table. We will save that in the system table.
-			dd.addDescriptor(trd, sd,
-					 DataDictionary.SYSTRIGGERS_CATALOG_NUM,
-					 false, tc);
+			// We might catch errors like following during this step.
+			// Say that following pre-10.7 trigger exists in the system and
+			// user is dropping column c11. During the regeneration of the
+			// internal trigger action sql format, we will catch that 
+			// column oldt.c11 does not exist anymore
+			// CREATE TRIGGER DERBY4998_SOFT_UPGRADE_RESTRICT_tr1 
+			//    AFTER UPDATE OF c12 
+			//    ON DERBY4998_SOFT_UPGRADE_RESTRICT REFERENCING OLD AS oldt
+			//    FOR EACH ROW 
+			//    SELECT oldt.c11 from DERBY4998_SOFT_UPGRADE_RESTRICT
 
+			SPSDescriptor triggerActionSPSD = trd.getActionSPS(lcc);
+			int[] referencedColsInTriggerAction = new int[td.getNumberOfColumns()];
+			java.util.Arrays.fill(referencedColsInTriggerAction, -1);
+			triggerActionSPSD.setText(dd.getTriggerActionString(stmtnode, 
+				trd.getOldReferencingName(),
+				trd.getNewReferencingName(),
+				trd.getTriggerDefinition(),
+				trd.getReferencedCols(),
+				referencedColsInTriggerAction,
+				0,
+				trd.getTableDescriptor(),
+				trd.getTriggerEventMask(),
+				true
+				));
+			
+			// Now that we have the internal format of the trigger action sql, 
+			// bind that sql to make sure that we are not using colunm being
+			// dropped in the trigger action sql directly (ie not through
+			// REFERENCING clause.
+			// eg
+			// create table atdc_12 (a integer, b integer);
+			// create trigger atdc_12_trigger_1 after update of a 
+			//     on atdc_12 for each row select a,b from atdc_12
+			// Drop one of the columns used in the trigger action
+			//   alter table atdc_12 drop column b
+			// Following rebinding of the trigger action sql will catch the use
+			// of column b in trigger atdc_12_trigger_1
+			compSchema = dd.getSchemaDescriptor(trd.getSchemaDescriptor().getUUID(), null);
+			newCC = lcc.pushCompilerContext(compSchema);
+		    newCC.setReliability(CompilerContext.INTERNAL_SQL_LEGAL);
+			pa = newCC.getParser();
+			stmtnode = (StatementNode)pa.parseStatement(triggerActionSPSD.getText());
+			// need a current dependent for bind
+			newCC.setCurrentDependent(triggerActionSPSD.getPreparedStatement());
+			stmtnode.bindStatement();
+		} catch (StandardException se)
+		{
+			//Need to catch for few different kinds of sql states depending
+			// on what kind of trigger action sql is using the column being 
+			// dropped. Following are examples for different sql states
+			//
+			//SQLState.LANG_COLUMN_NOT_FOUND is thrown for following usage in
+			// trigger action sql of column being dropped atdc_12.b
+			//        create trigger atdc_12_trigger_1 after update 
+			//           of a on atdc_12 
+			//           for each row 
+			//           select a,b from atdc_12
+			//
+			//SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE is thrown for following
+			// usage in trigger action sql of column being dropped  
+			// atdc_14_tab2a2 with restrict clause
+			//        create trigger atdc_14_trigger_1 after update 
+			//           on atdc_14_tab1 REFERENCING NEW AS newt 
+			//           for each row 
+			//           update atdc_14_tab2 set a2 = newt.a1
+			//
+			// SQLState.LANG_DB2_INVALID_COLS_SPECIFIED is thrown for following
+			//  usage in trigger action sql of column being dropped  
+			//  ATDC_13_TAB1_BACKUP.c11 with restrict clause
+			//         create trigger ATDC_13_TAB1_trigger_1 after update
+			//           on ATDC_13_TAB1 for each row
+			//           INSERT INTO ATDC_13_TAB1_BACKUP
+			//           SELECT C31, C32 from ATDC_13_TAB3
+			//
+			//SQLState.LANG_TABLE_NOT_FOUND is thrown for following scenario
+			//   create view ATDC_13_VIEW2 as select c12 from ATDC_13_TAB3 where c12>0
+			//Has following trigger defined
+			//         create trigger ATDC_13_TAB1_trigger_3 after update
+			//           on ATDC_13_TAB1 for each row
+			//           SELECT * from ATDC_13_VIEW2
+			// Ane drop column ATDC_13_TAB3.c12 is issued
+			if (se.getMessageId().equals(SQLState.LANG_COLUMN_NOT_FOUND)||
+					(se.getMessageId().equals(SQLState.LANG_COLUMN_NOT_FOUND_IN_TABLE) ||
+					(se.getMessageId().equals(SQLState.LANG_DB2_INVALID_COLS_SPECIFIED) ||
+					(se.getMessageId().equals(SQLState.LANG_TABLE_NOT_FOUND)))))
+			{
+				if (cascade)
+				{
+                    trd.drop(lcc);
+					activation.addWarning(
+						StandardException.newWarning(
+                            SQLState.LANG_TRIGGER_DROPPED, 
+                            trd.getName(), td.getName()));
+					return;
+				}
+				else
+				{	// we'd better give an error if don't drop it,
+					throw StandardException.newException(
+                        SQLState.LANG_PROVIDER_HAS_DEPENDENT_OBJECT,
+                        dm.getActionString(DependencyManager.DROP_COLUMN),
+                        columnName, "TRIGGER",
+                        trd.getName() );
+				}
+			} else
+				throw se;
+		}
+		finally
+		{
+			if (newCC != null)
+				lcc.popCompilerContext(newCC);
 		}
 		
-	}
+		// If we are here, then it means that the column being dropped
+		// is not getting used in the trigger action. 
+		//
+		// We have recreated the trigger action SPS and recollected the 
+		// column positions for trigger columns and trigger action columns
+		// getting accessed through REFERENCING clause because
+		// drop column can affect the column positioning of existing
+		// columns in the table. We will save that in the system table.
+		dd.addDescriptor(trd, sd,
+				 DataDictionary.SYSTRIGGERS_CATALOG_NUM,
+				 false, tc);
+    }
 
     private void modifyColumnType(int ix)
             throws StandardException {
