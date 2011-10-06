@@ -158,22 +158,24 @@ public final class SpawnedProcess {
     public int complete(boolean destroy, long timeout) throws InterruptedException, IOException {
         int exitCode;
         if (timeout >= 0 ) {
+            final long start = System.currentTimeMillis();
+            boolean timedOut = true;
             long totalwait = -1;
             while (totalwait < timeout) {
                try  { 
-               exitCode = javaProcess.exitValue();
-               //if no exception thrown, exited normally
-               destroy = false;
-               break;
+                   exitCode = javaProcess.exitValue();
+                   //if no exception thrown, exited normally
+                   destroy = timedOut = false;
+                   break;
                }catch (IllegalThreadStateException ite) {
-                   if (totalwait >= timeout) {
-                       destroy = true;
-                       break;
-                   } else {
-                       totalwait += 1000;
-                       Thread.sleep(1000);
-                   }
+                   // Ignore exception, it means that the process is running.
+                   Thread.sleep(1000);
+                   totalwait = System.currentTimeMillis() - start;
                }
+            }
+            // If we timed out, make sure we try to destroy the process.
+            if (timedOut) {
+                destroy = true;
             }
     	}
         if (destroy)
