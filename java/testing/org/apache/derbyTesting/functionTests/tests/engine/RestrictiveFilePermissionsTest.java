@@ -510,9 +510,12 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
     private static Class stringArrayClz;
     private static Class aclEntryBuilderClz;
     private static Class aclEntryTypeClz;
+    private static Class fileStoreClz;
 
     private static Method get;
     private static Method getFileAttributeView;
+    private static Method supportsFileAttributeView;
+    private static Method getFileStore;
     private static Method getOwner;
     private static Method getAcl;
     private static Method principal;
@@ -628,6 +631,8 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                             "java.nio.file.attribute.AclEntry$Builder");
                         aclEntryTypeClz = Class.forName(
                             "java.nio.file.attribute.AclEntryType");
+                        fileStoreClz = Class.forName(
+                            "java.nio.file.FileStore");
 
                         get = pathsClz.
                             getMethod("get",
@@ -639,7 +644,11 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                                       new Class[]{pathClz,
                                                   Class.class,
                                                   linkOptionArrayClz});
-
+                        supportsFileAttributeView = fileStoreClz.getMethod(
+                            "supportsFileAttributeView",
+                            new Class[]{Class.class});
+                        getFileStore = filesClz.getMethod("getFileStore",
+                                                          new Class[]{pathClz});
                         getOwner = filesClz.
                             getMethod(
                                 "getOwner",
@@ -690,6 +699,18 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                             null, new Object[]{file.getPath(),
                                                new String[]{}});
 
+                        // ACLs supported on this platform? Check the current
+                        // file system:
+                        Object fileStore = getFileStore.invoke(
+                            null,
+                            new Object[]{fileP});
+
+                        boolean aclsSupported =
+                            ((Boolean)supportsFileAttributeView.invoke(
+                                fileStore,
+                                new Object[]{aclFileAttributeViewClz})).
+                            booleanValue();
+
                         Object aclView = getFileAttributeView.invoke(
                             null,
                             new Object[]{
@@ -704,7 +725,8 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                                 posixFileAttributeViewClz,
                                 Array.newInstance(linkOptionClz, 0)});
 
-                        if (aclView != null) { // Windows, Solaris 11
+                        if (aclsSupported && aclView != null) {
+                            // Windows, Solaris 11
                             Object owner = getOwner.invoke(
                                 null,
                                 new Object[]{

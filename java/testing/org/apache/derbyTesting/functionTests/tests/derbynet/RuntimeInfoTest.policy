@@ -136,6 +136,7 @@ permission java.util.PropertyPermission "derby.storage.jvmInstanceId",
 
   // Needed by FileUtil#limitAccessToOwner
   permission java.lang.RuntimePermission "accessUserInformation";
+  permission java.lang.RuntimePermission "getFileStoreAttributes";
 };
 
 //
@@ -328,6 +329,7 @@ grant codeBase "${derbyTesting.codeclasses}" {
 
   // Needed by FileUtil#limitAccessToOwner
   permission java.lang.RuntimePermission "accessUserInformation";
+  permission java.lang.RuntimePermission "getFileStoreAttributes";
 };
 
 // JUnit jar file tries to read junit.properties in the user's

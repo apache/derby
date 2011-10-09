@@ -101,6 +101,7 @@ grant codeBase "${derby.install.url}derby.jar"
 
   // Needed by FileUtil#limitAccessToOwner
   permission java.lang.RuntimePermission "accessUserInformation";
+  permission java.lang.RuntimePermission "getFileStoreAttributes";
 };
 
 grant codeBase "${derby.install.url}derbynet.jar"
@@ -125,6 +126,7 @@ grant codeBase "${derby.install.url}derbynet.jar"
   permission java.io.FilePermission "${derby.drda.traceDirectory}${/}-", "read,write,delete";
   // Needed by FileUtil#limitAccessToOwner
   permission java.lang.RuntimePermission "accessUserInformation";
+  permission java.lang.RuntimePermission "getFileStoreAttributes";
   
   // Needed for NetworkServerMBean access (see JMX section above)
   permission org.apache.derby.security.SystemPermission "server", "control,monitor";
