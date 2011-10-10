@@ -886,9 +886,14 @@ public class IndexStatisticsDaemonImpl
      */
     public void stop() {
         Thread threadToWaitFor = null;
+        // Controls execution of last cleanup step outside of the synchronized
+        // block. Should only be done once, and this is ensured by the guard on
+        // 'queue' and the value of 'daemonDisabled'.
+        boolean clearContext = false;
 
         synchronized (queue) {
             if (!daemonDisabled) {
+                clearContext = true;
                 StringBuffer sb = new StringBuffer(100);
                 sb.append("stopping daemon, active=").
                         append(runningThread != null).
@@ -913,12 +918,7 @@ public class IndexStatisticsDaemonImpl
                 threadToWaitFor = runningThread;
                 runningThread = null;
                 queue.clear();
-                // DERBY-5336: Trigger cleanup code to remove the context
-                //             from the context service. This pattern was
-                //             copied from BasicDaemon.
-                ctxMgr.cleanupOnError(StandardException.normalClose(), false);
             }
-
         }
 
         // Wait for the currently running thread, if there is one. Must do
@@ -934,6 +934,17 @@ public class IndexStatisticsDaemonImpl
                 }
             }
 
+        }
+
+        // DERBY-5447: Remove the context only after the running daemon thread
+        //             (if any) has been shut down to avoid Java deadlocks
+        //             when closing the container handles obtained with this
+        //             context.
+        if (clearContext) {
+            // DERBY-5336: Trigger cleanup code to remove the context
+            //             from the context service. This pattern was
+            //             copied from BasicDaemon.
+            ctxMgr.cleanupOnError(StandardException.normalClose(), false);
         }
     }
 
