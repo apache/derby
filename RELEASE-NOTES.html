@@ -1,10 +1,10 @@
 <html lang="en">
-<title>Release Notes for Apache Derby 10.8.2.1</title>
+<title>Release Notes for Apache Derby 10.8.2.2</title>
 <body>
 <h1>
-<a name="Release Notes for Apache Derby 10.8.2.1"></a>Release Notes for Apache Derby 10.8.2.1</h1>
+<a name="Release Notes for Apache Derby 10.8.2.2"></a>Release Notes for Apache Derby 10.8.2.2</h1>
 <div>
-<p>These notes describe the difference between Apache Derby release 10.8.2.1 and the preceding release 10.8.1.2.</p>
+<p>These notes describe the difference between Apache Derby release 10.8.2.2 and the preceding release 10.8.1.2.</p>
 </div>
 <ul>
 <li>
@@ -87,10 +87,52 @@ This is a bug fix release. No new features were added.
 <h2>
 <a name="Bug Fixes"></a>Bug Fixes</h2>
 <div>
-<p>The following issues are addressed by Derby release 10.8.2.1. These issues are not addressed in the preceding 10.8.1.2 release.</p>
+<p>The following issues are addressed by Derby release 10.8.2.2. These issues are not addressed in the preceding 10.8.1.2 release.</p>
 <table border="2">
 <tr>
 <td><b>Issue Id</b></td><td><b>Description</b></td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5452">DERBY-5452</a></td><td>Possible NPE in NsTest.printException()</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5448">DERBY-5448</a></td><td>In the 10.8 branch, back out the concurrency improvements introduced by using SequenceUpdaters to allocate identity values.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5447">DERBY-5447</a></td><td>Deadlock in AutomaticIndexStatisticsTest.testShutdownWhileScanningThenDelete (BasePage.releaseExclusive and Observable.deleteObserver (BaseContainerHandle))</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5445">DERBY-5445</a></td><td>Enhance existing concurrency test to stress sequence generators to also stress identity columns</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5444">DERBY-5444</a></td><td>SpawnedProcess.complete may fail to destroy the process when a timeout is specified</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5438">DERBY-5438</a></td><td>Empty MAPS table in toursdb</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5426">DERBY-5426</a></td><td>Improve the error raised by too much contention on a sequence/identity.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5421">DERBY-5421</a></td><td>NullPointerException during system.nstest.utils.Dbutil.update_one_row</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5419">DERBY-5419</a></td><td>Make Derby run on Oracle Java ME Embedded Client</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5418">DERBY-5418</a></td><td>Network server session's close method neglects to close down any open trace file</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5414">DERBY-5414</a></td><td>SysDiagVTIMappingTest.test_5391() failed: java.text.ParseException: Unparseable date: "Thu Sep 15 14:00:16 CEST 2011"</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5413">DERBY-5413</a></td><td>NetworkServerControl#main can exit with status 1 without printing an error message to console</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5412">DERBY-5412</a></td><td>MemoryLeakFixesTest.testRepeatedDatabaseCreationWithAutoStats() fails on phoneME: java.lang.InternalError: Number of class names exceeds vm limit.</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5409">DERBY-5409</a></td><td>GrantRevokeDDLTest fails under Java 7</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5408">DERBY-5408</a></td><td>parameters for message 2200H - sequence generator does not cycle - is out of sync in non-English messages</td>
@@ -123,6 +165,9 @@ This is a bug fix release. No new features were added.
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5390">DERBY-5390</a></td><td>NPE in BasicDatabase.stop in replication slave mode (dd.clearSequenceCaches)</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5389">DERBY-5389</a></td><td>SequenceGeneratorTest failures with weme 6.2 sane build ASSERT FAILED Identity being changed on a live cacheable</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5385">DERBY-5385</a></td><td>Improve documentation for OFFSET/FETCH NEXT</td>
 </tr>
 <tr>
@@ -133,6 +178,9 @@ This is a bug fix release. No new features were added.
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5372">DERBY-5372</a></td><td>Need to document that the != and &lt;&gt; operators are pushed into Restricted table functions (once the work on DERBY-5369 wraps up)</td>
+</tr>
+<tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5367">DERBY-5367</a></td><td>Stale data retrieved when using new collation=TERRITORY_BASED:PRIMARY feature</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5362">DERBY-5362</a></td><td>HTML frameset files lack closing newline character</td>
@@ -318,6 +366,9 @@ This is a bug fix release. No new features were added.
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5084">DERBY-5084</a></td><td>convert ijConnName.sql to a ScriptTest junit test</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-5044">DERBY-5044</a></td><td>ALTER TABLE DROP COLUMN will not detect triggers defined on other tables with their trigger action using the column being dropped</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-5014">DERBY-5014</a></td><td>Tests should restore the timeout values to default after they are done running.</td>
 </tr>
 <tr>
@@ -343,9 +394,6 @@ This is a bug fix release. No new features were added.
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4443">DERBY-4443</a></td><td>Wrap rollback in exception handlers in try-catch</td>
-</tr>
-<tr>
-<td><a href="https://issues.apache.org/jira/browse/DERBY-4437">DERBY-4437</a></td><td>Concurrent inserts into table with identity column perform poorly</td>
 </tr>
 <tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-4408">DERBY-4408</a></td><td>missing DOCTYPE and META tags in toc.html and index.html pages</td>
@@ -384,6 +432,9 @@ This is a bug fix release. No new features were added.
 <td><a href="https://issues.apache.org/jira/browse/DERBY-1780">DERBY-1780</a></td><td>Document all supplied system procedures in the Server and Administration Guide (e.g. class loading utils and import/export)</td>
 </tr>
 <tr>
+<td><a href="https://issues.apache.org/jira/browse/DERBY-1046">DERBY-1046</a></td><td>JVMInfo is duplicated in derbyclient.jar</td>
+</tr>
+<tr>
 <td><a href="https://issues.apache.org/jira/browse/DERBY-484">DERBY-484</a></td><td>Documentation for derby.database.classpath in developers guide is misleading</td>
 </tr>
 <tr>
@@ -394,17 +445,11 @@ This is a bug fix release. No new features were added.
 <h2>
 <a name="Issues"></a>Issues</h2>
 <div>
-<p>Compared with the previous release (10.8.1.2), Derby release 10.8.2.1 introduces the following new features and incompatibilities. These merit your special attention.</p>
+<p>Compared with the previous release (10.8.1.2), Derby release 10.8.2.2 introduces the following new features and incompatibilities. These merit your special attention.</p>
 <ul>
 <li>
 <a href="#Note for DERBY-5395"><span>Note for DERBY-5395: 
 Now, only the database owner may view several diagnostic VTIs: <i>syscs_diag.statement_cache</i>, <i>syscs_diag.transaction_table</i>, <i>syscs_diag.error_log_reader( )</i>, and <i>syscs_diag.statement_duration()</i>.
-</span></a>
-</li>
-<li>
-<a href="#Note for DERBY-4437"><span>Note for DERBY-4437: 
-Abnormal shutdown may cause sequences and identity columns to leak
-unused, preallocated values.
 </span></a>
 </li>
 </ul>
@@ -532,128 +577,11 @@ select * from table( test_dbo.safeCacheViewer() ) s;
 
 
 </div>
-<hr>
-<h3>
-<a name="Note for DERBY-4437"></a>Note for DERBY-4437</h3>
-<div>
-
-
-<h4>Summary of Change</h4>
-
-<p>
-Abnormal shutdown may cause sequences and identity columns to leak
-unused, preallocated values.
-</p>
-
-
-
-<h4>Symptoms Seen by Applications Affected by Change</h4>
-
-<p>
-In previous releases, abnormal shutdown could leak up to 5 unused
-values per sequence. Now abnormal shutdown can leak up to 20 unused
-values. In addition, abnormal shutdown can leak up to 20 unused values
-for each identity column as well.
-</p>
-
-
-<p>
-Orderly database shutdown occurs when a
-user connects to Derby using the "shutdown=true" attribute as
-described by the <i>Reference Guide</i> in the section titled "Setting attributes for the database connection URL ".
-Abnormal shutdown occurs when the JVM exits without first closing databases
-in this orderly fashion.
-</p>
-
-
-
-<h4>Incompatibilities with Previous Release</h4>
-
-<p>
-In previous releases, sequences leaked only 5 values apiece on
-abnormal shutdown. Now they can leak up to 20 values.
-</p>
-
-
-<p>
-In previous
-releases, abnormal shutdown had no effect on identity columns. Now
-they too can leak up to 20 unused values apiece on abnormal shutdown.
-</p>
-
-
-
-<h4>Rationale for Change</h4>
-
-<p>
-Derby now preallocates longer ranges of upcoming values for sequences
-and Derby now preallocates the same sized ranges for
-identity columns. Preallocation results in fewer updates to the system
-catalogs. That, in turn, can substantially boost the concurrency of
-applications which use sequences and identity columns.
-</p>
-
-
-
-<h4>Application Changes Required</h4>
-
-<p>
-Applications which shut down their databases in an orderly fashion do
-not need to make any changes. Changes are also unnecessary for
-applications which exit abnormally but which can tolerate gaps of up
-to 20 values in sequences and identity columns. Note that Derby has
-never guaranteed that sequences and identity columns won't have
-gaps. Gaps can occur for other reasons. For instance, if a transaction
-aborts or is rolled back, Derby discards sequence and
-identity values allocated during a transaction--in this situation, gaps appear
-in the sequence and identity ranges.
-</p>
-
-
-<p>
-If an application cannot tolerate gaps of this size, then Derby's
-behavior can be customized by setting the <i>derby.language.sequence.preallocator</i> property as follows:
-</p>
-
-
-<ul>
-
-<li>
-<b>A number</b> - If the property is set to be a number, then that
-  number becomes the size of the preallocation ranges for all
-  sequences and identity columns. Setting
-  <i>derby.language.sequence.preallocator=1</i> turns off
-  preallocation. This causes identity columns to behave as they
-  did in previous Derby releases. This also reduces the concurrency of
-  sequences.</li>
-
-<li>
-<b>A class name</b> - The property can also be set to be the name of
-  a class which implements
-  <i>org.apache.derby.catalog.SequencePreallocator</i>. See Derby's
-  public API for the javadoc which describes this interface. The
-  user-supplied implementation of <i>org.apache.derby.catalog.SequencePreallocator</i> must
-  appear on the database classpath. The class can
-  individually customize the size of preallocation ranges for each sequence and
-  identity column.</li>
-
-</ul>
-
-
-<p>
-For more information on setting the
-<i>derby.language.sequence.preallocator</i> property, see its section
-under the <i>Reference Guide</i> topic titled "Derby property reference".
-</p>
-
-
-
-</div>
 </div>
 <h2>
 <a name="Build Environment"></a>Build Environment</h2>
 <div>
-<p>Derby release 10.8.2.1 was built using the following environment:</p>
+<p>Derby release 10.8.2.2 was built using the following environment:</p>
 <ul>
 <li>
 <b>Branch</b> - Source code came from the 10.8 branch.</li>
