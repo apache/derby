@@ -474,10 +474,7 @@ public abstract class EmbedResultSet extends ConnectionChild
          
 			SQLWarning w = theResults.getWarnings();
 			if (w != null) {
-				if (topWarning == null)
-					topWarning = w;
-				else
-					topWarning.setNextWarning(w);
+                addWarning(w);
 			}
 			
             boolean onRow = (currentRow = newRow) != null;			
