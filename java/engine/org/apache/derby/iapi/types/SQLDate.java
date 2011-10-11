@@ -21,8 +21,6 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.types.SQLInteger;
-
 import org.apache.derby.iapi.reference.SQLState;
 
 import org.apache.derby.iapi.services.io.ArrayInputStream;
@@ -30,11 +28,6 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.db.DatabaseContext;
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.DateTimeDataValue;
 
 import org.apache.derby.iapi.services.context.ContextService;
 
@@ -42,16 +35,12 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
  
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
-import org.apache.derby.iapi.types.DataType;
-
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 import org.apache.derby.iapi.util.StringUtil;
 
 import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.sql.PreparedStatement;
 
 import java.util.Calendar;
@@ -836,24 +825,6 @@ public final class SQLDate extends DataType
 		StringBuffer vstr = new StringBuffer();
         dateToString( getYear(encodedDate), getMonth(encodedDate), getDay(encodedDate), vstr);
 		return vstr.toString();
-	}
-
-	// International Support
-
-	/**
-	 * International version of getString(). Overrides getNationalString
-	 * in DataType for date, time, and timestamp.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	protected String getNationalString(LocaleFinder localeFinder) throws StandardException
-	{
-		if (isNull())
-		{
-			return getString();
-		}
-
-		return localeFinder.getDateFormat().format(getDate(new GregorianCalendar()));
 	}
 
 	/**

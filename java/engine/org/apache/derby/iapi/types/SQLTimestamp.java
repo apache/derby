@@ -28,29 +28,18 @@ import org.apache.derby.iapi.services.io.ArrayInputStream;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.db.DatabaseContext;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.TypeId;
-
-import org.apache.derby.iapi.types.NumberDataValue;
-import org.apache.derby.iapi.types.DateTimeDataValue;
-
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.context.ContextService;
  
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.types.DataType;
 import org.apache.derby.iapi.services.i18n.LocaleFinder;
 import org.apache.derby.iapi.services.cache.ClassSize;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.util.ReuseFactory;
 
-import org.apache.derby.iapi.types.SQLDouble;
-import org.apache.derby.iapi.types.SQLTime;
-
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
@@ -877,25 +866,6 @@ public final class SQLTimestamp extends DataType
 			nanos = value.getNanos();
 		}
 		/* encoded date should already be 0 for null */
-	}
-
-	// International Support
-
-	/**
-	 * International version of getString(). Overrides getNationalString
-	 * in DataType for date, time, and timestamp.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	protected String getNationalString(LocaleFinder localeFinder) throws StandardException
-	{
-		if (isNull())
-		{
-			return getString();
-		}
-
-
-		return localeFinder.getTimestampFormat().format(getTimestamp((Calendar) null));
 	}
 
 	/**

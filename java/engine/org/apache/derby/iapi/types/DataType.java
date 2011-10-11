@@ -21,17 +21,10 @@
 
 package org.apache.derby.iapi.types;
 
-import org.apache.derby.iapi.types.DataValueDescriptor;
-import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.BooleanDataValue;
-import org.apache.derby.iapi.types.Orderable;
-
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.i18n.MessageService;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.services.i18n.LocaleFinder;
 
 import java.io.InputStream;
 import java.sql.Blob;
@@ -652,19 +645,6 @@ public abstract class DataType
      */
     public DataValueDescriptor cloneHolder() {
 		return cloneValue(false);
-	}
-
-	// International support
-
-	/**
-	 * International version of getString(). Overridden for date, time,
-	 * and timestamp in SQLDate, SQLTime, SQLTimestamp.
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	protected String getNationalString(LocaleFinder localeFinder) throws StandardException
-	{
-		return getString();
 	}
 
 	public void throwLangSetMismatch(Object value) throws StandardException {
