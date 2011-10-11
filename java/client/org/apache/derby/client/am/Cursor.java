@@ -126,12 +126,6 @@ public abstract class Cursor {
         dataBufferStream_ = new java.io.ByteArrayOutputStream();
     }
 
-    public Cursor(Agent agent, byte[] dataBuffer) {
-        this(agent);
-        dataBuffer_ = dataBuffer;
-        setAllRowsReceivedFromServer(false);
-    }
-
     public void setNumberOfColumns(int numberOfColumns) {
         columnDataPosition_ = new int[numberOfColumns];
         columnDataComputedLength_ = new int[numberOfColumns];
@@ -263,11 +257,6 @@ public abstract class Cursor {
 
     protected abstract void getMoreData_() throws SqlException;
 
-    // Associate a new underlying COM or SQLDA output data buffer for this converter.
-    public final void setBuffer(byte[] dataBuffer) {
-        dataBuffer_ = dataBuffer;
-    }
-
     public final void setIsUpdataDeleteHole(int row, boolean isRowNull) {
         isUpdateDeleteHole_ = isRowNull;
         Boolean nullIndicator = (isUpdateDeleteHole_ == true) ? ROW_IS_NULL : ROW_IS_NOT_NULL;
@@ -311,44 +300,12 @@ public abstract class Cursor {
     
     //---------------------------cursor positioning-------------------------------
 
-    final int getPosition() {
-        return position_;
-    }
-
-    final void setPosition(int newPosition) {
-        position_ = newPosition;
-    }
-
-    public final void markCurrentRowPosition() {
-        currentRowPosition_ = position_;
-    }
-
     public final void markNextRowPosition() {
         nextRowPosition_ = position_;
     }
 
     public final void makeNextRowPositionCurrent() {
         currentRowPosition_ = nextRowPosition_;
-    }
-
-    final void repositionCursorToCurrentRow() {
-        position_ = currentRowPosition_;
-    }
-
-    final void repositionCursorToNextRow() {
-        position_ = nextRowPosition_;
-    }
-
-    public final byte[] getDataBuffer() {
-        return dataBuffer_;
-    }
-
-    public final int getDataBufferLength() {
-        return dataBuffer_.length;
-    }
-
-    public final int getLastValidBytePosition() {
-        return lastValidBytePosition_;
     }
 
     // This tracks the total number of rows read into the client side buffer for
@@ -763,9 +720,6 @@ public abstract class Cursor {
     public abstract Clob getClobColumn_(int column, Agent agent,
                                         boolean toBePublished)
             throws SqlException;
-
-    // get the raw clob bytes, without translation.  dataOffset must be int[1]
-    abstract public byte[] getClobBytes_(int column, int[] dataOffset /*output*/) throws SqlException;
 
     //------- the following getters perform any necessary cross-conversion _------
 
@@ -1430,14 +1384,5 @@ public abstract class Cursor {
 
     private final int getColumnScale(int column) {
         return (fdocaLength_[column] & 0xff);
-    }
-
-    // Only used by Sqlca.getMessage() when using a locale encoding
-    // to convert errror message text instead of relying on server encoding as usual.
-    final byte[] getBytesFromVARCHAR(int column) throws SqlException {
-        byte[] bytes;
-        bytes = new byte[columnDataComputedLength_[column - 1] - 2];
-        System.arraycopy(dataBuffer_, columnDataPosition_[column - 1] + 2, bytes, 0, bytes.length);
-        return bytes;
     }
 }

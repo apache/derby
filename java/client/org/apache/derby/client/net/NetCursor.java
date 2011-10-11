@@ -386,32 +386,6 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         }
     }
 
-    protected boolean isDataBufferNull() {
-        if (dataBuffer_ == null) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    protected void allocateDataBuffer() {
-        int length;
-        if (maximumRowSize_ > DssConstants.MAX_DSS_LEN) {
-            length = maximumRowSize_;
-        } else {
-            length = DssConstants.MAX_DSS_LEN;
-        }
-
-        dataBuffer_ = new byte[length];
-        position_ = 0;
-        lastValidBytePosition_ = 0;
-    }
-
-    protected void allocateDataBuffer(int length) {
-        dataBuffer_ = new byte[length];
-    }
-
-
     private int readFdocaInt() throws org.apache.derby.client.am.DisconnectException, SqlException {
         checkForSplitRowAndComplete(4);
         int i = SignedBinary.getInt(dataBuffer_, position_);
@@ -899,14 +873,6 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         isNull_ = new boolean[columns_];
     }
 
-    void setBlocking(int queryProtocolType) {
-        if (queryProtocolType == CodePoint.LMTBLKPRC) {
-            blocking_ = true;
-        } else {
-            blocking_ = false;
-        }
-    }
-
     protected byte[] findExtdtaData(int column) {
         byte[] data = null;
 
@@ -1029,26 +995,6 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         return clob;
     }
 
-    public byte[] getClobBytes_(int column, int[] dataOffset /*output*/) throws SqlException {
-        int index = column - 1;
-        byte[] data = null;
-
-        // locate the EXTDTA bytes, if any
-        data = findExtdtaData(column);
-
-        if (data != null) {
-            // data found
-            // set data offset based on the presence of a null indicator
-            if (!nullable_[index]) {
-                dataOffset[0] = 0;
-            } else {
-                dataOffset[0] = 1;
-            }
-        }
-
-        return data;
-    }
-
     // this is really an event-callback from NetStatementReply.parseSQLDTARDarray()
     void initializeColumnInfoArrays(Typdef typdef,
                                     int columnCount, int targetSqlamForTypdef) throws DisconnectException {
@@ -1060,47 +1006,6 @@ public class NetCursor extends org.apache.derby.client.am.Cursor {
         isGraphic_ = new boolean[columnCount];
         typeToUseForComputingDataLength_ = new int[columnCount];
         targetSqlamForTypdef_ = targetSqlamForTypdef;
-    }
-
-
-    int ensureSpaceForDataBuffer(int ddmLength) {
-        if (dataBuffer_ == null) {
-            allocateDataBuffer();
-        }
-        //super.resultSet.cursor.clearColumnDataOffsetsCache();
-        // Need to know how many bytes to ask from the Reply object,
-        // and handle the case where buffer is not big enough for all the bytes.
-        // Get the length in front of the code point first.
-
-        int bytesAvailableInDataBuffer = dataBuffer_.length - lastValidBytePosition_;
-
-        // Make sure the buffer has at least ddmLength amount of room left.
-        // If not, expand the buffer before calling the getQrydtaData() method.
-        if (bytesAvailableInDataBuffer < ddmLength) {
-
-            // Get a new buffer that is twice the size of the current buffer.
-            // Copy the contents from the old buffer to the new buffer.
-            int newBufferSize = 2 * dataBuffer_.length;
-
-            while (newBufferSize < ddmLength) {
-                newBufferSize = 2 * newBufferSize;
-            }
-
-            byte[] tempBuffer = new byte[newBufferSize];
-
-            System.arraycopy(dataBuffer_,
-                    0,
-                    tempBuffer,
-                    0,
-                    lastValidBytePosition_);
-
-            // Make the new buffer the dataBuffer.
-            dataBuffer_ = tempBuffer;
-
-            // Recalculate bytesAvailableInDataBuffer
-            bytesAvailableInDataBuffer = dataBuffer_.length - lastValidBytePosition_;
-        }
-        return bytesAvailableInDataBuffer;
     }
 
     protected void getMoreData_() throws SqlException {
