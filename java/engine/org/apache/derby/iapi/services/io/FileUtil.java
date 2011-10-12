@@ -752,7 +752,6 @@ nextFile:	for (int i = 0; i < list.length; i++) {
                     allow = aclEntryTypeClz.getField("ALLOW");
 
                 } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
                     // not Java 7 or higher
                 } catch (ClassNotFoundException e) {
                     // not Java 7 or higher
