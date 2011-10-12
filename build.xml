@@ -1017,6 +1017,15 @@
   <property name="javadoc.exclusions" value="${javadoc.temp.dir}/javadoc_exclusions"/>
   <property name="javadoc.inclusions" value="${javadoc.temp.dir}/javadoc_inclusions"/>
 
+  <!-- Helper target to build the JavaDocs and zip them up.
+       Introduced to achieve a higher degree of platform independence when
+       pulling JavaDocs from continuous integration systems and build systems.
+   -->
+  <target name="javadoc-with-bundle" depends="javadoc">
+    <zip destfile="${out.javadoc.dir}/javadocs.zip"
+         basedir="${out.javadoc.dir}"/>
+  </target>
+
   <target
       name="javadoc"
       depends="init,initjars,publishedapi,derbydocs,toolsdocs,grammardocs,testingdocs"
