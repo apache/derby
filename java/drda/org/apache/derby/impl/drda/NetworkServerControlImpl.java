@@ -2641,20 +2641,24 @@ public final class NetworkServerControlImpl {
 	 **/
 	private void buildLocalAddressList(InetAddress bindAddr) 
 	{
-			localAddresses = new ArrayList(3);
-			localAddresses.add(bindAddr);
-			try {
-				localAddresses.add(InetAddress.getLocalHost());
-				localAddresses.add(InetAddress.getByName("localhost"));
-			}catch(UnknownHostException uhe)
-			{
-				try {
-					consolePropertyMessage("DRDA_UnknownHostWarning.I",uhe.getMessage());
-				} catch (Exception e)
-				{ // just a warning shouldn't actually throw an exception
-				}
-			}			
+        localAddresses = new ArrayList(3);
+        localAddresses.add(bindAddr);
+        
+        try { localAddresses.add(InetAddress.getLocalHost()); }
+        catch(UnknownHostException uhe) { unknownHostException( uhe ); }
+        
+        try { localAddresses.add(InetAddress.getByName("localhost")); }
+        catch(UnknownHostException uhe) { unknownHostException( uhe ); }
 	}
+    private void unknownHostException( Throwable t )
+    {
+        try {
+            consolePropertyMessage( "DRDA_UnknownHostWarning.I", t.getMessage() );
+        } catch (Exception e)
+        { 
+            // just a warning shouldn't actually throw an exception
+        }
+    }
 	
 	/**
 	 * Routines for writing commands for NetworkServerControlImpl being used as a client
