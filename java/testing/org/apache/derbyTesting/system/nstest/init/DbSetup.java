@@ -171,7 +171,7 @@ public class DbSetup {
 						+ " SQLSTATE: " + m);
 			}
 		}
-		if (e.getMessage().equals(null)) {
+		if (e.getMessage() == null) {
 			System.out.println("NULL error message detected");
 			System.out.println("Here is the NULL exection - " + e.toString());
 			System.out.println("Stack trace of the NULL exception - ");

@@ -136,7 +136,7 @@ public class Initializer {
 						+ " SQLSTATE: " + m);
 			}
 		}
-		if (e.getMessage().equals(null)) {
+		if (e.getMessage() == null) {
 			e.printStackTrace(System.out);
 		}
 		System.out.println("During - " + where
