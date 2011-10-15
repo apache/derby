@@ -542,7 +542,7 @@ public class DbUtil {
 						+ " " + se.getErrorCode());
 			}
 		}
-		if (e.getMessage().equals(null)) {
+		if (e.getMessage() == null) {
 			System.out.println(getThreadName()
 					+ " dbUtil --> NULL error message detected");
 			System.out
