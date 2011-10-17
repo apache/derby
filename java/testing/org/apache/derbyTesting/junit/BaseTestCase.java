@@ -96,7 +96,10 @@ public abstract class BaseTestCase
         {
             startTime = System.currentTimeMillis();
             out.println();
-            out.print(getName() + " ");
+            String  junitClassName = this.getClass().getName();
+            junitClassName=Utilities.formatTestClassNames(junitClassName);
+            out.print(traceClientType());
+            out.print(junitClassName+"."+getName() + " ");
         }
 
         // install a default security manager if one has not already been
@@ -849,5 +852,13 @@ public abstract class BaseTestCase
         String[] cmd = new String[] { "junit.textui.TestRunner", "-m",
         testLaunchMethod };
         assertExecJavaCmdAsExpected(new String[] { "OK (1 test)" }, cmd, 0);
+    }
+
+    private static String traceClientType() {
+       if (TestConfiguration.getCurrent().getJDBCClient().isEmbedded()) {
+            return "(emb)";
+        } else {
+            return "(net)";
+        }
     }
 } // End class BaseTestCase
