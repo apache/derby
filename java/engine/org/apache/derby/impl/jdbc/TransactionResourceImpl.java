@@ -336,7 +336,12 @@ public final class TransactionResourceImpl
 			// it was already removed.  all that's left to cleanup is
 			// JDBC objects.
 			if (cm!=null) {
-				boolean isShutdown = cleanupOnError(thrownException, database != null ? database.isActive() : false);
+			    //diagActive should be passed to cleanupOnError
+			    //only if a session is active, Login errors are a special case where
+			    // the database is active but the session is not.
+				boolean sessionActive = (database != null) && database.isActive() && 
+					!isLoginException(thrownException);
+				boolean isShutdown = cleanupOnError(thrownException, sessionActive);
 				if (checkForShutdown && isShutdown) {
 					// Change the error message to be a known shutdown.
 					thrownException = shutdownDatabaseException();
@@ -367,6 +372,25 @@ public final class TransactionResourceImpl
 
 	}
 
+    /**
+     * Determine if the exception thrown is a login exception.
+     * Needed for DERBY-5427 fix to prevent inappropriate thread dumps
+     * and javacores. This exception is special because it is 
+     * SESSION_SEVERITY and database.isActive() is true, but the 
+     * session hasn't started yet,so it is not an actual crash and 
+     * should not report extended diagnostics.
+     * 
+     * @param thrownException
+     * @return true if this is a login failure exception
+     */
+    private boolean isLoginException(Throwable thrownException) {
+       if (thrownException instanceof StandardException) {
+           ((StandardException) thrownException).getSQLState().equals(SQLState.LOGIN_FAILED);
+           return true;
+       }
+       return false;
+    }
+    
     /**
      * Wrap a <code>Throwable</code> in an <code>SQLException</code>.
      *
