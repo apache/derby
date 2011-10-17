@@ -20,11 +20,16 @@
  */
 package org.apache.derbyTesting.functionTests.tests.store;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 import junit.framework.Test;
@@ -75,14 +80,29 @@ public class AutomaticIndexStatisticsMultiTest
 
         int total = 0;
         int totalError = 0;
+        List errors = new ArrayList();
         for (int i=0; i < threadCount; i++) {
-            int count = compileThreads[i].getCount();
-            int errors = compileThreads[i].getErrorCount();
+            MTCompileThread ct = compileThreads[i];
+            int count = ct.getCount();
+            int errorCount = ct.getErrorCount();
             total += count;
-            totalError += errors;
+            totalError += errorCount;
+            errors.addAll(ct.getErrors());
         }
         println("TOTAL = " + total + " (of which " + totalError + " errors)");
-        assertEquals(0, totalError);
+        if (totalError > 0) {
+            // Build an informative failure string.
+            StringWriter msg = new StringWriter();
+            PrintWriter out = new PrintWriter(msg);
+            out.println(totalError + " select/compile errors reported:");
+            for (Iterator ei = errors.iterator(); ei.hasNext(); ) {
+                out.println("------");
+                SQLException sqle = (SQLException)ei.next();
+                sqle.printStackTrace(out);
+            }
+            out.close();
+            fail(msg.toString());
+        }
 
         verifyStatistics();
         // Shutdown database to log daemon stats (if logging is enabled).
@@ -122,15 +142,37 @@ public class AutomaticIndexStatisticsMultiTest
 
         int total = 0;
         int totalError = 0;
+        List errors = new ArrayList();
         for (int i=0; i < threadCount; i++) {
-            int count = compileThreads[i].getCount();
-            int errors = compileThreads[i].getErrorCount();
+            MTCompileThread ct = compileThreads[i];
+            int count = ct.getCount();
+            int errorCount = ct.getErrorCount();
             total += count;
-            totalError += errors;
+            totalError += errorCount;
+            errors.addAll(ct.getErrors());
         }
         println("TOTAL = " + total + " (of which " + totalError +
                 " errors) CREATES = " + createThread.getCreates());
-        assertEquals(0, totalError);
+        if (totalError > 0 || createThread.failed()) {
+            // Build an informative failure string.
+            StringWriter msg = new StringWriter();
+            PrintWriter out = new PrintWriter(msg);
+            out.println("create/drop thread " +
+                    (createThread.failed() ? "died" : "survived") + ", " +
+                    totalError + " select/compile errors reported:");
+            if (createThread.failed()) {
+                out.println("create/drop thread error: ");
+                createThread.getError().printStackTrace(out);
+            }
+            out.println("select/compile errors:");
+            for (Iterator ei = errors.iterator(); ei.hasNext(); ) {
+                out.println("------");
+                SQLException sqle = (SQLException)ei.next();
+                sqle.printStackTrace(out);
+            }
+            out.close();
+            fail(msg.toString());
+        }
 
         verifyStatistics();
         // Shutdown database to log daemon stats (if logging is enabled).
@@ -213,8 +255,8 @@ public class AutomaticIndexStatisticsMultiTest
         private final Random rand = new Random();
         private final Connection con;
         private final long runTime;
-        private int count;
-        private int errorCount;
+        private final ArrayList errors = new ArrayList();
+        private volatile int count;
 
         public MTCompileThread(Connection con, long runTime)
                 throws SQLException {
@@ -231,7 +273,9 @@ public class AutomaticIndexStatisticsMultiTest
                                 (++counter) + " = " + counter + " AND val2 = " +
                                 (1 + rand.nextInt(10)));
                 } catch (SQLException sqle) {
-                    errorCount++;
+                    synchronized (this) {
+                        errors.add(sqle);
+                    }
                 }
                 count++;
             }
@@ -241,8 +285,12 @@ public class AutomaticIndexStatisticsMultiTest
             return count;
         }
 
-        public int getErrorCount() {
-            return errorCount;
+        public synchronized int getErrorCount() {
+            return errors.size();
+        }
+
+        public synchronized List getErrors() {
+            return (List)errors.clone();
         }
     }
 
@@ -251,7 +299,8 @@ public class AutomaticIndexStatisticsMultiTest
 
         private final Connection con;
         private final long runTime;
-        private long creates;
+        private volatile long creates;
+        private volatile SQLException error;
 
         public MTCreateDropThread(Connection con, long runTime)
                 throws SQLException {
@@ -280,12 +329,21 @@ public class AutomaticIndexStatisticsMultiTest
                     lastWasCreate = !lastWasCreate;
                 }
             } catch (SQLException sqle) {
-                fail("create drop thread crashed: " + sqle.getMessage());
+                error = sqle;
+                println("create/drop thread failed: " + sqle.getMessage());
             }
         }
 
         public long getCreates() {
             return creates;
+        }
+
+        public boolean failed() {
+            return error != null;
+        }
+
+        public SQLException getError() {
+            return error;
         }
     }
 }
