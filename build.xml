@@ -1022,7 +1022,9 @@
        pulling JavaDocs from continuous integration systems and build systems.
    -->
   <target name="javadoc-with-bundle" depends="javadoc">
-    <zip destfile="${out.javadoc.dir}/javadocs.zip"
+    <property name="javadoc.bundle" value="${out.javadoc.dir}/javadocs.zip"/>
+    <delete file="${javadoc.bundle}" quiet="true"/>
+    <zip destfile="${javadoc.bundle}"
          basedir="${out.javadoc.dir}"/>
   </target>
 
