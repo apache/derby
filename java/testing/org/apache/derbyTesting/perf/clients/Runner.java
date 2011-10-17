@@ -26,7 +26,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -93,10 +92,7 @@ public class Runner {
         if (init) {
             DBFiller filler = getDBFiller();
             Connection conn = DriverManager.getConnection(url, user, password);
-            System.out.print("initializing database for ");
-            System.out.println((Runner.getLoadOpt( "identityTest", 0 ) == 1)?
-            				"identity column testing...":
-            				"sequence generator testing...");
+            System.out.println("initializing database...");
             filler.fill(conn);
             conn.close();
         }
