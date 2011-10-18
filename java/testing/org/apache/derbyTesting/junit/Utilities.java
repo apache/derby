@@ -238,15 +238,15 @@ public class Utilities {
      * @param test
      *            class name prefixed with package
      */
-    public static String formatTestClassNames(String mainString) {
+    public static String formatTestClassNames(String test) {
         final String COMMON_FUNCTIONTEST_PREFIX = "org.apache.derbyTesting.functionTests.tests.";
         final String COMMON_TEST_PREFIX = "org.apache.derbyTesting.";
-        if (mainString.startsWith(COMMON_FUNCTIONTEST_PREFIX)) {
-            return mainString.substring(COMMON_FUNCTIONTEST_PREFIX.length());
-        } else if (mainString.startsWith(COMMON_TEST_PREFIX)) {
-            return mainString.substring(COMMON_TEST_PREFIX.length());
+        if (test.startsWith(COMMON_FUNCTIONTEST_PREFIX)) {
+            return test.substring(COMMON_FUNCTIONTEST_PREFIX.length());
+        } else if (test.startsWith(COMMON_TEST_PREFIX)) {
+            return test.substring(COMMON_TEST_PREFIX.length());
         } else {
-            return mainString;
+            return test;
         }
     }
 }
