@@ -247,13 +247,6 @@ public class MemoryLeakFixesTest extends BaseJDBCTestCase {
                 JDBCDataSource.clearStringBeanProperty(ds, "shutdownDatabase");
             }
 
-            if (isPhoneME()) {
-                // DERBY-5412: phoneME fails after some iterations because the
-                // number of class names exceeds a VM limit. If we invoke
-                // garbage collection manually, it seems to be able to reclaim
-                // the classes that are no longer in use, and complete the test.
-                Runtime.getRuntime().gc();
-            }
         }
 
         // extra sanity check making sure that the database was created in the
