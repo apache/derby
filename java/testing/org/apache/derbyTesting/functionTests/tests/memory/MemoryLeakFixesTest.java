@@ -33,6 +33,7 @@ import junit.framework.Test;
 
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
@@ -183,7 +184,7 @@ public class MemoryLeakFixesTest extends BaseJDBCTestCase {
         // within 20 iterations;  this program was run on Windows 7 64-bit using
         // jdk1.6.0_26
         int iter = 0;
-        while (iter < 50) {
+        while (iter < 20) {
             
             println("-- " + iter++);
             
@@ -199,6 +200,9 @@ public class MemoryLeakFixesTest extends BaseJDBCTestCase {
             JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
             Connection conn = ds.getConnection();
             JDBCDataSource.clearStringBeanProperty(ds, "createDatabase");
+
+            // Disable auto-commit to speed up insert statements.
+            conn.setAutoCommit(false);
             
             // we'll use this one statement the whole time this db is open
             Statement s = conn.createStatement();
@@ -207,23 +211,29 @@ public class MemoryLeakFixesTest extends BaseJDBCTestCase {
             // somehow as the memory leak does not appear without it
             s.executeUpdate("CREATE TABLE TEST (CINT INT)");
             s.executeUpdate("CREATE INDEX NDX ON TEST (CINT)");
-            
-            // perform some updates and queries; it seems that the number of
-            // iterations here is important and that there is a threshold that
-            // must be crossed; e.g. in my tests the memory leak would not
-            // manifest with 105 iterations but it would with 106 iterations
-            for (int i = 0; i < 500; i++) {
-                
-                // both update and query are important; removing either one
-                // causes the memory leak not to appear;  the order in which
-                // they are executed, however, does not seem to be important
-                s.executeUpdate("INSERT INTO TEST VALUES(" + i + ")");
-                s.executeQuery("SELECT * FROM TEST WHERE CINT=" + i).close();
-                
+
+            // Insert enough data into the table to make a select from the
+            // table trigger the daemon that updates index cardinality
+            // statistics. derby.storage.indexStats.debug.createThreshold is
+            // currently 100.
+            PreparedStatement ins =
+                    conn.prepareStatement("INSERT INTO TEST VALUES ?");
+            for (int i = 0; i < 200; i++) {
+                ins.setInt(1, i);
+                ins.executeUpdate();
             }
-            
+            ins.close();
+
+            conn.commit();
+
+            // Execute a query against the table. This will make the index
+            // statistics daemon do its work.
+            JDBC.assertDrainResults(
+                    s.executeQuery("SELECT * FROM TEST WHERE CINT=42"));
+
             // done with statement and connection
             s.close();
+            conn.rollback();
             conn.close();
             
             // shutdown this database, but not entire derby engine
