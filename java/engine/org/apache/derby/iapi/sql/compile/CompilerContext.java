@@ -287,6 +287,13 @@ public interface CompilerContext extends Context
 
 	void setCurrentDependent(Dependent d);
 
+    /**
+     * Get the current dependent from this {@code CompilerContext}.
+     *
+     * @return the dependent currently being compiled
+     */
+    Dependent getCurrentDependent();
+
 	/**
 	 * Get the current auxiliary provider list from this CompilerContext.
 	 *

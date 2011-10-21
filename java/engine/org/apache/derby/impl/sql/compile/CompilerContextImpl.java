@@ -274,6 +274,10 @@ public class CompilerContextImpl extends ContextImpl
 		currentDependent = d;
 	}
 
+    public Dependent getCurrentDependent() {
+        return currentDependent;
+    }
+
 	/**
 	 * Get the current auxiliary provider list from this CompilerContext.
 	 *
