@@ -51,7 +51,7 @@ public class splitmessages {
      * Note that all message ids that start with "XJ" are automatically added, 
      * these are just for message ids that have a different prefix.
      */
-    static void initClientMessageIds()
+    static
     {
         // Add message ids that don't start with XJ here
         clientMessageIds.add(SQLState.NO_CURRENT_CONNECTION);
@@ -121,11 +121,9 @@ public class splitmessages {
         clientMessageIds.add(SQLState.PROPERTY_INVALID_VALUE);
         clientMessageIds.add(SQLState.LANG_SUBSTR_START_ADDING_LEN_OUT_OF_RANGE);
         clientMessageIds.add(SQLState.LANG_CURSOR_NOT_FOUND);
-    }
+    };
 
 	public static void main(String[] args) throws Exception {
-
-        initClientMessageIds();
 
 		Properties p = new Properties();
 

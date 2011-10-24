@@ -134,8 +134,6 @@
     <mkdir dir="${loc.dir}"/>
     <java classname="org.apache.derbyBuild.splitmessages"
           classpath="${out.dir}"
-          dir="${derby.locales.dir}"
-          fork="yes"
           failonerror="true">
       <arg value="${loc.dir}"/> 
       <arg value="${split.properties}"/>
