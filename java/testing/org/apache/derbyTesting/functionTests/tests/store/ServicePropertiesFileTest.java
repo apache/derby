@@ -342,7 +342,7 @@ public class ServicePropertiesFileTest
         spfOld = new File(newDb, "service.propertiesold");
     }
 
-    /** Dependent on state set by {@linkplain copyDb}. */
+    /** Dependent on state set by {@linkplain #copyDbAs}. */
     private void createSPFBackup(boolean keepOriginal)
             throws IOException {
         PrivilegedFileOpsForTests.copy(spf, spfOld);
