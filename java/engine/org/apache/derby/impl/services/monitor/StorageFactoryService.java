@@ -39,14 +39,18 @@ import org.apache.derby.io.WritableStorageFactory;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.Property;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.InputStream;
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.OutputStreamWriter;
 
 import java.util.Enumeration;
 import java.util.NoSuchElementException;
@@ -64,6 +68,9 @@ import org.apache.derby.iapi.services.io.FileUtil;
  */
 final class StorageFactoryService implements PersistentService
 {
+    /** Marker printed as the last line of the service properties file. */
+    private static final String SERVICE_PROPERTIES_EOF_TOKEN =
+            "#--- last line, don't put anything after this line ---";
 
     private String home; // the path of the database home directory. Can be null
     private String canonicalHome; // will be null if home is null
@@ -276,6 +283,7 @@ final class StorageFactoryService implements PersistentService
                         {
                             StorageFactory storageFactory = privGetStorageFactoryInstance( true, serviceName, null, null);
                             StorageFile file = storageFactory.newStorageFile( PersistentService.PROPERTIES_NAME);
+                            resolveServicePropertiesFiles(storageFactory, file);
                             try {
                                 InputStream is = file.getInputStream();
                                 try {
@@ -323,6 +331,7 @@ final class StorageFactoryService implements PersistentService
         if( ! (sf instanceof WritableStorageFactory))
             throw StandardException.newException(SQLState.READ_ONLY_SERVICE);
         final WritableStorageFactory storageFactory = (WritableStorageFactory) sf;
+        // Write the service properties to file.
         try
         {
             AccessController.doPrivileged(
@@ -330,31 +339,55 @@ final class StorageFactoryService implements PersistentService
                 {
                     public Object run() throws StandardException
                     {
-                        StorageFile backupFile = null;
+                        StorageFile backupFile = replace
+                            ? storageFactory.newStorageFile(
+                                PersistentService.PROPERTIES_NAME.concat("old"))
+                            : null;
                         StorageFile servicePropertiesFile = storageFactory.newStorageFile( PersistentService.PROPERTIES_NAME);
+                        FileOperationHelper foh = new FileOperationHelper();
 
                         if (replace)
                         {
-                            backupFile = storageFactory.newStorageFile( PersistentService.PROPERTIES_NAME.concat("old"));
-                            try
-                            {
-                                if(!servicePropertiesFile.renameTo(backupFile))
-                                    throw StandardException.newException(SQLState.UNABLE_TO_RENAME_FILE,
-                                                                         servicePropertiesFile, backupFile);
-                            }
-                            catch (SecurityException se) { throw Monitor.exceptionStartingModule(se); }
+                            foh.renameTo(
+                                    servicePropertiesFile, backupFile, true);
                         }
 
                         OutputStream os = null;
                         try
                         {
                             os = servicePropertiesFile.getOutputStream();
-                            properties.store( os, serviceName + MessageService.getTextMessage(MessageId.SERVICE_PROPERTIES_DONT_EDIT));
+                            properties.store(os, serviceName +
+                                MessageService.getTextMessage(
+                                    MessageId.SERVICE_PROPERTIES_DONT_EDIT));
+                            BufferedWriter bOut = new BufferedWriter(
+                                    new OutputStreamWriter(os));
+                            bOut.write(SERVICE_PROPERTIES_EOF_TOKEN);
+                            bOut.newLine();
                             storageFactory.sync( os, false);
+                            bOut.close();
                             os.close();
-                            os = null;
+                            os = null; 
                         }
                         catch (IOException ioe)
+                        {
+                            if (backupFile != null)
+                            {
+                                // Rename the old properties file back again.
+                                foh.renameTo(backupFile, servicePropertiesFile,
+                                        false);
+                            }
+                            if (replace)
+                            {
+                                throw StandardException.newException(
+                                        SQLState.SERVICE_PROPERTIES_EDIT_FAILED,
+                                        ioe);
+                            }
+                            else
+                            {
+                                throw Monitor.exceptionStartingModule(ioe);
+                            }
+                        }
+                        finally
                         {
                             if (os != null)
                             {
@@ -362,31 +395,23 @@ final class StorageFactoryService implements PersistentService
                                 {
                                     os.close();
                                 }
-                                catch (IOException ioe2) {}
-                                os = null;
-                            }
-
-                            if (backupFile != null)
-                            {
-                                // need to re-name the old properties file back again
-                                try
+                                catch (IOException ioe)
                                 {
-                                    servicePropertiesFile.delete();
-                                    backupFile.renameTo(servicePropertiesFile);
+                                    // Ignore exception on close
                                 }
-                                catch (SecurityException se) {}
                             }
-                            throw Monitor.exceptionStartingModule(ioe);
                         }
 		
                         if (backupFile != null)
                         {
-                            try
+                            if (!foh.delete(backupFile, false))
                             {
-                                backupFile.delete();
-                                backupFile = null;
+                                Monitor.getStream().printlnWithHeader(
+                                    MessageService.getTextMessage(
+                                        MessageId.SERVICE_PROPERTIES_BACKUP_DEL_FAILED,
+                                        getMostAccuratePath(backupFile)));
+                                
                             }
-                            catch (SecurityException se) {}
                         }
                         return null;
                     }
@@ -453,6 +478,91 @@ final class StorageFactoryService implements PersistentService
                 }
                 );
         }catch( PrivilegedActionException pae) { throw (StandardException) pae.getException();}
+    }
+    
+    /**
+     * Resolves situations where a failure condition left the service properties
+     * file, and/or the service properties file backup, in an inconsistent
+     * state.
+     * <p>
+     * Note that this method doesn't resolve the situation where both the
+     * current service properties file and the backup file are missing.
+     *
+     * @param sf the storage factory for the service
+     * @param spf the service properties file
+     * @throws StandardException if a file operation on a service properties
+     *      file fails
+     */
+    private void resolveServicePropertiesFiles(StorageFactory sf,
+                                               StorageFile spf)
+            throws StandardException {
+        StorageFile spfOld = sf.newStorageFile(PROPERTIES_NAME.concat("old"));
+        FileOperationHelper foh = new FileOperationHelper();
+        boolean hasCurrent = foh.exists(spf, true);
+        boolean hasBackup = foh.exists(spfOld, true);
+        // Shortcut the normal case.
+        if (hasCurrent && !hasBackup) {
+            return;
+        }
+
+        // Backup file, but no current file.
+        if (hasBackup && !hasCurrent) {
+            // Writing the new service properties file must have failed during
+            // an update. Rename the backup to be the current file.
+            foh.renameTo(spfOld, spf, true);
+            Monitor.getStream().printlnWithHeader(
+                                MessageService.getTextMessage(
+                                    MessageId.SERVICE_PROPERTIES_RESTORED));
+        // Backup file and current file.
+        } else if (hasBackup && hasCurrent) {
+            // See if the new (current) file is valid. If so delete the backup,
+            // if not, rename the backup to be the current.
+            BufferedReader bin = null;
+            String lastLine = null;
+            try {
+                bin = new BufferedReader(new FileReader(spf.getPath()));
+                String line;
+                while ((line = bin.readLine()) != null) {
+                    if (line.trim().length() != 0) {
+                        lastLine = line;
+                    }
+                }
+            } catch (IOException ioe) {
+                throw StandardException.newException(
+                        SQLState.UNABLE_TO_OPEN_FILE, ioe,
+                        spf.getPath(), ioe.getMessage());
+            } finally {
+                try {
+                    if (bin != null) {
+                        bin.close();
+                    }
+                } catch (IOException ioe) {
+                    // Ignore exception during close
+                }
+            }
+            if (lastLine != null &&
+                    lastLine.startsWith(SERVICE_PROPERTIES_EOF_TOKEN)) {
+                // Being unable to delete the backup file is fine as long as
+                // the current file appears valid.
+                String msg;
+                if (foh.delete(spfOld, false)) {
+                    msg = MessageService.getTextMessage(
+                            MessageId.SERVICE_PROPERTIES_BACKUP_DELETED);    
+                } else {
+                    // Include path so the user can delete file manually.
+                    msg = MessageService.getTextMessage(
+                            MessageId.SERVICE_PROPERTIES_BACKUP_DEL_FAILED,
+                            getMostAccuratePath(spfOld));
+                }
+                Monitor.getStream().printlnWithHeader(msg);
+            } else {
+                foh.delete(spf, false);
+                foh.renameTo(spfOld, spf, true);
+                Monitor.getStream().printlnWithHeader(
+                                MessageService.getTextMessage(
+                                    MessageId.SERVICE_PROPERTIES_RESTORED));
+            }
+        } 
     }
                 
     /*
@@ -691,7 +801,7 @@ final class StorageFactoryService implements PersistentService
         if ( !service_properties.exists() )
         {
             throw StandardException.newException
-                ( SQLState.MISSING_SERVICE_PROPERTIES, serviceName, PersistentService.PROPERTIES_NAME );
+                ( SQLState.SERVICE_PROPERTIES_MISSING, serviceName, PersistentService.PROPERTIES_NAME );
         }
     }
 
@@ -956,4 +1066,114 @@ final class StorageFactoryService implements PersistentService
             return null;
         } // end of run
     } // end of class DirectoryList
+
+    /**
+     * Helper method returning the "best-effort-most-accurate" path.
+     *
+     * @param file the file to get the path to
+     * @return The file path, either ala {@code File.getCanonicalPath} or
+     *      {@code File.getPath}.
+     */
+    private static String getMostAccuratePath(StorageFile file) {
+        String path = file.getPath();
+        try {
+            path = file.getCanonicalPath();
+        } catch (IOException ioe) {
+            // Ignore this, use path from above.
+        }
+        return path;
     }
+
+    /**
+     * Helper class for common file operations on the service properties files.
+     * <p>
+     * Introduced to take care of error reporting for common file operations
+     * carried out in StorageFactoryService.
+     */
+    //@NotThreadSafe
+    private static class FileOperationHelper {
+        /** Name of the most recently performed operation. */
+        private String operation;
+
+        boolean exists(StorageFile file, boolean mustSucceed)
+                throws StandardException {
+            operation = "exists";
+            boolean ret = false;
+            try {
+                ret = file.exists();
+            } catch (SecurityException se) {
+                handleSecPrivException(file, mustSucceed, se);
+            }
+            return ret;
+        }
+
+        boolean delete(StorageFile file, boolean mustSucceed)
+                throws StandardException {
+            operation = "delete";
+            boolean deleted = false;
+            try {
+                deleted = file.delete();
+            } catch (SecurityException se) {
+                handleSecPrivException(file, mustSucceed, se);
+            }
+            if (mustSucceed && !deleted) {
+                throw StandardException.newException(
+                        SQLState.UNABLE_TO_DELETE_FILE, file.getPath());   
+            }
+            return deleted;
+        }
+
+        boolean renameTo(StorageFile from, StorageFile to, boolean mustSucceed)
+                throws StandardException {
+            operation = "renameTo";
+            // Even if the explicit delete fails, the rename may succeed.
+            delete(to, false);
+            boolean renamed = false;
+            try {
+                renamed = from.renameTo(to);
+            } catch (SecurityException se) {
+                StorageFile file = to;
+                try {
+                    // We got a security exception, assume a secman is present.
+                    System.getSecurityManager().checkWrite(from.getPath());
+                } catch (SecurityException se1) {
+                    file = from;
+                }
+                handleSecPrivException(file, mustSucceed, se);
+            }
+            if (mustSucceed && !renamed) {
+                throw StandardException.newException(
+                        SQLState.UNABLE_TO_RENAME_FILE,
+                        from.getPath(), to.getPath());
+            }
+            return renamed;
+        }
+        
+        /**
+         * Handles security exceptions caused by missing privileges on the
+         * files being accessed.
+         *
+         * @param file the file that was accessed
+         * @param mustSucceed if {@code true} a {@code StandardException} will
+         *      be thrown, if {@code false} a warning is written to the log
+         * @param se the security exception raised
+         * @throws StandardException if {@code mustSucceed} is {@code true}
+         * @throws NullPointerException if {@code file} or {@code se} is null
+         */
+        private void handleSecPrivException(StorageFile file,
+                                            boolean mustSucceed,
+                                            SecurityException se)
+                throws StandardException {
+            if (mustSucceed) {
+                throw StandardException.newException(
+                        SQLState.MISSING_FILE_PRIVILEGE, se, operation,
+                        file.getName(), se.getMessage());
+            } else {
+                Monitor.getStream().printlnWithHeader(
+                        MessageService.getTextMessage(
+                        SQLState.MISSING_FILE_PRIVILEGE, operation,
+                        getMostAccuratePath(file), se.getMessage())); 
+            }
+        }
+    } // End of static class FileOperationHelper
+}

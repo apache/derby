@@ -205,7 +205,15 @@ public interface MessageId {
     /*
      * Monitor
      */
-    String SERVICE_PROPERTIES_DONT_EDIT = "M001"; // Tell user not to edit service.properties
+
+    /** Tell user not to edit service.properties. */
+    String SERVICE_PROPERTIES_DONT_EDIT                     = "M001";
+    /** Informational message, service properties restored. */
+    String SERVICE_PROPERTIES_RESTORED                      = "M002";
+    /** Informational message, service properties backup deleted. */
+    String SERVICE_PROPERTIES_BACKUP_DELETED                = "M003";
+    /** Informational message, service properties backup deletion failed. */
+    String SERVICE_PROPERTIES_BACKUP_DEL_FAILED             = "M004";
 
     /*
      * Misc
