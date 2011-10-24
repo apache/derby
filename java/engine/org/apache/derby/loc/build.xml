@@ -130,14 +130,12 @@
   </target>
 
   <target name="doSplit" depends="splitprops,verifysplit,noSplit,chksplit" unless="split.done">
-<!-- SplitMessages doesn't play well with jdk13 (resource-bundle stuff??) -->
     <mkdir dir="${loc.dir}"/>
     <java classname="org.apache.derbyBuild.splitmessages"
           classpath="${out.dir}"
           failonerror="true">
       <arg value="${loc.dir}"/> 
       <arg value="${split.properties}"/>
-      <arg value="${derby.client.dir}/loc"/>
     </java>
     <touch file="${split.donefile}"/>
   </target>

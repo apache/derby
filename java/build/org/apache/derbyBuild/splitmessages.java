@@ -130,7 +130,6 @@ public class splitmessages {
 		File dir = new File(args[0]);
 
 		File source = new File(args[1]);
-        File clientDir = new File(args[2]);
         
 		String s = source.getName();
 		// loose the suffix
