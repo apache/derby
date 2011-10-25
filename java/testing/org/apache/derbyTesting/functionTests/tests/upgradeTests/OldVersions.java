@@ -53,6 +53,7 @@ public class OldVersions
         {10, 6, 2, 1}, // 10.6.2.1 (Oct 6, 2010/ SVN 999685)
         {10, 7, 1, 1}, // 10.7.1.1 (December 14, 2010/ SVN 1040133)
         {10, 8, 1, 2}, // 10.8.1.2 (April 29, 2011/ SVN 1095077)
+        {10, 8, 2, 2}, // 10.8.2.2 (October 24, 2011/ SVN 1181258)
     };
 
     //Constant for special upgrade testing with both upgrade and create 
