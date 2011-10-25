@@ -1230,8 +1230,15 @@ public class NetStatementRequest extends NetPackageRequest implements StatementR
                     }
                     else
                     {
+                        // If the server doesn't support BOOLEAN parameters,
+                        // send the parameter as a SMALLINT instead.
                         lidAndLengths[i][0] = DRDAConstants.DRDA_TYPE_NSMALL;
                         lidAndLengths[i][1] = 2;
+                        if (inputRow[i] instanceof Boolean) {
+                            Boolean bool = (Boolean) inputRow[i];
+                            inputRow[i] = new Short(
+                                    bool.booleanValue() ? (short) 1 : 0);
+                        }
                     }
                     break;
                 case java.sql.Types.SMALLINT:

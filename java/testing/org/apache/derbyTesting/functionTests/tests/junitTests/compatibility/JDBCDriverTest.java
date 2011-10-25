@@ -32,6 +32,8 @@ import java.io.*;
 import java.math.*;
 import java.sql.*;
 import java.util.*;
+import java.util.regex.Pattern;
+import org.apache.derbyTesting.junit.JDBC;
 
 public	class	JDBCDriverTest	extends	CompatibilitySuite
 {
@@ -255,6 +257,7 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
         derby_2602_test( conn );
         derby_4613_test( conn );
         derby_4888_test( conn );
+        derby_5449_test( conn );
 
 		close( conn );
 	}
@@ -382,7 +385,39 @@ public	class	JDBCDriverTest	extends	CompatibilitySuite
         // Used to get a ClassCastException here in some combinations.
         assertFalse(conn.getMetaData().storesLowerCaseIdentifiers());
     }
-    
+
+    /**
+     * A pattern that matches the value returned by
+     * DatabaseMetaData.getDriverVersion() for the versions that suffer
+     * from DERBY-5449. That is, all version on the 10.8 branch up to 10.8.2.2.
+     */
+    private static Pattern DERBY_5449_PATTERN = Pattern.compile(
+            "^10\\.8\\.([01]\\.|2\\.[012] ).*");
+
+    /**
+     * Test case for DERBY-5449. Verify that PreparedStatement.setBoolean()
+     * works across different versions. Used to fail with a ClassCastException
+     * when talking to servers at version 10.7 and earlier.
+     */
+    private void derby_5449_test(Connection conn) throws SQLException {
+        if (usingDerbyClient() &&
+                getServerVersion().compareTo(DRB_10_7) <= 0) {
+            // Derby's client drivers on the 10.8 branch up to 10.8.2.2
+            // suffered from DERBY-5449 and the test case will fail when
+            // talking to older servers. Skip the test case in such cases.
+            String driverVersion = conn.getMetaData().getDriverVersion();
+            if (DERBY_5449_PATTERN.matcher(driverVersion).matches()) {
+                return;
+            }
+        }
+
+        PreparedStatement ps = prepare(conn, "VALUES CAST(? AS INTEGER)");
+        ps.setBoolean(1, true);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "1");
+        ps.setBoolean(1, false);
+        JDBC.assertSingleValueResultSet(ps.executeQuery(), "0");
+    }
+
 	/////////////////////////////////////////////////////////////
     //
 	//	TEST UDTs
