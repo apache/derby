@@ -261,23 +261,24 @@ final public class GenericActivationHolder implements Activation
 		{
 			/* Has the activation class changed or has the activation been
 			 * invalidated? */
-			if (gc != ps.getActivationClass() || !ac.isValid())
+            final boolean needNewClass =
+                    gc == null || gc != ps.getActivationClass();
+			if (needNewClass || !ac.isValid())
 			{
 
                 GeneratedClass newGC;
 
-				if (gc != ps.getActivationClass()) {
-					// ensure the statement is valid by rePreparing it.
-					// DERBY-3260: If someone else reprepares the statement at
-					// the same time as we do, there's a window between the
-					// calls to rePrepare() and getActivationClass() when the
-					// activation class can be set to null, leading to
-					// NullPointerException being thrown later. Therefore,
-					// synchronize on ps to close the window.
-					synchronized (ps) {
-						ps.rePrepare(getLanguageConnectionContext());
-						newGC = ps.getActivationClass();
-					}
+				if (needNewClass) {
+                    // The statement has been re-prepared since the last time
+                    // we executed it. Get the new activation class.
+                    newGC = ps.getActivationClass();
+                    if (newGC == null) {
+                        // There is no class associated with the statement.
+                        // Tell the caller that the statement needs to be
+                        // recompiled.
+                        throw StandardException.newException(
+                                SQLState.LANG_STATEMENT_NEEDS_RECOMPILE);
+                    }
 				} else {
 					// Reuse the generated class, we just want a new activation
 					// since the old is no longer valid.
