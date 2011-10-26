@@ -51,6 +51,7 @@ import org.apache.tools.ant.taskdefs.Property;
  * <li>java14compile.classpath</li>
  * <li>java15compile.classpath</li>
  * <li>java16compile.classpath</li>
+ * <li>java17compile.classpath</li>
  * </ul>
  *
  * <p>
@@ -62,6 +63,7 @@ import org.apache.tools.ant.taskdefs.Property;
  * <li>j14lib</li>
  * <li>j15lib</li>
  * <li>j16lib</li>
+ * <li>j17lib</li>
  * </ul>
  *
  * <p>
@@ -112,6 +114,8 @@ public class PropertySetter extends Task
     private static  final   String  J15CLASSPATH = "java15compile.classpath";
     private static  final   String  J16LIB = "j16lib";
     private static  final   String  J16CLASSPATH = "java16compile.classpath";
+    private static  final   String  J17LIB = "j17lib";
+    private static  final   String  J17CLASSPATH = "java17compile.classpath";
 
     private static  final   String  JDK_VENDOR = "java.vendor";
     private static  final   String  JAVA_HOME = "java.home";
@@ -124,13 +128,16 @@ public class PropertySetter extends Task
     private static  final   String  JDK_SUN = "Sun Microsystems Inc.";
     private static  final   String  JDK_ORACLE = "Oracle Corporation";
 
+    private static  final   String  MAC_OSX = "Mac OS X";
     private static  final   String  APPLE_CLASSES_DIR = "Classes";
     private static  final   String  APPLE_COMMANDS_DIR = "Commands";
     private static  final   String  APPLE_HOME_DIR = "Home";
-    private static  final   String  APPLE_LIB_DIR = "Libraries";
+    private static  final   String  APPLE_LIBRARIES_DIR = "Libraries";
     private static  final   String  APPLE_RESOURCES_DIR = "Resources";
 
-    private static  final   String  JAVA_5 = "1.5";
+    private static  final   String  APPLE_LIB_DIR = "lib";
+    private static  final   String  APPLE_JRE_DIR = "jre";
+    private static  final   String  APPLE_JDK7_JRE_LIB_DIR = APPLE_JRE_DIR + "/" + APPLE_LIB_DIR;
 
     private static  final   String  PROPERTY_SETTER_DEBUG_FLAG = "printCompilerProperties";
     /** Property controlling extra verbose debugging information. */
@@ -224,6 +231,171 @@ public class PropertySetter extends Task
         }
     }
 
+    /** Holds the names of properties which define a JDK version to the build */
+    private static  final   class   JDKVersion  implements Comparable
+    {
+        private boolean _supportsGenerics;
+
+        /** This is the value returned by System.getProperty( "java.version" ) when you are running
+         * on the JVM corresponding to this JDKVersion. This value is used to look up the JDKVersion
+         * corresponding to the currently running JVM. */
+        private String  _baseJavaVersion;
+
+        /** This is the name of the lib property (e.g. "j14lib", "j15lib"). If this property is set, then we construct
+         * the corresponding classpath property (e.g., "java14compile.classpath", "java15compile.classpath")
+         * from the jar files in this directory */
+        private String  _libPropertyName;
+
+        /** This is the VM-specific classpath property which may be set by this program. It is used by the
+         * master build script. E.g.: "java14compile.classpath", "java15compile.classpath" */
+        private String  _classpathPropertyName;
+
+        /** This is the directory name stub which we look for in trying to find directories which contain
+         * Oracle JDKs. It is used by the setForMostJDKsJARInspection( ) and setForMostJDKs() methods. */
+        private String  _oracleDirectoryNameSeed;
+
+        /** This is the directory name stub which we look for in trying to find directories which contain
+         * IBM JDKs. It is used by the setForMostJDKsJARInspection( ) method. */        
+        private String  _ibmDirectoryNameSeed;
+
+        /** This is another directory name stub which we look for in trying to find directories which contain
+         * IBM JDKs. It is used by the setForMostJDKs( ) method. */        
+        private String  _ibmDirectoryNameSeedWithoutPeriod;
+
+        private int _sortOrder;
+        //
+        // The order here is important. The JDKs are listed in ascending version number order.
+        // This order is used to compare them under the Comparable interface.
+        //
+        static  final   JDKVersion[]    ALL =
+        {
+            new JDKVersion( false, "1.4",  J14LIB, J14CLASSPATH, "1.4", "1.4", "142" ),
+            new JDKVersion( true, "1.5", J15LIB, J15CLASSPATH, "1.5", "5.0", "50" ),
+            new JDKVersion( true, "1.6", J16LIB, J16CLASSPATH, "1.6", "6.0", "60" ),
+            new JDKVersion( true, "1.7", J17LIB, J17CLASSPATH, "1.7", "7.0", "70" ),
+        };
+        private static  int _count = 0;
+
+        JDKVersion
+            (
+             boolean supportsGenerics,
+             String baseJavaVersion,
+             String libPropertyName,
+             String classpathPropertyName,
+             String oracleDirectoryNameSeed,
+             String ibmDirectoryNameSeed,
+             String ibmDirectoryNameSeedWithoutPeriod
+             )
+        {
+            _sortOrder = _count++;
+            
+            _supportsGenerics = supportsGenerics;
+            _baseJavaVersion = baseJavaVersion;
+            _libPropertyName = libPropertyName;
+            _classpathPropertyName = classpathPropertyName;
+            _oracleDirectoryNameSeed = oracleDirectoryNameSeed;
+            _ibmDirectoryNameSeed = ibmDirectoryNameSeed;
+            _ibmDirectoryNameSeedWithoutPeriod = ibmDirectoryNameSeedWithoutPeriod;
+        }
+
+        /** Returns true if this version of the Java language understands generics */
+        boolean supportsGenerics() { return _supportsGenerics; }
+
+        /** Get the value of System.getProperty( "java.version" ) returned when running on this JVM */
+        String  getBaseJavaVersion() { return _baseJavaVersion; }
+
+        /** Get the name of the user-specified lib property which points at a library of jars to put on the classpath */
+        String  getLibPropertyName() { return _libPropertyName; }
+
+        /** Get the classpath property which the master build script expects us to set */
+        String  getClasspathPropertyName() { return _classpathPropertyName; }
+
+        /** Get the stub string we look for in order to find directories containing Oracle JDKs */
+        String  getOracleDirectoryNameSeed() { return _oracleDirectoryNameSeed; }
+
+        /** Get the stub string we look for in order to find directories containing IBM JDKs */
+        String  getIBMDirectoryNameSeed() { return _ibmDirectoryNameSeed; }
+
+        /** Get the stub string (without period separators) which we look for in order to find directories containing IBM JDKs */
+        String  getIBMDirectoryNameSeedWithoutPeriod() { return _ibmDirectoryNameSeedWithoutPeriod; }
+
+        /** Get the stub strings needed to find directories containing IBM JDKs. */
+        static String[]    getIBMDirectoryNameSeeds()
+        {
+            String[]    ibmNames = new String[ ALL.length ];
+            
+            for ( int i = 0; i < ALL.length; i++ ) { ibmNames[ i ] = ALL[ i ].getIBMDirectoryNameSeed(); }
+            
+            return ibmNames;
+        }
+        
+        /** Get the stub strings (without period separators) needed to find other directories containing IBM JDKs. */
+        static String[]    getIBMDirectoryNameSeedWithoutPeriods()
+        {
+            String[]    ibmNames = new String[ ALL.length ];
+            
+            for ( int i = 0; i < ALL.length; i++ ) { ibmNames[ i ] = ALL[ i ].getIBMDirectoryNameSeedWithoutPeriod(); }
+            
+            return ibmNames;
+        }
+
+        /** Get the stub strings needed to find directories containing Oracle JDKs. */
+        static String[]    getOracleDirectoryNameSeeds()
+        {
+            String[]    oracleDirectoryNameSeeds = new String[ ALL.length ];
+            
+            for ( int i = 0; i < ALL.length; i++ ) { oracleDirectoryNameSeeds[ i ] = ALL[ i ].getOracleDirectoryNameSeed(); }
+            
+            return oracleDirectoryNameSeeds;
+        }
+
+        /** Get all of the JDK versions which support generics */
+        static  ArrayList<JDKVersion>   genericsSupporters()
+        {
+            ArrayList<JDKVersion>   retval = new ArrayList<JDKVersion>();
+
+            for ( JDKVersion current : ALL )
+            {
+                if ( current.supportsGenerics() ) { retval.add( current ); }
+            }
+
+            return retval;
+        }
+
+        /** Find the JDKVersion matching the passed-in value of the java.version property */
+        static  JDKVersion  matchJREversion( String jreVersion )
+        {
+            for ( JDKVersion current : ALL )
+            {
+                if ( jreVersion.startsWith( current.getBaseJavaVersion() ) ) { return current; }
+            }
+            
+            return null;
+        }
+
+        /** Find the JDKVersion with the passed-in classpath property name */
+        static  JDKVersion  matchClasspathPropertyName( String classpathPropertyName )
+        {
+            for ( JDKVersion current : ALL )
+            {
+                if ( classpathPropertyName.equals( current.getClasspathPropertyName() ) ) { return current; }
+            }
+            
+            return null;
+        }
+
+        // Comparable implementation
+        
+        public  int compareTo( Object other )
+        {
+            if ( other ==  null ) { return 1; }
+            if ( !( other instanceof JDKVersion ) ) { return -1; }
+            else { return this._sortOrder - ((JDKVersion) other)._sortOrder; }
+        }
+        public  boolean equals( Object other ) { return ( compareTo( other ) == 0 ); }
+        public  int hashCode() { return _sortOrder; }
+    }
+
     /////////////////////////////////////////////////////////////////////////
     //
     //  CONSTRUCTORS
@@ -264,12 +436,14 @@ public class PropertySetter extends Task
             // Check for settings which are known to cause problems.
             //
             checkForProblematicSettings();
-            
+
             //
             // There's nothing to do if the classpath properties are already set.
             //
-            if ( isSet( J14CLASSPATH ) && isSet( J15CLASSPATH ) &&
-                    isSet( J16CLASSPATH ) ) {
+            boolean isSet = true;
+            for ( int i = 0; (i < JDKVersion.ALL.length) && isSet; i++ ) { isSet &= isSet( JDKVersion.ALL[ i ].getClasspathPropertyName() ); }
+            if ( isSet )
+            {
                 debug("All required properties already set.");
                 return;
             }
@@ -278,22 +452,7 @@ public class PropertySetter extends Task
             // If the library properties are set, then use them to set the
             // classpath properties.
             //
-            String  j14lib = getProperty( J14LIB );
-            String  j15lib = getProperty( J15LIB );
-            String  j16lib = getProperty( J16LIB );
-
-            if ( j14lib != null ) {
-                debug("'j14lib' explicitly set to '" + j14lib + "'");
-                setClasspathFromLib(J14CLASSPATH, j14lib, true );
-            }
-            if ( j15lib != null ) {
-                debug("'j15lib' explicitly set to '" + j15lib + "'");
-                setClasspathFromLib(J15CLASSPATH, j15lib, true );
-            }
-            if ( j16lib != null ) {
-                debug("'j16lib' explicitly set to '" + j16lib + "'");
-                setClasspathFromLib(J16CLASSPATH, j16lib, true );
-            }
+            for ( int i = 0; i < JDKVersion.ALL.length; i++ ) { tryToSetClasspathFromLib( JDKVersion.ALL[ i ] ); }
 
             //
             // If the library properties were not set, the following
@@ -304,7 +463,7 @@ public class PropertySetter extends Task
             //
             jdkVendor = getProperty(JDK_VENDOR, "");
 
-            if (  jdkVendor.startsWith( JDK_APPLE ) ) { setForAppleJDKs(); }
+            if (  usingMacOSXjdk( jdkVendor ) ) { setForAppleJDKs(); }
             else if ( usingIBMjdk( jdkVendor ) ) { setForIbmJDKs(); }
             else if ( usingOracleJDK( jdkVendor ) ) { setForOracleJDKs(); }
             else {
@@ -320,8 +479,8 @@ public class PropertySetter extends Task
                         "and ask the Derby development community for help\n" +
                         "    (please provide the debug output from running ant)"
                         );
-                setForMostJDKsJARInspection("1.4", "1.5", "1.6");
-                setForMostJDKs("1.4", "1.5", "1.6");
+                setForMostJDKsJARInspection( JDKVersion.getOracleDirectoryNameSeeds() );
+                setForMostJDKs( JDKVersion.getOracleDirectoryNameSeeds() );
             }
         } catch (Throwable t)
         {
@@ -342,8 +501,8 @@ public class PropertySetter extends Task
         // then the calling script will set J14CLASSPATH, based on J15CLASSPATH.
         //
 
-        // Require that at least one of these be set now.
-        requireAtLeastOneProperty( J15CLASSPATH, J16CLASSPATH );
+        // Require at least one version which supports generics.
+        requireGenerics();
     }
 
     /////////////////////////////////////////////////////////////////////////
@@ -360,25 +519,26 @@ public class PropertySetter extends Task
     private void    setForAppleJDKs()
         throws Exception
     {
-        String  default_j14lib = getProperty( J14LIB );
-        String  default_j15lib = getProperty( J15LIB );
-        String  default_j16lib = getProperty( J16LIB );
+        String[]    defaultLibPropertyValues = new String[ JDKVersion.ALL.length ];
+        for ( int i = 0; i < JDKVersion.ALL.length; i++ )
+        {
+            defaultLibPropertyValues[ i ] = getProperty( JDKVersion.ALL[ i ].getLibPropertyName() );
+        }
 
         // Obtain a list of all JDKs available to us, then specify which one to
         // use for the different versions we require.
         List<JDKInfo> jdks = locateAppleJDKs(getJdkSearchPath());
         debug("\nSelecting JDK candidates:");
-        if (default_j14lib == null) {
-            default_j14lib = getJreLib(jdks, "1.4", jdkVendor);
-        }
-        if (default_j15lib == null) {
-            default_j15lib = getJreLib(jdks, "1.5", jdkVendor);
-        }
-        if (default_j16lib == null) {
-            default_j16lib = getJreLib(jdks, "1.6", jdkVendor);
+        for ( int i = 0; i < JDKVersion.ALL.length; i++ )
+        {
+            if ( defaultLibPropertyValues[ i ] == null )
+            {
+                JDKVersion  currentJDK = JDKVersion.ALL[ i ];
+                defaultLibPropertyValues[ i ] = getJreLib( jdks, currentJDK.getOracleDirectoryNameSeed(), jdkVendor );
+            }
         }
 
-        defaultSetter(default_j14lib, default_j15lib, default_j16lib);
+        defaultSetter( defaultLibPropertyValues );
     }
     
     /////////////////////////////////////////////////////////////////////////
@@ -395,10 +555,10 @@ public class PropertySetter extends Task
     private void    setForIbmJDKs()
         throws Exception
     {
-        setForMostJDKsJARInspection("1.4", "5.0", "6.0");
-        setForMostJDKs( "142", "50", "60" );
+        setForMostJDKsJARInspection( JDKVersion.getIBMDirectoryNameSeeds() );
+        setForMostJDKs( JDKVersion.getIBMDirectoryNameSeedWithoutPeriods() );
     }
-    
+
     /////////////////////////////////////////////////////////////////////////
     //
     //  SET PROPERTIES FOR Oracle JDKs
@@ -414,8 +574,8 @@ public class PropertySetter extends Task
     private void setForOracleJDKs()
         throws Exception
     {
-        setForMostJDKsJARInspection("1.4", "1.5", "1.6");
-        setForMostJDKs( "1.4", "1.5", "1.6" );
+        setForMostJDKsJARInspection( JDKVersion.getOracleDirectoryNameSeeds() );
+        setForMostJDKs( JDKVersion.getOracleDirectoryNameSeeds() );
     }
     
     /////////////////////////////////////////////////////////////////////////
@@ -430,28 +590,28 @@ public class PropertySetter extends Task
      * Will search for JDK based on a list of root directories. A JDK is
      * identified by certain files and the content of JAR file manifests.
      */
-    private void setForMostJDKsJARInspection(
-            String seed14, String seed15, String seed16)
-        throws Exception {
-        String  default_j14lib = getProperty( J14LIB );
-        String  default_j15lib = getProperty( J15LIB );
-        String  default_j16lib = getProperty( J16LIB );
+    private void setForMostJDKsJARInspection( String[] seeds )
+        throws Exception
+    {
+        String[]    defaultLibPropertyValues = new String[ JDKVersion.ALL.length ];
+        for ( int i = 0; i < JDKVersion.ALL.length; i++ )
+        {
+            defaultLibPropertyValues[ i ] = getProperty( JDKVersion.ALL[ i ].getLibPropertyName() );
+        }
 
         // Obtain a list of all JDKs available to us, then specify which one to
         // use for the different versions we require.
         List<JDKInfo> jdks = locateMostJDKs(getJdkSearchPath());
         debug("\nSelecting JDK candidates:");
-        if (default_j14lib == null) {
-            default_j14lib = getJreLib(jdks, seed14, jdkVendor);
-        }
-        if (default_j15lib == null) {
-            default_j15lib = getJreLib(jdks, seed15, jdkVendor);
-        }
-        if (default_j16lib == null) {
-            default_j16lib = getJreLib(jdks, seed16, jdkVendor);
+        for ( int i = 0; i < JDKVersion.ALL.length; i++ )
+        {
+            if ( defaultLibPropertyValues[ i ] == null )
+            {
+                defaultLibPropertyValues[ i ] = getJreLib( jdks, seeds[ i ], jdkVendor );
+            }
         }
 
-        defaultSetter(default_j14lib, default_j15lib, default_j16lib);
+        defaultSetter( defaultLibPropertyValues );
     }
 
     /**
@@ -459,25 +619,26 @@ public class PropertySetter extends Task
      * Set the properties needed to compile using most JDKs
      * </p>
      */
-    private void    setForMostJDKs( String seed14, String seed15, String seed16 )
+    private void    setForMostJDKs( String[] seeds )
         throws Exception
     {
         List<File> jdkParents = getJdkSearchPath();
 
-        String  default_j14lib = getProperty( J14LIB );
-        String  default_j15lib = getProperty( J15LIB );
-        String  default_j16lib = getProperty( J16LIB );
+        String[]    defaultLibPropertyValues = new String[ JDKVersion.ALL.length ];
+        for ( int i = 0; i < JDKVersion.ALL.length; i++ )
+        {
+            defaultLibPropertyValues[ i ] = getProperty( JDKVersion.ALL[ i ].getLibPropertyName() );
+        }
         
-        if ( default_j14lib == null )
-        { default_j14lib = searchForJreLib(jdkParents, seed14, false ); }
+        for ( int i = 0; i < JDKVersion.ALL.length; i++ )
+        {
+            if ( defaultLibPropertyValues[ i ] == null )
+            {
+                defaultLibPropertyValues[ i ] = searchForJreLib( jdkParents, seeds[ i ], false );
+            }
+        }
 
-        if ( default_j15lib == null )
-        { default_j15lib = searchForJreLib(jdkParents, seed15, false ); }
-
-        if ( default_j16lib == null )
-        { default_j16lib = searchForJreLib(jdkParents, seed16, false ); }
-
-        defaultSetter( default_j14lib, default_j15lib, default_j16lib );
+        defaultSetter( defaultLibPropertyValues );
     }
 
     /**
@@ -509,7 +670,7 @@ public class PropertySetter extends Task
         // Add parent of JAVA_HOME
         searchPath.add(getJdkParentDirectory());
 
-        String osName = System.getProperty("os.name");
+        String osName = System.getProperty( OPERATING_SYSTEM );
 
         if ("SunOS".equals(osName)) {
             // On Solaris, JDK 1.4.2 is installed under /usr/jdk, whereas JDK
@@ -650,58 +811,105 @@ public class PropertySetter extends Task
             for (File f : possibleJdkRoots) {
                 verbose("checking root '" + f + "'");
 
-                File[] requiredDirs = new File[] {
-                    new File(f, APPLE_CLASSES_DIR),
-                    new File(f, APPLE_COMMANDS_DIR),
-                    new File(f, APPLE_HOME_DIR),
-                    new File(f, APPLE_LIB_DIR),
-                    new File(f, APPLE_RESOURCES_DIR)
-                };
-                
-                boolean dirsOK = true;
-                for (File reqDir : requiredDirs) {
-                    if (!reqDir.exists()) {
-                        debug("Missing JDK directory: " +
-                                reqDir.getAbsolutePath());
-                        dirsOK = false;
-                        break;
-                    }
-                }
-                if (!dirsOK) {
-                    continue;
-                }
+                JDKInfo jdk = findAppleJDK6( f );               
+                if ( jdk == null ) { jdk = findAppleJDK7( f ); }
 
-                File rtArchive = new File(f,
-                        new File(APPLE_CLASSES_DIR, "classes.jar").getPath());
-                if (!rtArchive.exists()) {
-                    debug("Missing JAR: " + rtArchive);
-                    // Bail out, we only understand JDKs that have a
-                    // "Classes/classes.jar".
-                    continue;
-                }
-                // Get implementation version from the manifest.
-                Manifest mf;
-                try {
-                    JarFile rtJar = new JarFile(rtArchive);
-                    mf = rtJar.getManifest();
-                } catch (IOException ioeIgnored) {
-                    // Obtaining the manifest failed for some reason.
-                    // If in debug mode, let the user know.
-                    debug("Failed to obtain manifest for " +
-                                rtArchive.getAbsolutePath() + ": " +
-                                ioeIgnored.getMessage());
-                    continue;
-                }
-                JDKInfo jdk = inspectJarManifest(mf, f);
-                if (jdk != null) {
-                    jdks.add(jdk);
-                    continue;
-                }
+                if ( jdk != null ) { jdks.add(jdk); }
             }
         }
         verbose("located " + jdks.size() + " JDKs in total");
         return jdks;
      }
+
+    /** Find the JDKInfo for an Apple JDK at rev level 6 or earlier */
+    private JDKInfo findAppleJDK6( File root )
+    {
+        boolean directoriesExist = requireDirectories
+            (
+             new File[]
+             {
+                 new File(root, APPLE_CLASSES_DIR),
+                 new File(root, APPLE_COMMANDS_DIR),
+                 new File(root, APPLE_HOME_DIR),
+                 new File(root, APPLE_LIBRARIES_DIR),
+                 new File(root, APPLE_RESOURCES_DIR)
+             }
+             );
+        if ( !directoriesExist ) { return null; }
+        
+        File rtArchive = new File(root,new File(APPLE_CLASSES_DIR, "classes.jar").getPath());
+        if (!rtArchive.exists()) {
+            debug("Missing JAR: " + rtArchive);
+            // Bail out, we only understand JDKs that have a
+            // "Classes/classes.jar".
+            return null;
+        }
+        // Get implementation version from the manifest.
+        Manifest mf;
+        try {
+            JarFile rtJar = new JarFile(rtArchive);
+            mf = rtJar.getManifest();
+        } catch (IOException ioeIgnored) {
+            // Obtaining the manifest failed for some reason.
+            // If in debug mode, let the user know.
+            debug("Failed to obtain manifest for " +
+                  rtArchive.getAbsolutePath() + ": " +
+                  ioeIgnored.getMessage());
+            return null;
+        }
+        
+        return inspectJarManifest(mf, root);
+    }
+    /** Return true if all of the required directories are found */
+    private boolean requireDirectories( File[] requiredDirs )
+    {
+        for (File reqDir : requiredDirs) {
+            if (!reqDir.exists()) {
+                debug("Missing JDK directory: " +
+                      reqDir.getAbsolutePath());
+                return  false;
+            }
+        }
+        
+        return true;
+    }
+
+    /** Find the JDKInfo for an Apple JDK at rev level 7 */
+    private JDKInfo findAppleJDK7( File root )
+    {
+        boolean directoriesExist = requireDirectories
+            (
+             new File[]
+             {
+                 new File(root, APPLE_LIB_DIR),
+                 new File(root, APPLE_JRE_DIR)
+             }
+             );
+        if ( !directoriesExist ) { return null; }
+        
+        File rtArchive = new File(root,new File(APPLE_JDK7_JRE_LIB_DIR, "rt.jar").getPath());
+        if (!rtArchive.exists()) {
+            debug("Missing JAR: " + rtArchive);
+            // Bail out, we only understand JDKs that have a
+            // "jre/lib/rt.jar".
+            return null;
+        }
+        // Get implementation version from the manifest.
+        Manifest mf;
+        try {
+            JarFile rtJar = new JarFile(rtArchive);
+            mf = rtJar.getManifest();
+        } catch (IOException ioeIgnored) {
+            // Obtaining the manifest failed for some reason.
+            // If in debug mode, let the user know.
+            debug("Failed to obtain manifest for " +
+                  rtArchive.getAbsolutePath() + ": " +
+                  ioeIgnored.getMessage());
+            return null;
+        }
+        
+        return inspectJarManifest(mf, root);
+    }
 
     /**
      * Searches for JDKs in the specified directories.
@@ -898,11 +1106,11 @@ public class PropertySetter extends Task
         }
         // Don't allow early access versions.
         // This rule should at least match Sun EA versions.
-        if (implVersion.contains("ea")) {
-            debug("JDK with version '" + implVersion + "' ignored: " +
-                    "early access");
-            return false;
-        }
+        //        if ( implVersion.contains("ea") ) {
+        //            debug("JDK with version '" + implVersion + "' ignored: " +
+        //                    "early access");
+        //            return false;
+        //        }
 
         // See if the implementation version matches the specification version.
         if (specVersion == null) {
@@ -975,19 +1183,50 @@ public class PropertySetter extends Task
      * values will override the defaults that are passed in to this method.
      * </p>
      */
-    private void    defaultSetter( String default_j14lib, String default_j15lib, String default_j16lib )
+    private void    defaultSetter( String[] defaultLibPropertyValues )
         throws  BuildException
     {
-        String  j14lib = getProperty( J14LIB, default_j14lib );
-        String  j15lib = getProperty( J15LIB, default_j15lib );
-        String  j16lib = getProperty( J16LIB, default_j16lib );
+        if ( defaultLibPropertyValues.length != JDKVersion.ALL.length )
+        {
+            throw new BuildException
+                (
+                 "The PropertySetter program does not understand this platform. " +
+                 "PropertySetter should be setting properties for " + JDKVersion.ALL.length + " JDKs. " +
+                 "However, PropertySetter is instead trying to set properties for " + defaultLibPropertyValues.length + " JDKs."
+                 );
+        }
 
-        setClasspathFromLib( J14CLASSPATH, j14lib, false );
-        setClasspathFromLib( J15CLASSPATH, j15lib, false );
-        setClasspathFromLib( J16CLASSPATH, j16lib, false );
+        for ( int i = 0; i < JDKVersion.ALL.length; i++ )
+        {
+            JDKVersion  currentVersion = JDKVersion.ALL[ i ];
+            String  libPropertyName = currentVersion.getLibPropertyName();
+            String  classpathPropertyName = currentVersion.getClasspathPropertyName();
+            String  libPropertyValue = getProperty( libPropertyName, defaultLibPropertyValues[ i ] );
+            
+            setClasspathFromLib( classpathPropertyName, libPropertyValue, false );
+        }
 
         // Refresh the properties snapshot to reflect the latest changes.
         refreshProperties();
+    }
+    
+    /**
+     * <p>
+     * Try to set a classpath from a corresponding lib property.
+     * </p>
+     */
+    private void    tryToSetClasspathFromLib( JDKVersion version )
+        throws BuildException
+    {
+        String  libPropertyName = version.getLibPropertyName();
+        String  classpathPropertyName = version.getClasspathPropertyName();
+        String  libPropertyValue = getProperty( libPropertyName );
+        
+        if ( libPropertyValue != null )
+        {
+            debug( singleQuote( libPropertyName ) + " explicitly set to " + singleQuote( libPropertyValue ) );
+            setClasspathFromLib( classpathPropertyName, libPropertyValue, true );
+        }
     }
     
     /**
@@ -1008,7 +1247,7 @@ public class PropertySetter extends Task
         if ( classpath != null ) { return; }
 
         // refuse to set certain properties
-        if ( shouldNotSet( classpathProperty ) ) { return; }
+        if ( shouldNotSetClasspathProperty( classpathProperty ) ) { return; }
 
         String      jars = listJars( libraryDirectory, squawkIfEmpty );
 
@@ -1138,40 +1377,73 @@ public class PropertySetter extends Task
      */
     private void  checkForProblematicSettings()
     {
-        if (
-            shouldNotSet( J16CLASSPATH ) &&
-            ( isSet( J16CLASSPATH ) || isSet( J16LIB ) )
-           )
+        for ( JDKVersion current : JDKVersion.ALL )
         {
-            throw new BuildException
+            String  classpathPropertyName = current.getClasspathPropertyName();
+            String  libPropertyName = current.getLibPropertyName();
+            String  baseJavaVersion = current.getBaseJavaVersion();
+
+            if (
+                shouldNotSetClasspathProperty( classpathPropertyName ) &&
+                ( isSet( classpathPropertyName ) || isSet( libPropertyName ) )
+                )
+            {
+                String  javaVersion = getProperty( JAVA_VERSION );
+                throw new BuildException
                 (
                  "\nThe build raises version mismatch errors when using a " +
-                 "Java 5 compiler with Java 6 libraries.\n" +
-                 "Please either use a Java 6 (or later) compiler or do not " +
-                 "set the '" +  J16CLASSPATH + "' and '" + J16LIB +
+                 javaVersion + " compiler with libraries from a later JDK.\n" +
+                 "Please either use a " + baseJavaVersion + " (or later) compiler or do not " +
+                 "set the '" +  classpathPropertyName + "' and '" + libPropertyName +
                  "' variables.\n"
                  );
+            }
         }
-
     }
     
     /**
      * <p>
-     * Returns true if the given property should not be set.
+     * Returns true if the given classpath property should not be set.
      * </p>
      */
-    private boolean shouldNotSet( String property )
+    private boolean shouldNotSetClasspathProperty( String classpathPropertyName )
     {
         //
-        // A Java 5 compiler raises version mismatch errors when used
-        // with Java 6 libraries.
+        // A Java compiler raises version mismatch errors when used
+        // with libraries supplied by a later version of Java.
         //
         String  javaVersion = getProperty( JAVA_VERSION );
-        
-        return ( javaVersion.startsWith( JAVA_5 ) &&
-                    J16CLASSPATH.equals( property  ) );
+
+        JDKVersion  compilerVersion = JDKVersion.matchJREversion( javaVersion );
+        JDKVersion  propertyVersion = JDKVersion.matchClasspathPropertyName( classpathPropertyName );
+
+        if ( compilerVersion == null )
+        {
+            throw new BuildException
+                (
+                 "\nCannot find a JDKVersion matching java.version = " + javaVersion + "\n"
+                 );
+        }
+        if ( propertyVersion == null )
+        {
+            throw new BuildException
+                (
+                 "\nCannot find a JDKVersion matching the classpath property named = " +classpathPropertyName + "\n"
+                 );
+        }
+
+        if ( compilerVersion.compareTo( propertyVersion ) < 0 ) { return true; }
+        else { return false; }
     }
     
+    /**
+     * Return true if we are using a JDK for Mac OS X.
+     */
+    private static boolean usingMacOSXjdk(String jdkVendor)
+    {
+        return jdkVendor.startsWith( JDK_APPLE ) || MAC_OSX.equals( System.getProperty( OPERATING_SYSTEM ) );
+    }
+
     /**
      * <p>
      * Return true if we are using an IBM JDK.
@@ -1254,17 +1526,23 @@ public class PropertySetter extends Task
 
     /**
      * <p>
-     * Require that at least one of the passed in properties be set.
+     * Require that at least one of the JDKs supports generics.
      * </p>
      */
-    private void  requireAtLeastOneProperty( String... properties )
+    private void  requireGenerics()
         throws BuildException
     {
-        int             count = properties.length;
+        ArrayList<JDKVersion>   genericsSupporters = JDKVersion.genericsSupporters();
+        int             count = genericsSupporters.size();
+        String[]    properties = new String[ count ];
+        int         idx = 0;
 
-        for ( String property : properties )
+        for ( JDKVersion version : genericsSupporters )
         {
-            if ( getProperty( property ) != null ) { return; }
+            String  propertyName = version.getClasspathPropertyName();
+            if ( getProperty( propertyName ) != null ) { return; }
+
+            properties[ idx++ ] = propertyName;
         }
 
         throw couldntSetProperty( properties );
@@ -1317,9 +1595,10 @@ public class PropertySetter extends Task
         appendProperty( buffer, JAVA_HOME );
         appendProperty( buffer, JAVA_VERSION );
         appendProperty( buffer, OPERATING_SYSTEM );
-        appendProperty( buffer, J14LIB );
-        appendProperty( buffer, J15LIB );
-        appendProperty( buffer, J16LIB );
+        for ( int i = 0; i < JDKVersion.ALL.length; i++ )
+        {
+            appendProperty( buffer, JDKVersion.ALL[ i ].getLibPropertyName() );
+        }
         // Build a string of the search path, which may contain multiple values.
         buffer.append("jdkSearchPath = ");
         try {
@@ -1412,5 +1691,10 @@ public class PropertySetter extends Task
             }
             return false;
         }
+    }
+
+    private String  singleQuote( String raw )
+    {
+        return "'" + raw + "'";
     }
 }
