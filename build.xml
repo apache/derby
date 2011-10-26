@@ -568,13 +568,27 @@
     <delete file="${out.dir}/org/apache/derby/info/locale_zh_TW.properties"/>
   </target>
 
-  <target name="checkmessages">
+  <target name="checkmessages" depends="checkmessages-done"
+          unless="checkmessages.done">
     <java classname="org.apache.derbyBuild.MessageVetter"
           classpath="${out.dir}"
           failonerror="true">
       <arg file="${out.dir}/org/apache/derby/loc"/>
       <arg file="${out.dir}/org/apache/derby/loc/drda"/>
     </java>
+    <touch file="${generated.dir}/checkmessages.done"/>
+  </target>
+
+  <target name="checkmessages-done">
+    <uptodate property="checkmessages.done"
+              targetfile="${generated.dir}/checkmessages.done">
+      <srcresources>
+        <fileset dir="${out.dir}/org/apache/derby/loc"
+                 includes="*.properties"/>
+        <fileset dir="${out.dir}/org/apache/derby/loc/drda"
+                 includes="*.properties"/>
+      </srcresources>
+    </uptodate>
   </target>
 
 <!-- ==================================================================== -->
