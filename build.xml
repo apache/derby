@@ -1461,9 +1461,6 @@
       <param name="info.productfile" value="derby.jar"/>
       <param name="info.file" value="${out.dir}//org/apache/derby/info/DBMS.properties"/>
     </antcall>
-    <echo level="info" file="${derby.jar.dir}/lists/derby.list"
-          append="true"
-          message="org/apache/derby/info/DBMS.properties"/>
 
     <!-- copy boilerplate common to derby jar files -->
     <antcall target="meta-inf-common"/>
@@ -1472,31 +1469,6 @@
     <antcall target="declare-autoloadable-driver">
       <param name="driver.name" value="org.apache.derby.jdbc.AutoloadedDriver"/>
     </antcall>
-
-    <antcall target="derbyjarwithosgi"/>
-
-    <!-- add non-class files to jar -->
-
-    <jar destfile="${derby.jar.dir}/derby.jar" 
-         update="true"
-         filesonly="true"
-         compress="true">
-      <fileset dir="${out.dir}"
-               includes="org/apache/derby/loc/m?_en.properties,
-                         org/apache/derby/loc/m??_en.properties,
-                         org/apache/derby/loc/sysinfoMessages.properties,
-                         org/apache/derby/loc/toolsmessages.properties,
-                         org/apache/derby/impl/jdbc/metadata.properties,
-                         org/apache/derby/impl/sql/catalog/metadata_net.properties,
-                         org/apache/derby/info/DBMS.properties"/>
-      <fileset dir="${derby.jar.dir}/lists"
-               includes="META-INF/**,
-                         org/apache/derby/modules.properties"/>
-    </jar>
-
-  </target>
-
-  <target name="derbyjarwithosgi">
 
     <antcall target="make-core-derbyjar-manifest">
       <param name="manifest.file" value="${derby.jar.dir}/lists/smf.mf"/>
@@ -1516,7 +1488,19 @@
 	 includesfile="${derby.jar.dir}/lists/derby.list"
          compress="true"
          filesonly="true"
-         manifest="${derby.jar.dir}/lists/smf.mf"/>
+         manifest="${derby.jar.dir}/lists/smf.mf">
+      <fileset dir="${out.dir}"
+               includes="org/apache/derby/loc/m?_en.properties,
+                         org/apache/derby/loc/m??_en.properties,
+                         org/apache/derby/loc/sysinfoMessages.properties,
+                         org/apache/derby/loc/toolsmessages.properties,
+                         org/apache/derby/impl/jdbc/metadata.properties,
+                         org/apache/derby/impl/sql/catalog/metadata_net.properties,
+                         org/apache/derby/info/DBMS.properties"/>
+      <fileset dir="${derby.jar.dir}/lists"
+               includes="META-INF/**,
+                         org/apache/derby/modules.properties"/>
+    </jar>
 
   </target>
 
@@ -1618,14 +1602,9 @@
     <jar destfile="${derby.jar.dir}/derbytools.jar"
          basedir="${out.dir}"
          includesfile="${derby.jar.dir}/lists/derbytools.list"
-         compress="true"
-         filesonly="true"/>
-	
-    <jar destfile="${derby.jar.dir}/derbytools.jar"
          manifest="${derby.jar.dir}/lists/smftools.mf"
          compress="true"
-         filesonly="true"
-         update="true">
+         filesonly="true">
       <fileset dir="${out.dir}"
                includes="org/apache/derby/loc/sysinfoMessages.properties,
                          org/apache/derby/loc/toolsmessages.properties,
@@ -1693,11 +1672,7 @@
          basedir="${out.dir}"
          includesfile="${derby.jar.dir}/lists/derbynet.list"
          compress="true"
-         filesonly="true"/>
-    <jar destfile="${derby.jar.dir}/derbynet.jar"
-         compress="true"
          filesonly="true"
-         update="true"
     	 manifest="${derby.jar.dir}/lists/smfnet.mf">
       <fileset dir="${out.dir}"
                includes="org/apache/derby/loc/drda/**,
