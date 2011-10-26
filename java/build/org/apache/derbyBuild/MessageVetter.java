@@ -115,7 +115,12 @@ public class MessageVetter {
     private MessageVetter(File file) throws IOException {
         this.file = file;
         properties = new Properties();
-        properties.load(new FileInputStream(file));
+        FileInputStream in = new FileInputStream(file);
+        try {
+            properties.load(in);
+        } finally {
+            in.close();
+        }
     }
 
     /**
