@@ -82,7 +82,7 @@ public class GenericStatement
 		** Note: don't reset state since this might be
 		** a recompilation of an already prepared statement.
 		*/ 
-		return prepMinion(lcc, true, (Object[]) null, (SchemaDescriptor) null, false); 
+		return prepare(lcc, false);
 	}
 	public PreparedStatement prepare(LanguageConnectionContext lcc, boolean forMetaData) throws StandardException
 	{
@@ -90,7 +90,52 @@ public class GenericStatement
 		** Note: don't reset state since this might be
 		** a recompilation of an already prepared statement.
 		*/ 
-		return prepMinion(lcc, true, (Object[]) null, (SchemaDescriptor) null, forMetaData); 
+
+        final int depth = lcc.getStatementDepth();
+        while (true) {
+            try {
+                return prepMinion(lcc, true, (Object[]) null,
+                                  (SchemaDescriptor) null, forMetaData);
+            } finally {
+                boolean recompile = false;
+
+                // Check if the statement was invalidated while it was
+                // compiled. If so, the newly compiled plan may not be
+                // up to date anymore, so we recompile the statement
+                // if this happens. Note that this is checked in a finally
+                // block, so we also retry if an exception was thrown. The
+                // exception was probably thrown because of the changes
+                // that invalidated the statement. If not, recompiling
+                // will also fail, and the exception will be exposed to
+                // the caller.
+                //
+                // invalidatedWhileCompiling and isValid are protected by
+                // synchronization on the prepared statement.
+                synchronized (preparedStmt) {
+                    if (preparedStmt.invalidatedWhileCompiling) {
+                        preparedStmt.isValid = false;
+                        preparedStmt.invalidatedWhileCompiling = false;
+                        recompile = true;
+                    }
+                }
+
+                if (recompile) {
+                    // A new statement context is pushed while compiling.
+                    // Typically, this context is popped by an error
+                    // handler at a higher level. But since we retry the
+                    // compilation, the error handler won't be invoked, so
+                    // the stack must be reset to its original state first.
+                    while (lcc.getStatementDepth() > depth) {
+                        lcc.popStatementContext(
+                                lcc.getStatementContext(), null);
+                    }
+
+                    // Don't return yet. The statement was invalidated, so
+                    // we must retry the compilation.
+                    continue;
+                }
+            }
+        }
 	}
 
 	private PreparedStatement prepMinion(LanguageConnectionContext lcc, boolean cacheMe, Object[] paramDefaults,
