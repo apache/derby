@@ -195,8 +195,6 @@ class UpgradeRun extends UpgradeClassLoader
                 	suite.addTest(Changes10_6.suite(phase));
                 if (oldMinor < 7)
                 	suite.addTest(Changes10_7.suite(phase));
-                if ( lessThan( version, new int[] { 10, 8, 1, 6 } ) )
-                { suite.addTest(Changes10_8_2.suite(phase)); }
                 if (oldMinor < 9)
                 	suite.addTest(Changes10_9.suite(phase));
             }
