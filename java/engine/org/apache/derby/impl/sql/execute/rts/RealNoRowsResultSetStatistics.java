@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
+import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.impl.sql.catalog.XPLAINResultSetDescriptor;
 import org.apache.derby.impl.sql.catalog.XPLAINResultSetTimingsDescriptor;

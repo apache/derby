@@ -106,7 +106,7 @@ import org.apache.derby.impl.sql.execute.rts.RealUnionResultSetStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealUpdateResultSetStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealVTIStatistics;
 import org.apache.derby.impl.sql.execute.rts.RealRowCountStatistics;
-import org.apache.derby.impl.sql.execute.rts.ResultSetStatistics;
+import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
 import org.apache.derby.impl.sql.execute.rts.RunTimeStatisticsImpl;
 import org.apache.derby.impl.sql.execute.rts.RealWindowResultSetStatistics;
 

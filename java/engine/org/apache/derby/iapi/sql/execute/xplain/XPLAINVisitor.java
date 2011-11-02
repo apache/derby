@@ -25,7 +25,7 @@ import java.sql.SQLException;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
-import org.apache.derby.impl.sql.execute.rts.ResultSetStatistics;
+import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
 /**
  * Classes, which implement this interface have the ability to explain the
  * gathered ResultSetStatistics. A Visitor pattern is used to traverse the 

@@ -28,7 +28,6 @@ import org.apache.derby.iapi.sql.ResultSet;
 
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 
-import org.apache.derby.impl.sql.execute.rts.ResultSetStatistics;
 
 /**
  * ResultSetStatisticsFactory provides a wrapper around all of

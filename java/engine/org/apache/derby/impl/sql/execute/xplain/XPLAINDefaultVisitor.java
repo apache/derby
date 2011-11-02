@@ -30,7 +30,7 @@ import org.apache.derby.iapi.sql.conn.ConnectionUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
-import org.apache.derby.impl.sql.execute.rts.ResultSetStatistics;
+import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
 /**
  * This is the Default Visitor which produces explain information like the 
  * old getRuntimeStatistics() approach. <br/>

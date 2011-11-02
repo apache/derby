@@ -45,7 +45,7 @@ import org.apache.derby.impl.sql.catalog.XPLAINStatementDescriptor;
 import org.apache.derby.impl.sql.catalog.XPLAINStatementTimingsDescriptor;
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 import org.apache.derby.iapi.sql.execute.xplain.XPLAINVisitor;
-import org.apache.derby.impl.sql.execute.rts.ResultSetStatistics;
+import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
 
 /**
  * This is the Visitor, which explains the information and stores the statistics in 

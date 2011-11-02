@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.sql.execute.rts;
 
+import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.Formatable;
 

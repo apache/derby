@@ -36,7 +36,7 @@ import org.apache.derby.iapi.sql.execute.ResultSetStatisticsFactory;
 
 import org.apache.derby.iapi.sql.execute.RunTimeStatistics;
 
-import org.apache.derby.impl.sql.execute.rts.ResultSetStatistics;
+import org.apache.derby.iapi.sql.execute.ResultSetStatistics;
 
 import java.util.Properties;
 
