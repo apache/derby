@@ -24,6 +24,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.db.Database;
 import org.apache.derby.iapi.error.StandardException;
@@ -896,5 +897,14 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 
     public void createIndexStatsRefresher(Database db, String dbName) {
         // Do nothing
+    }
+
+    public DependableFinder getDependableFinder(int formatId) {
+        return null;
+    }
+
+    public DependableFinder getColumnDependableFinder(
+            int formatId, byte[] columnBitMap) {
+        return null;
     }
 }

@@ -21,17 +21,8 @@
 
 package org.apache.derby.iapi.sql.dictionary;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-import org.apache.derby.iapi.error.StandardException;
-
 import	org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-
-import org.apache.derby.iapi.reference.SQLState;
-
-// is it OK to do this?
-import org.apache.derby.impl.sql.catalog.DDdependableFinder;
-import org.apache.derby.impl.sql.catalog.DDColumnDependableFinder;
 
 /**
  * This is the superclass of all Descriptors. Users of DataDictionary should use
@@ -98,15 +89,15 @@ public class TupleDescriptor
 	//////////////////////////////////////////////////////////////////
 
 
-	public DependableFinder getDependableFinder(int formatId)
+	DependableFinder getDependableFinder(int formatId)
 	{
-		return	new DDdependableFinder(formatId);
+		return dataDictionary.getDependableFinder(formatId);
 	}
 
 	DependableFinder getColumnDependableFinder(int formatId, byte[]
 													  columnBitMap)
 	{
-		return new DDColumnDependableFinder(formatId, columnBitMap);
+		return dataDictionary.getColumnDependableFinder(formatId, columnBitMap);
 	}
 	
 	/** Each descriptor must identify itself with its type; i.e index, check

@@ -26,9 +26,7 @@ import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.impl.sql.catalog.DDdependableFinder;
 
 /**
  * This class describes a row in the SYS.SYSTABLEPERMS system table, which
@@ -183,6 +181,7 @@ public class TablePermsDescriptor extends PermissionsDescriptor
 	 */
 	public DependableFinder getDependableFinder() 
 	{
-	    return	new DDdependableFinder(StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID);
+        return getDependableFinder(
+                StoredFormatIds.TABLE_PERMISSION_FINDER_V01_ID);
 	}
 }

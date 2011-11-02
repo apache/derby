@@ -139,6 +139,7 @@ import org.apache.derby.impl.services.locks.Timeout;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 import org.apache.derby.catalog.AliasInfo;
 import org.apache.derby.catalog.DefaultInfo;
+import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.catalog.types.BaseTypeIdImpl;
@@ -13907,5 +13908,14 @@ public final class	DataDictionaryImpl
                    Monitor.getStream(), indexStatsUpdateLogging,
                    indexStatsUpdateTracing, db, authorizationDatabaseOwner,
                    dbName);
+    }
+
+    public DependableFinder getDependableFinder(int formatId) {
+        return new DDdependableFinder(formatId);
+    }
+
+    public DependableFinder getColumnDependableFinder(
+            int formatId, byte[] columnBitMap) {
+        return new DDColumnDependableFinder(formatId, columnBitMap);
     }
 }

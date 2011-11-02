@@ -27,8 +27,6 @@ import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.impl.sql.catalog.DDdependableFinder;
 
 /**
  * This class describes rows in the SYS.SYSROUTINEPERMS system table, which keeps track of the routine
@@ -163,6 +161,7 @@ public class RoutinePermsDescriptor extends PermissionsDescriptor
 	 */
 	public DependableFinder getDependableFinder() 
 	{
-	    return	new DDdependableFinder(StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID);
+        return getDependableFinder(
+                StoredFormatIds.ROUTINE_PERMISSION_FINDER_V01_ID);
 	}
 }

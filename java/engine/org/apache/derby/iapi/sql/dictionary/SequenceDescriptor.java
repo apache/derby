@@ -34,7 +34,6 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.impl.sql.catalog.DDdependableFinder;
 
 /**
  * This class is used by rows in the SYS.SYSSEQUENCES system table.
@@ -305,7 +304,8 @@ public class SequenceDescriptor extends TupleDescriptor
      * @see Dependable#getDependableFinder
      */
     public DependableFinder getDependableFinder() {
-        return new DDdependableFinder(StoredFormatIds.SEQUENCE_DESCRIPTOR_FINDER_V01_ID);
+        return getDependableFinder(
+                StoredFormatIds.SEQUENCE_DESCRIPTOR_FINDER_V01_ID);
     }
 
     /*Accessor methods*/

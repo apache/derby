@@ -30,7 +30,6 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.Provider;
 import org.apache.derby.iapi.store.access.TransactionController;
-import org.apache.derby.impl.sql.catalog.DDdependableFinder;
 
 /**
  * This class is used by rows in the SYS.SYSROLES system table.
@@ -209,6 +208,6 @@ public class RoleGrantDescriptor extends TupleDescriptor
      */
     public DependableFinder getDependableFinder()
     {
-        return new DDdependableFinder(StoredFormatIds.ROLE_GRANT_FINDER_V01_ID);
+        return getDependableFinder(StoredFormatIds.ROLE_GRANT_FINDER_V01_ID);
     }
 }

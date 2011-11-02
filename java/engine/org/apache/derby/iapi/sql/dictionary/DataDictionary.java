@@ -35,6 +35,7 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.RowLocation;
 
+import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
@@ -2241,4 +2242,25 @@ public interface DataDictionary
      * system resources and potentially cause side-effects due to the errors.
      */
     public void disableIndexStatsRefresher();
+
+    /**
+     * Get a {@code DependableFinder} instance.
+     *
+     * @param formatId the format id
+     * @return an instance capable of finding {@code Dependable}s with the
+     * specified format id
+     */
+    public DependableFinder getDependableFinder(int formatId);
+
+    /**
+     * Get a {@code DependableFinder} instance for referenced columns in
+     * a table.
+     *
+     * @param formatId the format id
+     * @param columnBitMap byte array encoding the bitmap of referenced columns
+     * @return an instance capable of finding {@code Dependable}s with the
+     * specified format id
+     */
+    public DependableFinder getColumnDependableFinder(
+            int formatId, byte[] columnBitMap);
 }

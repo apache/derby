@@ -29,8 +29,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.impl.sql.catalog.DDdependableFinder;
-import org.apache.derby.iapi.sql.dictionary.PrivilegedSQLObject;
 
 /**
  * This class describes rows in the SYS.SYSPERMS system table, which keeps track of the
@@ -209,7 +207,8 @@ public class PermDescriptor extends PermissionsDescriptor
      * @see Dependable#getDependableFinder
      */
     public DependableFinder getDependableFinder() {
-        return new DDdependableFinder(StoredFormatIds.PERM_DESCRIPTOR_FINDER_V01_ID);
+        return getDependableFinder(
+                StoredFormatIds.PERM_DESCRIPTOR_FINDER_V01_ID);
     }
 
 }
