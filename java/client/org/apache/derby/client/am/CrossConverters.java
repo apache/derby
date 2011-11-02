@@ -929,6 +929,12 @@ final class CrossConverters {
             return setObject(targetType, ((Short) source).shortValue());
         } else if (source instanceof Byte) {
             return setObject(targetType, ((Byte) source).byteValue());
+        } else if (source instanceof java.math.BigInteger) {
+            return setObject(targetType, ((java.math.BigInteger) source).longValue() );
+        } else if (source instanceof java.util.Date) {
+            return setObject(targetType, new java.sql.Timestamp(  ((java.util.Date) source).getTime() ) );
+        } else if (source instanceof java.util.Calendar) {
+            return setObject(targetType, new java.sql.Timestamp(  ((java.util.Calendar) source).getTime().getTime() ) );
         } else {
             throw new SqlException(agent_.logWriter_, 
                 new ClientMessageId (SQLState.LANG_DATA_TYPE_SET_MISMATCH),

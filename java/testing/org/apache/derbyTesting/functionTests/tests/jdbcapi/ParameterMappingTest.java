@@ -1,4 +1,7 @@
 /**
+ *
+ * Derby - Class org.apache.derbyTesting.functionTests.tests.jdbcapi.ParameterMappingTest
+ *
  * 
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -59,6 +62,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
     private static final String BAD_TYPE = "42962";
     private static final String UTF8 = "UTF-8";
+    private static final long BIG_INTEGER_SEED = 98L;
+    private static final long DATE_SEED = 50L;
+    private static final long CALENDAR_SEED = 60L;
+    private static final String DATE_METHOD_NAME = "setObject(java.util.Date)";
+    private static final String CALENDAR_METHOD_NAME = "setObject(java.util.Calendar)";
 
     static {
         if (JDBC.vmSupportsJSR169())
@@ -274,6 +282,12 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
 /*13 Byte */            { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
 /*14 Short */           { X, X, X, X, X, X, X, X, X, X, X, X, X, X, _, _, _, _, _, _, _, _},
+
+//java.math.BigInteger, java.util.Date and java.util.Calendar were added to this table in JDBC 4.1. (See DERBY-5488.)
+
+/*15 java.math.BigInteger */            { _, _, _, X, _, _, _, _, _, _, _, X, X, X, _, _, _, _, _, _, _, _},
+/*16 java.util.Date */       { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
+/*17 java.util.Calendar */       { _, _, _, _, _, _, _, _, _, _, _, X, X, X, _, _, _, X, X, X, _, _},
         };
 
      
@@ -907,6 +921,66 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * Test the new object mappings allowed by setObject() in JDBC 4.1. See
+     * DERBY-5488.
+     */
+    public  void    test_jdbc4_1_objectMappings() throws  Exception
+    {
+        Connection conn = getConnection();
+
+        Statement s = conn.createStatement();
+        try {
+            s.execute( "drop table t_object_map" );
+        } catch (SQLException seq) {}
+        s.execute( "create table t_object_map( a int, b timestamp, c bigint )" );
+
+        PreparedStatement   ps = conn.prepareStatement
+            ( "insert into t_object_map( a, b, c ) values ( ?, ?, ? )" );
+
+        // insert objects that are now supported
+        ps.setInt( 1, 1 );
+        ps.setObject( 2, new java.util.Date( DATE_SEED ) );
+        ps.setObject( 3, null );
+        ps.executeUpdate();
+
+        ps.setInt( 1, 2 );
+        ps.setObject( 2, makeCalendar( CALENDAR_SEED ) );
+        ps.setObject( 3, null );
+        ps.executeUpdate();
+
+        ps.setInt( 1, 3 );
+        ps.setObject( 2, null );
+        ps.setObject( 3, new BigInteger( Long.toString( BIG_INTEGER_SEED ) ) );
+        ps.executeUpdate();
+
+        ps.close();
+
+        // verify that the correct values were inserted
+
+        ps = conn.prepareStatement( "select * from t_object_map order by a" );
+        ResultSet   rs = ps.executeQuery();
+
+        rs.next();
+        assertEquals( DATE_SEED, rs.getTimestamp( 2 ).getTime() );
+
+        rs.next();
+        assertEquals( CALENDAR_SEED, rs.getTimestamp( 2 ).getTime() );
+
+        rs.next();
+        assertEquals( BIG_INTEGER_SEED, rs.getLong( 3 ) );
+
+        rs.close();
+        ps.close();
+    }
+    private static  java.util.Calendar  makeCalendar( long calendarSeed )
+    {
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        calendar.setTime( new java.util.Date( calendarSeed ) );
+
+        return calendar;
+    }
+    
     /*
      * (non-Javadoc)
      * 
@@ -3123,6 +3197,11 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rsc.close();
             setXXX_setObject(s, psi, psq, type, tester, "java.sql.Clob", 12);
         }
+
+        // Test setObject with java.util.Date (DERBY-5488)
+        setXXX_setObject(s, psi, psq, type, new BigInteger( Long.toString( BIG_INTEGER_SEED ) ), "java.math.BigInteger", 15);
+        setXXX_setObject(s, psi, psq, type, new java.util.Date( DATE_SEED ), "java.util.Date", 16);
+        setXXX_setObject(s, psi, psq, type, makeCalendar( CALENDAR_SEED ), "java.util.Calendar", 17);
     }
 
     /**
@@ -3489,7 +3568,20 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             if (wn)
                 assertNull(d);
             else
-                assertEquals(Date.valueOf("2004-02-14"), d);
+            {
+                if ( DATE_METHOD_NAME.equals(method) )
+                {
+                    assertEquals( (new java.sql.Date( DATE_SEED )).toString(), d.toString() );
+                }
+                else if ( CALENDAR_METHOD_NAME.equals(method) )
+                {
+                    assertEquals( (new java.sql.Date( CALENDAR_SEED )).toString(), d.toString() );
+                }
+                else
+                {
+                    assertEquals(Date.valueOf("2004-02-14"), d);
+                }
+            }
             return true;
         }
         case Types.TIME: {
@@ -3498,7 +3590,20 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             if (wn)
                 assertNull(t);
             else
-                assertEquals(Time.valueOf("00:00:00"), t);
+            {
+                if ( DATE_METHOD_NAME.equals(method) )
+                {
+                    assertEquals( (new java.sql.Time( DATE_SEED )).toString(), t.toString() );
+                }
+                else if ( CALENDAR_METHOD_NAME.equals(method) )
+                {
+                    assertEquals( (new java.sql.Time( CALENDAR_SEED )).toString(), t.toString() );
+                }
+                else
+                {
+                    assertEquals(Time.valueOf("00:00:00"), t);
+                }
+            }
             return true;
 
         }
@@ -3508,7 +3613,20 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             if (wn)
                 assertNull(rs.getTimestamp(1));
             else
-                assertEquals(Timestamp.valueOf("2004-02-14 00:00:00.0"), ts);
+            {
+                if ( DATE_METHOD_NAME.equals(method) )
+                {
+                    assertEquals( (new java.sql.Timestamp( DATE_SEED )).toString(), ts.toString() );
+                }
+                else if ( CALENDAR_METHOD_NAME.equals(method) )
+                {
+                    assertEquals( (new java.sql.Timestamp( CALENDAR_SEED )).toString(), ts.toString() );
+                }
+                else
+                {
+                    assertEquals(Timestamp.valueOf("2004-02-14 00:00:00.0"), ts);
+                }
+            }
             return true;
         }
         case Types.CLOB: {
@@ -3589,6 +3707,10 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         else if ("setObject(java.lang.Float)".equals(method) ||
                 "setObject(java.lang.Double)".equals(method))
                assertEquals("98.0",s);
+        else if ( DATE_METHOD_NAME.equals(method))
+            assertEquals( ( new java.sql.Timestamp( DATE_SEED ) ).toString(), s );
+        else if ( CALENDAR_METHOD_NAME.equals(method))
+            assertEquals( ( new java.sql.Timestamp( CALENDAR_SEED ) ).toString(), s );
         else
             assertEquals("98",s.trim());
     }

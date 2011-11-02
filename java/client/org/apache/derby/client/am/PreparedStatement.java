@@ -1404,6 +1404,12 @@ public class PreparedStatement extends Statement
                     setRef(parameterIndex, (java.sql.Ref) x);
                 } else if (x instanceof Short) {
                     setShort(parameterIndex, ((Short) x).shortValue());
+                } else if (x instanceof java.math.BigInteger) {
+                    setLong(parameterIndex, ((java.math.BigInteger) x).longValue() );
+                } else if (x instanceof java.util.Date) {
+                    setTimestamp(parameterIndex, new Timestamp(  ((java.util.Date) x).getTime() ) );
+                } else if (x instanceof java.util.Calendar) {
+                    setTimestamp(parameterIndex, new Timestamp(  ((java.util.Calendar) x).getTime().getTime() ) );
                 } else if (x instanceof Byte) {
                     setByte(parameterIndex, ((Byte) x).byteValue());
                 } else {

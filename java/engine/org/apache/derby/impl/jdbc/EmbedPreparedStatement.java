@@ -1313,6 +1313,18 @@ public abstract class EmbedPreparedStatement
 			setClob(parameterIndex, (Clob) x);
 			return;
 		}
+		if (x instanceof java.math.BigInteger) {
+			setLong(parameterIndex, ((java.math.BigInteger) x).longValue() );
+			return;
+		}
+		if (x instanceof java.util.Date) {
+			setTimestamp(parameterIndex, new Timestamp(  ((java.util.Date) x).getTime() ) );
+			return;
+		}
+		if (x instanceof java.util.Calendar) {
+			setTimestamp(parameterIndex, new Timestamp(  ((java.util.Calendar) x).getTime().getTime() ) );
+			return;
+		}
 
 		if (setObjectConvert(parameterIndex, x))
 			return;
