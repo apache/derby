@@ -21,14 +21,12 @@
 
 package org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.impl.sql.compile.QueryTreeNode;
-import org.apache.derby.iapi.sql.compile.Parser;
-import org.apache.derby.iapi.sql.Statement;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Parser;
+import org.apache.derby.iapi.sql.compile.Visitable;
 
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.services.sanity.SanityManager;
 
 public class ParserImpl implements Parser
 {
@@ -73,7 +71,7 @@ public class ParserImpl implements Parser
 		this.cc = cc;
 	}
 
-	public StatementNode parseStatement(String statementSQLText) 
+	public Visitable parseStatement(String statementSQLText)
 		throws StandardException
 	{
 		return parseStatement(statementSQLText, (Object[])null);
@@ -126,7 +124,7 @@ public class ParserImpl implements Parser
 	 * @exception StandardException	Thrown on error
 	 */
 
-	public StatementNode parseStatement(String statementSQLText, Object[] paramDefaults) 
+	public Visitable parseStatement(String statementSQLText, Object[] paramDefaults)
 		throws StandardException
 	{
 

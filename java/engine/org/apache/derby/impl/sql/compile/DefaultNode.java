@@ -21,8 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -30,19 +28,15 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
+import org.apache.derby.iapi.sql.compile.Visitable;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
-import org.apache.derby.iapi.types.TypeId;
-
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.error.StandardException;
-
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 
 import org.apache.derby.catalog.types.DefaultInfoImpl;
 
@@ -256,7 +250,7 @@ public  class DefaultNode extends ValueNode
 		/* Finally, we can call the parser */
 		// Since this is always nested inside another SQL statement, so topLevel flag
 		// should be false
-		StatementNode qt = p.parseStatement(values);
+		Visitable qt = p.parseStatement(values);
 		if (SanityManager.DEBUG)
 		{
 			if (! (qt instanceof CursorNode))

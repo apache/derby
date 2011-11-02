@@ -23,12 +23,6 @@ package org.apache.derby.iapi.sql.compile;
 
 import org.apache.derby.iapi.error.StandardException;
 
-/* Strictly speaking we shouldn't import classes under the impl hierarchy here
- * but this is work in progress.
- * manish - Wed Mar 28 13:05:19 PST 2001
- */
-import org.apache.derby.impl.sql.compile.StatementNode;
-
 /**
  * The Parser interface is intended to work with Jack-generated parsers (now JavaCC).
  * We will specify "STATIC=false" when building Jack parsers - this specifies
@@ -56,12 +50,12 @@ public interface Parser
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public StatementNode	parseStatement(String statementSQLText,
+	public Visitable parseStatement(String statementSQLText,
 		Object[] paramDefaults) 
 		throws StandardException;
 
 
-	public StatementNode parseStatement(String statementSQLText)
+	public Visitable parseStatement(String statementSQLText)
 		throws StandardException;
 
 	/**

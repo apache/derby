@@ -21,10 +21,8 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import java.lang.reflect.Modifier;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.HashSet;
 import java.util.Vector;
 
 import org.apache.derby.catalog.DefaultInfo;
@@ -546,7 +544,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		/* Finally, we can call the parser */
 		// Since this is always nested inside another SQL statement, so topLevel flag
 		// should be false
-		StatementNode qt = p.parseStatement(select);
+		Visitable qt = p.parseStatement(select);
 		if (SanityManager.DEBUG)
 		{
 			if (! (qt instanceof CursorNode))
@@ -1394,7 +1392,7 @@ abstract class DMLModStatementNode extends DMLStatementNode
 		/* Finally, we can call the parser */
 		// Since this is always nested inside another SQL statement, so topLevel flag
 		// should be false
-		StatementNode qt = p.parseStatement(select);
+		Visitable qt = p.parseStatement(select);
 		if (SanityManager.DEBUG)
 		{
 			if (! (qt instanceof CursorNode))

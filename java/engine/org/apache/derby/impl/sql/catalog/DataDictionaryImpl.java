@@ -27,6 +27,7 @@ import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.Limits;
+import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.conn.Authorizer;
 
 import org.apache.derby.iapi.sql.dictionary.AliasDescriptor;
@@ -72,9 +73,6 @@ import org.apache.derby.iapi.sql.depend.DependencyManager;
 
 import org.apache.derby.impl.sql.compile.CollectNodesVisitor;
 import org.apache.derby.impl.sql.compile.ColumnReference;
-import org.apache.derby.impl.sql.compile.FromBaseTable;
-import org.apache.derby.impl.sql.compile.QueryTreeNode;
-import org.apache.derby.impl.sql.compile.StatementNode;
 import org.apache.derby.impl.sql.compile.TableName;
 import org.apache.derby.impl.sql.depend.BasicDependencyManager;
 
@@ -4750,7 +4748,7 @@ public final class	DataDictionaryImpl
 	 * @throws StandardException
 	 */
 	public String getTriggerActionString(
-			StatementNode actionStmt,
+			Visitable actionStmt,
 			String oldReferencingName,
 			String newReferencingName,
 			String triggerDefinition,

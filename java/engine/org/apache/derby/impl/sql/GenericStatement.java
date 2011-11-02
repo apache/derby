@@ -327,7 +327,8 @@ public class GenericStatement
 
 				//Only top level statements go through here, nested statement
 				//will invoke this method from other places
-				StatementNode qt = p.parseStatement(statementText, paramDefaults);
+				StatementNode qt = (StatementNode)
+                        p.parseStatement(statementText, paramDefaults);
 
 				parseTime = getCurrentTimeMillis(lcc);
 

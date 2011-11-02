@@ -21,8 +21,6 @@
 
 package	org.apache.derby.impl.sql.compile;
 
-import org.apache.derby.iapi.services.context.ContextManager;
-
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.CostEstimate;
@@ -34,7 +32,6 @@ import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
-import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
@@ -44,35 +41,22 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
-import org.apache.derby.iapi.sql.execute.ExecutionContext;
-
-import org.apache.derby.iapi.sql.Activation;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.sql.ResultColumnDescriptor;
 import org.apache.derby.iapi.sql.ResultDescription;
-import org.apache.derby.iapi.sql.ResultSet;
-
-import org.apache.derby.iapi.types.TypeId;
 
 import org.apache.derby.iapi.store.access.TransactionController;
-
-import org.apache.derby.iapi.services.loader.GeneratedMethod;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.ClassName;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 
-import org.apache.derby.impl.sql.compile.ActivationClassBuilder;
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
-
 import org.apache.derby.iapi.util.JBitSet;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import org.apache.derby.catalog.types.DefaultInfoImpl;
 
-import java.util.Properties;
 import java.util.Vector;
 import java.util.Set;
 
@@ -1242,7 +1226,7 @@ public abstract class ResultSetNode extends QueryTreeNode
 		/* Finally, we can call the parser */
 		// Since this is always nested inside another SQL statement, so topLevel flag
 		// should be false
-		StatementNode qt = p.parseStatement(values);
+		Visitable qt = p.parseStatement(values);
 		if (SanityManager.DEBUG)
 		{
 			if (! (qt instanceof CursorNode))

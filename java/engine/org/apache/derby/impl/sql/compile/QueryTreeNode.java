@@ -37,7 +37,6 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
 import org.apache.derby.iapi.services.context.ContextManager;
-import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.loader.ClassFactory;
 import org.apache.derby.iapi.services.loader.ClassInspector;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -783,7 +782,7 @@ public abstract class QueryTreeNode implements Visitable
 		try
 		{
 			Parser p = newCC.getParser();
-			return p.parseStatement(sql);
+			return (StatementNode) p.parseStatement(sql);
 		}
 
 		finally

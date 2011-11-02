@@ -41,7 +41,7 @@ import org.apache.derby.iapi.services.context.ContextService;
 
 import org.apache.derby.iapi.sql.compile.CompilerContext;
 import org.apache.derby.iapi.sql.compile.Parser;
-import org.apache.derby.impl.sql.compile.StatementNode;
+import org.apache.derby.iapi.sql.compile.Visitable;
 
 import java.io.ObjectOutput;
 import java.io.ObjectInput;
@@ -370,7 +370,7 @@ public class TriggerDescriptor extends TupleDescriptor
 			compSchema = getDataDictionary().getSchemaDescriptor(triggerSchemaId, null);
 			CompilerContext newCC = lcc.pushCompilerContext(compSchema);
 			Parser	pa = newCC.getParser();
-			StatementNode stmtnode = (StatementNode)pa.parseStatement(triggerDefinition);
+			Visitable stmtnode = pa.parseStatement(triggerDefinition);
 			lcc.popCompilerContext(newCC);
 					
 			actionSPS.setText(getDataDictionary().getTriggerActionString(stmtnode, 

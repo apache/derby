@@ -28,6 +28,7 @@ import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.types.DataValueFactory;
 import org.apache.derby.iapi.services.daemon.IndexStatisticsDaemon;
+import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.error.StandardException;
@@ -37,8 +38,6 @@ import org.apache.derby.iapi.types.RowLocation;
 import org.apache.derby.catalog.TypeDescriptor;
 import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
-
-import org.apache.derby.impl.sql.compile.StatementNode;
 
 import java.sql.Types;
 import java.util.List;
@@ -1290,7 +1289,7 @@ public interface DataDictionary
 	 * @throws StandardException
 	 */
 	public String getTriggerActionString(
-			StatementNode actionStmt,
+			Visitable actionStmt,
 			String oldReferencingName,
 			String newReferencingName,
 			String triggerDefinition,
