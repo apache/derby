@@ -91,32 +91,6 @@ public abstract class EmbedCallableStatement20
 	//
 	/////////////////////////////////////////////////////////////////////////
 
-    /**
-     * JDBC 2.0
-     *
-     * Get the value of a NUMERIC parameter as a java.math.BigDecimal object.
-     *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
-     * @return the parameter value (full precision); if the value is SQL NULL, 
-     * the result is null 
-     * @exception SQLException if a database-access error occurs.
-     */
-    public BigDecimal getBigDecimal(int parameterIndex) throws SQLException 
-	{
-		checkStatus();
-		try {
-			DataValueDescriptor dvd = getParms().getParameterForGet(parameterIndex-1);
-			if (wasNull = dvd.isNull())
-				return null;
-			
-			return org.apache.derby.iapi.types.SQLDecimal.getBigDecimal(dvd);
-			
-		} catch (StandardException e)
-		{
-			throw EmbedResultSet.noStateChangeException(e);
-		}
-	}
-
 
     /**
      * JDBC 2.0
@@ -1030,58 +1004,6 @@ public abstract class EmbedCallableStatement20
     throws SQLException
 	{
 		throw Util.notImplemented();
-	}
-
-	/*
-	** Methods using BigDecimal, moved out of EmbedPreparedStatement
-	** to allow that class to support JSR169.
-	*/
-	/**
-     * Set a parameter to a java.lang.BigDecimal value.  
-     * The driver converts this to a SQL NUMERIC value when
-     * it sends it to the database.
-     *
-     * @param parameterIndex the first parameter is 1, the second is 2, ...
-     * @param x the parameter value
-	 * @exception SQLException thrown on failure.
-     */
-    public final void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
-		checkStatus();
-		try {
-			/* JDBC is one-based, DBMS is zero-based */
-			getParms().getParameterForSet(parameterIndex - 1).setBigDecimal(x);
-
-		} catch (Throwable t) {
-			throw EmbedResultSet.noStateChangeException(t);
-		}
-	}
-    /**
-	 * @see CallableStatement#getBigDecimal
-     * @exception SQLException NoOutputParameters thrown.
-     * @deprecated
-     */
-    public final BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException
-	{
-    	BigDecimal v = getBigDecimal(parameterIndex);
-    	if (v != null)
-    		v = v.setScale(scale, BigDecimal.ROUND_HALF_DOWN);
-    	return v;
-	}
-	/**
-		Allow explict setObject conversions by sub-classes for classes
-		not supported by this variant. In this case handle BigDecimal.
-		@return true if the object was set successfully, false if no valid
-		conversion exists.
-
-		@exception SQLException value could not be set.
-	*/
-	boolean setObjectConvert(int parameterIndex, Object x) throws SQLException
-	{
-		if (x instanceof BigDecimal) {
-			setBigDecimal(parameterIndex, (BigDecimal) x);
-			return true;
-		}
-		return false;
 	}
 
     /////////////////////////////////////////////////////////////////////////

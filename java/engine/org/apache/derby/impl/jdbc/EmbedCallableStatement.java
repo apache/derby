@@ -31,6 +31,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
+import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -344,6 +345,49 @@ public abstract class EmbedCallableStatement extends EmbedPreparedStatement
 			throw EmbedResultSet.noStateChangeException(e);
 		}
 
+	}
+
+	/*
+	** Methods using BigDecimal, moved back into EmbedCallableStatement
+    ** because our small device implementation now requires CDC/FP 1.1.
+	*/
+    /**
+     * JDBC 2.0
+     *
+     * Get the value of a NUMERIC parameter as a java.math.BigDecimal object.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @return the parameter value (full precision); if the value is SQL NULL, 
+     * the result is null 
+     * @exception SQLException if a database-access error occurs.
+     */
+    public final BigDecimal getBigDecimal(int parameterIndex) throws SQLException 
+	{
+		checkStatus();
+		try {
+			DataValueDescriptor dvd = getParms().getParameterForGet(parameterIndex-1);
+			if (wasNull = dvd.isNull())
+				return null;
+			
+			return org.apache.derby.iapi.types.SQLDecimal.getBigDecimal(dvd);
+			
+		} catch (StandardException e)
+		{
+			throw EmbedResultSet.noStateChangeException(e);
+		}
+	}
+
+    /**
+	 * @see CallableStatement#getBigDecimal
+     * @exception SQLException NoOutputParameters thrown.
+     * @deprecated
+     */
+    public final BigDecimal getBigDecimal(int parameterIndex, int scale) throws SQLException
+	{
+    	BigDecimal v = getBigDecimal(parameterIndex);
+    	if (v != null)
+    		v = v.setScale(scale, BigDecimal.ROUND_HALF_DOWN);
+    	return v;
 	}
 
     /**

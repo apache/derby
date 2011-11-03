@@ -40,6 +40,8 @@ import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.reference.JDBC40Translation;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Vector;
 
@@ -442,6 +444,31 @@ public abstract class EmbedPreparedStatement
 			throw EmbedResultSet.noStateChangeException(t);
 		}
 
+	}
+
+	/*
+	** Methods using BigDecimal, moved back into EmbedPreparedStatement
+	** since our small device implementation now requires CDC/FP 1.1, which
+    ** supports BigDecimal.
+	*/
+	/**
+     * Set a parameter to a java.lang.BigDecimal value.  
+     * The driver converts this to a SQL NUMERIC value when
+     * it sends it to the database.
+     *
+     * @param parameterIndex the first parameter is 1, the second is 2, ...
+     * @param x the parameter value
+	 * @exception SQLException thrown on failure.
+     */
+    public final void setBigDecimal(int parameterIndex, BigDecimal x) throws SQLException {
+		checkStatus();
+		try {
+			/* JDBC is one-based, DBMS is zero-based */
+			getParms().getParameterForSet(parameterIndex - 1).setBigDecimal(x);
+
+		} catch (Throwable t) {
+			throw EmbedResultSet.noStateChangeException(t);
+		}
 	}
 
     /**
@@ -1321,28 +1348,16 @@ public abstract class EmbedPreparedStatement
 			setTimestamp(parameterIndex, new Timestamp(  ((java.util.Calendar) x).getTime().getTime() ) );
 			return;
 		}
-
-		if (setObjectConvert(parameterIndex, x))
+		if (x instanceof BigDecimal) {
+			setBigDecimal(parameterIndex, (BigDecimal) x);
 			return;
+		}
+		if (x instanceof BigInteger) {
+			setBigDecimal(parameterIndex, new BigDecimal( (BigInteger) x ) );
+			return;
+        }
 
-		
 		throw dataTypeConversion(parameterIndex, x.getClass().getName());
-
-	}
-
-	/**
-		Allow explict setObject conversions by sub-classes for classes
-		not supported by this variant. E.g. BigDecimal
-		This top-level implementation always returns false.
-
-		@return true if the object was set successfully, false if no valid
-		conversion exists.
-
-		@exception SQLException value could not be set.
-	*/
-	boolean setObjectConvert(int parameterIndex, Object x) throws SQLException
-	{
-		return false;
 	}
 
     /**

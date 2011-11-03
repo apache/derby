@@ -21,6 +21,7 @@
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -351,6 +352,16 @@ public class CallableTest extends BaseJDBCTestCase {
         assertEquals("OUT float" , (float) 6.0, cs.getFloat(10), .0001);
         assertEquals("OUT double" , 7.0, cs.getDouble(11), .0001);
         assertDecimalSameValue("OUT decimal", "88.88", cs.getBigDecimal(12));
+
+        // test that setObject() does the right thing for BigDecimal. see derby-5488.
+        cs.setObject(3, new BigDecimal( "10" ) );
+        cs.execute();
+        assertEquals("OUT long" , 10, cs.getLong(9));
+
+        // test that setObject() does the right thing for BigInteger. see derby-5488.
+        cs.setObject(3, new BigInteger( "11" ) );
+        cs.execute();
+        assertEquals("OUT long" , 11, cs.getLong(9));
     }
 
     /**
