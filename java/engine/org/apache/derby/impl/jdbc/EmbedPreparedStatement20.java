@@ -32,6 +32,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import java.io.InputStream;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 import java.sql.SQLException;
 import java.sql.SQLWarning;
@@ -148,6 +149,10 @@ public abstract class EmbedPreparedStatement20
 	{
 		if (x instanceof BigDecimal) {
 			setBigDecimal(parameterIndex, (BigDecimal) x);
+			return true;
+		}
+		else if (x instanceof BigInteger) {
+			setBigDecimal(parameterIndex, new BigDecimal( (BigInteger) x ) );
 			return true;
 		}
 		return false;

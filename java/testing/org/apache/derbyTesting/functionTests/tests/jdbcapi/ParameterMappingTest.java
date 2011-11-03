@@ -41,6 +41,7 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.HashSet;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -68,6 +69,9 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     private static final String DATE_METHOD_NAME = "setObject(java.util.Date)";
     private static final String CALENDAR_METHOD_NAME = "setObject(java.util.Calendar)";
 
+    private static  final   String  WONT_FIT = "22003";
+    private static  final   String  TRUNCATED = "22001";
+        
     static {
         if (JDBC.vmSupportsJSR169())
             HAVE_BIG_DECIMAL = false;
@@ -981,6 +985,115 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         return calendar;
     }
     
+    /**
+     * Test setObject( int, BigInteger ) in JDBC 4.1. See
+     * DERBY-5488.
+     */
+    public  void    testBigInteger() throws  Exception
+    {
+        Connection conn = getConnection();
+
+        Statement s = conn.createStatement();
+        try {
+            s.execute( "drop table t2_object_map" );
+        } catch (SQLException seq) {}
+        s.execute( "create table t2_object_map( smallint_col smallint, int_col int, bigint_col bigint, real_col real, float_col float, double_col double, decimal_col decimal( 31 ), numeric_col numeric( 31 ), char_col char( 10 ), varchar_col varchar( 10 ) )" );
+
+        String[]  allColumns = new String[]
+            {
+                "smallint_col", "int_col", "bigint_col",
+                "real_col", "float_col", "double_col",
+                "decimal_col", "numeric_col",
+                "char_col", "varchar_col"
+            };
+        
+        HashSet smallIntColumns = new HashSet();
+        for ( int i = 0; i < allColumns.length; i++ )
+        {
+            String  colName = allColumns[ i ];
+            if ( colName.endsWith( "int_col" ) ) { smallIntColumns.add( colName ); }
+        }
+
+        HashSet smallCharColumns = new HashSet();
+        for ( int i = 0; i < allColumns.length; i++ )
+        {
+            String  colName = allColumns[ i ];
+            if ( colName.endsWith( "char_col" ) ) { smallCharColumns.add( colName ); }
+        }
+        
+        vetBigInteger
+            (
+             conn,
+             "1",
+             allColumns,
+             new HashSet(),
+             new HashSet()
+             );
+        vetBigInteger
+            (
+             conn,
+             "9223372036854775808", // Long.MAX_VALUE + 1
+             allColumns,
+             smallIntColumns,
+             smallCharColumns
+             );
+        vetBigInteger
+            (
+             conn,
+             "-9223372036854775809", // Long.MIN_VALUE - 1
+             allColumns,
+             smallIntColumns,
+             smallCharColumns
+             );
+    }
+    private void    vetBigInteger
+        (
+         Connection conn,
+         String seed,
+         String[] allColumns,
+         HashSet undersizedIntColumns,
+         HashSet undersizedStringColumns
+         )
+        throws Exception
+    {
+        for ( int i = 0; i < allColumns.length; i++ )
+        {
+            String  columnName = allColumns[ i ];
+            String  errorState = null;
+            if ( undersizedIntColumns.contains( columnName ) ) { errorState = WONT_FIT; }
+            else if ( undersizedStringColumns.contains( columnName ) ) { errorState = TRUNCATED; }
+
+            vetBigInteger( conn, seed, columnName, errorState );
+        }
+    }
+    private void    vetBigInteger
+        (
+         Connection conn,
+         String seed,
+         String columnName,
+         String errorState
+         )
+        throws Exception
+    {
+        PreparedStatement   ps = conn.prepareStatement( "delete from t2_object_map" );
+        ps.executeUpdate();
+        ps.close();
+
+        String  insertText = "insert into t2_object_map( " + columnName + " ) values ( ? )";
+        ps = conn.prepareStatement( insertText );
+
+        try {
+            ps.setObject( 1, new BigInteger( seed ) );
+            ps.executeUpdate();
+
+            if ( errorState != null ) { fail( "Expected '" + insertText + "' to fail for BigInteger( " + seed + " )." ); }
+        }
+        catch (SQLException se )
+        {
+            assertEquals( errorState, se.getSQLState() );
+        }
+    }
+
     /*
      * (non-Javadoc)
      * 

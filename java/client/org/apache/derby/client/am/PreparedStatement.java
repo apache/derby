@@ -1405,7 +1405,7 @@ public class PreparedStatement extends Statement
                 } else if (x instanceof Short) {
                     setShort(parameterIndex, ((Short) x).shortValue());
                 } else if (x instanceof java.math.BigInteger) {
-                    setLong(parameterIndex, ((java.math.BigInteger) x).longValue() );
+                    setBigDecimal(parameterIndex, new java.math.BigDecimal( (java.math.BigInteger) x ) );
                 } else if (x instanceof java.util.Date) {
                     setTimestamp(parameterIndex, new Timestamp(  ((java.util.Date) x).getTime() ) );
                 } else if (x instanceof java.util.Calendar) {

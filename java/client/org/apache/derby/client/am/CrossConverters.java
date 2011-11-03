@@ -930,7 +930,7 @@ final class CrossConverters {
         } else if (source instanceof Byte) {
             return setObject(targetType, ((Byte) source).byteValue());
         } else if (source instanceof java.math.BigInteger) {
-            return setObject(targetType, ((java.math.BigInteger) source).longValue() );
+            return setObject(targetType, new java.math.BigDecimal( (java.math.BigInteger) source ) );
         } else if (source instanceof java.util.Date) {
             return setObject(targetType, new java.sql.Timestamp(  ((java.util.Date) source).getTime() ) );
         } else if (source instanceof java.util.Calendar) {
