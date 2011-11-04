@@ -593,6 +593,16 @@ public abstract class BaseTestCase
                     File.separator + "java";
             }
         }
+
+        // derby-5490. workaround problem if executable name contains spaces
+        if ( vmname.contains( " " ) )
+        {
+            if ( getSystemProperty( "os.name" ).equals( "Mac OS X" ) )
+            {
+                vmname = "java";
+            }
+        }
+        
         return vmname;
     }
 
