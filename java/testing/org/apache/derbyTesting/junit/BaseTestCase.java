@@ -595,7 +595,7 @@ public abstract class BaseTestCase
         }
 
         // derby-5490. workaround problem if executable name contains spaces
-        if ( vmname.contains( " " ) )
+        if ( vmname.indexOf( " " ) >= 0 )
         {
             if ( getSystemProperty( "os.name" ).equals( "Mac OS X" ) )
             {
