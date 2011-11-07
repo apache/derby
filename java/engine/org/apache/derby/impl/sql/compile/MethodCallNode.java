@@ -29,13 +29,9 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-import org.apache.derby.iapi.types.StringDataValue;
 import org.apache.derby.iapi.types.TypeId;
 import org.apache.derby.iapi.types.JSQLType;
 
-import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
-
-import org.apache.derby.iapi.sql.compile.Visitable;
 import org.apache.derby.iapi.sql.compile.Visitor;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
@@ -55,14 +51,13 @@ import org.apache.derby.iapi.store.access.Qualifier;
 
 import org.apache.derby.iapi.util.JBitSet;
 
-import org.apache.derby.impl.sql.compile.ExpressionClassBuilder;
 import org.apache.derby.catalog.types.RoutineAliasInfo;
 
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Member;
 
 import java.sql.ResultSet;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -163,11 +158,11 @@ abstract class MethodCallNode extends JavaValueNode
 	/**
 	 * Add the parameter list
 	 *
-	 * @param parameterList		A Vector of the parameters
+	 * @param parameterList		A list of the parameters
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public void addParms(Vector parameterList) throws StandardException
+	public void addParms(List parameterList) throws StandardException
 	{
 		methodParms = new JavaValueNode[parameterList.size()];
 

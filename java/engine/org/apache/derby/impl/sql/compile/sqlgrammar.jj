@@ -1671,7 +1671,7 @@ public class SQLParser
 	 * Get one of the several types of create alias nodes.
 	 *
 	 * @param aliasName	The name of the alias
-	 * @param fullStaticMethodName	The full path/method name
+	 * @param targetName TableName for target, or the full path/method name
 	 * @param aliasSpecificInfo	 Information specific to the type of alias being created.
 	 * @param aliasType	The type of alias to create
 	 * @param delimitedIdentifier	Whether or not to treat the class name
@@ -1685,24 +1685,47 @@ public class SQLParser
 	StatementNode
 	getCreateAliasNode(
 		Object aliasName,
-		String fullStaticMethodName,
+		Object targetName,
 		Object aliasSpecificInfo,
 		char aliasType,
 		Boolean delimitedIdentifier)
 		throws StandardException
 	{
+        int nodeType = C_NodeTypes.CREATE_ALIAS_NODE;
+        String methodName = null;
 
-		StatementNode aliasNode = (StatementNode) getNodeFactory().getCreateAliasNode
-			(
-				aliasName,
-				fullStaticMethodName,
-				aliasSpecificInfo,
-				aliasType,
-				delimitedIdentifier,
-				getContextManager()
-			);
+        if (
+            (aliasType != AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR) &&
+            (aliasType != AliasInfo.ALIAS_TYPE_UDT_AS_CHAR)
+            )
+        {
+            int lastPeriod;
+            String fullStaticMethodName = (String) targetName;
+            int paren = fullStaticMethodName.indexOf('(');
+            if (paren == -1) {
+                // not a Java signature - split based on last period
+                lastPeriod = fullStaticMethodName.lastIndexOf('.');
+            } else {
+                // a Java signature - split on last period before the '('
+                lastPeriod = fullStaticMethodName.substring(0, paren).lastIndexOf('.');
+            }
+            if (lastPeriod == -1 || lastPeriod == fullStaticMethodName.length()-1) {
+                throw StandardException.newException(SQLState.LANG_INVALID_FULL_STATIC_METHOD_NAME, fullStaticMethodName);
+            }
+            String javaClassName = fullStaticMethodName.substring(0, lastPeriod);
+            methodName = fullStaticMethodName.substring(lastPeriod + 1);
+            targetName = javaClassName;
+        }
 
-		return aliasNode;
+        return (StatementNode) getNodeFactory().getNode(
+            nodeType,
+            aliasName,
+            targetName,
+            methodName,
+            aliasSpecificInfo,
+            new Character(aliasType),
+            delimitedIdentifier,
+            cm );
 	}
 
 	/**
@@ -11085,14 +11108,13 @@ synonymDefinition() throws StandardException :
 		checkVersion(DataDictionary.DD_VERSION_DERBY_10_1,
 			     "CREATE SYNONYM");
 
-		return  (StatementNode) getNodeFactory().getCreateAliasNode
+		return getCreateAliasNode
 			(
 				synonymName,
 				targetName,
 				null,
 				AliasInfo.ALIAS_TYPE_SYNONYM_AS_CHAR,
-				Boolean.FALSE,
-				getContextManager()
+				Boolean.FALSE
 			);
 	}
 }

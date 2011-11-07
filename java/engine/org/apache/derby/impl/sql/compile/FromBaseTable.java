@@ -21,6 +21,7 @@
 
 package	org.apache.derby.impl.sql.compile;
 
+import java.util.*;
 import org.apache.derby.catalog.IndexDescriptor;
 import org.apache.derby.iapi.util.StringUtil;
 
@@ -35,6 +36,7 @@ import org.apache.derby.iapi.util.ReuseFactory;
 import org.apache.derby.iapi.services.classfile.VMOpcode;
 
 import org.apache.derby.iapi.services.compiler.MethodBuilder;
+import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
@@ -78,12 +80,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
 
-import java.util.Enumeration;
-import java.util.Properties;
-import java.util.Vector;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  * A FromBaseTable represents a table in the FROM list of a DML statement,
@@ -2192,7 +2188,7 @@ public class FromBaseTable extends FromTable
 		TableDescriptor tableDescriptor = bindTableDescriptor();
 
 		if (tableDescriptor.getTableType() == TableDescriptor.VTI_TYPE) {
-			ResultSetNode vtiNode = getNodeFactory().mapTableAsVTI(
+			ResultSetNode vtiNode = mapTableAsVTI(
 					tableDescriptor,
 					getCorrelationName(),
 					resultColumns,
@@ -2387,6 +2383,64 @@ public class FromBaseTable extends FromTable
 
 		return this;
 	}
+
+    /**
+     * Return a node that represents invocation of the virtual table for the
+     * given table descriptor. The mapping of the table descriptor to a specific
+     * VTI class name will occur as part of the "init" phase for the
+     * NewInvocationNode that we create here.
+     *
+     * Currently only handles no argument VTIs corresponding to a subset of the
+     * diagnostic tables. (e.g. lock_table). The node returned is a FROM_VTI
+     * node with a passed in NEW_INVOCATION_NODE representing the class, with no
+     * arguments. Other attributes of the original FROM_TABLE node (such as
+     * resultColumns) are passed into the FROM_VTI node.
+     */
+    private ResultSetNode mapTableAsVTI(
+            TableDescriptor td,
+            String correlationName,
+            ResultColumnList resultColumns,
+            Properties tableProperties,
+            ContextManager cm)
+        throws StandardException {
+
+
+        // The fact that we pass a non-null table descriptor to the following
+        // call is an indication that we are mapping to a no-argument VTI. Since
+        // we have the table descriptor we do not need to pass in a TableName.
+        // See NewInvocationNode for more.
+        QueryTreeNode newNode =
+                getNodeFactory().getNode(C_NodeTypes.NEW_INVOCATION_NODE,
+                null, // TableName
+                td, // TableDescriptor
+                Collections.EMPTY_LIST,
+                Boolean.FALSE,
+                cm);
+
+        QueryTreeNode vtiNode;
+
+        if (correlationName != null) {
+            vtiNode = getNodeFactory().getNode(C_NodeTypes.FROM_VTI,
+                    newNode,
+                    correlationName,
+                    resultColumns,
+                    tableProperties,
+                    cm);
+        } else {
+            TableName exposedName = newNode.makeTableName(td.getSchemaName(),
+                    td.getDescriptorName());
+
+            vtiNode = getNodeFactory().getNode(C_NodeTypes.FROM_VTI,
+                    newNode,
+                    correlationName,
+                    resultColumns,
+                    tableProperties,
+                    exposedName,
+                    cm);
+        }
+
+        return (ResultSetNode) vtiNode;
+    }
 
 	/** 
 	 * Determine whether or not the specified name is an exposed name in

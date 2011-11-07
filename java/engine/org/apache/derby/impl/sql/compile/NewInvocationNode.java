@@ -54,6 +54,7 @@ import java.lang.reflect.Modifier;
 
 import java.util.Vector;
 import java.util.Enumeration;
+import java.util.List;
 
 /**
  * A NewInvocationNode represents a new object() invocation.
@@ -85,7 +86,7 @@ public class NewInvocationNode extends MethodCallNode
 		throws StandardException
 	{
 		super.init("<init>");
-		addParms((Vector) params);
+		addParms((List) params);
 
 		this.javaClassName = (String) javaClassName;
 		this.delimitedIdentifier =
@@ -132,7 +133,7 @@ public class NewInvocationNode extends MethodCallNode
 		throws StandardException
 	{
 		super.init("<init>");
-		addParms((Vector) params);
+		addParms((List) params);
 
 		if (SanityManager.DEBUG)
 		{

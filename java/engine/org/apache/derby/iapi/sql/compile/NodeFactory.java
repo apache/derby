@@ -21,12 +21,7 @@
 
 package org.apache.derby.iapi.sql.compile;
 
-import java.util.Properties;
-
 import org.apache.derby.iapi.services.context.ContextManager;
-
-import org.apache.derby.iapi.sql.dictionary.DataDictionary;
-import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -35,8 +30,6 @@ import org.apache.derby.iapi.error.StandardException;
  * manish - Wed Mar 28 13:05:19 PST 2001
  */
 import	org.apache.derby.impl.sql.compile.QueryTreeNode;
-import org.apache.derby.impl.sql.compile.ResultColumnList;
-import org.apache.derby.impl.sql.compile.ResultSetNode;
 
 /**
 	This is an interface for NodeFactories.
@@ -573,53 +566,4 @@ public abstract class NodeFactory
 
 		return  retval;
 	}
-
-	/**
-	 * Get one of the several types of create alias nodes. Carved out of parser
-	 * so this could be used by ALTER PUBLICATION.
-	 *
-	 * @param aliasName				The name of the alias
-	 * @param targetName			The full path/method name
-	 * @param aliasSpecificInfo	The full path of the target method name,
-	 *								if any
-	 * @param aliasType	The type of alias to create
-	 * @param delimitedIdentifier	Whether or not to treat the class name
-	 *								as a delimited identifier if trying to
-	 *								resolve it as a class alias.
-	 * @param cm			A ContextManager
-	 *
-	 * @return	A CreateAliasNode matching the given parameters
-	 *
-	 * @exception StandardException		Thrown on error
-	 */
-	public abstract QueryTreeNode
-	getCreateAliasNode(
-		Object aliasName,
-		Object targetName,
-		Object aliasSpecificInfo,
-		char aliasType,
-		Boolean delimitedIdentifier,
-		ContextManager cm)
-		throws StandardException;
-
-	
-	/**
-	 * Return a correctly configured node that represents
-	 * a scan from a VTI dervied from the TableDesciptor.
-	 * Used to convert from system diagnostic tables
-	 * to VTI scans.
-	 * @param td Table that is really a vti
-	 * @param correlationName Correlation name of table clause
-	 * @param resultColumns Columns extracted from table.
-	 * @param tableProperties Properties being passed onto the table scan
-	 * @param cm Current context manager
-	 */
-	public abstract ResultSetNode mapTableAsVTI(
-			TableDescriptor td,
-			String correlationName,
-			ResultColumnList resultColumns,
-			Properties tableProperties,		
-			ContextManager cm) throws StandardException;
-
 }
-
