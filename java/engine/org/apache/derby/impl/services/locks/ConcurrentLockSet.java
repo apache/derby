@@ -923,7 +923,7 @@ forever:	for (;;) {
     {
         if (SanityManager.DEBUG)
         {
-            String str = new String();
+            String str = "";
 
             int i = 0;
             for (Entry entry : locks.values())

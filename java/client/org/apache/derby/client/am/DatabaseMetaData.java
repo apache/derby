@@ -1354,7 +1354,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
             cs.setStringX(3, tableNamePattern);
         }
 
-        String tableTypes = new String();
+        String tableTypes = "";
         int i = 0;
         if (types == null) {
             cs.setNullX(4, java.sql.Types.VARCHAR);
@@ -2070,7 +2070,7 @@ public abstract class DatabaseMetaData implements java.sql.DatabaseMetaData {
         cs.setStringX(2, schemaPattern);
         cs.setStringX(3, typeNamePattern);
         int i = 0;
-        String udtTypes = new String();
+        String udtTypes = "";
         while (types != null && i < types.length) {
             if (i > 0) {
                 udtTypes = udtTypes.concat(",");

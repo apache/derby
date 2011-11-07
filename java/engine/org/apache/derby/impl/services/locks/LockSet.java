@@ -703,7 +703,7 @@ forever:	for (;;) {
     {
         if (SanityManager.DEBUG)
         {
-            String str = new String();
+            String str = "";
 
             int i = 0;
             for (Iterator it = locks.values().iterator(); it.hasNext(); )

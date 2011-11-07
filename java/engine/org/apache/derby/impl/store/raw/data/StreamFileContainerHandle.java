@@ -308,8 +308,7 @@ final class StreamFileContainerHandle
 	*/
 	public String toString() {
         if (SanityManager.DEBUG) {
-            String str = new String();
-            str += "StreamContainerHandle:(" + identity.toString() + ")";
+            String str = "StreamContainerHandle:(" + identity.toString() + ")";
             return(str);
         } else {
             return(super.toString());

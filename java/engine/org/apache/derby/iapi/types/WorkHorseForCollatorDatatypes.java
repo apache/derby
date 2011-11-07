@@ -175,7 +175,7 @@ final class WorkHorseForCollatorDatatypes
 				(escapeCharacter.getCountOfCollationElements() != 1))
 		{
 			throw StandardException.newException(SQLState.LANG_INVALID_ESCAPE_CHARACTER,
-					new String(escapeCharacter.toString()));
+					escapeCharacter.toString());
 		}
 		likeResult = Like.like(stringData.getCharArray(), 
 				stringData.getLength(), 

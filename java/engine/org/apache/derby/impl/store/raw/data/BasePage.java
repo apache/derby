@@ -2831,7 +2831,7 @@ abstract class BasePage implements Page, Observer, TypedFormat
 		if (SanityManager.DEBUG)
 		{
             StoredRecordHeader rh;
-			str = new String();
+			str = "";
 
             for (int slot = FIRST_SLOT_NUMBER; slot < recordCount; slot++) {
                 rh = getHeaderAtSlot(slot);

@@ -1050,8 +1050,7 @@ public class BaseContainerHandle extends Observable
     {
         if (SanityManager.DEBUG)
         {
-            String str = new String();
-            str += "BaseContainerHandle:(" + identity.toString() + ")";
+            String str = "BaseContainerHandle:(" + identity.toString() + ")";
             return(str);
         }
         else

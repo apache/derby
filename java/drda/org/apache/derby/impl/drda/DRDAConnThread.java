@@ -6141,7 +6141,7 @@ class DRDAConnThread extends Thread {
 	 * <code>SQLERRMC_PREFORMATTED_MESSAGE_DELIMITER</code>, When full message text is 
 	 * sent for severe errors. This value separates the messages. 
 	 */
-	private static String SQLERRMC_PREFORMATTED_MESSAGE_DELIMITER = new String("::");
+	private static String SQLERRMC_PREFORMATTED_MESSAGE_DELIMITER = "::";
 	
 	/**
 	 * Create error message or message argements to return to client.  

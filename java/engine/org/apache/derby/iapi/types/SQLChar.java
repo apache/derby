@@ -2258,7 +2258,7 @@ readingLoop:
         {
             throw StandardException.newException(
                     SQLState.LANG_INVALID_PARAMETER_FOR_SEARCH_POSITION, 
-                    new String(getString()), new String(mySearchFrom), 
+                    getString(), mySearchFrom,
                     new Integer(startVal));
         }
         

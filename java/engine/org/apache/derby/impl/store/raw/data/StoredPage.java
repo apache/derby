@@ -8165,7 +8165,7 @@ public class StoredPage extends CachedPage
     {
         if (SanityManager.DEBUG)
         {
-            String str = new String();
+            String str = "";
             try 
             {
                 StoredRecordHeader recordHeader = getHeaderAtSlot(slot);

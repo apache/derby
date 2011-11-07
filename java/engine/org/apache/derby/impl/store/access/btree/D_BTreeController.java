@@ -189,7 +189,7 @@ public class D_BTreeController extends DiagnosticableGeneric
     Properties  prop,
     LevelInfo   li)
     {
-        String ret_string   = new String();
+        String ret_string   = "";
 
         ret_string += 
             "Btree conglom has:\n" + 
@@ -259,7 +259,7 @@ public class D_BTreeController extends DiagnosticableGeneric
     Properties  prop,
     LevelInfo   level_info[])
     {
-        String ret_string   = new String();
+        String ret_string   = "";
         LevelInfo   total   = new LevelInfo();
 
         // first tabulate totals for all levels
@@ -318,7 +318,7 @@ public class D_BTreeController extends DiagnosticableGeneric
     Properties  prop,
     LevelInfo   level_info[])
     {
-        String ret_string   = new String();
+        String ret_string   = "";
         long   total_pages  = 0;
         long   total_res    = 0;
 
@@ -395,7 +395,7 @@ public class D_BTreeController extends DiagnosticableGeneric
         ControlRow  root        = null;
         int         tree_height;
         LevelInfo   level_info[] = null;
-        String      diag_info    = new String();
+        String      diag_info    = "";
 
         
         try

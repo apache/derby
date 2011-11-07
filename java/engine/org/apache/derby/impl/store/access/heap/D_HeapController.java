@@ -140,7 +140,7 @@ public class D_HeapController extends DiagnosticableGeneric
     Properties  prop,
     TableStats stat)
     {
-        String ret_string   = new String();
+        String ret_string   = "";
 
         // Totals:
         ret_string += 

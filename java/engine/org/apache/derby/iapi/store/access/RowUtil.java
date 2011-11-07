@@ -444,7 +444,7 @@ public class RowUtil
         if (SanityManager.DEBUG)
         {
 
-            String str = new String();
+            String str = "";
 
             if (row != null)
             {
@@ -485,7 +485,7 @@ public class RowUtil
     {
         if (SanityManager.DEBUG)
         {
-            String str = new String();
+            String str = "";
 
             Object  row_or_vector;
 

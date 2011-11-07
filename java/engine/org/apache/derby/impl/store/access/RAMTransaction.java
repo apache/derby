@@ -941,7 +941,7 @@ public class RAMTransaction
         if (SanityManager.DEBUG)
         {
 
-            str = new String();
+            str = "";
 
             for (Iterator it = scanControllers.iterator(); it.hasNext(); )
             {

@@ -183,7 +183,7 @@ final class ExportWriteData extends ExportWriteDataAbstract
 
     //do uppercase because the ui shows the values as True and False
     if (columnDefinition.toUpperCase(java.util.Locale.ENGLISH).equals(ControlInfo.INTERNAL_TRUE.toUpperCase(java.util.Locale.ENGLISH))) {
-       String tempStr=new String();
+       String tempStr="";
        //put the start and stop delimiters around the column name and type
        for (int i=0; i<columnNames.length; i++) {
 		 // take care at adding fieldSeparator at the 
