@@ -354,12 +354,11 @@ public class ConditionalNode extends ValueNode
 	private QueryTreeNode recastNullNode(ValueNode nodeToCast,
 		DataTypeDescriptor typeToUse) throws StandardException
 	{
-		QueryTreeNode cast = getNodeFactory().getNode(
+		return (QueryTreeNode) getNodeFactory().getNode(
 					C_NodeTypes.CAST_NODE,
 					((CastNode)nodeToCast).castOperand,
 					typeToUse,
 					getContextManager());
-		return cast;
 	}
 
 	/**
@@ -402,7 +401,7 @@ public class ConditionalNode extends ValueNode
 			 * The untyped NULL should have a data type descriptor
 			 * that allows its value to be nullable.
 			 */
-			QueryTreeNode cast = getNodeFactory().getNode(
+			QueryTreeNode cast = (QueryTreeNode) getNodeFactory().getNode(
 						C_NodeTypes.CAST_NODE,
 						thenElseList.elementAt(0), 
 						bcon.getLeftOperand().getTypeServices().getNullabilityType(true),

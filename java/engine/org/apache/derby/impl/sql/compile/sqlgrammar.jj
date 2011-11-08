@@ -3437,7 +3437,7 @@ targetTable() throws StandardException :
 	LOOKAHEAD( { newInvocationFollows(1) } )
 	javaToSQLNode = newInvocation()
 	{
-		return nodeFactory.getNode(
+		return (QueryTreeNode) nodeFactory.getNode(
 								C_NodeTypes.FROM_VTI,
 								javaToSQLNode.getJavaValueNode(), 
 								correlationName,
@@ -7718,7 +7718,8 @@ newInvocation() throws StandardException :
 		{
 			checkInternalFeature(javaClassName);
 		}
-		newNode =  nodeFactory.getNode(C_NodeTypes.NEW_INVOCATION_NODE,
+		newNode = (QueryTreeNode) nodeFactory.getNode(
+									   C_NodeTypes.NEW_INVOCATION_NODE,
 									   javaClassName,
 									   parameterList, 
 									   lastTokenDelimitedIdentifier,

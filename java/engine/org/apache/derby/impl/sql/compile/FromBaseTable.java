@@ -2409,8 +2409,8 @@ public class FromBaseTable extends FromTable
         // call is an indication that we are mapping to a no-argument VTI. Since
         // we have the table descriptor we do not need to pass in a TableName.
         // See NewInvocationNode for more.
-        QueryTreeNode newNode =
-                getNodeFactory().getNode(C_NodeTypes.NEW_INVOCATION_NODE,
+        QueryTreeNode newNode = (QueryTreeNode) getNodeFactory().getNode(
+                C_NodeTypes.NEW_INVOCATION_NODE,
                 null, // TableName
                 td, // TableDescriptor
                 Collections.EMPTY_LIST,
@@ -2420,7 +2420,8 @@ public class FromBaseTable extends FromTable
         QueryTreeNode vtiNode;
 
         if (correlationName != null) {
-            vtiNode = getNodeFactory().getNode(C_NodeTypes.FROM_VTI,
+            vtiNode = (QueryTreeNode) getNodeFactory().getNode(
+                    C_NodeTypes.FROM_VTI,
                     newNode,
                     correlationName,
                     resultColumns,
@@ -2430,7 +2431,8 @@ public class FromBaseTable extends FromTable
             TableName exposedName = newNode.makeTableName(td.getSchemaName(),
                     td.getDescriptorName());
 
-            vtiNode = getNodeFactory().getNode(C_NodeTypes.FROM_VTI,
+            vtiNode = (QueryTreeNode) getNodeFactory().getNode(
+                    C_NodeTypes.FROM_VTI,
                     newNode,
                     correlationName,
                     resultColumns,

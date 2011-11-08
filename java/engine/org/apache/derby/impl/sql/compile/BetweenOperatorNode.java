@@ -213,7 +213,7 @@ public class BetweenOperatorNode extends BinaryListOperatorNode
 		NodeFactory nodeFactory = getNodeFactory();
 		ContextManager cm = getContextManager();
 
-        QueryTreeNode trueNode = nodeFactory.getNode(
+        QueryTreeNode trueNode = (QueryTreeNode) nodeFactory.getNode(
 											C_NodeTypes.BOOLEAN_CONSTANT_NODE,
 											Boolean.TRUE,
 											cm);

@@ -31,6 +31,7 @@ import org.apache.derby.iapi.services.monitor.Monitor;
 
 import org.apache.derby.iapi.sql.compile.Optimizer;
 
+import org.apache.derby.iapi.sql.compile.Node;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 
@@ -133,7 +134,7 @@ public class NodeFactoryImpl extends NodeFactory implements ModuleControl, Modul
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
-	public QueryTreeNode getNode(int nodeType, ContextManager cm)
+	public Node getNode(int nodeType, ContextManager cm)
 											throws StandardException
 	{
 

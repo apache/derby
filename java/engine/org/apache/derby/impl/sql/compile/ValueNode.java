@@ -613,7 +613,7 @@ public abstract class ValueNode extends QueryTreeNode
 	{
 		NodeFactory		nodeFactory = getNodeFactory();
 
-        QueryTreeNode trueNode = nodeFactory.getNode(
+        QueryTreeNode trueNode = (QueryTreeNode) nodeFactory.getNode(
 										C_NodeTypes.BOOLEAN_CONSTANT_NODE,
 										Boolean.TRUE,
 										getContextManager());

@@ -25,12 +25,6 @@ import org.apache.derby.iapi.services.context.ContextManager;
 
 import org.apache.derby.iapi.error.StandardException;
 
-/* Strictly speaking we shouldn't import classes under the impl hierarchy here
- * but this is work in progress.
- * manish - Wed Mar 28 13:05:19 PST 2001
- */
-import	org.apache.derby.impl.sql.compile.QueryTreeNode;
-
 /**
 	This is an interface for NodeFactories.
 	<p>
@@ -63,7 +57,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public abstract QueryTreeNode getNode(int nodeType,
+	public abstract Node getNode(int nodeType,
 							ContextManager cm) throws StandardException;
 
 	/**
@@ -77,10 +71,10 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType, Object arg1, ContextManager cm)
+	public final Node getNode(int nodeType, Object arg1, ContextManager cm)
 													throws StandardException
 	{
-		QueryTreeNode retval = getNode(nodeType, cm);
+		Node retval = getNode(nodeType, cm);
 
 		retval.init(arg1);
 
@@ -99,13 +93,13 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType,
+	public final Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2);
 
@@ -125,14 +119,14 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType,
+	public final Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3);
 
@@ -153,7 +147,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public QueryTreeNode getNode(int nodeType,
+	public Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
@@ -161,7 +155,7 @@ public abstract class NodeFactory
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3, arg4);
 
@@ -184,7 +178,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public QueryTreeNode getNode(int nodeType,
+	public Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
@@ -193,7 +187,7 @@ public abstract class NodeFactory
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3, arg4, arg5);
 
@@ -216,7 +210,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType,
+	public final Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
@@ -226,7 +220,7 @@ public abstract class NodeFactory
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3, arg4, arg5, arg6);
 
@@ -250,7 +244,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType,
+	public final Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
@@ -261,7 +255,7 @@ public abstract class NodeFactory
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 
@@ -285,7 +279,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType,
+	public final Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
@@ -297,7 +291,7 @@ public abstract class NodeFactory
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 
@@ -322,7 +316,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType,
+	public final Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
@@ -335,7 +329,7 @@ public abstract class NodeFactory
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
 
@@ -361,7 +355,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType,
+	public final Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
@@ -375,7 +369,7 @@ public abstract class NodeFactory
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
 					arg10);
@@ -403,7 +397,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType,
+	public final Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
@@ -418,7 +412,7 @@ public abstract class NodeFactory
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
 					arg10, arg11);
@@ -447,7 +441,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType,
+	public final Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
@@ -463,7 +457,7 @@ public abstract class NodeFactory
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
 					arg10, arg11, arg12);
@@ -493,7 +487,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType,
+	public final Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
@@ -510,7 +504,7 @@ public abstract class NodeFactory
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
 					arg10, arg11, arg12, arg13);
@@ -541,7 +535,7 @@ public abstract class NodeFactory
 	 *
 	 * @exception StandardException		Thrown on error.
 	 */
-	public final QueryTreeNode getNode(int nodeType,
+	public final Node getNode(int nodeType,
 							Object arg1,
 							Object arg2,
 							Object arg3,
@@ -559,7 +553,7 @@ public abstract class NodeFactory
 							ContextManager cm)
 								throws StandardException
 	{
-		QueryTreeNode retval =  getNode(nodeType, cm);
+		Node retval =  getNode(nodeType, cm);
 
 		retval.init(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
 					arg10, arg11, arg12, arg13, arg14);

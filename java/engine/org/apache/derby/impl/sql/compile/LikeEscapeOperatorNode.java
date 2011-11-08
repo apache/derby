@@ -673,7 +673,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
             {
                 // pattern string is a constant
                 likeLTopt = 
-                    getNodeFactory().getNode(
+                    (QueryTreeNode) getNodeFactory().getNode(
                         C_NodeTypes.CHAR_CONSTANT_NODE,
                         lessThanString,
                         getContextManager());
@@ -901,7 +901,7 @@ public final class LikeEscapeOperatorNode extends TernaryOperatorNode
         if (escapeNode != null)
             param.add(escapeNode);
 
-        QueryTreeNode maxWidthNode = getNodeFactory().getNode(
+        QueryTreeNode maxWidthNode = (QueryTreeNode) getNodeFactory().getNode(
             C_NodeTypes.INT_CONSTANT_NODE,
             new Integer(maxWidth),
             getContextManager());

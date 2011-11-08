@@ -43,6 +43,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.iapi.sql.compile.C_NodeTypes;
 import org.apache.derby.iapi.sql.compile.CompilerContext;
+import org.apache.derby.iapi.sql.compile.Node;
 import org.apache.derby.iapi.sql.compile.NodeFactory;
 import org.apache.derby.iapi.sql.compile.Parser;
 import org.apache.derby.iapi.sql.compile.TypeCompiler;
@@ -69,7 +70,7 @@ import org.apache.derby.impl.sql.execute.GenericExecutionFactory;
  *
  */
 
-public abstract class QueryTreeNode implements Visitable
+public abstract class QueryTreeNode implements Node, Visitable
 {
 	public static final int AUTOINCREMENT_START_INDEX = 0;
 	public static final int AUTOINCREMENT_INC_INDEX   = 1;
