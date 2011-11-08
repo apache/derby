@@ -20,8 +20,10 @@
  */
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.ResultSet;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -69,6 +71,36 @@ public class SynonymTest extends BaseJDBCTestCase {
         stmt.executeUpdate("drop view v1");
         stmt.executeUpdate("drop synonym mySyn");
         stmt.close();
+    }
+
+    /**
+     * DERBY-5244 DatabaseMetaData.getColumns(null, null, tableName, null) 
+     * 	does not return the columns meta for a SYNONYM
+     * 
+     * Test DatabaseMetaData.getColumns call on synonyms
+     *
+     * This test confirms the behavior noticed in DERBY-5244.
+     */
+    public void testMetaDataCallOnSynonymsDERBY5244()
+        throws SQLException
+    {
+            Statement st = createStatement();
+            st.executeUpdate("create table t1Derby5422 "+
+            		"( c11 int not null, c12 char(2) )");
+            //Create a synonym on table t1Derby5422
+            st.executeUpdate("create synonym s1Derby5422 for t1Derby5422");
+            
+            //Verify that the synonym has been created successfully by
+            // doing a select from it
+            ResultSet rs = st.executeQuery("select * from S1DERBY5422");
+            JDBC.assertEmpty(rs);
+            DatabaseMetaData dbmd = getConnection().getMetaData();
+            //Derby can find metadata info for the base table
+            rs = dbmd.getColumns(null, null, "T1DERBY5422", null);
+            JDBC.assertDrainResultsHasData(rs);
+            //But Derby does not locate the metadata info for synonym
+            rs = dbmd.getColumns(null, null, "S1DERBY5422", null);
+            JDBC.assertEmpty(rs);
     }
 
     /**
