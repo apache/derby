@@ -50,7 +50,7 @@
       destdir="${out.dir}"
       includes="Simple*">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
     </javac>
     <javac
@@ -69,7 +69,7 @@
       includes="nserverdemo/**"
       excludes="nserverdemo/Simple*">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
     </javac>
     <!-- "simple" demos under java/demo/ (SimpleApp, SimpleMobileApp) -->
@@ -88,7 +88,7 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${javasrc.dir}"/>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
     </javac>
     <javac
@@ -106,7 +106,7 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${javasrc.dir}"/>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
     </javac>
     <ant target="compile" dir="toursdb"/>

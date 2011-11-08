@@ -52,7 +52,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${xmlApis};${java14compile.classpath}"/>
+        <pathelement path="${xmlApis};${java15compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/types/SqlXmlUtil.java"/>
     </javac>
@@ -91,7 +91,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/iapi/types/SQLDecimal.java"/>
       <include name="${derby.dir}/iapi/types/J2SEDataValueFactory.java"/>

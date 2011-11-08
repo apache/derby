@@ -88,7 +88,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
 	  <include name="${derby.dir}/${cur.dir}/BrokeredConnection.java"/>
 	  <include name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement.java"/>
@@ -111,7 +111,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
 	  <include name="${derby.dir}/${cur.dir}/BrokeredStatement.java"/>
     </javac>
@@ -132,7 +132,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
 	  <include name="${derby.dir}/${cur.dir}/BrokeredConnection30.java"/>
 	  <include name="${derby.dir}/${cur.dir}/BrokeredPreparedStatement30.java"/>

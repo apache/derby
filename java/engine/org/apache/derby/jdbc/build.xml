@@ -95,7 +95,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/jdbc/AutoloadedDriver.java"/>
       <include name="${derby.dir}/jdbc/EmbeddedDriver.java"/>
@@ -122,7 +122,7 @@
       srcdir="${derby.engine.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/jdbc/Driver30.java"/>
       <include name="${derby.dir}/jdbc/EmbedXAConnection.java"/>

@@ -420,17 +420,17 @@ Derby is supposed to run in all of the following environments:
     </TR>
 
     <TR>
+      <TD><b><i>Java 7</i></b></TD>
+      <TD><b><i>JDBC 4.1</i></b></TD>
+    </TR>
+
+    <TR>
       <TD><b><i>Java 6</i></b></TD>
-      <TD><b><i>JDBC 4</i></b></TD>
+      <TD><b><i>JDBC 4.0</i></b></TD>
     </TR>
 
     <TR>
       <TD><b><i>Java 5</i></b></TD>
-      <TD><b><i>JDBC 3</i></b></TD>
-    </TR>
-
-    <TR>
-      <TD><b><i>JDK 1.4.2</i></b></TD>
       <TD><b><i>JDBC 3</i></b></TD>
     </TR>
 
@@ -475,34 +475,34 @@ enforces compile-time contracts for the supported platforms:
     </TR>
 
     <TR>
+      <TD><b><i>Java 7</i></b></TD>
+      <TD><b><i>java17compile.classpath</i></b></TD>
+      <TD>The set of libraries in the Java 7 JDK. The build fails if
+      your environment isn't a Java 5, 6 or 7 JDK.</TD>
+      <TD>The set of system jars in your JDK if your environment is
+      JDK 7. Otherwise,
+      <i>${java16compile.classpath}</i></TD>
+    </TR>
+
+    <TR>
       <TD><b><i>Java 6</i></b></TD>
       <TD><b><i>java16compile.classpath</i></b></TD>
-      <TD>The Derby build tries to find a Java 6
-      JDK on your machine. The build fails if it can't find a Java 5
-      or Java 6 JDK.</TD>
-      <TD>The list of jars in your Java 6 JDK if the build can find them. Otherwise,
-      <i>classes/stubs/jdbc4:${java15compile.classpath}</i></TD>
+      <TD>The set of libraries in the Java 6 JDK. The build fails if
+      your environment isn't a Java 5, 6 or 7 JDK.</TD>
+      <TD>The set of system jars in your JDK if your environment is
+      JDK 6. Otherwise, <i>classes/stubs/jdbc4:${java15compile.classpath}</i> if your environment
+      is JDK 5. Otherwise
+      <i>${java17compile.classpath}</i></TD>
     </TR>
 
     <TR>
       <TD><b><i>Java 5</i></b></TD>
       <TD><b><i>java15compile.classpath</i></b></TD>
-      <TD>The Derby build tries to find a Java 5
-      JDK on your machine. The build fails if it can't find a Java 5
-      or Java 6 JDK.</TD>
-      <TD>The list of jars in your Java 5 JDK if the build can find them. Otherwise,
+      <TD>The set of libraries in the Java 5 JDK. The build fails if
+      your environment isn't a Java 5, 6 or 7 JDK.</TD>
+      <TD>The set of system jars in your JDK if your environment is
+      JDK 5. Otherwise,
       <i>classes/stubs/jdbc3:${java16compile.classpath}</i></TD>
-    </TR>
-
-    <TR>
-      <TD><b><i>JDK 1.4.2</i></b></TD>
-      <TD><b><i>java14compile.classpath</i></b></TD>
-      <TD>The Derby build tries to find a 1.4 JDK
-      on your machine. Note that Sun and IBM supply free 1.4.2 JDKs for many machines.</TD>
-      <TD>The list of jars in your 1.4 JDK if the build can find
-      them. Otherwise,
-      <i>${java15compile.classpath}</i>
-      </TD>
     </TR>
 
     <TR>
@@ -511,10 +511,10 @@ enforces compile-time contracts for the supported platforms:
       <TD>This should be set to the list of small device libraries on
       your machine--if you have them. That is, the CDC/FP 1.1 jars and
       the jsr169 jar. To get a set of small device libraries, see
-      <a href="http://blogs.sun.com/wittyman/entry/javadb_on_sun_javame_cdc">Sun's instructions</a>
+      <a href="http://blogs.sun.com/wittyman/entry/javadb_on_sun_javame_cdc">Oracle's instructions</a>
       or download IBM's WCTME 5.7.
       </TD>
-      <TD><i>classes/stubs/jsr169:${java14compile.classpath}</i></TD>
+      <TD><i>classes/stubs/jsr169:${java15compile.classpath}</i></TD>
     </TR>
 
   </TBODY>
@@ -523,12 +523,8 @@ enforces compile-time contracts for the supported platforms:
 <br/>
 <p>
 The preceding variables are mandatory for the Derby build.
-For Mac OS X, Solaris, and many Linux and IBM machines, Derby
-can figure out where the JDKs live and can therefore set the
-preceding variables to reasonable values if you don't set them. For
-other platforms, the Derby build may not be able to figure out where the JDKs
-live. On those platforms, you can help the Derby build by setting the following optional
-variables in <i>ant.properties</i>:
+You can also force the setting of the preceding variables by setting the following optional
+library variables in <i>ant.properties</i>:
 </p>
 
 <TABLE border="2">
@@ -538,15 +534,6 @@ variables in <i>ant.properties</i>:
       <TD><b>Compiler Variable</b></TD>
       <TD><b>Description</b></TD>
       <TD><b>Default Value</b></TD>
-    </TR>
-
-    <TR>
-      <TD><b><i>j14lib</i></b></TD>
-      <TD>If you set this variable to be the directory which contains
-      your 1.4 jars, then the Derby build will set
-      <i>java14compile.classpath</i> to be the list of jars in that directory.
-      </TD>
-      <TD>Optional variable. No default value.</TD>
     </TR>
 
     <TR>
@@ -563,6 +550,15 @@ variables in <i>ant.properties</i>:
       <TD>If you set this variable to be the directory which contains
       your Java 6 jars, then the Derby build will set
       <i>java16compile.classpath</i> to be the list of jars in that directory.
+      </TD>
+      <TD>Optional variable. No default value.</TD>
+    </TR>
+
+    <TR>
+      <TD><b><i>j17lib</i></b></TD>
+      <TD>If you set this variable to be the directory which contains
+      your Java 7 jars, then the Derby build will set
+      <i>java17compile.classpath</i> to be the list of jars in that directory.
       </TD>
       <TD>Optional variable. No default value.</TD>
     </TR>

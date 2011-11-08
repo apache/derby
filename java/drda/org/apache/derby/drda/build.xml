@@ -57,7 +57,7 @@
       srcdir="${derby.drda.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/drda/*.java"/>
       <exclude name="${derby.dir}/drda/NetServlet.java"/>
@@ -80,7 +80,7 @@
       destdir="${out.dir}">
       <classpath>
 	 	<pathelement location="${servlet24}"/>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
 	  <include name="${derby.dir}/drda/NetServlet.java"/>
     </javac>

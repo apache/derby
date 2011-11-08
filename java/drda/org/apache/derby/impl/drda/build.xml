@@ -50,7 +50,7 @@
       srcdir="${derby.drda.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/drda/DecryptionManager.java"/>
     </javac>
@@ -68,7 +68,7 @@
       srcdir="${derby.drda.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/drda/DRDAXAProtocol.java"/>
       <include name="${derby.dir}/impl/drda/DRDAXid.java"/>
@@ -88,7 +88,7 @@
       srcdir="${derby.drda.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
       <include name="${derby.dir}/impl/drda/*.java"/>
       <exclude name="${derby.dir}/impl/drda/DecryptionManager.java"/>

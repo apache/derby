@@ -80,7 +80,7 @@
       srcdir="${derby.testing.src.dir}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
 	<pathelement path="${junit}"/>
       </classpath>
       <include name="${this.dir}/*.java"/>
@@ -105,7 +105,7 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${junit}"/>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
       <include name="${this.dir}/dataSourcePermissions_net.java"/>
       <include name="${this.dir}/SqlExceptionTest.java"/>

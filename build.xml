@@ -301,11 +301,6 @@
     -->
     <property name="java17compile.classpath" value="${java16compile.classpath}"/>
 
-    <!-- 
-            If a 1.4 JDK is not present, then use the Java 5 environment to build the 1.4 support
-    -->
-    <property name="java14compile.classpath" value="${java15compile.classpath}"/>
-
     <property file="${properties.dir}/compilepath.properties"/>
     <!-- Release and version info -->
     <property file="${properties.dir}/release.properties"/>
@@ -314,7 +309,7 @@
             If the user hasn't already set this property, point it at our stub
             implementation of JSR169.
     -->
-    <property name="jsr169compile.classpath" value="${out.jsr169.dir}:${java14compile.classpath}"/>
+    <property name="jsr169compile.classpath" value="${out.jsr169.dir}:${java15compile.classpath}"/>
 
     <!-- 
             The lowest common denominator compile path for Derby. We expect that
@@ -347,8 +342,6 @@
     <echo message="${checkEvent} compilerLevel16 = ${compilerLevel16}"/>
     <echo message="${checkEvent} compile.classpath = ${compile.classpath}"/>
     <echo message="${checkEvent} jsr169compile.classpath = ${jsr169compile.classpath}"/>
-    <echo message="${checkEvent} j14lib = ${j14lib}"/>
-    <echo message="${checkEvent} java14compile.classpath = ${java14compile.classpath}"/>
     <echo message="${checkEvent} j15lib = ${j15lib}"/>
     <echo message="${checkEvent} java15compile.classpath = ${java15compile.classpath}"/>
     <echo message="${checkEvent} j16lib = ${j16lib}"/>
@@ -826,7 +819,7 @@
       srcdir="${derby.jdbc3.src.dir}"
       destdir="${out.jdbc3.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
      </javac>
 
@@ -880,7 +873,7 @@
       srcdir="${derby.felix.src.dir}"
       destdir="${out.felix.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
       </classpath>
      </javac>
 
@@ -1100,7 +1093,7 @@
   <target name="public-jdbc3-api">
  
     <antcall target="publishedapi-workhorse">
-      <param name="bootClasspath" value="${java14compile.classpath}"/>
+      <param name="bootClasspath" value="${java15compile.classpath}"/>
       <param name="extraApi" value="publishedapi_jdbc3.ant"/>
     </antcall>
 
@@ -1211,7 +1204,7 @@
         access="private"
         breakiterator="yes"
         useexternalfile="yes"
-        classpath="${out.dir};${java16compile.classpath};${jars.javadoc}"
+        classpath="${out.dir};${jars.javadoc}"
         destdir="${out.javadoc.dir}/engine"
         windowtitle="Apache Derby V${major}.${minor} Internals"
         doctitle="Apache Derby V${major}.${minor} Internals"

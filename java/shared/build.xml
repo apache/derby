@@ -66,7 +66,7 @@
       srcdir="${generated.src.dir}"
       destdir="${out.dir}">
       <classpath>
-          <pathelement path="${java14compile.classpath}"/>
+          <pathelement path="${java15compile.classpath}"/>
       </classpath>
     </javac>
 
@@ -85,7 +85,7 @@
       includes="org/apache/derby/shared/**"
       destdir="${out.dir}">
       <classpath>
-          <pathelement path="${java14compile.classpath}"/>
+          <pathelement path="${java15compile.classpath}"/>
       </classpath>
       <include name="org/apache/derby/shared/**"/>
   	  <exclude name="org/apache/derby/shared/common/sanity/ThreadDump.java"/>

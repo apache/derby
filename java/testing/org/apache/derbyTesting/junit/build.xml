@@ -95,7 +95,7 @@
 	  includes="${junit.14.classes}"
       destdir="${out.dir}">
       <classpath>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
     </javac>

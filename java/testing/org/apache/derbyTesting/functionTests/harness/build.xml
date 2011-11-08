@@ -80,7 +80,7 @@
       destdir="${out.dir}">
       <classpath>
         <pathelement location="${oro}"/>
-        <pathelement path="${java14compile.classpath}"/>
+        <pathelement path="${java15compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
         <include name="${this.dir}/*.java"/> 
