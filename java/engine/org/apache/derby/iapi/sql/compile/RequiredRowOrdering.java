@@ -24,7 +24,6 @@ package org.apache.derby.iapi.sql.compile;
 import org.apache.derby.iapi.error.StandardException;
 
 import org.apache.derby.iapi.util.JBitSet;
-import org.apache.derby.impl.sql.compile.PredicateList;
 
 /**
  * This interface provides a representation of the required ordering of rows

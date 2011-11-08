@@ -25,21 +25,16 @@ import org.apache.derby.catalog.UUID;
 
 import org.apache.derby.iapi.sql.depend.Dependent;
 import org.apache.derby.iapi.sql.depend.Provider;
-import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 
-import org.apache.derby.iapi.services.context.ContextService;
-
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.StatementType;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
-import org.apache.derby.impl.sql.execute.DropTriggerConstantAction;
 
 /**
  * This is the implementation of ViewDescriptor. Users of View descriptors

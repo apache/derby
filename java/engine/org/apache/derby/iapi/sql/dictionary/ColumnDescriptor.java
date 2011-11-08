@@ -24,14 +24,10 @@ package org.apache.derby.iapi.sql.dictionary;
 import org.apache.derby.iapi.types.DataTypeDescriptor;
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.sanity.SanityManager;
-import org.apache.derby.iapi.sql.StatementType;
 
 import org.apache.derby.catalog.DefaultInfo;
 import org.apache.derby.catalog.UUID;
-
-import org.apache.derby.impl.sql.compile.ColumnDefinitionNode;
 
 /**
  * This class represents a column descriptor.
