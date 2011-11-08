@@ -39,9 +39,6 @@ public class J2SEDataValueFactory extends DataValueFactoryImpl
 
    	public void boot(boolean create, Properties properties) throws StandardException {
    		
-   		NumberDataType.MINLONG_MINUS_ONE = SQLDecimal.MINLONG_MINUS_ONE;
-   		NumberDataType.MAXLONG_PLUS_ONE = SQLDecimal.MAXLONG_PLUS_ONE;
-
     	super.boot(create, properties);
    	}
 	

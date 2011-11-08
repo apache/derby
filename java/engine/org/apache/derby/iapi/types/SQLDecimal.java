@@ -67,13 +67,6 @@ import java.sql.Types;
  */
 public final class SQLDecimal extends NumberDataType implements VariableSizeDataValue
 {
-	private static final BigDecimal ZERO = BigDecimal.valueOf(0L);
-	private static final BigDecimal ONE = BigDecimal.valueOf(1L);
-	static final BigDecimal MAXLONG_PLUS_ONE = BigDecimal.valueOf(Long.MAX_VALUE).add(ONE);
-	static final BigDecimal MINLONG_MINUS_ONE = BigDecimal.valueOf(Long.MIN_VALUE).subtract(ONE);
-
-
-
 	/**
 	 * object state.  Note that scale and precision are 
 	 * always determined dynamically from value when
@@ -236,8 +229,8 @@ public final class SQLDecimal extends NumberDataType implements VariableSizeData
 		// e.g. 9223372036854775807.1  converts to 9223372036854775807
 		// this matches DB2 UDB behaviour
 
-		if (   (localValue.compareTo(SQLDecimal.MINLONG_MINUS_ONE) == 1)
-			&& (localValue.compareTo(SQLDecimal.MAXLONG_PLUS_ONE) == -1)) {
+		if (   (localValue.compareTo(MINLONG_MINUS_ONE) == 1)
+			&& (localValue.compareTo(MAXLONG_PLUS_ONE) == -1)) {
 
 			return localValue.longValue();
 		}

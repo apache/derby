@@ -21,6 +21,8 @@
 
 package org.apache.derby.iapi.types;
 
+import java.math.BigDecimal;
+
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.types.NumberDataValue;
 import org.apache.derby.iapi.services.sanity.SanityManager;
@@ -48,14 +50,10 @@ public abstract class NumberDataType extends DataType
 	 */
 	static DataValueDescriptor ZERO_DECIMAL;
 	
-	/**
-	 * Set by the booting DataValueFactory implementation.
-	 */
-	static Comparable MINLONG_MINUS_ONE;
-	/**
-	 * Set by the booting DataValueFactory implementation.
-	 */
-	static Comparable MAXLONG_PLUS_ONE;
+	static final BigDecimal ZERO = BigDecimal.valueOf(0L);
+	static final BigDecimal ONE = BigDecimal.valueOf(1L);
+	static final BigDecimal MAXLONG_PLUS_ONE = BigDecimal.valueOf(Long.MAX_VALUE).add(ONE);
+	static final BigDecimal MINLONG_MINUS_ONE = BigDecimal.valueOf(Long.MIN_VALUE).subtract(ONE);
 
     /**
      * Numbers check for isNegative first and negate it if negative.

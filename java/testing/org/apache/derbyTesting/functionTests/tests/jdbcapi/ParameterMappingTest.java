@@ -563,7 +563,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 if (!HAVE_BIG_DECIMAL && SQLTypes[type].equals("DECIMAL(10,5)"))
                     continue;
-                //System.out.println(procSQL);
+                println(procSQL);
                 s.execute(procSQL);
             } catch (SQLException sqle) {
                 // may get error that column is not allowed
@@ -1090,7 +1090,8 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         }
         catch (SQLException se )
         {
-            assertEquals( errorState, se.getSQLState() );
+            assertEquals
+                ( "Expecting failure for seed = " + seed + " and insertText = '" + insertText + "'" , errorState, se.getSQLState() );
         }
     }
 
@@ -4292,11 +4293,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     
     public static Test suite() {
         
-        // Don't run for JSR169 until DERBY-2403 is resolved.
-        if (JDBC.vmSupportsJDBC3())
-            return TestConfiguration.defaultSuite(ParameterMappingTest.class);
-        else
-            return  new TestSuite("ParameterMapping");
+        return TestConfiguration.defaultSuite(ParameterMappingTest.class);
     }
         /*
         ** Procedures for parameter mapping testing.

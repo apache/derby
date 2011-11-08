@@ -21,6 +21,7 @@
 
 package org.apache.derby.iapi.types;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Types;
 
@@ -195,6 +196,12 @@ public final class BigIntegerDecimal extends BinaryDecimal
 	}
 	
 	
+	public Object	getObject() throws StandardException
+	{
+		if ( isNull() ) { return null; }
+        else { return new BigDecimal( getString() ); }
+	}
+
 	/* (non-Javadoc)
 	 * @see org.apache.derby.iapi.types.DataValueDescriptor#getString()
 	 */
@@ -526,6 +533,16 @@ public final class BigIntegerDecimal extends BinaryDecimal
 		}
 		return bi;
 	}
+    
+	public void setBigDecimal(Number theValue) throws StandardException
+	{
+        if ( theValue == null ) { setToNull(); }
+		else
+        {
+            setValue( theValue.toString() );
+        }
+	}
+    
 	/*
 	 * String display of value
 	 */
