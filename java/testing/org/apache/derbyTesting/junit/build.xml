@@ -48,6 +48,9 @@
   <property file="${user.home}/properties/derbytesting.properties"/>
   <property file="${ant.home}/properties/derbytesting.properties"/>
 
+  <!-- Classes which must be compiled against JDK 1.4 or higher -->
+  <property name="junit.14.classes" value="${derby.testing.junit.dir}/JAXPFinder.java,${derby.testing.junit.dir}/ConnectionPoolDataSourceConnector.java,${derby.testing.junit.dir}/J2EEDataSource.java,${derby.testing.junit.dir}/DriverManagerConnector.java,${derby.testing.junit.dir}/XADataSourceConnector.java,${derby.testing.junit.dir}/XATestUtil.java,${derby.testing.junit.dir}/BigDecimalHandler.java"/>
+
   <!-- Release and Version info -->
   <property file="${properties.dir}/release.properties"/>
 
@@ -55,29 +58,7 @@
  
   <target name="junitcomponents" 
           description="Build Derby JUnit test components">
-    <!-- We only compile junit/JAXPFinder.java against JDK 1.4   -->
-    <!-- because it relies on a JAXP class that is part of 1.4   -->
-    <!-- but it is not part of 1.3.                              -->
-    <!-- This needs to be revisited. The second javac invocation fails against the jsr169 classpath -->
-    <javac
-      source="1.4"
-      target="1.4"
-      bootclasspath="${empty}"
-      nowarn="on"
-      debug="true"
-      depend="${depend}"
-      deprecation="${deprecation}"
-      optimize="${optimize}"
-      proceed="${proceed}"
-      verbose="${verbose}"
-      srcdir="${derby.testing.src.dir}"
-      destdir="${out.dir}">
-      <classpath>
-        <pathelement path="${java14compile.classpath}"/>
-        <pathelement path="${junit}"/>
-      </classpath>
-	  <include name="${derby.testing.junit.dir}/JAXPFinder.java"/>
-    </javac>
+    <!-- Here we compile the classes which WILL run on small device platforms -->
     <javac
       source="1.4"
       target="1.4"
@@ -90,13 +71,33 @@
       proceed="${proceed}"
       verbose="${verbose}" 
       srcdir="${derby.testing.src.dir}"
+      includes="${derby.testing.junit.dir}/**/*.java"
+      excludes="${junit.14.classes}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${compile.classpath}"/>
+        <pathelement path="${junit}"/>
+      </classpath>
+    </javac>
+    <!-- Here we compile the classes which will NOT run on small device platforms -->
+    <javac
+      source="1.4"
+      target="1.4"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="true"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.testing.src.dir}"
+	  includes="${junit.14.classes}"
       destdir="${out.dir}">
       <classpath>
         <pathelement path="${java14compile.classpath}"/>
         <pathelement path="${junit}"/>
       </classpath>
-      <include name="${derby.testing.junit.dir}/**/*.java"/>
-      <exclude name="${derby.testing.junit.dir}/JAXPFinder.java"/>
     </javac>
   </target>
 

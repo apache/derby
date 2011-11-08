@@ -340,6 +340,15 @@ public class XML {
         if (!classpathHasJAXP())
             return null;
 
-        return JAXPFinder.getJAXPParserLocation();
+        try {
+            Class   jaxpFinderClass = Class.forName( "org.apache.derbyTesting.junit.JAXPFinder" );
+            Method  locatorMethod = jaxpFinderClass.getDeclaredMethod( "getJAXPParserLocation", null );
+
+            return (String) locatorMethod.invoke(  null, null );
+        }
+        catch (Exception e)
+        {
+            throw new UnsupportedOperationException( e.getClass().getName() + ": " + e.getMessage() );
+        }
     }
 }

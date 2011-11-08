@@ -20,6 +20,7 @@
 package org.apache.derbyTesting.junit;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,34 +45,25 @@ public class JDBC {
      */
     public static class GeneratedId {
         public boolean equals(Object o) {
-            // unless JSR169, use String.matches...
-            if (JDBC.vmSupportsJDBC3()) 
+            String tmpstr = (String)o;
+            boolean b = true;
+            if (!(o instanceof String))
+                b = false;
+            if (!(tmpstr.startsWith("SQL")))
+                b = false;
+            if (tmpstr.length() != 18)
+                b = false;
+            for (int i=3 ; i<18 ; i++)
             {
-                return o instanceof String &&
-                ((String) o).matches("SQL[0-9]{15}");
-            }
-            else
-            {
-                String tmpstr = (String)o;
-                boolean b = true;
-                if (!(o instanceof String))
-                    b = false;
-                if (!(tmpstr.startsWith("SQL")))
-                    b = false;
-                if (tmpstr.length() != 18)
-                    b = false;
-                for (int i=3 ; i<18 ; i++)
+                if (Character.isDigit(tmpstr.charAt(i)))
+                    continue;
+                else
                 {
-                    if (Character.isDigit(tmpstr.charAt(i)))
-                        continue;
-                    else
-                    {
-                        b = false;
-                        break;
-                    }
+                    b = false;
+                    break;
                 }
-            return b;
             }
+            return b;
         }
         public String toString() {
             return "xxxxGENERATED-IDxxxx";
@@ -781,18 +773,28 @@ public class JDBC {
      * @param expectedTypes Array of expected parameter types.
      */
     public static void assertParameterTypes (PreparedStatement ps,
-	        int[] expectedTypes) throws SQLException
+	        int[] expectedTypes) throws Exception
 	    {
-		ParameterMetaData pmd = ps.getParameterMetaData();
-	        int actualParams = pmd.getParameterCount();
+            if ( vmSupportsJSR169() )
+            {
+                Assert.fail( "The assertParameterTypes() method only works on platforms which support ParameterMetaData." );
+            }
+
+            Object pmd = ps.getClass().getMethod( "getParameterMetaData", null ).invoke(  ps, null );
+            int actualParams = ((Integer) pmd.getClass().getMethod( "getParameterCount", null ).invoke( pmd, null )).intValue();
 
 	        Assert.assertEquals("Unexpected parameter count:",
-	                expectedTypes.length, pmd.getParameterCount());
+	                expectedTypes.length, actualParams );
+
+            Method  getParameterType = pmd.getClass().getMethod( "getParameterType", new Class[] { Integer.TYPE } );
 
 	        for (int i = 0; i < actualParams; i++)
 	        {
-	            Assert.assertEquals("Types do not match for parameter " + (i+1),
-	                    expectedTypes[i], pmd.getParameterType(i+1));
+	            Assert.assertEquals
+                    ("Types do not match for parameter " + (i+1),
+                     expectedTypes[i],
+                     ((Integer) getParameterType.invoke( pmd, new Object[] { new Integer( i + 1 ) } )).intValue()
+                     );
 	        }
 	    }
     

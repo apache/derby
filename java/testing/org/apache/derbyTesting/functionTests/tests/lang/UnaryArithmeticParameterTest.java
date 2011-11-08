@@ -1,6 +1,6 @@
 /*
 
-Derby - Class org.apache.derbyTesting.functionTests.tests.lang.unaryArithmeticParameterTest
+Derby - Class org.apache.derbyTesting.functionTests.tests.lang.UnaryArithmeticParameterTest
 
 Licensed to the Apache Software Foundation (ASF) under one or more
 contributor license agreements.  See the NOTICE file distributed with
@@ -81,9 +81,9 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 	}
 	/**
 	 * Test using parameters with unary minus and unary plus
-	 * @throws SQLException
+	 * @throws Exception
 	 */
-		public void testParametersForUnaryMinusAndPlus() throws SQLException {
+		public void testParametersForUnaryMinusAndPlus() throws Exception {
 			PreparedStatement ps = prepareStatement("insert into t1 values(?,+?,-?,?)");
 			ps.setInt(1,3);
 			ps.setInt(2,3);
@@ -126,9 +126,9 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			}
 		/**
 		 * Tests ABS function with Unary plus and Unary minus
-		 * @throws SQLException
+		 * @throws Exception
 		 */
-		public void testABSWithUnaryMinusAndPlus() throws SQLException {
+		public void testABSWithUnaryMinusAndPlus() throws Exception {
 			Statement s = createStatement();
 			s.execute("CREATE FUNCTION ABS_FUNCT(P1 INT) RETURNS INT CALLED ON NULL INPUT EXTERNAL NAME 'java.lang.Math.abs' LANGUAGE JAVA PARAMETER STYLE JAVA");
 			PreparedStatement ps = prepareStatement("select * from t1 where -? = abs_funct(+?)");
@@ -145,9 +145,9 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 		}	
 		/**
 		 * Tests MAX function with Unary plus and Unary minus
-		 * @throws SQLException
+		 * @throws Exception
 		 */
-		public void testMAXWithUnaryMinusAndPlus() throws SQLException{
+		public void testMAXWithUnaryMinusAndPlus() throws Exception{
 			Statement s = createStatement();
 			s.execute("CREATE FUNCTION MAX_CNI(P1 INT, P2 INT) RETURNS INT CALLED ON NULL INPUT EXTERNAL NAME 'java.lang.Math.max' LANGUAGE JAVA PARAMETER STYLE JAVA");
 			PreparedStatement ps = prepareStatement("select * from t1 where -? = max_cni(-5,-1)");
@@ -180,9 +180,9 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 			}
 		/**
 		 * Tests BETWEEN with unary minus and unary plus
-		 * @throws SQLException
+		 * @throws Exception
 		 */
-		public void testBETWEENWithUnaryMinusAndPlus() throws SQLException{
+		public void testBETWEENWithUnaryMinusAndPlus() throws Exception{
 			PreparedStatement ps = prepareStatement("select * from t1 where c11 between -? and +?");
 			ps.setInt(1,-1);
 			ps.setInt(2,1);
@@ -194,9 +194,9 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 		}
 		/**
 		 * Tests NOT IN with unary minus and unary plus
-		 * @throws SQLException
+		 * @throws Exception
 		 */
-		public void testNOTINWithUnaryMinusAndPlus() throws SQLException{
+		public void testNOTINWithUnaryMinusAndPlus() throws Exception{
 			PreparedStatement ps = prepareStatement("select * from t1 where +? not in (-?, +?, 2, ?)");
 			ps.setInt(1,-11);
 			ps.setInt(2,1);
@@ -218,9 +218,9 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 		}
 		/**
 		 * Tests operators with Unary plus and unary Minus
-		 * @throws SQLException
+		 * @throws Exception
 		 */
-		public void testOperatorsWithUnaryMinusAndPlus() throws SQLException{
+		public void testOperatorsWithUnaryMinusAndPlus() throws Exception{
 			PreparedStatement ps = prepareStatement("select * from t1 where +? < c12");
 			ps.setInt(1,0);
 			int[] expectedTypes=new int[]{Types.SMALLINT};
@@ -251,9 +251,9 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 		}
 		/**
 		 * Tests Casting with unary plus and unary minus
-		 * @throws SQLException
+		 * @throws Exception
 		 */
-		public void testCastWithUnaryMinusAndPlus()throws SQLException{
+		public void testCastWithUnaryMinusAndPlus()throws Exception{
 			PreparedStatement ps = prepareStatement("select cast(-? as smallint), cast(+? as int) from t1");
 			ps.setInt(1,2);
 			ps.setInt(2,2);
@@ -265,9 +265,9 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 		}
 		/**
 		 * Tests NullIf with unary minus and unary plus
-		 * @throws SQLException
+		 * @throws Exception
 		 */
-		public void testNullIfWithUnaryMinusAndPlus() throws SQLException{
+		public void testNullIfWithUnaryMinusAndPlus() throws Exception{
 			PreparedStatement ps = prepareStatement("select nullif(-?,c11) from t1");
 			ps.setInt(1,22);
 			int[] expectedTypes= new int[]{Types.INTEGER};
@@ -278,9 +278,9 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 		}
 		/**
 		 * Tests SQRT with unary minus and unary plus
-		 * @throws SQLException
+		 * @throws Exception
 		 */
-		public void testSQRTWithUnaryMinusAndPlus() throws SQLException{
+		public void testSQRTWithUnaryMinusAndPlus() throws Exception{
 			PreparedStatement ps = prepareStatement("select sqrt(-?) from t1");
 			ps.setInt(1,-64);
 			int[] expectedTypes= new int[]{Types.DOUBLE};
@@ -291,9 +291,9 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 		}
 		/**
 		 * Tests "select case when -?=c11 then -? else c12 end from t1"
-		 * @throws SQLException
+		 * @throws Exception
 		 */
-		public void testSelectWithUnaryMinusAndPlus() throws SQLException{
+		public void testSelectWithUnaryMinusAndPlus() throws Exception{
 			PreparedStatement ps =prepareStatement("select case when -?=c11 then -? else c12 end from t1");
 			ps.setInt(1,1);
 			ps.setInt(2,22);
@@ -305,9 +305,9 @@ public class UnaryArithmeticParameterTest extends BaseJDBCTestCase {
 		}
 		/**
 		 * Negative tests for unary minus and unary plus
-		 * @throws SQLException
+		 * @throws Exception
 		 */
-		public void testExpectedErrors() throws SQLException{
+		public void testExpectedErrors() throws Exception{
 			assertCompileError("42X34","select * from t1 where c11 = any (select -? from t2)");
 			
 			// -?/+? at the beginning and/ at the end of where clause

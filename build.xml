@@ -345,6 +345,7 @@
 
     <echo message="${checkEvent} compilerPropsAlreadySet = ${compilerPropsAlreadySet}"/>
     <echo message="${checkEvent} compilerLevel16 = ${compilerLevel16}"/>
+    <echo message="${checkEvent} compile.classpath = ${compile.classpath}"/>
     <echo message="${checkEvent} jsr169compile.classpath = ${jsr169compile.classpath}"/>
     <echo message="${checkEvent} j14lib = ${j14lib}"/>
     <echo message="${checkEvent} java14compile.classpath = ${java14compile.classpath}"/>
