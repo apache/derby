@@ -38,8 +38,10 @@ import org.apache.derby.io.StorageFile;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.derby.iapi.reference.Property;
 import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -612,6 +614,7 @@ nextFile:	for (int i = 0; i < list.length; i++) {
     private static Class aclEntryBuilderClz;
     private static Class aclEntryTypeClz;
     private static Class fileStoreClz;
+    private static Class aclEntryPermissionClz;
 
     private static Method get;
     private static Method getFileAttributeView;
@@ -626,7 +629,9 @@ nextFile:	for (int i = 0; i < list.length; i++) {
     private static Method newBuilder;
     private static Method setPrincipal;
     private static Method setType;
-
+    private static Method values;
+    private static Method setPermissions;
+    
     private static Field allow;
     /**
      * Use when creating new files. If running with Java 6 or higher on Unix,
@@ -660,7 +665,7 @@ nextFile:	for (int i = 0; i < list.length; i++) {
             // The property has not been specified. Only proceed if we are
             // running with the network server started from the command line
             // *and* at Java 7 or above
-            if (JVMInfo.JDK_ID >= JVMInfo.J2SE_17 && 
+            if (JVMInfo.JDK_ID >= JVMInfo.J2SE_17 &&
                     (PropertyUtil.getSystemBoolean(
                         Property.SERVER_STARTED_FROM_CMD_LINE, false)) ) {
                 // proceed
@@ -717,6 +722,8 @@ nextFile:	for (int i = 0; i < list.length; i++) {
                         "java.nio.file.attribute.AclEntryType");
                     fileStoreClz = Class.forName(
                         "java.nio.file.FileStore");
+                    aclEntryPermissionClz = Class.forName(
+                            "java.nio.file.attribute.AclEntryPermission");
                     get = pathsClz.getMethod(
                         "get",
                         new Class[]{String.class, stringArrayClz});
@@ -748,6 +755,10 @@ nextFile:	for (int i = 0; i < list.length; i++) {
                                   new Class[]{userPrincipalClz});
                     setType = aclEntryBuilderClz.
                         getMethod("setType", new Class[]{aclEntryTypeClz});
+                    values = aclEntryPermissionClz.
+                        getMethod("values", (Class[]) null);
+                    setPermissions = aclEntryBuilderClz.
+                        getMethod("setPermissions", new Class[] { Set.class });
 
                     allow = aclEntryTypeClz.getField("ALLOW");
 
@@ -904,81 +915,49 @@ nextFile:	for (int i = 0; i < list.length; i++) {
             }
 
 
-            // If we have a posix view, we can use ACLs to interface
-            // the usual Unix permission masks vi the special principals
-            // OWNER@, GROUP@ and EVERYONE@
-
-            // PosixFileAttributeView posixView =
-            // Files.getFileAttributeView(fileP, PosixFileAttributeView.class);
+            // If we have a posix view, just return and fall back on
+            // the JDK 6 approach.
             Object posixView = getFileAttributeView.invoke(
                 null,
                 new Object[]{fileP,
                              posixFileAttributeViewClz,
                              Array.newInstance(linkOptionClz, 0)});
 
+            if (posixView != null) {
+                return false;
+            }
+
+            // Since we have an AclFileAttributeView which is not a
+            // PosixFileAttributeView, we probably have a NTFS file
+            // system.
+
             // UserPrincipal owner = Files.getOwner(fileP);
             Object owner = getOwner.invoke(
                 null,
                 new Object[]{fileP, Array.newInstance(linkOptionClz, 0)});
 
-            // List<AclEntry> oldAcl = view.getAcl();
-            // List<AclEntry> newAcl = new ArrayList<>();
-
-            List oldAcl = (List)getAcl.invoke(view, null);
-            List newAcl = new ArrayList();
-
-            // for (AclEntry ace : oldAcl) {
-            //     if (posixView != null) {
-            //         if (ace.principal().getName().equals("OWNER@")) {
-            //             // retain permission for owner
-            //             newAcl.add(ace);
-            //         } else if (
-            //             ace.principal().getName().equals("GROUP@") ||
-            //             ace.principal().getName().equals("EVERYONE@")) {
             //
-            //             AclEntry.Builder aceb = AclEntry.newBuilder();
-            //             aceb.setPrincipal(ace.principal())
-            //                 .setType(AclEntryType.ALLOW);
-            //             // add no permissions for the group and other
-            //             newAcl.add(aceb.build());
-            //         }
-            //     } else {
-            //         // NTFS, hopefully
-            //         if (ace.principal().equals(owner)) {
-            //             newAcl.add(ace);
-            //         }
-            //     }
-            // }
+            // Remove existing ACEs, build a new one which simply
+            // gives all possible permissions to current owner.
+            //
+            // List<AclEntry>        newAcl = new ArrayList<>();
+            // AclEntryPermissions[] perms = AclEntryPermission.values();
+            // AclEntry.Builder      aceb = AclEntry.newBuilder();
+            //
+            // aceb.setType(AclEntryType.ALLOW);
+            // aceb.setPermissions(new HashSet(Arrays.asList(perms);
+            // newAcl.add(aceb);
 
-            for (Iterator i = oldAcl.iterator(); i.hasNext();) {
-                Object ace = i.next();
-                Object princ = principal.invoke(ace, null);
-                String princName = (String)getName.invoke(princ, null);
-
-                if (posixView != null) {
-                    if (princName.equals("OWNER@")) {
-                        // retain permission for owner
-                        newAcl.add(ace);
-                    } else if (
-                        princName.equals("GROUP@") ||
-                        princName.equals("EVERYONE@")) {
-
-                        // add ALLOW ACE w/no permissions for group and other
-
-                        Object aceb = newBuilder.invoke(null, null);
-                        Object allowValue = allow.get(aclEntryTypeClz);
-
-                        aceb = setPrincipal.invoke(aceb, new Object[]{princ});
-                        aceb = setType.invoke(aceb, new Object[]{allowValue});
-                        newAcl.add(build.invoke(aceb, null));
-                    }
-                } else {
-                    // NTFS, hopefully
-                    if (princ.equals(owner)) {
-                        newAcl.add(ace);
-                    }
-                }
-            }
+            List newAcl = new ArrayList();
+            Object[] perms = (Object[]) values.invoke(null, (Object[]) null);
+            Object aceb = newBuilder.invoke(null, (Object[]) null);
+            Object allowValue = allow.get(aclEntryTypeClz);
+            aceb = setPrincipal.invoke(aceb, new Object[]{owner});
+            aceb = setType.invoke(aceb, new Object[]{allowValue});
+            aceb = setPermissions.invoke(
+                aceb,
+                new Object[] {new HashSet(Arrays.asList(perms))});
+            newAcl.add(build.invoke(aceb, (Object[]) null));
 
             // view.setAcl(newAcl);
             setAcl.invoke(view, new Object[]{newAcl});

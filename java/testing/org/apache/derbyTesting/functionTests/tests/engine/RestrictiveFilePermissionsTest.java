@@ -725,8 +725,9 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                                 posixFileAttributeViewClz,
                                 Array.newInstance(linkOptionClz, 0)});
 
-                        if (aclsSupported && aclView != null) {
-                            // Windows, Solaris 11
+                        if (aclsSupported && aclView != null &&
+                                posixView == null) {
+                            // Windows
                             Object owner = getOwner.invoke(
                                 null,
                                 new Object[]{
@@ -784,6 +785,7 @@ public class RestrictiveFilePermissionsTest extends BaseJDBCTestCase {
                                 }
                             }
                         } else if (posixView != null) {
+                            // Unixen
                             Object posixFileAttributes =
                                 readAttributes.invoke(posixView,
                                                       new Object[]{});
