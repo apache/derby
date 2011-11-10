@@ -113,6 +113,7 @@ public final class InsertNode extends DMLModStatementNode
 	private     OrderByList         orderByList;
     private     ValueNode           offset;
     private     ValueNode           fetchFirst;
+    private     boolean           hasJDBClimitClause; // true if using JDBC limit/offset escape syntax
 
 	protected   RowLocation[] 		autoincRowLocation;
 	/**
@@ -127,8 +128,10 @@ public final class InsertNode extends DMLModStatementNode
 	 * @param queryExpression	The query expression that will generate
 	 *				the rows to insert into the given table
 	 * @param targetProperties	The properties specified on the target table
-     * @param orderByList The order by list for the source result set, null if
-	 *			no order by list
+     * @param orderByList The order by list for the source result set, null if no order by list
+	 * @param offset The value of a <result offset clause> if present
+	 * @param fetchFirst The value of a <fetch first clause> if present
+	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses come from JDBC limit/offset escape syntax
 	 */
 
 	public void init(
@@ -138,7 +141,8 @@ public final class InsertNode extends DMLModStatementNode
 			Object targetProperties,
             Object orderByList,
             Object offset,
-            Object fetchFirst)
+            Object fetchFirst,
+            Object hasJDBClimitClause)
 	{
 		/* statementType gets set in super() before we've validated
 		 * any properties, so we've kludged the code to get the
@@ -155,6 +159,7 @@ public final class InsertNode extends DMLModStatementNode
 		this.orderByList = (OrderByList) orderByList;
         this.offset = (ValueNode)offset;
         this.fetchFirst = (ValueNode)fetchFirst;
+        this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
 
 		/* Remember that the query expression is the source to an INSERT */
 		getResultSetNode().setInsertSource();
@@ -850,7 +855,7 @@ public final class InsertNode extends DMLModStatementNode
 			orderByList = null;
 		}
 
-        resultSet.pushOffsetFetchFirst(offset, fetchFirst);
+        resultSet.pushOffsetFetchFirst( offset, fetchFirst, hasJDBClimitClause );
 
 		super.optimizeStatement();
         

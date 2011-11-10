@@ -1283,6 +1283,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 		int resultSetNumber,
 		GeneratedMethod offsetMethod,
 		GeneratedMethod fetchFirstMethod,
+        boolean hasJDBClimitClause,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost)
 		throws StandardException
@@ -1292,6 +1293,7 @@ public class GenericResultSetFactory implements ResultSetFactory
 									 resultSetNumber,
 									 offsetMethod,
 									 fetchFirstMethod,
+									 hasJDBClimitClause,
 									 optimizerEstimatedRowCount,
 									 optimizerEstimatedCost);
 	}

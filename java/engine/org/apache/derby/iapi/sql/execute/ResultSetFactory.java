@@ -1638,8 +1638,8 @@ public interface ResultSetFactory {
 	 *                        allocation operation
 	 * @param resultSetNumber The resultSetNumber for the ResultSet
 	 * @param offsetMethod   The OFFSET parameter was specified
-	 * @param fetchFirstMethod The FETCH FIRST/NEXT parameter was
-	 *                        specified
+	 * @param fetchFirstMethod The FETCH FIRST/NEXT parameter was specified
+	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses were added by JDBC LIMIT escape syntax
 	 * @param optimizerEstimatedRowCount
 	 *                        Estimated total # of rows by optimizer
 	 * @param optimizerEstimatedCost
@@ -1653,6 +1653,7 @@ public interface ResultSetFactory {
 		int resultSetNumber,
 		GeneratedMethod offsetMethod,
 		GeneratedMethod fetchFirstMethod,
+        boolean hasJDBClimitClause,
 		double optimizerEstimatedRowCount,
 		double optimizerEstimatedCost) throws StandardException;
 

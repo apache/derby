@@ -48,6 +48,10 @@ public final class RowCountNode extends SingleChildResultSetNode
      * If not null, this represents the value of a <fetch first clause>.
      */
     private ValueNode fetchFirst;
+    /**
+     * True if the offset/fetchFirst clauses were added by JDBC LIMIT syntax.
+     */
+    private boolean hasJDBClimitClause;
 
 
     /**
@@ -58,7 +62,8 @@ public final class RowCountNode extends SingleChildResultSetNode
     public void init(Object childResult,
                      Object rcl,
                      Object offset,
-                     Object fetchFirst)
+                     Object fetchFirst,
+                     Object hasJDBClimitClause)
         throws StandardException {
 
         init(childResult, null);
@@ -66,6 +71,7 @@ public final class RowCountNode extends SingleChildResultSetNode
 
         this.offset = (ValueNode)offset;
         this.fetchFirst = (ValueNode)fetchFirst;
+        this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
     }
 
 
@@ -112,14 +118,16 @@ public final class RowCountNode extends SingleChildResultSetNode
             mb.pushNull(ClassName.GeneratedMethod);
         }
 
-        mb.push(costEstimate.rowCount()); // arg6
-        mb.push(costEstimate.getEstimatedCost()); // arg7
+        mb.push( hasJDBClimitClause );  // arg6
+
+        mb.push(costEstimate.rowCount()); // arg7
+        mb.push(costEstimate.getEstimatedCost()); // arg8
 
         mb.callMethod(VMOpcode.INVOKEINTERFACE,
                       (String) null,
                       "getRowCountResultSet",
                       ClassName.NoPutResultSet,
-                      7);
+                      8);
     }
 
 

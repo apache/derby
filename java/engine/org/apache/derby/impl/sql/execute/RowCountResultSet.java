@@ -56,6 +56,7 @@ class RowCountResultSet extends NoPutResultSetImpl
     private long fetchFirst;
     final private GeneratedMethod offsetMethod;
     final private GeneratedMethod fetchFirstMethod;
+    final private boolean hasJDBClimitClause;
 
     /**
      * True if we haven't yet fetched any rows from this result set.
@@ -79,6 +80,7 @@ class RowCountResultSet extends NoPutResultSetImpl
      * @param resultSetNumber The resultSetNumber for the ResultSet
      * @param offsetMethod   Generated method
      * @param fetchFirstMethod Generated method
+     * @param hasJDBClimitClause True if offset/fetchFirst clauses were added by JDBC LIMIT escape syntax
      * @param optimizerEstimatedRowCount
      *                        Estimated total # of rows by optimizer
      * @param optimizerEstimatedCost
@@ -91,6 +93,7 @@ class RowCountResultSet extends NoPutResultSetImpl
          int resultSetNumber,
          GeneratedMethod offsetMethod,
          GeneratedMethod fetchFirstMethod,
+         boolean hasJDBClimitClause,
          double optimizerEstimatedRowCount,
          double optimizerEstimatedCost)
             throws StandardException {
@@ -102,6 +105,7 @@ class RowCountResultSet extends NoPutResultSetImpl
 
         this.offsetMethod = offsetMethod;
         this.fetchFirstMethod = fetchFirstMethod;
+        this.hasJDBClimitClause = hasJDBClimitClause;
 
         source = s;
 
@@ -214,6 +218,18 @@ class RowCountResultSet extends NoPutResultSetImpl
                 if (fetchFirstVal.isNotNull().getBoolean()) {
 
                     fetchFirst = fetchFirstVal.getLong();
+
+                    //
+                    // According to section 13.4.6 of the JDBC 4.1 MR spec, you
+                    // can specify a LIMIT of 0. This means that you want all rows
+                    // to be returned from the OFFSET onwards. This diverges from
+                    // the SQL Standard treatment of the FETCH FIRST clause. For the
+                    // SQL Standard, a FETCH FIRST value of 0 rows is supposed to
+                    // raise an error. See the functional spec attached to DERBY-5488.
+                    // Here we translate a JDBC LIMIT of 0 into a FETCH FIRST value of
+                    // Long.MAX_VALUE so that all rows will be returned from OFFSET onwards.
+                    //
+                    if ( hasJDBClimitClause && (fetchFirst == 0) ) { fetchFirst = Long.MAX_VALUE; }
 
                     if (fetchFirst < 1) {
                         throw StandardException.newException(

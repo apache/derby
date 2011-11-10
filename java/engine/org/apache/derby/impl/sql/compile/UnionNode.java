@@ -493,6 +493,7 @@ public class UnionNode extends SetOperatorNode
                 newRcl,
                 offset,
                 fetchFirst,
+                new Boolean( hasJDBClimitClause ),
                 getContextManager());
         }
 

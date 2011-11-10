@@ -50,6 +50,7 @@ public class FromSubquery extends FromTable
 	private OrderByList orderByList;
     private ValueNode offset;
     private ValueNode fetchFirst;
+    private boolean hasJDBClimitClause; // true if using JDBC limit/offset escape syntax
 
 	/**
 	 * DERBY-3270: If this subquery represents an expanded view, this holds the
@@ -64,6 +65,7 @@ public class FromSubquery extends FromTable
 	 * @param orderByList   ORDER BY list if any, or null
      * @param offset        OFFSET if any, or null
      * @param fetchFirst    FETCH FIRST if any, or null
+	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses come from JDBC limit/offset escape syntax
 	 * @param correlationName	The correlation name
 	 * @param derivedRCL		The derived column list
 	 * @param tableProperties	Properties list associated with the table
@@ -73,6 +75,7 @@ public class FromSubquery extends FromTable
 					Object orderByList,
                     Object offset,
                     Object fetchFirst,
+                    Object hasJDBClimitClause,
 					Object correlationName,
 				 	Object derivedRCL,
 					Object tableProperties)
@@ -82,6 +85,7 @@ public class FromSubquery extends FromTable
 		this.orderByList = (OrderByList)orderByList;
         this.offset = (ValueNode)offset;
         this.fetchFirst = (ValueNode)fetchFirst;
+        this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
 		resultColumns = (ResultColumnList) derivedRCL;
 	}
 
@@ -390,7 +394,7 @@ public class FromSubquery extends FromTable
 			orderByList = null;
 		}
 
-        subquery.pushOffsetFetchFirst(offset, fetchFirst);
+        subquery.pushOffsetFetchFirst( offset, fetchFirst, hasJDBClimitClause );
 
 		/* We want to chop out the FromSubquery from the tree and replace it 
 		 * with a ProjectRestrictNode.  One complication is that there may be 

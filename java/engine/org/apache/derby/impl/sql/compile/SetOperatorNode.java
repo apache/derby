@@ -63,6 +63,7 @@ abstract class SetOperatorNode extends TableOperatorNode
 	OrderByList orderByList;
     ValueNode   offset; // OFFSET n ROWS
     ValueNode   fetchFirst; // FETCH FIRST n ROWS ONLY
+    boolean   hasJDBClimitClause; // were OFFSET/FETCH FIRST specified by a JDBC LIMIT clause?
 	// List of scoped predicates for pushing during optimization.
 	private PredicateList leftOptPredicates;
 	private PredicateList rightOptPredicates;
@@ -803,11 +804,13 @@ abstract class SetOperatorNode extends TableOperatorNode
      *
      * @param offset    the OFFSET, if any
      * @param fetchFirst the OFFSET FIRST, if any
+     * @param hasJDBClimitClause true if the clauses were added by (and have the semantics of) a JDBC limit clause
      */
-    void pushOffsetFetchFirst(ValueNode offset, ValueNode fetchFirst)
+    void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
         this.offset = offset;
         this.fetchFirst = fetchFirst;
+        this.hasJDBClimitClause = hasJDBClimitClause;
     }
 
 

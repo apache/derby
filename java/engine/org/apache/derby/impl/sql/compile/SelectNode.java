@@ -107,6 +107,7 @@ public class SelectNode extends ResultSetNode
 
     ValueNode   offset;  // OFFSET n ROWS, if given
     ValueNode   fetchFirst; // FETCH FIRST n ROWS ONLY, if given
+    boolean   hasJDBClimitClause; //  were OFFSET/FETCH FIRST specified by a JDBC LIMIT clause?
 
 
 	/* PredicateLists for where clause */
@@ -934,11 +935,13 @@ public class SelectNode extends ResultSetNode
      *
      * @param offset    the OFFSET, if any
      * @param fetchFirst the OFFSET FIRST, if any
+     * @param hasJDBClimitClause true if the clauses were added by (and have the semantics of) a JDBC limit clause
      */
-    void pushOffsetFetchFirst(ValueNode offset, ValueNode fetchFirst)
+    void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
         this.offset = offset;
         this.fetchFirst = fetchFirst;
+        this.hasJDBClimitClause = hasJDBClimitClause;
     }
 
 
@@ -1654,6 +1657,7 @@ public class SelectNode extends ResultSetNode
                 topList,
                 offset,
                 fetchFirst,
+                new Boolean( hasJDBClimitClause ),
                 getContextManager());
         }
 

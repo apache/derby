@@ -71,6 +71,7 @@ public class CreateViewNode extends DDLStatementNode
 	private OrderByList orderByList;
     private ValueNode   offset;
     private ValueNode   fetchFirst;
+    private boolean hasJDBClimitClause; // true if using JDBC limit/offset escape syntax
 
 	/**
 	 * Initializer for a CreateViewNode
@@ -85,6 +86,7 @@ public class CreateViewNode extends DDLStatementNode
 	 * @param orderCols         ORDER BY list
      * @param offset            OFFSET if any, or null
      * @param fetchFirst        FETCH FIRST if any, or null
+	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses come from JDBC limit/offset escape syntax
 	 *
 	 * @exception StandardException		Thrown on error
 	 */
@@ -96,7 +98,8 @@ public class CreateViewNode extends DDLStatementNode
 				   Object qeText,
                    Object orderCols,
                    Object offset,
-                   Object fetchFirst)
+                   Object fetchFirst,
+                   Object hasJDBClimitClause)
 		throws StandardException
 	{
 		initAndCheck(newObjectName);
@@ -107,6 +110,7 @@ public class CreateViewNode extends DDLStatementNode
 		this.orderByList = (OrderByList)orderCols;
         this.offset = (ValueNode)offset;
         this.fetchFirst = (ValueNode)fetchFirst;
+        this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
 
 		implicitCreateSchema = true;
 	}
@@ -430,4 +434,7 @@ public class CreateViewNode extends DDLStatementNode
     public ValueNode getFetchFirst() {
         return fetchFirst;
     }
+    
+    public boolean hasJDBClimitClause() { return hasJDBClimitClause; }
+
 }

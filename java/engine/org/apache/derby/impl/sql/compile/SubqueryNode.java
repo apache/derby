@@ -170,6 +170,7 @@ public class SubqueryNode extends ValueNode
 	private OrderByList orderByList;
     private ValueNode   offset;
     private ValueNode   fetchFirst;
+    private boolean hasJDBClimitClause; // true if using JDBC limit/offset escape syntax
 
 	/* Subquery types.
 	 * NOTE: FROM_SUBQUERY only exists for a brief second in the parser.  It
@@ -209,6 +210,7 @@ public class SubqueryNode extends ValueNode
 	 * @param orderCols     ORDER BY list
      * @param offset        OFFSET n ROWS
      * @param fetchFirst    FETCH FIRST n ROWS ONLY
+	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses come from JDBC limit/offset escape syntax
 	 */
 
 	public void init(
@@ -217,13 +219,15 @@ public class SubqueryNode extends ValueNode
 							Object leftOperand,
                             Object orderCols,
                             Object offset,
-                            Object fetchFirst)
+                            Object fetchFirst,
+                            Object hasJDBClimitClause)
 	{
 		this.resultSet = (ResultSetNode) resultSet;
 		this.subqueryType = ((Integer) subqueryType).intValue();
 		this.orderByList = (OrderByList)orderCols;
         this.offset = (ValueNode)offset;
         this.fetchFirst = (ValueNode)fetchFirst;
+        this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
 
 		/* Subqueries are presumed not to be under a top level AndNode by
 		 * default.  This is because expression normalization only recurses
@@ -868,7 +872,7 @@ public class SubqueryNode extends ValueNode
 		}
 
 
-        resultSet.pushOffsetFetchFirst(offset, fetchFirst);
+        resultSet.pushOffsetFetchFirst( offset, fetchFirst, hasJDBClimitClause );
 
 		/* We transform the leftOperand and the select list for quantified 
 		 * predicates that have a leftOperand into a new predicate and push it
@@ -2575,4 +2579,14 @@ public class SubqueryNode extends ValueNode
     public ValueNode getFetchFirst() {
         return fetchFirst;
     }
+
+    /**
+     * Return true if the offset/fetchFirst clauses were added by JDBC LIMIT escape syntax.
+     * This method is used to construct a FROM_SUBQUERY only, cf.
+     * FromSubquery, for which this node is transient.
+     *
+     * @return true if the JDBC limit/offset semantics (rather than the SQL Standard OFFSET/FETCH NEXT) semantics apply
+     */
+    public boolean hasJDBClimitClause() { return hasJDBClimitClause; }
+
 }

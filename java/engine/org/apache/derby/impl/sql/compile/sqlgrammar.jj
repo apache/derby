@@ -226,6 +226,11 @@ public class SQLParser
     private static final int IDX_CYCLE_OPTION = IDX_MIN_VALUE_OPTION + 1;
     private static final int IDX_OPTION_COUNT = IDX_CYCLE_OPTION + 1;
 
+    // indexes into array of clauses for OFFSET FETCH NEXT
+    private static final int OFFSET_CLAUSE = 0;
+    private static final int FETCH_FIRST_CLAUSE = OFFSET_CLAUSE + 1;
+    private static final int OFFSET_CLAUSE_COUNT = FETCH_FIRST_CLAUSE + 1;
+
 	private Object[]					paramDefaults;
 	private String						statementSQLText;
 	private NodeFactory					nodeFactory;
@@ -2437,6 +2442,7 @@ TOKEN [IGNORE_CASE] :
 |	<LARGE: "large">
 |	<LENGTH: "length">
 |	<LEVEL: "level">
+|	<LIMIT: "limit">
 |	<LOCKS: "locks">
 |	<LOCKSIZE: "locksize">
 |	<LOGGED: "logged">
@@ -3361,14 +3367,13 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 	int				  isolationLevel = ExecutionContext.UNSPECIFIED_ISOLATION_LEVEL;
 	CursorNode		  retval;
 	OrderByList orderCols = null;
-	ValueNode offset = null;
-	ValueNode fetchFirst = null;
+    ValueNode[] offsetClauses = new ValueNode[ OFFSET_CLAUSE_COUNT ];
+    boolean     hasJDBClimitClause = false;
 }
 {
 	queryExpression = queryExpression(null, NO_SET_OP) 
 		[ orderCols = orderByClause() ]
-		[ offset = offsetClause() ]
-		[ fetchFirst = fetchFirstClause() ]
+        hasJDBClimitClause = offsetFetchFirstClause( offsetClauses )
 		[ <FOR> forUpdateState = forUpdateClause(updateColumns) ]
 		[ isolationLevel = atIsolationLevel() ]
 	{
@@ -3382,8 +3387,9 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 				queryExpression,
 				null,
 				orderCols,
-				offset,
-				fetchFirst,
+				offsetClauses[ OFFSET_CLAUSE ],
+				offsetClauses[ FETCH_FIRST_CLAUSE ],
+                new Boolean( hasJDBClimitClause ),
 				ReuseFactory.getInteger(forUpdateState),
 				(forUpdateState == CursorNode.READ_ONLY ? null : updateColumns ),
 				getContextManager());
@@ -3650,6 +3656,7 @@ bareCallStatement() throws StandardException :
 						C_NodeTypes.CURSOR_NODE,
 						"SELECT",
 						resultSetNode,
+						null,
 						null,
 						null,
 						null,
@@ -5573,6 +5580,7 @@ remainingNegatablePredicate(ValueNode leftOperand) throws StandardException :
 	<LIKE> likePattern = additiveExpression(null, 0)
             [
                 <ESCAPE> escapeValue = additiveExpression(null, 0) |
+                LOOKAHEAD ( { getToken(1).kind == LEFT_BRACE && getToken(2).kind != LIMIT } )
                 <LEFT_BRACE> <ESCAPE> escapeValue = additiveExpression(null, 0) <RIGHT_BRACE>
             ]
 	{
@@ -8246,6 +8254,75 @@ nullOrdering(OrderByColumn orderCol) :
 
 
 /*
+ * <A NAME="offsetFetchFirstClause">offsetFetchFirstClause</A>
+ */
+boolean
+offsetFetchFirstClause( ValueNode[] clauses ) throws StandardException :
+{}
+{
+    LOOKAHEAD ( { getToken(1).kind == OFFSET || getToken(1).kind == FETCH } )
+    sqlStandardOffsetFetchFirst( clauses )
+    {
+        return false;
+    }
+|
+    [
+        LOOKAHEAD ( { getToken(1).kind == LEFT_BRACE } )
+        jdbcLimitOffset( clauses )
+    ]
+    {
+        return true;
+    }
+}
+
+/*
+ * <A NAME="sqlStandardOffsetFetchFirst">sqlStandardOffsetFetchFirst</A>
+ */
+void
+sqlStandardOffsetFetchFirst( ValueNode[] clauses ) throws StandardException :
+{}
+{
+    [ clauses[ OFFSET_CLAUSE ] = offsetClause() ]
+    [ clauses[ FETCH_FIRST_CLAUSE ] = fetchFirstClause() ]
+}
+
+/*
+ * <A NAME="jdbcLimitOffset">jdbcLimitOffset</A>
+ */
+void
+jdbcLimitOffset( ValueNode[] clauses ) throws StandardException :
+{
+    ValueNode rowCount = null;
+    ValueNode startRow = null;
+}
+{
+    <LEFT_BRACE>
+        <LIMIT> ( rowCount = intLiteral() | rowCount = dynamicParameterSpecification() )
+        [ <OFFSET> ( startRow = intLiteral() | startRow = dynamicParameterSpecification() ) ]
+    <RIGHT_BRACE>
+    {
+        // LIMIT of 0 means omit the FETCH/FIRST CLAUSE
+        if ( 
+             (rowCount instanceof NumericConstantNode) &&
+             ((NumericConstantNode) rowCount).getValue().getInt() == 0
+           )
+        {
+            rowCount = null;
+        }
+
+        // default OFFSET is 0
+        if ( startRow == null )
+        {
+            startRow = getNumericNode( "0", true );
+        }
+
+        clauses[ FETCH_FIRST_CLAUSE ] = rowCount;
+        clauses[ OFFSET_CLAUSE ] = startRow;
+        return;
+    }
+}
+
+/*
  * <A NAME="offsetClause">offsetClause</A>
  */
 ValueNode
@@ -8441,8 +8518,8 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 	ResultSetNode	queryExpression;
 	ResultColumnList	columnList = null;
 	OrderByList orderCols = null;
-    ValueNode offset = null;
-    ValueNode fetchFirst = null;
+    ValueNode[] offsetClauses = new ValueNode[ OFFSET_CLAUSE_COUNT ];
+    boolean     hasJDBClimitClause = false;
 }
 {
 	[
@@ -8457,8 +8534,7 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 	[ targetProperties = propertyList(false) <CHECK_PROPERTIES>]
 	queryExpression = queryExpression(null, NO_SET_OP)
 	[ orderCols = orderByClause() ]
-    [ offset = offsetClause() ]
-    [ fetchFirst = fetchFirstClause() ]
+    hasJDBClimitClause = offsetFetchFirstClause( offsetClauses )
 	{
 		if (orderCols != null && isTableValueConstructor(queryExpression)) {
 			// Not allowed by the standard since this is a <contextually typed
@@ -8470,11 +8546,15 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 				SQLState.LANG_SYNTAX_ERROR, "ORDER BY");
 		}
 
-        if ((offset != null || fetchFirst != null) &&
-                isTableValueConstructor(queryExpression)) {
-            throw StandardException.newException(
-                SQLState.LANG_SYNTAX_ERROR,
-                (offset != null) ? "OFFSET" : "FETCH");
+        if ((offsetClauses[ OFFSET_CLAUSE ] != null || offsetClauses[ FETCH_FIRST_CLAUSE ] != null) &&
+                isTableValueConstructor(queryExpression))
+        {
+            String tokenName;
+            if ( hasJDBClimitClause ) { tokenName = "LIMIT"; }
+            else if ( offsetClauses[ OFFSET_CLAUSE ] != null ) { tokenName = "OFFSET"; }
+            else { tokenName = "FETCH"; }
+
+            throw StandardException.newException( SQLState.LANG_SYNTAX_ERROR, tokenName );
         }
 
 		return (StatementNode) nodeFactory.getNode(
@@ -8484,8 +8564,9 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 							queryExpression,
 							targetProperties,
 							orderCols,
-                            offset,
-                            fetchFirst,
+                            offsetClauses[ OFFSET_CLAUSE ],
+                            offsetClauses[ FETCH_FIRST_CLAUSE ],
+                            new Boolean( hasJDBClimitClause ),
 							getContextManager());
 	}
 	/* RESOLVE: Ignoring default values for now
@@ -8724,14 +8805,13 @@ subquery(int subqueryType, ValueNode leftOperand) throws StandardException :
 	ResultSetNode	queryExpression;
 	SubqueryNode	subqueryNode;
 	OrderByList orderCols = null;
-    ValueNode offset = null;
-    ValueNode fetchFirst = null;
+    ValueNode[] offsetClauses = new ValueNode[ OFFSET_CLAUSE_COUNT ];
+    boolean     hasJDBClimitClause = false;
 }
 {
 	queryExpression = queryExpression(null, NO_SET_OP)
 	[ orderCols = orderByClause() ]
-    [ offset = offsetClause() ]
-    [ fetchFirst = fetchFirstClause() ]
+    hasJDBClimitClause = offsetFetchFirstClause( offsetClauses )
 	{
 		subqueryNode = (SubqueryNode) nodeFactory.getNode(
 										C_NodeTypes.SUBQUERY_NODE,
@@ -8739,8 +8819,9 @@ subquery(int subqueryType, ValueNode leftOperand) throws StandardException :
 										ReuseFactory.getInteger(subqueryType),
 										leftOperand,
 										orderCols,
-                                        offset,
-                                        fetchFirst,
+                                        offsetClauses[ OFFSET_CLAUSE ],
+                                        offsetClauses[ FETCH_FIRST_CLAUSE ],
+                                        new Boolean( hasJDBClimitClause ),
 										getContextManager());
 		return subqueryNode;
 	}
@@ -9217,6 +9298,7 @@ FromTable tableFactor() throws StandardException :
 											derivedTable.getOrderByList(),
                                             derivedTable.getOffset(),
                                             derivedTable.getFetchFirst(),
+                                            new Boolean( derivedTable.hasJDBClimitClause() ),
 											correlationName,
 											derivedRCL,
 											((optionalTableClauses != null) ?
@@ -10970,16 +11052,15 @@ viewDefinition(Token beginToken) throws StandardException :
 	Token				checkTok = null;
 	Token				endToken;
 	OrderByList         orderCols = null;
-    ValueNode           offset = null;
-    ValueNode           fetchFirst = null;
+    ValueNode[] offsetClauses = new ValueNode[ OFFSET_CLAUSE_COUNT ];
+    boolean     hasJDBClimitClause = false;
 }
 {
 	<VIEW> tableName = qualifiedName(Limits.MAX_IDENTIFIER_LENGTH) 
 		[ <LEFT_PAREN> resultColumns = viewColumnList() <RIGHT_PAREN> ]
 		<AS> queryExpression = queryExpression(null, NO_SET_OP)
 		[ orderCols = orderByClause() ]
-        [ offset = offsetClause() ]
-        [ fetchFirst = fetchFirstClause() ]
+        hasJDBClimitClause = offsetFetchFirstClause( offsetClauses )
 	{
 		checkOptionType = ViewDescriptor.NO_CHECK_OPTION;
 		endToken = getToken(0);
@@ -11001,8 +11082,9 @@ viewDefinition(Token beginToken) throws StandardException :
 												beginToken.beginOffset,
 												endToken.endOffset,false),
 								orderCols,
-                                offset,
-                                fetchFirst,
+                                offsetClauses[ OFFSET_CLAUSE ],
+                                offsetClauses[ FETCH_FIRST_CLAUSE ],
+                                new Boolean( hasJDBClimitClause ),
 								getContextManager());
 	}
 }
@@ -14520,6 +14602,7 @@ nonReservedKeyword()  :
     |   tok = <LCASE>
 	|	tok = <LENGTH>
 	|	tok = <LEVEL>
+    |   tok = <LIMIT>
     |   tok = <LOCATE>
 	|	tok = <LOCK>
 	|	tok = <LOCKS>

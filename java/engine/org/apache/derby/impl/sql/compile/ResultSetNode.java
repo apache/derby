@@ -1671,8 +1671,9 @@ public abstract class ResultSetNode extends QueryTreeNode
      *
      * @param offset    the OFFSET, if any
      * @param fetchFirst the OFFSET FIRST, if any
+     * @param hasJDBClimitClause true if the clauses were added by (and have the semantics of) a JDBC limit clause
      */
-    void pushOffsetFetchFirst(ValueNode offset, ValueNode fetchFirst)
+    void pushOffsetFetchFirst( ValueNode offset, ValueNode fetchFirst, boolean hasJDBClimitClause )
     {
         if (SanityManager.DEBUG)
         {

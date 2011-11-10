@@ -335,6 +335,7 @@ public class IntersectOrExceptNode extends SetOperatorNode
                 newRcl,
                 offset,
                 fetchFirst,
+                new Boolean( hasJDBClimitClause ),
                 getContextManager());
         }
 

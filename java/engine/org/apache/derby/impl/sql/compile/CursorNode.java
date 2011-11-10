@@ -55,6 +55,7 @@ public class CursorNode extends DMLStatementNode
 	private OrderByList	orderByList;
 	private ValueNode   offset;     // <result offset clause> value
 	private ValueNode   fetchFirst; // <fetch first clause> value
+    private boolean hasJDBClimitClause; // true if using JDBC limit/offset escape syntax
 	private String		statementType;
 	private int		updateMode;
 	private boolean		needTarget;
@@ -89,6 +90,7 @@ public class CursorNode extends DMLStatementNode
 	 *			order by list
 	 * @param offset The value of a <result offset clause> if present
 	 * @param fetchFirst The value of a <fetch first clause> if present
+	 * @param hasJDBClimitClause True if the offset/fetchFirst clauses come from JDBC limit/offset escape syntax
 	 * @param updateMode	The user-specified update mode for the cursor,
 	 *			for example, CursorNode.READ_ONLY
 	 * @param updatableColumns The list of updatable columns specified by
@@ -105,6 +107,7 @@ public class CursorNode extends DMLStatementNode
 		Object orderByList,
 		Object offset,
 		Object fetchFirst,
+        Object hasJDBClimitClause,
 		Object updateMode,
 		Object updatableColumns)
 	{
@@ -114,6 +117,7 @@ public class CursorNode extends DMLStatementNode
 		this.orderByList = (OrderByList) orderByList;
 		this.offset = (ValueNode)offset;
 		this.fetchFirst = (ValueNode)fetchFirst;
+        this.hasJDBClimitClause = (hasJDBClimitClause == null) ? false : ((Boolean) hasJDBClimitClause).booleanValue();
 
 		this.updateMode = ((Integer) updateMode).intValue();
 		this.updatableColumns = (Vector) updatableColumns;
@@ -582,7 +586,7 @@ public class CursorNode extends DMLStatementNode
 			orderByList = null;
 		}
 
-        resultSet.pushOffsetFetchFirst(offset, fetchFirst);
+        resultSet.pushOffsetFetchFirst( offset, fetchFirst, hasJDBClimitClause );
 
         super.optimizeStatement();
 
