@@ -175,9 +175,6 @@ import java.security.NoSuchAlgorithmException;
 
 import java.sql.Types;
 
-// LOBStoredProcedure is imported only to get hold of a constant.
-import org.apache.derby.impl.jdbc.LOBStoredProcedure;
-
 /**
  * Standard database implementation of the data dictionary
  * that stores the information in the system catlogs.
@@ -2583,7 +2580,7 @@ public final class	DataDictionaryImpl
              TransactionController.ISOLATION_REPEATABLE_READ,
              tc);
         RoutineAliasInfo   oldRai = (RoutineAliasInfo) oldAD.getAliasInfo();
-        TypeDescriptor     newReturnType = DataTypeDescriptor.getCatalogType( Types.VARCHAR, LOBStoredProcedure.MAX_CLOB_RETURN_LEN );
+        TypeDescriptor     newReturnType = DataTypeDescriptor.getCatalogType( Types.VARCHAR, Limits.MAX_CLOB_RETURN_LEN );
         RoutineAliasInfo   newRai = new RoutineAliasInfo
             (
              oldRai.getMethodName(),
@@ -12308,7 +12305,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARCHAR,
-                    LOBStoredProcedure.MAX_CLOB_RETURN_LEN),
+                    Limits.MAX_CLOB_RETURN_LEN),
                 newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");
@@ -12504,7 +12501,7 @@ public final class	DataDictionaryImpl
                 false,
                 DataTypeDescriptor.getCatalogType(
                     Types.VARBINARY,
-                    LOBStoredProcedure.MAX_BLOB_RETURN_LEN),
+                    Limits.MAX_BLOB_RETURN_LEN),
                 newlyCreatedRoutines,
                 tc,
                 "org.apache.derby.impl.jdbc.LOBStoredProcedure");

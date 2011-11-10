@@ -66,9 +66,6 @@ public class AutoloadedDriver implements Driver
     // This is the driver that memorizes the autoloadeddriver (DERBY-2905)
     private static Driver _autoloadedDriver;
 
-    // This flag is true unless the deregister attribute has been set to
-    // false by the user (DERBY-2905)
-    private static boolean deregister = true;
 	//
 	// This is the driver that's specific to the JDBC level we're running at.
 	// It's the module which boots the whole Derby engine.
@@ -249,13 +246,13 @@ public class AutoloadedDriver implements Driver
 		_engineForcedDown = true;
         try {
             // deregister is false if user set deregister=false attribute (DERBY-2905)
-            if (deregister && _autoloadedDriver != null) {
+            if (InternalDriver.getDeregister() && _autoloadedDriver != null) {
                 DriverManager.deregisterDriver(_autoloadedDriver);
                 _autoloadedDriver = null;
             } else {
                 DriverManager.deregisterDriver(_driverModule);
                 //DERBY 5085, need to restore the default value
-                deregister = true;
+                InternalDriver.setDeregister(true);
             }
             _driverModule = null;
         } catch (SQLException e) {
@@ -273,20 +270,6 @@ public class AutoloadedDriver implements Driver
 		return ( _driverModule != null );
 	}
 	
-    /**
-     * @param theValue set the deregister value
-     */
-    public static void setDeregister(boolean theValue) {
-        AutoloadedDriver.deregister = theValue;
-    }
-
-    /**
-     * @return the deregister value
-     */
-    public static boolean getDeregister() {
-        return deregister;
-    }
-
     /**
      * load slightly more capable driver if possible.
      * But if the vm level doesn't support it, then we fall

@@ -23,8 +23,6 @@ package org.apache.derby.impl.jdbc;
 
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 import org.apache.derby.iapi.jdbc.EngineLOB;
@@ -37,30 +35,6 @@ import org.apache.derby.jdbc.InternalDriver;
  * LOB client side methods.
  */
 public class LOBStoredProcedure {
-
-    /**
-     * The maximum length of the data returned from the BLOB stored procedures.
-     * <p>
-     * This value is currently dictated by the maximum length of
-     * VARCHAR/VARBINARY, because these are the return types of the stored
-     * procedures.
-     */
-    public static final int MAX_BLOB_RETURN_LEN = Limits.DB2_VARCHAR_MAXWIDTH;
-
-    /**
-     * The maximum length of the data returned from the CLOB stored procedures.
-     * <p>
-     * This value is currently dictated by the maximum length of
-     * VARCHAR/VARBINARY, because these are the return types of the stored
-     * procedures, and the modified UTF8 encoding used for CLOB data. This
-     * threshold value could be higher (equal to {@code MAX_BLOB_RETURN_LEN}),
-     * but then the procedure fetching data from the CLOB must be rewritten to
-     * have more logic.
-     * <p>
-     * For now we use the defensive assumption that all characters are
-     * represented by three bytes.
-     */
-    public static final int MAX_CLOB_RETURN_LEN = MAX_BLOB_RETURN_LEN / 3;
 
     /**
      * Creates a new empty Clob and registers it in the HashMap in the
@@ -174,7 +148,7 @@ public class LOBStoredProcedure {
         long pos, int len) throws SQLException {
         // Don't read more than what we can represent as a VARCHAR.
         // See DERBY-3769.
-        len = Math.min(len, MAX_CLOB_RETURN_LEN);
+        len = Math.min(len, Limits.MAX_CLOB_RETURN_LEN);
         return getClobObjectCorrespondingtoLOCATOR(LOCATOR).getSubString(pos, len);
     }
 
@@ -332,7 +306,7 @@ public class LOBStoredProcedure {
     throws SQLException {
         // Don't read more than what we can represent as a VARBINARY.
         // See DERBY-3769.
-        len = Math.min(len, MAX_BLOB_RETURN_LEN);
+        len = Math.min(len, Limits.MAX_BLOB_RETURN_LEN);
         return getBlobObjectCorrespondingtoLOCATOR(LOCATOR).getBytes(pos, len);
     }
 

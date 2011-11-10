@@ -25,7 +25,6 @@ import org.apache.derby.iapi.error.PublicAPI;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.jdbc.AuthenticationService;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
@@ -34,8 +33,8 @@ import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 
-import java.sql.Driver;
-import java.sql.DriverManager;
+import org.apache.derby.jdbc.InternalDriver;
+
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -413,19 +412,15 @@ public class SlaveDatabase extends BasicDatabase {
         } 
         try {
             shutdownInitiated = true;
-            String driverName = 
-                "org.apache.derby.jdbc.EmbeddedDriver";
-
-            Class.forName(driverName).newInstance();
-
-            Driver embedDriver = 
-                DriverManager.getDriver(Attribute.PROTOCOL);
 
             String conStr = "jdbc:derby:"+dbname+";"+
                 Attribute.REPLICATION_INTERNAL_SHUTDOWN_SLAVE+
                 "=true";
 
-            embedDriver.connect(conStr, (Properties) null);
+            InternalDriver driver = InternalDriver.activeDriver();
+            if (driver != null) {
+                driver.connect(conStr, (Properties) null);
+            }
         } catch (Exception e) {
             // Todo: report error to derby.log if exception is not
             // SQLState.SHUTDOWN_DATABASE

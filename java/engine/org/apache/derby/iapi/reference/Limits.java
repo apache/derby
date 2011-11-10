@@ -100,5 +100,31 @@ public interface Limits
     static final double DB2_SMALLEST_POSITIVE_DOUBLE = +2.225E-307d;
     static final double DB2_LARGEST_NEGATIVE_DOUBLE  = -2.225E-307d;
 
+    // Limits on the length of the return values for the procedures in
+    // LOBStoredProcedure.
+
+    /**
+     * The maximum length of the data returned from the BLOB stored procedures.
+     * <p>
+     * This value is currently dictated by the maximum length of
+     * VARCHAR/VARBINARY, because these are the return types of the stored
+     * procedures.
+     */
+    int MAX_BLOB_RETURN_LEN = Limits.DB2_VARCHAR_MAXWIDTH;
+
+    /**
+     * The maximum length of the data returned from the CLOB stored procedures.
+     * <p>
+     * This value is currently dictated by the maximum length of
+     * VARCHAR/VARBINARY, because these are the return types of the stored
+     * procedures, and the modified UTF8 encoding used for CLOB data. This
+     * threshold value could be higher (equal to {@code MAX_BLOB_RETURN_LEN}),
+     * but then the procedure fetching data from the CLOB must be rewritten to
+     * have more logic.
+     * <p>
+     * For now we use the defensive assumption that all characters are
+     * represented by three bytes.
+     */
+    int MAX_CLOB_RETURN_LEN = MAX_BLOB_RETURN_LEN / 3;
     
 }

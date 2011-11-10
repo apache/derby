@@ -77,6 +77,13 @@ public abstract class InternalDriver implements ModuleControl {
 	private ContextService contextServiceFactory;
 	private AuthenticationService	authenticationService;
 
+    /**
+     * Tells whether or not {@code AutoloadedDriver} should deregister itself
+     * on shutdown. This flag is true unless the deregister attribute has been
+     * set to false by the user (DERBY-2905).
+     */
+    private static boolean deregister = true;
+
 	public static final InternalDriver activeDriver()
 	{
 		return activeDriver;
@@ -230,7 +237,7 @@ public abstract class InternalDriver implements ModuleControl {
                         boolean deregister = Boolean.valueOf(
                                 finfo.getProperty(Attribute.DEREGISTER_ATTR))
                                 .booleanValue();
-                        AutoloadedDriver.setDeregister(deregister);
+                        InternalDriver.setDeregister(deregister);
                     }
 
 					// check for shutdown privileges
@@ -634,7 +641,25 @@ public abstract class InternalDriver implements ModuleControl {
                            (ResultColumnDescriptor[] columnInfo) {
             return new EmbedResultSetMetaData(columnInfo);
         }
+
+    /**
+     * Indicate to {@code AutoloadedDriver} whether it should deregister
+     * itself on shutdown.
+     *
+     * @param deregister whether or not {@code AutoloadedDriver} should
+     * deregister itself
+     */
+    static void setDeregister(boolean deregister) {
+        InternalDriver.deregister = deregister;
+    }
+
+    /**
+     * Check whether {@code AutoloadedDriver} should deregister itself on
+     * shutdown.
+     *
+     * @return the deregister value
+     */
+    static boolean getDeregister() {
+        return InternalDriver.deregister;
+    }
 }
-
-
-
