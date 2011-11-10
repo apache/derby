@@ -139,7 +139,7 @@ public class LOBStoredProcedure {
      *            the substring begins.
      * @param len an integer representing the maximum length of the substring.
      *      The value will be reduced to the maximum allowed return length if
-     *      required (see {@link #MAX_CLOB_RETURN_LEN}).
+     *      required (see {@link Limits#MAX_CLOB_RETURN_LEN}).
      * @return A substring from the {@code Clob} starting at the given position,
      *      not longer than {@code len} characters.
      * @throws SQLException
@@ -294,7 +294,7 @@ public class LOBStoredProcedure {
      *                needs to be retrieved.
      * @param len the maximum number of bytes to read. The value will be
      *      reduced to the maximum allowed return length if required
-     *      (see {@link #MAX_BLOB_RETURN_LEN}).
+     *      (see {@link Limits#MAX_BLOB_RETURN_LEN}).
      * @param pos the position from which the bytes from the Blob need to be
      *            retrieved.
      * @return A byte array containing the bytes read, starting from position
