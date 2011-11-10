@@ -555,7 +555,7 @@ public	class DD_Version implements	Formatable
 			// invalidate all the procedures we need to indicate that
 			// any procedure we read off disk is automatically invalid,
 			// so we do not try to load the generated class.
-			bootingDictionary.readOnlyUpgrade = true;
+			bootingDictionary.setReadOnlyUpgrade();
 		}
 
 		bootingDictionary.clearCaches();

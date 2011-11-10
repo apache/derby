@@ -775,6 +775,10 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		return false;
 	}
 
+    public boolean isReadOnlyUpgrade() {
+        return false;
+    }
+
 	public boolean addRemovePermissionsDescriptor(boolean add,
 			PermissionsDescriptor perm, String grantee, TransactionController tc)
 			throws StandardException {

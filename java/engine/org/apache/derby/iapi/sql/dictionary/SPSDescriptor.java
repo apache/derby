@@ -393,7 +393,7 @@ public class SPSDescriptor extends TupleDescriptor
 		setCompileTime();
 		setParams(preparedStatement.getParameterTypes());
 
-		if (!((org.apache.derby.impl.sql.catalog.DataDictionaryImpl) dd).readOnlyUpgrade) {
+		if (!dd.isReadOnlyUpgrade()) {
 
 			/*
 			** Indicate that we are going to write the data
@@ -689,7 +689,7 @@ public class SPSDescriptor extends TupleDescriptor
 			
 
 
-			if (!((org.apache.derby.impl.sql.catalog.DataDictionaryImpl) (lcc.getDataDictionary())).readOnlyUpgrade) {
+			if (!lcc.getDataDictionary().isReadOnlyUpgrade()) {
 
 				//bug 4821 - First try compiling on a nested transaction so we can release
 				//the locks after the compilation. But if we get lock time out on the
@@ -1100,7 +1100,7 @@ public class SPSDescriptor extends TupleDescriptor
 
 		DataDictionary dd = getDataDictionary();
 
-		if (((org.apache.derby.impl.sql.catalog.DataDictionaryImpl) dd).readOnlyUpgrade)
+		if (dd.isReadOnlyUpgrade())
 			return;
 
 

@@ -307,7 +307,7 @@ public class SYSSTATEMENTSRowFactory extends CatalogRowFactory
 
 		// In soft upgrade mode the plan may not be understand by this engine
 		// so force a recompile.
-		if (((DataDictionaryImpl) dd).readOnlyUpgrade) {
+		if (dd.isReadOnlyUpgrade()) {
 			valid = false;
 		} else {
 			// 5th column is VALID (boolean)

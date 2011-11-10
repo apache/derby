@@ -428,7 +428,8 @@ public final class	DataDictionaryImpl
 		that created it.
 
 	*/
-	public boolean readOnlyUpgrade;
+	private boolean readOnlyUpgrade;
+
     /**
      * Tells if the automatic index statistics refresher has been disabled.
      * <p>
@@ -10486,7 +10487,19 @@ public final class	DataDictionaryImpl
 
 		return dictionaryVersion.checkVersion(requiredMajorVersion, feature);
 	}
-		
+
+    public boolean isReadOnlyUpgrade() {
+        return readOnlyUpgrade;
+    }
+
+    /**
+     * Mark this database as a read only database whose stored prepared
+     * statements are invalid because some kind of upgrade is needed.
+     */
+    void setReadOnlyUpgrade() {
+        readOnlyUpgrade = true;
+    }
+
 	/**
 	** Create system built-in metadata stored prepared statements.
 	*/

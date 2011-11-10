@@ -1871,6 +1871,16 @@ public interface DataDictionary
 		@return True if the database has been upgraded to the required level, false otherwise.
 	*/
 	public boolean checkVersion(int majorVersion, String feature) throws StandardException;
+
+    /**
+     * Check if the database is read only and requires some form of upgrade
+     * that makes the stored prepared statements invalid.
+     *
+     * @return {@code true} if the stored prepared statements are invalid
+     * because of an upgrade and the database is read only, {@code false}
+     * otherwise
+     */
+    public boolean isReadOnlyUpgrade();
 	
     /**
      * Add or remove a permission to the permission database.
