@@ -31,12 +31,13 @@ import java.io.OutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.channels.AsynchronousCloseException;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
-import java.security.AccessControlException;
 import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.shared.common.reference.SQLState;
+import org.apache.derby.iapi.util.InterruptStatus;
 
 /**
  * This class implements the StorageFile interface using features of Java 1.4 not available in earlier
@@ -154,24 +155,42 @@ class DirFile4 extends DirFile
 			//If we can acquire a reliable exclusive lock , try to get it.
 			if(validExclusiveLock)
 			{
-				lockFileOpen = new RandomAccessFile((File) this, "rw");
-                limitAccessToOwner(); // tamper-proof..
-				lockFileChannel = lockFileOpen.getChannel();
-				dbLock =lockFileChannel.tryLock();
-				if(dbLock == null)
-				{
-					lockFileChannel.close();
-					lockFileChannel=null;
-					lockFileOpen.close();
-					lockFileOpen = null;
-					status = EXCLUSIVE_FILE_LOCK_NOT_AVAILABLE;
-				}
-				else
-				{	
-					lockFileOpen.writeInt(EXCLUSIVE_FILE_LOCK);
-					lockFileChannel.force(true);
-					status = EXCLUSIVE_FILE_LOCK;
-				}
+                int retries = InterruptStatus.MAX_INTERRUPT_RETRIES;
+                while (true) {
+                    lockFileOpen = new RandomAccessFile((File) this, "rw");
+                    limitAccessToOwner(); // tamper-proof..
+                    lockFileChannel = lockFileOpen.getChannel();
+
+                    try {
+                        dbLock =lockFileChannel.tryLock();
+                        if(dbLock == null) {
+                            lockFileChannel.close();
+                            lockFileChannel=null;
+                            lockFileOpen.close();
+                            lockFileOpen = null;
+                            status = EXCLUSIVE_FILE_LOCK_NOT_AVAILABLE;
+                        } else {
+                            lockFileOpen.writeInt(EXCLUSIVE_FILE_LOCK);
+                            lockFileChannel.force(true);
+                            status = EXCLUSIVE_FILE_LOCK;
+                        }
+                    } catch (AsynchronousCloseException e) {
+                        // JDK bug 6979009: use AsynchronousCloseException
+                        // instead of the logically correct
+                        // ClosedByInterruptException
+
+                        InterruptStatus.setInterrupted();
+                        lockFileOpen.close();
+
+                        if (retries-- > 0) {
+                            continue;
+                        } else {
+                            throw e;
+                        }
+                    }
+
+                    break;
+                }
 			}
 			else
 			{

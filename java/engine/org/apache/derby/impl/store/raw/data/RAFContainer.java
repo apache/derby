@@ -435,7 +435,7 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
         // release our monitor on "this" and to retry writeRAFHeader, so be
         // prepared to retry.
         boolean success = false;
-        int maxTries = MAX_INTERRUPT_RETRIES; // ca 60s = (120 * 0.5s)
+        int maxTries = InterruptStatus.MAX_INTERRUPT_RETRIES;
 
         while (!success) {
             success = true;
@@ -512,7 +512,8 @@ class RAFContainer extends FileContainer implements PrivilegedExceptionAction
                             // we re-grab monitor on "this" (which recovery
                             // needs) and retry writeRAFHeader.
                             try {
-                                Thread.sleep(INTERRUPT_RETRY_SLEEP);
+                                Thread.sleep(
+                                    InterruptStatus.INTERRUPT_RETRY_SLEEP);
                             } catch (InterruptedException ee) {
                                 // This thread received an interrupt as
                                 // well, make a note.

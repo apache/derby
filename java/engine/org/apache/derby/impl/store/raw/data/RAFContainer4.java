@@ -324,7 +324,7 @@ class RAFContainer4 extends RAFContainer {
             synchronized (channelCleanupMonitor) {
 
                 // Gain entry
-                int retries = MAX_INTERRUPT_RETRIES;
+                int retries = InterruptStatus.MAX_INTERRUPT_RETRIES;
 
                 while (restoreChannelInProgress) {
                     if (retries-- == 0) {
@@ -333,7 +333,8 @@ class RAFContainer4 extends RAFContainer {
                     }
 
                     try {
-                        channelCleanupMonitor.wait(INTERRUPT_RETRY_SLEEP);
+                        channelCleanupMonitor.wait(
+                            InterruptStatus.INTERRUPT_RETRY_SLEEP);
                     } catch (InterruptedException e) {
                         InterruptStatus.setInterrupted();
                     }
@@ -346,7 +347,7 @@ class RAFContainer4 extends RAFContainer {
 
 
         boolean success = false;
-        int retries = MAX_INTERRUPT_RETRIES;
+        int retries = InterruptStatus.MAX_INTERRUPT_RETRIES;
 
       try {
         while (!success) {
@@ -498,7 +499,7 @@ class RAFContainer4 extends RAFContainer {
             synchronized (channelCleanupMonitor) {
 
                 // Gain entry
-                int retries = MAX_INTERRUPT_RETRIES;
+                int retries = InterruptStatus.MAX_INTERRUPT_RETRIES;
 
                 while (restoreChannelInProgress) {
                     if (retries-- == 0) {
@@ -507,7 +508,8 @@ class RAFContainer4 extends RAFContainer {
                     }
 
                     try {
-                        channelCleanupMonitor.wait(INTERRUPT_RETRY_SLEEP);
+                        channelCleanupMonitor.wait(
+                            InterruptStatus.INTERRUPT_RETRY_SLEEP);
                     } catch (InterruptedException e) {
                         InterruptStatus.setInterrupted();
                     }
@@ -519,7 +521,7 @@ class RAFContainer4 extends RAFContainer {
         }
 
         boolean success = false;
-        int retries = MAX_INTERRUPT_RETRIES;
+        int retries = InterruptStatus.MAX_INTERRUPT_RETRIES;
 
       try {
         while (!success) {
@@ -648,7 +650,8 @@ class RAFContainer4 extends RAFContainer {
      * <p/>
      * If {@code stealthMode == false}, maximum wait time for the container to
      * become available again is determined by the product {@code
-     * FileContainer#MAX_INTERRUPT_RETRIES * FileContainer#INTERRUPT_RETRY_SLEEP}.
+     * InterruptStatus.MAX_INTERRUPT_RETRIES *
+     * InterruptStatus.INTERRUPT_RETRY_SLEEP}.
      * There is a chance this thread will not see any recovery occuring (yet),
      * in which case it waits for a bit and just returns, so the caller must
      * retry IO until success.
@@ -721,7 +724,7 @@ class RAFContainer4 extends RAFContainer {
                             "already waited " + timesWaited + " times");
                     }
 
-                    if (timesWaited > MAX_INTERRUPT_RETRIES) {
+                    if (timesWaited > InterruptStatus.MAX_INTERRUPT_RETRIES) {
                         // Max, give up, probably way too long anyway,
                         // but doesn't hurt?
                         throw StandardException.newException(
@@ -729,7 +732,8 @@ class RAFContainer4 extends RAFContainer {
                     }
 
                     try {
-                        channelCleanupMonitor.wait(INTERRUPT_RETRY_SLEEP);
+                        channelCleanupMonitor.wait(
+                            InterruptStatus.INTERRUPT_RETRY_SLEEP);
                     } catch (InterruptedException we) {
                         InterruptStatus.setInterrupted();
                     }
@@ -763,7 +767,7 @@ class RAFContainer4 extends RAFContainer {
             // have raced past the interrupted thread, so let's wait a
             // bit before we attempt a new I/O.
             try {
-                Thread.sleep(INTERRUPT_RETRY_SLEEP);
+                Thread.sleep(InterruptStatus.INTERRUPT_RETRY_SLEEP);
             } catch (InterruptedException we) {
                 // This thread is getting hit, too..
                 InterruptStatus.setInterrupted();
@@ -849,7 +853,7 @@ class RAFContainer4 extends RAFContainer {
         // Wait till other concurrent threads hit the wall
         // (ClosedChannelException) and are a ready waiting for us to clean up,
         // so we can set them loose when we're done.
-        int retries = MAX_INTERRUPT_RETRIES;
+        int retries = InterruptStatus.MAX_INTERRUPT_RETRIES;
 
         while (true) {
             synchronized (channelCleanupMonitor) {
@@ -870,7 +874,7 @@ class RAFContainer4 extends RAFContainer {
             }
 
             try {
-                Thread.sleep(INTERRUPT_RETRY_SLEEP);
+                Thread.sleep(InterruptStatus.INTERRUPT_RETRY_SLEEP);
             } catch (InterruptedException te) {
                 InterruptStatus.setInterrupted();
             }

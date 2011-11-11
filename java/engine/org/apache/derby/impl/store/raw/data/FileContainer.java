@@ -1511,8 +1511,6 @@ abstract class FileContainer
 		}
 	}
 
-    protected final static int INTERRUPT_RETRY_SLEEP = 500; // millis
-    protected final static int MAX_INTERRUPT_RETRIES = 120; // i.e. 60s
 
 	/**
 	  Create a new page in the container.
@@ -1587,7 +1585,7 @@ abstract class FileContainer
 		boolean retry;
 		int numtries = 0;
 
-        int maxTries = MAX_INTERRUPT_RETRIES;
+        int maxTries = InterruptStatus.MAX_INTERRUPT_RETRIES;
 
         long startSearch = lastAllocatedPage;
 
@@ -1674,7 +1672,8 @@ abstract class FileContainer
                             // we re-grab monitor on "this" (which recovery
                             // needs) and retry writeRAFHeader.
                             try {
-                                Thread.sleep(INTERRUPT_RETRY_SLEEP);
+                                Thread.sleep(
+                                    InterruptStatus.INTERRUPT_RETRY_SLEEP);
                             } catch (InterruptedException ee) {
                                 // This thread received an interrupt as
                                 // well, make a note.
@@ -2069,7 +2068,7 @@ abstract class FileContainer
 	{
 		boolean retval = false;
         boolean done;
-        int maxTries = MAX_INTERRUPT_RETRIES;
+        int maxTries = InterruptStatus.MAX_INTERRUPT_RETRIES;
 
         do {
             done = true;
@@ -2095,7 +2094,7 @@ abstract class FileContainer
                         // we re-grab monitor on "this" (which recovery
                         // needs) and retry writeRAFHeader.
                         try {
-                            Thread.sleep(INTERRUPT_RETRY_SLEEP);
+                            Thread.sleep(InterruptStatus.INTERRUPT_RETRY_SLEEP);
                         } catch (InterruptedException ee) {
                             // This thread received an interrupt as
                             // well, make a note.

@@ -57,6 +57,13 @@ import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 public class InterruptStatus {
 
     /**
+     * Constants used by code that retries file operations after seeing the
+     * NIO file channel closed due to interrupts.
+     */
+    public final static int MAX_INTERRUPT_RETRIES = 120;
+    public final static int INTERRUPT_RETRY_SLEEP = 500; // millis
+
+    /**
      * Use thread local variable to store interrupt status flag *only* if we
      * don't have lcc, e.g. during database creation, shutdown etc.
      */
