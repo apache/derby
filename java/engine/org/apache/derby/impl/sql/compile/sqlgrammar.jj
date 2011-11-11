@@ -3389,7 +3389,7 @@ preparableSelectStatement(boolean checkParams) throws StandardException :
 				orderCols,
 				offsetClauses[ OFFSET_CLAUSE ],
 				offsetClauses[ FETCH_FIRST_CLAUSE ],
-                new Boolean( hasJDBClimitClause ),
+                Boolean.valueOf( hasJDBClimitClause ),
 				ReuseFactory.getInteger(forUpdateState),
 				(forUpdateState == CursorNode.READ_ONLY ? null : updateColumns ),
 				getContextManager());
@@ -8566,7 +8566,7 @@ insertColumnsAndSource(QueryTreeNode targetTable)
 							orderCols,
                             offsetClauses[ OFFSET_CLAUSE ],
                             offsetClauses[ FETCH_FIRST_CLAUSE ],
-                            new Boolean( hasJDBClimitClause ),
+                            Boolean.valueOf( hasJDBClimitClause ),
 							getContextManager());
 	}
 	/* RESOLVE: Ignoring default values for now
@@ -8821,7 +8821,7 @@ subquery(int subqueryType, ValueNode leftOperand) throws StandardException :
 										orderCols,
                                         offsetClauses[ OFFSET_CLAUSE ],
                                         offsetClauses[ FETCH_FIRST_CLAUSE ],
-                                        new Boolean( hasJDBClimitClause ),
+                                        Boolean.valueOf( hasJDBClimitClause ),
 										getContextManager());
 		return subqueryNode;
 	}
@@ -9298,7 +9298,7 @@ FromTable tableFactor() throws StandardException :
 											derivedTable.getOrderByList(),
                                             derivedTable.getOffset(),
                                             derivedTable.getFetchFirst(),
-                                            new Boolean( derivedTable.hasJDBClimitClause() ),
+                                            Boolean.valueOf( derivedTable.hasJDBClimitClause() ),
 											correlationName,
 											derivedRCL,
 											((optionalTableClauses != null) ?
@@ -11084,7 +11084,7 @@ viewDefinition(Token beginToken) throws StandardException :
 								orderCols,
                                 offsetClauses[ OFFSET_CLAUSE ],
                                 offsetClauses[ FETCH_FIRST_CLAUSE ],
-                                new Boolean( hasJDBClimitClause ),
+                                Boolean.valueOf( hasJDBClimitClause ),
 								getContextManager());
 	}
 }

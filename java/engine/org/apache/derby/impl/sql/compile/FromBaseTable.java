@@ -2287,7 +2287,7 @@ public class FromBaseTable extends FromTable
                     cvn.getOrderByList(),
                     cvn.getOffset(),
                     cvn.getFetchFirst(),
-                    new Boolean( cvn.hasJDBClimitClause() ),
+                    Boolean.valueOf( cvn.hasJDBClimitClause() ),
 					(correlationName != null) ? 
                         correlationName : getOrigTableName().getTableName(), 
 					resultColumns,

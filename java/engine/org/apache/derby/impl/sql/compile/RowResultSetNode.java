@@ -658,7 +658,7 @@ public class RowResultSetNode extends FromTable
                 newRcl,
                 offset,
                 fetchFirst,
-                new Boolean( hasJDBClimitClause ),
+                Boolean.valueOf( hasJDBClimitClause ),
                 getContextManager());
         }
 
