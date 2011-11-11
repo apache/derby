@@ -959,6 +959,46 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     }
 
     /**
+     * Test some additional corner cases in JDBC limit/offset syntax.
+     */
+    public  void    testJDBCLimitOffset()   throws Exception
+    {
+        // LIMIT 0 is allowed. It means: everything from the OFFSET forward
+        PreparedStatement   ps = prepareStatement( "select a from t2 order by a { limit ? }" );
+        ps.setInt( 1, 0 );
+        JDBC.assertFullResultSet
+            (
+             ps.executeQuery(),
+             new String[][] { { "1" }, { "2" }, { "3" }, { "4" }, { "5" } }
+             );
+        ps.close();
+
+        ps = prepareStatement( "select a from t2 order by a { limit ? offset 3 }" );
+        ps.setInt( 1, 0 );
+        JDBC.assertFullResultSet
+            (
+             ps.executeQuery(),
+             new String[][] { { "4" }, { "5" } }
+             );
+        ps.close();
+
+        // mix JDBC and SQL Standard syntax
+        ps = prepareStatement
+            (
+             "select t.a from\n" +
+             "( select * from t2 order by a { limit 3 offset 1 } ) t,\n" +
+             "( select * from t3 order by a offset 2 rows fetch next 10 rows only ) s\n" +
+             "where t.a = s.a order by t.a"
+             );
+        JDBC.assertFullResultSet
+            (
+             ps.executeQuery(),
+             new String[][] { { "3" }, { "4" } }
+             );
+        ps.close();
+    }
+
+    /**
      * Run a statement with both SQL Standard and JDBC limit/offset syntax. Verify
      * that we get the expected error or results. The statement has a % literal at the
      * point where the offset/fetchFirst and limit/offset clauses are to be inserted.
