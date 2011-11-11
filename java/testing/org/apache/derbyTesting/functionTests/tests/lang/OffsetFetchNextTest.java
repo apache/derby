@@ -50,6 +50,18 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     private final static String LANG_SYNTAX_ERROR = "42X01";
 	private final static String LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL = "2201Z";
 
+    private final static String PERCENT_TOKEN = "%";
+    
+    // flavors of SQL Standard syntax
+    private final static String FIRST_ROWS_ONLY = "fetch first % rows only";
+    private final static String FIRST_ROW_ONLY = "fetch first % row only";
+    private final static String NEXT_ROWS_ONLY = "fetch next % rows only";
+
+    // variants
+    private final static int SQL_STANDARD_VARIANT = 0;
+    private final static int JDBC_VARIANT = SQL_STANDARD_VARIANT + 1;
+    private final static int VARIANT_COUNT = JDBC_VARIANT + 1;
+
     public OffsetFetchNextTest(String name) {
         super(name);
     }
@@ -110,28 +122,27 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     {
         Statement st = createStatement();
 
+        String  stub = "select * from t1 %";
+
         // Wrong range in row count argument
+        vetStatement( st, LANG_INVALID_ROW_COUNT_OFFSET, stub, FIRST_ROWS_ONLY, "-1", null, null );
 
-        assertStatementError(LANG_INVALID_ROW_COUNT_OFFSET, st,
-                             "select * from t1 offset -1 rows");
-
-        assertStatementError(LANG_SYNTAX_ERROR, st,
-                             "select * from t1 offset -? rows");
+        vetStatement( st, LANG_SYNTAX_ERROR, stub, FIRST_ROWS_ONLY, "-?", null, null );
 
         assertStatementError(LANG_INVALID_ROW_COUNT_FIRST, st,
                              "select * from t1 fetch first 0 rows only");
 
-        assertStatementError(LANG_INVALID_ROW_COUNT_FIRST, st,
-                             "select * from t1 fetch first -1 rows only");
+        vetStatement( st, LANG_INVALID_ROW_COUNT_FIRST, stub, FIRST_ROWS_ONLY, null, "-1", null );
 
         // Wrong type in row count argument
-        assertStatementError(LANG_INTEGER_LITERAL_EXPECTED, st,
-                             "select * from t1 fetch first 3.14 rows only");
+        vetStatement( st, LANG_INTEGER_LITERAL_EXPECTED, stub, FIRST_ROWS_ONLY, null, "3.14", null );
 
         // Wrong order of clauses
         assertStatementError(LANG_SYNTAX_ERROR, st,
                              "select * from t1 " +
                              "fetch first 0 rows only offset 0 rows");
+        assertStatementError(LANG_SYNTAX_ERROR, st,
+                             "select * from t1 { offset 0 limit 0 }");
     }
 
 
@@ -144,14 +155,21 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     {
         setAutoCommit(false);
         prepareStatement("select a,b as offset from t1 offset 0 rows");
+        prepareStatement("select a,b as limit from t1 offset 0 rows");
 
         // Column and table correlation name usage
         prepareStatement("select a,b from t1 as offset");
+        prepareStatement("select a,b from t1 as limit");
 
         prepareStatement("select a,b offset from t1 offset");
+        prepareStatement("select a,b limit from t1 limit");
+
         prepareStatement("select a,b offset from t1 offset +2 rows");
+
         prepareStatement("select a offset,b from t1 offset ? rows");
+
         prepareStatement("select offset.a, offset.b offset from t1 as offset offset ? rows");
+        prepareStatement("select limit.a, limit.b offset from t1 as limit offset ? rows");
 
         // DERBY-4562
         Statement s = createStatement();
@@ -186,116 +204,119 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * offset 0 rows (a no-op)
          */
 
-        queryAndCheck(
-            stm,
-            "select a,b from t1 offset 0 rows",
-            new String [][] {
-                {"1","1"}, {"1","2"},{"1","3"}, {"1","4"},{"1","5"}});
-        queryAndCheck(
-            stm,
-            "select a,b from t2 offset 0 rows",
-            new String [][] {
-                {"1","1"}, {"2","1"},{"3","1"}, {"4","1"},{"5","1"}});
-        queryAndCheck(
-            stm,
-            "select a,b from t3 offset 0 rows",
-            new String [][] {
-                {"1","1"}, {"2","2"},{"3","3"}, {"4","4"},{"5","5"}});
+        vetStatement
+            (
+             stm, null, "select a, b from t1%", FIRST_ROWS_ONLY, "0", null,
+             new String [][] { {"1","1"}, {"1","2"},{"1","3"}, {"1","4"},{"1","5"} }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t2%", FIRST_ROWS_ONLY, "0", null,
+             new String [][] { {"1","1"}, {"2","1"},{"3","1"}, {"4","1"},{"5","1"} }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t3%", FIRST_ROWS_ONLY, "0", null,
+             new String [][] { {"1","1"}, {"2","2"},{"3","3"}, {"4","4"},{"5","5"} }
+             );
 
         /*
          * offset 1 rows
          */
 
-        queryAndCheck(
-            stm,
-            "select a,b from t1 offset 1 rows",
-            new String [][] {
-                {"1","2"},{"1","3"}, {"1","4"},{"1","5"}});
-        queryAndCheck(
-            stm,
-            "select a,b from t2 offset 1 rows",
-            new String [][] {
-                {"2","1"},{"3","1"}, {"4","1"},{"5","1"}});
-        queryAndCheck(
-            stm,
-            "select a,b from t3 offset 1 rows",
-            new String [][] {
-                {"2","2"},{"3","3"}, {"4","4"},{"5","5"}});
+        vetStatement
+            (
+             stm, null, "select a,b from t1%", FIRST_ROWS_ONLY, "1", null,
+             new String [][] { {"1","2"},{"1","3"}, {"1","4"},{"1","5"} }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t2%", FIRST_ROWS_ONLY, "1", null,
+             new String [][] { {"2","1"},{"3","1"}, {"4","1"},{"5","1"} }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t3%", FIRST_ROWS_ONLY, "1", null,
+             new String [][] { {"2","2"},{"3","3"}, {"4","4"},{"5","5"} }
+             );
 
         /*
          * offset 4 rows
          */
 
-        queryAndCheck(
-            stm,
-            "select a,b from t1 offset 4 rows",
-            new String [][] {
-                {"1","5"}});
-        queryAndCheck(
-            stm,
-            "select a,b from t2 offset 4 rows",
-            new String [][] {
-                {"5","1"}});
-        queryAndCheck(
-            stm,
-            "select a,b from t3 offset 4 rows",
-            new String [][] {
-                {"5","5"}});
+        vetStatement
+            (
+             stm, null, "select a,b from t1%", FIRST_ROWS_ONLY, "4", null,
+             new String [][] { {"1","5"} }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t2%", FIRST_ROWS_ONLY, "4", null,
+             new String [][] { {"5","1"} }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t3%", FIRST_ROWS_ONLY, "4", null,
+             new String [][] {  {"5","5"} }
+             );
 
         /*
          * offset 1 rows fetch 1 row. Use "next"/"rows" syntax
          */
-        queryAndCheck(
-            stm,
-            "select a,b from t1 offset 1 row fetch next 1 rows only",
-            new String [][] {
-                {"1","2"}});
-        queryAndCheck(
-            stm,
-            "select a,b from t2 offset 1 row fetch next 1 rows only",
-            new String [][] {
-                {"2","1"}});
-        queryAndCheck(
-            stm,
-            "select a,b from t3 offset 1 row  fetch next 1 rows only",
-            new String [][] {
-                {"2","2"}});
+        vetStatement
+            (
+             stm, null, "select a,b from t1%", FIRST_ROWS_ONLY, "1", "1",
+             new String [][] { {"1","2"}  }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t2%", FIRST_ROWS_ONLY, "1", "1",
+             new String [][] { {"2","1"}  }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t3%", FIRST_ROWS_ONLY, "1", "1",
+             new String [][] { {"2","2"}  }
+             );
 
         /*
          * offset 1 rows fetch so many rows we drain rs row. Use "first"/"row"
          * syntax
          */
-        queryAndCheck(
-            stm,
-            "select a,b from t1 offset 1 rows fetch first 10 row only",
-            new String [][] {
-                {"1","2"},{"1","3"}, {"1","4"},{"1","5"}});
-        queryAndCheck(
-            stm,
-            "select a,b from t2 offset 1 rows fetch first 10 row only",
-            new String [][] {
-                {"2","1"},{"3","1"}, {"4","1"},{"5","1"}});
-        queryAndCheck(
-            stm,
-            "select a,b from t3 offset 1 rows  fetch first 10 row only",
-            new String [][] {
-                {"2","2"},{"3","3"}, {"4","4"},{"5","5"}});
+        vetStatement
+            (
+             stm, null, "select a,b from t1%", FIRST_ROW_ONLY, "1", "10",
+             new String [][] { {"1","2"},{"1","3"}, {"1","4"},{"1","5"} }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t2%", FIRST_ROW_ONLY, "1", "10",
+             new String [][] { {"2","1"},{"3","1"}, {"4","1"},{"5","1"} }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t3%", FIRST_ROW_ONLY, "1", "10",
+             new String [][] { {"2","2"},{"3","3"}, {"4","4"},{"5","5"} }
+             );
 
         /*
          * offset so many rows that we see empty rs
          */
-        queryAndCheck(
-            stm,
-            "select a,b from t1 offset 10 rows",
-            new String [][] {});
-        queryAndCheck(
-            stm,
-            "select a,b from t2 offset 10 rows",
-            new String [][] {});
-        queryAndCheck(
-            stm,
-            "select a,b from t3 offset 10 rows",
-            new String [][] {});
+        vetStatement
+            (
+             stm, null, "select a,b from t1%", FIRST_ROW_ONLY, "10", null,
+             new String [][] { }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t2%", FIRST_ROW_ONLY, "10", null,
+             new String [][] { }
+             );
+        vetStatement
+            (
+             stm, null, "select a,b from t3%", FIRST_ROW_ONLY, "10", null,
+             new String [][] { }
+             );
 
         /*
          * fetch first/next row (no row count given)
@@ -329,7 +350,6 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
             "select a,b from t3 order by a asc fetch next row only",
             new String [][] {{"1","1"}});
 
-
         /*
          * Combine with order by desc.
          */
@@ -356,34 +376,35 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
             stm,
             "select max(a) from t1 group by b fetch first row only",
             new String [][] {{"1"}});
-        queryAndCheck(
-            stm,
-            "select max(a) from t2 group by b offset 0 rows",
-            new String [][] {{"5"}});
-        queryAndCheck(
-            stm,
-            "select max(a) from t3 group by b " +
-            "    order by max(a) fetch next 2 rows only",
-            new String [][] {{"1"},{"2"}});
+        vetStatement
+            (
+             stm, null, "select max(a) from t2 group by b %", FIRST_ROW_ONLY, "0", null,
+             new String [][] { {"5"} }
+             );
+        vetStatement
+            (
+             stm, null, "select max(a) from t3 group by b order by max(a) %", NEXT_ROWS_ONLY, null, "2",
+             new String [][] { {"1"},{"2"} }
+             );
 
         /*
          * Combine with union
          */
 
-        queryAndCheck(
-            stm,
-            "select * from t1 union all select * from t1 " +
-            "    fetch first 2 row only",
-            new String [][] {{"1","1"}, {"1","2"}});
+        vetStatement
+            (
+             stm, null, "select * from t1 union all select * from t1 %", FIRST_ROW_ONLY, null, "2",
+             new String [][] { {"1","1"}, {"1","2"} }
+             );
 
         /*
          * Combine with join
          */
-        queryAndCheck(
-            stm,
-            "select t2.b, t3.b from t2,t3 where t2.a=t3.a " +
-            "    fetch first 2 row only",
-            new String [][] {{"1","1"}, {"1","2"}});
+        vetStatement
+            (
+             stm, null, "select t2.b, t3.b from t2,t3 where t2.a=t3.a %", FIRST_ROW_ONLY, null, "2",
+             new String [][] { {"1","1"}, {"1","2"} }
+             );
 
         stm.close();
     }
@@ -397,44 +418,55 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     {
         Statement stm = createStatement(ResultSet.TYPE_FORWARD_ONLY,
                                         ResultSet.CONCUR_UPDATABLE);
+        ResultSet   rs;
+        String[]    variants;
 
         setAutoCommit(false);
 
         /*
          * offset 0 rows (a no-op), update a row and verify result
          */
-        ResultSet rs = stm.executeQuery("select * from t1  offset 0 rows");
-        rs.next();
-        rs.next(); // at row 2
-        rs.updateInt(1, -rs.getInt(1));
-        rs.updateRow();
-        rs.close();
+        variants = makeVariants( "select * from t1 %", FIRST_ROWS_ONLY, "0", null );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            rs = stm.executeQuery( variants[ i ] );
+            rs.next();
+            rs.next(); // at row 2
+            rs.updateInt(1, -rs.getInt(1));
+            rs.updateRow();
+            rs.close();
 
-        queryAndCheck(
-            stm,
-            "select a,b from t1",
-            new String [][] {
-                {"1","1"}, {"-1","2"},{"1","3"}, {"1","4"},{"1","5"}});
+            queryAndCheck(
+                          stm,
+                          "select a,b from t1",
+                          new String [][] {
+                              {"1","1"}, {"-1","2"},{"1","3"}, {"1","4"},{"1","5"}});
 
-        rollback();
+            rollback();
+        }
 
         /*
          * offset 1 rows, update a row and verify result
          */
-        rs = stm.executeQuery("select * from t1 offset 1 rows");
-        rs.next(); // at row 1, but row 2 of underlying rs
+        variants = makeVariants( "select * from t1 %", FIRST_ROWS_ONLY, "1", null );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            rs = stm.executeQuery( variants[ i ] );
+            rs.next(); // at row 1, but row 2 of underlying rs
 
-        rs.updateInt(1, -rs.getInt(1));
-        rs.updateRow();
-        rs.close();
+            rs.updateInt(1, -rs.getInt(1));
+            rs.updateRow();
+            rs.close();
 
-        queryAndCheck(
-            stm,
-            "select a,b from t1",
-            new String [][] {
-                {"1","1"}, {"-1","2"},{"1","3"}, {"1","4"},{"1","5"}});
+            queryAndCheck(
+                          stm,
+                          "select a,b from t1",
+                          new String [][] {
+                              {"1","1"}, {"-1","2"},{"1","3"}, {"1","4"},{"1","5"}});
 
-        rollback();
+            rollback();
+        }
+        
         stm.close();
     }
 
@@ -447,39 +479,48 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     {
         Statement stm = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                         ResultSet.CONCUR_READ_ONLY);
+        ResultSet   rs;
+        String[]    variants;
 
         /*
          * offset 0 rows (a no-op), update a row and verify result
          */
-        ResultSet rs = stm.executeQuery("select * from t1  offset 0 rows");
-        rs.next();
-        rs.next(); // at row 2
-        assertTrue(rs.getInt(2) == 2);
-        rs.close();
-
+        variants = makeVariants( "select * from t1 %", FIRST_ROWS_ONLY, "0", null );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            rs = stm.executeQuery( variants[ i ] );
+            rs.next();
+            rs.next(); // at row 2
+            assertTrue(rs.getInt(2) == 2);
+            rs.close();
+        }
+        
         /*
          * offset 1 rows, fetch 3 row, check that we have the right ones
          */
-        rs = stm.executeQuery(
-            "select * from t1 " + "offset 1 rows fetch next 3 rows only");
-        rs.next();
-        rs.next(); // at row 2, but row 3 of underlying rs
+        variants = makeVariants( "select * from t1 %", FIRST_ROWS_ONLY, "1", "3" );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            rs = stm.executeQuery( variants[ i ] );
+            rs.next();
+            rs.next(); // at row 2, but row 3 of underlying rs
 
-        assertTrue(rs.getInt(2) == 3);
+            assertTrue(rs.getInt(2) == 3);
 
-        // Go backbards and update
-        rs.previous();
-        assertTrue(rs.getInt(2) == 2);
+            // Go backbards and update
+            rs.previous();
+            assertTrue(rs.getInt(2) == 2);
 
-        // Try some navigation and border conditions
-        rs.previous();
-        assertTrue(rs.isBeforeFirst());
-        rs.next();
-        rs.next();
-        rs.next();
-        rs.next();
-        assertTrue(rs.isAfterLast());
-
+            // Try some navigation and border conditions
+            rs.previous();
+            assertTrue(rs.isBeforeFirst());
+            rs.next();
+            rs.next();
+            rs.next();
+            rs.next();
+            assertTrue(rs.isAfterLast());
+        }
+        
         stm.close();
     }
 
@@ -492,6 +533,8 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     {
         Statement stm = createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE,
                                         ResultSet.CONCUR_UPDATABLE);
+        ResultSet   rs;
+        String[]    variants;
 
         setAutoCommit(false);
 
@@ -499,107 +542,116 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
          * offset 0 rows (a no-op), update a row and verify result
          * also try the "for update" syntax so we see that it still works
          */
-        ResultSet rs = stm.executeQuery(
-            "select * from t1  offset 0 rows for update");
-        rs.next();
-        rs.next(); // at row 2
-        rs.updateInt(1, -rs.getInt(1));
-        rs.updateRow();
-        rs.close();
+        variants = makeVariants( "select * from t1 % for update", FIRST_ROWS_ONLY, "0", null );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            rs = stm.executeQuery( variants[ i ] );
+            rs.next();
+            rs.next(); // at row 2
+            rs.updateInt(1, -rs.getInt(1));
+            rs.updateRow();
+            rs.close();
 
-        queryAndCheck(
-            stm,
-            "select a,b from t1",
-            new String [][] {
-                {"1","1"}, {"-1","2"},{"1","3"}, {"1","4"},{"1","5"}});
+            queryAndCheck(
+                          stm,
+                          "select a,b from t1",
+                          new String [][] {
+                              {"1","1"}, {"-1","2"},{"1","3"}, {"1","4"},{"1","5"}});
 
-        rollback();
-
+            rollback();
+        }
+        
         /*
          * offset 1 rows, fetch 3 row, update some rows and verify result
          */
-        rs = stm.executeQuery(
-            "select * from t1 offset 1 rows fetch next 3 rows only");
-        rs.next();
-        rs.next(); // at row 2, but row 3 of underlying rs
+        variants = makeVariants( "select * from t1 %", NEXT_ROWS_ONLY, "1", "3" );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            rs = stm.executeQuery( variants[ i ] );
+            rs.next();
+            rs.next(); // at row 2, but row 3 of underlying rs
 
-        rs.updateInt(1, -rs.getInt(1));
-        rs.updateRow();
+            rs.updateInt(1, -rs.getInt(1));
+            rs.updateRow();
 
-        // Go backbards and update
-        rs.previous();
-        rs.updateInt(1, -rs.getInt(1));
-        rs.updateRow();
+            // Go backbards and update
+            rs.previous();
+            rs.updateInt(1, -rs.getInt(1));
+            rs.updateRow();
 
-        // Try some navigation and border conditions
-        rs.previous();
-        assertTrue(rs.isBeforeFirst());
-        rs.next();
-        rs.next();
-        rs.next();
-        rs.next();
-        assertTrue(rs.isAfterLast());
+            // Try some navigation and border conditions
+            rs.previous();
+            assertTrue(rs.isBeforeFirst());
+            rs.next();
+            rs.next();
+            rs.next();
+            rs.next();
+            assertTrue(rs.isAfterLast());
 
-        // Insert a row
-        rs.moveToInsertRow();
-        rs.updateInt(1,42);
-        rs.updateInt(2,42);
-        rs.insertRow();
+            // Insert a row
+            rs.moveToInsertRow();
+            rs.updateInt(1,42);
+            rs.updateInt(2,42);
+            rs.insertRow();
 
-        // Delete a row
-        rs.previous();
-        rs.deleteRow();
+            // Delete a row
+            rs.previous();
+            rs.deleteRow();
 
-        // .. and see that a hole is left in its place
-        rs.previous();
-        rs.next();
-        assertTrue(rs.rowDeleted());
+            // .. and see that a hole is left in its place
+            rs.previous();
+            rs.next();
+            assertTrue(rs.rowDeleted());
 
-        rs.close();
+            rs.close();
 
-        queryAndCheck(
-            stm,
-            "select a,b from t1",
-            new String [][] {
-                {"1","1"}, {"-1","2"},{"-1","3"},{"1","5"},{"42","42"}});
-        rollback();
-
+            queryAndCheck(
+                          stm,
+                          "select a,b from t1",
+                          new String [][] {
+                              {"1","1"}, {"-1","2"},{"-1","3"},{"1","5"},{"42","42"}});
+            rollback();
+        }
+        
         // Test with projection
-        rs = stm.executeQuery(
-            "select * from t1 where a + 1 < b offset 1 rows");
-        // should yield 2 rows
-        rs.absolute(2);
-        assertTrue(rs.getInt(2) == 5);
-        rs.updateInt(2, -5);
-        rs.updateRow();
-        rs.close();
+        variants = makeVariants( "select * from t1 where a + 1 < b%", NEXT_ROWS_ONLY, "1", null );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            rs = stm.executeQuery( variants[ i ] );
+            // should yield 2 rows
+            rs.absolute(2);
+            assertTrue(rs.getInt(2) == 5);
+            rs.updateInt(2, -5);
+            rs.updateRow();
+            rs.close();
 
-        queryAndCheck(
-            stm,
-            "select a,b from t1",
-            new String [][] {
-                {"1","1"}, {"1","2"},{"1","3"},{"1","4"},{"1","-5"}});
-        rollback();
-
+            queryAndCheck(
+                          stm,
+                          "select a,b from t1",
+                          new String [][] {
+                              {"1","1"}, {"1","2"},{"1","3"},{"1","4"},{"1","-5"}});
+            rollback();
+        }
+        
         stm.close();
     }
 
 
-    public void testValues() throws SQLException {
+    public void testValues() throws Exception
+    {
         Statement stm = createStatement();
 
-        queryAndCheck(
-            stm,
-            "values 4" +
-            "    fetch first 2 row only",
-            new String [][] {{"4"}});
+        vetStatement
+            (
+             stm, null, "values 4%", FIRST_ROW_ONLY, null, "2",
+             new String [][] { {"4"} }
+             );
 
-        queryAndCheck(
-            stm,
-            "values 4" +
-            "    offset 1 row",
-            new String [][] {});
-
+        vetStatement
+            (
+             stm, null, "values 4%", FIRST_ROW_ONLY, "1", null,
+             new String [][] { }
+             );
 
         stm.close();
     }
@@ -607,25 +659,33 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     /**
      * Positive tests, result set metadata
      */
-    public void testMetadata() throws SQLException {
+    public void testMetadata() throws Exception
+    {
         Statement stm = createStatement();
+        ResultSet   rs;
+        String[]    variants;
 
-        ResultSet rs = stm.executeQuery("select * from t1 offset 1 rows");
-        ResultSetMetaData rsmd= rs.getMetaData();
-        int cnt = rsmd.getColumnCount();
+        variants = makeVariants( "select * from t1%", NEXT_ROWS_ONLY, "1", null );
+        for ( int j = 0; j < variants.length; j++ )
+        {
+            rs = stm.executeQuery( variants[ j ] );
+            ResultSetMetaData rsmd= rs.getMetaData();
+            int cnt = rsmd.getColumnCount();
 
-        String[] cols = new String[]{"A","B"};
-        int[] types = {Types.INTEGER, Types.BIGINT};
+            String[] cols = new String[]{"A","B"};
+            int[] types = {Types.INTEGER, Types.BIGINT};
 
-        for (int i=1; i <= cnt; i++) {
-            String name = rsmd.getColumnName(i);
-            int type = rsmd.getColumnType(i);
+            for (int i=1; i <= cnt; i++) {
+                String name = rsmd.getColumnName(i);
+                int type = rsmd.getColumnType(i);
 
-            assertTrue(name.equals(cols[i-1]));
-            assertTrue(type == types[i-1]);
+                assertTrue(name.equals(cols[i-1]));
+                assertTrue(type == types[i-1]);
+            }
+
+            rs.close();
         }
-
-        rs.close();
+        
         stm.close();
     }
 
@@ -633,31 +693,38 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     /**
      * Test that we see correct traces of the filtering in the statistics
      */
-    public void testRunTimeStatistics() throws SQLException {
+    public void testRunTimeStatistics() throws Exception
+    {
         Statement stm = createStatement();
+        ResultSet   rs;
+        String[]    variants;
 
-        stm.executeUpdate("call syscs_util.syscs_set_runtimestatistics(1)");
+        variants = makeVariants( "select a,b from t1%", NEXT_ROWS_ONLY, "2", null );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            stm.executeUpdate( "call syscs_util.syscs_set_runtimestatistics(1)" );
 
-        queryAndCheck(
-            stm,
-            "select a,b from t1 offset 2 rows",
-            new String [][] {
-                {"1","3"}, {"1","4"},{"1","5"}});
+            queryAndCheck(
+                          stm,
+                          variants[ i ],
+                          new String [][] {
+                              {"1","3"}, {"1","4"},{"1","5"}});
 
-        stm.executeUpdate("call syscs_util.syscs_set_runtimestatistics(0)");
+            stm.executeUpdate( "call syscs_util.syscs_set_runtimestatistics(0)" );
 
-        ResultSet rs = stm.executeQuery(
-            "values syscs_util.syscs_get_runtimestatistics()");
-        rs.next();
-        String plan = rs.getString(1);
+            rs = stm.executeQuery( "values syscs_util.syscs_get_runtimestatistics()" );
+            rs.next();
+            String plan = rs.getString(1);
 
-        // Verify that the plan shows the filtering (2 rows of 3 seen):
-        assertTrue(plan.indexOf("Row Count (1):\n" +
-                                "Number of opens = 1\n" +
-                                "Rows seen = 3\n" +
-                                "Rows filtered = 2") != -1);
+            // Verify that the plan shows the filtering (2 rows of 3 seen):
+            assertTrue(plan.indexOf("Row Count (1):\n" +
+                                    "Number of opens = 1\n" +
+                                    "Rows seen = 3\n" +
+                                    "Rows filtered = 2") != -1);
 
-        rs.close();
+            rs.close();
+        }
+        
         stm.close();
     }
 
@@ -665,7 +732,8 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
     /**
      * Test against a bigger table
      */
-    public void testBigTable() throws SQLException {
+    public void testBigTable() throws Exception
+    {
         Statement stm = createStatement();
 
         setAutoCommit(false);
@@ -691,11 +759,11 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
             new String [][] {
                 {"100000"}});
 
-        queryAndCheck(
-            stm,
-            "select i from session.t offset 99999 rows",
-            new String [][] {
-                {"100000"}});
+        vetStatement
+            (
+             stm, null, "select i from session.t%", FIRST_ROWS_ONLY, "99999", null,
+             new String [][] { {"100000"} }
+             );
 
         stm.executeUpdate("drop table session.t");
         stm.close();
@@ -705,151 +773,304 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
      * Test that the values of offset and fetch first are not forgotten if
      * a {@code PreparedStatement} is executed multiple times (DERBY-4212).
      */
-    public void testRepeatedExecution() throws SQLException {
-        PreparedStatement ps = prepareStatement(
-                "select * from t1 order by b " +
-                "offset 2 rows fetch next 2 rows only");
-        String[][] expected = {{"1", "3"}, {"1", "4"}};
-        for (int i = 0; i < 10; i++) {
-            JDBC.assertFullResultSet(ps.executeQuery(), expected);
+    public void testRepeatedExecution() throws Exception
+    {
+        PreparedStatement ps;
+        ResultSet   rs;
+        String[]    variants;
+
+        variants = makeVariants( "select * from t1 order by b%", NEXT_ROWS_ONLY, "2", "2" );
+        for ( int j = 0; j < variants.length; j++ )
+        {
+            ps = prepareStatement( variants[ j ] );
+            String[][] expected = {{"1", "3"}, {"1", "4"}};
+            for (int i = 0; i < 10; i++) {
+                JDBC.assertFullResultSet(ps.executeQuery(), expected);
+            }
         }
     }
 
     /**
      * Test dynamic arguments
      */
-    public void testDynamicArgs() throws SQLException {
+    public void testDynamicArgs() throws Exception
+    {
+        PreparedStatement ps;
+        String[]    variants;
+        String[][] expected = null;
+
         // Check look-ahead also for ? in grammar since offset is not reserved
-        PreparedStatement ps = prepareStatement(
-            "select * from t1 offset ? rows");
-
-        // Check range errors
-        ps = prepareStatement(
-            "select * from t1 order by b " +
-            "offset ? rows fetch next ? rows only");
-
-        ps.setInt(1, 0);
-        assertPreparedStatementError(LANG_MISSING_PARMS, ps);
-
-        ps.setInt(1, -1);
-        ps.setInt(2, 2);
-        assertPreparedStatementError(LANG_INVALID_ROW_COUNT_OFFSET, ps);
-
-        ps.setInt(1, 0);
-        ps.setInt(2, 0);
-        assertPreparedStatementError(LANG_INVALID_ROW_COUNT_FIRST, ps);
-
-        // Check non-integer values
-        try {
-            ps.setString(1, "aaa");
-        } catch (SQLException e) {
-            assertSQLState(LANG_FORMAT_EXCEPTION, e);
+        variants = makeVariants( "select * from t1%", NEXT_ROWS_ONLY, "?", null );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            ps = prepareStatement( variants[ i ] );
         }
+        
+        
+        variants = makeVariants( "select * from t1 order by b%", NEXT_ROWS_ONLY, "?", "?" );
+        for ( int j = 0; j < variants.length; j++ )
+        {
+            // SQL Standard and JDBC limit/offset parameter orders are different
+            int offsetParam = ( j == SQL_STANDARD_VARIANT ) ? 1 : 2;
+            int fetchParam = ( j == SQL_STANDARD_VARIANT ) ? 2 : 1;
+            
+            expected = new String[][] {{"1", "3"}, {"1", "4"}};
+            ps = prepareStatement( variants[ j ] );
 
-        try {
-            ps.setString(2, "aaa");
-        } catch (SQLException e) {
-            assertSQLState(LANG_FORMAT_EXCEPTION, e);
+            // Check range errors
+
+            ps.setInt( offsetParam, 0 );
+            assertPreparedStatementError(LANG_MISSING_PARMS, ps);
+
+            ps.setInt( offsetParam, -1 );
+            ps.setInt( fetchParam, 2 );
+            assertPreparedStatementError(LANG_INVALID_ROW_COUNT_OFFSET, ps);
+
+            ps.setInt( offsetParam, 0 );
+            ps.setInt( fetchParam, ( j == SQL_STANDARD_VARIANT ) ? 0 : -1 );
+            assertPreparedStatementError(LANG_INVALID_ROW_COUNT_FIRST, ps);
+
+            // Check non-integer values
+            try {
+                ps.setString( offsetParam, "aaa");
+            } catch (SQLException e) {
+                assertSQLState(LANG_FORMAT_EXCEPTION, e);
+            }
+
+            try {
+                ps.setString( fetchParam, "aaa");
+            } catch (SQLException e) {
+                assertSQLState(LANG_FORMAT_EXCEPTION, e);
+            }
+
+
+            // A normal case
+            for (int i = 0; i < 2; i++) {
+                ps.setInt( offsetParam,2 );
+                ps.setInt( fetchParam,2 );
+                JDBC.assertFullResultSet(ps.executeQuery(), expected);
+            }
+
+            // Now, note that since we now have different values for offset and
+            // fetch first, we also exercise reusing the result set for this
+            // prepared statement (i.e. the values are computed at execution time,
+            // not at result set generation time). Try long value for change.
+            ps.setLong( offsetParam, 1L );
+            ps.setInt( fetchParam, 3 );
+            expected = new String[][]{{"1", "2"}, {"1", "3"}, {"1", "4"}};
+            JDBC.assertFullResultSet(ps.executeQuery(), expected);
+
+
+            //  Try a large number
+            ps.setLong( offsetParam, Integer.MAX_VALUE * 2L );
+            ps.setInt( fetchParam, 5 );
+            JDBC.assertEmpty(ps.executeQuery());
         }
-
-
-        // A normal case
-        String[][] expected = {{"1", "3"}, {"1", "4"}};
-        for (int i = 0; i < 2; i++) {
-            ps.setInt(1,2);
-            ps.setInt(2,2);
+        
+        // Mix of prepared and not
+        variants = makeVariants( "select * from t1 order by b%", NEXT_ROWS_ONLY, "?", "3" );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            ps = prepareStatement( variants[ i ] );
+            ps.setLong(1, 1L);
             JDBC.assertFullResultSet(ps.executeQuery(), expected);
         }
 
-        // Now, note that since we now have different values for offset and
-        // fetch first, we also exercise reusing the result set for this
-        // prepared statement (i.e. the values are computed at execution time,
-        // not at result set generation time). Try long value for change.
-        ps.setLong(1, 1L);
-        ps.setInt(2, 3);
-        expected = new String[][]{{"1", "2"}, {"1", "3"}, {"1", "4"}};
-        JDBC.assertFullResultSet(ps.executeQuery(), expected);
-
-
-        //  Try a large number
-        ps.setLong(1, Integer.MAX_VALUE * 2L);
-        ps.setInt(2, 5);
-        JDBC.assertEmpty(ps.executeQuery());
-
-        // Mix of prepared and not
-        ps = prepareStatement(
-            "select * from t1 order by b " +
-             "offset ? rows fetch next 3 rows only");
-        ps.setLong(1, 1L);
-        JDBC.assertFullResultSet(ps.executeQuery(), expected);
-
-        ps = prepareStatement(
-            "select * from t1 order by b " +
-             "offset 4 rows fetch next ? rows only");
-        ps.setLong(1, 1L);
-        JDBC.assertFullResultSet(ps.executeQuery(),
-                                 new String[][]{{"1", "5"}});
+        variants = makeVariants( "select * from t1 order by b%", NEXT_ROWS_ONLY, "4", "?" );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            ps = prepareStatement( variants[ i ] );
+            ps.setLong(1, 1L);
+            JDBC.assertFullResultSet(ps.executeQuery(), new String[][]{{"1", "5"}});
+        }
 
         // Mix of other dyn args and ours:
-        ps = prepareStatement(
-            "select * from t1 where a = ? order by b " +
-             "offset ? rows fetch next 3 rows only");
-        ps.setInt(1, 1);
-        ps.setLong(2, 1L);
-        JDBC.assertFullResultSet(ps.executeQuery(), expected);
+        variants = makeVariants( "select * from t1 where a = ? order by b%", NEXT_ROWS_ONLY, "?", "3" );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            ps = prepareStatement( variants[ i ] );
+            ps.setInt(1, 1);
+            ps.setLong(2, 1L);
+            JDBC.assertFullResultSet(ps.executeQuery(), expected);
+        }
 
-        ps = prepareStatement(
-            "select * from t1 where a = ? order by b " +
-             "offset 1 rows fetch next ? rows only");
-        ps.setInt(1, 1);
-        ps.setLong(2, 2L);
-        expected = new String[][]{{"1", "2"}, {"1", "3"}};
-        JDBC.assertFullResultSet(ps.executeQuery(), expected);
-
+        variants = makeVariants( "select * from t1 where a = ? order by b%", NEXT_ROWS_ONLY, "1", "?" );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            ps = prepareStatement( variants[ i ] );
+            ps.setInt(1, 1);
+            ps.setLong(2, 2L);
+            expected = new String[][]{{"1", "2"}, {"1", "3"}};
+            JDBC.assertFullResultSet(ps.executeQuery(), expected);
+        }
 
         // NULLs not allowed (Note: parameter metadata says "isNullable" for
         // all ? args in Derby...)
-        ps = prepareStatement(
-            "select * from t1 order by b " +
-             "offset ? rows fetch next ? rows only");
-        ps.setNull(1, Types.BIGINT);
-        ps.setInt(2, 2);
-        assertPreparedStatementError(LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL, ps);
+        variants = makeVariants( "select * from t1 order by b%", NEXT_ROWS_ONLY, "?", "?" );
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            ps = prepareStatement( variants[ i ] );
+            int offsetParam = ( i == SQL_STANDARD_VARIANT ) ? 1 : 2;
+            int fetchParam = ( i == SQL_STANDARD_VARIANT ) ? 2 : 1;
+            
+            ps.setNull( offsetParam, Types.BIGINT );
+            ps.setInt( fetchParam, 2 );
+            assertPreparedStatementError(LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL, ps);
 
-        ps.setInt(1,1);
-        ps.setNull(2, Types.BIGINT);
-        assertPreparedStatementError(LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL, ps);
-
-        ps.close();
+            ps.setInt( offsetParam,1 );
+            ps.setNull( fetchParam, Types.BIGINT );
+            assertPreparedStatementError(LANG_ROW_COUNT_OFFSET_FIRST_IS_NULL, ps);
+            
+            ps.close();
+        }
     }
 
     /**
      * Test dynamic arguments
      */
-    public void testDynamicArgsMetaData() throws SQLException {
+    public void testDynamicArgsMetaData() throws Exception
+    {
 
     	//since there is no getParameterMetaData() call available in JSR169 
     	//implementations, do not run this test if we are running JSR169
     	if (JDBC.vmSupportsJSR169()) return;
 
-        PreparedStatement ps = prepareStatement(
-            "select * from t1 where a = ? order by b " +
-            "offset ? rows fetch next ? rows only");
+        PreparedStatement ps;
+        String[]    variants;
 
-        ParameterMetaData pmd = ps.getParameterMetaData();
-        int[] expectedTypes = { Types.INTEGER, Types.BIGINT, Types.BIGINT };
+        variants = makeVariants( "select * from t1 where a = ? order by b%", NEXT_ROWS_ONLY, "?", "?" );
+        for ( int j = 0; j < variants.length; j++ )
+        {
+            ps = prepareStatement( variants[ j ] );
+            
+            ParameterMetaData pmd = ps.getParameterMetaData();
+            int[] expectedTypes = { Types.INTEGER, Types.BIGINT, Types.BIGINT };
 
-        for (int i = 0; i < 3; i++) {
-            assertEquals("Unexpected parameter type",
-                         expectedTypes[i], pmd.getParameterType(i+1));
-            assertEquals("Derby ? args are nullable",
-                         // Why is that? Cf. logic in ParameterNode.setType
-                         ParameterMetaData.parameterNullable,
-                         pmd.isNullable(i+1));
+            for (int i = 0; i < 3; i++) {
+                assertEquals("Unexpected parameter type",
+                             expectedTypes[i], pmd.getParameterType(i+1));
+                assertEquals("Derby ? args are nullable",
+                             // Why is that? Cf. logic in ParameterNode.setType
+                             ParameterMetaData.parameterNullable,
+                             pmd.isNullable(i+1));
+            }
+            ps.close();
         }
-        ps.close();
     }
 
+    /**
+     * Run a statement with both SQL Standard and JDBC limit/offset syntax. Verify
+     * that we get the expected error or results. The statement has a % literal at the
+     * point where the offset/fetchFirst and limit/offset clauses are to be inserted.
+     */
+    private void    vetStatement
+        ( Statement stmt, String sqlState, String stub, String fetchFormat, String offset, String fetchFirst, String[][] expectedResults )
+        throws Exception
+    {
+        String[]    variants = makeVariants( stub, fetchFormat, offset, fetchFirst );
+
+        for ( int i = 0; i < variants.length; i++ )
+        {
+            String  text = variants[ i ];
+            
+            if ( sqlState != null )
+            {
+                assertStatementError( sqlState, stmt, text );
+            }
+            else
+            {
+                queryAndCheck( stmt, text, expectedResults );
+            }
+        }
+    }
+
+    /**
+     * Make the SQL Standard and JDBC limit/offset variants of a stub statement,
+     * plugging in the given offset and fetch count.
+     */
+    private String[]    makeVariants
+        ( String stub, String fetchFormat, String offset, String fetchFirst )
+        throws Exception
+    {
+        String[]    result = new String[ VARIANT_COUNT ];
+
+        result[ SQL_STANDARD_VARIANT ] = makeSQLStandardText( stub, fetchFormat, offset, fetchFirst );
+        result[ JDBC_VARIANT ] = makeJDBCText( stub, offset, fetchFirst );
+
+        return result;
+    }
+    
+    /**
+     * Substitute the SQL Standard syntax into a stub statement, given an offset and fetch count.
+     */
+    private String  makeSQLStandardText
+        ( String stub, String fetchFormat, String offset, String fetchFirst )
+        throws Exception
+    {
+        String  sqlStandardText = "";
+
+        if ( offset != null )
+        {
+            sqlStandardText = " offset " + offset + " rows ";
+        }
+        if ( fetchFirst != null )
+        {
+            sqlStandardText = sqlStandardText + substitute( fetchFormat, PERCENT_TOKEN, fetchFirst );
+        }
+
+        sqlStandardText = substitute( stub, PERCENT_TOKEN, sqlStandardText );
+
+        println( sqlStandardText );
+
+        return sqlStandardText;
+    }
+    /**
+     * Substitute JDBC limit/offset syntax into a stub statement, given an offset and fetch count.
+     */
+    private String  makeJDBCText
+        ( String stub, String offset, String fetchFirst )
+        throws Exception
+    {
+        String  jdbcText = "";
+
+        if ( offset != null )
+        {
+            jdbcText = " offset " + offset;
+        }
+        if ( fetchFirst != null )
+        {
+            jdbcText = " limit " + fetchFirst + " " + jdbcText;
+        }
+        else
+        {
+            jdbcText = "limit 0 " + jdbcText;
+        }
+
+        jdbcText = substitute( stub, PERCENT_TOKEN, " { " + jdbcText + " } " );
+
+        println( jdbcText );
+
+        return jdbcText;
+    }
+
+    private String  substitute( String stub, String token, int replacement )
+        throws Exception
+    {
+        return substitute( stub, token, Integer.toString( replacement ) );
+    }
+    private String  substitute( String stub, String token, String replacement )
+        throws Exception
+    {
+        int substitutionIndex = stub.indexOf( token );
+        if ( substitutionIndex < 0 ) { fail( "Bad stub: " + stub + ". Can't find token: " + token ); }
+
+        String  prefix = stub.substring( 0, substitutionIndex );
+        String  suffix = ( substitutionIndex == stub.length() - 1 ) ?
+            "" : stub.substring( substitutionIndex + 1, stub.length() );
+
+        return prefix + replacement + suffix;
+    }
+    
     private void queryAndCheck(
         Statement stm,
         String queryText,
@@ -858,4 +1079,5 @@ public class OffsetFetchNextTest extends BaseJDBCTestCase {
         ResultSet rs = stm.executeQuery(queryText);
         JDBC.assertFullResultSet(rs, expectedRows);
     }
+
 }
