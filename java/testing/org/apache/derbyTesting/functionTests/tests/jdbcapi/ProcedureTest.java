@@ -1161,7 +1161,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
              new byte[] { (byte) 1, (byte) 1, (byte) 1 },
              new HarmonySerialClob( "firstt" ),
              new Date( 1L ),
-             new BigDecimal( 1 ),
+             new BigDecimal( "1" ),
              new Double( 1.0 ),
              new Integer( 1 ),
              new String( "firstt" ),
@@ -1170,7 +1170,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
              new Integer( 1 ),
              new Time( 1L ),
              new Timestamp( 1L ),
-             new Price( "USD", new BigDecimal( 1 ), new Timestamp( 1 ) ),
+             new Price( "USD", new BigDecimal( "1" ), new Timestamp( 1 ) ),
              "firstt",
              new byte[] { (byte) 1, (byte) 1, (byte) 1 }
              );
@@ -1186,7 +1186,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
              new byte[] { (byte) 2, (byte) 2, (byte) 2 },
              new HarmonySerialClob( "second" ),
              new Date( 2L ),
-             new BigDecimal( 2 ),
+             new BigDecimal( "2" ),
              new Double( 2.0 ),
              new Integer( 2 ),
              new String( "second" ),
@@ -1195,7 +1195,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
              new Integer( 2 ),
              new Time( 2L ),
              new Timestamp( 2L ),
-             new Price( "USD", new BigDecimal( 2 ), new Timestamp( 2 ) ),
+             new Price( "USD", new BigDecimal( "2" ), new Timestamp( 2 ) ),
              "second",
              new byte[] { (byte) 2, (byte) 2, (byte) 2 }
              );
