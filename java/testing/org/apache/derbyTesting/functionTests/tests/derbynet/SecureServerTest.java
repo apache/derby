@@ -22,33 +22,21 @@
 package org.apache.derbyTesting.functionTests.tests.derbynet;
 
 import java.io.File;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.URL;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
-import java.util.Properties;
+import java.util.Arrays;
 
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.Derby;
 import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
-import org.apache.derbyTesting.junit.ServerSetup;
 import org.apache.derbyTesting.junit.SpawnedProcess;
 import org.apache.derbyTesting.junit.SupportFilesSetup;
-import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
-
-import org.apache.derby.drda.NetworkServerControl;
 
 /**
  * This Junit test class tests whether the server comes up under a security
@@ -363,7 +351,8 @@ public class SecureServerTest extends BaseJDBCTestCase
 
     private void disableTracing() throws Exception {
 
-        String traceOffOutput = runServerCommand( "trace off" );
+        String traceOffOutput = runServerCommand(
+                new String[] { "trace", "off" });
 
         println( "Output for trace off command:\n\n" + traceOffOutput );
 
@@ -373,13 +362,14 @@ public class SecureServerTest extends BaseJDBCTestCase
 
     private void setTraceDirectory() throws Exception {
 
-        String  traceDirectoryOutput = runServerCommand( "tracedirectory trace" );
+        String  traceDirectoryOutput = runServerCommand(
+                new String[] { "tracedirectory", "trace" });
         println( "Output for tracedirectory trace command:\n\n" + traceDirectoryOutput );
 
         if ( traceDirectoryOutput.indexOf( "Trace directory changed to trace." ) < 0 )
         { fail( "Unexpected output in setting trace directory:" + traceDirectoryOutput ); }
 
-        String pingOutput = runServerCommand( "ping" );
+        String pingOutput = runServerCommand( new String[] { "ping" } );
 
         if (pingOutput.indexOf("Connection obtained for host:") < 0)
         { fail ("Failed ping after changing trace directory: " + pingOutput);}
@@ -412,7 +402,8 @@ public class SecureServerTest extends BaseJDBCTestCase
     private void    runsysinfo()
         throws Exception
     {
-        String          sysinfoOutput = runServerCommand( "sysinfo" );
+        String          sysinfoOutput = runServerCommand(
+                new String[] { "sysinfo" } );
 
         if ( sysinfoOutput.indexOf( "Security Exception:" ) > -1 )
         { fail( "Security exceptions in sysinfo output:\n\n:" + sysinfoOutput ); }
@@ -421,7 +412,8 @@ public class SecureServerTest extends BaseJDBCTestCase
     private void    enableTracing()
         throws Exception
     {
-        String          traceOnOutput = runServerCommand( "trace on" );
+        String          traceOnOutput = runServerCommand(
+                new String[] { "trace",  "on" } );
 
         println( "Output for trace on command:\n\n" + traceOnOutput );
 
@@ -460,42 +452,24 @@ public class SecureServerTest extends BaseJDBCTestCase
      * Run a NetworkServerControl command.
      * </p>
      */
-    private String    runServerCommand( String commandSpecifics )
+    private String    runServerCommand( String[] commandSpecifics )
         throws Exception
     {
         String          portNumber = Integer.toString( getTestConfiguration().getPort() );
-        StringBuffer    buffer = new StringBuffer();
-        String          classpath = getSystemProperty( "java.class.path" );
 
-        buffer.append( getJavaExecutableName() + " -classpath " );
-        buffer.append( classpath );
-        buffer.append( " -Demma.verbosity.level=silent");
-        buffer.append( " org.apache.derby.drda.NetworkServerControl -p " + portNumber + " " + commandSpecifics );
+        ArrayList cmdList = new ArrayList();
+        cmdList.add("-Demma.verbosity.level=silent");
+        cmdList.add("org.apache.derby.drda.NetworkServerControl");
+        cmdList.add("-p");
+        cmdList.add(portNumber);
+        cmdList.addAll(Arrays.asList(commandSpecifics));
 
-        final   String  command = buffer.toString();
+        String[] cmd = (String[]) cmdList.toArray(commandSpecifics);
 
-        println( "Server command is " + command );
-
-        Process     serverProcess = (Process) AccessController.doPrivileged
-            (
-             new PrivilegedAction()
-             {
-                 public Object run()
-                 {
-                     Process    result = null;
-                     try {
-                        result = Runtime.getRuntime().exec( command );
-                     } catch (Exception ex) {
-                         ex.printStackTrace();
-                     }
-                     
-                     return result;
-                 }
-             }
-            );
+        Process serverProcess = execJavaCmd(cmd);
         
         SpawnedProcess spawned = new SpawnedProcess(serverProcess,
-                commandSpecifics);
+                cmdList.toString());
         
         // Ensure it completes without failures.
         assertEquals(0, spawned.complete(false));

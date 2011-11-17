@@ -23,7 +23,6 @@ package org.apache.derbyTesting.functionTests.tests.jdbc4;
 
 import java.sql.Driver;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
 import junit.framework.Test;
@@ -139,19 +138,12 @@ public class Driver40UnbootedTest extends BaseJDBCTestCase
     {
         if ( !getTestConfiguration().loadingFromJars() ) { return ; }
         
-        StringBuffer    buffer = new StringBuffer();
-        String          classpath = getSystemProperty( "java.class.path" );
+        String[] command = {
+            "-Demma.verbosity.level=silent",
+            getClass().getName()
+        };
 
-        buffer.append( getJavaExecutableName() + " -classpath " );
-        buffer.append( classpath );
-        buffer.append( " -Demma.verbosity.level=silent ");
-        buffer.append( getClass().getName() );
-
-        final   String  command = buffer.toString();
-
-        println( "Server command is " + command );
-
-        Process     process = Runtime.getRuntime().exec( command );
+        Process process = execJavaCmd(command);
         
         SpawnedProcess spawned = new SpawnedProcess( process, "UnbootedTest" );
         
