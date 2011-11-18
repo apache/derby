@@ -51,7 +51,7 @@ public class NetDatabaseMetaData40 extends org.apache.derby.client.net.NetDataba
      */
     public int getJDBCMinorVersion() throws SQLException {
         checkForClosedConnection();
-        return 0;
+        return 1;
     }
 
     /**

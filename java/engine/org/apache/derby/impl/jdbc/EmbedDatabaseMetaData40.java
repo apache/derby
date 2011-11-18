@@ -46,7 +46,7 @@ public class EmbedDatabaseMetaData40 extends EmbedDatabaseMetaData {
      * @return JDBC version minor number
      */
     public int getJDBCMinorVersion() {
-        return 0;
+        return 1;
     }
 
     public RowIdLifetime getRowIdLifetime() throws SQLException {

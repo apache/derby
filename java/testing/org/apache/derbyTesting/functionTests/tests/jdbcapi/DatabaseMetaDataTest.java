@@ -668,13 +668,16 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         int jdbcMinor = dmd.getJDBCMinorVersion();
         
         int expectedJDBCMajor = -1;
+        int expectedJDBCMinor = -1;
         if (JDBC.vmSupportsJDBC4())
         {
             expectedJDBCMajor = 4;
+            expectedJDBCMinor = 1;
         }
         else if (JDBC.vmSupportsJDBC3())
         {
             expectedJDBCMajor = 3;
+            expectedJDBCMajor = 0;
         }
         else if (JDBC.vmSupportsJSR169())
         {
@@ -686,7 +689,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         {
             assertEquals("JDBC Major version",
                     expectedJDBCMajor, jdbcMajor);
-            assertEquals("JDBC Minor version", 0, jdbcMinor);
+            assertEquals("JDBC Minor version", expectedJDBCMinor, jdbcMinor);
         }
     }
     
