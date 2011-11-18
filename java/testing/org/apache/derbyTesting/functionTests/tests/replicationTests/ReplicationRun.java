@@ -24,6 +24,8 @@ package org.apache.derbyTesting.functionTests.tests.replicationTests;
 import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
 import org.apache.derby.drda.NetworkServerControl;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Properties;
 
 import java.sql.*;
@@ -541,17 +543,19 @@ public class ReplicationRun extends BaseTestCase
         
         String clientJvm = ReplicationRun.getClientJavaExecutableName();
         
-        String command = null;
+        String[] command;
         
         util.DEBUG("replicationTest: " + replicationTest);
         if ( replicationTest.indexOf(".sql") >= 0 )
         {
-            command = clientJvm
-                    + " -Dij.driver=" + DRIVER_CLASS_NAME
-                    + " -Dij.connection.startTestClient=" + URL
-                    + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
-                    + " " + replicationTest
-                    ;
+            command = new String[]{
+                clientJvm,
+                "-Dij.driver=" + DRIVER_CLASS_NAME,
+                "-Dij.connection.startTestClient=" + URL,
+                "-classpath", ijClassPath,
+                "org.apache.derby.tools.ij",
+                replicationTest
+            };
         }
         else
         { // JUnit or plain class w/main().
@@ -559,26 +563,27 @@ public class ReplicationRun extends BaseTestCase
             {
                 testingClassPath = classPath; // Using the complete classpath
             }
-            String StressMultiTestOption = "";
-            if ( THREADS != 0 && MINUTES != 0 )
-            {
-                StressMultiTestOption = "-Dderby.tests.ThreadsMinutes="+THREADS+"x"+MINUTES;
+
+            ArrayList cmd = new ArrayList();
+            cmd.add(clientJvm);
+            cmd.add("-Dderby.tests.trace=true");
+            cmd.add("-Dtest.serverHost=" + serverHost);  // Tell the test what server
+            cmd.add("-Dtest.serverPort=" + serverPort);  // and port to connect to.
+            cmd.add("-Dtest.inserts=" + tuplesToInsertPerf); // for SimplePerfTest
+            cmd.add("-Dtest.commitFreq=" +  commitFreq); // for SimplePerfTest
+            if (THREADS != 0 && MINUTES != 0) {
+                // For StressMultiTestForReplLoad as load.
+                cmd.add("-Dderby.tests.ThreadsMinutes="+THREADS+"x"+MINUTES);
             }
-            String testRunner = " junit.textui.TestRunner";
-            if ( ! junitTest ) testRunner = ""; // plain class w/main()
-            command = clientJvm
-                    + " -Dderby.tests.trace=true"
-                    // + " -Djava.security.policy=\"<NONE>\"" // Now using noSecurityManager decorator
-                    + " -Dtest.serverHost=" + serverHost  // Tell the test what server
-                    + " -Dtest.serverPort=" + serverPort  // and port to connect to.
-                    + " -Dtest.inserts=" + tuplesToInsertPerf // for SimplePerfTest
-                    + " -Dtest.commitFreq=" +  commitFreq // for SimplePerfTest
-                    + " " + StressMultiTestOption // For StressMultiTestForReplLoad as load.
-                    + " -Dtest.dbPath=" + masterDbPath(dbName) // OK?
-                    + " -classpath " + testingClassPath
-                    + testRunner // NB Empty if a plain class w/main()!
-                    + " " + replicationTest
-                    ;
+            cmd.add("-Dtest.dbPath=" + masterDbPath(dbName)); // OK?
+            cmd.add("-classpath");
+            cmd.add(testingClassPath);
+            if (junitTest) {
+                cmd.add("junit.textui.TestRunner");
+            }
+            cmd.add(replicationTest);
+
+            command = (String[]) cmd.toArray(new String[cmd.size()]);
         }
         
         long startTime = System.currentTimeMillis();
@@ -590,10 +595,16 @@ public class ReplicationRun extends BaseTestCase
         }
         else
         {
-            command = "cd "+ workingDir +";" // NOT Correct: ...Must be positioned where the properties file is located.
-                    + command;
-            results = runUserCommandRemotely(command, testClientHost, testUser,
-                    "runTest ");
+            // This doesn't work if path names contain spaces or other
+            // characters with special meaning to the shell.
+            StringBuffer cmd = new StringBuffer();
+            cmd.append("cd "+ workingDir +";"); // NOT Correct: ...Must be positioned where the properties file is located.
+            for (int i = 0; i < command.length; i++) {
+                cmd.append(' ');
+                cmd.append(command[i]);
+            }
+            results = runUserCommandRemotely(
+                    cmd.toString(), testClientHost, testUser, "runTest ");
         }
         util.DEBUG("Time: " + (System.currentTimeMillis() - startTime) / 1000.0);
         
@@ -626,7 +637,7 @@ public class ReplicationRun extends BaseTestCase
         
         String clientJvm = ReplicationRun.getSlaveJavaExecutableName();
         
-        String command = null;
+        String[] command;
         
         if ( replicationTest == null ) 
         {
@@ -642,12 +653,14 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("replicationTest: " + replicationTest);
         if ( replicationTest.indexOf(".sql") >= 0 )
         {
-            command = clientJvm
-                    + " -Dij.driver=" + DRIVER_CLASS_NAME
-                    + " -Dij.connection.startTestClient=" + URL
-                    + " -classpath " + ijClassPath + " org.apache.derby.tools.ij"
-                    + " " + replicationTest
-                    ;
+            command = new String[]{
+                clientJvm,
+                "-Dij.driver=" + DRIVER_CLASS_NAME,
+                "-Dij.connection.startTestClient=" + URL,
+                "-classpath", ijClassPath,
+                "org.apache.derby.tools.ij",
+                replicationTest
+            };
         }
         else
         { // JUnit
@@ -655,18 +668,18 @@ public class ReplicationRun extends BaseTestCase
             {
                 testingClassPath = classPath; // Using the complete classpath
             }
-            command = clientJvm
-                    + " -Dderby.tests.trace=true"
-                    // + " -Djava.security.policy=\"<NONE>\""  // Now using noSecurityManager decorator
-                    + " -Dtest.serverHost=" + serverHost  // Tell the test what server
-                    + " -Dtest.serverPort=" + serverPort  // and port to connect to.
-                    + " -Dtest.inserts=" + tuplesToInsertPerf // for SimplePerfTest
-                    + " -Dtest.commitFreq=" +  commitFreq // for SimplePerfTest
-                    + " -Dtest.dbPath=" + slaveDbPath(dbName) // OK?
-                    + " -classpath " + testingClassPath
-                    + " junit.textui.TestRunner"
-                    + " " + replicationTest
-                    ;
+            command = new String[]{
+                clientJvm,
+                "-Dderby.tests.trace=true",
+                "-Dtest.serverHost=" + serverHost, // Tell the test what server
+                "-Dtest.serverPort=" + serverPort, // and port to connect to.
+                "-Dtest.inserts=" + tuplesToInsertPerf, // for SimplePerfTest
+                "-Dtest.commitFreq=" + commitFreq, // for SimplePerfTest
+                "-Dtest.dbPath=" + slaveDbPath(dbName), // OK?
+                "-classpath", testingClassPath,
+                "junit.textui.TestRunner",
+                replicationTest
+            };
         }
         
         long startTime = System.currentTimeMillis();
@@ -677,10 +690,16 @@ public class ReplicationRun extends BaseTestCase
         }
         else
         {
-            command = "cd "+ userDir +";" // Must be positioned where the properties file is located.
-                    + command;
-            results = runUserCommandRemotely(command, testClientHost, testUser,
-                    "runTestOnSlave ");
+            // This doesn't work if path names contain spaces or other
+            // characters with special meaning to the shell.
+            StringBuffer cmd = new StringBuffer();
+            cmd.append("cd "+ userDir +";"); // Must be positioned where the properties file is located.
+            for (int i = 0; i < command.length; i++) {
+                cmd.append(' ');
+                cmd.append(command[i]);
+            }
+            results = runUserCommandRemotely(
+                cmd.toString(), testClientHost, testUser, "runTestOnSlave ");
         }
         util.DEBUG("Time: " + (System.currentTimeMillis() - startTime) / 1000.0);
         
@@ -1473,15 +1492,14 @@ public class ReplicationRun extends BaseTestCase
         
         return output;
     }
-    private void runUserCommandLocally(String command, String user_dir, String ID)
+    private void runUserCommandLocally(
+            String[] command, String user_dir, String ID)
     { // Running on localhost. Param user_dir is not used! FIXME: remove user_dir param!
         util.DEBUG("");
         final String debugId = "runUserCommandLocally " + ID + " ";
         util.DEBUG("+++ runUserCommandLocally " + command + " / " + user_dir);
                         
         util.DEBUG(debugId+command);
-        
-        final String fullCmd = command;
         
         String[] envElements = null; // rt.exec() will inherit..
         /*
@@ -1491,15 +1509,12 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG(debugId+"envElements: " + tmp);
          */
         
-        String shellCmd = fullCmd;
-        
         {
-            final String localCommand = shellCmd;
-            util.DEBUG(debugId+"localCommand: " + localCommand);
+            util.DEBUG(debugId + "localCommand: " + Arrays.asList(command));
             
             try
             {
-                Process proc = Runtime.getRuntime().exec(localCommand,envElements,
+                Process proc = Runtime.getRuntime().exec(command, envElements,
                         null); // Inherit user.dir
                 processDEBUGOutput(debugId+"pDo ", proc);
             }
@@ -2001,24 +2016,20 @@ public class ReplicationRun extends BaseTestCase
             serverClassPath = classPath;
         }
         
-        String command = "start";
-        String securityOption = "";
-        
-        securityOption = "-noSecurityManager";
-        
         String workingDirName = masterDatabasePath +FS+ dbSubDirPath;
         
-        final String[] commandElements = {ReplicationRun.getMasterJavaExecutableName()
-                , " -Dderby.system.home=" + workingDirName
-                , " -Dderby.infolog.append=true"
+        final String[] commandElements = {
+            ReplicationRun.getMasterJavaExecutableName(),
+            "-Dderby.system.home=" + workingDirName,
+            "-Dderby.infolog.append=true",
                 // , " -Dderby.language.logStatementText=true" // Goes into derby.log: Gets HUGE!
-                , " -cp ", serverClassPath
-                , " " + networkServerControl
-                , " " + command
-                , " -h ", interfacesToListenOn // allowedClients
-                , " -p ", serverPort+""
-                , " " + securityOption
-                };
+            "-cp", serverClassPath,
+            networkServerControl,
+            "start",
+            "-h", interfacesToListenOn, // allowedClients
+            "-p", String.valueOf(serverPort),
+            "-noSecurityManager"
+        };
         String[] envElements = {"CLASS_PATH="+serverClassPath
                 , "PATH="+serverVM+FS+".."+FS+"bin"
                 };
@@ -2030,7 +2041,7 @@ public class ReplicationRun extends BaseTestCase
         String tmp ="";
         
         for ( int i=0;i<commandElements.length;i++)
-        {tmp = tmp + commandElements[i];}
+        {tmp = tmp + commandElements[i] + " ";}
         util.DEBUG(debugId+"commandElements: " + tmp);
         
         final String fullCmd = tmp;
@@ -2048,7 +2059,9 @@ public class ReplicationRun extends BaseTestCase
         }
         
         String shellCmd = null;
-        if ( serverHost.equalsIgnoreCase("localhost") )
+        final boolean serverOnLocalhost =
+                serverHost.equalsIgnoreCase("localhost");
+        if (serverOnLocalhost)
         {
             util.DEBUG(debugId+"Starting server on localhost "+ serverHost);
             shellCmd = fullCmd;
@@ -2085,13 +2098,13 @@ public class ReplicationRun extends BaseTestCase
             {
                 public void run()
                 {
-                    Process proc = null;
                     try
                     {
                         util.DEBUG(debugId+"************** In run().");
-                        proc = Runtime.getRuntime().exec(localCommand,
-                                fEnvElements, // if null inherit environment
-                                null); // null: means inherit user.dir.
+                        Runtime rt = Runtime.getRuntime();
+                        Process proc = serverOnLocalhost ?
+                                rt.exec(commandElements, fEnvElements, null) :
+                                rt.exec(localCommand, fEnvElements, null);
                         util.DEBUG(debugId+"************** Done exec().");
                         processDEBUGOutput(debugId+"pDo ", proc);
                     }
@@ -2202,18 +2215,15 @@ public class ReplicationRun extends BaseTestCase
             serverClassPath = classPath;
         }
         
-        String command = "shutdown";
-        int port = serverPort;
-        
-        final String[] commandElements = {serverJvm
-                , " -Dderby.infolog.append=true"
-                , " -cp ", serverClassPath
-                , " " + networkServerControl
-                , " " + command
-                , " -h " + serverHost // FIXME! interfacesToListenOn
-                , " -p ", serverPort+""
-                // , " " + securityOption
-                };
+        final String[] commandElements = {
+            serverJvm,
+            "-Dderby.infolog.append=true",
+            "-cp", serverClassPath,
+            networkServerControl,
+            "shutdown",
+            "-h", serverHost, // FIXME! interfacesToListenOn
+            "-p", String.valueOf(serverPort)
+        };
         String[] envElements = {"CLASS_PATH="+serverClassPath
                 , "PATH="+serverVM+FS+".."+FS+"bin"
                 };
@@ -2227,7 +2237,7 @@ public class ReplicationRun extends BaseTestCase
         
         String tmp ="";
         for ( int i=0;i<commandElements.length;i++)
-        {tmp = tmp + commandElements[i];}
+        {tmp = tmp + commandElements[i] + " ";}
         util.DEBUG(debugId+"commandElements: " + tmp);
         
         final String fullCmd = tmp;
@@ -2242,8 +2252,10 @@ public class ReplicationRun extends BaseTestCase
         final File workingDir = new File(workingDirName);
         
         String shellCmd = null;
-        
-        if ( serverHost.equalsIgnoreCase("localhost") )
+
+        final boolean serverOnLocalhost =
+                serverHost.equalsIgnoreCase("localhost");
+        if (serverOnLocalhost)
         {
             util.DEBUG(debugId+"Stopping server on localhost "+ serverHost);
             shellCmd = fullCmd;
@@ -2276,7 +2288,10 @@ public class ReplicationRun extends BaseTestCase
             
             try
             {
-                Process proc = Runtime.getRuntime().exec(localCommand,envElements,workingDir);
+                Runtime rt = Runtime.getRuntime();
+                Process proc = serverOnLocalhost ?
+                        rt.exec(commandElements, envElements, workingDir) :
+                        rt.exec(localCommand, envElements, workingDir);
                 processDEBUGOutput(debugId+"pDo ", proc);
             }
             catch (Exception ex)
