@@ -395,13 +395,11 @@ public class BasicSetup extends UpgradeChange {
         Statement s = createStatement();
         boolean modeDb2SqlOptional = oldAtLeast(10, 3);
 
-        dropTable("ATDC_BKUP2");
         dropTable("ATDC_BKUP1");
         dropTable("ATDC_TAB1");
         s.execute("create table ATDC_TAB1(c11 int, c12 int)");
         s.execute("insert into ATDC_TAB1 values (1,11)");
         s.execute("create table ATDC_BKUP1(c111 int, c112 int)");
-        s.execute("create table ATDC_BKUP2(c211 int, c212 int)");
         //Three rows will be added in sysdepends for following trigger
         s.execute("create trigger ATDC_TAB1_TRG1 after update "+
            		"of C11 on ATDC_TAB1 REFERENCING old_table as old " +
@@ -448,11 +446,18 @@ public class BasicSetup extends UpgradeChange {
             //Following update will recpmpile the first trigger since it was
             // marked invalid during the creation of the 2nd trigger. But
             // as part of recompiling, we accidentally erase the dependency
-            // between trigger action sps and trigger table
+            // between trigger action sps and trigger table except in 10.8.2.2 
+            // and higher releases where DERBY-5120 has already been fixed.
             s.execute("update ATDC_TAB1 set c11=11");
             s.executeUpdate("alter table ATDC_TAB1 add column c113 int");
-            s.execute("update ATDC_TAB1 set c11=11");
-        	break;
+
+            //DERBY-5120 has been fixed in 10.8.2.2 and higher and hence we 
+            // will not see the buggy behavior on those codelines
+            if (oldLessThan(10,8,2,2)) 
+                s.execute("update ATDC_TAB1 set c11=11");
+            else
+                assertStatementError("42802", s, " update ATDC_TAB1 set c11=2");            
+            break;
 
         case PH_SOFT_UPGRADE:
         case PH_HARD_UPGRADE:
@@ -469,13 +474,19 @@ public class BasicSetup extends UpgradeChange {
         	// marked invalid and hence they will be regenerated during 
         	// the next time they get fired. This regeneration will cause
         	// the dependency between trigger action sps and trigger table
-        	// be dropped.
+        	// be dropped except in 10.8.2.2 and higher releases where
+        	// DERBY-5120 has already been fixed.
             assertStatementError("42802", s, " update ATDC_TAB1 set c11=2");
 
         	preapreFortDERBY5120();
             s.execute("update ATDC_TAB1 set c12=11");
             s.executeUpdate("alter table ATDC_TAB1 add column c113 int");
-            s.execute("update ATDC_TAB1 set c12=11");
+            //DERBY-5120 has been fixed in 10.8.2.2 and higher and hence we 
+            // will not see the buggy behavior on those codelines
+            if (oldLessThan(10,8,2,2)) 
+                s.execute("update ATDC_TAB1 set c12=11");
+            else
+                assertStatementError("42802", s, " update ATDC_TAB1 set c12=11");            
         	break;
 
         case PH_POST_HARD_UPGRADE:
@@ -586,18 +597,31 @@ public class BasicSetup extends UpgradeChange {
         case PH_POST_SOFT_UPGRADE:
         	//For the CREATE and PH_POST_SOFT_UPGRADE upgrade phases, 
         	// ALTER TABLE DROP COLUMN will not detect that trigger 
-        	// TAB1_TRG1 depends on the column being dropped. This is 
-        	// because of DERBY-5120 and DERBY-5044
+        	// TAB1_TRG1 depends on the column being dropped except
+        	// in 10.8.2.2 and higher releases where DERBY-5044 and
+        	// DERBY-5120 have already been fixed.
         	s.executeUpdate("alter table BKUP1_5044_5120 drop column c112");
-            //Since ALTER TABLE DROP COLUMN did not drop dependent trigger,
-            // following UPDATE sql will fail because trigger TAB1_TRG1 will
-        	// get fired. Trigger TAB1_TRG1 will fail because it is expecting 
-            // more column in BKUP1_5044_5120 than are actually available
-            assertStatementError("42802", s, " update TAB1_5044_5120 set c11=999");
-            //Confirm the behavior mentioned by looking at the table data
-        	rs = s.executeQuery("select * from TAB1_5044_5120");
-            JDBC.assertFullResultSet(rs,
-               		new String[][]{{"99","11"}});        		
+            if (oldLessThan(10,8,2,2)) {
+                //Since in releases prior to 10.8.2.2, ALTER TABLE DROP COLUMN 
+                // did not drop dependent trigger, following UPDATE sql will fail 
+                // for those releases because trigger TAB1_TRG1 will get fired. 
+                // Trigger TAB1_TRG1 will fail because it is expecting more column 
+                // in BKUP1_5044_5120 than are actually available
+            	assertStatementError("42802", s, " update TAB1_5044_5120 set c11=999");
+                //Confirm the behavior mentioned by looking at the table data
+            	rs = s.executeQuery("select * from TAB1_5044_5120");
+                JDBC.assertFullResultSet(rs,
+                   		new String[][]{{"99","11"}});        		
+            } else {
+            	//10.8.2.2 and higher will work fine because DERBY-5044 and
+            	// DERBY-5120 have been fixed in those releases.
+                s.execute("update TAB1_5044_5120 set c11=999");
+                //Confirm the behavior mentioned by looking at the table data
+            	rs = s.executeQuery("select * from TAB1_5044_5120");
+                JDBC.assertFullResultSet(rs,
+                   		new String[][]{{"999","11"}});        		
+            }
+        	
             //No row in BKUP1_5044_5120 because update failed
         	rs = s.executeQuery("select * from BKUP1_5044_5120");
             JDBC.assertEmpty(rs);
@@ -727,23 +751,36 @@ public class BasicSetup extends UpgradeChange {
             s.execute("insert into ATDC_13_TAB1_BACKUP values (1,11)");
             s.execute("insert into ATDC_13_TAB2 values (1,11)");
 
-            //Following does not detect that column c22 is getting used by
-        	// trigger ATDC_13_TAB1_trg2 defined on ATDC_13_TAB1
-            s.executeUpdate("alter table ATDC_13_TAB2 drop column c22 " +
-            		"restrict");
-            //Following will fail because trigger ATDC_13_TAB1_trg2 will be
-            // fired and it will detect that column ATDC_13_TAB2.c22 getting
-            // used in it's trigger action does not exist anymore
-            assertStatementError("42X04", s,
-               		"update ATDC_13_TAB1 set c12=999");
-            //The number of rows in the tables above didn't change because 
-            // UPDATE sql above failed and hence triggers didn't fire.
-        	rs = s.executeQuery("select * from ATDC_13_TAB1_BACKUP");
-            JDBC.assertFullResultSet(rs,
-               		new String[][]{{"1","11"}});        		
-        	rs = s.executeQuery("select * from ATDC_13_TAB2");
-            JDBC.assertFullResultSet(rs,
-               		new String[][]{{"1"}});
+            if (oldLessThan(10,8,2,2)) {
+                //In releases prior to 10.8.2.2, following does not detect 
+            	// that column c22 is getting used by trigger 
+            	// ATDC_13_TAB1_trg2 defined on ATDC_13_TAB1
+                s.executeUpdate("alter table ATDC_13_TAB2 drop column c22 " +
+                		"restrict");
+                //Following will fail because trigger ATDC_13_TAB1_trg2 will be
+                // fired and it will detect that column ATDC_13_TAB2.c22 getting
+                // used in it's trigger action does not exist anymore
+                assertStatementError("42X04", s,
+                   		"update ATDC_13_TAB1 set c12=999");
+                //The number of rows in the tables above didn't change because 
+                // UPDATE sql above failed and hence triggers didn't fire.
+            	rs = s.executeQuery("select * from ATDC_13_TAB1_BACKUP");
+                JDBC.assertFullResultSet(rs,
+                   		new String[][]{{"1","11"}});        		
+            	rs = s.executeQuery("select * from ATDC_13_TAB2");
+                JDBC.assertFullResultSet(rs,
+                   		new String[][]{{"1"}});
+            } else {
+            	//10.8.2.2 and higher will work fine because DERBY-5044 has
+            	// been fixed in those releases.
+                assertStatementError("X0Y25", s,
+                		"alter table ATDC_13_TAB2 drop column c22 restrict");
+            	s.executeUpdate("update ATDC_13_TAB1 set c12=999");
+            	rs = s.executeQuery("select * from ATDC_13_TAB1_BACKUP");
+                JDBC.assertEmpty(rs);
+            	rs = s.executeQuery("select * from ATDC_13_TAB2");
+                JDBC.assertEmpty(rs);
+            }
         	break;
 
         case PH_SOFT_UPGRADE:
