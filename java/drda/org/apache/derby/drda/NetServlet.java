@@ -40,10 +40,10 @@ import org.apache.derby.iapi.reference.Property;
 	<P>
 	These servlet configuration parameters are understood by this servlet.
 	<UL>
-	<LI><PRE>portNumber</PRE> - Port number to use. The default is 1527.
+	<LI><PRE>portNumber</PRE> - Port number to use. The default is 1527.</LI>
 	<LI><PRE>startNetworkServerOnInit</PRE> - Starts the Derby Network Server at servlet 
-			initialization if 'true'.
-	<LI><PRE>tracingDirectory</PRE> - Directory for trace files
+			initialization if 'true'.</LI>
+	<LI><PRE>tracingDirectory</PRE> - Directory for trace files</LI>
 	</UL>
 
 */
@@ -75,10 +75,10 @@ public class NetServlet extends HttpServlet {
 		Initialize the servlet.
 		Configuration parameters:
 		<UL>
-		<LI><PRE>portNumber</PRE> - Port number
-		<LI><PRE>host</PRE> - Host name
-		<LI><PRE>traceDirectory</PRE> - location of trace directory
-		<LI><PRE>startNetworkServerOnInit</PRE> - start the server on initialization
+		<LI><PRE>portNumber</PRE> - Port number</LI>
+		<LI><PRE>host</PRE> - Host name</LI>
+		<LI><PRE>traceDirectory</PRE> - location of trace directory</LI>
+		<LI><PRE>startNetworkServerOnInit</PRE> - start the server on initialization</LI>
 		</UL>
 	*/
 	public void init(ServletConfig config)
