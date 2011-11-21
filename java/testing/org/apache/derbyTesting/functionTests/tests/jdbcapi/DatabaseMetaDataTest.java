@@ -896,7 +896,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 null, null, "1", "",
                 null, null, null, null,
                 "1", "YES", null, null,
-                null, null, "NO", "NO"
+                null, null, "NO", "NO", null
             },
         };
         JDBC.assertFullResultSet( rs, expectedRows );
@@ -1999,6 +1999,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         }
         
         // SCOPE not supported
+        assertNull("SCOPE_CATALOG", rs.getString("SCOPE_CATALOG"));
         assertNull("SCOPE_CATLOG", rs.getString("SCOPE_CATLOG"));
         assertNull("SCOPE_SCHEMA", rs.getString("SCOPE_SCHEMA"));
         assertNull("SCOPE_TABLE", rs.getString("SCOPE_TABLE"));
@@ -2490,7 +2491,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.VARCHAR,
                 Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER,
                 Types.INTEGER, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR,
-                Types.VARCHAR, Types.SMALLINT, Types.VARCHAR, Types.VARCHAR
+                Types.VARCHAR, Types.SMALLINT, Types.VARCHAR, Types.VARCHAR,
+                Types.VARCHAR
                 };
         boolean[]   nullability =
         {
@@ -2499,7 +2501,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
             true,   true,   true,  false,
             true,   true,   true,   true,
             false,  false,  true,   true,
-            true,   true,   false,  false
+            true,   true,   false,  false,
+            true
         };
         if (odbc == 1)
         {
@@ -2519,8 +2522,9 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                  "DATA_TYPE", "TYPE_NAME", "COLUMN_SIZE", "BUFFER_LENGTH",
                  "DECIMAL_DIGITS", "NUM_PREC_RADIX", "NULLABLE", "REMARKS",
                  "COLUMN_DEF", "SQL_DATA_TYPE", "SQL_DATETIME_SUB", "CHAR_OCTET_LENGTH",
-                 "ORDINAL_POSITION", "IS_NULLABLE", "SCOPE_CATLOG", "SCOPE_SCHEMA",
-                 "SCOPE_TABLE", "SOURCE_DATA_TYPE", "IS_AUTOINCREMENT", "IS_GENERATEDCOLUMN"
+                 "ORDINAL_POSITION", "IS_NULLABLE", "SCOPE_CATALOG", "SCOPE_SCHEMA",
+                 "SCOPE_TABLE", "SOURCE_DATA_TYPE", "IS_AUTOINCREMENT", "IS_GENERATEDCOLUMN",
+                 "SCOPE_CATLOG"
              },
              columnTypes,
              nullability
@@ -4954,7 +4958,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "0", "10", "1", "",
                 null, null, null, null,
                 "1", "YES", null, null,
-                null, null, "NO", "NO"
+                null, null, "NO", "NO",
+                null
             },
             {
                 "", "APP", "T_JDBC41", "B",
@@ -4962,7 +4967,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "0", "10", "1", "",
                 null, null, null, null,
                 "2", "YES", null, null,
-                null, null, "NO", "NO"
+                null, null, "NO", "NO",
+                null
             },
             {
                 "", "APP", "T_JDBC41", "C",
@@ -4970,7 +4976,8 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
                 "0", "10", "1", "",
                 "GENERATED ALWAYS AS ( -a )", null, null, null,
                 "3", "YES", null, null,
-                null, null, "NO", "YES"
+                null, null, "NO", "YES",
+                null
             },
         };
         JDBC.assertFullResultSet( rs2, expectedRows );

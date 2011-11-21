@@ -1864,7 +1864,7 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *	<LI><B>IS_NULLABLE</B> String => "NO" means column definitely
      *      does not allow NULL values; "YES" means the column might
      *      allow NULL values.  An empty string means nobody knows.
-     *  <LI><B>SCOPE_CATLOG</B> String => catalog of table that is the
+     *  <LI><B>SCOPE_CATALOG</B> String => catalog of table that is the
      *  scope of a reference attribute (<code>null</code> if DATA_TYPE
      *  isn't REF)
      *  <LI><B>SCOPE_SCHEMA</B> String => schema of table that is the
@@ -1885,6 +1885,9 @@ public class EmbedDatabaseMetaData extends ConnectionChild
      *  <LI> empty string --- if it cannot be determined whether the
      *       column is auto incremented parameter is unknown
      *  </UL>
+     *  <LI><B>SCOPE_CATLOG</B> A redundant copy of SCOPE_CATALOG. The name
+     *   of this column is deliberately mis-spelled in order to support a typo in the
+     *   javadoc for DatabaseMetaData.getColumns() which was corrected by JDBC 4.1.
      *  </OL>
      *
      * @param catalog a catalog name; "" retrieves those without a
