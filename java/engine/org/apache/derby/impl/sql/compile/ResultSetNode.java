@@ -425,7 +425,8 @@ public abstract class ResultSetNode extends QueryTreeNode
 			resultColumn = (ResultColumn) resultColumns.elementAt(0);
 	
 			/* Nothing to do if query is already select TRUE ... */
-			if (resultColumn.getExpression().isBooleanTrue())
+            if (resultColumn.getExpression().isBooleanTrue() &&
+                    resultColumns.size() == 1)
 			{
 				return this;
 			}

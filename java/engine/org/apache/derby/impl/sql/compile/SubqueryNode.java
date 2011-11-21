@@ -464,10 +464,11 @@ public class SubqueryNode extends ValueNode
 
 		resultColumns = resultSet.getResultColumns();
 
-		/* The parser does not enforce the fact that a subquery can only return
-		 * a single column, so we must check here.
-		 */
-		if (resultColumns.visibleSize() != 1)
+        /* The parser does not enforce the fact that a subquery (except in the
+         * case of EXISTS; NOT EXISTS does not appear prior to preprocessing)
+         * can only return a single column, so we must check here.
+         */
+        if (subqueryType != EXISTS_SUBQUERY && resultColumns.visibleSize() != 1)
 		{
 			throw StandardException.newException(SQLState.LANG_NON_SINGLE_COLUMN_SUBQUERY);
 		}

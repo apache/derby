@@ -396,7 +396,81 @@ public class NestedWhereSubqueryTest extends BaseJDBCTestCase {
 		s.close();
 	}
 
-	public static Test suite() {
+    /**
+     * Allow multiple columns in EXISTS subquery. SQL feature T501 "Enhanced
+     * EXISTS predicate".
+     * <p/>
+     * Strictly speaking, this test belongs in a general subquery test class,
+     * but pending conversion of subquery.sql to JUnit, testDerby5501 resides
+     * here (FIXME).
+     */
+    public void testDerby5501 () throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+
+        s.executeUpdate("create table t5501a(i int, j int, primary key(i,j))");
+        s.executeUpdate("create table t5501b(i int)");
+
+        s.executeUpdate("insert into t5501a values (1,1),(2,2),(3,3),(4,4)");
+        s.executeUpdate("insert into t5501b values 1,3,5");
+
+
+        // works before DERBY-5501
+        ResultSet rs = s.executeQuery(
+            "select i from t5501b t1 where not exists " +
+            "    (select i from t5501a t2 where t1.i=t2.i)");
+        JDBC.assertUnorderedResultSet(rs, new String [][] {{"5"}});
+
+        rs = s.executeQuery(
+            "select i+3.14 from t5501b t1 where not exists " +
+            "    (select i+3.14 from t5501a t2 where t1.i=t2.i)");
+        JDBC.assertUnorderedResultSet(rs, new String [][] {{"8.14"}});
+
+        // works before DERBY-5501: "*" is specially handled already
+        rs = s.executeQuery(
+            "select i from t5501b t1 where not exists " +
+            "    (select * from t5501a t2 where t1.i=t2.i)");
+        JDBC.assertUnorderedResultSet(rs, new String [][] {{"5"}});
+
+
+        // fails before DERBY-5501
+        rs = s.executeQuery(
+            "select i from t5501b t1 where not exists " +
+            "    (select i,j from t5501a t2 where t1.i=t2.i)");
+        JDBC.assertUnorderedResultSet(rs, new String [][] {{"5"}});
+
+        rs = s.executeQuery(
+            "select i from t5501b t1 where not exists " +
+            "    (select true,j from t5501a t2 where t1.i=t2.i)");
+        JDBC.assertUnorderedResultSet(rs, new String [][] {{"5"}});
+
+        s.executeUpdate("delete from t5501a where i=1");
+        rs = s.executeQuery(
+            "select i from t5501b t1 where not exists " +
+            "    (select i,j from t5501a t2 where t1.i=t2.i)");
+        JDBC.assertUnorderedResultSet(rs, new String [][] {{"1"}, {"5"}});
+
+        // should still fail: no column "k" exists
+        assertCompileError(
+            "42X04",
+            "select i from t5501b t1 where not exists " +
+            "    (select i,k from t5501a t2 where t1.i=t2.i)");
+
+        // should still fail: no table "foo" exists
+        assertCompileError(
+            "42X10",
+            "select i from t5501b t1 where not exists " +
+            "    (select t2.*,foo.* from t5501a t2 where t1.i=t2.i)");
+
+        // should still fail: illegal integer format in cast
+        assertCompileError(
+            "22018",
+            "select i from t5501b t1 where not exists " +
+            "   (select t2.*,cast('a' as int) from t5501a t2 where t1.i=t2.i)");
+    }
+
+
+    public static Test suite() {
 		return TestConfiguration.defaultSuite(NestedWhereSubqueryTest.class);
 	}
 }

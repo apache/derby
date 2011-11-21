@@ -76,9 +76,6 @@ select * from s where exists (select tt.* from t);
 ERROR 42X10: 'TT' is not an exposed table name in the scope in which it appears.
 ij> select * from s where exists (select t.* from t tt);
 ERROR 42X10: 'T' is not an exposed table name in the scope in which it appears.
-ij> -- too many columns in select list
-select * from s where exists (select i, s from t);
-ERROR 42X39: Subquery is only allowed to return a single column.
 ij> -- invalid column reference in select list
 select * from s where exists (select nosuchcolumn from t);
 ERROR 42X04: Column 'NOSUCHCOLUMN' is either not in any table in the FROM list or appears within a join specification and is outside the scope of the join specification or appears in a HAVING clause and is not in the GROUP BY list. If this is a CREATE or ALTER TABLE  statement then 'NOSUCHCOLUMN' is not a column in the target table.
@@ -116,6 +113,12 @@ NULL       |NULL  |NULL                          |NULL                          
 0          |0     |0                             |0                             |0                   
 1          |1     |1                             |1                             |1                   
 ij> select * from s where exists (select t.i from t);
+I          |S     |C                             |VC                            |B                   
+-----------------------------------------------------------------------------------------------------
+NULL       |NULL  |NULL                          |NULL                          |NULL                
+0          |0     |0                             |0                             |0                   
+1          |1     |1                             |1                             |1                   
+ij> select * from s where exists (select i, s from t);
 I          |S     |C                             |VC                            |B                   
 -----------------------------------------------------------------------------------------------------
 NULL       |NULL  |NULL                          |NULL                          |NULL                

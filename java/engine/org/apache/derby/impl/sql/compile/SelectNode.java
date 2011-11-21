@@ -847,39 +847,45 @@ public class SelectNode extends ResultSetNode
 	public void verifySelectStarSubquery(FromList outerFromList, int subqueryType) 
 					throws StandardException
 	{
-		if (! ((ResultColumn) resultColumns.elementAt(0) instanceof AllResultColumn) )
-		{
-			return;
-		}
+        for (int i = 0; i < resultColumns.size(); i++) {
+            if (!((ResultColumn)resultColumns.elementAt(i)
+                     instanceof AllResultColumn) ) {
+                continue;
+            }
 
-		/* Select * currently only valid for EXISTS/NOT EXISTS.
-		 * NOT EXISTS does not appear prior to preprocessing.
-		 */
-		if (subqueryType != SubqueryNode.EXISTS_SUBQUERY)
-		{
-			throw StandardException.newException(SQLState.LANG_CANT_SELECT_STAR_SUBQUERY);
-		}
+            /* Select * currently only valid for EXISTS/NOT EXISTS.  NOT EXISTS
+             * does not appear prior to preprocessing.
+             */
+            if (subqueryType != SubqueryNode.EXISTS_SUBQUERY) {
+                throw StandardException.newException(
+                    SQLState.LANG_CANT_SELECT_STAR_SUBQUERY);
+            }
 
-		/* If the AllResultColumn is qualified, then we have to verify
-		 * that the qualification is a valid exposed name.
-		 * NOTE: The exposed name can come from an outer query block.
-		 */
-		String		fullTableName;
-			
-		fullTableName = ((AllResultColumn) resultColumns.elementAt(0)).getFullTableName();
+            /* If the AllResultColumn is qualified, then we have to verify that
+             * the qualification is a valid exposed name.  NOTE: The exposed
+             * name can come from an outer query block.
+             */
+            String fullTableName =
+                ((AllResultColumn)resultColumns.elementAt(i)).
+                getFullTableName();
 
-		if (fullTableName != null)
-		{
-			if (fromList.getFromTableByName(fullTableName, null, true) == null &&
-				outerFromList.getFromTableByName(fullTableName, null, true) == null)
-			{
-				if (fromList.getFromTableByName(fullTableName, null, false) == null &&
-					outerFromList.getFromTableByName(fullTableName, null, false) == null)
-				{
-					throw StandardException.newException(SQLState.LANG_EXPOSED_NAME_NOT_FOUND, fullTableName);
-				}
-			}
-		}
+            if (fullTableName != null) {
+                if (fromList.getFromTableByName
+                        (fullTableName, null, true) == null &&
+                    outerFromList.getFromTableByName
+                        (fullTableName, null, true) == null) {
+
+                    if (fromList.getFromTableByName
+                            (fullTableName, null, false) == null &&
+                        outerFromList.getFromTableByName
+                            (fullTableName, null, false) == null) {
+                        throw StandardException.newException(
+                            SQLState.LANG_EXPOSED_NAME_NOT_FOUND,
+                            fullTableName);
+                    }
+                }
+            }
+        }
 	}
 
 	/** 

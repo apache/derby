@@ -60,8 +60,6 @@ commit;
 -- "mis"qualified all
 select * from s where exists (select tt.* from t);
 select * from s where exists (select t.* from t tt);
--- too many columns in select list
-select * from s where exists (select i, s from t);
 -- invalid column reference in select list
 select * from s where exists (select nosuchcolumn from t);
 -- multiple matches at subquery level
@@ -79,6 +77,7 @@ select * from s u where exists (select u.* from t);
 -- column reference in select list
 select * from s where exists (select i from t);
 select * from s where exists (select t.i from t);
+select * from s where exists (select i, s from t);
 
 -- subquery returns empty result set
 select * from s where exists (select * from t where i = -1);
