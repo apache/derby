@@ -677,7 +677,7 @@ public class DatabaseMetaDataTest extends BaseJDBCTestCase {
         else if (JDBC.vmSupportsJDBC3())
         {
             expectedJDBCMajor = 3;
-            expectedJDBCMajor = 0;
+            expectedJDBCMinor = 0;
         }
         else if (JDBC.vmSupportsJSR169())
         {
