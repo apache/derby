@@ -59,6 +59,7 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 	<LI>sysinfo [-h &lt;host>] [-p &lt;portnumber>] [-ssl &lt;sslmode&gt;]:  This prints 
 	classpath and version information about the Network Server, 
 	the JVM and the Derby engine. 
+	</LI>
 
 	<LI>runtimeinfo [-h &lt;host] [-p &lt;portnumber] [-ssl &lt;sslmode&gt;]: This prints
 	extensive debbugging information about sessions, threads, 
@@ -94,6 +95,7 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 	Otherwise the default is the current directory.</LI>
 
 	</UL>
+	</P>
 	<P>Properties can be set in the derby.properties file or on the command line.
 	Properties on the command line take precedence over properties in the 
 	derby.properties file.  Arguments on the command line take precedence
@@ -105,7 +107,7 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 	indicates which port should be used for the Network Server. </LI>
 
 	<LI>derby.drda.host=&lt;host name  or ip address >: This property 
-	indicates the ip address to which NetworkServerControl should connect 
+	indicates the ip address to which NetworkServerControl should connect. </LI>
 
 	<LI>derby.drda.traceDirectory=&lt;trace directory>: This property 
 	indicates where to put trace files. </LI>
@@ -136,18 +138,22 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
     mode of the server.
 	
 </LI>
+</UL>
+</P>
 
-<P><B>Examples.</B>
+<P><B>Examples.</B></P>
 
 	<P>This is an example of shutting down the server on port 1621.
 	<PRE> 
 	java org.apache.derby.drda.NetworkServerControl shutdown -p 1621
 	</PRE>
+	</P>
 
 	<P>This is an example of turning tracing on for session 3
 	<PRE>
 	java org.apache.derby.drda.NetworkServerControl  trace on -s 3 
 	</PRE>
+	</P>
 
 	<P>This is an example of starting and then shutting down the network 
 	   server on port 1621 on machine myhost   
@@ -155,6 +161,7 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 	java org.apache.derby.drda.NetworkServerControl  start -h myhost -p 1621
 	java org.apache.derby.drda.NetworkServerControl  shutdown -h myhost -p 1621
 	</PRE>
+	</P>
 
 	<P> This is an example of starting and shutting down the Network Server in the example
 	above with the API.
@@ -164,6 +171,7 @@ import org.apache.derby.impl.drda.NetworkServerControlImpl;
 
 	serverControl.shutdown();
 	</PRE>
+	</P>
 
 	
 */
@@ -233,12 +241,14 @@ public class NetworkServerControl{
 	 * a Network Server on a  specified port and InetAddress.
 	 *<P>
 	 * <B> Examples: </B>
+	 * </P>
 	 * <P>
 	 * To configure for port 1621 and listen on the loopback address:
 	 *<PRE>
 	 *  NetworkServerControl  util = new
 	 * NetworkServerControl(InetAddress.getByName("localhost"), 1621);
 	 * </PRE>
+	 * </P>
 	 *
 	 * @param address     The IP address of the Network Server host.
 	 *                     address cannot be null.
@@ -267,6 +277,7 @@ public class NetworkServerControl{
 	 *
 	 * new NetworkServerControl(InetAddress.getByName("localhost"),1527);
 	 * </PRE>
+	 * </P>
 	 *
 	 * @throws             Exception on error
 	 */
@@ -355,6 +366,7 @@ public class NetworkServerControl{
 	 *  Note: an alternate method to starting the Network Server with the API,
 	 *  is to use the derby.drda.startNetworkServer property in 
 	 *  derby.properties.
+	 * </P>
 	 *  
 	 * 
 	 * @param consoleWriter   PrintWriter to which server console will be 
