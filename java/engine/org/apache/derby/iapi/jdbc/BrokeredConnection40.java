@@ -24,7 +24,6 @@ package org.apache.derby.iapi.jdbc;
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.Connection;
 import java.sql.SQLClientInfoException;
 import java.sql.NClob;
 import java.sql.SQLException;
@@ -33,12 +32,11 @@ import java.sql.Struct;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 import org.apache.derby.impl.jdbc.Util;
-//import org.apache.derby.impl.jdbc.EmbedConnection40;
 import org.apache.derby.iapi.reference.SQLState;
-import org.apache.derby.impl.jdbc.EmbedConnection40;
 
 
-public class BrokeredConnection40 extends BrokeredConnection30 {
+public class BrokeredConnection40
+        extends BrokeredConnection30 implements EngineConnection40 {
     
     /** Creates a new instance of BrokeredConnection40 */
     public BrokeredConnection40(BrokeredConnectionControl control) {
@@ -356,14 +354,15 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
     {
         if (!isClosed)
         {
-            ((EmbedConnection40) getRealConnection()).abort( executor );
+            ((EngineConnection40) getRealConnection()).abort(executor);
         }
     }
     
     public int getNetworkTimeout() throws SQLException
     {
          try {
-             return ((EmbedConnection40) getRealConnection()).getNetworkTimeout();
+             return
+                 ((EngineConnection40) getRealConnection()).getNetworkTimeout();
          } catch (SQLException sqle) {
              notifyException(sqle);
              throw sqle;
@@ -373,7 +372,8 @@ public class BrokeredConnection40 extends BrokeredConnection30 {
     public void setNetworkTimeout( Executor executor, int milliseconds ) throws SQLException
     {
          try {
-             ((EmbedConnection40) getRealConnection()).setNetworkTimeout( executor, milliseconds );
+             ((EngineConnection40) getRealConnection())
+                     .setNetworkTimeout(executor, milliseconds);
          } catch (SQLException sqle) {
              notifyException(sqle);
              throw sqle;
