@@ -82,17 +82,6 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
     }    
     
     /**
-     * Checks if the statement is closed.
-     *
-     * @return <code>true</code> if the statement is closed,
-     * <code>false</code> otherwise
-     * @exception SQLException if an error occurs
-     */
-    public final boolean isClosed() throws SQLException {
-        return getPreparedStatement().isClosed();
-    }
-    
-    /**
      * Returns <code>this</code> if this class implements the interface
      *
      * @param  interfaces a Class defining an interface

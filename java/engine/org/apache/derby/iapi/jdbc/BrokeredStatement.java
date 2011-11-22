@@ -21,12 +21,8 @@
 
 package org.apache.derby.iapi.jdbc;
 
-import org.apache.derby.iapi.reference.JDBC30Translation;
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.iapi.error.StandardException;
-import org.apache.derby.iapi.error.PublicAPI;
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.impl.jdbc.Util;
 
 import java.sql.Connection;
@@ -34,8 +30,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-
-import java.lang.reflect.*;
 
 /**
 	A Statement implementation that forwards all of its requests to an underlying Statement.
@@ -552,21 +546,14 @@ public class BrokeredStatement implements EngineStatement
     }
 
     /**
-     * Checks if the statement is closed. Not implemented for this
-     * class since <code>isClosed()</code> is a new method in JDBC
-     * 4.0. The JDBC 4.0 sub-classes should override this method.
+     * Checks if the statement is closed.
      *
      * @return <code>true</code> if the statement is closed,
      * <code>false</code> otherwise
-     * @exception SQLException not-implemented exception
+     * @exception SQLException if an error occurs
      */
-    protected boolean isClosed() throws SQLException {
-        // Not implemented since we cannot forward the call to a JDBC
-        // 4.0 method from this class. This dummy implementation is
-        // provided here so that checkIfClosed() can be implemented
-        // once in this class instead of once in each of the
-        // Brokered*Statement40 classes.
-        throw Util.notImplemented();
+    public final boolean isClosed() throws SQLException {
+        return ((EngineStatement) getStatement()).isClosed();
     }
 
     /**

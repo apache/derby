@@ -46,6 +46,11 @@ public interface EngineStatement extends Statement {
      * @see java.sql.Statement#getResultSetHoldability()
      */ 
     public int getResultSetHoldability() throws SQLException;
+
+    /**
+     * Identical to the JDBC 4 isClosed() method.
+     */
+    public boolean isClosed() throws SQLException;
     
     ////////////////////////////////////////////////////////////////////
     //
