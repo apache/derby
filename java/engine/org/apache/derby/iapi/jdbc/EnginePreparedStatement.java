@@ -39,4 +39,12 @@ public interface EnginePreparedStatement extends PreparedStatement {
     
     public void setCharacterStream(int parameterIndex, Reader reader)
         throws SQLException;
+
+    /**
+     * Get the version of the prepared statement. If this has not been changed,
+     * the caller may assume that a recompilation has not taken place, i.e.
+     * meta-data are (also) unchanged.
+     * @return version counter
+     */
+    public long getVersionCounter() throws SQLException;
 }

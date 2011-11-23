@@ -200,19 +200,12 @@ public final class AlterTableTest extends BaseJDBCTestCase {
         // select * prepared statements do see added columns after 
         // alter table
 
-        if (usingEmbedded()) // client/server doesn't keep cursor open.
-        {
-            rs = pSt.executeQuery();
-            JDBC.assertColumnNames(rs, new String[]{"C1", "C2"});
-            JDBC.assertFullResultSet(rs, new String[][]{
-                        {"1", null},
-                        {"2", null}
-                    });
-        } else {
-            rs = pSt.executeQuery();
-            JDBC.assertColumnNames(rs, new String[]{"C1"});
-            JDBC.assertFullResultSet(rs, new String[][]{{"1"}, {"2"}});
-        }
+        rs = pSt.executeQuery();
+        JDBC.assertColumnNames(rs, new String[]{"C1", "C2"});
+        JDBC.assertFullResultSet(rs, new String[][]{
+                {"1", null},
+                {"2", null}
+            });
 
         // add non-nullable column to 0 row table and verify
         st.executeUpdate("alter table t0 add column c2 int not null default 0");

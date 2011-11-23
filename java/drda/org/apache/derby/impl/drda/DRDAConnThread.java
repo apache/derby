@@ -828,6 +828,7 @@ class DRDAConnThread extends Thread {
 					try {
 						database.getConnection().clearWarnings();
 						sqldaType = parsePRPSQLSTT();
+                        database.getCurrentStatement().sqldaType = sqldaType;
 						if (sqldaType > 0)		// do write SQLDARD
 							writeSQLDARD(database.getCurrentStatement(),
 										 (sqldaType ==  CodePoint.TYPSQLDA_LIGHT_OUTPUT),
@@ -871,6 +872,27 @@ class DRDAConnThread extends Thread {
 							writeOPNQRYRM(false, stmt);
 							checkWarning(null, ps, null, 0, false, true);
 
+                            long sentVersion = stmt.versionCounter;
+                            long currentVersion =
+                                    ((EnginePreparedStatement)stmt.ps).
+                                    getVersionCounter();
+
+                            if (stmt.sqldaType ==
+                                    CodePoint.TYPSQLDA_LIGHT_OUTPUT &&
+                                    currentVersion != sentVersion) {
+                                // DERBY-5459. The prepared statement has a
+                                // result set and has changed on the server
+                                // since we last informed the client about its
+                                // shape, so re-send metadata.
+                                //
+                                // NOTE: This is an extension of the standard
+                                // DRDA protocol since we send the SQLDARD
+                                // even if it isn't requested in this case.
+                                // This is OK because there is already code on the
+                                // client to handle an unrequested SQLDARD at
+                                // this point in the protocol.
+                                writeSQLDARD(stmt, true, null);
+                            }
 							writeQRYDSC(stmt, false);
 
 							stmt.rsSuspend();

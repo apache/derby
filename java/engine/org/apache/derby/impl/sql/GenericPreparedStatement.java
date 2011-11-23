@@ -173,6 +173,11 @@ public class GenericPreparedStatement
 	*/
 	private Cacheable cacheHolder;
 
+    /**
+     * Incremented for each (re)compile.
+     */
+    private long versionCounter;
+
 	//
 	// constructors
 	//
@@ -1241,4 +1246,12 @@ recompileOutOfDatePlan:
 	{
 		return requiredPermissionsList;
 	}
+
+    public final long getVersionCounter() {
+        return versionCounter;
+    }
+
+    public final void incrementVersionCounter() {
+        ++versionCounter;
+    }
 }

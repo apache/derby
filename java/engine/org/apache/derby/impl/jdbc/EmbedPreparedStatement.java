@@ -1971,4 +1971,8 @@ public abstract class EmbedPreparedStatement
             throw dataTypeConversion(parameterIndex, "java.sql.Blob");
         }
     }
+
+    public final long getVersionCounter() throws SQLException {
+        return preparedStatement.getVersionCounter();
+    }
 }

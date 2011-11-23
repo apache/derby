@@ -489,6 +489,12 @@ public class NetStatementReply extends NetPackageReply implements StatementReply
                 //
                 // this will override the same call made from parsePrepareDescribe
                 //  this will not work, this is not the DA for the stored proc params
+                //
+                // DERBY-5459. We may now receive a new SQLDARD (unrequested, a
+                // DRDA protocol extension) when a query is opened iff the
+                // underlying server's prepared statement has been recompiled
+                // since the client first received metadata when preparing the
+                // statement.
                 statementI.completePrepareDescribeOutput(columnMetaData, netSqlca);
                 peekCP = parseTypdefsOrMgrlvlovrs();
             }

@@ -284,6 +284,19 @@ class DRDAStatement
 	boolean needsToSendParamData = false;
 	boolean explicitlyPrepared = false;    //Prepared with PRPSQLSTT (reusable) 
 
+    /**
+     * If this changes, we need to re-send result set metadata to client, since
+     * a change indicates the engine has recompiled the prepared statement.
+     */
+    long versionCounter;
+
+    /**
+     * Saved value returned from {@link DRDAConnThread#from
+     * parsePRPSQLSTT}. Used to determine if the statment is such that we may
+     * need to re-send metadata at execute time, see {@link #versionCounter}.
+     */
+    int sqldaType;
+
 	// constructor
 	/**
 	 * DRDAStatement constructor
@@ -678,7 +691,10 @@ class DRDAStatement
 			ps.setCursorName(cursorName);
 		if (isolationSet)
 			database.setPrepareIsolation(saveIsolationLevel);
-				return ps;
+
+        versionCounter = ((EnginePreparedStatement)ps).getVersionCounter();
+
+        return ps;
 	}
 
 	/**

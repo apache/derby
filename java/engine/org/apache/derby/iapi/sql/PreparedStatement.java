@@ -270,4 +270,10 @@ public interface PreparedStatement
 	*/
 	public SQLWarning getCompileTimeWarnings();
 
+    /**
+     * Get the version counter. A change in the value indicates a recompile
+     * has happened.
+     * @return version counter
+     */
+    public long getVersionCounter();
 }

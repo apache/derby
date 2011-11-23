@@ -115,18 +115,20 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
         assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(1));
         assertEquals("C11", rsmd.getColumnName(1));
 
-        // DERBY-2402 Client does not report added columns.
-        // Take out check when DERBY-2402 is fixed
-        if (usingDerbyNetClient())
-            return;
-
         s.executeUpdate("alter table bug4579 add column c12 int");
-        rsmd = ps.getMetaData();
-        assertEquals(2, rsmd.getColumnCount());
-        assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(1));
-        assertEquals("C11", rsmd.getColumnName(1));
-        assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(2));
-        assertEquals("C12", rsmd.getColumnName(2));
+
+        if (usingDerbyNetClient()) {
+            // DERBY-2402 Client does not report added columns.
+            // Take out check when DERBY-2402 is fixed
+            //
+        } else {
+            rsmd = ps.getMetaData();
+            assertEquals(2, rsmd.getColumnCount());
+            assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(1));
+            assertEquals("C11", rsmd.getColumnName(1));
+            assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(2));
+            assertEquals("C12", rsmd.getColumnName(2));
+        }
 
         // ResultSetMetaData for select * after alter table and
         // executeQuery.
@@ -140,6 +142,17 @@ public class PrepStmtMetaDataTest extends BaseJDBCTestCase {
         assertEquals("C12", rsmd.getColumnName(2));
         assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(3));
         assertEquals("C13", rsmd.getColumnName(3));
+
+        // Check ps metadata again
+        rsmd = ps.getMetaData();
+        assertEquals(3, rsmd.getColumnCount());
+        assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(1));
+        assertEquals("C11", rsmd.getColumnName(1));
+        assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(2));
+        assertEquals("C12", rsmd.getColumnName(2));
+        assertEquals(java.sql.Types.INTEGER, rsmd.getColumnType(3));
+        assertEquals("C13", rsmd.getColumnName(3));
+
         rs.close();
         ps.close();
         s.executeUpdate("drop table bug4579");

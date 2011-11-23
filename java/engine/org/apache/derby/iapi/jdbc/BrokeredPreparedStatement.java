@@ -549,4 +549,9 @@ public abstract class BrokeredPreparedStatement extends BrokeredStatement
 
 		return newStatement;
 	}
+
+    public final long getVersionCounter() throws SQLException {
+        return ((EnginePreparedStatement)getPreparedStatement()).
+                getVersionCounter();
+    }
 }
