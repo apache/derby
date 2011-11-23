@@ -31,9 +31,9 @@ import java.sql.SQLException;
 import java.sql.SQLXML;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.impl.jdbc.EmbedCallableStatement40;
 
-public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
+public class BrokeredCallableStatement40 extends BrokeredCallableStatement30
+        implements EngineCallableStatement40 {
     
     public BrokeredCallableStatement40(BrokeredStatementControl control, String sql) throws SQLException{
         super(control, sql);
@@ -441,12 +441,14 @@ public class BrokeredCallableStatement40 extends  BrokeredCallableStatement30{
     public <T> T getObject( int parameterIndex, Class<T> type )
         throws SQLException
     {
-        return ((EmbedCallableStatement40) getCallableStatement()).getObject( parameterIndex, type );
+        return ((EngineCallableStatement40) getCallableStatement())
+                .getObject(parameterIndex, type);
     }
     
     public <T> T getObject(String parameterName, Class<T> type)
         throws SQLException
     {
-        return ((EmbedCallableStatement40) getCallableStatement()).getObject( parameterName, type );
+        return ((EngineCallableStatement40) getCallableStatement())
+                .getObject(parameterName, type);
     }
 }

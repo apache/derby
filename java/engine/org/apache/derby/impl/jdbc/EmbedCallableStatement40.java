@@ -35,10 +35,12 @@ import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
 
+import org.apache.derby.iapi.jdbc.EngineCallableStatement40;
 import org.apache.derby.iapi.reference.SQLState;
 
-public class EmbedCallableStatement40 extends EmbedCallableStatement30 {
-    
+public class EmbedCallableStatement40
+        extends EmbedCallableStatement30
+        implements EngineCallableStatement40 {
         
     /** Creates a new instance of EmbedCallableStatement40 */
     public EmbedCallableStatement40(EmbedConnection conn, String sql,
