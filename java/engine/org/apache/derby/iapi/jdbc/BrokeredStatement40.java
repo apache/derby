@@ -21,9 +21,6 @@
 package org.apache.derby.iapi.jdbc;
 
 import java.sql.SQLException;
-import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.iapi.reference.SQLState;
-
 
 public class BrokeredStatement40 extends BrokeredStatement {
     
@@ -56,8 +53,7 @@ public class BrokeredStatement40 extends BrokeredStatement {
         try {
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw Util.generateCsSQLException(SQLState.UNABLE_TO_UNWRAP,
-                    interfaces);
+            throw unableToUnwrap(interfaces);
         }
     }
 

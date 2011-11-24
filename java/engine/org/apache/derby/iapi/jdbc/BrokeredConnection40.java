@@ -31,7 +31,6 @@ import java.sql.SQLXML;
 import java.sql.Struct;
 import java.util.Properties;
 import java.util.concurrent.Executor;
-import org.apache.derby.impl.jdbc.Util;
 import org.apache.derby.iapi.reference.SQLState;
 
 
@@ -39,7 +38,8 @@ public class BrokeredConnection40
         extends BrokeredConnection30 implements EngineConnection40 {
     
     /** Creates a new instance of BrokeredConnection40 */
-    public BrokeredConnection40(BrokeredConnectionControl control) {
+    public BrokeredConnection40(BrokeredConnectionControl control)
+            throws SQLException {
         super(control);
     }
     
@@ -309,7 +309,7 @@ public class BrokeredConnection40
     public final boolean isWrapperFor(Class<?> interfaces) throws SQLException {
         try {
             if (getRealConnection().isClosed())
-                throw Util.noCurrentConnection();
+                throw noCurrentConnection();
             return interfaces.isInstance(this);
         } catch (SQLException sqle) {
             notifyException(sqle);
@@ -329,14 +329,15 @@ public class BrokeredConnection40
                             throws SQLException{
         try {
             if (getRealConnection().isClosed())
-                throw Util.noCurrentConnection();
+                throw noCurrentConnection();
             //Derby does not implement non-standard methods on 
             //JDBC objects
             try {
                 return interfaces.cast(this);
             } catch (ClassCastException cce) {
-                throw Util.generateCsSQLException(SQLState.UNABLE_TO_UNWRAP,
-                        interfaces);
+                throw getExceptionFactory().getSQLException(
+                        SQLState.UNABLE_TO_UNWRAP, null, null,
+                        new Object[]{ interfaces });
             }
         } catch (SQLException sqle) {
             notifyException(sqle);

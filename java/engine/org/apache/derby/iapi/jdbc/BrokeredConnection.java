@@ -30,8 +30,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 
-import org.apache.derby.impl.jdbc.Util;
-
 import org.apache.derby.iapi.error.SQLWarningFactory;
 import org.apache.derby.shared.common.reference.SQLState;
 
@@ -49,6 +47,9 @@ public abstract class BrokeredConnection implements EngineConnection
 	protected boolean isClosed;
         private String connString;
 
+    /** Exception factory for the underlying connection. */
+    private final ExceptionFactory exceptionFactory;
+
 	/**
 		Maintain state as seen by this Connection handle, not the state
 		of the underlying Connection it is attached to.
@@ -64,8 +65,11 @@ public abstract class BrokeredConnection implements EngineConnection
 	/////////////////////////////////////////////////////////////////////////
 
 	public	BrokeredConnection(BrokeredConnectionControl control)
+            throws SQLException
 	{
 		this.control = control;
+        this.exceptionFactory =
+                control.getRealConnection().getExceptionFactory();
 	}
 
 	public final void setAutoCommit(boolean autoCommit) throws SQLException 
@@ -364,6 +368,15 @@ public abstract class BrokeredConnection implements EngineConnection
 	//
 	/////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Generate an exception reporting that there is no current connection.
+     * @return a no-current-connection exception
+     */
+    final SQLException noCurrentConnection() {
+        return exceptionFactory.getSQLException(
+                SQLState.NO_CURRENT_CONNECTION, null, null, null);
+    }
+
 	/**
 	  *	A little indirection for getting the real connection. 
 	  *
@@ -371,7 +384,7 @@ public abstract class BrokeredConnection implements EngineConnection
 	  */
 	final EngineConnection getRealConnection() throws SQLException {
 		if (isClosed)
-			throw Util.noCurrentConnection();
+			throw noCurrentConnection();
 
 		return control.getRealConnection();
 	}
@@ -495,18 +508,6 @@ public abstract class BrokeredConnection implements EngineConnection
     public final void addWarning(SQLWarning w) throws SQLException
     {
         getRealConnection().addWarning(w);
-    }
-            
-    /**
-     * Checks if the connection is closed and throws an exception if
-     * it is.
-     *
-     * @exception SQLException if the connection is closed
-     */
-    protected final void checkIfClosed() throws SQLException {
-        if (isClosed()) {
-            throw Util.noCurrentConnection();
-        }
     }
 
     /**
@@ -649,6 +650,13 @@ public abstract class BrokeredConnection implements EngineConnection
     public void resetFromPool()
             throws SQLException {
         getRealConnection().resetFromPool();
+    }
+
+    /**
+     * Return the exception factory for the underlying connection.
+     */
+    public final ExceptionFactory getExceptionFactory() {
+        return exceptionFactory;
     }
     
     ////////////////////////////////////////////////////////////////////

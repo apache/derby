@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.jdbc;
 
-import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.jdbc.InternalDriver;
 
 import org.apache.derby.iapi.reference.Attribute;
@@ -54,8 +53,6 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.replication.master.MasterFactory;
 import org.apache.derby.iapi.store.replication.slave.SlaveFactory;
 
-import org.apache.derby.iapi.util.IdUtil;
-
 import java.io.IOException;
 
 import java.security.Permission;
@@ -83,6 +80,7 @@ import java.util.Properties;
 import java.util.Iterator;
 
 import org.apache.derby.iapi.jdbc.EngineLOB;
+import org.apache.derby.iapi.jdbc.ExceptionFactory;
 import org.apache.derby.iapi.util.InterruptStatus;
 import org.apache.derby.impl.jdbc.authentication.NoneAuthenticationServiceImpl;
 
@@ -3077,6 +3075,11 @@ public abstract class EmbedConnection implements EngineConnection
 			return rootConnection.resultSetId++;
 		}
 	}
+
+    /** Get the exception factory for this connection. */
+    public ExceptionFactory getExceptionFactory() {
+        return Util.getExceptionFactory();
+    }
 
 	protected SQLException newSQLException(String messageId) {
 		return Util.generateCsSQLException(messageId);

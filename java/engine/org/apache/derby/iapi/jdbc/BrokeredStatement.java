@@ -23,8 +23,6 @@ package org.apache.derby.iapi.jdbc;
 
 import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.impl.jdbc.Util;
-
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -62,7 +60,6 @@ public class BrokeredStatement implements EngineStatement
 		// underlying statement is open.
 		resultSetType = getResultSetType();
 		resultSetConcurrency = getResultSetConcurrency();
-
 		resultSetHoldability = getResultSetHoldability();
     }
 
@@ -558,8 +555,7 @@ public class BrokeredStatement implements EngineStatement
 
     /**
      * Checks if the statement is closed and throws an exception if it
-     * is. This method relies on the <code>isClosed()</code> method
-     * and therefore only works with JDBC 4.0.
+     * is.
      *
      * @exception SQLException if the statement is closed
      */
@@ -567,9 +563,23 @@ public class BrokeredStatement implements EngineStatement
         throws SQLException
     {
         if (isClosed()) {
-            throw Util.generateCsSQLException(SQLState.ALREADY_CLOSED,
-                                              "Statement");
+            throw control.getExceptionFactory().getSQLException(
+                    SQLState.ALREADY_CLOSED, null, null,
+                    new Object[]{ "Statement" });
         }
+    }
+
+    /**
+     * Return an exception that reports that an unwrap operation has failed
+     * because the object couldn't be cast to the specified interface.
+     *
+     * @param iface the class or interface passed in to the failed unwrap call
+     * @return an exception indicating that unwrap failed
+     */
+    final SQLException unableToUnwrap(Class iface) {
+        return control.getExceptionFactory().getSQLException(
+                SQLState.UNABLE_TO_UNWRAP, null, null,
+                new Object[]{ iface });
     }
     
     ////////////////////////////////////////////////////////////////////

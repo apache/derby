@@ -24,11 +24,7 @@ package org.apache.derby.jdbc;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.MessageId;
 import org.apache.derby.iapi.reference.Property;
-import org.apache.derby.iapi.reference.SQLState;
 
-import org.apache.derby.impl.jdbc.EmbedConnection;
-
-import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.sql.ResultSet;
 import org.apache.derby.iapi.jdbc.BrokeredConnection;
@@ -40,10 +36,8 @@ import org.apache.derby.iapi.security.SecurityUtil;
 
 import org.apache.derby.impl.jdbc.*;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Driver;
-import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 
 import java.security.Permission;
@@ -94,7 +88,10 @@ public abstract class Driver20 extends InternalDriver implements Driver {
 		return new EmbedResultSet20(conn, results, forMetaData, statement,
 								 isAtomic); 
 	}
-	public abstract BrokeredConnection newBrokeredConnection(BrokeredConnectionControl control);
+
+    public abstract BrokeredConnection newBrokeredConnection(
+            BrokeredConnectionControl control) throws SQLException;
+
     /**
      * <p>The getPropertyInfo method is intended to allow a generic GUI tool to 
      * discover what properties it should prompt a human for in order to get 

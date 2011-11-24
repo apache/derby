@@ -116,7 +116,15 @@ public interface EngineConnection extends Connection {
      * schema are reset.
      */
     public void resetFromPool() throws SQLException;
-    
+
+    /**
+     * Return an exception factory that could be used to generate
+     * {@code SQLException}s raised by this connection.
+     *
+     * @return an exception factory instance
+     */
+    public ExceptionFactory getExceptionFactory();
+
     ////////////////////////////////////////////////////////////////////
     //
     // INTRODUCED BY JDBC 4.1 IN JAVA 7

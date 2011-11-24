@@ -27,8 +27,6 @@ import java.sql.NClob;
 import java.sql.RowId;
 import java.sql.SQLException;
 import java.sql.SQLXML;
-import org.apache.derby.impl.jdbc.Util;
-import org.apache.derby.iapi.reference.SQLState;
 
 public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
     
@@ -97,8 +95,7 @@ public class BrokeredPreparedStatement40 extends BrokeredPreparedStatement30{
         try {
             return interfaces.cast(this);
         } catch (ClassCastException cce) {
-            throw Util.generateCsSQLException(SQLState.UNABLE_TO_UNWRAP,
-                    interfaces);
+            throw unableToUnwrap(interfaces);
         }
     }
 

@@ -26,7 +26,6 @@ import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import org.apache.derby.iapi.reference.JDBC30Translation;
 
 /**
 	Extends BrokeredConnection to provide the JDBC 3.0 connection methods.
@@ -35,6 +34,7 @@ public class BrokeredConnection30 extends BrokeredConnection
 {
 
 	public	BrokeredConnection30(BrokeredConnectionControl control)
+            throws SQLException
 	{
 		super(control);
 	}

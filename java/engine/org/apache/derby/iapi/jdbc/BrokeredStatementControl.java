@@ -80,4 +80,10 @@ public interface BrokeredStatementControl
         @param s Statement that created the ResultSet.
 	*/
 	public ResultSet	wrapResultSet(Statement s, ResultSet rs);
+
+    /**
+     * Return the exception factory for the underlying connection.
+     * @return an exception factory instance
+     */
+    public ExceptionFactory getExceptionFactory();
 }

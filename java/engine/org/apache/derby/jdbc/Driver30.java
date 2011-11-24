@@ -125,7 +125,10 @@ public class Driver30 extends Driver20 {
 								resultSetConcurrency,
 								resultSetHoldability);
 	}
-	public BrokeredConnection newBrokeredConnection(BrokeredConnectionControl control) {
+	public BrokeredConnection newBrokeredConnection(
+            BrokeredConnectionControl control)
+        throws SQLException
+    {
 
 		return new BrokeredConnection30(control);
 	}

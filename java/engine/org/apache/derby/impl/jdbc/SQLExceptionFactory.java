@@ -21,12 +21,9 @@
 
 package org.apache.derby.impl.jdbc;
 
-import java.io.IOException;
-import org.apache.derby.iapi.error.ExceptionSeverity;
-import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.jdbc.ExceptionFactory;
 import org.apache.derby.iapi.services.i18n.MessageService;
-import org.apache.derby.iapi.reference.MessageId;
 
 import java.sql.SQLException;
 
@@ -34,7 +31,7 @@ import java.sql.SQLException;
  *Class to create SQLException
  *
  */
-public class SQLExceptionFactory {
+public class SQLExceptionFactory implements ExceptionFactory {
     /**
      * method to construct SQLException
      * version specific drivers can overload this method to create
@@ -44,6 +41,17 @@ public class SQLExceptionFactory {
             SQLException next, int severity, Throwable t, Object[] args) {
         return new EmbedSQLException(message, messageId, next, severity,
                 t, args);
+    }
+
+    /**
+     * Construct an SQLException whose message and severity are derived from
+     * the message id.
+     */
+    public final SQLException getSQLException(String messageId,
+            SQLException next, Throwable cause, Object[] args) {
+        String message = MessageService.getCompleteMessage(messageId, args);
+        int severity = StandardException.getSeverityFromIdentifier(messageId);
+        return getSQLException(message, messageId, next, severity, cause, args);
     }
 
 	/**
