@@ -291,8 +291,8 @@ class DRDAStatement
     long versionCounter;
 
     /**
-     * Saved value returned from {@link DRDAConnThread#from
-     * parsePRPSQLSTT}. Used to determine if the statment is such that we may
+     * Saved value returned from {@link DRDAConnThread#parsePRPSQLSTT}.
+     * Used to determine if the statement is such that we may
      * need to re-send metadata at execute time, see {@link #versionCounter}.
      */
     int sqldaType;
