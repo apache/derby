@@ -2706,7 +2706,7 @@ you should not have to do this.
         <mkdir dir="${emmabase}"/>
     </target>
     
-    <target name="emma-instrumentation" depends="emma-init,junit-init">
+    <target name="emma-instrumentation" depends="emma-init,junit-init-nocp">
         <!-- Apply emma instrumentation to the classes in instrpath and copy to destdir -->
 	<emma verbosity="verbose">
             <instr outfile="junit_${derby.junit.timestamp}/coverage.em" destdir="${emmabase}" merge="true" mode="fullcopy">
