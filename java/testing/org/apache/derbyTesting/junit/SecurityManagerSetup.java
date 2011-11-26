@@ -277,7 +277,6 @@ public final class SecurityManagerSetup extends TestSetup {
         URL emma = getURL("com.vladium.emma.EMMAException");
         if (emma != null) {
             classPathSet.setProperty("emma.active", "");
-            classPathSet.setProperty("derbyTesting.emma", emma.toExternalForm());
         }
 		
         /* When inserting XML values that use external DTD's, the JAXP

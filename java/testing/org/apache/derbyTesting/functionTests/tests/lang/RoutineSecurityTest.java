@@ -96,8 +96,11 @@ public class RoutineSecurityTest extends BaseJDBCTestCase {
         
         String[] restricted = {
                 "derby.system.home", // not granted to all code on the stack
-                "user.dir",  // restricted by jvm
-                // "user.home",  // restricted by jvm
+                // DERBY-5514: Property read permission on user.dir is granted
+                // to all code bases when running code instrumented with EMMA,
+                // so reading the property will succeed under EMMA.
+                // "user.dir",  // restricted by jvm
+                "user.home",  // restricted by jvm
                 "java.class.path", // restricted by jvm
                 "java.home",  // restricted by jvm
                 "derbyRoutineSecurityTest.no", // not granted at all

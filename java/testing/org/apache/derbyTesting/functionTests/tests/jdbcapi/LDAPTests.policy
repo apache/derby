@@ -114,13 +114,6 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission org.apache.derby.security.SystemPermission "engine", "monitor";
   permission org.apache.derby.security.SystemPermission "server", "monitor";  
  
-  // These permissions are needed when testing code instrumented with EMMA.
-  // They will only be used if the emma.active system property property is set,
-  // which should be set to "" for the permissions to be correct.
-  permission java.util.PropertyPermission "${emma.active}user.dir", "read";
-  permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
-  permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
-
   // resolve is needed to run ldap related tests 
   permission java.net.SocketPermission "${derbyTesting.ldapServer}", "connect, resolve";
 };
@@ -230,9 +223,6 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission org.apache.derby.security.SystemPermission "engine", "monitor";
   permission org.apache.derby.security.SystemPermission "server", "control,monitor";
   
-  // These permissions are needed when testing code instrumented with EMMA.
-  permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
-
   // resolve is needed to run ldap related tests
   permission java.net.SocketPermission "${derbyTesting.ldapServer}", "connect, resolve";
 };
@@ -317,11 +307,6 @@ grant codeBase "${derbyTesting.junit}" {
     // This permission is needed when running the tests using ant 1.7
     permission java.io.FilePermission "${user.dir}${/}*", "write";
   
-    // These permissions are needed when testing code instrumented with EMMA.
-    permission java.util.PropertyPermission "${emma.active}user.dir", "read";
-    permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
-    permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
-
   // resolve is needed to run ldap related tests
   permission java.net.SocketPermission "${derbyTesting.ldapServer}", "connect, resolve";
 };
@@ -343,11 +328,6 @@ grant codeBase "${derbyTesting.antjunit}" {
 
     // This permission is needed when running the tests using ant 1.7
     permission java.io.FilePermission "${user.dir}${/}*", "write";
-
-    // These permissions are needed when testing code instrumented with EMMA.
-    permission java.util.PropertyPermission "${emma.active}user.dir", "read";
-    permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
-    permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
 };
 
 // functionTests.tests.lang.RoutineSecurityTest requires this grant
@@ -357,20 +337,21 @@ grant {
     permission java.util.PropertyPermission "derbyRoutineSecurityTest.yes", "read";
 };
 
+// These permissions are needed when testing code instrumented with EMMA.
+// They will only be used if the emma.active system property property is
+// set, which should be set to "" for the permissions to be correct. Must
+// be granted to all code bases because EMMA doesn't use doPrivileged
+// blocks around the code that needs the permissions.
+grant {
+  permission java.util.PropertyPermission "${emma.active}user.dir", "read";
+  permission java.io.FilePermission "${emma.active}${user.dir}${/}coverage.ec", "read, write";
+  permission java.lang.RuntimePermission "${emma.active}writeFileDescriptor";
+};
+
 // When inserting XML values that use external DTD's, the JAXP parser
 // needs permission to read the DTD files.  We assume that all DTD
 // files will be copied to extin/ by whichever tests need them.  So
 // grant the JAXP parser permissions to read that directory.
 grant codeBase "${derbyTesting.jaxpjar}" {
   permission java.io.FilePermission "${user.dir}${/}extin${/}-", "read";
-};
-
-
-// These permissions are needed when testing code instrumented with EMMA.
-// They are all related to writing coverage statistics to a file that by default
-// is named coverage.ec placed in the directory where the test is executed.
-grant codeBase "${derbyTesting.emma}" {
-    permission java.util.PropertyPermission "user.dir", "read";
-    permission java.io.FilePermission "${user.dir}${/}coverage.ec", "read, write";
-    permission java.lang.RuntimePermission "writeFileDescriptor";
 };
