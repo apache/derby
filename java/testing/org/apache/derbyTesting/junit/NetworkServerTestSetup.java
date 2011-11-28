@@ -255,12 +255,16 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         boolean         skipHostName = false;
 
         al.add( BaseTestCase.getJavaExecutableName() );
+        al.add( "-Demma.verbosity.level=silent" );
         al.add( "-classpath" );
         al.add( classpath );
         
-        // Loading from classes need to work-around the limitation
-        // of the default policy file doesn't work with classes.
-        if (!TestConfiguration.loadingFromJars())
+        // Loading from classes need to work-around the limitation of the
+        // default policy file doesn't work with classes.  Similarly, if we are
+        // running with Emma we don't run with the security manager, as the
+        // default server policy doesn't contain needed permissions and,
+        // additionally, Emma sources do not use doPrivileged blocks anyway.
+        if (!TestConfiguration.loadingFromJars() || BaseTestCase.runsWithEmma())
         {
             boolean setNoSecurityManager = true;
             for (int i = 0; i < systemProperties.length; i++)

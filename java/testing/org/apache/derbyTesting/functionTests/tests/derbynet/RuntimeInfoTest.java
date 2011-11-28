@@ -46,9 +46,11 @@ import org.apache.derbyTesting.junit.TestConfiguration;
 public class RuntimeInfoTest extends BaseJDBCTestCase {
 
 	private static String[] RuntimeinfoCmd = new String[] {
+            "-Demma.verbosity.level=silent",
 			"org.apache.derby.drda.NetworkServerControl", "runtimeinfo",
 			"-p", String.valueOf(TestConfiguration.getCurrent().getPort()) };
 	private static String[] RuntimeinfoLocaleCmd = new String[] {
+            "-Demma.verbosity.level=silent",
 			"-Duser.language=err", "-Duser.country=DE",
 			"org.apache.derby.drda.NetworkServerControl", "runtimeinfo",
 			"-p", String.valueOf(TestConfiguration.getCurrent().getPort()) };

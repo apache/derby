@@ -329,8 +329,14 @@ public class SecureServerTest extends BaseJDBCTestCase
         boolean     outputOK = ( serverOutput.indexOf( _outcome.expectedServerOutput() ) >= 0 );
 
         assertEquals( myName + ": serverCameUp = " + serverCameUp, _outcome.serverShouldComeUp(), serverCameUp );
-        
-        assertTrue( myName + "\nExpected: " + _outcome.expectedServerOutput() + "\nBut saw: " + serverOutput , outputOK );
+
+        if (!runsWithEmma()) {
+            // With Emma we run without the security manager, so we can't
+            // assert on seeing it.
+            assertTrue( myName + "\nExpected: " +
+                        _outcome.expectedServerOutput() +
+                        "\nBut saw: " + serverOutput , outputOK );
+        }
 
         //
         // make sure that the default policy lets us connect to the server if the hostname was

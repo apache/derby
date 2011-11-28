@@ -646,6 +646,12 @@ public abstract class BaseTestCase
     public static final boolean isJava7() {
         return getSystemProperty("java.version").startsWith("1.7");
     }
+
+    public static final boolean runsWithEmma() {
+        return getSystemProperty("java.class.path").indexOf("emma.jar") != -1;
+    }
+
+
     /**
      * Returns the major version of the class specification version supported
      * by the running JVM.
