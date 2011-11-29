@@ -760,7 +760,12 @@ final class StorageFactoryService implements PersistentService
                             if (serviceDirectory.mkdirs())
                             {
                                 serviceDirectory.limitAccessToOwner();
-
+                                // DERBY-5096 On iseries, the storageFactory canonicalName may need to be adjusted
+                                // for casing after the directory is created.
+                                String serviceDirCanonicalPath = serviceDirectory.getCanonicalPath();
+                                if (storageFactory.getCanonicalName() != serviceDirCanonicalPath) {
+                                    storageFactory.setCanonicalName(serviceDirCanonicalPath);
+                                }
                                 try
                                 {
                                     return storageFactory.getCanonicalName();
