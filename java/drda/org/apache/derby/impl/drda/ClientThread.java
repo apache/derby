@@ -57,22 +57,15 @@ final class ClientThread extends Thread {
                 try { // Check for underlying InterruptedException,
                       // SSLException and IOException
 
-                    try{ // Check for PrivilegedActionException
-
-                        clientSocket = 
-                            (Socket) AccessController.doPrivileged(
-                                 new PrivilegedExceptionAction() {
-                                     public Object run() throws IOException
-                                     {
-                                         return serverSocket.accept();
-                                     }
-                                 }
-                                 );
+                    try { // Check for PrivilegedActionException
+                        clientSocket =
+                                    acceptClientWithRetry();
                         // Server may have been shut down.  If so, close this
                         // client socket and break out of the loop.
                         // DERBY-3869
                         if (parent.getShutdown()) {
-                            clientSocket.close();
+                            if (clientSocket != null)
+                                clientSocket.close();
                             return;
                         }
                             
@@ -149,6 +142,52 @@ final class ClientThread extends Thread {
         } // end for(;;)
         
     }// end run()
+
+    /**
+     * Perform a server socket accept. Allow three attempts with a one second
+     * wait between each
+     * 
+     * @return client socket or null if accept failed.
+     * 
+     */
+    private Socket acceptClientWithRetry() {
+        return (Socket) AccessController.doPrivileged(
+                new PrivilegedAction() {
+                    public Object run() {
+                        for (int trycount = 1; trycount <= 3; trycount++) {
+                            try {
+                                // DERBY-5347 Need to exit if
+                                // accept fails with IOException
+                                // Cannot just aimlessly loop
+                                // writing errors
+                                return serverSocket.accept();
+                            } catch (IOException acceptE) {
+                                // If not a normal shutdown,
+                                // log and shutdown the server
+                                if (!parent.getShutdown()) {
+                                    parent
+                                            .consoleExceptionPrintTrace(acceptE);
+                                    if (trycount == 3) {
+                                        // give up after three tries
+                                        parent.directShutdownInternal();
+                                    } else {
+                                        // otherwise wait 1 second and retry
+                                        try {
+                                            Thread.sleep(1000);
+                                        } catch (InterruptedException ie) {
+                                            parent
+                                            .consoleExceptionPrintTrace(ie);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        return null; // no socket to return after three tries
+                    }
+                }
+
+                );
+    }
 }
 
 
