@@ -189,6 +189,15 @@ public class VFMemoryStorageFactory
     }
 
     /**
+     * Set the canonicalName. May need adjustment due to DERBY-5096
+     * 
+     * @param name uniquely identifiable name for this database
+     */
+    public void setCanonicalName(String name) {
+       canonicalName = name;
+    }
+    
+    /**
      * Returns a handle to the specific storage file.
      *
      * @param path the path of the file or directory
