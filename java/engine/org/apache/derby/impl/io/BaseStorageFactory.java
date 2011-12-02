@@ -111,6 +111,15 @@ abstract class BaseStorageFactory implements StorageFactory
     }
     
     /**
+     * Set the canonicalName. May need adjustment due to DERBY-5096
+     * 
+     * @param name uniquely identifiable name for this database
+     */
+    public void setCanonicalName(String name) {
+       canonicalName = name;
+    }
+    
+    /**
      * Construct a StorageFile from a path name.
      *
      * @param path The path name of the file

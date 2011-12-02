@@ -665,6 +665,11 @@ final class StorageFactoryService implements PersistentService
 
                             if (serviceDirectory.mkdirs())
                             {
+                                // DERBY-5096. The storageFactory canonicalName may need to be adjusted
+                                // for casing after the directory is created. Just reset it after making the 
+                                // the directory to make sure.
+                                String serviceDirCanonicalPath = serviceDirectory.getCanonicalPath();
+                                storageFactory.setCanonicalName(serviceDirCanonicalPath);
                                 try
                                 {
                                     return storageFactory.getCanonicalName();
