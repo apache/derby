@@ -118,6 +118,15 @@ abstract class CorruptBaseStorageFactory implements WritableStorageFactory
     }
     
     /**
+     * Set the canonicalName. May need adjustment due to DERBY-5096
+     * 
+     * @param name uniquely identifiable name for this database
+     */
+    public void setCanonicalName(String name) {
+       realStorageFactory.setCanonicalName(name);
+    }
+    
+    /**
      * Construct a StorageFile from a path name.
      *
      * @param path The path name of the file

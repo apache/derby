@@ -231,4 +231,12 @@ public interface StorageFactory
      */
     public StorageFile createTemporaryFile (String prefix, String suffix)
                                                             throws IOException;
+    
+    /**
+     * Set the canonicalName. May need adjustment due to DERBY-5096
+     * 
+     * @param name uniquely identifiable name for this database
+     */
+    public void setCanonicalName(String name);
+    
 }
