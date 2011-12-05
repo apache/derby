@@ -427,6 +427,75 @@ public class XATransactionTest extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * This fixture triggers DERBY-1016. It creates an XA transaction, executes
+     * an update over it and then prepares the transaction. Trying to forget
+     * after preparing should throw XAER_PROTO and not XAER_NOTA.
+     */
+    public void testForgetExceptionDerby1016PROTO() throws XAException, SQLException {      
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        J2EEDataSource.setBeanProperty(xads, "databaseName", "wombat");
+        
+        XAConnection xaconn = xads.getXAConnection();
+        XAResource xar = xaconn.getXAResource();
+        Xid xid = createXid(93,18);
+        xar.start(xid, XAResource.TMNOFLAGS);
+        Connection conn = xaconn.getConnection();
+        Statement s = conn.createStatement();
+        s.executeUpdate("CREATE TABLE Derby1016 (I INT)");
+        xar.end(xid, XAResource.TMSUCCESS);
+        xar.prepare(xid);
+        try {
+            xar.forget(xid);
+            fail("FAIL: prepared XA-Transaction forgotten");
+        } catch (XAException XAeForget) {
+            assertEquals("FAIL: Got unexpected exception "
+                          + XAeForget.getMessage()   + " errorCode: " 
+                          + XAeForget.errorCode  + "  calling forget on a prepared transaction",
+                        XAException.XAER_PROTO, XAeForget.errorCode);
+        } finally {
+            s.close();
+            xar.rollback(xid);
+            conn.close(); 
+            xaconn.close();
+        }
+    }
+ 
+    /**
+     * Further test case prompted by DERBY-1016. Tests that XAER_NOTA is thrown
+     * if no transaction exists.
+     */
+    public void testForgetExceptionDerby1016NOTA() throws XAException, SQLException {      
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        J2EEDataSource.setBeanProperty(xads, "databaseName", "wombat");
+        
+        XAConnection xaconn = xads.getXAConnection();
+        XAResource xar = xaconn.getXAResource();
+        Xid xid = createXid(93,18);
+        xar.start(xid, XAResource.TMNOFLAGS);
+        Connection conn = xaconn.getConnection();
+        Statement s = conn.createStatement();
+        s.executeUpdate("CREATE TABLE Derby1016 (I INT)");
+        xar.end(xid, XAResource.TMSUCCESS);
+        xar.prepare(xid);
+        xar.commit(xid, false);
+        try {
+            // since the transaction was committed, it should no longer exist
+            // thus, forget should now throw an XAER_NOTA
+            xar.forget(xid);
+            fail("FAIL: able to forget committed XA-Transaction");
+        } catch (XAException XAeForget) {
+            assertEquals("FAIL: Got unexpected exception "
+                          + XAeForget.getMessage()   + " errorCode: " 
+                          + XAeForget.errorCode  + "  calling forget on a committed transaction",
+                        XAException.XAER_NOTA, XAeForget.errorCode);
+        } finally {
+            s.close();
+            conn.close(); 
+            xaconn.close();
+        }
+    }
+
     /* ------------------- end helper methods  -------------------------- */
 
     /** Create the Xid object for global transaction identification

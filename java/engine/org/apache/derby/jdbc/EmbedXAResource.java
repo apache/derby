@@ -420,9 +420,8 @@ class EmbedXAResource implements XAResource {
             
         }
         
-        throw new XAException(tranState.isPrepared
-            ? XAException.XAER_NOTA 
-            : XAException.XAER_PROTO);
+        // DERBY-1016; if the transaction exists throw XAER_PROTO on forget
+        throw new XAException(XAException.XAER_PROTO);
     }    
 
     /**
