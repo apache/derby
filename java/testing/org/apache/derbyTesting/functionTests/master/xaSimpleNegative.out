@@ -190,7 +190,7 @@ IJ ERROR: XAER_INVAL
 ij(XA)> xa_prepare 1;
 ij(XA)> -- can only forget heuristically completed transaction
 xa_forget 1;
-IJ ERROR: XAER_NOTA 
+IJ ERROR: XAER_PROTO 
 ij(XA)> xa_start xa_noflags 2;
 ij(XA)> -- ERROR: deadlock, transaction trashed
 select * from APP.negative;
