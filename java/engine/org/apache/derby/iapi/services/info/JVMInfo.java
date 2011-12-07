@@ -48,6 +48,7 @@ public abstract class JVMInfo
 		<LI> 5 - J2SE_142 - JDK 1.4.2
 		<LI> 6 - J2SE_15 - JDK 1.5
 		<LI> 7 - J2SE_16 - JDK 1.6
+        <LI> 8 - J2SE_17 - JDK 1.7
 		</UL>
 	*/
 	public static final int JDK_ID;
@@ -174,7 +175,8 @@ public abstract class JVMInfo
 		case J2SE_14: return J2ME ? "J2ME - JDBC for CDC/FP 1.1" : "J2SE 1.4 - JDBC 3.0";
 		case J2SE_142: return "J2SE 1.4.2 - JDBC 3.0";
 		case J2SE_15: return "J2SE 5.0 - JDBC 3.0";
-		case J2SE_16: return "Java SE 6 - JDBC 4.0";
+        case J2SE_16: return "Java SE 6 - JDBC 4.1";
+        case J2SE_17: return "Java SE 7 - JDBC 4.1";
 		default: return "?-?";
 		}
 	}
