@@ -98,17 +98,24 @@ public class JDBCMBeanTest extends MBeanTest {
     public void testAttributeDriverLevel() throws Exception {
         // get JDBC version from DatabaseMetaData for comparison
         DatabaseMetaData dmd = getConnection().getMetaData();
-        String JDBCVersion = "" + dmd.getJDBCMajorVersion() + 
+
+        String JDBCVersion =
             dmd.getJDBCMajorVersion() + "." +
             dmd.getJDBCMinorVersion();
-        println("DatabaseMetaDataJDBCLevel = " + JDBCVersion);
-        ObjectName driverLevel = getJdbcMBeanObjectName();
-        String driverLevelString = driverLevel.toString();
-        println("MBean driverLevel  = " + driverLevelString);
-       
-        assert(driverLevelString.indexOf('?') == -1);
-        assert(driverLevelString.matches("^JRE - JDBC: " + JDBCVersion + ".*"));
 
+        String driverLevelString = (String)getAttribute(
+            getJdbcMBeanObjectName(),
+            "DriverLevel");
+
+        println("DatabaseMetaDataJDBCLevel = " + JDBCVersion);
+        println("MBean driverLevel  = " + driverLevelString);
+
+        assertEquals(
+            "Unexpected driver level string: " + driverLevelString,
+            -1, driverLevelString.indexOf('?'));
+        assertTrue(
+            "Unexpected driver level string: " + driverLevelString,
+             driverLevelString.matches("^Java SE .*JDBC .*" + JDBCVersion));
     }
     
     /**
