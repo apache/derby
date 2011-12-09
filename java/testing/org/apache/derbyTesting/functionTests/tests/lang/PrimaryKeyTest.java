@@ -210,34 +210,37 @@ public class PrimaryKeyTest extends BaseJDBCTestCase
 	public void testCatalog() throws SQLException {
 		Statement s = createStatement();
 		assertUpdateCount(s , 0 , "create table pos1(c1 int primary key)");
-		ResultSet rs = s.executeQuery("select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename) from sys.systables where CAST(tabletype AS CHAR(1)) = 'S'  and CAST(tablename AS VARCHAR(128)) != 'SYSDUMMY1'");
+		ResultSet rs = s.executeQuery("select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename) from sys.systables where CAST(tabletype AS CHAR(1)) = 'S'  and CAST(tablename AS VARCHAR(128)) != 'SYSDUMMY1' order by tablename");
                 String[][] expectedCheckTables = new String[][]
-                       {{"SYSCONGLOMERATES","1"},
-                        {"SYSTABLES","1"},
-                        {"SYSCOLUMNS","1"},
-                        {"SYSSCHEMAS","1"},
-                        {"SYSCONSTRAINTS","1"},
-                        {"SYSKEYS","1"},
-                        {"SYSDEPENDS","1"},
+                       {
                         {"SYSALIASES","1"},
-                        {"SYSVIEWS","1"},
                         {"SYSCHECKS","1"},
-                        {"SYSFOREIGNKEYS","1"},
-                        {"SYSSTATEMENTS","1"},
+                        {"SYSCOLPERMS","1"},
+                        {"SYSCOLUMNS","1"},
+                        {"SYSCONGLOMERATES","1"},
+                        {"SYSCONSTRAINTS","1"},
+                        {"SYSDEPENDS","1"},
                         {"SYSFILES","1"},
-                        {"SYSTRIGGERS","1"},
+                        {"SYSFOREIGNKEYS","1"},
+                        {"SYSKEYS","1"},
+                        {"SYSPERMS", "1"},
+						{"SYSROLES", "1"},
+                        {"SYSROUTINEPERMS","1"},
+                        {"SYSSCHEMAS","1"},
+                        {"SYSSEQUENCES", "1"},
+                        {"SYSSTATEMENTS","1"},
                         {"SYSSTATISTICS","1"},
                         {"SYSTABLEPERMS","1"},
-                        {"SYSCOLPERMS","1"},
-                        {"SYSROUTINEPERMS","1"},
-						{"SYSROLES", "1"},
-                        {"SYSSEQUENCES", "1"},
-                        {"SYSPERMS", "1"}};
+                        {"SYSTABLES","1"},
+                        {"SYSTRIGGERS","1"},
+                        {"SYSUSERS","1"},
+                        {"SYSVIEWS","1"},
+                       };
                 JDBC.assertFullResultSet(rs,expectedCheckTables); 
 		//-- drop tables
 		assertUpdateCount(s , 0 , "drop table pos1");
 		//-- verify it again
-                rs = s.executeQuery("select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename) from sys.systables where CAST(tabletype AS CHAR(1)) = 'S'  and CAST(tablename AS VARCHAR(128)) != 'SYSDUMMY1'");
+                rs = s.executeQuery("select tablename, SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename) from sys.systables where CAST(tabletype AS CHAR(1)) = 'S'  and CAST(tablename AS VARCHAR(128)) != 'SYSDUMMY1' order by tablename");
                 JDBC.assertFullResultSet(rs, expectedCheckTables);
 	}
 	/**

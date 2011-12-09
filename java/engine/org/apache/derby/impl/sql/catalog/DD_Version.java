@@ -493,6 +493,17 @@ public	class DD_Version implements	Formatable
             bootingDictionary.upgradeSYSROUTINEPERMS_10_6( tc );
         }
         
+        if (fromMajorVersionNumber <= DataDictionary.DD_VERSION_DERBY_10_9)
+        {
+            // On ugrade from versions before 10.9, create system procedures
+            // added in 10.9.
+            
+            // On upgrade from versions before 10.9, create system catalogs
+            // added in 10.9
+            bootingDictionary.upgradeMakeCatalog(
+                    tc, DataDictionary.SYSUSERS_CATALOG_NUM);
+        }
+
         // Grant PUBLIC access to some system routines
         bootingDictionary.grantPublicAccessToSystemRoutines(newlyCreatedRoutines, tc, aid);
 	}

@@ -194,6 +194,7 @@ public interface DataDictionary
     public static final int SYSROLES_CATALOG_NUM = 19;
     public static final int SYSSEQUENCES_CATALOG_NUM = 20;
     public static final int SYSPERMS_CATALOG_NUM = 21;
+    public static final int SYSUSERS_CATALOG_NUM = 22;
 
     /* static finals for constraints
 	 * (Here because they are needed by parser, compilation and execution.)

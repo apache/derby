@@ -49,6 +49,9 @@ public class DBOAccessTest extends GeneratedColumnsHelper
     // Name of the log file to use when testing VTIs that expect one.
     private static final String TEST_LOG_FILE = "sys_vti_test_derby.tstlog";
 
+    private static  final   String      ONLY_DBO = "4251D";
+    private static  final   String      HIDDEN_COLUMN = "4251E";
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE
@@ -165,7 +168,65 @@ public class DBOAccessTest extends GeneratedColumnsHelper
         if ( shouldSucceed ) { goodStatement( conn, query ); }
         else
         {
-            expectCompilationError( conn, "4251D", query );
+            expectCompilationError( conn, ONLY_DBO, query );
+        }
+    }
+
+    /**
+     * <p>
+     * Tests that only the DBO can select from SYSUSERS and no-one can SELECT
+     * SYSUSERS.PASSWORD.
+     * </p>
+     */
+    public  void    testSYSUSERS() throws Exception
+    {
+        println( "testSYSUSERS authorizationIsOn() = " + authorizationIsOn() );
+        
+        Connection  dboConnection = openUserConnection( TEST_DBO );
+        Connection  janetConnection = openUserConnection( JANET );
+
+        goodStatement( dboConnection, "create view v2 as select username, hashingscheme, lastmodified from sys.sysusers" );
+        if ( authorizationIsOn() ) { goodStatement( dboConnection, "grant select on v2 to public" ); }
+
+        vetDBO_OKProbes( dboConnection, true );
+        vetDBO_OKProbes( janetConnection, !authorizationIsOn() );
+
+        vetUnauthorizedProbes( dboConnection, !authorizationIsOn(), HIDDEN_COLUMN );
+        vetUnauthorizedProbes( janetConnection, !authorizationIsOn(), ONLY_DBO );
+    }
+    // these statements should always succeed if the dbo is running
+    // them or if authorization is not enabled
+    private void    vetDBO_OKProbes( Connection conn, boolean shouldSucceed )
+        throws Exception
+    {
+        vetUserProbes( conn, shouldSucceed, "select count(*) from sys.sysusers", ONLY_DBO );
+        vetUserProbes( conn, shouldSucceed, "select username, hashingscheme, lastmodified from sys.sysusers", ONLY_DBO );
+        vetUserProbes( conn, shouldSucceed, "select username from sys.sysusers", ONLY_DBO );
+
+        // can't use views to subvert authorization checks
+        vetUserProbes( conn, shouldSucceed, "select count(*) from test_dbo.v2", ONLY_DBO );
+        vetUserProbes( conn, shouldSucceed, "select * from test_dbo.v2", ONLY_DBO );
+        vetUserProbes( conn, shouldSucceed, "select username, hashingscheme, lastmodified from test_dbo.v2", ONLY_DBO );
+        vetUserProbes( conn, shouldSucceed, "select username from test_dbo.v2", ONLY_DBO );
+    }
+    // these statements should always fail if authorization is enabled
+    private void    vetUnauthorizedProbes( Connection conn, boolean shouldSucceed, String expectedSQLState )
+        throws Exception
+    {
+        vetUserProbes( conn, shouldSucceed, "select * from sys.sysusers", expectedSQLState );
+        vetUserProbes( conn, shouldSucceed, "select * from sys.sysusers where username='foo'", expectedSQLState );
+        vetUserProbes( conn, shouldSucceed, "select password from sys.sysusers", expectedSQLState );
+        vetUserProbes( conn, shouldSucceed, "select username, password from sys.sysusers", expectedSQLState );
+        vetUserProbes( conn, shouldSucceed, "select username from sys.sysusers where password = 'foo'", expectedSQLState );
+    }
+    private void    vetUserProbes
+        ( Connection conn, boolean shouldSucceed, String query, String expectedSQLState )
+        throws Exception
+    {
+        if ( shouldSucceed ) { goodStatement( conn, query ); }
+        else
+        {
+            expectCompilationError( conn, expectedSQLState, query );
         }
     }
 

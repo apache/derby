@@ -79,7 +79,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 
 import org.apache.derby.iapi.types.DataValueDescriptor;
 
-
+import org.apache.derby.impl.sql.catalog.SYSUSERSRowFactory;
 
 /**
  * A FromBaseTable represents a table in the FROM list of a DML statement,
@@ -195,6 +195,9 @@ public class FromBaseTable extends FromTable
 	private JBitSet dependencyMap;
 
 	private boolean getUpdateLocks;
+
+    // true if we are running with sql authorization and this is the SYSUSERS table
+    private boolean authorizeSYSUSERS;
 
 	/**
 	 * Initializer for a table in a FROM list. Parameters are as follows:
@@ -2382,6 +2385,23 @@ public class FromBaseTable extends FromTable
 				tableNumber = compilerContext.getNextTableNumber();
 		}
 
+        //
+        // Only the DBO can select from SYS.SYSUSERS.
+        //
+        authorizeSYSUSERS =
+            dataDictionary.usesSqlAuthorization() &&
+            tableDescriptor.getUUID().toString().equals( SYSUSERSRowFactory.SYSUSERS_UUID );
+        if ( authorizeSYSUSERS )
+        {
+            String  databaseOwner = dataDictionary.getAuthorizationDatabaseOwner();
+            String  currentUser = getLanguageConnectionContext().getStatementContext().getSQLSessionContext().getCurrentUser();
+
+            if ( !databaseOwner.equals( currentUser ) )
+            {
+                throw StandardException.newException( SQLState.DBO_ONLY );
+            }
+        }
+
 		return this;
 	}
 
@@ -2709,7 +2729,7 @@ public class FromBaseTable extends FromTable
 		referencedTableMap = new JBitSet(numTables);
 		referencedTableMap.set(tableNumber);
 
-		return genProjectRestrict(numTables);
+        return genProjectRestrict(numTables);
 	}
 
 	/** 
@@ -3181,6 +3201,30 @@ public class FromBaseTable extends FromTable
 								MethodBuilder mb)
 							throws StandardException
 	{
+        //
+        // By now the map of referenced columns has been filled in.
+        // We check to see if SYSUSERS.PASSWORD is referenced.
+        // Even the DBO is not allowed to SELECT that column.
+        // This is to prevent us from instantiating the password as a
+        // String. The char[] inside the String can hang around, unzeroed
+        // and be read by a memory-sniffer. See DERBY-866.
+        //
+        if ( authorizeSYSUSERS )
+        {
+            int passwordColNum = SYSUSERSRowFactory.PASSWORD_COL_NUM;
+            
+            if (
+                ( referencedCols == null ) || // select * from sys.sysusers results in a null referecedCols
+                (
+                 (referencedCols.getLength() >= passwordColNum ) && referencedCols.isSet( passwordColNum - 1 )
+                )
+               )
+            {
+                throw StandardException.newException
+                    ( SQLState.HIDDEN_COLUMN, SYSUSERSRowFactory.TABLE_NAME, SYSUSERSRowFactory.PASSWORD_COL_NAME );
+            }
+        }
+        
 		generateResultSet( acb, mb );
 
 		/*

@@ -294,7 +294,7 @@ public final class	DataDictionaryImpl
 	private SchemaDescriptor systemUtilSchemaDesc;
     
 	// This array of non-core table names *MUST* be in the same order
-	// as the non-core table numbers, above.
+	// as the non-core table numbers in DataDictionary.
 	private static final String[] nonCoreNames = {
 									"SYSCONSTRAINTS",
 									"SYSKEYS",
@@ -313,7 +313,8 @@ public final class	DataDictionaryImpl
                                     "SYSROUTINEPERMS",
 									"SYSROLES",
                                     "SYSSEQUENCES",
-                                    "SYSPERMS"
+                                    "SYSPERMS",
+                                    "SYSUSERS"
                                     };
 
 	private	static final int		NUM_NONCORE = nonCoreNames.length;
@@ -9628,6 +9629,12 @@ public final class	DataDictionaryImpl
 
               case SYSPERMS_CATALOG_NUM:
 				retval = new TabInfoImpl(new SYSPERMSRowFactory(
+											 luuidFactory, exFactory, dvf));
+
+				break;            
+
+              case SYSUSERS_CATALOG_NUM:
+				retval = new TabInfoImpl(new SYSUSERSRowFactory(
 											 luuidFactory, exFactory, dvf));
 
 				break;            

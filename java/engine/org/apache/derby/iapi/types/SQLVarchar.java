@@ -126,6 +126,16 @@ public class SQLVarchar
 		super(val);
 	}
 
+    /**
+     * <p>
+     * This is a special constructor used when we need to represent a password
+     * as a VARCHAR (see DERBY-866). If you need a general-purpose constructor
+     * for char[] values and you want to re-use this constructor, make sure to
+     * read the comment on the SQLChar( char[] ) constructor.
+     * </p>
+     */
+    public SQLVarchar( char[] val ) { super( val ); }
+
 	/**
 	 * Normalization method - this method may be called when putting
 	 * a value into a SQLVarchar, for example, when inserting into a SQLVarchar

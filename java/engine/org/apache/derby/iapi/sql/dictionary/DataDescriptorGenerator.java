@@ -437,6 +437,17 @@ public class DataDescriptorGenerator
 		if (id == null) id = getUUIDFactory().createUUID();
 		return new FileInfoDescriptor(dataDictionary, id,sd,SQLName,generationId);
 	}
+
+	public UserDescriptor newUserDescriptor
+        (
+         String userName,
+         String hashingScheme,
+         char[] password,
+         Timestamp lastModified
+         )
+	{
+		return new UserDescriptor( dataDictionary, userName, hashingScheme, password, lastModified );
+	}
 	 	
     public TablePermsDescriptor newTablePermsDescriptor( TableDescriptor td,
                                                          String selectPerm,

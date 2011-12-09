@@ -72,6 +72,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.RuleBasedCollator;
 import java.text.CollationKey;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Calendar;
 
@@ -214,6 +215,49 @@ public class SQLChar
         setValue( val );
     }
 
+    /**
+     * <p>
+     * This is a special constructor used when we need to represent a password
+     * as a VARCHAR (see DERBY-866). If you need a general-purpose constructor
+     * for char[] values and you want to re-use this constructor, make sure to
+     * keep track of the following:
+     * </p>
+     *
+     * <ul>
+     * <li>A password should never be turned into a String. This is because Java
+     * garbage collection makes it easy to sniff memory for String passwords. For
+     * more information, see
+     * <a href="http://securesoftware.blogspot.com/2009/01/java-security-why-not-to-use-string.html">this blog</a>.</li>
+     * <li>It must be possible to 0 out the char[] array wrapped inside this SQLChar. This
+     * reduces the vulnerability that someone could sniff the char[] password after Derby
+     * has processed it.</li>
+     * </ul>
+     */
+    public SQLChar( char[] val )
+    {
+        if ( val == null )
+        {
+            value = null;
+        }
+        else
+        {
+            int length = val.length;
+            char[]  localCopy = new char[ length ];
+            System.arraycopy( val, 0, localCopy, 0, length );
+            
+            copyState
+                (
+                 null,
+                 localCopy,
+                 length,
+                 null,
+                 null,
+                 null,
+                 null
+                 );
+        }
+    }
+
     /**************************************************************************
      * Private/Protected methods of This class:
      **************************************************************************
@@ -235,6 +279,41 @@ public class SQLChar
      * Public Methods of This class:
      **************************************************************************
      */
+
+    /**
+     * <p>
+     * This is a special accessor used when we wrap passwords in VARCHARs.
+     * This accessor copies the wrapped char[] and then fills it with 0s so that
+     * the password can't be memory-sniffed. For more information, see the comment
+     * on the SQLChar( char[] ) constructor.
+     * </p>
+     */
+    public  char[]  getRawDataAndZeroIt()
+    {
+        if ( rawData == null ) { return null; }
+
+        int length = rawData.length;
+        char[] retval = new char[ length ];
+        System.arraycopy( rawData, 0, retval, 0, length );
+
+        zeroRawData();
+
+        return retval;
+    }
+
+    /**
+     * <p>
+     * Zero out the wrapped char[] so that it can't be memory-sniffed.
+     * This helps us protect passwords. See
+     * the comment on the SQLChar( char[] ) constructor.
+     * </p>
+     */
+    public  void  zeroRawData()
+    {
+        if ( rawData == null ) { return; }
+
+        Arrays.fill( rawData, (char) 0 );
+    }
 
     /**************************************************************************
      * Public Methods of DataValueDescriptor interface:
@@ -2978,15 +3057,37 @@ readingLoop:
 
     } // end of estimateMemoryUsage
 
-    protected void copyState(SQLChar other) {
-
-        this.value = other.value;
-        this.rawData = other.rawData;
-        this.rawLength = other.rawLength;
-        this.cKey = other.cKey;
-        this.stream = other.stream;
-        this._clobValue = other._clobValue;
-        this.localeFinder = other.localeFinder;
+    protected void copyState(SQLChar other)
+    {
+        copyState
+            (
+             other.value,
+             other.rawData,
+             other.rawLength,
+             other.cKey,
+             other.stream,
+             other._clobValue,
+             other.localeFinder
+             );
+    }
+    private void    copyState
+        (
+         String otherValue,
+         char[] otherRawData,
+         int otherRawLength,
+         CollationKey otherCKey,
+         InputStream    otherStream,
+         Clob otherClobValue,
+         LocaleFinder otherLocaleFinder
+         )
+    {
+        value = otherValue;
+        rawData = otherRawData;
+        rawLength = otherRawLength;
+        cKey = otherCKey;
+        stream = otherStream;
+        _clobValue = otherClobValue;
+        localeFinder = otherLocaleFinder;
     }
 
     /**

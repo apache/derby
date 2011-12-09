@@ -838,30 +838,31 @@ public final class AlterTableTest extends BaseJDBCTestCase {
                 "select tablename, " +
                 "SYSCS_UTIL.SYSCS_CHECK_TABLE('SYS', tablename) from " +
                 "sys.systables where tabletype = 'S' and tablename " +
-                "!= 'SYSDUMMY1'");
+                "!= 'SYSDUMMY1' order by tablename");
 
         expRS = new String[][]{
-                    {"SYSCONGLOMERATES", "1"},
-                    {"SYSTABLES", "1"},
-                    {"SYSCOLUMNS", "1"},
-                    {"SYSSCHEMAS", "1"},
-                    {"SYSCONSTRAINTS", "1"},
-                    {"SYSKEYS", "1"},
-                    {"SYSDEPENDS", "1"},
                     {"SYSALIASES", "1"},
-                    {"SYSVIEWS", "1"},
                     {"SYSCHECKS", "1"},
-                    {"SYSFOREIGNKEYS", "1"},
-                    {"SYSSTATEMENTS", "1"},
+                    {"SYSCOLPERMS", "1"},
+                    {"SYSCOLUMNS", "1"},
+                    {"SYSCONGLOMERATES", "1"},
+                    {"SYSCONSTRAINTS", "1"},
+                    {"SYSDEPENDS", "1"},
                     {"SYSFILES", "1"},
-                    {"SYSTRIGGERS", "1"},
+                    {"SYSFOREIGNKEYS", "1"},
+                    {"SYSKEYS", "1"},
+                    {"SYSPERMS", "1"},
+                    {"SYSROLES", "1"},
+                    {"SYSROUTINEPERMS", "1"},
+                    {"SYSSCHEMAS", "1"},
+                    {"SYSSEQUENCES", "1"},
+                    {"SYSSTATEMENTS", "1"},
                     {"SYSSTATISTICS", "1"},
                     {"SYSTABLEPERMS", "1"},
-                    {"SYSCOLPERMS", "1"},
-                    {"SYSROUTINEPERMS", "1"},
-                    {"SYSROLES", "1"},
-                    {"SYSSEQUENCES", "1"},
-                    {"SYSPERMS", "1"}
+                    {"SYSTABLES", "1"},
+                    {"SYSTRIGGERS", "1"},
+                    {"SYSUSERS", "1"},
+                    {"SYSVIEWS", "1"},
                 };
 
         JDBC.assertFullResultSet(rs, expRS, true);

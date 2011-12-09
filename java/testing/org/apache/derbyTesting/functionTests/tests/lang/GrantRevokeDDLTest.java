@@ -7777,42 +7777,43 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         // ok
         
         rs = st_user2.executeQuery(
-            "select tablename from user1.sv1");
+            "select tablename from user1.sv1 order by tablename");
         
         expColNames = new String [] {"TABLENAME"};
         JDBC.assertColumnNames(rs, expColNames);
         
         expRS = new String [][]
         {
-            {"SYSCONGLOMERATES"},
-            {"SYSTABLES"},
-            {"SYSCOLUMNS"},
-            {"SYSSCHEMAS"},
-            {"SYSCONSTRAINTS"},
-            {"SYSKEYS"},
-            {"SYSDEPENDS"},
+            {"SV1"},
             {"SYSALIASES"},
-            {"SYSVIEWS"},
             {"SYSCHECKS"},
-            {"SYSFOREIGNKEYS"},
-            {"SYSSTATEMENTS"},
-            {"SYSFILES"},
-            {"SYSTRIGGERS"},
-            {"SYSSTATISTICS"},
-            {"SYSDUMMY1"},
-            {"SYSTABLEPERMS"},
             {"SYSCOLPERMS"},
-            {"SYSROUTINEPERMS"},
-            {"SYSROLES"},
-            {"SYSSEQUENCES"},
+            {"SYSCOLUMNS"},
+            {"SYSCONGLOMERATES"},
+            {"SYSCONSTRAINTS"},
+            {"SYSDEPENDS"},
+            {"SYSDUMMY1"},
+            {"SYSFILES"},
+            {"SYSFOREIGNKEYS"},
+            {"SYSKEYS"},
             {"SYSPERMS"},
+            {"SYSROLES"},
+            {"SYSROUTINEPERMS"},
+            {"SYSSCHEMAS"},
+            {"SYSSEQUENCES"},
+            {"SYSSTATEMENTS"},
+            {"SYSSTATISTICS"},
+            {"SYSTABLEPERMS"},
+            {"SYSTABLES"},
+            {"SYSTRIGGERS"},
+            {"SYSUSERS"},
+            {"SYSVIEWS"},
             {"T1"},
             {"T2"},
             {"T2"},
             {"T3"},
             {"T4"},
             {"T5"},
-            {"SV1"}
         };
         
         JDBC.assertFullResultSet(rs, expRS, true);

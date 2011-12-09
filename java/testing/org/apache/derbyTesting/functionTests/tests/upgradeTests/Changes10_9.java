@@ -156,4 +156,45 @@ public class Changes10_9 extends UpgradeChange
         assertEquals( expectedRowCount, actualRowCount );
     }
 
+    /**
+     * Make sure that the catalogs and procedures for NATIVE authentication
+     * only appear after hard-upgrade.
+     */
+    public  void    testNativeAuthentication()  throws Exception
+    {
+        Statement s = createStatement();
+
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+            vetSYSUSERS( s, false );
+            break;
+            
+        case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
+            vetSYSUSERS( s, false );
+            break;
+            
+        case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old version after soft-upgrade
+            vetSYSUSERS( s, false );
+            break;
+
+        case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
+            vetSYSUSERS( s, true );
+            break;
+        }
+        
+        s.close();
+    }
+    private void    vetSYSUSERS( Statement s, boolean shouldExist ) throws Exception
+    {
+        ResultSet   rs = s.executeQuery( "select count(*) from sys.systables where tablename = 'SYSUSERS'" );
+        rs.next();
+
+        int expectedValue = shouldExist ? 1 : 0;
+
+        assertEquals( expectedValue, rs.getInt( 1 ) );
+
+        rs.close();
+    }
+    
 }
