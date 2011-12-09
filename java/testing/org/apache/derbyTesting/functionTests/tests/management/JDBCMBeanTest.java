@@ -111,11 +111,13 @@ public class JDBCMBeanTest extends MBeanTest {
         println("MBean driverLevel  = " + driverLevelString);
 
         assertEquals(
-            "Unexpected driver level string: " + driverLevelString,
+            "Unexpected driver level string: " + driverLevelString +
+            " JDBCVersion: " + JDBCVersion,
             -1, driverLevelString.indexOf('?'));
         assertTrue(
-            "Unexpected driver level string: " + driverLevelString,
-             driverLevelString.matches("^Java SE .*JDBC .*" + JDBCVersion));
+            "Unexpected driver level string: " + driverLevelString +
+            " JDBCVersion: " + JDBCVersion,
+             driverLevelString.matches("^J.*SE.* - JDBC .*" + JDBCVersion));
     }
     
     /**
