@@ -23,11 +23,14 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 import java.io.File;
 import java.sql.SQLException;
 
+import javax.sql.DataSource;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.SecurityManagerSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.JDBC;
@@ -147,6 +150,31 @@ public class HalfCreatedDatabaseTest extends BaseJDBCTestCase
 
         // move service.properties back so that tearDown() won't explode
         renamedProperties.renameTo( serviceProperties );
+    }
+    
+    /**
+     * Verify that a user data dir (in this case empty) throws the old message
+     * 
+     */
+    public void test_5526()  throws SQLException {
+        String mydatadirStr = BaseTestCase.getSystemProperty("derby.system.home") +
+                File.separator + "mydatadir";
+        File mydatadir = new File(mydatadirStr);
+        assertTrue(mydatadir.mkdir());
+        DataSource ds = JDBCDataSource.getDataSource(mydatadirStr);
+        JDBCDataSource.setBeanProperty(ds, "createDatabase", "create");
+        try {
+            ds.getConnection();
+            fail("Should not be able to create database on existing directory " + mydatadirStr);
+        } catch (SQLException se) {
+            // should be nested exception XJ041 -> XBM0J (Directory exists)
+            assertSQLState("XJ041",se);
+            se = se.getNextException();
+            assertSQLState("XBM0J",se);
+        } finally {
+            BaseTestCase.removeDirectory(mydatadir);
+        }
+        
     }
     
 }
