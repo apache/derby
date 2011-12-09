@@ -712,8 +712,13 @@ final class StorageFactoryService implements PersistentService
 
         if ( !service_properties.exists() )
         {
+            // DERBY-5526 Try to roughly determine if this was a partially created database by 
+            // seeing if the seg0 directory exists.
+            StorageFile seg0 = storageFactory.newStorageFile("seg0");
+            if (seg0.exists()) {
             throw StandardException.newException
                 ( SQLState.MISSING_SERVICE_PROPERTIES, serviceName, PersistentService.PROPERTIES_NAME );
+            }
         }
     }
 
