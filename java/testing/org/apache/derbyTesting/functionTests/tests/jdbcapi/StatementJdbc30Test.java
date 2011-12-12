@@ -301,6 +301,11 @@ public class StatementJdbc30Test extends BaseJDBCTestCase {
      * Section objects until it is closed.
      */
     public void xtestMaxOpenStatementsWithQueryTimeout() throws SQLException {
+        // Disable auto-commit for this test case. Otherwise, closing all the
+        // statements in tearDown() will take forever, since every close() will
+        // force a commit. DERBY-5524.
+        setAutoCommit(false);
+
         Statement[] stmts = new Statement[16500];
         int i = 0;
         try {
