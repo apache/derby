@@ -490,6 +490,8 @@ public class XATransactionTest extends BaseJDBCTestCase {
                           + XAeForget.errorCode  + "  calling forget on a committed transaction",
                         XAException.XAER_NOTA, XAeForget.errorCode);
         } finally {
+            s.executeUpdate("DROP TABLE Derby1016");
+            conn.commit();
             s.close();
             conn.close(); 
             xaconn.close();
