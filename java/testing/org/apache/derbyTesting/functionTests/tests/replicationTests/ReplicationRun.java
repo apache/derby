@@ -26,6 +26,7 @@ import org.apache.derby.drda.NetworkServerControl;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Properties;
 
 import java.sql.*;
@@ -162,6 +163,13 @@ public class ReplicationRun extends BaseTestCase
     private volatile Exception startSlaveException = null;
 
     /**
+     * List of threads that have been started by the tests and not explicitly
+     * waited for. Wait for these to complete in {@link #tearDown()} so that
+     * they don't interfere with subsequent test cases.
+     */
+    private ArrayList helperThreads = new ArrayList();
+
+    /**
      * Creates a new instance of ReplicationRun
      * @param testcaseName Identifying the test.
      */
@@ -192,6 +200,13 @@ public class ReplicationRun extends BaseTestCase
         
         stopServer(jvmVersion, derbyVersion,
                 masterServerHost, masterServerPort);
+
+        // Wait for all threads to complete.
+        for (Iterator it = helperThreads.iterator(); it.hasNext(); ) {
+            Thread t = (Thread) it.next();
+            t.join();
+        }
+        helperThreads = null;
 
         super.tearDown();
     }
@@ -1201,6 +1216,7 @@ public class ReplicationRun extends BaseTestCase
             }
             );
             connThread.start();
+            registerThread(connThread);
             util.DEBUG("startSlave_direct exit.");
     }
     
@@ -1715,6 +1731,7 @@ public class ReplicationRun extends BaseTestCase
             );
             util.DEBUG(ID+"************** Do .start(). ");
             serverThread.start();
+            registerThread(serverThread);
             // serverThread.join();
             // DEBUG(ID+"************** Done .join().");
             
@@ -2123,6 +2140,7 @@ public class ReplicationRun extends BaseTestCase
             long iterations = startTimeout / PINGSERVER_SLEEP_TIME_MILLIS;		
             util.DEBUG(debugId+"************** Do .start().");
             serverThread.start();
+            registerThread(serverThread);
             pingServer(serverHost, serverPort, (int) iterations); // Wait for the server to come up in a reasonable time....
 
         }
@@ -2397,6 +2415,16 @@ public class ReplicationRun extends BaseTestCase
         }
         util.DEBUG(id+"----     ");
         
+    }
+
+    /**
+     * Register that a thread has been started so that we can wait for it to
+     * complete in {@link #tearDown()}.
+     *
+     * @param thread a thread that has been started
+     */
+    private void registerThread(Thread thread) {
+        helperThreads.add(thread);
     }
 
     private void pingServer( String hostName, int port, int iterations)
