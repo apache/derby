@@ -69,18 +69,18 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
     public void testBoundaries() throws SQLException, UnsupportedEncodingException {
         if (usingEmbedded()) return; /* This test is only for Client/Server */
 
+        // ensuring that we get a connection.
+        getConnection();
+        
         /*
          * Sun's 1.4.2 JVM and IBM's JVM (any version) fail on Windows for this test
          * Thus, we skip it.
          * 
          * Read JIRA's DERBY-4836 for more information.
          */
-        if (getSystemProperty("os.name").startsWith("Windows")) {
-            /* Skip with IBM */
-            if (isIBMJVM()) return;
-            
-            /* Skip with Sun 1.4.2 */
-            if (isSunJVM() && getSystemProperty("java.version").startsWith("1.4.2")) return;
+        if (getSystemProperty("os.name").startsWith("Windows")) {            
+            /* Skip with 1.4.2 jvms */
+            if (getSystemProperty("java.version").startsWith("1.4.2")) return;
         }
         
         /*
