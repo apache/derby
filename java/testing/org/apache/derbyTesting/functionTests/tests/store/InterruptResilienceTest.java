@@ -95,14 +95,6 @@ public class InterruptResilienceTest extends BaseJDBCTestCase
         String testName = "InterruptResilienceTest";
 
         if (isIBMJVM()) {
-            // DERBY-4463 test fails on IBM VM 1.5.
-            // It's fixed in IBM VM 1.6 SR9 and above.
-            // Remove this condition when that issue is solved in IBM VM 1.5 SR13.
-            if (getSystemProperty("java.version").startsWith("1.5.0"))
-            {
-                println("InterruptResilienceTest skipped for this VM, cf. DERBY-4463");
-                return new TestSuite(testName);
-            }
             if (getSystemProperty("java.version").startsWith("1.4.2"))
             {
                 println("InterruptResilienceTest skipped for this VM, cf. DERBY-5074/5109");

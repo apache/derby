@@ -54,17 +54,6 @@ public class LockInterruptTest extends BaseJDBCTestCase {
 
     public static Test suite() {
         
-        if (isIBMJVM()) {
-            // DERBY-4463 test fails on IBM VM 1.5.
-            // It's fixed in IBM VM 1.6 SR9 and above.
-            // Remove this condition when that issue is solved in IBM VM 1.5 SR13.
-            if (getSystemProperty("java.version").startsWith("1.5.0"))
-            {
-                println("Test skipped for this VM, cf. DERBY-4463");
-                return new TestSuite("empty LockInterruptTest");
-            }
-        }
-        
         // Only run in embedded mode since we cannot interrupt the engine
         // thread from the network client.
         Test test = TestConfiguration.embeddedSuite(LockInterruptTest.class);
