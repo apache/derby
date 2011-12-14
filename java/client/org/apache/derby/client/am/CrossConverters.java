@@ -973,10 +973,6 @@ final class CrossConverters {
         return source != 0;
     }
 
-    final boolean getBooleanFromBigDecimal(java.math.BigDecimal source) throws SqlException {
-        return source.intValue() != 0;
-    }
-
     /**
      * <p>
      * Get a boolean value from a CHAR column. In order to match the embedded
@@ -1046,14 +1042,6 @@ final class CrossConverters {
         return (byte) source;
     }
 
-    final byte getByteFromBigDecimal(java.math.BigDecimal source) throws SqlException {
-        if (Configuration.rangeCheckCrossConverters &&
-                (source.compareTo(bdMaxByteValue__) == 1 || source.compareTo(bdMinByteValue__) == -1)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
-        }
-        return (byte) source.intValue();
-    }
-
     final byte getByteFromBoolean(boolean source) throws SqlException {
         return source ? (byte) 1 : (byte) 0;
     }
@@ -1106,14 +1094,6 @@ final class CrossConverters {
         return (short) source;
     }
 
-    final short getShortFromBigDecimal(java.math.BigDecimal source) throws SqlException {
-        if (Configuration.rangeCheckCrossConverters &&
-                (source.compareTo(bdMaxShortValue__) == 1 || source.compareTo(bdMinShortValue__) == -1)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
-        }
-        return (short) source.intValue();
-    }
-
     final short getShortFromBoolean(boolean source) throws SqlException {
         return source ? (short) 1 : (short) 0;
     }
@@ -1158,14 +1138,6 @@ final class CrossConverters {
         return (int) source;
     }
 
-    final int getIntFromBigDecimal(java.math.BigDecimal source) throws SqlException {
-        if (Configuration.rangeCheckCrossConverters &&
-                (source.compareTo(bdMaxIntValue__) == 1 || source.compareTo(bdMinIntValue__) == -1)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
-        }
-        return source.intValue();
-    }
-
     final int getIntFromBoolean(boolean source) throws SqlException {
         return source ? (int) 1 : (int) 0;
     }
@@ -1200,14 +1172,6 @@ final class CrossConverters {
         return (long) source;
     }
 
-    final long getLongFromBigDecimal(java.math.BigDecimal source) throws SqlException {
-        if (Configuration.rangeCheckCrossConverters &&
-                (source.compareTo(bdMaxLongValue__) == 1 || source.compareTo(bdMinLongValue__) == -1)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
-        }
-        return source.longValue();
-    }
-
     final long getLongFromBoolean(boolean source) throws SqlException {
         return source ? (long) 1 : (long) 0;
     }
@@ -1233,14 +1197,6 @@ final class CrossConverters {
         return (float) source;
     }
 
-    final float getFloatFromBigDecimal(java.math.BigDecimal source) throws SqlException {
-        if (Configuration.rangeCheckCrossConverters &&
-                (source.compareTo(bdMaxFloatValue__) == 1 || source.compareTo(bdMinFloatValue__) == -1)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
-        }
-        return source.floatValue();
-    }
-
     final float getFloatFromBoolean(boolean source) throws SqlException {
         return source ? (float) 1 : (float) 0;
     }
@@ -1256,14 +1212,6 @@ final class CrossConverters {
     }
 
     //---------------------------- getDouble*() methods --------------------------
-
-    final double getDoubleFromBigDecimal(java.math.BigDecimal source) throws SqlException {
-        if (Configuration.rangeCheckCrossConverters &&
-                (source.compareTo(bdMaxDoubleValue__) == 1 || source.compareTo(bdMinDoubleValue__) == -1)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
-        }
-        return source.doubleValue();
-    }
 
     final double getDoubleFromBoolean(boolean source) throws SqlException {
         return source ? (double) 1 : (double) 0;
