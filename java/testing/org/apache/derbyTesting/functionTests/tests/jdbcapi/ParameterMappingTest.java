@@ -1102,6 +1102,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
      */
     protected void tearDown() throws Exception {
         Connection conn = getConnection();
+        rollback();
         Statement scb = conn.createStatement();
         scb.execute("DROP TABLE PM.LOB_GET");
         scb.close();
@@ -4485,6 +4486,548 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
         assertCompileError( sqlState, query );
     }
+
+    /**
+     * Tests that SQLStates are correct across drivers on rs.getXXX
+     * over/underflow.
+     * @exception SQLException database access error. Causes test to
+     *                         fail with an error.
+     */
+    public void testDerby5533GetXXX() throws SQLException
+    {
+        String createTableString = "CREATE TABLE MultiTypeTable (" +
+            "F01 SMALLINT," +
+            "F02 INTEGER," +
+            "F03 BIGINT," +
+            "F04 REAL," +
+            "F05 FLOAT," +
+            "F06 DOUBLE," +
+            "F07 DECIMAL(31)," +
+            "F08 NUMERIC," +
+            "F09 CHAR(100)," +
+            "F10 VARCHAR(256)," +
+            "F11 BOOLEAN)";
+        Statement stmt = createStatement();
+        stmt.executeUpdate(createTableString);
+
+        PreparedStatement ps = prepareStatement
+            ("insert into MultiTypeTable values(?,?,?,?,?,?,?,?,?,?,?)");
+
+        /* First check upper bounds */
+
+        ps.setShort(1, (short)((short)Byte.MAX_VALUE + 1));
+        ps.setInt(2, (int)Short.MAX_VALUE + 1);
+        ps.setLong(3, (long)Integer.MAX_VALUE + 1);
+        ps.setFloat(4, (float)Long.MAX_VALUE * 10);
+        ps.setFloat(5, (float)Long.MAX_VALUE * 10);
+        ps.setDouble(6, (double)Float.MAX_VALUE * 10);
+        // Largest integer representable in DECIMAL is Derby has 31 digits:
+        ps.setBigDecimal(7, new BigDecimal("9999999999999999999999999999999"));
+        ps.setInt(8, _X);
+        ps.setString(9, " ");
+        ps.setString(10, " ");
+        ps.setBoolean(11, true);
+        ps.executeUpdate();
+
+        ResultSet rs = createStatement().
+                executeQuery("select * from MultiTypeTable");
+        rs.next();
+
+        // JDBC type -> byte
+        assertGetState(rs, "F01", XXX_BYTE, "22003");
+        assertGetState(rs, "F02", XXX_BYTE, "22003");
+        assertGetState(rs, "F03", XXX_BYTE, "22003");
+        assertGetState(rs, "F04", XXX_BYTE, "22003");
+        assertGetState(rs, "F05", XXX_BYTE, "22003");
+        assertGetState(rs, "F06", XXX_BYTE, "22003");
+        assertGetState(rs, "F07", XXX_BYTE, "22003");
+
+        // JDBC type -> short
+        assertGetState(rs, "F02", XXX_SHORT, "22003");
+        assertGetState(rs, "F03", XXX_SHORT, "22003");
+        assertGetState(rs, "F04", XXX_SHORT, "22003");
+        assertGetState(rs, "F05", XXX_SHORT, "22003");
+        assertGetState(rs, "F06", XXX_SHORT, "22003");
+        assertGetState(rs, "F07", XXX_SHORT, "22003");
+
+        // JDBC type -> int
+        assertGetState(rs, "F03", XXX_INT, "22003");
+        assertGetState(rs, "F04", XXX_INT, "22003");
+        assertGetState(rs, "F05", XXX_INT, "22003");
+        assertGetState(rs, "F06", XXX_INT, "22003");
+        assertGetState(rs, "F07", XXX_INT, "22003");
+
+        // JDBC type -> long
+        assertGetState(rs, "F04", XXX_LONG, "22003");
+        assertGetState(rs, "F05", XXX_LONG, "22003");
+        assertGetState(rs, "F06", XXX_LONG, "22003");
+
+        // Uncomment when DERBY-5536 is fixed
+        // assertGetState(rs, "F07", XXX_LONG, "22003");
+
+
+        // JDBC type -> float
+        rs.close();
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_UPDATABLE);
+        rs = s.executeQuery("SELECT * FROM MultiTypeTable");
+        rs.next();
+        rs.updateDouble("F06", Float.MAX_VALUE * 10.0);
+        rs.updateRow();
+
+        rs = createStatement().
+                executeQuery("select * from MultiTypeTable");
+        rs.next();
+
+        assertGetState(rs, "F06", XXX_FLOAT, "22003");
+
+
+        /* Now check lower bounds */
+        PreparedStatement psDelete = prepareStatement(
+                "delete from MultiTypeTable");
+        psDelete.executeUpdate();
+
+        ps.setShort(1, (short)((short)Byte.MIN_VALUE - 1));
+        ps.setInt(2, (int)Short.MIN_VALUE - 1);
+        ps.setLong(3, (long)Integer.MIN_VALUE - 1);
+        ps.setFloat(4, -(float)Long.MAX_VALUE * 10);
+        ps.setFloat(5, -(float)Long.MAX_VALUE * 10);
+        ps.setDouble(6, -(double)Float.MAX_VALUE * 10);
+        // Largest integer representable in DECIMAL is Derby has 31 digits:
+        ps.setBigDecimal(7, new BigDecimal("-999999999999999999999999999999"));
+        ps.setInt(8, _X);
+        ps.setString(9, " ");
+        ps.setString(10, " ");
+        ps.setBoolean(11, false);
+        ps.executeUpdate();
+
+        rs = createStatement().
+                executeQuery("select * from MultiTypeTable");
+        rs.next();
+        // JDBC type -> byte
+        assertGetState(rs, "F01", XXX_BYTE, "22003");
+        assertGetState(rs, "F02", XXX_BYTE, "22003");
+        assertGetState(rs, "F03", XXX_BYTE, "22003");
+        assertGetState(rs, "F04", XXX_BYTE, "22003");
+        assertGetState(rs, "F05", XXX_BYTE, "22003");
+        assertGetState(rs, "F06", XXX_BYTE, "22003");
+        assertGetState(rs, "F07", XXX_BYTE, "22003");
+
+        // JDBC type -> short
+        assertGetState(rs, "F02", XXX_SHORT, "22003");
+        assertGetState(rs, "F03", XXX_SHORT, "22003");
+        assertGetState(rs, "F04", XXX_SHORT, "22003");
+        assertGetState(rs, "F05", XXX_SHORT, "22003");
+        assertGetState(rs, "F06", XXX_SHORT, "22003");
+        assertGetState(rs, "F07", XXX_SHORT, "22003");
+
+        // JDBC type -> int
+        assertGetState(rs, "F03", XXX_INT, "22003");
+        assertGetState(rs, "F04", XXX_INT, "22003");
+        assertGetState(rs, "F05", XXX_INT, "22003");
+        assertGetState(rs, "F06", XXX_INT, "22003");
+        assertGetState(rs, "F07", XXX_INT, "22003");
+
+        // JDBC type -> long
+        assertGetState(rs, "F04", XXX_LONG, "22003");
+        assertGetState(rs, "F05", XXX_LONG, "22003");
+        assertGetState(rs, "F06", XXX_LONG, "22003");
+
+        // JDBC type -> float
+        rs.close();
+        s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_UPDATABLE);
+        rs = s.executeQuery("SELECT * FROM MultiTypeTable");
+        rs.next();
+        rs.updateDouble("F06", -Float.MAX_VALUE * 10.0);
+        rs.updateRow();
+
+        rs = createStatement().
+                executeQuery("select * from MultiTypeTable");
+        rs.next();
+
+        assertGetState(rs, "F06", XXX_FLOAT, "22003");
+    }
+
+
+    /**
+     * Tests that SQLStates are correct across drivers on updateXXX
+     * over/underflow.
+     * @exception SQLException database access error. Causes test to
+     *                         fail with an error.
+     */
+    public void testDerby5533UpdateXXX() throws SQLException
+    {
+        String createTableString = "CREATE TABLE MultiTypeTable (" +
+            "F01 SMALLINT," +
+            "F02 INTEGER," +
+            "F03 BIGINT," +
+            "F04 REAL," +
+            "F05 FLOAT," +
+            "F06 DOUBLE," +
+            "F07 DECIMAL(31)," +
+            "F08 NUMERIC," +
+            "F09 CHAR(100)," +
+            "F10 VARCHAR(256)," +
+            "F11 BOOLEAN)";
+        Statement stmt = createStatement();
+        stmt.executeUpdate(createTableString);
+
+        PreparedStatement ps = prepareStatement
+            ("insert into MultiTypeTable values(?,?,?,?,?,?,?,?,?,?,?)");
+        PreparedStatement psDelete = prepareStatement(
+            "delete from MultiTypeTable");
+
+        /* First check upper bounds */
+
+        ps.setShort(1, (short)1);
+        ps.setInt(2, 1);
+        ps.setLong(3, 1L);
+        ps.setFloat(4, 1.0f);
+        ps.setDouble(5, 1.0);
+        ps.setDouble(6, 1.0);
+        ps.setString(7, "1");
+        ps.setString(8, "1");
+        ps.setString(9, "1");
+        ps.setString(10, "1");
+        ps.setBoolean(11, true);
+
+        ps.executeUpdate();
+
+        Statement s = createStatement(ResultSet.TYPE_FORWARD_ONLY,
+                ResultSet.CONCUR_UPDATABLE);
+        ResultSet rs = s.executeQuery("SELECT * FROM MultiTypeTable");
+        rs.next();
+
+        // SMALLINT
+        assertUpdateState(rs, "F01",
+                          Short.MAX_VALUE + 1, _X, XXX_INT,"22003");
+        assertUpdateState(rs, "F01",
+                          _X, Short.MAX_VALUE + 1, XXX_DOUBLE, "22003");
+        assertUpdateState(rs, "F01",
+                          Short.MAX_VALUE + 1, _X, XXX_LONG, "22003");
+        assertUpdateState(rs, "F01",
+                          _X, Short.MAX_VALUE + 1, XXX_FLOAT, "22003");
+        assertUpdateState(rs, "F01",
+                          bdMaxShortValue.add(BigDecimal.ONE), "22003");
+
+        assertUpdateState(rs, "F01",
+                          Short.MIN_VALUE - 1, _X, XXX_INT,"22003");
+        assertUpdateState(rs, "F01",
+                          _X, Short.MIN_VALUE - 1, XXX_DOUBLE, "22003");
+        assertUpdateState(rs, "F01",
+                          Short.MIN_VALUE - 1, _X, XXX_LONG, "22003");
+        assertUpdateState(rs, "F01",
+                          _X, Short.MIN_VALUE - 1, XXX_FLOAT, "22003");
+        assertUpdateState(rs, "F01",
+                          bdMinShortValue.subtract(BigDecimal.ONE), "22003");
+
+
+        // INT
+        assertUpdateState(rs, "F02",
+                          (long)Integer.MAX_VALUE + 1, _X, XXX_LONG, "22003");
+        assertUpdateState(rs, "F02", _X,
+                          (float)Integer.MAX_VALUE * 10, XXX_FLOAT, "22003");
+        assertUpdateState(rs, "F02", _X,
+                          (double)Integer.MAX_VALUE * 10, XXX_DOUBLE, "22003");
+        assertUpdateState(rs, "F02",
+                          bdMaxIntValue.add(BigDecimal.ONE), "22003");
+
+        assertUpdateState(rs, "F02",
+                          (long)Integer.MIN_VALUE - 1, _X, XXX_LONG, "22003");
+        assertUpdateState(rs, "F02",
+                       _X, (float)Integer.MIN_VALUE * 10, XXX_FLOAT, "22003");
+        assertUpdateState(rs, "F02",
+                       _X, (double)Integer.MIN_VALUE * 10, XXX_DOUBLE, "22003");
+        assertUpdateState(rs, "F02",
+                          bdMinIntValue.subtract(BigDecimal.ONE), "22003");
+
+        // BIGINT
+        assertUpdateState(rs, "F03",
+                          _X, (float)Long.MAX_VALUE * 10, XXX_FLOAT, "22003");
+        assertUpdateState(rs, "F03",
+                          _X, (double)Long.MAX_VALUE * 10, XXX_DOUBLE, "22003");
+        assertUpdateState(rs, "F03",
+                          bdMaxLongValue.add(BigDecimal.ONE), "22003");
+
+        assertUpdateState(rs, "F03",
+                          _X, (float)Long.MIN_VALUE * 10, XXX_FLOAT, "22003");
+        assertUpdateState(rs, "F03",
+                          _X, (double)Long.MIN_VALUE * 10, XXX_DOUBLE, "22003");
+        assertUpdateState(rs, "F03",
+                          bdMinLongValue.subtract(BigDecimal.ONE), "22003");
+
+        // REAL overflow checking
+        assertUpdateState(rs, "F04",
+                          _X, (new Float(Float.MAX_VALUE)).doubleValue() * 10,
+                          XXX_DOUBLE, "22003");
+        assertUpdateState(rs, "F04",
+                          _X, Float.NEGATIVE_INFINITY, XXX_FLOAT, "22003");
+        assertUpdateState(rs, "F04",
+                          bdMaxFloatValue.multiply(BigDecimal.TEN), "22003");
+
+        assertUpdateState(rs, "F04",
+                          _X, -(new Float(Float.MAX_VALUE)).doubleValue() * 10,
+                          XXX_DOUBLE, "22003");
+        assertUpdateState(rs, "F04",
+                          _X, Float.NEGATIVE_INFINITY, XXX_FLOAT, "22003");
+        assertUpdateState(rs, "F04",
+                          bdMinFloatValue.multiply(BigDecimal.TEN), "22003");
+
+        // Remove test when DERBY-5534 is fixed
+        if (usingEmbedded()) {
+            assertUpdateState(rs, "F04",
+                              _X, Float.NaN, XXX_FLOAT, "22003");
+            assertUpdateState(rs, "F04",
+                              _X, Double.MIN_VALUE, XXX_DOUBLE, "22003");
+
+            // REAL DB2 limits: remove if DERBY-3398 is implemented
+            assertUpdateState(rs, "F04", bdSmallestPosFloatValue, "22003");
+            assertUpdateState(rs, "F04", bdSmallestNegFloatValue, "22003");
+
+            assertUpdateState(rs, "F04", bdMaxFloatValue, "22003");
+            assertUpdateState(rs, "F04", bdMinFloatValue, "22003");
+        }
+
+        // REAL Underflow checking
+        //
+        // Uncomment when DERBY-5546 is fixed:
+        // assertUpdateState(rs, "F04", bdSmallestPosDoubleValue, "22003");
+        // assertUpdateState(rs, "F04", bdSmallestNegDoubleValue, "22003");
+
+
+        // DOUBLE, FLOAT (SQL FLOAT is really the same as SQL DOUBLE in Derby)
+        final String[] dfCols = new String[]{"F05", "F06"};
+        for (int i = 0; i < 2; i++) {
+            assertUpdateState(rs, dfCols[i], _X,
+                              Float.POSITIVE_INFINITY, XXX_FLOAT, "22003");
+            assertUpdateState(rs, dfCols[i], _X,
+                              Double.POSITIVE_INFINITY, XXX_DOUBLE, "22003");
+            assertUpdateState(rs, dfCols[i],
+                              bdMaxDoubleValue.multiply(BigDecimal.TEN),
+                              "22003");
+
+            // Uncomment when DERBY-5534 is fixed, or remove entirely if
+            // DERBY-3398 is fixed
+            // assertUpdateState(rs, dfCols[i], _X,
+            //                   Double.MAX_VALUE, UPDATE_DOUBLE, "22003");
+
+            assertUpdateState(rs, dfCols[i],
+                              _X, Float.NEGATIVE_INFINITY, XXX_FLOAT, "22003");
+            assertUpdateState(rs, dfCols[i],
+                              _X, Double.NEGATIVE_INFINITY,
+                              XXX_DOUBLE, "22003");
+            assertUpdateState(rs, dfCols[i],
+                              bdMinDoubleValue.multiply(BigDecimal.TEN),
+                              "22003");
+
+            // Uncomment when DERBY-5534 is fixed, or remove entirely if
+            // DERBY-3398 is fixed
+
+            // assertUpdateState(rs, dfCols[i], _X,
+            //                   Double.MIN_VALUE, UPDATE_DOUBLE, "22003");
+
+            // Remove test when DERBY-5534 is fixed
+            if (usingEmbedded()) {
+                assertUpdateState(rs, dfCols[i],
+                                  _X, Double.NaN, XXX_DOUBLE, "22003");
+            }
+
+            // DOUBLE, FLOAT underflow checking
+            //
+            // Uncomment when DERBY-5546 is fixed
+            // assertUpdateState(rs, dfCols[i],
+            //     bdSmallestPosDoubleValue.divide(BigDecimal.TEN), "22003");
+            // assertUpdateState(rs, dfCols[i],
+            //     bdSmallestNegDoubleValue.divide(BigDecimal.TEN), "22003");
+        }
+
+        // Derby BOOLEAN: not range checked: FALSE of 0, else TRUE.
+        // assertUpdateState(rs, "F11", 2, _X, XXX_BYTE, "22003");
+        // assertUpdateState(rs, "F11", 2, _X, XXX_SHORT, "22003");
+        // assertUpdateState(rs, "F11", 2, _X, XXX_INT, "22003");
+        // assertUpdateState(rs, "F11", 2, _X, XXX_LONG, "22003");
+        // assertUpdateState(rs, "F11", _X, 2.0, XXX_FLOAT, "22003");
+        // assertUpdateState(rs, "F11", _X, 2.0, XXX_DOUBLE, "22003");
+        // assertUpdateState(rs, "F11", new BigDecimal(2), "22003");
+    }
+
+    // Short limits
+    //
+    private final static BigDecimal bdMaxShortValue =
+        BigDecimal.valueOf(Short.MAX_VALUE);
+
+    private final static BigDecimal bdMinShortValue =
+        BigDecimal.valueOf(Short.MIN_VALUE);
+
+    // Integer limits
+    //
+    private final static BigDecimal bdMaxIntValue =
+        BigDecimal.valueOf(Integer.MAX_VALUE);
+
+    private final static BigDecimal bdMinIntValue =
+        BigDecimal.valueOf(Integer.MIN_VALUE);
+
+    // Long limits
+    //
+    private final static BigDecimal bdMaxLongValue =
+        BigDecimal.valueOf(Long.MAX_VALUE);
+
+    private final static BigDecimal bdMinLongValue =
+        BigDecimal.valueOf(Long.MIN_VALUE);
+
+    // Float limits
+    //
+    private final static BigDecimal bdMaxFloatValue =
+        new BigDecimal(Float.MAX_VALUE);
+
+    private final static BigDecimal bdMinFloatValue =
+        new BigDecimal(-Float.MAX_VALUE);
+
+    private final static BigDecimal bdSmallestPosFloatValue =
+        new BigDecimal(Float.MIN_VALUE);
+
+    private final static BigDecimal bdSmallestNegFloatValue =
+        new BigDecimal(-Float.MIN_VALUE);
+
+    // Double limits
+    //
+    private final static BigDecimal bdMaxDoubleValue =
+        new BigDecimal(Double.MAX_VALUE);
+
+    private final static BigDecimal bdMinDoubleValue =
+        new BigDecimal(-Double.MAX_VALUE);
+
+    private final static BigDecimal bdSmallestPosDoubleValue =
+        new BigDecimal(Double.MIN_VALUE);
+
+    private final static BigDecimal bdSmallestNegDoubleValue =
+        new BigDecimal(-Double.MIN_VALUE);
+
+    // REAL/FLOAT/DOUBLE range limits
+
+    static final float DB2_SMALLEST_REAL = -3.402E+38f;
+    static final float DB2_LARGEST_REAL  = +3.402E+38f;
+    static final float DB2_SMALLEST_POSITIVE_REAL = +1.175E-37f;
+    static final float DB2_LARGEST_NEGATIVE_REAL  = -1.175E-37f;
+
+    static final double DB2_SMALLEST_DOUBLE = -1.79769E+308d;
+    static final double DB2_LARGEST_DOUBLE  = +1.79769E+308d;
+    static final double DB2_SMALLEST_POSITIVE_DOUBLE = +2.225E-307d;
+    static final double DB2_LARGEST_NEGATIVE_DOUBLE  = -2.225E-307d;
+
+    // Constants for use with assertUpdateState and assertGetState
+
+    private static final int _X = -1; // don't care
+    private static final int XXX_BYTE = 0;
+    private static final int XXX_SHORT = 1;
+    private static final int XXX_INT = 2;
+    private static final int XXX_LONG = 3;
+    private static final int XXX_FLOAT = 4;
+    private static final int XXX_DOUBLE = 5;
+
+    /*
+     * Using ResultSet.updateBigDecimal with value on colName, assert that we
+     * see the SQLstate expected.
+     */
+    private void assertUpdateState(
+        ResultSet rs,
+        String colName,
+        BigDecimal value,
+        String expected) throws SQLException {
+
+        try {
+            rs.updateBigDecimal(colName, value);
+            fail("exception expected");
+        } catch (SQLException e) {
+            println(e.toString());
+            assertSQLState(expected, e);
+        }
+    }
+
+
+    /*
+     * Using ResultSet.updateXXX with value or dvalue as the case may be on
+     * colName, assert that we see the SQLstate expected. XXX is indicated by
+     * updateType.
+     */
+    private void assertUpdateState(
+        ResultSet rs,
+        String colName,
+        long value,
+        double dvalue,
+        int updateType,
+        String expected) throws SQLException {
+
+        try {
+            switch (updateType) {
+            case XXX_BYTE:
+                rs.updateByte(colName, (byte)value);
+                break;
+            case XXX_SHORT:
+                rs.updateShort(colName, (short)value);
+            case XXX_INT:
+                rs.updateInt(colName, (int)value);
+                break;
+            case XXX_LONG:
+                rs.updateLong(colName, value);
+                break;
+            case XXX_FLOAT:
+                rs.updateFloat(colName, (float)dvalue);
+                break;
+            case XXX_DOUBLE:
+                rs.updateDouble(colName, dvalue);
+                break;
+            default:
+                fail("wrong argument");
+            }
+
+            fail("exception expected");
+        } catch (SQLException e) {
+            println(e.toString());
+            assertSQLState(expected, e);
+        }
+    }
+
+
+    /*
+     * Using ResultSet.getXXX on colName, assert that we see the SQLstate
+     * expected. XXX is indicated by getType.
+     */
+    private void assertGetState(
+        ResultSet rs,
+        String colName,
+        int getType,
+        String expected) throws SQLException {
+
+        try {
+            switch (getType) {
+            case XXX_BYTE:
+                rs.getByte(colName);
+                break;
+            case XXX_SHORT:
+                rs.getShort(colName);
+                    break;
+            case XXX_INT:
+                rs.getInt(colName);
+                break;
+            case XXX_LONG:
+                rs.getLong(colName);
+                break;
+            case XXX_FLOAT:
+                rs.getFloat(colName);
+                break;
+            case XXX_DOUBLE:
+                rs.getDouble(colName);
+                break;
+            default:
+                fail("wrong argument");
+            }
+
+            fail("exception expected");
+        } catch (SQLException e) {
+            println(e.toString());
+            assertSQLState(expected, e);
+        }
+    }
 }
-
-

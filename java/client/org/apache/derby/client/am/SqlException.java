@@ -536,9 +536,10 @@ class ColumnTypeConversionException extends SqlException {
 // An intermediate exception encapsulation to provide code-reuse
 // for common CrossConverters data conversion exceptions.
 
-class LossOfPrecisionConversionException extends SqlException {
-    LossOfPrecisionConversionException(LogWriter logWriter, String instance) {
-        super(logWriter, new ClientMessageId(SQLState.LOSS_OF_PRECISION_EXCEPTION), 
-            instance);
+class OutsideRangeForDataTypeException extends SqlException {
+    OutsideRangeForDataTypeException(LogWriter logWriter, String instance) {
+        super(logWriter,
+              new ClientMessageId(SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE), 
+              instance);
     }
 }

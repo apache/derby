@@ -191,7 +191,8 @@ final class CrossConverters {
         case Types.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "SMALLINT");
             }
             return new Short((short) source);
 
@@ -285,14 +286,16 @@ final class CrossConverters {
         case Types.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "SMALLINT");
             }
             return new Short((short) source);
 
         case Types.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Integer.MAX_VALUE || source < Integer.MIN_VALUE)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "INTEGER");
             }
             return new Integer((int) source);
 
@@ -331,21 +334,24 @@ final class CrossConverters {
         case Types.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "SMALLINT");
             }
             return new Short((short) source);
 
         case Types.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Integer.MAX_VALUE || source < Integer.MIN_VALUE)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "INTEGER");
             }
             return new Integer((int) source);
 
         case Types.BIGINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Long.MAX_VALUE || source < Long.MIN_VALUE)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "BIGINT");
             }
             return new Long((long) source);
 
@@ -362,7 +368,8 @@ final class CrossConverters {
                     //           |                          |________________________
                     //-----------------------------------------------------------------------------------
                     (source == Float.POSITIVE_INFINITY || source == Float.NEGATIVE_INFINITY)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "REAL");
             }
             return new Float(source);
 
@@ -377,7 +384,8 @@ final class CrossConverters {
                     //            |                          |________________________
                     //-------------------------------------------------------------------------------------
                     (source == Double.POSITIVE_INFINITY || source == Double.NEGATIVE_INFINITY)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "DOUBLE");
             }
             // source passed in is a float, do we need to check if the source already contains "infinity"??
             return new Double(String.valueOf(source));
@@ -410,28 +418,32 @@ final class CrossConverters {
         case Types.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Short.MAX_VALUE || source < Short.MIN_VALUE)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "SMALLINT");
             }
             return new Short((short) source);
 
         case Types.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Integer.MAX_VALUE || source < Integer.MIN_VALUE)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "INTEGER");
             }
             return new Integer((int) source);
 
         case Types.BIGINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Long.MAX_VALUE || source < Long.MIN_VALUE)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "BIGINT");
             }
             return new Long((long) source);
 
         case Types.REAL:
             if (Configuration.rangeCheckCrossConverters &&
                     (source > Float.MAX_VALUE || source < -Float.MAX_VALUE)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "REAL");
             }
             return new Float((float) source);
 
@@ -448,7 +460,8 @@ final class CrossConverters {
                     //            |                          |________________________
                     //-------------------------------------------------------------------------------------
                     (source == Double.POSITIVE_INFINITY || source == Double.NEGATIVE_INFINITY)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "DOUBLE");
             }
             return new Double(source);
 
@@ -478,35 +491,40 @@ final class CrossConverters {
         case Types.SMALLINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxShortValue__) == 1 || source.compareTo(bdMinShortValue__) == -1)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "SMALLINT");
             }
             return new Short(source.shortValue());
 
         case Types.INTEGER:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxIntValue__) == 1 || source.compareTo(bdMinIntValue__) == -1)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "INTEGER");
             }
             return new Integer(source.intValue());
 
         case Types.BIGINT:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxLongValue__) == 1 || source.compareTo(bdMinLongValue__) == -1)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "BIGINT");
             }
             return new Long(source.longValue());
 
         case Types.REAL:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxFloatValue__) == 1 || source.compareTo(bdMinFloatValue__) == -1)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "REAL");
             }
             return new Float(source.floatValue());
 
         case Types.DOUBLE:
             if (Configuration.rangeCheckCrossConverters &&
                     (source.compareTo(bdMaxDoubleValue__) == 1 || source.compareTo(bdMinDoubleValue__) == -1)) {
-                throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+                throw new OutsideRangeForDataTypeException(
+                    agent_.logWriter_, "DOUBLE");
             }
             return new Double(source.doubleValue());
 
@@ -1000,7 +1018,8 @@ final class CrossConverters {
     final byte getByteFromShort(short source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Byte.MAX_VALUE || source < java.lang.Byte.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "TINYINT");
         }
 
         return (byte) source;
@@ -1009,7 +1028,8 @@ final class CrossConverters {
     final byte getByteFromInt(int source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Byte.MAX_VALUE || source < java.lang.Byte.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "TINYINT");
         }
 
         return (byte) source;
@@ -1018,7 +1038,8 @@ final class CrossConverters {
     final byte getByteFromLong(long source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Byte.MAX_VALUE || source < java.lang.Byte.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "TINYINT");
         }
 
         return (byte) source;
@@ -1027,7 +1048,8 @@ final class CrossConverters {
     final byte getByteFromFloat(float source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Byte.MAX_VALUE || source < java.lang.Byte.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "TINYINT");
         }
 
         return (byte) source;
@@ -1036,7 +1058,8 @@ final class CrossConverters {
     final byte getByteFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Byte.MAX_VALUE || source < java.lang.Byte.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "TINYINT");
         }
 
         return (byte) source;
@@ -1061,7 +1084,8 @@ final class CrossConverters {
     final short getShortFromInt(int source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Short.MAX_VALUE || source < java.lang.Short.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "SMALLINT");
         }
 
         return (short) source;
@@ -1070,7 +1094,8 @@ final class CrossConverters {
     final short getShortFromLong(long source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Short.MAX_VALUE || source < java.lang.Short.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "SMALLINT");
         }
 
         return (short) source;
@@ -1079,7 +1104,8 @@ final class CrossConverters {
     final short getShortFromFloat(float source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Short.MAX_VALUE || source < java.lang.Short.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "SMALLINT");
         }
 
         return (short) source;
@@ -1088,7 +1114,8 @@ final class CrossConverters {
     final short getShortFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Short.MAX_VALUE || source < java.lang.Short.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "SMALLINT");
         }
 
         return (short) source;
@@ -1114,7 +1141,8 @@ final class CrossConverters {
     final int getIntFromLong(long source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Integer.MAX_VALUE || source < java.lang.Integer.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "INTEGER");
         }
 
         return (int) source;
@@ -1123,7 +1151,8 @@ final class CrossConverters {
     final int getIntFromFloat(float source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Integer.MAX_VALUE || source < java.lang.Integer.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "INTEGER");
         }
 
         return (int) source;
@@ -1132,7 +1161,8 @@ final class CrossConverters {
     final int getIntFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Integer.MAX_VALUE || source < java.lang.Integer.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "INTEGER");
         }
 
         return (int) source;
@@ -1157,7 +1187,8 @@ final class CrossConverters {
     final long getLongFromFloat(float source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Long.MAX_VALUE || source < java.lang.Long.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "BIGINT");
         }
 
         return (long) source;
@@ -1166,7 +1197,8 @@ final class CrossConverters {
     final long getLongFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 (source > java.lang.Long.MAX_VALUE || source < java.lang.Long.MIN_VALUE)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "BIGINT");
         }
 
         return (long) source;
@@ -1191,7 +1223,8 @@ final class CrossConverters {
     final float getFloatFromDouble(double source) throws SqlException {
         if (Configuration.rangeCheckCrossConverters &&
                 Float.isInfinite((float)source)) {
-            throw new LossOfPrecisionConversionException(agent_.logWriter_, String.valueOf(source));
+            throw new OutsideRangeForDataTypeException(
+                agent_.logWriter_, "DOUBLE");
         }
 
         return (float) source;

@@ -97,7 +97,6 @@ public class splitmessages {
         clientMessageIds.add(SQLState.UNSUPPORTED_HOLDABILITY_PROPERTY);
         clientMessageIds.add(SQLState.CANCEL_NOT_SUPPORTED_BY_SERVER);
         clientMessageIds.add(SQLState.LANG_INVALID_CALL_STATEMENT);
-        clientMessageIds.add(SQLState.LOSS_OF_PRECISION_EXCEPTION);
         clientMessageIds.add(SQLState.LANG_INVALID_SQL_IN_BATCH);
         clientMessageIds.add(SQLState.LANG_RESULT_SET_NOT_OPEN);
         clientMessageIds.add(SQLState.CANT_CONVERT_UNICODE_TO_EBCDIC);

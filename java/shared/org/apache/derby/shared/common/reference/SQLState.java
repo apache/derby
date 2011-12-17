@@ -715,7 +715,6 @@ public interface SQLState {
     String LANG_SQRT_OF_NEG_NUMBER                                     = "22013";
     String LANG_INVALID_PARAMETER_FOR_SEARCH_POSITION                  = "22014";
     String LANG_INVALID_TYPE_FOR_LOCATE_FUNCTION                       = "22015";
-    String LOSS_OF_PRECISION_EXCEPTION                                 = "22015.S.1";
 	String LANG_FORMAT_EXCEPTION                                       = "22018";
 	String LANG_INVALID_ESCAPE_CHARACTER                               = "22019";
 	String LANG_INVALID_TRIM_CHARACTER                                 = "22020";

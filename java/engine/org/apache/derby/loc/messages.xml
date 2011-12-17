@@ -740,12 +740,6 @@ Guide.
             </msg>
 
             <msg>
-                <name>22015.S.1</name>
-                <text> Invalid data conversion: requested conversion would result in a loss of precision of {0}</text>
-                <arg>value</arg>
-            </msg>
-
-            <msg>
                 <name>22015</name>
                 <text>The '{0}' function is not allowed on the following set of types.  First operand is of type '{1}'.  Second operand is of type '{2}'.  Third operand (start position) is of type '{3}'.</text>
                 <arg>functionName</arg>
