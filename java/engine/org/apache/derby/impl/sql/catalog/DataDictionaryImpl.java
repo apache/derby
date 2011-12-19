@@ -7789,7 +7789,7 @@ public final class	DataDictionaryImpl
 	/** 
 	 * Drop a User from the DataDictionary
 	 *
-	 * @param ad	The AliasDescriptor to drop
+	 * @param userName The user to drop.
 	 * @param tc	The TransactionController
 	 *
 	 * @exception StandardException		Thrown on failure
