@@ -806,6 +806,11 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
                 }
         }
         
+        public StringDataValue          getNullPassword(StringDataValue dataValue)
+        {
+            return new SQLPassword();
+        }
+        
         /**
          * Get a SQL VARCHAR set to NULL with collation set to collationType.
          * If the supplied value is null then get a new value,
@@ -1156,6 +1161,7 @@ abstract class DataValueFactoryImpl implements DataValueFactory, ModuleControl
         case StoredFormatIds.SQL_TIME_ID: return new SQLTime();
         case StoredFormatIds.SQL_TIMESTAMP_ID: return new SQLTimestamp();
         case StoredFormatIds.SQL_TINYINT_ID: return new SQLTinyint();
+        case StoredFormatIds.SQL_PASSWORD_ID: return new SQLPassword();
         case StoredFormatIds.SQL_VARCHAR_ID: return new SQLVarchar();
         case StoredFormatIds.SQL_LONGVARCHAR_ID: return new SQLLongvarchar();
         case StoredFormatIds.SQL_VARBIT_ID: return new SQLVarbit();

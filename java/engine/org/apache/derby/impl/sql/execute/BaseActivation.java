@@ -314,6 +314,7 @@ public abstract class BaseActivation implements CursorActivation, GeneratedByteC
 		@return	A RowLocation template for the conglomerate
 	 */
 	public RowLocation getRowLocationTemplate(int itemNumber)
+        throws StandardException
 	{
 		if (SanityManager.DEBUG)
 		{

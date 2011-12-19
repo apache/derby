@@ -1670,6 +1670,9 @@ public interface DataDictionary
 									TransactionController tc)
 			throws StandardException;
 
+	public void dropUser( String userName, TransactionController tc )
+        throws StandardException;
+    
 	public	int	getEngineType();
 
 	/**

@@ -195,6 +195,15 @@ public interface StringDataValue extends ConcatableDataValue
 	 */
 	public char[] getCharArray() throws StandardException;
 
+    /**
+     * Gets the enclosed character array and zeroes it. Used for covering
+     * our tracks as we ship a password across the system. We want the
+     * passwords to be smudged out as soon as possible so that they
+     * can't be memory-sniffed.
+     */
+    public  char[]  getRawDataAndZeroIt() throws StandardException;
+    
+
 	/**
 	 * Gets either SQLChar/SQLVarchar/SQLLongvarchar/SQLClob(base classes) or 
 	 * CollatorSQLChar/CollatorSQLVarchar/CollatorSQLLongvarch/CollatorSQLClob

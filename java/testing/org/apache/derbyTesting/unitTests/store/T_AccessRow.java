@@ -126,7 +126,9 @@ public class T_AccessRow
 		return column;
 	}
 
-	public DataValueDescriptor[] getRowArrayClone() {
+	public DataValueDescriptor[] getRowArrayClone()
+        throws StandardException
+    {
 		DataValueDescriptor[] retval = new DataValueDescriptor[column.length];
 		for (int index = 0; index < column.length; index++)
 			retval[index] = column[index].cloneValue(false);

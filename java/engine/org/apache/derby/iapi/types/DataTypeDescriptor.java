@@ -199,6 +199,16 @@ public final class DataTypeDescriptor implements Formatable
                 StringDataValue.COLLATION_DERIVATION_IMPLICIT).getCatalogType();
     }
 
+    /**
+     * Get the descriptor for an internal PASSWORD type.
+     */
+    public  static  TypeDescriptor  getPasswordDataTypeDescriptor( boolean isNullable )
+    {
+        BaseTypeIdImpl baseTypeID = new BaseTypeIdImpl( StoredFormatIds.PASSWORD_TYPE_ID_IMPL );
+        
+        return new TypeDescriptorImpl( baseTypeID, isNullable, TypeId.VARCHAR_MAXWIDTH );
+    }
+
 	/**
 	 * Get a descriptor that corresponds to a builtin JDBC type.
      * 

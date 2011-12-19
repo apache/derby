@@ -421,6 +421,7 @@ final public class GenericActivationHolder implements Activation
 	 * @see Activation#getRowLocationTemplate
 	 */
 	public RowLocation getRowLocationTemplate(int itemNumber)
+        throws StandardException
 	{
 		return ac.getRowLocationTemplate(itemNumber);
 	}

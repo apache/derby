@@ -150,6 +150,7 @@ public final class TypeId
         public static final String      NUMERIC_NAME = "NUMERIC";
         public static final String      DECIMAL_NAME = "DECIMAL";
         public static final String      CHAR_NAME = "CHAR";
+        public static final String      PASSWORD_NAME = "PASSWORD";
         public static final String      VARCHAR_NAME = "VARCHAR";
         public static final String      LONGVARCHAR_NAME = "LONG VARCHAR";
         public static final String      DATE_NAME = "DATE";
@@ -210,6 +211,7 @@ public final class TypeId
         public static final int CLOB_PRECEDENCE = 14;
         public static final int LONGVARCHAR_PRECEDENCE = 12;
         public static final int VARCHAR_PRECEDENCE  = 10;
+        public static final int PASSWORD_PRECEDENCE  = 200;
         public static final int CHAR_PRECEDENCE  = 0;
 
         /*
@@ -245,6 +247,8 @@ public final class TypeId
                 StoredFormatIds.DOUBLE_TYPE_ID, StoredFormatIds.DOUBLE_TYPE_ID_IMPL);
         private static final TypeId DECIMAL_ID =  new TypeId(StoredFormatIds.DECIMAL_TYPE_ID, new DecimalTypeIdImpl(false));
         private static final TypeId NUMERIC_ID =  new TypeId(StoredFormatIds.DECIMAL_TYPE_ID, new DecimalTypeIdImpl(true));
+        public static final TypeId PASSWORD_ID = create(
+                StoredFormatIds.PASSWORD_TYPE_ID, StoredFormatIds.PASSWORD_TYPE_ID_IMPL);
         private static final TypeId VARCHAR_ID = create(
                 StoredFormatIds.VARCHAR_TYPE_ID, StoredFormatIds.VARCHAR_TYPE_ID_IMPL);
         private static final TypeId DATE_ID = create(
@@ -641,6 +645,12 @@ public final class TypeId
     public static TypeId getTypeId(TypeDescriptor catalogType)
     {
         TypeDescriptorImpl tdi = (TypeDescriptorImpl) catalogType;
+
+        if ( tdi.getTypeId().getTypeFormatId() == StoredFormatIds.PASSWORD_TYPE_ID_IMPL )
+        {
+            return PASSWORD_ID;
+        }
+        
         final int jdbcType = catalogType.getJDBCTypeId();
         TypeId typeId = TypeId.getBuiltInTypeId(jdbcType);
         if (typeId != null)
@@ -675,6 +685,7 @@ public final class TypeId
         private boolean                 isLongConcatableTypeId;
         private boolean                 isNumericTypeId;
         private boolean                 isRefTypeId;
+        private boolean                 isPasswordTypeId;
         private boolean                 isStringTypeId;
         private boolean                 isFloatingPointTypeId;
         private boolean                 isRealTypeId;
@@ -911,6 +922,15 @@ public final class TypeId
                                 isLOBTypeId = true;
                                 break;
 
+                        case StoredFormatIds.PASSWORD_TYPE_ID:
+                                typePrecedence = PASSWORD_PRECEDENCE;
+                                javaTypeName = "char[]";
+                                maxMaxWidth = TypeId.VARCHAR_MAXWIDTH;
+                                isStringTypeId = true;
+                                isPasswordTypeId = true;
+                                isConcatableTypeId = true;
+                                break;
+
                         case StoredFormatIds.VARCHAR_TYPE_ID:
                                 typePrecedence = VARCHAR_PRECEDENCE;
                                 javaTypeName = "java.lang.String";
@@ -1025,6 +1045,16 @@ public final class TypeId
         public boolean getClassNameWasDelimitedIdentifier()
         {
                 return classNameWasDelimitedIdentifier;
+        }
+
+        /**
+         * Does this TypeId represent a TypeId for a PASSWORD.
+         *
+         * @return Whether or not this TypeId represents a TypeId for a PASSWORD.
+         */
+        public boolean isPasswordTypeId()
+        {
+                return isPasswordTypeId;
         }
 
         /**
@@ -1470,6 +1500,9 @@ public final class TypeId
 
                         case StoredFormatIds.VARCHAR_TYPE_ID:
                                 return new SQLVarchar();
+
+                        case StoredFormatIds.PASSWORD_TYPE_ID:
+                                return new SQLPassword();
 
                         case StoredFormatIds.XML_TYPE_ID:
                                 return new XML();

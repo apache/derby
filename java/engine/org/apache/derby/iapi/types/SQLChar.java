@@ -235,27 +235,7 @@ public class SQLChar
      */
     public SQLChar( char[] val )
     {
-        if ( val == null )
-        {
-            value = null;
-        }
-        else
-        {
-            int length = val.length;
-            char[]  localCopy = new char[ length ];
-            System.arraycopy( val, 0, localCopy, 0, length );
-            
-            copyState
-                (
-                 null,
-                 localCopy,
-                 length,
-                 null,
-                 null,
-                 null,
-                 null
-                 );
-        }
+        setAndZeroOldValue( val );
     }
 
     /**************************************************************************
@@ -289,16 +269,55 @@ public class SQLChar
      * </p>
      */
     public  char[]  getRawDataAndZeroIt()
+        throws StandardException
     {
-        if ( rawData == null ) { return null; }
+        if ( isNull() ) { return null; }
 
-        int length = rawData.length;
+        char[]  sourceValue = (rawData ==  null) ? getCharArray() : rawData;
+
+        int length = sourceValue.length;
         char[] retval = new char[ length ];
-        System.arraycopy( rawData, 0, retval, 0, length );
+        System.arraycopy( sourceValue, 0, retval, 0, length );
 
-        zeroRawData();
+        Arrays.fill( sourceValue, (char) 0 );
+
+        setAndZeroOldValue( sourceValue );
 
         return retval;
+    }
+
+    /**
+     * <p>
+     * This is a special setter for forcing this SQLChar to carry a password.
+     * See the discussion of passwords on DERBY-866. This zeroes the old
+     * character array and pokes in the new value.
+     * </p>
+     */
+    public  void    setAndZeroOldValue( char[] val )
+    {
+        zeroRawData();
+
+        if ( val == null )
+        {
+            value = null;
+        }
+        else
+        {
+            int length = val.length;
+            char[]  localCopy = new char[ length ];
+            System.arraycopy( val, 0, localCopy, 0, length );
+            
+            copyState
+                (
+                 null,
+                 localCopy,
+                 length,
+                 null,
+                 null,
+                 null,
+                 null
+                 );
+        }
     }
 
     /**
@@ -1398,7 +1417,8 @@ readingLoop:
      *  difference of this method from cloneValue is this method does not
      *  objectify a stream.
      */
-    public DataValueDescriptor cloneHolder() {
+    public DataValueDescriptor cloneHolder() throws StandardException
+    {
         if ((stream == null) && (_clobValue == null)) {
             return cloneValue(false);
         }
@@ -1415,6 +1435,7 @@ readingLoop:
 
     /** @see DataValueDescriptor#cloneValue */
     public DataValueDescriptor cloneValue(boolean forceMaterialization)
+        throws StandardException
     {
         try
         {

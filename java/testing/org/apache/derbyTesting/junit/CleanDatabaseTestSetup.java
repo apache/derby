@@ -165,6 +165,7 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
          if (compress)
              compressObjects(conn);
          removeRoles(conn);
+         removeUsers( conn );
      }
      
      /**
@@ -257,6 +258,31 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
 
         stm.close();
         dropStm.close();
+        conn.commit();
+    }
+
+    /** Drop all credentials stored in SYSUSERS */
+    private static void removeUsers(Connection conn) throws SQLException
+    {
+        // Get the users
+        Statement stm = conn.createStatement();
+        ResultSet rs = stm.executeQuery( "select username from sys.sysusers" );
+        ArrayList   users = new ArrayList();
+        
+        while ( rs.next() ) { users.add( rs.getString( 1 ) ); }
+        rs.close();
+        stm.close();
+
+        // Now delete them
+        PreparedStatement   ps = conn.prepareStatement( "call syscs_util.syscs_drop_user( ? )" );
+
+        for ( int i = 0; i < users.size(); i++ )
+        {
+            ps.setString( 1, (String) users.get( i ) );
+            ps.executeUpdate();
+        }
+
+        ps.close();
         conn.commit();
     }
 

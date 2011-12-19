@@ -138,7 +138,7 @@ public interface ParameterValueSet
 	 *
 	 * @return ParameterValueSet	A clone of the ParameterValueSet and its contents.
 	 */
-	ParameterValueSet getClone();
+	ParameterValueSet getClone() throws StandardException;
 
 	/**
 	 * Validate the parameters.  This is done for situations where

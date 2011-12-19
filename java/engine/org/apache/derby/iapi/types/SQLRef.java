@@ -190,6 +190,7 @@ public class SQLRef extends DataType implements RefDataValue
 
     /** @see DataValueDescriptor#cloneValue */
     public DataValueDescriptor cloneValue(boolean forceMaterialization)
+        throws StandardException
 	{
 		/* In order to avoid a throws clause nightmare, we only call
 		 * the constructors which do not have a throws clause.

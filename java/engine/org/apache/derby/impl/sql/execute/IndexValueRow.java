@@ -69,7 +69,8 @@ class IndexValueRow implements ExecIndexRow {
 
 		@see ExecRow#getRowArray
 	*/
-	public DataValueDescriptor[] getRowArrayClone() 
+	public DataValueDescriptor[] getRowArrayClone()
+        throws StandardException
 	{
 		return valueRow.getRowArrayClone();
 	}
@@ -93,11 +94,11 @@ class IndexValueRow implements ExecIndexRow {
 	}
 
 	// position is 1-based
-	public ExecRow getClone() {
+	public ExecRow getClone() throws StandardException {
 		return new IndexValueRow(valueRow.getClone());
 	}
 
-	public ExecRow getClone(FormatableBitSet clonedCols) {
+	public ExecRow getClone(FormatableBitSet clonedCols) throws StandardException {
 		return new IndexValueRow(valueRow.getClone(clonedCols));
 	}
 
@@ -114,6 +115,7 @@ class IndexValueRow implements ExecIndexRow {
 
 	// position is 1-based
 	public DataValueDescriptor cloneColumn(int columnPosition)
+        throws StandardException
 	{
 		return valueRow.cloneColumn(columnPosition);
 	}

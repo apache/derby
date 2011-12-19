@@ -30,6 +30,7 @@ import java.sql.Statement;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -67,6 +68,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
+import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
 
 /**
 	Some system built-in procedures, and help routines.  Now used for network server.
@@ -2038,4 +2040,85 @@ public class SystemProcedures  {
         return sd;
     }
 
+    /**
+     * Create a new user.
+     */
+    public static void SYSCS_CREATE_USER
+        (
+         String userName,
+         char[] password
+         )
+        throws SQLException
+    {
+        try {
+            LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+            DataDictionary dd = lcc.getDataDictionary();
+            TransactionController tc = lcc.getTransactionExecute();
+            DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
+
+            /*
+            ** Inform the data dictionary that we are about to write to it.
+            ** There are several calls to data dictionary "get" methods here
+            ** that might be done in "read" mode in the data dictionary, but
+            ** it seemed safer to do this whole operation in "write" mode.
+            **
+            ** We tell the data dictionary we're done writing at the end of
+            ** the transaction.
+            */
+            dd.startWriting(lcc);
+
+            //
+            // FIXME: DERBY-866 Proper values need to be computed for the
+            // following variables once Knut is done reworking builtin hashing.
+            //
+            String  hashingScheme = "???????";
+            char[]  hashedPassword = password;
+
+            
+            Timestamp   currentTimestamp = new Timestamp( (new java.util.Date()).getTime() );
+
+            UserDescriptor  userDescriptor = ddg.newUserDescriptor
+                ( userName, hashingScheme, hashedPassword, currentTimestamp );
+
+            dd.addDescriptor( userDescriptor, null, DataDictionary.SYSUSERS_CATALOG_NUM, false, tc );
+            
+        } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
+    }
+  
+    /**
+     * Drop a user.
+     */
+    public static void SYSCS_DROP_USER
+        (
+         String userName
+         )
+        throws SQLException
+    {
+        try {
+            LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+            DataDictionary dd = lcc.getDataDictionary();
+            String  dbo = dd.getAuthorizationDatabaseOwner();
+
+            // you can't drop the credentials of the dbo
+            if ( dbo.equals( userName ) )
+            {
+                throw StandardException.newException( SQLState.CANT_DROP_DBO );
+            }
+            
+            /*
+            ** Inform the data dictionary that we are about to write to it.
+            ** There are several calls to data dictionary "get" methods here
+            ** that might be done in "read" mode in the data dictionary, but
+            ** it seemed safer to do this whole operation in "write" mode.
+            **
+            ** We tell the data dictionary we're done writing at the end of
+            ** the transaction.
+            */
+            dd.startWriting(lcc);
+
+            dd.dropUser( userName, lcc.getTransactionExecute() );
+            
+        } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
+    }
+  
 }

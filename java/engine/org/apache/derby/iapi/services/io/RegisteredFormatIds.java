@@ -536,5 +536,8 @@ String[] TwoByte = {
         /* 472 */       "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
         /* 473 */       "org.apache.derby.impl.sql.catalog.CoreDDFinderClassInfo",
         /* 474 */       "org.apache.derby.catalog.types.UDTAliasInfo",
+        /* 475 */   null,
+        /* 476 */   "org.apache.derby.catalog.types.TypesImplInstanceGetter",
+        /* 477 */   "org.apache.derby.iapi.types.DTSClassInfo", //InstanceGetter
 };
 }

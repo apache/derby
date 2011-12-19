@@ -200,6 +200,7 @@ class TemporaryRowHolderImpl implements TemporaryRowHolder
      * Beetle 4896.
      */
 	private ExecRow cloneRow(ExecRow inputRow)
+        throws StandardException
 	{
 		DataValueDescriptor[] cols = inputRow.getRowArray();
 		int ncols = cols.length;

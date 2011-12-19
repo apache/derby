@@ -643,7 +643,7 @@ public abstract class DataType
      *
      * @return A shallow clone.
      */
-    public DataValueDescriptor cloneHolder() {
+    public DataValueDescriptor cloneHolder() throws StandardException {
 		return cloneValue(false);
 	}
 

@@ -168,18 +168,22 @@ public class Changes10_9 extends UpgradeChange
         {
         case PH_CREATE: // create with old version
             vetSYSUSERS( s, false );
+            vetNativeProcs( s, false );
             break;
             
         case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
             vetSYSUSERS( s, false );
+            vetNativeProcs( s, false );
             break;
             
         case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old version after soft-upgrade
             vetSYSUSERS( s, false );
+            vetNativeProcs( s, false );
             break;
 
         case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
             vetSYSUSERS( s, true );
+            vetNativeProcs( s, true );
             break;
         }
         
@@ -195,6 +199,36 @@ public class Changes10_9 extends UpgradeChange
         assertEquals( expectedValue, rs.getInt( 1 ) );
 
         rs.close();
+    }
+    private void    vetNativeProcs( Statement s, boolean shouldExist ) throws Exception
+    {
+        try {
+            s.execute( "call syscs_util.syscs_create_user( 'fred', 'fredpassword' )" );
+            
+            ResultSet   rs = s.executeQuery( "select username from sys.sysusers order by username" );
+            rs.next();
+            assertEquals( "fred", rs.getString( 1 ) );
+            
+            s.execute( "call syscs_util.syscs_drop_user( 'fred' )" );
+            
+            rs = s.executeQuery( "select username from sys.sysusers order by username" );
+            assertFalse( rs.next() );
+
+            rs.close();
+
+            if ( !shouldExist )
+            {
+                fail( "syscs_util.syscs_create_user should not exist." );
+            }
+        } catch (SQLException se )
+        {
+            if ( shouldExist )
+            {
+                fail( "Saw unexpected error: " + se.getMessage() );
+            }
+            assertSQLState( "42Y03", se );
+        }
+        
     }
     
 }

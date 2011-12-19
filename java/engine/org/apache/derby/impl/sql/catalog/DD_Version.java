@@ -497,11 +497,11 @@ public	class DD_Version implements	Formatable
         {
             // On ugrade from versions before 10.9, create system procedures
             // added in 10.9.
+            bootingDictionary.create_10_9_system_procedures( tc, newlyCreatedRoutines );
             
             // On upgrade from versions before 10.9, create system catalogs
             // added in 10.9
-            bootingDictionary.upgradeMakeCatalog(
-                    tc, DataDictionary.SYSUSERS_CATALOG_NUM);
+            bootingDictionary.upgradeMakeCatalog(tc, DataDictionary.SYSUSERS_CATALOG_NUM );
         }
 
         // Grant PUBLIC access to some system routines

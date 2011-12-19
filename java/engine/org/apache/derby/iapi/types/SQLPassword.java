@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derby.iapi.types.SQLVarchar
+   Derby - Class org.apache.derby.iapi.types.SQLPassword
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -23,6 +23,7 @@ package org.apache.derby.iapi.types;
 
 import java.sql.Clob;
 import java.text.RuleBasedCollator;
+import java.util.Arrays;
 
 import org.apache.derby.iapi.error.StandardException;
 
@@ -31,14 +32,11 @@ import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
 /**
- * SQLVarchar represents a VARCHAR value with UCS_BASIC collation.
- *
- * SQLVarchar is mostly the same as SQLChar, so it is implemented as a
- * subclass of SQLChar.  Only those methods with different behavior are
- * implemented here.
+ * SQLPassword represents a VARCHAR value with UCS_BASIC collation
+ * which can only be used to wrap a char[]. See DERBY-866. This is a special
+ * internal type which should never leak outside Derby into application code.
  */
-public class SQLVarchar
-	extends SQLChar
+public class SQLPassword extends SQLVarchar
 {
 
 	/*
@@ -48,7 +46,7 @@ public class SQLVarchar
 
 	public String getTypeName()
 	{
-		return TypeId.VARCHAR_NAME;
+		return TypeId.PASSWORD_NAME;
 	}
 
 	/*
@@ -59,16 +57,7 @@ public class SQLVarchar
     public DataValueDescriptor cloneValue(boolean forceMaterialization)
         throws StandardException
 	{
-		try
-		{
-			return new SQLVarchar(getString());
-		}
-		catch (StandardException se)
-		{
-			if (SanityManager.DEBUG)
-				SanityManager.THROWASSERT("Unexpected exception", se);
-			return null;
-		}
+        return new SQLPassword( getRawDataAndZeroIt() );
 	}
 
 	/**
@@ -77,22 +66,14 @@ public class SQLVarchar
 	 */
 	public DataValueDescriptor getNewNull()
 	{
-		return new SQLVarchar();
+		return new SQLPassword();
 	}
 
 	/** @see StringDataValue#getValue(RuleBasedCollator) */
 	public StringDataValue getValue(RuleBasedCollator collatorForComparison)
 	{
-		if (collatorForComparison == null)
-		{//null collatorForComparison means use UCS_BASIC for collation
-		    return this;			
-		} else {
-			//non-null collatorForComparison means use collator sensitive
-			//implementation of SQLVarchar
-		     CollatorSQLVarchar s = new CollatorSQLVarchar(collatorForComparison);
-		     s.copyState(this);
-		     return s;
-		}
+        // passwords are never search/sorted or ever used in a collation-sensitive context
+        return this;
 	}
 
 
@@ -106,25 +87,15 @@ public class SQLVarchar
 		@see org.apache.derby.iapi.services.io.TypedFormat#getTypeFormatId
 	*/
 	public int getTypeFormatId() {
-		return StoredFormatIds.SQL_VARCHAR_ID;
+		return StoredFormatIds.SQL_PASSWORD_ID;
 	}
 
 	/*
 	 * constructors
 	 */
 
-	public SQLVarchar()
+	public SQLPassword()
 	{
-	}
-
-	public SQLVarchar(String val)
-	{
-		super(val);
-	}
-
-	public SQLVarchar(Clob val)
-	{
-		super(val);
 	}
 
     /**
@@ -135,11 +106,11 @@ public class SQLVarchar
      * read the comment on the SQLChar( char[] ) constructor.
      * </p>
      */
-    public SQLVarchar( char[] val ) { super( val ); }
+    public SQLPassword( char[] val ) { super( val ); }
 
 	/**
 	 * Normalization method - this method may be called when putting
-	 * a value into a SQLVarchar, for example, when inserting into a SQLVarchar
+	 * a value into a SQLPassword, for example, when inserting into a SQLPassword
 	 * column.  See NormalizeResultSet in execution.
 	 *
 	 * @param desiredType	The type to normalize the source column to
@@ -156,41 +127,60 @@ public class SQLVarchar
 				DataValueDescriptor source)
 					throws StandardException
 	{
-		normalize(desiredType, source.getString());
+        if ( source == null )
+        {
+            throwLangSetMismatch("null");
+        }
+        else if ( !(source instanceof SQLChar) )
+        {
+            throwLangSetMismatch( source.getClass().getName() );
+        }
+        else
+        {
+            normalize(desiredType, ((SQLChar) source).getRawDataAndZeroIt() );
+        }
 	}
 
-	protected void normalize(DataTypeDescriptor desiredType, String sourceValue)
+    /** The passed-in sourceValue may be zeroed out */
+	protected void normalize(DataTypeDescriptor desiredType, char[] sourceValue)
 		throws StandardException
 	{
 
 		int			desiredWidth = desiredType.getMaximumWidth();
 
-		int sourceWidth = sourceValue.length();
+		int sourceWidth = sourceValue.length;
 
 		/*
-		** If the input is already the right length, no normalization is
+		** If the input is already the right length or shorter, no normalization is
 		** necessary.
-		**
-		** It's OK for a Varchar value to be shorter than the desired width.
-		** This can happen, for example, if you insert a 3-character Varchar
-		** value into a 10-character Varchar column.  Just return the value
-		** in this case.
 		*/
 
-		if (sourceWidth > desiredWidth) {
+        char[]  result = sourceValue;
+        
+		if (sourceWidth > desiredWidth)
+        {
+            result = new char[ desiredWidth ];
+            System.arraycopy( sourceValue, 0, result, 0, desiredWidth );
 
-			hasNonBlankChars(sourceValue, desiredWidth, sourceWidth);
-
-			/*
-			** No non-blank characters will be truncated.  Truncate the blanks
-			** to the desired width.
-			*/
-			sourceValue = sourceValue.substring(0, desiredWidth);
+            // we can't count on our caller to zero out the old array
+            Arrays.fill( sourceValue, (char) 0 );
 		}
 
-		setValue(sourceValue);
+		setAndZeroOldValue( result );
 	}
 
+    protected void setFrom(DataValueDescriptor theValue) 
+        throws StandardException 
+    {
+        if ( !(theValue instanceof SQLChar ) )
+        {
+            throwLangSetMismatch( theValue.getClass().getName() );
+        }
+        else
+        {
+            setAndZeroOldValue(  ((SQLChar) theValue).getRawDataAndZeroIt() );
+        }
+    }
 
 	/*
 	 * DataValueDescriptor interface
@@ -199,19 +189,7 @@ public class SQLVarchar
 	/* @see DataValueDescriptor#typePrecedence */
 	public int typePrecedence()
 	{
-		return TypeId.VARCHAR_PRECEDENCE;
+		return TypeId.PASSWORD_PRECEDENCE;
 	}
     
-    /**
-     * returns the reasonable minimum amount by 
-     * which the array can grow . See readExternal. 
-     * when we know that the array needs to grow by at least
-     * one byte, it is not performant to grow by just one byte
-     * instead this amount is used to provide a resonable growby size.
-     * @return minimum reasonable growby size
-     */
-    protected final int growBy()
-    {
-        return RETURN_SPACE_THRESHOLD;  //seems reasonable for a varchar or clob 
-    }
 }

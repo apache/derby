@@ -105,6 +105,7 @@ public class RIBulkChecker
 			ConglomerateController	    unreferencedCC,
 			ExecRow					    firstRowToFail
 	)
+        throws StandardException
 	{
 		this.referencedKeyScan = referencedKeyScan;
 		this.foreignKeyScan = foreignKeyScan;

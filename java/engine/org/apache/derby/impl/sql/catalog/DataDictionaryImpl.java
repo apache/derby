@@ -7786,6 +7786,27 @@ public final class	DataDictionaryImpl
 
 	}
 
+	/** 
+	 * Drop a User from the DataDictionary
+	 *
+	 * @param ad	The AliasDescriptor to drop
+	 * @param tc	The TransactionController
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+
+	public void dropUser( String userName, TransactionController tc )
+			throws StandardException
+	{	
+		TabInfoImpl					ti = getNonCoreTI(SYSUSERS_CATALOG_NUM);
+
+		/* Set up the start/stop position for the scan */
+        ExecIndexRow keyRow1 = (ExecIndexRow) exFactory.getIndexableRow( 1 );
+		keyRow1.setColumn( 1, new SQLVarchar( userName ) );
+
+		ti.deleteRow( tc, keyRow1, SYSUSERSRowFactory.SYSUSERS_INDEX1_ID );
+	}
+
 	//
 	// class implementation
 	//
@@ -11352,6 +11373,8 @@ public final class	DataDictionaryImpl
         create_10_5_system_procedures(tc, newlyCreatedRoutines );
         // add 10.6 specific system procedures
         create_10_6_system_procedures(tc, newlyCreatedRoutines );
+        // add 10.9 specific system procedures
+        create_10_9_system_procedures( tc, newlyCreatedRoutines );
     }
 
     /**
@@ -12973,6 +12996,83 @@ public final class	DataDictionaryImpl
                 tc);
         }
 
+    }
+
+    /**
+     * <p>
+     * Create system procedures that are part of the
+     * SYSCS_UTIL schema added in version 10.9. These include the procedures for managing NATIVE credentials.
+     * See DERBY-866.
+     * </p>
+     *
+     * @param tc an instance of the Transaction Controller.
+     * @param newlyCreatedRoutines set of routines we are creating (used to add permissions later on)
+     **/
+    void create_10_9_system_procedures( TransactionController   tc, HashSet newlyCreatedRoutines )
+        throws StandardException
+    {
+        UUID  sysUtilUUID = getSystemUtilSchemaDescriptor().getUUID();
+
+        //
+        // SYSCS_CREATE_USER( IN USERNAME  VARCHAR(128), IN PASSWORD VARCHAR(32672) )
+        //
+		
+        {
+            // procedure argument names
+            String[] arg_names = { "userName", "password" };
+
+            // procedure argument types
+            TypeDescriptor[] arg_types =
+                {
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER, 
+                    DataTypeDescriptor.getPasswordDataTypeDescriptor( false )
+                };
+
+            createSystemProcedureOrFunction
+                (
+                 "SYSCS_CREATE_USER",
+                 sysUtilUUID,
+                 arg_names,
+                 arg_types,
+                 0,
+                 0,
+                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                 false,
+                 (TypeDescriptor) null,
+                 newlyCreatedRoutines,
+                 tc
+                 );
+        }
+        
+        //
+        // SYSCS_DROP_USER( IN USERNAME  VARCHAR(128) )
+        //
+		
+        {
+            // procedure argument names
+            String[] arg_names = { "userName" };
+
+            // procedure argument types
+            TypeDescriptor[] arg_types =
+                {
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER
+                };
+
+            createSystemProcedureOrFunction
+                (
+                 "SYSCS_DROP_USER",
+                 sysUtilUUID,
+                 arg_names,
+                 arg_types,
+                 0,
+                 0,
+                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                 false,
+                 (TypeDescriptor) null,
+                 newlyCreatedRoutines,
+                 tc
+                 );
+        }
     }
 
 

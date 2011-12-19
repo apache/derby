@@ -99,6 +99,7 @@ public class CardinalityCounter implements RowLocationRetRowSource
 	}
 	
 	private DataValueDescriptor[] clone(DataValueDescriptor[] clonee)
+        throws StandardException
 	{
 		DataValueDescriptor[] cloned;
 

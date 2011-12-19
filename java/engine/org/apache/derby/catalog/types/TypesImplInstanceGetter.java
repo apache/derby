@@ -38,6 +38,7 @@ public class TypesImplInstanceGetter extends FormatableInstanceGetter {
                   case StoredFormatIds.REAL_TYPE_ID_IMPL:
                   case StoredFormatIds.REF_TYPE_ID_IMPL:
                   case StoredFormatIds.CHAR_TYPE_ID_IMPL:
+                  case StoredFormatIds.PASSWORD_TYPE_ID_IMPL:
                   case StoredFormatIds.VARCHAR_TYPE_ID_IMPL:
                   case StoredFormatIds.LONGVARCHAR_TYPE_ID_IMPL:
                   case StoredFormatIds.BIT_TYPE_ID_IMPL:

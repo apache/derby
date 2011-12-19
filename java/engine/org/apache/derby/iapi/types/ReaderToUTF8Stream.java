@@ -140,6 +140,7 @@ public final class ReaderToUTF8Stream
             SanityManager.ASSERT(typeName != null && (
                     typeName.equals(TypeId.CHAR_NAME) ||
                     typeName.equals(TypeId.VARCHAR_NAME) ||
+                    typeName.equals(TypeId.PASSWORD_NAME) ||
                     typeName.equals(TypeId.CLOB_NAME)) ||
                     typeName.equals(TypeId.LONGVARCHAR_NAME));
         }
