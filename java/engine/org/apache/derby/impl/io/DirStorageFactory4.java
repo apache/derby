@@ -22,9 +22,6 @@
 package org.apache.derby.impl.io;
 
 import org.apache.derby.io.StorageFile;
-import org.apache.derby.iapi.services.info.JVMInfo;
-
-import java.io.IOException;
 
 /**
  * This class implements the WritableStorageFactory interface using features found in Java 1.4 but
@@ -33,8 +30,6 @@ import java.io.IOException;
 public class DirStorageFactory4 extends DirStorageFactory
 {
 
-	private static final boolean	rwsOK = JVMInfo.JDK_ID >= JVMInfo.J2SE_142;
-    
     /**
      * Most of the initialization is done in the init method.
      */
@@ -54,8 +49,8 @@ public class DirStorageFactory4 extends DirStorageFactory
     StorageFile newPersistentFile( String path)
     {
         if( path == null)
-            return new DirFile4(dataDirectory, rwsOK);
-        return new DirFile4(dataDirectory, path, rwsOK);
+            return new DirFile4(dataDirectory);
+        return new DirFile4(dataDirectory, path);
     }
 
     /**
@@ -69,7 +64,7 @@ public class DirStorageFactory4 extends DirStorageFactory
      */
     StorageFile newPersistentFile( String directoryName, String fileName)
     {
-        return new DirFile4( separatedDataDirectory + directoryName, fileName, rwsOK);
+        return new DirFile4( separatedDataDirectory + directoryName, fileName);
     }
 
     /**
@@ -83,7 +78,7 @@ public class DirStorageFactory4 extends DirStorageFactory
      */
     StorageFile newPersistentFile( StorageFile directoryName, String fileName)
     {
-        return new DirFile4( (DirFile) directoryName, fileName, rwsOK);
+        return new DirFile4((DirFile) directoryName, fileName);
     }
 
 	
@@ -99,7 +94,7 @@ public class DirStorageFactory4 extends DirStorageFactory
      */
     public boolean supportsWriteSync()
     {
-        return rwsOK;
+        return true;
     }
 	
 

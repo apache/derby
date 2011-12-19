@@ -50,17 +50,14 @@ class DirFile4 extends DirFile
     private FileChannel lockFileChannel;
     private FileLock dbLock;
 
-	private final boolean rwsOK;
-
     /**
      * Construct a DirFile from a path name.
      *
      * @param path The path name.
      */
-    DirFile4( String path, boolean rwsOK)
+    DirFile4(String path)
     {
         super( path);
-		this.rwsOK = rwsOK;
     }
 
     /**
@@ -69,10 +66,9 @@ class DirFile4 extends DirFile
      * @param directoryName The directory part of the path name.
      * @param fileName The name of the file within the directory.
      */
-    DirFile4( String directoryName, String fileName, boolean rwsOK)
+    DirFile4(String directoryName, String fileName)
     {
         super( directoryName, fileName);
-		this.rwsOK = rwsOK;
     }
 
     /**
@@ -81,10 +77,9 @@ class DirFile4 extends DirFile
      * @param directoryName The directory part of the path name.
      * @param fileName The name of the file within the directory.
      */
-    DirFile4( DirFile directoryName, String fileName, boolean rwsOK)
+    DirFile4( DirFile directoryName, String fileName)
     {
         super( directoryName, fileName);
-		this.rwsOK = rwsOK;
     }
 
     /**
@@ -98,7 +93,7 @@ class DirFile4 extends DirFile
         String parent = getParent();
         if( parent == null)
             return null;
-        return new DirFile4( parent, rwsOK);
+        return new DirFile4(parent);
     }
     
     /**
@@ -292,9 +287,6 @@ class DirFile4 extends DirFile
      */
     public StorageRandomAccessFile getRandomAccessFile( String mode) throws FileNotFoundException
     {
-        // Assume that modes "rws" and "rwd" are not supported.
-        if(!rwsOK && ("rws".equals( mode) || "rwd".equals( mode)))
-            mode = "rw";
         return new DirRandomAccessFile( (File) this, mode);
     } // end of getRandomAccessFile
 }
