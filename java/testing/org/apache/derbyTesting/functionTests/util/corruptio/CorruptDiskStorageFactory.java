@@ -68,17 +68,8 @@ public class CorruptDiskStorageFactory extends CorruptBaseStorageFactory
 	 */
 	WritableStorageFactory getRealStorageFactory()
 	{
-		String dirStorageFactoryClass;
-		if( JVMInfo.JDK_ID >= JVMInfo.J2SE_14)
-        {
-            dirStorageFactoryClass = 
+		String dirStorageFactoryClass =
                 "org.apache.derby.impl.io.DirStorageFactory4";
-        }
-        else
-        {
-            dirStorageFactoryClass = 
-                "org.apache.derby.impl.io.DirStorageFactory";
-        }
 		
 		WritableStorageFactory storageFactory = null;
 		try{

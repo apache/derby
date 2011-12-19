@@ -36,7 +36,6 @@ import org.apache.derby.iapi.jdbc.ResourceAdapter;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.services.context.ContextService;
-import org.apache.derby.iapi.services.info.JVMInfo;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.store.access.XATransactionController;
@@ -827,8 +826,7 @@ class EmbedXAResource implements XAResource {
         
         xae = new XAException(message);
         xae.errorCode = xaErrorCode;
-        if (JVMInfo.JDK_ID >= JVMInfo.J2SE_14)
-            xae.initCause(se);
+        xae.initCause(se);
         return xae;
     }
 	
