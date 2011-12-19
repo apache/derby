@@ -121,6 +121,9 @@ public class AuthenticationTest extends BaseJDBCTestCase {
         test = new AuthenticationTest("testDefaultHashAlgorithm");
         setBaseProps(suite, test);
 
+        test = new AuthenticationTest("testDerby5507PlaintextPassword");
+        setBaseProps(suite, test);
+
         // The test cases below test the configurable hash authentication
         // mechanism added in DERBY-4483. Set the property that specifies the
         // hash algorithm to some valid value for these tests. Not all tests
@@ -1213,6 +1216,25 @@ public class AuthenticationTest extends BaseJDBCTestCase {
                 assertSQLState(NO_SUCH_ALGO, sqle);
             }
         }
+    }
+
+    /**
+     * DERBY-5507: Setting a user's password as a database property, when
+     * that user's password is already set as a system property, used to make
+     * the password getting stored in plaintext in the database.
+     */
+    public void testDerby5507PlaintextPassword() throws SQLException {
+        // This user account is defined in a system property
+        String key = "derby.user.mickey";
+
+        // Now define the account in a database property
+        String pw = "M0u$e";
+        setDatabaseProperty(key, pw);
+
+        // This used to return the plaintext password, but it should
+        // return a hashed token
+        String pwToken = getDatabaseProperty(key);
+        assertFalse("Password stored in plaintext", pwToken.equals(pw));
     }
     
     protected void assertFailSetDatabaseProperty(

@@ -61,6 +61,9 @@ public class PropertyValidation implements PropertyFactory
 					if (!psc.validate(key, value, d))
 						continue;
 
+					if (mappedValue == null)
+ 						mappedValue = psc.map(key, value, d);
+
 					// if this property should not be used then
 					// don't call apply. This depends on where
 					// the old value comes from
@@ -77,8 +80,6 @@ public class PropertyValidation implements PropertyFactory
 					Serviceable s;
 					if ((s = psc.apply(key,value,d)) != null)
 						((TransactionManager) tc).addPostCommitWork(s);
-					if (mappedValue == null)
- 						mappedValue = psc.map(key, value, d);
 				}
 			}
 		}
