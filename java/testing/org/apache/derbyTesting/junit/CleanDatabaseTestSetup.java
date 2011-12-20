@@ -279,7 +279,16 @@ public class CleanDatabaseTestSetup extends BaseJDBCTestSetup {
         for ( int i = 0; i < users.size(); i++ )
         {
             ps.setString( 1, (String) users.get( i ) );
-            ps.executeUpdate();
+
+            // you can't drop the DBO's credentials. sorry.
+            try {
+                ps.executeUpdate();
+            }
+            catch (SQLException se)
+            {
+                if ( "4251F".equals( se.getSQLState() ) ) { continue; }
+                else { throw se; }
+            }
         }
 
         ps.close();

@@ -2054,7 +2054,6 @@ public class SystemProcedures  {
             LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
             DataDictionary dd = lcc.getDataDictionary();
             TransactionController tc = lcc.getTransactionExecute();
-            DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
 
             /*
             ** Inform the data dictionary that we are about to write to it.
@@ -2067,22 +2066,83 @@ public class SystemProcedures  {
             */
             dd.startWriting(lcc);
 
-            //
-            // FIXME: DERBY-866 Proper values need to be computed for the
-            // following variables once Knut is done reworking builtin hashing.
-            //
-            String  hashingScheme = "???????";
-            char[]  hashedPassword = password;
-
-            
-            Timestamp   currentTimestamp = new Timestamp( (new java.util.Date()).getTime() );
-
-            UserDescriptor  userDescriptor = ddg.newUserDescriptor
-                ( userName, hashingScheme, hashedPassword, currentTimestamp );
+            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password );
 
             dd.addDescriptor( userDescriptor, null, DataDictionary.SYSUSERS_CATALOG_NUM, false, tc );
             
         } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
+    }
+    private static  UserDescriptor  makeUserDescriptor
+        (
+         LanguageConnectionContext lcc,
+         String userName,
+         char[] password
+         )
+        throws StandardException
+    {
+        DataDictionary dd = lcc.getDataDictionary();
+        DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
+
+        //
+        // FIXME: DERBY-866 Proper values need to be computed for the
+        // following variables once Knut is done reworking builtin hashing.
+        //
+        String  hashingScheme = "???????";
+        char[]  hashedPassword = password;
+            
+        Timestamp   currentTimestamp = new Timestamp( (new java.util.Date()).getTime() );
+
+        UserDescriptor  userDescriptor = ddg.newUserDescriptor
+            ( userName, hashingScheme, hashedPassword, currentTimestamp );
+
+        return userDescriptor;
+    }
+  
+    /**
+     * Reset a user's password.
+     */
+    public static void SYSCS_RESET_PASSWORD
+        (
+         String userName,
+         char[] password
+         )
+        throws SQLException
+    {
+        try {
+            LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+            DataDictionary dd = lcc.getDataDictionary();
+            TransactionController tc = lcc.getTransactionExecute();
+
+            /*
+            ** Inform the data dictionary that we are about to write to it.
+            ** There are several calls to data dictionary "get" methods here
+            ** that might be done in "read" mode in the data dictionary, but
+            ** it seemed safer to do this whole operation in "write" mode.
+            **
+            ** We tell the data dictionary we're done writing at the end of
+            ** the transaction.
+            */
+            dd.startWriting(lcc);
+
+            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password );
+
+            dd.updateUser( userDescriptor, tc );
+            
+        } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
+    }
+  
+    /**
+     * Change a user's password.
+     */
+    public static void SYSCS_MODIFY_PASSWORD
+        (
+         char[] password
+         )
+        throws SQLException
+    {
+        String currentUser = ConnectionUtil.getCurrentLCC().getStatementContext().getSQLSessionContext().getCurrentUser();
+
+        SYSCS_RESET_PASSWORD( currentUser, password );
     }
   
     /**

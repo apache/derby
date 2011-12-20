@@ -7232,6 +7232,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
             {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"},
+            {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"}
         };
         
@@ -7272,6 +7273,7 @@ public final class GrantRevokeDDLTest extends BaseJDBCTestCase {
         
         expRS = new String [][]
         {
+            {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"},
             {"PUBLIC", "TEST_DBO", "N"},

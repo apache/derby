@@ -63,13 +63,10 @@ public class SYSUSERSRowFactory extends CatalogRowFactory
     private static final int		SYSUSERS_COLUMN_COUNT = 4;
 
 	/* Column #s (1 based) */
-    private static final int		USERNAME_COL_NUM = 1;
-
-    private static final int		HASHINGSCHEME_COL_NUM = 2;
-
+    public static final int		USERNAME_COL_NUM = 1;
+    public static final int		HASHINGSCHEME_COL_NUM = 2;
     public static final int		PASSWORD_COL_NUM = 3;
-
-    private static final int		LASTMODIFIED_COL_NUM = 4;
+    public static final int		LASTMODIFIED_COL_NUM = 4;
 
     static final int		SYSUSERS_INDEX1_ID = 0;
 

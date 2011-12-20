@@ -25,6 +25,7 @@ import java.io.CharArrayReader;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -178,9 +179,42 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         Connection  dboConnection = openUserConnection( TEST_DBO );
         Connection  janetConnection = openUserConnection( JANET );
 
+        if ( !dboExists( dboConnection ) )
+        {
+            goodStatement( dboConnection, "call syscs_util.syscs_create_user( 'TEST_DBO', 'test_dbopassword' )" );
+        }
+        goodStatement( dboConnection, "call syscs_util.syscs_create_user( 'JANET', 'janetpassword' )" );
+
         createUserTests( dboConnection, janetConnection );
+        resetPasswordTests( dboConnection, janetConnection );
+        modifyPasswordTests( dboConnection, janetConnection );
+    }
+    private boolean dboExists( Connection conn )
+        throws Exception
+    {
+        PreparedStatement   ps = conn.prepareStatement( "select username from sys.sysusers" );
+        ResultSet   rs = ps.executeQuery();
+
+        try {
+            while ( rs.next() )
+            {
+                if ( rs.getString( 1 ).equals( "TEST_DBO" ) ) { return true; }
+            }
+        }
+        finally
+        {
+            rs.close();
+            ps.close();
+        }
+
+        return false;
     }
 
+
+    //
+    // Create/Drop User
+    //
+    
     private void    createUserTests
         ( Connection dboConnection, Connection janetConnection )
         throws Exception
@@ -204,6 +238,8 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
              "select username from sys.sysusers order by  username",
              new String[][]
              {
+                 new String[] { "JANET" },
+                 new String[] { "TEST_DBO" },
                  new String[] { "ruth" },
              },
              true, null
@@ -222,6 +258,8 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
              "select username from sys.sysusers order by  username",
              new String[][]
              {
+                 new String[] { "JANET" },
+                 new String[] { "TEST_DBO" },
                  new String[] { "fred" },
              },
              true, "4251D"
@@ -236,7 +274,11 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
             (
              conn, shouldSucceed,
              "select username from sys.sysusers order by  username",
-             new String[][] {},
+             new String[][]
+             {
+                 new String[] { "JANET" },
+                 new String[] { "TEST_DBO" },
+             },
              true, "4251D"
              );
 
@@ -274,8 +316,109 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         }
     }
 
+    //
+    // Reset Password
+    //
+    
+    private void    resetPasswordTests
+        ( Connection dboConnection, Connection janetConnection )
+        throws Exception
+    {
+        goodStatement( dboConnection, "call syscs_util.syscs_create_user( 'resetuser', 'resetuserpassword_rev1' )" );
+
+        long lastModified = getLastModified( dboConnection );
+
+        lastModified = vetResetPassword( dboConnection, dboConnection, lastModified, true );
+        lastModified = vetResetPassword( dboConnection, janetConnection, lastModified, !authorizationIsOn() );
+                 
+        // Make sure that we can reset a password in the approved fashion.
+        char[]  password = new char[] { 'r','u','t','h','p','a','s','s','w','o','r','d' };
+        CharArrayReader reader = new CharArrayReader( password );
+
+        CallableStatement cs = dboConnection.prepareCall( "call syscs_util.syscs_reset_password( 'resetuser', ? )" );
+        cs.setCharacterStream( 1, reader, password.length );
+        cs.execute();
+        cs.close();
+        Arrays.fill( password, (char) 0 );
+        
+        long    newLastModified = getLastModified( dboConnection );
+        assertTrue( newLastModified > lastModified );
+
+        goodStatement( dboConnection, "call syscs_util.syscs_drop_user( 'resetuser' )" );
+    }
+    private long    vetResetPassword( Connection dboConnection, Connection conn, long oldLastModified, boolean shouldSucceed )
+        throws Exception
+    {
+        // pause so that when we check timestamps, we will see a change
+        Thread.sleep( 1L );
+        
+        vetExecution
+            (
+             conn, shouldSucceed,
+             "call syscs_util.syscs_reset_password( 'resetuser', 'resetuserpassword_rev2' )",
+             NO_EXECUTE_PERMISSION
+             );
+
+        long    newLastModified = getLastModified( dboConnection );
+        if ( shouldSucceed ) { assertTrue( newLastModified > oldLastModified ); }
+        else { assertTrue( newLastModified == oldLastModified ); }
+
+        return newLastModified;
+    }
+    private long    getLastModified( Connection conn )
+        throws Exception
+    {
+        PreparedStatement   ps = conn.prepareStatement( "select max( lastmodified ) from sys.sysusers" );
+        ResultSet rs = ps.executeQuery();
+
+        rs.next();
+
+        long    result = rs.getTimestamp( 1 ).getTime();
+
+        rs.close();
+        ps.close();
+
+        return result;
+    }
+    
+    //
+    // Modify Password
+    //
+    
+    private void    modifyPasswordTests
+        ( Connection dboConnection, Connection janetConnection )
+        throws Exception
+    {
+        long    lastModified = getLastModified( dboConnection );
+
+        lastModified = vetModifyPassword( dboConnection, dboConnection, lastModified );
+        lastModified = vetModifyPassword( dboConnection, janetConnection, lastModified );
+    }
+    private long    vetModifyPassword( Connection dboConnection, Connection conn, long oldLastModified )
+        throws Exception
+    {
+        // pause so that when we check timestamps, we will see a change
+        Thread.sleep( 1L );
+        
+        goodStatement( conn, "call syscs_util.syscs_modify_password( 'newpassword' )" );
+                       
+        long    newLastModified = getLastModified( dboConnection );
+        assertTrue( newLastModified > oldLastModified );
+
+        // Make sure that we can modify a password in the approved fashion.
+        char[]  password = new char[] { 'r','u','t','h','p','a','s','s','w','o','r','d' };
+        CharArrayReader reader = new CharArrayReader( password );
+
+        CallableStatement cs = conn.prepareCall( "call syscs_util.syscs_modify_password( ? )" );
+        cs.setCharacterStream( 1, reader, password.length );
+        cs.execute();
+        cs.close();
+        Arrays.fill( password, (char) 0 );
+        
+        long    newerLastModified = getLastModified( dboConnection );
+        assertTrue( newerLastModified > newLastModified );
+
+        return newerLastModified;
+    }
+    
 }
-
-
-
-

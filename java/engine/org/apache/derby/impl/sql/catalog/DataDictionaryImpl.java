@@ -64,6 +64,7 @@ import org.apache.derby.iapi.sql.dictionary.SubConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SubKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
+import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.SequenceDescriptor;
@@ -455,6 +456,7 @@ public final class	DataDictionaryImpl
 												"SYSCS_INPLACE_COMPRESS_TABLE",
 												"SYSCS_COMPRESS_TABLE",
 												"SYSCS_UPDATE_STATISTICS",
+												"SYSCS_MODIFY_PASSWORD",
 												};
 	
 	/**
@@ -7786,14 +7788,35 @@ public final class	DataDictionaryImpl
 
 	}
 
-	/** 
-	 * Drop a User from the DataDictionary
-	 *
-	 * @param userName The user to drop.
-	 * @param tc	The TransactionController
-	 *
-	 * @exception StandardException		Thrown on failure
-	 */
+	public void updateUser( UserDescriptor newDescriptor,TransactionController tc )
+		throws StandardException
+	{
+		ExecIndexRow				keyRow;
+		TabInfoImpl					ti = getNonCoreTI( SYSUSERS_CATALOG_NUM );
+
+		/* Set up the start/stop position for the scan */
+		keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
+		keyRow.setColumn( 1, new SQLVarchar( newDescriptor.getUserName() ) );
+
+		// this zeroes out the password in the UserDescriptor
+		ExecRow row = ti.getCatalogRowFactory().makeRow( newDescriptor, null );
+
+		boolean[] bArray = { false };
+
+		int[] colsToUpdate =
+            {
+                SYSUSERSRowFactory.HASHINGSCHEME_COL_NUM,
+                SYSUSERSRowFactory.PASSWORD_COL_NUM,
+                SYSUSERSRowFactory.LASTMODIFIED_COL_NUM,
+            };
+
+		ti.updateRow
+            (
+             keyRow, row,
+             SYSUSERSRowFactory.SYSUSERS_INDEX1_ID,
+             bArray, colsToUpdate, tc
+             );
+	}
 
 	public void dropUser( String userName, TransactionController tc )
 			throws StandardException
@@ -13031,6 +13054,67 @@ public final class	DataDictionaryImpl
             createSystemProcedureOrFunction
                 (
                  "SYSCS_CREATE_USER",
+                 sysUtilUUID,
+                 arg_names,
+                 arg_types,
+                 0,
+                 0,
+                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                 false,
+                 (TypeDescriptor) null,
+                 newlyCreatedRoutines,
+                 tc
+                 );
+        }
+        
+        //
+        // SYSCS_RESET_PASSWORD( IN USERNAME  VARCHAR(128), IN PASSWORD VARCHAR(32672) )
+        //
+		
+        {
+            // procedure argument names
+            String[] arg_names = { "userName", "password" };
+
+            // procedure argument types
+            TypeDescriptor[] arg_types =
+                {
+                    CATALOG_TYPE_SYSTEM_IDENTIFIER, 
+                    DataTypeDescriptor.getPasswordDataTypeDescriptor( false )
+                };
+
+            createSystemProcedureOrFunction
+                (
+                 "SYSCS_RESET_PASSWORD",
+                 sysUtilUUID,
+                 arg_names,
+                 arg_types,
+                 0,
+                 0,
+                 RoutineAliasInfo.MODIFIES_SQL_DATA,
+                 false,
+                 (TypeDescriptor) null,
+                 newlyCreatedRoutines,
+                 tc
+                 );
+        }
+        
+        //
+        // SYSCS_MODIFY_PASSWORD( IN PASSWORD VARCHAR(32672) )
+        //
+		
+        {
+            // procedure argument names
+            String[] arg_names = { "password" };
+
+            // procedure argument types
+            TypeDescriptor[] arg_types =
+                {
+                    DataTypeDescriptor.getPasswordDataTypeDescriptor( false )
+                };
+
+            createSystemProcedureOrFunction
+                (
+                 "SYSCS_MODIFY_PASSWORD",
                  sysUtilUUID,
                  arg_names,
                  arg_types,

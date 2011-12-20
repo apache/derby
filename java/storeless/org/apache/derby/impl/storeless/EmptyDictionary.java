@@ -60,6 +60,7 @@ import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TablePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TriggerDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
+import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ViewDescriptor;
 import org.apache.derby.iapi.sql.execute.ExecutionFactory;
 import org.apache.derby.iapi.store.access.TransactionController;
@@ -667,6 +668,12 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		// TODO Auto-generated method stub
 
 	}
+
+	public void updateUser( UserDescriptor newDescriptor,TransactionController tc )
+		throws StandardException
+	{
+		// TODO Auto-generated method stub
+    }
 
 	public void dropUser( String userName, TransactionController tc )
 			throws StandardException

@@ -208,6 +208,12 @@ public class Changes10_9 extends UpgradeChange
             ResultSet   rs = s.executeQuery( "select username from sys.sysusers order by username" );
             rs.next();
             assertEquals( "fred", rs.getString( 1 ) );
+
+            // does nothing
+            s.execute( "call syscs_util.syscs_modify_password( 'test_dbo_password_rev0' )" );
+
+            s.execute( "call syscs_util.syscs_reset_password( 'fred', 'fredpassword_rev2' )" );
+
             
             s.execute( "call syscs_util.syscs_drop_user( 'fred' )" );
             

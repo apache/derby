@@ -1670,6 +1670,26 @@ public interface DataDictionary
 									TransactionController tc)
 			throws StandardException;
 
+	/**
+	 * Update a user. Changes all columns in the corresponding SYSUSERS row
+     * except for the user name.
+	 *
+	 * @param newDescriptor New values for columns in the SYSUSERS row.
+	 * @param tc					The TransactionController to use
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public void updateUser( UserDescriptor newDescriptor,TransactionController tc )
+		throws StandardException;
+
+	/** 
+	 * Drop a User from the DataDictionary
+	 *
+	 * @param userName The user to drop.
+	 * @param tc	The TransactionController
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
 	public void dropUser( String userName, TransactionController tc )
         throws StandardException;
     
