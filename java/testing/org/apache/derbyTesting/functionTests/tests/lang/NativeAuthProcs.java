@@ -188,6 +188,7 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         createUserTests( dboConnection, janetConnection );
         resetPasswordTests( dboConnection, janetConnection );
         modifyPasswordTests( dboConnection, janetConnection );
+        if ( authorizationIsOn() ) { grantRevokeTests( dboConnection, janetConnection ); }
     }
     private boolean dboExists( Connection conn )
         throws Exception
@@ -419,6 +420,33 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         assertTrue( newerLastModified > newLastModified );
 
         return newerLastModified;
+    }
+    
+    //
+    // Grant/Revoke
+    //
+    private void    grantRevokeTests
+        ( Connection dboConnection, Connection janetConnection )
+        throws Exception
+    {
+        goodStatement( dboConnection, "grant execute on procedure syscs_util.syscs_create_user to JANET" );
+        goodStatement( dboConnection, "grant execute on procedure syscs_util.syscs_reset_password to JANET" );
+        goodStatement( dboConnection, "grant execute on procedure syscs_util.syscs_drop_user to JANET" );
+
+        goodStatement( janetConnection, "call syscs_util.syscs_create_user( 'JOE', 'joepassword' )" );
+        goodStatement( janetConnection, "call syscs_util.syscs_reset_password( 'JOE', 'joepassword_rev3' )" );
+        goodStatement( janetConnection, "call syscs_util.syscs_drop_user( 'JOE' )" );
+
+        goodStatement( dboConnection, "revoke execute on procedure syscs_util.syscs_create_user from JANET restrict" );
+        goodStatement( dboConnection, "revoke execute on procedure syscs_util.syscs_reset_password from JANET restrict" );
+        goodStatement( dboConnection, "revoke execute on procedure syscs_util.syscs_drop_user from JANET restrict" );
+        
+        expectExecutionError
+            ( janetConnection, NO_EXECUTE_PERMISSION, "call syscs_util.syscs_create_user( 'JOE', 'joepassword' )" );
+        expectExecutionError
+            ( janetConnection, NO_EXECUTE_PERMISSION, "call syscs_util.syscs_reset_password( 'JOE', 'joepassword_rev3' )" );
+        expectExecutionError
+            ( janetConnection, NO_EXECUTE_PERMISSION, "call syscs_util.syscs_drop_user( 'JOE' )" );
     }
     
 }
