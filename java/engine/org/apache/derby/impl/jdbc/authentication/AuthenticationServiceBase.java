@@ -55,6 +55,7 @@ import java.security.NoSuchAlgorithmException;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.security.SecureRandom;
 import java.util.Dictionary;
 import java.util.Properties;
 import org.apache.derby.iapi.reference.SQLState;
@@ -142,6 +143,16 @@ public abstract class AuthenticationServiceBase
      * hash authentication scheme.
      */
     public static final String ID_PATTERN_CONFIGURABLE_HASH_SCHEME = "3b61";
+
+    /**
+     * Pattern that is prefixed to the stored password in the configurable
+     * hash authentication scheme if key stretching has been applied. This
+     * scheme extends the configurable hash scheme by adding a random salt and
+     * applying the hash function multiple times when generating the hashed
+     * token.
+     */
+    public static final String
+            ID_PATTERN_CONFIGURABLE_STRETCHED_SCHEME = "3b62";
 
     /**
         Userid with Strong password substitute DRDA security mechanism
@@ -520,9 +531,14 @@ public abstract class AuthenticationServiceBase
 
     /**
      * <p>
-     * Encrypt a password using the specified hash algorithm and with the
-     * user name as extra salt. The algorithm must be supported by one of
-     * the registered security providers in the JVM.
+     * Hash credentials using the specified hash algorithm, possibly performing
+     * key stretching by adding random salt and applying the hash function
+     * multiple times.
+     * </p>
+     *
+     * <p>
+     * The algorithm must be supported by one of the registered security
+     * providers in the JVM.
      * </p>
      *
      * <p>
@@ -532,16 +548,29 @@ public abstract class AuthenticationServiceBase
      * @param user the user whose password to encrypt
      * @param password the plain text password
      * @param algorithm the hash algorithm to use
+     * @param salt random salt to add to the credentials (possibly {@code null})
+     * @param iterations the number of times to apply the hash function
      * @return a digest of the user name and password formatted as a string,
      *         or {@code null} if {@code password} is {@code null}
      * @throws StandardException if the specified algorithm is not supported
      */
     String encryptPasswordConfigurableScheme(
-            String user, String password, String algorithm)
+            String user, String password, String algorithm,
+            byte[] salt, int iterations)
             throws StandardException
     {
         if (password == null) {
             return null;
+        }
+
+        byte[] userBytes;
+        byte[] passwordBytes;
+        try {
+            userBytes = user.getBytes(ENCODING);
+            passwordBytes = password.getBytes(ENCODING);
+        } catch (UnsupportedEncodingException uee) {
+            // UTF-8 should always be available, so this should never happen.
+            throw StandardException.plainWrapException(uee);
         }
 
         MessageDigest md;
@@ -552,21 +581,36 @@ public abstract class AuthenticationServiceBase
                     SQLState.DIGEST_NO_SUCH_ALGORITHM, nsae, algorithm);
         }
 
-        md.reset();
-
-        try {
-            md.update(user.getBytes(ENCODING));
-            md.update(password.getBytes(ENCODING));
-        } catch (UnsupportedEncodingException uee) {
-            // UTF-8 should always be available, so this should never happen.
-            throw StandardException.plainWrapException(uee);
+        byte[] digest = null;
+        for (int i = 0; i < iterations; i++) {
+            md.reset();
+            if (digest != null) {
+                md.update(digest);
+            }
+            md.update(userBytes);
+            md.update(passwordBytes);
+            if (salt != null) {
+                md.update(salt);
+            }
+            digest = md.digest();
         }
 
-        byte[] digest = md.digest();
-
-        return ID_PATTERN_CONFIGURABLE_HASH_SCHEME +
+        if ((salt == null || salt.length == 0) && iterations == 1) {
+            // No salt was used, and only a single iteration, which is
+            // identical to the default hashing scheme in 10.6-10.8. Generate
+            // a token on a format compatible with those old versions.
+            return ID_PATTERN_CONFIGURABLE_HASH_SCHEME +
                 StringUtil.toHexString(digest, 0, digest.length) +
                 SEPARATOR_CHAR + algorithm;
+        } else {
+            // Salt and/or multiple iterations was used, so we need to add
+            // those parameters to the token in order to verify the credentials
+            // later.
+            return ID_PATTERN_CONFIGURABLE_STRETCHED_SCHEME +
+                StringUtil.toHexString(digest, 0, digest.length) +
+                SEPARATOR_CHAR + StringUtil.toHexString(salt, 0, salt.length) +
+                SEPARATOR_CHAR + iterations + SEPARATOR_CHAR + algorithm;
+        }
     }
 
     /**
@@ -596,14 +640,19 @@ public abstract class AuthenticationServiceBase
                                                 String password,
                                                 Dictionary props)
             throws StandardException {
+        DataDictionary dd = getDataDictionary();
 
         // Support for configurable hash algorithm was added in Derby 10.6, so
         // we don't want to store a hash using the new scheme if the database
         // is running in soft upgrade and may be used with an older version
         // later.
         boolean supportConfigurableHash =
-                getDataDictionary().checkVersion(
-                        DataDictionary.DD_VERSION_DERBY_10_6, null);
+                dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_6, null);
+
+        // Support for key stretching was added in Derby 10.9, so don't use it
+        // if the database may still be used with an older version.
+        boolean supportKeyStretching =
+                dd.checkVersion(DataDictionary.DD_VERSION_DERBY_10_9, null);
 
         if (supportConfigurableHash) {
             String algorithm = (String)
@@ -612,12 +661,78 @@ public abstract class AuthenticationServiceBase
                         Property.AUTHENTICATION_BUILTIN_ALGORITHM);
 
             if (algorithm != null && algorithm.length() > 0) {
+                byte[] salt = null;
+                int iterations = 1;
+
+                if (supportKeyStretching) {
+                    salt = generateRandomSalt(props);
+                    iterations = getIntProperty(
+                            props,
+                            Property.AUTHENTICATION_BUILTIN_ITERATIONS,
+                            Property.AUTHENTICATION_BUILTIN_ITERATIONS_DEFAULT,
+                            1, Integer.MAX_VALUE);
+                }
+
                 return encryptPasswordConfigurableScheme(
-                        user, password, algorithm);
+                        user, password, algorithm, salt, iterations);
             }
         }
 
         return encryptPasswordSHA1Scheme(password);
+    }
+
+    /**
+     * Get the value of an integer property.
+     *
+     * @param props database properties
+     * @param key the key of the property
+     * @param defaultValue which value to return if the property is not set,
+     *   or if the property value is not in the valid range
+     * @param minValue lowest property value to accept
+     * @param maxValue highest property value to accept
+     * @return the value of the property
+     */
+    private int getIntProperty(
+            Dictionary props, String key,
+            int defaultValue, int minValue, int maxValue) {
+
+        String sVal = (String) PropertyUtil.getPropertyFromSet(props, key);
+
+        if (sVal != null) {
+            try {
+                int i = Integer.parseInt(sVal);
+                if (i >= minValue && i <= maxValue) {
+                    return i;
+                }
+            } catch (NumberFormatException nfe) {
+                // By convention, Derby ignores property values that cannot be
+                // parsed. Use the default value instead.
+            }
+        }
+
+        return defaultValue;
+    }
+
+    /**
+     * Generate an array of random bytes to use as salt when hashing
+     * credentials.
+     *
+     * @param props database properties that possibly specify the desired
+     *   length of the salt
+     * @return random bytes
+     */
+    private byte[] generateRandomSalt(Dictionary props) {
+        int saltLength = getIntProperty(
+                props,
+                Property.AUTHENTICATION_BUILTIN_SALT_LENGTH,
+                Property.AUTHENTICATION_BUILTIN_SALT_LENGTH_DEFAULT,
+                0, Integer.MAX_VALUE);
+
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[saltLength];
+        random.nextBytes(salt);
+
+        return salt;
     }
 
     /**

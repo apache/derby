@@ -828,6 +828,31 @@ public interface Property {
     public static final String AUTHENTICATION_BUILTIN_ALGORITHM_FALLBACK =
             "SHA-1";
 
+    /**
+     * Property that specifies the number of bytes with random salt to use
+     * when hashing credentials using the configurable hash authentication
+     * scheme.
+     */
+    public static final String AUTHENTICATION_BUILTIN_SALT_LENGTH =
+            "derby.authentication.builtin.saltLength";
+
+    /**
+     * The default value for derby.authentication.builtin.saltLength.
+     */
+    public static final int AUTHENTICATION_BUILTIN_SALT_LENGTH_DEFAULT = 16;
+
+    /**
+     * Property that specifies the number of times to apply the hash
+     * function in the configurable hash authentication scheme.
+     */
+    public static final String AUTHENTICATION_BUILTIN_ITERATIONS =
+            "derby.authentication.builtin.iterations";
+
+    /**
+     * Default value for derby.authentication.builtin.iterations.
+     */
+    public static final int AUTHENTICATION_BUILTIN_ITERATIONS_DEFAULT = 1000;
+
 	/*
 	** Log
 	*/

@@ -64,6 +64,12 @@ public class AuthenticationTest extends BaseJDBCTestCase {
     private static final String BUILTIN_ALGO_PROP =
             "derby.authentication.builtin.algorithm";
 
+    private static final String BUILTIN_SALT_LENGTH_PROP =
+            "derby.authentication.builtin.saltLength";
+
+    private static final String BUILTIN_ITERATIONS_PROP =
+            "derby.authentication.builtin.iterations";
+
     private static final String USER_PREFIX = "derby.user.";
 
     private static final String NO_SUCH_ALGO = "XBCXW";
@@ -1139,32 +1145,64 @@ public class AuthenticationTest extends BaseJDBCTestCase {
                 continue;
             }
 
-            setDatabaseProperty(BUILTIN_ALGO_PROP, algo);
+            // Test the algorithm with and without key stretching (added in
+            // DERBY-5539)
+            testVariousBuiltinAlgorithms(algo, true);
+            testVariousBuiltinAlgorithms(algo, false);
+        }
+    }
 
-            for (int j = 0; j < USERS.length; j++) {
-                String user = USERS[j];
-                String password = user + PASSWORD_SUFFIX;
-                String userProp = USER_PREFIX + user;
+    /**
+     * Worker method for {@link #testVariousBuiltinAlgorithms()}.
+     *
+     * @param algo the name of the hash algorithm to test
+     * @param keyStretching whether or not to use the authentication scheme that
+     *   performs key stretching
+     */
+    private void testVariousBuiltinAlgorithms(String algo, boolean keyStretching)
+            throws SQLException {
+        setDatabaseProperty(BUILTIN_ALGO_PROP, algo);
 
-                // Set the password for the user
-                setDatabaseProperty(userProp, password);
+        if (keyStretching) {
+            // Unset the properties specifying salt length and iterations, so
+            // we get the default scheme (with key stretching)
+            setDatabaseProperty(BUILTIN_SALT_LENGTH_PROP, null);
+            setDatabaseProperty(BUILTIN_ITERATIONS_PROP, null);
+        } else {
+            // Disable salt and use a single iteration
+            setDatabaseProperty(BUILTIN_SALT_LENGTH_PROP, "0");
+            setDatabaseProperty(BUILTIN_ITERATIONS_PROP, "1");
+        }
 
-                // Get the stored password token and verify that it
-                // hashed the way we expect it to be
-                String token = getDatabaseProperty(userProp);
-                if (algo == null) {
-                    assertTrue("Expected old authentication schema: " + token,
-                               token.startsWith("3b60"));
+        for (int i = 0; i < USERS.length; i++) {
+            String user = USERS[i];
+            String password = user + PASSWORD_SUFFIX;
+            String userProp = USER_PREFIX + user;
+
+            // Set the password for the user
+            setDatabaseProperty(userProp, password);
+
+            // Get the stored password token and verify that it
+            // hashed the way we expect it to be
+            String token = getDatabaseProperty(userProp);
+            if (algo == null) {
+                assertTrue("Expected old authentication scheme: " + token,
+                           token.startsWith("3b60"));
+            } else {
+                if (keyStretching) {
+                    assertTrue("Expected configurable hash scheme with "+
+                               "key stretching: " + token,
+                               token.startsWith("3b62"));
                 } else {
-                    assertTrue("Expected configurable hash schema: " + token,
+                    assertTrue("Expected configurable hash scheme: " + token,
                                token.startsWith("3b61"));
-                    assertTrue("Expected algorithm " + algo + ":" + token,
-                               token.endsWith(":" + algo));
                 }
-
-                // Verify that we can still connect as that user
-                openDefaultConnection(user, password).close();
+                assertTrue("Expected algorithm " + algo + ":" + token,
+                           token.endsWith(":" + algo));
             }
+
+            // Verify that we can still connect as that user
+            openDefaultConnection(user, password).close();
         }
     }
 

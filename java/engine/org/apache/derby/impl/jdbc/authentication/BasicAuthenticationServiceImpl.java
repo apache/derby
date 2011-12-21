@@ -276,7 +276,21 @@ public final class BasicAuthenticationServiceImpl
                         ID_PATTERN_CONFIGURABLE_HASH_SCHEME)) {
             String algorithm = storedPassword.substring(
                     storedPassword.indexOf(SEPARATOR_CHAR) + 1);
-            return encryptPasswordConfigurableScheme(user, password, algorithm);
+            return encryptPasswordConfigurableScheme(
+                    user, password, algorithm, null, 1);
+        } else if (storedPassword.startsWith(
+                        ID_PATTERN_CONFIGURABLE_STRETCHED_SCHEME)) {
+            int saltPos = storedPassword.indexOf(SEPARATOR_CHAR) + 1;
+            int iterPos = storedPassword.indexOf(SEPARATOR_CHAR, saltPos) + 1;
+            int algoPos = storedPassword.indexOf(SEPARATOR_CHAR, iterPos) + 1;
+
+            byte[] salt = StringUtil.fromHexString(
+                    storedPassword, saltPos, iterPos - saltPos - 1);
+            int iterations = Integer.parseInt(
+                    storedPassword.substring(iterPos, algoPos - 1));
+            String algorithm = storedPassword.substring(algoPos);
+            return encryptPasswordConfigurableScheme(
+                    user, password, algorithm, salt, iterations);
         } else {
             if (SanityManager.DEBUG) {
                 SanityManager.THROWASSERT(
