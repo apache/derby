@@ -2046,7 +2046,7 @@ public class SystemProcedures  {
     public static void SYSCS_CREATE_USER
         (
          String userName,
-         char[] password
+         String password
          )
         throws SQLException
     {
@@ -2066,7 +2066,7 @@ public class SystemProcedures  {
             */
             dd.startWriting(lcc);
 
-            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password );
+            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password.toCharArray() );
 
             dd.addDescriptor( userDescriptor, null, DataDictionary.SYSUSERS_CATALOG_NUM, false, tc );
             
@@ -2104,7 +2104,7 @@ public class SystemProcedures  {
     public static void SYSCS_RESET_PASSWORD
         (
          String userName,
-         char[] password
+         String password
          )
         throws SQLException
     {
@@ -2124,7 +2124,7 @@ public class SystemProcedures  {
             */
             dd.startWriting(lcc);
 
-            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password );
+            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password.toCharArray() );
 
             dd.updateUser( userDescriptor, tc );
             
@@ -2136,7 +2136,7 @@ public class SystemProcedures  {
      */
     public static void SYSCS_MODIFY_PASSWORD
         (
-         char[] password
+         String password
          )
         throws SQLException
     {

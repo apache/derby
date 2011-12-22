@@ -135,7 +135,6 @@ public class BasicSortObserver implements SortObserver
 
 
 	private DataValueDescriptor[] getClone(DataValueDescriptor[] origArray)
-        throws StandardException
 	{
 		/* If the free list is not empty, then
 		 * get an DataValueDescriptor[] from there and swap

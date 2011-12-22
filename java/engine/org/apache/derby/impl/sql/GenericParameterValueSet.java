@@ -79,7 +79,6 @@ final class GenericParameterValueSet implements ParameterValueSet
 	** Construct a pvs by cloning a pvs.
 	*/
 	private GenericParameterValueSet(int numParms, GenericParameterValueSet pvs)
-        throws StandardException
 	{
 		this.hasReturnOutputParam = pvs.hasReturnOutputParam;
 		this.ci = pvs.ci;
@@ -327,7 +326,6 @@ final class GenericParameterValueSet implements ParameterValueSet
 
 
 	public ParameterValueSet getClone()
-        throws StandardException
 	{
 		return(new GenericParameterValueSet(parms.length, this));
 	}

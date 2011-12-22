@@ -299,7 +299,7 @@ public interface Activation extends Dependent
 
 		@return	A RowLocation template for the conglomerate
 	 */
-	public RowLocation getRowLocationTemplate(int itemNumber) throws StandardException;
+	public RowLocation getRowLocationTemplate(int itemNumber);
 
 	/**
 		Get the number of subqueries in the entire query.

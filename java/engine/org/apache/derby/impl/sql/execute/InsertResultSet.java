@@ -2439,7 +2439,7 @@ class InsertResultSet extends DMLWriteResultSet implements TargetResultSet
 			this.row = row;
 		}
 
-		public Object invoke(Object ref) throws StandardException
+		public Object invoke(Object ref)
 		{
 			return row.getClone();
 		}

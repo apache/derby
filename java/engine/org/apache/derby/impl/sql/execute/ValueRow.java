@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.sql.execute;
 
-import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.execute.ExecRow;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -103,13 +102,12 @@ public class ValueRow implements ExecRow
 	*/
 
 	// position is 1-based
-	public ExecRow getClone() throws StandardException
+	public ExecRow getClone() 
 	{
 		return getClone((FormatableBitSet) null);
 	}
 
 	public ExecRow getClone(FormatableBitSet clonedCols)
-        throws StandardException
 	{
 		int numColumns = column.length;
 
@@ -170,7 +168,6 @@ public class ValueRow implements ExecRow
 
 	// position is 1-based
 	public final DataValueDescriptor cloneColumn(int columnPosition)
-        throws StandardException
 	{
         return column[columnPosition -1].cloneValue(false);
 	}
@@ -210,8 +207,7 @@ public class ValueRow implements ExecRow
 
 		@see ExecRow#getRowArray
 	*/
-	public DataValueDescriptor[] getRowArrayClone()
-        throws StandardException
+	public DataValueDescriptor[] getRowArrayClone() 
 	{
 		int numColumns = column.length;
 		DataValueDescriptor[] columnClones = new DataValueDescriptor[numColumns];

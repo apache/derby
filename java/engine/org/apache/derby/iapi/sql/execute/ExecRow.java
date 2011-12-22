@@ -21,7 +21,6 @@
 
 package org.apache.derby.iapi.sql.execute;
 
-import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.io.FormatableBitSet;
 import org.apache.derby.iapi.sql.Row;
 import org.apache.derby.iapi.types.DataValueDescriptor;
@@ -40,7 +39,7 @@ public interface ExecRow extends Row {
 	 *
 	 * @return Row	A clone of the Row and its contents.
 	 */
-	ExecRow getClone() throws StandardException;
+	ExecRow getClone();
 
 	/**
 	 * Clone the Row.  The cloned row will contain clones of the
@@ -51,7 +50,7 @@ public interface ExecRow extends Row {
 	 *
 	 * @return Row	A clone of the Row and its contents.
 	 */
-	ExecRow getClone(FormatableBitSet clonedCols) throws StandardException;
+	ExecRow getClone(FormatableBitSet clonedCols);
 
 	/**
 	 * Get a new row with the same columns type as this one, containing nulls.
@@ -71,14 +70,14 @@ public interface ExecRow extends Row {
 	 *
 	 * @param columnPosition (1 based)
 	 */
-	DataValueDescriptor cloneColumn(int columnPosition) throws StandardException;
+	DataValueDescriptor cloneColumn(int columnPosition);
 
 	/**
 		Get a clone of the array form of the row that Access expects.
 
 		@see ExecRow#getRowArray
 	*/
-	public DataValueDescriptor[] getRowArrayClone() throws StandardException;
+	public DataValueDescriptor[] getRowArrayClone();
 
 	/**
 		Return the array of objects that the store needs.

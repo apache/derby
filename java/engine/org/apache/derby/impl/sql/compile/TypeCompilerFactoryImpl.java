@@ -45,7 +45,6 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
         static TypeCompiler bitTypeCompiler;
         static TypeCompiler booleanTypeCompiler;
         static TypeCompiler charTypeCompiler;
-        static TypeCompiler passwordTypeCompiler;
         static TypeCompiler decimalTypeCompiler ;
         static TypeCompiler doubleTypeCompiler ;
         static TypeCompiler intTypeCompiler ;
@@ -81,14 +80,6 @@ public class TypeCompilerFactoryImpl implements TypeCompilerFactory
         static TypeCompiler staticGetTypeCompiler(TypeId typeId)
         {
                 String sqlTypeName;
-
-                if ( typeId.isPasswordTypeId() )
-                {
-                    return passwordTypeCompiler =
-                        getAnInstance(PACKAGE_NAME + "CharTypeCompiler",
-                                      passwordTypeCompiler,
-                                      typeId);
-                }
 
                 switch (typeId.getJDBCTypeId())
                 {

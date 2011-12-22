@@ -1034,28 +1034,24 @@ public abstract class EmbedPreparedStatement
      * @exception SQLException if a database-access error occurs.
      */
     public void addBatch() throws SQLException {
-        checkStatus();
+	  checkStatus();
 
-        // need to synchronize to ensure that two threads
-        // don't both create a Vector at the same time. This
-        // would lead to one of the set of parameters being thrown
-        // away
-        synchronized (getConnectionSynchronization()) {
-            if (batchStatements == null)
-                batchStatements = new Vector();
+	  // need to synchronized to ensure that two threads
+	  // don't both create a Vector at the same time. This
+	  // would lead to one of the set of parameters being thrown
+	  // away
+  	  synchronized (getConnectionSynchronization()) {
+  			if (batchStatements == null)
+  				batchStatements = new Vector();
 
-            try {
-                //get a clone of the parameterValueSet and save it in the vector
-                //which will be used later on at the time of batch execution.
-                //This way we will get a copy of the current statement's parameter
-                //values rather than a pointer to the statement's parameter value
-                //set which will change with every new statement in the batch.
-                batchStatements.add(getParms().getClone());
-                clearParameters();
-            } catch (StandardException t) {
-                throw EmbedResultSet.noStateChangeException(t);
-            }
-        }
+          //get a clone of the parameterValueSet and save it in the vector
+          //which will be used later on at the time of batch execution.
+          //This way we will get a copy of the current statement's parameter
+          //values rather than a pointer to the statement's parameter value
+          //set which will change with every new statement in the batch.
+          batchStatements.add(getParms().getClone());
+          clearParameters();
+  	  }
     }
 
 	boolean executeBatchElement(Object batchElement) throws SQLException, StandardException {

@@ -163,9 +163,7 @@ public class XML
      *      underlying source data
      */
     private XML(SQLChar val, int xmlType, boolean seqWithAttr,
-            boolean materialize)
-        throws StandardException
-    {
+            boolean materialize) {
         xmlStringValue = (val == null ? null
                                       : (SQLChar)val.cloneValue(materialize));
         setXType(xmlType);
@@ -180,9 +178,7 @@ public class XML
     /**
      * @see DataValueDescriptor#cloneValue
      */
-    public DataValueDescriptor cloneValue(boolean forceMaterialization)
-        throws StandardException
-    {
+    public DataValueDescriptor cloneValue(boolean forceMaterialization) {
         return new XML(xmlStringValue, getXType(), hasTopLevelAttr(),
                 forceMaterialization);
     }

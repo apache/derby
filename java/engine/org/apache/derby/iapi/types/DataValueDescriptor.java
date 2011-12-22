@@ -326,7 +326,7 @@ public interface DataValueDescriptor extends Storable, Orderable
      *
      * @return A clone of this descriptor, which shares the internal state.
      */
-    public DataValueDescriptor cloneHolder() throws StandardException;
+    public DataValueDescriptor cloneHolder();
 
     /**
      * Clone this DataValueDescriptor. Results in a new object
@@ -347,7 +347,7 @@ public interface DataValueDescriptor extends Storable, Orderable
      *      value as this.
      */
     public abstract DataValueDescriptor cloneValue(
-            boolean forceMaterialization) throws StandardException;
+            boolean forceMaterialization);
 
     /**
      * Recycle this DataValueDescriptor if possible. Create and return a new

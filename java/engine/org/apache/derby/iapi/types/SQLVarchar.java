@@ -57,7 +57,6 @@ public class SQLVarchar
 
     /** @see DataValueDescriptor#cloneValue */
     public DataValueDescriptor cloneValue(boolean forceMaterialization)
-        throws StandardException
 	{
 		try
 		{

@@ -69,7 +69,6 @@ public class RowUtil
 	  @param count Clone this number of columns.
 	  */
 	public static void copyCloneColumns(ExecRow to, ExecRow from, int count)
-        throws StandardException
 	{
 		for (int ix = 1; ix <= count; ix++)
 		{

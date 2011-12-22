@@ -13048,7 +13048,7 @@ public final class	DataDictionaryImpl
             TypeDescriptor[] arg_types =
                 {
                     CATALOG_TYPE_SYSTEM_IDENTIFIER, 
-                    DataTypeDescriptor.getPasswordDataTypeDescriptor( false )
+                    DataTypeDescriptor.getCatalogType( Types.VARCHAR, 32672 )
                 };
 
             createSystemProcedureOrFunction
@@ -13079,7 +13079,7 @@ public final class	DataDictionaryImpl
             TypeDescriptor[] arg_types =
                 {
                     CATALOG_TYPE_SYSTEM_IDENTIFIER, 
-                    DataTypeDescriptor.getPasswordDataTypeDescriptor( false )
+                    DataTypeDescriptor.getCatalogType( Types.VARCHAR, 32672 )
                 };
 
             createSystemProcedureOrFunction
@@ -13109,7 +13109,7 @@ public final class	DataDictionaryImpl
             // procedure argument types
             TypeDescriptor[] arg_types =
                 {
-                    DataTypeDescriptor.getPasswordDataTypeDescriptor( false )
+                    DataTypeDescriptor.getCatalogType( Types.VARCHAR, 32672 )
                 };
 
             createSystemProcedureOrFunction

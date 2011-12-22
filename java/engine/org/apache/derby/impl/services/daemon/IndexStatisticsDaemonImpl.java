@@ -1204,9 +1204,7 @@ public class IndexStatisticsDaemonImpl
          *
          * @param ir index row (template)
          */
-        public KeyComparator(ExecIndexRow ir)
-            throws StandardException
-        {
+        public KeyComparator(ExecIndexRow ir) {
             rowBufferArray = new DataValueDescriptor[FETCH_SIZE][];
             rowBufferArray[0] = ir.getRowArray(); // 1 gets old objects.
             lastUniqueKey = ir.getRowArrayClone();

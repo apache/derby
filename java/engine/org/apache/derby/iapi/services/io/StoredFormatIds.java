@@ -257,18 +257,6 @@ public interface StoredFormatIds {
             (MIN_ID_2 + 265);
     
     /**
-        class org.apache.derby.iapi.types.PasswordTypeId
-     */
-    static public final int PASSWORD_TYPE_ID =
-            (MIN_ID_2 + 475);
-    
-    /**
-        class org.apache.derby.catalog.types.PasswordTypeIdImpl
-     */
-    static public final int PASSWORD_TYPE_ID_IMPL =
-            (MIN_ID_2 + 476);
-    
-    /**
         class org.apache.derby.iapi.types.VarcharTypeId
      */
     static public final int VARCHAR_TYPE_ID =
@@ -1529,9 +1517,6 @@ public interface StoredFormatIds {
     public static final int SQL_LONGINT_ID = 
             (MIN_ID_2 + 84);
 
-    public static final int SQL_PASSWORD_ID = 
-            (MIN_ID_2 + 477);
-
     public static final int SQL_VARCHAR_ID = 
             (MIN_ID_2 + 85);
 
@@ -1919,7 +1904,7 @@ public interface StoredFormatIds {
      * Make sure this is updated when a new module is added
      */
     public static final int MAX_ID_2 =
-            (MIN_ID_2 + 477);
+            (MIN_ID_2 + 474);
 
     // DO NOT USE 4 BYTE IDS ANYMORE
     static public final int MAX_ID_4 =

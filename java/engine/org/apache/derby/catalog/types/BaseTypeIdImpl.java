@@ -185,7 +185,6 @@ public class BaseTypeIdImpl implements Formatable
 			  break;
 
           case StoredFormatIds.CHAR_TYPE_ID_IMPL:
-          case StoredFormatIds.PASSWORD_TYPE_ID_IMPL:
           case StoredFormatIds.VARCHAR_TYPE_ID_IMPL:
           case StoredFormatIds.BLOB_TYPE_ID_IMPL:
           case StoredFormatIds.CLOB_TYPE_ID_IMPL:
@@ -400,12 +399,6 @@ public class BaseTypeIdImpl implements Formatable
           case StoredFormatIds.VARCHAR_TYPE_ID_IMPL:
               schemaName = null;
               unqualifiedName = TypeId.VARCHAR_NAME;
-              JDBCTypeId = Types.VARCHAR;
-              break;
-
-          case StoredFormatIds.PASSWORD_TYPE_ID_IMPL:
-              schemaName = null;
-              unqualifiedName = TypeId.PASSWORD_NAME;
               JDBCTypeId = Types.VARCHAR;
               break;
 

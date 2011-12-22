@@ -433,23 +433,12 @@ public class SQLToJavaValueNode extends JavaValueNode
 			if (returnsNullOnNullState != null)
 				generateReturnsNullOnNullCheck(mbex);
 
-            if ( value.getTypeId().isPasswordTypeId() )
-            {
-                // if we are setting a password, make sure we zero out the value
-                // that was passed in so that it can't be memory-sniffed
-                
-                mbex.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.StringDataValue, "getRawDataAndZeroIt",
-                                "char[]", 0);
-            }
-            else
-            {
-                /* Call getObject() to get the right type of Java value */
-                mbex.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.DataValueDescriptor, "getObject",
-                                "java.lang.Object", 0);
+			/* Call getObject() to get the right type of Java value */
+			mbex.callMethod(VMOpcode.INVOKEINTERFACE, ClassName.DataValueDescriptor, "getObject",
+										"java.lang.Object", 0);
 
-                mbex.cast(value.getTypeId().getCorrespondingJavaTypeName());
-            }
-        }
+			mbex.cast(value.getTypeId().getCorrespondingJavaTypeName());
+		}
 	}
 
 	/**

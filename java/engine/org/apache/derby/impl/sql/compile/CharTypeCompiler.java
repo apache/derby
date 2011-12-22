@@ -147,9 +147,6 @@ public final class CharTypeCompiler extends BaseTypeCompiler
                         case StoredFormatIds.VARCHAR_TYPE_ID:
                                 return "getNullVarchar";
 
-                        case StoredFormatIds.PASSWORD_TYPE_ID:
-                                return "getNullPassword";
-
                         default:
                                 if (SanityManager.DEBUG)
                                 {

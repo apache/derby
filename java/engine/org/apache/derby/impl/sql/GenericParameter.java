@@ -124,7 +124,6 @@ final class GenericParameter
 	 * @return a new generic parameter.
 	 */
 	public GenericParameter getClone(GenericParameterValueSet pvs)
-        throws StandardException
 	{
 		GenericParameter gpClone = new GenericParameter(pvs, isReturnOutputParameter);
         gpClone.initialize(this.getValue().cloneValue(false),
