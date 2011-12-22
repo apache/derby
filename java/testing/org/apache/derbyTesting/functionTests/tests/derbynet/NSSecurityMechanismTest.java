@@ -412,6 +412,10 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             }
         }
 
+        // Before attempting to start a new server, wait for the previous
+        // server to complete and release the server port.
+        NetworkServerTestSetup.waitForAvailablePort();
+
         setSystemProperty("derby.drda.securityMechanism",
                 derby_drda_securityMechanism);
         try {

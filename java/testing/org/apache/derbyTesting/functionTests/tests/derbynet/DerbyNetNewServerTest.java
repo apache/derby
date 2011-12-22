@@ -58,7 +58,15 @@ public class DerbyNetNewServerTest extends BaseJDBCTestCase {
             return new TestSuite("DerbyNetNewServerTest.empty");
         }
     }
-        
+
+    protected void setUp() throws Exception {
+        // The test cases in this test start a new network server. Wait until
+        // the network server in the previous test case has shut down
+        // completely and released the network port before attempting to start
+        // a new server.
+        NetworkServerTestSetup.waitForAvailablePort();
+    }
+
     public void testStartWithPrintWriter()
             throws UnknownHostException,
             Exception {

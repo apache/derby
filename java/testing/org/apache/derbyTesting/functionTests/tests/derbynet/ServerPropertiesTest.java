@@ -393,6 +393,10 @@ public class ServerPropertiesTest  extends BaseJDBCTestCase {
         }
         NetworkServerTestSetup.setDefaultWaitTime();
 
+        // Wait until the server has shut down completely and released the
+        // port.
+        NetworkServerTestSetup.waitForAvailablePort();
+
         /* 
          * The port should be default, but it might not be, so the second argument
          * must be true to accommodate for every case.
