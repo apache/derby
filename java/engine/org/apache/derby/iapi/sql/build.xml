@@ -34,7 +34,7 @@
 
 <!-- Targets -->
 
-  <target name="compile" depends="compile_iapi_sql_jdbc2"/>
+  <target name="compile" depends="compile_iapi_sql_jsr169"/>
 
   <target name="compile_iapi_sql_jsr169">
     <javac
@@ -55,9 +55,6 @@
       </classpath>
       <include name="${derby.dir}/iapi/sql/**"/>
     </javac>
-  </target>
-
-  <target name="compile_iapi_sql_jdbc2" depends="compile_iapi_sql_jsr169">
   </target>
 
 </project>
