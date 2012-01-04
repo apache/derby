@@ -544,7 +544,14 @@ public abstract class BaseTestCase
 	    ArrayList cmdlist = new ArrayList();
 	    cmdlist.add(getJavaExecutableName());
 	    if (isJ9Platform())
+	    {
 	        cmdlist.add("-jcl:foun11");
+            // also add the setting for emma.active so any tests
+            // that fork will work correctly. See DERBY-5558.
+            String emmaactive=getSystemProperty("emma.active");
+            if (emmaactive != null)
+                cmdlist.add("-Demma.active=" + emmaactive);            
+	    }
 	    cmdlist.add("-classpath");
 	    cmdlist.add(getSystemProperty("java.class.path"));
 	    for (int i =0; i < cmd.length;i++) {
