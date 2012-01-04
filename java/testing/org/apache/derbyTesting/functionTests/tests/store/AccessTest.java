@@ -29,6 +29,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
+import junit.framework.AssertionFailedError;
 import junit.framework.Test;
 
 import org.apache.derbyTesting.functionTests.util.Formatters;
@@ -373,14 +374,14 @@ public final class AccessTest extends BaseJDBCTestCase {
             String expScanType, String expStartPosition, String expStopPosition,
             String expQualifier, String expQualifierInfo)
     throws SQLException {
-        
-        ResultSet rs = null;
-        rs = st.executeQuery(
+        ResultSet rs = st.executeQuery(
             "values SYSCS_UTIL.SYSCS_GET_RUNTIMESTATISTICS()");
         rs.next();
-        if(usingEmbedded()){
-            RuntimeStatisticsParser rtsp = new RuntimeStatisticsParser(rs.getString(1));
-            rs.close();
+        RuntimeStatisticsParser rtsp =
+            new RuntimeStatisticsParser(rs.getString(1));
+        rs.close();
+
+        try {
             if (expectedScan.equals("Table"))
                     assertTrue(rtsp.usedTableScan());
             else if (expectedScan.equals("Index"))
@@ -412,6 +413,10 @@ public final class AccessTest extends BaseJDBCTestCase {
                 assertTrue(rtsp.hasEqualsQualifier());
             if (expQualifierInfo !=null)
                 assertTrue(rtsp.findString(expQualifierInfo, 1));
+        } catch (AssertionFailedError e) {
+            // One of the assertions failed. Report the full statistics
+            // to help debugging.
+            fail("Statistics didn't match:\n" + rtsp.toString(), e);
         }
     }
     
