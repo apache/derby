@@ -54,6 +54,10 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
     private static  final   String      NO_EXECUTE_PERMISSION = "42504";
     private static  final   String      DUPLICATE_USER = "X0Y68";
     private static  final   String      CANT_DROP_DBO = "4251F";
+    private static  final   String      WEAK_AUTHENTICATION = "4251G";
+
+    private static  final   String      HASHING_FORMAT_10_9 = "3b62";
+    private static  final   int           HEX_CHARS_PER_BYTE = 2;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -179,6 +183,14 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         Connection  dboConnection = openUserConnection( TEST_DBO );
         Connection  janetConnection = openUserConnection( JANET );
 
+        // set a message digest algorithm in case it was unset by a previous test.
+        // a message digest algorithm must be set in order to use NATIVE authentication
+        String  defaultDigestAlgorithm = getDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm" );
+        if ( defaultDigestAlgorithm == null )
+        {
+            setDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm", "SHA-1" );
+        }
+
         if ( !dboExists( dboConnection ) )
         {
             goodStatement( dboConnection, "call syscs_util.syscs_create_user( 'TEST_DBO', 'test_dbopassword' )" );
@@ -189,6 +201,14 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         resetPasswordTests( dboConnection, janetConnection );
         modifyPasswordTests( dboConnection, janetConnection );
         if ( authorizationIsOn() ) { grantRevokeTests( dboConnection, janetConnection ); }
+
+        passwordHashingTests( dboConnection );
+
+        // reset the message digest algorithm in order to not disrupt the existing tests
+        if ( defaultDigestAlgorithm == null )
+        {
+            setDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm", null );
+        }
     }
     private boolean dboExists( Connection conn )
         throws Exception
@@ -447,6 +467,120 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
             ( janetConnection, NO_EXECUTE_PERMISSION, "call syscs_util.syscs_reset_password( 'JOE', 'joepassword_rev3' )" );
         expectExecutionError
             ( janetConnection, NO_EXECUTE_PERMISSION, "call syscs_util.syscs_drop_user( 'JOE' )" );
+    }
+    
+    //
+    // Create/Drop User
+    //
+    
+    private void    passwordHashingTests
+        ( Connection dboConnection )
+        throws Exception
+    {
+        String  defaultDigestAlgorithm = getDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm" );
+
+        goodStatement( dboConnection, "call syscs_util.syscs_create_user( 'pht', 'phtpassword' )" );
+
+        vetHashingScheme( dboConnection, "pht", HASHING_FORMAT_10_9, 16, 1000, defaultDigestAlgorithm );
+
+        int saltLength = 5;
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.saltLength", Integer.toString( saltLength ) );
+        goodStatement( dboConnection, "call syscs_util.syscs_reset_password( 'pht', 'newsaltlength' )" );
+        vetHashingScheme( dboConnection, "pht", HASHING_FORMAT_10_9, saltLength, 1000, defaultDigestAlgorithm );
+
+        int iterations = 10;
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.iterations", Integer.toString( iterations ) );
+        goodStatement( dboConnection, "call syscs_util.syscs_reset_password( 'pht', 'newiterations' )" );
+        vetHashingScheme( dboConnection, "pht", HASHING_FORMAT_10_9, saltLength, iterations, defaultDigestAlgorithm );
+
+        String digestAlgorithm = "SHA-1";
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm", digestAlgorithm );
+        goodStatement( dboConnection, "call syscs_util.syscs_reset_password( 'pht', 'newiterations' )" );
+        vetHashingScheme( dboConnection, "pht", HASHING_FORMAT_10_9, saltLength, iterations, digestAlgorithm );
+
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm", null );
+        expectExecutionError( dboConnection, WEAK_AUTHENTICATION, "call syscs_util.syscs_reset_password( 'pht', 'badalgorithm' )" );
+
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.saltLength", null );
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.iterations", null );
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm", defaultDigestAlgorithm );
+        goodStatement( dboConnection, "call syscs_util.syscs_drop_user( 'pht' )" );
+    }
+    private void  setDatabaseProperty( Connection conn, String key, String value )
+        throws Exception
+    {
+        if ( value == null ) { value = "cast ( null as varchar( 32672 ) )"; }
+        else { value = "'" + value + "'"; }
+        String  command = "call syscs_util.syscs_set_database_property( '" + key + "', " + value + " )";
+
+        goodStatement( conn, command );
+    }
+    private String  getDatabaseProperty( Connection conn, String key )
+        throws Exception
+    {
+        PreparedStatement   ps = chattyPrepare( conn, "values( syscs_util.syscs_get_database_property( '" + key + "' ) )" );
+        ResultSet   rs = ps.executeQuery();
+
+        try {
+            rs.next();
+            return rs.getString( 1 );
+        }
+        finally
+        {
+            rs.close();
+            ps.close();
+        }
+    }
+    private void    vetHashingScheme
+        (
+         Connection conn,
+         String userName,
+         String expectedHashingFormat,
+         int expectedSaltLength,
+         int expectedIterations,
+         String expectedDigestAlgorithm
+         )
+        throws Exception
+    {
+        String  hashingScheme = getHashingScheme( conn,  userName );
+        int     firstColonPosition = hashingScheme.indexOf( ":" );
+        int     secondColonPosition = hashingScheme.indexOf( ":", firstColonPosition + 1 );
+        int     thirdColonPosition = hashingScheme.indexOf( ":", secondColonPosition + 1 );
+
+        String  actualHashingFormat = hashingScheme.substring( 0, firstColonPosition );
+        String  salt = hashingScheme.substring( firstColonPosition + 1, secondColonPosition );
+        String  iterationString = hashingScheme.substring( secondColonPosition + 1, thirdColonPosition );
+        String  actualDigestAlgorithm = hashingScheme.substring( thirdColonPosition + 1 );
+
+        int     actualSaltLength = salt.length();
+        int     actualIterations = Integer.parseInt( iterationString );
+
+        assertEquals( expectedHashingFormat, actualHashingFormat );
+        assertEquals( expectedSaltLength * HEX_CHARS_PER_BYTE, actualSaltLength );
+        assertEquals( expectedIterations, actualIterations );
+        assertEquals( expectedDigestAlgorithm, actualDigestAlgorithm );
+    }
+    private String  getHashingScheme( Connection conn, String userName )
+        throws Exception
+    {
+        PreparedStatement   ps = conn.prepareStatement( "select userName, hashingScheme from sys.sysusers" );
+        ResultSet   rs = ps.executeQuery();
+
+        try {
+            while ( rs.next() )
+            {
+                if ( userName.equals( rs.getString( 1 )  ) ) { return rs.getString( 2 ); }
+            }
+        } finally
+        {
+            rs.close();
+            ps.close();
+        }
+
+        fail( "Could not find credentials for " + userName );
+
+        // never get here
+        return null;
     }
     
 }

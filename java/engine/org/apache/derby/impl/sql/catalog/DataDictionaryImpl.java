@@ -46,6 +46,7 @@ import org.apache.derby.iapi.sql.dictionary.DefaultDescriptor;
 import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ForeignKeyConstraintDescriptor;
 import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
 import org.apache.derby.iapi.sql.dictionary.TupleDescriptor;
 import org.apache.derby.iapi.sql.dictionary.IndexRowGenerator;
 import org.apache.derby.iapi.sql.dictionary.KeyConstraintDescriptor;
@@ -153,10 +154,13 @@ import org.apache.derby.iapi.services.locks.ShExLockable;
 import org.apache.derby.iapi.services.locks.ShExQual;
 import org.apache.derby.iapi.util.IdUtil;
 
+import java.security.SecureRandom;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Dictionary;
 import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.HashMap;
@@ -1459,6 +1463,104 @@ public final class	DataDictionaryImpl
                 SchemaDescriptor.SYSCS_UTIL_SCHEMA_UUID);
     }
 
+    // returns null if database is at rev level 10.5 or earlier
+    public  PasswordHasher  makePasswordHasher( Dictionary props )
+        throws StandardException
+    {
+        // Support for configurable hash algorithm was added in Derby 10.6, so
+        // we don't want to store a hash using the new scheme if the database
+        // is running in soft upgrade and may be used with an older version
+        // later.
+        boolean supportConfigurableHash = checkVersion(DataDictionary.DD_VERSION_DERBY_10_6, null);
+
+        // Support for key stretching was added in Derby 10.9, so don't use it
+        // if the database may still be used with an older version.
+        boolean supportKeyStretching = checkVersion(DataDictionary.DD_VERSION_DERBY_10_9, null);
+
+        if ( !supportConfigurableHash ) { return null; }
+        else
+        {
+            String algorithm = (String)
+                    PropertyUtil.getPropertyFromSet(
+                        props,
+                        Property.AUTHENTICATION_BUILTIN_ALGORITHM);
+
+            if ( algorithm == null ) { return null; }
+
+            byte[] salt = null;
+            int iterations = 1;
+            
+            if (algorithm != null && algorithm.length() > 0) {
+
+                if (supportKeyStretching) {
+                    salt = generateRandomSalt(props);
+                    iterations = getIntProperty(
+                            props,
+                            Property.AUTHENTICATION_BUILTIN_ITERATIONS,
+                            Property.AUTHENTICATION_BUILTIN_ITERATIONS_DEFAULT,
+                            1, Integer.MAX_VALUE);
+                }
+            }
+
+            return new PasswordHasher( algorithm, salt, iterations );
+        }
+    }
+    
+    /**
+     * Generate an array of random bytes to use as salt when hashing
+     * credentials.
+     *
+     * @param props database properties that possibly specify the desired
+     *   length of the salt
+     * @return random bytes
+     */
+    private byte[] generateRandomSalt(Dictionary props) {
+        int saltLength = getIntProperty(
+                props,
+                Property.AUTHENTICATION_BUILTIN_SALT_LENGTH,
+                Property.AUTHENTICATION_BUILTIN_SALT_LENGTH_DEFAULT,
+                0, Integer.MAX_VALUE);
+
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[saltLength];
+        random.nextBytes(salt);
+
+        return salt;
+    }
+    /**
+     * Get the value of an integer property.
+     *
+     * @param props database properties
+     * @param key the key of the property
+     * @param defaultValue which value to return if the property is not set,
+     *   or if the property value is not in the valid range
+     * @param minValue lowest property value to accept
+     * @param maxValue highest property value to accept
+     * @return the value of the property
+     */
+    private int getIntProperty(
+            Dictionary props, String key,
+            int defaultValue, int minValue, int maxValue) {
+
+        String sVal = (String) PropertyUtil.getPropertyFromSet(props, key);
+
+        if (sVal != null) {
+            try {
+                int i = Integer.parseInt(sVal);
+                if (i >= minValue && i <= maxValue) {
+                    return i;
+                }
+            } catch (NumberFormatException nfe) {
+                // By convention, Derby ignores property values that cannot be
+                // parsed. Use the default value instead.
+            }
+        }
+
+        return defaultValue;
+    }
+
+
+    
 	/**
 	 * Get the descriptor for the system schema. Schema descriptors include 
      * authorization ids and schema ids.

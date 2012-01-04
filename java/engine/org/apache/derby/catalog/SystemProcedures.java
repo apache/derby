@@ -66,6 +66,7 @@ import org.apache.derby.iapi.sql.dictionary.CatalogRowFactory;
 import org.apache.derby.iapi.sql.dictionary.SystemColumn;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DataDescriptorGenerator;
+import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
 import org.apache.derby.iapi.sql.dictionary.SchemaDescriptor;
 import org.apache.derby.iapi.sql.dictionary.TableDescriptor;
 import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
@@ -2066,7 +2067,7 @@ public class SystemProcedures  {
             */
             dd.startWriting(lcc);
 
-            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password.toCharArray() );
+            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password );
 
             dd.addDescriptor( userDescriptor, null, DataDictionary.SYSUSERS_CATALOG_NUM, false, tc );
             
@@ -2076,24 +2077,26 @@ public class SystemProcedures  {
         (
          LanguageConnectionContext lcc,
          String userName,
-         char[] password
+         String password
          )
         throws StandardException
     {
         DataDictionary dd = lcc.getDataDictionary();
         DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
+        PasswordHasher hasher = dd.makePasswordHasher( lcc.getTransactionExecute().getProperties() );
 
-        //
-        // FIXME: DERBY-866 Proper values need to be computed for the
-        // following variables once Knut is done reworking builtin hashing.
-        //
-        String  hashingScheme = "???????";
-        char[]  hashedPassword = password;
+        if ( hasher == null )
+        {
+            throw StandardException.newException( SQLState.WEAK_AUTHENTICATION );
+        }
+
+        String  hashingScheme = hasher.encodeHashingScheme();
+        String  hashedPassword = hasher.hashPasswordIntoString( userName, password );
             
         Timestamp   currentTimestamp = new Timestamp( (new java.util.Date()).getTime() );
 
         UserDescriptor  userDescriptor = ddg.newUserDescriptor
-            ( userName, hashingScheme, hashedPassword, currentTimestamp );
+            ( userName, hashingScheme, hashedPassword.toCharArray(), currentTimestamp );
 
         return userDescriptor;
     }
@@ -2124,7 +2127,7 @@ public class SystemProcedures  {
             */
             dd.startWriting(lcc);
 
-            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password.toCharArray() );
+            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password );
 
             dd.updateUser( userDescriptor, tc );
             

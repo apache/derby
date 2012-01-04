@@ -41,6 +41,7 @@ import org.apache.derby.catalog.UUID;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
 
 import java.sql.Types;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.Hashtable;
 
@@ -401,6 +402,15 @@ public interface DataDictionary
 									   TransactionController tc)
 			throws StandardException;
 
+	/**
+	 * Get the default password hasher for this database level. Returns null
+     * if the system is at rev level 10.5 or earlier.
+	 *
+	 * @param props   The persistent properties used to configure password hashing.
+	 */
+    public  PasswordHasher  makePasswordHasher( Dictionary props )
+        throws StandardException;
+    
 	/**
 	 * Get the descriptor for the system schema. Schema descriptors include 
      * authorization ids and schema ids.

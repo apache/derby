@@ -204,6 +204,13 @@ public class Changes10_9 extends UpgradeChange
     }
     private void    vetNativeProcs( Statement s, boolean shouldExist ) throws Exception
     {
+        // make sure that an authentication algorithm has been set
+        String  defaultDigestAlgorithm = getDatabaseProperty( s, "derby.authentication.builtin.algorithm" );
+        if ( defaultDigestAlgorithm == null )
+        {
+            setDatabaseProperty( s, "derby.authentication.builtin.algorithm", "SHA-1" );
+        }
+
         try {
             s.execute( "call syscs_util.syscs_create_user( 'fred', 'fredpassword' )" );
             
@@ -236,7 +243,35 @@ public class Changes10_9 extends UpgradeChange
             }
             assertSQLState( "42Y03", se );
         }
-        
+
+        // restore the authentication algorithm if we changed it
+        if ( defaultDigestAlgorithm == null )
+        {
+            setDatabaseProperty( s, "derby.authentication.builtin.algorithm", null );
+        }
+    }
+    private void  setDatabaseProperty( Statement s, String key, String value )
+        throws Exception
+    {
+        if ( value == null ) { value = "cast ( null as varchar( 32672 ) )"; }
+        else { value = "'" + value + "'"; }
+        String  command = "call syscs_util.syscs_set_database_property( '" + key + "', " + value + " )";
+
+        s.execute( command );
+    }
+    private String  getDatabaseProperty( Statement s, String key )
+        throws Exception
+    {
+        ResultSet   rs = s.executeQuery( "values( syscs_util.syscs_get_database_property( '" + key + "' ) )" );
+
+        try {
+            rs.next();
+            return rs.getString( 1 );
+        }
+        finally
+        {
+            rs.close();
+        }
     }
     
     /**

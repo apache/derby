@@ -20,6 +20,7 @@
  */
 package org.apache.derby.impl.storeless;
 
+import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Properties;
@@ -47,6 +48,7 @@ import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.DependencyDescriptor;
 import org.apache.derby.iapi.sql.dictionary.FileInfoDescriptor;
 import org.apache.derby.iapi.sql.dictionary.GenericDescriptorList;
+import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
 import org.apache.derby.iapi.sql.dictionary.PermissionsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.RoutinePermsDescriptor;
 import org.apache.derby.iapi.sql.dictionary.SPSDescriptor;
@@ -161,6 +163,13 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		// TODO Auto-generated method stub
 		return false;
 	}
+
+    public  PasswordHasher  makePasswordHasher( Dictionary props )
+        throws StandardException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 	public SchemaDescriptor getSystemSchemaDescriptor()
 			throws StandardException {

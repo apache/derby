@@ -21,6 +21,7 @@
 
 package org.apache.derby.impl.jdbc.authentication;
 
+import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.authentication.UserAuthenticator;
@@ -270,34 +271,14 @@ public final class BasicAuthenticationServiceImpl
                 String user, String password, String storedPassword)
             throws StandardException
     {
-        if (storedPassword.startsWith(ID_PATTERN_SHA1_SCHEME)) {
+        if (storedPassword.startsWith( PasswordHasher.ID_PATTERN_SHA1_SCHEME )) {
             return encryptPasswordSHA1Scheme(password);
-        } else if (storedPassword.startsWith(
-                        ID_PATTERN_CONFIGURABLE_HASH_SCHEME)) {
-            String algorithm = storedPassword.substring(
-                    storedPassword.indexOf(SEPARATOR_CHAR) + 1);
-            return encryptPasswordConfigurableScheme(
-                    user, password, algorithm, null, 1);
-        } else if (storedPassword.startsWith(
-                        ID_PATTERN_CONFIGURABLE_STRETCHED_SCHEME)) {
-            int saltPos = storedPassword.indexOf(SEPARATOR_CHAR) + 1;
-            int iterPos = storedPassword.indexOf(SEPARATOR_CHAR, saltPos) + 1;
-            int algoPos = storedPassword.indexOf(SEPARATOR_CHAR, iterPos) + 1;
+        }
+        else
+        {
+            PasswordHasher  hasher = new PasswordHasher( storedPassword );
 
-            byte[] salt = StringUtil.fromHexString(
-                    storedPassword, saltPos, iterPos - saltPos - 1);
-            int iterations = Integer.parseInt(
-                    storedPassword.substring(iterPos, algoPos - 1));
-            String algorithm = storedPassword.substring(algoPos);
-            return encryptPasswordConfigurableScheme(
-                    user, password, algorithm, salt, iterations);
-        } else {
-            if (SanityManager.DEBUG) {
-                SanityManager.THROWASSERT(
-                        "Unknown authentication scheme for token " +
-                        storedPassword);
-            }
-            return null;
+            return hasher.hashAndEncode( user, password );
         }
     }
 }

@@ -779,6 +779,7 @@ public interface SQLState {
 	String DBO_ONLY                                                         = "4251D";
 	String HIDDEN_COLUMN                                                         = "4251E";
 	String CANT_DROP_DBO                                                         = "4251F";
+	String WEAK_AUTHENTICATION                                               = "4251G";
 
 	String LANG_DB2_NOT_NULL_COLUMN_INVALID_DEFAULT                    = "42601";
 	String LANG_DB2_INVALID_HEXADECIMAL_CONSTANT                    = "42606";
