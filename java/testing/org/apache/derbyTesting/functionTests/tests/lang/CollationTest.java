@@ -476,7 +476,89 @@ public void testNorwayCollation() throws SQLException {
       s.close();
 
       }
-  
+
+  /**
+   * Test USING clause and NATURAL JOIN for case insensitive and
+   * 	case sensitive collations.
+   * As per the SQL spec, "the join columns in a natural join or in a named 
+   *    columns join should be added to the select list by coalescing the 
+   *    column from the left table with the column from the right table. "
+   * DERBY-4631 - Derby does not coalesce as suggested by SQL spec, instead
+   * 	it picks up join column's value from the left table when working with 
+   *    natural left outer join and it picks up the join column's value from 
+   *    the right table when working with natural right outer join. This works
+   *    ok with non-territory based databases. It works ok for natural left
+   *    outer join for territory based database but depending on the data 
+   *    value, it does not always work for natural right outer join in a 
+   *    territory based database as shown in the test cases below.
+   * @throws SQLException
+  */
+public void testUsingClauseAndNaturalJoin() throws SQLException {
+      getConnection().setAutoCommit(false);
+      Statement s = createStatement();
+      String collation; 
+
+      ResultSet rs = null;
+      rs = s.executeQuery("VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')");
+      rs.next();
+      collation = rs.getString(1); 
+	
+      s.executeUpdate("CREATE TABLE derby4631_t1(x varchar(5))");
+      s.executeUpdate("INSERT INTO derby4631_t1 VALUES 'A','B'");
+      s.executeUpdate("CREATE TABLE derby4631_t2(x varchar(5))");
+      s.executeUpdate("INSERT INTO derby4631_t2 VALUES 'b','c'");
+      
+      if (collation != null && collation.equals("TERRITORY_BASED:SECONDARY")) {
+    	  //We are working with a database with case-insensitive collation.
+    	  // Hence row 'b' in derby4631_t2 will find a match in derby4631_t1
+    	  // with row 'B'.
+    	  
+    	  //Derby always picks up the join column's value from the right table
+    	  // when working with RIGHT OUTER JOIN. This causes as issue with 
+    	  // case-sensitive collation for the given data in this test case.
+    	  // We get wrong results below for the 1st column in 2nd row which is 
+    	  // 'B'. As per the SQL spec, the join column's value should always be 
+    	  // the value resulting from coalescing the left table's column value 
+    	  // with the right table's column value but Derby instead always picks
+    	  // up right table's column value
+          checkLangBasedQuery(s, "SELECT x, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
+          		new String[][] {{"A","A"},{"B","b"}});
+          //Derby always picks up the join column's value from the left table
+          // when working with LEFT OUTER JOIN. This logic deos not cause any
+          // issue with territory or non-territory based databases. We get 
+          // correct results even though Derby is not doing a coalesce on left 
+          // table's column value and right table's column value as required
+          // by SQL spec. This is because, in case of LEFT OUTER JOIN, if the
+          // left table's column value is null THEN right table's column value 
+          // will also be null and hence it is ok for Derby to always pick up  
+          // left table's column value for join columns in case of LEFT OUTER
+          // JOIN.
+          checkLangBasedQuery(s, "SELECT x, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
+          		new String[][] {{"b","b"},{"c","c"}});
+      } else {
+    	  //We are working with a database with case-sensitive collation.
+    	  // For the given data, RIGHT OUTER JOIN will not find any 
+    	  // matching rows in the left table and hence it will be ok for
+          // Derby to pick up join column's value from right table's column.
+          checkLangBasedQuery(s, "SELECT x, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
+          		new String[][] {{"A","A"},{"B","B"}});
+          //Same is true for LEFT OUTER JOIN for the given data. None of the
+          // rows in the left table match the rows in the right table and hence
+          // it will be ok for Derby to pick up join column's value from left
+          // table's column
+          checkLangBasedQuery(s, "SELECT x, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+        		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
+          		new String[][] {{"b","b"},{"c","c"}});
+      }
+
+      }
 
   /**
    * Test order by with English collation
@@ -1363,6 +1445,8 @@ public void testMissingCollatorSupport() throws SQLException {
         suite.addTest(new CleanDatabaseTestSetup(
                 new CollationTest("testDefaultCollation")));
         suite.addTest(collatedSuite("en", false, "testEnglishCollation"));
+        suite.addTest(collatedSuite("en", true, "testUsingClauseAndNaturalJoin"));
+        suite.addTest(collatedSuite("en", false, "testUsingClauseAndNaturalJoin"));
          
         // Only add tests for other locales if they are in fact supported 
         // by the jvm.
