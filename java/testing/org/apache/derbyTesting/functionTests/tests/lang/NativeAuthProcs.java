@@ -363,7 +363,12 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         Arrays.fill( password, (char) 0 );
         
         long    newLastModified = getLastModified( dboConnection );
-        assertTrue( newLastModified > lastModified );
+
+        assertTrue( 
+            "expected newLastModified > lastModified, but instead: " +
+            "newLastModified = "  + newLastModified + 
+            "; lastModified  = "  + lastModified,
+            newLastModified > lastModified );
 
         goodStatement( dboConnection, "call syscs_util.syscs_drop_user( 'resetuser' )" );
     }
@@ -381,8 +386,22 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
              );
 
         long    newLastModified = getLastModified( dboConnection );
-        if ( shouldSucceed ) { assertTrue( newLastModified > oldLastModified ); }
-        else { assertTrue( newLastModified == oldLastModified ); }
+        if ( shouldSucceed ) 
+        { 
+            assertTrue( 
+                "expected newLastModified > oldLastModified, but instead: " +
+                "newLastModified = "     + newLastModified + 
+                "; oldLastModified  = "  + oldLastModified,
+                newLastModified > oldLastModified);
+        }
+        else 
+        { 
+            assertTrue( 
+                "expected newLastModified == oldLastModified, but instead: " +
+                "newLastModified = "     + newLastModified + 
+                "; oldLastModified  = "  + oldLastModified,
+                newLastModified == oldLastModified);
+        }
 
         return newLastModified;
     }
@@ -424,7 +443,11 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         goodStatement( conn, "call syscs_util.syscs_modify_password( 'newpassword' )" );
                        
         long    newLastModified = getLastModified( dboConnection );
-        assertTrue( newLastModified > oldLastModified );
+        assertTrue( 
+            "expected newLastModified > oldLastModified, but instead: " +
+            "newLastModified = "   + newLastModified + 
+            "; oldLastModified  = "  + oldLastModified,
+            newLastModified > oldLastModified);
 
         // Make sure that we can modify a password in the approved fashion.
         char[]  password = new char[] { 'r','u','t','h','p','a','s','s','w','o','r','d' };
@@ -437,7 +460,11 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         Arrays.fill( password, (char) 0 );
         
         long    newerLastModified = getLastModified( dboConnection );
-        assertTrue( newerLastModified > newLastModified );
+        assertTrue(
+            "expected newerLastModified > newLastModified, but instead: " +
+            "newerLastModified = "   + newerLastModified + 
+            "; newLastModified  = "  + newLastModified,
+            newerLastModified > newLastModified );
 
         return newerLastModified;
     }
