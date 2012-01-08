@@ -502,7 +502,8 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
       rs = s.executeQuery("VALUES SYSCS_UTIL.SYSCS_GET_DATABASE_PROPERTY('derby.database.collation')");
       rs.next();
       collation = rs.getString(1); 
-	
+
+      //Do the testing with one join column
       s.executeUpdate("CREATE TABLE derby4631_t1(x varchar(5))");
       s.executeUpdate("INSERT INTO derby4631_t1 VALUES 'A','B'");
       s.executeUpdate("CREATE TABLE derby4631_t2(x varchar(5))");
@@ -557,7 +558,40 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
         		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
           		new String[][] {{"b","b"},{"c","c"}});
       }
-
+      s.executeUpdate("DROP TABLE derby4631_t1");
+      s.executeUpdate("DROP TABLE derby4631_t2");
+      
+      //Now do the testing with 2 join columns
+      s.executeUpdate("CREATE TABLE derby4631_t1(x varchar(5), y varchar(2))");
+      s.executeUpdate("INSERT INTO derby4631_t1 VALUES ('A','z'),('B','y')");
+      s.executeUpdate("CREATE TABLE derby4631_t2(x varchar(5), y varchar(2))");
+      s.executeUpdate("INSERT INTO derby4631_t2 VALUES ('b','Y'),('c','x')");
+      
+      if (collation != null && collation.equals("TERRITORY_BASED:SECONDARY")) {
+          checkLangBasedQuery(s, "SELECT x, y," +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
+        		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
+          		new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
+          checkLangBasedQuery(s, "SELECT x, y," +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
+        		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
+          		new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      } else {
+          checkLangBasedQuery(s, "SELECT x, y," +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+            		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
+            		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
+              		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+          checkLangBasedQuery(s, "SELECT x, y," +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+            		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
+            		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
+              		new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      }
+      s.executeUpdate("DROP TABLE derby4631_t1");
+      s.executeUpdate("DROP TABLE derby4631_t2");
       }
 
   /**
