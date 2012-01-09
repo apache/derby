@@ -715,30 +715,25 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
     }
 
     /**
-     * 
+     * Check if locks are held.
      * 
      * @return true if locks are held.
      * @throws SQLException
      */
     private boolean locksHeld() throws SQLException {
 
-        boolean hasLocks = false;
         Connection con2 = openDefaultConnection();
-        PreparedStatement ps2 = con2
-                .prepareStatement("select XID, count(*) from SYSCS_DIAG.LOCK_TABLE as L group by XID");
-        ResultSet rs2 = ps2.executeQuery();
+        Statement s2 = con2.createStatement();
 
-        while (rs2.next()) {
-            if (rs2.getInt(2) > 0) {
-                hasLocks = true;
-            } else {
-                // 0 locks held
-                hasLocks = false;
-            }
-        }
+        // Wait for post-commit work to complete first. Otherwise, extra
+        // locks may intermittently show up in the lock table. DERBY-5568.
+        s2.execute("CALL WAIT_FOR_POST_COMMIT()");
+
+        ResultSet rs2 = s2.executeQuery("SELECT 1 FROM SYSCS_DIAG.LOCK_TABLE");
+        boolean hasLocks = rs2.next();
 
         rs2.close();
-        ps2.close();
+        s2.close();
         con2.close();
         return hasLocks;
     }
@@ -790,6 +785,12 @@ public class ResultSetMiscTest extends BaseJDBCTestCase {
                                 + ","
                                 + Utilities.stringToHexLiteral("4teen")
                                 + ", null, null)");
+
+                s.execute("CREATE PROCEDURE WAIT_FOR_POST_COMMIT() "
+                        + "LANGUAGE JAVA EXTERNAL NAME "
+                        + "'org.apache.derbyTesting.functionTests.util."
+                        + "T_Access.waitForPostCommitToFinish' "
+                        + "PARAMETER STYLE JAVA");
 
             }
         };
