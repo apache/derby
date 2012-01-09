@@ -526,6 +526,14 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
         		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
           		new String[][] {{"A","A"},{"B","b"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          checkLangBasedQuery(s, "SELECT x, " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+              		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+            		"USING(x)",
+            		new String[][] {{"A","A"},{"B","b"}});
+
           //Derby always picks up the join column's value from the left table
           // when working with LEFT OUTER JOIN. This logic deos not cause any
           // issue with territory or non-territory based databases. We get 
@@ -540,6 +548,13 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
         		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
           		new String[][] {{"b","b"},{"c","c"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          checkLangBasedQuery(s, "SELECT x, " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+              		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
+            		"USING(x)",
+            		new String[][] {{"b","b"},{"c","c"}});
       } else {
     	  //We are working with a database with case-sensitive collation.
     	  // For the given data, RIGHT OUTER JOIN will not find any 
@@ -549,6 +564,14 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
         		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
           		new String[][] {{"A","A"},{"B","B"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          checkLangBasedQuery(s, "SELECT x, " +
+            		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+              		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+            		"USING(x)",
+            		new String[][] {{"A","A"},{"B","B"}});
+
           //Same is true for LEFT OUTER JOIN for the given data. None of the
           // rows in the left table match the rows in the right table and hence
           // it will be ok for Derby to pick up join column's value from left
@@ -557,8 +580,16 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
         		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
           		new String[][] {{"b","b"},{"c","c"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          checkLangBasedQuery(s, "SELECT x, " +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+          		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
+        		"USING(x)",
+        		new String[][] {{"b","b"},{"c","c"}});
       }
-      s.executeUpdate("DROP TABLE derby4631_t1");
+          	  
+   	  s.executeUpdate("DROP TABLE derby4631_t1");
       s.executeUpdate("DROP TABLE derby4631_t2");
       
       //Now do the testing with 2 join columns
@@ -573,10 +604,27 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
         		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
           		new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          checkLangBasedQuery(s, "SELECT x, y," +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
+        		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+          		"USING(x,y)",
+          		new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
+
           checkLangBasedQuery(s, "SELECT x, y," +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
           		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
         		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
+          		new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          checkLangBasedQuery(s, "SELECT x, y," +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
+        		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
+          		"USING(x,y)",
           		new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
       } else {
           checkLangBasedQuery(s, "SELECT x, y," +
@@ -584,11 +632,28 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
             		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
             		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
               		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          checkLangBasedQuery(s, "SELECT x, y," +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
+          		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
+          		"USING(x,y)",
+        		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+
           checkLangBasedQuery(s, "SELECT x, y," +
             		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
             		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
             		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
               		new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          checkLangBasedQuery(s, "SELECT x, y," +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
+          		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
+          		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
+          		"USING(x,y)",
+        		new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
       }
       s.executeUpdate("DROP TABLE derby4631_t1");
       s.executeUpdate("DROP TABLE derby4631_t2");
