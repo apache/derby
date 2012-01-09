@@ -392,20 +392,25 @@ public abstract class Cursor {
     }
 
     // Build a Java long from a fixed point decimal byte representation.
-    private final long getLongFromDECIMAL(int column) throws SqlException {
+    private final long getLongFromDECIMAL(int column, String targetType) 
+            throws SqlException {
         try {
             return org.apache.derby.client.am.Decimal.getLong(dataBuffer_,
                     columnDataPosition_[column - 1],
                     getColumnPrecision(column - 1),
                     getColumnScale(column - 1));
+        } catch (ArithmeticException e) {
+            throw new SqlException(agent_.logWriter_,
+                new ClientMessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
+                targetType, e);
         } catch (java.lang.IllegalArgumentException e) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId (SQLState.LANG_OUTSIDE_RANGE_FOR_DATATYPE),
-                "long", e);
+                targetType, e);
         } catch (java.io.UnsupportedEncodingException e) {
             throw new SqlException(agent_.logWriter_,
                 new ClientMessageId (SQLState.UNSUPPORTED_ENCODING), 
-                "DECIMAL", "long", e);
+                "DECIMAL", targetType, e);
         }
     }
 
@@ -739,7 +744,8 @@ public abstract class Cursor {
             return agent_.crossConverters_.getBooleanFromDouble(get_DOUBLE(column));
         case java.sql.Types.DECIMAL:
             // For performance we don't materialize the BigDecimal, but convert directly from decimal bytes to a long.
-            return agent_.crossConverters_.getBooleanFromLong(getLongFromDECIMAL(column));
+            return agent_.crossConverters_.getBooleanFromLong(
+                getLongFromDECIMAL(column, "boolean"));
         case java.sql.Types.CHAR:
             return agent_.crossConverters_.getBooleanFromString(getCHAR(column));
         case java.sql.Types.VARCHAR:
@@ -767,7 +773,8 @@ public abstract class Cursor {
             return agent_.crossConverters_.getByteFromDouble(get_DOUBLE(column));
         case java.sql.Types.DECIMAL:
             // For performance we don't materialize the BigDecimal, but convert directly from decimal bytes to a long.
-            return agent_.crossConverters_.getByteFromLong(getLongFromDECIMAL(column));
+            return agent_.crossConverters_.getByteFromLong(
+                getLongFromDECIMAL(column, "byte"));
         case java.sql.Types.CHAR:
             return agent_.crossConverters_.getByteFromString(getCHAR(column));
         case java.sql.Types.VARCHAR:
@@ -794,7 +801,8 @@ public abstract class Cursor {
             return agent_.crossConverters_.getShortFromDouble(get_DOUBLE(column));
         case java.sql.Types.DECIMAL:
             // For performance we don't materialize the BigDecimal, but convert directly from decimal bytes to a long.
-            return agent_.crossConverters_.getShortFromLong(getLongFromDECIMAL(column));
+            return agent_.crossConverters_.getShortFromLong(
+                getLongFromDECIMAL(column, "short"));
         case java.sql.Types.CHAR:
             return agent_.crossConverters_.getShortFromString(getCHAR(column));
         case java.sql.Types.VARCHAR:
@@ -821,7 +829,8 @@ public abstract class Cursor {
             return agent_.crossConverters_.getIntFromDouble(get_DOUBLE(column));
         case java.sql.Types.DECIMAL:
             // For performance we don't materialize the BigDecimal, but convert directly from decimal bytes to a long.
-            return agent_.crossConverters_.getIntFromLong(getLongFromDECIMAL(column));
+            return agent_.crossConverters_.getIntFromLong(
+                getLongFromDECIMAL(column, "int"));
         case java.sql.Types.CHAR:
             return agent_.crossConverters_.getIntFromString(getCHAR(column));
         case java.sql.Types.VARCHAR:
@@ -848,7 +857,7 @@ public abstract class Cursor {
             return agent_.crossConverters_.getLongFromDouble(get_DOUBLE(column));
         case java.sql.Types.DECIMAL:
             // For performance we don't materialize the BigDecimal, but convert directly from decimal bytes to a long.
-            return getLongFromDECIMAL(column);
+            return getLongFromDECIMAL(column, "long");
         case java.sql.Types.CHAR:
             return agent_.crossConverters_.getLongFromString(getCHAR(column));
         case java.sql.Types.VARCHAR:

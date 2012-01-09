@@ -20,6 +20,7 @@
 */
 package org.apache.derby.client.am;
 
+import java.math.BigDecimal;
 import org.apache.derby.shared.common.reference.SQLState;
 import org.apache.derby.shared.common.i18n.MessageUtil;
 
@@ -320,6 +321,7 @@ public class Decimal {
      * Build a Java <code>long</code> from a fixed point decimal byte representation.
      *
      * @throws IllegalArgumentException if the specified representation is not recognized.
+     * @throws ArithmeticException if value is too large for a long
      */
     public static final long getLong(byte[] buffer,
                                      int offset,
@@ -342,22 +344,20 @@ public class Decimal {
             signum = 1;
         }
 
-        // compute the integer part only.
-        int leftOfDecimalPoint = length * 2 - 1 - scale;
-        long integer = 0;
-        if (leftOfDecimalPoint > 0) {
-            int i = 0;
-            for (; i < leftOfDecimalPoint / 2; i++) {
-                integer = integer * 10 + signum * ((buffer[offset + i] & 0xF0) >>> 4); // high nybble.
-                integer = integer * 10 + signum * (buffer[offset + i] & 0x0F);        // low nybble.
-            }
-            if ((leftOfDecimalPoint % 2) == 1) {
-                // process high nybble of the last byte if necessary.
-                integer = integer * 10 + signum * ((buffer[offset + i] & 0xF0) >>> 4);
-            }
+        if (precision - scale <= 18) {
+            // Can be handled by long without overflow.
+            // Compute the integer part only.
+            int leftOfDecimalPoint = length * 2 - 1 - scale;
+            return signum * packedNybblesToLong(buffer, offset, 0,
+                                                leftOfDecimalPoint);
+        } else {
+            // Strip off fraction part by converting via BigInteger
+            // lest longValueExact will throw ArithmeticException
+            BigDecimal tmp = new BigDecimal(
+                getBigDecimal(buffer, offset, precision, scale).toBigInteger());
+            // throws ArithmeticException if overflow:
+            return tmp.longValueExact();
         }
-
-        return integer;
     }
 
     //--------------entry points for runtime representation-----------------------
