@@ -4566,69 +4566,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         assertGetState(rs, "F07", XXX_LONG, "22003");
         rs.close();
 
-        // DERBY-5536: client driver change of implementation for getting long
-        // from DECIMAL, so check correctness for two cases: 1) value with 18
-        // decimal digits or less, and 2) value with more than 18 decimal
-        // digits. Reason: cross-over point in implementation; the smaller
-        // numbers use an optimized code path.  Also try with and without
-        // non-zero fraction to see what happens to the discarded fractional
-        // part (scale == 1): Conversions to long should round off in the
-        // direction of zero for both positive and negative numbers with a
-        // fractional part >< 0, cf. RoundingMode.DOWN used in the asserts
-        // below.
-
-        BigDecimal vBelow[] =
-            new BigDecimal[]{new BigDecimal(123456789012345678L),  // 18 digits
-                             new BigDecimal(-12345678901234567L)};
-
-        BigDecimal vAbove[] =
-            new BigDecimal[]{new BigDecimal(1234567890123456789L), // 19 digits
-                             new BigDecimal(-123456789012345678L)};
-
-        createStatement().executeUpdate(
-            "create table t5536(d1 decimal(19,1)," +
-            "                   d2 decimal(20,1))");
-        PreparedStatement ps5536 = prepareStatement(
-            "insert into t5536 values (?,?)");
-
-        for (int scale=0; scale < 2; scale++) {
-            for (int i=0; i < vBelow.length; i++) {
-                ps5536.setBigDecimal(
-                    1,
-                    new BigDecimal(vBelow[i].toBigInteger(), scale));
-                ps5536.setBigDecimal(
-                    2,
-                    new BigDecimal(vAbove[i].toBigInteger(), scale));
-
-                ps5536.execute();
-            }
-        }
-
-
-
-        rs = createStatement().executeQuery("select * from t5536");
-
-        BigDecimal divisor[] = {BigDecimal.ONE, BigDecimal.TEN};
-
-        for (int scale=0; scale < 2; scale++) {
-            for (int i=0; i < vBelow.length; i++) {
-                rs.next();
-
-                assertEquals(
-                    "round-trip conversion error",
-                    vBelow[i].divide(divisor[scale], RoundingMode.DOWN).
-                        longValue(),
-                    rs.getLong(1));
-                assertEquals(
-                    "round-trip conversion error",
-                    vAbove[i].divide(divisor[scale], RoundingMode.DOWN).
-                        longValue(),
-                    rs.getLong(2));
-            }
-        }
-
-        rs.close();
-
 
         // JDBC type -> float
         PreparedStatement uSelect = prepareStatement(
@@ -4913,6 +4850,77 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         // assertUpdateState(rs, "F11", _X, 2.0, XXX_DOUBLE, "22003");
         // assertUpdateState(rs, "F11", new BigDecimal(2), "22003");
     }
+
+    /**
+     * DERBY-5536: client driver change of implementation for getting long
+     * from DECIMAL, so check correctness for two cases: 1) value with 18
+     * decimal digits or less, and 2) value with more than 18 decimal
+     * digits. Reason: cross-over point in implementation; the smaller
+     * numbers use an optimized code path.  Also try with and without
+     * non-zero fraction to see what happens to the discarded fractional
+     * part (scale == 1): Conversions to long should round off in the
+     * direction of zero for both positive and negative numbers with a
+     * fractional part >< 0, cf. RoundingMode.DOWN used in the asserts
+     * below.
+     */
+    public void testDerby5536() throws SQLException {
+
+        BigDecimal vBelow[] =
+            new BigDecimal[]{new BigDecimal(123456789012345678L),  // 18 digits
+                             new BigDecimal(-12345678901234567L)};
+
+        BigDecimal vAbove[] =
+            new BigDecimal[]{new BigDecimal(1234567890123456789L), // 19 digits
+                             new BigDecimal(-123456789012345678L)};
+
+        createStatement().executeUpdate(
+            "create table t5536(d1 decimal(19,1)," +
+            "                   d2 decimal(20,1)," +
+            "                   i int generated always as identity" +
+            "                         (start with 1, increment by 1))");
+        PreparedStatement ps5536 = prepareStatement(
+            "insert into t5536 values (?, ?, default)");
+
+        for (int scale=0; scale < 2; scale++) {
+            for (int i=0; i < vBelow.length; i++) {
+                ps5536.setBigDecimal(
+                    1,
+                    new BigDecimal(vBelow[i].toBigInteger(), scale));
+                ps5536.setBigDecimal(
+                    2,
+                    new BigDecimal(vAbove[i].toBigInteger(), scale));
+
+                ps5536.execute();
+            }
+        }
+
+
+
+        ResultSet rs = createStatement().executeQuery(
+            "select * from t5536 order by i");
+
+        BigDecimal divisor[] = {BigDecimal.ONE, BigDecimal.TEN};
+
+        for (int scale=0; scale < 2; scale++) {
+            for (int i=0; i < vBelow.length; i++) {
+                rs.next();
+
+                assertEquals(
+                    "round-trip conversion error",
+                    vBelow[i].divide(divisor[scale], RoundingMode.DOWN).
+                        longValue(),
+                    rs.getLong(1));
+                assertEquals(
+                    "round-trip conversion error",
+                    vAbove[i].divide(divisor[scale], RoundingMode.DOWN).
+                        longValue(),
+                    rs.getLong(2));
+            }
+        }
+
+        rs.close();
+    }
+
 
     // Short limits
     //
