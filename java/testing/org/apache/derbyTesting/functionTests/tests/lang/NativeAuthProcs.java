@@ -351,6 +351,9 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
 
         lastModified = vetResetPassword( dboConnection, dboConnection, lastModified, true );
         lastModified = vetResetPassword( dboConnection, janetConnection, lastModified, !authorizationIsOn() );
+
+        // pause so that when we check timestamps, we will see a change
+        Thread.sleep( 10L );
                  
         // Make sure that we can reset a password in the approved fashion.
         char[]  password = new char[] { 'r','u','t','h','p','a','s','s','w','o','r','d' };
@@ -376,7 +379,7 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         throws Exception
     {
         // pause so that when we check timestamps, we will see a change
-        Thread.sleep( 1L );
+        Thread.sleep( 10L );
         
         vetExecution
             (
@@ -438,7 +441,7 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         throws Exception
     {
         // pause so that when we check timestamps, we will see a change
-        Thread.sleep( 1L );
+        Thread.sleep( 10L );
         
         goodStatement( conn, "call syscs_util.syscs_modify_password( 'newpassword' )" );
                        
@@ -448,6 +451,9 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
             "newLastModified = "   + newLastModified + 
             "; oldLastModified  = "  + oldLastModified,
             newLastModified > oldLastModified);
+
+        // pause so that when we check timestamps, we will see a change
+        Thread.sleep( 10L );
 
         // Make sure that we can modify a password in the approved fashion.
         char[]  password = new char[] { 'r','u','t','h','p','a','s','s','w','o','r','d' };
