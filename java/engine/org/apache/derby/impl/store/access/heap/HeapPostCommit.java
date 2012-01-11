@@ -351,15 +351,16 @@ class HeapPostCommit implements Serviceable
         }
         catch (StandardException se)
         {
-            // exception might have occured either container got dropper or lock not granted.
+            // exception might have occured either because the container got 
+            // dropper or the lock was not granted.
             // It is possible by the time this post commit work gets scheduled 
             // that the container has been dropped and that the open container 
             // call will return null - in this case just return assuming no 
             // work to be done.
 
-			//If this expcetion is because lock could not be obtained , work is requeued.
-			if (se.getMessageId().equals(SQLState.LOCK_TIMEOUT) || 
-				se.getMessageId().equals(SQLState.DEADLOCK))
+			// If this expcetion is because lock could not be obtained, 
+            // work is requeued.
+			if (se.isLockTimeoutOrDeadlock())
 			{
 				requeue_work = true;
 			}

@@ -257,8 +257,7 @@ class BTreePostCommit implements Serviceable
             // call will return null - in this case just return assuming no 
             // work to be done.
 
-			if (se.getMessageId().equals(SQLState.LOCK_TIMEOUT) ||
-				se.getMessageId().equals(SQLState.DEADLOCK))
+            if (se.isLockTimeoutOrDeadlock())
 			{
                 // Could not get exclusive table lock, so try row level
                 // reclaim of just the rows on this page.  No merge is 
@@ -277,8 +276,7 @@ class BTreePostCommit implements Serviceable
                 }
                 catch (StandardException se2)
                 {
-                    if (se2.getMessageId().equals(SQLState.LOCK_TIMEOUT) ||
-                        se2.getMessageId().equals(SQLState.DEADLOCK))
+                    if (se2.isLockTimeoutOrDeadlock())
                     {
                         // Could not get intended exclusive table lock, so 
                         // requeue and hope other user gives up table level
