@@ -498,6 +498,88 @@ public class XATransactionTest extends BaseJDBCTestCase {
         }
     }
 
+    /**
+     * <p>
+     * Regression test case for DERBY-5562.
+     * </p>
+     *
+     * <p>
+     * The timer that aborts long-running transactions if a transaction timeout
+     * has been specified, was not cancelled when preparing a read-only
+     * transaction. Since read-only transactions are implicitly committed when
+     * they are prepared, this meant that the timer would try to abort an
+     * already completed transaction. In addition to printing a confusing
+     * message in derby.log about the transaction being rolled back, when it
+     * actually had been committed, this could also make the timer roll back
+     * the wrong transaction, if a new transaction with the same Xid was
+     * started later.
+     * </p>
+     *
+     * <p>
+     * This test case exposes the bug by running a read-only transaction with
+     * a timeout and preparing it, and then starting a new transaction with the
+     * same Xid and no timeout. The bug would cause the second transaction to
+     * time out.
+     * </p>
+     */
+    public void testDerby5562ReadOnlyTimeout()
+            throws InterruptedException, SQLException, XAException {
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        XAConnection xac = xads.getXAConnection();
+        XAResource xar = xac.getXAResource();
+
+        Xid xid = createXid(55, 62);
+
+        // Set a transaction timeout. This should be relatively short so that
+        // the test case doesn't need to wait very long to trigger the timeout.
+        // However, it needs to be long enough to let the first transaction go
+        // through without hitting the timeout. Hopefully, four seconds is
+        // enough. If the test case starts failing intermittently during the
+        // first transaction, we might have to raise the timeout (and raise the
+        // sleep time in the second transaction correspondingly).
+        assertTrue(xar.setTransactionTimeout(4));
+
+        // Start first transaction.
+        xar.start(xid, XAResource.TMNOFLAGS);
+        Connection c = xac.getConnection();
+        Statement s = c.createStatement();
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from sysibm.sysdummy1"),
+                "Y");
+        s.close();
+        c.close();
+        xar.end(xid, XAResource.TMSUCCESS);
+
+        // Prepare the first transaction. Since it's a read-only transaction,
+        // it'll be automatically committed, so there's no need to call commit.
+        assertEquals("XA_RDONLY", XAResource.XA_RDONLY, xar.prepare(xid));
+
+        // Reset the timeout for the second transaction.
+        assertTrue(xar.setTransactionTimeout(0));
+
+        // Start second transaction.
+        xar.start(xid, XAResource.TMNOFLAGS);
+        c = xac.getConnection();
+        s = c.createStatement();
+        JDBC.assertSingleValueResultSet(
+                s.executeQuery("select * from sysibm.sysdummy1"),
+                "Y");
+        s.close();
+        c.close();
+
+        // Keep the transaction running so long that it must have exceeded the
+        // timeout for the previous transaction.
+        Thread.sleep(5000);
+
+        // End the transaction. Since there's no timeout on this transaction,
+        // it should work. Before DERBY-5562 was fixed, it would fail because
+        // it had been rolled back by the timer from the previous transaction.
+        xar.end(xid, XAResource.TMSUCCESS);
+        assertEquals("XA_RDONLY", XAResource.XA_RDONLY, xar.prepare(xid));
+
+        xac.close();
+    }
+
     /* ------------------- end helper methods  -------------------------- */
 
     /** Create the Xid object for global transaction identification

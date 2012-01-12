@@ -33,6 +33,7 @@ import org.apache.derby.iapi.services.context.ContextImpl;
 import org.apache.derby.iapi.services.context.ContextManager;
 import org.apache.derby.iapi.error.ExceptionSeverity;
 import org.apache.derby.iapi.error.StandardException;
+import org.apache.derby.iapi.store.access.XATransactionController;
 import org.apache.derby.iapi.store.access.xa.XAXactId;
 import org.apache.derby.iapi.reference.SQLState;
 import java.util.HashMap;
@@ -357,13 +358,21 @@ final class XATransactionState extends ContextImpl {
      */
     synchronized int xa_prepare() throws SQLException {
         int retVal = conn.xa_prepare();
+
+        if (retVal == XATransactionController.XA_RDONLY) {
+            // Read-only transactions are implicitly committed when they are
+            // prepared. Since the transaction has completed, the timeout task
+            // should be cancelled now. DERBY-5562.
+            xa_finalize();
+        }
+
         return retVal;
     }
 
     /** This method cancels timeoutTask and assigns
       * 'performTimeoutRollback = false'.
       */
-    synchronized void xa_finalize() {
+    private void xa_finalize() {
         if (timeoutTask != null) {
             timeoutTask.cancel();
             timeoutTask = null;
