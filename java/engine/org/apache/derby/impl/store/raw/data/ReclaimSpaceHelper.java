@@ -537,7 +537,7 @@ public class ReclaimSpaceHelper
 			// DERBY-4059
 			// if this is a lock timeout just return null.
 			// otherwise throw the exception
-			if (!se.getSQLState().equals(SQLState.LOCK_TIMEOUT)) {
+			if (!se.isLockTimeout()) {
 				throw se;
 			}
 		}

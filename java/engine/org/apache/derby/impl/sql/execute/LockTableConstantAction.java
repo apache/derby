@@ -111,9 +111,11 @@ class LockTableConstantAction implements ConstantAction
 		catch (StandardException se)
 		{
 			String msgId = se.getMessageId();
-			if (msgId.equals(SQLState.DEADLOCK) || msgId.equals(SQLState.LOCK_TIMEOUT) || msgId.equals(SQLState.LOCK_TIMEOUT_LOG)) {
+            if (se.isLockTimeoutOrDeadlock())
+            {
 				String mode = (exclusiveMode) ? "EXCLUSIVE" : "SHARE";
-				se = StandardException.newException(SQLState.LANG_CANT_LOCK_TABLE, se, fullTableName, mode);
+				se = StandardException.newException(
+                        SQLState.LANG_CANT_LOCK_TABLE, se, fullTableName, mode);
 			}
 
 			throw se;

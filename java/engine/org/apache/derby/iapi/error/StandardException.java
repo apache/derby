@@ -731,4 +731,29 @@ public class StandardException extends Exception
 
 		return sqlw;
 	}
+
+    /**
+     * Is this a lock timeout exception.
+     * <p>
+     *
+     * @return true if this exception is a lock timeout.
+     *
+     **/
+    public final boolean isLockTimeout() {
+
+        return(SQLState.LOCK_TIMEOUT.equals(getSQLState()));
+    }
+
+    /**
+     * Is this a lock timeout or lock deadlock exception.
+     * <p>
+     *
+     * @return true if this exception is a lock timeout or lock deadlock.
+     *
+     **/
+    public final boolean isLockTimeoutOrDeadlock() {
+
+        return(SQLState.LOCK_TIMEOUT.equals(getSQLState()) ||
+               SQLState.DEADLOCK.equals(getSQLState()));
+    }
 }

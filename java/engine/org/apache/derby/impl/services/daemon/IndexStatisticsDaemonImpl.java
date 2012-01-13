@@ -323,6 +323,7 @@ public class IndexStatisticsDaemonImpl
                 updateIndexStatsMinion(lcc, td, cds, AS_BACKGROUND_TASK);
                 break;
             } catch (StandardException se) {
+
                 // At this level, we retry the whole operation. If this happens,
                 // it normally means that a lengthy operation, or possibly DDL,
                 // is taking place (for instance compress table). We retry only
@@ -330,12 +331,14 @@ public class IndexStatisticsDaemonImpl
                 // Note that some lower level operations may have tried to
                 // aquire the locks several times already, and we may not be
                 // able to complete the work if we get here.
-                if (SQLState.LOCK_TIMEOUT.equals(se.getMessageId()) &&
-                        !lockConflictSeen) {
+
+                if (se.isLockTimeout() && !lockConflictSeen) {
+
                     trace(1, "locks unavailable, retrying");
                     lockConflictSeen = true;
                     lcc.internalRollback(); // Get rid of any locks
                     sleep(1000);
+
                 } else {
                     // Rethrow exception, because:
                     //   o error is not a lock timeout
@@ -508,9 +511,10 @@ public class IndexStatisticsDaemonImpl
                             cmp.getRowCount(), cardinality, asBackgroundTask);
                     break;
                 } catch (StandardException se) {
+
                     retries++;
-                    if (SQLState.LOCK_TIMEOUT.equals(se.getMessageId()) &&
-                            retries < 3) {
+
+                    if (se.isLockTimeout() && retries < 3) {
                         trace(2, "lock timeout when writing stats, retrying");
                         sleep(100*retries);
                     } else {
@@ -632,8 +636,8 @@ public class IndexStatisticsDaemonImpl
                 break;
             } catch (StandardException se) {
                 // Special handling when running as background task.
-                if (SQLState.LOCK_TIMEOUT.equals(se.getMessageId()) &&
-                        asBackgroundTask && retries < 3) {
+
+                if (se.isLockTimeout() && asBackgroundTask && retries < 3) {
                     retries++;
                     // If this is the first time we retry, don't roll back.
                     // If we already waited once, but still didn't get the
@@ -995,9 +999,10 @@ public class IndexStatisticsDaemonImpl
         // Accept that the heap/index/conglomerate has been deleted since the
         // work for it was scheduled. Just ignore the unit of work and continue.
         if (SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST.equals(state) ||
-                SQLState.HEAP_CONTAINER_NOT_FOUND.equals(state) ||
-                SQLState.FILE_IO_INTERRUPTED.equals(state) ||
-                SQLState.LOCK_TIMEOUT.equals(state)) {
+            SQLState.HEAP_CONTAINER_NOT_FOUND.equals(state) ||
+            SQLState.FILE_IO_INTERRUPTED.equals(state) ||
+            se.isLockTimeout()) {
+
             errorsKnown++;
             log(AS_BACKGROUND_TASK, td, "generation aborted (reason: " +
                     state + ") {" + extractIstatInfo(se) + "}");

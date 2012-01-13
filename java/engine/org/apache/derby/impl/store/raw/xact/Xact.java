@@ -2468,7 +2468,7 @@ public class Xact extends RawTransaction implements Limit, LockOwner {
             }
             catch (StandardException se)
             {
-                if (!se.getMessageId().equals(SQLState.LOCK_TIMEOUT))
+                if (!se.isLockTimeout())
                 {
                     // if it is a timeout then escalate did not happen and
                     // just fall through.
