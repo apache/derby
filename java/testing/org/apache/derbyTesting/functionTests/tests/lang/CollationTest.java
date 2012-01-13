@@ -522,12 +522,20 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
     	  // the value resulting from coalescing the left table's column value 
     	  // with the right table's column value but Derby instead always picks
     	  // up right table's column value
+    	  //
+    	  //Following query is returning INCORRECT data and once DERBY-4631 is
+    	  // fixed, we should get the expected results as 
+    	  // new String[][] {{"A","A"},{"b","b"}});
           checkLangBasedQuery(s, "SELECT x, " +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
         		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
           		new String[][] {{"A","A"},{"B","b"}});
           //Do the same test as above, but this time using the USING clause
           // rather the NATURAL join
+    	  //
+    	  //Following query is returning INCORRECT data and once DERBY-4631 is
+    	  // fixed, we should get the expected results as 
+    	  // new String[][] {{"A","A"},{"b","b"}});
           checkLangBasedQuery(s, "SELECT x, " +
             		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
               		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
@@ -544,12 +552,18 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           // will also be null and hence it is ok for Derby to always pick up  
           // left table's column value for join columns in case of LEFT OUTER
           // JOIN.
+          //
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
           checkLangBasedQuery(s, "SELECT x, " +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
         		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
           		new String[][] {{"b","b"},{"c","c"}});
           //Do the same test as above, but this time using the USING clause
           // rather the NATURAL join
+          //
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
           checkLangBasedQuery(s, "SELECT x, " +
             		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
               		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
@@ -560,12 +574,18 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
     	  // For the given data, RIGHT OUTER JOIN will not find any 
     	  // matching rows in the left table and hence it will be ok for
           // Derby to pick up join column's value from right table's column.
+    	  //
+    	  //Case-sensitive collation will not run into any problems for the
+    	  // given data set and hence following is returning correct results.
           checkLangBasedQuery(s, "SELECT x, " +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
         		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1",
           		new String[][] {{"A","A"},{"B","B"}});
           //Do the same test as above, but this time using the USING clause
           // rather the NATURAL join
+    	  //
+    	  //Case-sensitive collation will not run into any problems for the
+    	  // given data set and hence following is returning correct results.
           checkLangBasedQuery(s, "SELECT x, " +
             		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
               		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
@@ -576,12 +596,18 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           // rows in the left table match the rows in the right table and hence
           // it will be ok for Derby to pick up join column's value from left
           // table's column
+          //
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
           checkLangBasedQuery(s, "SELECT x, " +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
         		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1",
           		new String[][] {{"b","b"},{"c","c"}});
           //Do the same test as above, but this time using the USING clause
           // rather the NATURAL join
+          //
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
           checkLangBasedQuery(s, "SELECT x, " +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
           		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
@@ -599,6 +625,9 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
       s.executeUpdate("INSERT INTO derby4631_t2 VALUES ('b','Y'),('c','x')");
       
       if (collation != null && collation.equals("TERRITORY_BASED:SECONDARY")) {
+    	  //Following query is returning INCORRECT data and once DERBY-4631 is
+    	  // fixed, we should get the expected results as 
+    	  // new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
           checkLangBasedQuery(s, "SELECT x, y," +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
           		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
@@ -606,6 +635,10 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
           //Do the same test as above, but this time using the USING clause
           // rather the NATURAL join
+          //
+    	  //Following query is returning INCORRECT data and once DERBY-4631 is
+    	  // fixed, we should get the expected results as 
+    	  // new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
           checkLangBasedQuery(s, "SELECT x, y," +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
           		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
@@ -613,6 +646,8 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		"USING(x,y)",
           		new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
 
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
           checkLangBasedQuery(s, "SELECT x, y," +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
           		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
@@ -620,6 +655,9 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
           //Do the same test as above, but this time using the USING clause
           // rather the NATURAL join
+          //
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
           checkLangBasedQuery(s, "SELECT x, y," +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
           		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
@@ -627,6 +665,8 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		"USING(x,y)",
           		new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
       } else {
+    	  //Case-sensitive collation will not run into any problems for the
+    	  // given data set and hence following is returning correct results.
           checkLangBasedQuery(s, "SELECT x, y," +
             		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
             		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
@@ -634,6 +674,9 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
               		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
           //Do the same test as above, but this time using the USING clause
           // rather the NATURAL join
+          //
+    	  //Case-sensitive collation will not run into any problems for the
+    	  // given data set and hence following is returning correct results.
           checkLangBasedQuery(s, "SELECT x, y," +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
           		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
@@ -641,6 +684,8 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		"USING(x,y)",
         		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
 
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
           checkLangBasedQuery(s, "SELECT x, y," +
             		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
             		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +
@@ -648,6 +693,9 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
               		new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
           //Do the same test as above, but this time using the USING clause
           // rather the NATURAL join
+          //
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
           checkLangBasedQuery(s, "SELECT x, y," +
           		"coalesce(derby4631_t2.x, derby4631_t1.x) cx, " +
           		"coalesce(derby4631_t2.y, derby4631_t1.y) cy " +

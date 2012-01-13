@@ -1482,6 +1482,9 @@ public class GroupByTest extends BaseJDBCTestCase {
 		// should be qualified with left or right table name. Just a note
 		// that ON clause is not allowed on CROSS and NATURAL JOINS.
 		//
+        //The join queries with ON clause are not impacted by DERBY-4631 and 
+        // hence following tests are showing the correct behavior.
+		//
 		//Try INNER JOIN with ON clause.
         assertStatementError("42X03", s,
                 "select i from t1_D3880 " +
@@ -1519,26 +1522,47 @@ public class GroupByTest extends BaseJDBCTestCase {
 		// on CROSS and NATURAL JOINS.
 		//
 		//Try INNER JOIN with USING clause.
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t1_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"inner join t2_D3880 USING(i) group by t1_D3880.i");
 		expRs = new String[][] {{"1"},{"2"}};
 		JDBC.assertFullResultSet(rs,expRs);
+		//Following query does not allow t2_D3880.i in group by clause
+		// because join column i the select query gets associated with
+		// left table in case of INNER JOIN.
         assertStatementError("42Y36", s,
         		"select i from t1_D3880 " +
 				"inner join t2_D3880 USING(i) group by t2_D3880.i");
 
         //Test the GROUP BY problem with LEFT OUTER JOIN and USING clause.
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t1_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"LEFT OUTER JOIN t2_D3880 USING(i) GROUP BY t1_D3880.i");
 		JDBC.assertFullResultSet(rs,expRs);
+		//Following query does not allow t2_D3880.i in group by clause
+		// because join column i the select query gets associated with
+		// left table in case of LEFT OUTER JOIN.
         assertStatementError("42Y36", s,
         		"select i from t1_D3880 " +
 				"LEFT OUTER JOIN t2_D3880 USING(i) GROUP BY t2_D3880.i");
 
         //Test the GROUP BY problem with RIGHT OUTER JOIN and USING clause.
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t2_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"RIGHT OUTER JOIN t2_D3880 USING(i) GROUP BY t2_D3880.i");
 		JDBC.assertFullResultSet(rs,expRs);
+		//Following query does not allow t1_D3880.i in group by clause
+		// because join column i the select query gets associated with
+		// right table in case of RIGHT OUTER JOIN.
         assertStatementError("42Y36", s,
         		"select i from t1_D3880 " +
 				"RIGHT OUTER JOIN t2_D3880 USING(i) GROUP BY t1_D3880.i");
@@ -1566,14 +1590,26 @@ public class GroupByTest extends BaseJDBCTestCase {
 		// NATURAL JOIN.
 		//
 		//Try the GROUP BY problem with NATURAL INNER JOIN
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t1_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"NATURAL inner join t2_D3880 group by t1_D3880.i");
 		JDBC.assertFullResultSet(rs,expRs);
 		//Test the GROUP BY problem with NATURAL LEFT OUTER JOIN
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t1_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"NATURAL LEFT OUTER JOIN t2_D3880 GROUP BY t1_D3880.i");
 		JDBC.assertFullResultSet(rs,expRs);
 		//Test the GROUP BY problem with NATURAL RIGHT OUTER JOIN
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t2_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"NATURAL RIGHT OUTER JOIN t2_D3880 GROUP BY t2_D3880.i");
 		JDBC.assertFullResultSet(rs,expRs);
@@ -1589,6 +1625,10 @@ public class GroupByTest extends BaseJDBCTestCase {
 				"NATURAL LEFT OUTER JOIN t2_D3880 GROUP BY t1_D3880.i");
 		JDBC.assertFullResultSet(rs,expRs);
 		//NATURAL RIGHT OUTER JOIN
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t2_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select t2_D3880.i from t1_D3880 " +
 				"NATURAL RIGHT OUTER JOIN t2_D3880 GROUP BY t2_D3880.i");
 		JDBC.assertFullResultSet(rs,expRs);
@@ -1596,29 +1636,53 @@ public class GroupByTest extends BaseJDBCTestCase {
 		//Similar query for HAVING clause. HAVING clause should not be able
 		// to use a column which is not part of the SELECT column list.
 		// Doing this testing with USING clause
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t1_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"inner join t2_D3880 USING(i) group by t1_D3880.i " +
 				"HAVING t1_D3880.i > 1");
 		expRs = new String[][] {{"2"}};
 		JDBC.assertFullResultSet(rs,expRs);
 		// Doing the same test as above with NATURAL JOIN
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t1_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"NATURAL inner join  t2_D3880 group by t1_D3880.i " +
 				"HAVING t1_D3880.i > 1");
 		expRs = new String[][] {{"2"}};
 		JDBC.assertFullResultSet(rs,expRs);
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t1_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"LEFT OUTER join t2_D3880 USING(i) group by t1_D3880.i " +
 				"HAVING t1_D3880.i > 1");
 		JDBC.assertFullResultSet(rs,expRs);
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t1_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"NATURAL LEFT OUTER join t2_D3880 group by t1_D3880.i " +
 				"HAVING t1_D3880.i > 1");
 		JDBC.assertFullResultSet(rs,expRs);
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t2_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"RIGHT OUTER join t2_D3880 USING(i) group by t2_D3880.i " +
 				"HAVING t2_D3880.i > 1");
 		JDBC.assertFullResultSet(rs,expRs);
+		//Following query should have given compile time error. 
+		//Once DERBY-4631 is fixed, this query will run into compile time
+		// error for using t2_D3880.i in group by clause because that column
+		// is not part of the SELECT list. 
 		rs = s.executeQuery("select i from t1_D3880 " +
 				"NATURAL RIGHT OUTER join t2_D3880 group by t2_D3880.i " +
 				"HAVING t2_D3880.i > 1");
