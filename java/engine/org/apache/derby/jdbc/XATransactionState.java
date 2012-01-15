@@ -153,8 +153,8 @@ final class XATransactionState extends ContextImpl {
 					associationState = TRO_FAIL;
 					if (SQLState.DEADLOCK.equals(se.getMessageId()))
 						rollbackOnlyCode = XAException.XA_RBDEADLOCK;
-					else if (SQLState.LOCK_TIMEOUT.equals(se.getMessageId()))
-						rollbackOnlyCode = XAException.XA_RBTIMEOUT;					
+					else if (se.isLockTimeout())
+						rollbackOnlyCode = XAException.XA_RBTIMEOUT;
 					else
 						rollbackOnlyCode = XAException.XA_RBOTHER;
 				}

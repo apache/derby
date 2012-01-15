@@ -42,7 +42,6 @@ import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
 
     final private static String LOCK_TIMEOUT = "40XL1";
-    final private static String LOCK_TIMEOUT_LOG = "40XL2";
 
     /**
      * Creates a new {@code LazyDefaultSchemaCreationTest} instance.
@@ -149,6 +148,9 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
      * nested transaction (cf solution for DERBY-48) when deadlock
      * detection is on, i.e. 40XL2 (LOCK_TIMEOUT_LOG) rather than
      * 40XL1 (LOCK_TIMEOUT) happens.
+     *
+     * After fix for DERBY-5564 LOCK_TIMEOUT will be returned whether
+     * diagnostics are on or not.
      */
     public void testDerby48SelfLockingRecoveryDeadlockDetectionOn ()
             throws SQLException
@@ -166,9 +168,9 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
         // in outer transaction:
         try {
             s1.executeUpdate("create table t1(i int)");
-            fail("Expected exception " + LOCK_TIMEOUT_LOG);
+            fail("Expected exception " + LOCK_TIMEOUT);
         } catch (SQLException e) {
-            assertSQLState("Expected state: ", LOCK_TIMEOUT_LOG, e);
+            assertSQLState("Expected state: ", LOCK_TIMEOUT, e);
         }
 
         JDBC.assertEmpty(
@@ -184,6 +186,9 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
      * use case will not cause an infinite recursion after the fix to
      * DERBY-48). The scenario in this test case does create the
      * infinite recursion prior to the fix of DERBY-3678, however.
+     *
+     * After fix for DERBY-5564 LOCK_TIMEOUT SQL state should be returned
+     * for a lock timeout whether diagnostics are on or not.
      */
     public void testDerby3678 ()
             throws SQLException
@@ -201,9 +206,9 @@ public class LazyDefaultSchemaCreationTest extends BaseJDBCTestCase {
         // ..which conflicts with the next connect
         try {
             c2 = openUserConnection("newuser");
-            fail("Expected exception " + LOCK_TIMEOUT_LOG);
+            fail("Expected exception " + LOCK_TIMEOUT);
         } catch (SQLException e) {
-            assertSQLState("Expected state: ", LOCK_TIMEOUT_LOG, e);
+            assertSQLState("Expected state: ", LOCK_TIMEOUT, e);
         } finally {
             c1.rollback();
         }

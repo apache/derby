@@ -74,6 +74,9 @@ public class ErrorMessageTest extends BaseJDBCTestCase {
     /**
      * Test that a wait timeout prints the lock table correctly when the
      * <code>derby.locks.deadlockTrace</code> property is set. DERBY-2817
+     *
+     * After fix for DERBY-5564, the sql state for a lock timeout will be
+     * the same whether diagnostics are on or not (ie. 40XL1).  
      */
     public void testWaitTimeout() throws SQLException {
         getConnection().setAutoCommit(false);
@@ -88,7 +91,7 @@ public class ErrorMessageTest extends BaseJDBCTestCase {
                     s2.executeQuery("select * from t where id=1"));
             fail("Expected lock timeout");
         } catch (SQLException e) {
-            assertSQLState("Not a timeout", "40XL2", e);
+            assertSQLState("Not a timeout", "40XL1", e);
 
             // check that information about the victim is printed
             String[] msg = e.getMessage().split("\n");

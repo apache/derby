@@ -264,7 +264,7 @@ public interface SQLState {
 	*/
 	String DEADLOCK = "40001";
 	String LOCK_TIMEOUT = "40XL1";
-    String LOCK_TIMEOUT_LOG = "40XL2";
+    String LOCK_TIMEOUT_LOG = "40XL1.T.1";
 
 	/*
 	** Store - access.protocol.Interface statement exceptions

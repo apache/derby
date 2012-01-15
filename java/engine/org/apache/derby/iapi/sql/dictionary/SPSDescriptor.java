@@ -702,11 +702,14 @@ public class SPSDescriptor extends TupleDescriptor
 
 			if (!((org.apache.derby.impl.sql.catalog.DataDictionaryImpl) (lcc.getDataDictionary())).readOnlyUpgrade) {
 
-				//bug 4821 - First try compiling on a nested transaction so we can release
-				//the locks after the compilation. But if we get lock time out on the
-				//nested transaction, then go ahead and do the compilation on the user
-				//transaction. When doing the compilation on user transaction, the locks
-				//acquired for recompilation will be released at the end of the user transaction.
+				// First try compiling in a nested transaction so we can 
+                // release the locks after the compilation, and not have them
+                // sit around in the parent transaction. But if we get lock 
+                // time out in the nested transaction, then go ahead and do 
+                // the compilation in the user transaction. When doing the 
+                // compilation in the user transaction, the locks acquired for 
+                // recompilation will be released at the end of the user 
+                // transaction (commit or abort).
 				TransactionController nestedTC;
 				try
 				{
@@ -722,8 +725,8 @@ public class SPSDescriptor extends TupleDescriptor
 				}
 				catch (StandardException se)
 				{
-					// If I cannot start a Nested User Transaction use the parent
-					// transaction to do all the work.
+					// If I cannot start a Nested User Transaction use the 
+                    // parent transaction to do all the work.
 					nestedTC = null;
 				}
 
@@ -740,27 +743,39 @@ public class SPSDescriptor extends TupleDescriptor
 				}
 				catch (StandardException se)
 				{
-					if (se.getMessageId().equals(SQLState.LOCK_TIMEOUT))
+					if (se.isLockTimeout())
 					{
+                        // Locks were set nowait, so a lock timeout here
+                        // means that some lock request in the nested 
+                        // transaction immediately conflicted.  A conflict
+                        // with a parent lock would lead to a undetected 
+                        // deadlock so must give up trying in the nested
+                        // transaction and retry with parent transaction.
 						if (nestedTC != null)
 						{
-						nestedTC.commit();
-						nestedTC.destroy();
-						nestedTC = null;
+                            nestedTC.commit();
+                            nestedTC.destroy();
+                            nestedTC = null;
 						}
-						// if we couldn't do this with a nested xaction, retry with
-						// parent-- we need to wait this time!
+
+						// if we couldn't do this with a nested transaction, 
+                        // retry with parent-- we need to wait this time!
+                        // Lock conflicts at this point are with other 
+                        // transactions, so must wait.
 						initiallyCompilable = compilable;
 						prepareAndRelease(lcc, null, null);
 						updateSYSSTATEMENTS(lcc, RECOMPILE, null);
 					}
-					else throw se;
+					else 
+                    {
+                        throw se;
+                    }
 				}
 				finally
 				{
-					// no matter what, commit the nested transaction; if something
-					// bad happened in the child xaction lets not abort the parent
-					// here.
+					// no matter what, commit the nested transaction; 
+                    // if something bad happened in the child transaction lets
+                    // not abort the parent here.
 					if (nestedTC != null)
 					{
 						nestedTC.commit();

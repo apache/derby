@@ -405,7 +405,7 @@ public abstract class SequenceUpdater implements Cacheable
             }
             catch (StandardException se)
             {
-                if ( !se.getMessageId().equals( SQLState.LOCK_TIMEOUT ) ) { throw se; }
+                if ( !se.isLockTimeout() ) { throw se; }
             }
             finally
             {

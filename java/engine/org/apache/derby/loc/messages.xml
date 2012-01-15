@@ -1024,7 +1024,7 @@ Guide.
             </msg>
 
             <msg>
-                <name>40XL2</name>
+                <name>40XL1.T.1</name>
                 <text>A lock could not be obtained within the time requested.  The lockTable dump is: {0}</text>
                 <arg>tableDump</arg>
             </msg>

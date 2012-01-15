@@ -190,22 +190,28 @@ abstract class DDLConstantAction implements ConstantAction
 			try {
 				csca.executeConstantAction(activation, useTc);
 			} catch (StandardException se) {
-				if (se.getMessageId().equals(SQLState.LOCK_TIMEOUT)) {
-					// We don't test for SQLState.DEADLOCK or
-					// .LOCK_TIMEOUT_LOG here because a) if it is a
-					// deadlock, it may be better to expose it, and b)
-					// LOCK_TIMEOUT_LOG happens when the app has set
-					// derby.locks.deadlockTrace=true, in which case we
-					// don't want to mask the timeout.  So in both the
-					// latter cases we just throw.
-					if (useTc == nestedTc) {
 
-						// clean up after use of nested transaction,
-						// then try again in outer transaction
-						useTc = tc;
-						nestedTc.destroy();
-						continue;
-					}
+				if (se.isLockTimeout()) {
+                    // We don't test for SQLState.DEADLOCK because if it is a
+                    // deadlock, it may be better to expose it.  Just go ahead
+                    // and throw it.
+
+                    if (!se.getMessageId().equals(SQLState.LOCK_TIMEOUT_LOG)) {
+                        // In case of a LOCK_TIMEOUT_LOG also just throw it.
+                        // LOCK_TIMEOUT_LOG happens when the app has set
+                        // derby.locks.deadlockTrace=true, in which case we
+                        // don't want to mask the timeout. 
+
+                        if (useTc == nestedTc) {
+
+                            // clean up after use of nested transaction,
+                            // then try again in outer transaction
+                            useTc = tc;
+                            nestedTc.destroy();
+                            continue;
+                        }
+                    }
+
 				} else if (se.getMessageId()
 							   .equals(SQLState.LANG_OBJECT_ALREADY_EXISTS)) {
 					// Ignore "Schema already exists". Another thread has
