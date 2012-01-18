@@ -400,7 +400,14 @@ public final class AccessTest extends BaseJDBCTestCase {
             assertTrue(rtsp.findString("Number of columns fetched="+expNumCols, 1));
             if (expDelRowsV!=null)
                 assertTrue(rtsp.findString("Number of deleted rows visited="+expDelRowsV, 1));
-            assertTrue(rtsp.findString("Number of pages visited="+expPages, 1));
+
+
+            assertTrue(
+                "RuntimeStatisticsParser.findstring(Number of pages visited= "
+                    + expPages + ") returned false" +
+                "full runtime statistics = " + rtsp.toString(),
+                rtsp.findString("Number of pages visited=" + expPages, 1));
+
             assertTrue(rtsp.findString("Number of rows qualified="+expRowsQ, 1));            
             assertTrue(rtsp.findString("Number of rows visited="+expRowsV, 1));
             assertTrue(rtsp.findString("Scan type="+expScanType, 1));
