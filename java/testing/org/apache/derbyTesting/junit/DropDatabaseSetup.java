@@ -54,12 +54,13 @@ class DropDatabaseSetup extends BaseTestSetup {
             config.openConnection(logicalDBName).close();
             shutdown = true;
         } catch (SQLException e) {
+            String  sqlState = e.getSQLState();
             // If the database cannot be booted due
             // to some restrictions such as authentication
             // or encrypted (ie here we don't know the 
             // correct authentication tokens, then it's
             // ok since we just want it shutdown anyway!
-            if ("XJ040".equals(e.getSQLState()))
+            if ( "XJ040".equals( sqlState ) || "08004".equals( sqlState ) || "4251I".equals( sqlState ) )
             {
                 shutdown = false;
             }

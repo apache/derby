@@ -80,7 +80,7 @@ public class DriverManagerConnector implements Connector {
         try {
             return DriverManager.getConnection(url, connectionAttributes);
         } catch (SQLException e) {
-            
+
             // Expected state for database not found.
             // For the client the generic 08004 is returned,
             // will just retry on that.
@@ -95,6 +95,7 @@ public class DriverManagerConnector implements Connector {
             
             Properties attributes = new Properties(connectionAttributes);
             attributes.setProperty("create", "true");
+
             return DriverManager.getConnection(url, attributes);
         }
     }
@@ -117,7 +118,7 @@ public class DriverManagerConnector implements Connector {
      */
     public void shutEngine() throws SQLException {
         
-        getConnectionByAttributes("jdbc:derby:", "shutdown", "true");        
+        getConnectionByAttributes("jdbc:derby:", "shutdown", "true");
     }
     
     /**
@@ -129,7 +130,7 @@ public class DriverManagerConnector implements Connector {
         throws SQLException
     {
         Properties attributes = new Properties();
-        
+
         attributes.setProperty("user", config.getUserName());
         attributes.setProperty("password", config.getUserPassword());
         attributes.setProperty(key, value);

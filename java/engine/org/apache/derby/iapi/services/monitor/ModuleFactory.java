@@ -227,6 +227,13 @@ public interface ModuleFactory
 
 
 	/**
+		Canonicalize a service name, mapping different user-specifications of a database name
+        onto a single, standard name.
+	*/
+    public  String  getCanonicalServiceName( String userSpecifiedName )
+        throws StandardException;
+    
+	/**
 		Find a service.
 
 		<BR>

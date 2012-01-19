@@ -392,6 +392,17 @@ abstract class BaseMonitor
 			bootPersistentServices( );
 	}
 
+    public  String  getCanonicalServiceName( String userSpecifiedName )
+        throws StandardException
+    {
+        if ( userSpecifiedName == null ) { return null; }
+        
+        PersistentService   correspondingService = findProviderForCreate(  userSpecifiedName );
+
+        if ( correspondingService == null ) { return null; }
+        else { return correspondingService.getCanonicalServiceName( userSpecifiedName ); }
+    }
+
 	public Object findService(String factoryInterface, String serviceName) {
 
 		if (serviceName == null)

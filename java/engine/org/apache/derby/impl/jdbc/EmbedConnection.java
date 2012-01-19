@@ -397,9 +397,11 @@ public abstract class EmbedConnection implements EngineConnection
 					addWarning(SQLWarningFactory.newSQLWarning(SQLState.DATABASE_EXISTS, getDBName()));
 				} else {
 
-					// check for user's credential and authenticate the user
-					// with system level authentication service.
-					checkUserCredentials(null, info);
+                    //
+					// Check for user's credential and authenticate the user
+					// with the system level authentication service.
+                    //
+                    checkUserCredentials( true, null, info );
 					
 					// Process with database creation
 					database = createDatabase(tr.getDBName(), info);
@@ -417,7 +419,7 @@ public abstract class EmbedConnection implements EngineConnection
 			// the database
 			//
             try {
-                checkUserCredentials(tr.getDBName(), info);
+                checkUserCredentials( false, tr.getDBName(), info );
             } catch (SQLException sqle) {
                 if (isStartSlaveBoot && !slaveDBAlreadyBooted) {
                     // Failing credentials check on a previously
@@ -1170,7 +1172,7 @@ public abstract class EmbedConnection implements EngineConnection
 	//
 	// Check passed-in user's credentials.
 	//
-	private void checkUserCredentials(String dbname,
+	private void checkUserCredentials( boolean creatingDatabase, String dbname,
 									  Properties userInfo)
 	  throws SQLException
 	{
@@ -1209,7 +1211,31 @@ public abstract class EmbedConnection implements EngineConnection
 			throw newSQLException(SQLState.LOGIN_FAILED, failedString);
 		}
 
-		if (dbname != null) {
+        //
+        // We must handle the special case when the system uses NATIVE
+        // authentication for system-wide operations but we are being
+        // asked to create the system-wide credentials database. In this situation,
+        // the database holding the credentials does not exist yet. In this situation,
+        // we are supposed to create the credentials database and store the
+        // creation credentials in that database as the credentials of the system administrator.
+        //
+        if (
+            creatingDatabase &&
+            compareDatabaseNames( getDBName(), authenticationService.getSystemCredentialsDatabaseName() )
+            )
+        {
+            //
+            // NATIVE authentication using a system-wide credentials database
+            // which is being created now. Allow this to succeed.
+            //
+            return;
+        }
+
+        //
+        // If we are creating a database, we set the dbname
+        //
+
+        if (dbname != null) {
 			checkUserIsNotARole();
 		}
 
@@ -1231,6 +1257,23 @@ public abstract class EmbedConnection implements EngineConnection
 		if (authenticationService instanceof NoneAuthenticationServiceImpl)
 			usingNoneAuth = true;
 	}
+
+    /**
+     * Compare two user-specified database names to see if they identify
+     * the same database.
+     */
+    private boolean compareDatabaseNames( String leftDBName, String rightDBName )
+        throws SQLException
+    {
+        try {
+            String  leftCanonical = Monitor.getMonitor().getCanonicalServiceName( leftDBName );
+            String  rightCanonical = Monitor.getMonitor().getCanonicalServiceName( rightDBName );
+
+            if ( leftCanonical == null ) { return false; }
+            else { return leftCanonical.equals( rightCanonical ); }
+            
+        } catch (StandardException se) { throw Util.generateCsSQLException(se); }
+    }
 
 
 	/**

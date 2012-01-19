@@ -260,7 +260,7 @@ public abstract class BaseTestCase
      *
      * @param name name of the property
      */
-    protected static void removeSystemProperty(final String name)
+    public static void removeSystemProperty(final String name)
 	{
 	
 	AccessController.doPrivileged

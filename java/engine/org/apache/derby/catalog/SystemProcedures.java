@@ -2051,10 +2051,26 @@ public class SystemProcedures  {
          )
         throws SQLException
     {
+        LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
+        TransactionController tc = lcc.getTransactionExecute();
+
+        addUser( userName, password, tc );
+    }
+    /**
+     * Create a new user (this entry is called when bootstrapping the credentials of the DBO
+     * at database creation time.
+     */
+    public static void addUser
+        (
+         String userName,
+         String password,
+         TransactionController tc
+         )
+        throws SQLException
+    {
         try {
             LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
             DataDictionary dd = lcc.getDataDictionary();
-            TransactionController tc = lcc.getTransactionExecute();
 
             /*
             ** Inform the data dictionary that we are about to write to it.
@@ -2067,7 +2083,7 @@ public class SystemProcedures  {
             */
             dd.startWriting(lcc);
 
-            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password );
+            UserDescriptor  userDescriptor = makeUserDescriptor( dd, tc, userName, password );
 
             dd.addDescriptor( userDescriptor, null, DataDictionary.SYSUSERS_CATALOG_NUM, false, tc );
             
@@ -2075,15 +2091,15 @@ public class SystemProcedures  {
     }
     private static  UserDescriptor  makeUserDescriptor
         (
-         LanguageConnectionContext lcc,
+         DataDictionary dd,
+         TransactionController tc,
          String userName,
          String password
          )
         throws StandardException
     {
-        DataDictionary dd = lcc.getDataDictionary();
         DataDescriptorGenerator ddg = dd.getDataDescriptorGenerator();
-        PasswordHasher hasher = dd.makePasswordHasher( lcc.getTransactionExecute().getProperties() );
+        PasswordHasher hasher = dd.makePasswordHasher( tc.getProperties() );
 
         if ( hasher == null )
         {
@@ -2127,7 +2143,7 @@ public class SystemProcedures  {
             */
             dd.startWriting(lcc);
 
-            UserDescriptor  userDescriptor = makeUserDescriptor( lcc, userName, password );
+            UserDescriptor  userDescriptor = makeUserDescriptor( dd, tc, userName, password );
 
             dd.updateUser( userDescriptor, tc );
             

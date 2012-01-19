@@ -260,6 +260,8 @@ public abstract class AuthenticationServiceBase
 						 );
 	}
 
+    public  String  getSystemCredentialsDatabaseName()    { return null; }
+
 	/**
 	 * Returns a property if it was set at the database or
 	 * system level. Treated as SERVICE property by default.
@@ -273,11 +275,7 @@ public abstract class AuthenticationServiceBase
 
 		try {
 
-		  if (store != null)
-          {
-            tc = store.getTransaction(
-                ContextService.getFactory().getCurrentContextManager());
-          }
+          tc = getTransaction();
 
 		  propertyValue =
 			PropertyUtil.getServiceProperty(tc,
@@ -294,6 +292,32 @@ public abstract class AuthenticationServiceBase
 
 		return propertyValue;
 	}
+
+    /**
+     * <p>
+     * Get a transaction for performing authentication at the database level.
+     * </p>
+     */
+    protected   TransactionController   getTransaction()
+        throws StandardException
+    {
+        if ( store == null ) { return null; }
+        else
+        {
+            return store.getTransaction( ContextService.getFactory().getCurrentContextManager() );
+        }
+    }
+
+    /**
+     * <p>
+     * Get the name of the database if we are performing authentication at the database level.
+     * </p>
+     */
+    protected   String  getServiceName()
+    {
+        if ( store == null ) { return null; }
+        else { return Monitor.getServiceName( store ); }
+    }
 
 	public String getDatabaseProperty(String key) {
 
@@ -406,7 +430,12 @@ public abstract class AuthenticationServiceBase
 					properties,
 					org.apache.derby.iapi.reference.Property.REQUIRE_AUTHENTICATION_PARAMETER
 														);
-		return Boolean.valueOf(requireAuthentication).booleanValue();
+		if ( Boolean.valueOf(requireAuthentication).booleanValue() ) { return true; }
+
+        //
+        // NATIVE authentication does not require that you set REQUIRE_AUTHENTICATION_PARAMETER.
+        //
+        return PropertyUtil.nativeAuthenticationEnabled( properties );
 	}
 
 	/**

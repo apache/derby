@@ -669,7 +669,7 @@ public final class TestConfiguration {
     /**
      * Generate the unique database name for single use.
      */
-    private static synchronized String generateUniqueDatabaseName()
+    public static synchronized String generateUniqueDatabaseName()
     {
         // Forward slash is ok, Derby treats database names
         // as URLs and translates forward slash to the local
@@ -766,7 +766,7 @@ public final class TestConfiguration {
      * the database in openConnection(String logicalDatabaseName) method calls.
      * @return decorated test.
      */
-    public static TestSetup additionalDatabaseDecorator(Test test, String logicalDbName)
+    public static DatabaseChangeSetup additionalDatabaseDecorator(Test test, String logicalDbName)
     {
         return new DatabaseChangeSetup(new DropDatabaseSetup(test, logicalDbName),
                                        logicalDbName,
@@ -786,7 +786,7 @@ public final class TestConfiguration {
      *                      method calls.
      * @return decorated test.
      */
-    public static TestSetup additionalDatabaseDecoratorNoShutdown(
+    public static DatabaseChangeSetup additionalDatabaseDecoratorNoShutdown(
         Test test,
         String logicalDbName)
     {
@@ -800,6 +800,36 @@ public final class TestConfiguration {
             },
             logicalDbName,
             generateUniqueDatabaseName(),
+            false);
+    }
+
+    /**
+     * Similar to additionalDatabaseDecorator except the database will
+     * not be shutdown, only deleted. It is the responsibility of the
+     * test to shut it down.
+     *
+     * @param test Test to be decorated
+     * @param logicalDbName The logical database name. This name is
+     *                      used to identify the database in
+     *                      openConnection(String logicalDatabaseName)
+     *                      method calls.
+     * @param physicalDbName - Real database name on disk.
+     * @return decorated test.
+     */
+    public static DatabaseChangeSetup additionalDatabaseDecoratorNoShutdown(
+        Test test,
+        String logicalDbName, String physicalDbName )
+    {
+        return new DatabaseChangeSetup(
+            new DropDatabaseSetup(test, logicalDbName)
+            {
+                protected void tearDown() throws Exception {
+                    // the test is responsible for shutdown
+                    removeDatabase();
+                }
+            },
+            logicalDbName,
+            physicalDbName,
             false);
     }
 
@@ -1381,8 +1411,7 @@ public final class TestConfiguration {
     public JDBCClient getJDBCClient() {
         return jdbcClient;
     }
-    
-    
+
     /**
      * <p>
      * Return the jdbc url for connecting to the default database.
@@ -1597,14 +1626,43 @@ public final class TestConfiguration {
      * @return connection to specified database.
      */
     Connection openConnection(String logicalDatabaseName)
-        throws SQLException {
-        String databaseName = getPhysicalDatabaseName(logicalDatabaseName);
-        if (usedDbNames.contains(databaseName))
-            return connector.openConnection(databaseName);
+        throws SQLException
+    {
+        return connector.openConnection( getAndVetPhysicalDatabaseName( logicalDatabaseName ) );
+    }
+    private String  getAndVetPhysicalDatabaseName( String logicalDatabaseName )
+        throws SQLException
+    {
+        String databaseName = getPhysicalDatabaseName( logicalDatabaseName );
+        
+        if ( usedDbNames.contains(databaseName) ) { return databaseName; }
         else
+        {
             throw new SQLException("Database name \"" + logicalDatabaseName
                       + "\" is not in a list of used databases."
                       + "Use method TestConfiguration.additionalDatabaseDecorator first.");
+        }
+    }
+
+    /**
+     * Open connection to the specified database using the supplied username and password.
+     * If the database does not exist, it will be created.
+     * Requires that the test has been decorated with
+     * additionalDatabaseDecorator with the matching name.
+     * The physical database name may differ.
+     * @param logicalDatabaseName A logical database name as passed
+     * to <code>additionalDatabaseDecorator</code> function.
+     * @return connection to specified database.
+     */
+    public  Connection openConnection( String logicalDatabaseName, String user, String password )
+        throws SQLException
+    {
+        return connector.openConnection
+            (
+             getAndVetPhysicalDatabaseName( logicalDatabaseName ),
+             user,
+             password
+             );
     }
 
     /**

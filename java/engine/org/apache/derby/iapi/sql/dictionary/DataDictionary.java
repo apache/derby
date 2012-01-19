@@ -1692,6 +1692,17 @@ public interface DataDictionary
 	public void updateUser( UserDescriptor newDescriptor,TransactionController tc )
 		throws StandardException;
 
+	/**
+	 * Return the credentials descriptor for the named user.
+	 *
+	 * @param userName      Name of the user whose credentials we want.
+	 * @param tc					The TransactionController to use
+	 *
+	 * @exception StandardException		Thrown on failure
+	 */
+	public UserDescriptor getUser( String userName, TransactionController tc )
+		throws StandardException;
+
 	/** 
 	 * Drop a User from the DataDictionary
 	 *

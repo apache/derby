@@ -68,6 +68,12 @@ public class SpecificAuthenticationServiceImpl
 		if (!requireAuthentication(properties))
 			return false;
 
+        //
+        // Don't treat the NATIVE authentication specification as a user-supplied
+        // class which should be instantiated.
+        //
+        if (  PropertyUtil.nativeAuthenticationEnabled( properties ) ) { return false; }
+
 		specificAuthenticationScheme = PropertyUtil.getPropertyFromSet(
 					properties,
 					org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_PARAMETER);
@@ -78,7 +84,7 @@ public class SpecificAuthenticationServiceImpl
 			  (!((StringUtil.SQLEqualsIgnoreCase(specificAuthenticationScheme,
 					  org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_BUILTIN)) ||
 			  (specificAuthenticationScheme.equalsIgnoreCase(
-					  org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_LDAP))  ))))
+                                                             org.apache.derby.iapi.reference.Property.AUTHENTICATION_PROVIDER_LDAP))  ))))
 			return true;
 		else
 			return false;

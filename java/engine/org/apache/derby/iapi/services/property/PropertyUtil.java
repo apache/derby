@@ -562,6 +562,39 @@ public class PropertyUtil {
 		return false;
 	}
 
+	/**
+		Return true if NATIVE authentication has been enabled in the passed-in properties.
+	*/
+	public static boolean nativeAuthenticationEnabled( Properties properties )
+    {
+		String authenticationProvider = getPropertyFromSet
+            (
+             properties,
+             Property.AUTHENTICATION_PROVIDER_PARAMETER
+             );
+
+        if ( authenticationProvider ==  null ) { return false; }
+
+        return StringUtil.SQLToUpperCase( authenticationProvider ).startsWith( Property.AUTHENTICATION_PROVIDER_NATIVE );
+	}
+
+	/**
+		Return true if the passed-in properties specify NATIVE authentication using LOCAL credentials.
+	*/
+	public static boolean localNativeAuthenticationEnabled( Properties properties )
+    {
+        if ( ! nativeAuthenticationEnabled( properties ) ) { return false; }
+        
+		String authenticationProvider = getPropertyFromSet
+            (
+             properties,
+             Property.AUTHENTICATION_PROVIDER_PARAMETER
+             );
+
+        return StringUtil.SQLToUpperCase( authenticationProvider ).endsWith
+            ( Property.AUTHENTICATION_PROVIDER_LOCAL_SUFFIX );
+	}
+
 
 	/**
 	 * Return true if username is defined as a system property

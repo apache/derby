@@ -26,7 +26,7 @@ import junit.framework.Test;
  * Previous configuration is restored on tearDown.
  *
  */
-final class DatabaseChangeSetup extends ChangeConfigurationSetup {
+public  final class DatabaseChangeSetup extends ChangeConfigurationSetup {
 
     private final String logicalDbName;
     private final String dbName;
@@ -42,4 +42,7 @@ final class DatabaseChangeSetup extends ChangeConfigurationSetup {
     TestConfiguration getNewConfiguration(TestConfiguration old) {
         return new TestConfiguration(old, logicalDbName, dbName, defaultDb);
     }
+
+    public  String  physicalDatabaseName() { return dbName; }
+    
 }

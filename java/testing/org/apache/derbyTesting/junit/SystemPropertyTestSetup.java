@@ -77,10 +77,14 @@ public class SystemPropertyTestSetup extends TestSetup {
     protected void setUp()
     throws java.lang.Exception
     {
-    	setProperties(newValues);
     	// shutdown engine so static properties take effect
+        // shutdown the engine before setting the properties. this
+        // is because the properties may change authentication settings
+        // to NATIVE authentication and we may be missing a credentials DB.
     	if (staticProperties)
-    		TestConfiguration.getCurrent().shutdownEngine();
+    	{ TestConfiguration.getCurrent().shutdownEngine(); }
+        
+    	setProperties(newValues);
     }
 
     /**

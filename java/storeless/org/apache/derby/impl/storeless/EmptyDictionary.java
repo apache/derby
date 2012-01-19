@@ -684,10 +684,17 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		// TODO Auto-generated method stub
     }
 
-	public void dropUser( String userName, TransactionController tc )
+	public void dropUser( String userName,TransactionController tc )
+		throws StandardException
+	{
+		// TODO Auto-generated method stub
+    }
+
+	public UserDescriptor getUser( String userName, TransactionController tc )
 			throws StandardException
 	{
 		// TODO Auto-generated method stub
+        return null;
     }
 
 	public int getEngineType() {

@@ -31,6 +31,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import junit.framework.Test;
 import org.apache.derby.drda.NetworkServerControl;
@@ -464,9 +465,20 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             if (failedShutdown != null)
             {
                 if (failedShutdown instanceof Exception)
-                    throw (Exception) failedShutdown;
-                
-                throw (Error) failedShutdown;
+                {
+                    // authentication failure is ok.
+                    if (
+                        !(failedShutdown instanceof SQLException) ||
+                        !( "4251I".equals( ((SQLException) failedShutdown).getSQLState() ) )
+                        )
+                    {
+                        throw (Exception) failedShutdown;
+                    }
+                }
+                else
+                {
+                    throw (Error) failedShutdown;
+                }
             }
                 
         }

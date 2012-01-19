@@ -40,11 +40,20 @@ public interface AuthenticationService
 	public static final String MODULE =
 								"org.apache.derby.iapi.jdbc.AuthenticationService";
 	/**
-	 * Authenticate a User inside JBMS.
+	 * Authenticate a User inside Derby.
 	 *
 	 * @param info			Connection properties info.
 	 * failure.
 	 */
 	public boolean authenticate(String databaseName, Properties info)
 	  throws SQLException;
+
+    /**
+     * <p>
+     * Get the name of the credentials database used to authenticate system-wide operations.
+     * This returns null for all implementations except NATIVE authentication.
+     * </p>
+     */
+    public  String  getSystemCredentialsDatabaseName();
+
 }

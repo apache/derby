@@ -797,6 +797,9 @@ public interface Property {
 
 	// These are the different built-in providers Derby supports
 
+	public static final String AUTHENTICATION_PROVIDER_NATIVE =
+								"NATIVE:";
+
 	public static final String AUTHENTICATION_PROVIDER_BUILTIN =
 								"BUILTIN";
 
@@ -806,6 +809,15 @@ public interface Property {
 	public static final String AUTHENTICATION_SERVER_PARAMETER =
 								"derby.authentication.server";
 
+    // this suffix on the NATIVE authentication provider means that
+    // database operations should be authenticated locally
+	public static final String AUTHENTICATION_PROVIDER_LOCAL_SUFFIX =
+								":LOCAL";
+
+    // when local native authentication is enabled, we store this value for derby.authentication.provider
+    public static final String AUTHENTICATION_PROVIDER_NATIVE_LOCAL =
+        AUTHENTICATION_PROVIDER_NATIVE + AUTHENTICATION_PROVIDER_LOCAL_SUFFIX;
+    
     /**
      * Property that specifies the name of the hash algorithm to use with
      * the configurable hash authentication scheme.

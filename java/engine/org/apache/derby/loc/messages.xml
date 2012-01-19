@@ -1239,6 +1239,17 @@ Guide.
            </msg>
 
             <msg>
+                <name>4251H</name>
+                <text>Invalid NATIVE authentication specification. Please set derby.authentication.provider to a value of the form NATIVE:$credentialsDB or NATIVE:$credentialsDB:LOCAL (at the system level) or NATIVE::LOCAL (at the database level).</text>
+           </msg>
+
+            <msg>
+                <name>4251I</name>
+                <text>Authentication cannot be performed because the credentials database '{0}' does not exist.</text>
+                 <arg>databaseName</arg>
+           </msg>
+
+            <msg>
                 <name>42601</name>
                 <text>In an ALTER TABLE statement, the column '{0}' has been specified as NOT NULL and either the DEFAULT clause was not specified or was specified as DEFAULT NULL.</text>
                 <arg>columnName</arg>

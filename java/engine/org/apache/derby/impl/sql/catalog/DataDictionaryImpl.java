@@ -522,7 +522,7 @@ public final class	DataDictionaryImpl
 			throws StandardException
 	{
 		softwareVersion = new DD_Version(this, DataDictionary.DD_VERSION_DERBY_10_9);
-        
+
 		startupParameters = startParams;
 
 		uuidFactory = Monitor.getMonitor().getUUIDFactory();
@@ -807,16 +807,22 @@ public final class	DataDictionaryImpl
                     DataDictionary.CREATE_DATA_DICTIONARY_VERSION,
                     dictionaryVersion, true);
 
-				// If SqlAuthorization is set as system property during database
-				// creation, set it as database property also, so it gets persisted.
-				if (PropertyUtil.getSystemBoolean(Property.SQL_AUTHORIZATION_PROPERTY))
+                boolean nativeAuthenticationEnabled = PropertyUtil.nativeAuthenticationEnabled( startParams );
+
+                //
+				// If SqlAuthorization is set as a system property during database
+				// creation, set it as a database property also, so that it gets persisted.
+                //
+                // We also turn on SqlAuthorization if NATIVE authentication has been specified.
+                //
+				if (PropertyUtil.getSystemBoolean(Property.SQL_AUTHORIZATION_PROPERTY) || nativeAuthenticationEnabled)
 				{
 					bootingTC.setProperty(Property.SQL_AUTHORIZATION_PROPERTY,"true",true);
 					usesSqlAuthorization=true;
 				}
 
                 // Set default hash algorithm used to protect passwords stored
-                // in the database for BUILTIN authentication.
+                // in the database for BUILTIN and NATIVE authentication.
                 bootingTC.setProperty(
                         Property.AUTHENTICATION_BUILTIN_ALGORITHM,
                         findDefaultBuiltinAlgorithm(),
@@ -7917,6 +7923,28 @@ public final class	DataDictionaryImpl
              keyRow, row,
              SYSUSERSRowFactory.SYSUSERS_INDEX1_ID,
              bArray, colsToUpdate, tc
+             );
+	}
+
+	public UserDescriptor getUser( String userName, TransactionController tc )
+		throws StandardException
+	{
+		ExecIndexRow				keyRow;
+		TabInfoImpl					ti = getNonCoreTI( SYSUSERS_CATALOG_NUM );
+
+		/* Set up the start/stop position for the scan */
+		keyRow = (ExecIndexRow) exFactory.getIndexableRow(1);
+		keyRow.setColumn( 1, new SQLVarchar( userName ) );
+
+		return (UserDescriptor) getDescriptorViaIndex
+            (
+             SYSUSERSRowFactory.SYSUSERS_INDEX1_ID,
+             keyRow,
+             (ScanQualifier [][]) null,
+             ti,
+             (TupleDescriptor) null,
+             (List) null,
+             false
              );
 	}
 
