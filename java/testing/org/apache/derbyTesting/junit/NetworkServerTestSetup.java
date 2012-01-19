@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
+import java.net.UnknownHostException;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
@@ -217,9 +218,14 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      * by earlier test cases, or until the timeout specified by
      * {@link #getWaitTime()} has elapsed.
      *
-     * @throws Exception if the port didn't become available before the timeout
+     * @throws AssertionFailedError if the port didn't become available before
+     * the timeout
+     * @throws InterruptedException if the thread was interrupted while waiting
+     * for the port to become available
+     * @throws UnknownHostException if the host name couldn't be resolved
      */
-    private void waitForAvailablePort() throws Exception {
+    public static void waitForAvailablePort()
+            throws InterruptedException, UnknownHostException {
         TestConfiguration conf = TestConfiguration.getCurrent();
         InetAddress serverAddress = InetAddress.getByName(conf.getHostName());
         int port = conf.getPort();
@@ -248,7 +254,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
      * @param addr the address of the network interface
      * @throws IOException if a server socket couldn't be opened
      */
-    private void probeServerPort(final int port, final InetAddress addr)
+    private static void probeServerPort(final int port, final InetAddress addr)
             throws IOException {
         try {
             AccessController.doPrivileged(new PrivilegedExceptionAction() {
