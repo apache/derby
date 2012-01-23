@@ -55,8 +55,6 @@ import org.apache.derby.iapi.sql.compile.RequiredRowOrdering;
 import org.apache.derby.iapi.sql.compile.RowOrdering;
 import org.apache.derby.iapi.sql.compile.Visitor;
 
-import org.apache.derby.iapi.sql.depend.DependencyManager;
-
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptor;
 import org.apache.derby.iapi.sql.dictionary.ColumnDescriptorList;
@@ -2349,20 +2347,8 @@ public class FromBaseTable extends FromTable
 					);
 
             // Bail out if the descriptor couldn't be found. The conglomerate
-            // probably doesn't exist anymore because of concurrent DDL or
-            // compress operations, and the compilation will have to be tried
-            // again.
+            // probably doesn't exist anymore.
             if (baseConglomerateDescriptor == null) {
-                // The statement is typically invalidated by the operation
-                // that dropped the conglomerate. However, if the invalidation
-                // happened before we called createDependency(), we'll miss it
-                // and we won't retry the compilation with fresh dictionary
-                // information (DERBY-5406). So let's invalidate the statement
-                // ourselves here.
-                compilerContext.getCurrentDependent().makeInvalid(
-                        DependencyManager.COMPILE_FAILED,
-                        getLanguageConnectionContext());
-
                 throw StandardException.newException(
                         SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST,
                         new Long(tableDescriptor.getHeapConglomerateId()));

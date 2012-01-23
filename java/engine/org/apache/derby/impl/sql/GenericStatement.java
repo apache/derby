@@ -92,13 +92,40 @@ public class GenericStatement
 		*/ 
 
         final int depth = lcc.getStatementDepth();
+        String prevErrorId = null;
         while (true) {
+            boolean recompile = false;
             try {
                 return prepMinion(lcc, true, (Object[]) null,
                                   (SchemaDescriptor) null, forMetaData);
-            } finally {
-                boolean recompile = false;
+            } catch (StandardException se) {
+                // There is a chance that we didn't see the invalidation
+                // request from a DDL operation in another thread because
+                // the statement wasn't registered as a dependent until
+                // after the invalidation had been completed. Assume that's
+                // what has happened if we see a conglomerate does not exist
+                // error, and force a retry even if the statement hasn't been
+                // invalidated.
+                if (SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST.equals(
+                        se.getMessageId())) {
+                    // STORE_CONGLOMERATE_DOES_NOT_EXIST has exactly one
+                    // argument: the conglomerate id
+                    String conglomId = String.valueOf(se.getArguments()[0]);
 
+                    // Request a recompile of the statement if a conglomerate
+                    // disappears while we are compiling it. But if we have
+                    // already retried once because the same conglomerate was
+                    // missing, there's probably no hope that yet another retry
+                    // will help, so let's break out instead of potentially
+                    // looping infinitely.
+                    if (!conglomId.equals(prevErrorId)) {
+                        recompile = true;
+                    }
+
+                    prevErrorId = conglomId;
+                }
+                throw se;
+            } finally {
                 // Check if the statement was invalidated while it was
                 // compiled. If so, the newly compiled plan may not be
                 // up to date anymore, so we recompile the statement
@@ -112,7 +139,7 @@ public class GenericStatement
                 // invalidatedWhileCompiling and isValid are protected by
                 // synchronization on the prepared statement.
                 synchronized (preparedStmt) {
-                    if (preparedStmt.invalidatedWhileCompiling) {
+                    if (recompile || preparedStmt.invalidatedWhileCompiling) {
                         preparedStmt.isValid = false;
                         preparedStmt.invalidatedWhileCompiling = false;
                         recompile = true;
