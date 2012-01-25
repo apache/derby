@@ -790,6 +790,29 @@ public final class TestConfiguration {
         Test test,
         String logicalDbName)
     {
+        return additionalDatabaseDecoratorNoShutdown( test, logicalDbName, false );
+    }
+
+    /**
+     * Similar to additionalDatabaseDecorator except the database will
+     * not be shutdown, only deleted. It is the responsibility of the
+     * test to shut it down.
+     *
+     * @param test Test to be decorated
+     * @param logicalDbName The logical database name. This name is
+     *                      used to identify the database in
+     *                      openConnection(String logicalDatabaseName)
+     *                      method calls.
+     * @param defaultDB True if the database should store its own name in its TestConfiguration.
+     * @return decorated test.
+     */
+    public static DatabaseChangeSetup additionalDatabaseDecoratorNoShutdown
+        (
+         Test test,
+         String logicalDbName,
+         boolean defaultDB
+        )
+    {
         return new DatabaseChangeSetup(
             new DropDatabaseSetup(test, logicalDbName)
             {
@@ -800,7 +823,7 @@ public final class TestConfiguration {
             },
             logicalDbName,
             generateUniqueDatabaseName(),
-            false);
+            defaultDB);
     }
 
     /**

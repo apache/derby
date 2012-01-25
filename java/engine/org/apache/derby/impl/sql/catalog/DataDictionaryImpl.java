@@ -777,6 +777,8 @@ public final class	DataDictionaryImpl
 	            newDeclaredGlobalTemporaryTablesSchemaDesc(
 	                    SchemaDescriptor.STD_DECLARED_GLOBAL_TEMPORARY_TABLES_SCHEMA_NAME);
 			
+            boolean nativeAuthenticationEnabled = PropertyUtil.nativeAuthenticationEnabled( startParams );
+
 			if (create) {
 				String userName = IdUtil.getUserNameFromURLProps(startParams);
 				authorizationDatabaseOwner = IdUtil.getUserAuthorizationId(userName);
@@ -807,17 +809,18 @@ public final class	DataDictionaryImpl
                     DataDictionary.CREATE_DATA_DICTIONARY_VERSION,
                     dictionaryVersion, true);
 
-                boolean nativeAuthenticationEnabled = PropertyUtil.nativeAuthenticationEnabled( startParams );
-
                 //
 				// If SqlAuthorization is set as a system property during database
 				// creation, set it as a database property also, so that it gets persisted.
                 //
                 // We also turn on SqlAuthorization if NATIVE authentication has been specified.
                 //
-				if (PropertyUtil.getSystemBoolean(Property.SQL_AUTHORIZATION_PROPERTY) || nativeAuthenticationEnabled)
+				if ( PropertyUtil.getSystemBoolean(Property.SQL_AUTHORIZATION_PROPERTY) )
 				{
 					bootingTC.setProperty(Property.SQL_AUTHORIZATION_PROPERTY,"true",true);
+				}
+				if ( PropertyUtil.getSystemBoolean(Property.SQL_AUTHORIZATION_PROPERTY) || nativeAuthenticationEnabled )
+				{
 					usesSqlAuthorization=true;
 				}
 
@@ -889,11 +892,10 @@ public final class	DataDictionaryImpl
 					// database owner check at a hard upgrade.
 					if (dictionaryVersion.majorVersionNumber >=
 						DataDictionary.DD_VERSION_DERBY_10_2) {
-						usesSqlAuthorization = Boolean.valueOf(sqlAuth).
-							booleanValue();
+						usesSqlAuthorization = Boolean.valueOf(sqlAuth).booleanValue() || nativeAuthenticationEnabled;
 					}
 				} else {
-					if (Boolean.valueOf(sqlAuth).booleanValue()) {
+					if (Boolean.valueOf(sqlAuth).booleanValue() || nativeAuthenticationEnabled) {
 						// SQL authorization requires 10.2 or higher database
 						checkVersion(DataDictionary.DD_VERSION_DERBY_10_2,
 									 "sqlAuthorization");
@@ -7926,7 +7928,7 @@ public final class	DataDictionaryImpl
              );
 	}
 
-	public UserDescriptor getUser( String userName, TransactionController tc )
+	public UserDescriptor getUser( String userName )
 		throws StandardException
 	{
 		ExecIndexRow				keyRow;
@@ -7988,6 +7990,13 @@ public final class	DataDictionaryImpl
 
 		dictionaryVersion = (DD_Version)tc.getProperty(
 											DataDictionary.CORE_DATA_DICTIONARY_VERSION);
+
+        // NATIVE authentication allowed if the database is at least at level 10.9
+        boolean nativeAuthenticationEnabled = PropertyUtil.nativeAuthenticationEnabled( startParams );
+        if ( nativeAuthenticationEnabled )
+        {
+            dictionaryVersion.checkVersion( DD_VERSION_DERBY_10_9, "NATIVE AUTHENTICATION" );
+        }
 
         resetDatabaseOwner( tc );
         

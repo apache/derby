@@ -261,6 +261,7 @@ public interface SQLState {
 	String PROPERTY_UNSUPPORTED_CHANGE  = "XCY02.S";
 	String PROPERTY_MISSING				= "XCY03.S";
 	String PROPERTY_SYNTAX_INVALID		= "XCY04.S";
+	String PROPERTY_BAD_NATIVE_CHANGE  = "XCY05.S";
 
 	/*
 	** LockManager

@@ -31,6 +31,8 @@ public  final class DatabaseChangeSetup extends ChangeConfigurationSetup {
     private final String logicalDbName;
     private final String dbName;
     private final boolean defaultDb;
+
+    private TestConfiguration   _myTestConfiguration;
     
     public DatabaseChangeSetup(Test test, String logicalDbName, String dbName, boolean defaultDb) {
         super(test);
@@ -40,9 +42,12 @@ public  final class DatabaseChangeSetup extends ChangeConfigurationSetup {
    }
 
     TestConfiguration getNewConfiguration(TestConfiguration old) {
-        return new TestConfiguration(old, logicalDbName, dbName, defaultDb);
+        _myTestConfiguration = new TestConfiguration(old, logicalDbName, dbName, defaultDb);
+        return _myTestConfiguration;
     }
 
+    public  TestConfiguration   getTestConfiguration()  { return _myTestConfiguration; }
+    
     public  String  physicalDatabaseName() { return dbName; }
     
 }

@@ -414,60 +414,50 @@ public final class NativeAuthenticationServiceImpl
 	{
         userName = IdUtil.getUserAuthorizationId( userName ) ;
 
-        TransactionController   tc = getTransaction();
-        try {
-            //
-            // Special bootstrap code. If we are creating a credentials database, then
-            // we store the DBO's initial credentials in it. We also turn on NATIVE LOCAL authentication
-            // forever.
-            //
-            if ( _creatingCredentialsDB )
-            {
-                _creatingCredentialsDB = false;
+        //
+        // Special bootstrap code. If we are creating a credentials database, then
+        // we store the DBO's initial credentials in it. We also turn on NATIVE LOCAL authentication
+        // forever.
+        //
+        if ( _creatingCredentialsDB )
+        {
+            _creatingCredentialsDB = false;
             
-                SystemProcedures.addUser( userName, userPassword, tc );
+            TransactionController   tc = getTransaction();
             
-                tc.setProperty
-                    ( Property.AUTHENTICATION_PROVIDER_PARAMETER, Property.AUTHENTICATION_PROVIDER_NATIVE_LOCAL, true );
+            SystemProcedures.addUser( userName, userPassword, tc );
             
-                return true;
-            }
-        
-            //
-            // we expect to find a data dictionary
-            //
-            DataDictionary      dd = (DataDictionary) Monitor.getServiceModule( this, DataDictionary.MODULE );
-        
-            //
-            // NATIVE authentication is only available if the database is at version 10.9 or later
-            //
-            dd.checkVersion( DataDictionary.DD_VERSION_DERBY_10_9, "NATIVE AUTHENTICATION" );
-        
-            UserDescriptor      userDescriptor = dd.getUser( userName, tc );
-        
-            if ( userDescriptor == null )   { return false; }
-        
-            PasswordHasher      hasher = new PasswordHasher( userDescriptor.getHashingScheme() );
-            char[]                     candidatePassword = hasher.hashPasswordIntoString( userName, userPassword ).toCharArray();
-            char[]                     actualPassword = userDescriptor.getAndZeroPassword();
-        
-            if ( (candidatePassword == null) || (actualPassword == null)) { return false; }
-            if ( candidatePassword.length != actualPassword.length ) { return false; }
-        
-            for ( int i = 0; i < candidatePassword.length; i++ )
-            {
-                if ( candidatePassword[ i ] != actualPassword[ i ] ) { return false; }
-            }
-        
-            Arrays.fill( candidatePassword, (char) 0 );
-            Arrays.fill( actualPassword, (char) 0 );
-        
+            tc.setProperty
+                ( Property.AUTHENTICATION_PROVIDER_PARAMETER, Property.AUTHENTICATION_PROVIDER_NATIVE_LOCAL, true );
+            tc.commit();
+            
             return true;
         }
-        finally
+        
+        //
+        // we expect to find a data dictionary
+        //
+        DataDictionary      dd = (DataDictionary) Monitor.getServiceModule( this, DataDictionary.MODULE );        
+        UserDescriptor      userDescriptor = dd.getUser( userName );
+        
+        if ( userDescriptor == null )   { return false; }
+        
+        PasswordHasher      hasher = new PasswordHasher( userDescriptor.getHashingScheme() );
+        char[]                     candidatePassword = hasher.hashPasswordIntoString( userName, userPassword ).toCharArray();
+        char[]                     actualPassword = userDescriptor.getAndZeroPassword();
+        
+        if ( (candidatePassword == null) || (actualPassword == null)) { return false; }
+        if ( candidatePassword.length != actualPassword.length ) { return false; }
+        
+        for ( int i = 0; i < candidatePassword.length; i++ )
         {
-            tc.commit();
+            if ( candidatePassword[ i ] != actualPassword[ i ] ) { return false; }
         }
+        
+        Arrays.fill( candidatePassword, (char) 0 );
+        Arrays.fill( actualPassword, (char) 0 );
+        
+        return true;
     }
     
 }

@@ -28,6 +28,7 @@ import java.util.Properties;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.DatabaseChangeSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
@@ -49,17 +50,23 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  DBO = "KIWI";   
     private static  final   String  APPLE_USER = "APPLE";   
     private static  final   String  PEAR_USER = "PEAR";   
+    private static  final   String  ORANGE_USER = "ORANGE";   
 
     private static  final   String  WALNUT_USER = "WALNUT";
 
     private static  final   String  CREDENTIALS_DB = "credDB";
     private static  final   String  SECOND_DB = "secondDB";
     private static  final   String  THIRD_DB = "thirdDB";
+    private static  final   String  FOURTH_DB = "fourthDB";
 
     private static  final   String  PROVIDER_PROPERTY = "derby.authentication.provider";
 
     private static  final   String  CREDENTIALS_DB_DOES_NOT_EXIST = "4251I";
     private static  final   String  INVALID_AUTHENTICATION = "08004";
+    private static  final   String  DBO_ONLY_OPERATION = "4251D";
+    private static  final   String  INVALID_PROVIDER_CHANGE = "XCY05";
+    private static  final   String  CANT_DROP_DBO = "4251F";
+    private static  final   String  NO_COLUMN_PERMISSION = "42502";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -69,6 +76,8 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
     private final   boolean _nativeAuthentication;
     private final   boolean _localAuthentication;
+
+    private DatabaseChangeSetup _fourthDBSetup;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -158,9 +167,9 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     {
         TestSuite suite = new TestSuite();
 
-        suite.addTest( decorate( new NativeAuthenticationServiceTest( false, false ), clientServer ) );
-        suite.addTest( decorate( new NativeAuthenticationServiceTest( true, true ), clientServer ) );
-        suite.addTest( decorate( new NativeAuthenticationServiceTest( true, false ), clientServer ) );
+        suite.addTest( (new NativeAuthenticationServiceTest( false, false ) ).decorate( clientServer ) );
+        suite.addTest( ( new NativeAuthenticationServiceTest( true, true ) ).decorate( clientServer ) );
+        suite.addTest( ( new NativeAuthenticationServiceTest( true, false ) ).decorate( clientServer ) );
 
         return suite;
     }
@@ -172,11 +181,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
      * stored properties that can't be removed at tearDown time.
      * </p>
      */
-    private static  Test    decorate( NativeAuthenticationServiceTest nast, boolean clientServer )
+    private Test    decorate( boolean clientServer )
     {
         String      credentialsDBPhysicalName = TestConfiguration.generateUniqueDatabaseName();
         
-        Test        result = nast;
+        Test        result = this;
 
         //
         // Putting the clientServer decorator on the inside allows the server-side
@@ -193,7 +202,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // before deleting the physical databases. This is because we need one of the
         // databases (the credentials db) in order to authenticate engine shutdown.
         //
-        Properties  systemProperties = nast.systemProperties( credentialsDBPhysicalName );
+        Properties  systemProperties = systemProperties( credentialsDBPhysicalName );
         if ( systemProperties != null )
         {
             result = new SystemPropertyTestSetup( result, systemProperties, true );
@@ -218,6 +227,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             ( result, CREDENTIALS_DB, credentialsDBPhysicalName );
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, SECOND_DB );
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, THIRD_DB );
+        result = _fourthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FOURTH_DB, true );
 
         result = TestConfiguration.changeUserDecorator( result, DBO, getPassword( DBO ) );
         
@@ -239,8 +249,20 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     {
         println( nameOfTest() );
 
+        vetForAllConfigurations();
+
+        if ( !_nativeAuthentication ) { vetUnauthenticatedConfiguration(); }
+    }
+
+    /**
+     * <p>
+     * These tests are run for all configurations.
+     * </p>
+     */
+    private void    vetForAllConfigurations()   throws Exception
+    {
         // can't create any database until the credentials db has been created
-        Connection  secondDBConn = createDB
+        Connection  secondDBConn = getConnection
             ( _nativeAuthentication, SECOND_DB, APPLE_USER, CREDENTIALS_DB_DOES_NOT_EXIST );
 
         // create the credentials database
@@ -254,7 +276,6 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         //
         // 1) The DBO's credentials should have been stored in SYSUSERS.
         // 2) The authentication provider should have been set to NATIVE::LOCAL
-        // 3) SQL authorization should have been turned on.
         //
         String[][]  legalUsers = _nativeAuthentication ? new String[][] { { APPLE_USER }, { DBO } } : new String[][] {  { APPLE_USER } };
         assertResults
@@ -272,7 +293,9 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
              authenticationProvider,
              false
              );
-        String[][]  sqlAuthorization = _nativeAuthentication ? new String[][] { { "true" } } : new String[][] { { null } };
+
+        // there should be no need to explicitly set the sql authorization property
+        String[][]  sqlAuthorization = new String[][] { { null } };
         assertResults
             (
              sysadminConn,
@@ -280,6 +303,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
              sqlAuthorization,
              false
              );
+        vetSQLAuthorizationOn();
 
         // Sanity-check that the creator of the credentials db is the DBO
         String[][]   dboName = new String[][] { { DBO } };
@@ -292,13 +316,13 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
              );
 
         // Databases can't be created by users who don't have credentials stored in the credentials database
-        Connection  thirdDBConn = createDB
+        Connection  thirdDBConn = getConnection
             ( _nativeAuthentication, THIRD_DB, WALNUT_USER, INVALID_AUTHENTICATION );
 
         // Now let the other valid user create a database
         if ( secondDBConn == null )
         {
-            secondDBConn = createDB( false, SECOND_DB, APPLE_USER, null );
+            secondDBConn = getConnection( false, SECOND_DB, APPLE_USER, null );
         }
 
         // verify that the other valid user is the dbo in the database he just created
@@ -344,12 +368,138 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         
     }
 
-    private Connection  createDB( boolean shouldFail, String dbName, String user, String expectedSQLState )
+    /**
+     * <p>
+     * These tests are run only if authentication is turned off.
+     * </p>
+     */
+    private void    vetUnauthenticatedConfiguration()   throws Exception
+    {
+        // create an empty database without authentication turned on
+        String          dbo = ORANGE_USER;
+        Connection  dboConn = openConnection( FOURTH_DB, dbo );
+
+        addUser( dboConn, PEAR_USER );
+
+        // NATIVE authentication isn't on, so you can store oddball values for the authentication provider
+        goodStatement
+            ( dboConn, "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'com.acme.AcmeAuthenticator' )" );
+
+        // can't turn on NATIVE authentication until you have stored credentials for the dbo
+        expectExecutionError
+            (
+             dboConn, INVALID_PROVIDER_CHANGE,
+             "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE::LOCAL' )"
+             );
+ 
+        // store credentials for the DBO
+        addUser( dboConn, dbo );
+
+        // verify that you can't drop the dbo
+        expectExecutionError
+            (
+             dboConn, CANT_DROP_DBO,
+             "call syscs_util.syscs_drop_user( '" + dbo + "' )"
+             );
+        String[][]  legalUsers = new String[][] { { dbo }, { PEAR_USER } };
+        assertResults
+            (
+             dboConn,
+             "select username from sys.sysusers order by username",
+             legalUsers,
+             false
+             );
+        
+        // NATIVE::LOCAL is the only legal value which the authentication provider property can take on disk
+        expectExecutionError
+            (
+             dboConn, INVALID_PROVIDER_CHANGE,
+             "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE:db:LOCAL' )"
+             );
+        expectExecutionError
+            (
+             dboConn, INVALID_PROVIDER_CHANGE,
+             "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE:LOCAL' )"
+             );
+ 
+        // now turn on NATIVE + LOCAL authentication
+        goodStatement( dboConn, "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE::LOCAL' )" );
+
+        // once set, you can't unset or change it
+        expectExecutionError
+            (
+             dboConn, INVALID_PROVIDER_CHANGE,
+             "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE::LOCAL' )"
+             );
+        expectExecutionError
+            (
+             dboConn, INVALID_PROVIDER_CHANGE,
+             "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', null )"
+             );
+        expectExecutionError
+            (
+             dboConn, INVALID_PROVIDER_CHANGE,
+             "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'com.acme.AcmeAuthenticator' )"
+             );
+
+        // verify that the authentication provider property has the value we expect
+        String[][]  authenticationProvider = new String[][] { { "NATIVE::LOCAL" } };
+        assertResults
+            (
+             dboConn,
+             "values ( syscs_util.syscs_get_database_property( 'derby.authentication.provider' ) )",
+             authenticationProvider,
+             false
+             );
+        
+        // create a table for a simple authorization check later on
+        goodStatement( dboConn, "create table t( a int )" );
+
+        // shutdown this database so that the on-disk properties will take effect on reboot
+        _fourthDBSetup.getTestConfiguration().shutdownDatabase();
+        
+        // can't connect to the database with credentials which aren't stored in it.
+        Connection  appleConn = getConnection( true, FOURTH_DB, APPLE_USER, INVALID_AUTHENTICATION );
+
+        // ...but these credentials work
+        Connection  pearConn = openConnection( FOURTH_DB, PEAR_USER );
+
+        // should get authorization errors trying to select from a table private to the DBO
+        // and from trying to view the credentials table
+        expectExecutionError( pearConn, NO_COLUMN_PERMISSION, "select * from " + dbo + ".t" );
+        expectCompilationError( pearConn, DBO_ONLY_OPERATION, "select username from sys.sysusers" );
+        
+    }
+    
+    private void    vetSQLAuthorizationOn() throws Exception
+    {
+        Connection  nonDBOConn = openConnection( CREDENTIALS_DB, APPLE_USER );
+        String          query = "select username from sys.sysusers" ;
+
+        try {
+            chattyPrepare( nonDBOConn, query );
+
+            if ( _nativeAuthentication ) { fail( "SQL Authorization not on!" ); }
+        }
+        catch (SQLException se)
+        {
+            if ( _nativeAuthentication )
+            {
+                assertSQLState( DBO_ONLY_OPERATION, se );
+            }
+            else
+            {
+                fail( "Caught unexpected SQLException: " + se.getSQLState() + ": " + se.getMessage() );
+            }
+        }
+    }
+    
+    private Connection  getConnection( boolean shouldFail, String dbName, String user, String expectedSQLState )
         throws Exception
     {
         Connection  conn = null;
 
-        println( user + " attempting to create database " + dbName );
+        println( user + " attempting to get connection to database " + dbName );
 
         try {
             conn = openConnection( dbName, user );

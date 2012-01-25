@@ -690,7 +690,7 @@ public class EmptyDictionary implements DataDictionary, ModuleSupportable {
 		// TODO Auto-generated method stub
     }
 
-	public UserDescriptor getUser( String userName, TransactionController tc )
+	public UserDescriptor getUser( String userName )
 			throws StandardException
 	{
 		// TODO Auto-generated method stub

@@ -206,6 +206,17 @@ public class PropertyUtil {
 	
 		boolean dbOnly = set != null ? isDBOnly(set) : false;
 
+        //
+        // Once NATIVE authentication has been set in the database, it cannot
+        // be overridden.
+        //
+        if ( Property.AUTHENTICATION_PROVIDER_PARAMETER.equals( key ) )
+        {
+            String  dbValue = PropertyUtil.getPropertyFromSet( true, set, key );
+
+            if ( nativeAuthenticationEnabled( dbValue ) ) { return dbValue; }
+        }
+
 		return PropertyUtil.getPropertyFromSet(dbOnly, set, key);
 	}
 
@@ -563,8 +574,8 @@ public class PropertyUtil {
 	}
 
 	/**
-		Return true if NATIVE authentication has been enabled in the passed-in properties.
-	*/
+     *Return true if NATIVE authentication has been enabled in the passed-in properties.
+     */
 	public static boolean nativeAuthenticationEnabled( Properties properties )
     {
 		String authenticationProvider = getPropertyFromSet
@@ -573,11 +584,20 @@ public class PropertyUtil {
              Property.AUTHENTICATION_PROVIDER_PARAMETER
              );
 
+        return nativeAuthenticationEnabled( authenticationProvider );
+	}
+
+	/**
+     *Return true if NATIVE authentication is turned on for the passed-in
+     * value of Property.AUTHENTICATION_PROVIDER_PARAMETER.
+     */
+	private static boolean nativeAuthenticationEnabled( String authenticationProvider )
+    {
         if ( authenticationProvider ==  null ) { return false; }
 
         return StringUtil.SQLToUpperCase( authenticationProvider ).startsWith( Property.AUTHENTICATION_PROVIDER_NATIVE );
-	}
-
+    }
+    
 	/**
 		Return true if the passed-in properties specify NATIVE authentication using LOCAL credentials.
 	*/

@@ -50,6 +50,7 @@ import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.sql.dictionary.PasswordHasher;
+import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -368,9 +369,51 @@ public abstract class AuthenticationServiceBase
 	/**
 	  @see PropertySetCallback#validate
 	*/
-	public boolean validate(String key, Serializable value, Dictionary p)	{
-		return key.startsWith(org.apache.derby.iapi.reference.Property.USER_PROPERTY_PREFIX);
+	public boolean validate(String key, Serializable value, Dictionary p)
+        throws StandardException
+    {
+
+        // user password properties need to be remapped. nothing else needs remapping.
+		if ( key.startsWith(org.apache.derby.iapi.reference.Property.USER_PROPERTY_PREFIX) ) { return true; }
+
+        String      stringValue = (String) value;
+        boolean     settingToNativeLocal = Property.AUTHENTICATION_PROVIDER_NATIVE_LOCAL.equals( stringValue );
+        
+        if ( Property.AUTHENTICATION_PROVIDER_PARAMETER.equals( key ) )
+        {
+            // NATIVE + LOCAL is the only value of this property which can be persisted
+            if (
+                ( stringValue != null ) &&
+                ( stringValue.startsWith( Property.AUTHENTICATION_PROVIDER_NATIVE ) )&&
+                !settingToNativeLocal
+                )
+            { throw badNativeAuthenticationChange(); }
+
+            // once set to NATIVE authentication, you can't change it
+            String  oldValue = (String) p.get( Property.AUTHENTICATION_PROVIDER_PARAMETER );
+            if ( (oldValue != null) && oldValue.startsWith( Property.AUTHENTICATION_PROVIDER_NATIVE ) )
+            { throw badNativeAuthenticationChange(); }
+
+            // can't turn on NATIVE + LOCAL authentication unless the DBO's credentials are already stored.
+            // this should prevent setting NATIVE + LOCAL authentication in pre-10.9 databases too
+            // because you can't store credentials in a pre-10.9 database.
+            if ( settingToNativeLocal )
+            {
+                DataDictionary  dd = getDataDictionary();
+                String              dbo = dd.getAuthorizationDatabaseOwner();
+                UserDescriptor  userCredentials = dd.getUser( dbo );
+
+                if ( userCredentials == null ) { throw badNativeAuthenticationChange(); }
+            }
+        }
+
+        return false;
 	}
+    private StandardException   badNativeAuthenticationChange()
+    {
+        return StandardException.newException( SQLState.PROPERTY_BAD_NATIVE_CHANGE );
+    }
+    
 	/**
 	  @see PropertySetCallback#validate
 	*/
