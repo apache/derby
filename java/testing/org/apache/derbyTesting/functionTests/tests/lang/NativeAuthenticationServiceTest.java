@@ -25,10 +25,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import org.apache.derbyTesting.junit.BaseJDBCTestCase;
-import org.apache.derbyTesting.junit.DatabaseChangeSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
@@ -198,6 +197,16 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         if ( systemProperties != null )
         {
             result = new SystemPropertyTestSetup( result, systemProperties, true );
+        }
+        else
+        {
+            // DERBY-5580: We should also shut down the engine before deleting
+            // the database if we don't set any system properties.
+            result = new TestSetup(result) {
+                protected void tearDown() {
+                    TestConfiguration.getCurrent().shutdownEngine();
+                }
+            };
         }
         
         //
