@@ -26,6 +26,8 @@ import org.apache.derby.io.StorageRandomAccessFile;
 
 import org.apache.derby.iapi.services.sanity.SanityManager;
 
+import org.apache.derby.iapi.util.InterruptStatus;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -225,12 +227,16 @@ class DirFile extends File implements StorageFile
     } // end of getRandomAccessFile
 
     /**
-     * Rename the file denoted by this name. Note that StorageFile objects are immutable. This method
-     * renames the underlying file, it does not change this StorageFile object. The StorageFile object denotes the
-     * same name as before, however the exists() method will return false after the renameTo method
-     * executes successfully.
+     * Rename the file denoted by this name. 
      *
-     *<p>It is not specified whether this method will succeed if a file already exists under the new name.
+     * Note that StorageFile objects are immutable. This method renames the 
+     * underlying file, it does not change this StorageFile object. The 
+     * StorageFile object denotes the same name as before, however the exists()
+     * method will return false after the renameTo method executes successfully.
+     *
+     * <p>
+     * It is not specified whether this method will succeed if a file 
+     * already exists under the new name.
      *
      * @param newName the new name.
      *
@@ -238,7 +244,30 @@ class DirFile extends File implements StorageFile
      */
     public boolean renameTo( StorageFile newName)
     {
-        return super.renameTo( (File) newName);
+        boolean rename_status = super.renameTo( (File) newName);
+        int     retry_count   = 1;
+
+        while (!rename_status && (retry_count <= 5))
+        {
+            // retry operation, hoping a temporary I/O resource issue is 
+            // causing the failure.
+
+            try
+            {
+                Thread.sleep(1000 * retry_count);
+            }
+            catch (InterruptedException ie)
+            {
+                // This thread received an interrupt as well, make a note.
+                InterruptStatus.setInterrupted();
+            }
+
+            rename_status = super.renameTo((File) newName);
+
+            retry_count++;
+        }
+
+        return(rename_status);
     }
 
     /**
