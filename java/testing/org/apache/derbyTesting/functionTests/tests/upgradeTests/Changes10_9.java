@@ -48,6 +48,9 @@ public class Changes10_9 extends UpgradeChange
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    private static  final   String  UPGRADE_REQUIRED = "XCL47";
+    private static  final   String  INVALID_PROVIDER_CHANGE = "XCY05";
+
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // STATE
@@ -205,11 +208,7 @@ public class Changes10_9 extends UpgradeChange
     private void    vetNativeProcs( Statement s, boolean shouldExist ) throws Exception
     {
         // make sure that an authentication algorithm has been set
-        String  defaultDigestAlgorithm = getDatabaseProperty( s, "derby.authentication.builtin.algorithm" );
-        if ( defaultDigestAlgorithm == null )
-        {
-            setDatabaseProperty( s, "derby.authentication.builtin.algorithm", "SHA-1" );
-        }
+        String  defaultDigestAlgorithm = pushAuthenticationAlgorithm( s );
 
         try {
             s.execute( "call syscs_util.syscs_create_user( 'fred', 'fredpassword' )" );
@@ -245,6 +244,23 @@ public class Changes10_9 extends UpgradeChange
         }
 
         // restore the authentication algorithm if we changed it
+        popAuthenticationAlgorithm( s, defaultDigestAlgorithm );
+    }
+    private String    pushAuthenticationAlgorithm( Statement s ) throws Exception
+    {
+        // make sure that an authentication algorithm has been set.
+        // otherwise, we won't be able to create NATIVE users.
+        String  defaultDigestAlgorithm = getDatabaseProperty( s, "derby.authentication.builtin.algorithm" );
+        if ( defaultDigestAlgorithm == null )
+        {
+            setDatabaseProperty( s, "derby.authentication.builtin.algorithm", "SHA-1" );
+        }
+
+        return defaultDigestAlgorithm;
+    }
+    private void    popAuthenticationAlgorithm( Statement s, String defaultDigestAlgorithm ) throws Exception
+    {
+        // restore the authentication algorithm if we changed it
         if ( defaultDigestAlgorithm == null )
         {
             setDatabaseProperty( s, "derby.authentication.builtin.algorithm", null );
@@ -274,6 +290,51 @@ public class Changes10_9 extends UpgradeChange
         }
     }
     
+    /**
+     * Make sure that NATIVE LOCAL authentication can't be turned on
+     * before hard-upgrade.
+     */
+    public  void    testNativeLocalAuthentication()  throws Exception
+    {
+        Statement s = createStatement();
+
+        switch ( getPhase() )
+        {
+        case PH_CREATE: // create with old version
+        case PH_POST_SOFT_UPGRADE: // soft-downgrade: boot with old version after soft-upgrade
+
+            //
+            // It's possible (although very unlikely) that someone could set the
+            // authentication provider to be NATIVE::LOCAL in an old database
+            // just before upgrading. If they do this, they will get an error at
+            // soft-upgrade time and they will have to back off to the old
+            // derby version in order to unset the authentication provider.
+            //
+            setDatabaseProperty( s, "derby.authentication.provider", "NATIVE::LOCAL" );
+            setDatabaseProperty( s, "derby.authentication.provider", null );
+            break;
+            
+        case PH_SOFT_UPGRADE: // boot with new version and soft-upgrade
+            setDatabaseProperty( s, "derby.authentication.provider", "com.acme.AcmeAuthenticator" );
+            assertStatementError
+                (
+                 UPGRADE_REQUIRED, s,
+                 "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE::LOCAL' )"
+                 );
+            setDatabaseProperty( s, "derby.authentication.provider", null );
+            break;
+            
+        case PH_HARD_UPGRADE: // boot with new version and hard-upgrade
+            //
+            // Can't actually turn on NATIVE LOCAL authentication in the upgrade tests because, once turned on,
+            // you can't turn it off and that would mess up later tests. 
+            //
+            break;
+        }
+        
+        s.close();
+    }
+
     /**
      * Make sure builtin authentication doesn't use a hash scheme that's not
      * supported by the old version until the database has been hard upgraded.

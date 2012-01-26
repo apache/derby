@@ -7931,6 +7931,12 @@ public final class	DataDictionaryImpl
 	public UserDescriptor getUser( String userName )
 		throws StandardException
 	{
+        //
+        // No sense looking for the SYSUSERS congomerate until the database
+        // is hard-upgraded to 10.9 or later.
+        //
+        dictionaryVersion.checkVersion( DD_VERSION_DERBY_10_9, "NATIVE AUTHENTICATION" );
+        
 		ExecIndexRow				keyRow;
 		TabInfoImpl					ti = getNonCoreTI( SYSUSERS_CATALOG_NUM );
 
