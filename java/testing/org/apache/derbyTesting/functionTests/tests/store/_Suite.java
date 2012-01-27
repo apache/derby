@@ -71,6 +71,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(HoldCursorJDBC30Test.suite());
         suite.addTest(AccessTest.suite());
         suite.addTest(AutomaticIndexStatisticsTest.suite());
+        suite.addTest(Derby5582AutomaticIndexStatisticsTest.suite());
         suite.addTest(AutomaticIndexStatisticsMultiTest.suite());
         suite.addTest(BTreeMaxScanTest.suite());
         suite.addTest(MadhareTest.suite());

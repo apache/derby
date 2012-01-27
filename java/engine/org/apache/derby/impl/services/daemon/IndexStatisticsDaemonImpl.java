@@ -39,6 +39,7 @@ import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.iapi.services.stream.HeaderPrintWriter;
 import org.apache.derby.iapi.services.uuid.UUIDFactory;
+import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.sql.conn.LanguageConnectionContext;
 import org.apache.derby.iapi.sql.depend.DependencyManager;
 import org.apache.derby.iapi.sql.dictionary.ConglomerateDescriptor;
@@ -247,10 +248,9 @@ public class IndexStatisticsDaemonImpl
                         " (queueSize=" + queue.size() + ")");
                 // If we're idle, fire off the worker thread.
                 if (runningThread == null) {
-                    runningThread = new Thread(this, "index-stat-thread");
-                    // Make the thread a daemon thread, we don't want it to stop
-                    // the JVM from exiting. This is a precaution.
-                    runningThread.setDaemon(true);
+                    //DERBY-5582. Make sure the thread is in the derby group
+                    // to avoid potential security manager issues
+                    runningThread = Monitor.getMonitor().getDaemonThread(this, "index-stat-thread", false);
                     runningThread.start();
                 }
             }
