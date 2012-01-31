@@ -23,6 +23,7 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.util.Properties;
 
 import junit.extensions.TestSetup;
@@ -58,6 +59,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  SECOND_DB = "secondDB";
     private static  final   String  THIRD_DB = "thirdDB";
     private static  final   String  FOURTH_DB = "fourthDB";
+    private static  final   String  FIFTH_DB = "fifthDB";
 
     private static  final   String  PROVIDER_PROPERTY = "derby.authentication.provider";
 
@@ -67,6 +69,8 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  INVALID_PROVIDER_CHANGE = "XCY05";
     private static  final   String  CANT_DROP_DBO = "4251F";
     private static  final   String  NO_COLUMN_PERMISSION = "42502";
+    private static  final   String  PASSWORD_EXPIRING = "01J15";
+    private static  final   String  BAD_PASSWORD_PROPERTY = "4251J";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -78,6 +82,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private final   boolean _localAuthentication;
 
     private DatabaseChangeSetup _fourthDBSetup;
+    private DatabaseChangeSetup _fifthDBSetup;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -132,11 +137,17 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             "NATIVE authentication on, " :
             "Authentication off, ";
         String  local = _localAuthentication ?
-            "LOCAL authentication ON" :
-            "LOCAL authentication OFF";
+            "LOCAL authentication ON, " :
+            "LOCAL authentication OFF, ";
+        String  embedded = isEmbedded() ?
+            "Embedded" :
+            "Client/Server";
 
-        return "[ " + authType + local + " ]";
+        return "[ " + authType + local + embedded + " ]";
     }
+
+    /** Return true if the test is running embedded */
+    public  boolean isEmbedded() { return getTestConfiguration().getJDBCClient().isEmbedded(); }
     
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -228,6 +239,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, SECOND_DB );
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, THIRD_DB );
         result = _fourthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FOURTH_DB, true );
+        result = _fifthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FIFTH_DB, true );
 
         result = TestConfiguration.changeUserDecorator( result, DBO, getPassword( DBO ) );
         
@@ -249,17 +261,23 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     {
         println( nameOfTest() );
 
-        vetForAllConfigurations();
+        vetCoreBehavior();
 
-        if ( !_nativeAuthentication ) { vetUnauthenticatedConfiguration(); }
+        if ( !_nativeAuthentication ) { vetProviderChanges(); }
+
+        // only run this for local authentication so that we don't have to shutdown
+        // the system-wide credentials db. also only run this embedded so that we
+        // don't have to deal with the problems of shutting down a database
+        // across the network.
+        if ( _localAuthentication && isEmbedded() ) { vetPasswordLifetime(); }
     }
 
     /**
      * <p>
-     * These tests are run for all configurations.
+     * Verify the core behavior of NATIVE authentication.
      * </p>
      */
-    private void    vetForAllConfigurations()   throws Exception
+    private void    vetCoreBehavior()   throws Exception
     {
         // can't create any database until the credentials db has been created
         Connection  secondDBConn = getConnection
@@ -370,10 +388,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
     /**
      * <p>
+     * Try changing the value of the provider property on disk.
      * These tests are run only if authentication is turned off.
      * </p>
      */
-    private void    vetUnauthenticatedConfiguration()   throws Exception
+    private void    vetProviderChanges()   throws Exception
     {
         // create an empty database without authentication turned on
         String          dbo = ORANGE_USER;
@@ -471,6 +490,68 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         
     }
     
+    /**
+     * <p>
+     * Verify that password lifetimes are checked.
+     * </p>
+     */
+    private void    vetPasswordLifetime()   throws Exception
+    {
+        // create another database
+        Connection  dboConn = openConnection( FIFTH_DB, DBO );
+
+        // add another legal user
+        addUser( dboConn, APPLE_USER );
+
+        Connection  appleConn = passwordExpiring( false, FIFTH_DB, APPLE_USER );
+
+        // setup so that passwords are expiring after the db is rebooted.
+        // shutdown the database in this test so that the new property settings take effect.
+        goodStatement
+            ( dboConn, "call syscs_util.syscs_set_database_property( 'derby.authentication.native.passwordLifetimeMillis', '86400000' )" );
+        goodStatement
+            ( dboConn, "call syscs_util.syscs_set_database_property( 'derby.authentication.native.passwordLifetimeThreshold', '2.0' )" );
+        _fifthDBSetup.getTestConfiguration().shutdownDatabase();
+ 
+        // password should be expiring
+        dboConn = passwordExpiring( true, FIFTH_DB, DBO );
+        appleConn = passwordExpiring( true, FIFTH_DB, APPLE_USER );
+        
+        // setup so that passwords have expired after we reboot the database.
+        // shutdown the database so that the new property settings take effect.
+        goodStatement
+            ( dboConn, "call syscs_util.syscs_set_database_property( 'derby.authentication.native.passwordLifetimeMillis', '1' )" );
+        _fifthDBSetup.getTestConfiguration().shutdownDatabase();
+
+        // the DBO's password does not expire
+        dboConn = openConnection( FIFTH_DB, DBO );
+
+        // but the other user's password has expired
+        appleConn = getConnection( true, FIFTH_DB, APPLE_USER, INVALID_AUTHENTICATION );
+        
+        // setup so that passwords don't expire after we reboot the database.
+        // shutdown the database so that the new property settings take effect.
+        goodStatement
+            ( dboConn, "call syscs_util.syscs_set_database_property( 'derby.authentication.native.passwordLifetimeMillis', '0' )" );
+        _fifthDBSetup.getTestConfiguration().shutdownDatabase();
+
+        // passwords should NOT be expiring or expired
+        dboConn = passwordExpiring( false, FIFTH_DB, DBO );
+        appleConn = passwordExpiring( false, FIFTH_DB, APPLE_USER );
+
+        // check that invalid property settings are caught
+        expectExecutionError
+            (
+             dboConn, BAD_PASSWORD_PROPERTY,
+             "call syscs_util.syscs_set_database_property( 'derby.authentication.native.passwordLifetimeMillis', 'rabbit' )"
+             );
+        expectExecutionError
+            (
+             dboConn, BAD_PASSWORD_PROPERTY,
+             "call syscs_util.syscs_set_database_property( 'derby.authentication.native.passwordLifetimeThreshold', '-1' )"
+             );
+    }
+
     private void    vetSQLAuthorizationOn() throws Exception
     {
         Connection  nonDBOConn = openConnection( CREDENTIALS_DB, APPLE_USER );
@@ -511,6 +592,32 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             if ( shouldFail )   { assertSQLState( expectedSQLState, se ); }
             else    { fail( tagError( "Connection to " + dbName + " unexpectedly succeeded." ) );}
         }
+
+        return conn;
+    }
+
+    // connect but expect a warning that the password is about to expire
+    private Connection  passwordExpiring( boolean expiring, String dbName, String user )
+        throws Exception
+    {
+        Connection  conn = null;
+
+        println( user + " attempting to get connection to database " + dbName );
+
+        conn = openConnection( dbName, user );
+
+        SQLWarning  warning = conn.getWarnings();
+
+        if ( expiring )
+        {
+            assertNotNull( tagError( "Should have seen a warning" ), warning );
+            assertSQLState( PASSWORD_EXPIRING, warning );
+        }
+        else
+        {
+            assertNull( tagError( "Should not have seen a warning" ), warning );
+        }
+
 
         return conn;
     }

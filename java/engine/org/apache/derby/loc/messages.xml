@@ -211,6 +211,12 @@ Guide.
                 <text>SQL authorization is being used without first enabling authentication.</text>
             </msg>
 
+            <msg>
+                <name>01J15</name>
+                <text>Your password will expire in {0} day(s). Please use the SYSCS_UTIL.SYSCS_MODIFY_PASSWORD  procedure to change your password.</text>
+                <arg>remainingDays</arg>
+            </msg>
+
         </family>
 
         <family>
@@ -1247,6 +1253,12 @@ Guide.
                 <name>4251I</name>
                 <text>Authentication cannot be performed because the credentials database '{0}' does not exist.</text>
                  <arg>databaseName</arg>
+           </msg>
+
+            <msg>
+                <name>4251J</name>
+                <text>The value for the property '{0}' is formatted badly.</text>
+                 <arg>propertyName</arg>
            </msg>
 
             <msg>

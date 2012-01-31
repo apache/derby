@@ -407,11 +407,50 @@ public abstract class AuthenticationServiceBase
             }
         }
 
+        if ( Property.AUTHENTICATION_NATIVE_PASSWORD_LIFETIME.equals( key ) )
+        {
+            if ( parsePasswordLifetime( stringValue ) == null )
+            {
+                throw StandardException.newException
+                    ( SQLState.BAD_PASSWORD_LIFETIME, Property.AUTHENTICATION_NATIVE_PASSWORD_LIFETIME );
+            }
+        }
+        
+        if ( Property.AUTHENTICATION_PASSWORD_EXPIRATION_THRESHOLD.equals( key ) )
+        {
+            if ( parsePasswordThreshold( stringValue ) == null )
+            {
+                throw StandardException.newException
+                    ( SQLState.BAD_PASSWORD_LIFETIME, Property.AUTHENTICATION_PASSWORD_EXPIRATION_THRESHOLD );
+            }
+        }
+        
         return false;
 	}
     private StandardException   badNativeAuthenticationChange()
     {
         return StandardException.newException( SQLState.PROPERTY_BAD_NATIVE_CHANGE );
+    }
+    /** Parse the value of the password lifetime property. Return null if it is bad. */
+    protected   Long    parsePasswordLifetime( String passwordLifetimeString )
+    {
+            try {
+                long    passwordLifetime = Long.parseLong( passwordLifetimeString );
+
+                if ( passwordLifetime < 0L ) { passwordLifetime = 0L; }
+
+                return new Long( passwordLifetime );
+            } catch (Exception e) { return null; }
+    }
+    /** Parse the value of the password expiration threshold property. Return null if it is bad. */
+    protected   Double  parsePasswordThreshold( String expirationThresholdString )
+    {
+            try {
+                double  expirationThreshold = Double.parseDouble( expirationThresholdString );
+
+                if ( expirationThreshold <= 0L ) { return null; }
+                else { return new Double( expirationThreshold ); }
+            } catch (Exception e) { return null; }
     }
     
 	/**

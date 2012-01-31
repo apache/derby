@@ -26,6 +26,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLWarning;
 import java.util.Arrays;
 import javax.sql.DataSource;
 
@@ -39,6 +40,7 @@ import org.apache.derby.iapi.sql.dictionary.UserDescriptor;
 import org.apache.derby.iapi.reference.Attribute;
 import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.authentication.UserAuthenticator;
+import org.apache.derby.iapi.error.SQLWarningFactory;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.services.property.PropertyUtil;
@@ -87,6 +89,9 @@ public final class NativeAuthenticationServiceImpl
     
     private String      _credentialsDB;
     private boolean _authenticateDatabaseOperationsLocally;
+    private long        _passwordLifetimeMillis = Property.AUTHENTICATION_NATIVE_PASSWORD_LIFETIME_DEFAULT;
+    private double      _passwordExpirationThreshold = Property.AUTHENTICATION_PASSWORD_EXPIRATION_THRESHOLD_DEFAULT;
+    private String      _badlyFormattedPasswordProperty;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -149,6 +154,39 @@ public final class NativeAuthenticationServiceImpl
 
             if ( _credentialsDB.length() == 0 ) { _credentialsDB = null; }
         }
+
+        //
+        // Let the application override password lifespans.
+        //
+        _badlyFormattedPasswordProperty = null;
+        String passwordLifetimeString = PropertyUtil.getPropertyFromSet
+            (
+             properties,
+             Property.AUTHENTICATION_NATIVE_PASSWORD_LIFETIME
+             );
+        if ( passwordLifetimeString != null )
+        {
+            Long    passwordLifetime = parsePasswordLifetime( passwordLifetimeString );
+
+            if ( passwordLifetime != null ) { _passwordLifetimeMillis = passwordLifetime.longValue(); }
+            else
+            { _badlyFormattedPasswordProperty = Property.AUTHENTICATION_NATIVE_PASSWORD_LIFETIME; }
+        }
+
+        String  expirationThresholdString = PropertyUtil.getPropertyFromSet
+            (
+             properties,
+             Property.AUTHENTICATION_PASSWORD_EXPIRATION_THRESHOLD
+             );
+        if ( expirationThresholdString != null )
+        {
+            Double  expirationThreshold = parsePasswordThreshold( expirationThresholdString );
+
+            if ( expirationThreshold != null ) { _passwordExpirationThreshold = expirationThreshold.doubleValue(); }
+            else
+            { _badlyFormattedPasswordProperty = Property.AUTHENTICATION_PASSWORD_EXPIRATION_THRESHOLD; }
+        }
+        
     }
 
     /**
@@ -176,6 +214,12 @@ public final class NativeAuthenticationServiceImpl
         if ( !validAuthenticationProvider() )
         {
             throw StandardException.newException( SQLState.BAD_NATIVE_AUTH_SPEC );
+        }
+
+        if ( _badlyFormattedPasswordProperty != null )
+        {
+            throw StandardException.newException
+                ( SQLState.BAD_PASSWORD_LIFETIME, _badlyFormattedPasswordProperty );
         }
 
 		// Initialize the MessageDigest class engine here
@@ -340,7 +384,7 @@ public final class NativeAuthenticationServiceImpl
          String userPassword,
          String databaseName
          )
-        throws StandardException
+        throws StandardException, SQLWarning
 	{
         // this catches the case when someone specifies derby.authentication.provider=NATIVE::LOCAL
         // at the system level
@@ -353,6 +397,8 @@ public final class NativeAuthenticationServiceImpl
             "org.apache.derby.jdbc.EmbeddedSimpleDataSource" :
             "org.apache.derby.jdbc.EmbeddedDataSource";
 
+        SQLWarning  warnings = null;
+        
         try {
             DataSource  dataSource = (DataSource) Class.forName( dataSourceName ).newInstance();
 
@@ -361,6 +407,8 @@ public final class NativeAuthenticationServiceImpl
             callDataSourceSetter( dataSource, "setPassword", userPassword );
 
             Connection  conn = dataSource.getConnection();
+
+            warnings = conn.getWarnings();
             conn.close();
         }
         catch (ClassNotFoundException cnfe) { throw wrap( cnfe ); }
@@ -377,6 +425,10 @@ public final class NativeAuthenticationServiceImpl
             }
             else { throw wrap( se ); }
         }
+
+        // let warnings percolate up so that EmbedConnection can handle notifications
+        // about expiring passwords
+        if ( warnings != null ) { throw warnings; }
 
         // If we get here, then we successfully connected to the credentials database. Hooray.
         return true;
@@ -445,17 +497,48 @@ public final class NativeAuthenticationServiceImpl
         PasswordHasher      hasher = new PasswordHasher( userDescriptor.getHashingScheme() );
         char[]                     candidatePassword = hasher.hashPasswordIntoString( userName, userPassword ).toCharArray();
         char[]                     actualPassword = userDescriptor.getAndZeroPassword();
+
+        try {
+            if ( (candidatePassword == null) || (actualPassword == null)) { return false; }
+            if ( candidatePassword.length != actualPassword.length ) { return false; }
         
-        if ( (candidatePassword == null) || (actualPassword == null)) { return false; }
-        if ( candidatePassword.length != actualPassword.length ) { return false; }
-        
-        for ( int i = 0; i < candidatePassword.length; i++ )
+            for ( int i = 0; i < candidatePassword.length; i++ )
+            {
+                if ( candidatePassword[ i ] != actualPassword[ i ] ) { return false; }
+            }
+        } finally
         {
-            if ( candidatePassword[ i ] != actualPassword[ i ] ) { return false; }
+            Arrays.fill( candidatePassword, (char) 0 );
+            Arrays.fill( actualPassword, (char) 0 );
         }
-        
-        Arrays.fill( candidatePassword, (char) 0 );
-        Arrays.fill( actualPassword, (char) 0 );
+
+        //
+        // Password is good. Check whether the password has expired or will expire soon.
+        //
+        if ( _passwordLifetimeMillis > 0 )
+        {
+            long    passwordAge = System.currentTimeMillis() - userDescriptor.getLastModified().getTime();
+            long    remainingLifetime = _passwordLifetimeMillis - passwordAge;
+
+            //
+            // Oops, the password has expired. Fail the authentication. Say nothing more
+            // so that we give password crackers as little information as possible.
+            //
+            if ( remainingLifetime <= 0L )
+            {
+                // The DBO's password never expires.
+                if ( !dd.getAuthorizationDatabaseOwner().equals( userName ) ) { return false; }
+                else { remainingLifetime = 0L; }
+            }
+
+            long    expirationThreshold = (long) ( _passwordLifetimeMillis * _passwordExpirationThreshold );
+            
+            if ( remainingLifetime <= expirationThreshold )
+            {
+                long    daysRemaining = remainingLifetime / Property.MILLISECONDS_IN_DAY;
+                throw SQLWarningFactory.newSQLWarning( SQLState.PASSWORD_EXPIRES_SOON, Long.toString( daysRemaining ) );
+            }
+        }
         
         return true;
     }

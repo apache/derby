@@ -818,6 +818,21 @@ public interface Property {
     public static final String AUTHENTICATION_PROVIDER_NATIVE_LOCAL =
         AUTHENTICATION_PROVIDER_NATIVE + AUTHENTICATION_PROVIDER_LOCAL_SUFFIX;
     
+    // lifetime (in milliseconds) of a NATIVE password. if <= 0, then the password never expires
+    public static final String AUTHENTICATION_NATIVE_PASSWORD_LIFETIME =
+        "derby.authentication.native.passwordLifetimeMillis";
+    
+    // default lifetime (in milliseconds) of a NATIVE password. 31 days.
+    public static final long MILLISECONDS_IN_DAY = 1000L * 60L * 60L * 24L;
+    public static final long AUTHENTICATION_NATIVE_PASSWORD_LIFETIME_DEFAULT = MILLISECONDS_IN_DAY * 31L;
+    
+    // threshhold for raising a warning that a password is about to expire.
+    // raise a warning if the remaining password lifetime is less than this proportion of the max lifetime.
+    public static final String  AUTHENTICATION_PASSWORD_EXPIRATION_THRESHOLD =
+        "derby.authentication.native.passwordLifetimeThreshold";
+    public static final double  AUTHENTICATION_PASSWORD_EXPIRATION_THRESHOLD_DEFAULT = 0.125;
+    
+
     /**
      * Property that specifies the name of the hash algorithm to use with
      * the configurable hash authentication scheme.

@@ -1240,15 +1240,24 @@ public abstract class EmbedConnection implements EngineConnection
 		}
 
 		// Let's authenticate now
-			
-		if (!authenticationService.authenticate(
-											   dbname,
-											   userInfo
-											   )) {
 
+        boolean authenticationSucceeded = true;
+
+        try {
+            authenticationSucceeded = authenticationService.authenticate( dbname, userInfo );
+        }
+        catch (SQLWarning warnings)
+        {
+            //
+            // Let the user handle the warning that her password is about to expire.
+            //
+            addWarning( warnings );
+        }
+			
+		if ( !authenticationSucceeded )
+        {
 			throw newSQLException(SQLState.NET_CONNECT_AUTH_FAILED,
                      MessageService.getTextMessage(MessageId.AUTH_INVALID));
-
 		}
 
 		// If authentication is not on, we have to raise a warning if sqlAuthorization is ON

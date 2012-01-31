@@ -783,6 +783,7 @@ public interface SQLState {
 	String WEAK_AUTHENTICATION                                               = "4251G";
 	String BAD_NATIVE_AUTH_SPEC                                               = "4251H";
 	String MISSING_CREDENTIALS_DB                                               = "4251I";
+	String BAD_PASSWORD_LIFETIME                                               = "4251J";
 
 	String LANG_DB2_NOT_NULL_COLUMN_INVALID_DEFAULT                    = "42601";
 	String LANG_DB2_INVALID_HEXADECIMAL_CONSTANT                    = "42606";
@@ -1742,6 +1743,7 @@ public interface SQLState {
     String UNABLE_TO_OBTAIN_MESSAGE_TEXT_FROM_SERVER  = "01J12";
     String NUMBER_OF_ROWS_TOO_LARGE_FOR_INT = "01J13";
 	String SQL_AUTHORIZATION_WITH_NO_AUTHENTICATION = "01J14";
+	String PASSWORD_EXPIRES_SOON = "01J15";
 		
     String CURSOR_OPERATION_CONFLICT = "01001";
 
