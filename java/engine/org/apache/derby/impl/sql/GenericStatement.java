@@ -82,7 +82,7 @@ public class GenericStatement
 		** Note: don't reset state since this might be
 		** a recompilation of an already prepared statement.
 		*/ 
-		return prepMinion(lcc, true, (Object[]) null, (SchemaDescriptor) null, false); 
+		return prepare(lcc, false);
 	}
 	public PreparedStatement prepare(LanguageConnectionContext lcc, boolean forMetaData) throws StandardException
 	{
@@ -90,7 +90,79 @@ public class GenericStatement
 		** Note: don't reset state since this might be
 		** a recompilation of an already prepared statement.
 		*/ 
-		return prepMinion(lcc, true, (Object[]) null, (SchemaDescriptor) null, forMetaData); 
+
+        final int depth = lcc.getStatementDepth();
+        String prevErrorId = null;
+        while (true) {
+            boolean recompile = false;
+            try {
+                return prepMinion(lcc, true, (Object[]) null,
+                                  (SchemaDescriptor) null, forMetaData);
+            } catch (StandardException se) {
+                // There is a chance that we didn't see the invalidation
+                // request from a DDL operation in another thread because
+                // the statement wasn't registered as a dependent until
+                // after the invalidation had been completed. Assume that's
+                // what has happened if we see a conglomerate does not exist
+                // error, and force a retry even if the statement hasn't been
+                // invalidated.
+                if (SQLState.STORE_CONGLOMERATE_DOES_NOT_EXIST.equals(
+                        se.getMessageId())) {
+                    // STORE_CONGLOMERATE_DOES_NOT_EXIST has exactly one
+                    // argument: the conglomerate id
+                    String conglomId = String.valueOf(se.getArguments()[0]);
+
+                    // Request a recompile of the statement if a conglomerate
+                    // disappears while we are compiling it. But if we have
+                    // already retried once because the same conglomerate was
+                    // missing, there's probably no hope that yet another retry
+                    // will help, so let's break out instead of potentially
+                    // looping infinitely.
+                    if (!conglomId.equals(prevErrorId)) {
+                        recompile = true;
+                    }
+
+                    prevErrorId = conglomId;
+                }
+                throw se;
+            } finally {
+                // Check if the statement was invalidated while it was
+                // compiled. If so, the newly compiled plan may not be
+                // up to date anymore, so we recompile the statement
+                // if this happens. Note that this is checked in a finally
+                // block, so we also retry if an exception was thrown. The
+                // exception was probably thrown because of the changes
+                // that invalidated the statement. If not, recompiling
+                // will also fail, and the exception will be exposed to
+                // the caller.
+                //
+                // invalidatedWhileCompiling and isValid are protected by
+                // synchronization on the prepared statement.
+                synchronized (preparedStmt) {
+                    if (recompile || preparedStmt.invalidatedWhileCompiling) {
+                        preparedStmt.isValid = false;
+                        preparedStmt.invalidatedWhileCompiling = false;
+                        recompile = true;
+                    }
+                }
+
+                if (recompile) {
+                    // A new statement context is pushed while compiling.
+                    // Typically, this context is popped by an error
+                    // handler at a higher level. But since we retry the
+                    // compilation, the error handler won't be invoked, so
+                    // the stack must be reset to its original state first.
+                    while (lcc.getStatementDepth() > depth) {
+                        lcc.popStatementContext(
+                                lcc.getStatementContext(), null);
+                    }
+
+                    // Don't return yet. The statement was invalidated, so
+                    // we must retry the compilation.
+                    continue;
+                }
+            }
+        }
 	}
 
 	private PreparedStatement prepMinion(LanguageConnectionContext lcc, boolean cacheMe, Object[] paramDefaults,

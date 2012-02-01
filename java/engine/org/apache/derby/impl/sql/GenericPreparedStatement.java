@@ -147,6 +147,8 @@ public class GenericPreparedStatement
 	// true if the statement is being compiled.
 	boolean compilingStatement;
 
+    /** True if the statement was invalidated while it was being compiled. */
+    boolean invalidatedWhileCompiling;
 
 	////////////////////////////////////////////////
 	// STATE that is not copied by getClone()
@@ -406,7 +408,7 @@ recompileOutOfDatePlan:
 			// to execute.  That exception will be caught by the executeSPS()
 			// method of the GenericTriggerExecutor class, and at that time
 			// the SPS action will be recompiled correctly.
-				rePrepare(lccToUse);
+                rePrepare(lccToUse);
 			}
 
 			StatementContext statementContext = lccToUse.pushStatementContext(
@@ -785,7 +787,16 @@ recompileOutOfDatePlan:
 		synchronized (this) {
 
 			if (compilingStatement)
+            {
+                // Since the statement is in the process of being compiled,
+                // and at the end of the compilation it will set isValid to
+                // true and overwrite whatever we set it to here, set another
+                // flag to indicate that an invalidation was requested. A
+                // re-compilation will be triggered if this flag is set, but
+                // not until the current compilation is done.
+                invalidatedWhileCompiling = true;
 				return;
+            }
 
 			alreadyInvalid = !isValid;
 		
