@@ -265,7 +265,7 @@ implements Resetable, CloneableStream
 
         // Use isolation level READ_COMMITTED and reopen the container to 
         // get a new container handle to use for locking.  This way, the lock 
-        // will be freed when we the container handle is closed. This will 
+        // will be freed when the container handle is closed. This will 
         // happen in closeStream() or when the transaction commits. 
         // Hence, locks will be released before the end of transaction if 
         // blobs/clobs are explicitly released.
