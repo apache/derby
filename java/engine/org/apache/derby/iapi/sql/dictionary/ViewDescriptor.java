@@ -35,6 +35,7 @@ import org.apache.derby.iapi.services.sanity.SanityManager;
 import org.apache.derby.catalog.DependableFinder;
 import org.apache.derby.catalog.Dependable;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
+import org.apache.derby.impl.sql.depend.BasicDependencyManager;
 
 /**
  * This is the implementation of ViewDescriptor. Users of View descriptors
@@ -359,20 +360,28 @@ public final class ViewDescriptor extends TupleDescriptor
 				// types SELECT, UPDATE, DELETE, INSERT, REFERENCES, TRIGGER),
 				// we make the ViewDescriptor drop itself. REVOKE_ROLE also
 				// drops the dependent view.
+            case DependencyManager.DROP_COLUMN:
 		    case DependencyManager.REVOKE_PRIVILEGE:
-		    case DependencyManager.DROP_COLUMN:
 			case DependencyManager.REVOKE_ROLE:
-				drop(lcc, 
-						getDataDictionary().getTableDescriptor(uuid).getSchemaDescriptor(),
-						getDataDictionary().getTableDescriptor(uuid));
+                
+                TableDescriptor td = 
+                        getDataDictionary().getTableDescriptor(uuid);
+                
+                if (td == null) { 
+                    // DERBY-5567 already dropped via another dependency 
+                    break;
+                }
+                
+                // DERBY-5567 keep original action
+                drop(lcc, td.getSchemaDescriptor(), td, action);
 
-                                lcc.getLastActivation().addWarning(
-                                    StandardException.newWarning(
-                                        SQLState.LANG_VIEW_DROPPED,
-                                        this.getObjectName() ));
-                                return;
+                lcc.getLastActivation().addWarning(
+                        StandardException.newWarning(
+                        SQLState.LANG_VIEW_DROPPED,
+                        this.getObjectName() ));
+                break;
 
-		    default:
+            default:
 
 				/* We should never get here, since we can't have dangling references */
 				if (SanityManager.DEBUG)
@@ -409,14 +418,43 @@ public final class ViewDescriptor extends TupleDescriptor
 		}
 	}
 
-	public void drop(LanguageConnectionContext lcc,
-							  SchemaDescriptor sd, TableDescriptor td)
-		throws StandardException
-	{
+    /**
+     * Drop this descriptor, if not already done.
+     * 
+     * @param lcc current language connection context
+     * @param sd schema descriptor
+     * @param td table descriptor for this view
+     * @throws StandardException standard error policy
+     */
+    public void drop(
+            LanguageConnectionContext lcc,
+            SchemaDescriptor sd,
+            TableDescriptor td) throws StandardException
+    {
+        drop(lcc, sd, td, DependencyManager.DROP_VIEW);
+    }
+
+    /**
+     * Drop this descriptor, if not already done, due to action.
+     * If action is not {@code DependencyManager.DROP_VIEW}, the descriptor is 
+     * dropped due to dropping some other object, e.g. a table column.
+     * 
+     * @param lcc current language connection context
+     * @param sd schema descriptor
+     * @param td table descriptor for this view
+     * @param action action
+     * @throws StandardException standard error policy
+     */
+    private void drop(
+            LanguageConnectionContext lcc,
+            SchemaDescriptor sd,
+            TableDescriptor td,
+            int action) throws StandardException
+    {
         DataDictionary dd = getDataDictionary();
         DependencyManager dm = dd.getDependencyManager();
         TransactionController tc = lcc.getTransactionExecute();
-        
+
 		/* Drop the columns */
 		dd.dropAllColumnDescriptors(td.getUUID(), tc);
 
@@ -425,7 +463,7 @@ public final class ViewDescriptor extends TupleDescriptor
 		 * cursor referencing a table/view that the user is attempting to
 		 * drop.) If no one objects, then invalidate any dependent objects.
 		 */
-		dm.invalidateFor(td, DependencyManager.DROP_VIEW, lcc);
+        dm.invalidateFor(td, action, lcc);
 
 		/* Clear the dependencies for the view */
 		dm.clearDependencies(lcc, this);
@@ -440,5 +478,8 @@ public final class ViewDescriptor extends TupleDescriptor
 		dd.dropTableDescriptor(td, sd, tc);
 	}
 
+    public String getName() {
+        return viewName;
+    }
 
 }
