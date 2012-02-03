@@ -459,7 +459,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                 spawnedServer.complete(failedShutdown != null, getWaitTime());
                 spawnedServer = null;
             }
-            
+
             // Throw an error to record the fact that the
             // shutdown failed.
             if (failedShutdown != null)
@@ -468,8 +468,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                 {
                     // authentication failure is ok.
                     if (
-                        !(failedShutdown instanceof SQLException) ||
-                        !( "4251I".equals( ((SQLException) failedShutdown).getSQLState() ) )
+                        !(failedShutdown instanceof SQLException)
                         )
                     {
                         throw (Exception) failedShutdown;

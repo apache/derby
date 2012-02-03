@@ -21,16 +21,19 @@
 
 package org.apache.derbyTesting.functionTests.tests.lang;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.Properties;
+import javax.sql.DataSource;
 
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.DatabaseChangeSetup;
 import org.apache.derbyTesting.junit.JDBC;
+import org.apache.derbyTesting.junit.JDBCDataSource;
 import org.apache.derbyTesting.junit.TestConfiguration;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
 
@@ -52,6 +55,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  APPLE_USER = "APPLE";   
     private static  final   String  PEAR_USER = "PEAR";   
     private static  final   String  ORANGE_USER = "ORANGE";   
+    private static  final   String  BANANA_USER = "BANANA";   
 
     private static  final   String  WALNUT_USER = "WALNUT";
 
@@ -60,6 +64,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  THIRD_DB = "thirdDB";
     private static  final   String  FOURTH_DB = "fourthDB";
     private static  final   String  FIFTH_DB = "fifthDB";
+    private static  final   String  SIXTH_DB = "sixthDB";
 
     private static  final   String  PROVIDER_PROPERTY = "derby.authentication.provider";
 
@@ -81,8 +86,14 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private final   boolean _nativeAuthentication;
     private final   boolean _localAuthentication;
 
+    private String  _credentialsDBPhysicalName;
+
     private DatabaseChangeSetup _fourthDBSetup;
     private DatabaseChangeSetup _fifthDBSetup;
+    private DatabaseChangeSetup _sixthDBSetup;
+
+    private String  _derbySystemHome;
+    private String  _fullBackupDir;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -108,6 +119,14 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    public void setUp() throws Exception
+    {
+        super.setUp();
+        
+        _derbySystemHome = getSystemProperty( "derby.system.home" );
+        _fullBackupDir = _derbySystemHome + "/backupDir";
+    }
+
     /**
      * <p>
      * Return the system properties to be used in a particular test run.
@@ -115,12 +134,21 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
      */
     private Properties  systemProperties( String physicalDatabaseName )
     {
-        if ( !_nativeAuthentication ) { return null; }
-
-        String  authenticationProvider = "NATIVE:" + physicalDatabaseName;
-        if ( _localAuthentication ) { authenticationProvider = authenticationProvider + ":LOCAL"; }
-
         Properties  result = new Properties();
+        String      authenticationProvider;
+
+        _credentialsDBPhysicalName = physicalDatabaseName;
+
+        if ( !_nativeAuthentication )
+        {
+            authenticationProvider = "NONE";
+        }
+        else
+        {
+            authenticationProvider = "NATIVE:" + physicalDatabaseName;
+            if ( _localAuthentication ) { authenticationProvider = authenticationProvider + ":LOCAL"; }
+        }
+
         result.put( PROVIDER_PROPERTY, authenticationProvider );
 
         return result;
@@ -214,20 +242,16 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // databases (the credentials db) in order to authenticate engine shutdown.
         //
         Properties  systemProperties = systemProperties( credentialsDBPhysicalName );
-        if ( systemProperties != null )
-        {
-            result = new SystemPropertyTestSetup( result, systemProperties, true );
-        }
-        else
-        {
-            // DERBY-5580: We should also shut down the engine before deleting
-            // the database if we don't set any system properties.
-            result = new TestSetup(result) {
-                protected void tearDown() {
-                    TestConfiguration.getCurrent().shutdownEngine();
-                }
-            };
-        }
+        println( "NativeAuthenticationServiceTest.decorate() systemProperties = " + systemProperties );
+        result = new SystemPropertyTestSetup( result, systemProperties, true );
+        
+        // DERBY-5580: We should also shut down the engine before deleting
+        // the database if we don't set any system properties.
+        //result = new TestSetup(result) {
+        //        protected void tearDown() {
+        //            TestConfiguration.getCurrent().shutdownEngine();
+        //        }
+        //    };
         
         //
         // Register temporary databases, where the test will do its work.
@@ -240,6 +264,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, THIRD_DB );
         result = _fourthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FOURTH_DB, true );
         result = _fifthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FIFTH_DB, true );
+        result = _sixthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, SIXTH_DB, true );
 
         result = TestConfiguration.changeUserDecorator( result, DBO, getPassword( DBO ) );
         
@@ -260,8 +285,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     public  void    testAll()   throws Exception
     {
         println( nameOfTest() );
+        println( "Credentials DB physical name = " + _credentialsDBPhysicalName );
+        println( PROVIDER_PROPERTY + " = " + getSystemProperty( PROVIDER_PROPERTY ) );
 
         vetCoreBehavior();
+        vetSystemWideOperations();
 
         if ( !_nativeAuthentication ) { vetProviderChanges(); }
 
@@ -288,6 +316,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
         // add another legal user
         addUser( sysadminConn, APPLE_USER );
+        addUser( sysadminConn, BANANA_USER );
 
         //
         // Creating the credentials db should have stored the following information in it:
@@ -295,7 +324,9 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // 1) The DBO's credentials should have been stored in SYSUSERS.
         // 2) The authentication provider should have been set to NATIVE::LOCAL
         //
-        String[][]  legalUsers = _nativeAuthentication ? new String[][] { { APPLE_USER }, { DBO } } : new String[][] {  { APPLE_USER } };
+        String[][]  legalUsers = _nativeAuthentication ?
+            new String[][] { { APPLE_USER }, { BANANA_USER } , { DBO } } :
+            new String[][] {  { APPLE_USER }, { BANANA_USER } };
         assertResults
             (
              sysadminConn,
@@ -386,6 +417,111 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         
     }
 
+    /**
+     * <p>
+     * The vetCoreBehavior() method verifies credentials-checking for the
+     * following system-wide operations:
+     * </p>
+     *
+     * <ul>
+     * <li>Database creation.</li>
+     * <li>Engine shutdown.</li>
+     * <li>Server shutdown. The default credentials are embedded inside the NetworkServerControl
+     * created by NetworkServerTestSetup.</li>
+     * </ul>
+     *
+     * <p>
+     * This method verifies credentials-checking for this additional
+     * system-wide operation:
+     * </p>
+     *
+     * <ul>
+     * <li>Database restoration.</li>
+     * </ul>
+     */
+    private void    vetSystemWideOperations()   throws Exception
+    {
+        // create a database which we will backup and restore
+        Connection  dboConn = openConnection( SIXTH_DB, DBO );
+
+        // add another user who can perform restores successfully
+        addUser( dboConn, BANANA_USER );
+
+        // add a table which we will backup and then drain. this is so that later on we can
+        // verify that we really restored the database rather than just reconnected to the
+        // original version.
+        goodStatement( dboConn, "create table t( a int )" );
+        goodStatement( dboConn, "insert into t( a ) values ( 1000 )" );
+        if ( _nativeAuthentication)
+        {
+            goodStatement( dboConn, "grant select on table t to public" );
+            goodStatement( dboConn, "grant insert on table t to public" );
+        }
+        goodStatement( dboConn, "call syscs_util.syscs_backup_database( '" + _fullBackupDir + "' )" );
+        goodStatement( dboConn, "delete from t" );
+
+        // this user is valid both in the system-wide credentials db and in the local db
+        shutdownAndRestoreDB( true, BANANA_USER, null );
+
+        //
+        // If we are doing local authentication, then restoration will fail when we use
+        // the credentials of a user who is in the system-wide SYSUSERS but not
+        // in the SYSUSERS of the database being restored. Restoration involves two
+        // authentication attempts: First we authenticate system-wide in order to
+        // verify that it's ok to proceed with the restoration. After that, we attempt
+        // to connect to the restored database. It is the authentication of the second
+        // attempt which may fail here.
+        //
+        shutdownAndRestoreDB( !_localAuthentication, APPLE_USER, INVALID_AUTHENTICATION );
+        
+        // delete the backup directory
+        assertDirectoryDeleted( new File( _fullBackupDir ) );
+    }
+    private void    shutdownAndRestoreDB( boolean shouldSucceed, String user, String expectedSQLState ) throws Exception
+    {
+        // shutdown the database. the restore will overwrite it.
+        _sixthDBSetup.getTestConfiguration().shutdownDatabase();
+
+        // the physical database name has some parent directories in it.
+        // we need to strip these off because backup ignores them.
+        String      dbName = _sixthDBSetup.physicalDatabaseName();
+        int         slashIdx = dbName.lastIndexOf( "/" );
+        if ( slashIdx >= 0 ) { dbName = dbName.substring( slashIdx + 1 ); }
+
+        DataSource  ds = JDBCDataSource.getDataSourceLogical( SIXTH_DB );
+        String          fullRestoreDir = _fullBackupDir + "/" + dbName;
+        JDBCDataSource.setBeanProperty( ds, "connectionAttributes", "restoreFrom=" + fullRestoreDir );
+
+        Connection  conn = null;
+
+        try {
+            conn = ds.getConnection( user, getPassword( user ) );
+
+            if ( !shouldSucceed ) { fail( tagError( "Database restoration should have failed." ) ); }
+        }
+        catch (SQLException se)
+        {
+            if ( shouldSucceed ) { fail( tagError( "Database restoration unexpectedly failed." ) );}
+            else    { assertSQLState( expectedSQLState, se ); }
+        }
+
+        if ( conn != null )
+        {
+            // verify that this is the version which was backed up, not the original
+            assertResults
+                (
+                 conn,
+                 "select a from " + DBO + ".t",
+                 new String[][] { { "1000" } },
+                 false
+                 );
+
+            // add another tuple to distinguish the database from later attempts
+            // to re-initialize it from the backup
+            goodStatement( conn, "insert into " + DBO + ".t( a ) values ( 2000 )" );
+        }
+    }
+    
     /**
      * <p>
      * Try changing the value of the provider property on disk.
@@ -580,7 +716,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     {
         Connection  conn = null;
 
-        println( user + " attempting to get connection to database " + dbName );
+        reportConnectionAttempt( dbName, user );
 
         try {
             conn = openConnection( dbName, user );
@@ -590,7 +726,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         catch (SQLException se)
         {
             if ( shouldFail )   { assertSQLState( expectedSQLState, se ); }
-            else    { fail( tagError( "Connection to " + dbName + " unexpectedly succeeded." ) );}
+            else    { fail( tagError( "Connection to " + dbName + " unexpectedly failed." ) );}
         }
 
         return conn;
@@ -602,7 +738,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     {
         Connection  conn = null;
 
-        println( user + " attempting to get connection to database " + dbName );
+        reportConnectionAttempt( dbName, user );
 
         conn = openConnection( dbName, user );
 
@@ -620,6 +756,12 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
 
         return conn;
+    }
+    private void    reportConnectionAttempt( String dbName, String user )
+    {
+        println
+            ( user + " attempting to get connection to database " + dbName +
+              " aka " + getTestConfiguration().getPhysicalDatabaseName( dbName ) );
     }
 
     private void    addUser( Connection conn, String user ) throws Exception
