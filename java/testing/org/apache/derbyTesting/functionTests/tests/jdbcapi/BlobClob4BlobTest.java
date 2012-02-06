@@ -70,9 +70,15 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         stmt.executeUpdate("CREATE TABLE testClob (b INT, c INT)");
         stmt.executeUpdate("ALTER TABLE testClob ADD COLUMN a CLOB(300K)");
 
+        // multiple tests depend on small page size, make sure size is 4k
+        checkSmallPageSize(stmt, "TESTCLOB");
+
         stmt.executeUpdate("CREATE TABLE testBlob (b INT)");
         stmt.executeUpdate("ALTER TABLE testBlob ADD COLUMN a blob(300k)");
         stmt.executeUpdate("ALTER TABLE testBlob ADD COLUMN crc32 BIGINT");
+
+        // multiple tests depend on small page size, make sure size is 4k
+        checkSmallPageSize(stmt, "TESTBLOB");
 
         stmt.close();
         commit();
@@ -1274,6 +1280,11 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         } catch (SQLException se) {
             checkException(LOCK_TIMEOUT, se);
         }
+
+        // DERBY-3740, the reference below to clob must remain after the above
+        // expected lock timeout, otherwise GC might run on the clob and
+        // cause intermittent problems if the GC causes lock to be released
+        // early.
         assertEquals("FAIL: clob length changed", 10000, clob.length());
         
         // Test that update goes through after the transaction is committed
@@ -2377,9 +2388,17 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
      * test locking
      */
     public void testLockingBlob() throws Exception {
-        insertDefaultData();
 
         Statement stmt = createStatement();
+
+        insertDefaultData();
+
+        // for blob lock to remain, autocommit must be false.
+        assertFalse(getConnection().getAutoCommit());
+
+        // test depends on small page size, make sure size is 4k
+        checkSmallPageSize(stmt, "TESTBLOB");
+
         ResultSet rs = stmt.executeQuery("select a,b from testBlob");
         // fetch row back, get the column as a blob.
         Blob blob = null, shortBlob = null;
@@ -2392,6 +2411,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 shortBlob = rs.getBlob(1);
         }
         rs.close();
+
 
         Connection conn2 = openDefaultConnection();
         // turn off autocommit, otherwise blobs/clobs cannot hang around
@@ -2416,6 +2436,21 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         } catch (SQLException se) {
             checkException(LOCK_TIMEOUT, se);
         }
+
+        // DERBY-3740, add a reference to the retrieved blobs that is used
+        // after the expected lock timeout in conn2.  Before this change 
+        // this test would intermittently fail.  I believe that a smart
+        // JVM/JIT recognized that the blob reference was no longer used
+        // after the above while loop, and allowed gc on it before the routine
+        // could get to the expected conflicting lock.  Upon GC the blob's
+        // finalize code closes the internal stream and releases the lock in
+        // read committed mode.
+
+        // make sure we got the 10000 byte blob which should be a stream.
+        assertTrue(blob != null);
+
+        // make sure we got the 26 byte blob which should be materialized.
+        assertTrue(shortBlob != null);
         
         // Test that update goes through after the transaction is committed
         commit();
@@ -2434,7 +2469,15 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     {
         ResultSet rs;
         Statement stmt, stmt2;
+
+        // for blob lock to remain, autocommit must be false.
+        assertFalse(getConnection().getAutoCommit());
+
         stmt = createStatement();
+
+        // test depends on small page size, make sure size is 4k
+        checkSmallPageSize(stmt, "TESTBLOB");
+
         stmt.execute("alter table testBlob add column al varchar(2000)");
         stmt.execute("alter table testBlob add column bl varchar(3000)");
         stmt.execute("alter table testBlob add column cl varchar(2000)");
@@ -2482,6 +2525,18 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
         }
         // Test that update goes through after the transaction is committed
         commit();
+
+        // DERBY-3740, add a reference to the retrieved blobs that is used
+        // after the expected lock timeout in conn2.  Before this change 
+        // this test would intermittently fail.  I believe that a smart
+        // JVM/JIT recognized that the blob reference was no longer used
+        // after the above while loop, and allowed gc on it before the routine
+        // could get to the expected conflicting lock.  Upon GC the blob's
+        // finalize code closes the internal stream and releases the lock in
+        // read committed mode.
+        assertTrue(
+            "FAIL - blob is null after expected lock timeout", blob != null);
+
         stmt2.executeUpdate("update testBlob set el = null where b = 1");
         
         stmt2.close();
@@ -3510,6 +3565,22 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
 
 
 
+
+    private void checkSmallPageSize(Statement st, String tblName)
+        throws SQLException
+    {
+        ResultSet rs = st.executeQuery(
+            "select * from TABLE(SYSCS_DIAG.SPACE_TABLE('"+tblName+"')) T");
+
+        int found_rows = 0;
+        while (rs.next())
+        {
+            found_rows++;
+            assertEquals(4096, rs.getInt("pagesize"));
+        }
+        assertTrue(found_rows == 1);
+        rs.close();
+    }
         
     
     private static final String BLOB_BAD_POSITION = "XJ070";
