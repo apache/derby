@@ -59,14 +59,20 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
     private static  final   String  WALNUT_USER = "WALNUT";
 
+    private static  final   String  BUILTIN_USER = "PECAN";
+
     private static  final   String  CREDENTIALS_DB = "credDB";
     private static  final   String  SECOND_DB = "secondDB";
     private static  final   String  THIRD_DB = "thirdDB";
     private static  final   String  FOURTH_DB = "fourthDB";
     private static  final   String  FIFTH_DB = "fifthDB";
     private static  final   String  SIXTH_DB = "sixthDB";
+    private static  final   String  SEVENTH_DB = "seventhDB";
+    private static  final   String  EIGHTH_DB = "eighthDB";
 
     private static  final   String  PROVIDER_PROPERTY = "derby.authentication.provider";
+    private static  final   String  REQUIRE_AUTHENTICATION_PROPERTY = "derby.connection.requireAuthentication";
+    private static  final   String  SQL_AUTHORIZATION_PROPERTY = "derby.database.sqlAuthorization";
 
     private static  final   String  CREDENTIALS_DB_DOES_NOT_EXIST = "4251I";
     private static  final   String  INVALID_AUTHENTICATION = "08004";
@@ -76,6 +82,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  NO_COLUMN_PERMISSION = "42502";
     private static  final   String  PASSWORD_EXPIRING = "01J15";
     private static  final   String  BAD_PASSWORD_PROPERTY = "4251J";
+    private static  final   String  BAD_PROPERTY_CHANGE = "XCY02";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -85,12 +92,15 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
     private final   boolean _nativeAuthentication;
     private final   boolean _localAuthentication;
+    private final   boolean _turnOffAuthenticationAndAuthorization;
 
     private String  _credentialsDBPhysicalName;
 
     private DatabaseChangeSetup _fourthDBSetup;
     private DatabaseChangeSetup _fifthDBSetup;
     private DatabaseChangeSetup _sixthDBSetup;
+    private DatabaseChangeSetup _seventhDBSetup;
+    private DatabaseChangeSetup _eighthDBSetup;
 
     private String  _derbySystemHome;
     private String  _fullBackupDir;
@@ -104,13 +114,15 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     public  NativeAuthenticationServiceTest
         (
          boolean    nativeAuthentication,
-         boolean    localAuthentication
+         boolean    localAuthentication,
+         boolean    turnOffAuthenticationAndAuthorization
          )
     {
         super( "testAll" );
 
         _nativeAuthentication = nativeAuthentication;
         _localAuthentication = localAuthentication;
+        _turnOffAuthenticationAndAuthorization = turnOffAuthenticationAndAuthorization;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////
@@ -151,6 +163,16 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
         result.put( PROVIDER_PROPERTY, authenticationProvider );
 
+        //
+        // This is to verify that NATIVE authentication trumps attempts
+        // to disable these features at the system level.
+        //
+        if ( _turnOffAuthenticationAndAuthorization )
+        {
+            result.put( REQUIRE_AUTHENTICATION_PROPERTY, "false" );
+            result.put( SQL_AUTHORIZATION_PROPERTY, "false" );
+        }
+
         return result;
     }
 
@@ -167,11 +189,14 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         String  local = _localAuthentication ?
             "LOCAL authentication ON, " :
             "LOCAL authentication OFF, ";
+        String  authOverrides = _turnOffAuthenticationAndAuthorization ?
+            "Authentication/Authorization turned OFF, " :
+            "Authentication/Authorization DEFAULT, ";
         String  embedded = isEmbedded() ?
             "Embedded" :
             "Client/Server";
 
-        return "[ " + authType + local + embedded + " ]";
+        return "[ " + authType + local + authOverrides + embedded + " ]";
     }
 
     /** Return true if the test is running embedded */
@@ -206,9 +231,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     {
         TestSuite suite = new TestSuite();
 
-        suite.addTest( (new NativeAuthenticationServiceTest( false, false ) ).decorate( clientServer ) );
-        suite.addTest( ( new NativeAuthenticationServiceTest( true, true ) ).decorate( clientServer ) );
-        suite.addTest( ( new NativeAuthenticationServiceTest( true, false ) ).decorate( clientServer ) );
+        suite.addTest( (new NativeAuthenticationServiceTest( false, false, false ) ).decorate( clientServer ) );
+        suite.addTest( ( new NativeAuthenticationServiceTest( true, true, true ) ).decorate( clientServer ) );
+        suite.addTest( ( new NativeAuthenticationServiceTest( true, true, false ) ).decorate( clientServer ) );
+        suite.addTest( ( new NativeAuthenticationServiceTest( true, false, true ) ).decorate( clientServer ) );
+        suite.addTest( ( new NativeAuthenticationServiceTest( true, false, false ) ).decorate( clientServer ) );
 
         return suite;
     }
@@ -265,6 +292,8 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         result = _fourthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FOURTH_DB, true );
         result = _fifthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FIFTH_DB, true );
         result = _sixthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, SIXTH_DB, true );
+        result = _seventhDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, SEVENTH_DB, true );
+        result = _eighthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, EIGHTH_DB, true );
 
         result = TestConfiguration.changeUserDecorator( result, DBO, getPassword( DBO ) );
         
@@ -414,7 +443,79 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
              legalUsers,
              false
              );
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        //
+        // You can't turn off authentication or SQL authorization when NATIVE authentication
+        // is set in the database. If NATIVE authentication is set at the system level,
+        // you can still override it with database only properties.
+        //
+        ///////////////////////////////////////////////////////////////////////////////////
+
+        Connection  seventhDBOConn = openConnection( SEVENTH_DB, DBO );
+
+        addUser( seventhDBOConn, APPLE_USER );
+        goodStatement( seventhDBOConn, "create table t1( a int )" );
+        goodStatement( seventhDBOConn, "insert into t1( a ) values ( 10 )" );
+
+        // at this point, you can't even force SQL authorization off on disk
+        setDatabaseProperty
+            ( _nativeAuthentication, seventhDBOConn, "derby.database.sqlAuthorization", "false", BAD_PROPERTY_CHANGE );
+
+        // you can change these properties, but the change will be overridden by NATIVE authentication
+        goodStatement
+            ( seventhDBOConn, "call syscs_util.syscs_set_database_property( 'derby.connection.requireAuthentication', 'false' )" );
+        goodStatement
+            ( seventhDBOConn, "call syscs_util.syscs_set_database_property( 'derby.database.propertiesOnly', 'true' )" );
+
+        //  now bring down the database so that the new property settings take effect
+        _seventhDBSetup.getTestConfiguration().shutdownDatabase();
+
+        // if NATIVE authentication is set in the database, then sql authorization prevents this legal user from viewing private data
+        Connection  seventhAppleConn = openConnection( SEVENTH_DB, APPLE_USER );
+        vetStatement( _localAuthentication, seventhAppleConn, "select * from " + DBO + ".t1", NO_COLUMN_PERMISSION );
+
+        // if NATIVE authentication is set in the database, then authentication still prevents this user from logging in
+        Connection  seventhWalnutConn = getConnection
+            ( _localAuthentication, SEVENTH_DB, WALNUT_USER, INVALID_AUTHENTICATION );
         
+        ///////////////////////////////////////////////////////////////////////////////////
+        //
+        // Using database only properties, you can override system-specified NATIVE
+        // authentication as long as the NATIVE authentication is not LOCAL, i.e., not set
+        // at the database level.
+        //
+        ///////////////////////////////////////////////////////////////////////////////////
+
+        Connection  eighthDBOConn = openConnection( EIGHTH_DB, DBO );
+
+        addUser( eighthDBOConn, APPLE_USER );
+
+        // create BUILTIN credentials and set BULTIN authentication via database only properties
+        setDatabaseProperty
+            ( _localAuthentication, eighthDBOConn, "derby.authentication.provider", "BUILTIN", INVALID_PROVIDER_CHANGE );
+        setDatabaseProperty( false, eighthDBOConn, "derby.connection.requireAuthentication", "true", null );
+        setDatabaseProperty( false, eighthDBOConn, "derby.database.propertiesOnly", "true", null );
+        addBuiltinUser( eighthDBOConn, DBO );
+        addBuiltinUser( eighthDBOConn, BUILTIN_USER );
+
+        //  now bring down the database so that the new property settings take effect
+        _eighthDBSetup.getTestConfiguration().shutdownDatabase();
+
+        // succeeds unless LOCAL authentication overrides database-specified BUILTIN authentication
+        Connection  builtinConn = getConnection
+            ( _localAuthentication, EIGHTH_DB, BUILTIN_USER, INVALID_AUTHENTICATION );
+
+        // fails if we are using BUILTIN authentication because this user wasn't given BUILTIN credentials
+        Connection  eightAppleConn = getConnection
+            ( !_localAuthentication, EIGHTH_DB, APPLE_USER, INVALID_AUTHENTICATION );
+    }
+    private void    addBuiltinUser( Connection conn, String user )  throws Exception
+    {
+        String  key = "derby.user." + user;
+        String  value = getPassword( user );
+        
+        setDatabaseProperty( false, conn, key, value, null );
     }
 
     /**
@@ -770,6 +871,40 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         String  statement = "call syscs_util.syscs_create_user( '" + user + "', '" + password + "' )";
         
         goodStatement( conn, statement );
+    }
+
+    private void  setDatabaseProperty( boolean shouldFail, Connection conn, String key, String value, String expectedSQLState )
+        throws Exception
+    {
+        if ( value == null ) { value = "cast ( null as varchar( 32672 ) )"; }
+        else { value = "'" + value + "'"; }
+        String  command = "call syscs_util.syscs_set_database_property( '" + key + "', " + value + " )";
+
+        try {
+            goodStatement( conn, command );
+
+            if ( shouldFail )   { fail( tagError( "Property setting should have failed." ) ); }
+        }
+        catch (SQLException se)
+        {
+            if ( shouldFail )   { assertSQLState( expectedSQLState, se ); }
+            else    { fail( tagError( "Property setting unexpectedly failed." ) );}
+        }
+    }
+
+    private void  vetStatement( boolean shouldFail, Connection conn, String command, String expectedSQLState )
+        throws Exception
+    {
+        try {
+            goodStatement( conn, command );
+
+            if ( shouldFail )   { fail( tagError( "Statement should have failed." ) ); }
+        }
+        catch (SQLException se)
+        {
+            if ( shouldFail )   { assertSQLState( expectedSQLState, se ); }
+            else    { fail( tagError( "Statement unexpectedly failed." ) );}
+        }
     }
 
     ///////////////////////////////////////////////////////////////////////////////////

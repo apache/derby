@@ -197,7 +197,17 @@ public final class NativeAuthenticationServiceImpl
      */
     private boolean validAuthenticationProvider()
     {
-        return (_credentialsDB != null) || _authenticateDatabaseOperationsLocally;
+        // If there is no store, then we are booting a system-wide authentication service
+        boolean     systemWideAuthentication = ( getServiceName() == null );
+
+        if ( _credentialsDB != null ) { return true; }
+        
+        // must have a global credentials db for system-wide authentication
+        if ( systemWideAuthentication ) { return false; }
+
+        // so there is no credentials db specified and we are booting a database.
+        // this is only allowed if we are authenticating locally in that database.
+        return _authenticateDatabaseOperationsLocally;
     }
 
 	/**
