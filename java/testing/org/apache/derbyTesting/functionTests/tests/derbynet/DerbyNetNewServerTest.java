@@ -88,7 +88,15 @@ public class DerbyNetNewServerTest extends BaseJDBCTestCase {
         assertTrue("Create log with start message", 0 < sizeAfterPing);        
         
         server.shutdown();
+
+        // DERBY-5598: The shutdown command doesn't wait until the message has
+        // been written before it returns. Give the message a little time (up
+        // to half a minute) to propagate to the log.
         int sizeAfterShutDown = bos.size();
+        for (int i = 0; i < 60 && sizeAfterShutDown == sizeAfterPing; i++) {
+            Thread.sleep(500L);
+            sizeAfterShutDown = bos.size();
+        }
         bos.close();
         bos = null;
         writer.close();
