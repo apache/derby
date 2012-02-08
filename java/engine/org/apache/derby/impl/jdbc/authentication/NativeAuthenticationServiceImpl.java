@@ -49,6 +49,7 @@ import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.util.IdUtil;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.Util;
+import org.apache.derby.jdbc.InternalDriver;
 
 /**
  * <p>
@@ -403,27 +404,20 @@ public final class NativeAuthenticationServiceImpl
             throw StandardException.newException( SQLState.BAD_NATIVE_AUTH_SPEC );
         }
         
-        String      dataSourceName = JVMInfo.J2ME ?
-            "org.apache.derby.jdbc.EmbeddedSimpleDataSource" :
-            "org.apache.derby.jdbc.EmbeddedDataSource";
-
         SQLWarning  warnings = null;
         
         try {
-            DataSource  dataSource = (DataSource) Class.forName( dataSourceName ).newInstance();
+            Properties  properties = new Properties();
+            properties.setProperty( Attribute.USERNAME_ATTR, userName );
+            properties.setProperty( Attribute.PASSWORD_ATTR, userPassword );
 
-            callDataSourceSetter( dataSource, "setDatabaseName", _credentialsDB );
-            callDataSourceSetter( dataSource, "setUser", userName );
-            callDataSourceSetter( dataSource, "setPassword", userPassword );
+            String  connectionURL = Attribute.PROTOCOL + _credentialsDB;
 
-            Connection  conn = dataSource.getConnection();
-
+            Connection  conn = InternalDriver.activeDriver().connect( connectionURL, properties );
+            
             warnings = conn.getWarnings();
             conn.close();
         }
-        catch (ClassNotFoundException cnfe) { throw wrap( cnfe ); }
-        catch (InstantiationException ie) { throw wrap( ie ); }
-        catch (IllegalAccessException ie) { throw wrap( ie ); }
         catch (SQLException se)
         {
             String  sqlState = se.getSQLState();
