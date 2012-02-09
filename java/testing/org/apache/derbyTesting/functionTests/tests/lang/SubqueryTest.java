@@ -35,7 +35,6 @@ import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.RuntimeStatisticsParser;
 import org.apache.derbyTesting.junit.SystemPropertyTestSetup;
-import org.apache.derbyTesting.junit.Utilities;
 
 /**
  * Test case for subquery.sql.
