@@ -461,7 +461,13 @@ public class RuntimeStatisticsParser {
             
             for (int j=0; j < strings[i].length(); j++) {
                 if (strings[i].charAt(j) == '_') {
-                    sb.append('\t');
+                    // this would mess up if the string has an _ somewhere in
+                    // the middle, e.g. if a table name has an _ in it. So, 
+                    // only do this for the first 15 characters.
+                    if (j < 15)
+                        sb.append('\t');
+                    else
+                        sb.append(strings[i].substring(j));                        
                 } else {
                     sb.append(strings[i].substring(j));
                     break;
@@ -470,18 +476,17 @@ public class RuntimeStatisticsParser {
             strings[i] = sb.toString();
         }
 
-        int matchIdx = 0; // which string to match next
         String window = statistics;
         for (int i = 0; i < strings.length; i++) {
             int pos = window.indexOf(strings[i]);
 
             if (pos == -1) {
                 throw new AssertionError(
-                    "Sequence not found in statistics");
+                    "Sequence " + strings[i] + "not found in statistics");
             }
 
             window = window.substring(pos + 1);
         }
-    }
+    }     
 }
     
