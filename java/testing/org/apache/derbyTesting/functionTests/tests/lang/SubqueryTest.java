@@ -985,7 +985,6 @@ public class SubqueryTest extends BaseJDBCTestCase {
         rs = st.executeQuery("values ConsistencyChecker()");
         expColNames = new String [] {"1"};
         JDBC.assertColumnNames(rs, expColNames);
-        // Utilities.showResultSet(rs);
         if (usingEmbedded()) {
             expRS = new String[][] 
                 { { "No open scans, etc.\n16 dependencies found" } };
