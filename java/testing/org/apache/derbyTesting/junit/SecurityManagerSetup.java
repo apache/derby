@@ -70,10 +70,28 @@ public final class SecurityManagerSetup extends TestSetup {
 	}
 	
 	private final String decoratorPolicyResource;
-	public SecurityManagerSetup(Test test, String policyResource)
+	private SecurityManager decoratorSecurityManager = null;
+	
+        public SecurityManagerSetup(Test test, String policyResource)
+        {
+            super(test);
+            this.decoratorPolicyResource = policyResource != null ?
+                    policyResource : getDefaultPolicy();
+        }
+
+	/**
+	 * Use custom policy and SecurityManager
+	 * 
+	 * @param test - Test to wrap
+	 * @param policyResource - policy resource. If null use default testing policy
+	 * @param securityManager - Custom SecurityManager if null use the system security manager
+	 */
+	public SecurityManagerSetup(Test test, String policyResource, SecurityManager securityManager)
 	{
 		super(test);
-		this.decoratorPolicyResource = policyResource;
+		this.decoratorPolicyResource = policyResource != null ?
+		            policyResource : getDefaultPolicy();
+		this.decoratorSecurityManager = securityManager;
 	}
 	
 	/**
@@ -113,7 +131,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	 * including the special case of no security manager.
 	 */
 	protected void setUp() {
-		installSecurityManager(decoratorPolicyResource);
+		installSecurityManager(decoratorPolicyResource, decoratorSecurityManager);
 	}
     
     protected void tearDown() throws Exception
@@ -144,28 +162,34 @@ public final class SecurityManagerSetup extends TestSetup {
 	{
 		installSecurityManager( getDefaultPolicy() );
 	}
-	
-	private static void installSecurityManager(String policyFile)
-			 {
 
+	private static void installSecurityManager(String policyFile) {
+	   installSecurityManager(policyFile, System.getSecurityManager());
+	}
+
+	private static void installSecurityManager(String policyFile, final SecurityManager sm)
+			 {
+	    
 		if (externalSecurityManagerInstalled)
 			return;
 		
 		Properties set = new Properties(classPathSet);
 		setSecurityPolicy(set, policyFile);
 
-		SecurityManager sm = System.getSecurityManager();
-		if (sm != null) {
+		SecurityManager currentsm = System.getSecurityManager();
+		if (currentsm != null) {
 			// SecurityManager installed, see if it has the same settings.
 
 			String  newPolicyProperty = set.getProperty("java.security.policy" );
 			if ( newPolicyProperty == null ) { newPolicyProperty = ""; } 
                                                    
 			String  oldPolicyProperty = BaseTestCase.getSystemProperty("java.security.policy");
+			SecurityManager oldSecMan = System.getSecurityManager();
 
 			if ( oldPolicyProperty == null ) { oldPolicyProperty = ""; }
 
-			if ( newPolicyProperty.equals( oldPolicyProperty ) ) { return; }
+			if ( newPolicyProperty.equals( oldPolicyProperty ) &&
+			        oldSecMan == sm) { return; }
 			
 			// Uninstall the current manager.
 			uninstallSecurityManager();
@@ -186,8 +210,10 @@ public final class SecurityManagerSetup extends TestSetup {
 
 
                 public Object run() {
-                    SecurityManager sm = new SecurityManager();
-                    System.setSecurityManager(sm);
+                    if (sm == null)
+                        System.setSecurityManager(new SecurityManager());
+                    else
+                        System.setSecurityManager(sm);
                     Policy.getPolicy().refresh();
                     return null;
                 }

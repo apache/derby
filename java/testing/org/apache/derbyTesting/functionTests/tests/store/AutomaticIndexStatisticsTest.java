@@ -57,7 +57,8 @@ import org.apache.derbyTesting.junit.Utilities;
 public class AutomaticIndexStatisticsTest
     extends BaseJDBCTestCase {
 
-    private static final String MASTERDB = "masterDb";
+    // used also by Derby5582AutomaticIndexStatisticsTest so just protected
+    protected static final String MASTERDB = "masterDb";
     private static final String BIG_TABLE = "BIG_TABLE";
     private static final long DEFAULT_TIMEOUT = 20*1000;
 
