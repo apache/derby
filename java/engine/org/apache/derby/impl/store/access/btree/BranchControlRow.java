@@ -601,8 +601,7 @@ public class BranchControlRow extends ControlRow
                 "page is not latched:");
         }
 
-        if ((this.page.recordCount() - 1 >=
-                open_btree.getConglomerate().maxRowsPerPage) ||
+        if ((this.page.recordCount() - 1 >= BTree.maxRowsPerPage) ||
             (!this.page.spaceForInsert(splitrow, (FormatableBitSet) null,
 				AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD)))
         {

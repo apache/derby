@@ -530,8 +530,7 @@ public class LeafControlRow extends ControlRow
         }
 
         // See if this page has space.
-        if ((this.page.recordCount() - 1 < 
-                open_btree.getConglomerate().maxRowsPerPage) &&
+        if ((this.page.recordCount() - 1 < BTree.maxRowsPerPage) &&
             (this.page.spaceForInsert(splitrow, (FormatableBitSet) null,
 				AccessFactoryGlobals.BTREE_OVERFLOW_THRESHOLD)))
         {

@@ -914,8 +914,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
                     }
                 }
             }
-            else if (targetleaf.page.recordCount() - 1 < 
-                    this.getConglomerate().maxRowsPerPage)
+            else if (targetleaf.page.recordCount() - 1 < BTree.maxRowsPerPage)
             {
                 // The row wasn't there, so try to insert it
                 // on the page returned by the search.
@@ -1073,7 +1072,7 @@ public class BTreeController extends OpenBTree implements ConglomerateController
             this.isIndexableRowConsistent(rowToInsert);
         }
 
-        if (num_rows_on_page < this.getConglomerate().maxRowsPerPage)
+        if (num_rows_on_page < BTree.maxRowsPerPage)
         {
             // By default maxRowsPerPage is set to MAXINT, some tests
             // set it small to cause splitting to happen quicker with
