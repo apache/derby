@@ -213,6 +213,16 @@ public class st_reclaim_longcol extends BaseTest
                 " rows with blob(" + blob_size + ")"); 
     }
 
+    /**
+     * DERBY-1913
+     * <p>
+     * test2 is too sensitive to machine speed and background thread
+     * processing.  It would be better suited as a long running stress
+     * test if someone has the inclination.  Disabling this test for
+     * now.  test1 covers the original intent to test that blobs are
+     * immediately marked for post commit on individual delete, rather
+     * than waiting for all rows on a page to be deleted.
+     **/
     public void test2(
     Connection  conn, 
     int         blob_size, 
@@ -476,7 +486,10 @@ public class st_reclaim_longcol extends BaseTest
         throws SQLException
     {
         test1(conn, 250000, 20);
-        test2(conn, 250000, 5, 500);
+
+        // DERBY-1913 - disabling test2 as it is too sensitive to background
+        // processing.
+        // test2(conn, 250000, 5, 500);
     }
 
     public static void main(String[] argv) 
