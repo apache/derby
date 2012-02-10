@@ -2,4 +2,3 @@ store/RowLockBasic.sql
 store/TableLockBasic.sql
 store/longColumn.sql
 store/updatelocksJDBC30.sql
-store/updatelocks.sql
