@@ -41,6 +41,8 @@ public final class SpawnedProcess {
 
     private final StreamSaver outSaver;
 
+    private boolean suppressOutput;
+
     public SpawnedProcess(Process javaProcess, String name) {
         this.javaProcess = javaProcess;
         this.name = name;
@@ -49,6 +51,17 @@ public final class SpawnedProcess {
                 .concat(":System.err"));
         outSaver = streamSaver(javaProcess.getInputStream(), name
                 .concat(":System.out"));
+    }
+
+    /**
+     * Causes output obtained from the subprocess to be suppressed when
+     * executing the {@code complete}-methods.
+     *
+     * @see #getFullServerOutput() to obtain suppressed output from stdout
+     * @see #getFullServerError() to obtain suppressed output from stderr
+     */
+    public void suppressOutputOnComplete() {
+        suppressOutput = true;
     }
 
     /**
@@ -70,7 +83,7 @@ public final class SpawnedProcess {
      * should be called first.
      * </p>
      */
-    public String getFullServerOutput() throws Exception {
+    public String getFullServerOutput() throws InterruptedException {
         // First wait until we've read all the output.
         outSaver.thread.join();
 
@@ -79,6 +92,23 @@ public final class SpawnedProcess {
         }
     }
     
+    /**
+     * Get the full server error output (stderr) as a string using the default
+     * encoding which is assumed is how it was originally written.
+     * <p>
+     * This method should only be called after the process has completed.
+     * That is, {@link #complete(boolean)} or {@link #complete(boolean, long)}
+     * should be called first.
+     */
+    public String getFullServerError() throws InterruptedException {
+        // First wait until we've read all the output on stderr.
+        errSaver.thread.join();
+
+        synchronized (this) {
+            return errSaver.stream.toString();
+        }
+    }
+
     /**
      * Position offset for getNextServerOutput().
      */
@@ -191,7 +221,7 @@ public final class SpawnedProcess {
 
             // Always write the error
             ByteArrayOutputStream err = errSaver.stream;
-            if (err.size() != 0) {
+            if (!suppressOutput && err.size() != 0) {
                 System.err.println("START-SPAWNED:" + name + " ERROR OUTPUT:");
                 err.writeTo(System.err);
                 System.err.println("END-SPAWNED  :" + name + " ERROR OUTPUT:");
@@ -200,7 +230,8 @@ public final class SpawnedProcess {
             // Only write the error if it appeared the server
             // failed in some way.
             ByteArrayOutputStream out = outSaver.stream;
-            if ((destroy || exitCode != 0) && out.size() != 0) {
+            if (!suppressOutput && (destroy || exitCode != 0) &&
+                    out.size() != 0) {
                 System.out.println("START-SPAWNED:" + name
                         + " STANDARD OUTPUT: exit code=" + exitCode);
                 out.writeTo(System.out);

@@ -28,12 +28,9 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.Reader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -758,60 +755,33 @@ public abstract class BaseTestCase
         return ("IBM Corporation".equals(
                 getSystemProperty("java.vendor")));
     }
-    
-   /**
-    * Reads output from a process and returns it as a string.
-    * This will block until the process terminates.
-    * 
-    * @param pr a running process
-    * @return output of the process, both STDOUT and STDERR
-    * @throws InterruptedException
-    */
-   public static String readProcessOutput(Process pr) throws InterruptedException {
-		InputStream is = pr.getInputStream();
-		InputStream es = pr.getErrorStream();
-		if (is == null) {
-			fail("Unexpectedly receiving no text from the process");
-		}
-		String output = "";
-		try {
-		      output += "<STDOUT> " + inputStreamToString(is) + "<END STDOUT>\n";
-		      output += "<STDERR>" + inputStreamToString(es) + "<END STDERR>\n";
 
-		} catch (Exception e) {
-		    fail("Exception accessing inputstream from process", e);
-		}
-		
-		// wait until the process exits
-		pr.waitFor();
-		
-		return output;
-	}
-   
     /**
-     * Read contents of an input stream to a String
+     * Reads output from a process and returns it as a string.
+     * <p>
+     * This will block until the process terminates.
      * 
-     * @param is
-     * @return String with input stream contents
-     * @throws IOException
+     * @param pr a running process
+     * @return Output of the process, both STDOUT and STDERR.
+     * @throws InterruptedException if interrupted while waiting for the
+     *      subprocess or one of the output collector threads to terminate
      */
-    private static String inputStreamToString(InputStream is) throws IOException {
-
-        String isout = "";
-        char[] ca = new char[1024];
-        // Create an InputStreamReader with default encoding; we're hoping
-        // this to be en.
-        InputStreamReader inStream;
-        inStream = new InputStreamReader(is);
-
-        // keep reading from the stream until all done
-        int charsRead;
-        while ((charsRead = inStream.read(ca, 0, ca.length)) != -1) {
-            isout = isout + new String(ca, 0, charsRead);
+    public static String readProcessOutput(Process pr)
+            throws InterruptedException {
+        SpawnedProcess wrapper = new SpawnedProcess(pr, "readProcessOutput");
+        wrapper.suppressOutputOnComplete();
+        try {
+            wrapper.complete(false);
+        } catch (IOException ioe) {
+            fail("process completion method failed", ioe);
         }
-        return isout;
+        String output = "<STDOUT> " + wrapper.getFullServerOutput() +
+                "<END STDOUT>\n";
+        output += "<STDERR>" + wrapper.getFullServerError() +
+                "<END STDERR>\n";
+        return output;
     }
-   
+
     /**
      * Remove the directory and its contents.
      * @param path Path of the directory
