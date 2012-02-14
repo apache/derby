@@ -221,9 +221,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(Derby5005Test.suite());
         suite.addTest(AutoIncrementTest.suite());
         suite.addTest(HalfCreatedDatabaseTest.suite());
-        //DERBY-5601 Hang in NativeAuthenticationServiceTest on Windows.
-        // Disable there for the moment.
-        if ( !getSystemProperty("os.name").startsWith("Windows") ) { suite.addTest(NativeAuthenticationServiceTest.suite()); }
+        suite.addTest(NativeAuthenticationServiceTest.suite());
         suite.addTest(NativeAuthProcs.suite());
         return suite;
 	}
