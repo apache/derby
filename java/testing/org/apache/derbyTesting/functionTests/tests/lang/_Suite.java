@@ -124,7 +124,6 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(CollationTest2.suite());
         suite.addTest(ScrollCursors1Test.suite());
         suite.addTest(SimpleTest.suite());
-        suite.addTest(GrantRevokeDDLTest.suite());
         suite.addTest(ReleaseCompileLocksTest.suite());
         suite.addTest(LazyDefaultSchemaCreationTest.suite());
         suite.addTest(ErrorCodeTest.suite());
