@@ -176,6 +176,36 @@
   </target> 
 
 
+  <target name="build-test-jars" description="Build jar files used in tests." depends="init" >
+
+    <property name="lang-test-dir" value="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/lang"/>
+
+    <delete dir="${lang-test-dir}/nast"/>
+    <mkdir dir="${lang-test-dir}/nast"/>
+
+    <echo level="info" message="Running script to create the nast database"/>
+    <java classname="org.apache.derby.tools.ij"
+          output="${lang-test-dir}/nast.out"
+          failonerror="true"
+          dir="${lang-test-dir}" fork="true">
+      <classpath>
+        <pathelement path="${out.dir}"/>
+        <pathelement path="${compile.classpath}"/>
+      </classpath>
+      <arg value="${lang-test-dir}/nast_init.sql"/>
+    </java>
+
+    <echo level="info" message="Putting the nast database into a jar file"/>
+    <jar destfile="${lang-test-dir}/nast1.jar"
+         basedir="${lang-test-dir}/nast" />
+
+    <!--  Comment out these lines if you have trouble generating the jar file  -->
+    <delete dir="${lang-test-dir}/nast"/>
+    <delete file="${lang-test-dir}/nast.out"/>
+    <delete file="${lang-test-dir}/derby.log"/>
+
+  </target>
+
 <!--             ============= End Targets ==============                -->
 
 <!--             ============= End Project ==============                -->

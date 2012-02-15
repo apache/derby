@@ -651,6 +651,12 @@
     <ant dir="${derby.testing.src.dir}"/>
   </target>
 	
+  <target name="build-test-jars" description="Build jar files used in tests." depends="buildsource" >
+
+    <ant dir="${derby.testing.src.dir}/${derby.testing.functest.dir}/tests/lang" target="build-test-jars" />
+
+  </target>
+
   <!-- Build the package private tests -->
   <target name="pptesting" depends="testing">
     <ant dir="${derby.testing.src.dir}/org/apache/derby"/>

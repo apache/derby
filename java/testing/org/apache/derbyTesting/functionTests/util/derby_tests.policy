@@ -88,6 +88,9 @@ grant codeBase "${derbyTesting.codejar}derby.jar" {
   permission java.io.FilePermission "${user.dir}${/}extinout${/}-", "read,  write, delete";
   permission java.io.FilePermission "${user.dir}${/}extout${/}-", "read,write";
   permission java.io.FilePermission "${user.dir}${/}extinout", "read,write";
+
+  // needed to create a temp file in order to open a database in a jar file
+  permission java.io.FilePermission "${java.io.tmpdir}${/}-", "read,write,delete";
   
   // These permissions are needed to load the JCE for encryption with Sun and IBM JDK131.
   // JDK14 has the JCE  preloaded
@@ -244,6 +247,10 @@ grant codeBase "${derbyTesting.testjar}derbyTesting.jar" {
   permission java.lang.RuntimePermission "setSecurityManager";
   permission java.security.SecurityPermission "getPolicy";
   permission java.lang.RuntimePermission "setIO";  
+
+  // Needed by ClasspathSetup to change the classloader
+  permission java.lang.RuntimePermission "createClassLoader";
+  permission java.lang.RuntimePermission "setContextClassLoader";
 
   // These permissions are needed to dump the thread stack
   // traces upon failure.

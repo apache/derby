@@ -1689,6 +1689,29 @@ public final class TestConfiguration {
     }
 
     /**
+     * Open connection to the specified database using the supplied username and password.
+     * Treat the database name as a physical database name rather than as a logical name
+     * which needs to be mapped.
+     * If the database does not exist, it will be created.
+     * Requires that the test has been decorated with
+     * additionalDatabaseDecorator with the matching name.
+     * @param physicalDatabaseName The real database name to use.
+     * @user name of user
+     * @password password of user
+     * @return connection to specified database.
+     */
+    public  Connection openPhysicalConnection( String physicalDatabaseName, String user, String password )
+        throws SQLException
+    {
+        return connector.openConnection
+            (
+             physicalDatabaseName,
+             user,
+             password
+             );
+    }
+
+    /**
      * Shutdown the database for this configuration
      * assuming it is booted.
      *

@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class BaseTestCase
+ * Derby - Class org.apache.derbyTesting.junit.BaseTestCase
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -599,6 +599,16 @@ public abstract class BaseTestCase
         }
 
         return vmname;
+    }
+
+    /**
+     * <p>
+     * Return the current directory.
+     * </p>
+     */
+    public  static  File    currentDirectory()
+    {
+        return new File( getSystemProperty( "user.dir" ) );
     }
 
     /**

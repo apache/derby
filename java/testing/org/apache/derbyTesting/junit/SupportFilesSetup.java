@@ -228,6 +228,28 @@ public class SupportFilesSetup extends TestSetup {
     {
         return getFile(EXTIN, name);
     }
+    
+    /**
+     * Get the full name of the file.
+     * @param name Base name for the resouce.
+     */
+    public static String getReadOnlyFileName(String name)
+        throws Exception
+    {
+        final   String  finalName = name;
+        try {
+            return (String) AccessController.doPrivileged
+            (new java.security.PrivilegedExceptionAction(){
+
+                public Object run() throws MalformedURLException{
+                    return getReadOnly(  finalName ).getAbsolutePath();
+                }
+            }
+             );
+        } catch (PrivilegedActionException e) {
+            throw e.getException();
+        } 
+    }
     /**
      * Obtain a File for the local copy of a read-write resource.
      * @param name Base name for the resouce.

@@ -540,7 +540,7 @@ public class BaseDataFileFactory
 
 		releaseJBMSLockOnDB();
         
-        writableStorageFactory.shutdown();
+        if ( writableStorageFactory != null ) { writableStorageFactory.shutdown(); }
 	} // end of stop
 
 	/*
