@@ -478,7 +478,7 @@ public class SecureServerTest extends BaseJDBCTestCase
                 cmdList.toString());
         
         // Ensure it completes without failures.
-        assertEquals(0, spawned.complete(false));
+        assertEquals(0, spawned.complete());
         
         return spawned.getFullServerOutput();
     }

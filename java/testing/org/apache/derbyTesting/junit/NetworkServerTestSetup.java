@@ -204,7 +204,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                     // Dump the output from the spawned process
                     // and destroy it.
                     if (spawnedServer != null) {
-                        spawnedServer.complete(true);
+                        spawnedServer.complete(2000);
                         msg = spawnedServer.getFailMessage(msg);
                         spawnedServer = null;
                     }
@@ -456,7 +456,7 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
                 // Destroy the process if a failed shutdown
                 // to avoid hangs running tests as the complete()
                 // waits for the process to complete.
-                spawnedServer.complete(failedShutdown != null, getWaitTime());
+                spawnedServer.complete(getWaitTime());
                 spawnedServer = null;
             }
 

@@ -771,7 +771,7 @@ public abstract class BaseTestCase
         SpawnedProcess wrapper = new SpawnedProcess(pr, "readProcessOutput");
         wrapper.suppressOutputOnComplete();
         try {
-            wrapper.complete(false);
+            wrapper.complete();
         } catch (IOException ioe) {
             fail("process completion method failed", ioe);
         }
