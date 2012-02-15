@@ -1741,10 +1741,6 @@ public class SURTest extends SURBaseTest {
      */
     public static Test suite() {
         TestSuite mainSuite = new TestSuite("SURTest");
-        // DB2 client doesn't support this functionality
-        if (usingDB2Client())
-            return mainSuite;
-        
         mainSuite.addTest(baseSuite("SURTest:embedded"));
         mainSuite.addTest(
                 TestConfiguration.clientServerDecorator(baseSuite("SURTest:client")));

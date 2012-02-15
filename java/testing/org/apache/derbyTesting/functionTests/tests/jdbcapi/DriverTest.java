@@ -292,11 +292,6 @@ public class DriverTest extends BaseJDBCTestCase {
      */
     public void testEmbeddedAttributes() throws SQLException
     {
-        // JCC can't take embedded attributes in info or as normal url 
-        // attributes, so not tested here.
-        if (usingDB2Client())
-            return;
-        
         String dbName = TestConfiguration.getCurrent().getDefaultDatabaseName();
         String protocol = 
             TestConfiguration.getCurrent().getJDBCClient().getUrlBase();
@@ -516,11 +511,6 @@ public class DriverTest extends BaseJDBCTestCase {
         if (usingDerbyNetClient())
             protocol = protocol + TestConfiguration.getCurrent().getHostName()
             + ":" + TestConfiguration.getCurrent().getPort() + "/";
-        else if (usingDB2Client())
-            protocol = protocol + "net:" + 
-            TestConfiguration.getCurrent().getHostName() + ":" + 
-            TestConfiguration.getCurrent().getPort() + "/";
-        
         url = protocol + DB_NAME_WITH_SPACES + ";create=true";
         String shuturl = protocol + DB_NAME_WITH_SPACES + ";shutdown=true";
         

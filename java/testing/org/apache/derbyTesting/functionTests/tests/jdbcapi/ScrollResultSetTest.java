@@ -124,12 +124,9 @@ public class ScrollResultSetTest extends BaseJDBCTestCase {
             assertTrue("Excepted exception to be thrown - result set is closed", 
                        false);
         } catch (SQLException se) {
-            if (!usingDB2Client()) {
                 assertSQLState("Unexpected SQL State",
                                SQLStateConstants.RESULT_SET_IS_CLOSED, se);
-            }
         }
-
     }
 
     /**

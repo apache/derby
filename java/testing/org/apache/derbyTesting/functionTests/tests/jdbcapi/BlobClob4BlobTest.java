@@ -870,9 +870,6 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     "should have caused an exception");
         }  catch (SQLException e) {
             checkException(BLOB_POSITION_TOO_LARGE, e);
-        } catch (StringIndexOutOfBoundsException se) {
-            assertTrue("FAIL - This exception should only happen with " +
-                    "DB2 client", usingDB2Client());
         }
         // 0 or negative position value
         try {
@@ -2250,21 +2247,14 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                             "exception");
                 } catch (SQLException e) {
                     checkException(BLOB_POSITION_TOO_LARGE, e);
-                } catch (NegativeArraySizeException nase) {
-                    assertTrue("FAIL - this exception should only happen " +
-                            "with DB2 client", usingDB2Client());
                 }
                 // 0 or negative position value
                 try {
                     blob.position(new byte[0], -4000);
-                    if (!usingDB2Client()) {
-                        fail("FAIL - position with negative start " +
-                                "position should have caused an exception");
-                    }
+                    fail("FAIL - position with negative start " +
+                            "position should have caused an exception");
                 } catch (SQLException e) {
                     checkException(BLOB_BAD_POSITION, e);
-                    assertTrue("FAIL - JCC should not get an exception",
-                            !usingDB2Client());
                 }
                 // null pattern
                 try {
@@ -2277,15 +2267,10 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 // 0 or negative position value
                 try {
                     blob.position(blob, -42);
-                    if (!usingDB2Client()) {
-                        fail("FAIL - position with negative start " +
-                                "position should have caused an exception");
-                    }
+                    fail("FAIL - position with negative start " +
+                            "position should have caused an exception");
                 } catch (SQLException e) {
                     checkException(BLOB_BAD_POSITION, e);
-                } catch (ArrayIndexOutOfBoundsException aob) {
-                    assertTrue("FAIL - this excpetion should only happen " +
-                            "with DB2 client", usingDB2Client());
                 }
                 // null pattern
                 try {
@@ -3358,11 +3343,6 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                     throw e;
                 }
             }
-        } catch (StringIndexOutOfBoundsException obe) {
-            // Known bug.  JCC 5914.
-            if (!((pos > clobLength) && usingDB2Client())) {
-                throw obe;
-            }
         }
     }
 
@@ -3406,10 +3386,6 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
                 } else {
                     throw e;
                 }
-            }
-        } catch (NegativeArraySizeException nase) {
-            if (!((pos > blobLength) && usingDB2Client())) {
-                throw nase;
             }
         }
     }
@@ -3521,9 +3497,7 @@ public class BlobClob4BlobTest extends BaseJDBCTestCase {
     private void checkException(String SQLState, SQLException se)
             throws Exception
     {
-        if (!usingDB2Client()) {
-            assertSQLState(SQLState, se);
-        }
+         assertSQLState(SQLState, se);
     }
 
 

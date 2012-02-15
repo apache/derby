@@ -104,12 +104,6 @@ public class UpdatableResultSetTest extends BaseJDBCTestCase {
     /** Create a test suite with all tests in this class. */
     public static Test suite() {
 
-        // Test will fail with JCC.
-        if (usingDB2Client()) {
-            // empty suite
-            return new TestSuite();
-        }
-
         return TestConfiguration.defaultSuite(UpdatableResultSetTest.class);
     }
     

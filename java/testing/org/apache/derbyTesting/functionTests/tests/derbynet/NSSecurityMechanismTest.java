@@ -93,54 +93,13 @@ import junit.framework.TestSuite;
  * will work are IBM JVM [versions 1.4.1, later versions of 1.4.2 (from 2005),
  * 1.5]
  * 
- * #2) JCC 2.6 client does some automatic upgrade of security mechanism in one
- * case. Logic is  as follows:
- * If client sends USRIDPWD to server and server rejects this
- * and says it accepts only EUSRIDPWD, in that case JCC 2.6 will upgrade the 
- * security mechanism to EUSRIDPWD and retry the request with EUSRIDPWD.
- * This switching will also override the security mechanism specified by user.
- * Thus if JCC client is running with Sun JVM 1.4.2 and even though Sun JCE
- * does not have support for algorithms needed for  EUSRIDPWD, the JCC client
- * will still try to switch to  EUSRIDPWD and throw an exception with 
- * ClassNotFoundException for the IBM JCE.
- *
- * - Default security mechanism is USRIDPWD(0x03)
- * - If securityMechanism is not explicitly specified on connection request 
- *   and if no user specified, an exception is thrown - Null userid not 
- *   supported
- * - If securityMechanism is not explicitly specified on connection request, 
- *   and if no password is specified, an exception is thrown - null password
- *   not supported
- *   If securityMechanism is explicitly specified to be USRIDONL,  then a
- *   password is not required. But in other cases (EUSRIDPWD, USRIDPWD, 
- *   USRSSBPWD) if password is null, an exception with the message 'a null
- *   password not valid' will be thrown.
- * - On datasource, setting a security mechanism works. It also allows a 
- *   security mechanism of USRIDONL to be set on datasource unlike jcc 2.4.
- * 
- * #3)JCC 2.4 client behavior 
- * Default security mechanism used is USRIDPWD (0x03)
- * If securityMechanism is not explicitly specified on connection request, and
- * if no user is specified, an exception is thrown - Null userid not supported.
- * If securityMechanism is not explicitly specified on connection request, and
- * if no password is specified, an exception is thrown - null password not
- * supported.
- * If security mechanism is specified, jcc client will not override the 
- * security mechanism.
- * If securityMechanism is explicitly specified to be USRIDONL, then a password
- * is not required. But in other cases (EUSRIDPWD,USRIDPWD) if password is null
- * an exception with the message 'a null password not valid' will be thrown.
- * On datasource, setting a security mechanism does not work (bug). It defaults
- * to USRIDPWD.  Setting a value of USRIDONL or EUSRIDPWD does not seem to have
- * an effect.
- * 
- * #4) Note, if  server restricts the client connections based on security 
+ * #2) Note, if  server restricts the client connections based on security 
  * mechanism by setting derby.drda.securityMechanism, in that case the clients 
  * will see an error similar to this:
  * "Connection authorization failure occurred. Reason: security mechanism not
  *  supported"
  *
- * #5) USRSSBPWD - Strong password substitute is only supported starting from
+ * #3) USRSSBPWD - Strong password substitute is only supported starting from
  *     Apache Derby 10.2.
  *	 NOTE: USRSSBPWD only works with the derby network client driver for now.
  *   ---- 
@@ -501,7 +460,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      */
     private void assertConnectionUsingDataSource(String[] expectedValues)
     {
-        // Note: bug in jcc, throws error with null password
         if (usingDerbyNetClient())
         {
             assertSecurityMechanismOK("sarah",null, new Short(
@@ -510,11 +468,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         assertSecurityMechanismOK("john","sarah", new Short(
             SECMEC_USRIDPWD),"SECMEC_USRIDPWD:", expectedValues[2]);
 
-        // Possible bug in JCC, hence disable this test for JCC framework only
-        // the security mechanism when set on JCC datasource does not seem to 
-        // have an effect. JCC driver is sending a secmec of 3( USRIDPWD) to 
-        // the server even though the security mechanism on datasource is set to 
-        // EUSRIDPWD (9)
         if (usingDerbyNetClient())
         {
             // Please note: EUSRIDPWD security mechanism in DRDA uses 
@@ -529,7 +482,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
             // The test methods are implemented to work either way.
             assertSecurityMechanismOK("john","sarah",new Short(
                 SECMEC_EUSRIDPWD),"SECMEC_EUSRIDPWD:", expectedValues[3]);
-            // JCC does not support USRSSBPWD security mechanism
             assertSecurityMechanismOK("john","sarah",new Short(
                 SECMEC_USRSSBPWD),"SECMEC_USRSSBPWD:", expectedValues[4]);
         }
@@ -670,11 +622,8 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * level comments (#1)
      * <BR>
      * The expected output from this test will depend on the following
-     * -- the client behavior (JCC 2.4, JCC2.6 or derby client).For the derby
-     * client, the table below represents what security mechanism the client
-     * will send to server. 
-     * -- See class level comments (#2,#3) to understand the JCC2.6 and JCC2.4 
-     * behavior
+     * -- the client behavior. For the derby client, the table below 
+     * represents what security mechanism the client will send to server. 
      * -- Note: in case of derby client, if no user  is specified, user 
      * defaults to APP.
      * -- Will depend on if the server has been started with property 
@@ -836,8 +785,7 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
                 if (PWD_ATTRIBUTE[j] != null)
                     urlAttributes += "password=" + PWD_ATTRIBUTE[j] +";";
                 
-                // removing the last semicolon that we added here, getJDBCUrl
-                // will add another semicolon for jcc, which would be too many.
+                // removing the last semicolon that we added here
                 if (urlAttributes.length() >= 1)
                     urlAttributes = urlAttributes.substring(
                         0,urlAttributes.length()-1);
@@ -939,10 +887,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
         {
             // Exceptions expected in certain case hence printing message
             // instead of stack traces here. 
-            // - For cases when userid is null or password is null and by
-            //   default JCC does not allow a null password or null userid.
-            // - For case when JVM does not support EUSRIDPWD and JCC 2.6 
-            //   tries to do autoswitching of security mechanism.
             // - For case if server doesnt accept connection with this 
             //   security mechanism
             // - For case when client driver does support USRSSBPWD security
@@ -1059,9 +1003,6 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
      * with initializing EncryptionManager will happen. This will happen for 
      * Sun JVM (versions 1.3.1, 1.4.1, 1.4.2, 1.5) and 
      * IBM JVM (versions 1.3.1 and some old versions of 1.4.2 (in 2004) )
-     * For JCC clients, error message is   
-     * "java.lang.ClassNotFoundException is caught when initializing
-     * EncryptionManager 'IBMJCE'"
      * For derby client, the error message is 
      * "Security exception encountered, see next exception for details."
      * 2)If server does not accept EUSRIDPWD security mechanism from clients,then
@@ -1256,18 +1197,9 @@ public class NSSecurityMechanismTest extends BaseJDBCTestCase
     {
         String hostName = TestConfiguration.getCurrent().getHostName();
         int port = TestConfiguration.getCurrent().getPort();
-        if (usingDB2Client())
-        {
-            //attrs.put("retrieveMessagesFromServerOnGetMessage","true");
-            attrs.put("driverType","4");
-            /**
-             * As per the fix of derby-410 servername should
-             * default to localhost, but for jcc it's still needed  
-             */
-            attrs.put("serverName",hostName);
-        }
         /** 
-         * For a remote host of course it's also needed 
+         * serverName defaults to localhost (see DERBY-410), 
+         * but for a remote host it's needed 
          */
         if (!hostName.equals("localhost"))
         {

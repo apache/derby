@@ -56,10 +56,6 @@ final public class UpdateXXXTest extends BaseJDBCTestCase
      */
     public static Test suite() {
         
-        // DB2 client doesn't support this functionality
-        if (usingDB2Client())
-            return new TestSuite("empty");
-        
         TestSuite suite = baseSuite("UpdateXXXTest");
         
         suite.addTest(

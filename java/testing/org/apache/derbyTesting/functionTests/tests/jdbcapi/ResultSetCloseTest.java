@@ -120,12 +120,6 @@ public class ResultSetCloseTest extends BaseJDBCTestCase {
      */
     public static Test suite() {
                 
-        // DB2 client doesn't implement result set closing
-        // correctly wrt ensuring all its methods subsequently
-        // throw an exception.
-        if (usingDB2Client())
-            return new TestSuite("empty");
-        
         return TestConfiguration.defaultSuite(ResultSetCloseTest.class);
     }
     

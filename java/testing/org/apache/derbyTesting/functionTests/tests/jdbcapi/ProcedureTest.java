@@ -113,8 +113,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * Tests that <code>Statement.executeUpdate()</code> succeeds when
      * no result sets are returned.
      *
-     * <p>Currently, this test fails with JCC.
-     *
      * @exception SQLException if a database error occurs
      */
     public void testExecuteUpdateWithNoDynamicResultSets()
@@ -201,8 +199,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * Tests that <code>PreparedStatement.executeUpdate()</code>
      * succeeds when no result sets are returned.
      *
-     * <p>Currently, this test fails with JCC.
-     *
      * @exception SQLException if a database error occurs
      */
     public void testExecuteUpdateWithNoDynamicResultSets_prepared()
@@ -218,11 +214,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
     /**
      * Tests that <code>PreparedStatement.executeUpdate()</code> fails
      * when a result set is returned from a stored procedure.
-     *
-     * <p>Currently, this test fails with
-     * JCC. However, the corresponding tests for
-     * <code>Statement</code> and <code>CallableStatement</code>
-     * succeed. Strange...
      *
      * @exception SQLException if a database error occurs
      */
@@ -300,8 +291,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * Tests that <code>CallableStatement.executeUpdate()</code>
      * succeeds when no result sets are returned.
      *
-     * <p>Currently, this test fails with JCC.
-     *
      * @exception SQLException if a database error occurs
      */
     public void testExecuteUpdateWithNoDynamicResultSets_callable()
@@ -372,8 +361,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * <code>executeQuery()</code> are correctly rolled back when the
      * query fails because the number of returned result sets is zero.
      *
-     * <p> This test case fails with JCC.
-     *
      * @exception SQLException if a database error occurs
      */
     public void testRollbackStoredProcWhenExecuteQueryReturnsNothing()
@@ -399,8 +386,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * query fails because the number of returned result sets is more
      * than one.
      *
-     * <p> This test case fails with JCC.
-     *
      * @exception SQLException if a database error occurs
      */
     public void testRollbackStoredProcWhenExecuteQueryReturnsTooMuch()
@@ -425,8 +410,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * <code>executeUpdate()</code> are correctly rolled back when the
      * query fails because the stored procedure returned a result set.
      *
-     * <p> This test case fails with JCC.
-     *
      * @exception SQLException if a database error occurs
      */
     public void testRollbackStoredProcWhenExecuteUpdateReturnsResults()
@@ -450,8 +433,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * Tests that the effects of executing a stored procedure with
      * <code>executeQuery()</code> are correctly rolled back when the
      * query fails because the number of returned result sets is zero.
-     *
-     * <p> This test case fails with JCC.
      *
      * @exception SQLException if a database error occurs
      */
@@ -481,8 +462,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * query fails because the number of returned result sets is more
      * than one.
      *
-     * <p> This test case fails with JCC.
-     *
      * @exception SQLException if a database error occurs
      */
     public void testRollbackStoredProcWhenExecuteQueryReturnsTooMuch_prepared()
@@ -508,8 +487,6 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * Tests that the effects of executing a stored procedure with
      * <code>executeUpdate()</code> are correctly rolled back when the
      * query fails because the stored procedure returned a result set.
-     *
-     * <p> This test case fails with JCC.
      *
      * @exception SQLException if a database error occurs
      */
@@ -847,11 +824,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @param sqle a <code>SQLException</code> value
      */
     private void assertNoResultSetFromExecuteQuery(SQLException sqle) {
-        if (usingDB2Client()) {
-            assertNull("Unexpected SQL state.", sqle.getSQLState());
-        } else {
-            assertSQLState("Unexpected SQL state.", "X0Y78", sqle);
-        }
+        assertSQLState("Unexpected SQL state.", "X0Y78", sqle);        
     }
 
     /**
@@ -862,11 +835,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      */
     private void assertMultipleResultsFromExecuteQuery(SQLException sqle)
     {
-        if (usingDB2Client()) {
-            assertNull("Unexpected SQL state.", sqle.getSQLState());
-        } else {
-            assertSQLState("Unexpected SQL state.", "X0Y78", sqle);
-        }
+        assertSQLState("Unexpected SQL state.", "X0Y78", sqle);        
     }
 
     /**
@@ -876,12 +845,7 @@ public class ProcedureTest extends BaseJDBCTestCase {
      * @param sqle a <code>SQLException</code> value
      */
     private void assertResultsFromExecuteUpdate(SQLException sqle) {
-        if (usingDB2Client()) {
-            assertNull("Unexpected SQL state.", sqle.getSQLState());
-        } else {
-            assertSQLState("Unexpected SQL state.", "X0Y79", sqle);
-        }
-
+        assertSQLState("Unexpected SQL state.", "X0Y79", sqle);
     }
 
     // SETUP

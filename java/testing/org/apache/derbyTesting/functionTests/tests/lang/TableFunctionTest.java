@@ -2197,21 +2197,16 @@ public class TableFunctionTest extends BaseJDBCTestCase
         ( String functionName, Object[][] expectedGetFunctionsResult, Object[][] expectedGetFunctionColumnsResult )
         throws Exception
     {
-        // skip this test if using the DB2 client, which does not support the
-        // JDBC4 metadata calls.
-        if (  usingDB2Client() ) { return; }
+        println( "\nExpecting correct function metadata from " + functionName );
+        ResultSet                   rs = getFunctions(  null, "APP", functionName );
+        JDBC.assertFullResultSet( rs, expectedGetFunctionsResult, false );
+        rs.close();
         
-
-            println( "\nExpecting correct function metadata from " + functionName );
-            ResultSet                   rs = getFunctions(  null, "APP", functionName );
-            JDBC.assertFullResultSet( rs, expectedGetFunctionsResult, false );
-            rs.close();
-            
-            println( "\nExpecting correct function column metadata from " + functionName );
-            rs = getFunctionColumns(  null, "APP", functionName, "%" );
-            //prettyPrint( getConnection(), getFunctionColumns(  null, "APP", functionName, "%" ) );
-            JDBC.assertFullResultSet( rs, expectedGetFunctionColumnsResult, false );
-            rs.close();
+        println( "\nExpecting correct function column metadata from " + functionName );
+        rs = getFunctionColumns(  null, "APP", functionName, "%" );
+        //prettyPrint( getConnection(), getFunctionColumns(  null, "APP", functionName, "%" ) );
+        JDBC.assertFullResultSet( rs, expectedGetFunctionColumnsResult, false );
+        rs.close();
     }
 
     /**

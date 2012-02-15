@@ -877,28 +877,23 @@ public class ConcurrencyTest extends SURBaseTest {
             suite.addTest(new ConcurrencyTest("testSharedLocks1"));
             suite.addTest(new ConcurrencyTest("testSharedAndUpdateLocks1"));
             suite.addTest(new ConcurrencyTest("testSharedAndUpdateLocks2"));
+            suite.addTest(new ConcurrencyTest ("testUpdatePurgedTuple2"));
+            suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple3"));
+            suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple4"));
+            suite.addTest(new ConcurrencyTest("testUpdateModifiedTuple1"));
+            suite.addTest(new ConcurrencyTest("testUpdateModifiedTuple2"));
+            suite.addTest(new ConcurrencyTest("testTableIntentLock1"));
+            suite.addTest
+                (new ConcurrencyTest("testUpdateLockInReadUncommitted"));
+            suite.addTest(new ConcurrencyTest("testDefragmentDuringScan"));
+            suite.addTest(new ConcurrencyTest("testTruncateDuringScan"));
             
-            // The following testcases do use updatable result sets.            
-            if (!usingDB2Client()) { // DB2 client does not support UR with Derby
-                suite.addTest(new ConcurrencyTest ("testUpdatePurgedTuple2"));
-                suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple3"));
-                suite.addTest(new ConcurrencyTest("testUpdatePurgedTuple4"));
-                suite.addTest(new ConcurrencyTest("testUpdateModifiedTuple1"));
-                suite.addTest(new ConcurrencyTest("testUpdateModifiedTuple2"));
-                suite.addTest(new ConcurrencyTest("testTableIntentLock1"));
+            // This testcase fails in DerbyNetClient framework due to 
+            // DERBY-1696
+            if (embedded) {
                 suite.addTest
-                    (new ConcurrencyTest("testUpdateLockInReadUncommitted"));
-                suite.addTest(new ConcurrencyTest("testDefragmentDuringScan"));
-                suite.addTest(new ConcurrencyTest("testTruncateDuringScan"));
-                
-                // This testcase fails in DerbyNetClient framework due to 
-                // DERBY-1696
-                if (embedded) {
-                    suite.addTest
-                        (new ConcurrencyTest("testUpdatePurgedTuple1"));
-                }
-                
-            }         
+                    (new ConcurrencyTest("testUpdatePurgedTuple1"));
+            }        
         }
         
         return suite;
