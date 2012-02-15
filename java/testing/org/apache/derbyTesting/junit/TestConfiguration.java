@@ -1696,8 +1696,8 @@ public final class TestConfiguration {
      * Requires that the test has been decorated with
      * additionalDatabaseDecorator with the matching name.
      * @param physicalDatabaseName The real database name to use.
-     * @user name of user
-     * @password password of user
+     * @param user name of user
+     * @param password password of user
      * @return connection to specified database.
      */
     public  Connection openPhysicalConnection( String physicalDatabaseName, String user, String password )
