@@ -53,6 +53,25 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    // location of credentials db
+    private static  final   int FILE = 0;
+    private static  final   int JAR = 1;
+    private static  final   int CLASSPATH = 2;
+    private static  final   int NONE = 3;
+
+    // settings for constructor options
+    private static  final   boolean NATIVE = true;
+    private static  final   boolean NO_AUTH = false;
+    
+    private static  final   boolean LOCAL = true;
+    private static  final   boolean SYSTEM_WIDE = false;
+    
+    private static  final   boolean DISABLE_AUTHORIZATION = true;
+    private static  final   boolean DONT_DISABLE_AUTH = false;
+    
+    private static  final   boolean DISABLE_JAVA_SECURITY = true;
+    private static  final   boolean ENABLE_JAVA_SECURITY = false;
+    
     // fruits are legal users. nuts are not
     private static  final   String  DBO = "KIWI";   
     private static  final   String  APPLE_USER = "APPLE";   
@@ -74,6 +93,8 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  SEVENTH_DB = "seventhDB";
     private static  final   String  EIGHTH_DB = "eighthDB";
     private static  final   String  NINTH_DB = "ninthDB";
+    private static  final   String  TENTH_DB = "tenthDB";
+    private static  final   String  ELEVENTH_DB = "eleventhDB";
 
     private static  final   String  NAST1_JAR_FILE = "nast1.jar";
     private static  final   String  NAST2_JAR_FILE = "nast2.jar";
@@ -108,6 +129,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
+    private final   int         _credentialsDBLocation;
     private final   boolean _nativeAuthentication;
     private final   boolean _localAuthentication;
     private final   boolean _turnOffAuthenticationAndAuthorization;
@@ -133,6 +155,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
     public  NativeAuthenticationServiceTest
         (
+         int            credentialsDBLocation,
          boolean    nativeAuthentication,
          boolean    localAuthentication,
          boolean    turnOffAuthenticationAndAuthorization,
@@ -141,6 +164,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     {
         super( "testAll" );
 
+        _credentialsDBLocation = credentialsDBLocation;
         _nativeAuthentication = nativeAuthentication;
         _localAuthentication = localAuthentication;
         _turnOffAuthenticationAndAuthorization = turnOffAuthenticationAndAuthorization;
@@ -167,11 +191,29 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
      * </p>
      */
     private Properties  systemProperties( String physicalDatabaseName )
+        throws  Exception
     {
         Properties  result = new Properties();
         String      authenticationProvider;
 
-        _credentialsDBPhysicalName = physicalDatabaseName;
+        switch ( _credentialsDBLocation )
+        {
+            case JAR:
+                _credentialsDBPhysicalName = jarDBName();
+                break;
+
+            case CLASSPATH:
+                _credentialsDBPhysicalName = classpathDBName();
+                break;
+
+            case FILE:
+            case NONE:
+                _credentialsDBPhysicalName = physicalDatabaseName;
+                break;
+                
+            default:
+                throw new Exception( "Unknown location of credentials db: " + _credentialsDBLocation );
+        }
 
         if ( !_nativeAuthentication )
         {
@@ -179,7 +221,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         }
         else
         {
-            authenticationProvider = "NATIVE:" + physicalDatabaseName;
+            authenticationProvider = "NATIVE:" + _credentialsDBPhysicalName;
             if ( _localAuthentication ) { authenticationProvider = authenticationProvider + ":LOCAL"; }
         }
 
@@ -200,11 +242,51 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
     /**
      * <p>
+     * Return true if the credentials db is accessed via a jar or classpath subprotocol.
+     * </p>
+     */
+    private boolean credentialsViaSubprotocol()
+    {
+        switch ( _credentialsDBLocation )
+        {
+            case JAR:
+            case CLASSPATH:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * <p>
      * Construct the name of this test (useful for error messages).
      * </p>
      */
     private String  nameOfTest()
     {
+        String  dbLocation = "";
+        switch ( _credentialsDBLocation )
+        {
+            case JAR:
+                dbLocation = "JAR, ";
+                break;
+
+            case CLASSPATH:
+                dbLocation = "CLASSPATH, ";
+                break;
+
+            case FILE:
+            case NONE:
+                dbLocation = "FILE, ";
+                break;
+                
+            default:
+                dbLocation = "UNKNOWN, ";
+                break;
+        }
+
+        
         String  authType = _nativeAuthentication ?
             "NATIVE authentication on, " :
             "Authentication off, ";
@@ -221,7 +303,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             "Embedded" :
             "Client/Server";
 
-        return "[ " + authType + local + authOverrides + securityManager + embedded + " ]";
+        return "[ " + dbLocation + authType + local + authOverrides + securityManager + embedded + " ]";
     }
 
     /** Return true if the test is running embedded */
@@ -246,14 +328,20 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // to use the classpath subprotocol. We may be able to remove this special
         // case after DERBY-5615 is fixed.
         //
-        suite.addTest( (new NativeAuthenticationServiceTest( false, false, false, true ) ).decorate( false ) );
+        suite.addTest
+            (
+             (
+              new NativeAuthenticationServiceTest
+              ( NONE, NO_AUTH, SYSTEM_WIDE, DONT_DISABLE_AUTH, DISABLE_JAVA_SECURITY )
+              ).decorate( false )
+             );
         
         suite.addTest( allConfigurations( false ) );
         if ( !JDBC.vmSupportsJSR169() ) { suite.addTest( allConfigurations( true ) ); }
 
         return suite;
     }
-    private boolean onWindows()
+    private static  boolean onWindows()
     {
         return getSystemProperty("os.name").startsWith("Windows");
     }
@@ -267,11 +355,94 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     {
         TestSuite suite = new TestSuite();
 
-        suite.addTest( (new NativeAuthenticationServiceTest( false, false, false, false ) ).decorate( clientServer ) );
-        suite.addTest( ( new NativeAuthenticationServiceTest( true, true, true, false ) ).decorate( clientServer ) );
-        suite.addTest( ( new NativeAuthenticationServiceTest( true, true, false, false ) ).decorate( clientServer ) );
-        suite.addTest( ( new NativeAuthenticationServiceTest( true, false, true, false ) ).decorate( clientServer ) );
-        suite.addTest( ( new NativeAuthenticationServiceTest( true, false, false, false ) ).decorate( clientServer ) );
+        //
+        // No authentication
+        //
+        suite.addTest
+            (
+             (
+              new NativeAuthenticationServiceTest
+              ( NONE, NO_AUTH, SYSTEM_WIDE, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+              ).decorate( clientServer )
+             );
+
+        //
+        // NATIVE/LOCAL authentication with credentials in read/write dbs
+        //
+        suite.addTest
+            (
+             (
+              new NativeAuthenticationServiceTest
+              ( FILE, NATIVE, LOCAL, DISABLE_AUTHORIZATION, ENABLE_JAVA_SECURITY )
+              ).decorate( clientServer )
+             );
+        suite.addTest
+            (
+             (
+              new NativeAuthenticationServiceTest
+              ( FILE, NATIVE, LOCAL, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+              ).decorate( clientServer )
+             );
+
+        //
+        // NATIVE system-wide authentication with credentials in read/write dbs
+        //
+        suite.addTest
+            (
+             (
+              new NativeAuthenticationServiceTest
+              ( FILE, NATIVE, SYSTEM_WIDE, DISABLE_AUTHORIZATION, ENABLE_JAVA_SECURITY )
+              ).decorate( clientServer )
+             );
+        suite.addTest
+            (
+             (
+              new NativeAuthenticationServiceTest
+              ( FILE, NATIVE, SYSTEM_WIDE, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+              ).decorate( clientServer )
+             );
+        
+        //
+        // For testing subprotocols. Cleanup of support files is blocked by DERBY-5618.
+        //
+        if ( !onWindows() )
+        {
+            //
+            // NATIVE authentication with credentials in read-only databases accessed via jar subprotocol
+            //
+            suite.addTest
+                (
+                 (
+                  new NativeAuthenticationServiceTest
+                  ( JAR, NATIVE, SYSTEM_WIDE, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+                  ).decorate( clientServer )
+                 );
+            suite.addTest
+                (
+                 (
+                  new NativeAuthenticationServiceTest
+                  ( JAR, NATIVE, LOCAL, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+                  ).decorate( clientServer )
+                 );
+
+            //
+            // NATIVE authentication with credentials in read-only databases accessed via classpath subprotocol
+            //
+            suite.addTest
+                (
+                 (
+                  new NativeAuthenticationServiceTest
+                  ( CLASSPATH, NATIVE, SYSTEM_WIDE, DONT_DISABLE_AUTH, DISABLE_JAVA_SECURITY )
+                  ).decorate( clientServer )
+                 );
+            suite.addTest
+                (
+                 (
+                  new NativeAuthenticationServiceTest
+                  ( CLASSPATH, NATIVE, LOCAL, DONT_DISABLE_AUTH, DISABLE_JAVA_SECURITY )
+                  ).decorate( clientServer )
+                 );
+        }   // end if !onWindows()
 
         return suite;
     }
@@ -306,8 +477,13 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // before deleting the physical databases. This is because we need one of the
         // databases (the credentials db) in order to authenticate engine shutdown.
         //
-        Properties  systemProperties = systemProperties( credentialsDBPhysicalName );
-        println( "NativeAuthenticationServiceTest.decorate() systemProperties = " + systemProperties );
+        Properties  systemProperties = null;
+        try {
+            systemProperties = systemProperties( credentialsDBPhysicalName );
+        } catch (Exception e) { printStackTrace( e ); }
+
+        println( nameOfTest() );
+        println( "    NativeAuthenticationServiceTest.decorate() systemProperties = " + systemProperties );
         result = new SystemPropertyTestSetup( result, systemProperties, true );
         
         // DERBY-5580: We should also shut down the engine before deleting
@@ -354,6 +530,8 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         result = _seventhDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, SEVENTH_DB, true );
         result = _eighthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, EIGHTH_DB, true );
         result = _ninthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, NINTH_DB, true );
+        result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, TENTH_DB );
+        result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, ELEVENTH_DB );
 
         result = TestConfiguration.changeUserDecorator( result, DBO, getPassword( DBO ) );
         
@@ -377,18 +555,50 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         println( "Credentials DB physical name = " + _credentialsDBPhysicalName );
         println( PROVIDER_PROPERTY + " = " + getSystemProperty( PROVIDER_PROPERTY ) );
 
-        vetCoreBehavior();
-        vetSystemWideOperations();
+        if ( credentialsViaSubprotocol() )
+        {
+            vetCredentialsViaSubprotocol();
+        }
+        else
+        {
+            vetCoreBehavior();
+            vetSystemWideOperations();
 
-        if ( !_nativeAuthentication ) { vetProviderChanges(); }
+            if ( !_nativeAuthentication ) { vetProviderChanges(); }
 
-        // only run this for local authentication so that we don't have to shutdown
-        // the system-wide credentials db. also only run this embedded so that we
-        // don't have to deal with the problems of shutting down a database
-        // across the network.
-        if ( _localAuthentication && isEmbedded() ) { vetPasswordLifetime(); }
+            // only run this for local authentication so that we don't have to shutdown
+            // the system-wide credentials db. also only run this embedded so that we
+            // don't have to deal with the problems of shutting down a database
+            // across the network.
+            if ( _localAuthentication && isEmbedded() ) { vetPasswordLifetime(); }
+        }
     }
 
+    /**
+     * <p>
+     * Verify that credentials work when they are stored in a db accessed via
+     * the jar or classpath subprotocols.
+     * </p>
+     */
+    private void    vetCredentialsViaSubprotocol()   throws Exception
+    {
+        // create a new database
+        Connection  grapeConn = openConnection( TENTH_DB, GRAPE_USER, true );
+        String[][]  legalUsers = _localAuthentication ?
+            new String[][] { { GRAPE_USER } } : new String[][] {};
+        assertResults
+            (
+             grapeConn,
+             "select username from sys.sysusers order by username",
+             legalUsers,
+             false
+             );
+
+        // Databases can't be created by users who don't have credentials stored in the credentials database
+        Connection  walnutConn = getConnection
+            ( true, true, ELEVENTH_DB, WALNUT_USER, INVALID_AUTHENTICATION );
+    }
+    
     /**
      * <p>
      * Verify the core behavior of NATIVE authentication.
@@ -589,11 +799,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             if ( _disableSecurityManager ) { vetProtocol( classpathDBName() ); }
         }
     }
-    private String  jarDBName() throws Exception
+    private static  String  jarDBName() throws Exception
     {
         return "jar:(" + SupportFilesSetup.getReadOnlyFileName( NAST1_JAR_FILE  ) + ")nast";
     }
-    private String  classpathDBName()   { return "classpath:nast"; }
+    private static  String  classpathDBName()   { return "classpath:nast"; }
     
     private void    addBuiltinUser( Connection conn, String user )  throws Exception
     {
