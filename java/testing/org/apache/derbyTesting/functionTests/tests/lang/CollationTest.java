@@ -705,7 +705,106 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
       }
       s.executeUpdate("DROP TABLE derby4631_t1");
       s.executeUpdate("DROP TABLE derby4631_t2");
+      
+      //Test for DERBY-4631 using VALUES clause
+      if (collation != null && collation.equals("TERRITORY_BASED:SECONDARY")) {
+    	  //Following query is returning INCORRECT data and once DERBY-4631 is
+    	  // fixed, we should get the expected results as 
+    	  // new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+          checkLangBasedQuery(s, "SELECT x, y," +
+          		"coalesce(v2.x, v1.x) cx, " +
+          		"coalesce(v2.y, v1.y) cy " +
+        		"FROM (values('A','z'),('B','y')) v2(x,y) " +
+          		"NATURAL RIGHT OUTER JOIN "+
+        		"(values ('b','Y'),('c','x')) v1(x,y)",
+          		new String[][] {{"b","Y","B","y"},{"c","x","c","x"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          //
+    	  //Following query is returning INCORRECT data and once DERBY-4631 is
+    	  // fixed, we should get the expected results as 
+    	  // new String[][] {{"A","z","A","z"},{"b","Y","b","Y"}});
+          checkLangBasedQuery(s, "SELECT x, y," +
+            		"coalesce(v2.x, v1.x) cx, " +
+              		"coalesce(v2.y, v1.y) cy " +
+            		"FROM (values('A','z'),('B','y')) v2(x,y) " +
+              		"RIGHT OUTER JOIN "+
+            		"(values ('b','Y'),('c','x')) v1(x,y)" +
+            		"USING(x,y)",
+            		new String[][] {{"b","Y","B","y"},{"c","x","c","x"}});
+
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
+          checkLangBasedQuery(s, "SELECT x, y," +
+            		"coalesce(v2.x, v1.x) cx, " +
+              		"coalesce(v2.y, v1.y) cy " +
+            		"FROM (values('A','z'),('B','y')) v2(x,y) " +
+              		"NATURAL LEFT OUTER JOIN "+
+            		"(values ('b','Y'),('c','x')) v1(x,y)",
+              		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+            		
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          //
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
+          checkLangBasedQuery(s, "SELECT x, y," +
+            		"coalesce(v2.x, v1.x) cx, " +
+            		"coalesce(v2.y, v1.y) cy " +
+              		"FROM (values('A','z'),('B','y')) v2(x,y) " +
+            		"LEFT OUTER JOIN "+
+              		"(values ('b','Y'),('c','x')) v1(x,y)" +
+              		"USING(x,y)",
+            		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+      } else{
+    	  //Case-sensitive collation will not run into any problems for the
+    	  // given data set and hence following is returning correct results.
+          checkLangBasedQuery(s, "SELECT x, y," +
+            		"coalesce(v2.x, v1.x) cx, " +
+            		"coalesce(v2.y, v1.y) cy " +
+              		"FROM (values('A','z'),('B','y')) v2(x,y) " +
+            		"NATURAL RIGHT OUTER JOIN "+
+              		"(values ('b','Y'),('c','x')) v1(x,y)",
+              		new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          //
+    	  //Case-sensitive collation will not run into any problems for the
+    	  // given data set and hence following is returning correct results.
+          checkLangBasedQuery(s, "SELECT x, y," +
+            		"coalesce(v2.x, v1.x) cx, " +
+            		"coalesce(v2.y, v1.y) cy " +
+              		"FROM (values('A','z'),('B','y')) v2(x,y) " +
+            		"RIGHT OUTER JOIN "+
+              		"(values ('b','Y'),('c','x')) v1(x,y)" +
+              		"USING(x,y)",
+          		new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
+          checkLangBasedQuery(s, "SELECT x, y," +
+            		"coalesce(v2.x, v1.x) cx, " +
+            		"coalesce(v2.y, v1.y) cy " +
+              		"FROM (values('A','z'),('B','y')) v2(x,y) " +
+            		"NATURAL LEFT OUTER JOIN "+
+              		"(values ('b','Y'),('c','x')) v1(x,y)",
+            		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          //
+          //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
+          // and hence following is returning the correct results.
+          checkLangBasedQuery(s, "SELECT x, y," +
+          		"coalesce(v2.x, v1.x) cx, " +
+          		"coalesce(v2.y, v1.y) cy " +
+        		"FROM (values('A','z'),('B','y')) v2(x,y) " +
+          		"LEFT OUTER JOIN "+
+        		"(values ('b','Y'),('c','x')) v1(x,y)" +
+          		"USING(x,y)",
+        		new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
+    	  
       }
+}
 
   /**
    * Test order by with English collation
