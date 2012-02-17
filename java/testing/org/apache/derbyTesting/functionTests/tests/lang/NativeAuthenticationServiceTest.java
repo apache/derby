@@ -95,6 +95,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  NINTH_DB = "ninthDB";
     private static  final   String  TENTH_DB = "tenthDB";
     private static  final   String  ELEVENTH_DB = "eleventhDB";
+    private static  final   String  TWELTH_DB = "twelthDB";
 
     private static  final   String  NAST1_JAR_FILE = "nast1.jar";
     private static  final   String  NAST2_JAR_FILE = "nast2.jar";
@@ -119,9 +120,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  INVALID_PROVIDER_CHANGE = "XCY05";
     private static  final   String  CANT_DROP_DBO = "4251F";
     private static  final   String  NO_COLUMN_PERMISSION = "42502";
+    private static  final   String  NO_EXECUTE_PERMISSION = "42504";
     private static  final   String  PASSWORD_EXPIRING = "01J15";
     private static  final   String  BAD_PASSWORD_PROPERTY = "4251J";
     private static  final   String  BAD_PROPERTY_CHANGE = "XCY02";
+    private static  final   String  SQL_AUTHORIZATION_NOT_ON = "42Z60";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -532,6 +535,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         result = _ninthDBSetup = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, NINTH_DB, true );
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, TENTH_DB );
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, ELEVENTH_DB );
+        result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, TWELTH_DB );
 
         result = TestConfiguration.changeUserDecorator( result, DBO, getPassword( DBO ) );
         
@@ -798,6 +802,65 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             //
             if ( _disableSecurityManager ) { vetProtocol( classpathDBName() ); }
         }
+        
+        ///////////////////////////////////////////////////////////////////////////////////
+        //
+        // Verify that the DBO can grant and revoke execute privilege on the NATIVE procedures.
+        //
+        ///////////////////////////////////////////////////////////////////////////////////
+
+        Connection  twelthDBOConn = openConnection( TWELTH_DB, DBO, true );
+
+        addUser( twelthDBOConn, APPLE_USER );
+
+        Connection  twelthAppleConn = openConnection( TWELTH_DB, APPLE_USER, true );
+
+        // these fail without the appropriate grant
+        vetStatement( _nativeAuthentication, twelthAppleConn,
+                      "call syscs_util.syscs_create_user( 'JULIUS', 'juliuspassword' )", NO_EXECUTE_PERMISSION );
+        vetStatement( _nativeAuthentication, twelthAppleConn,
+                      "call syscs_util.syscs_reset_password( 'JULIUS', 'foopassword' )", NO_EXECUTE_PERMISSION );
+        vetStatement( _nativeAuthentication, twelthAppleConn,
+                      "call syscs_util.syscs_drop_user( 'JULIUS' )", NO_EXECUTE_PERMISSION );
+
+        // but you always have permission to change your own password
+        goodStatement( twelthAppleConn, "call syscs_util.syscs_modify_password( 'foo' )" );
+
+        // grant execute permission and retry the test
+        vetStatement
+            ( !_nativeAuthentication, twelthDBOConn,
+              "grant execute on procedure syscs_util.syscs_create_user to " + APPLE_USER, SQL_AUTHORIZATION_NOT_ON );
+        vetStatement
+            ( !_nativeAuthentication, twelthDBOConn,
+              "grant execute on procedure syscs_util.syscs_reset_password to " + APPLE_USER, SQL_AUTHORIZATION_NOT_ON );
+        vetStatement
+            ( !_nativeAuthentication, twelthDBOConn,
+              "grant execute on procedure syscs_util.syscs_drop_user to " + APPLE_USER, SQL_AUTHORIZATION_NOT_ON );
+       
+        goodStatement( twelthAppleConn, "call syscs_util.syscs_create_user( 'HORACE', 'horacepassword' )" );
+        goodStatement( twelthAppleConn, "call syscs_util.syscs_reset_password( 'HORACE', 'foopassword' )" );
+        goodStatement( twelthAppleConn, "call syscs_util.syscs_drop_user( 'HORACE' )" );
+
+        // revoke execute permission and retry the test
+        vetStatement
+            ( !_nativeAuthentication, twelthDBOConn,
+              "revoke execute on procedure syscs_util.syscs_create_user from " + APPLE_USER + " restrict",
+              SQL_AUTHORIZATION_NOT_ON );
+        vetStatement
+            ( !_nativeAuthentication, twelthDBOConn,
+              "revoke execute on procedure syscs_util.syscs_reset_password from " + APPLE_USER  + " restrict",
+              SQL_AUTHORIZATION_NOT_ON );
+        vetStatement
+            ( !_nativeAuthentication, twelthDBOConn,
+              "revoke execute on procedure syscs_util.syscs_drop_user from " + APPLE_USER  + " restrict",
+              SQL_AUTHORIZATION_NOT_ON );
+        
+        vetStatement( _nativeAuthentication, twelthAppleConn,
+                      "call syscs_util.syscs_create_user( 'CORNELIA', 'corneliapassword' )", NO_EXECUTE_PERMISSION );
+        vetStatement( _nativeAuthentication, twelthAppleConn,
+                      "call syscs_util.syscs_reset_password( 'CORNELIA', 'foopassword' )", NO_EXECUTE_PERMISSION );
+        vetStatement( _nativeAuthentication, twelthAppleConn,
+                      "call syscs_util.syscs_drop_user( 'CORNELIA' )", NO_EXECUTE_PERMISSION );
     }
     private static  String  jarDBName() throws Exception
     {
@@ -1225,7 +1288,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         catch (SQLException se)
         {
             if ( shouldFail )   { assertSQLState( expectedSQLState, se ); }
-            else    { fail( tagError( "Statement unexpectedly failed." ) );}
+            else
+            {
+                String  error =  "Statement unexpectedly failed. SQLState = " + se.getSQLState() + ": " + se.getMessage();
+                fail( tagError( error ) );
+            }
         }
     }
 
