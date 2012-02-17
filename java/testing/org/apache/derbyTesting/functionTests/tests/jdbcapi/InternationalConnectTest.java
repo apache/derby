@@ -83,15 +83,6 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
             if (getSystemProperty("java.version").startsWith("1.4.2")) return;
         }
         
-        /*
-         * IBM's jvms on iseries have a bug that causes this fixture to fail
-         * and leave behind a hard-to-remove file, see DERBY-4149.
-         * Skip on that O.S.
-         */
-        if (getSystemProperty("os.name").startsWith("OS/400")) {
-            return;
-        }
-        
         // Maximum length in bytes is 255. We subtract 14 to account for
         // ;create=true and ;shutdown=true
         int maxNameLength = 255 - 14;
@@ -147,16 +138,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
      * 
      * @throws SQLException
      */
-    public void testDriverManagerConnect() throws SQLException {
-        /*
-         * IBM's jvms on iseries have a bug that causes this fixture to fail
-         * and leave behind a hard-to-remove file, see DERBY-4149.
-         * Skip on that O.S.
-         */
-        if (getSystemProperty("os.name").startsWith("OS/400")) {
-            return;
-        }
-        
+    public void testDriverManagerConnect() throws SQLException {        
         //get a connection to load the driver
         getConnection();
         Connection conn = null;
@@ -197,16 +179,7 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
      * Test XA Connection for chinese database name, user and password.
      * @throws SQLException
      */
-    public void testXADSConnect() throws SQLException {
-        /*
-         * IBM's jvms on iseries have a bug that causes this fixture to fail
-         * and leave behind a hard-to-remove file, see DERBY-4149.
-         * Skip on that O.S.
-         */
-        if (getSystemProperty("os.name").startsWith("OS/400")) {
-            return;
-        }
-        
+    public void testXADSConnect() throws SQLException {        
         // Test chinese database name.
         XADataSource ds = J2EEDataSource.getXADataSource();
         J2EEDataSource.setBeanProperty(ds, "databaseName", "\u4e10");
@@ -238,15 +211,6 @@ public class InternationalConnectTest extends BaseJDBCTestCase {
      * @throws SQLException
      */
     public void testCPDSConnect() throws SQLException {
-        /*
-         * IBM's jvms on iseries have a bug that causes this fixture to fail
-         * and leave behind a hard-to-remove file, see DERBY-4149.
-         * Skip on that O.S.
-         */
-        if (getSystemProperty("os.name").startsWith("OS/400")) {
-            return;
-        }
-        
         // Test chinese database name.
         ConnectionPoolDataSource ds = J2EEDataSource.getConnectionPoolDataSource();
         J2EEDataSource.setBeanProperty(ds, "databaseName", "\u4e10");

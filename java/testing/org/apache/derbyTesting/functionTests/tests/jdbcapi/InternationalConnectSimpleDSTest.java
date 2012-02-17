@@ -27,7 +27,6 @@ import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBCDataSource;
@@ -102,14 +101,6 @@ public class InternationalConnectSimpleDSTest extends BaseJDBCTestCase {
     }
    
     public static Test suite() {
-        /*
-         * IBM's jvms on iseries have a bug that causes this fixture to fail
-         * and leave behind a hard-to-remove file, see DERBY-4149.
-         * Skip on that O.S.
-         */
-        if (getSystemProperty("os.name").startsWith("OS/400")) {
-            return(new TestSuite ("emtpy InternationalConnectSimpleDSTest"));
-        }
         return TestConfiguration.defaultSuite(InternationalConnectSimpleDSTest.class);
     }
     
