@@ -1,6 +1,6 @@
 /*
 
-   Derby - Class org.apache.derbyTesting.junit.DerbyVersionSimple
+   Derby - Class org.apache.derbyTesting.junit.Version
 
    Licensed to the Apache Software Foundation (ASF) under one or more
    contributor license agreements.  See the NOTICE file distributed with
@@ -23,63 +23,50 @@ package org.apache.derbyTesting.junit;
 import java.util.StringTokenizer;
 
 /**
+ * A generic class for storing a major and minor version number.
  * <p>
- * A class for storing a major and minor version number. This class
- * assumes that more capable versions compare greater than less capable versions.
- * </p>
+ * This class assumes that more capable versions compare greater than less
+ * capable versions.
+ *
+ * @see DerbyVersion 
  */
-public final class DerbyVersionSimple
+public final class Version
         implements Comparable {
-    private	int	_major;
-    private	int	_minor;
+    private final int _major;
+    private final int _minor;
 
-    DerbyVersionSimple( int major, int minor )
-    {
-        constructorMinion( major, minor );
+    Version(int major, int minor) {
+        this._major = major;
+        this._minor = minor;
     }
 
-    public	DerbyVersionSimple( String desc )
-        throws NumberFormatException
-    {
-        StringTokenizer		tokens = new StringTokenizer( desc, "." );
-
-        constructorMinion
-            (
-                java.lang.Integer.parseInt( tokens.nextToken() ),
-                java.lang.Integer.parseInt( tokens.nextToken() )
-            );
-    }
-
-    private	void	constructorMinion( int major, int minor )
-    {
-        _major = major;
-        _minor = minor;
+    public Version(String desc)
+            throws NumberFormatException {
+        StringTokenizer tokens = new StringTokenizer( desc, "." );
+        this._major = Integer.parseInt(tokens.nextToken());
+        this._minor = Integer.parseInt(tokens.nextToken());
     }
 
     /**
-     * <p>
-     * Returns true if this Version is at least as advanced
-     * as that Version.
-     * </p>
+     * Returns {@code true} if this version is at least as advanced
+     * as the other version.
      */
-    public	boolean	atLeast( DerbyVersionSimple that )
-    {
+    public boolean atLeast(Version that) {
         return this.compareTo( that ) > -1;
     }
 
 
     ////////////////////////////////////////////////////////
     //
-    //	Comparable BEHAVIOR
+    //    Comparable BEHAVIOR
     //
     ////////////////////////////////////////////////////////
 
     public int compareTo(Object o) {
-        return compareTo((DerbyVersionSimple)o);
+        return compareTo((Version)o);
     }
 
-    public int compareTo(DerbyVersionSimple that) {
-
+    public int compareTo(Version that) {
         if ( this._major < that._major ) { return -1; }
         if ( this._major > that._major ) { return 1; }
 
@@ -88,27 +75,23 @@ public final class DerbyVersionSimple
 
     ////////////////////////////////////////////////////////
     //
-    //	Object OVERLOADS
+    //    Object OVERLOADS
     //
     ////////////////////////////////////////////////////////
 
-    public	String	toString()
-    {
+    public String toString() {
         return Integer.toString( _major ) + '.' + Integer.toString( _minor );
     }
 
-    public	boolean	equals(Object other)
-    {
-        if (other instanceof DerbyVersionSimple) {
-            return compareTo((DerbyVersionSimple)other) == 0;
+    public boolean equals(Object other) {
+        if (other instanceof Version) {
+            return compareTo((Version)other) == 0;
         } else {
             return false;
         }
     }
 
-    public	int	hashCode()
-    {
+    public int hashCode() {
         return _major ^ _minor;
     }
 }
-

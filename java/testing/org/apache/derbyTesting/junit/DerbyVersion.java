@@ -82,7 +82,7 @@ public class DerbyVersion
     private final int minor;
     private final int fixpack;
     private final int point;
-    private final DerbyVersionSimple simpleVersion;
+    private final Version simpleVersion;
 
     /**
      * Parses the given string as a Derby version.
@@ -114,7 +114,7 @@ public class DerbyVersion
         this.minor = minor;
         this.fixpack = fixpack;
         this.point = point;
-        this.simpleVersion = new DerbyVersionSimple(major, minor);
+        this.simpleVersion = new Version(major, minor);
     }
 
     public int getMajor() {
@@ -164,10 +164,10 @@ public class DerbyVersion
      * version.
      *
      * @param other version to compare with
-     * @return {@code true} if this version is equal/higher than {@code other},
-     *      {@code false} otherwise.
+     * @return {@code true} if this version is equal to or higher than
+     *      {@code other}, {@code false} otherwise.
      */
-    public boolean atLeastAs(DerbyVersion other) {
+    public boolean atLeast(DerbyVersion other) {
         return compareTo(other) >= 0;
     }
 
@@ -176,10 +176,10 @@ public class DerbyVersion
      * version.
      *
      * @param other version to compare with
-     * @return {@code true} if this version is equal/lower than {@code other},
-     *      {@code false} otherwise.
+     * @return {@code true} if this version is equal to or lower than
+     *      {@code other}, {@code false} otherwise.
      */
-    public boolean atMostAs(DerbyVersion other) {
+    public boolean atMost(DerbyVersion other) {
         return compareTo(other) <= 0;
     }
 
@@ -283,7 +283,7 @@ public class DerbyVersion
      *
      * @return A simplified version view.
      */
-    public DerbyVersionSimple asSimpleVersion() {
+    public Version asSimpleVersion() {
         return this.simpleVersion;
     }
 

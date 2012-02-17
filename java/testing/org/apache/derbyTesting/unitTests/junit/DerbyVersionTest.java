@@ -72,14 +72,14 @@ public class DerbyVersionTest
         assertFalse(_11_9.lessThan(_10_7));
     }
 
-    public void testAtLeastAs() {
-        assertTrue(_10_4.atLeastAs(_10_4));
-        assertTrue(_10_4.atLeastAs(_10_3));
-        assertTrue(_10_5_2_0.atLeastAs(_10_5_1_1));
+    public void testAtLeast() {
+        assertTrue(_10_4.atLeast(_10_4));
+        assertTrue(_10_4.atLeast(_10_3));
+        assertTrue(_10_5_2_0.atLeast(_10_5_1_1));
 
-        assertFalse(_10_2.atLeastAs(_10_4));
-        assertFalse(_10_2.atLeastAs(_11_0));
-        assertFalse(_10_5_1_1.atLeastAs(_10_5_3_0));
+        assertFalse(_10_2.atLeast(_10_4));
+        assertFalse(_10_2.atLeast(_11_0));
+        assertFalse(_10_5_1_1.atLeast(_10_5_3_0));
     }
 
     public void testGreaterThan() {
@@ -92,12 +92,12 @@ public class DerbyVersionTest
     }
 
 
-    public void testAtMostAs() {
-        assertTrue(_10_4.atMostAs(_10_5));
-        assertTrue(_10_8.atMostAs(_11_9));
+    public void testAtMost() {
+        assertTrue(_10_4.atMost(_10_5));
+        assertTrue(_10_8.atMost(_11_9));
 
-        assertFalse(_10_7.atMostAs(_10_2));
-        assertFalse(_11_0.atMostAs(_10_5_3_0));
+        assertFalse(_10_7.atMost(_10_2));
+        assertFalse(_11_0.atMost(_10_5_3_0));
     }
 
     public void testAtMajorMinor() {
