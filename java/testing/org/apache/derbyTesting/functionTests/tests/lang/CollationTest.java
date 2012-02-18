@@ -532,6 +532,21 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 " +
         		"USING(x)",
         		new String[][] {{"b","b"},{"c","c"}});
+      //Test nested NATURAL LEFT OUTER JOIN. They will return correct data
+      // with both territory and non-territory based dbs.
+      checkLangBasedQuery(s, "SELECT x " +
+      		"FROM (values ('b')) v2(x) " +
+    		"NATURAL LEFT OUTER JOIN " +
+    		"derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1 ",
+      		new String[][] {{"b"}});
+      //Test nested LEFT OUTER JOIN with USING clause They will return correct
+      // data with both territory and non-territory based dbs.
+      checkLangBasedQuery(s, "SELECT x " +
+        		"FROM (values ('b')) v2(x) " +
+          		"LEFT OUTER JOIN " +
+          		"derby4631_t2 USING(x) " +
+          		"LEFT OUTER JOIN derby4631_t1 USING(x) ",
+        		new String[][] {{"b"}});
       
       if (collation != null && collation.equals("TERRITORY_BASED:SECONDARY")) {
     	  //We are working with a database with case-insensitive collation.
@@ -565,6 +580,19 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
               		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 " +
             		"USING(x)",
             		new String[][] {{"A","A"},{"B","b"}});
+          //Test nested NATURAL RIGHT OUTER JOIN
+          checkLangBasedQuery(s, "SELECT x " +
+            		"FROM (values ('b')) v2(x) " +
+              		"NATURAL RIGHT OUTER JOIN " +
+              		"derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1 ",
+              		new String[][] {{"A"},{"B"}});
+          //Test nested LEFT OUTER JOIN with USING clause
+          checkLangBasedQuery(s, "SELECT x " +
+            		"FROM (values ('b')) v2(x) " +
+              		"RIGHT OUTER JOIN " +
+              		"derby4631_t2 USING(x) " +
+              		"RIGHT OUTER JOIN derby4631_t1 USING(x) ",
+            		new String[][] {{"A"},{"B"}});
       } else {
     	  //Case-sensitive collation will not run into any problems for the
     	  // given data set and hence following is returning correct results.
