@@ -393,6 +393,15 @@ APP     |UserTran|ROW     |1   |X   |A           |(1,10)    |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(1,12)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,8)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -685,6 +694,15 @@ APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(1,13)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -793,6 +811,15 @@ APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -2882,6 +2909,15 @@ APP     |UserTran|ROW     |1   |X   |A           |(1,8)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(2,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,7)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -3174,6 +3210,15 @@ APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(4,6)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -3282,6 +3327,15 @@ APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -5440,6 +5494,15 @@ APP     |UserTran|ROW     |1   |X   |A           |(1,10)    |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(1,12)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,8)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -5770,6 +5833,15 @@ APP     |UserTran|ROW     |1   |U   |A           |(1,7)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(1,13)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,7)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -5884,6 +5956,15 @@ APP     |UserTran|ROW     |1   |U   |A           |(1,9)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(1,11)    |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(1,9)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -8295,6 +8376,15 @@ APP     |UserTran|ROW     |1   |X   |A           |(1,8)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(2,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,7)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -8625,6 +8715,15 @@ APP     |UserTran|ROW     |1   |U   |A           |(4,6)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(1,7)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(4,6)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -8739,6 +8838,15 @@ APP     |UserTran|ROW     |1   |U   |A           |(3,6)     |GRANT|ACTIVE
 APP     |UserTran|ROW     |1   |X   |A           |(2,6)     |GRANT|ACTIVE  
 APP     |UserTran|ROW     |1   |X   |A           |(3,6)     |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -11068,6 +11176,15 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -11341,6 +11458,15 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -11443,6 +11569,15 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -13485,6 +13620,15 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 APP     |UserTran|TABLE   |3   |IX  |A           |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -13758,6 +13902,15 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
@@ -13860,6 +14013,15 @@ USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS
 APP     |UserTran|TABLE   |2   |IX  |A           |Tablelock |GRANT|ACTIVE  
 APP     |UserTran|TABLE   |1   |X   |A           |Tablelock |GRANT|ACTIVE  
 ij> commit;
+ij> -- The above delete and commit can allow post commit processing to run before
+-- the subsequent select is run, most likely if this run is on a table where
+-- there is one row per page.  To get reproducible results from the subsequent
+-- lock calls, wait for post commit to finish before running the select.  
+-- Without this wait "extra" locks sometimes might show up - these are locks
+-- on the committed deleted rows which have not been cleaned yet depending
+-- on timing.
+CALL WAIT_FOR_POST_COMMIT();
+0 rows inserted/updated/deleted
 ij> select * from lock_table order by tabname, type desc, mode, cnt, lockname;
 USERNAME|TRANTYPE|TYPE    |CNT |MODE|TABNAME     |LOCKNAME  |STATE|STATUS  
 ---------------------------------------------------------------------------
