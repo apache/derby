@@ -641,6 +641,12 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
 			  " (values('A','z'),('B','y')) v1(x,y) ", 
 			  " NATURAL LEFT OUTER JOIN ", "",
 			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test subqueries.
+	  joinTesting(s,"t2", "t1",
+			  " (select * from derby4631_t2) t2(x,y) ",
+			  " (select * from derby4631_t1) t1(x,y) ", 
+			  " NATURAL LEFT OUTER JOIN ", "",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
 	  
       //Do the same test as above, but this time using the USING clause
       // rather the NATURAL join
@@ -660,6 +666,12 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
 	  joinTesting(s,"v2", "v1",
 			  " (values ('b','Y'),('c','x')) v2(x,y) ",
 			  " (values('A','z'),('B','y')) v1(x,y) ", 
+			  " LEFT OUTER JOIN ", " USING(x,y)",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test subqueries.
+	  joinTesting(s,"t2", "t1",
+			  " (select * from derby4631_t2) t2(x,y) ",
+			  " (select * from derby4631_t1) t1(x,y) ", 
 			  " LEFT OUTER JOIN ", " USING(x,y)",
 			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
       
@@ -682,6 +694,12 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
     			  " (values('A','z'),('B','y')) v1(x,y) ", 
     			  " NATURAL RIGHT OUTER JOIN ", "",
     			  new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
+          //Test subqueries.
+    	  joinTesting(s,"t2", "t1",
+    			  " (select * from derby4631_t2) t2(x,y) ",
+    			  " (select * from derby4631_t1) t1(x,y) ", 
+    			  " NATURAL RIGHT OUTER JOIN ", "",
+    			  new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
           //Do the same test as above, but this time using the USING clause
           // rather the NATURAL join
           //
@@ -702,6 +720,12 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
     			  " (values ('b','Y'),('c','x')) v2(x,y) ",
     			  " (values('A','z'),('B','y')) v1(x,y) ", 
     			  " RIGHT OUTER JOIN ", " USING(x,y) ",
+    			  new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
+          //Test subqueries.
+    	  joinTesting(s,"t2", "t1",
+    			  " (select * from derby4631_t2) t2(x,y) ",
+    			  " (select * from derby4631_t1) t1(x,y) ", 
+    			  " RIGHT OUTER JOIN ", " USING(x,y)",
     			  new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
       } else {
     	  //Case-sensitive collation will not run into any problems for the
