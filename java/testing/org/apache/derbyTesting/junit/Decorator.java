@@ -57,16 +57,36 @@ public class Decorator {
      */
     public static Test encryptedDatabase(Test test)
     {
+        return encryptedDatabaseBpw(test, getBootPhrase(16));
+    }
+
+    /**
+     * Decorate a set of tests to use an encrypted
+     * single use database. This is to run tests
+     * using encryption as a general test and
+     * not specific tests of how encryption is handled.
+     * E.g. tests of setting various URL attributes
+     * would be handled in a specific test.
+     * <BR>
+     * The database will use the default encryption
+     * algorithm.
+     * 
+     * @param test test to decorate
+     * @param bootPassword boot passphrase to use
+     * @return decorated tests
+     */
+    public static Test encryptedDatabaseBpw(Test test, String bootPassword)
+    {
         if (JDBC.vmSupportsJSR169())
             return new TestSuite("no encryption support");
 
         Properties attributes = new Properties();
         attributes.setProperty("dataEncryption", "true");
-        attributes.setProperty("bootPassword", getBootPhrase(16));
+        attributes.setProperty("bootPassword", bootPassword);
 
         return attributesDatabase(attributes, test);
     }
-    
+
     /**
      * Decorate a set of tests to use an encrypted
      * single use database. This is to run tests
@@ -86,14 +106,37 @@ public class Decorator {
      */
     public static Test encryptedDatabase(Test test, final String algorithm)
     {
+        return encryptedDatabaseBpw(test, algorithm, getBootPhrase(16));
+    }
+
+
+    /**
+     * Decorate a set of tests to use an encrypted
+     * single use database. This is to run tests
+     * using encryption as a general test and
+     * not specific tests of how encryption is handled.
+     * E.g. tests of setting various URL attributes
+     * would be handled in a specific test.
+     * <BR>
+     * The database will use the specified encryption
+     * algorithm.
+     * 
+     * @param test test to decorate
+     * @param bootPassword boot passphrase to use
+     * @return decorated tests
+     */
+    public static Test encryptedDatabaseBpw(Test test,
+                                            final String algorithm,
+                                            String bootPassword)
+    {
         Properties attributes = new Properties();
         attributes.setProperty("dataEncryption", "true");
-        attributes.setProperty("bootPassword", getBootPhrase(64));
+        attributes.setProperty("bootPassword", bootPassword);
         attributes.setProperty("encryptionAlgorithm", algorithm);
 
         return attributesDatabase(attributes, test);
     }
-    
+
     private static String getBootPhrase(int length)
     {
         Random rand = new Random();
