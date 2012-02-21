@@ -78,6 +78,7 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(LongColumnTest.suite());
         suite.addTest(RowLockBasicTest.suite());
         suite.addTest(RecoveryTest.suite());
+        suite.addTest(OCRecoveryTest.suite());
         suite.addTest(TableLockBasicTest.suite());
         suite.addTest(ServicePropertiesFileTest.suite());
 
