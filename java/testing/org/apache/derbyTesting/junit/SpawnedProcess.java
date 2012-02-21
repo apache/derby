@@ -99,7 +99,7 @@ public final class SpawnedProcess {
             // terminates before returning, and we don't want to preserve
             // the interrupt flag because it causes Derby to shut down. These
             // are test requirements and don't apply for production code.
-            // Print a notice to stderr.
+            // Print a notice to stdout.
             System.out.println(TAG + "Interrupted while sleeping (ignored)");
         }
     }
@@ -311,9 +311,9 @@ public final class SpawnedProcess {
 
         // Clean up
         killTask.cancel();
-        cleanupProcess();
         joinWith(errSaver.thread);
         joinWith(outSaver.thread);
+        cleanupProcess();
         printDiagnostics(exitCode.intValue());
         return exitCode.intValue();
     }
@@ -367,7 +367,7 @@ public final class SpawnedProcess {
             // terminates before returning, and we don't want to preserve
             // the interrupt flag because it causes Derby to shut down. These
             // are test requirements and don't apply for production code.
-            // Print a notice to stderr.
+            // Print a notice to stdout.
             System.out.println(TAG + "Interrupted while joining " +
                     "with thread '" + t.toString() + "'");
         }
@@ -497,7 +497,7 @@ public final class SpawnedProcess {
             }
             if (retriesAllowed == 0) {
                 System.err.println(
-                        "DEBUG: Faild to destroy process '" + name + "'");
+                        "DEBUG: Failed to destroy process '" + name + "'");
             } 
             process = null;
         }
