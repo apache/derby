@@ -40,6 +40,7 @@ public class _Suite extends BaseJDBCTestCase {
     public static Test suite() {
         TestSuite suite = new TestSuite("largedata suite");
         suite.addTest(LobLimitsLiteTest.suite());
+        suite.addTest(Derby5624Test.suite());
         suite.addTest(LobLimitsTest.suite());
         suite.addTest(LobLimitsClientTest.suite());
         return suite;

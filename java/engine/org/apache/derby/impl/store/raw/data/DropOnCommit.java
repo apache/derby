@@ -98,14 +98,6 @@ public class DropOnCommit extends ContainerActionOnCommit {
 			}
 
 			obj.deleteObserver(this);
-
-            // DERBY-3993
-            // make sure any observer that may have been added by either
-            // dropContainer() or dropStreamContainer() is also handled.
-            // The calling notifyObservers() call from Xact.doComplete()
-            // may not "see" new observers added during processing of the
-            // initial observer list.
-            xact.notifyObservers(arg);
 		}
 	}
 }
