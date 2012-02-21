@@ -785,7 +785,7 @@ public abstract class BaseTestCase
         } catch (IOException ioe) {
             fail("process completion method failed", ioe);
         }
-        String output = "<STDOUT> " + wrapper.getFullServerOutput() +
+        String output = "<STDOUT>" + wrapper.getFullServerOutput() +
                 "<END STDOUT>\n";
         output += "<STDERR>" + wrapper.getFullServerError() +
                 "<END STDERR>\n";
