@@ -1914,7 +1914,20 @@ public final class TestConfiguration {
         
         sb.append(className);
         sb.append(File.separatorChar);
-        sb.append(test.getName());
+        // DERBY-5620: Ensure valid file name.
+        char[] tmpName = test.getName().toCharArray();
+        for (int i=0; i < tmpName.length; i++) {
+            switch (tmpName[i]) {
+                case '-':
+                case '_':
+                    continue;
+                default:
+                    if (!Character.isLetterOrDigit(tmpName[i])) {
+                        tmpName[i] = '_';
+                    }
+            }
+        }
+        sb.append(tmpName);
         
         String base = sb.toString().intern();
         final File folder = new File(base);
