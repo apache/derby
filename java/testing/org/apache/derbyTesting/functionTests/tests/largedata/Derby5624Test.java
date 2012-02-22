@@ -43,7 +43,16 @@ limitations under the License.
 
 /**
 
-Test to reproduce DERBY-5624, An expanding update fails with an nospc.U error.
+Test to reproduce DERBY-5624, a recursion during DropOnCommit causes out
+of stack space for operations that generate a lot of objects to be dropped
+at commit time. 
+
+This test reproduces the problem by creating a table with 1000 columns, then
+an index on each of those columns, loads some data and then call compress
+will drop and recreate each of those indexes.  At commit time each index
+drop will have registered itself onto the Observer list for processing at
+commit time.  Before fix this would fail with out of disk space in at least
+XP, ibm16 default jvm configuration.
 
 **/
 
@@ -119,7 +128,8 @@ public class Derby5624Test extends BaseJDBCTestCase
 
         commit();
 
-        // verify access to table
+        // verify access to table after the commit, previous to fix the
+        // commit would fail with an out of memory or out of stack space error.
         JDBC.assertUnorderedResultSet(
             prepareStatement(
                 "select col1, col2 from TESTBIGTABLE where col1 = 10").executeQuery(),
