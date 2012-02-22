@@ -69,7 +69,7 @@ public final class RecoveryTest extends BaseJDBCTestCase
      * fork a jvm, add one row, commit, add another row, exit the jvm(killed).
      * Reconnect with the first jvm and verify that the first row is there 
      * and the second is not. 
-     * When a new JVM connects, the log entries are read one by one and if 
+     * When a new JVM connects, the log entries are read one by one and it 
      * then rolls back to the transaction boundaries, then the database is
      * in a consistent state. 
      * @throws Exception
@@ -95,7 +95,18 @@ public final class RecoveryTest extends BaseJDBCTestCase
 
     /**
      * This fixture is used by the forked JVM to add and commit rows to the
-     * database in the first JVM.
+     * database in the first JVM.  Note that this routine does not shutdown
+     * the database, and thus executes a "dirty" shutdown.  This dirty 
+     * shutdown is why we are forking the JVM so that we can test recovery
+     * codepaths during the reboot of the database.
+     *
+     * Do not call TestConfiguration.getCurrent().shutdownDatabase(), as
+     * that will do a clean shutdown and leave no work for restart recovery
+     * to do.  The point of assertLaunchedJUnitTestMethod() is to launch
+     * a separate process, crash it after some work, and then do restart
+     * recovery to test those code paths that only get exercised when restart
+     * starts on a non-cleanly shutdown database.
+     *
      * @throws SQLException 
      **/
     public void launchRecoveryInsert() throws SQLException
