@@ -27,7 +27,7 @@ import org.apache.derby.iapi.reference.SQLState;
 import org.apache.derby.authentication.UserAuthenticator;
 import org.apache.derby.iapi.services.property.PropertyUtil;
 import org.apache.derby.iapi.services.monitor.Monitor;
-import org.apache.derby.iapi.services.sanity.SanityManager;
+import org.apache.derby.iapi.store.access.TransactionController;
 import org.apache.derby.iapi.error.StandardException;
 import org.apache.derby.iapi.util.StringUtil;
 import org.apache.derby.impl.jdbc.Util;
@@ -221,6 +221,27 @@ public final class BasicAuthenticationServiceImpl
         }
         else
         {
+            // DERBY-5539: Generate a hashed token even if the user is not
+            // defined at the database level (that is, the user is defined at
+            // the system level or does not exist at all). If we don't do that,
+            // authentication failures would take less time for non-existing
+            // users than they would for existing users, since generating the
+            // hashed token is a relatively expensive operation. Attackers
+            // could use this to determine if a user exists. By generating the
+            // hashed token also for non-existing users, authentication
+            // failures will take the same time for existing and non-existing
+            // users, and it will be more difficult for attackers to tell the
+            // difference.
+            try {
+                Properties props = getDatabaseProperties();
+                if (props != null) {
+                    encryptUsingDefaultAlgorithm(
+                            userName, userPassword, props);
+                }
+            } catch (StandardException se) {
+                throw Util.generateCsSQLException(se);
+            }
+
             // check if user defined at the system level
             definedUserPassword = getSystemProperty(userNameProperty);
             passedUserPassword = userPassword;

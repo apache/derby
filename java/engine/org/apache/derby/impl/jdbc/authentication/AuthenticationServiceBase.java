@@ -310,6 +310,26 @@ public abstract class AuthenticationServiceBase
     }
 
     /**
+     * Get all the database properties.
+     * @return the database properties, or {@code null} if there is no
+     * access factory
+     */
+    Properties getDatabaseProperties() throws StandardException {
+        Properties props = null;
+
+        TransactionController tc = getTransaction();
+        if (tc != null) {
+            try {
+                props = tc.getProperties();
+            } finally {
+                tc.commit();
+            }
+        }
+
+        return props;
+    }
+
+    /**
      * <p>
      * Get the name of the database if we are performing authentication at the database level.
      * </p>
@@ -629,7 +649,7 @@ public abstract class AuthenticationServiceBase
      *         or {@code null} if {@code password} is {@code null}
      * @throws StandardException if the specified algorithm is not supported
      */
-    private String encryptUsingDefaultAlgorithm(String user,
+    String encryptUsingDefaultAlgorithm(String user,
                                                 String password,
                                                 Dictionary props)
             throws StandardException
