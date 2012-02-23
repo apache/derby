@@ -1783,6 +1783,39 @@ public class CollationTest2 extends BaseJDBCTestCase
     }
 
     /**
+     * Tests that truncating a table with indexes leaves us with a valid set
+     * of conglomerates.
+     */
+    private void runDerby5530TruncateIndex()
+            throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.executeUpdate("create table d5530i (val varchar(10))");
+        s.executeUpdate("create index idx on d5530i(val)");
+        s.executeUpdate("truncate table d5530i");
+        s.executeUpdate("insert into d5530i values 'one', 'two'");
+        ResultSet rs = s.executeQuery("select * from d5530i");
+        JDBC.assertUnorderedResultSet(rs, new String[][] {{"one"}, {"two"}});
+        rollback();
+    }
+
+    /**
+     * Tests that truncating a table without indexes leaves us with a valid
+     * conglomerate.
+     */
+    private void runDerby5530TruncateNoIndex()
+            throws SQLException {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        s.executeUpdate("create table d5530 (val varchar(10))");
+        s.executeUpdate("truncate table d5530");
+        s.executeUpdate("insert into d5530 values 'one', 'two'");
+        ResultSet rs = s.executeQuery("select * from d5530");
+        JDBC.assertUnorderedResultSet(rs, new String[][] {{"one"}, {"two"}});
+        rollback();
+    }
+
+    /**
      * Shared code to run all test cases against a single collation.
      * <p>
      * Pass in the index of which TEST_DATABASE database to test.  So
@@ -1849,6 +1882,8 @@ public class CollationTest2 extends BaseJDBCTestCase
 
         runLikeTests(db_index);
 
+        runDerby5530TruncateNoIndex();
+        runDerby5530TruncateIndex();
 
         /*
         TODO -MIKEM, this test does not work yet.

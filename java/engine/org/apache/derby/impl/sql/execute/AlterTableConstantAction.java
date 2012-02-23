@@ -2507,9 +2507,10 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 			for (int index = 0; index < numIndexes; index++)
 			{
+                IndexRowGenerator curIndex = compressIRGs[index];
 				// create a single index row template for each index
-				indexRows[index] = compressIRGs[index].getIndexRowTemplate();
-				compressIRGs[index].getIndexRow(emptyHeapRow, 
+                indexRows[index] = curIndex.getIndexRowTemplate();
+                curIndex.getIndexRow(emptyHeapRow, 
 											  rl, 
 											  indexRows[index],
 											  (FormatableBitSet) null);
@@ -2518,15 +2519,15 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 				 * No need to try to enforce uniqueness here as
 				 * index should be valid.
 				 */
-				int[] baseColumnPositions = 
-                    compressIRGs[index].baseColumnPositions();
+                int[] baseColumnPositions = curIndex.baseColumnPositions();
 
-				boolean[] isAscending = compressIRGs[index].isAscending();
+                boolean[] isAscending = curIndex.isAscending();
 
 				int numColumnOrderings;
 				numColumnOrderings = baseColumnPositions.length + 1;
 				ordering[index]    = new ColumnOrdering[numColumnOrderings];
-                collation[index]   = new int[baseColumnPositions.length + 1];
+                collation[index]   = curIndex.getColumnCollationIds(
+                                                td.getColumnDescriptorList());
 
 				for (int ii =0; ii < numColumnOrderings - 1; ii++) 
 				{
