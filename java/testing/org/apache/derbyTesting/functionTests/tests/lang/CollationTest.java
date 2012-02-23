@@ -562,6 +562,25 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
       		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 USING(x))");
       checkLangBasedQuery(s, "SELECT * FROM derby4631_t3",
         		null);
+
+      //Test create view with insert from join
+      s.executeUpdate("create view derby4631_v2 as " +
+      		"(SELECT x," +
+      		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+      		"FROM derby4631_t2 NATURAL LEFT OUTER JOIN derby4631_t1)");
+      checkLangBasedQuery(s, "SELECT * FROM derby4631_v2 ",
+      		new String[][] {{"b","b"},{"c","c"}});
+      s.executeUpdate("drop view derby4631_v2 ");
+      //Do the same test as above, but this time using the USING clause
+      // rather the NATURAL join
+      s.executeUpdate("create view derby4631_v2 as " +
+      		"(SELECT x," +
+      		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+      		"FROM derby4631_t2 LEFT OUTER JOIN derby4631_t1 USING(x))");
+      checkLangBasedQuery(s, "SELECT * FROM derby4631_v2 ",
+      		new String[][] {{"b","b"},{"c","c"}});
+      s.executeUpdate("drop view derby4631_v2 ");
+
       //Test nested NATURAL LEFT OUTER JOIN. They will return correct data
       // with both territory and non-territory based dbs.
       checkLangBasedQuery(s, "SELECT x " +
@@ -638,6 +657,24 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 USING(x))");
           checkLangBasedQuery(s, "SELECT * FROM derby4631_t3",
             		null);
+
+          //Test create view with insert from join
+          s.executeUpdate("create view derby4631_v2 as " +
+          		"(SELECT x," +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+          		"FROM derby4631_t2 NATURAL RIGHT OUTER JOIN derby4631_t1)");
+          checkLangBasedQuery(s, "SELECT * FROM derby4631_v2 ",
+          		new String[][] {{"A","A"},{"B","b"}});
+          s.executeUpdate("drop view derby4631_v2 ");
+          //Do the same test as above, but this time using the USING clause
+          // rather the NATURAL join
+          s.executeUpdate("create view derby4631_v2 as " +
+          		"(SELECT x," +
+          		"coalesce(derby4631_t2.x, derby4631_t1.x) cx " +
+          		"FROM derby4631_t2 RIGHT OUTER JOIN derby4631_t1 USING(x))");
+          checkLangBasedQuery(s, "SELECT * FROM derby4631_v2 ",
+          		new String[][] {{"A","A"},{"B","b"}});
+          s.executeUpdate("drop view derby4631_v2 ");
           
           //Test nested NATURAL RIGHT OUTER JOIN
           checkLangBasedQuery(s, "SELECT x " +
@@ -830,7 +867,6 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
       s.executeUpdate("DROP VIEW derby4631_v2");
       s.executeUpdate("DROP TABLE derby4631_t1");
       s.executeUpdate("DROP TABLE derby4631_t2");
-      
 }
 
 private void joinTesting(Statement s, 
