@@ -648,6 +648,39 @@ public abstract class BaseTestCase
 
         return getSystemProperty("os.name").equals(osName);
     }
+
+    /**
+     * Determine if platform is a Windows variant.
+     * <p>
+     * Return true if platform is a windows platform.  Just looks for
+     * os.name starting with "Windows".  The os.name property
+     * can have at least the following values (there are probably more):
+     *
+     * AIX
+     * Digital Unix
+     * FreeBSD
+     * HP UX
+     * Irix
+     * Linux
+     * Mac OS
+     * Mac OS X
+     * MPE/iX
+     * Netware 4.11
+     * OS/2
+     * Solaris
+     * Windows 2000
+     * Windows 95
+     * Windows 98
+     * Windows NT
+     * Windows Vista
+     * Windows XP
+     * <p>
+     *
+     * @return true if running on a Windows platform.
+     **/
+    public static final boolean isWindowsPlatform() {
+        return getSystemProperty("os.name").startsWith("Windows");
+    }
     
     /**
      * Check if this is java 5
