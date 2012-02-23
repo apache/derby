@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.services.monitor;
 
-import org.apache.derby.iapi.services.monitor.Monitor;
 import org.apache.derby.iapi.reference.Property;
 
 import org.apache.derby.iapi.services.io.FileUtil;
@@ -33,8 +32,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import java.net.URL;
-import java.util.Enumeration;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
+
 import java.util.Properties;
 
 /**
@@ -43,7 +44,7 @@ import java.util.Properties;
 
 */
 
-public final class FileMonitor extends BaseMonitor implements java.security.PrivilegedExceptionAction
+public final class FileMonitor extends BaseMonitor
 {
 
 	/* Fields */
@@ -190,134 +191,90 @@ public final class FileMonitor extends BaseMonitor implements java.security.Priv
 	** Priv block code, moved out of the old Java2 version.
 	*/
 
-	private int action;
-	private String key3;
-	private Runnable task;
-	private int intValue;
-
 	/**
 		Initialize the system in a privileged block.
 	**/
-	synchronized final boolean initialize(boolean lite)
+	final boolean initialize(final boolean lite)
 	{
-		action = lite ? 0 : 1;
-		try {
-			Object ret = java.security.AccessController.doPrivileged(this);
-
-			return ((Boolean) ret).booleanValue();
-        } catch (java.security.PrivilegedActionException pae) {
-			throw (RuntimeException) pae.getException();
-		}
+        // SECURITY PERMISSION - OP2, OP2a, OP2b
+        return ((Boolean) AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+                return Boolean.valueOf(PBinitialize(lite));
+            }
+        })).booleanValue();
 	}
 
-	synchronized final Properties getDefaultModuleProperties() {
-		action = 2;
- 		try {
-			return (Properties) java.security.AccessController.doPrivileged(this);
-        } catch (java.security.PrivilegedActionException pae) {
-           throw (RuntimeException) pae.getException();
-        }
+	final Properties getDefaultModuleProperties() {
+        // SECURITY PERMISSION - IP1
+        return (Properties) AccessController.doPrivileged(
+                new PrivilegedAction() {
+            public Object run() {
+                return FileMonitor.super.getDefaultModuleProperties();
+            }
+        });
     }
 
-	public synchronized final String getJVMProperty(String key) {
+	public final String getJVMProperty(final String key) {
 		if (!key.startsWith("derby."))
 			return PBgetJVMProperty(key);
 
-		try {
-
-			action = 3;
-			key3 = key;
-			String value  = (String) java.security.AccessController.doPrivileged(this);
-			key3 = null;
-			return value;
-        } catch (java.security.PrivilegedActionException pae) {
-			throw (RuntimeException) pae.getException();
-		}
+        // SECURITY PERMISSION - OP1
+        return (String) AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+                return PBgetJVMProperty(key);
+            }
+        });
 	}
 
-	public synchronized final Thread getDaemonThread(Runnable task, String name, boolean setMinPriority) {
+	public synchronized final Thread getDaemonThread(
+            final Runnable task,
+            final String name,
+            final boolean setMinPriority) {
+        return (Thread) AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+                try {
+                    return FileMonitor.super.getDaemonThread(
+                            task, name, setMinPriority);
+                } catch (IllegalThreadStateException e) {
+                    // We may get an IllegalThreadStateException if all the
+                    // previously running daemon threads have completed and the
+                    // daemon group has been automatically destroyed. If that's
+                    // what happened, create a new daemon group and try again.
+                    if (daemonGroup != null && daemonGroup.isDestroyed()) {
+                        daemonGroup = createDaemonGroup();
+                        return FileMonitor.super.getDaemonThread(
+                                task, name, setMinPriority);
+                    } else {
+                        throw e;
+                    }
+                }
+            }
+        });
+    }
 
-		action = 4;
-		key3 = name;
-		this.task = task;
-		this.intValue = setMinPriority ? 1 : 0;
-
-		try {
-
-			Thread t = (Thread) java.security.AccessController.doPrivileged(this);
-
-			key3 = null;
-			task = null;
-
-			return t;
-        } catch (java.security.PrivilegedActionException pae) {
-			throw (RuntimeException) pae.getException();
-		}
+	public final void setThreadPriority(final int priority) {
+        AccessController.doPrivileged(new PrivilegedAction() {
+            public Object run() {
+                FileMonitor.super.setThreadPriority(priority);
+                return null;
+            }
+        });
 	}
 
-	public synchronized final void setThreadPriority(int priority) {
-		action = 5;
-		intValue = priority;
-		try {
-			java.security.AccessController.doPrivileged(this);
-        } catch (java.security.PrivilegedActionException pae) {
-			throw (RuntimeException) pae.getException();
-		}
-	}
-
-	synchronized final InputStream applicationPropertiesStream()
+	final InputStream applicationPropertiesStream()
 	  throws IOException {
-		action = 6;
 		try {
 			// SECURITY PERMISSION - OP3
-			return (InputStream) java.security.AccessController.doPrivileged(this);
+			return (InputStream) AccessController.doPrivileged(
+                    new PrivilegedExceptionAction() {
+                public Object run() throws IOException {
+                    return PBapplicationPropertiesStream();
+                }
+            });
 		}
         catch (java.security.PrivilegedActionException pae)
         {
 			throw (IOException) pae.getException();
-		}
-	}
-
-
-	public synchronized final Object run() throws IOException {
-		switch (action) {
-		case 0:
-		case 1:
-			// SECURITY PERMISSION - OP2, OP2a, OP2b
-			return new Boolean(PBinitialize(action == 0));
-		case 2: 
-			// SECURITY PERMISSION - IP1
-			return super.getDefaultModuleProperties();
-		case 3:
-			// SECURITY PERMISSION - OP1
-			return PBgetJVMProperty(key3);
-		case 4:
-        {
-            boolean setMinPriority = (intValue != 0);
-            try {
-                return super.getDaemonThread(task, key3, setMinPriority);
-            } catch (IllegalThreadStateException e) {
-                // We may get an IllegalThreadStateException if all the
-                // previously running daemon threads have completed and the
-                // daemon group has been automatically destroyed. If that's
-                // what has happened, create a new daemon group and try again.
-                if (daemonGroup != null && daemonGroup.isDestroyed()) {
-                    daemonGroup = createDaemonGroup();
-                    return super.getDaemonThread(task, key3, setMinPriority);
-                } else {
-                    throw e;
-                }
-            }
-        }
-		case 5:
-			super.setThreadPriority(intValue);
-			return null;
-		case 6:
-			// SECURITY PERMISSION - OP3
-			return PBapplicationPropertiesStream();
-
-		default:
-			return null;
 		}
 	}
 
