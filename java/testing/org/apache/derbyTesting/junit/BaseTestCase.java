@@ -667,7 +667,7 @@ public abstract class BaseTestCase
      * MPE/iX
      * Netware 4.11
      * OS/2
-     * Solaris
+     * SunOS
      * Windows 2000
      * Windows 95
      * Windows 98
