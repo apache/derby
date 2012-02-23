@@ -21,7 +21,6 @@
 package org.apache.derbyTesting.functionTests.tests.store;
 
 import java.sql.CallableStatement;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -32,7 +31,6 @@ import junit.framework.TestSuite;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
-import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class OCRecoveryTest extends BaseJDBCTestCase {
@@ -60,17 +58,16 @@ public class OCRecoveryTest extends BaseJDBCTestCase {
         return new CleanDatabaseTestSetup(test);
     }
 
-    public void testOCRecovery_1() throws Exception
+    public void testOCRecovery() throws Exception
     {
         setAutoCommit(false);
-        Statement st = createStatement();
 
-        createAndLoadTable(tableName, true, 5000, 0);
-        st.executeUpdate("DELETE FROM " + tableName);
-        commit();
-        callCompress(tableName, true, true, true, true);
         TestConfiguration.getCurrent().shutdownDatabase();
-        st.close();
+        // Now call forked processes - each of these will do something,
+        // then *not* shutdown, forcing the next one to recover the
+        // database.
+        assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
+                "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_1");
         assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
                 "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_2");
         assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
@@ -79,19 +76,35 @@ public class OCRecoveryTest extends BaseJDBCTestCase {
                 "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_4");
     }
 
+    public void launchOCRecovery_1() throws Exception
+    {
+        // setup to test restart recovery of online compress.  Real work
+        // is done in next method launchOCRecovery_2 which will run restart
+        // recovery on the work done in this step.
+        createAndLoadTable(tableName, true, 5000, 0);
+        Statement st = createStatement();
+        st.executeUpdate("DELETE FROM " + tableName);
+        commit();
+        callCompress(tableName, true, true, true, true);
+        st.close();        
+    }
+
     public void launchOCRecovery_2() throws Exception
     {
         setAutoCommit(false);
         assertCheckTable(tableName);
+        // make sure we can add data to the existing table after redo
+        // recovery.
         createAndLoadTable(tableName, false, 6000, 0);
         assertCheckTable(tableName);
         String table_name =  tableName + "_2";
+        // setup to test redo recovery on: 
+        //      create table, delete rows, compress, commit
         createAndLoadTable(table_name, true, 2000, 0);
         Statement st = createStatement();
         st.executeUpdate("DELETE FROM " + tableName);
         commit();
         callCompress(tableName, true, true, true, true);
-        TestConfiguration.getCurrent().shutdownDatabase();
 
         st.close();
     }
@@ -107,24 +120,26 @@ public class OCRecoveryTest extends BaseJDBCTestCase {
         assertCheckTable(tableName);
 
         // setup to test redo recovery on: 
-        // add more rows, delete rows, compress, add more, no commit
+        //      add more rows, delete rows, commit, compress, no commit
         createAndLoadTable(table_name, false, 4000, 2000);
         Statement st = createStatement();
         st.executeUpdate("DELETE FROM " + table_name);
         commit();
         callCompress(table_name, true, true, true, false);
-        TestConfiguration.getCurrent().shutdownDatabase();
         st.close();
     }
     
     public void launchOCRecovery_4() throws SQLException
     {
+        // oc_rec3 left the table  with no rows, but compress command
+        // did not commit.
         setAutoCommit(false);
         String table_name =  tableName + "_2";
         assertCheckTable(table_name);
+        // make sure we can add data to the existing table after redo
+        // recovery.
         createAndLoadTable(table_name, false, 6000, 0);
         assertCheckTable(table_name);
-        TestConfiguration.getCurrent().shutdownDatabase();
     }
     
     /**
