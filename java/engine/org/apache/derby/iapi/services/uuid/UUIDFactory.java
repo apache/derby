@@ -65,12 +65,5 @@ public interface UUIDFactory
 	  @return		The UUID.
 	**/
 	public UUID recreateUUID(String uuidstring);
-
-	/**
-	  Recreate a UUID from a byte array produced by UUID.toByteArray.
-	  @return		The UUID.
-	  @see UUID#toByteArray
-	**/
-	public UUID recreateUUID(byte[] b);
 }
 

@@ -151,26 +151,5 @@ public class T_UUIDFactory extends T_Generic {
 			out.printlnWithHeader(message);
 			resultSoFar =  false;
 		}
-
-		byte[] uuidByteArray = uuid.toByteArray();
-		UUID uuid_b = factory.recreateUUID(uuidByteArray);
-		if (!uuid_b.equals(uuid))
-		{
-			// Resolve: format this with a message factory
-			String badByteArrayString = "";
-			for (int ix = 0; ix < 16; ix++)
-			{
-				badByteArrayString +=
-					Integer.toHexString(0x00ff&uuidByteArray[ix])+".";
-			}
-
-			String message = 
-				"Conversion error: "
-				+ uuidstring 
-				+ " != " 
-				+ badByteArrayString;
-			out.printlnWithHeader(message);
-			resultSoFar =  false;
-		}
 	}
 }

@@ -141,14 +141,6 @@ public final class BasicUUIDFactory
 		return new BasicUUID(uuidstring);
 	}
 
-	/**
-		@see UUIDFactory#recreateUUID
-	**/
-	public UUID recreateUUID(byte[] b)
-	{
-		return new BasicUUID(b);
-	}
-
 	private void bumpMajor() {
 
 		// 48 bits only

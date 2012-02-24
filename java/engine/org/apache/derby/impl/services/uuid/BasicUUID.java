@@ -21,7 +21,6 @@
 
 package org.apache.derby.impl.services.uuid;
 
-import org.apache.derby.iapi.services.io.FormatIdUtil;
 import org.apache.derby.iapi.services.io.StoredFormatIds;
 import org.apache.derby.iapi.services.io.Formatable;
 
@@ -76,40 +75,6 @@ public class BasicUUID implements UUID, Formatable
 		majorId = readMSB(sr);
 	}
 
-	/**
-		Constructor only called by BasicUUIDFactory.
-		Constructs a UUID from the byte array representation
-		produced by toByteArrayio.
-		@see BasicUUID#toByteArray
-	**/
-	public BasicUUID(byte[] b)
-	{
-		int lsequence = 0;
-		for (int ix = 0; ix < 4; ix++)
-		{
-			lsequence = lsequence << 8;
-			lsequence = lsequence | (0xff & b[ix]);
-		}
-
-		long ltimemillis = 0;
-		for (int ix = 4; ix < 10; ix++)
-		{
-			ltimemillis = ltimemillis << 8;
-			ltimemillis = ltimemillis | (0xff & b[ix]);
-		}
-
-		long linetaddr = 0;
-		for (int ix = 10; ix < 16; ix++)
-		{
-			linetaddr = linetaddr << 8;
-			linetaddr = linetaddr | (0xff & b[ix]);
-		}
-
-		sequence = lsequence;
-		timemillis = ltimemillis;
-		majorId = linetaddr;
-	}
-
 	/*
 	 * Formatable methods
 	 */
@@ -123,7 +88,6 @@ public class BasicUUID implements UUID, Formatable
 	*/
 	public void writeExternal(ObjectOutput out) throws IOException 
 	{
-		// RESOLVE: write out the byte array instead?
 		out.writeLong(majorId);
 		out.writeLong(timemillis);
 		out.writeInt(sequence);
@@ -275,42 +239,6 @@ public class BasicUUID implements UUID, Formatable
 	}
 
 	/**
-	  Store this UUID in a byte array. Arrange the bytes in the UUID
-	  in the same order the code which stores a UUID in a string
-	  does.
-	  
-	  @see org.apache.derby.catalog.UUID#toByteArray
-	*/
-	public byte[] toByteArray()
-	{
-		byte[] result = new byte[16];
-
-		int lsequence = sequence; 
-		result[0] = (byte)(lsequence >>> 24);
-		result[1] = (byte)(lsequence >>> 16);
-		result[2] = (byte)(lsequence >>> 8);
-		result[3] = (byte)lsequence;
-
-		long ltimemillis = timemillis;
-		result[4] = (byte)(ltimemillis >>> 40);
-		result[5] = (byte)(ltimemillis >>> 32);
-		result[6] = (byte)(ltimemillis >>> 24);
-		result[7] = (byte)(ltimemillis >>> 16);
- 		result[8] = (byte)(ltimemillis >>> 8);
-		result[9] = (byte)ltimemillis;
-
-		long linetaddr = majorId;
-		result[10] = (byte)(linetaddr >>> 40);
-		result[11] = (byte)(linetaddr >>> 32);
-		result[12] = (byte)(linetaddr >>> 24);
-		result[13] = (byte)(linetaddr >>> 16);
-		result[14] = (byte)(linetaddr >>> 8);
-		result[15] = (byte)linetaddr;
-
-		return result;
-	}
-
-	/**
 	  Clone this UUID.
 
 	  @return	a copy of this UUID
@@ -319,7 +247,5 @@ public class BasicUUID implements UUID, Formatable
 	{
 		return	new	BasicUUID(majorId, timemillis, sequence);
 	}
-
-	public String toHexString() {return stringWorkhorse( (char) 0 );}
 }
 

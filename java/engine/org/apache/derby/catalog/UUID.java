@@ -49,22 +49,10 @@ public interface UUID extends java.io.Externalizable
 	String toANSIidentifier();
 
 	/**
-	    Produce a byte array representation of this UUID
-		which can be passed to UUIDFactory.recreateUUID later
-		on to reconstruct it.
-	*/
-	byte[] toByteArray();
-
-	/**
 	  Clone this UUID.
 
 	  @return	a copy of this UUID
 	  */
 	UUID cloneMe();
-
-	/**
-	  Create a hex string representation of this UUID.
-	  */
-	String toHexString();
 }
 
