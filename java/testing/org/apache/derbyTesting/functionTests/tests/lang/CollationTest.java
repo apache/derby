@@ -718,6 +718,15 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
       //Test with views too
       s.executeUpdate("create view derby4631_v1 as select * from derby4631_t1");
       s.executeUpdate("create view derby4631_v2 as select * from derby4631_t2");
+      //Test with global temporary tables too
+      s.executeUpdate("DECLARE GLOBAL TEMPORARY TABLE gt1 " +
+    	      "(x varchar(5), y varchar(2)) " +
+    	      "on commit delete rows not logged");
+      s.executeUpdate("INSERT INTO session.gt1 VALUES ('A','z'),('B','y')");
+      s.executeUpdate("DECLARE GLOBAL TEMPORARY TABLE gt2" +
+    	      "(x varchar(5), y varchar(2)) " +
+    	      "on commit delete rows not logged");
+      s.executeUpdate("INSERT INTO session.gt2 VALUES ('b','Y'),('c','x')");
 
       //LEFT OUTER JOIN's join column value is not impacted by DERBY-4631 
       // and hence following is returning the correct results for both
@@ -729,6 +738,11 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
       //Test with views
 	  joinTesting(s,"derby4631_v2", "derby4631_v1",
 			  "derby4631_v2", "derby4631_v1",
+			  " NATURAL LEFT OUTER JOIN ", "",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test with global temporary tables
+	  joinTesting(s,"gt2", "gt1",
+			  "session.gt2 gt2", "session.gt1 gt1",
 			  " NATURAL LEFT OUTER JOIN ", "",
 			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
       //Test with VALUES
@@ -758,6 +772,11 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
 			  "derby4631_v2", "derby4631_v1",
 			  "  LEFT OUTER JOIN ", " USING(x,y)",
 			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
+      //Test with global temporary tables
+	  joinTesting(s,"gt2", "gt1",
+			  "session.gt2 gt2", "session.gt1 gt1",
+			  "  LEFT OUTER JOIN ", " USING(x,y)",
+			  new String[][] {{"b","Y","b","Y"},{"c","x","c","x"}});
       //Test with VALUES
 	  joinTesting(s,"v2", "v1",
 			  " (values ('b','Y'),('c','x')) v2(x,y) ",
@@ -782,6 +801,11 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           //Test with views
     	  joinTesting(s,"derby4631_v2", "derby4631_v1",
     			  "derby4631_v2", "derby4631_v1",
+    			  " NATURAL RIGHT OUTER JOIN ", "",
+    			  new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
+          //Test with global temporary tables
+    	  joinTesting(s,"gt2", "gt1",
+    			  "session.gt2 gt2", "session.gt1 gt1",
     			  " NATURAL RIGHT OUTER JOIN ", "",
     			  new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
           //Test with VALUES
@@ -809,6 +833,11 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
           //Test with views
     	  joinTesting(s,"derby4631_v2", "derby4631_v1",
     			  "derby4631_v2", "derby4631_v1",
+    			  " RIGHT OUTER JOIN ", " USING(x,y)",
+    			  new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
+          //Test with global temporary tables
+    	  joinTesting(s,"gt2", "gt1",
+    			  "session.gt2 gt2", "session.gt1 gt1",
     			  " RIGHT OUTER JOIN ", " USING(x,y)",
     			  new String[][] {{"A","z","A","z"},{"B","y","b","Y"}});
           //Test with VALUES
@@ -863,6 +892,8 @@ public void testUsingClauseAndNaturalJoin() throws SQLException {
     			  new String[][] {{"A","z","A","z"},{"B","y","B","y"}});
       }
 
+      s.executeUpdate("DROP TABLE session.gt1");
+      s.executeUpdate("DROP TABLE session.gt2");
       s.executeUpdate("DROP VIEW derby4631_v1");
       s.executeUpdate("DROP VIEW derby4631_v2");
       s.executeUpdate("DROP TABLE derby4631_t1");
