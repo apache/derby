@@ -199,7 +199,9 @@ A         |B
 ERROR 40XL1: A lock could not be obtained within the time requested
 ij(XA)> -- ERROR: should have no connection underneath
 select * from APP.negative;
-ERROR 08003: No current connection.
+A         |B          
+----------------------
+ERROR 40XL1: A lock could not be obtained within the time requested
 ij(XA)> -- ERROR: should have no connection underneath and xid 2 is gone
 xa_end xa_suspend 2;
 IJ ERROR: XA_RBTIMEOUT 
