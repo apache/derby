@@ -137,10 +137,9 @@ public class Utilities {
 
             if (next) {
                 System.out.println(",");
-            } else {
-                System.out.println("};\n");
-            }
+            } 
         }
+        System.out.println("};\n");
     }
 
     /**
