@@ -22,6 +22,7 @@ package org.apache.derbyTesting.junit;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Properties;
 
 import javax.sql.XADataSource;
 
@@ -65,7 +66,7 @@ public class XADataSourceConnector implements Connector {
             // a new DataSource with the createDtabase property set.
             if (!expectedState.equals(e.getSQLState()))
                 throw e;
-            return singleUseDS("createDatabase", "create").
+            return singleUseDS( DataSourceConnector.makeCreateDBAttributes( config ) ).
                    getXAConnection().getConnection(); 
        }
     }
@@ -86,7 +87,7 @@ public class XADataSourceConnector implements Connector {
             // a new DataSource with the createDtabase property set.
             if (!expectedState.equals(e.getSQLState()))
                 throw e;
-            XADataSource tmpDs = singleUseDS("createDatabase", "create");
+            XADataSource tmpDs = singleUseDS( DataSourceConnector.makeCreateDBAttributes( config ) );
             JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
             return tmpDs.getXAConnection().getConnection();
        }
@@ -102,13 +103,21 @@ public class XADataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
-            return singleUseDS("createDatabase", "create").
+            return singleUseDS( DataSourceConnector.makeCreateDBAttributes( config ) ).
                    getXAConnection(user, password).getConnection(); 
        }
     }
 
     public Connection openConnection(String databaseName, String user, String password)
-            throws SQLException {
+            throws SQLException
+    {
+        return openConnection( databaseName, user, password, null );
+    }
+    
+    public  Connection openConnection
+        (String databaseName, String user, String password, Properties connectionProperties)
+         throws SQLException
+    {
         JDBCDataSource.setBeanProperty(ds, "databaseName", databaseName);
         try {
             return ds.getXAConnection(user, password).getConnection();
@@ -118,14 +127,17 @@ public class XADataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
-            XADataSource tmpDs = singleUseDS("createDatabase", "create");
+            HashMap hm = DataSourceConnector.makeCreateDBAttributes( config );
+            if ( connectionProperties != null ) { hm.putAll( connectionProperties ); }
+            XADataSource tmpDs = singleUseDS( hm );
             JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
             return tmpDs.getXAConnection(user, password).getConnection(); 
        }
     }
 
     public void shutDatabase() throws SQLException {
-        singleUseDS("shutdownDatabase", "shutdown").getXAConnection().getConnection();     
+        singleUseDS( DataSourceConnector.makeShutdownDBAttributes( config ) )
+            .getXAConnection().getConnection();     
     }
 
     public void shutEngine() throws SQLException {
@@ -136,10 +148,8 @@ public class XADataSourceConnector implements Connector {
      * Get a connection from a single use XADataSource configured
      * from the configuration but with the passed in property set.
      */
-    private XADataSource singleUseDS(String property, String value)
+    private XADataSource singleUseDS( HashMap hm )
        throws SQLException {
-        HashMap hm = JDBCDataSource.getDataSourceProperties(config);
-        hm.put(property, value);
         XADataSource sds = J2EEDataSource.getXADataSource(config, hm);
         return sds;
     }

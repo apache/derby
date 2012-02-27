@@ -58,6 +58,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   int JAR = 1;
     private static  final   int CLASSPATH = 2;
     private static  final   int NONE = 3;
+    private static  final   int JAR_ENCRYPTED = 4;
 
     // settings for constructor options
     private static  final   boolean NATIVE = true;
@@ -96,6 +97,8 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  TENTH_DB = "tenthDB";
     private static  final   String  ELEVENTH_DB = "eleventhDB";
     private static  final   String  TWELTH_DB = "twelthDB";
+    private static  final   String  THIRTEENTH_DB = "thirteenthDB";
+    private static  final   String  FOURTEENTH_DB = "fourteenthDB";
 
     private static  final   String  NAST1_JAR_FILE = "nast1.jar";
     private static  final   String  NAST2_JAR_FILE = "nast2.jar";
@@ -125,6 +128,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  BAD_PASSWORD_PROPERTY = "4251J";
     private static  final   String  BAD_PROPERTY_CHANGE = "XCY02";
     private static  final   String  SQL_AUTHORIZATION_NOT_ON = "42Z60";
+    private static  final   String  CANT_BOOT_DATABASE = "XJ040";
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -202,7 +206,8 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         switch ( _credentialsDBLocation )
         {
             case JAR:
-                _credentialsDBPhysicalName = jarDBName();
+            case JAR_ENCRYPTED:
+                _credentialsDBPhysicalName = jarDBName( _credentialsDBLocation );
                 break;
 
             case CLASSPATH:
@@ -253,6 +258,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         switch ( _credentialsDBLocation )
         {
             case JAR:
+            case JAR_ENCRYPTED:
             case CLASSPATH:
                 return true;
 
@@ -273,6 +279,10 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         {
             case JAR:
                 dbLocation = "JAR, ";
+                break;
+
+            case JAR_ENCRYPTED:
+                dbLocation = "JAR_ENCRYPTED, ";
                 break;
 
             case CLASSPATH:
@@ -327,17 +337,21 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         TestSuite suite = new TestSuite();
 
         //
-        // Special version of the test which disables the security manager in order
-        // to use the classpath subprotocol. We may be able to remove this special
-        // case after DERBY-5615 is fixed.
+        // Special version of the test which uses an encrypted database for credentials.
+        // Not run on windows until DERBY-5618 is addressed.
+        // Also not run on small devices because encryption is not supported there
+        // by default.
         //
-        suite.addTest
-            (
-             (
-              new NativeAuthenticationServiceTest
-              ( NONE, NO_AUTH, SYSTEM_WIDE, DONT_DISABLE_AUTH, DISABLE_JAVA_SECURITY )
-              ).decorate( false )
-             );
+        if ( !onWindows() && !JDBC.vmSupportsJSR169() )
+        {
+            suite.addTest
+                (
+                 (
+                  new NativeAuthenticationServiceTest
+                  ( JAR_ENCRYPTED, NATIVE, LOCAL, DONT_DISABLE_AUTH, ENABLE_JAVA_SECURITY )
+                  ).decorate( false )
+                 );
+        }
         
         suite.addTest( allConfigurations( false ) );
         if ( !JDBC.vmSupportsJSR169() ) { suite.addTest( allConfigurations( true ) ); }
@@ -359,7 +373,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         TestSuite suite = new TestSuite();
 
         //
-        // No authentication
+        // No authentication. 
         //
         suite.addTest
             (
@@ -536,6 +550,8 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, TENTH_DB );
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, ELEVENTH_DB );
         result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, TWELTH_DB );
+        result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, THIRTEENTH_DB );
+        result = TestConfiguration.additionalDatabaseDecoratorNoShutdown( result, FOURTEENTH_DB );
 
         result = TestConfiguration.changeUserDecorator( result, DBO, getPassword( DBO ) );
         
@@ -559,7 +575,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         println( "Credentials DB physical name = " + _credentialsDBPhysicalName );
         println( PROVIDER_PROPERTY + " = " + getSystemProperty( PROVIDER_PROPERTY ) );
 
-        if ( credentialsViaSubprotocol() )
+        if ( _credentialsDBLocation == JAR_ENCRYPTED )
+        {
+            vetEncryptedCredentialsDB();
+        }
+        else if ( credentialsViaSubprotocol() )
         {
             vetCredentialsViaSubprotocol();
         }
@@ -580,6 +600,28 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
     /**
      * <p>
+     * Verify behavior when credentials live in an encrypted db.
+     * </p>
+     */
+    private void    vetEncryptedCredentialsDB()   throws Exception
+    {
+        // can't create a database if the encrypted credentials db hasn't been booted yet
+        Connection  badConn = getConnection( true, true, THIRTEENTH_DB, DBO, CANT_BOOT_DATABASE );
+        
+        // now boot the encrypted credentials db
+        Properties  props = new Properties();
+        props.setProperty( "bootPassword", "clo760uds2caPe" );
+        Connection  dboConn = openConnection( jarDBName( _credentialsDBLocation ), DBO, false, props );
+
+        // credentials db is booted. now we can create databases with good credentials.
+        Connection  grapeConn = getConnection( false, true, THIRTEENTH_DB, GRAPE_USER, null );
+
+        // but we can't create a database with bad credentials
+        getConnection( true, true, FOURTEENTH_DB, WALNUT_USER, INVALID_AUTHENTICATION );
+    }
+    
+    /**
+     * <p>
      * Verify that credentials work when they are stored in a db accessed via
      * the jar or classpath subprotocols.
      * </p>
@@ -587,7 +629,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private void    vetCredentialsViaSubprotocol()   throws Exception
     {
         // create a new database
-        Connection  grapeConn = openConnection( TENTH_DB, GRAPE_USER, true );
+        Connection  grapeConn = openConnection( TENTH_DB, GRAPE_USER, true, null );
         String[][]  legalUsers = _localAuthentication ?
             new String[][] { { GRAPE_USER } } : new String[][] {};
         assertResults
@@ -615,7 +657,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             ( _nativeAuthentication, true, SECOND_DB, APPLE_USER, CREDENTIALS_DB_DOES_NOT_EXIST );
 
         // create the credentials database
-        Connection  sysadminConn = openConnection( CREDENTIALS_DB, DBO, true );
+        Connection  sysadminConn = openConnection( CREDENTIALS_DB, DBO, true, null );
 
         // add another legal user
         addUser( sysadminConn, APPLE_USER );
@@ -726,7 +768,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         //
         ///////////////////////////////////////////////////////////////////////////////////
 
-        Connection  seventhDBOConn = openConnection( SEVENTH_DB, DBO, true );
+        Connection  seventhDBOConn = openConnection( SEVENTH_DB, DBO, true, null );
 
         addUser( seventhDBOConn, APPLE_USER );
         goodStatement( seventhDBOConn, "create table t1( a int )" );
@@ -746,7 +788,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         _seventhDBSetup.getTestConfiguration().shutdownDatabase();
 
         // if NATIVE authentication is set in the database, then sql authorization prevents this legal user from viewing private data
-        Connection  seventhAppleConn = openConnection( SEVENTH_DB, APPLE_USER, true );
+        Connection  seventhAppleConn = openConnection( SEVENTH_DB, APPLE_USER, true, null );
         vetStatement( _localAuthentication, seventhAppleConn, "select * from " + DBO + ".t1", NO_COLUMN_PERMISSION );
 
         // if NATIVE authentication is set in the database, then authentication still prevents this user from logging in
@@ -761,7 +803,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         //
         ///////////////////////////////////////////////////////////////////////////////////
 
-        Connection  eighthDBOConn = openConnection( EIGHTH_DB, DBO, true );
+        Connection  eighthDBOConn = openConnection( EIGHTH_DB, DBO, true, null );
 
         addUser( eighthDBOConn, APPLE_USER );
 
@@ -794,7 +836,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         if ( !onWindows() )
         {
             // database accessed via jar subprotocol
-            vetProtocol( jarDBName() );
+            vetProtocol( jarDBName( _credentialsDBLocation ) );
         
             //
             // We only use the classpath subprotocol if we are not running under a security manager.
@@ -809,11 +851,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         //
         ///////////////////////////////////////////////////////////////////////////////////
 
-        Connection  twelthDBOConn = openConnection( TWELTH_DB, DBO, true );
+        Connection  twelthDBOConn = openConnection( TWELTH_DB, DBO, true, null );
 
         addUser( twelthDBOConn, APPLE_USER );
 
-        Connection  twelthAppleConn = openConnection( TWELTH_DB, APPLE_USER, true );
+        Connection  twelthAppleConn = openConnection( TWELTH_DB, APPLE_USER, true, null );
 
         // these fail without the appropriate grant
         vetStatement( _nativeAuthentication, twelthAppleConn,
@@ -862,9 +904,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         vetStatement( _nativeAuthentication, twelthAppleConn,
                       "call syscs_util.syscs_drop_user( 'CORNELIA' )", NO_EXECUTE_PERMISSION );
     }
-    private static  String  jarDBName() throws Exception
+    private static  String  jarDBName( int credentialsDBLocation ) throws Exception
     {
-        return "jar:(" + SupportFilesSetup.getReadOnlyFileName( NAST1_JAR_FILE  ) + ")nast";
+        String  dbName = (credentialsDBLocation == JAR_ENCRYPTED) ? "nastEncrypted" : "nast";
+        
+        return "jar:(" + SupportFilesSetup.getReadOnlyFileName( NAST1_JAR_FILE  ) + ")" + dbName;
     }
     private static  String  classpathDBName()   { return "classpath:nast"; }
     
@@ -923,7 +967,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private void    vetSystemWideOperations()   throws Exception
     {
         // create a database which we will backup and restore
-        Connection  dboConn = openConnection( SIXTH_DB, DBO, true );
+        Connection  dboConn = openConnection( SIXTH_DB, DBO, true, null );
 
         // add another user who can perform restores successfully
         addUser( dboConn, BANANA_USER );
@@ -1013,7 +1057,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     {
         // create an empty database without authentication turned on
         String          dbo = ORANGE_USER;
-        Connection  dboConn = openConnection( FOURTH_DB, dbo, true );
+        Connection  dboConn = openConnection( FOURTH_DB, dbo, true, null );
 
         addUser( dboConn, PEAR_USER );
 
@@ -1098,7 +1142,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         Connection  appleConn = getConnection( true, true, FOURTH_DB, APPLE_USER, INVALID_AUTHENTICATION );
 
         // ...but these credentials work
-        Connection  pearConn = openConnection( FOURTH_DB, PEAR_USER, true );
+        Connection  pearConn = openConnection( FOURTH_DB, PEAR_USER, true, null );
 
         // should get authorization errors trying to select from a table private to the DBO
         // and from trying to view the credentials table
@@ -1115,7 +1159,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private void    vetPasswordLifetime()   throws Exception
     {
         // create another database
-        Connection  dboConn = openConnection( FIFTH_DB, DBO, true );
+        Connection  dboConn = openConnection( FIFTH_DB, DBO, true, null );
 
         // add another legal user
         addUser( dboConn, APPLE_USER );
@@ -1141,7 +1185,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         _fifthDBSetup.getTestConfiguration().shutdownDatabase();
 
         // the DBO's password does not expire
-        dboConn = openConnection( FIFTH_DB, DBO, true );
+        dboConn = openConnection( FIFTH_DB, DBO, true, null );
 
         // but the other user's password has expired
         appleConn = getConnection( true, true, FIFTH_DB, APPLE_USER, INVALID_AUTHENTICATION );
@@ -1171,7 +1215,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
     private void    vetSQLAuthorizationOn() throws Exception
     {
-        Connection  nonDBOConn = openConnection( CREDENTIALS_DB, APPLE_USER, true );
+        Connection  nonDBOConn = openConnection( CREDENTIALS_DB, APPLE_USER, true, null );
         String          query = "select username from sys.sysusers" ;
 
         try {
@@ -1201,7 +1245,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         reportConnectionAttempt( dbName, user, isLogicalName );
 
         try {
-            conn = openConnection( dbName, user, isLogicalName );
+            conn = openConnection( dbName, user, isLogicalName, null );
 
             if ( shouldFail )   { fail( tagError( "Connection to " + dbName + " should have failed." ) ); }
         }
@@ -1226,7 +1270,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
         reportConnectionAttempt( dbName, user, true );
 
-        conn = openConnection( dbName, user, true );
+        conn = openConnection( dbName, user, true, null );
 
         SQLWarning  warning = conn.getWarnings();
 
@@ -1303,7 +1347,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     ///////////////////////////////////////////////////////////////////////////////////
 
     /** Open a connection to a database using the supplied credentials */
-    private Connection  openConnection( String dbName, String user, boolean isLogicalName )
+    private Connection  openConnection( String dbName, String user, boolean isLogicalName, Properties props )
         throws SQLException
     {
         String  password = getPassword( user );
@@ -1313,7 +1357,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         }
         else
         {
-            return getTestConfiguration().openPhysicalConnection( dbName, user, password );
+            return getTestConfiguration().openPhysicalConnection( dbName, user, password, props );
         }
     }
     

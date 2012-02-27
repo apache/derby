@@ -19,6 +19,7 @@
  */
 package org.apache.derbyTesting.junit;
 
+import java.util.Properties;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -74,6 +75,15 @@ interface Connector {
      * If the database does not exist then it should be created.
      */
      abstract Connection openConnection(String databaseName, String user, String password)
+         throws SQLException;
+
+    /**
+     * Open a connection to the database
+     * defined by the configuration passed to setConfiguration.
+     * If the database does not exist then it should be created.
+     */
+    abstract Connection openConnection
+        (String databaseName, String user, String password, Properties connectionProperties)
          throws SQLException;
 
     /**

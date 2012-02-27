@@ -62,8 +62,25 @@ public class DriverManagerConnector implements Connector {
      * with attributes create=true.
      */
     public Connection openConnection(String databaseName, String user, String password)
-            throws SQLException {
-
+            throws SQLException
+    {
+        return openConnection( databaseName, user, password, (Properties)  null );
+    }
+    
+    /**
+     * Open a connection using the DriverManager.
+     * <BR>
+     * The JDBC driver is only loaded if DriverManager.getDriver()
+     * for the JDBC URL throws an exception indicating no driver is loaded.
+     * <BR>
+     * If the connection request fails with SQLState XJ004
+     * (database not found) then the connection is retried
+     * with attributes create=true.
+     */
+    public  Connection openConnection
+        (String databaseName, String user, String password, Properties connectionProperties)
+         throws SQLException
+    {
         String url = config.getJDBCUrl(databaseName);
 
         try {
@@ -76,6 +93,8 @@ public class DriverManagerConnector implements Connector {
                 new Properties(config.getConnectionAttributes());
         connectionAttributes.setProperty("user", user);
         connectionAttributes.setProperty("password", password);
+
+        if ( connectionProperties != null ) { connectionAttributes.putAll( connectionProperties ); }
 
         try {
             return DriverManager.getConnection(url, connectionAttributes);

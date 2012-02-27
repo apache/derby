@@ -22,6 +22,7 @@ package org.apache.derbyTesting.junit;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Properties;
 
 import javax.sql.ConnectionPoolDataSource;
 
@@ -78,7 +79,7 @@ public class ConnectionPoolDataSourceConnector implements Connector {
             // a new DataSource with the createDtabase property set.
             if (!expectedState.equals(e.getSQLState()))
                 throw e;
-            return singleUseDS("createDatabase", "create").
+            return singleUseDS( DataSourceConnector.makeCreateDBAttributes( config ) ).
                    getPooledConnection().getConnection(); 
        }
     }
@@ -100,7 +101,7 @@ public class ConnectionPoolDataSourceConnector implements Connector {
             if (!expectedState.equals(e.getSQLState()))
                 throw e;
             ConnectionPoolDataSource tmpDs =
-                    singleUseDS("createDatabase", "create");
+                    singleUseDS( DataSourceConnector.makeCreateDBAttributes( config ) );
             JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
             return tmpDs.getPooledConnection().getConnection();
        }
@@ -116,7 +117,7 @@ public class ConnectionPoolDataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
-            return singleUseDS("createDatabase", "create").
+            return singleUseDS( DataSourceConnector.makeCreateDBAttributes( config ) ).
                    getPooledConnection(user, password).getConnection(); 
        }
     }
@@ -124,7 +125,15 @@ public class ConnectionPoolDataSourceConnector implements Connector {
     public Connection openConnection(String databaseName,
                                      String user,
                                      String password)
-            throws SQLException {
+            throws SQLException
+    {
+        return openConnection( databaseName, user, password, null );
+    }
+    
+    public  Connection openConnection
+        (String databaseName, String user, String password, Properties connectionProperties)
+         throws SQLException
+    {
         JDBCDataSource.setBeanProperty(ds, "databaseName", databaseName);
         try {
             return ds.getPooledConnection(user, password).getConnection();
@@ -134,21 +143,22 @@ public class ConnectionPoolDataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
-            ConnectionPoolDataSource tmpDs =
-                    singleUseDS("createDatabase", "create");
+            HashMap hm = DataSourceConnector.makeCreateDBAttributes( config );
+            if ( connectionProperties != null ) { hm.putAll( connectionProperties ); }
+            ConnectionPoolDataSource tmpDs = singleUseDS( hm );
             JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
             return tmpDs.getPooledConnection(user, password).getConnection(); 
        }
     }
 
     public void shutDatabase() throws SQLException {
-        singleUseDS("shutdownDatabase", "shutdown").
+        singleUseDS( DataSourceConnector.makeShutdownDBAttributes( config ) ).
                 getPooledConnection().getConnection();     
     }
 
     public void shutEngine() throws SQLException {
         ConnectionPoolDataSource tmpDs =
-                singleUseDS("shutdownDatabase", "shutdown");
+                singleUseDS( DataSourceConnector.makeShutdownDBAttributes( config ) );
         JDBCDataSource.setBeanProperty(tmpDs, "databaseName", "");
         tmpDs.getPooledConnection();
     }
@@ -157,10 +167,9 @@ public class ConnectionPoolDataSourceConnector implements Connector {
      * Get a connection from a single use ConnectionPoolDataSource configured
      * from the configuration but with the passed in property set.
      */
-    private ConnectionPoolDataSource singleUseDS(String property, String value)
-       throws SQLException {
-        HashMap hm = JDBCDataSource.getDataSourceProperties(config);
-        hm.put(property, value);
+    private ConnectionPoolDataSource singleUseDS( HashMap hm )
+       throws SQLException
+    {
         ConnectionPoolDataSource sds =
                 J2EEDataSource.getConnectionPoolDataSource(config, hm);
         return sds;

@@ -22,6 +22,7 @@ package org.apache.derbyTesting.junit;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Properties;
 
 import javax.sql.DataSource;
 
@@ -64,7 +65,7 @@ public class DataSourceConnector implements Connector {
             // a new DataSource with the createDtabase property set.
             if (!expectedState.equals(e.getSQLState()))
                 throw e;
-            return singleUseDS("createDatabase", "create").getConnection(); 
+            return singleUseDS( makeCreateDBAttributes( config ) ).getConnection(); 
        }
     }
 
@@ -84,7 +85,7 @@ public class DataSourceConnector implements Connector {
             // a new DataSource with the createDtabase property set.
             if (!expectedState.equals(e.getSQLState()))
                 throw e;
-            DataSource tmpDs = singleUseDS("createDatabase", "create");
+            DataSource tmpDs = singleUseDS( makeCreateDBAttributes( config ) );
             JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
             return tmpDs.getConnection();
        }
@@ -100,13 +101,21 @@ public class DataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
-            return singleUseDS(
-                    "createDatabase", "create").getConnection(user, password); 
+            return singleUseDS( makeCreateDBAttributes( config ) ).getConnection
+                (user, password); 
        }
     }
 
     public Connection openConnection(String databaseName, String user, String password)
-            throws SQLException {
+            throws SQLException
+    {
+        return openConnection( databaseName, user, password, null );
+    }
+    
+    public  Connection openConnection
+        (String databaseName, String user, String password, Properties connectionProperties)
+         throws SQLException
+    {
         JDBCDataSource.setBeanProperty(ds, "databaseName", databaseName);
         try {
             return ds.getConnection(user, password);
@@ -116,18 +125,20 @@ public class DataSourceConnector implements Connector {
             // a new DataSource with the createDatabase property set.
             if (!"XJ004".equals(e.getSQLState()))
                 throw e;
-            DataSource tmpDs = singleUseDS("createDatabase", "create");
+            HashMap hm = makeCreateDBAttributes( config );
+            if ( connectionProperties != null ) { hm.putAll( connectionProperties ); }
+            DataSource tmpDs = singleUseDS( hm );
             JDBCDataSource.setBeanProperty(tmpDs, "databaseName", databaseName);
             return tmpDs.getConnection(user, password); 
        }
     }
 
     public void shutDatabase() throws SQLException {
-        singleUseDS("shutdownDatabase", "shutdown").getConnection();     
+        singleUseDS( makeShutdownDBAttributes( config ) ).getConnection();     
     }
 
     public void shutEngine() throws SQLException {
-        DataSource tmpDs = singleUseDS("shutdownDatabase", "shutdown");
+        DataSource tmpDs = singleUseDS( makeShutdownDBAttributes( config ) );
         JDBCDataSource.setBeanProperty(tmpDs, "databaseName", "");
         tmpDs.getConnection();
     }
@@ -136,12 +147,26 @@ public class DataSourceConnector implements Connector {
      * Get a connection from a single use DataSource configured
      * from the configuration but with the passed in property set.
      */
-    private DataSource singleUseDS(String property, String value)
+    private DataSource singleUseDS( HashMap hm )
        throws SQLException {
-        HashMap hm = JDBCDataSource.getDataSourceProperties(config);
-        hm.put(property, value);
         DataSource sds = JDBCDataSource.getDataSource(config, hm);
         return sds;
+    }
+
+    static  HashMap makeCreateDBAttributes( TestConfiguration configuration )
+    {
+        HashMap hm = JDBCDataSource.getDataSourceProperties( configuration );
+        hm.put( "createDatabase", "create" );
+
+        return hm;
+    }
+
+    static  HashMap makeShutdownDBAttributes( TestConfiguration configuration )
+    {
+        HashMap hm = JDBCDataSource.getDataSourceProperties( configuration );
+        hm.put( "shutdownDatabase", "shutdown" );
+
+        return hm;
     }
 
 }

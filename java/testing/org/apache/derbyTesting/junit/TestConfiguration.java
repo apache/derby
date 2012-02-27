@@ -1698,16 +1698,18 @@ public final class TestConfiguration {
      * @param physicalDatabaseName The real database name to use.
      * @param user name of user
      * @param password password of user
+     * @param props extra properties to pass to the connection
      * @return connection to specified database.
      */
-    public  Connection openPhysicalConnection( String physicalDatabaseName, String user, String password )
+    public  Connection openPhysicalConnection( String physicalDatabaseName, String user, String password, Properties props )
         throws SQLException
     {
         return connector.openConnection
             (
              physicalDatabaseName,
              user,
-             password
+             password,
+             props
              );
     }
 
