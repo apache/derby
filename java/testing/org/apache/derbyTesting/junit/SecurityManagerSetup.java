@@ -1,6 +1,6 @@
 /*
  *
- * Derby - Class org.apache.derbyTesting.functionTests.util.SecurityManagerSetup
+ * Derby - Class org.apache.derbyTesting.junit.SecurityManagerSetup
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -38,6 +38,9 @@ import junit.framework.TestSuite;
  */
 public final class SecurityManagerSetup extends TestSetup {
     
+    /** Constant used to indicate that no security policy is to be installed. */
+    static final String NO_POLICY = "<NONE>";
+
     /**
      * Does the JVM support Subjects for
      * authorization through Java security manager.
@@ -114,7 +117,7 @@ public final class SecurityManagerSetup extends TestSetup {
 		if (externalSecurityManagerInstalled)
 			return new TestSuite("skipped due to external security manager "
                     + test.toString());
-		return new SecurityManagerSetup(test, "<NONE>");
+        return new SecurityManagerSetup(test, NO_POLICY);
 	}
 
 	/**
@@ -123,11 +126,11 @@ public final class SecurityManagerSetup extends TestSetup {
 	 */
 	static void noSecurityManager()
 	{
-		installSecurityManager("<NONE>");
+        installSecurityManager(NO_POLICY);
 	}
 	
 	/**
-	 * Install specific polciy file with the security manager
+     * Install specific policy file with the security manager
 	 * including the special case of no security manager.
 	 */
 	protected void setUp() {
@@ -136,7 +139,7 @@ public final class SecurityManagerSetup extends TestSetup {
     
     protected void tearDown() throws Exception
     {
-        if ("<NONE>".equals(decoratorPolicyResource))
+        if (NO_POLICY.equals(decoratorPolicyResource))
             BaseTestCase.setSystemProperty("java.security.policy", "");
         else if ( !externalSecurityManagerInstalled )
         {
@@ -202,7 +205,7 @@ public final class SecurityManagerSetup extends TestSetup {
 		}
 		
 		// Check indicator for no security manager
-		if ("<NONE>".equals(set.getProperty("java.security.policy")))
+        if (NO_POLICY.equals(set.getProperty("java.security.policy")))
 			return;
 		
 		// and install
@@ -224,7 +227,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	private static void setSecurityPolicy(Properties set,
 			String policyResource)
 	{
-		if ("<NONE>".equals(policyResource)) {
+        if (NO_POLICY.equals(policyResource)) {
 			set.setProperty("java.security.policy", policyResource);
 			return;
 		}

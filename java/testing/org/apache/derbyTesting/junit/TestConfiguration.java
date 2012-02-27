@@ -2012,7 +2012,7 @@ public final class TestConfiguration {
     		SecurityManagerSetup.noSecurityManager();
     		return false;
     	} else {
-            if ("<NONE>".equals(
+            if (SecurityManagerSetup.NO_POLICY.equals(
                     BaseTestCase.getSystemProperty("java.security.policy")))
             {
                 // Explict setting of no security manager
