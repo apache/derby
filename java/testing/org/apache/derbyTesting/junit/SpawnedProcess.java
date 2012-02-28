@@ -143,8 +143,8 @@ public final class SpawnedProcess {
     private TimerTask scheduleKill(Process process, String name) {
         synchronized (KILL_THRESHOLD_PROPERTY) {
             if (KILL_TIMER == null) {
-                // Can't use 1.5 methods yet due to J2ME.
-                KILL_TIMER = new Timer();
+                // Can't use 1.5 methods yet due to J2ME. Add name later.
+                KILL_TIMER = new Timer(true);
             }        
         }
         TimerTask killer = new ProcessKillerTask(process, name);
