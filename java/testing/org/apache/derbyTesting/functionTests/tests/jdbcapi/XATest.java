@@ -21,6 +21,7 @@
 
 package org.apache.derbyTesting.functionTests.tests.jdbcapi;
 
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -41,13 +42,17 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
+import org.apache.derbyTesting.junit.DatabasePropertyTestSetup;
 import org.apache.derbyTesting.junit.J2EEDataSource;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
+import org.apache.derbyTesting.junit.Utilities;
 import org.apache.derbyTesting.junit.XATestUtil;
 
 public class XATest extends BaseJDBCTestCase {
 
+    public static final String LOCKTIMEOUT="40XL1";
+    
     public XATest(String name) {
         super(name);
 
@@ -1129,6 +1134,99 @@ public class XATest extends BaseJDBCTestCase {
           doXATempTableD4731Work(true, true, XATestUtil.getXid(998, 10, 50));
     }
  
+    /**
+     * DERBY-5552 Check that lock timeout does not destroy connection
+     * during an XA Transaction.
+     * 
+     * @throws SQLException
+     * @throws XAException
+     */
+    public void testXALockTimeout() throws SQLException, XAException {
+        XADataSource xads = J2EEDataSource.getXADataSource();
+        J2EEDataSource.setBeanProperty(xads, "databaseName", "wombat");
+       
+        // Get the first connection and lock table in 
+        // xa transaction
+        XAConnection xaconn = xads.getXAConnection();
+        XAResource xar = xaconn.getXAResource();
+        Xid xid = XATestUtil.getXid(998,10,50);
+   
+        Connection conn = xaconn.getConnection();
+        Statement s = conn.createStatement();
+        xar.start(xid, XAResource.TMNOFLAGS);
+        s.executeUpdate("INSERT INTO TABLT VALUES(2)");
+        
+        // Get a second connection and global xact
+        // and try to select causing lock timeout
+        XAConnection xaconn2 = xads.getXAConnection();
+        XAResource xar2 = xaconn2.getXAResource();
+        Xid xid2 = XATestUtil.getXid(999,11,51);
+        Connection conn2 = xaconn2.getConnection();
+        // Set to serializable so we get lock timeout
+        conn2.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        xar2.start(xid2, XAResource.TMNOFLAGS);
+        Statement s2 = conn2.createStatement();
+        s2.executeUpdate("INSERT INTO TABLT VALUES(3)");
+        assertGlobalXactCount(2);
+        try {
+            ResultSet rs = s2.executeQuery("SELECT * FROM TABLT");
+            fail("Should have gotten lock timeout error: " + LOCKTIMEOUT);
+        } catch (SQLException se) {
+            assertSQLState(LOCKTIMEOUT,se);
+            }
+        // After the lock timeout we just have one global transaction.
+        // lock timeout implicitly rolled back xid2
+        assertGlobalXactCount(1);
+        assertConnOK(conn);
+        // DERBY-5552 Make sure connection is ok after lock timeout
+        assertConnOK(conn2);
+        //Should be able to end and commit xid1
+        xar.end(xid, XAResource.TMSUCCESS);
+        xar.prepare(xid);
+        xar.commit(xid, false);
+        
+        // xid2 should have already been rolled back so end should fail
+        try {    
+            xar2.end(xid2, XAResource.TMSUCCESS);
+            fail("Should have gotten exception ending xid2");
+        } catch (XAException xae) {
+            //xae.printStackTrace();
+            assertEquals(XAException.XA_RBTIMEOUT, xae.errorCode);
+            
+        } 
+     
+        // Should have no locks on TABLT
+        Statement drops = createStatement();
+        drops.executeUpdate("DROP TABLE TABLT");
+        // verify there are no more global transactions
+        assertGlobalXactCount(0);
+        
+        // Need to explicitly rollback xid2 as it ended with
+        // an implicit rollback XA_RBTIMEOUT
+        xar2.rollback(xid2);
+        
+        // Make sure both connections can be used to make a new global xact
+        xar.start(xid, XAResource.TMNOFLAGS);
+        s.executeUpdate("CREATE TABLE TABLT (I INT)");
+        s.executeUpdate("INSERT INTO TABLT VALUES(1)");
+        xar.end(xid, XAResource.TMSUCCESS);
+        xar.prepare(xid);
+        xar.commit(xid, false);
+        
+        // now the other connection ..
+        xar2.start(xid2, XAResource.TMNOFLAGS);
+        s2.executeUpdate("INSERT INTO TABLT VALUES(2)");
+        xar2.end(xid2, XAResource.TMSUCCESS);
+        xar.prepare(xid2);
+        xar.commit(xid2, false);
+        assertGlobalXactCount(0);
+        conn.close();
+        xaconn.close();
+        conn2.close();
+        xaconn2.close();
+        
+    }
+    
     
     /**
      * The two cases for DERBY-4371 do essentially the same thing. Except doing
@@ -1267,11 +1365,50 @@ public class XATest extends BaseJDBCTestCase {
              */
             protected void decorateSQL(Statement s) throws SQLException {
                 XATestUtil.createXATransactionView(s);
+                // Table for lock timeout test
+                s.executeUpdate("CREATE TABLE TABLT (I INT)");
+                s.executeUpdate("INSERT INTO TABLT VALUES(1)");
             }
 
         };
     }
-
+    
+    /**
+     * Excecute a simple SQL statement to assert that the connection is valid
+     * @param conn Connection to check
+     * @throws SQLException on error
+     */
+    private static void assertConnOK(Connection conn) throws SQLException{
+        Statement s = conn.createStatement();
+        ResultSet rs = s.executeQuery("VALUES(1)");
+        JDBC.assertSingleValueResultSet(rs, "1");
+      }
+    
+    
+    /**
+     * Verify the expected number of global transactions.
+     * Run test with -Dderby.tests.debug to see the full transaction table on the
+     * console
+     * 
+     * @param expectedCount expected number of global transaction
+     * @throws SQLException on error
+     */
+    private void assertGlobalXactCount(int expectedCount ) throws SQLException {
+        Connection conn = openDefaultConnection();
+        Statement s = conn.createStatement();
+        ResultSet rs = s.executeQuery(
+              "SELECT COUNT(*) FROM syscs_diag.transaction_table WHERE GLOBAL_XID IS NOT NULL");
+        rs.next();
+        int count = rs.getInt(1);
+        if (TestConfiguration.getCurrent().isVerbose()) {
+            System.out.println("assertGlobalXactCount(" + expectedCount +
+                    "): Full Transaction Table ...");
+            Utilities.showResultSet(s.executeQuery(
+                    "SELECT * FROM syscs_diag.transaction_table"));
+        }
+        assertTrue("Expected " + expectedCount + "global transactions but saw " + count, expectedCount == count);
+    }
+    
     /**
      * Runs the test fixtures in embedded and client.
      * 
@@ -1287,7 +1424,8 @@ public class XATest extends BaseJDBCTestCase {
 
         suite.addTest(TestConfiguration
                 .clientServerDecorator(baseSuite("XATest:client")));
-        return suite;
+        
+        return DatabasePropertyTestSetup.setLockTimeouts(suite, 3, 5);
     }
 
 }
