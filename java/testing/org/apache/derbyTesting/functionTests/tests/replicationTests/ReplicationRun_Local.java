@@ -46,6 +46,14 @@ public class ReplicationRun_Local extends ReplicationRun
         super(testcaseName);
     }
     
+    /**
+     * Creates a new instance of ReplicationRun_Local running with authentication.
+     */
+    public ReplicationRun_Local(String testcaseName, String user, String password )
+    {
+        super( testcaseName, user, password );
+    }
+    
     public static Test suite()
     {
         TestSuite suite = new TestSuite("ReplicationRun_Local Suite");
@@ -54,6 +62,18 @@ public class ReplicationRun_Local extends ReplicationRun
         
         return SecurityManagerSetup.noSecurityManager(suite);
 
+    }
+    
+    public static Test localAuthenticationSuite()
+    {
+        String      user = "KIWI";
+        String      password = "KIWI_password";
+        TestSuite suite = new TestSuite("ReplicationRun_Local Suite Local Authentication Suite");
+
+        suite.addTest( new ReplicationRun_Local( "testReplication_Local_TestStraightReplication", user, password ) );
+        suite.addTest( new ReplicationRun_Local( "testReplication_Local_LogFilesSynched", user, password ) );
+
+        return SecurityManagerSetup.noSecurityManager( suite );
     }
     
     //////////////////////////////////////////////////////////////

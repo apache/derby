@@ -96,8 +96,6 @@ public class ReplicationRun extends BaseTestCase
     
     static String masterDbSubPath = "db_master";
     static String slaveDbSubPath = "db_slave";
-    static final String DB_UID = "";
-    static final String DB_PASSWD = "";
     
     
     static String replicationTest = "";
@@ -169,6 +167,9 @@ public class ReplicationRun extends BaseTestCase
      */
     private ArrayList helperThreads = new ArrayList();
 
+    private String db_uid = null;
+    private String db_passwd = null;
+
     /**
      * Creates a new instance of ReplicationRun
      * @param testcaseName Identifying the test.
@@ -178,6 +179,17 @@ public class ReplicationRun extends BaseTestCase
         super(testcaseName);
         
         LF = System.getProperties().getProperty("line.separator");
+    }
+    
+    /**
+     * Creates a new instance of ReplicationRun running with authentication.
+     */
+    public ReplicationRun( String testcaseName, String user, String password )
+    {
+        this( testcaseName );
+
+        db_uid = user;
+        db_passwd = password;
     }
     
     /**
@@ -321,11 +333,7 @@ public class ReplicationRun extends BaseTestCase
         throws Exception
     {
         
-        String serverURL = "jdbc:derby:"
-                +"//"+serverHost+":"+serverPort+"/";
-        String dbURL = serverURL
-                +fullDbPath
-                +useEncryption(false);
+        String dbURL = serverURL( fullDbPath, serverHost, serverPort );
         Connection conn = null;
         String lastmsg = null;
         long sleeptime = 200L;
@@ -381,11 +389,7 @@ public class ReplicationRun extends BaseTestCase
         Thread.sleep(waitTime); // .... until stable...
         try
         {
-            ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
-            ds.setDatabaseName(fullDbPath);
-            ds.setServerName(serverHost);
-            ds.setPortNumber(serverPort);
-            ds.setConnectionAttributes(useEncryption(false));
+            ClientDataSource ds = configureDataSource( fullDbPath, serverHost, serverPort, useEncryption(false) );
             Connection conn = ds.getConnection();
             conn.close();
         }
@@ -410,11 +414,7 @@ public class ReplicationRun extends BaseTestCase
         {
             try
             {
-                ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
-                ds.setDatabaseName(fullDbPath);
-                ds.setServerName(serverHost);
-                ds.setPortNumber(serverPort);
-                ds.setConnectionAttributes(useEncryption(false));
+                ClientDataSource ds = configureDataSource( fullDbPath, serverHost, serverPort, useEncryption(false) );
                 Connection conn = ds.getConnection();
                 util.DEBUG("Wait Got connection after " 
                         + (count-1) +" * "+ sleepTime + " ms.");
@@ -446,11 +446,7 @@ public class ReplicationRun extends BaseTestCase
         {
             try
             {
-                ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
-                ds.setDatabaseName(fullDbPath);
-                ds.setServerName(serverHost);
-                ds.setPortNumber(serverPort);
-                ds.setConnectionAttributes(useEncryption(false));
+                ClientDataSource ds = configureDataSource( fullDbPath, serverHost, serverPort, useEncryption(false) );
                 Connection conn = ds.getConnection();
                 // Should never get here!
                 conn.close();
@@ -491,12 +487,7 @@ public class ReplicationRun extends BaseTestCase
             String clientHost) // Not yet used
         throws Exception
     {
-        String serverURL = "jdbc:derby:"
-                +"//"+serverHost+":"+serverPort+"/";
-        String dbURL = serverURL
-                +dbPath
-                +FS+replicatedDb
-                +useEncryption(false);
+        String  dbURL = serverURL( dbPath+FS+replicatedDb, serverHost, serverPort );
         util.DEBUG("**** DriverManager.getConnection(\"" + dbURL+";shutdown=true\");");
 
         try{
@@ -1001,14 +992,12 @@ public class ReplicationRun extends BaseTestCase
                     Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                     conn = DriverManager.getConnection(URL);
                      */
-                    ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
-                    ds.setDatabaseName(masterDatabasePath+FS+masterDbSubPath+FS+dbName);
-                    ds.setServerName(masterHost);
-                    ds.setPortNumber(masterServerPort);
-                    ds.setConnectionAttributes("startMaster=true"
-                            +";slaveHost="+slaveReplInterface
-                            +";slavePort="+slaveReplPort
-                            +useEncryption(false));
+                    String  connectionAttributes = "startMaster=true"
+                        +";slaveHost="+slaveReplInterface
+                        +";slavePort="+slaveReplPort
+                        +useEncryption(false);
+                    ClientDataSource ds = configureDataSource
+                        ( masterDbPath( dbName ), masterHost, masterServerPort, connectionAttributes );
                     conn = ds.getConnection();
                     
                     done = true;
@@ -1174,7 +1163,7 @@ public class ReplicationRun extends BaseTestCase
         
             util.DEBUG("startSlave_direct getConnection("+URL+")");
             
-            final String fDbPath = slaveDatabasePath+FS+slaveDbSubPath+FS+dbName;
+            final String fDbPath = slaveDbPath( dbName );
             final String fSlaveHost = slaveHost;
             final int fSlaveServerPort = slaveServerPort;
             final String fConnAttrs = "startSlave=true"
@@ -1196,11 +1185,7 @@ public class ReplicationRun extends BaseTestCase
                         Class.forName(DRIVER_CLASS_NAME); // Needed when running from classes!
                         conn = DriverManager.getConnection(URL);
                          */
-                        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
-                        ds.setDatabaseName(fDbPath);
-                        ds.setServerName(fSlaveHost);
-                        ds.setPortNumber(fSlaveServerPort);
-                        ds.setConnectionAttributes(fConnAttrs);
+                        ClientDataSource ds = configureDataSource( fDbPath, fSlaveHost, fSlaveServerPort, fConnAttrs );
                         conn = ds.getConnection();
                         conn.close();
                     }
@@ -1352,23 +1337,19 @@ public class ReplicationRun extends BaseTestCase
     throws Exception
     {
         util.DEBUG("BEGIN verifySlave "+slaveServerHost+":"
-                +slaveServerPort+"/"+slaveDatabasePath+FS+slaveDbSubPath+FS+replicatedDb);
+                   +slaveServerPort+"/"+slaveDbPath( replicatedDb ) );
         
         if ( (replicationTest != null) // If 'replicationTest==null' no table was created/filled
                 && simpleLoad )
         {
             _verifyDatabase(slaveServerHost, slaveServerPort, 
-                    slaveDatabasePath+FS+slaveDbSubPath+FS+replicatedDb,
+                    slaveDbPath( replicatedDb ),
                     simpleLoadTuples);
             // return;
         }
 
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
-        ds.setDatabaseName(slaveDatabasePath + FS + slaveDbSubPath + FS +
-                           replicatedDb);
-        ds.setServerName(slaveServerHost);
-        ds.setPortNumber(slaveServerPort);
-        ds.setConnectionAttributes(useEncryption(false));
+        ClientDataSource ds = configureDataSource
+            ( slaveDbPath( replicatedDb ), slaveServerHost, slaveServerPort, useEncryption(false) );
         Connection conn = ds.getConnection();
             
         simpleVerify(conn);
@@ -1386,23 +1367,19 @@ public class ReplicationRun extends BaseTestCase
     throws Exception
     {
         util.DEBUG("BEGIN verifyMaster " + masterServerHost + ":"
-                +masterServerPort+"/"+masterDatabasePath+FS+masterDbSubPath+FS+replicatedDb);
+                   +masterServerPort+"/"+masterDbPath( replicatedDb ) );
         
         if ( (replicationTest != null)  // If 'replicationTest==null' no table was created/filled
                 && simpleLoad )
         {
             _verifyDatabase(masterServerHost, masterServerPort, 
-                    masterDatabasePath+FS+masterDbSubPath+FS+replicatedDb,
+                    masterDbPath( replicatedDb ),
                     simpleLoadTuples);
             // return;
         }
 
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
-        ds.setDatabaseName(masterDatabasePath + FS + masterDbSubPath + FS +
-                           replicatedDb);
-        ds.setServerName(masterServerHost);
-        ds.setPortNumber(masterServerPort);
-        ds.setConnectionAttributes(useEncryption(false));
+        ClientDataSource ds = configureDataSource
+            ( masterDbPath( replicatedDb ), masterServerHost, masterServerPort, useEncryption(false) );
         Connection conn = ds.getConnection();
             
         simpleVerify(conn);
@@ -2035,18 +2012,28 @@ public class ReplicationRun extends BaseTestCase
         
         String workingDirName = masterDatabasePath +FS+ dbSubDirPath;
         
-        final String[] commandElements = {
-            ReplicationRun.getMasterJavaExecutableName(),
-            "-Dderby.system.home=" + workingDirName,
-            "-Dderby.infolog.append=true",
-                // , " -Dderby.language.logStatementText=true" // Goes into derby.log: Gets HUGE!
-            "-cp", serverClassPath,
-            networkServerControl,
-            "start",
-            "-h", interfacesToListenOn, // allowedClients
-            "-p", String.valueOf(serverPort),
-            "-noSecurityManager"
-        };
+        ArrayList   ceArray = new ArrayList();
+        ceArray.add( ReplicationRun.getMasterJavaExecutableName() );
+        ceArray.add( "-Dderby.system.home=" + workingDirName );
+        ceArray.add( "-Dderby.infolog.append=true" );
+        //ceArray.add( " -Dderby.language.logStatementText=true" ); // Goes into derby.log: Gets HUGE );
+        if ( db_uid != null )
+        {
+            ceArray.add( "-Dderby.authentication.provider=NATIVE:" + replicatedDb + ":LOCAL" );
+        }
+        ceArray.add( "-cp" );
+        ceArray.add( serverClassPath );
+        ceArray.add( networkServerControl );
+        ceArray.add( "start" );
+        ceArray.add( "-h" );
+        ceArray.add( interfacesToListenOn ); // allowedClient
+        ceArray.add( "-p" );
+        ceArray.add( String.valueOf( serverPort ) );
+        ceArray.add( "-noSecurityManager" );
+
+        final   String[]    commandElements = new String[ ceArray.size() ];
+        ceArray.toArray( commandElements );
+
         String[] envElements = {"CLASS_PATH="+serverClassPath
                 , "PATH="+serverVM+FS+".."+FS+"bin"
                 };
@@ -2058,7 +2045,7 @@ public class ReplicationRun extends BaseTestCase
         String tmp ="";
         
         for ( int i=0;i<commandElements.length;i++)
-        {tmp = tmp + commandElements[i] + " ";}
+        {tmp = tmp +commandElements[i] + " ";}
         util.DEBUG(debugId+"commandElements: " + tmp);
         
         final String fullCmd = tmp;
@@ -2232,16 +2219,29 @@ public class ReplicationRun extends BaseTestCase
         { // Use full classpath when running locally. Can not vary server versions!
             serverClassPath = classPath;
         }
+
+        ArrayList   ceArray = new ArrayList();
+        ceArray.add( serverJvm );
+        ceArray.add( "-Dderby.infolog.append=true" );
+        ceArray.add( "-cp" );
+        ceArray.add( serverClassPath );
+        ceArray.add( networkServerControl );
+        ceArray.add( "shutdown" );
+        ceArray.add( "-h" );
+        ceArray.add( serverHost ); // FIXME! interfacesToListenOn
+        ceArray.add( "-p" );
+        ceArray.add( String.valueOf(serverPort ) );
+        if ( db_uid != null )
+        {
+            ceArray.add( "-user" );
+            ceArray.add( db_uid );
+            ceArray.add( "-password" );
+            ceArray.add( db_passwd );
+        }
+
+        final   String[]    commandElements = new String[ ceArray.size() ];
+        ceArray.toArray( commandElements );
         
-        final String[] commandElements = {
-            serverJvm,
-            "-Dderby.infolog.append=true",
-            "-cp", serverClassPath,
-            networkServerControl,
-            "shutdown",
-            "-h", serverHost, // FIXME! interfacesToListenOn
-            "-p", String.valueOf(serverPort)
-        };
         String[] envElements = {"CLASS_PATH="+serverClassPath
                 , "PATH="+serverVM+FS+".."+FS+"bin"
                 };
@@ -2508,7 +2508,7 @@ public class ReplicationRun extends BaseTestCase
             ijClassPath = classPath;
         }
             String clientJvm = ReplicationRun.getClientJavaExecutableName();
-            String command = "rm -rf /"+masterDatabasePath+FS+dbSubPath+FS+database+";" // FIXME! for slave load!
+            String command = "rm -rf /"+masterDbPath( database )+";" // FIXME! for slave load!
                     + clientJvm // "java"
                     + " -Dij.driver=" + DRIVER_CLASS_NAME
                     + " -Dij.connection.create"+database+"=\"" + URL + "\""
@@ -3092,11 +3092,7 @@ test.postStoppedSlaveServer.return=true
     {
         util.DEBUG("_testInsertUpdateDeleteOnMaster: " + serverHost + ":" +
                    serverPort + "/" + dbPath + " " + _noTuplesToInsert);
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
-        ds.setDatabaseName(dbPath);
-        ds.setServerName(serverHost);
-        ds.setPortNumber(serverPort);
-        ds.setConnectionAttributes(useEncryption(false));
+        ClientDataSource ds = configureDataSource( dbPath, serverHost, serverPort, useEncryption(false) );
         Connection conn = ds.getConnection();
         
         PreparedStatement ps = conn.prepareStatement("create table t(i integer primary key, s varchar(64))");
@@ -3123,11 +3119,7 @@ test.postStoppedSlaveServer.return=true
         throws SQLException
     {
         util.DEBUG("_verifyDatabase: "+serverHost+":"+serverPort+"/"+dbPath);
-        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
-        ds.setDatabaseName(dbPath);
-        ds.setServerName(serverHost);
-        ds.setPortNumber(serverPort);
-        ds.setConnectionAttributes(useEncryption(false));
+        ClientDataSource ds = configureDataSource( dbPath, serverHost, serverPort, useEncryption(false) );
         Connection conn = ds.getConnection();
         
         _verify(conn,_noTuplesInserted);
@@ -3157,9 +3149,10 @@ test.postStoppedSlaveServer.return=true
         throws SQLException
     {
         String db = databasePath +FS+dbSubPath +FS+ replicatedDb;
-        String connectionURL = "jdbc:derby:"  
-                + "//" + serverHost + ":" + serverPort + "/"
-                + db;
+        String connectionURL = serverURL( db, serverHost, serverPort );
+        //String connectionURL = "jdbc:derby:"  
+        //       + "//" + serverHost + ":" + serverPort + "/"
+        //        + db;
         util.DEBUG(connectionURL);
         return DriverManager.getConnection(connectionURL);
     }
@@ -3174,28 +3167,29 @@ test.postStoppedSlaveServer.return=true
     }
     String masterURL(String dbName)
     {
-        return DB_PROTOCOL
-                +"://"+masterServerHost
-                +":"+masterServerPort+"/"
-                +masterDatabasePath+FS+masterDbSubPath+FS+dbName
-                +useEncryption(false);
+        return serverURL( masterDbPath( dbName ), masterServerHost, masterServerPort );
     }
     String masterLoadURL(String dbSubPath)
     {
-        return DB_PROTOCOL
-                +"://"+masterServerHost
-                +":"+masterServerPort+"/"
-                +masterDatabasePath+FS+dbSubPath
-                +useEncryption(false);
+        return serverURL( masterDatabasePath+FS+dbSubPath, masterServerHost, masterServerPort );
     }
-
     String slaveURL(String dbName)
     {
+        return serverURL( slaveDbPath( dbName ), slaveServerHost, slaveServerPort );
+    }
+    String  serverURL( String fullDbPath, String serverHost, int serverPort )
+    {
         return DB_PROTOCOL
-                +"://"+slaveServerHost
-                +":"+slaveServerPort+"/"
-                +slaveDatabasePath+FS+slaveDbSubPath+FS+dbName
-                +useEncryption(false);
+                +"://"+serverHost
+                +":"+serverPort+"/"
+                +fullDbPath
+                +useEncryption(false)
+                +credentials();
+    }
+    String  credentials()
+    {
+        if ( db_uid == null ) { return ""; }
+        else { return ";user=" + db_uid + ";password=" + db_passwd; }
     }
 
 
@@ -3228,11 +3222,12 @@ test.postStoppedSlaveServer.return=true
         util.DEBUG("stopSlave");
         String dbPath = slaveDatabasePath + FS + subPath + FS + replicatedDb;
 
-        String connectionURL = "jdbc:derby:"
-            + "//" + slaveServerHost + ":" + slaveServerPort + "/"
-            + dbPath
-            + ";stopSlave=true"
-            + useEncryption(false);
+        String connectionURL = serverURL( dbPath, slaveServerHost, slaveServerPort ) + ";stopSlave=true";
+        //String connectionURL = "jdbc:derby:"
+        //    + "//" + slaveServerHost + ":" + slaveServerPort + "/"
+        //    + dbPath
+        //    + ";stopSlave=true"
+        //    + useEncryption(false);
 
         if (masterServerAlive) {
             try {
@@ -3336,4 +3331,34 @@ test.postStoppedSlaveServer.return=true
         }
         return serverVM+FS+".."+FS+"bin"+FS+"java";        
     }
+
+    /**
+     * <p>
+     * Set up a data source.
+     * </p>
+     */
+    ClientDataSource    configureDataSource
+        (
+         String dbName,
+         String serverHost,
+         int        serverPort,
+         String     connectionAttributes
+         )
+    {
+        ClientDataSource ds = new org.apache.derby.jdbc.ClientDataSource();
+
+        ds.setDatabaseName( dbName );
+        ds.setServerName( serverHost );
+        ds.setPortNumber(serverPort);
+        ds.setConnectionAttributes( connectionAttributes );
+
+        if ( db_uid != null )
+        {
+            ds.setUser( db_uid );
+            ds.setPassword( db_passwd );
+        }
+        
+        return ds;
+    }
+    
 }

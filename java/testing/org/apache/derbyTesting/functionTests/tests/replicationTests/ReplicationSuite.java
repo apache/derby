@@ -53,6 +53,7 @@ public class ReplicationSuite extends BaseTestCase
         if (JDBC.vmSupportsJDBC3()) {
 
             suite.addTest(ReplicationRun_Local.suite());
+            suite.addTest(ReplicationRun_Local.localAuthenticationSuite());
 
             suite.addTest(ReplicationRun_Local_1.suite());
 
