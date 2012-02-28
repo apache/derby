@@ -880,6 +880,25 @@ public abstract class BaseTestCase
         testLaunchMethod };
         assertExecJavaCmdAsExpected(new String[] { "OK (1 test)" }, cmd, 0);
     }
+    
+    /**
+     * assert a method from an executing test
+     *
+     * @param testLaunchMethod
+     *            complete pathname of the method to be executed
+     * @param databaseName
+     *            name of the database to be used
+     * @throws Exception
+     */
+    public static void assertLaunchedJUnitTestMethod(String testLaunchMethod,
+            String databaseName)
+            throws Exception 
+    {
+        String[] cmd = new String[] { 
+                "-Dderby.tests.defaultDatabaseName=" + databaseName, 
+                "junit.textui.TestRunner", "-m", testLaunchMethod };
+        assertExecJavaCmdAsExpected(new String[] { "OK (1 test)" }, cmd, 0);
+    }
 
     private static String traceClientType() {
        if (TestConfiguration.getCurrent().getJDBCClient().isEmbedded()) {

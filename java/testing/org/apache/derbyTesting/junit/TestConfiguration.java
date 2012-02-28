@@ -1093,7 +1093,14 @@ public final class TestConfiguration {
      *
      */
     private TestConfiguration() {
-        this.defaultDbName = DEFAULT_DBNAME;
+        // Check for possibly passed in DatabaseName
+        // this is used in OCRecoveryTest
+        String propDefDbName = getSystemProperties().getProperty(
+                "derby.tests.defaultDatabaseName");
+        if (propDefDbName != null)
+            this.defaultDbName = propDefDbName;
+        else
+            this.defaultDbName=DEFAULT_DBNAME;
         usedDbNames.add(DEFAULT_DBNAME);
         logicalDbMapping.put(DEFAULT_DBNAME, DEFAULT_DBNAME);
         this.userName = DEFAULT_USER_NAME;

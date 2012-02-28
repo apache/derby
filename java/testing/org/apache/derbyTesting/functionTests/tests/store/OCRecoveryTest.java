@@ -30,7 +30,6 @@ import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
-import org.apache.derbyTesting.junit.CleanDatabaseTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 public class OCRecoveryTest extends BaseJDBCTestCase {
@@ -55,25 +54,31 @@ public class OCRecoveryTest extends BaseJDBCTestCase {
     {
         Test test = TestConfiguration.embeddedSuite(
                         OCRecoveryTest.class);
-        return new CleanDatabaseTestSetup(test);
+        // using a singleUseDatabaseDecorator which should not create
+        // the database until the first connection is made
+        return TestConfiguration.singleUseDatabaseDecorator(test,
+            "OCRecoveryDB");
     }
 
     public void testOCRecovery() throws Exception
     {
-        setAutoCommit(false);
-
-        TestConfiguration.getCurrent().shutdownDatabase();
+        
         // Now call forked processes - each of these will do something,
         // then *not* shutdown, forcing the next one to recover the
         // database.
+        // Pass in the name of the database to be used.
         assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
-                "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_1");
+                "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_1",
+                "OCRecoveryDB");
         assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
-                "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_2");
+                "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_2",
+                "OCRecoveryDB");
         assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
-                "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_3");
+                "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_3",
+                "OCRecoveryDB");
         assertLaunchedJUnitTestMethod("org.apache.derbyTesting." +
-                "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_4");
+                "functionTests.tests.store.OCRecoveryTest.launchOCRecovery_4",
+                "OCRecoveryDB");
     }
 
     public void launchOCRecovery_1() throws Exception
@@ -81,6 +86,9 @@ public class OCRecoveryTest extends BaseJDBCTestCase {
         // setup to test restart recovery of online compress.  Real work
         // is done in next method launchOCRecovery_2 which will run restart
         // recovery on the work done in this step.
+        // open a connection to the database, this should create the db
+        getConnection();
+        setAutoCommit(false);        
         createAndLoadTable(tableName, true, 5000, 0);
         Statement st = createStatement();
         st.executeUpdate("DELETE FROM " + tableName);
