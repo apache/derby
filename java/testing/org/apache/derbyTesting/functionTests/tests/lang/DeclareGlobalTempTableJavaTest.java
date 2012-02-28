@@ -1040,7 +1040,8 @@ public class DeclareGlobalTempTableJavaTest extends BaseJDBCTestCase {
         assertUpdateCount(s , 0 , "CREATE TABLE SESSION.t3(c31 int, c32 int)");
         ResultSet rs1 = databaseMetaData.getTables("", null, "%", null);
         while (rs1.next()) {
-            if (("T2" == rs1.getString(3)) && ("SESSION" == rs1.getString(2)))
+            if (("T2".equals(rs1.getString(3))) &&
+                    ("SESSION".equals(rs1.getString(2))))
                 fail("Temporary table Found");
             count++;
         }
