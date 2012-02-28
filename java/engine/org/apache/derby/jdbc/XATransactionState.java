@@ -147,8 +147,9 @@ final class XATransactionState extends ContextImpl {
 			if (se.getSeverity() == ExceptionSeverity.TRANSACTION_SEVERITY) {
 
 				synchronized (this) {
-					// disable use of the connection until it is cleaned up.
-					conn.setApplicationConnection(null);
+					// prior to the DERBY-5552 fix, we would disable the connection
+					// here with conn.setApplicationConnection(null);
+					// which could cause a NPE
 					notifyAll();
 					associationState = TRO_FAIL;
 					if (SQLState.DEADLOCK.equals(se.getMessageId()))
