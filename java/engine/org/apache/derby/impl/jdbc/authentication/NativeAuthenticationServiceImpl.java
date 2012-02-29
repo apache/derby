@@ -284,6 +284,7 @@ public final class NativeAuthenticationServiceImpl
         try {
             // No "guest" user
             if ( userName == null ) { return false; }
+            if ( userPassword == null ) { return false; }
 
             //
             // We must handle these cases:
@@ -405,7 +406,7 @@ public final class NativeAuthenticationServiceImpl
         }
         
         SQLWarning  warnings = null;
-        
+
         try {
             Properties  properties = new Properties();
             properties.setProperty( Attribute.USERNAME_ATTR, userName );
@@ -496,7 +497,20 @@ public final class NativeAuthenticationServiceImpl
         DataDictionary      dd = (DataDictionary) Monitor.getServiceModule( this, DataDictionary.MODULE );        
         UserDescriptor      userDescriptor = dd.getUser( userName );
         
-        if ( userDescriptor == null )   { return false; }
+        if ( userDescriptor == null )
+        {
+            //
+            // Before returning, we pretend to evaluate the password.
+            // This helps prevent blackhats from discovering legal usernames
+            // by measuring how long password evaluation takes. For more context,
+            // see the 2012-02-22 comment on DERBY-5539.
+            //
+            PasswordHasher          hasher = dd.makePasswordHasher( getDatabaseProperties() );
+            
+            hasher.hashPasswordIntoString( userName, userPassword ).toCharArray();
+
+            return false;
+        }
         
         PasswordHasher      hasher = new PasswordHasher( userDescriptor.getHashingScheme() );
         char[]                     candidatePassword = hasher.hashPasswordIntoString( userName, userPassword ).toCharArray();
@@ -512,8 +526,8 @@ public final class NativeAuthenticationServiceImpl
             }
         } finally
         {
-            Arrays.fill( candidatePassword, (char) 0 );
-            Arrays.fill( actualPassword, (char) 0 );
+            if ( candidatePassword != null ) { Arrays.fill( candidatePassword, (char) 0 ); }
+            if ( actualPassword != null ) { Arrays.fill( actualPassword, (char) 0 ); }
         }
 
         //

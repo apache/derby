@@ -659,6 +659,9 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // create the credentials database
         Connection  sysadminConn = openConnection( CREDENTIALS_DB, DBO, true, null );
 
+        // null password should not generate NPE
+        getConnection( _nativeAuthentication, true, CREDENTIALS_DB, DBO, null, INVALID_AUTHENTICATION );
+
         // add another legal user
         addUser( sysadminConn, APPLE_USER );
         addUser( sysadminConn, BANANA_USER );
@@ -1240,12 +1243,18 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         ( boolean shouldFail, boolean isLogicalName, String dbName, String user, String expectedSQLState )
         throws Exception
     {
+        return getConnection( shouldFail, isLogicalName, dbName, user, getPassword( user ), expectedSQLState );
+    }
+    private Connection  getConnection
+        ( boolean shouldFail, boolean isLogicalName, String dbName, String user, String password, String expectedSQLState )
+        throws Exception
+    {
         Connection  conn = null;
 
         reportConnectionAttempt( dbName, user, isLogicalName );
 
         try {
-            conn = openConnection( dbName, user, isLogicalName, null );
+            conn = openConnection( dbName, user, password, isLogicalName, null );
 
             if ( shouldFail )   { fail( tagError( "Connection to " + dbName + " should have failed." ) ); }
         }
@@ -1350,7 +1359,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private Connection  openConnection( String dbName, String user, boolean isLogicalName, Properties props )
         throws SQLException
     {
-        String  password = getPassword( user );
+        return openConnection( dbName, user, getPassword( user ), isLogicalName, props );
+    }
+    private Connection  openConnection( String dbName, String user, String password, boolean isLogicalName, Properties props )
+        throws SQLException
+    {
         if ( isLogicalName )
         {
             return getTestConfiguration().openConnection( dbName, user, password );

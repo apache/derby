@@ -91,8 +91,8 @@ public class DriverManagerConnector implements Connector {
 
         Properties connectionAttributes =
                 new Properties(config.getConnectionAttributes());
-        connectionAttributes.setProperty("user", user);
-        connectionAttributes.setProperty("password", password);
+        if ( user != null ) { connectionAttributes.setProperty("user", user); }
+        if ( password  != null ) { connectionAttributes.setProperty("password", password); }
 
         if ( connectionProperties != null ) { connectionAttributes.putAll( connectionProperties ); }
 
