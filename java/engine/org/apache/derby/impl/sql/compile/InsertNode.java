@@ -867,8 +867,13 @@ public final class InsertNode extends DMLModStatementNode
         //
         HasTableFunctionVisitor tableFunctionVisitor = new HasTableFunctionVisitor();
         this.accept( tableFunctionVisitor );
-        if ( tableFunctionVisitor.hasNode() ) { requestBulkInsert(); }
-	}
+        // DERBY-5614: See if the target is a global temporary table (GTT),
+        // in which case we don't support bulk insert.
+        if ( tableFunctionVisitor.hasNode() &&
+                !isSessionSchema(targetTableDescriptor.getSchemaDescriptor())) {
+            requestBulkInsert();
+        }
+    }
 
     /**
      * Request bulk insert optimization at run time.
