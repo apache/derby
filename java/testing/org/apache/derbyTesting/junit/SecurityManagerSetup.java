@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.Policy;
@@ -493,10 +494,10 @@ public final class SecurityManagerSetup extends TestSetup {
             throws IOException {
         String resource = policy1;
         if (!NO_POLICY.equals(resource)) {
-            URL url1 = BaseTestCase.getTestResource(policy1);
+            URL url1 = getResourceURL(policy1);
             resource = url1.toExternalForm();
             if (policy2 != null) {
-                URL url2 = BaseTestCase.getTestResource(policy2);
+                URL url2 = getResourceURL(policy2);
                 // Don't use URL.equals - it blocks and goes onto the network.
                 if (!url1.toExternalForm().equals(url2.toExternalForm())) {
                     resource = mergePolicies(url1, url2);
@@ -504,6 +505,24 @@ public final class SecurityManagerSetup extends TestSetup {
             }
         }
         return resource;
+    }
+
+    /**
+     * Returns a URL for the given policy resource.
+     *
+     * @param policy the policy resource
+     * @return A {@code URL} denoting the policy resource.
+     * @throws MalformedURLException if the resource string not a valid URL
+     */
+    private static URL getResourceURL(final String policy)
+            throws MalformedURLException {
+        URL url = BaseTestCase.getTestResource(policy);
+        if (url == null) {
+            // Assume the policy is expressed as an URL already, probably
+            // as a file.
+            url =  new URL(policy);
+        }
+        return url;       
     }
 
     /**
