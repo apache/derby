@@ -20,9 +20,13 @@
 package org.apache.derbyTesting.junit;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.Policy;
+import java.security.PrivilegedActionException;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -31,13 +35,23 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.apache.derbyTesting.functionTests.util.PrivilegedFileOpsForTests;
+
 /**
- * Setup for running Derby JUnit tests with the SecurityManager
- * which is the default for tests.
- *
+ * Configures the wrapped test to be run with the specified security policy.
+ * <p>
+ * This setup class normally installs the default policy file. This can be
+ * overridden by specifying {@literal java.security.policy=<NONE>} (see
+ * {@linkplain #NO_POLICY}), and can also be overridden by installing a
+ * security manager explicitly before the default security manager is installed.
+ * <p>
+ * Individual tests/suites can be configured to be run without a security
+ * manager, with a specific policy file, or with a specific policy file merged
+ * with the default policy file. The last option is useful when you only need
+ * to extend the default policy with a few extra permissions to run a test.
  */
 public final class SecurityManagerSetup extends TestSetup {
-    
+
     /** Constant used to indicate that no security policy is to be installed. */
     static final String NO_POLICY = "<NONE>";
 
@@ -73,14 +87,36 @@ public final class SecurityManagerSetup extends TestSetup {
 	}
 	
 	private final String decoratorPolicyResource;
+    /** An additional policy to install (may be {@code null}). */
+    private final String additionalPolicyResource;
 	private SecurityManager decoratorSecurityManager = null;
 	
-        public SecurityManagerSetup(Test test, String policyResource)
-        {
-            super(test);
+    public SecurityManagerSetup(Test test, String policyResource) {
+        this(test, policyResource, false);
+    }
+
+    /**
+     * Installs a new security policy.
+     *
+     * @param test the test to wrap
+     * @param policyResource the policy to install
+     * @param mergePolicies if {@code false} the specified policy will be the
+     *      only policy installed, if {@code true} the specified policy will be
+     *      merged with the default test policy for the test framework
+     */
+    public SecurityManagerSetup(Test test, String policyResource,
+                                boolean mergePolicies) {
+        super(test);
+        if (mergePolicies) {
+            // By choice, only support merging with the default test policy.
+            this.decoratorPolicyResource = getDefaultPolicy();
+            this.additionalPolicyResource = policyResource;
+        } else {
             this.decoratorPolicyResource = policyResource != null ?
                     policyResource : getDefaultPolicy();
+            this.additionalPolicyResource = null;
         }
+    }
 
 	/**
 	 * Use custom policy and SecurityManager
@@ -91,9 +127,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	 */
 	public SecurityManagerSetup(Test test, String policyResource, SecurityManager securityManager)
 	{
-		super(test);
-		this.decoratorPolicyResource = policyResource != null ?
-		            policyResource : getDefaultPolicy();
+        this(test, policyResource, false);
 		this.decoratorSecurityManager = securityManager;
 	}
 	
@@ -133,8 +167,11 @@ public final class SecurityManagerSetup extends TestSetup {
      * Install specific policy file with the security manager
 	 * including the special case of no security manager.
 	 */
-	protected void setUp() {
-		installSecurityManager(decoratorPolicyResource, decoratorSecurityManager);
+    protected void setUp()
+            throws IOException {
+        String resource = getEffectivePolicyResource(
+                decoratorPolicyResource, additionalPolicyResource);
+        installSecurityManager(resource, decoratorSecurityManager);
 	}
     
     protected void tearDown() throws Exception
@@ -150,7 +187,7 @@ public final class SecurityManagerSetup extends TestSetup {
     /**
      * Return the name of the default policy.
      */
-    public static String getDefaultPolicy()
+    private static String getDefaultPolicy()
     {
         return "org/apache/derbyTesting/functionTests/util/derby_tests.policy";
     }
@@ -221,7 +258,7 @@ public final class SecurityManagerSetup extends TestSetup {
                     return null;
                 }
 		});
-
+        println("installed policy " + policyFile);
 	}
 	
 	private static void setSecurityPolicy(Properties set,
@@ -440,4 +477,109 @@ public final class SecurityManagerSetup extends TestSetup {
 
     }
 
+    /**
+     * Returns the location of the effective policy resource.
+     * <p>
+     * If two valid policy resources from different locations are specified,
+     * they will be merged into one policy file.
+     *
+     * @param policy1 first policy
+     * @param policy2 second policy (may be {@code null})
+     * @return The location of a policy resource.
+     * @throws IOException if reading or writing a policy resource fails
+     */
+    private static String getEffectivePolicyResource(String policy1,
+                                                     String policy2)
+            throws IOException {
+        URL url1 = BaseTestCase.getTestResource(policy1);
+        String resource = url1.toExternalForm();
+        if (policy2 != null) {
+            URL url2 = BaseTestCase.getTestResource(policy2);
+            // Don't use URL.equals - it blocks and goes onto the network.
+            if (!url1.toExternalForm().equals(url2.toExternalForm())) {
+                resource = mergePolicies(url1, url2);
+            }
+        }
+        return resource;
+    }
+
+    /**
+     * Merges the two specified policy resources (typically files), and writes
+     * the combined policy to a new file.
+     *
+     * @param policy1 the first policy
+     * @param policy2 the second policy
+     * @return The resource location string for a policy file.
+     * @throws IOException if reading or writing to one of the resources fails
+     */
+    private static String mergePolicies(URL policy1, URL policy2)
+            throws IOException {
+        // Create target directory for the merged policy files.
+        String sytemHome =
+                BaseTestCase.getSystemProperty("derby.system.home");
+        File sysDir = new File(sytemHome == null ? "system" : sytemHome);
+        File varDir = new File(sysDir, "var");
+        // If running as the first test the system directory may not exist.
+        // This situation looks a little bit suspicious - investigate?
+        mkdir(sysDir);
+        mkdir(varDir);
+
+        // Read the contents of both policy files and write them out to
+        // a new policy file. Construct a somewhat informative file name.
+        File mergedPF = new File(varDir,
+                new File(policy2.getPath()).getName() +
+                    "-MERGED_WITH-" +
+                new File(policy1.getPath()).getName());
+        OutputStream o =
+                PrivilegedFileOpsForTests.getFileOutputStream(mergedPF);
+        byte[] buf = new byte[1024];
+        int read;
+        InputStream i1 = openStream(policy1);
+        while ((read = i1.read(buf)) != -1) {
+            o.write(buf, 0, read);
+        }
+        i1.close();
+        InputStream i2 = openStream(policy2);
+        while ((read = i2.read(buf)) != -1) {
+            o.write(buf, 0, read);
+        }
+        i2.close();
+        o.close();
+        return mergedPF.toURI().toURL().toExternalForm();
+    }
+
+    /** Opens the resource stream in a privileged block. */
+    private static InputStream openStream(final URL resource)
+            throws IOException {
+        try {
+            return (InputStream)AccessController.doPrivileged(
+                    new java.security.PrivilegedExceptionAction(){
+                        public Object run() throws IOException {
+                            return resource.openStream();
+                        }
+                    }
+                );
+        } catch (PrivilegedActionException pae) {
+            throw (IOException)pae.getException();
+        }
+    }
+
+    /** Creates the specified directory if it doesn't exist. */
+    private static void mkdir(final File dir) {
+        AccessController.doPrivileged(
+            new java.security.PrivilegedAction(){
+                public Object run(){
+                    if (!dir.exists() && !dir.mkdir()) {
+                        fail("failed to create directory: " + dir.getPath());
+                    }
+                    return null;
+                }
+            }
+        );
+    }
+
+    /** Prints a debug message if debugging is enabled. */
+    private static void println(String msg) {
+        BaseTestCase.println("{SecurityManagerSetup} " + msg);
+    }
 }
