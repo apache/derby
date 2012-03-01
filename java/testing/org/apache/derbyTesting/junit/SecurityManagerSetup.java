@@ -485,19 +485,22 @@ public final class SecurityManagerSetup extends TestSetup {
      *
      * @param policy1 first policy
      * @param policy2 second policy (may be {@code null})
-     * @return The location of a policy resource.
+     * @return The location of a policy resource, or {@linkplain #NO_POLICY}.
      * @throws IOException if reading or writing a policy resource fails
      */
     private static String getEffectivePolicyResource(String policy1,
                                                      String policy2)
             throws IOException {
-        URL url1 = BaseTestCase.getTestResource(policy1);
-        String resource = url1.toExternalForm();
-        if (policy2 != null) {
-            URL url2 = BaseTestCase.getTestResource(policy2);
-            // Don't use URL.equals - it blocks and goes onto the network.
-            if (!url1.toExternalForm().equals(url2.toExternalForm())) {
-                resource = mergePolicies(url1, url2);
+        String resource = policy1;
+        if (!NO_POLICY.equals(resource)) {
+            URL url1 = BaseTestCase.getTestResource(policy1);
+            resource = url1.toExternalForm();
+            if (policy2 != null) {
+                URL url2 = BaseTestCase.getTestResource(policy2);
+                // Don't use URL.equals - it blocks and goes onto the network.
+                if (!url1.toExternalForm().equals(url2.toExternalForm())) {
+                    resource = mergePolicies(url1, url2);
+                }
             }
         }
         return resource;
