@@ -1668,6 +1668,7 @@ public interface SQLState {
     //DERBY-2109: new state/msg
     String AUTH_DATABASE_CREATE_MISSING_PERMISSION          = "08004.C.11";
     String NET_CONNECT_SECMEC_INCOMPATIBLE_SCHEME           = "08004.C.12";
+    String AUTH_EMPTY_CREDENTIALS                                  = "08004.C.13";
 
     // There can be multiple causes for 08003, which according
     // to SQL2003 spec means "connection does not exist"

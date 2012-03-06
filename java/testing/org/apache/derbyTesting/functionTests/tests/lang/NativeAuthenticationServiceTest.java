@@ -118,6 +118,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  SQL_AUTHORIZATION_PROPERTY = "derby.database.sqlAuthorization";
 
     private static  final   String  CREDENTIALS_DB_DOES_NOT_EXIST = "4251I";
+    private static  final   String  BAD_NETWORK_AUTHENTICATION = "08001";
     private static  final   String  INVALID_AUTHENTICATION = "08004";
     private static  final   String  DBO_ONLY_OPERATION = "4251D";
     private static  final   String  INVALID_PROVIDER_CHANGE = "XCY05";
@@ -656,6 +657,9 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         Connection  secondDBConn = getConnection
             ( _nativeAuthentication, true, SECOND_DB, APPLE_USER, CREDENTIALS_DB_DOES_NOT_EXIST );
 
+        // can't create a credentials db with an empty username or password
+        if ( _nativeAuthentication ) { vetEmptyCredentials(); }
+        
         // create the credentials database
         Connection  sysadminConn = openConnection( CREDENTIALS_DB, DBO, true, null );
 
@@ -914,6 +918,26 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         return "jar:(" + SupportFilesSetup.getReadOnlyFileName( NAST1_JAR_FILE  ) + ")" + dbName;
     }
     private static  String  classpathDBName()   { return "classpath:nast"; }
+
+    private void    vetEmptyCredentials()   throws Exception
+    {
+        vetEmptyCredentials( null, null );
+        vetEmptyCredentials( "", null );
+        vetEmptyCredentials( null, "" );
+        vetEmptyCredentials( "", "" );
+
+        vetEmptyCredentials( "foo", null );
+        vetEmptyCredentials( "foo", "" );
+
+        if ( isEmbedded() ) { vetEmptyCredentials( null, "bar" ); } // the network server fabricates a username of APP
+        vetEmptyCredentials( "", "bar" );
+    }
+    private void    vetEmptyCredentials( String user, String password ) throws Exception
+    {
+        String[]  expectedSQLStates = new String[] { INVALID_AUTHENTICATION,BAD_NETWORK_AUTHENTICATION };
+        
+        getConnection( true, true, CREDENTIALS_DB, user, password, expectedSQLStates );
+    }
     
     private void    addBuiltinUser( Connection conn, String user )  throws Exception
     {
@@ -1249,9 +1273,15 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         ( boolean shouldFail, boolean isLogicalName, String dbName, String user, String password, String expectedSQLState )
         throws Exception
     {
+        return getConnection( shouldFail, isLogicalName, dbName, user, password, new String[] { expectedSQLState } );
+    }
+    private Connection  getConnection
+        ( boolean shouldFail, boolean isLogicalName, String dbName, String user, String password, String[] expectedSQLStates )
+        throws Exception
+    {
         Connection  conn = null;
 
-        reportConnectionAttempt( dbName, user, isLogicalName );
+        reportConnectionAttempt( dbName, user, password, isLogicalName );
 
         try {
             conn = openConnection( dbName, user, password, isLogicalName, null );
@@ -1260,7 +1290,20 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         }
         catch (Throwable t)
         {
-            if ( shouldFail && (t instanceof SQLException) )   { assertSQLState( expectedSQLState, (SQLException) t ); }
+            if ( shouldFail && (t instanceof SQLException) )
+            {
+                String          actualSQLState = ((SQLException) t).getSQLState();
+                StringBuffer    buffer = new StringBuffer();
+
+                //  ok if the sqlstate is one of the expected ones
+                for ( int i = 0; i < expectedSQLStates.length; i++ )
+                {
+                    String  expected = expectedSQLStates[ i ];
+                    buffer.append( " " + expected );
+                    if ( expected.equals( actualSQLState ) ) { return null; }
+                }
+                fail( tagError( "SQLState " + actualSQLState + " not in expected list: " + buffer.toString() ) );
+            }
             else
             {
                 printStackTrace( t );
@@ -1277,7 +1320,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     {
         Connection  conn = null;
 
-        reportConnectionAttempt( dbName, user, true );
+        reportConnectionAttempt( dbName, user, getPassword( user ), true );
 
         conn = openConnection( dbName, user, true, null );
 
@@ -1296,9 +1339,9 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
         return conn;
     }
-    private void    reportConnectionAttempt( String dbName, String user, boolean isLogicalName )
+    private void    reportConnectionAttempt( String dbName, String user, String password, boolean isLogicalName )
     {
-        String  message = user + " attempting to get connection to database " + dbName;
+        String  message = "User '" + user + "' with password '" + password + "' attempting to get connection to database " + dbName;
         if ( isLogicalName ) { message = message + " aka " + getTestConfiguration().getPhysicalDatabaseName( dbName ) ; }
         println( message );
     }

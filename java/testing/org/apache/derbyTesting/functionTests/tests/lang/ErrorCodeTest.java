@@ -128,6 +128,7 @@ public final class ErrorCodeTest extends BaseJDBCTestCase {
         		{"08004","Cannot check system permission to create database '{0}' [{1}].","40000"},
         		{"08004","Missing permission for user '{0}' to create database '{1}' [{2}].","40000"},
         		{"08004","Connection authentication failure occurred. Either the supplied credentials were invalid, or the database uses a password encryption scheme not compatible with the strong password substitution security mechanism. If this error started after upgrade, refer to the release note for DERBY-4483 for options.","40000"},
+        		{"08004","Username or password is null or 0 length.","40000"},
         		{"08006","An error occurred during connect reset and the connection has been terminated.  See chained exceptions for details.","40000"},
         		{"08006","SocketException: '{0}'","40000"},
         		{"08006","A communications error has been detected: {0}.","40000"},

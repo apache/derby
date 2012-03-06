@@ -1226,8 +1226,18 @@ public abstract class EmbedConnection implements EngineConnection
         {
             //
             // NATIVE authentication using a system-wide credentials database
-            // which is being created now. Allow this to succeed.
+            // which is being created now. Allow this to succeed. However, here we make sure that
+            // the credentials are legal. This prevents the credentials db from being
+            // created with a bad DBO or password.
             //
+            String  user = userInfo.getProperty(Attribute.USERNAME_ATTR);
+            String  password = userInfo.getProperty(Attribute.PASSWORD_ATTR);
+
+            if ( emptyCredential( user ) || emptyCredential( password ) )
+            {
+                throw newSQLException( SQLState.AUTH_EMPTY_CREDENTIALS );
+            }
+            
             return;
         }
 
@@ -1256,9 +1266,9 @@ public abstract class EmbedConnection implements EngineConnection
 			
 		if ( !authenticationSucceeded )
         {
-			throw newSQLException(SQLState.NET_CONNECT_AUTH_FAILED,
+            throw newSQLException(SQLState.NET_CONNECT_AUTH_FAILED,
                      MessageService.getTextMessage(MessageId.AUTH_INVALID));
-		}
+        }
 
 		// If authentication is not on, we have to raise a warning if sqlAuthorization is ON
 		// Since NoneAuthenticationService is the default for Derby, it should be ok to refer
@@ -1266,6 +1276,16 @@ public abstract class EmbedConnection implements EngineConnection
 		if (authenticationService instanceof NoneAuthenticationServiceImpl)
 			usingNoneAuth = true;
 	}
+
+    /**
+     * <p>
+     * Forbid empty or null usernames and passwords.
+     * </p>
+     */
+    private boolean emptyCredential( String credential )
+    {
+        return ( (credential == null) || (credential.length() == 0) );
+    }
 
     /**
      * Compare two user-specified database names to see if they identify

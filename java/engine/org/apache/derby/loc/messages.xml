@@ -437,6 +437,11 @@ Guide.
             </msg>
 
             <msg>
+                <name>08004.C.13</name>
+                <text>Username or password is null or 0 length.</text>
+            </msg>
+
+            <msg>
                 <name>08006.C</name>
                 <text>A network protocol error was encountered and the connection has been terminated: {0}</text>
 		<arg>error</arg>
