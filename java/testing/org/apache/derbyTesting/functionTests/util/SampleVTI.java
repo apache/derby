@@ -23,7 +23,6 @@ package org.apache.derbyTesting.functionTests.util;
 import java.io.InputStream;
 import java.io.Reader;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import org.apache.derby.vti.VTITemplate;
@@ -86,11 +85,6 @@ public class SampleVTI
         String val = data[index][columnIndex -1];
         wasNull = val == null;
         return val;
-    }
-
-    //@Override
-    public ResultSetMetaData getMetaData() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     //@Override

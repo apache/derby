@@ -28,7 +28,6 @@ import java.math.BigDecimal;
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.Date;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -130,9 +129,6 @@ public  abstract    class   StringColumnVTI extends VTITemplate
     //
     ///////////////////////////////////////////////////////////////////////////////////
 
-    /** This method returns null. Derby does not look at the metadata returned by the table function. */
-    public ResultSetMetaData getMetaData() throws SQLException { return null; }
-    
     public boolean wasNull() throws SQLException { return _lastColumnWasNull; }
     
     public int findColumn( String columnName ) throws SQLException

@@ -21,22 +21,8 @@
 
 package org.apache.derby.vti;
 
-import java.io.InputStream;
-
-import java.sql.Connection;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.SQLWarning;
 import java.math.BigDecimal;
-
-import java.net.URL;
-import java.util.Calendar;
-import java.sql.Ref;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.Array;
 
 /**
 	An abstract implementation of ResultSet that is useful
@@ -66,7 +52,6 @@ public abstract class VTITemplate extends VTITemplateBase
 {
     // Together with our superclass, the following overrides are a trick
     // to allow subclasses to compile on both Java 5 and Java 6
-    public abstract ResultSetMetaData getMetaData() throws SQLException;
     public abstract boolean next() throws SQLException;
     public abstract void close() throws SQLException;
 

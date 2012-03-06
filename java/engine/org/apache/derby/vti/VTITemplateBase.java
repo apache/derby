@@ -23,7 +23,6 @@ package org.apache.derby.vti;
 
 import java.io.InputStream;
 
-import java.sql.Connection;
 import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;

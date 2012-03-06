@@ -209,11 +209,6 @@ public    class   StringArrayVTI  extends StringColumnVTI
     public  void close() throws SQLException
     {}
 
-    public  ResultSetMetaData   getMetaData() throws SQLException
-    {
-        throw new SQLException( "Not implemented." );
-    }
-    
     ///////////////////////////////////////////////////////////////////////////////////
     //
     // MINIONS
