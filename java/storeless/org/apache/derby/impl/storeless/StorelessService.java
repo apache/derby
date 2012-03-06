@@ -61,24 +61,24 @@ public class StorelessService implements PersistentService {
 	}
 
 	public void saveServiceProperties(String serviceName, StorageFactory storageFactory, Properties properties, boolean replace) throws StandardException {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
 	}
 
     public void saveServiceProperties(String serviceName,
                                       Properties properties)
             throws StandardException {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		
 	}
 
 	public String createServiceRoot(String name, boolean deleteExisting) throws StandardException {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return null;
 	}
 
 	public boolean removeServiceRoot(String serviceName) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return false;
 	}
 
@@ -87,22 +87,22 @@ public class StorelessService implements PersistentService {
 	}
 
 	public String getUserServiceName(String serviceName) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return null;
 	}
 
 	public boolean isSameService(String serviceName1, String serviceName2) {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return serviceName1.equals(serviceName2);
 	}
 
 	public boolean hasStorageFactory() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return false;
 	}
 
 	public StorageFactory getStorageFactoryInstance(boolean useHome, String databaseName, String tempDirName, String uniqueName) throws StandardException, IOException {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return null;
 	}
 

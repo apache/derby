@@ -58,12 +58,12 @@ import org.apache.derby.iapi.types.DataValueFactory;
 class NoOpTransaction implements TransactionController {
 
     public AccessFactory getAccessManager() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public boolean conglomerateExists(long conglomId) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return false;
     }
 
@@ -71,7 +71,7 @@ class NoOpTransaction implements TransactionController {
             DataValueDescriptor[] template, ColumnOrdering[] columnOrder,
             int[] collation_ids,
             Properties properties, int temporaryFlag) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return 0;
     }
 
@@ -81,7 +81,7 @@ class NoOpTransaction implements TransactionController {
             Properties properties, int temporaryFlag,
             RowLocationRetRowSource rowSource, long[] rowCount)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return 0;
     }
 
@@ -93,28 +93,28 @@ class NoOpTransaction implements TransactionController {
             int temporaryFlag, long orig_conglomId,
             RowLocationRetRowSource rowSource, long[] rowCount)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return 0;
     }
 
     public void addColumnToConglomerate(long conglomId, int column_id,
             Storable template_column, int collation_id) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
     public void dropConglomerate(long conglomId) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
     public long findConglomid(long containerid) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return 0;
     }
 
     public long findContainerid(long conglomid) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return 0;
     }
 
@@ -124,14 +124,14 @@ class NoOpTransaction implements TransactionController {
     }
 
     public Properties getUserCreateConglomPropList() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public ConglomerateController openConglomerate(long conglomId,
             boolean hold, int open_mode, int lock_level, int isolation_level)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
@@ -140,7 +140,7 @@ class NoOpTransaction implements TransactionController {
             StaticCompiledOpenConglomInfo static_info,
             DynamicCompiledOpenConglomInfo dynamic_info)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
@@ -155,7 +155,7 @@ class NoOpTransaction implements TransactionController {
             boolean collect_runtimestats, boolean skipNullKeyColumns,
             boolean keepAfterCommit)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
@@ -165,7 +165,7 @@ class NoOpTransaction implements TransactionController {
             DataValueDescriptor[] startKeyValue, int startSearchOperator,
             Qualifier[][] qualifier, DataValueDescriptor[] stopKeyValue,
             int stopSearchOperator) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
@@ -177,7 +177,7 @@ class NoOpTransaction implements TransactionController {
             int stopSearchOperator, StaticCompiledOpenConglomInfo static_info,
             DynamicCompiledOpenConglomInfo dynamic_info)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
@@ -187,24 +187,24 @@ class NoOpTransaction implements TransactionController {
             DataValueDescriptor[] startKeyValue, int startSearchOperator,
             Qualifier[][] qualifier, DataValueDescriptor[] stopKeyValue,
             int stopSearchOperator) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public GroupFetchScanController defragmentConglomerate(long conglomId,
             boolean online, boolean hold, int open_mode, int lock_level,
             int isolation_level) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public void purgeConglomerate(long conglomId) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
     public void compressConglomerate(long conglomId) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
@@ -212,60 +212,60 @@ class NoOpTransaction implements TransactionController {
             int lock_level, int isolation_level,
             FormatableBitSet scanColumnList, DataValueDescriptor[] fetchRow)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return false;
     }
 
     public StoreCostController openStoreCost(long conglomId)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public int countOpens(int which_to_count) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return 0;
     }
 
     public String debugOpened() throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public FileResource getFileHandler() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public CompatibilitySpace getLockSpace() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public StaticCompiledOpenConglomInfo getStaticCompiledConglomInfo(
             long conglomId) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public DynamicCompiledOpenConglomInfo getDynamicCompiledConglomInfo(
             long conglomId) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public long[] getCacheStats(String cacheName) {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public void resetCacheStats(String cacheName) {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
     public void logAndDo(Loggable operation) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
@@ -273,157 +273,157 @@ class NoOpTransaction implements TransactionController {
             DataValueDescriptor[] template, ColumnOrdering[] columnOrdering,
             SortObserver sortObserver, boolean alreadyInOrder,
             long estimatedRows, int estimatedRowSize) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return 0;
     }
 
     public void dropSort(long sortid) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
     public SortController openSort(long id) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public SortCostController openSortCostController(Properties implParameters)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public RowLocationRetRowSource openSortRowSource(long id)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public ScanController openSortScan(long id, boolean hold)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public boolean anyoneBlocked() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return false;
     }
 
     public void abort() throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
     public void commit() throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
     public DatabaseInstant commitNoSync(int commitflag)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public void destroy() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
     public ContextManager getContextManager() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public String getTransactionIdString() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public String getActiveStateTxIdString() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public boolean isIdle() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return false;
     }
 
     public boolean isGlobal() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return false;
     }
 
     public boolean isPristine() {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return false;
     }
 
     public int releaseSavePoint(String name, Object kindOfSavepoint)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return 0;
     }
 
     public int rollbackToSavePoint(String name, boolean close_controllers,
             Object kindOfSavepoint) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return 0;
     }
 
     public int setSavePoint(String name, Object kindOfSavepoint)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return 0;
     }
 
     public Object createXATransactionFromLocalTransaction(int format_id,
             byte[] global_id, byte[] branch_id) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public Serializable getProperty(String key) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public Serializable getPropertyDefault(String key) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
 
     public boolean propertyDefaultIsVisible(String key)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return false;
     }
 
     public void setProperty(String key, Serializable value,
             boolean dbOnlyProperty) throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
     public void setPropertyDefault(String key, Serializable value)
             throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
 
     }
 
     public Properties getProperties() throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return null;
     }
     public DataValueFactory getDataValueFactory() throws StandardException {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
         return(null);
     }
 
     public void setNoLockWait(boolean noWait) {
-        // TODO Auto-generated method stub
+        // Auto-generated method stub
     }
 
 }
