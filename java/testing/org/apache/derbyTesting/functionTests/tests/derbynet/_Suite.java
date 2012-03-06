@@ -42,7 +42,7 @@ public class _Suite extends BaseTestCase  {
         super(name);
     }
 
-    public static Test suite() {
+    public static Test suite() throws Exception {
 
         TestSuite suite = new TestSuite("derbynet");
         suite.addTest(PrepareStatementTest.suite());
@@ -80,6 +80,7 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(NSSecurityMechanismTest.suite());
             // Test does not run on J2ME    
             suite.addTest(DerbyNetNewServerTest.suite());
+            suite.addTest(ProtocolTest.suite());
         }
 
         // These tests references a client class directly

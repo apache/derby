@@ -65,7 +65,7 @@
     <mkdir dir="${out.dir}/${derby.testing.functest.dir}/tests/derbynet"/>
   </target>
 
-  <target name="compilet1" depends="compilet2">
+  <target name="compilet1" depends="compilet2, compilet3">
     <javac
       source="1.4"
       target="1.4"
@@ -86,6 +86,7 @@
       <include name="${this.dir}/*.java"/>
       <exclude name="${this.dir}/dataSourcePermissions_net.java"/>
       <exclude name="${this.dir}/SqlExceptionTest.java"/>
+      <exclude name="${this.dir}/ProtocolTest.java"/>
     </javac>
   </target>
 
@@ -111,6 +112,28 @@
       <include name="${this.dir}/SqlExceptionTest.java"/>
     </javac>
   </target> 
+
+  <target name="compilet3">
+    <javac
+      source="1.5"
+      target="1.5"
+      bootclasspath="${empty}"
+      nowarn="on"
+      debug="true"
+      depend="${depend}"
+      deprecation="${deprecation}"
+      optimize="${optimize}"
+      proceed="${proceed}"
+      verbose="${verbose}"
+      srcdir="${derby.testing.src.dir}"
+      destdir="${out.dir}">
+      <classpath>
+        <pathelement path="${junit}"/>
+        <pathelement path="${java15compile.classpath}"/>
+      </classpath>
+      <include name="${this.dir}/ProtocolTest.java"/>
+    </javac>
+  </target>
 
   <target name="copyfiles">
     <copy todir="${out.dir}/${derby.testing.functest.dir}/tests/derbynet">
