@@ -3196,8 +3196,6 @@ public abstract class EmbedConnection implements EngineConnection
 	public void clearLOBMapping() throws SQLException {
 
 		//free all the lob resources in the HashMap
-		//initialize the locator value to 0 and
-		//the hash table object to null.
 		Map map = rootConnection.lobReferences;
 		if (map != null) {
             Iterator it = map.keySet ().iterator ();
@@ -3211,18 +3209,25 @@ public abstract class EmbedConnection implements EngineConnection
         }
 		
 		synchronized (this) {   
+            // Try a bit harder to close all open files, as open file handles
+            // can cause problems further down the road.
 			if (lobFiles != null) {       
+                SQLException firstException = null;
 				Iterator it = lobFiles.iterator();
-				while (it.hasNext()) {
-					try {
-						((LOBFile) it.next()).close();
-					} catch (IOException ioe) {
-						throw Util.javaException(ioe);
-					}
-					finally {
-						lobFiles.clear();
-					}
-				}
+                while (it.hasNext()) {
+                    try {
+                        ((LOBFile) it.next()).close();
+                    } catch (IOException ioe) {
+                        // Discard all exceptions besides the first one.
+                        if (firstException == null) {
+                            firstException = Util.javaException(ioe);
+                        }
+                    }
+                }
+                lobFiles.clear();
+                if (firstException != null) {
+                    throw firstException;
+                }
 			}
 		}
 	}
@@ -3271,7 +3276,7 @@ public abstract class EmbedConnection implements EngineConnection
 	* Return the Hash Map in the root connection
 	* @return the HashMap that contains the locator to LOB object mapping
 	*/
-	public HashMap getlobHMObj() {
+	private HashMap getlobHMObj() {
 		if (rootConnection.lobHashMap == null) {
 			rootConnection.lobHashMap = new HashMap();
 		}
