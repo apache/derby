@@ -27,7 +27,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.AccessController;
 import java.security.Policy;
+import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
+import java.security.PrivilegedExceptionAction;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -247,7 +249,7 @@ public final class SecurityManagerSetup extends TestSetup {
 			return;
 		
 		// and install
-		AccessController.doPrivileged(new java.security.PrivilegedAction() {
+        AccessController.doPrivileged(new PrivilegedAction() {
 
 
                 public Object run() {
@@ -269,21 +271,13 @@ public final class SecurityManagerSetup extends TestSetup {
 			set.setProperty("java.security.policy", policyResource);
 			return;
 		}
-		URL policyURL = BaseTestCase.getTestResource(policyResource);
-
-		// maybe the passed in resource was an URL to begin with
-		if ( policyURL == null )
-		{
-			try { policyURL = new URL( policyResource ); }
-			catch (Exception e) { System.out.println( "Unreadable url: " + policyResource ); }
-		}
-
-		if (policyURL != null) {
-			set.setProperty("java.security.policy",
-					policyURL.toExternalForm());
+        try {
+            URL policyURL = getResourceURL(policyResource);
+            set.setProperty("java.security.policy", policyURL.toExternalForm());
+        } catch (MalformedURLException mue) {
+            BaseTestCase.alarm("Unreadable policy URL: " + policyResource);
         }
 	}
-
 	
 	/**
 	 * Determine the settings of the classpath in order to configure
@@ -442,7 +436,7 @@ public final class SecurityManagerSetup extends TestSetup {
 	static URL getURL(final Class cl)
 	{
 		return (URL)
-		   AccessController.doPrivileged(new java.security.PrivilegedAction() {
+            AccessController.doPrivileged(new PrivilegedAction() {
 
 			public Object run() {
 
@@ -467,7 +461,7 @@ public final class SecurityManagerSetup extends TestSetup {
 
             AccessController.doPrivileged
             (
-             new java.security.PrivilegedAction()
+             new PrivilegedAction()
              {
                  public Object run() {
                       System.setSecurityManager(null);
@@ -548,7 +542,7 @@ public final class SecurityManagerSetup extends TestSetup {
 
         // Read the contents of both policy files and write them out to
         // a new policy file. Construct a somewhat informative file name.
-        File mergedPF = new File(varDir,
+        final File mergedPF = new File(varDir,
                 new File(policy2.getPath()).getName() +
                     "-MERGED_WITH-" +
                 new File(policy1.getPath()).getName());
@@ -567,7 +561,16 @@ public final class SecurityManagerSetup extends TestSetup {
         }
         i2.close();
         o.close();
-        return mergedPF.toURI().toURL().toExternalForm();
+        try {
+            return (String)
+                AccessController.doPrivileged(new PrivilegedExceptionAction() {
+                    public Object run() throws MalformedURLException {
+                        return mergedPF.toURI().toURL().toExternalForm();
+                    }
+                });
+        } catch (PrivilegedActionException pae) {
+            throw (MalformedURLException)pae.getException();
+        }
     }
 
     /** Opens the resource stream in a privileged block. */
@@ -575,7 +578,7 @@ public final class SecurityManagerSetup extends TestSetup {
             throws IOException {
         try {
             return (InputStream)AccessController.doPrivileged(
-                    new java.security.PrivilegedExceptionAction(){
+                    new PrivilegedExceptionAction(){
                         public Object run() throws IOException {
                             return resource.openStream();
                         }
@@ -589,7 +592,7 @@ public final class SecurityManagerSetup extends TestSetup {
     /** Creates the specified directory if it doesn't exist. */
     private static void mkdir(final File dir) {
         AccessController.doPrivileged(
-            new java.security.PrivilegedAction(){
+            new PrivilegedAction(){
                 public Object run(){
                     if (!dir.exists() && !dir.mkdir()) {
                         fail("failed to create directory: " + dir.getPath());
