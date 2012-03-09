@@ -549,6 +549,13 @@ public abstract class BaseTestCase
             if (emmaactive != null)
                 cmdlist.add("-Demma.active=" + emmaactive);            
 	    }
+
+        if (isCVM()) {
+            // DERBY-5642: The default maximum heap size on CVM is very low.
+            // Increase it to prevent OOME in the forked process.
+            cmdlist.add("-Xmx32M");
+        }
+
 	    cmdlist.add("-classpath");
 	    cmdlist.add(getSystemProperty("java.class.path"));
 	    for (int i =0; i < cmd.length;i++) {
@@ -625,12 +632,20 @@ public abstract class BaseTestCase
     }
 
     /**
+     * Check if this is a CVM-based VM (like phoneME or Oracle Java ME
+     * Embedded Client).
+     */
+    public static boolean isCVM() {
+        return "CVM".equals(getSystemProperty("java.vm.name"));
+    }
+
+    /**
      * Check if the VM is phoneME.
      *
      * @return true if it is phoneME
      */
     public static boolean isPhoneME() {
-        return getSystemProperty("java.vm.name").equals("CVM") &&
+        return isCVM() &&
                 getSystemProperty("java.vm.version").startsWith("phoneme");
     }
 
