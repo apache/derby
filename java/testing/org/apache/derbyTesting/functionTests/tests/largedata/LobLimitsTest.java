@@ -422,6 +422,7 @@ public class LobLimitsTest extends BaseJDBCTestCase {
                 assertSQLState("22003", sqle);
             }
         }
+        rollback();
 
         // ADD NEW TESTS HERE
     }
