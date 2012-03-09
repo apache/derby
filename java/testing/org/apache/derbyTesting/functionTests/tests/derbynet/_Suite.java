@@ -80,8 +80,7 @@ public class _Suite extends BaseTestCase  {
             suite.addTest(NSSecurityMechanismTest.suite());
             // Test does not run on J2ME    
             suite.addTest(DerbyNetNewServerTest.suite());
-            // DERBY-2031: Temporarily disabled, investigating permission issue.
-            //suite.addTest(ProtocolTest.suite());
+            suite.addTest(ProtocolTest.suite());
         }
 
         // These tests references a client class directly
