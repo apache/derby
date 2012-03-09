@@ -82,12 +82,10 @@ import java.util.Hashtable;
 import java.util.Enumeration;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import java.net.URL;
 
-import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.CodeSource;
 import java.security.PrivilegedAction;
@@ -150,7 +148,7 @@ public class BaseDataFileFactory
 
 	private     UUID            identifier;      // unique id for locking 
 
-	private     Object          freezeSemaphore;
+	private final Object freezeSemaphore = new Object();
 
 
     // is the data store frozen - protected by freezeSemaphore
@@ -203,7 +201,6 @@ public class BaseDataFileFactory
 
     // PrivilegedAction actions
     private int actionCode;
-    private static final int GET_TEMP_DIRECTORY_ACTION              = 1;
     private static final int REMOVE_TEMP_DIRECTORY_ACTION           = 2;
     private static final int GET_CONTAINER_PATH_ACTION              = 3;
     private static final int GET_ALTERNATE_CONTAINER_PATH_ACTION    = 4;
@@ -225,7 +222,6 @@ public class BaseDataFileFactory
     private UUIDFactory     uuidFactory;
     private String          databaseDirectory;
 
-    private String          backupPath;
     private File            backupRoot;
     private String[]        bfilelist;
 
@@ -434,8 +430,6 @@ public class BaseDataFileFactory
 			inCreateNoLog = 
                 (noLog != null && Boolean.valueOf(noLog).booleanValue());
 		}
-
-		freezeSemaphore = new Object();
 
 		droppedTableStubInfo = new Hashtable();
 
@@ -1401,20 +1395,6 @@ public class BaseDataFileFactory
 		getLogFactory().flush(instant);
 	}
 
-	/**
-		Ask the log factory to flush the side log up to this bip location
-		Not implemented in this class - subclass who deals with side log must
-		override this.
-
-		@exception StandardException Derby Standard Error Policy
-	*/
-	private void syncSideLog(long bipLocation)
-		 throws StandardException
-	{
-		return;
-	}
-
-
 	LogFactory getLogFactory() 
 	{
 		return logFactory;
@@ -1464,18 +1444,6 @@ public class BaseDataFileFactory
         return new RAFContainer(factory);
     }
 
-	/**
-	 *	This page is going from clean to dirty, this is a chance for the
-	 *	sub class to do something if so desired
-	 *
-	 * @exception StandardException Standard Derby Error Policy
-	 */
-	private void pageToDirty(RawTransaction t, StoredPage page)
-		 throws StandardException
-	{
-		return;					// this implementation does nothing
-	}
-
 	/*
 	 * Get the loggable page action that is associated with this implementation
 	 *
@@ -1501,20 +1469,6 @@ public class BaseDataFileFactory
 		return loggableAllocActions;
 	}
 
-    synchronized StorageFile getTempDirectory()
-    {
-        actionCode = GET_TEMP_DIRECTORY_ACTION;
-        try
-        {
-            return (StorageFile) AccessController.doPrivileged( this);
-        }
-        catch (PrivilegedActionException pae)
-        {  
-            // getTempDirectory does not actually throw an exception
-            return null;
-        } 
-    }
-    
     private synchronized void removeTempDirectory()
     {
         if( storageFactory != null)
@@ -1980,10 +1934,6 @@ public class BaseDataFileFactory
                 if (fileLockExisted && !throwDBlckException)
                 {
 
-                    StandardException multipleJBMSWarning =
-                      StandardException.newException(
-                          SQLState.DATA_MULTIPLE_JBMS_WARNING, args);
-
                     String warningMsg = 
                       MessageService.getCompleteMessage(
                           SQLState.DATA_MULTIPLE_JBMS_WARNING, args);
@@ -2092,8 +2042,6 @@ public class BaseDataFileFactory
 		//multiple jvm booting the same database on Unix environments.
 		if(exFileLock != null)
 			exFileLock.releaseExclusiveFileLock();
-
-        return;
     } // end of privReleaseJBMSLockOnDB
         
 	private void logMsg(String msg)
@@ -2591,7 +2539,7 @@ public class BaseDataFileFactory
                             AccessController.doPrivileged(
                                 new PrivilegedAction() {
                                     public Object run() {
-                                        return new Boolean(bsegdir.exists());
+                                        return Boolean.valueOf(bsegdir.exists());
                                     }
                             })).booleanValue();
                     if (bsegdirExists) {
@@ -2600,7 +2548,7 @@ public class BaseDataFileFactory
                             AccessController.doPrivileged(
                             new PrivilegedAction() {
                                 public Object run() {
-                                    return new Boolean(bsegdir.isDirectory());
+                                    return Boolean.valueOf(bsegdir.isDirectory());
                                 }
                             })).booleanValue();
                         if (isDirectory) {
@@ -2628,7 +2576,6 @@ public class BaseDataFileFactory
         synchronized (this)
         {
             actionCode = RESTORE_DATA_DIRECTORY_ACTION;
-            this.backupPath = backupPath;
             this.backupRoot = backupRoot;
             this.bfilelist = bfilelist;
             try
@@ -2641,7 +2588,6 @@ public class BaseDataFileFactory
             }
             finally
             {
-                this.backupPath = null;
                 this.backupRoot = null;
                 this.bfilelist = null;
             }
@@ -2744,9 +2690,6 @@ public class BaseDataFileFactory
             supportsRandomAccess = storageFactory.supportsRandomAccess();
             return null;
             
-        case GET_TEMP_DIRECTORY_ACTION:
-            return storageFactory.getTempDir();
-
         case REMOVE_TEMP_DIRECTORY_ACTION:
             StorageFile tempDir = storageFactory.getTempDir();
             if( tempDir != null)
