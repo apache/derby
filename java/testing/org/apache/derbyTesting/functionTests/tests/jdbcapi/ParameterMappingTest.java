@@ -45,13 +45,11 @@ import java.util.HashSet;
 import java.math.RoundingMode;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.apache.derbyTesting.junit.BigDecimalHandler;
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.JDBC;
 import org.apache.derbyTesting.junit.TestConfiguration;
-import org.apache.derbyTesting.junit.Utilities;
 
 import org.apache.derby.iapi.types.HarmonySerialBlob;
 import org.apache.derby.iapi.types.HarmonySerialClob;
@@ -60,7 +58,8 @@ import org.apache.derby.iapi.types.HarmonySerialClob;
  * 
  */
 public class ParameterMappingTest extends BaseJDBCTestCase {
-    private static boolean HAVE_BIG_DECIMAL;
+    /** We support BigDecimal if we're <em>not</em> running under JSR 169. */
+    private static final boolean HAVE_BIG_DECIMAL = !JDBC.vmSupportsJSR169();
 
     private static final String BAD_TYPE = "42962";
     private static final String UTF8 = "UTF-8";
@@ -73,13 +72,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
     private static  final   String  WONT_FIT = "22003";
     private static  final   String  TRUNCATED = "22001";
         
-    static {
-        if (JDBC.vmSupportsJSR169())
-            HAVE_BIG_DECIMAL = false;
-        else
-            HAVE_BIG_DECIMAL = true;
-    }
-
     private static int[] jdbcTypes = { Types.TINYINT, Types.SMALLINT,
             Types.INTEGER, Types.BIGINT, Types.REAL, Types.FLOAT, Types.DOUBLE,
             Types.DECIMAL, Types.NUMERIC, Types.BIT, Types.BOOLEAN,
@@ -1128,7 +1120,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 byte b = rs.getByte(1);
                 boolean wn = rs.wasNull();
@@ -1179,7 +1170,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 int i = rs.getInt(1);
                 boolean wn = rs.wasNull();
@@ -1204,7 +1194,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 long l = rs.getLong(1);
                 boolean wn = rs.wasNull();
@@ -1281,7 +1270,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 BigDecimal bd = rs.getBigDecimal(1);
                 boolean wn = rs.wasNull();
@@ -1310,7 +1298,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 boolean b = rs.getBoolean(1);
                 boolean wn = rs.wasNull();
@@ -1336,7 +1323,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 String s = rs.getString(1);
                 boolean wn = rs.wasNull();
@@ -1403,7 +1389,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 byte[] data = rs.getBytes(1);
                 boolean wn = rs.wasNull();
@@ -1439,7 +1424,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
 
             boolean worked;
             SQLException sqleResult = null;
-            ;
             ResultSet rs = null;
             try {
                 rs = ps.executeQuery();
@@ -1472,7 +1456,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         {
             boolean worked;
             SQLException sqleResult = null;
-            ;
             ResultSet rs = null;
             try {
                 // getTime()
@@ -1505,7 +1488,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         {
             boolean worked;
             SQLException sqleResult = null;
-            ;
             ResultSet rs = null;
             try {
                 // getTimestamp();
@@ -1544,7 +1526,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 InputStream is = rs.getAsciiStream(1);
                 boolean wn = rs.wasNull();
@@ -1583,7 +1564,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 InputStream is = rs.getBinaryStream(1);
                 if (isNull) {
@@ -1612,7 +1592,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
 
                 Reader r = rs.getCharacterStream(1);
@@ -1643,7 +1622,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 Clob clob = rs.getClob(1);
                 boolean wn = rs.wasNull();
@@ -1674,7 +1652,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 Blob blob = rs.getBlob(1);
                 boolean wn = rs.wasNull();
@@ -1703,7 +1680,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             rs.next();
             boolean worked;
             SQLException sqleResult = null;
-            ;
             try {
                 InputStream is = rs.getUnicodeStream(1);
                 boolean wn = rs.wasNull();
@@ -1733,8 +1709,6 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             // getObject();
             ResultSet rs = ps.executeQuery();
             rs.next();
-            SQLException sqleResult = null;
-            ;
             try {
 
                 boolean worked;
@@ -1767,7 +1741,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
                 assertTrue(worked);
 
             } catch (SQLException sqle) {
-                sqleResult = sqle;
+                throw sqle; // Just pass this on to fail the test.
             }
             rs.close();
         }
@@ -3096,7 +3070,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 // setClob(null)
 
-                psi.setClob(1, null);
+                psi.setClob(1, (Clob)null);
                 psi.executeUpdate();
                 getValidValue(psq, jdbcTypes[type], "setClob");
 
@@ -3116,7 +3090,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 // setClob(null) as batch
 
-                psi.setClob(1, null);
+                psi.setClob(1, (Clob)null);
                 psi.addBatch();
                 psi.executeBatch();
                 getValidValue(psq, jdbcTypes[type], "setClob");
@@ -3187,7 +3161,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 // Blob(null)
 
-                psi.setBlob(1, null);
+                psi.setBlob(1, (Blob)null);
                 psi.executeUpdate();
                 getValidValue(psq, jdbcTypes[type], "setBlob");
 
@@ -3206,7 +3180,7 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
             try {
                 // setBlob(null) as batch
 
-                psi.setBlob(1, null);
+                psi.setBlob(1, (Blob)null);
                 psi.addBatch();
                 psi.executeBatch();
                 getValidValue(psq, jdbcTypes[type], "setBlob");
@@ -3428,26 +3402,24 @@ public class ParameterMappingTest extends BaseJDBCTestCase {
         getValidValue(psq, jdbcTypes[type], "setObject");
     }
 
-    private static void unexpectedException(SQLException sqle) {
-
-        fail("FAIL unexpected exception - ");
-        showException(sqle);
-        sqle.printStackTrace(System.out);
-    }
-
+    /**
+     * Fails the test, doing some processing on the SQL state and exception
+     * message.
+     * <p>
+     * The method accepts a {@code null} SQLState and a {@code null} exception
+     * message, although these conditions would normally be considered as bugs.
+     *
+     * @param sqle the cause of the failure
+     */
     private static void showException(SQLException sqle) {
-        do {
-            String state = sqle.getSQLState();
-            if (state == null)
-                state = "?????";
+        String state = sqle.getSQLState();
+        if (state == null)
+            state = "?????";
 
-            String msg = sqle.getMessage();
-            if (msg == null)
-                msg = "?? no message ??";
-            sqle.printStackTrace();
-            fail(" (" + state + "):" + msg);
-            sqle = sqle.getNextException();
-        } while (sqle != null);
+        String msg = sqle.getMessage();
+        if (msg == null)
+            msg = "?? no message ??";
+        fail(" (" + state + "):" + msg, sqle);
     }
 
     private static boolean setValidValue(PreparedStatement ps, int param,
