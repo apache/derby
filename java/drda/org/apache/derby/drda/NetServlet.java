@@ -68,9 +68,6 @@ public class NetServlet extends HttpServlet {
 
 	private NetworkServerControl server;
 
-	// for doPri block
-	private Runnable service;
-	
 	/**
 		Initialize the servlet.
 		Configuration parameters:
@@ -146,11 +143,7 @@ public class NetServlet extends HttpServlet {
 		String returnMessage;
 		String traceSessionMessage;
 		String traceDirMessage;
-		String contMessage;
-		String setParamMessage;
-		String setParamMessage2;
 		String netParamMessage;
-        String formHeader = null;
 
 		LocalizedResource langUtil;
         String locale[] = new String[ 1 ];
@@ -161,7 +154,7 @@ public class NetServlet extends HttpServlet {
 		//prevent caching of the servlet since contents can change - beetle 4649
 		response.setHeader("Cache-Control", "no-cache,no-store");
 
-		formHeader = "<form enctype='multipart/form-data; charset=UTF-8' action='" +
+		String formHeader = "<form enctype='multipart/form-data; charset=UTF-8' action='" +
 			request.getRequestURI() +" '>";
 
         PrintWriter out = new PrintWriter
@@ -178,9 +171,6 @@ public class NetServlet extends HttpServlet {
 		traceOnOffMessage = escapeSingleQuotes(langUtil.getTextMessage("SRV_TraceOnOff"));
 		returnMessage = escapeSingleQuotes(langUtil.getTextMessage("SRV_Return"));
 		traceDirMessage = escapeSingleQuotes(langUtil.getTextMessage("SRV_TraceDir"));
-		contMessage = escapeSingleQuotes(langUtil.getTextMessage("SRV_Continue"));
-		setParamMessage = escapeSingleQuotes(langUtil.getTextMessage("SRV_SetParam"));
-		setParamMessage2 = escapeSingleQuotes(langUtil.getTextMessage("SRV_SetParam2"));
 		netParamMessage = escapeSingleQuotes(langUtil.getTextMessage("SRV_NetParam"));
 
 		printBanner(langUtil, out);
@@ -344,7 +334,7 @@ public class NetServlet extends HttpServlet {
 				if (doAction.equals(traceOnOffMessage))
 				{
 					String sessionid = request.getParameter("sessionid");
-					int session = 0;
+					int session;
 					try {
 					 	session = (new Integer(sessionid)).intValue();
 					} catch (Exception e) {
@@ -354,7 +344,7 @@ public class NetServlet extends HttpServlet {
                                        returnMessage, out);
 						return;
 					}
-					Properties p = null;
+					Properties p;
 					try {
 						p = server.getCurrentProperties();
 					} catch (Exception e) {
@@ -424,8 +414,8 @@ public class NetServlet extends HttpServlet {
 		}
 		else if (form.equals(netParamMessage))
 		{
-			int maxThreads = 0;
-			int timeSlice = 0;
+			int maxThreads;
+			int timeSlice;
 			String maxName = langUtil.getTextMessage("SRV_NewMaxThreads");
 			String sliceName = langUtil.getTextMessage("SRV_NewTimeSlice");
 			try {
@@ -521,12 +511,12 @@ public class NetServlet extends HttpServlet {
 	private String getParam(HttpServletRequest request, String paramName) throws
 	java.io.IOException { 
 				
-		String newValue= null;
 		String value = request.getParameter(paramName);
-		if (value == null)
-			return value;
-		newValue = new String(value.getBytes("ISO-8859-1"),"UTF8");
-		return newValue;
+        if (value != null) {
+            return new String(value.getBytes("ISO-8859-1"),"UTF8");
+        } else {
+            return null;
+        }
 	}
 
 	/**
@@ -543,7 +533,7 @@ public class NetServlet extends HttpServlet {
         ( LocalizedResource localUtil, String returnMessage, PrintWriter out )
 		throws ServletException
 	{
-		service = new Runnable() {
+	    final Runnable service = new Runnable() {
 			public void run() {
 				try {
 					//Echo server output to console
@@ -1057,7 +1047,8 @@ public class NetServlet extends HttpServlet {
 	 * get an HTML labelled message from the resource bundle file, according to
 	 * the given key.
 	 */
-	public String getHtmlLabelledMessageInstance(LocalizedResource localUtil, String key, String id) {
+	private String getHtmlLabelledMessageInstance(LocalizedResource localUtil,
+                                                  String key, String id) {
 
 		if (id == null)
 			id = "";
@@ -1073,10 +1064,7 @@ public class NetServlet extends HttpServlet {
 	 * @param out Form PrintWriter
 	 */
 	private void printAsContentHeader(String str, PrintWriter out) {
-
 		out.println("<a name=\"navskip\"></a><h2>" + str + "</h2>");
-		return;
-
 	}
 
 	/**
