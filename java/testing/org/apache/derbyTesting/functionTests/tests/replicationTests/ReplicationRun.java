@@ -1598,8 +1598,10 @@ public class ReplicationRun extends BaseTestCase
                     try
                     {
                         util.DEBUG(ID+"************** In run().");
-                        Runtime.getRuntime().exec(fullCmd,envElements,workingDir);
+                        Process proc = Runtime.getRuntime().exec(
+                                fullCmd, envElements, workingDir);
                         util.DEBUG(ID+"************** Done exec().");
+                        processDEBUGOutput(ID, proc);
                     }
                     catch (Exception ex)
                     {
@@ -1611,8 +1613,7 @@ public class ReplicationRun extends BaseTestCase
             );
             util.DEBUG(ID+"************** Do .start().");
             cmdThread.start();
-            cmdThread.join();
-            util.DEBUG(ID+"************** Done .join().");
+            registerThread(cmdThread);
         }
      
         util.DEBUG(ID+"--- ");
@@ -1709,8 +1710,6 @@ public class ReplicationRun extends BaseTestCase
             util.DEBUG(ID+"************** Do .start(). ");
             serverThread.start();
             registerThread(serverThread);
-            // serverThread.join();
-            // DEBUG(ID+"************** Done .join().");
             
         }
         
@@ -2414,7 +2413,9 @@ public class ReplicationRun extends BaseTestCase
             util.DEBUG(id+line);
         }
         util.DEBUG(id+"----     ");
-        
+
+        int exitCode = proc.waitFor();
+        util.DEBUG(id + "process exit status: " + exitCode);
     }
 
     /**
