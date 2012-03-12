@@ -101,10 +101,10 @@ public class OldVersions
             }
             // Derby 10.3.1.4 does not boot on the phoneME advanced platform,
             // (see DERBY-3176) so don't run upgrade tests in this combination.
-            if ( BaseTestCase.isPhoneME()
+            if ( BaseTestCase.isCVM()
                   && old[i][0]==10 && old[i][1]==3 
                   && old[i][2]==1 && old[i][3]==4 ) {
-                traceit("Skipping 10.3.1.4 on CVM/phoneme");
+                traceit("Skipping 10.3.1.4 on CVM");
                 continue;
             }
 
