@@ -472,9 +472,8 @@ public class NetServlet extends HttpServlet {
 
 		}
 
-		out.println( "</html>" ); 
-		out.println( "</body>" ); 	
-
+        out.println( "</body>" ); 	
+        out.println( "</html>" ); 
 	}
 
 	/**
@@ -616,8 +615,8 @@ public class NetServlet extends HttpServlet {
 		printAsContentHeader(localUtil.getTextMessage("SRV_NetworkServerError"), out);
 		out.println( "<h4>"+localUtil.getTextMessage("SRV_Message", e.getMessage()) + "</h4>" );
 		out.println( "<INPUT type=submit name=form value='"+returnMessage+"'>" );
-		out.println( "</html>" );
 		out.println( "</body>" );
+		out.println( "</html>" );
 	}
 	/**
 	 *	Display an error form
@@ -638,8 +637,8 @@ public class NetServlet extends HttpServlet {
 		printAsContentHeader(localUtil.getTextMessage("SRV_NetworkServerError"), out);
 		out.println( "<h4>"+localUtil.getTextMessage("SRV_Message", msg) + "</h4>" );
 		out.println( "<INPUT type=submit name=form value='"+returnMessage+"'>" );
-		out.println( "</html>" ); 
 		out.println( "</body>" ); 	
+		out.println( "</html>" ); 
 	}
 	/**
 	 *	Display the current Network server status
@@ -930,18 +929,21 @@ public class NetServlet extends HttpServlet {
 	 */
 	private void printBanner(LocalizedResource localUtil, PrintWriter out)
 	{
+        out.println("<!DOCTYPE html>");
+        out.println("<html>");        
+        out.println("<head>");
+        out.println("<title>"+localUtil.getTextMessage("SRV_Banner")+"</title>");
+        out.println("</head>");
+        out.println("<body>");     
 		out.println("<a href=\"#navskip\">[ " +
 		localUtil.getTextMessage("SRV_SkipToContent") + " ]</a>");
 		out.println("  -  <a href=\"" + SERVLET_ADDRESS + "\">[ " +
 		localUtil.getTextMessage("SRV_BackToMain") + " ]</a>");
-		out.println( "<html>" );		
-		out.println( "<title>"+localUtil.getTextMessage("SRV_Banner")+"</title>" );
-		out.println( "<body>" ); 	
-		out.println( "<hr>" );
-		out.println( "<h1>"+localUtil.getTextMessage("SRV_Banner")+"</h1>" );
-		out.println( "<hr>" );
-
+        out.println("<hr>");
+        out.println("<h1>"+localUtil.getTextMessage("SRV_Banner")+"</h1>");
+        out.println("<hr>");
 	}
+
 	/**
 	 * Determine the locale file needed for this browsers preferences
 	 * Defaults to the settings for derby.locale and derby.codeset if set
