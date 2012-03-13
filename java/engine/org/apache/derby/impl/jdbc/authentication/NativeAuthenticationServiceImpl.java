@@ -555,11 +555,12 @@ public final class NativeAuthenticationServiceImpl
             {
                 if ( dd.getAuthorizationDatabaseOwner().equals( userName ) )
                 {
-                    throw SQLWarningFactory.newSQLWarning( SQLState.DBO_PASSWORD_EXPIRES_SOON );
+                    throw SQLWarningFactory.newSQLWarning( SQLState.DBO_PASSWORD_EXPIRES_SOON, databaseName );
                 }
                 
                 long    daysRemaining = remainingLifetime / Property.MILLISECONDS_IN_DAY;
-                throw SQLWarningFactory.newSQLWarning( SQLState.PASSWORD_EXPIRES_SOON, Long.toString( daysRemaining ) );
+                throw SQLWarningFactory.newSQLWarning
+                    ( SQLState.PASSWORD_EXPIRES_SOON, Long.toString( daysRemaining ), databaseName );
             }
         }
         

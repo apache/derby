@@ -41,14 +41,13 @@ public class SQLWarningFactory {
 	 * up the messageId to generate a localised warning message. Also, SQLState
 	 * is set correctly based on the messageId.
 	 * 
-	 * @param messageId
-	 *            A Derby messageId as defined in
-	 *            {@link SQLState org.apache.derby.shared.common.reference.SQLState}.
+	 * @param messageId A Derby messageId as defined in{@link SQLState org.apache.derby.shared.common.reference.SQLState}.
 	 * @return Properly initialized SQLWarning instance.
 	 * @see org.apache.derby.shared.common.reference.SQLState
 	 */
-	public static SQLWarning newSQLWarning(String messageId) {
-		return newSQLWarning(messageId, null);
+	public static SQLWarning newSQLWarning( String messageId )
+    {
+		return newSQLWarning(messageId, new Object[] {} );
 	}
 
 	/**
@@ -56,18 +55,51 @@ public class SQLWarningFactory {
 	 * argument. It looks up the messageId to generate a localised warning
 	 * message. Also, SQLState is set correctly based on the messageId.
 	 * 
-	 * @param messageId
-	 *            A Derby messageId as defined in
-	 *            {@link SQLState org.apache.derby.shared.common.reference.SQLState}.
-	 * @param arg
-	 *            An argument for the warning message
+	 * @param messageId A Derby messageId as defined in {@link SQLState org.apache.derby.shared.common.reference.SQLState}.
+	 * @param arg1 An argument for the warning message
 	 * @return Properly initialized SQLWarning instance.
 	 * @see org.apache.derby.shared.common.reference.SQLState
 	 */
-	public static SQLWarning newSQLWarning(String messageId, Object arg) {
-		return new SQLWarning(MessageService.getCompleteMessage(messageId,
-				new Object[] { arg }), StandardException
-				.getSQLStateFromIdentifier(messageId), ExceptionSeverity.WARNING_SEVERITY);
+	public static SQLWarning newSQLWarning( String messageId, Object arg1 )
+    {
+        return newSQLWarning( messageId, new Object[] { arg1 } );
+	}
+
+	/**
+	 * Generates a SQLWarning instance based on the supplied messageId and
+	 * arguments. It looks up the messageId to generate a localised warning
+	 * message. Also, SQLState is set correctly based on the messageId.
+	 * 
+	 * @param messageId
+	 *            A Derby messageId as defined in {@link SQLState org.apache.derby.shared.common.reference.SQLState}.
+	 * @param arg1 First argument for the warning message
+	 * @param arg2 Second argument for the warning message
+	 * @return Properly initialized SQLWarning instance.
+	 * @see org.apache.derby.shared.common.reference.SQLState
+	 */
+	public static SQLWarning newSQLWarning( String messageId, Object arg1, Object arg2 )
+    {
+        return newSQLWarning( messageId, new Object[] { arg1, arg2 } );
+	}
+
+	/**
+	 * Generates a SQLWarning instance based on the supplied messageId and
+	 * arguments. It looks up the messageId to generate a localised warning
+	 * message. Also, SQLState is set correctly based on the messageId.
+	 * 
+	 * @param messageId A Derby messageId as defined in {@link SQLState org.apache.derby.shared.common.reference.SQLState}.
+	 * @param args Arguments for the warning message
+	 * @return Properly initialized SQLWarning instance.
+	 * @see org.apache.derby.shared.common.reference.SQLState
+	 */
+	public static SQLWarning newSQLWarning( String messageId, Object[] args )
+    {
+		return new SQLWarning
+            (
+             MessageService.getCompleteMessage( messageId, args ),
+             StandardException.getSQLStateFromIdentifier(messageId),
+             ExceptionSeverity.WARNING_SEVERITY
+             );
 	}
 
 }

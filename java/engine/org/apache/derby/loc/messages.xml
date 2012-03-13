@@ -213,13 +213,15 @@ Guide.
 
             <msg>
                 <name>01J15</name>
-                <text>Your password will expire in {0} day(s). Please use the SYSCS_UTIL.SYSCS_MODIFY_PASSWORD  procedure to change your password.</text>
+                <text>Your password will expire in {0} day(s). Please use the SYSCS_UTIL.SYSCS_MODIFY_PASSWORD procedure to change your password in database '{1}'.</text>
                 <arg>remainingDays</arg>
+                <arg>databaseName</arg>
             </msg>
 
             <msg>
                 <name>01J16</name>
-                <text>Your password is stale. To protect the database, you should update your password soon. Please use the SYSCS_UTIL.SYSCS_MODIFY_PASSWORD  procedure to change your password.</text>
+                <text>Your password is stale. To protect the database, you should update your password soon. Please use the SYSCS_UTIL.SYSCS_MODIFY_PASSWORD procedure to change your password in database '{0}'.</text>
+                <arg>databaseName</arg>
             </msg>
 
         </family>
@@ -5021,6 +5023,11 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
                 <name>XK000.S</name>
                 <text>The security policy could not be reloaded: {0}</text>
                 <arg>reason</arg>
+            </msg>
+
+            <msg>
+                <name>XK001.S</name>
+                <text>Username not found in SYS.SYSUSERS.</text>
             </msg>
 
         </family>

@@ -55,6 +55,7 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
     private static  final   String      DUPLICATE_USER = "X0Y68";
     private static  final   String      CANT_DROP_DBO = "4251F";
     private static  final   String      WEAK_AUTHENTICATION = "4251G";
+    private static  final   String      MISSING_USER = "XK001";
 
     private static  final   String      HASHING_FORMAT_10_9 = "3b62";
     private static  final   int           HEX_CHARS_PER_BYTE = 2;
@@ -182,6 +183,10 @@ public class NativeAuthProcs extends GeneratedColumnsHelper
         
         Connection  dboConnection = openUserConnection( TEST_DBO );
         Connection  janetConnection = openUserConnection( JANET );
+
+        vetExecution( dboConnection, false, "call syscs_util.syscs_reset_password( 'FOO', 'bar' )", MISSING_USER );
+        vetExecution( dboConnection, false, "call syscs_util.syscs_drop_user( 'FOO' )", MISSING_USER );
+        vetExecution( janetConnection, false, "call syscs_util.syscs_modify_password( 'bar' )", MISSING_USER );
 
         // set a message digest algorithm in case it was unset by a previous test.
         // a message digest algorithm must be set in order to use NATIVE authentication

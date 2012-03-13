@@ -2132,6 +2132,8 @@ public class SystemProcedures  {
             DataDictionary dd = lcc.getDataDictionary();
             TransactionController tc = lcc.getTransactionExecute();
 
+            checkLegalUser( dd, userName );
+            
             /*
             ** Inform the data dictionary that we are about to write to it.
             ** There are several calls to data dictionary "get" methods here
@@ -2183,6 +2185,8 @@ public class SystemProcedures  {
             {
                 throw StandardException.newException( SQLState.CANT_DROP_DBO );
             }
+
+            checkLegalUser( dd, userName );
             
             /*
             ** Inform the data dictionary that we are about to write to it.
@@ -2198,6 +2202,18 @@ public class SystemProcedures  {
             dd.dropUser( userName, lcc.getTransactionExecute() );
             
         } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
+    }
+
+    /**
+     * Raise an exception if the user doesn't exist. See commentary on DERBY-5648.
+     */
+    private static  void    checkLegalUser( DataDictionary dd, String userName )
+        throws StandardException
+    {
+        if ( dd.getUser( userName ) == null )
+        {
+            throw StandardException.newException( SQLState.NO_SUCH_USER );
+        }
     }
   
 }
