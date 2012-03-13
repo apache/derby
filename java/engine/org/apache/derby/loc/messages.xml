@@ -1234,7 +1234,7 @@ Guide.
 
             <msg>
                 <name>4251E</name>
-                <text>No-one can view the '{0}'.'{1}' column.</text>
+                <text>No one can view the '{0}'.'{1}' column.</text>
                  <arg>tableName</arg>
                  <arg>columnName</arg>
            </msg>
