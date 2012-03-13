@@ -126,6 +126,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  NO_COLUMN_PERMISSION = "42502";
     private static  final   String  NO_EXECUTE_PERMISSION = "42504";
     private static  final   String  PASSWORD_EXPIRING = "01J15";
+    private static  final   String  DBO_PASSWORD_EXPIRING = "01J16";
     private static  final   String  BAD_PASSWORD_PROPERTY = "4251J";
     private static  final   String  BAD_PROPERTY_CHANGE = "XCY02";
     private static  final   String  SQL_AUTHORIZATION_NOT_ON = "42Z60";
@@ -1322,6 +1323,8 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
         reportConnectionAttempt( dbName, user, getPassword( user ), true );
 
+        String  expectedSQLState = DBO.equals( user ) ? DBO_PASSWORD_EXPIRING : PASSWORD_EXPIRING;
+
         conn = openConnection( dbName, user, true, null );
 
         SQLWarning  warning = conn.getWarnings();
@@ -1329,7 +1332,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         if ( expiring )
         {
             assertNotNull( tagError( "Should have seen a warning" ), warning );
-            assertSQLState( PASSWORD_EXPIRING, warning );
+            assertSQLState( expectedSQLState, warning );
         }
         else
         {

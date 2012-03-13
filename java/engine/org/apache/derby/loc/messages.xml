@@ -217,6 +217,11 @@ Guide.
                 <arg>remainingDays</arg>
             </msg>
 
+            <msg>
+                <name>01J16</name>
+                <text>Your password is stale. To protect the database, you should update your password soon. Please use the SYSCS_UTIL.SYSCS_MODIFY_PASSWORD  procedure to change your password.</text>
+            </msg>
+
         </family>
 
         <family>

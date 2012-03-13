@@ -553,6 +553,11 @@ public final class NativeAuthenticationServiceImpl
             
             if ( remainingLifetime <= expirationThreshold )
             {
+                if ( dd.getAuthorizationDatabaseOwner().equals( userName ) )
+                {
+                    throw SQLWarningFactory.newSQLWarning( SQLState.DBO_PASSWORD_EXPIRES_SOON );
+                }
+                
                 long    daysRemaining = remainingLifetime / Property.MILLISECONDS_IN_DAY;
                 throw SQLWarningFactory.newSQLWarning( SQLState.PASSWORD_EXPIRES_SOON, Long.toString( daysRemaining ) );
             }
