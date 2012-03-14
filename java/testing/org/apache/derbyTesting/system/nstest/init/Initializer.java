@@ -49,8 +49,7 @@ public class Initializer {
 		int insertsRemaining = NsTest.MAX_INITIAL_ROWS;
 
 		// The JDBC driver should have been loaded by nstest.java at this
-		// point, we just need
-		// to get a connection to the database
+		// point, we just need to get a connection to the database
 		try {
 
 			System.out.println(thread_id
@@ -91,8 +90,8 @@ public class Initializer {
 		while (insertsRemaining-- >= 0) {
 			try {
 				int numInserts = dbutil.add_one_row(conn, thread_id);
-				System.out.println("Intializer.java: exited add_one_row: "
-						+ numInserts + " rows");
+				//System.out.println("Intializer.java: exited add_one_row: "
+				//		+ numInserts + " rows");
 			} catch (Exception e) {
 				System.out.println(" FAIL: " + thread_id
 						+ " unexpected exception:");

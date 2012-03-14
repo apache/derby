@@ -120,7 +120,7 @@ public class TesterObject {
 	public void closeConnection() {
 		try {
 			System.out.println(getThread_id()
-					+ " is closing it's connection to the database...");
+					+ " is closing its connection to the database...");
 			connex.close();
 		} catch (Exception e) {
 			System.out.println("FAIL: " + getThread_id()
@@ -190,15 +190,12 @@ public class TesterObject {
 	// This method will do a basic Select operation based on the following
 	// criteria
 	// The query should return approximately nstest.MAX_LOW_STRESS number of
-	// rows that we
-	// loop through via a result set and perform operations (getXX calls) in
-	// order to ensure
-	// that data flows properly. The method will
-	// return the total number of rows selected. Note that we do not touch rows
-	// with serialkey
-	// less than nstest.NUM_UNTOUCHED_ROWS, and the selects will be based on the
-	// parameter passed
-	// in, viz numRowsToSelect which is <= nstest.NUM_UNTOUCHED_ROWS
+	// rows that we loop through via a result set and perform operations 
+	// (getXX calls) in order to ensure that data flows properly. The method 
+	// will return the total number of rows selected. Note that we do not touch
+	// rows with serialkey less than nstest.NUM_UNTOUCHED_ROWS, and the selects
+	// will be based on the parameter passed in, viz numRowsToSelect which is
+	// <= nstest.NUM_UNTOUCHED_ROWS
 	//
 	// *******************************************************************************************
 	public int doSelectOperation(int numRowsToSelect) throws SQLException {
@@ -231,11 +228,10 @@ public class TesterObject {
 		}
 
 		if (rSet != null) {
-		    // Now work over the returned ResultSet and keep track of number of rows
-		    // returned
+		    // Now work over the returned ResultSet and keep track of number of
+		    // rows returned
 		    // We execute the getXXX methods on each of the selected columns so that
-		    // data flow out
-		    // from the network server is also tested.
+		    // data flow out from the network server is also tested.
 		    try {
 		        while (rSet.next()) {
 		            // get value of column id
@@ -302,7 +298,7 @@ public class TesterObject {
 		    }
 		}
 
-		// close the ResultSet and statement and release it's resources.
+		// close the ResultSet and statement and release its resources.
 		try {
 			if ((rSet != null) && (s != null)) {
 				rSet.close();
@@ -326,23 +322,18 @@ public class TesterObject {
 	public void startTesting() {
 
 		// This method needs to be overridden by the child classes in order for
-		// a Tester to
-		// be able to do work. The specifics such as how often the connection is
-		// opened and
-		// closed and how many transactions are done etc etc which form
-		// individual test cases or
-		// sorts are left to the child class to implement in their overridden
-		// version of this
-		// method
+		// a Tester to be able to do work. The specifics such as how often the
+		// connection is opened and closed and how many transactions are done 
+		// etc etc which form individual test cases or sorts are left to the 
+		// child class to implement in their overridden version of this method.
 
 	}// end of startTesting()
 
 	// ** This method abstracts exception message printing for all exception
-	// messages. You may want to change
-	// ****it if more detailed exception messages are desired.
+	// messages. You may want to change it if more detailed exception messages
+	// are desired.
 	// ***Method is synchronized so that the output file will contain sensible
-	// stack traces that are not
-	// ****mixed but rather one exception printed at a time
+	// stack traces that are not mixed but one exception printed at a time
 	public synchronized void printException(String where, Exception e) {
 		if (e instanceof SQLException) {
 			SQLException se = (SQLException) e;

@@ -78,7 +78,6 @@ public class NsTest extends Thread {
 			+ ";create=true");
 
 	public static boolean embeddedMode = false; // true is to run the test in
-
 	// embedded mode
 
 	public static final String driver = new String(
@@ -104,52 +103,32 @@ public class NsTest extends Thread {
 	public static String RESTOREDIR = "restoredir";
 
 	public static boolean START_SERVER_IN_SAME_VM = false;// If the server
-
-	// also needs to be
-	// started as a
-	// thread
+	// also needs to be started as a thread
 
 	public static boolean AUTO_COMMIT_OFF = false; // true is autocommit off
 
 	public static boolean CREATE_DATABASE_ONLY = false;
 
 	public static boolean schemaCreated = false; // initially schema is
-
 	// assumed to not exist
 
-	// *********Uncomment this block for a small test scenario, comment it for
-	// full testing
-	/*
-	 * public static int INIT_THREADS = 3; //keep this low to avoid deadlocks
-	 * public static int MAX_INITIAL_ROWS = 150; //for a small test public
-	 * static int MAX_ITERATIONS = 50; //for a small test public static int
-	 * MAX_LOW_STRESS_ROWS = 10; //for a small test public static int
-	 * MAX_OPERATIONS_PER_CONN = 10; //for a small test public static int
-	 * NUMTESTER1 = 3; //for a small test public static int NUMTESTER2 = 4;
-	 * //for a small test public static int NUMTESTER3 = 3; //for a small test
-	 * public static int NUM_HIGH_STRESS_ROWS = 20; //for a small test public
-	 * static int NUM_UNTOUCHED_ROWS = 50; //for a small test
-	 */
-	// ***End of small test scenario block
-	// ****Comment this block for a small test scenario, uncomment it for full
-	// testing
+	// Default configuration; can be overwritten by
+	// adding the argument 'small' to the call of this class - 
+	// see setSmallConfig()
 	public static int INIT_THREADS = 6; // keep this low to avoid deadlocks
 
 	// public static int MAX_INITIAL_ROWS = 60000; //for network server mode
 	public static int MAX_INITIAL_ROWS = 6000; // for network server mode
 
 	public static int MAX_ITERATIONS = 2000; // Each client does these many
-
 	// transactions in the test.
 
 	// for network server mode
 	public static int MAX_LOW_STRESS_ROWS = 30; // num of rows worked over in a
-
 	// transaction
 
 	// for network server mode
 	public static int MAX_OPERATIONS_PER_CONN = 25; // num of transaction
-
 	// batches made by a client
 
 	// before closing the connection
@@ -212,6 +191,18 @@ public class NsTest extends Thread {
 	public static String driver_type = null;
 
 	private int type;
+    
+	private static NsTest[] testThreads = null;
+
+	public static int numActiveTestThreads() {
+		int activeThreadCount=0;
+		for (int i = 0; i < testThreads.length ; i++)
+		{
+			if (testThreads[i] != null && testThreads[i].isAlive())
+			activeThreadCount++;
+		}
+		return activeThreadCount;
+	}
 
 	public static synchronized void addStats(int type, int addValue) {
 		switch (type) {
@@ -254,6 +245,20 @@ public class NsTest extends Thread {
 			this.setName("Thread " + k);
 	}
 
+	private static void setSmallConfig() {
+        
+		INIT_THREADS = 3; //keep this low to avoid deadlocks
+		MAX_INITIAL_ROWS = 150; //for a small test public
+		MAX_ITERATIONS = 50; //for a small test public static int
+		MAX_LOW_STRESS_ROWS = 10; //for a small test public static int
+		MAX_OPERATIONS_PER_CONN = 10; //for a small test public static int
+		NUMTESTER1 = 3; //for a small test 
+		NUMTESTER2 = 4;//for a small test
+		NUMTESTER3 = 3; //for a small test
+		NUM_HIGH_STRESS_ROWS = 20; //for a small test public
+		NUM_UNTOUCHED_ROWS = 50; //for a small test
+	}
+    
 	// ****************************************************************************
 	//
 	// main - will load the Derby embedded or client, invoke the
@@ -265,7 +270,7 @@ public class NsTest extends Thread {
 	InterruptedException, Exception, Throwable {
 
 		Connection conn = null;
-		if (args.length == 1) {
+		if (args.length >= 1) {
 			driver_type = args[0];
 			if (!((driver_type.equalsIgnoreCase("DerbyClient"))
 					|| (driver_type
@@ -278,7 +283,15 @@ public class NsTest extends Thread {
 		} else {
 			driver_type = "DerbyClient";
 		}
-
+		if (args.length >= 2) {
+		String testConfiguration = args [1];
+		if (testConfiguration.equalsIgnoreCase("small"))
+		{
+			System.out.println("using small config");
+			setSmallConfig();
+		}    
+	}
+        
 		// Load the driver and get a connection to the database
 		String jdbcUrl = "";
 		try {
@@ -352,22 +365,17 @@ public class NsTest extends Thread {
 		mc.start();
 
 		// Now populate the tables using INIT_THREADS number of threads only if
-		// the schemaCreated
-		// flag has not been set. If so, then we assume that some other thread
-		// from possibly
-		// another jvm reached here and has already created the schema and
-		// loaded the tables.
+		// the schemaCreated flag has not been set. If so, then we assume that 
+		// some other thread from possibly another jvm reached here and has
+		// already created the schema and loaded the tables.
 		// Note that we kick off threads of this object type (nstest) and use
-		// the run method to
-		// do the work. The key to starting the init threads is the use of the
-		// constructor
-		// to indicate to the thread that it is an init thread. In this case, we
-		// pass the
-		// value INIT to the constructor and in the run method we go to the
-		// right section of the
+		// the run method to do the work. The key to starting the init threads
+		// is the use of the constructor to indicate to the thread that it is
+		// an init thread. In this case, we pass the value INIT to the
+		// constructor and in the run method we go to the right section of the
 		// code based on what value is passed in. The other possible value that
-		// a thread can get
-		// is TESTER which indicates that these are the main test threads.
+		// a thread can get is TESTER which indicates that these are the main 
+		// test threads.
 
 		if (NsTest.schemaCreated == false) {
 			// Table was created by this object, so we need to load it
@@ -395,9 +403,8 @@ public class NsTest extends Thread {
 			.println("Schema has already been created by another process!");
 
 		// The following 2 lines are used when you want to only create the test
-		// database that can be
-		// used as a reference so that subsequent tests do not need to create
-		// one of their own.
+		// database that can be used as a reference so that subsequent tests do
+		// not need to create one of their own.
 		// The CREATE_DATABASE_ONLY FLAG is set with the rest of the flags
 		if (CREATE_DATABASE_ONLY) {
 			System.out
@@ -412,15 +419,14 @@ public class NsTest extends Thread {
 		// Table was created by some other object, so we assume it is already
 		// loaded
 		// Now kick off the actual test threads that will do the work for us.
-		// Note that we use
-		// the value TESTER when initializing the threads.
+		// Note that we use the value TESTER when initializing the threads.
 		// The total number of threads is NUMTESTER1+NUMTESTER2+NUMTESTER3
 		System.out
 		.println("Kicking off test threads that will work over the test table");
 
 		int numTestThread = 0;
 		int maxTestThreads = 1 + NUMTESTER1 + NUMTESTER2 + NUMTESTER3;
-		NsTest testThreads[] = new NsTest[maxTestThreads];
+		testThreads = new NsTest[maxTestThreads];
 
 		// This loop is made of 3 subloops that will initialize the required
 		// amount of tester threads
@@ -460,7 +466,7 @@ public class NsTest extends Thread {
 
 		}
 
-		// Wait for the init threads to finish and join back
+		// Wait for the test threads to finish and join back
 		for (int j = 0; j < maxTestThreads; j++) {
 			System.out.println("Waiting for thread " + j
 					+ " to join back/finish");
@@ -484,11 +490,11 @@ public class NsTest extends Thread {
 		System.out.println("	Number of failed DELETES = " + numFailedDeletes);
 		System.out.println("	Number of failed SELECTS = " + numFailedSelects);
 		System.out.println("");
-		System.out.println("  Note that this may not be the same as the server side connections made "
+		System.out.println("  Note that this may not be the same as the server side connections made\n"
 				+ "   to the database especially if connection pooling is employed");
 		System.out.println("");
 		System.out
-		.println("NOTE: Failing operations could be because of locking issue that are "
+		.println("NOTE: Failing operations could be because of locking issue that are\n"
 				+ "directly related to the application logic.  They are not necessarily bugs.");
 
 		// Finally also stop the memory checker thread
@@ -503,16 +509,14 @@ public class NsTest extends Thread {
 	// ****************************************************************************
 	//
 	// run() - the main workhorse method of the threads that will either
-	// initialize
-	// the table data or work over it as part of the test process.
+	// initialize the table data or work over it as part of the test process.
 	// Table data initialization threads are of the following type
 	// Initializer -
 	// Bulk Insert client type that deals with a large(stress)
 	// number of rows with the connection being closed after the insert.
 	// Max rows inserted is based on the parameter MAX_INITIAL_ROWS
 	// Note that the run method will also instantiate tester objects of
-	// different
-	// types based on the following criteria
+	// different types based on the following criteria
 	// Tester1 -
 	// The connection to the database is open forever. This client
 	// will do Insert/Update/Delete and simple Select queries over
