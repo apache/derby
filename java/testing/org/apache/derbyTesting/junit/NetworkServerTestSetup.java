@@ -43,19 +43,27 @@ import org.apache.derby.drda.NetworkServerControl;
  */
 final public class NetworkServerTestSetup extends BaseTestSetup {
 
-    /** Setting maximum wait time to 40 seconds by default.  On some platforms
-     * it may take this long to start the server.  Increasing the wait
-     *  time should not adversely affect those
+    /**
+     * <p>
+     * Setting maximum wait time to 4 minutes by default. On some platforms
+     * it may take this long to start the server. See for example
+     * <a href="http://bugs.sun.com/view_bug.do?bug_id=6483406">this JVM
+     * bug</a> that sometimes makes server startup take more than 3 minutes.
+     * </p>
+     *
+     * <p>
+     * Increasing the wait time should not adversely affect those
      *  systems with fast port turnaround as the actual code loops for 
      *  SLEEP_TIME intervals, so should never see WAIT_TIME.
      *  For even slower systems (or for faster systems) the default value can
      *  be overwritten using the property derby.tests.networkServerStartTimeout
      *  (which is in seconds, rather than milliseconds)
+     * </p>
      */
-    private static final long DEFAULT_WAIT_TIME = 40000;
+    private static final long DEFAULT_WAIT_TIME = 240000;
     private static final long WAIT_TIME = getWaitTime();
     
-    /** Sleep for 500 ms before pinging the network server (again) */
+    /** Sleep for 100 ms before pinging the network server (again) */
     private static final int SLEEP_TIME = 100;
 
     public static final String HOST_OPTION = "-h";
@@ -640,13 +648,15 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         while (true) {
             try {
                 networkServerController.ping();
-                if (expectServerUp)
-                    return true;
-                else
-                {
-                    if (System.currentTimeMillis() - startTime > waitTime) {
-                        return true;
+                long elapsed = System.currentTimeMillis() - startTime;
+                if (expectServerUp) {
+                    if (elapsed > 60000L) {
+                        BaseTestCase.alarm(
+                            "Very slow server startup: " + elapsed + " ms");
                     }
+                    return true;
+                } else if (elapsed > waitTime) {
+                    return true;
                 }
             } catch (Throwable e) {
                 if ( !vetPing( e ) )
@@ -711,14 +721,16 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
         return pingForServerUp(control, null, true);
     }
     
-    /*
-     * set the period before network server times out on start up based on the
+    /**
+     * Set the period before network server times out on start up based on the
      * value passed in with property derby.tests.networkServerStartTimeout
-     * in seconds, or use the default
-     * for example: with DEFAULT_WAIT_TIME set to 40000, i.e. 40 seconds,
+     * in seconds, or use the default.
+     * For example: with DEFAULT_WAIT_TIME set to 240000, i.e. 4 minutes,
      * setting the property like so: 
-     *          -Dderby.tests.networkServerStartTimeout=60
-     * would extend the timeout to 1 minute.
+     * <pre>
+     *          -Dderby.tests.networkServerStartTimeout=600
+     * </pre>
+     * would extend the timeout to 10 minutes.
      * If an invalid value is passed in (eg. 'abc') the calling test will fail
      */
     public static long getWaitTime() {
@@ -730,9 +742,9 @@ final public class NetworkServerTestSetup extends BaseTestSetup {
             try {
                 waitTime = (Long.parseLong(waitString)*1000);
             } catch (Exception e) {
-                e.printStackTrace();
-                fail("trouble setting WAIT_TIME from passed in property " +
-                        "derby.tests.networkServerStartTimeout");
+                BaseTestCase.fail(
+                        "trouble setting WAIT_TIME from passed in property " +
+                        "derby.tests.networkServerStartTimeout", e);
             }
         }
         return waitTime;

@@ -35,6 +35,7 @@ import org.apache.derby.jdbc.ClientDataSource;
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
 import org.apache.derbyTesting.junit.BaseTestCase;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 import org.apache.derbyTesting.junit.TestConfiguration;
 
 /**
@@ -123,7 +124,6 @@ public class ReplicationRun extends BaseTestCase
     final static String PS = File.pathSeparator;
     
     static boolean showSysinfo = false;
-    static long PINGSERVER_SLEEP_TIME_MILLIS = 500L;
     
     static long sleepTime = 5000L; // millisecs.
     
@@ -136,8 +136,6 @@ public class ReplicationRun extends BaseTestCase
     
     static final String remoteShell = "/usr/bin/ssh -x"; // or /usr/bin/ssh ?
 
-    private static final long DEFAULT_SERVER_START_TIMEOUT = 75000;
-    
     Utils util = new Utils();
     
     State state = new State();
@@ -2119,15 +2117,11 @@ public class ReplicationRun extends BaseTestCase
                 }
             }
             );
-            // DERBY-4564. Make replication tests use derby.tests.networkServerTimeout proeprty
-            String userStartTimeout = getSystemProperty("derby.tests.networkServerStartTimeout");
-            long startTimeout = (userStartTimeout != null )? 
-            		(Long.parseLong(userStartTimeout) * 1000): DEFAULT_SERVER_START_TIMEOUT;
-            long iterations = startTimeout / PINGSERVER_SLEEP_TIME_MILLIS;		
             util.DEBUG(debugId+"************** Do .start().");
             serverThread.start();
             registerThread(serverThread);
-            pingServer(serverHost, serverPort, (int) iterations); // Wait for the server to come up in a reasonable time....
+            // Wait for the server to come up in a reasonable time.
+            pingServer(serverHost, serverPort);
 
         }
         
@@ -2428,39 +2422,14 @@ public class ReplicationRun extends BaseTestCase
         helperThreads.add(thread);
     }
 
-    private void pingServer( String hostName, int port, int iterations)
+    private void pingServer( String hostName, int port)
     throws Exception
     {
         util.DEBUG("+++ pingServer: " + hostName +":" + port);
-        ping( new NetworkServerControl(InetAddress.getByName(hostName),port), iterations);
+        NetworkServerControl controller =
+            new NetworkServerControl(InetAddress.getByName(hostName), port);
+        NetworkServerTestSetup.pingForServerStart(controller);
         util.DEBUG("--- pingServer: " + hostName +":" + port);
-    }
-    
-    private	void ping( NetworkServerControl controller, int iterations )
-    throws Exception
-    {
-        Exception	finalException = null;
-        
-        for ( int i = 0; i < iterations; i++ )
-        {
-            try
-            {
-                controller.ping();
-                util.DEBUG("Server came up in less than "+i+" * "+PINGSERVER_SLEEP_TIME_MILLIS+"ms.");
-                return;
-            }
-            catch (Exception e)
-            { finalException = e; }
-            
-            Thread.sleep( PINGSERVER_SLEEP_TIME_MILLIS  );
-        }
-        
-        String msg = "Could not ping in " 
-                + iterations + " * " + PINGSERVER_SLEEP_TIME_MILLIS + "ms.: "
-                + finalException.getMessage();
-        util.DEBUG( msg );
-        throw finalException;
-        
     }
 
     void startOptionalLoad(Load load,

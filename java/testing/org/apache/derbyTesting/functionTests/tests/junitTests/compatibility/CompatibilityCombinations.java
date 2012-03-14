@@ -30,6 +30,7 @@ import java.util.*;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.apache.derbyTesting.junit.NetworkServerTestSetup;
 
 
 
@@ -228,8 +229,6 @@ public class CompatibilityCombinations extends BaseTestCase
     private static boolean printDebug = false;
     private static boolean showSysinfo = false;
     private static boolean includeUpgrade = false;
-    
-    private static long SLEEP_TIME_MILLIS = 5000L;
 
     /** The process in which the network server is running. */
     private Process serverProc;
@@ -1018,31 +1017,12 @@ public class CompatibilityCombinations extends BaseTestCase
                     "proc = Runtime.getRuntime().exec(commandElements,envElements,workingDir);"
                  );
 
-            Thread serverThread = new Thread(
-                    new Runnable()
-            {
-                public void run()
-                {
-                    try
-                    {
-                        DEBUG("************** In run().");
-                        serverProc = Runtime.getRuntime().
-                                exec(fullCmd, envElements, workingDir);
-                        DEBUG("************** Done exec().");
-                    }
-                    catch (Exception ex)
-                    {
-                        ex.printStackTrace();
-                    }
-                    
-                }
-            }
-            );
-            DEBUG("************** Do .start().");
-            serverThread.start();
-            pingServer(1, envElements); // Wait for the server to come up in a reasonable time....
-            serverThread.join();
-            DEBUG("************** Done .join().");
+            serverProc = Runtime.getRuntime().
+                    exec(fullCmd, envElements, workingDir);
+            DEBUG("************** Done exec().");
+
+            // Wait for the server to come up in a reasonable time.
+            pingServer();
         }
         else
         {
@@ -1163,57 +1143,16 @@ public class CompatibilityCombinations extends BaseTestCase
      * come up in a reasonable amount of time, (re-)throw the
      * final exception.
      * </p>
-     * @param iterations How many times to try pinging the server to see if it is running. Sleeps <CODE>SLEEP_TIME_MILLIS</CODE> between tries.
-     * @param serverEnvironment Paths used in bringing up server
      * @throws java.lang.Exception .
      */
     // Copied from org.apache.derbyTesting.functionTests.tests.junitTests.compatibility.Pinger
-    private	void	pingServer( int iterations, String[] serverEnvironment )
+    private	void	pingServer( )
     throws Exception
     {
         DEBUG("+++ pingServer");
-        ping( new NetworkServerControl(), iterations, serverEnvironment );
+        NetworkServerControl controller = new NetworkServerControl();
+        NetworkServerTestSetup.pingForServerUp(controller, serverProc, true);
         DEBUG("--- pingServer");
-    }
-    
-    /**
-     * It used to be possible to ping down-rev servers using an up-rev NetworkServerControl.
-     * This is no longer possible. So we will just take it on faith that the server comes up after
-     * a decent interval.
-     */
-    private	void	ping( NetworkServerControl controller, int iterations, String[] serverEnvironment )
-    throws Exception
-    {
-        Exception	finalException = null;
-        
-        for ( int i = 0; i < iterations; i++ )
-        {
-            /*
-            try
-            {
-                controller.ping();
-                // DEBUG("Server came up in less than " + i*(SLEEP_TIME_MILLIS/1000) + " secs.");
-                return;
-            }
-            catch (Exception e)
-          { finalException = e; }
-            */
-            
-            Thread.sleep( SLEEP_TIME_MILLIS );
-        }
-
-        /*
-        StringBuffer buffer = new StringBuffer();
-        buffer.append( "Server did not come up: " + finalException.getMessage() );
-        int pathCount = serverEnvironment.length;
-        for ( int i = 0; i < pathCount; i++ )
-        {
-            buffer.append( "\n\t" + serverEnvironment[ i ] );
-        }
-        System.out.println( buffer.toString() );
-        finalException.printStackTrace();
-        */
-        
     }
     
     
