@@ -71,13 +71,12 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 	//
 	// *********************************************************************************
 	public void startTesting() {
-
+        
 		// The following loop will be done nstest.MAX_ITERATIONS times after
 		// which we exit the thread
 		// Note that a different connection is used for each operation. The
-		// purpose of this client is
-		// to work on a large set of data as defined by the parameter
-		// NUM_HIGH_STRESS_ROWS
+		// purpose of this client is to work on a large set of data as defined 
+        // by the parameter NUM_HIGH_STRESS_ROWS
 		// This thread could be made to pause (sleep) for a bit between each
 		// iteration.
 		for (int i = 0; i < NsTest.MAX_ITERATIONS; i++) {
@@ -92,8 +91,7 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 			}
 
 			// set isolation level to Connection.TRANSACTION_READ_UNCOMMITTED to
-			// reduce number of
-			// deadlocks/lock issues
+			// reduce number of deadlocks/lock issues
 			setIsolationLevel(Connection.TRANSACTION_READ_UNCOMMITTED);
 
 			// Now select nstest.NUM_HIGH_STRESS_ROWS number of rows
@@ -138,6 +136,20 @@ public class BackupRestoreReEncryptTester extends TesterObject {
 				log(message);
 			}
 
+            // first check if there are still active tester threads, so 
+            // we do not make backups on an unchanged db every 10 mins for
+            // the remainder of MAX_ITERATIONS.
+            if (NsTest.numActiveTestThreads() > 1)
+            {
+                log("active test threads > 1, backup will continue in 10 minutes");
+                continue;
+            }
+            else
+            {
+                log("no more test threads, finishing backup also");
+                break;
+            }
+    
 		}// end of for (int i=0;...)
 
 		System.out.println("Thread " + getThread_id() + " is now terminating");

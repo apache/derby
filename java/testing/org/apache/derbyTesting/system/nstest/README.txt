@@ -66,7 +66,7 @@ variable settings used in the test are set in this class. The user threads resid
 HOW TO RUN:
 ===========
 Usage:
-java org.apache.derbyTesting.system.nstest.NsTest DerbyClient|Embedded
+java org.apache.derbyTesting.system.nstest.NsTest DerbyClient|Embedded [small]
 
 The main class to invoke is org.apache.derbyTesting.system.nstest.NsTest. This class
 takes a String argument of "DerbyClient"/"Embedded", default is DerbyClient. The test requires
@@ -77,6 +77,10 @@ useful for a small test setup.
 
 To turn off Backup/Restore/Re-Encryption, set the System property 'derby.nstest.backupRestore'
 to 'false', default is 'true'.
+
+To run the test can be run with a smaller configuration, add the parameter 'small'. This
+can only be used as the 2nd parameter, so you'll need to add DerbyClient or Embedded 
+as the first parameter, then add small as the second.
 
 EXIT CRITERIA
 =============
@@ -109,9 +113,14 @@ always started.
 KNOWN ISSUES:
 =============
 
-With the addition of the Backup/Restore/Re-Encryption thread, long runs of this test are blocked
-by:
-DERBY-1947 - OOM after repeated calls to boot and shutdown a database
+EXPECTED ERRORS:
+================
+The test expects and catches the following errors (so seeing them in derby.log is expected):
+- XBM06; see BackupRestoreReEncryptTester.java - trying to access restored db with old encryption pwd:
+    ERROR XBM06: Startup failed. An encrypted database cannot be accessed without the correct boot password.
+- XJ040; see BackupRestoreReEncryptTester.java - the sqlstate is not always available in derby.log, but
+    you'll see the message:  
+java.sql.SQLException: Failed to start database 'restoredir\nstestdb' with class loader sun.misc.Launcher$AppClassLoader@40614061, see the next exception for details.
 
 FUTURE WORK:
 ============

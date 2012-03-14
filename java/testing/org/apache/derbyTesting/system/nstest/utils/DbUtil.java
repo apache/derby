@@ -88,10 +88,9 @@ public class DbUtil {
 		
 		try {
 			// autoincrement feature added, so we need to specify the column
-			// name
-			// for prepared statement, otherwise auto increment column will
-			// think
-			// it is trying to update/insert a null value to the column.
+			// name for prepared statement, otherwise auto increment column
+			// will think it is trying to update/insert a null value to the
+			// column.
 			
 			ps = conn
 			.prepareStatement(" insert into nstesttab (id, t_char,"
@@ -132,9 +131,6 @@ public class DbUtil {
 			// System.out.println("set t_date to " + dt.toString());
 			
 			// Set value of column "t_decimal"
-			// double t_dec = rand.nextDouble() *
-			// Math.pow(10,Math.abs(rand.nextInt()%18));
-			// double t_dec = rand.nextDouble();
 			double t_dec = rand.nextDouble()
 			* Math.pow(10, Math.abs(rand.nextInt() % 6));
 			ps.setDouble(4, t_dec);
@@ -212,13 +208,12 @@ public class DbUtil {
 			}
 			if (rowsAdded == 1) {
 				System.out.println(thread_id + " inserted 1 row with id "
-						+ id_ind + NsTest.SUCCESS);
-				
+						//+ id_ind + NsTest.SUCCESS);
+                        + id_ind);
 			} else
-				System.out.println("FAIL: " + thread_id + " insert failed");
+				System.out.println("FAIL: " + thread_id + " inserted " + rowsAdded + "rows");
 			
 		} catch (Exception e) {
-			e.printStackTrace();
 			System.out
 			.println("Exception when preparing or executing insert prepared stmt");
 			printException("executing/preparing insert stmt in dbUtil", e);
@@ -289,7 +284,7 @@ public class DbUtil {
 			break;
 			
 		case TDECIMAL:
-			d = rand.nextDouble() * Math.pow(10, rand.nextInt() % 18);
+			d = rand.nextDouble() * Math.pow(10, Math.abs(rand.nextInt() % 6));
 			ps2.setDouble(1, d);
 			ds2 = String.valueOf(d);
 			break;
@@ -364,8 +359,8 @@ public class DbUtil {
 			
 		} // end of switch(type)
 		
-		System.out.println(thread_id + " attempting  to update col " + column
-				+ " to " + ds2);
+		//System.out.println(thread_id + " attempting  to update col " + column
+		//		+ " to " + ds2);
 		try {
 			rowsUpdated = ps2.executeUpdate();
 		} catch (SQLException sqe) {
@@ -416,8 +411,8 @@ public class DbUtil {
 		}
 		
 		long skey = pick_one(conn, thread_id);
-		System.out.println(thread_id
-				+ " attempting  to delete a row with serialkey = " + skey);
+		//System.out.println(thread_id
+		//		+ " attempting  to delete a row with serialkey = " + skey);
 		if (skey == 0) { // means we did not find a row
 			System.out.println(thread_id
 					+ " could not find a row to delete or there was an error.");
@@ -491,10 +486,10 @@ public class DbUtil {
 			while (rs.next()) {
 				if (rs.getLong(1) > 0) {
 					rowToReturn = rs.getLong(1);
-					System.out
-					.println(getThreadName()
-							+ " dbutil.pick_one() -> Obtained row from the table "
-							+ rowToReturn);
+					//System.out
+					//.println(getThreadName()
+					//		+ " dbutil.pick_one() -> Obtained row from the table "
+					//		+ rowToReturn);
 				} else {
 					System.out
 					.println(getThreadName()

@@ -45,14 +45,12 @@ public class Tester1 extends TesterObject {
 	// This starts the acutal test operations. Overrides the startTesting() of
 	// parent.
 	// Tester1 profile -
-	// The connection to the database is open forever. This client
-	// will do Insert/Update/Delete and simple Select queries over
-	// a small to medium set of data determined randomly over
-	// MAX_LOW_STRESS_ROWS rows. Autocommit is left on else too many deadlocks
-	// occur and the
-	// goal is to test the data flow and connection management of the network
-	// server,
-	// not the transaction management of the database.
+	// The connection to the database is open forever. This client will do 
+	// Insert/Update/Delete and simple Select queries over a small to medium 
+	// set of data determined randomly over MAX_LOW_STRESS_ROWS rows. 
+	// Autocommit is left on else too many deadlocks occur and the goal is to
+	// test the data flow and connection management of the network server, not
+	// the transaction management of the database.
 	//
 	// *********************************************************************************
 	public void startTesting() {
@@ -76,19 +74,16 @@ public class Tester1 extends TesterObject {
 		}
 
 		// also set isolation level to Connection.TRANSACTION_READ_UNCOMMITTED
-		// to reduce number of
-		// deadlocks
+		// to reduce number of deadlocks
 		setIsolationLevel(Connection.TRANSACTION_READ_UNCOMMITTED);
 
 		// The following loop will be done nstest.MAX_ITERATIONS times after
-		// which we exit the thread
+		// which we exit the thread.
 		// Note that the same connection is used for each operation. The
-		// connection is only closed
-		// outside the loop. Since autocommit is on, we make an interation work
-		// over
-		// MAX_LOW_STRESS_ROWS number of rows. This thread could be made to
-		// pause (sleep) for a bit
-		// between each iteration.
+		// connection is only closed outside the loop. Since autocommit is on,
+		// we make an interation work over MAX_LOW_STRESS_ROWS number of rows.
+		// This thread could be made to pause (sleep) for a bit between each
+		// iteration.
 		for (int i = 0; i < NsTest.MAX_ITERATIONS; i++) {
 
 			// Now loop through nstest.MAX_LOW_STRESS_ROWS number of times/rows
@@ -121,8 +116,8 @@ public class Tester1 extends TesterObject {
 			}
 
 			// Letting this be even though autocommit is on so that if later on
-			// if we decide to turn
-			// autocommit off, this automatically takes effect.
+			// if we decide to turn autocommit off, this automatically takes
+            // effect.
 			// commit
 			try {
 				connex.commit();

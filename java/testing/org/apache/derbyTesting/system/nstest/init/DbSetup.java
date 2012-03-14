@@ -60,8 +60,7 @@ public class DbSetup {
 				System.out.println("table 'NSTESTTAB' already exists");
 				finished = true;
 				NsTest.schemaCreated = true; // indicates to other classes
-				// that the schema already
-				// exists
+				// that the schema already exists
 			}
 		} catch (Exception e) {
 			System.out
