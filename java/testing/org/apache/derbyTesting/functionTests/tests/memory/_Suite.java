@@ -40,6 +40,7 @@ public class _Suite extends BaseJDBCTestCase {
         suite.addTest(ClobMemTest.suite());
         suite.addTest(MultiByteClobTest.suite());
         suite.addTest(RolesDependencyTest.suite());
+        suite.addTest(Derby3009Test.suite());
         suite.addTest(MemoryLeakFixesTest.suite());
         suite.addTest(XAMemTest.suite());
         return suite;
