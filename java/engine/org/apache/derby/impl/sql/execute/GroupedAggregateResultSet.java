@@ -88,6 +88,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	private ExecIndexRow sortTemplateRow;
 	public	boolean	hasDistinctAggregate;	// true if distinct aggregate
 	public	boolean isInSortedOrder;				// true if source results in sorted order
+	private	int numDistinctAggs = 0;
 	private int maxRowSize;
 
 	// set in open and not modified thereafter
@@ -237,7 +238,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		else if (!resultsComplete)
 		{
 			if (rollup)
-				resultRows = new ExecIndexRow[order.length+1];
+				resultRows = new ExecIndexRow[numGCols()+1];
 			else
 				resultRows = new ExecIndexRow[1];
 			if (aggInfoList.hasDistinct())
@@ -324,33 +325,26 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			** by that column, we just sorted it so that distinct
 			** aggregation would see the values in order.
 			*/
-			int numDistinctAggs = 0;
-			for (int i = 0; i < aggregates.length; i++)
-			{
-				AggregatorInfo aInfo = (AggregatorInfo)
-					aggInfoList.elementAt(i);
-				if (aInfo.isDistinct())
-					numDistinctAggs++;
-			}
 			// Although it seems like N aggs could have been
 			// added at the end, in fact only one has been
 			// FIXME -- need to get GroupByNode to handle this
 			// correctly, but that requires understanding
 			// scalar distinct aggregates.
 			numDistinctAggs = 1;
-			if (order.length > numDistinctAggs)
-			{
-				ColumnOrdering[] newOrder = new ColumnOrdering[
-					order.length - numDistinctAggs];
-				System.arraycopy(order, 0, newOrder, 0,
-					order.length-numDistinctAggs);
-				order = newOrder;
-			}
 		}
 		return tc.openSortScan(genericSortId,
 			activation.getResultSetHoldability());
 	}
 
+	/**
+	 * Return the number of grouping columns.
+	 *
+	 * Since some additional sort columns may have been included
+	 * in the sort for DISTINCT aggregates, this function is
+	 * used to ignore those columns when computing the grouped
+	 * results.
+	 */
+	private int numGCols() { return order.length - numDistinctAggs; }
 
 	/**
 	 * Return the next row.  
@@ -409,7 +403,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 			{
 				boolean sameGroup = (rollup ?
 				    r <= distinguisherCol :
-				    distinguisherCol == order.length);
+				    distinguisherCol == numGCols());
 				if (sameGroup)
 				{
 					/* Same group - initialize the new
@@ -486,7 +480,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 	private int sameGroupingValues(ExecRow currRow, ExecRow newRow)
 		throws StandardException
 	{
-		for (int index = 0; index < order.length; index++)
+		for (int index = 0; index < numGCols(); index++)
 		{
 			DataValueDescriptor currOrderable = currRow.getColumn(order[index].getColumnId() + 1);
 			DataValueDescriptor newOrderable = newRow.getColumn(order[index].getColumnId() + 1);
@@ -495,7 +489,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 				return index;
 			}
 		}
-		return order.length;
+		return numGCols();
 	}
 
 	/**
@@ -650,7 +644,7 @@ class GroupedAggregateResultSet extends GenericAggregateResultSet
 		int numRolledUpCols = resultRows.length - resultNum - 1;
 		for (int i = 0; i < numRolledUpCols; i++)
 		{
-			int rolledUpColIdx = order.length - 1 - i;
+			int rolledUpColIdx = numGCols() - 1 - i;
 			DataValueDescriptor rolledUpColumn =
 				row.getColumn(order[rolledUpColIdx].getColumnId() + 1);
 			rolledUpColumn.setToNull();

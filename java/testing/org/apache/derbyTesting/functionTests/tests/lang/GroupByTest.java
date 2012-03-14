@@ -2351,4 +2351,262 @@ public class GroupByTest extends BaseJDBCTestCase {
 
             rollback();
     }
+
+
+    /**
+     * DISTINCT aggregates in result sets which are opened multiple times.
+     * DERBY-5584.
+     * @throws SQLException
+     */
+    public void testDerby5584()
+	throws SQLException
+    {
+        setAutoCommit(false);
+        Statement s = createStatement();
+        ResultSet rs;
+
+        s.executeUpdate(
+		"CREATE TABLE TEST_5 (" +
+		"       profile_id INTEGER NOT NULL," +
+		"       group_ref INTEGER NOT NULL," +
+		"       matched_count INTEGER NOT NULL )"); 
+
+        s.executeUpdate(
+		"CREATE TABLE TEST_6 ( " +
+		"       profile_id INTEGER NOT NULL, " +
+		"       group_ref INTEGER NOT NULL, " +
+		"       matched_count INTEGER NOT NULL )"); 
+
+        s.executeUpdate( "insert into test_5 values (1, 10000, 1)" ); 
+        s.executeUpdate( "insert into test_5 values (2, 10000, 2)" ); 
+
+        s.executeUpdate( "insert into test_6 values (1, 10000, 1)" ); 
+        s.executeUpdate( "insert into test_6 values (2, 10000, 2)" );
+
+        rs = s.executeQuery( "SELECT ps1.group_ref," +
+		"COUNT(DISTINCT ps1.matched_count) AS matched_count" +
+		" FROM test_5 ps1 " +
+		" GROUP BY ps1.group_ref, ps1.profile_id" );
+        JDBC.assertFullResultSet(rs, new String[][] {
+                {"10000", "1"},
+                {"10000", "1"}
+	});
+
+        rs = s.executeQuery( "SELECT ps1.group_ref," +
+		"COUNT(ps1.matched_count) AS matched_count" +
+		" FROM test_5 ps1 " +
+		" GROUP BY ps1.group_ref, ps1.profile_id" );
+        JDBC.assertFullResultSet(rs, new String[][] {
+                {"10000", "1"},
+                {"10000", "1"}
+	});
+
+	String cartProdWithDISTINCTsubqueries = " SELECT *" +
+		" FROM " +
+		" (SELECT ps1.group_ref, ps1.profile_id, " +
+		"         COUNT(DISTINCT ps1.matched_count) AS matched_count " +
+		"  FROM test_5 ps1" +
+		"  GROUP BY ps1.group_ref, ps1.profile_id " +
+		" ) a, " +
+		" (SELECT ps2.group_ref, ps2.profile_id, " +
+		"         COUNT( DISTINCT ps2.matched_count) AS matched_count" +
+		"  FROM test_6 ps2" +
+		"  GROUP BY ps2.group_ref, ps2.profile_id " +
+		") b ";
+
+	String cartProdWithSubqueries = " SELECT * " +
+		" FROM " +
+		" (SELECT ps1.group_ref, ps1.profile_id, " +
+		"         COUNT(ps1.matched_count) AS matched_count " +
+		"  FROM test_5 ps1 " +
+		"  GROUP BY ps1.group_ref, ps1.profile_id " +
+		") a, " +
+		" (SELECT ps2.group_ref, ps2.profile_id, " +
+		"         COUNT( ps2.matched_count) AS matched_count " +
+		"  FROM test_6 ps2 " +
+		"  GROUP BY ps2.group_ref, ps2.profile_id " +
+		") b ";
+
+	String cartProdWithOrderBySubqueries = "SELECT * " +
+		" FROM " +
+		" (SELECT ps1.group_ref, ps1.profile_id " +
+		"  FROM test_5 ps1 ORDER BY profile_id fetch first 3 rows only) a, " +
+		" (SELECT ps2.group_ref, ps2.profile_id " +
+		"  FROM test_6 ps2 ORDER BY PROFILE_ID fetch first 2 rows only) b "; 
+
+
+	rs = s.executeQuery( cartProdWithDISTINCTsubqueries );
+        JDBC.assertFullResultSet(rs, new String[][] {
+		{"10000", "1", "1", "10000", "1", "1"},
+		{"10000", "1", "1", "10000", "2", "1"},
+		{"10000", "2", "1", "10000", "1", "1"},
+		{"10000", "2", "1", "10000", "2", "1"}
+	});
+
+	rs = s.executeQuery( cartProdWithSubqueries );
+        JDBC.assertFullResultSet(rs, new String[][] {
+		{"10000", "1", "1", "10000", "1", "1"},
+		{"10000", "1", "1", "10000", "2", "1"},
+		{"10000", "2", "1", "10000", "1", "1"},
+		{"10000", "2", "1", "10000", "2", "1"}
+	});
+
+        s.executeUpdate( "insert into test_5 values (3, 10000, 3)" ); 
+
+	rs = s.executeQuery( cartProdWithDISTINCTsubqueries );
+        JDBC.assertFullResultSet(rs, new String[][] {
+		{"10000", "1", "1", "10000", "1", "1"},
+		{"10000", "1", "1", "10000", "2", "1"},
+		{"10000", "2", "1", "10000", "1", "1"},
+		{"10000", "2", "1", "10000", "2", "1"},
+		{"10000", "3", "1", "10000", "1", "1"},
+		{"10000", "3", "1", "10000", "2", "1"}
+	});
+
+	rs = s.executeQuery( cartProdWithSubqueries );
+        JDBC.assertFullResultSet(rs, new String[][] {
+		{"10000", "1", "1", "10000", "1", "1"},
+		{"10000", "1", "1", "10000", "2", "1"},
+		{"10000", "2", "1", "10000", "1", "1"},
+		{"10000", "2", "1", "10000", "2", "1"},
+		{"10000", "3", "1", "10000", "1", "1"},
+		{"10000", "3", "1", "10000", "2", "1"}
+	});
+
+        s.executeUpdate( "insert into test_5 values (4, 10000, 4) "); 
+        s.executeUpdate( "insert into test_6 values (3, 10000, 3) "); 
+
+	// NOTE: At this point,
+	//   test_5 contains:		test_6 contains:
+	//	1, 10000, 1			1, 10000, 1
+	//	2, 10000, 2			2, 10000, 2
+	//	3, 10000, 3			3, 10000, 3
+	//	4, 10000, 4
+
+	rs = s.executeQuery( cartProdWithDISTINCTsubqueries );
+        JDBC.assertFullResultSet(rs, new String[][] {
+		{"10000", "1", "1", "10000", "1", "1"},
+		{"10000", "1", "1", "10000", "2", "1"},
+		{"10000", "1", "1", "10000", "3", "1"},
+		{"10000", "2", "1", "10000", "1", "1"},
+		{"10000", "2", "1", "10000", "2", "1"},
+		{"10000", "2", "1", "10000", "3", "1"},
+		{"10000", "3", "1", "10000", "1", "1"},
+		{"10000", "3", "1", "10000", "2", "1"},
+		{"10000", "3", "1", "10000", "3", "1"},
+		{"10000", "4", "1", "10000", "1", "1"},
+		{"10000", "4", "1", "10000", "2", "1"},
+		{"10000", "4", "1", "10000", "3", "1"}
+	});
+
+	rs = s.executeQuery( cartProdWithSubqueries );
+        JDBC.assertFullResultSet(rs, new String[][] {
+		{"10000", "1", "1", "10000", "1", "1"},
+		{"10000", "1", "1", "10000", "2", "1"},
+		{"10000", "1", "1", "10000", "3", "1"},
+		{"10000", "2", "1", "10000", "1", "1"},
+		{"10000", "2", "1", "10000", "2", "1"},
+		{"10000", "2", "1", "10000", "3", "1"},
+		{"10000", "3", "1", "10000", "1", "1"},
+		{"10000", "3", "1", "10000", "2", "1"},
+		{"10000", "3", "1", "10000", "3", "1"},
+		{"10000", "4", "1", "10000", "1", "1"},
+		{"10000", "4", "1", "10000", "2", "1"},
+		{"10000", "4", "1", "10000", "3", "1"}
+	});
+
+        s.executeUpdate( "insert into test_6 values (2, 10000, 1) "); 
+
+	rs = s.executeQuery( cartProdWithDISTINCTsubqueries );
+        JDBC.assertFullResultSet(rs, new String[][] {
+		{"10000", "1", "1", "10000", "1", "1"},
+		{"10000", "1", "1", "10000", "2", "2"},
+		{"10000", "1", "1", "10000", "3", "1"},
+		{"10000", "2", "1", "10000", "1", "1"},
+		{"10000", "2", "1", "10000", "2", "2"},
+		{"10000", "2", "1", "10000", "3", "1"},
+		{"10000", "3", "1", "10000", "1", "1"},
+		{"10000", "3", "1", "10000", "2", "2"},
+		{"10000", "3", "1", "10000", "3", "1"},
+		{"10000", "4", "1", "10000", "1", "1"},
+		{"10000", "4", "1", "10000", "2", "2"},
+		{"10000", "4", "1", "10000", "3", "1"}
+	});
+
+	rs = s.executeQuery( cartProdWithSubqueries );
+        JDBC.assertFullResultSet(rs, new String[][] {
+		{"10000", "1", "1", "10000", "1", "1"},
+		{"10000", "1", "1", "10000", "2", "2"},
+		{"10000", "1", "1", "10000", "3", "1"},
+		{"10000", "2", "1", "10000", "1", "1"},
+		{"10000", "2", "1", "10000", "2", "2"},
+		{"10000", "2", "1", "10000", "3", "1"},
+		{"10000", "3", "1", "10000", "1", "1"},
+		{"10000", "3", "1", "10000", "2", "2"},
+		{"10000", "3", "1", "10000", "3", "1"},
+		{"10000", "4", "1", "10000", "1", "1"},
+		{"10000", "4", "1", "10000", "2", "2"},
+		{"10000", "4", "1", "10000", "3", "1"}
+	});
+
+	// Now introduce some duplicate values so that the DISTINCT
+	// aggregates have some work to do
+
+
+        s.executeUpdate( "insert into test_6 values (1, 10000, 1) "); 
+        s.executeUpdate( "insert into test_6 values (2, 10000, 2) "); 
+
+	// NOTE: At this point,
+	//   test_5 contains:		test_6 contains:
+	//	1, 10000, 1			1, 10000, 1 (2 vals, 1 distinct)
+	//	2, 10000, 2			1, 10000, 1 
+	//	3, 10000, 3			2, 10000, 1 (3 vals, 2 distinct)
+	//	4, 10000, 4			2, 10000, 2
+	//	 				2, 10000, 2
+	//	 				3, 10000, 2 (1 val, 1 distinct)
+
+	rs = s.executeQuery( cartProdWithDISTINCTsubqueries );
+        JDBC.assertFullResultSet(rs, new String[][] {
+		{"10000", "1", "1", "10000", "1", "1"},
+		{"10000", "1", "1", "10000", "2", "2"},
+		{"10000", "1", "1", "10000", "3", "1"},
+		{"10000", "2", "1", "10000", "1", "1"},
+		{"10000", "2", "1", "10000", "2", "2"},
+		{"10000", "2", "1", "10000", "3", "1"},
+		{"10000", "3", "1", "10000", "1", "1"},
+		{"10000", "3", "1", "10000", "2", "2"},
+		{"10000", "3", "1", "10000", "3", "1"},
+		{"10000", "4", "1", "10000", "1", "1"},
+		{"10000", "4", "1", "10000", "2", "2"},
+		{"10000", "4", "1", "10000", "3", "1"}
+	});
+
+	rs = s.executeQuery( cartProdWithSubqueries );
+        JDBC.assertFullResultSet(rs, new String[][] {
+		{"10000", "1", "1", "10000", "1", "2"},
+		{"10000", "1", "1", "10000", "2", "3"},
+		{"10000", "1", "1", "10000", "3", "1"},
+		{"10000", "2", "1", "10000", "1", "2"},
+		{"10000", "2", "1", "10000", "2", "3"},
+		{"10000", "2", "1", "10000", "3", "1"},
+		{"10000", "3", "1", "10000", "1", "2"},
+		{"10000", "3", "1", "10000", "2", "3"},
+		{"10000", "3", "1", "10000", "3", "1"},
+		{"10000", "4", "1", "10000", "1", "2"},
+		{"10000", "4", "1", "10000", "2", "3"},
+		{"10000", "4", "1", "10000", "3", "1"}
+	});
+
+	rs = s.executeQuery( cartProdWithOrderBySubqueries );
+        JDBC.assertFullResultSet(rs, new String[][] {
+		{"10000", "1", "10000", "1"},
+		{"10000", "1", "10000", "1"},
+		{"10000", "2", "10000", "1"},
+		{"10000", "2", "10000", "1"},
+		{"10000", "3", "10000", "1"},
+		{"10000", "3", "10000", "1"}
+	});
+
+            rollback();
+    }
 }
