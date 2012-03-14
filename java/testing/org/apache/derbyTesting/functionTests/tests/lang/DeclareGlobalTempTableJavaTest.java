@@ -30,6 +30,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.Connection;
 
 import junit.framework.Test;
+import org.apache.derbyTesting.functionTests.util.SampleVTI;
 
 
 import org.apache.derbyTesting.junit.BaseJDBCTestCase;
@@ -1040,7 +1041,8 @@ public class DeclareGlobalTempTableJavaTest extends BaseJDBCTestCase {
         assertUpdateCount(s , 0 , "CREATE TABLE SESSION.t3(c31 int, c32 int)");
         ResultSet rs1 = databaseMetaData.getTables("", null, "%", null);
         while (rs1.next()) {
-            if (("T2" == rs1.getString(3)) && ("SESSION" == rs1.getString(2)))
+            if (("T2".equals(rs1.getString(3))) &&
+                    ("SESSION".equals(rs1.getString(2))))
                 fail("Temporary table Found");
             count++;
         }
@@ -1162,6 +1164,50 @@ public class DeclareGlobalTempTableJavaTest extends BaseJDBCTestCase {
         assertEquals(1, rs1.getInt(2));
         assertUpdateCount(s , 0 , "DROP TABLE SESSION.t2");
     }
+
+    /**
+     * Tests that you can insert data into a GTT with a VTI as the source.
+     * <p>
+     * This used to fail because inserting from a VTI would trigger bulk insert,
+     * but the bulk insert code path is not supported for GTT as the
+     * destination of the insert.
+     * <p>
+     * See DERBY-5614.
+     */
+    public void testVtiInsertIntoGTT()
+            throws SQLException {
+        Statement s = createStatement();
+        s.executeUpdate("DECLARE GLOBAL TEMPORARY TABLE SESSION.vtitogtt(" +
+                "c1 varchar(10)) not logged on commit preserve rows");
+        // Use an empty VTI as the source.
+        s.executeUpdate("CREATE FUNCTION emptySampleVTI() " +
+                "RETURNS TABLE(v1 varchar(10))" +
+                "LANGUAGE JAVA " +
+                "PARAMETER STYLE DERBY_JDBC_RESULT_SET " +
+                "NO SQL " +
+                "EXTERNAL NAME 'org.apache.derbyTesting.functionTests." +
+                "util.SampleVTI.emptySampleVTI'");
+        s.executeUpdate("insert into session.vtitogtt " +
+                "select * from table(emptySampleVTI()) as v");
+        JDBC.assertEmpty(s.executeQuery("select * from session.vtitogtt"));
+        s.executeUpdate("DROP FUNCTION emptySampleVTI");
+
+        // Now try to actually insert some data.
+        s.executeUpdate("CREATE FUNCTION sampleVTI() " +
+                "RETURNS TABLE(v1 varchar(10))" +
+                "LANGUAGE JAVA " +
+                "PARAMETER STYLE DERBY_JDBC_RESULT_SET " +
+                "NO SQL " +
+                "EXTERNAL NAME 'org.apache.derbyTesting.functionTests." +
+                "util.SampleVTI.oneColSampleVTI'");
+        s.executeUpdate("insert into session.vtitogtt " +
+                "select * from table(sampleVTI()) as v");
+        JDBC.assertUnorderedResultSet(
+                s.executeQuery("select * from session.vtitogtt"),
+                SampleVTI.oneColSampleVTIData());
+        s.executeUpdate("DROP FUNCTION sampleVTI");
+    }
+
     /**
      * 
      * A Utility method that deletes all the SESSION schema tables before each fixture.
@@ -1170,26 +1216,17 @@ public class DeclareGlobalTempTableJavaTest extends BaseJDBCTestCase {
      */
     public void dropSchemaTables() throws SQLException {
         Statement s = createStatement();
-        try {
-            s.executeUpdate("DROP TABLE SESSION.t1");
-        } catch (SQLException e) {
+        // Query the meta data to avoid filling the log with lots of
+        // table-not-found error messages.
+        ResultSet rs = getConnection().getMetaData().getTables(
+                null, "SESSION", "%", null);
+        while (rs.next()) {
+            try {
+                s.executeUpdate("DROP TABLE " + rs.getString(2) + "." +
+                        rs.getString(3));
+            } catch (SQLException e) {
+            }
         }
-        try {
-            s.executeUpdate("DROP TABLE SESSION.t2");
-        } catch (SQLException e) {
-        }
-        try {
-            s.executeUpdate("DROP TABLE SESSION.t3");
-        } catch (SQLException e) {
-        }
-        try {
-            s.executeUpdate("DROP TABLE SESSION.t4");
-        } catch (SQLException e) {
-        }
-        try {
-            s.executeUpdate("DROP TABLE SESSION.t5");
-        } catch (SQLException e) {
-        }
+        rs.close();
     }
 }
-
