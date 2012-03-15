@@ -37,6 +37,7 @@ public class LobLimitsClientTest extends LobLimitsTest {
     }
 
     public static Test suite() {
-        return TestConfiguration.clientServerDecorator(LobLimitsTest.suite());
+        return TestConfiguration.singleUseDatabaseDecorator(
+        TestConfiguration.clientServerDecorator(LobLimitsTest.suite()));
     }
 }
