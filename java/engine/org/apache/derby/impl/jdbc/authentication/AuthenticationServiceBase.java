@@ -407,12 +407,16 @@ public abstract class AuthenticationServiceBase
                 ( stringValue.startsWith( Property.AUTHENTICATION_PROVIDER_NATIVE ) )&&
                 !settingToNativeLocal
                 )
-            { throw badNativeAuthenticationChange(); }
+            {
+                throw  StandardException.newException( SQLState.PROPERTY_BAD_NATIVE_VALUE );
+            }
 
             // once set to NATIVE authentication, you can't change it
             String  oldValue = (String) p.get( Property.AUTHENTICATION_PROVIDER_PARAMETER );
             if ( (oldValue != null) && oldValue.startsWith( Property.AUTHENTICATION_PROVIDER_NATIVE ) )
-            { throw badNativeAuthenticationChange(); }
+            {
+                throw StandardException.newException( SQLState.PROPERTY_CANT_UNDO_NATIVE );
+            }
 
             // can't turn on NATIVE + LOCAL authentication unless the DBO's credentials are already stored.
             // this should prevent setting NATIVE + LOCAL authentication in pre-10.9 databases too
@@ -423,7 +427,10 @@ public abstract class AuthenticationServiceBase
                 String              dbo = dd.getAuthorizationDatabaseOwner();
                 UserDescriptor  userCredentials = dd.getUser( dbo );
 
-                if ( userCredentials == null ) { throw badNativeAuthenticationChange(); }
+                if ( userCredentials == null )
+                {
+                    throw StandardException.newException( SQLState.PROPERTY_DBO_LACKS_CREDENTIALS );
+                }
             }
         }
 
@@ -447,10 +454,6 @@ public abstract class AuthenticationServiceBase
         
         return false;
 	}
-    private StandardException   badNativeAuthenticationChange()
-    {
-        return StandardException.newException( SQLState.PROPERTY_BAD_NATIVE_CHANGE );
-    }
     /** Parse the value of the password lifetime property. Return null if it is bad. */
     protected   Long    parsePasswordLifetime( String passwordLifetimeString )
     {
