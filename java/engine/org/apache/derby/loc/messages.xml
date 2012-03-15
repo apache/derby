@@ -4247,7 +4247,7 @@ ln=lower-case two-letter ISO-639 language code, CO=upper-case two-letter ISO-316
 
             <msg>
                 <name>XCY05.S</name>
-                <text>Invalid change of the derby.authentication.provider property. Once set to NATIVE authentication, this property cannot be changed. NATIVE::LOCAL is the only NATIVE value accepted by derby.authentication.provider. This property cannot be set to NATIVE::LOCAL unless credentials for the database owner have been stored in the database using the syscs_util.syscs_create_user procedure.</text>
+                <text>Invalid change of the derby.authentication.provider property. Once set to NATIVE authentication, this property cannot be changed. NATIVE::LOCAL is the only NATIVE value accepted by derby.authentication.provider. This property cannot be set to NATIVE::LOCAL unless credentials for the database owner have been stored in the database using the SYSCS_UTIL.SYSCS_CREATE_USER procedure.</text>
             </msg>
 
         </family>
