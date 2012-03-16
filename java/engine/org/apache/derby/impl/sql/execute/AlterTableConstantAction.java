@@ -269,6 +269,22 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 
 	// INTERFACE METHODS
 
+    /**
+     * Run this constant action.
+     *
+     * @param activation the activation in which to run the action
+     * @throws StandardException if an error happens during execution
+     * of the action
+     */
+    public void executeConstantAction(Activation activation)
+            throws StandardException {
+        try {
+            executeConstantActionBody(activation);
+        } finally {
+            clearState();
+        }
+    }
+
 	/**
 	 *	This is the guts of the Execution-time logic for ALTER TABLE.
 	 *
@@ -276,7 +292,7 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 	 *
 	 * @exception StandardException		Thrown on failure
 	 */
-	public void	executeConstantAction(
+	public void	executeConstantActionBody(
     Activation activation)
         throws StandardException
 	{
@@ -626,6 +642,23 @@ class AlterTableConstantAction extends DDLSingleTableConstantAction
 			truncateTable(activation);
 		}
 	}
+
+    /**
+     * Clear the state of this constant action.
+     */
+    private void clearState() {
+        // DERBY-3009: executeConstantAction() stores some of its state in
+        // instance variables instead of local variables for convenience.
+        // These variables should be cleared after the execution of the
+        // constant action has completed, so that the objects they reference
+        // can be garbage collected.
+        td = null;
+        lcc = null;
+        dd = null;
+        dm = null;
+        tc = null;
+        activation = null;
+    }
 
 	/**
 	 * Update statistics of either all the indexes on the table or only one
