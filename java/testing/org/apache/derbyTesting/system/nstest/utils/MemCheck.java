@@ -23,6 +23,8 @@ package org.apache.derbyTesting.system.nstest.utils;
 
 import java.util.Date;
 
+import org.apache.derbyTesting.system.nstest.NsTest;
+
 /**
  * MemCheck - a background thread that prints current memory usage
  */
@@ -48,6 +50,20 @@ public class MemCheck extends Thread {
 			try {
 				showmem();
 				sleep(delay);
+                
+				// first check if there are still active tester threads, so 
+				// we do not make backups on an unchanged db every 10 mins for
+				// the remainder of MAX_ITERATIONS.
+				if (NsTest.numActiveTestThreads() != 0 && NsTest.numActiveTestThreads() > 1)
+				{
+					continue;
+				}
+				else
+				{
+					System.out.println("no more test threads, finishing memcheck thread also");
+					showmem();
+					stopNow=true;
+				}
 			} catch (java.lang.InterruptedException ie) {
 				System.out.println("memcheck: unexpected error in sleep");
 			}
