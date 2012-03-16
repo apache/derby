@@ -472,7 +472,6 @@ class MultiProbeTableScanResultSet extends TableScanResultSet
      * then just return null.
      */
     private DataValueDescriptor getNextProbeValue()
-        throws StandardException
     {
         int ctr = probeValIndex;
 

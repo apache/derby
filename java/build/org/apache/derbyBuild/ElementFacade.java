@@ -32,9 +32,8 @@ public class ElementFacade {
     /**
      * Construct a new ElementFacade from an Element.
      * @param r - the Element to wrap
-     * @throws java.lang.Exception
      */
-    public ElementFacade(Element r) throws Exception {
+    public ElementFacade(Element r) {
         root = r;
     }
 

@@ -168,7 +168,6 @@ public class StreamFileContainer implements TypedFormat, PrivilegedExceptionActi
 	StreamFileContainer(
     ContainerKey        identity, 
     BaseDataFileFactory dataFactory)
-		throws StandardException 
     {
 		this.identity = identity;
 		this.dataFactory = dataFactory;

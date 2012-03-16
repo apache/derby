@@ -4252,7 +4252,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return (isBeforeFirstX() && firstRowInRowset_ == 0 && lastRowInRowset_ == 0 && absolutePosition_ == 0);
     }
 
-    private boolean isServerCursorPositionAfterLast() throws SqlException {
+    private boolean isServerCursorPositionAfterLast() {
         return (absolutePosition_ == (rowCount_ + 1));
     }
 
@@ -4856,7 +4856,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         }
     }
 
-    private boolean rowIsInCurrentRowset(long rowNumber) throws SqlException {
+    private boolean rowIsInCurrentRowset(long rowNumber) {
         // firstRowInRowset_ is equal to lastRowInRowset_ if there is only one row
         // in the rowset or if fetchSize_ is 1.  however, return false if firstRowInRowset_
         // is equal to lastRowInRowset_ and also equal to zero which means there is no
@@ -5156,7 +5156,7 @@ public abstract class ResultSet implements java.sql.ResultSet,
         return true;
     }
 
-    private void adjustPreviousRowset(int orientation, long rowNumber, boolean isAfterLastRow) throws SqlException {
+    private void adjustPreviousRowset(int orientation, long rowNumber, boolean isAfterLastRow) {
         if (orientation == scrollOrientation_absolute__ && rowNumber == 1) {
             // Subtracting 2 because the currentRowInRowset_ index starts at 0, and all
             // the other indexes starts at 1.

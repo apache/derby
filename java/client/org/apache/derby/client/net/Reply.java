@@ -1412,7 +1412,7 @@ public class Reply {
         return (nullInd == CodePoint.NULLDATA);
     }
 
-    private final int skipSQLDHROW(int offset) throws DisconnectException {
+    private final int skipSQLDHROW(int offset) {
         int sqldhrowgrpNullInd = buffer_[pos_ + offset++] & 0xff;
         if (sqldhrowgrpNullInd == CodePoint.NULLDATA) {
             return offset;
