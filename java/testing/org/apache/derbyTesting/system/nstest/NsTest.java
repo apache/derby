@@ -117,34 +117,26 @@ public class NsTest extends Thread {
 	// see setSmallConfig()
 	public static int INIT_THREADS = 6; // keep this low to avoid deadlocks
 
-	// public static int MAX_INITIAL_ROWS = 60000; //for network server mode
-	public static int MAX_INITIAL_ROWS = 6000; // for network server mode
+	public static int MAX_INITIAL_ROWS = 6000;
 
 	public static int MAX_ITERATIONS = 2000; // Each client does these many
 	// transactions in the test.
 
-	// for network server mode
-	public static int MAX_LOW_STRESS_ROWS = 30; // num of rows worked over in a
-	// transaction
+	// num of rows worked over in a transaction
+	public static int MAX_LOW_STRESS_ROWS = 30; 
 
-	// for network server mode
-	public static int MAX_OPERATIONS_PER_CONN = 25; // num of transaction
-	// batches made by a client
+	// num of transaction batches
+	public static int MAX_OPERATIONS_PER_CONN = 25; 
 
-	// before closing the connection
-	// for network server mode
-	public static int NUMTESTER1 = 15; // for network server mode
+	public static int NUMTESTER1 = 15;
 
-	// ***public static int NUMTESTER1 = 45; //for embedded mode
-	public static int NUMTESTER2 = 45; // for network server mode
+	public static int NUMTESTER2 = 45;
 
-	// ***public static int NUMTESTER2 = 135; //for embedded server mode
-	public static int NUMTESTER3 = 10; // for network server mode
+	public static int NUMTESTER3 = 10;
 
-	// ***public static int NUMTESTER3 = 30; //for network server mode
-	public static int NUM_HIGH_STRESS_ROWS = 25000; // for network server mode
+	public static int NUM_HIGH_STRESS_ROWS = 25000;
 
-	public static int NUM_UNTOUCHED_ROWS = 6000; // for network server mode
+	public static int NUM_UNTOUCHED_ROWS = 6000;
 
 	// ***End of full test block
 
@@ -248,14 +240,14 @@ public class NsTest extends Thread {
 	private static void setSmallConfig() {
         
 		INIT_THREADS = 3; //keep this low to avoid deadlocks
-		MAX_INITIAL_ROWS = 150; //for a small test public
-		MAX_ITERATIONS = 50; //for a small test public static int
-		MAX_LOW_STRESS_ROWS = 10; //for a small test public static int
-		MAX_OPERATIONS_PER_CONN = 10; //for a small test public static int
+		MAX_INITIAL_ROWS = 150; //for a small test
+		MAX_ITERATIONS = 50; //for a small test
+		MAX_LOW_STRESS_ROWS = 10; //for a small test
+		MAX_OPERATIONS_PER_CONN = 10; //for a small test
 		NUMTESTER1 = 3; //for a small test 
 		NUMTESTER2 = 4;//for a small test
 		NUMTESTER3 = 3; //for a small test
-		NUM_HIGH_STRESS_ROWS = 20; //for a small test public
+		NUM_HIGH_STRESS_ROWS = 20; //for a small test
 		NUM_UNTOUCHED_ROWS = 50; //for a small test
 	}
     
@@ -284,13 +276,13 @@ public class NsTest extends Thread {
 			driver_type = "DerbyClient";
 		}
 		if (args.length >= 2) {
-		String testConfiguration = args [1];
-		if (testConfiguration.equalsIgnoreCase("small"))
-		{
-			System.out.println("using small config");
-			setSmallConfig();
-		}    
-	}
+			String testConfiguration = args [1];
+			if (testConfiguration.equalsIgnoreCase("small"))
+			{
+				System.out.println("using small config");
+				setSmallConfig();
+			}    
+		}
         
 		// Load the driver and get a connection to the database
 		String jdbcUrl = "";
@@ -425,7 +417,12 @@ public class NsTest extends Thread {
 		.println("Kicking off test threads that will work over the test table");
 
 		int numTestThread = 0;
-		int maxTestThreads = 1 + NUMTESTER1 + NUMTESTER2 + NUMTESTER3;
+		int maxTestThreads = 0;
+		String runBackup = System.getProperty("derby.nstest.backupRestore");
+		if ((runBackup != null) && (runBackup.equalsIgnoreCase("false")))
+				maxTestThreads = NUMTESTER1 + NUMTESTER2 + NUMTESTER3;
+		else
+				maxTestThreads = 1 + NUMTESTER1 + NUMTESTER2 + NUMTESTER3;
 		testThreads = new NsTest[maxTestThreads];
 
 		// This loop is made of 3 subloops that will initialize the required
@@ -433,7 +430,6 @@ public class NsTest extends Thread {
 		// It uses the numTestThread variable as the array index which gets
 		// incremented in each subloop
 		while (numTestThread < maxTestThreads) {
-			String runBackup = System.getProperty("derby.nstest.backupRestore");
 			// Check for property setting to decide the need for starting
 			// BackupRestore thread
 			if ((runBackup != null) && (runBackup.equalsIgnoreCase("false"))) {
