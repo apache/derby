@@ -986,7 +986,7 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
                  { "before_insert_statement_trigger: [ -1, -1, -1 ]" },
                  { "after_insert_row_trigger: [ 1, -1, null ]" },
                  { "after_insert_row_trigger: [ 2, -2, null ]" },
-                 { "after_insert_row_trigger: [ 3, -3, null ]" },                                                           
+                 { "after_insert_row_trigger: [ 3, -3, null ]" },
                  { "after_insert_statement_trigger: [ -1, -1, -1 ]" },
              }
              );
@@ -5472,7 +5472,69 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
                 new String[][] { {"1","2"},{"2","4"},{"3","6"}}, false);
     }
 
+    // Derby 4779
+    public void test_derby_4779()
+        throws Exception
+    {
+    	Connection conn = getConnection();
 
+        goodStatement
+        (
+         conn,
+         "create function f_getRegion\n" +
+         "(\n" +
+         "    v int\n" +
+         ")\n" +
+         "returns int\n" +
+         "language java\n" +
+         "parameter style java\n" +
+         "deterministic\n" +
+         "no sql\n" +
+         "external name 'org.apache.derbyTesting.functionTests.tests.lang.GeneratedColumnsTest.signum'\n"
+        );
+
+        goodStatement
+        (
+         conn,
+         "create table t1_orders( price int, region generated always as " +
+         "( f_getRegion(price) ) )\n"
+        );
+        
+        goodStatement
+        (
+         conn,
+         "create table t1_dummy(a int)\n"
+        );
+
+        goodStatement
+        (
+         conn,
+         "create trigger t1_trig_after_insert_row_trigger_4779\n" +
+         "after insert on t1_orders\n" +
+         "referencing new as ar\n" +
+         "for each row\n" +
+         "insert into t1_dummy( a ) values ( 1 )\n"
+        );
+
+        goodStatement
+        (
+         conn, 
+         "insert into t1_orders(price) values (1), (2)"
+        );
+
+        assertResults
+        ( 
+         conn,
+         "select a from t1_dummy",
+         new String[][]
+                      {
+                          { "1" },
+                          { "1" }
+                      },
+                      false
+         
+        );
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -5593,6 +5655,13 @@ public class GeneratedColumnsTest extends GeneratedColumnsHelper
     public static   int readMinusCounter()
     {
         return _minusCounter;
+    }
+
+    public static   int signum( int i )
+    {
+        if ( i > 0 ) { return 1; }
+        else if ( i == 0 ) { return 0; }
+        else { return -1; }
     }
 
     public  static  void    clearTriggerReports()
