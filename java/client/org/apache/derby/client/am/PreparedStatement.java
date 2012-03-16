@@ -303,7 +303,7 @@ public class PreparedStatement extends Statement
     }
 
     private void initPreparedStatement(ColumnMetaData parameterMetaData,
-                                       ColumnMetaData resultSetMetaData) throws SqlException {
+                                       ColumnMetaData resultSetMetaData) {
         isPreparedStatement_ = true;
         parameterMetaData_ = parameterMetaData;
         resultSetMetaData_ = resultSetMetaData;

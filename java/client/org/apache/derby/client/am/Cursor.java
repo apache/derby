@@ -1406,7 +1406,7 @@ public abstract class Cursor {
         charBuffer_ = new char[maxCharLength];
     }
 
-    private final String getStringWithoutConvert(int position, int actualLength) throws SqlException {
+    private final String getStringWithoutConvert(int position, int actualLength) {
         int start = position;
         int end = position + actualLength;
 

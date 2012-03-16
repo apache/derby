@@ -2500,7 +2500,7 @@ public class Statement implements java.sql.Statement, StatementCallbackInterface
         return tokenFound;
     }
 
-    private void parseUpdateSql(String firstToken) throws SqlException {
+    private void parseUpdateSql(String firstToken) {
         sqlMode_ = isUpdate__;
         if (firstToken.equalsIgnoreCase("insert")) {
             sqlUpdateMode_ = isInsertSql__;

@@ -9002,7 +9002,6 @@ public final class	DataDictionaryImpl
 	 * Initialized the noncore info array.
 	 */
 	private void initializeNoncoreInfo()
-		throws StandardException
 	{
 		noncoreInfo = new TabInfoImpl[NUM_NONCORE];
 	}
