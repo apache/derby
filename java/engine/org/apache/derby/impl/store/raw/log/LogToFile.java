@@ -221,6 +221,8 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 								  Serviceable, java.security.PrivilegedExceptionAction
 {
 
+	private static final    long INT_LENGTH = 4L;
+
 	private static int fid = StoredFormatIds.FILE_STREAM_LOG_FILE; 
 
 	// format Id must fit in 4 bytes
@@ -1028,7 +1030,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
                         // successfully init'd the log file - set up markers,
                         // and position at the end of the log.
-						endPosition = theLog.getFilePointer();
+						setEndPosition( theLog.getFilePointer() );
 						lastFlush   = endPosition;
 						
 						//if write sync is true , prellocate the log file
@@ -1099,7 +1101,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 
 					if (!ReadOnlyDB)
 					{
-						endPosition = LogCounter.getLogFilePosition(logEnd);
+						setEndPosition( LogCounter.getLogFilePosition(logEnd) );
 
 						//
 						// The end of the log is at endPosition.  Which is where
@@ -2094,7 +2096,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					
 					logOut.writeEndMarker(0);
 
-					endPosition += 4;
+					setEndPosition( endPosition + INT_LENGTH );
 					//set that we are in log switch to prevent flusher 
 					//not requesting  to switch log again 
 					inLogSwitch = true; 
@@ -2114,7 +2116,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					
 					logWrittenFromLastCheckPoint += endPosition;
 
-					endPosition = newLog.getFilePointer();
+					setEndPosition( newLog.getFilePointer() );
 					lastFlush = endPosition;
 					
 					if(isWriteSynced)
@@ -3376,7 +3378,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                             SQLState.LOG_SEGMENT_NOT_EXIST, logFile.getPath());
                     }
 
-					endPosition = firstLog.getFilePointer();
+					setEndPosition( firstLog.getFilePointer() );
 					lastFlush = firstLog.getFilePointer();
 
                     //if write sync is true , prellocate the log file
@@ -3796,15 +3798,18 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				 */
 
 				// see if the log file is too big, if it is, switch to the next
-				// log file
-				if ((endPosition + LOG_RECORD_OVERHEAD + length) >=
-					LogCounter.MAX_LOGFILE_SIZE)
+				// log file. account for an extra INT_LENGTH because switchLogFile()
+                // writes an extra 0 at the end of the log. in addition, a checksum log record
+                // may need to be written (see DERBY-2254).
+                int     checksumLogRecordSize = logOut.getChecksumLogRecordSize();
+				if ( (endPosition + LOG_RECORD_OVERHEAD + length + INT_LENGTH + checksumLogRecordSize) >=
+                     LogCounter.MAX_LOGFILE_SIZE)
 				{
 					switchLogFile();
 
 					// still too big??  Giant log record?
-					if ((endPosition + LOG_RECORD_OVERHEAD + length) >=
-						LogCounter.MAX_LOGFILE_SIZE) 
+                    if ( (endPosition + LOG_RECORD_OVERHEAD + length + INT_LENGTH + checksumLogRecordSize) >=
+                         LogCounter.MAX_LOGFILE_SIZE)
                     {
 						throw StandardException.newException(
                                 SQLState.LOG_EXCEED_MAX_LOG_FILE_SIZE, 
@@ -3816,7 +3821,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				}
 
 				//reserve the space for the checksum log record
-				endPosition += logOut.reserveSpaceForChecksum(length, logFileNumber,endPosition);
+				setEndPosition( endPosition + logOut.reserveSpaceForChecksum(length, logFileNumber,endPosition) );
 
 				// don't call currentInstant since we are already in a
 				// synchronzied block 
@@ -3845,7 +3850,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 					}
 				}
 
-				endPosition += (length + LOG_RECORD_OVERHEAD);
+				setEndPosition( endPosition + (length + LOG_RECORD_OVERHEAD) );
 			}
 		}
 		catch (IOException ioe)
@@ -4661,19 +4666,19 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 				{
 					// reserve the space for the checksum log record
 					// NOTE:  bytesToWrite include the log record overhead.
-					endPosition += 
+					setEndPosition( endPosition +
 						logOut.reserveSpaceForChecksum(((length + LOG_RECORD_OVERHEAD) 
 														< bytesToWrite ? length :
 														(bytesToWrite - LOG_RECORD_OVERHEAD)),
-													   logFileNumber,endPosition);
+													   logFileNumber,endPosition) );
 					instant = currentInstant();
 
 					//check if the length of the records to be written is 
 					//actually smaller than the number of bytesToWrite 
 					if(length + LOG_RECORD_OVERHEAD < bytesToWrite)
-						endPosition += (length + LOG_RECORD_OVERHEAD);
+                    { setEndPosition( endPosition + (length + LOG_RECORD_OVERHEAD) ); }
 					else
-						endPosition += bytesToWrite;
+                    { setEndPosition( endPosition + bytesToWrite ); }
 
 					while(true)		// so we can break out without returning out of
 						// sync block...
@@ -5296,7 +5301,7 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
                 logEndInstant = scanOfHighestLogFile.getLogRecordEnd();
             }
 
-            endPosition = LogCounter.getLogFilePosition(logEndInstant);
+            setEndPosition( LogCounter.getLogFilePosition(logEndInstant) );
 
             // endPosition and logFileNumber now point to the end of the
             // highest log file. This is where a new log record should be
@@ -5734,6 +5739,17 @@ public final class LogToFile implements LogFactory, ModuleControl, ModuleSupport
 		}
 	}
 
+    /** set the endPosition of the log and make sure the new position won't spill off the end of the log */
+    private void    setEndPosition( long newPosition )
+    {
+		if (SanityManager.DEBUG)
+        {
+			SanityManager.ASSERT(newPosition < LogCounter.MAX_LOGFILE_SIZE,
+							 "log file would spill past its legal end if the end were set to = " + newPosition );
+		}
+
+        endPosition = newPosition;
+    }
 
 	
 
