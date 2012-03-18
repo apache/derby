@@ -64,6 +64,7 @@ import java.sql.Types;
 import org.apache.derby.iapi.jdbc.BrokeredConnectionControl;
 import org.apache.derby.iapi.jdbc.EngineParameterMetaData;
 import org.apache.derby.iapi.jdbc.EnginePreparedStatement;
+import org.apache.derby.iapi.services.loader.GeneratedClass;
 import org.apache.derby.iapi.sql.dictionary.DataDictionary;
 import org.apache.derby.iapi.types.StringDataValue;
 
@@ -1072,43 +1073,48 @@ public abstract class EmbedPreparedStatement
 			setupContextStack(); // make sure there's context
 
 			try {
-				//bug 4579 - if the statement is invalid, regenerate the metadata info
-				if (preparedStatement.isValid() == false)
-				{
-					//need to revalidate the statement here, otherwise getResultDescription would
-					//still have info from previous valid statement
-					preparedStatement.rePrepare(lcc);
-					rMetaData = null;
-				}
 				//bug 4579 - gcDuringGetMetaData will be null if this is the first time
 				//getMetaData call is made.
 				//Second check - if the statement was revalidated since last getMetaData call,
 				//then gcDuringGetMetaData wouldn't match with current generated class name
-				if (gcDuringGetMetaData == null || gcDuringGetMetaData.equals(execp.getActivationClass().getName()) == false)
-				{
-					rMetaData = null;
-					gcDuringGetMetaData = execp.getActivationClass().getName();
-				}
-				if (rMetaData == null)
-				{
-					ResultDescription resd = preparedStatement.getResultDescription();
-					if (resd != null)
-					{
-						// Internally, the result description has information
-						// which is used for insert, update and delete statements
-						// Externally, we decided that statements which don't
-						// produce result sets such as insert, update and delete
-						// should not return ResultSetMetaData.  This is enforced
-						// here
-						String statementType = resd.getStatementType();
-						if (statementType.equals("INSERT") ||
-								statementType.equals("UPDATE") ||
-								statementType.equals("DELETE"))
-							rMetaData = null;
-						else
-				    		rMetaData = newEmbedResultSetMetaData(resd);
-					}
-				}
+
+                GeneratedClass currAc = null;
+                ResultDescription resd = null;
+
+                synchronized(execp) {
+                    // DERBY-3823 Some other thread may be repreparing
+                    do {
+                        while (!execp.upToDate()) {
+                            execp.rePrepare(lcc);
+                        }
+
+                        currAc = execp.getActivationClass();
+                        resd = execp.getResultDescription();
+                    } while (currAc == null);
+                }
+
+                if (gcDuringGetMetaData == null ||
+                        !gcDuringGetMetaData.equals(currAc.getName())) {
+                    rMetaData = null;
+                    gcDuringGetMetaData = currAc.getName();
+                }
+
+                if (rMetaData == null && resd != null) {
+                    // Internally, the result description has information
+                    // which is used for insert, update and delete statements
+                    // Externally, we decided that statements which don't
+                    // produce result sets such as insert, update and delete
+                    // should not return ResultSetMetaData.  This is enforced
+                    // here
+                    String statementType = resd.getStatementType();
+                    if (statementType.equals("INSERT") ||
+                            statementType.equals("UPDATE") ||
+                            statementType.equals("DELETE"))
+                        rMetaData = null;
+                    else
+                        rMetaData = newEmbedResultSetMetaData(resd);
+                }
+
 			} catch (Throwable t) {
 				throw handleException(t);
 			}	finally {

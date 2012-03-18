@@ -1710,6 +1710,65 @@ public final class AlterTableTest extends BaseJDBCTestCase {
 
         st.executeUpdate(
                 "rename column renc_schema_2.renc_8.b to b2");
+        
+        //DERBY-3823 While a resulset is still open, network server allows
+        // ALTER TABLE to change the length of the column in the resultset,
+        // but that length is not reflected in resultset's metadata. This
+        // most likely is happening because of the pre-fetching by the 
+        // server. Related jiras are DERBY-3839 and DERBY-4373.
+        //Once DERBY-3823 is fixed, we should see the change in metadata
+        // reflected in resultset's metadata. A fix for DERBY-3823 will
+        // cause the following test to fail. Right now, the following
+        // test accepts the incorrect metadata length obtained through
+        // the resultset's metadata after ALTER TABLE has been performed.
+        conn.setAutoCommit(false);
+        //Create table and load data
+        st.executeUpdate(
+                "create table derby_3823_t1 (c11 int, c12 varchar(5))");
+        PreparedStatement ps = prepareStatement(
+        		"insert into derby_3823_t1 values(?,'aaaaa')");
+        for (int i = 0; i < 1000; i++) { 
+        	ps.setInt(1, i); 
+        	ps.executeUpdate(); 
+    	} 
+        conn.commit();
+        //Open a resultset on the table which will be altered because
+        // the resultset has been exhausted. The alter table will fail
+        // in embedded mode because of the open resulset but will succeed
+        // in network server because of the pre-fetching.
+        rs = st.executeQuery("select * from derby_3823_t1");
+        //Just get first 100 rows rather than going through all the rows
+        //Next, we will attempt to change the column length of one of the
+        // columns in the resultset and see what happens
+        for (int i = 0; i < 100; i++) { 
+        	rs.next(); 
+    	}
+        rsmd = rs.getMetaData();
+        //The column c12's length at this point is 2
+        assertEquals(5, rsmd.getColumnDisplaySize(2));
+        Statement st1 = createStatement();
+        // This should fail, as c12's column length at this point is 2 and
+        //  data being inserted is 8 characters in length
+        assertStatementError("22001", st1, "insert into derby_3823_t1 values(99,'12345678')");
+        if (usingEmbedded()) 
+        {
+        	//ALTER TABLE will fail in embedded because of the open resulset
+            assertStatementError("X0X95", st1,
+                    "alter table derby_3823_t1 alter column c12 set data type varchar(8)");
+        } else {
+        	//ALTER TABLE does not fail in network server because of pre-fetching
+            st1.execute("alter table derby_3823_t1 alter column c12 set data type varchar(8)"); 
+            //BUG - but the following metadata of the resultset does not show
+            //  the new column length for C12 which is 8 rather than 2
+            rsmd = rs.getMetaData(); 
+            //Following is incorrect. The column length should have been 8
+            // rather than 5
+            assertEquals(5, rsmd.getColumnDisplaySize(2));
+            //Following shows that we are able to enter 8character string after
+            // alter table alter column. It is the resulset metadata which does
+            // not reflect the change in length
+            st1.executeUpdate("insert into derby_3823_t1 values(99,'12345678')"); 
+        }
     }
 
     // alter table tests for ALTER TABLE DROP COLUMN. The 
