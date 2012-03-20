@@ -786,6 +786,7 @@ public interface SQLState {
 	String BAD_NATIVE_AUTH_SPEC                                               = "4251H";
 	String MISSING_CREDENTIALS_DB                                               = "4251I";
 	String BAD_PASSWORD_LIFETIME                                               = "4251J";
+	String DBO_FIRST                                                                    = "4251K";
 
 	String LANG_DB2_NOT_NULL_COLUMN_INVALID_DEFAULT                    = "42601";
 	String LANG_DB2_INVALID_HEXADECIMAL_CONSTANT                    = "42606";
@@ -1748,7 +1749,7 @@ public interface SQLState {
 	String SQL_AUTHORIZATION_WITH_NO_AUTHENTICATION = "01J14";
 	String PASSWORD_EXPIRES_SOON = "01J15";
 	String DBO_PASSWORD_EXPIRES_SOON = "01J16";
-		
+
     String CURSOR_OPERATION_CONFLICT = "01001";
 
 

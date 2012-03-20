@@ -23,7 +23,7 @@ connect 'jdbc:derby:nast/nast;create=true;user=kiwi;password=KIWI_password';
 
 call syscs_util.syscs_create_user( 'KIWI', 'KIWI_password' );
 call syscs_util.syscs_create_user( 'GRAPE', 'GRAPE_password' );
-call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE::LOCAL' );
+call syscs_util.syscs_set_database_property( 'derby.authentication.native.passwordLifetimeMillis', '0' );
 
 create table t( a int );
 insert into t( a ) values ( 100 ), ( 200 );
@@ -35,7 +35,7 @@ connect 'jdbc:derby:nast/nastEncrypted;create=true;user=kiwi;password=KIWI_passw
 
 call syscs_util.syscs_create_user( 'KIWI', 'KIWI_password' );
 call syscs_util.syscs_create_user( 'GRAPE', 'GRAPE_password' );
-call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE::LOCAL' );
+call syscs_util.syscs_set_database_property( 'derby.authentication.native.passwordLifetimeMillis', '0' );
 
 connect 'jdbc:derby:;shutdown=true';
 

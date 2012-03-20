@@ -484,8 +484,6 @@ public final class NativeAuthenticationServiceImpl
             
             SystemProcedures.addUser( userName, userPassword, tc );
             
-            tc.setProperty
-                ( Property.AUTHENTICATION_PROVIDER_PARAMETER, Property.AUTHENTICATION_PROVIDER_NATIVE_LOCAL, true );
             tc.commit();
             
             return true;

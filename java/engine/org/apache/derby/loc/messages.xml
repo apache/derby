@@ -1274,6 +1274,11 @@ Guide.
            </msg>
 
             <msg>
+                <name>4251K</name>
+                <text>The first credentials created must be those of the DBO.</text>
+           </msg>
+
+            <msg>
                 <name>42601</name>
                 <text>In an ALTER TABLE statement, the column '{0}' has been specified as NOT NULL and either the DEFAULT clause was not specified or was specified as DEFAULT NULL.</text>
                 <arg>columnName</arg>

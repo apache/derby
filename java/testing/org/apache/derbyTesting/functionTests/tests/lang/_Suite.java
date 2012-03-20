@@ -221,7 +221,6 @@ public class _Suite extends BaseTestCase  {
         suite.addTest(AutoIncrementTest.suite());
         suite.addTest(HalfCreatedDatabaseTest.suite());
         suite.addTest(NativeAuthenticationServiceTest.suite());
-        suite.addTest(NativeAuthProcs.suite());
         return suite;
 	}
 }

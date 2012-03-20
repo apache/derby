@@ -228,21 +228,8 @@ public class Changes10_9 extends UpgradeChange
         String  defaultDigestAlgorithm = pushAuthenticationAlgorithm( s );
 
         try {
-            s.execute( "call syscs_util.syscs_create_user( 'fred', 'fredpassword' )" );
+            s.execute( "call syscs_util.syscs_create_user( 'FRED', 'fredpassword' )" );
             
-            ResultSet   rs = s.executeQuery( "select username from sys.sysusers order by username" );
-            rs.next();
-            assertEquals( "fred", rs.getString( 1 ) );
-
-            s.execute( "call syscs_util.syscs_reset_password( 'fred', 'fredpassword_rev2' )" );
-            
-            s.execute( "call syscs_util.syscs_drop_user( 'fred' )" );
-            
-            rs = s.executeQuery( "select username from sys.sysusers order by username" );
-            assertFalse( rs.next() );
-
-            rs.close();
-
             if ( !shouldExist )
             {
                 fail( "syscs_util.syscs_create_user should not exist." );
@@ -251,9 +238,12 @@ public class Changes10_9 extends UpgradeChange
         {
             if ( shouldExist )
             {
-                fail( "Saw unexpected error: " + se.getMessage() );
+                assertSQLState( "4251K", se );
             }
-            assertSQLState( "42Y03", se );
+            else
+            {
+                assertSQLState( "42Y03", se );
+            }
         }
 
         // restore the authentication algorithm if we changed it

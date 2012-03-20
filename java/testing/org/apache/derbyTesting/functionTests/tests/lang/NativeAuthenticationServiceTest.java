@@ -23,6 +23,8 @@ package org.apache.derbyTesting.functionTests.tests.lang;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.util.Properties;
@@ -131,6 +133,11 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
     private static  final   String  BAD_PROPERTY_CHANGE = "XCY02";
     private static  final   String  SQL_AUTHORIZATION_NOT_ON = "42Z60";
     private static  final   String  CANT_BOOT_DATABASE = "XJ040";
+    private static  final   String  MISSING_USER = "XK001";
+
+    private static  final   String      WEAK_AUTHENTICATION = "4251G";
+    private static  final   String      HASHING_FORMAT_10_9 = "3b62";
+    private static  final   int           HEX_CHARS_PER_BYTE = 2;
 
     ///////////////////////////////////////////////////////////////////////////////////
     //
@@ -667,6 +674,12 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // null password should not generate NPE
         getConnection( _nativeAuthentication, true, CREDENTIALS_DB, DBO, null, INVALID_AUTHENTICATION );
 
+        // add the dbo as a user if he wasn't created when the database was created
+        if ( !_nativeAuthentication )
+        {
+            addUser( sysadminConn, DBO );
+        }
+        
         // add another legal user
         addUser( sysadminConn, APPLE_USER );
         addUser( sysadminConn, BANANA_USER );
@@ -677,9 +690,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         // 1) The DBO's credentials should have been stored in SYSUSERS.
         // 2) The authentication provider should have been set to NATIVE::LOCAL
         //
-        String[][]  legalUsers = _nativeAuthentication ?
-            new String[][] { { APPLE_USER }, { BANANA_USER } , { DBO } } :
-            new String[][] {  { APPLE_USER }, { BANANA_USER } };
+        String[][]  legalUsers = new String[][] { { APPLE_USER }, { BANANA_USER } , { DBO } };
         assertResults
             (
              sysadminConn,
@@ -687,7 +698,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
              legalUsers,
              false
              );
-        String[][]  authenticationProvider = _nativeAuthentication ? new String[][] { { "NATIVE::LOCAL" } } : new String[][] { { null } };
+        String[][]  authenticationProvider = new String[][] { { "NATIVE::LOCAL" } };
         assertResults
             (
              sysadminConn,
@@ -716,6 +727,12 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
              dboName,
              false
              );
+
+        // verify password hashing
+        if ( _localAuthentication )
+        {
+            passwordHashingTests( sysadminConn );
+        }
 
         // Databases can't be created by users who don't have credentials stored in the credentials database
         Connection  thirdDBConn = getConnection
@@ -778,7 +795,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
         Connection  seventhDBOConn = openConnection( SEVENTH_DB, DBO, true, null );
 
-        addUser( seventhDBOConn, APPLE_USER );
+        if ( _localAuthentication) { addUser( seventhDBOConn, APPLE_USER ); }
         goodStatement( seventhDBOConn, "create table t1( a int )" );
         goodStatement( seventhDBOConn, "insert into t1( a ) values ( 10 )" );
 
@@ -813,8 +830,6 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
         Connection  eighthDBOConn = openConnection( EIGHTH_DB, DBO, true, null );
 
-        addUser( eighthDBOConn, APPLE_USER );
-
         // create BUILTIN credentials and set BULTIN authentication via database only properties
         setDatabaseProperty
             ( _localAuthentication, eighthDBOConn, "derby.authentication.provider", "BUILTIN", INVALID_PROVIDER_CHANGE );
@@ -830,10 +845,6 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         Connection  builtinConn = getConnection
             ( _localAuthentication, true, EIGHTH_DB, BUILTIN_USER, INVALID_AUTHENTICATION );
 
-        // fails if we are using BUILTIN authentication because this user wasn't given BUILTIN credentials
-        Connection  eightAppleConn = getConnection
-            ( !_localAuthentication, true, EIGHTH_DB, APPLE_USER, INVALID_AUTHENTICATION );
-        
         ///////////////////////////////////////////////////////////////////////////////////
         //
         // Vet databases accessed via subprotocols. Not run on Windows machines
@@ -861,20 +872,24 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
 
         Connection  twelthDBOConn = openConnection( TWELTH_DB, DBO, true, null );
 
-        addUser( twelthDBOConn, APPLE_USER );
+        if ( _localAuthentication ) { addUser( twelthDBOConn, APPLE_USER ); }
 
         Connection  twelthAppleConn = openConnection( TWELTH_DB, APPLE_USER, true, null );
 
         // these fail without the appropriate grant
-        vetStatement( _nativeAuthentication, twelthAppleConn,
-                      "call syscs_util.syscs_create_user( 'JULIUS', 'juliuspassword' )", NO_EXECUTE_PERMISSION );
-        vetStatement( _nativeAuthentication, twelthAppleConn,
-                      "call syscs_util.syscs_reset_password( 'JULIUS', 'foopassword' )", NO_EXECUTE_PERMISSION );
-        vetStatement( _nativeAuthentication, twelthAppleConn,
-                      "call syscs_util.syscs_drop_user( 'JULIUS' )", NO_EXECUTE_PERMISSION );
+        if ( _localAuthentication )
+        {
+            vetStatement( _nativeAuthentication, twelthAppleConn,
+                          "call syscs_util.syscs_create_user( 'JULIUS', 'juliuspassword' )", NO_EXECUTE_PERMISSION );
+            vetStatement( _nativeAuthentication, twelthAppleConn,
+                          "call syscs_util.syscs_reset_password( 'JULIUS', 'foopassword' )", NO_EXECUTE_PERMISSION );
+            vetStatement( _nativeAuthentication, twelthAppleConn,
+                          "call syscs_util.syscs_drop_user( 'JULIUS' )", NO_EXECUTE_PERMISSION );
+        }
 
         // but you always have permission to change your own password
-        goodStatement( twelthAppleConn, "call syscs_util.syscs_modify_password( 'foo' )" );
+        vetStatement( !_localAuthentication, twelthAppleConn,
+                      "call syscs_util.syscs_modify_password( 'foo' )", MISSING_USER );
 
         // grant execute permission and retry the test
         vetStatement
@@ -886,10 +901,13 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         vetStatement
             ( !_nativeAuthentication, twelthDBOConn,
               "grant execute on procedure syscs_util.syscs_drop_user to " + APPLE_USER, SQL_AUTHORIZATION_NOT_ON );
-       
-        goodStatement( twelthAppleConn, "call syscs_util.syscs_create_user( 'HORACE', 'horacepassword' )" );
-        goodStatement( twelthAppleConn, "call syscs_util.syscs_reset_password( 'HORACE', 'foopassword' )" );
-        goodStatement( twelthAppleConn, "call syscs_util.syscs_drop_user( 'HORACE' )" );
+
+        if ( _localAuthentication )
+        {
+            goodStatement( twelthAppleConn, "call syscs_util.syscs_create_user( 'HORACE', 'horacepassword' )" );
+            goodStatement( twelthAppleConn, "call syscs_util.syscs_reset_password( 'HORACE', 'foopassword' )" );
+            goodStatement( twelthAppleConn, "call syscs_util.syscs_drop_user( 'HORACE' )" );
+        }
 
         // revoke execute permission and retry the test
         vetStatement
@@ -904,13 +922,16 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
             ( !_nativeAuthentication, twelthDBOConn,
               "revoke execute on procedure syscs_util.syscs_drop_user from " + APPLE_USER  + " restrict",
               SQL_AUTHORIZATION_NOT_ON );
-        
-        vetStatement( _nativeAuthentication, twelthAppleConn,
-                      "call syscs_util.syscs_create_user( 'CORNELIA', 'corneliapassword' )", NO_EXECUTE_PERMISSION );
-        vetStatement( _nativeAuthentication, twelthAppleConn,
-                      "call syscs_util.syscs_reset_password( 'CORNELIA', 'foopassword' )", NO_EXECUTE_PERMISSION );
-        vetStatement( _nativeAuthentication, twelthAppleConn,
-                      "call syscs_util.syscs_drop_user( 'CORNELIA' )", NO_EXECUTE_PERMISSION );
+
+        if ( _localAuthentication )
+        {
+            vetStatement( _nativeAuthentication, twelthAppleConn,
+                          "call syscs_util.syscs_create_user( 'CORNELIA', 'corneliapassword' )", NO_EXECUTE_PERMISSION );
+            vetStatement( _nativeAuthentication, twelthAppleConn,
+                          "call syscs_util.syscs_reset_password( 'CORNELIA', 'foopassword' )", NO_EXECUTE_PERMISSION );
+            vetStatement( _nativeAuthentication, twelthAppleConn,
+                          "call syscs_util.syscs_drop_user( 'CORNELIA' )", NO_EXECUTE_PERMISSION );
+        }
     }
     private static  String  jarDBName( int credentialsDBLocation ) throws Exception
     {
@@ -998,7 +1019,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         Connection  dboConn = openConnection( SIXTH_DB, DBO, true, null );
 
         // add another user who can perform restores successfully
-        addUser( dboConn, BANANA_USER );
+        if ( _localAuthentication ) { addUser( dboConn, BANANA_USER ); }
 
         // add a table which we will backup and then drain. this is so that later on we can
         // verify that we really restored the database rather than just reconnected to the
@@ -1087,8 +1108,6 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
         String          dbo = ORANGE_USER;
         Connection  dboConn = openConnection( FOURTH_DB, dbo, true, null );
 
-        addUser( dboConn, PEAR_USER );
-
         // NATIVE authentication isn't on, so you can store oddball values for the authentication provider
         goodStatement
             ( dboConn, "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'com.acme.AcmeAuthenticator' )" );
@@ -1100,8 +1119,22 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
              "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE::LOCAL' )"
              );
  
+        // NATIVE::LOCAL is the only legal value which the authentication provider property can take on disk
+        expectExecutionError
+            (
+             dboConn, INVALID_PROVIDER_CHANGE,
+             "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE:db:LOCAL' )"
+             );
+        expectExecutionError
+            (
+             dboConn, INVALID_PROVIDER_CHANGE,
+             "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE:LOCAL' )"
+             );
+ 
         // store credentials for the DBO
         addUser( dboConn, dbo );
+
+        addUser( dboConn, PEAR_USER );
 
         // verify that you can't drop the dbo
         expectExecutionError
@@ -1118,21 +1151,7 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
              false
              );
         
-        // NATIVE::LOCAL is the only legal value which the authentication provider property can take on disk
-        expectExecutionError
-            (
-             dboConn, INVALID_PROVIDER_CHANGE,
-             "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE:db:LOCAL' )"
-             );
-        expectExecutionError
-            (
-             dboConn, INVALID_PROVIDER_CHANGE,
-             "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE:LOCAL' )"
-             );
- 
-        // now turn on NATIVE + LOCAL authentication
-        goodStatement( dboConn, "call syscs_util.syscs_set_database_property( 'derby.authentication.provider', 'NATIVE::LOCAL' )" );
-
+        // creating the DBO turned on NATIVE + LOCAL
         // once set, you can't unset or change it
         expectExecutionError
             (
@@ -1239,6 +1258,130 @@ public class NativeAuthenticationServiceTest extends GeneratedColumnsHelper
              dboConn, BAD_PASSWORD_PROPERTY,
              "call syscs_util.syscs_set_database_property( 'derby.authentication.native.passwordLifetimeThreshold', '-1' )"
              );
+    }
+
+    private void    passwordHashingTests
+        ( Connection dboConnection )
+        throws Exception
+    {
+        // set a message digest algorithm in case it was unset by a previous test.
+        // a message digest algorithm must be set in order to use NATIVE authentication
+        String  originalDigestAlgorithm = getDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm" );
+        if ( originalDigestAlgorithm == null )
+        {
+            setDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm", "SHA-1" );
+        }
+
+        String  defaultDigestAlgorithm = getDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm" );
+
+        goodStatement( dboConnection, "call syscs_util.syscs_create_user( 'pht', 'phtpassword' )" );
+
+        vetHashingScheme( dboConnection, "pht", HASHING_FORMAT_10_9, 16, 1000, defaultDigestAlgorithm );
+
+        int saltLength = 5;
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.saltLength", Integer.toString( saltLength ) );
+        goodStatement( dboConnection, "call syscs_util.syscs_reset_password( 'pht', 'newsaltlength' )" );
+        vetHashingScheme( dboConnection, "pht", HASHING_FORMAT_10_9, saltLength, 1000, defaultDigestAlgorithm );
+
+        int iterations = 10;
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.iterations", Integer.toString( iterations ) );
+        goodStatement( dboConnection, "call syscs_util.syscs_reset_password( 'pht', 'newiterations' )" );
+        vetHashingScheme( dboConnection, "pht", HASHING_FORMAT_10_9, saltLength, iterations, defaultDigestAlgorithm );
+
+        String digestAlgorithm = "SHA-1";
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm", digestAlgorithm );
+        goodStatement( dboConnection, "call syscs_util.syscs_reset_password( 'pht', 'newiterations' )" );
+        vetHashingScheme( dboConnection, "pht", HASHING_FORMAT_10_9, saltLength, iterations, digestAlgorithm );
+
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm", null );
+        expectExecutionError( dboConnection, WEAK_AUTHENTICATION, "call syscs_util.syscs_reset_password( 'pht', 'badalgorithm' )" );
+
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.saltLength", null );
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.iterations", null );
+        setDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm", defaultDigestAlgorithm );
+        goodStatement( dboConnection, "call syscs_util.syscs_drop_user( 'pht' )" );
+        
+        // reset the message digest algorithm in order to not disrupt the existing tests
+        if ( originalDigestAlgorithm == null )
+        {
+            setDatabaseProperty( dboConnection, "derby.authentication.builtin.algorithm", null );
+        }
+    }
+    private void  setDatabaseProperty( Connection conn, String key, String value )
+        throws Exception
+    {
+        if ( value == null ) { value = "cast ( null as varchar( 32672 ) )"; }
+        else { value = "'" + value + "'"; }
+        String  command = "call syscs_util.syscs_set_database_property( '" + key + "', " + value + " )";
+
+        goodStatement( conn, command );
+    }
+    private String  getDatabaseProperty( Connection conn, String key )
+        throws Exception
+    {
+        PreparedStatement   ps = chattyPrepare( conn, "values( syscs_util.syscs_get_database_property( '" + key + "' ) )" );
+        ResultSet   rs = ps.executeQuery();
+
+        try {
+            rs.next();
+            return rs.getString( 1 );
+        }
+        finally
+        {
+            rs.close();
+            ps.close();
+        }
+    }
+    private void    vetHashingScheme
+        (
+         Connection conn,
+         String userName,
+         String expectedHashingFormat,
+         int expectedSaltLength,
+         int expectedIterations,
+         String expectedDigestAlgorithm
+         )
+        throws Exception
+    {
+        String  hashingScheme = getHashingScheme( conn,  userName );
+        int     firstColonPosition = hashingScheme.indexOf( ":" );
+        int     secondColonPosition = hashingScheme.indexOf( ":", firstColonPosition + 1 );
+        int     thirdColonPosition = hashingScheme.indexOf( ":", secondColonPosition + 1 );
+
+        String  actualHashingFormat = hashingScheme.substring( 0, firstColonPosition );
+        String  salt = hashingScheme.substring( firstColonPosition + 1, secondColonPosition );
+        String  iterationString = hashingScheme.substring( secondColonPosition + 1, thirdColonPosition );
+        String  actualDigestAlgorithm = hashingScheme.substring( thirdColonPosition + 1 );
+
+        int     actualSaltLength = salt.length();
+        int     actualIterations = Integer.parseInt( iterationString );
+
+        assertEquals( expectedHashingFormat, actualHashingFormat );
+        assertEquals( expectedSaltLength * HEX_CHARS_PER_BYTE, actualSaltLength );
+        assertEquals( expectedIterations, actualIterations );
+        assertEquals( expectedDigestAlgorithm, actualDigestAlgorithm );
+    }
+    private String  getHashingScheme( Connection conn, String userName )
+        throws Exception
+    {
+        PreparedStatement   ps = conn.prepareStatement( "select userName, hashingScheme from sys.sysusers" );
+        ResultSet   rs = ps.executeQuery();
+
+        try {
+            while ( rs.next() )
+            {
+                if ( userName.equals( rs.getString( 1 )  ) ) { return rs.getString( 2 ); }
+            }
+        } finally
+        {
+            rs.close();
+            ps.close();
+        }
+
+        fail( "Could not find credentials for " + userName );
+
+        // never get here
+        return null;
     }
 
     private void    vetSQLAuthorizationOn() throws Exception

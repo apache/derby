@@ -2054,6 +2054,20 @@ public class SystemProcedures  {
         LanguageConnectionContext lcc = ConnectionUtil.getCurrentLCC();
         TransactionController tc = lcc.getTransactionExecute();
 
+        // the first credentials must be those of the DBO
+        try {
+            DataDictionary dd = lcc.getDataDictionary();
+            String  dbo = dd.getAuthorizationDatabaseOwner();
+
+            if ( !dbo.equals( userName ) )
+            {
+                if ( dd.getUser( dbo ) == null )
+                {
+                    throw StandardException.newException( SQLState.DBO_FIRST );
+                }
+            }
+        } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
+
         addUser( userName, password, tc );
     }
     /**
@@ -2086,6 +2100,13 @@ public class SystemProcedures  {
             UserDescriptor  userDescriptor = makeUserDescriptor( dd, tc, userName, password );
 
             dd.addDescriptor( userDescriptor, null, DataDictionary.SYSUSERS_CATALOG_NUM, false, tc );
+
+            // turn on NATIVE::LOCAL authentication
+            if ( dd.getAuthorizationDatabaseOwner().equals( userName ) )
+            {
+                tc.setProperty
+                    ( Property.AUTHENTICATION_PROVIDER_PARAMETER, Property.AUTHENTICATION_PROVIDER_NATIVE_LOCAL, true );
+            }
             
         } catch (StandardException se) { throw PublicAPI.wrapStandardException(se); }
     }
