@@ -2428,7 +2428,8 @@ public class ReplicationRun extends BaseTestCase
         util.DEBUG("+++ pingServer: " + hostName +":" + port);
         NetworkServerControl controller =
             new NetworkServerControl(InetAddress.getByName(hostName), port);
-        NetworkServerTestSetup.pingForServerStart(controller);
+        assertTrue("Server did not start in time",
+                   NetworkServerTestSetup.pingForServerStart(controller));
         util.DEBUG("--- pingServer: " + hostName +":" + port);
     }
 

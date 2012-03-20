@@ -1140,8 +1140,7 @@ public class CompatibilityCombinations extends BaseTestCase
     /**
      * <p>
      * Checks to see that the server is up. If the server doesn't
-     * come up in a reasonable amount of time, (re-)throw the
-     * final exception.
+     * come up in a reasonable amount of time, throw an assert failure.
      * </p>
      * @throws java.lang.Exception .
      */
@@ -1151,7 +1150,9 @@ public class CompatibilityCombinations extends BaseTestCase
     {
         DEBUG("+++ pingServer");
         NetworkServerControl controller = new NetworkServerControl();
-        NetworkServerTestSetup.pingForServerUp(controller, serverProc, true);
+        assertTrue("Server did not start in time",
+            NetworkServerTestSetup.pingForServerUp(
+                controller, serverProc, true));
         DEBUG("--- pingServer");
     }
     

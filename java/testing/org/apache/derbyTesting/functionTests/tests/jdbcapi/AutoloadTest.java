@@ -423,8 +423,17 @@ public class AutoloadTest extends BaseJDBCTestCase
         String user = getTestConfiguration().getUserName();
         String pw = getTestConfiguration().getUserPassword();
         NetworkServerControl control = new NetworkServerControl(user, pw);
-        
-        boolean isServerUp = NetworkServerTestSetup.pingForServerStart(control);
+
+        if (!serverShouldBeUp) {
+            // If we expect the server not to come up, wait a little before
+            // checking if the server is up. If the server is (unexpectedly)
+            // coming up and we ping before it has come up, we will conclude
+            // (incorrectly) that it did not come up.
+            Thread.sleep(5000L);
+        }
+
+        boolean isServerUp = NetworkServerTestSetup.pingForServerUp(
+                control, null, serverShouldBeUp);
         
         assertEquals("Network Server state incorrect",
                 serverShouldBeUp, isServerUp);
